@@ -177,6 +177,53 @@ On a fresh Azure server, skip the baseline and run `db:migrate` from empty.
 Seeds keep the old apply-every-time behaviour on purpose — they are written with
 `WHERE NOT EXISTS` / `ON CONFLICT` and are meant to be re-runnable.
 
+## Budget
+
+Figures pulled from the Azure retail pricing API for `germanywestcentral` in EUR on 2026-08-12.
+Verify against the pricing calculator before committing — rates change.
+
+| Line | Config | Monthly |
+| --- | --- | --- |
+| PostgreSQL compute | Flexible Server, Burstable **B1ms** (1 vCore, 2 GiB) — €0.0175/hr | **€12.78** |
+| PostgreSQL storage | 32 GB (the enforced minimum) at €0.1202/GB | **€3.85** |
+| PostgreSQL backup | LRS at €0.0904/GB beyond the included allowance | €0–3 |
+| Container App | Consumption. vCPU/memory are €0 within the subscription free grant; €0.351 per 1M requests beyond 2M | €5–20 |
+| Container registry | `acrcasaprodf8d745` — **shared, already paid** | €0 |
+| Log Analytics | ~5 GB/month included | €0–5 |
+| Egress | first 100 GB/month included | €0 |
+| Blob storage (if CVs move out of Postgres) | a few GB | €1–2 |
+
+**Realistic total: €25–45/month. Floor is ~€17/month**, essentially all of it the isolated
+PostgreSQL server — that is the price of keeping applicant data off the student app's
+infrastructure, and it is worth paying.
+
+Note the next step up is steep: **B2s is €51.03/month**, four times B1ms. A marketing site with
+a few MB of content and a handful of writes per week does not need it. Stay on B1ms and only move
+if monitoring shows real pressure.
+
+The free Container Apps grant (vCPU-seconds, GiB-seconds, and 2M requests) is **per subscription,
+not per app** — the student app already draws on it, so the website's share is smaller than a
+greenfield estimate would suggest.
+
+### Recommended budget: €75/month, alerting at 50 / 80 / 100%
+
+Roughly double the expected run rate. Enough headroom that normal variation does not page anyone,
+tight enough that a misconfiguration surfaces within days.
+
+The baseline is not what blows budgets. These are:
+
+- **Container Apps autoscaling** under a crawler or bot storm. Cap `maxReplicas` (3 is plenty).
+- **Log Analytics ingestion** if verbose logging ships to production. Set a daily cap.
+- **PostgreSQL storage auto-grow**, which ratchets up and never comes back down.
+
+### Revision: use `minReplicas: 1`, not 0
+
+Earlier in this plan scale-to-zero was recommended to save money. **That was the wrong call for
+this particular site.** Its entire purpose is discovery and lead capture, and it is being tuned
+for Google Ad Grants — so a cold start is paid for in bounced Ad Grants clicks and in Googlebot
+seeing a slow first byte. Keeping one warm replica costs perhaps €5–15/month and protects the
+thing the site exists to do. Scale-to-zero is right for internal tools, not for the front door.
+
 ## Open questions
 
 - Budget ceiling for the website specifically. (Server topology is settled: its own Flexible
