@@ -141,6 +141,24 @@ improvise them.** The live site says only "the medical specialist language exami
 repo carries a €400 fee and specific dates (26.06–28.08.2026) that are not published publicly;
 treat as internally sourced and confirm.
 
+### U7b · Confirm an Ansprechpartner for each course format
+**Owns:** `src/config/courses/course-profiles.ts` (the `contact` field only)
+**Must not touch:** archetypes, pricing, narratives
+**Blocked by:** staff confirming who owns each format
+**Verify:** `npm run test`
+
+Every course format resolves to a contact. Only **German for Groups** has a named one so far —
+Ina Eismann, because casa-bremen.de already publishes her for group quotes. Every other format
+falls back to `GENERAL_OFFICE_CONTACT` (`info@casa-bremen.de`), which renders as "The CASA course
+advice team answers questions on this format."
+
+Add a named person **only** when CASA already publishes them in that role or staff confirm it,
+and always fill the `source` field. A named contact is a promise that a real person answers; a
+guessed one sends enquiries nowhere. A test enforces that the currently-unowned formats stay
+unowned, so it will fail loudly if someone invents one.
+
+Likely owners to confirm: Firmenunterricht, Medical German (FSP enquiries), Bildungszeit/AZAV.
+
 ### U6b · Group package configurator UI
 **Owns:** a new group configurator component, `src/app/courses/german-for-groups` presentation
 **Must not touch:** `src/lib/pricing/group-pricing.ts` (the engine is done and tested)

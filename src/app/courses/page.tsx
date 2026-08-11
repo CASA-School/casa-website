@@ -552,10 +552,10 @@ export default async function CoursesPage({
         <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
           <Container className="space-y-12 md:space-y-16">
             <div className="max-w-3xl mx-auto text-center space-y-3">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Der menschliche Unterschied' : 'The Human Difference'}
               </p>
-              <h2 className="text-3xl font-black tracking-tight text-[var(--casa-ink)] sm:text-4xl">
+              <h2 className="text-3xl font-extrabold tracking-tight text-[var(--casa-ink)] sm:text-4xl">
                 {locale === 'de' ? 'Unterstützung auf jedem Schritt Ihres Weges' : 'Support on Every Step of Your Journey'}
               </h2>
               <p className="text-base text-[var(--casa-muted)] md:text-lg">
@@ -585,7 +585,7 @@ export default async function CoursesPage({
                     {locale === 'de' ? 'Teilnehmerbericht' : 'Student story'}
                   </p>
                   <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  <h3 className="mt-3 text-2xl font-extrabold leading-tight text-[var(--casa-ink)] sm:text-3xl">
                     {locale === 'de' ? 'Wie sich der passende Kurs im Alltag anfühlt' : 'How the right course format feels in real life'}
                   </h3>
                   <blockquote className="mt-4 text-lg font-medium leading-relaxed text-[var(--casa-ink)]">
@@ -616,7 +616,7 @@ export default async function CoursesPage({
                     {locale === 'de' ? 'Kursberatung' : 'Academic guidance'}
                   </p>
                   <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  <h3 className="mt-3 text-2xl font-extrabold leading-tight text-[var(--casa-ink)] sm:text-3xl">
                     {locale === 'de' ? 'Persönliche Lernwege brauchen Orientierung' : 'Human learning journeys need clear guidance'}
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">

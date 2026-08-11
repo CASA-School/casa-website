@@ -12,10 +12,38 @@ import type { CourseArchetypeId } from './archetypes';
  * `archetype` decides the page shape. A slug absent from this registry keeps
  * exactly the behaviour it had before the registry existed.
  */
+/**
+ * The named person who answers enquiries about a course format.
+ *
+ * Only add someone here when CASA already publishes them in that role, or when
+ * staff have explicitly confirmed it. A named contact is a commitment that a
+ * real person will answer, and getting it wrong sends enquiries into a void.
+ * Leave a format without a contact and it falls back to the general office —
+ * which is honest, and better than inventing an owner.
+ */
+export type CourseContact = {
+  name: string;
+  /** Role as CASA would describe it, not an internal job title. */
+  role: { en: string; de: string };
+  email: string;
+  /** Where this was verified from. Keep it so the next person can re-check. */
+  source: string;
+};
+
+/** Used whenever a format has no named owner yet. */
+export const GENERAL_OFFICE_CONTACT: CourseContact = {
+  name: 'CASA Bremen',
+  role: { en: 'Course advice team', de: 'Kursberatung' },
+  email: 'info@casa-bremen.de',
+  source: 'casa-bremen.de contact page',
+};
+
 export type CourseProfile = {
   archetype: CourseArchetypeId;
   /** Key into the course-detail photo set in public-page-config. */
   photoKey: string;
+  /** Omit until a real owner is confirmed. Never guess. */
+  contact?: CourseContact;
 };
 
 export const courseProfiles: Record<string, CourseProfile> = {
@@ -26,12 +54,32 @@ export const courseProfiles: Record<string, CourseProfile> = {
   'special-courses': { archetype: 'module-catalogue', photoKey: 'special' },
   'medical-german': { archetype: 'professional-track', photoKey: 'medical' },
   'business-german': { archetype: 'professional-track', photoKey: 'business' },
-  'german-for-groups': { archetype: 'package-inquiry', photoKey: 'groups' },
+  'german-for-groups': {
+    archetype: 'package-inquiry',
+    photoKey: 'groups',
+    // Published on casa-bremen.de as the contact for group quotes.
+    contact: {
+      name: 'Ina Eismann',
+      role: { en: 'Group programmes', de: 'Gruppenprogramme' },
+      email: 'i.eismann@casa-bremen.de',
+      source: 'casa-bremen.de/en/language-courses/german-for-groups/ (verified 2026-08-12)',
+    },
+  },
   'in-company': { archetype: 'package-inquiry', photoKey: 'company' },
 };
 
 export function getCourseProfile(slug: string): CourseProfile | undefined {
   return courseProfiles[slug];
+}
+
+/** Never returns null — an unassigned format falls back to the general office. */
+export function getCourseContact(slug: string): CourseContact {
+  return courseProfiles[slug]?.contact ?? GENERAL_OFFICE_CONTACT;
+}
+
+/** True when a real person owns this format, rather than the shared inbox. */
+export function hasNamedCourseContact(slug: string): boolean {
+  return Boolean(courseProfiles[slug]?.contact);
 }
 
 export function getCoursePhotoKey(slug: string) {

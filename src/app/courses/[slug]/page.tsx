@@ -15,6 +15,7 @@ import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
 import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile } from '@/config/courses/course-profiles';
+import { getCourseContact, hasNamedCourseContact } from '@/config/courses/course-profiles';
 import { getCourseDetail, getCourses, getSocialProof, getTeamSpotlights } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
@@ -91,6 +92,19 @@ export default async function CourseDetailPage({
   const courseStoryPhoto = pageConfig.photos[`${coursePhotoKey}Story`] ?? coursePhoto;
   const courseLevelGoals = getCourseLevelGoals(detail.course.slug, locale);
   const archetype = getCourseArchetype(getCourseProfile(detail.course.slug)?.archetype);
+
+  // Each course format has an Ansprechpartner. Formats without a confirmed
+  // owner fall back to the general office rather than naming someone who has
+  // not agreed to answer.
+  const courseContact = getCourseContact(detail.course.slug);
+  const namedContact = hasNamedCourseContact(detail.course.slug);
+  const contactLine = namedContact
+    ? locale === 'de'
+      ? `Ihre Ansprechpartnerin: ${courseContact.name}, ${courseContact.role.de}.`
+      : `Your contact: ${courseContact.name}, ${courseContact.role.en}.`
+    : locale === 'de'
+      ? 'Fragen beantwortet das CASA Kursberatungsteam.'
+      : 'The CASA course advice team answers questions on this format.';
   const beginnerTrack = (detail.course.level_min ?? 'A1').toUpperCase().startsWith('A');
 
   // Quote-only products (group packages, Firmenunterricht) are bought by an
@@ -344,9 +358,11 @@ export default async function CourseDetailPage({
         infoTitle={locale === 'de' ? 'Kursinfo' : 'Course info'}
         infoItems={infoItems}
         notes={
-          locale === 'de'
-            ? 'Termine und Verfügbarkeit werden bei der Anmeldung bestätigt.'
-            : 'Dates and availability are confirmed during registration.'
+          archetype.cta === 'request-quote'
+            ? contactLine
+            : locale === 'de'
+              ? 'Termine und Verfügbarkeit werden bei der Anmeldung bestätigt.'
+              : 'Dates and availability are confirmed during registration.'
         }
         ctas={[primaryDecisionCta, secondaryDecisionCta]}
         photo={{
@@ -361,7 +377,7 @@ export default async function CourseDetailPage({
           <section id="course-summary" aria-label={locale === 'de' ? 'Kursüberblick' : 'Course summary'} className="grid scroll-mt-28 gap-3 sm:grid-cols-2 lg:grid-cols-4 md:scroll-mt-32">
             {detailSummaryItems.map((item) => (
               <article key={item.label} className="rounded-lg border border-[color:var(--casa-sand)] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{item.label}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{item.label}</p>
                 <p className="mt-2 text-lg font-black leading-tight text-[var(--casa-ink)]">{item.value}</p>
               </article>
             ))}
@@ -444,10 +460,10 @@ export default async function CourseDetailPage({
                   return (
                   <section key={sectionKey} className="space-y-5">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                         {locale === 'de' ? 'Weitere Optionen' : 'Related routes'}
                       </p>
-                      <h2 className="mt-2 text-2xl font-black leading-tight text-[var(--casa-ink)]">
+                      <h2 className="mt-2 text-2xl font-extrabold leading-tight text-[var(--casa-ink)]">
                         {locale === 'de' ? 'Andere Kurswege vergleichen' : 'Compare other course paths'}
                       </h2>
                     </div>
@@ -471,11 +487,11 @@ export default async function CourseDetailPage({
                               />
                             </div>
                             <div className="p-4">
-                              <h3 className="text-lg font-black leading-tight text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">{course.name}</h3>
+                              <h3 className="text-lg font-bold leading-tight text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">{course.name}</h3>
                               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--casa-muted)]">
                                 {course.narrative?.promise || (locale === 'de' ? 'Strukturierter Deutschkurs mit klaren nächsten Schritten.' : 'Structured German course with clear next steps.')}
                               </p>
-                              <p className="mt-3 text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
                                 {course.level_min || 'A1'} - {course.level_max || 'C1'} · {course.lessons_per_week} {locale === 'de' ? 'Lektionen/Woche' : 'lessons/week'}
                               </p>
                             </div>
@@ -495,11 +511,7 @@ export default async function CourseDetailPage({
               locale={locale}
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
               infoItems={infoItems}
-              notes={
-                locale === 'de'
-                  ? 'Startdatum, Preis und nächster Schritt bleiben schnell prüfbar.'
-                  : 'Keep date, pricing, and next action easy to check.'
-              }
+              notes={contactLine}
               ctas={[primaryDecisionCta, secondaryDecisionCta]}
               deadlineIso={selectedInstance?.start_date}
               teacher={spotlightTeacher}

@@ -6,7 +6,13 @@ import {
   courseArchetypes,
   getCourseArchetype,
 } from '@/config/courses/archetypes';
-import { courseProfiles, getCoursePhotoKey } from '@/config/courses/course-profiles';
+import {
+  GENERAL_OFFICE_CONTACT,
+  courseProfiles,
+  getCourseContact,
+  getCoursePhotoKey,
+  hasNamedCourseContact,
+} from '@/config/courses/course-profiles';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
 import { isQuoteOnly } from '@/lib/content/course-pricing';
 
@@ -51,6 +57,39 @@ describe('course archetypes', () => {
   it('keeps learner testimonials off organiser-facing pages', () => {
     expect(courseArchetypes['package-inquiry'].sections).not.toContain('testimonials');
     expect(courseArchetypes['scheduled-cohort'].sections).toContain('testimonials');
+  });
+
+  it('gives every course format a contact, falling back to the office', () => {
+    const hidden = new Set(['exam-preparation', 'summer-intensive', 'integration-german']);
+
+    for (const course of fallbackCourseTypes.filter((c) => !hidden.has(c.slug))) {
+      const contact = getCourseContact(course.slug);
+
+      // Never null — an unassigned format resolves to the general office.
+      expect(contact.email).toMatch(/@casa-bremen\.de$/);
+      expect(contact.name.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('only names a person where CASA already publishes one', () => {
+    // Ina Eismann is published on casa-bremen.de as the group-quote contact.
+    expect(hasNamedCourseContact('german-for-groups')).toBe(true);
+    expect(getCourseContact('german-for-groups').name).toBe('Ina Eismann');
+
+    // Everything else falls back until staff confirm an owner. Guards against
+    // someone inventing a plausible-looking contact.
+    for (const slug of ['intensive-german', 'evening-german', 'medical-german', 'in-company']) {
+      expect(hasNamedCourseContact(slug), `${slug} should not name a person yet`).toBe(false);
+      expect(getCourseContact(slug)).toBe(GENERAL_OFFICE_CONTACT);
+    }
+  });
+
+  it('records where every named contact was verified from', () => {
+    for (const [slug, profile] of Object.entries(courseProfiles)) {
+      if (profile.contact) {
+        expect(profile.contact.source, `${slug} contact needs a source`).toMatch(/\S/);
+      }
+    }
   });
 
   it('gives every public course a profile and a resolvable photo key', () => {
