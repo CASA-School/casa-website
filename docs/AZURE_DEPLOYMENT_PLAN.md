@@ -7,6 +7,32 @@ CASA is consolidating onto Azure so the website, the student app, and the future
 one tenant and can be integrated. The student app already runs there, so this plan mirrors its
 topology rather than inventing a second pattern.
 
+## Confirmed live resources (read from the subscription, 2026-08-12)
+
+Subscription `Azure subscription 1` · `f8d745fc-c2dc-4ad9-a3a8-e9da556b69ab`
+Tenant `578a68cb-a4d8-4b79-90f3-e853dbd7e639` · signed in as `admin@casa-bremen.de`
+
+| Resource | Name | Notes |
+| --- | --- | --- |
+| Platform resource group | `rg-casa-platform-prod` | germanywestcentral |
+| Student app resource group | `rg-casa-student-prod` | germanywestcentral |
+| Container Apps environment | `cae-casa-prod` | reuse for the website |
+| Environment default domain | `livelycliff-6187a034.germanywestcentral.azurecontainerapps.io` | |
+| Container registry | `acrcasaprodf8d745.azurecr.io` | reuse |
+| Existing apps | `ca-casa-student-api`, `ca-casa-student-web` | |
+
+### The free test subdomain
+
+Container Apps issues every app a free HTTPS FQDN on the environment domain — no DNS work, no
+certificate to buy, nothing pointed at `casa-bremen.de`. The website would land on:
+
+```
+ca-casa-website.livelycliff-6187a034.germanywestcentral.azurecontainerapps.io
+```
+
+That is the staging URL to test against for as long as needed. The custom domain is a separate,
+later step and is what makes cutover a real go-live.
+
 ## What the student app already has
 
 Read `~/Tasks/10-active/work/casa-student-app/infra/azure/README.md` before provisioning.

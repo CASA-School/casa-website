@@ -445,6 +445,35 @@ Also flagged: `bfbedb7` integrated the Vercel Toolbar unconditionally — remove
 an Azure build, and set `minReplicas: 0` on the website Container App since a marketing site does
 not need warm capacity.
 
+### 21. Repository Move to CASA-School
+
+On 2026-08-12 the project moved off the Quantutech repository to CASA ownership.
+
+- **Canonical repository is now `CASA-School/casa-website`** (private). Created with the `gh` CLI
+  as `rshafiee-casa`, which holds admin on the `CASA-School` org.
+- **Fresh history by decision.** One initial commit of 356 files. The full 117-commit development
+  history remains on `Quantutech/CASA`, which is deliberately left untouched as a fallback until
+  the Azure deployment is proven — so nothing was lost, it just lives in two places.
+- Local remotes: `casa` → CASA-School (tracking `casa-main` → `main`), `origin` → Quantutech,
+  unchanged. Do not force-push or retarget `origin`.
+- Pre-flight before pushing confirmed: no secrets in tracked files, `.env*` correctly ignored
+  (only `.env.example` is committed, containing one public feature flag set to `false`), largest
+  blob 2.3 MB.
+- A stale zero-byte `.git/index.lock` from an earlier crashed session blocked the first attempt;
+  removed after confirming no git process held it.
+
+**Vercel.** The `@vercel/toolbar` dependency and its `next.config.ts` wrapper are removed — the
+layout usage had already been stripped by another pass. The build no longer depends on Vercel.
+Disconnecting the Vercel *project* itself is a manual step: the `vercel` CLI is installed but not
+authenticated, and logging in on the user's behalf is out of scope.
+
+**Azure subscription is live and matches the plan.** `rg-casa-platform-prod` and
+`rg-casa-student-prod` exist in germanywestcentral, with Container Apps environment
+`cae-casa-prod` and registry `acrcasaprodf8d745.azurecr.io` available to reuse. The website will
+get a free HTTPS test URL on the environment domain — no DNS work needed for staging. Concrete
+resource names are recorded in `docs/AZURE_DEPLOYMENT_PLAN.md`. **Nothing has been provisioned**;
+the cost-bearing decisions (PostgreSQL SKU above all) are still open.
+
 ## Verified Baseline
 
 The latest implementation pass has already cleared:
