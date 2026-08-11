@@ -129,7 +129,9 @@ applicants' CVs is a policy question, not a technical one.
 
 ## Migration order
 
-1. Provision `rg-casa-website-prod` and the PostgreSQL Flexible Server. Nothing else changes yet.
+1. ~~Provision `rg-casa-website-prod`~~ **done 2026-08-12** — empty, germanywestcentral, tagged
+   `project=casa-website`. Costs nothing while empty. Provision the PostgreSQL Flexible Server
+   (B1ms, 32 GB) next; that is the first line item that actually bills.
 2. Port the driver (two files above) behind `DATABASE_URL`, and prove the careers upload path
    against Azure Postgres.
 3. Move the schema: `npm run db:migrate` against the new server, then `npm run db:seed`.
@@ -205,10 +207,21 @@ The free Container Apps grant (vCPU-seconds, GiB-seconds, and 2M requests) is **
 not per app** — the student app already draws on it, so the website's share is smaller than a
 greenfield estimate would suggest.
 
-### Recommended budget: €75/month, alerting at 50 / 80 / 100%
+### Budget in place: €30/month (set 2026-08-12)
 
-Roughly double the expected run rate. Enough headroom that normal variation does not page anyone,
-tight enough that a misconfiguration surfaces within days.
+**Provisioned:** budget `casa-website-monthly`, €30, monthly, scoped to
+`rg-casa-website-prod`. Alerts to `admin@casa-bremen.de` at 80% actual, 100% actual, and 100%
+forecast. Chosen by the owner as a starting figure, to be revised once real usage is visible.
+
+An Azure budget **alerts, it does not cap** — it will never stop the site or block a deploy.
+
+Note that €30 sits *inside* the expected €22–37 range rather than above it, so exceeding it in a
+normal month is likely rather than exceptional. Treat a 100% alert as "check the cost breakdown",
+not as an incident. The forecast alert is the more useful of the three, because it fires before
+the month ends.
+
+An earlier draft of this plan suggested €75 as roughly double the run rate. That remains the
+figure to move to if the alerts prove noisy.
 
 The baseline is not what blows budgets. These are:
 
