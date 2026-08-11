@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160" viewBox="0 0 300 160" role="img" aria-labelledby="title desc">
+  <title id="title">AZAV accreditation badge</title>
+  <desc id="desc">AZAV approved training provider badge for CASA accreditation display.</desc>
+  <rect width="300" height="160" rx="18" fill="#ffffff"/>
+  <rect x="10" y="10" width="280" height="140" rx="14" fill="#f8fbff" stroke="#009fe3" stroke-width="4"/>
+  <path d="M42 50h216" stroke="#ffd500" stroke-width="8" stroke-linecap="round"/>
+  <text x="150" y="94" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800" letter-spacing="4" fill="#1d1d1b">AZAV</text>
+  <text x="150" y="122" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#334155">ZUGELASSENER TRAEGER</text>
+</svg>

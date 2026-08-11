@@ -1,0 +1,200 @@
+'use client';
+
+import Link from 'next/link';
+import Image from 'next/image';
+import { useMemo, useState } from 'react';
+import { ArrowRight, Compass } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+export type QuickChooserOption = {
+  label: string;
+  value: string;
+};
+
+export type QuickChooserField = {
+  key: string;
+  label: string;
+  options: QuickChooserOption[];
+};
+
+export type QuickChooserThumbnail = {
+  src: string;
+  alt: string;
+  caption: string;
+};
+
+type QuickChooserPanelProps = {
+  title: string;
+  description: string;
+  fields: QuickChooserField[];
+  submitLabel: string;
+  submitHref: string;
+  badgeLabel?: string;
+  summaryLabel?: string;
+  secondaryLabel?: string;
+  secondaryHref?: string;
+  thumbnails?: QuickChooserThumbnail[];
+  initialValues?: Record<string, string>;
+  className?: string;
+};
+
+function resolveChooserValues(fields: QuickChooserField[], initialValues?: Record<string, string>) {
+  return fields.reduce<Record<string, string>>((accumulator, field) => {
+    const initialValue = initialValues?.[field.key] ?? '';
+    const hasValidInitial = field.options.some((option) => option.value === initialValue);
+    accumulator[field.key] = hasValidInitial ? initialValue : field.options[0]?.value ?? '';
+    return accumulator;
+  }, {});
+}
+
+export function QuickChooserPanel({
+  title,
+  description,
+  fields,
+  submitLabel,
+  submitHref,
+  badgeLabel = 'Route planner',
+  summaryLabel = 'Your route summary',
+  secondaryLabel,
+  secondaryHref,
+  thumbnails = [],
+  initialValues,
+  className,
+}: QuickChooserPanelProps) {
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    resolveChooserValues(fields, initialValues)
+  );
+
+  const query = useMemo(() => {
+    const params = new URLSearchParams();
+    Object.entries(values).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+
+    const queryString = params.toString();
+    if (!queryString) {
+      return submitHref;
+    }
+
+    return `${submitHref}${submitHref.includes('?') ? '&' : '?'}${queryString}`;
+  }, [submitHref, values]);
+
+  const selectedSummary = useMemo(
+    () =>
+      fields.map((field) => {
+        const selected = field.options.find((option) => option.value === values[field.key]) ?? field.options[0];
+        return {
+          key: field.key,
+          label: field.label,
+          value: selected?.label || 'Any',
+        };
+      }),
+    [fields, values]
+  );
+
+  return (
+    <aside
+      data-reveal="true"
+      className={cn(
+        'rounded-3xl bg-white/95 p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75',
+        className
+      )}
+      data-testid="course-finder-filter"
+    >
+      <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-ink)]">
+        <Compass className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
+        {badgeLabel}
+      </p>
+      <h2 className="mt-3 text-xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
+      <span className="casa-tricolor-rule mt-3 block h-1 w-20 rounded-full" aria-hidden />
+
+      <div className="mt-5 space-y-4">
+        {fields.map((field) => (
+          <fieldset key={field.key} className="space-y-2">
+            <legend className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+              {field.label}
+            </legend>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={field.label}>
+              {field.options.map((option) => {
+                const isActive = (values[field.key] ?? '') === option.value;
+                return (
+                  <button
+                    key={`${field.key}-${option.value || 'any'}`}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    className={cn(
+                      'rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-blue)]',
+                      isActive
+                        ? 'border-[color:var(--casa-blue)] bg-[var(--casa-blue)]/12 text-[var(--casa-ink)]'
+                        : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-muted)] hover:bg-[var(--casa-warm-soft)]'
+                    )}
+                    onClick={() =>
+                      setValues((current) => ({
+                        ...current,
+                        [field.key]: option.value,
+                      }))
+                    }
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ))}
+      </div>
+
+      <div className="mt-5 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/42 p-4">
+        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{summaryLabel}</p>
+        <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+          {selectedSummary.map((item) => (
+            <li key={item.key} className="text-sm text-[var(--casa-ink)]">
+              <span className="font-semibold text-[var(--casa-muted)]">{item.label}:</span> {item.value}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Button asChild className="casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]">
+          <Link href={query}>
+            {submitLabel}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+
+        {secondaryLabel && secondaryHref ? (
+          <Button asChild variant="outline" className="casa-button-outline border-[color:var(--casa-sand)] text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]">
+            <Link href={secondaryHref}>{secondaryLabel}</Link>
+          </Button>
+        ) : null}
+      </div>
+
+      {thumbnails.length > 0 ? (
+        <ul className="mt-5 grid grid-cols-3 gap-2.5" aria-label="People moments at CASA">
+          {thumbnails.slice(0, 3).map((photo) => (
+            <li key={`${photo.src}-${photo.caption}`}>
+              <figure className="overflow-hidden rounded-xl bg-[var(--casa-warm-soft)]">
+                <div className="relative h-16">
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                  />
+                </div>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </aside>
+  );
+}

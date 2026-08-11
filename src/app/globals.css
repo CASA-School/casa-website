@@ -1,0 +1,1379 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --casa-sun: #ffd500;
+  --casa-blue: #009fe3;
+  --casa-red: #e30613;
+  --casa-amber: #f2b441;
+  --casa-amber-strong: #df9f24;
+  --casa-coral: #d66b4d;
+  --casa-warm-soft: #fff3da;
+  --casa-ink-deep: #111827;
+  --casa-ink-deep-hover: #1f2b3c;
+  --casa-ink-panel: #1b2537;
+  --casa-gold-deep: #be8b1d;
+  /*
+   * --casa-bg is the CARD surface and stays pure white. It is also referenced
+   * as semanticTokens.surface.card, and ~53 components use it for cards,
+   * inputs and chips, so it must not be tinted.
+   */
+  --casa-bg: #ffffff;
+
+  /*
+   * Page canvas — the surface cards sit ON, not the cards themselves.
+   *
+   * The page used to be pure white, which meant a white card could only be
+   * seen because of its 1px --casa-sand border. Borders accumulate into noise
+   * and the result reads flat. A faint cool tint behind white cards lets the
+   * card be the light thing in the room, which is what makes the CASA student
+   * app look more premium than this site did. Value matched to the app's
+   * --surface-canvas so the two products share one page colour.
+   *
+   * Contrast-safe by construction: every text token here was already tuned to
+   * clear AA on --casa-sand (#e2e8f0), which is far darker than this canvas.
+   * Measured on #f6fafb — ink 16.99, muted 5.31, accent-text 5.30.
+   */
+  --casa-canvas: #f6fafb;
+  --casa-surface-subtle: #eef4f5;
+  --casa-surface-wash: #fbfdfd;
+
+  --casa-sand: #e2e8f0;
+  --casa-ink: #0f172a;
+  /* Was #64748b (4.76:1 on white but 4.32:1 on --casa-warm-soft and 3.86:1 on
+     --casa-sand). Darkened so body text clears AA on every light surface. */
+  --casa-muted: #5b697e;
+  --casa-blue-strong: #008ecb;
+
+  /*
+   * Accent text — surface-aware.
+   *
+   * --casa-blue (#009fe3) is the brand colour and stays untouched for surfaces:
+   * backgrounds, borders, rings, icons. As TEXT on a light surface it is only
+   * 2.97:1, which fails AA (4.5:1) and even the 3:1 large-text floor. On dark
+   * surfaces the same blue is fine (5.97:1 on --casa-ink-deep).
+   *
+   * So text never references --casa-blue directly. It uses
+   * --casa-accent-text, which resolves per surface:
+   *
+   *   on light  #006f9f → white 5.56  warm 5.06  sand 4.51   (all AA)
+   *   on dark   #5cc8f5 → ink-deep 9.32  ink-panel 8.08      (all AA)
+   *
+   * Dark sections flip it via .casa-surface-dark (or a --casa-ink* background);
+   * light cards nested inside them flip it back via .casa-surface-light.
+   */
+  --casa-accent-on-light: #006f9f;
+  --casa-accent-on-dark: #5cc8f5;
+  --casa-accent-text: var(--casa-accent-on-light);
+  /* Hover pairs move further from the surface, so they stay AA too. */
+  --casa-accent-on-light-hover: #005a80;
+  --casa-accent-on-dark-hover: #9bdefa;
+  --casa-accent-text-hover: var(--casa-accent-on-light-hover);
+
+  /*
+   * Solid accent SURFACE — for filled chips, selected states and badges that
+   * carry white text. --casa-blue cannot do this job: white on #009fe3 is
+   * 2.97:1. Contrast is symmetric, so the same value as --casa-accent-on-light
+   * gives white text 5.56:1. Same hue (198°) and saturation (100%) as the brand
+   * blue, so it still reads as CASA.
+   */
+  --casa-accent-surface: #006f9f;
+  --casa-accent-surface-hover: #005a80;
+
+  /*
+   * Subtle text — captions, unit labels, character counters, eyebrow labels.
+   * Replaces bare Tailwind slate-400 (#94a3b8), which is only 2.56:1 on white.
+   * Surface-aware for the same reason as the accent: slate-400 is fine on the
+   * dark footer (6.9:1) but fails on every light surface.
+   *
+   *   on light  #5b697e → 5.58:1 on white
+   *   on dark   #cbd5e1 → 11.95:1 on --casa-ink-deep
+   */
+  --casa-subtle-on-light: #5b697e;
+  --casa-subtle-on-dark: #cbd5e1;
+  --casa-text-subtle: var(--casa-subtle-on-light);
+
+  /* Status text — all four fail AA as text at their brand values on white.
+     Surfaces keep the original brand values; these are text-only variants. */
+  --casa-success-text: #107837; /* from #16a34a (3.30:1) */
+  --casa-warning-text: #866214; /* from #be8b1d (3.04:1) */
+  --casa-danger-text:  #d20612; /* from #e30613 (4.88:1 white, 3.96:1 sand) */
+  --casa-coral-text:   #b14629; /* from #d66b4d (3.46:1) */
+  /*
+   * Skill accents — shared vocabulary with the CASA student app.
+   *
+   * The app (lernen.casa-bremen.de) colour-codes language skills, and a learner
+   * meets those colours daily. Gold means speaking there, so gold must mean
+   * speaking here too. Surface values below are copied verbatim from the app's
+   * globals.css so the two products cannot drift.
+   *
+   * The app uses those values directly as text. This site cannot: four of the
+   * seven fail AA on white (speaking 1.84, writing 3.25, vocabulary 3.42,
+   * listening 2.97). So the same discipline as --casa-accent-text applies —
+   * raw value for surfaces, derived variant for text.
+   *
+   * The on-light variants are derived by darkening each hue until it clears
+   * 4.5:1 against --casa-sand (#e2e8f0), the strictest light surface here.
+   * That method reproduces the two tokens this file already had:
+   * reading resolves to #d20612 (= --casa-danger-text) and listening to
+   * #006f9f (= --casa-accent-on-light). See
+   * docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md.
+   *
+   * Never signal a skill with colour alone — always pair with a label or icon.
+   */
+  --skill-reading: #e30613;
+  --skill-listening: #009fe3;
+  --skill-speaking: #f3b43c;
+  --skill-writing: #20a17e;
+  --skill-grammar: #705eca;
+  --skill-vocabulary: #d96c2c;
+  --skill-exam: #08775f;
+
+  /* AA on white / warm-soft / sand. Lowest ratio of the three noted. */
+  --skill-reading-on-light: #d20612;    /* sand 4.51 */
+  --skill-listening-on-light: #006f9f;  /* sand 4.51 */
+  --skill-speaking-on-light: #856221;   /* sand 4.52 */
+  --skill-writing-on-light: #17765c;    /* sand 4.50 */
+  --skill-grammar-on-light: #6a59be;    /* sand 4.50 */
+  --skill-vocabulary-on-light: #a45121; /* sand 4.51 */
+  --skill-exam-on-light: #08765e;       /* sand 4.53 */
+
+  /* AA on --casa-ink-panel (#1b2537). Lightened until each clears 4.5:1. */
+  --skill-reading-on-dark: #ec5961;     /* 4.51 */
+  --skill-listening-on-dark: #009fe3;   /* 5.17 — brand blue already clears */
+  --skill-speaking-on-dark: #f3b43c;    /* 8.35 — brand gold already clears */
+  --skill-writing-on-dark: #20a17e;     /* 4.73 */
+  --skill-grammar-on-dark: #8e80d5;     /* 4.54 */
+  --skill-vocabulary-on-dark: #d96d2d;  /* 4.52 */
+  --skill-exam-on-dark: #459987;        /* 4.51 */
+
+  /* Resolved text tokens. Flipped on dark sections alongside --casa-accent-text. */
+  --skill-reading-text: var(--skill-reading-on-light);
+  --skill-listening-text: var(--skill-listening-on-light);
+  --skill-speaking-text: var(--skill-speaking-on-light);
+  --skill-writing-text: var(--skill-writing-on-light);
+  --skill-grammar-text: var(--skill-grammar-on-light);
+  --skill-vocabulary-text: var(--skill-vocabulary-on-light);
+  --skill-exam-text: var(--skill-exam-on-light);
+
+  /*
+   * Radius intent.
+   *
+   * The numeric scale above (--radius and its derived steps) is Tailwind/shadcn
+   * wiring and stays as-is; changing it would ripple through every rounded-*
+   * utility. What was missing is the app's *hierarchy*: controls are tighter
+   * than cards, cards are tighter than feature surfaces, and a card nested
+   * inside a card takes a smaller radius than its parent. These aliases name
+   * that intent so new components stop guessing.
+   */
+  --casa-radius-control: var(--radius-sm);   /* 6px  — chips, small marks */
+  --casa-radius-input: var(--radius-lg);     /* 10px — buttons, inputs */
+  --casa-radius-card: var(--radius-xl);      /* 14px — cards, panels */
+  --casa-radius-feature: var(--radius-3xl);  /* 22px — heroes, feature surfaces */
+
+  --casa-button-height: 2.75rem;
+  --casa-button-radius: 0.625rem; /* rounded-lg — tier 3 interactive */
+  --casa-button-font-size: 0.95rem;
+  --casa-button-focus-ring: color-mix(in srgb, var(--casa-blue) 56%, transparent);
+  --casa-button-focus-shadow: 0 0 0 2px var(--casa-button-focus-ring);
+
+  /*
+   * Shadow scale — 4 elevation tiers, spotlight style.
+   * All use rgba(15,23,42,…) = --casa-ink. No pure black.
+   * Ratio: Y×3 blur, Y×-1.75 spread, opacity doubles per tier.
+   *
+   * soft  → subtle lift for flat cards and tiles
+   * card  → standard elevation for content cards
+   * modal → high elevation for overlays and sticky panels
+   * hero  → maximum depth for featured hero blocks and dark sections
+   */
+  /*
+   * Elevation, softened 2026-08-12 to match the student app's falloff.
+   *
+   * These four names and their meanings are unchanged — 167 usages across the
+   * codebase keep working untouched. What changed is the physics.
+   *
+   * Before: a single layer with large negative spread (-16 to -48px) at high
+   * opacity (0.18 → 0.88) in slate ink. Negative spread cancels most of the
+   * blur, so the result was a tight, dark contact shadow that reads like a UI
+   * kit default rather than considered depth.
+   *
+   * Now: two layers per step — a tight contact shadow plus a broad ambient one
+   * — with no negative spread and much lower opacity, in the app's warmer ink
+   * (36, 51, 59) instead of cold slate (15, 23, 42). Light falls off gradually.
+   * The warmer ink is also what stops the greys reading cold.
+   */
+  --shadow-soft:  0 1px 2px rgba(36, 51, 59, 0.04), 0 2px 8px rgba(36, 51, 59, 0.05);
+  --shadow-card:  0 2px 4px rgba(36, 51, 59, 0.04), 0 10px 28px rgba(36, 51, 59, 0.08);
+  --shadow-modal: 0 8px 16px rgba(36, 51, 59, 0.06), 0 22px 54px rgba(36, 51, 59, 0.13);
+  --shadow-hero:  0 12px 24px rgba(36, 51, 59, 0.07), 0 32px 72px rgba(36, 51, 59, 0.16);
+
+  /*
+   * Coloured elevation — a brand-blue glow under primary actions and selected
+   * states. This is the cue that reads as premium in the student app; this site
+   * had no equivalent. Use sparingly: primary CTAs and active cards only, never
+   * as a default card shadow.
+   */
+  --shadow-primary: 0 12px 28px rgba(0, 159, 227, 0.20);
+  --shadow-accent:  0 12px 28px rgba(0, 111, 159, 0.16);
+}
+
+/*
+ * Surface context — drives --casa-accent-text (see :root above).
+ *
+ * Prefer the semantic classes on new work. The Tailwind arbitrary-value
+ * selectors below cover the ~70 existing dark sections that set a --casa-ink*
+ * background directly, so they adapt without touching every call site.
+ */
+.casa-surface-dark,
+.bg-\[var\(--casa-ink-deep\)\],
+.bg-\[var\(--casa-ink-panel\)\],
+.bg-\[var\(--casa-ink\)\] {
+  --casa-accent-text: var(--casa-accent-on-dark);
+  --casa-accent-text-hover: var(--casa-accent-on-dark-hover);
+  --casa-text-subtle: var(--casa-subtle-on-dark);
+  --skill-reading-text: var(--skill-reading-on-dark);
+  --skill-listening-text: var(--skill-listening-on-dark);
+  --skill-speaking-text: var(--skill-speaking-on-dark);
+  --skill-writing-text: var(--skill-writing-on-dark);
+  --skill-grammar-text: var(--skill-grammar-on-dark);
+  --skill-vocabulary-text: var(--skill-vocabulary-on-dark);
+  --skill-exam-text: var(--skill-exam-on-dark);
+}
+
+/* Light surfaces reset the accent, so a white card inside a dark section does
+   not inherit the light-on-dark tint. */
+.casa-surface-light,
+.bg-white,
+.bg-\[var\(--casa-bg\)\],
+.bg-\[var\(--casa-warm-soft\)\],
+.bg-\[var\(--casa-sand\)\] {
+  --casa-accent-text: var(--casa-accent-on-light);
+  --casa-accent-text-hover: var(--casa-accent-on-light-hover);
+  --casa-text-subtle: var(--casa-subtle-on-light);
+  --skill-reading-text: var(--skill-reading-on-light);
+  --skill-listening-text: var(--skill-listening-on-light);
+  --skill-speaking-text: var(--skill-speaking-on-light);
+  --skill-writing-text: var(--skill-writing-on-light);
+  --skill-grammar-text: var(--skill-grammar-on-light);
+  --skill-vocabulary-text: var(--skill-vocabulary-on-light);
+  --skill-exam-text: var(--skill-exam-on-light);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  html {
+    font-size: 16.5px;
+    scroll-padding-top: 7rem;
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      font-size: 17px;
+      scroll-padding-top: 8rem;
+    }
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.6;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(0, 159, 227, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(242, 180, 65, 0.05) 0px, transparent 50%);
+  }
+
+  :target {
+    scroll-margin-top: 6rem;
+  }
+}
+
+[data-hero-archetype] h1 {
+  text-wrap: balance;
+}
+
+.matt-shadow {
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+}
+
+.japanese-fade {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+.hero-grain {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --hero-accent-a: rgba(254, 213, 0, 0.07);
+  --hero-accent-b: rgba(214, 107, 77, 0.06);
+  --hero-accent-c: rgba(0, 159, 227, 0.04);
+  --hero-base-start: #fffefa;
+  --hero-base-mid: #fffdf9;
+  --hero-base-end: #fffdfb;
+  --hero-noise-opacity: 0.028;
+  --hero-sheen-top: 0.14;
+  --hero-sheen-mid: 0.06;
+  --hero-sheen-bottom: 0.11;
+  background:
+    radial-gradient(circle at 14% 24%, var(--hero-accent-a), transparent 62%),
+    radial-gradient(circle at 86% 10%, var(--hero-accent-b), transparent 64%),
+    radial-gradient(circle at 52% 102%, var(--hero-accent-c), transparent 70%),
+    linear-gradient(150deg, var(--hero-base-start) 0%, var(--hero-base-mid) 50%, var(--hero-base-end) 100%);
+}
+
+.hero-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--hero-noise-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
+}
+
+.hero-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, var(--hero-sheen-top)) 0%,
+    rgba(255, 255, 255, var(--hero-sheen-mid)) 46%,
+    rgba(255, 255, 255, var(--hero-sheen-bottom)) 100%
+  );
+}
+
+.hero-grain-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-theme-default {
+  --hero-accent-a: rgba(254, 213, 0, 0.065);
+  --hero-accent-b: rgba(214, 107, 77, 0.05);
+  --hero-accent-c: rgba(0, 159, 227, 0.035);
+}
+
+.hero-theme-home {
+  --hero-accent-a: rgba(254, 213, 0, 0.075);
+  --hero-accent-b: rgba(214, 107, 77, 0.06);
+  --hero-accent-c: rgba(0, 159, 227, 0.04);
+  --hero-base-start: #fffefb;
+  --hero-base-mid: #fffbf6;
+  --hero-base-end: #fffaf7;
+  --hero-noise-opacity: 0.03;
+}
+
+.hero-theme-courses {
+  --hero-accent-a: rgba(242, 180, 65, 0.09);
+  --hero-accent-b: rgba(0, 159, 227, 0.06);
+  --hero-accent-c: rgba(17, 24, 39, 0.04);
+  --hero-base-start: #fffdf8;
+  --hero-base-mid: #f8fbff;
+  --hero-base-end: #f7f9ff;
+}
+
+.hero-theme-exams {
+  --hero-accent-a: rgba(0, 159, 227, 0.09);
+  --hero-accent-b: rgba(17, 24, 39, 0.06);
+  --hero-accent-c: rgba(214, 107, 77, 0.055);
+  --hero-base-start: #f9fcff;
+  --hero-base-mid: #f5f9ff;
+  --hero-base-end: #f7fbfe;
+}
+
+.hero-theme-accommodation {
+  --hero-accent-a: rgba(214, 107, 77, 0.085);
+  --hero-accent-b: rgba(254, 213, 0, 0.08);
+  --hero-accent-c: rgba(0, 159, 227, 0.04);
+  --hero-base-start: #fffcf8;
+  --hero-base-mid: #fff9f3;
+  --hero-base-end: #fffaf5;
+}
+
+.hero-theme-about {
+  --hero-accent-a: rgba(17, 24, 39, 0.08);
+  --hero-accent-b: rgba(0, 159, 227, 0.07);
+  --hero-accent-c: rgba(242, 180, 65, 0.06);
+  --hero-base-start: #f9fbff;
+  --hero-base-mid: #f4f8ff;
+  --hero-base-end: #f8fbfe;
+}
+
+.hero-archetype-a {
+  --hero-noise-opacity: 0.033;
+  --hero-sheen-top: 0.17;
+  --hero-sheen-mid: 0.07;
+  --hero-sheen-bottom: 0.12;
+}
+
+.hero-archetype-b {
+  --hero-noise-opacity: 0.027;
+  --hero-accent-a: rgba(0, 159, 227, 0.07);
+  --hero-accent-b: rgba(242, 180, 65, 0.065);
+  --hero-accent-c: rgba(17, 24, 39, 0.04);
+}
+
+.hero-archetype-c {
+  --hero-noise-opacity: 0.02;
+  --hero-accent-a: rgba(0, 159, 227, 0.03);
+  --hero-accent-b: rgba(242, 180, 65, 0.03);
+  --hero-accent-c: rgba(17, 24, 39, 0.02);
+  --hero-sheen-top: 0.11;
+  --hero-sheen-mid: 0.04;
+  --hero-sheen-bottom: 0.08;
+}
+
+.hero-archetype-d {
+  --hero-noise-opacity: 0.031;
+  --hero-accent-a: rgba(214, 107, 77, 0.085);
+  --hero-accent-b: rgba(254, 213, 0, 0.075);
+  --hero-accent-c: rgba(0, 159, 227, 0.035);
+}
+
+.hero-archetype-e {
+  --hero-noise-opacity: 0.028;
+  --hero-accent-a: rgba(0, 159, 227, 0.082);
+  --hero-accent-b: rgba(17, 24, 39, 0.06);
+  --hero-accent-c: rgba(214, 107, 77, 0.04);
+}
+
+.hero-archetype-f {
+  --hero-noise-opacity: 0.032;
+  --hero-accent-a: rgba(0, 159, 227, 0.08);
+  --hero-accent-b: rgba(242, 180, 65, 0.07);
+  --hero-accent-c: rgba(17, 24, 39, 0.045);
+}
+
+.casa-tricolor-rule {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--casa-red) 86%, transparent),
+    color-mix(in srgb, var(--casa-sun) 88%, transparent) 45%,
+    color-mix(in srgb, var(--casa-blue) 86%, transparent)
+  );
+}
+
+.casa-media-overlay {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.casa-media-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.6;
+  background:
+    linear-gradient(
+      128deg,
+      color-mix(in srgb, var(--casa-ink-deep) 28%, transparent) 0%,
+      transparent 41%,
+      color-mix(in srgb, var(--casa-blue) 24%, transparent) 100%
+    ),
+    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--casa-blue) 26%, transparent), transparent 64%),
+    radial-gradient(115% 75% at 0% 100%, color-mix(in srgb, var(--casa-sun) 26%, transparent), transparent 65%);
+  background-repeat: no-repeat;
+  background-size: 130% 130%, 100% 100%, 100% 100%;
+  background-position: 8% 2%, center, center;
+  transform: scale(1.02);
+}
+
+.casa-media-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.12;
+  background:
+    linear-gradient(
+      118deg,
+      transparent 0 32%,
+      rgba(255, 255, 255, 0.64) 48%,
+      color-mix(in srgb, var(--casa-blue) 78%, white) 52%,
+      transparent 68% 100%
+    ),
+    linear-gradient(
+      300deg,
+      transparent 0 54%,
+      color-mix(in srgb, var(--casa-sun) 68%, transparent) 74%,
+      transparent 92% 100%
+    );
+  background-repeat: no-repeat;
+  background-size: 240% 100%, 180% 100%;
+  background-position: 102% 0%, -36% 100%;
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 72%, 100% 100%, 0 100%, 0 38%, 19% 28%);
+  filter: blur(0.3px) saturate(1.1);
+  mix-blend-mode: screen;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes casa-media-overlay-breathe {
+  0% {
+    background-position: 8% 2%, center, center;
+    opacity: 0.56;
+  }
+
+  50% {
+    background-position: 4% 0%, center, center;
+    opacity: 0.68;
+  }
+
+  100% {
+    background-position: 8% 2%, center, center;
+    opacity: 0.56;
+  }
+}
+
+@keyframes casa-media-prismatic-sweep {
+  0% {
+    opacity: 0.2;
+    background-position: 102% 0%, -36% 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 72%, 100% 100%, 0 100%, 0 38%, 19% 28%);
+  }
+
+  28% {
+    opacity: 0.7;
+  }
+
+  54% {
+    background-position: 40% 0%, 12% 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 55%, 73% 67%, 100% 100%, 0 100%, 0 45%, 28% 33%);
+  }
+
+  100% {
+    opacity: 0.22;
+    background-position: -44% 0%, 100% 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 72%, 100% 100%, 0 100%, 0 38%, 19% 28%);
+  }
+}
+
+.casa-media-overlay-card::before {
+  opacity: 0.52;
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--casa-ink-deep) 32%, transparent) 0%,
+      transparent 40%,
+      color-mix(in srgb, var(--casa-blue) 18%, transparent) 100%
+    ),
+    radial-gradient(110% 90% at 88% 8%, color-mix(in srgb, var(--casa-blue) 22%, transparent), transparent 68%),
+    repeating-linear-gradient(
+      122deg,
+      rgba(255, 255, 255, 0.035) 0 9px,
+      rgba(255, 255, 255, 0.08) 9px 12px,
+      rgba(255, 255, 255, 0.028) 12px 20px
+    );
+  background-size: 120% 120%, 100% 100%, 140% 140%;
+  background-position: 6% 4%, center, 0% 0%;
+}
+
+.casa-media-overlay-card::after {
+  opacity: 0.16;
+  background:
+    linear-gradient(118deg, transparent 0 46%, rgba(255, 255, 255, 0.72) 52%, transparent 62%),
+    radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--casa-sun) 72%, transparent) 0 8%, transparent 32%),
+    linear-gradient(300deg, transparent 0 62%, color-mix(in srgb, var(--casa-blue) 62%, transparent) 82%, transparent 100%);
+  background-repeat: no-repeat;
+  background-size: 220% 100%, 100% 100%, 160% 100%;
+  background-position: 112% 0%, center, -26% 100%;
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 87% 88%, 100% 100%, 0 100%, 0 24%, 13% 12%);
+  filter: blur(0);
+}
+
+.casa-card-surface {
+  border: 1px solid var(--casa-sand);
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 20px 42px -34px rgba(15, 23, 42, 0.34);
+}
+
+@keyframes casa-card-grid-shift {
+  0% {
+    opacity: 0.52;
+    background-position: 6% 4%, center, 0% 0%;
+  }
+
+  50% {
+    opacity: 0.64;
+    background-position: 2% 1%, center, 24% -12%;
+  }
+
+  100% {
+    opacity: 0.52;
+    background-position: 6% 4%, center, 0% 0%;
+  }
+}
+
+@keyframes casa-card-spark-sweep {
+  0% {
+    opacity: 0.2;
+    background-position: 112% 0%, center, -26% 100%;
+  }
+
+  45% {
+    opacity: 0.82;
+    background-position: 44% 0%, center, 18% 100%;
+  }
+
+  100% {
+    opacity: 0.24;
+    background-position: -44% 0%, center, 94% 100%;
+  }
+}
+
+.casa-button-prism {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: var(--casa-button-height);
+  border-radius: var(--casa-button-radius);
+  font-size: var(--casa-button-font-size);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.003em;
+  border: 1px solid color-mix(in srgb, var(--casa-blue) 32%, rgba(255, 255, 255, 0.28));
+  background:
+    linear-gradient(
+      118deg,
+      color-mix(in srgb, var(--casa-ink-deep) 94%, black) 0%,
+      var(--casa-ink-deep) 52%,
+      color-mix(in srgb, var(--casa-blue) 16%, var(--casa-ink-deep)) 100%
+    );
+  background-size: 170% 100%;
+  background-position: 0% 50%;
+  box-shadow:
+    0 10px 24px -18px rgba(15, 23, 42, 0.66),
+    0 2px 6px -5px rgba(15, 23, 42, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.casa-button-prism:focus-visible {
+  box-shadow:
+    var(--casa-button-focus-shadow),
+    0 14px 28px -20px rgba(15, 23, 42, 0.76),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.casa-button-prism:active {
+  transform: translateY(0.5px);
+  box-shadow:
+    0 7px 16px -14px rgba(15, 23, 42, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.casa-button-prism:disabled,
+.casa-button-prism[aria-disabled="true"] {
+  border-color: color-mix(in srgb, var(--casa-sand) 72%, transparent);
+  opacity: 0.66;
+  box-shadow:
+    0 6px 16px -14px rgba(15, 23, 42, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  filter: saturate(0.86) contrast(0.96);
+}
+
+.casa-button-prism::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.82;
+  background:
+    radial-gradient(
+      95% 120% at 0% 0%,
+      rgba(255, 255, 255, 0.19) 0%,
+      rgba(255, 255, 255, 0) 64%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0) 42%
+    );
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 240ms ease,
+    transform 420ms cubic-bezier(0.2, 0.78, 0.2, 1);
+}
+
+.casa-button-prism::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      color-mix(in srgb, var(--casa-sun) 70%, white) 48%,
+      rgba(255, 255, 255, 0) 100%
+    )
+    no-repeat,
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      color-mix(in srgb, var(--casa-blue) 78%, white) 48%,
+      rgba(255, 255, 255, 0) 100%
+    )
+    no-repeat;
+  background-size: 42% 1.5px, 42% 1.5px;
+  background-position:
+    -48% 2px,
+    148% calc(100% - 2px);
+}
+
+.casa-button-prism > * {
+  position: relative;
+  z-index: 2;
+}
+
+.casa-button-prism svg {
+  transition:
+    transform 240ms cubic-bezier(0.2, 0.78, 0.2, 1),
+    opacity 240ms ease;
+}
+
+.casa-button-outline {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: var(--casa-button-height);
+  border-radius: var(--casa-button-radius);
+  font-size: var(--casa-button-font-size);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.003em;
+  border-width: 1px;
+  box-shadow:
+    0 8px 20px -18px rgba(15, 23, 42, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.casa-button-outline:focus-visible {
+  box-shadow:
+    var(--casa-button-focus-shadow),
+    0 12px 25px -18px rgba(15, 23, 42, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.casa-button-outline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+  background:
+    radial-gradient(
+      92% 120% at 0% 0%,
+      rgba(255, 255, 255, 0.46) 0%,
+      rgba(255, 255, 255, 0) 64%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--casa-blue) 12%, transparent) 0%,
+      rgba(255, 255, 255, 0) 45%
+    );
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 240ms ease,
+    transform 420ms cubic-bezier(0.2, 0.78, 0.2, 1);
+}
+
+.casa-button-outline::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      color-mix(in srgb, var(--casa-blue) 76%, white) 50%,
+      rgba(255, 255, 255, 0) 100%
+    )
+    no-repeat,
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      color-mix(in srgb, var(--casa-sun) 64%, white) 50%,
+      rgba(255, 255, 255, 0) 100%
+    )
+    no-repeat;
+  background-size: 38% 1.5px, 38% 1.5px;
+  background-position:
+    -44% 2px,
+    144% calc(100% - 2px);
+}
+
+.casa-button-outline > * {
+  position: relative;
+  z-index: 2;
+}
+
+.casa-button-outline svg {
+  transition:
+    transform 240ms cubic-bezier(0.2, 0.78, 0.2, 1),
+    opacity 240ms ease;
+}
+
+.casa-cta-link {
+  border-radius: 0.5rem;
+}
+
+.casa-cta-link:focus-visible {
+  outline: 2px solid var(--casa-button-focus-ring);
+  outline-offset: 2px;
+  text-decoration: underline;
+}
+
+@keyframes casa-button-outline-trace {
+  0% {
+    opacity: 0;
+    background-position:
+      -44% 2px,
+      144% calc(100% - 2px);
+  }
+
+  20% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0.22;
+    background-position:
+      144% 2px,
+      -44% calc(100% - 2px);
+  }
+}
+
+@keyframes casa-button-edge-trace {
+  0% {
+    opacity: 0;
+    background-position:
+      -48% 2px,
+      148% calc(100% - 2px);
+  }
+
+  20% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0.24;
+    background-position:
+      148% 2px,
+      -48% calc(100% - 2px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .casa-reveal-init {
+    opacity: 0;
+    filter: blur(1.5px);
+    transform: translate3d(0, 12px, 0);
+    pointer-events: none;
+    transition-property: opacity, transform, filter;
+    transition-duration: 420ms;
+    transition-timing-function: cubic-bezier(0.2, 0.78, 0.2, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .casa-reveal-init.is-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
+  }
+
+  main a,
+  main button {
+    transition-property: color, background-color, border-color, transform, box-shadow, opacity;
+    transition-duration: 170ms;
+    transition-timing-function: ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    main button.casa-button-prism:hover,
+    main button.casa-button-outline:hover,
+    main a.casa-button-prism:hover,
+    main a.casa-button-outline:hover,
+    main a.casa-cta-link:hover {
+      transform: translateY(-1px);
+    }
+
+    main article:hover .casa-media-overlay,
+    main figure:hover .casa-media-overlay,
+    main a:hover .casa-media-overlay {
+      transform: scale(1.014);
+    }
+
+    main article:hover .casa-media-overlay::before,
+    main figure:hover .casa-media-overlay::before,
+    main a:hover .casa-media-overlay::before {
+      animation: casa-media-overlay-breathe 950ms ease-in-out both;
+    }
+
+    main article:hover .casa-media-overlay::after,
+    main figure:hover .casa-media-overlay::after,
+    main a:hover .casa-media-overlay::after {
+      animation: casa-media-prismatic-sweep 1100ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
+    }
+
+    main article:hover .casa-media-overlay-card::before,
+    main figure:hover .casa-media-overlay-card::before,
+    main a:hover .casa-media-overlay-card::before {
+      animation: casa-card-grid-shift 960ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
+    }
+
+    main article:hover .casa-media-overlay-card::after,
+    main figure:hover .casa-media-overlay-card::after,
+    main a:hover .casa-media-overlay-card::after {
+      animation: casa-card-spark-sweep 900ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
+    }
+
+    main article:hover .casa-media-overlay > img,
+    main article:hover .casa-media-overlay > picture > img,
+    main article:hover .casa-media-overlay > span > img,
+    main article:hover .casa-media-overlay img[data-nimg],
+    main figure:hover .casa-media-overlay > img,
+    main figure:hover .casa-media-overlay > picture > img,
+    main figure:hover .casa-media-overlay > span > img,
+    main figure:hover .casa-media-overlay img[data-nimg],
+    main a:hover .casa-media-overlay > img,
+    main a:hover .casa-media-overlay > picture > img,
+    main a:hover .casa-media-overlay > span > img,
+    main a:hover .casa-media-overlay img[data-nimg] {
+      transform: scale(1.07) translate3d(0.4%, -0.6%, 0);
+      filter: saturate(1.1) contrast(1.05) brightness(1.02);
+    }
+
+    main article:hover .casa-media-overlay-card > img,
+    main article:hover .casa-media-overlay-card > picture > img,
+    main article:hover .casa-media-overlay-card > span > img,
+    main article:hover .casa-media-overlay-card img[data-nimg],
+    main figure:hover .casa-media-overlay-card > img,
+    main figure:hover .casa-media-overlay-card > picture > img,
+    main figure:hover .casa-media-overlay-card > span > img,
+    main figure:hover .casa-media-overlay-card img[data-nimg],
+    main a:hover .casa-media-overlay-card > img,
+    main a:hover .casa-media-overlay-card > picture > img,
+    main a:hover .casa-media-overlay-card > span > img,
+    main a:hover .casa-media-overlay-card img[data-nimg] {
+      transform: scale(1.064) translate3d(0.1%, -0.9%, 0);
+      filter: saturate(1.07) contrast(1.04) brightness(1.03);
+    }
+
+    .casa-button-prism:hover,
+    .casa-button-prism:focus-visible {
+      border-color: color-mix(in srgb, var(--casa-blue) 46%, rgba(255, 255, 255, 0.22));
+      background-position: 100% 50%;
+      box-shadow:
+        0 14px 30px -22px rgba(15, 23, 42, 0.78),
+        0 0 0 1px color-mix(in srgb, var(--casa-blue) 38%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .casa-button-prism:hover::before,
+    .casa-button-prism:focus-visible::before {
+      opacity: 1;
+      transform: translate3d(0, -5%, 0);
+    }
+
+    .casa-button-prism:hover::after,
+    .casa-button-prism:focus-visible::after {
+      animation: casa-button-edge-trace 860ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
+    }
+
+    .casa-button-prism:hover svg,
+    .casa-button-prism:focus-visible svg {
+      opacity: 0.96;
+      transform: translateX(1.4px);
+    }
+
+    .casa-button-outline:hover,
+    .casa-button-outline:focus-visible {
+      border-color: color-mix(in srgb, var(--casa-blue) 42%, currentColor 18%);
+      box-shadow:
+        0 12px 25px -18px rgba(15, 23, 42, 0.48),
+        0 0 0 1px color-mix(in srgb, var(--casa-blue) 28%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .casa-button-outline:hover::before,
+    .casa-button-outline:focus-visible::before {
+      opacity: 1;
+      transform: translate3d(0, -5%, 0);
+    }
+
+    .casa-button-outline:hover::after,
+    .casa-button-outline:focus-visible::after {
+      animation: casa-button-outline-trace 860ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
+    }
+
+    .casa-button-outline:hover svg,
+    .casa-button-outline:focus-visible svg {
+      opacity: 0.96;
+      transform: translateX(1.25px);
+    }
+  }
+
+  .casa-media-overlay {
+    transition: transform 380ms cubic-bezier(0.2, 0.78, 0.2, 1);
+    will-change: transform;
+  }
+
+  .casa-media-overlay > img,
+  .casa-media-overlay > picture > img,
+  .casa-media-overlay > span > img,
+  .casa-media-overlay img[data-nimg] {
+    transition:
+      transform 620ms cubic-bezier(0.2, 0.78, 0.2, 1),
+      filter 620ms cubic-bezier(0.2, 0.78, 0.2, 1);
+    will-change: transform, filter;
+  }
+
+  .casa-media-overlay::before {
+    transition: opacity 220ms ease, transform 220ms ease;
+    will-change: background-position, opacity, transform;
+  }
+
+  .casa-media-overlay::after {
+    transition: opacity 220ms ease;
+    will-change: background-position, clip-path, opacity;
+  }
+
+  .casa-button-prism {
+    transition:
+      box-shadow 240ms ease,
+      border-color 240ms ease,
+      background-position 360ms cubic-bezier(0.2, 0.78, 0.2, 1);
+  }
+
+  .casa-button-prism::before,
+  .casa-button-prism::after {
+    will-change: transform, opacity, background-position;
+  }
+
+  .casa-button-outline {
+    transition:
+      box-shadow 240ms ease,
+      border-color 240ms ease;
+  }
+
+  .casa-button-outline::before,
+  .casa-button-outline::after {
+    will-change: transform, opacity, background-position;
+  }
+}
+
+@keyframes clara-float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-3px) rotate(0.8deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes clara-orbit {
+  0% {
+    transform: rotate(0deg) translateX(0px);
+  }
+
+  50% {
+    transform: rotate(180deg) translateX(1px);
+  }
+
+  100% {
+    transform: rotate(360deg) translateX(0px);
+  }
+}
+
+@keyframes clara-blink {
+  0%,
+  88%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  90% {
+    transform: scaleY(0.24);
+  }
+
+  94% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes clara-thinking {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 159, 227, 0.18);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 159, 227, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 159, 227, 0);
+  }
+}
+
+@keyframes clara-status-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
+.clara-avatar {
+  animation: clara-float 4.8s ease-in-out infinite;
+}
+
+.clara-avatar-thinking {
+  animation:
+    clara-float 2.8s ease-in-out infinite,
+    clara-thinking 1.65s ease-out infinite;
+}
+
+.clara-orbit {
+  transform-origin: 32px 32px;
+  animation: clara-orbit 5.6s linear infinite;
+}
+
+.clara-eye {
+  transform-origin: center;
+  animation: clara-blink 6.2s ease-in-out infinite;
+}
+
+.clara-eye-delay {
+  animation-delay: 0.22s;
+}
+
+.clara-scroll {
+  scroll-behavior: smooth;
+}
+
+.course-rail-scroll {
+  scrollbar-width: none;
+}
+.course-rail-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+
+.clara-status-pulse {
+  animation: clara-status-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .casa-reveal-init {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    transition: none !important;
+  }
+
+  main a,
+  main button,
+  .casa-media-overlay {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .casa-media-overlay::after {
+    animation: none !important;
+    opacity: 0.12 !important;
+    background-position: 102% 0%, -36% 100% !important;
+  }
+
+  .casa-media-overlay > img,
+  .casa-media-overlay > picture > img,
+  .casa-media-overlay > span > img,
+  .casa-media-overlay img[data-nimg] {
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .casa-button-prism::before {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .casa-button-prism::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .casa-button-prism svg {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .casa-button-outline::before {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .casa-button-outline::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .casa-button-outline svg {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .casa-cta-link {
+    transition: none !important;
+  }
+
+  .clara-avatar,
+  .clara-avatar-thinking,
+  .clara-orbit,
+  .clara-eye,
+  .clara-eye-delay,
+  .clara-status-pulse {
+    animation: none !important;
+    transform: none !important;
+  }
+}

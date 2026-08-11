@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+
+# Local generated deliverables
+output/
+tmp/
+coverage/
+playwright-report/
+test-results/
+*.local.pdf
+*.presentation.pdf
+
+# Local machine and secret state
+.DS_Store
+.env*
+!.env.example
+.vercel/
+.neon
+*.tsbuildinfo
+
+# Development-only coordination
+.agentic/

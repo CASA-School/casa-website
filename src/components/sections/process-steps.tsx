@@ -1,0 +1,53 @@
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+export type ProcessStep = {
+  step: string;
+  title: string;
+  description: string;
+};
+
+type ProcessStepsProps = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  steps: ProcessStep[];
+  cta?: {
+    label: string;
+    href: string;
+  };
+  className?: string;
+};
+
+export function ProcessSteps({ eyebrow, title, description, steps, cta, className }: ProcessStepsProps) {
+  return (
+    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/30 px-6 py-8 md:px-9 md:py-10', className)}>
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+      <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
+      <h2 className="mt-2 text-2xl font-black text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+      <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+
+      <ol className="mt-8 grid gap-7 md:grid-cols-3">
+        {steps.map((item) => (
+          <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
+            <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-[10px] font-bold text-white">
+              {item.step}
+            </span>
+            <h3 className="text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
+            <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
+          </li>
+        ))}
+      </ol>
+
+      {cta ? (
+        <div className="mt-7">
+          <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
+            <Link href={cta.href}>{cta.label}</Link>
+          </Button>
+        </div>
+      ) : null}
+    </section>
+  );
+}

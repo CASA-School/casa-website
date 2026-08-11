@@ -1,0 +1,12 @@
+{
+  "app": {
+    "title": "CASA Portal",
+    "subtitle": "Language School Platform"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in"
+  }
+}
