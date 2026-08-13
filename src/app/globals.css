@@ -235,6 +235,74 @@
   --skill-exam-text: var(--skill-exam-on-light);
 
   /*
+   * CEFR level scale.
+   *
+   * Skills are categorical, so they get distinct hues. Levels are *ordered* —
+   * A1 to C1 is a progression, not a set of alternatives — so they get a single
+   * sequential ramp instead. Derived from --casa-blue (#009fe3): its Lab hue is
+   * held constant while lightness steps down and chroma follows a curve, so the
+   * scale reads as "further along" rather than "different thing".
+   *
+   * Unlike the skill tokens this is CASA's own decision — the student app has no
+   * level colours to mirror. If the app adopts levels later, copy these.
+   *
+   * B1+ is included because CASA bills it as a real step (CASA_LEVEL_SEQUENCE in
+   * src/config/calculator/pricing.ts) and it is where the textbook switches from
+   * Netzwerk neu to Kontext.
+   *
+   * Never signal a level by colour alone — always pair with the label.
+   */
+  --level-a1: #daeafa;
+  --level-a2: #b6d5f2;
+  --level-b1: #81b6e2;
+  --level-b1plus: #4f9dd2;
+  --level-b2: #0078b3;
+  --level-c1: #005c90;
+
+  /*
+   * Text colour for a FILLED chip using the surfaces above. The ramp crosses
+   * over between B1+ and B2, so this is measured, not guessed:
+   *   a1 ink 14.56 · a2 ink 11.72 · b1 ink 8.27 · b1plus ink 6.02
+   *   b2 white 4.84 · c1 white 7.16
+   * B2 was deepened from L*50 to L*47 because L*50 sat in the dead zone where
+   * neither white (4.42) nor ink (4.04) cleared AA.
+   */
+  --level-a1-ink: var(--casa-ink);
+  --level-a2-ink: var(--casa-ink);
+  --level-b1-ink: var(--casa-ink);
+  --level-b1plus-ink: var(--casa-ink);
+  --level-b2-ink: #ffffff;
+  --level-c1-ink: #ffffff;
+
+  /*
+   * Level colour as TEXT on a light surface. Same house method as the skill
+   * tokens: darken until 4.5:1 against --casa-sand (#e2e8f0), the strictest
+   * light surface here. Ratio noted is vs sand; all clear 5.5+ on white.
+   */
+  --level-a1-on-light: #5b6a78;     /* sand 4.51 */
+  --level-a2-on-light: #4d6b85;     /* sand 4.53 */
+  --level-b1-on-light: #326d95;     /* sand 4.53 */
+  --level-b1plus-on-light: #006ea0; /* sand 4.56 */
+  --level-b2-on-light: #006da7;     /* sand 4.55 */
+  --level-c1-on-light: #005c90;     /* sand 5.81 — the surface already clears */
+
+  /* AA on --casa-ink-panel (#1b2537). Lightened until each clears 4.5:1. */
+  --level-a1-on-dark: #daeafa;      /* 12.54 */
+  --level-a2-on-dark: #b6d5f2;      /* 10.09 */
+  --level-b1-on-dark: #81b6e2;      /* 7.12 */
+  --level-b1plus-on-dark: #4f9dd2;  /* 5.19 */
+  --level-b2-on-dark: #3a92cf;      /* 4.53 */
+  --level-c1-on-dark: #5490c8;      /* 4.54 */
+
+  /* Resolved text tokens. Flipped on dark sections alongside --casa-accent-text. */
+  --level-a1-text: var(--level-a1-on-light);
+  --level-a2-text: var(--level-a2-on-light);
+  --level-b1-text: var(--level-b1-on-light);
+  --level-b1plus-text: var(--level-b1plus-on-light);
+  --level-b2-text: var(--level-b2-on-light);
+  --level-c1-text: var(--level-c1-on-light);
+
+  /*
    * Radius intent.
    *
    * The numeric scale above (--radius and its derived steps) is Tailwind/shadcn
@@ -317,6 +385,12 @@
   --skill-grammar-text: var(--skill-grammar-on-dark);
   --skill-vocabulary-text: var(--skill-vocabulary-on-dark);
   --skill-exam-text: var(--skill-exam-on-dark);
+  --level-a1-text: var(--level-a1-on-dark);
+  --level-a2-text: var(--level-a2-on-dark);
+  --level-b1-text: var(--level-b1-on-dark);
+  --level-b1plus-text: var(--level-b1plus-on-dark);
+  --level-b2-text: var(--level-b2-on-dark);
+  --level-c1-text: var(--level-c1-on-dark);
 }
 
 /* Light surfaces reset the accent, so a white card inside a dark section does
@@ -336,6 +410,12 @@
   --skill-grammar-text: var(--skill-grammar-on-light);
   --skill-vocabulary-text: var(--skill-vocabulary-on-light);
   --skill-exam-text: var(--skill-exam-on-light);
+  --level-a1-text: var(--level-a1-on-light);
+  --level-a2-text: var(--level-a2-on-light);
+  --level-b1-text: var(--level-b1-on-light);
+  --level-b1plus-text: var(--level-b1plus-on-light);
+  --level-b2-text: var(--level-b2-on-light);
+  --level-c1-text: var(--level-c1-on-light);
 }
 
 .dark {

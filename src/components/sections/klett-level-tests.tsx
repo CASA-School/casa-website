@@ -3,6 +3,7 @@
 import { ExternalLink } from 'lucide-react';
 
 import { buttonVariants } from '@/components/ui/button';
+import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
@@ -108,9 +109,9 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
 
   return (
     <section id="klett-level-tests" className={cn('rounded-3xl border border-[color:var(--casa-sand)] bg-white p-7 shadow-[var(--shadow-soft)]', className)}>
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-      <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{copy.title}</h2>
+      <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{copy.title}</h2>
       <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{copy.description}</p>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -121,12 +122,25 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
           >
             <div className="space-y-3">
               <div>
-                <span className="inline-flex items-center rounded-lg bg-[var(--casa-blue)]/10 px-2 py-0.5 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                {/* Six of these sit in one grid directly below the level
+                    timeline on /placement-test. Identical blue chips made them
+                    indistinguishable; the shared level ramp makes the position
+                    readable. The label is always present, so colour is never
+                    the only signal. */}
+                <span
+                  className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.12em]"
+                  style={(() => {
+                    const key = levelKeyFromLabel(test.level);
+                    return key
+                      ? { background: levelTokens[key].surface, color: levelTokens[key].ink }
+                      : undefined;
+                  })()}
+                >
                   {test.level}
                 </span>
               </div>
               <div>
-                <h3 className="text-lg font-black text-[var(--casa-ink)]">{test.provider}</h3>
+                <h3 className="text-lg font-bold text-[var(--casa-ink)]">{test.provider}</h3>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--casa-text-subtle)]">
                   {copy.providerLabel}: Klett Sprachen
                 </p>

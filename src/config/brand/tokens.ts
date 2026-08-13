@@ -165,6 +165,47 @@ export const skillTokens = {
 export type SkillKey = keyof typeof skillTokens;
 
 /**
+ * CEFR level scale — a single sequential ramp derived from --casa-blue, because
+ * levels are ordered rather than categorical. `surface` is the chip background,
+ * `ink` is the AA-safe text ON that surface (the ramp crosses over between B1+
+ * and B2, so this is measured per step, not assumed), and `text` is the level
+ * colour used as text on an ordinary light surface.
+ *
+ * Contrast ratios are documented in `globals.css`. Never signal a level by
+ * colour alone — always pair it with the label.
+ */
+export const levelTokens = {
+  a1: { surface: 'var(--level-a1)', ink: 'var(--level-a1-ink)', text: 'var(--level-a1-text)' },
+  a2: { surface: 'var(--level-a2)', ink: 'var(--level-a2-ink)', text: 'var(--level-a2-text)' },
+  b1: { surface: 'var(--level-b1)', ink: 'var(--level-b1-ink)', text: 'var(--level-b1-text)' },
+  b1plus: {
+    surface: 'var(--level-b1plus)',
+    ink: 'var(--level-b1plus-ink)',
+    text: 'var(--level-b1plus-text)',
+  },
+  b2: { surface: 'var(--level-b2)', ink: 'var(--level-b2-ink)', text: 'var(--level-b2-text)' },
+  c1: { surface: 'var(--level-c1)', ink: 'var(--level-c1-ink)', text: 'var(--level-c1-text)' },
+} as const;
+
+export type LevelKey = keyof typeof levelTokens;
+
+/** Maps a published level label ("A1", "B1+", "A2/B1") to its scale step. */
+export function levelKeyFromLabel(label: string): LevelKey | null {
+  const normalized = label.trim().toUpperCase();
+  // A range like "A2/B1" or "B1/B2" takes its LOWER bound: that is the entry
+  // requirement, which is what a reader is checking themselves against.
+  const first = normalized.split(/[/–-]/)[0]?.trim() ?? '';
+
+  if (first === 'B1+') return 'b1plus';
+  if (first.startsWith('C1')) return 'c1';
+  if (first.startsWith('B2')) return 'b2';
+  if (first.startsWith('B1')) return 'b1';
+  if (first.startsWith('A2')) return 'a2';
+  if (first.startsWith('A1')) return 'a1';
+  return null;
+}
+
+/**
  * Radius intent. The numeric scale stays in globals.css as Tailwind wiring;
  * these name the hierarchy so new components stop guessing.
  * A card nested inside a card takes the next step down.
