@@ -464,8 +464,51 @@ On 2026-08-12 the project moved off the Quantutech repository to CASA ownership.
 
 **Vercel.** The `@vercel/toolbar` dependency and its `next.config.ts` wrapper are removed — the
 layout usage had already been stripped by another pass. The build no longer depends on Vercel.
-Disconnecting the Vercel *project* itself is a manual step: the `vercel` CLI is installed but not
-authenticated, and logging in on the user's behalf is out of scope.
+The local `vercel` CLI (v50.15.1) is installed but not authenticated (`vercel whoami` fails), and
+there is a stale, unrelated `.vercel/project.json` (dated Feb, project name `casa`, org
+`team_cP1SKrdM3igxToJt5ztgcm1S`) left over from before the repo moved to CASA-School — gitignored,
+harmless, do not reuse it without first confirming it actually points at the current project.
+
+**The user has multiple Vercel accounts across multiple browser profiles, and they are unrelated
+businesses.** On 2026-08-13, driving the one Chrome instance Claude-in-Chrome auto-connected to
+landed in a workspace called "Parami Hairsalon" (Hobby plan, one project
+`para-mi-hair-beauty-salon`) — a different business entirely, not CASA. **CASA's Vercel account is
+connected to the `CASA-School` GitHub org and is signed in as `r.shafiee@casa-bremen.de`** in a
+browser window the user opens deliberately. Before doing anything Vercel-related for this
+project, check the team name in the top-left switcher first; if it isn't CASA-related, use
+`switch_browser` so the user can explicitly connect the right window rather than guessing.
+
+## Deployed to Vercel — casa-bremen.vercel.app (2026-08-13)
+
+**Live at `https://casa-bremen.vercel.app`.** Vercel team `CASA International Language School`
+(account `rshafiee-casa`, Hobby plan), project name `casa-bremen`, imported directly from
+`CASA-School/casa-website` on `main`. Auto-deploys on every push to `main` from here on — no
+separate deploy step needed for future work, just push.
+
+**The GitHub repo had to be made public first.** Vercel's Hobby plan cannot deploy from a private
+repo in an org — it prompted Pro/Pro-trial. Rather than pay or start a trial, the user chose to
+flip `CASA-School/casa-website` to public (confirmed explicitly, GitHub's own two-step warning
+shown and accepted). Verified safe beforehand: `.env.local` has zero commits in history ever,
+`.env.example`'s only "secret-shaped" line is the literal placeholder
+`postgresql://user:password@host/database`, and a full repo grep for key/token/secret patterns
+came back clean.
+
+**No `DATABASE_URL` was set on Vercel — deliberately.** Entering the real Neon connection string
+into a third-party platform's env-var UI wasn't something to do without a separate explicit
+call, so the deployment runs in fallback mode (in-repo fixtures), which `CLAUDE.md` already
+guarantees stays fully working. Only env var set: `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS=false`, the one
+uncommented line in `.env.example`, not a secret. If live Neon data is wanted on the deployed
+site, `DATABASE_URL` needs adding in Vercel's dashboard (Settings -> Environment Variables) —
+that's a step for the user, not something to do through chat.
+
+**Verified live, not just deployed:** build succeeded (51s, same as local), zero console errors,
+and the actual numbers were checked against the site rather than trusted from a screenshot — the
+calculator's A1.1->B2.1 estimate reads EUR 3,657.93-3,678.93, which hand-computes exactly from
+the corrected per-group tuition (940+940+520+520+520=3440) plus the corrected book range
+(7 x 23.99-26.99) plus the EUR 50 enrolment fee. `/courses` shows the corrected EUR 520/940/117.50
+fee copy. `/placement-test` shows B1+ with the staff-confirmed 8-9 weeks and its provenance note,
+the Kontext B1+ textbook card, and the stand-in cover (not real Klett art). `/courses/
+special-courses` shows the module catalogue with working filters and skill-coloured cards.
 
 **Azure subscription is live and matches the plan.** `rg-casa-platform-prod` and
 `rg-casa-student-prod` exist in germanywestcentral, with Container Apps environment
