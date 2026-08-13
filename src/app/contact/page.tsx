@@ -103,14 +103,14 @@ function normalizeTopicValue(value: string | undefined) {
     .replace(/^-+|-+$/g, '');
 }
 
-function getInitialTopicLabel(
-  rawTopic: string | undefined,
-  locale: 'en' | 'de',
-  options: readonly string[]
-) {
+/**
+ * Resolves `?topic=` to a catalog key. Returns an empty string when nothing
+ * matches; the form then falls back to its first option.
+ */
+function getInitialTopicKey(rawTopic: string | undefined, locale: 'en' | 'de') {
   const normalized = normalizeTopicValue(rawTopic);
   if (!normalized) {
-    return options[0] ?? '';
+    return '';
   }
 
   const match = topicCatalog.find((item) => {
@@ -118,11 +118,7 @@ function getInitialTopicLabel(
     return item.aliases.includes(normalized) || normalizeTopicValue(localizedLabel) === normalized;
   });
 
-  if (!match) {
-    return options[0] ?? '';
-  }
-
-  return locale === 'de' ? match.labels.de : match.labels.en;
+  return match?.key ?? '';
 }
 
 const formCopyByLocale = {
@@ -201,11 +197,14 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   const hero = getPageHero('contact', locale);
 
   const copy = formCopyByLocale[locale];
-  const topics = topicCatalog.map((topic) => (locale === 'de' ? topic.labels.de : topic.labels.en));
+  const topics = topicCatalog.map((topic) => ({
+    key: topic.key,
+    label: locale === 'de' ? topic.labels.de : topic.labels.en,
+  }));
   const topicParamValue = Array.isArray(resolvedSearchParams.topic)
     ? resolvedSearchParams.topic[0]
     : resolvedSearchParams.topic;
-  const initialTopic = getInitialTopicLabel(topicParamValue, locale, topics);
+  const initialTopicKey = getInitialTopicKey(topicParamValue, locale);
 
   const contactSchema = {
     '@context': 'https://schema.org',
@@ -235,7 +234,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
       <section className="bg-[linear-gradient(180deg,var(--casa-bg)_0%,#f8fafc_100%)] py-16 md:py-20">
         <Container className="max-w-7xl">
           <div id="contact-form" className="grid scroll-mt-28 gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-            <ContactInquiryForm locale={locale} topics={topics} initialTopic={initialTopic} copy={copy} />
+            <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 
             <div className="min-w-0 xl:sticky xl:top-28 xl:self-start">
               <aside className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-slate-50/50 p-6 sm:p-8 space-y-8 shadow-[var(--shadow-soft)]">
@@ -246,8 +245,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                       <Clock className="h-5 w-5" aria-hidden />
                     </span>
                     <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{copy.responseTitle}</p>
-                      <p className="mt-0.5 text-xl font-black text-[var(--casa-ink)]">{copy.responseValue}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{copy.responseTitle}</p>
+                      <p className="mt-0.5 text-xl font-bold text-[var(--casa-ink)]">{copy.responseValue}</p>
                     </div>
                   </div>
                   <p className="text-sm leading-relaxed text-slate-600">{copy.responseBody}</p>
@@ -257,7 +256,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
                 {/* Office Details */}
                 <div className="space-y-5">
-                  <h3 className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{copy.officeDetails}</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{copy.officeDetails}</h3>
                   <ul className="space-y-4 text-sm text-slate-700">
                     <li className="flex gap-3">
                       <MapPin className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />

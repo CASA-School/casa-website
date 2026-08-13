@@ -11,7 +11,14 @@ import { NextStepsTimeline } from '@/components/sections';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
-import { contactInquirySchema } from '@/lib/validation/contact';
+import {
+  contactInquirySchema,
+  isCompanyTopic,
+  isOrganiserTopic,
+  ORGANISER_CHOICES,
+  organiserBriefFields,
+  type OrganiserBriefField,
+} from '@/lib/validation/contact';
 
 type ContactInquiryFormCopy = {
   formTitle: string;
@@ -35,10 +42,16 @@ type ContactInquiryFormCopy = {
   errorBody: string;
 };
 
+type ContactTopicOption = {
+  /** Stable topic id, e.g. `group-booking`. Submitted alongside the label. */
+  key: string;
+  label: string;
+};
+
 type ContactInquiryFormProps = {
   locale: ContentLocale;
-  topics: readonly string[];
-  initialTopic?: string;
+  topics: readonly ContactTopicOption[];
+  initialTopicKey?: string;
   copy: ContactInquiryFormCopy;
 };
 
@@ -55,14 +68,343 @@ const initialFields = {
   topic: '',
   message: '',
   website: '',
+  // Organiser brief — rendered only for the group and company topics, and all
+  // optional. See `organiserBriefFields` for which topic gets which.
+  organisationName: '',
+  groupSize: '',
+  participantLevels: '',
+  preferredDates: '',
+  durationWeeks: '',
+  weeklyLessons: '',
+  languageFocus: '',
+  invoicingParty: '',
+  ageBand: '',
+  accommodation: '',
+  meals: '',
+  transport: '',
+  cultureProgramme: '',
+  deliveryMode: '',
+  schedulePreference: '',
 };
 
 const fieldGroupClassName = 'space-y-1.5';
 const inputClassName =
   'h-11 data-[size=default]:h-11 rounded-lg border border-slate-300 bg-slate-50 px-3.5 text-sm text-slate-900 placeholder:text-slate-500 shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const labelTextClassName = 'block text-xs font-black uppercase tracking-[0.12em] text-slate-700';
+const labelTextClassName = 'block text-xs font-semibold uppercase tracking-[0.12em] text-slate-700';
 
-export function ContactInquiryForm({ locale, topics, initialTopic, copy }: ContactInquiryFormProps) {
+type OrganiserChoiceField = keyof typeof ORGANISER_CHOICES;
+
+type OrganiserCopy = {
+  legendGroup: string;
+  legendCompany: string;
+  intro: string;
+  announcementGroup: string;
+  announcementCompany: string;
+  selectPlaceholder: string;
+  labels: Record<OrganiserBriefField, string>;
+  placeholders: Partial<Record<OrganiserBriefField, string>>;
+  options: {
+    [Field in OrganiserChoiceField]: Record<(typeof ORGANISER_CHOICES)[Field][number], string>;
+  };
+};
+
+/**
+ * Copy for the organiser brief. It lives here rather than in the page's `copy`
+ * prop because it is one self-contained block, and the form already carries
+ * locale-conditional copy (prompt ideas, next steps).
+ */
+const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
+  en: {
+    legendGroup: 'Group enquiry details',
+    legendCompany: 'Company training details',
+    intro:
+      'Every field below is optional — send what you already know and we will fill in the rest by email. This is a non-binding enquiry, not a quotation.',
+    announcementGroup: 'Group enquiry details added below. All of these fields are optional.',
+    announcementCompany: 'Company training details added below. All of these fields are optional.',
+    selectPlaceholder: 'Optional — select if known',
+    labels: {
+      organisationName: 'Organisation or company',
+      groupSize: 'Number of participants',
+      participantLevels: 'Current German level(s)',
+      preferredDates: 'Preferred dates',
+      durationWeeks: 'Length in weeks',
+      weeklyLessons: 'Lessons per week (UE, 45 minutes each)',
+      languageFocus: 'Language focus',
+      invoicingParty: 'Who receives the invoice?',
+      ageBand: 'Age group',
+      accommodation: 'Accommodation',
+      meals: 'Meals',
+      transport: 'Public transport pass',
+      cultureProgramme: 'Culture programme',
+      deliveryMode: 'Where the course should take place',
+      schedulePreference: 'Preferred time of day',
+    },
+    placeholders: {
+      organisationName: 'Gymnasium Beispiel / Example GmbH',
+      participantLevels: 'Mixed A2-B1, or not tested yet',
+      preferredDates: 'Second half of July',
+    },
+    options: {
+      languageFocus: {
+        general: 'General German',
+        'exam-preparation': 'Exam preparation',
+        business: 'Workplace and business German',
+        academic: 'Academic or university preparation',
+        technical: 'Sector-specific vocabulary',
+        undecided: 'Not decided yet',
+      },
+      invoicingParty: {
+        organisation: 'Our organisation',
+        'public-funder': 'A public body or funding programme',
+        participants: 'Each participant pays individually',
+        undecided: 'Not decided yet',
+      },
+      ageBand: {
+        'under-14': 'Under 14',
+        '14-17': '14-17',
+        '18-25': '18-25',
+        '26-plus': '26 and older',
+        mixed: 'Mixed ages',
+      },
+      accommodation: {
+        'not-needed': 'Not needed',
+        double: 'Host family, double room',
+        single: 'Host family, single room',
+        undecided: 'Not decided yet',
+      },
+      meals: {
+        'not-needed': 'Not needed',
+        'half-board': 'Half board with the host family',
+        'half-board-plus-canteen': 'Half board plus lunch at the canteen',
+        undecided: 'Not decided yet',
+      },
+      transport: {
+        'not-needed': 'Not needed',
+        weekly: 'Weekly pass',
+        monthly: 'Monthly pass',
+        undecided: 'Not decided yet',
+      },
+      cultureProgramme: {
+        'not-needed': 'Not needed',
+        small: 'Compact',
+        medium: 'Standard',
+        large: 'Full programme',
+        undecided: 'Not decided yet',
+      },
+      deliveryMode: {
+        'on-site': 'At our own premises',
+        'at-casa': 'At CASA in Bremen',
+        online: 'Online',
+        undecided: 'Not decided yet',
+      },
+      schedulePreference: {
+        mornings: 'Mornings',
+        midday: 'Midday',
+        afternoons: 'Afternoons',
+        evenings: 'Evenings',
+        undecided: 'Not decided yet',
+      },
+    },
+  },
+  de: {
+    legendGroup: 'Angaben zur Gruppenanfrage',
+    legendCompany: 'Angaben zum Firmenunterricht',
+    intro:
+      'Alle Felder unten sind optional — senden Sie, was Sie bereits wissen, den Rest klären wir per E-Mail. Dies ist eine unverbindliche Anfrage, kein Angebot.',
+    announcementGroup: 'Angaben zur Gruppenanfrage wurden ergänzt. Alle Felder sind optional.',
+    announcementCompany: 'Angaben zum Firmenunterricht wurden ergänzt. Alle Felder sind optional.',
+    selectPlaceholder: 'Optional — falls bekannt',
+    labels: {
+      organisationName: 'Organisation oder Unternehmen',
+      groupSize: 'Anzahl der Teilnehmenden',
+      participantLevels: 'Aktuelles Deutschniveau',
+      preferredDates: 'Wunschzeitraum',
+      durationWeeks: 'Dauer in Wochen',
+      weeklyLessons: 'Unterrichtseinheiten pro Woche (UE à 45 Minuten)',
+      languageFocus: 'Sprachlicher Schwerpunkt',
+      invoicingParty: 'Wer erhält die Rechnung?',
+      ageBand: 'Altersgruppe',
+      accommodation: 'Unterkunft',
+      meals: 'Verpflegung',
+      transport: 'ÖPNV-Ticket',
+      cultureProgramme: 'Kulturprogramm',
+      deliveryMode: 'Wo der Unterricht stattfinden soll',
+      schedulePreference: 'Bevorzugte Tageszeit',
+    },
+    placeholders: {
+      organisationName: 'Gymnasium Beispiel / Beispiel GmbH',
+      participantLevels: 'Gemischt A2-B1 oder noch nicht getestet',
+      preferredDates: 'Zweite Julihälfte',
+    },
+    options: {
+      languageFocus: {
+        general: 'Allgemeines Deutsch',
+        'exam-preparation': 'Prüfungsvorbereitung',
+        business: 'Berufs- und Arbeitsplatzdeutsch',
+        academic: 'Studienvorbereitung',
+        technical: 'Fachwortschatz',
+        undecided: 'Noch offen',
+      },
+      invoicingParty: {
+        organisation: 'Unsere Organisation',
+        'public-funder': 'Öffentlicher Träger oder Förderprogramm',
+        participants: 'Jede Person zahlt selbst',
+        undecided: 'Noch offen',
+      },
+      ageBand: {
+        'under-14': 'Unter 14',
+        '14-17': '14-17',
+        '18-25': '18-25',
+        '26-plus': '26 und älter',
+        mixed: 'Gemischte Altersgruppen',
+      },
+      accommodation: {
+        'not-needed': 'Nicht nötig',
+        double: 'Gastfamilie, Doppelzimmer',
+        single: 'Gastfamilie, Einzelzimmer',
+        undecided: 'Noch offen',
+      },
+      meals: {
+        'not-needed': 'Nicht nötig',
+        'half-board': 'Halbpension in der Gastfamilie',
+        'half-board-plus-canteen': 'Halbpension plus Mittagessen in der Kantine',
+        undecided: 'Noch offen',
+      },
+      transport: {
+        'not-needed': 'Nicht nötig',
+        weekly: 'Wochenticket',
+        monthly: 'Monatsticket',
+        undecided: 'Noch offen',
+      },
+      cultureProgramme: {
+        'not-needed': 'Nicht nötig',
+        small: 'Kompakt',
+        medium: 'Standard',
+        large: 'Volles Programm',
+        undecided: 'Noch offen',
+      },
+      deliveryMode: {
+        'on-site': 'In unseren eigenen Räumen',
+        'at-casa': 'Bei CASA in Bremen',
+        online: 'Online',
+        undecided: 'Noch offen',
+      },
+      schedulePreference: {
+        mornings: 'Vormittags',
+        midday: 'Mittags',
+        afternoons: 'Nachmittags',
+        evenings: 'Abends',
+        undecided: 'Noch offen',
+      },
+    },
+  },
+};
+
+/**
+ * Option list for one choice field. `OrganiserCopy` already forces every allowed
+ * value to have a label, so the widening here cannot hide a missing one.
+ */
+function choiceOptions(field: OrganiserChoiceField, copy: OrganiserCopy) {
+  const labels: Record<string, string> = copy.options[field];
+
+  return (ORGANISER_CHOICES[field] as readonly string[]).map((value) => ({
+    value,
+    label: labels[value],
+  }));
+}
+
+type BriefTextFieldProps = {
+  id: OrganiserBriefField;
+  label: string;
+  value: string;
+  placeholder?: string;
+  error?: string;
+  /** Whole-number field. `max` mirrors the schema bound. */
+  max?: number;
+  onChange: (value: string) => void;
+};
+
+function BriefTextField({ id, label, value, placeholder, error, max, onChange }: BriefTextFieldProps) {
+  const errorId = `${id}-error`;
+  const numeric = typeof max === 'number';
+
+  return (
+    <div className={fieldGroupClassName}>
+      <label htmlFor={id} className={labelTextClassName}>
+        {label}
+      </label>
+      <Input
+        id={id}
+        className={inputClassName}
+        value={value}
+        placeholder={placeholder}
+        type={numeric ? 'number' : 'text'}
+        inputMode={numeric ? 'numeric' : undefined}
+        min={numeric ? 1 : undefined}
+        max={max}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      {error ? (
+        <p id={errorId} className="text-xs text-rose-600 mt-1">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+type BriefSelectFieldProps = {
+  id: OrganiserBriefField;
+  label: string;
+  placeholder: string;
+  value: string;
+  options: readonly { value: string; label: string }[];
+  error?: string;
+  onChange: (value: string) => void;
+};
+
+function BriefSelectField({ id, label, placeholder, value, options, error, onChange }: BriefSelectFieldProps) {
+  const errorId = `${id}-error`;
+
+  return (
+    <div className={fieldGroupClassName}>
+      <label htmlFor={id} className={labelTextClassName}>
+        {label}
+      </label>
+      <Select value={value || undefined} onValueChange={onChange}>
+        <SelectTrigger
+          id={id}
+          aria-label={label}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : undefined}
+          className={cn(
+            inputClassName,
+            'w-full flex items-center justify-between text-left',
+            error && 'border-rose-300 focus-visible:ring-rose-200'
+          )}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {error ? (
+        <p id={errorId} className="text-xs text-rose-600 mt-1">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: ContactInquiryFormProps) {
   const promptIdeas =
     locale === 'de'
       ? [
@@ -78,18 +420,18 @@ export function ContactInquiryForm({ locale, topics, initialTopic, copy }: Conta
           'I need accommodation support in Bremen.',
         ];
 
-  const normalizedTopicList = useMemo(() => topics.filter(Boolean), [topics]);
+  const topicOptions = useMemo(() => topics.filter((option) => option.key && option.label), [topics]);
   const preferredTopic = useMemo(() => {
-    if (!normalizedTopicList.length) {
+    if (!topicOptions.length) {
       return '';
     }
 
-    if (initialTopic && normalizedTopicList.includes(initialTopic)) {
-      return initialTopic;
+    if (initialTopicKey && topicOptions.some((option) => option.key === initialTopicKey)) {
+      return initialTopicKey;
     }
 
-    return normalizedTopicList[0];
-  }, [initialTopic, normalizedTopicList]);
+    return topicOptions[0].key;
+  }, [initialTopicKey, topicOptions]);
 
   const [fields, setFields] = useState(() => ({
     ...initialFields,
@@ -100,6 +442,20 @@ export function ContactInquiryForm({ locale, topics, initialTopic, copy }: Conta
   const [requestId, setRequestId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof typeof initialFields, string>>>({});
   const messageLength = fields.message.trim().length;
+
+  const activeTopicKey = fields.topic || preferredTopic;
+  const activeTopicLabel = topicOptions.find((option) => option.key === activeTopicKey)?.label ?? '';
+  const briefCopy = organiserCopy[locale];
+  const showBrief = isOrganiserTopic(activeTopicKey);
+  const showCompanyFields = isCompanyTopic(activeTopicKey);
+  const briefLegend = showCompanyFields ? briefCopy.legendCompany : briefCopy.legendGroup;
+
+  const setField = (name: OrganiserBriefField, value: string) => {
+    setFields((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
 
   const addPromptIdea = (value: string) => {
     setFields((current) => {
@@ -132,11 +488,23 @@ export function ContactInquiryForm({ locale, topics, initialTopic, copy }: Conta
     setRequestId(null);
     setFieldErrors({});
 
+    // Only the brief fields that belong to the selected topic travel with the
+    // request, so switching topic mid-form cannot leak stale answers.
+    const brief = Object.fromEntries(
+      organiserBriefFields(activeTopicKey).map((name) => [name, fields[name]])
+    );
+
     const payload = {
-      ...fields,
-      topic: fields.topic || preferredTopic || '',
+      firstName: fields.firstName,
+      lastName: fields.lastName,
+      email: fields.email,
+      message: fields.message,
+      website: fields.website,
+      topic: activeTopicLabel,
+      topicKey: activeTopicKey,
       locale,
       source: 'contact-page',
+      ...brief,
     };
 
     const parsed = contactInquirySchema.safeParse(payload);
@@ -215,11 +583,11 @@ export function ContactInquiryForm({ locale, topics, initialTopic, copy }: Conta
     >
 
       <div className="mb-8 border-b border-slate-100 pb-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
           <MessageCircle className="h-3.5 w-3.5" aria-hidden />
           {locale === 'de' ? 'CASA-Beratung' : 'CASA admissions'}
         </div>
-        <h2 className="mt-4 text-2xl font-black leading-tight text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
+        <h2 className="mt-4 text-2xl font-bold leading-tight text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">{copy.formBody}</p>
       </div>
 
@@ -348,7 +716,7 @@ export function ContactInquiryForm({ locale, topics, initialTopic, copy }: Conta
               <SelectTrigger
                 id="topic"
                 aria-label={copy.topicLabel}
-                disabled={normalizedTopicList.length === 0}
+                disabled={topicOptions.length === 0}
                 className={cn(
                   inputClassName,
                   'w-full flex items-center justify-between text-left',
@@ -358,15 +726,172 @@ export function ContactInquiryForm({ locale, topics, initialTopic, copy }: Conta
                 <SelectValue placeholder={copy.topicPlaceholder} />
               </SelectTrigger>
               <SelectContent>
-                {normalizedTopicList.map((topic) => (
-                  <SelectItem key={topic} value={topic}>
-                    {topic}
+                {topicOptions.map((option) => (
+                  <SelectItem key={option.key} value={option.key}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {fieldErrors.topic ? <p className="text-xs text-rose-600 mt-1">{fieldErrors.topic}</p> : null}
           </div>
+
+          {/*
+            Organiser brief. The live region is always mounted so that swapping
+            the topic announces the new block instead of it appearing silently.
+          */}
+          <p className="sr-only" role="status">
+            {showBrief ? (showCompanyFields ? briefCopy.announcementCompany : briefCopy.announcementGroup) : ''}
+          </p>
+
+          {showBrief ? (
+            <fieldset className="sm:col-span-2 rounded-2xl border border-[color:var(--casa-sand)] bg-white/70 p-5 sm:p-6">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                {briefLegend}
+              </legend>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">{briefCopy.intro}</p>
+
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <BriefTextField
+                  id="organisationName"
+                  label={briefCopy.labels.organisationName}
+                  placeholder={briefCopy.placeholders.organisationName}
+                  value={fields.organisationName}
+                  error={fieldErrors.organisationName}
+                  onChange={(value) => setField('organisationName', value)}
+                />
+                <BriefTextField
+                  id="groupSize"
+                  label={briefCopy.labels.groupSize}
+                  value={fields.groupSize}
+                  error={fieldErrors.groupSize}
+                  max={500}
+                  onChange={(value) => setField('groupSize', value)}
+                />
+                <BriefTextField
+                  id="participantLevels"
+                  label={briefCopy.labels.participantLevels}
+                  placeholder={briefCopy.placeholders.participantLevels}
+                  value={fields.participantLevels}
+                  error={fieldErrors.participantLevels}
+                  onChange={(value) => setField('participantLevels', value)}
+                />
+                <BriefTextField
+                  id="preferredDates"
+                  label={briefCopy.labels.preferredDates}
+                  placeholder={briefCopy.placeholders.preferredDates}
+                  value={fields.preferredDates}
+                  error={fieldErrors.preferredDates}
+                  onChange={(value) => setField('preferredDates', value)}
+                />
+                <BriefTextField
+                  id="durationWeeks"
+                  label={briefCopy.labels.durationWeeks}
+                  value={fields.durationWeeks}
+                  error={fieldErrors.durationWeeks}
+                  max={52}
+                  onChange={(value) => setField('durationWeeks', value)}
+                />
+                <BriefTextField
+                  id="weeklyLessons"
+                  label={briefCopy.labels.weeklyLessons}
+                  value={fields.weeklyLessons}
+                  error={fieldErrors.weeklyLessons}
+                  max={40}
+                  onChange={(value) => setField('weeklyLessons', value)}
+                />
+                <BriefSelectField
+                  id="languageFocus"
+                  label={briefCopy.labels.languageFocus}
+                  placeholder={briefCopy.selectPlaceholder}
+                  value={fields.languageFocus}
+                  options={choiceOptions('languageFocus', briefCopy)}
+                  error={fieldErrors.languageFocus}
+                  onChange={(value) => setField('languageFocus', value)}
+                />
+                <BriefSelectField
+                  id="invoicingParty"
+                  label={briefCopy.labels.invoicingParty}
+                  placeholder={briefCopy.selectPlaceholder}
+                  value={fields.invoicingParty}
+                  options={choiceOptions('invoicingParty', briefCopy)}
+                  error={fieldErrors.invoicingParty}
+                  onChange={(value) => setField('invoicingParty', value)}
+                />
+
+                {showCompanyFields ? (
+                  <>
+                    <BriefSelectField
+                      id="deliveryMode"
+                      label={briefCopy.labels.deliveryMode}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.deliveryMode}
+                      options={choiceOptions('deliveryMode', briefCopy)}
+                      error={fieldErrors.deliveryMode}
+                      onChange={(value) => setField('deliveryMode', value)}
+                    />
+                    <BriefSelectField
+                      id="schedulePreference"
+                      label={briefCopy.labels.schedulePreference}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.schedulePreference}
+                      options={choiceOptions('schedulePreference', briefCopy)}
+                      error={fieldErrors.schedulePreference}
+                      onChange={(value) => setField('schedulePreference', value)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <BriefSelectField
+                      id="ageBand"
+                      label={briefCopy.labels.ageBand}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.ageBand}
+                      options={choiceOptions('ageBand', briefCopy)}
+                      error={fieldErrors.ageBand}
+                      onChange={(value) => setField('ageBand', value)}
+                    />
+                    <BriefSelectField
+                      id="accommodation"
+                      label={briefCopy.labels.accommodation}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.accommodation}
+                      options={choiceOptions('accommodation', briefCopy)}
+                      error={fieldErrors.accommodation}
+                      onChange={(value) => setField('accommodation', value)}
+                    />
+                    <BriefSelectField
+                      id="meals"
+                      label={briefCopy.labels.meals}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.meals}
+                      options={choiceOptions('meals', briefCopy)}
+                      error={fieldErrors.meals}
+                      onChange={(value) => setField('meals', value)}
+                    />
+                    <BriefSelectField
+                      id="transport"
+                      label={briefCopy.labels.transport}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.transport}
+                      options={choiceOptions('transport', briefCopy)}
+                      error={fieldErrors.transport}
+                      onChange={(value) => setField('transport', value)}
+                    />
+                    <BriefSelectField
+                      id="cultureProgramme"
+                      label={briefCopy.labels.cultureProgramme}
+                      placeholder={briefCopy.selectPlaceholder}
+                      value={fields.cultureProgramme}
+                      options={choiceOptions('cultureProgramme', briefCopy)}
+                      error={fieldErrors.cultureProgramme}
+                      onChange={(value) => setField('cultureProgramme', value)}
+                    />
+                  </>
+                )}
+              </div>
+            </fieldset>
+          ) : null}
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
             <label htmlFor="message" className={labelTextClassName}>

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { contactInquirySchema } from '@/lib/validation/contact';
+import { getGroupInquiryWebhookUrl } from '@/lib/db/env';
+import { contactInquirySchema, organiserBriefFields } from '@/lib/validation/contact';
 
 const REQUEST_TIMEOUT_MS = 8000;
 
@@ -61,7 +62,20 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const webhookUrl = process.env.CONTACT_WEBHOOK_URL;
+  // Group and company enquiries carry a structured brief. It is an estimate
+  // request, never a quotation — the binding offer still comes from staff.
+  const briefFields = organiserBriefFields(payload.topicKey);
+  const organiserBrief = briefFields.length
+    ? Object.fromEntries(
+        briefFields.map((field) => {
+          const value = payload[field];
+          return [field, value === '' || value === undefined ? null : value];
+        })
+      )
+    : null;
+
+  const webhookUrl =
+    (organiserBrief ? getGroupInquiryWebhookUrl() : null) || process.env.CONTACT_WEBHOOK_URL;
   const submittedAt = new Date().toISOString();
 
   if (webhookUrl) {
@@ -79,8 +93,10 @@ export async function POST(request: NextRequest) {
           lastName: payload.lastName || null,
           email: payload.email,
           topic: payload.topic,
+          topicKey: payload.topicKey || null,
           message: payload.message,
           source: payload.source,
+          organiserBrief,
           userAgent: request.headers.get('user-agent') || 'unknown',
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -106,8 +122,10 @@ export async function POST(request: NextRequest) {
       requestId,
       submittedAt,
       topic: payload.topic,
+      topicKey: payload.topicKey || null,
       email: payload.email,
       source: payload.source,
+      organiserBrief,
     });
   }
 
