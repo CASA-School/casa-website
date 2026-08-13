@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+
+  // Files that are deliberately staged ahead of the UI that will consume them.
+  //
+  // Each entry needs a removal condition, so an ignore cannot quietly become
+  // permanent. Delete the line as soon as its condition is met — knip failing
+  // again is the point, not a regression.
+  //
+  // Currently empty: `special-course-modules.ts` was ignored here until work
+  // board U6 landed, and is now imported by
+  // `src/components/courses/special-course-catalogue.tsx`.
+  "ignore": []
+}

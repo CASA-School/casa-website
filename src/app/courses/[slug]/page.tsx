@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
 import { HeroCUtilityRail } from '@/components/heroes';
 import { DecisionRail, EditorialSplit, ProcessSteps, TestimonialGrid } from '@/components/sections';
 import { CourseLevelGoals } from '@/components/signatures';
@@ -387,6 +388,9 @@ export default async function CourseDetailPage({
             <div className="space-y-12 md:space-y-14">
               {archetype.sections.map((sectionKey) => {
                 switch (sectionKey) {
+                case 'module-catalogue':
+                  return <SpecialCourseCatalogue key={sectionKey} locale={locale} />;
+
                 case 'level-goals':
                   return (
                   <CourseLevelGoals
@@ -463,7 +467,7 @@ export default async function CourseDetailPage({
                       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                         {locale === 'de' ? 'Weitere Optionen' : 'Related routes'}
                       </p>
-                      <h2 className="mt-2 text-2xl font-extrabold leading-tight text-[var(--casa-ink)]">
+                      <h2 className="mt-2 text-2xl font-bold leading-tight text-[var(--casa-ink)]">
                         {locale === 'de' ? 'Andere Kurswege vergleichen' : 'Compare other course paths'}
                       </h2>
                     </div>

@@ -24,6 +24,8 @@ export type CourseArchetypeId =
 /** Body sections, rendered in the order the archetype lists them. */
 export type CourseSectionKey =
   | 'summary-strip'
+  /** The week-grid module picker. Only `module-catalogue` renders this. */
+  | 'module-catalogue'
   | 'level-goals'
   | 'audience'
   | 'next-steps'
@@ -82,7 +84,9 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
   'module-catalogue': {
     id: 'module-catalogue',
     buyingQuestion: 'Which module, and does the slot fit my week?',
-    sections: ['summary-strip', 'level-goals', 'audience', 'next-steps', 'related-courses'],
+    // The catalogue leads: on this archetype the page IS the picker, and the
+    // reader cannot evaluate anything else until they have found their module.
+    sections: ['summary-strip', 'module-catalogue', 'level-goals', 'audience', 'next-steps', 'related-courses'],
     facts: ['duration', 'lessons-per-week', 'level-range', 'price'],
     cta: 'reserve-module',
     showsStartDateSelector: true,

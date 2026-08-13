@@ -13,6 +13,8 @@ import {
   getCoursePhotoKey,
   hasNamedCourseContact,
 } from '@/config/courses/course-profiles';
+import { specialCourseModules } from '@/config/courses/special-course-modules';
+import { skillTokens } from '@/config/brand/tokens';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
 import { isQuoteOnly } from '@/lib/content/course-pricing';
 
@@ -52,6 +54,46 @@ describe('course archetypes', () => {
       'testimonials',
       'related-courses',
     ]);
+  });
+
+  it('renders the module catalogue on the archetype named after it, and nowhere else', () => {
+    const catalogue = courseArchetypes['module-catalogue'];
+
+    // The section slot is what actually puts the week grid on the page. Without
+    // it the archetype is named module-catalogue and renders no catalogue.
+    expect(catalogue.sections).toContain('module-catalogue');
+
+    // It leads: on this archetype the page IS the picker.
+    expect(catalogue.sections.indexOf('module-catalogue')).toBeLessThan(
+      catalogue.sections.indexOf('level-goals')
+    );
+
+    for (const [id, archetype] of Object.entries(courseArchetypes)) {
+      if (id === 'module-catalogue') continue;
+      expect(archetype.sections).not.toContain('module-catalogue');
+    }
+  });
+
+  it('gives every special-course module a skill colour and a text label to pair it with', () => {
+    // Colour must never be the only signal, so a module needs both a skill key
+    // that resolves to a token and a category label the reader can actually read.
+    expect(specialCourseModules.length).toBeGreaterThan(0);
+
+    for (const courseModule of specialCourseModules) {
+      expect(skillTokens[courseModule.skill]).toBeDefined();
+      expect(courseModule.category.en.trim()).not.toBe('');
+      expect(courseModule.category.de.trim()).not.toBe('');
+    }
+  });
+
+  it('keeps the special-course constants actually constant, since the UI states them once', () => {
+    // The catalogue prints "one evening a week, 90 minutes, 12 weeks, EUR 192"
+    // a single time at the top. If any module drifts, that line starts lying.
+    const prices = new Set(specialCourseModules.map((m) => m.priceEur));
+    const times = new Set(specialCourseModules.map((m) => m.time));
+
+    expect([...prices]).toEqual([192]);
+    expect([...times]).toEqual(['18:30 - 20:00']);
   });
 
   it('keeps learner testimonials off organiser-facing pages', () => {
