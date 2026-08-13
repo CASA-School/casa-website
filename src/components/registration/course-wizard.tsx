@@ -40,7 +40,7 @@ const fieldClassName =
   'h-11 rounded-lg border border-slate-300 bg-slate-50 px-3.5 text-base sm:text-sm text-slate-900 placeholder:text-slate-500 shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
 const selectTriggerClassName =
   'h-11 data-[size=default]:h-11 w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 text-base sm:text-sm text-slate-900 data-[placeholder]:text-slate-500 shadow-none text-left flex items-center justify-between transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const labelClassName = 'block text-xs font-black uppercase tracking-[0.12em] text-slate-700';
+const labelClassName = 'block text-xs font-semibold uppercase tracking-[0.12em] text-slate-700';
 const requiredMarkClassName = 'mr-1 text-[var(--casa-coral)]';
 const fieldGroupClassName = 'space-y-1.5';
 const reviewTileClassName = 'rounded-lg border border-slate-200 bg-white p-4';
@@ -318,7 +318,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
               <div key={item.title} className="relative z-10 flex flex-col items-center">
                 <div
                   className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-black transition-all duration-300',
+                    'flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300',
                     complete
                       ? 'border-[var(--casa-blue)] bg-[var(--casa-accent-surface)] text-white shadow-[var(--shadow-card)] shadow-[var(--casa-blue)]/10'
                       : active
@@ -353,10 +353,10 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <GraduationCap className="h-5 w-5" aria-hidden />
                 </span>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                     {t('Course path', 'Kursweg')}
                   </p>
-                  <h2 className="mt-1 text-xl font-black tracking-tight text-[var(--casa-ink)]">
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
                     {t('Choose your course', 'Kurs auswählen')}
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-slate-700">
@@ -464,22 +464,22 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
               <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_6%,transparent),transparent_55%)] p-5 shadow-[var(--shadow-card)]">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                       {t('Selected session', 'Ausgewählter Termin')}
                     </p>
-                    <h3 className="mt-1 text-lg font-black text-[var(--casa-ink)]">{selectedCourseType?.name}</h3>
+                    <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedCourseType?.name}</h3>
                   </div>
                   <AvailabilityTag option={selectedOption} />
                 </div>
                 <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
                   <div>
-                    <dt className="text-xs font-black uppercase tracking-[0.12em] text-slate-700">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
                       {t('Dates', 'Daten')}
                     </dt>
                     <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.dateRangeLabel}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-black uppercase tracking-[0.12em] text-slate-700">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
                       {t('Schedule', 'Zeitplan')}
                     </dt>
                     <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.scheduleLabel}</dd>
@@ -498,10 +498,10 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <UserRound className="h-5 w-5" aria-hidden />
                 </span>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-coral)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-coral)]">
                     {t('Student profile', 'Teilnehmerprofil')}
                   </p>
-                  <h2 className="mt-1 text-xl font-black tracking-tight text-[var(--casa-ink)]">
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
                     {t('Personal details', 'Persönliche Angaben')}
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-slate-700">
@@ -645,7 +645,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
             <div className="space-y-3 rounded-lg border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf1_100%)] p-4">
               <div className="flex items-center gap-2">
                 <Home className="h-4 w-4 text-[var(--casa-gold-deep)]" aria-hidden />
-                <p className="text-sm font-black text-slate-800">
+                <p className="text-sm font-bold text-slate-800">
                   {t('Accommodation support (optional)', 'Unterkunftsunterstützung (optional)')}
                 </p>
               </div>
@@ -721,10 +721,10 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <ShieldCheck className="h-5 w-5" aria-hidden />
                 </span>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                     {t('Final check', 'Letzte Kontrolle')}
                   </p>
-                  <h2 className="mt-1 text-xl font-black tracking-tight text-[var(--casa-ink)]">
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
                     {t('Review and submit', 'Prüfen und absenden')}
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-slate-700">
@@ -895,7 +895,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
               <CheckCircle2 className="size-10" aria-hidden />
             </div>
 
-            <h2 id="modal-title" className="text-2xl font-black tracking-tight text-[var(--casa-ink)] mt-5">
+            <h2 id="modal-title" className="text-2xl font-bold tracking-tight text-[var(--casa-ink)] mt-5">
               {catalog.locale === 'de' ? 'Registrierung erfolgreich' : 'Registration successful'}
             </h2>
             <p className="max-w-md text-sm text-slate-600 mt-2">

@@ -15,7 +15,7 @@ export function PartnerStrip({ items, title, description, className }: PartnerSt
   return (
     <section className={cn('rounded-3xl bg-white px-6 py-7 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:px-8', className)}>
       <div className="text-center">
-        <h2 className="text-lg font-black text-[var(--casa-ink)] md:text-xl">{title}</h2>
+        <h2 className="text-lg font-bold text-[var(--casa-ink)] md:text-xl">{title}</h2>
         {description ? <p className="mt-2 text-sm text-[var(--casa-muted)]">{description}</p> : null}
       </div>
       <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

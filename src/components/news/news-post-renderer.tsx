@@ -91,10 +91,10 @@ function renderNode(node: RichNode, key: string): ReactNode {
       const levelValue = typeof node.attrs?.level === 'number' ? node.attrs.level : 2;
       const level = levelValue <= 2 ? 2 : levelValue === 3 ? 3 : 4;
       if (level === 2) {
-        return <h2 key={key} className="mt-7 text-2xl font-black text-[var(--casa-ink)]">{renderInlineContent(node.content, key)}</h2>;
+        return <h2 key={key} className="mt-7 text-2xl font-bold text-[var(--casa-ink)]">{renderInlineContent(node.content, key)}</h2>;
       }
       if (level === 3) {
-        return <h3 key={key} className="mt-6 text-xl font-black text-[var(--casa-ink)]">{renderInlineContent(node.content, key)}</h3>;
+        return <h3 key={key} className="mt-6 text-xl font-bold text-[var(--casa-ink)]">{renderInlineContent(node.content, key)}</h3>;
       }
       return <h4 key={key} className="mt-5 text-lg font-bold text-[var(--casa-ink)]">{renderInlineContent(node.content, key)}</h4>;
     }
@@ -191,10 +191,10 @@ export function NewsPostLead({
 }: NewsPostLeadProps) {
   return (
     <div className="max-w-3xl">
-      <p className="mb-3 inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+      <p className="mb-3 inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
         {category}
       </p>
-      <h2 className="text-4xl font-black leading-tight sm:text-5xl">{title}</h2>
+      <h2 className="text-4xl font-bold leading-tight sm:text-5xl">{title}</h2>
       {summary ? <p className="mt-5 text-lg leading-relaxed text-slate-600">{summary}</p> : null}
       <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-500">
         <span className="inline-flex items-center gap-1.5">

@@ -95,7 +95,7 @@ function Section({
 }) {
   return (
     <section className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm sm:p-8">
-      <h2 className="text-2xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{title}</h2>
       {description ? <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">{description}</p> : null}
       <div className="mt-6">{children}</div>
     </section>
@@ -109,7 +109,7 @@ export default function DesignSystemPage() {
         <header className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--casa-accent-text)]">Governance</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--casa-accent-text)]">Governance</p>
               <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">CASA Design System v2</h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
                 Source-of-truth guidelines for conversion UX, brand character, and public interface consistency.
@@ -138,7 +138,7 @@ export default function DesignSystemPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {Object.entries(toneByContext).map(([context, guidance]) => (
               <div key={context} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{context}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{context}</p>
                 <p className="mt-1 text-sm text-slate-700">{guidance}</p>
               </div>
             ))}
@@ -148,7 +148,7 @@ export default function DesignSystemPage() {
         <Section title="Brand Token Layers" description="All public pages should consume semantic tokens instead of hardcoded values.">
           <div className="space-y-6">
             <div>
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-slate-500">Primitives</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Primitives</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {Object.entries(brandPrimitives).map(([name, value]) => (
                   <div key={name} className="rounded-xl border border-slate-200 bg-white p-3">
@@ -162,13 +162,13 @@ export default function DesignSystemPage() {
 
             <div className="grid gap-5 lg:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Semantic Tokens</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Semantic Tokens</p>
                 <pre className="mt-3 overflow-x-auto text-xs leading-relaxed text-slate-700">
 {JSON.stringify(semanticTokens, null, 2)}
                 </pre>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Component Token Rules</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Component Token Rules</p>
                 <pre className="mt-3 overflow-x-auto text-xs leading-relaxed text-slate-700">
 {JSON.stringify(componentTokenRules, null, 2)}
                 </pre>
@@ -183,7 +183,7 @@ export default function DesignSystemPage() {
         >
           <div className="grid gap-4 lg:grid-cols-2">
             <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Rounded Shape</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Rounded Shape</p>
               <div className="mt-4 flex items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
                 <CasaRoundedShape tone="sun" className="h-16 w-24" />
                 <CasaRoundedShape tone="blue" className="h-12 w-20" />
@@ -195,7 +195,7 @@ export default function DesignSystemPage() {
             </article>
 
             <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Triangle Shape</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Triangle Shape</p>
               <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
                 <CasaTriangleShape tone="red" className="h-14 w-14" />
                 <CasaTriangleShape tone="blue" direction="right" className="h-12 w-12" />
@@ -223,7 +223,7 @@ export default function DesignSystemPage() {
         <Section title="CTA Priority Matrix" description="Every public route follows one primary intent path, one secondary path, and one tertiary support path.">
           <div className="overflow-x-auto rounded-2xl border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Page Key</th>
                   <th className="px-4 py-3">Primary</th>
@@ -249,7 +249,7 @@ export default function DesignSystemPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {heroArchetypes.map((archetype) => (
               <article key={archetype.key} className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Hero {archetype.key}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Hero {archetype.key}</p>
                 <p className="mt-2 text-base font-bold text-[var(--casa-ink)]">{archetype.name}</p>
                 <p className="mt-1 text-xs text-slate-500">{archetype.usage}</p>
               </article>
@@ -270,7 +270,7 @@ export default function DesignSystemPage() {
 
           <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Route Key</th>
                   <th className="px-4 py-3">Hero</th>
@@ -363,7 +363,7 @@ export default function DesignSystemPage() {
         <Section title="Media and Component Contracts" description="Use authentic CASA visuals and keep every guideline tied to production code.">
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Media Rules</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Media Rules</p>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
                 {mediaRules.map((rule) => (
                   <li key={rule} className="flex items-start gap-2">
@@ -374,7 +374,7 @@ export default function DesignSystemPage() {
               </ul>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Production Contracts</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Production Contracts</p>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
                 {publicComponentContracts.map((entry) => (
                   <li key={entry.file}>

@@ -21,10 +21,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         prism: "casa-button-prism text-white hover:bg-[var(--casa-ink-deep-hover)]",
         "outline-prism": "casa-button-outline border-[color:var(--casa-sand)] text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]",
-        "marketing-sun": "group h-12 px-6 text-sm font-black rounded-full bg-[var(--casa-sun)] text-[var(--casa-ink-deep)] shadow-[var(--shadow-card)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_28px_52px_-28px_rgba(255,255,255,0.72)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-sun)]",
-        "marketing-dark": "group h-12 px-6 text-sm font-black rounded-full bg-[var(--casa-ink-deep)] text-white shadow-[var(--shadow-modal)] transition-all hover:-translate-y-0.5 hover:bg-[var(--casa-ink-deep-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]",
-        "marketing-outline": "group h-12 px-6 text-sm font-black rounded-full border border-white/24 bg-white/8 text-white transition-colors hover:bg-white hover:text-[var(--casa-ink-deep)]",
-        "marketing-light": "group h-12 px-6 text-sm font-black rounded-full border border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:text-[var(--casa-accent-text)]"
+        "marketing-sun": "group h-12 px-6 text-sm font-bold rounded-full bg-[var(--casa-sun)] text-[var(--casa-ink-deep)] shadow-[var(--shadow-card)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_28px_52px_-28px_rgba(255,255,255,0.72)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-sun)]",
+        "marketing-dark": "group h-12 px-6 text-sm font-bold rounded-full bg-[var(--casa-ink-deep)] text-white shadow-[var(--shadow-modal)] transition-all hover:-translate-y-0.5 hover:bg-[var(--casa-ink-deep-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]",
+        "marketing-outline": "group h-12 px-6 text-sm font-bold rounded-full border border-white/24 bg-white/8 text-white transition-colors hover:bg-white hover:text-[var(--casa-ink-deep)]",
+        "marketing-light": "group h-12 px-6 text-sm font-bold rounded-full border border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:text-[var(--casa-accent-text)]"
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

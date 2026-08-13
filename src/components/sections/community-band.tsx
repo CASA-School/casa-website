@@ -20,7 +20,7 @@ export function CommunityBand({ title, description, ctas, className }: Community
       <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-amber)]">Community</p>
-          <h2 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">{title}</h2>
+          <h2 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl">{title}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300 md:text-base">{description}</p>
         </div>
 

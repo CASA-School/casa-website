@@ -105,11 +105,11 @@ export function QuickChooserPanel({
       )}
       data-testid="course-finder-filter"
     >
-      <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-ink)]">
+      <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-ink)]">
         <Compass className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
         {badgeLabel}
       </p>
-      <h2 className="mt-3 text-xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <h2 className="mt-3 text-xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
       <span className="casa-tricolor-rule mt-3 block h-1 w-20 rounded-full" aria-hidden />
 
@@ -151,7 +151,7 @@ export function QuickChooserPanel({
       </div>
 
       <div className="mt-5 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/42 p-4">
-        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{summaryLabel}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{summaryLabel}</p>
         <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
           {selectedSummary.map((item) => (
             <li key={item.key} className="text-sm text-[var(--casa-ink)]">

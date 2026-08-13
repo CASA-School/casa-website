@@ -109,7 +109,7 @@ export function GuidedPicker({
       {showAccentRule ? (
         <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       ) : null}
-      <h2 className={cn('text-2xl font-black text-[var(--casa-ink)] sm:text-3xl', showAccentRule ? 'mt-2' : 'mt-3')}>
+      <h2 className={cn('text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl', showAccentRule ? 'mt-2' : 'mt-3')}>
         {title}
       </h2>
       <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
@@ -164,7 +164,7 @@ export function GuidedPicker({
               <li key={item.id ?? item.href} className={cn(index >= 3 && !showAll ? 'hidden md:block' : '')}>
                 <article className="group flex h-full min-h-[13rem] flex-col rounded-lg bg-white p-5 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35">
                   <div className="flex items-start justify-between gap-4">
-                    <span className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     {item.meta ? (
@@ -174,7 +174,7 @@ export function GuidedPicker({
                     ) : null}
                   </div>
 
-                  <h3 className="mt-5 text-xl font-black leading-tight text-[var(--casa-ink)]">
+                  <h3 className="mt-5 text-xl font-bold leading-tight text-[var(--casa-ink)]">
                     {item.title}
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">
@@ -183,7 +183,7 @@ export function GuidedPicker({
 
                   <Link
                     href={item.href}
-                    className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-black text-[var(--casa-ink)] transition-colors group-hover:text-[var(--casa-accent-text)]"
+                    className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-[var(--casa-ink)] transition-colors group-hover:text-[var(--casa-accent-text)]"
                   >
                     {item.ctaLabel}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
@@ -220,10 +220,10 @@ export function GuidedPicker({
               ) : null}
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,16,32,0.05)_0%,rgba(9,16,32,0.86)_100%)]" aria-hidden />
               <div className="relative z-10 mt-auto max-w-xl">
-                <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white/70">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
                   {locale === 'de' ? 'Empfohlener Startpunkt' : 'Recommended starting point'}
                 </p>
-                <h3 className="mt-3 text-3xl font-black leading-tight md:text-4xl">{leadItem.title}</h3>
+                <h3 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{leadItem.title}</h3>
                 <p className="mt-4 text-base leading-relaxed text-white/82 md:text-lg">
                   {leadItem.description}
                 </p>
@@ -243,16 +243,16 @@ export function GuidedPicker({
               {supportingItems.map((item, index) => (
                 <li key={item.id ?? item.href} className={cn(index >= 2 && !showAll ? 'hidden md:block' : '')}>
                   <article className="group flex h-full min-h-[11.75rem] flex-col rounded-lg bg-white p-5 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35">
-                    <span className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
                       {String(index + 2).padStart(2, '0')}
                     </span>
-                    <h3 className="mt-4 text-lg font-black leading-tight text-[var(--casa-ink)]">
+                    <h3 className="mt-4 text-lg font-bold leading-tight text-[var(--casa-ink)]">
                       {item.title}
                     </h3>
                     <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
                     <Link
                       href={item.href}
-                      className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-black text-[var(--casa-ink)] transition-colors group-hover:text-[var(--casa-accent-text)]"
+                      className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-[var(--casa-ink)] transition-colors group-hover:text-[var(--casa-accent-text)]"
                     >
                       {item.ctaLabel}
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
@@ -296,13 +296,13 @@ export function GuidedPicker({
                         sizes="(max-width: 768px) 85vw, (min-width: 1280px) 28vw, 44vw"
                         className="object-cover transition-transform duration-500 md:group-hover:scale-[1.03]"
                       />
-                      <span className="absolute left-3 top-3 md:left-4 md:top-4 inline-flex h-7 min-w-7 md:h-9 md:min-w-9 items-center justify-center rounded-lg md:rounded-lg bg-white/90 md:bg-white/92 px-2 text-[11px] md:text-xs font-black tabular-nums text-[var(--casa-ink)] shadow-[var(--shadow-soft)]">
+                      <span className="absolute left-3 top-3 md:left-4 md:top-4 inline-flex h-7 min-w-7 md:h-9 md:min-w-9 items-center justify-center rounded-lg md:rounded-lg bg-white/90 md:bg-white/92 px-2 text-[11px] md:text-xs font-bold tabular-nums text-[var(--casa-ink)] shadow-[var(--shadow-soft)]">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                     </div>
                   ) : null}
                   <div className="flex flex-1 flex-col gap-3 md:gap-0 p-4 md:p-5">
-                    <h3 className="text-base md:text-xl font-black leading-snug md:leading-tight text-[var(--casa-ink)]">
+                    <h3 className="text-base md:text-xl font-bold leading-snug md:leading-tight text-[var(--casa-ink)]">
                       {item.title}
                     </h3>
                     <p className="line-clamp-3 md:line-clamp-none text-sm md:mt-3 leading-relaxed text-[var(--casa-muted)]">
@@ -352,10 +352,10 @@ export function GuidedPicker({
                   ) : null}
 
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
                       Option {index + 1}
                     </p>
-                    <h3 className="mt-2 text-xl font-black text-[var(--casa-ink)] md:text-2xl">
+                    <h3 className="mt-2 text-xl font-bold text-[var(--casa-ink)] md:text-2xl">
                       {item.title}
                     </h3>
                     {item.meta ? (
@@ -407,10 +407,10 @@ export function GuidedPicker({
               ) : null}
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,16,32,0.2)_0%,rgba(9,16,32,0.82)_100%)]" aria-hidden />
               <div className="relative z-10 mt-auto max-w-xl">
-                <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white/70">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
                   {locale === 'de' ? 'Intensiver Rhythmus' : 'Intensive rhythm'}
                 </p>
-                <h3 className="mt-3 text-3xl font-black leading-tight md:text-4xl">{featuredItem.title}</h3>
+                <h3 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{featuredItem.title}</h3>
                 <p className="mt-4 text-base leading-relaxed text-white/80 md:text-lg">
                   {featuredItem.description}
                 </p>
@@ -443,10 +443,10 @@ export function GuidedPicker({
                   </div>
                 ) : null}
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
                     {locale === 'de' ? 'Abendrhythmus' : 'Evening rhythm'}
                   </p>
-                  <h3 className="mt-2 text-2xl font-black text-[var(--casa-ink)]">{item.title}</h3>
+                  <h3 className="mt-2 text-2xl font-bold text-[var(--casa-ink)]">{item.title}</h3>
                   <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
                   <Link
                     href={item.href}

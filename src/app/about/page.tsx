@@ -273,8 +273,8 @@ export default async function AboutPage() {
       <section id="leitbild" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30 scroll-mt-28">
         <Container>
           <article className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-white p-6 shadow-[var(--shadow-card)] md:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{leitbild.eyebrow}</p>
-            <h2 className="mt-2 text-2xl font-black text-[var(--casa-ink)] md:text-3xl">{leitbild.title}</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{leitbild.eyebrow}</p>
+            <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{leitbild.title}</h2>
             <p className="mt-3 max-w-4xl text-base leading-relaxed text-[var(--casa-muted)]">{leitbild.intro}</p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -316,8 +316,8 @@ export default async function AboutPage() {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{tandemGuide.eyebrow}</p>
-              <h2 className="mt-2 text-2xl font-black text-[var(--casa-ink)] md:text-3xl">{tandemGuide.title}</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{tandemGuide.eyebrow}</p>
+              <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{tandemGuide.title}</h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemGuide.intro}</p>
 
               <div className="mt-5 flex flex-wrap gap-3">

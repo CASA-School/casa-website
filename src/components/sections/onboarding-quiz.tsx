@@ -120,8 +120,8 @@ export function OnboardingQuiz({ locale, availableSlugs }: OnboardingQuizProps) 
 
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{dictionary.eyebrow}</p>
-      <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{dictionary.title}</h2>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{dictionary.eyebrow}</p>
+      <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{dictionary.title}</h2>
       <p className="mt-3 text-base text-[var(--casa-muted)] md:text-lg">{dictionary.description}</p>
 
       <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -185,7 +185,7 @@ export function OnboardingQuiz({ locale, availableSlugs }: OnboardingQuizProps) 
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--casa-warm-soft)]/30 px-4 py-3">
         <p className="text-sm font-semibold text-[var(--casa-ink)]">
-          {dictionary.recommendation}: <span className="font-black">{locale === 'de' ? route.labelDe : route.labelEn}</span>
+          {dictionary.recommendation}: <span className="font-bold">{locale === 'de' ? route.labelDe : route.labelEn}</span>
         </p>
         <Link
           href={route.href}

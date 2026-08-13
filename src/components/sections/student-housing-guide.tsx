@@ -104,11 +104,11 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
         className
       )}
     >
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
         {copy.eyebrow}
       </p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-      <h2 className="mt-2 text-2xl font-black text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
+      <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
       <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">{copy.description}</p>
 
       <Accordion type="multiple" className="mt-8 divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">

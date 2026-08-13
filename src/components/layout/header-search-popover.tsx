@@ -145,7 +145,7 @@ function ResultRow({
       </span>
       <span className="min-w-0 flex-1">
         <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{label}</span>
-        <span className="mt-0.5 block truncate text-sm font-black">{result.title}</span>
+        <span className="mt-0.5 block truncate text-sm font-bold">{result.title}</span>
         <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-[var(--casa-muted)]">{result.snippet}</span>
       </span>
       <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[var(--casa-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--casa-accent-text)]" />
@@ -395,7 +395,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
             <Link
               href={searchHref}
               onClick={() => setOpen(false)}
-              className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-black text-[var(--casa-accent-text)] transition-colors hover:bg-white"
+              className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-[var(--casa-accent-text)] transition-colors hover:bg-white"
             >
               <span>{trimmedQuery ? dictionary.viewAll : dictionary.searchPage}</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

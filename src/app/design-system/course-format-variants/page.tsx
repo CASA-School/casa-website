@@ -173,7 +173,7 @@ export default async function CourseFormatVariantsPage() {
     <main className="bg-[var(--casa-canvas)] py-12 text-[var(--casa-ink)] md:py-16">
       <Container className="space-y-12">
         <header className="max-w-4xl">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--casa-accent-text)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--casa-accent-text)]">
             Internal design review
           </p>
           <h1 className="mt-3 text-4xl font-black leading-tight md:text-5xl">
@@ -192,7 +192,7 @@ export default async function CourseFormatVariantsPage() {
         </header>
 
         <section className="space-y-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--casa-muted)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--casa-muted)]">
             Variant A - Atlas
           </p>
           <GuidedPicker
@@ -216,7 +216,7 @@ export default async function CourseFormatVariantsPage() {
         </section>
 
         <section className="space-y-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--casa-muted)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--casa-muted)]">
             Variant B - Mosaic
           </p>
           <GuidedPicker
@@ -240,7 +240,7 @@ export default async function CourseFormatVariantsPage() {
         </section>
 
         <section className="space-y-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--casa-muted)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--casa-muted)]">
             Variant C - Signal Cards
           </p>
           <GuidedPicker

@@ -33,7 +33,7 @@ export function StickyInfoCard({ title, items, notes, ctas = [], className }: St
         className
       )}
     >
-      <h2 className="text-xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <h2 className="text-xl font-bold text-[var(--casa-ink)]">{title}</h2>
 
       <dl className="mt-5 divide-y divide-[color:var(--casa-sand)]">
         {items.map((item) => (

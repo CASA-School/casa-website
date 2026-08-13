@@ -220,7 +220,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(380px,0.8fr)] xl:items-start">
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 md:p-10 shadow-[var(--shadow-card)] space-y-8">
               <div>
-                <h2 className="text-3xl font-black text-[var(--casa-ink)]">{copy.about}</h2>
+                <h2 className="text-3xl font-bold text-[var(--casa-ink)]">{copy.about}</h2>
                 <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] font-medium">
                   {position.shortDescription}
                 </p>
@@ -234,7 +234,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
               <hr className="border-[color:var(--casa-sand)]" />
 
               <div>
-                <h3 className="text-2xl font-black text-[var(--casa-ink)]">{copy.responsibilities}</h3>
+                <h3 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.responsibilities}</h3>
                 <ul className="mt-4 space-y-3.5">
                   {(responsibilities.length > 0 ? responsibilities : fallbackResponsibilities).map((item) => (
                     <li key={item} className="flex gap-3 text-base text-[var(--casa-muted)] leading-relaxed">
@@ -248,7 +248,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
               <hr className="border-[color:var(--casa-sand)]" />
 
               <div>
-                <h3 className="text-2xl font-black text-[var(--casa-ink)]">{copy.requirements}</h3>
+                <h3 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.requirements}</h3>
                 <ul className="mt-4 space-y-3.5">
                   {(requirements.length > 0 ? requirements : fallbackResponsibilities).map((item) => (
                     <li key={item} className="flex gap-3 text-base text-[var(--casa-muted)] leading-relaxed">
@@ -262,7 +262,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
 
             <div className="space-y-6">
               <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-[linear-gradient(165deg,color-mix(in_srgb,var(--casa-sun)_12%,white)_0%,white_76%)] p-6 shadow-[var(--shadow-card)]">
-                <p className="text-xs font-black uppercase tracking-[0.13em] text-[var(--casa-muted)]">{copy.processTitle}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.13em] text-[var(--casa-muted)]">{copy.processTitle}</p>
                 <ol className="mt-4 space-y-3">
                   {copy.processSteps.map((step, index) => (
                     <li key={step} className="flex items-start gap-3 text-sm text-[var(--casa-muted)] leading-relaxed font-medium">

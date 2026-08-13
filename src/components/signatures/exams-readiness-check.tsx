@@ -20,8 +20,8 @@ export function ExamsReadinessCheck({ title, description, checklist }: ExamsRead
 
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
-      <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+      <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
       <div className="mt-4 rounded-full bg-[var(--casa-warm-soft)] p-1">

@@ -183,32 +183,32 @@ export function CareerApplicationForm({
       className="rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-6 shadow-[var(--shadow-card)] sm:p-7 lg:sticky lg:top-28"
       data-track-section="career-application"
     >
-      <h2 className="text-3xl font-black text-[var(--casa-ink)]">{copy.title}</h2>
+      <h2 className="text-3xl font-bold text-[var(--casa-ink)]">{copy.title}</h2>
 
       <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate data-casa-track-form="career_application">
         <div className="grid gap-4 2xl:grid-cols-2">
           <label className="space-y-1.5">
-            <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.firstName}</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.firstName}</span>
             <Input value={firstName} onChange={(event) => setFirstName(event.target.value)} required className="h-11" />
           </label>
           <label className="space-y-1.5">
-            <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.lastName}</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.lastName}</span>
             <Input value={lastName} onChange={(event) => setLastName(event.target.value)} required className="h-11" />
           </label>
         </div>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.email}</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.email}</span>
           <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required className="h-11" />
         </label>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.phone}</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.phone}</span>
           <Input value={phone} onChange={(event) => setPhone(event.target.value)} className="h-11" />
         </label>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.linkedin}</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.linkedin}</span>
           <Input
             type="url"
             value={linkedinUrl}
@@ -219,7 +219,7 @@ export function CareerApplicationForm({
         </label>
 
         <div className="space-y-1.5">
-          <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.cv}</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.cv}</span>
           <label htmlFor="career-cv" className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-4 py-3">
             <Upload className="h-4 w-4 text-[var(--casa-accent-text)]" />
             <span className="text-sm text-[var(--casa-muted)]">{cvFile ? cvFile.name : copy.cvHint}</span>
@@ -234,7 +234,7 @@ export function CareerApplicationForm({
         </div>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.letter}</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.letter}</span>
           <Textarea
             rows={6}
             value={coverLetter}

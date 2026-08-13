@@ -32,7 +32,7 @@ export function HeroHomePhoto({
     <HeroSurface themeClassName={themeClassName} archetype="A">
       <div className="grid items-start gap-10 lg:grid-cols-[1.08fr_0.92fr]">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
           <h1 className="mt-3 text-4xl font-black leading-[1.04] text-[var(--casa-ink)] sm:text-5xl lg:text-[3.3rem]">{title}</h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 

@@ -19,13 +19,13 @@ export function HeroD({ spec, showDraftClaims = false, className, dataTestId }: 
           <div className="relative">
             <HeroMediaCard spec={spec} compact className="min-h-[300px]" />
             <div className="absolute -bottom-3 left-5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-[var(--shadow-soft)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 {isDe ? 'Wohnen in Bremen' : 'Bremen housing'}
               </p>
             </div>
           </div>
           <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[var(--shadow-soft)]">
-            <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
               <ShieldCheck className="h-3.5 w-3.5" />
               {isDe ? 'Vertrauenssignal' : 'Trust signal'}
             </p>
@@ -38,7 +38,7 @@ export function HeroD({ spec, showDraftClaims = false, className, dataTestId }: 
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
           <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-[2.85rem]">
             {spec.headline}
           </h1>

@@ -10,7 +10,7 @@ export function HeroA({ spec, showDraftClaims = false, className, dataTestId }: 
     <HeroShell spec={spec} className={className} dataTestId={dataTestId}>
       <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr]">
         <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
           <h1 className="text-4xl font-black leading-[1.04] tracking-tight text-[var(--casa-ink)] sm:text-5xl lg:text-[3.35rem]">
             {spec.headline}
           </h1>

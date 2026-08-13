@@ -154,7 +154,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                           {dropdown.sections.map((section, sectionIndex) => (
                             <div key={sectionIndex}>
                               {section.title ? (
-                                <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--casa-text-subtle)]">
+                                <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--casa-text-subtle)]">
                                   {localizeNavText(section.title, contentLocale)}
                                 </p>
                               ) : null}

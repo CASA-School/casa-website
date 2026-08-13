@@ -11,7 +11,7 @@ type TeacherSpotlightCardProps = {
 export function TeacherSpotlightCard({ teacher, ctaLabel }: TeacherSpotlightCardProps) {
   return (
     <article className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Teacher spotlight</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Teacher spotlight</p>
       <div className="mt-3 grid gap-3 grid-cols-[74px_1fr] items-center">
         <div className="relative h-[74px] w-[74px] overflow-hidden rounded-xl bg-[var(--casa-warm-soft)]/45">
           <Image

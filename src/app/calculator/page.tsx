@@ -57,7 +57,7 @@ export default async function CalculatorPage() {
           ]}
         />
         <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white bg-[linear-gradient(165deg,color-mix(in_srgb,var(--casa-blue)_8%,transparent)_0%,transparent_44%,color-mix(in_srgb,var(--casa-sun)_12%,transparent)_100%)] px-6 py-6 shadow-[var(--shadow-card)] md:px-8 md:py-7">
-          <p className="inline-flex rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-ink)]">
+          <p className="inline-flex rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-ink)]">
             {copy.eyebrow}
           </p>
           <h1 className="mt-4 text-3xl font-black leading-tight text-[var(--casa-ink)] md:text-4xl">

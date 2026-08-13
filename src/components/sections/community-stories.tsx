@@ -24,8 +24,8 @@ type CommunityStoriesProps = {
 export function CommunityStories({ eyebrow, title, description, stories, className }: CommunityStoriesProps) {
   return (
     <section className={cn('space-y-5', className)}>
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
-      <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+      <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="max-w-3xl text-sm leading-relaxed text-[var(--casa-muted)] md:text-base">{description}</p>
 
       <ul className="grid gap-5 md:grid-cols-3">

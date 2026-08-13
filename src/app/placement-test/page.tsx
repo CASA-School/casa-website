@@ -110,7 +110,7 @@ export default async function PlacementTestPage() {
               <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
                 <LaptopMinimalCheck className="h-5 w-5" />
               </div>
-              <h2 className="text-2xl font-black">{copy.onlineTitle}</h2>
+              <h2 className="text-2xl font-bold">{copy.onlineTitle}</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{copy.onlineBody}</p>
               <ul className="mt-5 flex-1 space-y-2.5 text-sm text-slate-700">
                 {copy.onlineBullets.map((bullet) => (
@@ -134,7 +134,7 @@ export default async function PlacementTestPage() {
               <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-coral)]/14 text-[var(--casa-coral)]">
                 <Building2 className="h-5 w-5" />
               </div>
-              <h2 className="text-2xl font-black">{copy.inPersonTitle}</h2>
+              <h2 className="text-2xl font-bold">{copy.inPersonTitle}</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{copy.inPersonBody}</p>
               <ul className="mt-5 flex-1 space-y-2.5 text-sm text-slate-700">
                 {copy.inPersonBullets.map((bullet) => (
@@ -176,7 +176,7 @@ export default async function PlacementTestPage() {
               <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
                 <ClipboardCheck className="h-5 w-5" />
               </div>
-              <h2 className="text-2xl font-black">{copy.prepTitle}</h2>
+              <h2 className="text-2xl font-bold">{copy.prepTitle}</h2>
               <p className="mt-2 text-sm text-slate-600">{copy.prepBody}</p>
               <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-slate-700">
                 {narrative.prepChecklist.map((line) => (
@@ -186,7 +186,7 @@ export default async function PlacementTestPage() {
             </div>
 
             <div className="rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
-              <h2 className="text-2xl font-black">{copy.continueTitle}</h2>
+              <h2 className="text-2xl font-bold">{copy.continueTitle}</h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600">{copy.continueBody}</p>
               <div className="mt-5 space-y-3">
                 <Button asChild className="w-full justify-between rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-4 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">

@@ -49,7 +49,7 @@ export function LiveReviewModule({ locale, title, reviews, className }: LiveRevi
     <article className={className}>
       <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{title ?? dictionary.title}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{title ?? dictionary.title}</p>
           {reviews.length > 1 ? (
             <div className="flex items-center gap-1">
               <button

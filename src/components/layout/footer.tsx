@@ -71,7 +71,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
         <Container className="py-8">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-sun)]/90">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-sun)]/90">
                 {footerText('Consistent Help', locale)}
               </p>
               <h3 className="mt-1 text-xl font-bold text-white">

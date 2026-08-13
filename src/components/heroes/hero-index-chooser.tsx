@@ -38,7 +38,7 @@ export function HeroIndexChooser({
     <HeroSurface themeClassName={themeClassName} archetype="B">
       <div className="grid items-start gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
           <h1 className="mt-3 text-4xl font-black leading-[1.08] text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 

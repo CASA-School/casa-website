@@ -126,7 +126,7 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
             {locale === 'de' ? 'Stimmen' : 'Stories'}
           </p>
           <span className="casa-tricolor-rule mt-2 block h-1 w-24 rounded-full" aria-hidden />
-          <h2 className="mt-2 text-2xl font-black text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+          <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
         </div>
 

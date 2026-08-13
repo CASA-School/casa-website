@@ -202,7 +202,7 @@ export function StatsRow({ title, items, className }: StatsRowProps) {
       <div className="absolute -bottom-28 left-10 h-56 w-56 rounded-full border border-white/10" aria-hidden="true" />
 
       <div className="relative px-5 py-6 md:px-7 md:py-7">
-        {title ? <h2 className="max-w-2xl text-2xl font-black leading-tight text-white md:text-3xl">{title}</h2> : null}
+        {title ? <h2 className="max-w-2xl text-2xl font-bold leading-tight text-white md:text-3xl">{title}</h2> : null}
       </div>
 
       <ul

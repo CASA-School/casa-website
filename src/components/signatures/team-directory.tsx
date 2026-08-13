@@ -84,8 +84,8 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
   return (
     <>
       <section className="rounded-3xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
-        <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{title}</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+        <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
         <p className="mt-3 max-w-3xl text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
         <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="Team role filters">
@@ -143,7 +143,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                 <div className="space-y-3 p-5">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-accent-text)]">{member.role}</p>
-                    <h3 className="mt-2 text-lg font-black text-[var(--casa-ink)]">{member.name}</h3>
+                    <h3 className="mt-2 text-lg font-bold text-[var(--casa-ink)]">{member.name}</h3>
                     <p className="text-sm font-semibold text-[var(--casa-muted)]">{member.title}</p>
                   </div>
 
@@ -244,7 +244,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-accent-text)]">{activeMember.role}</p>
-                      <h3 className="mt-2 text-xl font-black text-[var(--casa-ink)] sm:text-2xl">{activeMember.name}</h3>
+                      <h3 className="mt-2 text-xl font-bold text-[var(--casa-ink)] sm:text-2xl">{activeMember.name}</h3>
                       <p className="text-sm font-semibold text-[var(--casa-muted)]">{activeMember.title}</p>
                     </div>
                     <button

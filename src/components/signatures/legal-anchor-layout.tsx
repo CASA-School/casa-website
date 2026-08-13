@@ -15,8 +15,8 @@ type LegalAnchorLayoutProps = {
 export function LegalAnchorLayout({ title, intro, sections }: LegalAnchorLayoutProps) {
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7 print:shadow-none">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
-      <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+      <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm text-[var(--casa-muted)] md:text-base">{intro}</p>
 
       <nav aria-label="Legal section anchors" className="mt-4 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/34 p-4 print:hidden">
@@ -34,7 +34,7 @@ export function LegalAnchorLayout({ title, intro, sections }: LegalAnchorLayoutP
       <div className="mt-5 space-y-5">
         {sections.map((section) => (
           <article key={section.id} id={section.id} className="scroll-mt-28 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] p-4 print:border-slate-300">
-            <h3 className="text-lg font-black text-[var(--casa-ink)]">{section.title}</h3>
+            <h3 className="text-lg font-bold text-[var(--casa-ink)]">{section.title}</h3>
             <div className="mt-2 space-y-2 text-sm leading-relaxed text-[var(--casa-muted)]">
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

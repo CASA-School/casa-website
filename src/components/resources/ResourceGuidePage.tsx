@@ -148,7 +148,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
         <Container>
           <article className="casa-card-surface relative overflow-hidden p-6 md:p-7">
             <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full border border-[color:var(--casa-sand)]/90" />
-            <h2 className="text-2xl font-black text-[var(--casa-ink)]">At a glance</h2>
+            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">At a glance</h2>
             <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
             <ul className={`mt-4 grid gap-3 ${preset.quickFactsGridClass}`}>
               {data.quickFacts.map((fact) => (
@@ -167,7 +167,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
       <section className="pb-12 md:pb-14">
         <Container>
           <article className="casa-card-surface p-6 md:p-7">
-            <h2 className="text-2xl font-black text-[var(--casa-ink)]">{data.stepsTitle}</h2>
+            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{data.stepsTitle}</h2>
             <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
             <ol className="mt-5 space-y-4">
               {data.steps.map((step, index) => (
@@ -191,7 +191,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
 
       <section className="pb-12 md:pb-14">
         <Container className="space-y-6">
-          <h2 className="text-2xl font-black text-[var(--casa-ink)]">Deep dive</h2>
+          <h2 className="text-2xl font-bold text-[var(--casa-ink)]">Deep dive</h2>
           <span className="casa-tricolor-rule block h-1 w-20 rounded-full" aria-hidden />
           <div className={`grid gap-4 ${preset.deepDiveGridClass}`}>
             {data.sections.map((section, index) => (
@@ -248,7 +248,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
         <Container>
           <article className={`casa-card-surface relative overflow-hidden p-6 md:p-7 ${preset.checklistClass}`}>
             <div className="pointer-events-none absolute -left-8 -top-8 h-24 w-24 rounded-full bg-[var(--casa-sun)]/20 blur-xl" />
-            <h2 className="text-2xl font-black text-[var(--casa-ink)]">{data.checklistTitle}</h2>
+            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{data.checklistTitle}</h2>
             <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
             <ul className="mt-4 space-y-2">
               {data.checklistItems.map((item) => (
@@ -265,7 +265,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
       <section className="pb-12 md:pb-14">
         <Container>
           <article className="casa-card-surface p-6 md:p-7">
-            <h2 className="text-2xl font-black text-[var(--casa-ink)]">FAQ</h2>
+            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">FAQ</h2>
             <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
             <Accordion type="single" collapsible className="mt-4">
               {data.faq.map((item) => (
@@ -285,7 +285,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
 
       <section className="pb-12 md:pb-14">
         <Container className="space-y-4">
-          <h2 className="text-2xl font-black text-[var(--casa-ink)]">Official links</h2>
+          <h2 className="text-2xl font-bold text-[var(--casa-ink)]">Official links</h2>
           <span className="block h-px w-24 bg-[color:var(--casa-sand)]" aria-hidden />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.officialLinks.map((link) => (

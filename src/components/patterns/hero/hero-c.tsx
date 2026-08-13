@@ -11,7 +11,7 @@ export function HeroC({ spec, breadcrumbs, className, dataTestId }: HeroPatternP
       {breadcrumbs && breadcrumbs.length > 0 ? <Breadcrumbs items={breadcrumbs} className="mb-4" /> : null}
 
       <div className="mx-auto max-w-3xl text-center">
-        <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
         <h1 className="text-3xl font-black leading-[1.1] tracking-tight text-[var(--casa-ink)] sm:text-4xl lg:text-[2.75rem]">
           {spec.headline}
         </h1>

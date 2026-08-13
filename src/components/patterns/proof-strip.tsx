@@ -36,7 +36,7 @@ export function ProofStrip({
           <p className="text-xl font-black text-[var(--casa-ink)]">{metric.value}</p>
           <p className="mt-1 text-xs font-semibold text-slate-600">{metric.label}</p>
           {metric.verificationStatus === 'draft' ? (
-            <p className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--casa-coral)]">Draft</p>
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-coral)]">Draft</p>
           ) : null}
         </article>
       ))}

@@ -454,7 +454,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
           <div className="flex items-center gap-2.5">
             <ClaraAvatar active={loading} />
             <div>
-              <p className="text-sm font-black tracking-tight text-[var(--casa-ink)]">{copy.title}</p>
+              <p className="text-sm font-bold tracking-tight text-[var(--casa-ink)]">{copy.title}</p>
               <p className="text-xs font-medium text-[var(--casa-muted)]">{copy.subtitle}</p>
             </div>
           </div>

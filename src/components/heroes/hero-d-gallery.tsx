@@ -25,7 +25,7 @@ export function HeroDGallery({
 }: HeroDGalleryProps) {
   return (
     <HeroSurface themeClassName={themeClassName} archetype="D">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
       <h1 className="mt-3 max-w-4xl text-4xl font-black leading-[1.08] text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
       <p className="mt-5 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 

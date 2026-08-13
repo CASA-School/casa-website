@@ -14,7 +14,7 @@ export function HeroB({ spec, showDraftClaims = false, quickLinks, className, da
     <HeroShell spec={spec} className={className} dataTestId={dataTestId}>
       <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
           <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-[2.9rem]">
             {spec.headline}
           </h1>
@@ -23,7 +23,7 @@ export function HeroB({ spec, showDraftClaims = false, quickLinks, className, da
         </div>
 
         <aside className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[var(--shadow-soft)]">
-          <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
             <ListFilter className="h-3.5 w-3.5" />
             {isDe ? 'Nächste Schritte' : 'Next steps'}
           </p>

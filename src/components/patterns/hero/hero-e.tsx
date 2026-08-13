@@ -14,7 +14,7 @@ export function HeroE({ spec, showDraftClaims = false, utilityItems, className, 
     <HeroShell spec={spec} className={className} dataTestId={dataTestId}>
       <div className="grid gap-8 lg:grid-cols-[1.06fr_0.94fr]">
         <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
           <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-[2.85rem]">
             {spec.headline}
           </h1>
@@ -34,11 +34,11 @@ export function HeroE({ spec, showDraftClaims = false, utilityItems, className, 
         </div>
 
         <aside className="rounded-3xl border border-slate-200/80 bg-[repeating-linear-gradient(45deg,#f8fafc_0,#f8fafc_14px,#ffffff_14px,#ffffff_28px)] p-6 shadow-[var(--shadow-soft)]">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{isDe ? 'Datenpanel' : 'Data panel'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{isDe ? 'Datenpanel' : 'Data panel'}</p>
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
             {panels.map((panel) => (
               <div key={`${panel.label}-${panel.value}`} className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-                <dt className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">{panel.label}</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{panel.label}</dt>
                 <dd className="mt-1 text-sm font-semibold text-[var(--casa-ink)]">{panel.value}</dd>
               </div>
             ))}

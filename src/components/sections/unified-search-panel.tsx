@@ -67,7 +67,7 @@ export function UnifiedSearchPanel({ locale, defaultScope = 'all', className }: 
 
   return (
     <section data-reveal="true" className={cn('rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-soft)] md:p-6', className)}>
-      <h2 className="flex items-center gap-2 text-xl font-black text-[var(--casa-ink)] md:text-2xl">
+      <h2 className="flex items-center gap-2 text-xl font-bold text-[var(--casa-ink)] md:text-2xl">
         <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
           <Search className="h-4 w-4" aria-hidden="true" />
         </span>

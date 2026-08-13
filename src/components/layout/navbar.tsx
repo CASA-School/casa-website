@@ -393,7 +393,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                 {dropdown.sections.map((section) => (
                             <div key={`${dropdown.trigger}-${section.title}`} className="space-y-4">
                               {section.title && (
-                                <h4 className="text-[11px] font-black uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+                                <h4 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
                                   {localizeNavText(section.title, contentLocale)}
                                 </h4>
                               )}

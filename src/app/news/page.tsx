@@ -130,11 +130,11 @@ export default async function NewsPage() {
       <section className="py-16 md:py-20">
         <Container className="space-y-12 md:space-y-14">
           <article id="featured" className="casa-card-surface p-7 sm:p-8">
-            <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-ink)]">
+            <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-ink)]">
               <Newspaper className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
               {copy.featured}
             </p>
-            <h2 className="mt-4 text-3xl font-black leading-tight sm:text-4xl">{featured.title}</h2>
+            <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl">{featured.title}</h2>
             <p className="mt-4 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)]">{featured.summary}</p>
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-[var(--casa-muted)]">
               <span className="inline-flex items-center gap-1.5">
@@ -157,8 +157,8 @@ export default async function NewsPage() {
           </article>
 
           <section id="latest" className="casa-card-surface p-7 sm:p-8">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.latestEyebrow}</p>
-            <h3 className="mt-2 text-2xl font-black sm:text-3xl">{copy.latestTitle}</h3>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.latestEyebrow}</p>
+            <h3 className="mt-2 text-2xl font-bold sm:text-3xl">{copy.latestTitle}</h3>
             <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{copy.latestDescription}</p>
 
             <ul className="mt-6 divide-y divide-[color:var(--casa-sand)]/85">
@@ -188,11 +188,11 @@ export default async function NewsPage() {
           </section>
 
           <section id="careers" className="rounded-3xl border border-[color:var(--casa-sand)]/80 bg-[var(--casa-warm-soft)]/42 p-7 sm:p-8">
-            <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
               <Briefcase className="h-3.5 w-3.5" />
               {copy.careersEyebrow}
             </p>
-            <h3 className="mt-2 text-2xl font-black sm:text-3xl">{copy.careersTitle}</h3>
+            <h3 className="mt-2 text-2xl font-bold sm:text-3xl">{copy.careersTitle}</h3>
             <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{copy.careersDescription}</p>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {careerOpenings.length > 0 ? (

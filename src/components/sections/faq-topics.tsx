@@ -40,7 +40,7 @@ export function FAQTopics({ title, description, topics, items, className }: FAQT
 
   return (
     <section className={cn('rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7', className)}>
-      <h2 className="text-3xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <h2 className="text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)] md:text-base">{description}</p>
 
       <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="FAQ topics">

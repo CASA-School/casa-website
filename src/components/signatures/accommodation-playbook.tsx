@@ -11,8 +11,8 @@ type AccommodationPlaybookProps = {
 export function AccommodationPlaybook({ title, description, cards, checklist }: AccommodationPlaybookProps) {
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
-      <h2 className="mt-2 text-3xl font-black text-[var(--casa-ink)]">{title}</h2>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+      <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">

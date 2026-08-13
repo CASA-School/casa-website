@@ -45,7 +45,7 @@ export function EditorialSplit({
       >
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-black leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+          <h2 className="mt-2 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
           <ul className="mt-6 space-y-2.5">
             {bullets.map((bullet) => (

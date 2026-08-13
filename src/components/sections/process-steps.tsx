@@ -26,7 +26,7 @@ export function ProcessSteps({ eyebrow, title, description, steps, cta, classNam
     <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/30 px-6 py-8 md:px-9 md:py-10', className)}>
       <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-      <h2 className="mt-2 text-2xl font-black text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+      <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
       <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 
       <ol className="mt-8 grid gap-7 md:grid-cols-3">

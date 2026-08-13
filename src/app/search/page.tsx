@@ -34,7 +34,7 @@ function SearchResultGroup({
   return (
     <section className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)] sm:p-5">
       <header className="flex items-center justify-between gap-3 border-b border-[color:var(--casa-sand)] pb-3">
-        <h2 className="text-lg font-black text-[var(--casa-ink)]">{title}</h2>
+        <h2 className="text-lg font-bold text-[var(--casa-ink)]">{title}</h2>
         <span className="rounded-full bg-[var(--casa-warm-soft)] px-2.5 py-1 text-xs font-bold text-[var(--casa-muted)]">
           {count}
         </span>
@@ -91,7 +91,7 @@ function SearchResultCard({
               </span>
             ))}
           </span>
-          <span className="mt-1 block text-sm font-black leading-snug text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)] sm:text-base">
+          <span className="mt-1 block text-sm font-bold leading-snug text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)] sm:text-base">
             {title}
           </span>
           <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-[var(--casa-muted)]">{snippet}</span>
@@ -194,7 +194,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
           {shouldSearch && totalResults === 0 ? (
             <section className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-soft)]">
-              <h2 className="text-lg font-black">{locale === 'de' ? 'Keine Treffer gefunden' : 'No matching results found'}</h2>
+              <h2 className="text-lg font-bold">{locale === 'de' ? 'Keine Treffer gefunden' : 'No matching results found'}</h2>
               <p className="mt-2 text-sm text-[var(--casa-muted)]">
                 {locale === 'de'
                   ? 'Versuchen Sie ein breiteres Stichwort oder wechseln Sie den Suchbereich.'
