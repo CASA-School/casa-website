@@ -36,3 +36,42 @@ export const getDb = () => {
   database ??= neon(getDatabaseUrl());
   return database;
 };
+
+/**
+ * A driver error can quote the connection string back, and that string carries
+ * the password. Every string taken off an error goes through this first.
+ */
+const CONNECTION_STRING_PATTERN = /postgres(?:ql)?:\/\/\S*/gi;
+
+function redactConnectionString(message: string) {
+  return message.replace(CONNECTION_STRING_PATTERN, 'postgres://[redacted]');
+}
+
+/**
+ * Reports a database read that failed and fell back to in-repo fixtures.
+ *
+ * The fallback itself is intended (see "Runtime modes" in CLAUDE.md), but a
+ * *silent* fallback makes an unapplied migration or an unreachable Postgres
+ * container look exactly like a healthy site — the caller still renders, just
+ * from fixtures. Callers keep their fallback; this only names the cause.
+ *
+ * Server-only in practice: every caller reaches this from a `getDb()` branch,
+ * and `getDb()` returns null without `DATABASE_URL`, which is never exposed to
+ * the browser. Fallback mode (`DATABASE_URL` unset) skips the query entirely
+ * and so never logs — only a real query failure does.
+ */
+export function logDatabaseFallback(scope: string, error: unknown) {
+  const source = error instanceof Error ? error : null;
+  // Neon wraps connection failures, so the reachability signal (ECONNREFUSED,
+  // DNS) lives on `cause` rather than in the top-level message.
+  const cause = source?.cause;
+
+  console.error('[db] query failed, serving fallback content', {
+    scope,
+    name: source?.name ?? 'UnknownError',
+    message: redactConnectionString(source?.message ?? String(error)),
+    ...(cause === undefined || cause === null
+      ? {}
+      : { cause: redactConnectionString(cause instanceof Error ? cause.message : String(cause)) }),
+  });
+}

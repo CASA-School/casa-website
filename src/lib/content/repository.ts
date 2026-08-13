@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db/server';
+import { getDb, logDatabaseFallback } from '@/lib/db/server';
 import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import { heroSpecsByLocale } from '@/config/content/heroes';
 import { proofMetricsByLocale } from '@/config/content/proof-metrics';
@@ -554,7 +554,8 @@ export async function getCourses(locale: ContentLocale): Promise<CourseWithNarra
       if (rows.length > 0) {
         courses = rows;
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback('getCourses (course_types)', error);
       courses = [];
     }
   }
@@ -707,7 +708,8 @@ export async function getCourseDetail(slug: string, locale: ContentLocale): Prom
           instances = instanceRows;
         }
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback(`getCourseDetail (course_types, course_instances; slug=${contentSlug})`, error);
       course = null;
       instances = [];
     }
@@ -827,7 +829,8 @@ export async function getCourseRegistrationCatalog(
           selectedOptionId = instance.id;
         }
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback('getCourseRegistrationCatalog (course_types, course_instances)', error);
       courseTypes = [];
       instances = [];
       selectedCourseTypeId = undefined;
@@ -997,7 +1000,8 @@ export async function getExamRegistrationCatalog(
           }
         }
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback('getExamRegistrationCatalog (exam_types, exam_sessions)', error);
       examTypes = [];
       sessions = [];
       selectedOptionId = undefined;
@@ -1152,7 +1156,8 @@ export async function getExamCatalog(locale: ContentLocale): Promise<ExamCatalog
       if (sessionRows.length > 0) {
         sessions = sessionRows;
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback('getExamCatalog (exam_types, exam_sessions)', error);
       examTypes = [];
       sessions = [];
     }
@@ -1260,7 +1265,8 @@ export async function getFaq(locale: ContentLocale): Promise<FaqViewItem[]> {
           answer: item.answer,
         }));
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback('getFaq (faq_items)', error);
       faqItems = [];
     }
   }
@@ -1410,8 +1416,9 @@ export async function getCareerPositions(locale: ContentLocale): Promise<CareerP
       if (rows.length > 0) {
         return normalizeCareerRows(rows, locale);
       }
-    } catch {
+    } catch (error) {
       // fallback to mock data in local/demo mode
+      logDatabaseFallback('getCareerPositions (career_positions)', error);
     }
   }
 
@@ -1464,8 +1471,12 @@ export async function getCareerPositionBySlug(
         if (row) {
           return normalizeCareerRow(row);
         }
-      } catch {
+      } catch (error) {
         // fallback to mock rows below
+        logDatabaseFallback(
+          `getCareerPositionBySlug (career_positions; slug=${slug}, locale=${candidateLocale})`,
+          error
+        );
       }
     }
   }
@@ -1521,7 +1532,8 @@ export async function getNewsList(locale: ContentLocale): Promise<NewsViewItem[]
       if (rows.length > 0) {
         posts = normalizeNewsRows(rows, locale);
       }
-    } catch {
+    } catch (error) {
+      logDatabaseFallback('getNewsList (news_posts)', error);
       posts = [];
     }
   }
@@ -1607,8 +1619,9 @@ export async function getNewsPost(slug: string, locale: ContentLocale): Promise<
           author: 'CASA Team',
         };
       }
-    } catch {
+    } catch (error) {
       // no-op, fallback below
+      logDatabaseFallback(`getNewsPost (news_posts; slug=${slug})`, error);
     }
   }
 
