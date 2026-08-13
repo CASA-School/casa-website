@@ -105,12 +105,12 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
       facts: locale === 'de'
           ? [
               'Gebühren: 4 Wochen 520 EUR, 8 Wochen (komplettes Niveau) 940 EUR, jede weitere Woche 117,50 EUR.',
-              'Einmalige Einschreibegebühr: 50 EUR. Lehrmaterial: 23,99 EUR bis 26,99 EUR je nach Niveaustufe.',
+              'Einmalige Einschreibegebühr: 50 EUR. Lehrmaterial: 23,99 bis 26,99 EUR.',
               'Ein ganzes Niveau dauert im Intensivformat in der Regel etwa 8 bis 9 Wochen.',
             ]
           : [
               'Fees: 4 weeks EUR 520, 8 weeks (full level) EUR 940, each additional week EUR 117.50.',
-              'One-time enrollment fee: EUR 50. Textbooks: EUR 23.99 to EUR 26.99 depending on level.',
+              'One-time enrollment fee: EUR 50. Textbooks: EUR 23.99 to EUR 26.99.',
               'In intensive format, one full CEFR level usually takes around 8 to 9 weeks.',
             ],
     };
@@ -555,7 +555,7 @@ export default async function CoursesPage({
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Der menschliche Unterschied' : 'The Human Difference'}
               </p>
-              <h2 className="text-3xl font-extrabold tracking-tight text-[var(--casa-ink)] sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight text-[var(--casa-ink)] sm:text-4xl">
                 {locale === 'de' ? 'Unterstützung auf jedem Schritt Ihres Weges' : 'Support on Every Step of Your Journey'}
               </h2>
               <p className="text-base text-[var(--casa-muted)] md:text-lg">
@@ -585,7 +585,7 @@ export default async function CoursesPage({
                     {locale === 'de' ? 'Teilnehmerbericht' : 'Student story'}
                   </p>
                   <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-extrabold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  <h3 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
                     {locale === 'de' ? 'Wie sich der passende Kurs im Alltag anfühlt' : 'How the right course format feels in real life'}
                   </h3>
                   <blockquote className="mt-4 text-lg font-medium leading-relaxed text-[var(--casa-ink)]">
@@ -616,7 +616,7 @@ export default async function CoursesPage({
                     {locale === 'de' ? 'Kursberatung' : 'Academic guidance'}
                   </p>
                   <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-extrabold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  <h3 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
                     {locale === 'de' ? 'Persönliche Lernwege brauchen Orientierung' : 'Human learning journeys need clear guidance'}
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">

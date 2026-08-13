@@ -1,7 +1,9 @@
 /**
  * CASA pricing configuration — single source of truth.
  *
- * All figures sourced from 2026 official CASA flyers and level development plan:
+ * Course prices are the ones verified against casa-bremen.de in
+ * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md — read that before changing a number here.
+ * The remaining figures come from the 2026 CASA source documents:
  *   - Flyer Abendkurs Herbst 26.docx / GERMAN IN THE EVENING 26.docx
  *   - Flyer Intensivkurse NEU 24.25.docx
  *   - ENG_Level_Developmentplan_2026.docx (dated 05.12.2025)
@@ -31,21 +33,45 @@ export const CASA_LEVEL_SEQUENCE = [
 
 export type CasaLevel = (typeof CASA_LEVEL_SEQUENCE)[number];
 
-// ---------------------------------------------------------------------------
-// Intensive courses — weekly pricing (source: Flyer Intensivkurse NEU 24.25)
-// ---------------------------------------------------------------------------
+/**
+ * The level a half-level belongs to. The sequence above is written in halves,
+ * so the level is whatever precedes the dot — which leaves B1+ (no dot) as a
+ * level of its own that is only ever sold as a single 4-week step.
+ */
+export function casaLevelGroupId(level: CasaLevel) {
+  return level.split('.')[0];
+}
 
 /**
- * Price per number of weeks for intensive courses.
- * Index 0 = 1 week, index 7 = 8 weeks.
+ * CASA_LEVEL_SEQUENCE grouped into the levels it is actually sold as:
+ * [A1.1 A1.2] [A2.1 A2.2] [B1.1 B1.2] [B1+] [B2.1 B2.2] [C1.1 C1.2].
+ *
+ * Derived from the sequence rather than hand-written so the two cannot drift.
+ * Only a two-member group can be bought as a full 8-week level; a lone half —
+ * and B1+, whose group has one member — is a 4-week half level.
  */
-export const INTENSIVE_WEEKLY_PRICES = [140, 270, 390, 500, 600, 700, 800, 900] as const;
+export const CASA_LEVEL_GROUPS: readonly (readonly CasaLevel[])[] =
+  CASA_LEVEL_SEQUENCE.reduce<CasaLevel[][]>((groups, level) => {
+    const currentGroup = groups[groups.length - 1];
 
-/** Price for a full 8-week intensive level (source: Level Development Plan 2026) */
+    if (currentGroup && casaLevelGroupId(currentGroup[0]) === casaLevelGroupId(level)) {
+      currentGroup.push(level);
+    } else {
+      groups.push([level]);
+    }
+
+    return groups;
+  }, []);
+
+// ---------------------------------------------------------------------------
+// Intensive courses — level pricing
+// ---------------------------------------------------------------------------
+
+/** Price for a full 8-week intensive level (source: docs/COURSE_FACTS_SOURCE_OF_TRUTH.md:52) */
 export const INTENSIVE_FULL_LEVEL_8_WEEKS = 940;
 
-/** Price for a half 4-week intensive level */
-export const INTENSIVE_HALF_LEVEL_4_WEEKS = 500;
+/** Price for a half 4-week intensive level (source: docs/COURSE_FACTS_SOURCE_OF_TRUTH.md:52) */
+export const INTENSIVE_HALF_LEVEL_4_WEEKS = 520;
 
 // ---------------------------------------------------------------------------
 // Evening courses — trimester pricing (source: GERMAN IN THE EVENING 26.docx)
@@ -67,36 +93,37 @@ export const EVENING_TRIMESTER_PRICES: Record<EveningTerm, number> = {
 export const EVENING_DEFAULT_PRICE = EVENING_TRIMESTER_PRICES.autumn;
 
 // ---------------------------------------------------------------------------
-// Special courses — individual module pricing (source: Herbst 26 flyer)
+// Special courses — individual module pricing
 // ---------------------------------------------------------------------------
 
-export type SpecialCourseSlug =
-  | 'c1-grammar-conversation'
-  | 'phonetics'
-  | 'writing-workshop'
-  | 'b1-b2-grammar-conversation'
-  | 'basic-grammar';
-
-export const SPECIAL_COURSE_PRICES: Record<SpecialCourseSlug, number> = {
-  'c1-grammar-conversation': 176,
-  phonetics: 176,
-  'writing-workshop': 176,
-  'b1-b2-grammar-conversation': 192,
-  'basic-grammar': 176,
-};
-
-/** Default / planning basis for a single special course module */
-export const SPECIAL_COURSE_DEFAULT_PRICE = 176;
+/**
+ * Price of a single special course module
+ * (source: docs/COURSE_FACTS_SOURCE_OF_TRUTH.md:54; every module in
+ * src/config/courses/special-course-modules.ts carries the same 192).
+ */
+export const SPECIAL_COURSE_DEFAULT_PRICE = 192;
 
 // ---------------------------------------------------------------------------
-// Textbooks — per book (source: Flyer Intensivkurse NEU 24.25)
+// Textbooks — per book
 // ---------------------------------------------------------------------------
+
+/**
+ * Verified 2026-08-13 directly against casa-bremen.de/en/language-courses/
+ * intensive-german-courses: "books 23,99€-26,99€* *varies according to level".
+ *
+ * The educational-leave page separately quotes "books 46€ - 54€*" with the
+ * footnote "*costs for two books" — Bildungszeit runs two intensive courses in
+ * parallel, so that figure is a doubled total, not a different per-book price.
+ * 2x23.99=47.98 and 2x26.99=53.98 land inside that range, confirming the two
+ * figures describe the same underlying per-book cost. See
+ * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
+ */
 
 /** Per book price for levels A1, A2, B1 (Netzwerk neu series) */
-export const BOOK_PRICE_LOWER = 22.99;
+export const BOOK_PRICE_LOWER = 23.99;
 
 /** Per book price for levels B1+, B2, C1 (Kontext series) */
-export const BOOK_PRICE_UPPER = 25.99;
+export const BOOK_PRICE_UPPER = 26.99;
 
 // ---------------------------------------------------------------------------
 // Enrollment fee (source: Level Development Plan 2026)

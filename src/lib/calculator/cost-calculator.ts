@@ -1,5 +1,6 @@
 import {
   CASA_CALCULATOR_PRICING,
+  CASA_LEVEL_GROUPS,
   CASA_LEVEL_SEQUENCE,
   type CasaCalculatorPricing,
   type CasaLevel,
@@ -103,6 +104,39 @@ export function calculateLevelSteps(currentLevel: CasaLevel, targetLevel: CasaLe
   }
 
   return targetIndex - currentIndex;
+}
+
+/**
+ * Intensive tuition, priced per real level rather than per pair of steps.
+ *
+ * The learner studies the half-levels *after* their current one, up to and
+ * including the target. Each level is then billed as a full 8-week level only
+ * when both of its halves are studied; anything else — a lone half at either
+ * end of the path, or the single-member B1+ level — is a 4-week half level.
+ *
+ * Counting pairs instead would bill B1+ together with a neighbouring half as a
+ * "full level" CASA does not sell.
+ */
+function resolveIntensiveTuition(
+  currentLevel: CasaLevel,
+  targetLevel: CasaLevel,
+  pricing: CasaCalculatorPricing
+) {
+  const currentIndex = CASA_LEVEL_SEQUENCE.indexOf(currentLevel);
+  const targetIndex = CASA_LEVEL_SEQUENCE.indexOf(targetLevel);
+  const studied = new Set<CasaLevel>(CASA_LEVEL_SEQUENCE.slice(currentIndex + 1, targetIndex + 1));
+
+  return CASA_LEVEL_GROUPS.reduce((total, group) => {
+    const studiedHalves = group.filter((level) => studied.has(level)).length;
+
+    if (studiedHalves === 0) {
+      return total;
+    }
+
+    return studiedHalves === group.length && group.length === 2
+      ? total + pricing.intensive.fullLevel8Weeks
+      : total + studiedHalves * pricing.intensive.halfLevel4Weeks;
+  }, 0);
 }
 
 function resolveBooksLineItem(
@@ -219,11 +253,7 @@ export function calculateCasaCostPathway(
 
   const tuition =
     input.studyMode === 'intensive'
-      ? (() => {
-          const pairs = Math.floor(steps / 2);
-          const rem = steps % 2;
-          return pairs * pricing.intensive.fullLevel8Weeks + rem * pricing.intensive.halfLevel4Weeks;
-        })()
+      ? resolveIntensiveTuition(input.currentLevel, input.targetLevel, pricing)
       : steps * pricing.evening.halfLevelTrimester;
 
   const computedDuration =
