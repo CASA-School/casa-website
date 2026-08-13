@@ -474,6 +474,213 @@ get a free HTTPS test URL on the environment domain — no DNS work needed for s
 resource names are recorded in `docs/AZURE_DEPLOYMENT_PLAN.md`. **Nothing has been provisioned**;
 the cost-bearing decisions (PostgreSQL SKU above all) are still open.
 
+## Type Weight Scale — 2026-08-12 (work board U1)
+
+The site used `font-black` on nearly every heading, eyebrow, stat and card title — 284 of the
+~370 weighted elements in shipping code. All 284 have been rescaled in one pass.
+
+**The key discovery is that weight 900 was never rendering.** `src/app/layout.tsx` loads only
+`400–800`, and Plus Jakarta Sans has no 900 face. Measured in-browser at 60px, weights 900 and
+800 produce an identical `724.27px` advance width. So `font-black` has always resolved to 800,
+and the site really was rendering everything at one flat maximum weight. This also means the
+work board's proposed 900-for-H1 / 800-for-H2 split would have been invisible.
+
+`font-extrabold` is separately forbidden by `src/config/brand/usage-rules.ts` and renders the
+same as `font-black` anyway, so the ladder was shifted down one step to use only sanctioned
+classes that produce three genuinely distinct weights:
+
+| Class | Renders | Use |
+| --- | --- | --- |
+| `font-black` | 800 | page `<h1>`, hero stat numbers — **scarce**, one per page plus stats |
+| `font-bold` | 700 | section `<h2>`/`<h3>`, card titles, label values, buttons, counters |
+| `font-semibold` | 600 | eyebrows and uppercase micro-labels, badges, inline links |
+
+Section headings and card titles deliberately share 700, separated by size (30–37px vs
+16–20px). Full rules in `UI_SYSTEM.md` → "Weight scale". Homepage now measures 6 elements at
+the top tier, 70 at 700, 53 at 600, 162 at 400.
+
+`/design-alternatives`, `/landing-page-alt` and `/homepage-reorganized` were **excluded** (85
+occurrences) — they are frozen comparison artifacts per `docs/EXPERIMENTAL_LANDING_PAGES.md`.
+
+**Owed follow-up:** `src/config/brand/usage-rules.ts:138` still says "font-black for headings
+and section titles" and now contradicts the code. U1 was not permitted to touch `src/config/**`,
+so it is logged on the work board instead.
+
+**Also corrected while picking this up:** work board entries U1b (canvas tint + softened
+elevation) and U3 (internal surface guards) were both already implemented and have been marked
+stale. `--casa-surface-subtle` / `--casa-surface-wash` still have zero consumers.
+
+**Concurrency note.** Two agents were writing to this working tree at once. Commit `77ad285`
+("add an Ansprechpartner per course format") swept up four in-flight `font-extrabold` edits from
+a superseded draft of this sweep into `src/app/courses/page.tsx` and `courses/[slug]/page.tsx`;
+they have since been corrected to `font-bold`. When more than one agent is active, stage
+explicitly rather than committing the whole tree.
+
+## Migration 0002 applied to live Neon; textbook price and B1+ duration resolved (2026-08-13)
+
+**`DATABASE_URL` points at a real Neon project** (`casa` DB on `ep-plain-dew-age7idft`, owner
+`casa_owner`) — confirmed by the user, connected via `rahman@quantutech.com`. `neon` CLI is
+installed (v2.22.0) but auth needs an interactive browser step that will not complete headless;
+talk to the DB directly via the app's own `DATABASE_URL` instead.
+
+**Migration 0002 is now applied.** Before: `schema_migrations` existed but was empty (0001's
+schema was live pre-tracking, exactly as earlier notes said), `course_types` had 2 rows
+(`intensive-german`, `evening-german`) and neither `pricing_mode` nor `visa_eligible` — every
+Neon-mode course query was throwing `column "pricing_mode" does not exist` and silently falling
+back to fixtures (confirmed in the e2e server log before this fix). Ran `db:baseline` first;
+it reported "nothing to baseline", so `db:migrate` ran 0001 fresh — **verified safe first**: every
+`CREATE TABLE`/`CREATE TYPE` in 0001 is `IF NOT EXISTS` or exception-guarded, so re-running it
+against the already-existing schema changed nothing. 0002's `UPDATE`s are scoped by `slug`; with
+only two rows present, only `intensive-german` matched (`default_price` 520.00, `pricing_mode`
+'from', `visa_eligible` true — now correctly `null` on `evening-german`, i.e. "please ask", not a
+guessed default). Verified after: `npm run build` and `npm run test:e2e` (10/10) both clean with
+`DATABASE_URL` set, no `column does not exist` anywhere in the log.
+
+**Textbook price was actually verifiable — I hadn't looked hard enough on 2026-08-12.**
+Direct fetch of `casa-bremen.de/en/language-courses/intensive-german-courses` quotes *"books
+23,99€-26,99€\* \*varies according to level"*, and `.../educational-leave` quotes *"books 46€ -
+54€\* \*costs for two books"* — its own footnote resolves the earlier open question: Bildungszeit
+runs two intensive courses in parallel, so €46–54 is a doubled total, not a competing price.
+2×23.99=47.98 and 2×26.99=53.98 land inside that range. Also confirmed real: "each additional
+week EUR 117.50", which I had incorrectly called unverified in the previous pass — it's directly
+quoted on the same page. Fixed `BOOK_PRICE_LOWER`/`UPPER` in `pricing.ts` from 22.99/25.99 (off
+by exactly €1 on each bound — the wrong side of the earlier contradiction) to 23.99/26.99, and
+restored the real number to `courses/page.tsx` where I'd defensively written "depends on level".
+
+**B1+ duration — Rahman (project owner) confirmed 2026-08-13, not published on casa-bremen.de:**
+about 2 months, the same order as a full level, despite billing at the half-level rate. CASA
+runs it as two internal parts (B1+.1 / B1+.2), intentionally **not** modelled as separate tabs
+per the same conversation. Tracked as `WEEKS_FOR_BRIDGE_STAFF_CONFIRMED` in
+`level-progression-timeline.tsx`, kept distinct from the site-verified `WEEKS_PER_LEVEL` so the
+two provenances (staff-told vs. site-published) never blur into one constant. The card now shows
+a small "as told to us by the school, not published on casa-bremen.de" note.
+
+**Follow-up now more visible, not yet fixed:** the calculator's duration model
+(`cost-calculator.ts:261`, `steps * 4` weeks) still computes B1+ as 4 weeks — a bigger fix than
+what was asked, since it would need a per-group duration model mirroring the tuition one in
+`CASA_LEVEL_GROUPS`. Flagged, not done.
+
+**Medical course fee/hours — genuinely not published, confirmed by direct fetch, not absence
+from search.** Checked both the English and German course pages directly; only the B2/C1 entry
+level and FSP framing are public. A dated news post surfaced in web search matching the exact
+dates already in `course-profiles.ts` (26.06.–28.08.2026), but the article body would not render
+on direct fetch and the post no longer appears in the live `/aktuelles` list — logged as
+**inconclusive**, not treated as confirmation, since a search-engine paraphrase that happens to
+match an existing internal note is not independent verification.
+
+**Safety note:** `elct777.cfd` surfaced in a web search claiming to be "CASA Bremen" — almost
+certainly an impersonation/scam clone (wrong TLD, no legitimate reason to exist under that
+domain). Not visited beyond the search snippet.
+
+## CEFR level colour scale + B1+ — work board U10 (2026-08-12)
+
+**U10 shipped.** Skills are categorical so they get distinct hues; levels are *ordered*, so they
+get one sequential ramp instead. Derived from `--casa-blue` by holding its Lab hue constant and
+stepping lightness down: `--level-a1` `#daeafa` → `--level-c1` `#005c90`, with `-on-light`,
+`-on-dark`, `-ink` and `-text` variants, flipped on dark sections exactly like the skill tokens.
+TS surface is `levelTokens` + `levelKeyFromLabel()` in `src/config/brand/tokens.ts`.
+
+Every ratio is measured, not eyeballed. `-on-light` clears 4.5:1 against `--casa-sand` (4.51–5.81);
+`-on-dark` clears it against `--casa-ink-panel` (4.53–12.54). **B2 was deepened from L\*50 to L\*47**
+because L\*50 sat in a dead zone where neither white (4.42) nor ink (4.04) cleared AA on a filled
+chip. The ramp crosses over between B1+ and B2, so `-ink` is stored per step rather than assumed.
+
+**B1+ added to the timeline** (user confirmed CASA runs it). It is *not* a CEFR level — it is one
+step in `CASA_LEVEL_SEQUENCE` where a full level is two, and it is where the textbook switches
+from Netzwerk neu to Kontext.
+
+Four things an audit caught that would have shipped as false claims:
+
+1. **No week count for B1+.** The tempting figure is 4 weeks, but that traces only to
+   `INTENSIVE_HALF_LEVEL_4_WEEKS` — a *price* tier, not a published duration — and that
+   constant's €500 contradicts the verified €520 for 4 weeks. The card says "Duration on
+   request" instead. `BRIDGE_HAS_NO_PUBLISHED_DURATION` names the decision so it is not undone.
+2. **`aria-label="CEFR levels"` was a lie** once B1+ joined. Now "Course levels" / "Kursstufen".
+3. **The "% of the journey" readout is gone.** It asserted a proportion of total effort no source
+   verifies, and inserting B1+ silently restated every level's number (A1 20% → 16.7%).
+4. **"8–9 weeks per level" now says "per full level"**, matching the verified wording, which
+   scopes itself to A1–C1 and says "one full CEFR level".
+
+Prose for B1+ reuses the verified visitor-facing wording ("Bridge level before B2" /
+"Übergangsniveau vor B2") rather than inventing can-do descriptors for a level the CEFR does not
+define. Also fixed: the series is **Kontext**, not "Context" as `course-level-goals.tsx` had it.
+
+## Special-courses module catalogue — work board U6 + U2 (2026-08-12)
+
+`/courses/special-courses` was one route standing in for eight distinct products, rendered as a
+flat list of visually identical blocks — same price, same time, same length — so neither question
+a reader actually has ("which one is for me?", "does it fit my week?") was answerable at a glance.
+
+Now `src/components/courses/special-course-catalogue.tsx`: level and evening as filter chips with
+a live count, the week as a grid whose empty days drop out under filtering, the constants (€192,
+one 90-minute evening, 12 weeks) stated once at the top instead of eight times, and each module
+accented by its skill colour.
+
+**U2 is finished by this, and its board entry was mis-sequenced.** U2 asked for skill colours in
+`course-level-goals.tsx` and `sections/*`, but nothing there labels a skill from structured data —
+those components label *CEFR levels*, which is U10, which the board blocked behind U2. The only
+`SkillKey`-typed data in the repo is `special-course-modules.ts`, so U6 was always the tokens'
+first real consumer. **U10 is now unblocked.**
+
+**`archetypes.ts` needed one additive change** despite U6's "must not touch" rule: the archetype
+named `module-catalogue` had no section key able to render a module catalogue. Added
+`'module-catalogue'` to `CourseSectionKey` and to that one archetype's `sections`; no other
+archetype changed. Guarded by a test asserting no other archetype renders it.
+
+**Not implemented, deliberately:** the brief's "say who each module is for in one line". The
+modules carry no audience field and writing eight would be inventing claims. Needs staff copy.
+
+**The knip ignore added earlier is gone** — `knip.jsonc` has an empty `ignore` and still exits 0,
+which is the proof the data file is imported rather than suppressed.
+
+## /placement-test level timeline — prices removed, textbooks added (2026-08-12)
+
+`LevelProgressionTimeline` was publishing a **"total budget 5.502,38 €"** headline plus per-level
+tuition on `/placement-test`. The figures contradicted the verified source: it showed €460 for an
+8-week level where `COURSE_FACTS_SOURCE_OF_TRUTH.md:52` verifies **€940 / 8 weeks** — roughly half,
+in the direction that under-quotes people. All money is gone from the component. Per the user's
+decision, pricing will come back **dynamically from the central dashboard**, not as hardcoded
+constants.
+
+**The durations were wrong too, and removing the prices made that more prominent.** The component
+claimed A1=8, A2=8, B1=12, B2=12, C1=12 weeks and an aggregate "52 weeks · 1040 lessons". Nothing in
+the repo supports per-level escalation: four places state a flat **8–9 weeks per full level**, and
+the pricing engine bills every full level as 8 weeks (`pricing.ts:44`). The one reading that could
+have justified B1=12 (treating B1+ as a third half-step of B1) is contradicted by
+`klett-level-tests.tsx:57`, which calls B1+ a *"bridge level before B2"*. Now: a uniform verified
+`8–9 weeks`, the **rate** (20 UE/week) instead of invented per-level totals, and no aggregate — no
+repo source verifies a total A1→C1 duration, and one reads as an outcome promise.
+
+**Added a mandatory format qualifier.** The section named no course format while rendering under
+"Your learning path". 8–9 weeks is intensive-only; evening pace is ~half a level per trimester,
+roughly 4× slower, so an evening prospect was reading it as a promise about their own timeline.
+
+**Klett textbooks per level** now render in the slot the price card vacated — verified titles,
+ISBNs and official product links for Netzwerk neu A1/A2/B1 and Kontext B1+/B2/C1, in
+`src/config/content/klett-textbooks.ts`.
+
+**Cover artwork is deliberately absent and must stay absent until permission is on file.** Klett's
+Impressum expressly reserves rights; their press page grants royalty-free use for the *logo* only,
+editorial only; §51 UrhG Bildzitat does not cover recognition/decorative use and Germany has no
+fair-use doctrine; and CJEU C-161/17 (Renckhoff) found re-hosting a freely available image on a
+**school website** infringing. Self-hosting is the highest-risk option of all. Each entry carries
+`coverPermission: 'none'` — a data-level gate, not a comment — and the UI shows a designed stand-in
+that does not imitate Klett artwork. Unblock via `pr@klett-sprachen.de`; details in
+`COURSE_FACTS_SOURCE_OF_TRUTH.md`.
+
+## CI was red on knip — fixed 2026-08-12
+
+`npm run knip` runs in `.github/workflows/quality.yml` and was exiting 1 on every PR and every
+push to `main`, reporting `src/config/courses/special-course-modules.ts` as an unused file.
+Nothing imports it: it is verified autumn-2026 module data captured ahead of the U6 catalogue UI.
+Deleting it would have thrown away verified course facts, so it is ignored via a new
+`knip.jsonc` (there was no knip config in the repo at all before this).
+
+The ignore carries an explicit removal condition and is cross-referenced from work board U6.
+Verified the gate still works by adding a throwaway unused file and confirming knip returned to
+exit 1, then removing it — an ignore that silently disables the check would be worse than a red
+build.
+
 ## Verified Baseline
 
 The latest implementation pass has already cleared:

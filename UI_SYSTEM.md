@@ -6,7 +6,7 @@ Repo evidence: `src/app/globals.css`, `src/config/brand/*`, `src/components/ui/*
 ## Visual Style Summary
 - Brand-forward, light-first interface with warm neutrals and CASA accent colors.
 - Editorial public pages use shared token foundations across marketing, information, and registration flows.
-- Heavy heading weight (`font-black`) is used for hierarchy; body copy stays neutral and readable.
+- Hierarchy comes from a three-tier weight ladder plus size, not from weight alone; body copy stays neutral and readable.
 - Surfaces favor rounded cards, soft borders, and subtle shadow depth.
 
 ## Token Sources
@@ -27,9 +27,35 @@ Repo evidence: `src/app/globals.css`, `src/config/brand/*`, `src/components/ui/*
 
 ### Typography
 - Primary typeface: Plus Jakarta Sans via `next/font/google` (`--font-sans`).
-- Weights loaded: `400, 500, 600, 700, 800`.
+- Weights loaded: `400, 500, 600, 700, 800` (`src/app/layout.tsx`).
 - Base font size: `16.5px`; desktop (`>=1024px`): `17px`.
 - Global line-height baseline: `1.6`.
+
+#### Weight scale (established 2026-08-12)
+
+**900 does not exist in this typeface.** Plus Jakarta Sans tops out at 800, and only
+400–800 are downloaded, so `font-black` resolves to the 800 face. Measured at 60px,
+weight 900 and weight 800 render an identical `724.27px` advance width. Treat
+`font-black` as "the heaviest available weight", not as a step above `font-extrabold`.
+
+`font-extrabold` is **not** part of the scale — `src/config/brand/usage-rules.ts`
+forbids it. Since it would render the same as `font-black` anyway, the ladder uses
+three classes that produce three genuinely distinct rendered weights:
+
+| Class | Renders | Use for |
+| --- | --- | --- |
+| `font-black` | 800 | page `<h1>`, hero stat numbers |
+| `font-bold` | 700 | section `<h2>`/`<h3>`, card titles, label values, buttons, counters |
+| `font-semibold` | 600 | eyebrows and uppercase micro-labels, badges, inline links |
+| `font-medium` | 500 | inline emphasis in body copy |
+
+Section headings and card titles share 700 deliberately — they are separated by size
+(30–37px vs 16–20px), which is what keeps the page from reading uniformly heavy.
+
+The top tier is meant to stay scarce: **one `font-black` element per page plus its stat
+numbers.** If a page has more than that, the ladder has been flattened again. Before this
+pass, 284 of ~370 weighted elements in shipping code were `font-black`, so every heading,
+eyebrow, stat and card title rendered at the same 800 and nothing read as emphasis.
 
 ### Radius
 - Base radius token: `--radius: 0.625rem`.

@@ -58,25 +58,54 @@ write path on the public site, so a build passing is not sufficient evidence. Fu
 
 ## Ready now — no dependencies
 
-### U1 · Reduce `font-black` usage
-**Owns:** `src/components/**`, `src/app/**` (className strings only)
-**Must not touch:** `src/config/**`, `src/lib/**`, any content module
-**Verify:** `npm run build` + visual diff against `/design-system`
+### ~~U1 · Reduce `font-black` usage~~ ✅ Done 2026-08-12
 
-`font-black` (900) is applied to nearly every heading, eyebrow, stat, and card title. When
-everything is heaviest, nothing reads as emphasis, and it is the main reason this site feels
-heavier and more commercial than the student app. Establish a scale — 900 reserved for page
-H1 and hero stats, 800 for section H2, 700 for card titles, 600 for eyebrows — and apply it.
-Rationale in `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md`. This is a broad, low-risk, highly
-parallelisable sweep. **Do it in one pass so the diff is reviewable as a whole.**
+252 of 284 in-scope occurrences rescaled in one pass. The scale is documented in
+`UI_SYSTEM.md` → "Weight scale"; the rendered ladder is now 800 / 700 / 600 instead of
+one flat 800.
 
-### U1b · Canvas tint and softened elevation ⭐ highest visual impact
-**Owns:** `src/app/globals.css` (surface + shadow tokens), `src/config/brand/tokens.ts`
-**Must not touch:** `src/config/courses/**`, any content module, any component className
-**Verify:** `npm run build`; review on `/design-system` before going wide
-**Sequencing:** must land *before* U1, since both change how weight and depth read
+**The proposed 900/800/700/600 scale was not achievable and was replaced.** Two findings:
 
-Two token-level changes, no component edits:
+1. **Weight 900 does not exist here.** `src/app/layout.tsx` loads only `400–800`, and Plus
+   Jakarta Sans has no 900 face at all. Measured in the browser at 60px, weights 900 and 800
+   produce an identical `724.27px` advance width. So `font-black` was *already* rendering at
+   800 — the "everything is heaviest" problem was literal, and a 900-for-H1 / 800-for-H2 split
+   would have been invisible.
+2. **`font-extrabold` is forbidden** by `src/config/brand/usage-rules.ts`: *"it has no defined
+   role in the CASA type scale."* Since it renders identically to `font-black` anyway, the
+   ladder was shifted down one step to use only sanctioned classes:
+   `font-black` (→800) page H1 + hero stats · `font-bold` (700) section H2/H3, card titles,
+   buttons · `font-semibold` (600) eyebrows, badges, inline links.
+
+Section headings and card titles intentionally share 700 and are separated by size, per
+`docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md`: "let size and colour carry hierarchy".
+
+**Excluded:** `/design-alternatives`, `/landing-page-alt`, `/homepage-reorganized` (85
+occurrences) were left untouched. They are frozen comparison artifacts per
+`docs/EXPERIMENTAL_LANDING_PAGES.md`; restyling them would invalidate the comparison.
+
+**Follow-up owed by whoever owns `src/config/**` (U1 could not touch it):**
+`src/config/brand/usage-rules.ts:138` still says *"font-black for headings and section
+titles"*, which now contradicts the code. It should read: font-black for page H1 and hero
+stats, font-bold for section headings and card titles, font-semibold for eyebrows and CTA
+labels, font-medium for inline body emphasis. Keep the "do not use font-extrabold" clause.
+
+Verified: `lint`, `typecheck`, `test` (48), `build`, `test:e2e` (10) all green; computed
+weights checked in-browser on `/`, `/courses`, `/design-system`.
+
+### ~~U1b · Canvas tint and softened elevation~~ ✅ Already done — board entry was stale
+
+Verified 2026-08-12 while picking up U1. Both halves already shipped in
+`src/app/globals.css`: `--casa-canvas: #f6fafb` with `--casa-surface-subtle` /
+`--casa-surface-wash` (globals.css:115–117), and the softened two-layer elevation ladder in
+warmer ink at globals.css:284–287, plus `--shadow-primary` / `--shadow-accent` at 295–296.
+`--casa-canvas` is consumed by 20 route files and `semanticTokens.surface.page`.
+
+Still genuinely open from this unit: `--casa-surface-subtle` and `--casa-surface-wash` have
+**zero consumers**, and the follow-up pass to remove now-redundant card borders (which the
+canvas tint was supposed to make unnecessary) has not happened.
+
+Original brief, for that follow-up:
 
 1. Move the page canvas off pure white to a faint cool tint (the app uses `#f6fafb`) and add
    `--casa-surface-subtle` / `--casa-surface-wash`. White cards then separate by contrast with
@@ -92,19 +121,47 @@ Two token-level changes, no component edits:
 Full comparison in `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md`, "Elevation and canvas".
 A follow-up pass should remove now-redundant card borders, but do that separately.
 
-### U2 · Apply skill colour tokens to components
-**Owns:** `src/components/signatures/course-level-goals.tsx`, `src/components/sections/*` where
-skills or CEFR levels are labelled
-**Must not touch:** `src/app/globals.css` (tokens already exist), `src/config/courses/**`
-**Verify:** `npm run build`; check contrast with the ratios documented in `globals.css`
+### ~~U2 · Apply skill colour tokens to components~~ ✅ Done 2026-08-12, via U6
 
-`--skill-*` and `--skill-*-text` tokens landed in `globals.css` and `src/config/brand/tokens.ts`
-(`skillTokens`), mirrored from the student app so gold means *speaking* in both products. Nothing
-consumes them yet. Wire them into level and skill labelling. **Never signal a skill by colour
-alone** — always pair with a label or icon. Use `-text` variants for text; the raw values fail AA
-on light surfaces.
+**This unit as scoped had no valid target, and the sequencing was inverted.** It named
+`course-level-goals.tsx` and `sections/*` as the place to apply skill colour. Audited on
+2026-08-12: none of them label a language skill from structured data.
 
-### U3 · Protect internal surfaces
+- `course-level-goals.tsx` — its "what you will practice" list is free-text `narrative.outcomes`
+  strings. Colouring those means inferring skill from prose, i.e. guessing.
+- Exam narratives — free text too ("Reliable reading and listening performance").
+- `level-progression-timeline`, `klett-level-tests`, `onboarding-quiz`, `persona-pathways`, the
+  calculator — these label **CEFR levels**, not skills. That is U10, which this board blocks
+  *behind* U2.
+
+The only `SkillKey`-typed data in the repo is `src/config/courses/special-course-modules.ts`, so
+U6 was always the tokens' first real consumer. Shipped there:
+`skillTokens[module.skill]` drives each card's accent, paired with the category as text, using
+the AA-safe `-text` variants. Four distinct skill colours render on
+`/courses/special-courses`.
+
+**U10 (CEFR level scale) is therefore unblocked** and is now the honest next colour unit — levels
+*are* labelled in five components, unlike skills.
+
+Remaining place skill colour could still go, if wanted: give `course-level-goals.tsx` practices a
+`skill` key in the content layer rather than inferring one. That is a content-model change, not a
+component change.
+
+### ~~U3 · Protect internal surfaces~~ ✅ Already done — board entry was stale
+
+Verified 2026-08-12 while picking up U1. `src/lib/internal-surfaces.ts` exists and all four
+routes have guard layouts calling `notFound()` when `internalSurfacesEnabled()` is false —
+`design-alternatives`, `design-system`, `homepage-reorganized`, `landing-page-alt`. Enabled on
+dev and Vercel previews; override in production with `CASA_ENABLE_INTERNAL_SURFACES=true`.
+`MEMORY.md` records this as fixed in the 2026-08-11 audit pass.
+
+Two things this unit did *not* cover, if anyone wants to finish them:
+- There is no test asserting the guard, so a regression would be silent.
+- The guard is evaluated per-render, not at the edge; it 404s but the route still executes the
+  layout. That is fine for review surfaces, not for anything sensitive.
+
+The stale original entry follows.
+
 **Owns:** `src/lib/internal-surfaces.ts`, `src/app/design-alternatives/**`,
 `src/app/design-system/**`, `src/app/homepage-reorganized/**`, `src/app/landing-page-alt/**`
 **Must not touch:** any public route
@@ -121,8 +178,8 @@ control. Known open item in `CLAUDE.md`; there is already a `src/lib/internal-su
 
 The hero and "Why CASA" block are purely transactional; the gGmbH identity appears only on one
 page and in the footer. Part A7 of `docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md` has a proposed
-hero proof line. **Confirm the 1983 founding year with staff before using it** — it is in the
-unverified list.
+hero proof line. The 1983 founding year is **confirmed by staff (2026-08-12)** and cleared for
+public use, so the proof line can use it.
 
 ---
 
@@ -172,22 +229,43 @@ Reuse the pattern in `src/components/calculator/casa-cost-pathway-calculator.tsx
 inventing a second calculator. Open decisions are listed in
 `docs/GROUP_PRICING_AND_SPECIAL_COURSES.md`.
 
-### U6 · `module-catalogue` archetype content
-**Owns:** `src/config/courses/course-profiles.ts` (special-courses entry only), a new module list
-**Must not touch:** `src/config/courses/archetypes.ts`, other course slugs
-**Blocked by:** the current term's dates (autumn 2026 is captured; it will be stale at launch)
-**Verify:** `npm run test`
+### ~~U6 · `module-catalogue` archetype content~~ ✅ Done 2026-08-12
 
-**The module data already exists** — all eight modules are captured in
-`src/config/courses/special-course-modules.ts` with level, weekday, time, dates, price, and a
-`skill` key wired to the shared skill tokens. What remains is the presentation.
+Built as `src/components/courses/special-course-catalogue.tsx`, rendered on
+`/courses/special-courses`. All five points from `GROUP_PRICING_AND_SPECIAL_COURSES.md` Part 2
+are implemented except one (see below):
 
-The current live page is a flat list of eight visually identical items, so the two questions a
-reader actually has — "which one is for me?" and "does it fit my week?" — are unanswerable at a
-glance. Build the catalogue around **level and weekday as the primary filters**, show the week as
-a grid (Mon–Thu), colour-code by skill, and state the constants (€192, one 90-minute evening,
-12 weeks) once at the top instead of eight times. Full critique and layout direction in
-`docs/GROUP_PRICING_AND_SPECIAL_COURSES.md`, Part 2.
+- Level and weekday are the two filters, as chips with `aria-pressed` and a live result count.
+- The week renders as a grid; days with no match after filtering drop out entirely.
+- Skill colour comes from the shared `skillTokens`, so writing reads teal here and in the student
+  app. **Colour never signals alone** — every card pairs its accent with the category as text, and
+  label colours use the AA-safe `-text` variants.
+- The constants (€192, one 90-minute evening, 12 weeks) are stated once at the top.
+
+**This also completed U2**, which had no valid target of its own: nothing else in shipping code
+labels a language skill from structured data, so `special-course-modules.ts` was always the
+skill tokens' first real consumer. See the U2 entry.
+
+**The knip ignore is gone.** `knip.jsonc` now has an empty `ignore` array and `npm run knip`
+exits 0 — proof the data file is genuinely imported rather than suppressed.
+
+**One deviation from the brief, deliberate.** Point 5, "say who each module is for in one line",
+is *not* implemented. The modules carry no audience field and writing eight of them would be
+inventing claims about who a course suits. Level + category + title already answer most of it.
+Add an `audience` field to `special-course-modules.ts` once staff supply the copy.
+
+**Scope note — `archetypes.ts` was touched, against this unit's own rule.** The `module-catalogue`
+archetype had no section key capable of rendering a module catalogue, so the page could not exist
+without it. The change is additive and confined to that one archetype: a new `'module-catalogue'`
+`CourseSectionKey`, and that key inserted into the `module-catalogue` archetype's `sections`. No
+other archetype's shape changed. Three tests now guard it, including one asserting no other
+archetype renders the section.
+
+**Still blocked for launch:** the autumn 2026 dates. `SPECIAL_COURSE_TERM_LABEL` is rendered in
+the footnote so the term is visible rather than implied.
+
+Verified: `lint`, `typecheck`, `test` (51), `build`, `knip`, `test:e2e` (10) all green; filters,
+empty state, reset, skill-token colours and 375px layout all checked in-browser.
 
 ### U7 · Verify the unverified claims list
 **Owns:** `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` only
@@ -196,8 +274,10 @@ a grid (Mon–Thu), colour-code by skill, and state the constants (€192, one 9
 
 Work through the "Not verified" table: the medical fee and hours, whether `university-prep`,
 `business-german`, `summer-intensive`, `integration-german` and `exam-preparation` are real
-current products, TestDaF's status, the 1983 founding year, and the draft `40+ staff` claim.
+current products, TestDaF's status, and the draft `40+ staff` claim.
 Update only the doc; other units consume it.
+
+~~the 1983 founding year~~ — **confirmed by staff 2026-08-12**, no longer blocking.
 
 ---
 

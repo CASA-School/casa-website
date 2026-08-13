@@ -81,12 +81,73 @@ correct in the repo, and the review has been amended:
 - Bildungszeit falls under the *Bremisches Bildungszeitgesetz*: ten days over two years for
   employees in Bremen. Students may join on Mondays.
 
+### Textbooks per level — verified 2026-08-12 against klett-sprachen.de
+
+CASA teaches from two Ernst Klett Sprachen series. Titles, ISBNs and product URLs were read
+directly out of the product-page markup and independently re-verified (HTTP 200, no redirect,
+ISBN present in the page body; a control test confirmed the CDN 404s on fabricated ISBNs).
+
+| Level | Book | ISBN-13 |
+| --- | --- | --- |
+| A1 | Netzwerk neu A1 – Kursbuch mit Audios und Videos | 978-3-12-607156-7 |
+| A2 | Netzwerk neu A2 – Kursbuch mit Audios und Videos | 978-3-12-607164-2 |
+| B1 | Netzwerk neu B1 – Kursbuch mit Audios und Videos | 978-3-12-607172-7 |
+| B1+ | Kontext B1+ – Kursbuch mit Audios und Videos | 978-3-12-605334-1 |
+| B2 | Kontext B2 – Kursbuch mit Audios und Videos | 978-3-12-605342-6 |
+| C1 | Kontext C1 – Hybride Ausgabe allango | 978-3-12-605349-5 |
+
+Data lives in `src/config/content/klett-textbooks.ts`.
+
+**ASSUMPTION — the level→series split is not from casa-bremen.de.** Netzwerk neu up to B1 and
+Kontext from B1+ traces to `src/config/calculator/pricing.ts:95-99` (citing "Flyer Intensivkurse
+NEU 24.25") and is consistent with the placement tests CASA links to. Confirm with staff.
+
+**OPEN QUESTION — complete-level volumes vs half-level editions.** The ISBNs above are the
+**complete** volumes (e.g. "Netzwerk neu A1"). Klett also publishes **half-level** editions
+("Netzwerk neu A1.1", "A1.2"), and `CASA_LEVEL_SEQUENCE` is built from half-levels
+(A1.1, A1.2, A2.1 …), which suggests CASA may actually issue the split editions. Ask the office
+which they hand out; if it is the split editions, every ISBN in this table changes.
+
+**B1+ duration — confirmed by Rahman (project owner) 2026-08-13, not published on
+casa-bremen.de.** About 2 months (8–9 weeks), the same order as a full level, despite billing at
+the half-level rate — CASA apparently runs it as two internal parts (B1+.1 / B1+.2), which is
+intentionally not modelled as separate tabs here. Tracked in
+`level-progression-timeline.tsx` as `WEEKS_FOR_BRIDGE_STAFF_CONFIRMED`, kept as a distinct
+constant from the site-verified `WEEKS_PER_LEVEL` so the two provenances never blur — this
+number did not come from the same rejection of `cost-calculator.ts`'s derived-from-a-price-tier
+4 weeks (see the code comment there for why that number was wrong on its own terms).
+
+**Cover artwork is NOT licensed and must not be published.** See the block comment in
+`klett-textbooks.ts`: Klett's Impressum expressly reserves rights, their press page grants
+royalty-free use for the *logo* only and only for editorial purposes, and CJEU C-161/17
+(Renckhoff) held that re-hosting a freely available image — on a school website — is a new
+communication to the public requiring authorisation. Each entry carries
+`coverPermission: 'none'`; the UI renders a designed stand-in and never fetches Klett artwork.
+To unblock, request written permission from `pr@klett-sprachen.de` (cc
+`abdruckanfrage@klett-sprachen.de`) for the exact ISBNs above, and ask Klett to confirm the
+grant covers the cover *photography* — their own reprint page warns it may belong to third
+parties. Then set `coverSrc` + `coverPermission: 'granted'` and add a "not affiliated with /
+endorsed by Ernst Klett Sprachen GmbH" note.
+
 ### Ancillary costs
 
 | Item | Amount | Source |
 | --- | --- | --- |
-| Enrolment fee, first-time students | €50 | educational-leave page |
-| Textbooks | €46–54 | educational-leave page |
+| Enrolment fee, first-time students | €50 | intensive-german-courses / educational-leave pages |
+| Textbooks, single intensive course | €23.99–26.99 | intensive-german-courses page |
+| Textbooks, Bildungszeit (two parallel courses) | €46–54 | educational-leave page |
+| Each additional intensive week | €117.50 | intensive-german-courses page |
+
+**Resolved 2026-08-13.** Both figures are real and consistent, not competing claims:
+`casa-bremen.de/en/language-courses/intensive-german-courses` states *"books
+23,99€-26,99€\* \*varies according to level"*; `.../educational-leave` states *"books 46€ -
+54€\* \*costs for two books"* — its own footnote says two books, because Bildungszeit runs two
+intensive courses in parallel. 2×23.99=47.98 and 2×26.99=53.98 land inside the quoted €46–54
+range, confirming the same underlying per-book price. `BOOK_PRICE_LOWER`/`UPPER` in
+`src/config/calculator/pricing.ts` are corrected to 23.99/26.99 to match.
+
+Also confirmed real (was previously flagged here as unverified in error): **"each additional
+week EUR 117.50"** on `/courses` is directly quoted from the intensive-courses page.
 
 ---
 
@@ -94,11 +155,11 @@ correct in the repo, and the review has been amended:
 
 | Claim | In repo | Status |
 | --- | --- | --- |
-| German for Medical: 4 UE/week, €400 | `public-fixtures.ts` | No published figure. Needs staff confirmation. |
+| German for Medical: 4 UE/week, €400 | `public-fixtures.ts` | Checked 2026-08-13 against `casa-bremen.de/en/language-courses/german-for-medical-professionals/` and the German course page `/sprachkurse/deutsch-fuer-mediziner`. **Fee and hours genuinely not published anywhere on the site** — confirmed by direct fetch, not just absence from search results. Only the CEFR entry (B2/C1) and FSP framing are public. A dated news post ("26.06.–28.08.2026") surfaced in search but would not render its article body on direct fetch and no longer appears in the live `/aktuelles` list — **inconclusive, do not treat as confirming the dates already in `course-profiles.ts`.** Still needs staff confirmation for fee, hours, and dates. |
 | Firmenunterricht: €1,200 | `public-fixtures.ts` | Quote-based. Publishing a number is a commitment CASA has not made. |
 | TestDaF as an administered exam, €215 | `public-fixtures.ts` | Appears only as a footer logo on the live site. No dates, no fees. Likely preparation-only or an affiliation. |
 | `university-prep`, `business-german`, `summer-intensive`, `integration-german`, `exam-preparation` | full fixture rows with prices | Not in the live course menu. Either unlaunched, retired, or invented. Confirm before any of them ship. |
-| Founded 1983 | `heroes.ts`, `about/page.tsx` | Not verifiable from public pages. |
+| ~~Founded 1983~~ | — | ✅ **Verified 2026-08-12** by CASA staff. Cleared for public use; already live on `/`, `/about`, `/accommodation/become-host`. |
 | 40+ staff/teachers | draft claim in `CLAUDE.md` | Explicitly draft. Must not ship. |
 | Visa eligibility Yes/No per course | inferred in `repository.ts:576` | **Inferred from `lessons_per_week >= 15`, not verified.** See below. |
 
