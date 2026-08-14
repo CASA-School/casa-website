@@ -24,25 +24,23 @@ it owns, the files it must not touch, its verification command, and what blocks 
 
 ## ⚠️ Do this first — blocks the accuracy of everything else
 
-### U0 · Baseline and apply migration 0002
-**Owns:** running the db scripts
-**Must not touch:** any source file
-**Blocked by:** confirming which database `DATABASE_URL` points at
+### ~~U0 · Baseline and apply migration 0002~~ ✅ Done 2026-08-13
 
-`db/migrations/0002_course_pricing_mode_and_visa.sql` is written but **not applied**. Until it
-runs, the site renders the old, wrong course prices in Neon-backed mode, `pricing_mode` is
-missing so quote-only products can render a list price, and the group course may still sit under
-the retired `conversation-lab` slug.
+Applied against the live Neon database (`DATABASE_URL` → project `casa` on
+`ep-plain-dew-age7idft`, confirmed by the user). `schema_migrations` now contains both
+`0001_public_site_schema` and `0002_course_pricing_mode_and_visa`.
 
-The runner is now tracked and transactional (`scripts/db/migrate.mjs`). The existing database
-already has `0001` applied from before tracking existed, so baseline first:
+**`db:baseline` reported "nothing to baseline" and `db:migrate` ran 0001 fresh** — that was
+verified safe *before* running, not after: every `CREATE TABLE`/`CREATE TYPE` in 0001 is
+`IF NOT EXISTS` or exception-guarded, so re-running it against the already-live schema was a
+no-op. 0002's `UPDATE`s are slug-scoped and only two seeded rows exist, so only
+`intensive-german` changed (→ `default_price` 520.00, `pricing_mode` 'from',
+`visa_eligible` true). `evening-german` keeps `visa_eligible: null`, which the UI surfaces as
+"please ask" rather than a guessed Yes/No.
 
-```bash
-npm run db:baseline && npm run db:migrate:status && npm run db:migrate
-```
-
-Verify against a rendered page afterwards, not just tests — the unit suite imports fixtures
-directly and therefore only covers fallback mode.
+Verified after with a real build and e2e run with `DATABASE_URL` set — the
+`column "pricing_mode" does not exist` error that had been silently falling back to fixtures is
+gone. That error was only *visible* because of the DB-logging work committed in `a422201`.
 
 ### U0b · Port the database driver for Azure
 **Owns:** `src/lib/db/server.ts`, `src/app/api/careers/apply/route.ts`, `scripts/db/*.mjs`
@@ -293,29 +291,37 @@ There are currently two disagreeing sources of truth for course facts. `buildSel
 week rate and enrolment/textbook costs) while `public-fixtures.ts` drives the detail page. Move
 the former into per-course profiles so both pages read one source.
 
-### U9 · Group and company inquiry fields
-**Owns:** `src/app/contact/page.tsx`, `src/components/forms/contact-inquiry-form.tsx`,
-`src/lib/validation/**`
-**Blocked by:** nothing technically, but confirm the field list with the group coordinator
-**Verify:** `npm run test && npm run build`
+### ~~U9 · Group and company inquiry fields~~ ✅ Done 2026-08-13 (commit `77c1ff7`)
 
-The `group-booking` and `company-courses` contact topics exist and the course pages now route to
-them, but the form is generic. A group organiser should be asked for group size, age band, dates,
-weekly hours, focus, meals, accommodation, transport, and invoicing party — the same information
-currently collected by email. Follow the optional-webhook pattern in `src/lib/db/env.ts` if a
-`GROUP_INQUIRY_WEBHOOK_URL` is added; keep it optional so fallback mode still works.
+The organiser brief (group size, age band, dates, weekly hours, focus, meals, accommodation,
+transport, invoicing party) now appears on `/contact` only when the topic is `group-booking` or
+`company-courses`, validated in `contactInquirySchema`. **Every new field is optional** so a
+partial enquiry ("about 15 people in July") still submits rather than being blocked.
+`GROUP_INQUIRY_WEBHOOK_URL` was added following the optional pattern in `src/lib/db/env.ts`,
+falling back to `CONTACT_WEBHOOK_URL` then preview logging, so fallback mode is unchanged.
 
-### U10 · CEFR level colour scale
-**Owns:** `src/app/globals.css`, `src/config/brand/tokens.ts`
-**Blocked by:** U2 (so skill and level systems are designed together)
-**Verify:** `npm run build` + documented contrast ratios
+**Still worth doing:** the field list was designed from
+`docs/GROUP_PRICING_AND_SPECIAL_COURSES.md`, *not* confirmed with the group coordinator — that
+part of this unit's blocker is still open. Also, an adversarial review flagged that
+`src/app/api/contact/route.ts` has no test covering the `organiserBrief` derivation or the
+webhook fallthrough.
 
-Skills now have shared semantics with the app. CEFR levels do not, and the app does not define
-them either — so this needs an actual design decision rather than a copy. A sequential
-progression (A1 lightest → C1 deepest) derived from the brand blue is the obvious candidate.
-**Derive AA-safe text variants the same way the skill tokens were** — darken against
-`--casa-sand` (#e2e8f0) until 4.5:1. That method reproduced two existing tokens exactly, so it
-is the house method.
+### ~~U10 · CEFR level colour scale~~ ✅ Done 2026-08-13 (commit `8727a78`)
+
+Levels are *ordered*, so they got one sequential ramp rather than the skill tokens' distinct
+hues: `--level-a1` `#daeafa` → `--level-c1` `#005c90`, derived by holding `--casa-blue`'s Lab hue
+constant and stepping lightness down. TS surface is `levelTokens` + `levelKeyFromLabel()` in
+`src/config/brand/tokens.ts` (the latter resolves a range like "A2/B1" to its lower bound, which
+is the entry requirement a reader checks themselves against).
+
+Every ratio measured, not eyeballed: `-on-light` clears 4.5:1 on `--casa-sand` (4.51–5.81),
+`-on-dark` on `--casa-ink-panel` (4.53–12.54). **B2 was deepened from L\*50 to L\*47** because
+L\*50 sat in a dead zone where neither white (4.42) nor ink (4.04) cleared AA on a filled chip —
+so `-ink` is stored per step rather than assumed, since the ramp crosses over between B1+ and B2.
+
+Applied to the `/placement-test` timeline tabs, level badge and progress bar, and to the six
+Klett placement-test chips below them that were previously all identical blue. Colour never
+signals alone — every use pairs with the level label.
 
 ---
 
