@@ -101,7 +101,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
       <section className="py-16 md:py-20">
         <Container>
-          <Link href="/news" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-[var(--casa-accent-text)]">
+          <Link href="/news" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)]">
             <ArrowLeft className="h-4 w-4" />
             Back to all news
           </Link>
@@ -126,7 +126,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             <aside className="space-y-5">
               <div className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-[var(--casa-warm-soft)]/45 p-6">
                 <h2 className="text-xl font-bold">Plan your next step</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">
                   Ready to turn this insight into progress? We can recommend the best course and timeline for you.
                 </p>
                 <div className="mt-5 space-y-3">
@@ -146,13 +146,13 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               </div>
 
               <div className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-white p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Related articles</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">Related articles</h3>
                 <ul className="mt-4 space-y-4">
                   {related.map((item) => (
                     <li key={item.slug}>
                       <Link href={`/news/${item.slug}`} className="block rounded-xl border border-[color:var(--casa-sand)]/30 p-4 transition-colors hover:border-[color:var(--casa-sand)]/70">
                         <p className="text-sm font-bold text-[var(--casa-ink)]">{item.title}</p>
-                        <p className="mt-1 text-xs text-slate-500">{formatNewsDate(item.publishedAt, locale)}</p>
+                        <p className="mt-1 text-xs text-[var(--casa-muted)]">{formatNewsDate(item.publishedAt, locale)}</p>
                       </Link>
                     </li>
                   ))}

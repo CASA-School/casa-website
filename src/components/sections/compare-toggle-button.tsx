@@ -77,7 +77,7 @@ export function CompareToggleButton({ type, locale, item }: CompareToggleButtonP
         selected
           ? 'border-[var(--casa-blue)]/45 bg-[var(--casa-blue)]/12 text-[var(--casa-accent-text)]'
           : limitReached
-            ? 'cursor-not-allowed border-[color:var(--casa-sand)] bg-slate-100 text-[var(--casa-text-subtle)]'
+            ? 'cursor-not-allowed border-[color:var(--casa-sand)] bg-[var(--casa-surface-subtle)] text-[var(--casa-text-subtle)]'
             : 'border-[color:var(--casa-sand)] text-[var(--casa-muted)] hover:bg-[var(--casa-warm-soft)]'
       )}
       aria-pressed={selected}

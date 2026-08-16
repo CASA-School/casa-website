@@ -71,7 +71,10 @@ eyebrow, stat and card title rendered at the same 800 and nothing read as emphas
 ## Layout and Motion Conventions
 - Shared container: `max-w-[1440px] px-6 lg:px-8`.
 - Public section rhythm commonly uses `py-14`, `py-16`, `py-20`.
-- Page section entrance animation: `casa-soft-rise` (`560ms`, cubic-bezier `(0.2, 0.78, 0.2, 1)`).
+- Page section entrance animation: **`casa-reveal-init` + `is-visible`** (`420ms`, cubic-bezier
+  `(0.2, 0.78, 0.2, 1)`), applied by `src/components/ui/scroll-effects.tsx` via
+  `IntersectionObserver`. *(Corrected 2026-08-16: this doc previously named `casa-soft-rise` at
+  560ms. That class has no definition in `globals.css` and no consumers — it never shipped.)*
 - Reduced motion support remains global through `prefers-reduced-motion: reduce`.
 
 ## Component Conventions

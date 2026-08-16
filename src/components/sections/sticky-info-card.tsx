@@ -38,7 +38,7 @@ export function StickyInfoCard({ title, items, notes, ctas = [], className }: St
       <dl className="mt-5 divide-y divide-[color:var(--casa-sand)]">
         {items.map((item) => (
           <div key={item.label} className="py-2.5">
-            <dt className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--casa-muted)]">{item.label}</dt>
+            <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{item.label}</dt>
             <dd className="mt-1 text-base font-semibold text-[var(--casa-ink)]">
               {item.selector && item.selector.options.length > 0 ? (
                 <InfoRailSelect

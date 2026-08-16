@@ -18,18 +18,18 @@ export function HeroD({ spec, showDraftClaims = false, className, dataTestId }: 
         <div className="space-y-4">
           <div className="relative">
             <HeroMediaCard spec={spec} compact className="min-h-[300px]" />
-            <div className="absolute -bottom-3 left-5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-[var(--shadow-soft)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            <div className="absolute -bottom-3 left-5 rounded-xl border border-[color:var(--casa-sand)]/80 bg-white px-3 py-2 shadow-[var(--shadow-soft)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                 {isDe ? 'Wohnen in Bremen' : 'Bremen housing'}
               </p>
             </div>
           </div>
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[var(--shadow-soft)]">
-            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+          <div className="rounded-xl border border-[color:var(--casa-sand)]/80 bg-white p-4 shadow-[var(--shadow-soft)]">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
               <ShieldCheck className="h-3.5 w-3.5" />
               {isDe ? 'Vertrauenssignal' : 'Trust signal'}
             </p>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-[var(--casa-muted)]">
               {isDe
                 ? 'Wohnqualität, Ansprechpartner und Onboarding-Standards werden vor jeder Vermittlung geprüft.'
                 : 'Living quality, support contact, and onboarding standards are reviewed before placement.'}
@@ -38,13 +38,13 @@ export function HeroD({ spec, showDraftClaims = false, className, dataTestId }: 
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
-          <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-[2.85rem]">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+          <h1 className="text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-5xl">
             {spec.headline}
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-slate-600">{spec.subheadline}</p>
+          <p className="mt-4 text-lg leading-relaxed text-[var(--casa-muted)]">{spec.subheadline}</p>
 
-          <ul className="mt-6 space-y-2.5 text-sm text-slate-700">
+          <ul className="mt-6 space-y-2.5 text-sm text-[var(--casa-ink)]">
             {points.map((point) => (
               <li key={point} className="flex items-start gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--casa-amber)]" />

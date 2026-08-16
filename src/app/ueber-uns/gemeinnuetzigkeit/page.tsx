@@ -248,10 +248,10 @@ export default async function NonProfitStatusPage() {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Öffentlicher Auftrag' : 'Public-benefit purpose'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {copy.introTitle}
               </h2>
               <p className="mt-5 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
@@ -275,14 +275,14 @@ export default async function NonProfitStatusPage() {
         </Container>
       </section>
 
-      <section className="border-b border-[color:var(--casa-sand)]/40 bg-slate-50/45 py-16 md:py-20">
+      <section className="border-b border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/45 py-16 md:py-20">
         <Container>
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Mittelverwendung' : 'Use of funds'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {copy.fundingTitle}
               </h2>
               <p className="mt-5 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
@@ -303,7 +303,7 @@ export default async function NonProfitStatusPage() {
               <dl className="mt-6 divide-y divide-[color:var(--casa-sand)]/60">
                 {copy.legalRows.map(([label, value]) => (
                   <div key={label} className="grid gap-1 py-4 sm:grid-cols-[0.36fr_0.64fr] sm:gap-4">
-                    <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-muted)]">{label}</dt>
+                    <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{label}</dt>
                     <dd className="text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">{value}</dd>
                   </div>
                 ))}
@@ -317,10 +317,10 @@ export default async function NonProfitStatusPage() {
         <Container>
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Wirkung' : 'Impact'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {copy.impactTitle}
               </h2>
             </div>
@@ -335,14 +335,14 @@ export default async function NonProfitStatusPage() {
         </Container>
       </section>
 
-      <section id="integrationsprojekte" className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 bg-slate-50/45 py-16 md:py-20">
+      <section id="integrationsprojekte" className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/45 py-16 md:py-20">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Wirkung im Alltag' : 'Everyday impact'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {copy.projectTitle}
               </h2>
               <p className="mt-5 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
@@ -361,7 +361,7 @@ export default async function NonProfitStatusPage() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <Icon className="h-6 w-6 text-[var(--casa-accent-text)]" aria-hidden />
-                      <span className="rounded-full bg-[var(--casa-warm-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--casa-ink)]">
+                      <span className="rounded-full bg-[var(--casa-warm-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
                         {project.label}
                       </span>
                     </div>
@@ -379,10 +379,10 @@ export default async function NonProfitStatusPage() {
         <Container>
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-sun)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
                 {locale === 'de' ? 'Nächster Schritt' : 'Next step'}
               </p>
-              <h2 className="mt-2 text-3xl font-bold leading-tight">{copy.ctaTitle}</h2>
+              <h2 className="mt-2 text-3xl font-bold">{copy.ctaTitle}</h2>
               <p className="mt-3 text-base leading-relaxed text-white/72">{copy.ctaText}</p>
             </div>
             <div className="flex flex-wrap gap-3">

@@ -37,6 +37,21 @@ const buttonVariants = cva(
         "icon-lg": "size-10",
       },
     },
+    /*
+     * The four `marketing-*` variants are designed at 48px. Their own `h-12`
+     * cannot deliver that: cva emits `variant` classes before `size` classes,
+     * so tailwind-merge resolved the conflict in favour of the size default
+     * `h-9` and they rendered at 38px — 10px short and under the 44px touch
+     * minimum. compoundVariants are emitted AFTER both, so the height wins here.
+     * Passing an explicit size still overrides it, which is the intended escape
+     * hatch. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §1.3.
+     */
+    compoundVariants: [
+      { variant: "marketing-sun", size: "default", className: "h-12" },
+      { variant: "marketing-dark", size: "default", className: "h-12" },
+      { variant: "marketing-outline", size: "default", className: "h-12" },
+      { variant: "marketing-light", size: "default", className: "h-12" },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",

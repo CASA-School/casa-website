@@ -51,7 +51,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button aria-label="Open navigation menu" variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-slate-200 lg:hidden">
+        <Button aria-label="Open navigation menu" variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] lg:hidden">
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
@@ -65,7 +65,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
             : 'Browse CASA sections, switch language, or jump directly to registration and admissions.'}
         </SheetDescription>
         <div className="flex h-full flex-col bg-white">
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 p-6 backdrop-blur">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[color:var(--casa-sand)]/70 bg-white/95 p-6 backdrop-blur">
             <Link href="/" aria-label="Go to CASA homepage" className="flex items-center">
               <Logo className="h-8 w-auto" />
             </Link>
@@ -78,7 +78,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                   aria-expanded={isLocaleMenuOpen}
                   aria-controls="mobile-locale-menu"
                   aria-label={`Select content language, current ${contentLocale === 'de' ? 'Deutsch' : 'English'}`}
-                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-slate-200 px-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600 transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-[color:var(--casa-sand)] px-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
                   onClick={() => setIsLocaleMenuOpen((isOpen) => !isOpen)}
                   onKeyDown={(event) => {
                     if (event.key === 'Escape') {
@@ -93,7 +93,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                   <div
                     id="mobile-locale-menu"
                     role="menu"
-                    className="absolute right-0 top-full z-20 mt-2 min-w-[130px] rounded-xl border border-slate-200 bg-white p-2 shadow-[var(--shadow-modal)]"
+                    className="absolute right-0 top-full z-20 mt-2 min-w-[130px] rounded-xl border border-[color:var(--casa-sand)] bg-white p-2 shadow-[var(--shadow-modal)]"
                   >
                     <button
                       type="button"
@@ -101,8 +101,8 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                       aria-checked={contentLocale === 'en'}
                       data-testid="mobile-locale-option-en"
                       className={cn(
-                        'flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-800',
-                        contentLocale === 'en' ? 'bg-slate-100' : 'hover:bg-slate-50'
+                        'flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-[var(--casa-ink)]',
+                        contentLocale === 'en' ? 'bg-[var(--casa-surface-subtle)]' : 'hover:bg-[var(--casa-canvas)]'
                       )}
                       onClick={() => switchContentLocale('en')}
                     >
@@ -115,8 +115,8 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                       aria-checked={contentLocale === 'de'}
                       data-testid="mobile-locale-option-de"
                       className={cn(
-                        'mt-1 flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-800',
-                        contentLocale === 'de' ? 'bg-slate-100' : 'hover:bg-slate-50'
+                        'mt-1 flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-[var(--casa-ink)]',
+                        contentLocale === 'de' ? 'bg-[var(--casa-surface-subtle)]' : 'hover:bg-[var(--casa-canvas)]'
                       )}
                       onClick={() => switchContentLocale('de')}
                     >
@@ -130,7 +130,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                 <button
                   type="button"
                   aria-label={contentLocale === 'de' ? 'Navigation schließen' : 'Close navigation menu'}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -145,8 +145,8 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                 if (isDropdown) {
                   const dropdown = item as NavDropdown;
                   return (
-                    <AccordionItem key={index} value={`item-${index}`} className="border-b border-slate-50">
-                      <AccordionTrigger className="py-4 text-lg font-bold text-slate-900 hover:no-underline">
+                    <AccordionItem key={index} value={`item-${index}`} className="border-b border-[color:var(--casa-sand)]/40">
+                      <AccordionTrigger className="py-4 text-lg font-bold text-[var(--casa-ink)] hover:no-underline">
                         {localizeNavText(dropdown.trigger, contentLocale)}
                       </AccordionTrigger>
                       <AccordionContent>
@@ -154,7 +154,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                           {dropdown.sections.map((section, sectionIndex) => (
                             <div key={sectionIndex}>
                               {section.title ? (
-                                <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--casa-text-subtle)]">
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                                   {localizeNavText(section.title, contentLocale)}
                                 </p>
                               ) : null}
@@ -178,9 +178,9 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
 
                 const linkItem = item as NavItem;
                 return (
-                  <div key={index} className="border-b border-slate-50 py-4">
+                  <div key={index} className="border-b border-[color:var(--casa-sand)]/40 py-4">
                     <SheetClose asChild>
-                      <Link href={linkItem.href} className="block text-lg font-bold text-slate-900 hover:text-[var(--casa-accent-text)]">
+                      <Link href={linkItem.href} className="block text-lg font-bold text-[var(--casa-ink)] hover:text-[var(--casa-accent-text)]">
                         {localizeNavText(linkItem.label, contentLocale)}
                       </Link>
                     </SheetClose>
@@ -190,7 +190,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
             </Accordion>
           </div>
 
-          <div className="border-t border-slate-100 bg-slate-50/50 p-6">
+          <div className="border-t border-[color:var(--casa-sand)]/70 bg-[var(--casa-canvas)]/50 p-6">
             <div className="grid gap-3">
               {!isRegistrationPage && (
                 <Button asChild className="h-11 w-full rounded-xl bg-[var(--casa-accent-surface)] font-bold text-white">
@@ -199,7 +199,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                   </SheetClose>
                 </Button>
               )}
-              <Button asChild variant="outline" className="h-11 w-full rounded-xl casa-button-outline border-slate-200 font-bold">
+              <Button asChild variant="outline" className="h-11 w-full rounded-xl casa-button-outline border-[color:var(--casa-sand)] font-bold">
                 <SheetClose asChild>
                   <Link href="/contact">{contentLocale === 'de' ? 'Beratung anfragen' : 'Talk to Admissions'}</Link>
                 </SheetClose>
@@ -224,7 +224,7 @@ function MobileLink({ item, locale, isActive }: { item: NavItem; locale: Content
         {Icon ? (
           <div
             className={cn(
-              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-all',
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-surface-subtle)] text-[var(--casa-muted)] transition-all',
               isActive
                 ? 'bg-[var(--casa-accent-surface)] text-white'
                 : 'group-hover:bg-[var(--casa-accent-surface)] group-hover:text-white'
@@ -236,14 +236,14 @@ function MobileLink({ item, locale, isActive }: { item: NavItem; locale: Content
         <div>
           <div
             className={cn(
-              'text-[15px] font-bold transition-colors',
-              isActive ? 'text-[var(--casa-accent-text)]' : 'text-slate-900 group-hover:text-[var(--casa-accent-text)]'
+              'text-sm font-bold transition-colors',
+              isActive ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]'
             )}
           >
             {localizeNavText(item.label, locale)}
           </div>
           {item.description ? (
-            <div className="mt-0.5 text-xs text-slate-500">{localizeNavText(item.description, locale)}</div>
+            <div className="mt-0.5 text-xs text-[var(--casa-muted)]">{localizeNavText(item.description, locale)}</div>
           ) : null}
         </div>
       </Link>

@@ -27,22 +27,22 @@ export function ComparisonModule({
 }: ComparisonModuleProps) {
   return (
     <section data-reveal="true" className={cn('rounded-3xl bg-white px-6 py-8 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:px-9 md:py-10', className)}>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-      <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 
       <div className="mt-8 overflow-x-auto">
         <table className="w-full min-w-full border-collapse text-left text-base md:min-w-[520px]">
           <thead>
             <tr>
-              <th className="border-b border-[color:var(--casa-sand)] px-2 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+              <th className="border-b border-[color:var(--casa-sand)] px-2 py-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                 Focus
               </th>
-              <th className="border-b border-[color:var(--casa-sand)] px-2 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+              <th className="border-b border-[color:var(--casa-sand)] px-2 py-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                 {leftTitle}
               </th>
-              <th className="border-b border-[color:var(--casa-sand)] px-2 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+              <th className="border-b border-[color:var(--casa-sand)] px-2 py-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                 {rightTitle}
               </th>
             </tr>

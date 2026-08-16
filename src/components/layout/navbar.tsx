@@ -279,7 +279,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
       className={cn(
         'sticky top-0 z-[900] h-20 border-b transition-[background-color,border-color,box-shadow] duration-200',
         scrolled || activeDropdown
-          ? 'border-slate-200/80 bg-white/90 shadow-[var(--shadow-soft)] backdrop-blur supports-[backdrop-filter]:bg-white/80'
+          ? 'border-[color:var(--casa-sand)]/80 bg-white/90 shadow-[var(--shadow-soft)] backdrop-blur supports-[backdrop-filter]:bg-white/80'
           : 'border-transparent bg-white/65 backdrop-blur supports-[backdrop-filter]:bg-white/55'
       )}
     >
@@ -321,12 +321,12 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                       aria-current={isDropdownActive ? 'page' : undefined}
                       data-testid={`nav-trigger-${navId(dropdown.trigger)}`}
                       className={cn(
-                        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full lg:px-2.5 xl:px-4 py-2 text-[15px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
+                        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full lg:px-2.5 xl:px-4 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
                         isOpen
-                          ? 'bg-slate-100 text-slate-900'
+                          ? 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
                           : isDropdownActive
-                            ? 'bg-slate-100 text-slate-900'
-                            : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            ? 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
+                            : 'text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)] hover:text-[var(--casa-ink)]'
                       )}
                       onClick={() => {
                         if (isOpen) {
@@ -370,7 +370,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                       data-testid={`nav-panel-${navId(dropdown.trigger)}`}
                       data-panel-trigger={navId(dropdown.trigger)}
                       className={cn(
-                        'absolute top-[calc(100%+10px)] z-50 rounded-3xl border border-slate-200 bg-white shadow-[var(--shadow-hero)] shadow-slate-900/10 transition-[opacity,transform] duration-200 will-change-transform',
+                        'absolute top-[calc(100%+10px)] z-50 rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-hero)] transition-[opacity,transform] duration-200 will-change-transform',
                         panelWidthClass,
                         'left-0',
                         isOpen
@@ -393,7 +393,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                 {dropdown.sections.map((section) => (
                             <div key={`${dropdown.trigger}-${section.title}`} className="space-y-4">
                               {section.title && (
-                                <h4 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+                                <h4 className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                                   {localizeNavText(section.title, contentLocale)}
                                 </h4>
                               )}
@@ -407,23 +407,23 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                           href={subItem.href}
                                           aria-current={isActivePath(subItem.href) ? 'page' : undefined}
                                           className={cn(
-                                            'group/item flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-slate-50',
+                                            'group/item flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[var(--casa-canvas)]',
                                             isActivePath(subItem.href)
-                                              ? 'bg-slate-100 text-slate-900'
-                                              : 'text-slate-700'
+                                              ? 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
+                                              : 'text-[var(--casa-ink)]'
                                           )}
                                           onClick={closeDropdown}
                                         >
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-[var(--casa-text-subtle)] transition-colors group-hover/item:border-[var(--casa-blue)]/20 group-hover/item:text-[var(--casa-accent-text)]">
-                                          {Icon ? <Icon className="h-4 w-4" /> : <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />}
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[color:var(--casa-sand)] bg-white text-[var(--casa-text-subtle)] transition-colors group-hover/item:border-[var(--casa-blue)]/20 group-hover/item:text-[var(--casa-accent-text)]">
+                                          {Icon ? <Icon className="h-4 w-4" /> : <span className="h-1.5 w-1.5 rounded-full bg-[var(--casa-sand)]" />}
                                         </div>
 
                                         <div>
-                                          <p className="text-sm font-semibold text-slate-900 group-hover/item:text-[var(--casa-accent-text)]">
+                                          <p className="text-sm font-semibold text-[var(--casa-ink)] group-hover/item:text-[var(--casa-accent-text)]">
                                             {localizeNavText(subItem.label, contentLocale)}
                                           </p>
                                           {subItem.description && (
-                                            <p className="mt-0.5 text-xs text-slate-500">
+                                            <p className="mt-0.5 text-xs text-[var(--casa-muted)]">
                                               {localizeNavText(subItem.description, contentLocale)}
                                             </p>
                                           )}
@@ -438,10 +438,10 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                         </div>
 
                         {dropdown.href && (
-                          <div className="mt-5 border-t border-slate-100 pt-4">
+                          <div className="mt-5 border-t border-[color:var(--casa-sand)]/70 pt-4">
                             <Link
                               href={dropdown.href}
-                              className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
                               onClick={closeDropdown}
                             >
                               {contentLocale === 'de'
@@ -474,10 +474,10 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                     href={linkItem.href}
                     aria-current={isLinkActive ? 'page' : undefined}
                     className={cn(
-                      'whitespace-nowrap rounded-full lg:px-2.5 xl:px-4 py-2 text-[15px] font-bold transition-colors',
+                      'whitespace-nowrap rounded-full lg:px-2.5 xl:px-4 py-2 text-sm font-bold transition-colors',
                       isLinkActive
-                        ? 'bg-slate-100 text-slate-900'
-                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
+                        : 'text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)] hover:text-[var(--casa-ink)]'
                     )}
                     onFocus={closeDropdown}
                     onClick={closeDropdown}
@@ -499,17 +499,17 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                 <button
                   data-testid="locale-trigger"
                   aria-label={`Select content language, current ${contentLocale === 'de' ? 'Deutsch' : 'English'}`}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 p-2 text-slate-600 transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] p-2 text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
                 >
                   <Globe className="h-5 w-5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="mt-[calc(1.25rem+6px)] min-w-[140px] rounded-xl border-slate-200 p-2 shadow-[var(--shadow-modal)]">
+              <DropdownMenuContent align="end" className="mt-[calc(1.25rem+6px)] min-w-[140px] rounded-xl border-[color:var(--casa-sand)] p-2 shadow-[var(--shadow-modal)]">
                 <DropdownMenuItem
                   data-testid="locale-option-en"
                   className={cn(
                     'cursor-pointer rounded-xl px-4 py-3 font-bold',
-                    contentLocale === 'en' && 'bg-slate-100 text-slate-900'
+                    contentLocale === 'en' && 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
                   )}
                   onSelect={() => switchContentLocale('en')}
                 >
@@ -519,7 +519,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                   data-testid="locale-option-de"
                   className={cn(
                     'cursor-pointer rounded-xl px-4 py-3 font-bold',
-                    contentLocale === 'de' && 'bg-slate-100 text-slate-900'
+                    contentLocale === 'de' && 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
                   )}
                   onSelect={() => switchContentLocale('de')}
                 >
@@ -532,19 +532,39 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
               type="button"
               aria-label="Language options"
               disabled
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 p-2 text-slate-600"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] p-2 text-[var(--casa-muted)]"
             >
               <Globe className="h-5 w-5" />
             </button>
           )}
 
           <div className="hidden items-center gap-2 sm:flex">
-            <Button asChild variant="outline" className="hidden h-11 rounded-xl casa-button-outline border-slate-200 2xl:inline-flex">
+            {/*
+              Was `2xl:inline-flex`, so the secondary CTA only appeared at
+              >=1536px and was display:none at 1440 — the most common desktop
+              width. Measured with it shown: the nav row's intrinsic width is
+              1342px, so it overflows the page below ~1360 and fits 1366 with
+              exactly 0px of slack. 1400 is the narrowest threshold with real
+              headroom, which matters because the German label
+              ("Beratung anfragen") is not the one that was measured.
+              Do not lower this to `xl` (1280) — that reintroduces the
+              horizontal overflow MEMORY.md §4 records as already fixed once.
+              See docs/PREMIUM_UI_REVIEW_2026-08-16.md §1.4.
+            */}
+            <Button asChild variant="outline" className="hidden h-11 rounded-lg casa-button-outline border-[color:var(--casa-sand)] min-[1400px]:inline-flex">
               <Link href="/contact">{contentLocale === 'de' ? 'Beratung anfragen' : 'Talk to Admissions'}</Link>
             </Button>
 
+            {/*
+              The register CTA carries no shadow utility on purpose:
+              `.casa-button-prism` is unlayered and sets its own box-shadow, so
+              it beats any Tailwind shadow class. The `shadow-lg shadow-[…]/20`
+              this replaced was already dead code. That class's elevation is
+              still the retired cold-slate physics — tracked in the review doc
+              §4.4, not fixed here, because it repaints the CTA on 31 call sites.
+            */}
             {!isRegistrationPage && (
-              <Button asChild className="h-11 rounded-xl casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-bold text-white shadow-lg shadow-[var(--casa-ink-deep)]/20 transition hover:bg-[var(--casa-ink-deep-hover)] xl:px-7">
+              <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-bold text-white transition hover:bg-[var(--casa-ink-deep-hover)] xl:px-7">
                 <Link href={registerHref}>{registerText}</Link>
               </Button>
             )}
@@ -558,7 +578,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                 aria-label="Open navigation menu"
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-full border border-slate-200 lg:hidden"
+                className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] lg:hidden"
                 disabled
               >
                 <Menu className="h-6 w-6" />

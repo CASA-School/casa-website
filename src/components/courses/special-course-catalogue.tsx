@@ -113,13 +113,13 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
       aria-label={copy.title}
       className={cn('scroll-mt-28 md:scroll-mt-32', className)}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
         {copy.eyebrow}
       </p>
-      <h2 className="mt-2 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+      <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">
         {copy.title}
       </h2>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)]">{copy.lead}</p>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{copy.lead}</p>
 
       {/* Everything that is identical across all eight modules, said once. */}
       <p className="mt-4 inline-flex rounded-lg bg-[var(--casa-warm-soft)]/60 px-3 py-2 text-sm font-semibold text-[var(--casa-ink)]">
@@ -209,7 +209,7 @@ function FilterGroup({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
         {label}
       </p>
       <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label={label}>
@@ -271,7 +271,7 @@ function ModuleCard({
       style={{ borderLeft: `4px solid ${skill.surface}` }}
     >
       {/* Skill is signalled by colour AND this label — never colour alone. */}
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: skill.text }}>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow" style={{ color: skill.text }}>
         {courseModule.category[locale] ?? courseModule.category.en}
       </p>
       <h4 className="mt-1.5 text-sm font-bold leading-snug text-[var(--casa-ink)]">

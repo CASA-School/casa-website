@@ -59,9 +59,9 @@ export function HumanStoryBlock({
         </figure>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
           <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-          <h2 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+          <h2 className="mt-3 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <blockquote className="mt-4 text-lg font-medium leading-relaxed text-[var(--casa-ink)]">
             &quot;{quote}&quot;
           </blockquote>

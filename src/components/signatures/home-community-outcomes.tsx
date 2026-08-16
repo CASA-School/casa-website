@@ -34,7 +34,7 @@ export function HomeCommunityOutcomes({ title, description, stories, outcomes }:
 
   return (
     <section className="rounded-3xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:p-7">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Signature</p>
       <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)] md:text-base">{description}</p>
 

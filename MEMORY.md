@@ -724,6 +724,210 @@ Verified the gate still works by adding a throwaway unused file and confirming k
 exit 1, then removing it — an ignore that silently disables the check would be worse than a red
 build.
 
+## Premium UI review + Tier 1 fixes (2026-08-16)
+
+A design-layer review ran across typography, spacing, colour, shape/elevation, motion,
+primitives, imagery and page composition, with rendered checks at 375/1280/1366/1400/1440/1500.
+Full findings and the ordered backlog: **`docs/PREMIUM_UI_REVIEW_2026-08-16.md`** — read it
+before any further UI work.
+
+**The framing that matters:** the token system is good and *does not reach the site*. 515
+stock-Tailwind palette utilities remain in shipping code (412 `slate-*`), concentrated in the
+conversion funnel — course-wizard 82, exam-wizard 77, navbar 34, contact form 34, calculator 30,
+mobile-nav 25, footer 19. `--primary`/`--secondary`/`--accent` are still untouched shadcn
+greyscale (`oklch(… 0 0)`), which is *why* call sites hand-patch `bg-[var(--casa-ink-deep)]`.
+The AA-measured CEFR and skill ramps reach 2 of ~30 routes. `--shadow-primary`,
+`--shadow-accent` and `--casa-surface-wash` still have zero consumers. There is **no typography
+layer at all** — no `--text-*`/`--leading-*`/`--tracking-*` tokens, no `clamp()` anywhere, and
+every heading renders at `letter-spacing: normal`.
+
+**Tier 1 shipped** (lint, typecheck, 74 unit tests, build, knip, 10/10 e2e all green):
+
+1. **`StatsRow` no longer animates.** It parsed `7-80+` as a *range* and counted both bounds, so
+   the homepage rendered "age range represented: **1-6+**" and "**1,114+** learners supported"
+   mid-flight — false claims on a site whose hard rules forbid exactly that. The count-up is gone
+   entirely, including the single-value case, and the component dropped `'use client'`.
+2. **`main a, main button { transition-duration: 170ms }` was unlayered**, so it silently beat
+   every Tailwind `duration-*`/`ease-*` utility inside `<main>`. Now in `@layer base`. Component
+   timings were a no-op before this; they work now.
+3. **`marketing-*` buttons rendered 38px, not the designed 48px** — cva emits `variant` before
+   `size`, so tailwind-merge let the size default `h-9` beat the variant's `h-12`. Fixed with
+   `compoundVariants`. `componentTokenRules.button.height` declared a flat 44px nothing used; it
+   is now a `heights` map mirroring the real cva ladder.
+4. **Navbar "Talk to Admissions" was `2xl:` (≥1536px)**, invisible at 1440. **Do not "fix" this
+   with `xl:`** — that reintroduces horizontal overflow (measured `scrollWidth` 1342 at a 1280
+   viewport), the overflow §4 above records as already fixed once. The nav needs 1342px intrinsic
+   and 1366 fits with *zero* slack, so it shipped as `min-[1400px]:`, verified in both locales
+   (the German register CTA is 46px wider than the English one).
+5. **Course detail showed the same five facts three times** in one viewport. The
+   `#course-summary` tile strip is deleted (nothing linked that anchor) and the sticky rail now
+   carries only `price` + `next-start`. **Prices go through `Intl.NumberFormat`** — `from €520`,
+   not `from 520.00 EUR`. That also closed a fallback-vs-Neon gap: `default_price` is typed
+   `number` but Postgres returns `numeric(10,2)` as the string `"520.00"`, so fixture-backed
+   tests passed while the live site was wrong. **The type lie itself is still open.**
+6. **`ProofBand` stranded one stat in a 4-column grid** — of four EN metrics only `Since 1983`
+   clears its `sourceType !== 'internal'` filter. The grid now follows the surviving count.
+   **Open decision for CASA:** `CLAUDE.md` hard rule 1 approves `30,000+` and `150+ countries`
+   for public use and `StatsRow` already publishes them, but `ProofBand` filters them out. Two
+   components disagree about the same approved figures. That is a content call, not a UI one.
+
+**Also learned:** `.casa-button-prism` and `.casa-card-surface` are unlayered and set their own
+`box-shadow`, so no Tailwind shadow utility can reach them — the navbar's `shadow-lg` was dead
+code. Both still carry the *pre-refactor* cold-slate physics (negative spread, 0.34–0.66 opacity)
+that §18 replaced everywhere else. Repainting `.casa-button-prism` touches the primary CTA on 31
+call sites and is the natural first consumer of `--shadow-primary`; tracked as review doc §4.4.
+
+**Tier 2 in progress — live status is `docs/PARALLEL_AGENT_WORK_BOARD.md` → "Tier 2".** That
+board is the handover surface: per-unit status, per-file counts, and the mapping to use. Done so
+far (all gates green, 74 unit / 10 e2e):
+
+- **The shadcn semantic tokens are rebranded.** `--primary`/`--secondary`/`--muted`/`--accent`/
+  `--border`/`--input`/`--ring`/`--destructive`, plus `--background`/`--card`/`--popover` and
+  their foregrounds, now point at CASA values. **No file under `src/components/ui/` was edited** —
+  every shadcn primitive picked up the brand at once. Contrast measured first, not eyeballed;
+  `--muted-foreground` on white actually improves 4.54 → 5.58.
+- **Default-palette drift 515 → 0**, across 44 files. The whole funnel now renders in CASA
+  tokens: navbar, mobile-nav, header search popover, footer, contact form, both registration
+  wizards, the calculator, and the long tail. Verified by rendering, not just building — 0
+  contrast failures on `/registration/course`, `/registration/exam`, `/contact`, and 162 text
+  nodes checked on `/`. **This now needs a lint rule**; at zero it drifts straight back the first
+  time someone types `text-slate-600`, and nothing prevents that today.
+- **Three latent bugs surfaced by the sweep, all fixed:** `exam-wizard.tsx` had
+  **`text-blue-955`** — not a real Tailwind class, so that text never had a colour applied
+  (confirmed pre-existing via `git diff`); `checkbox.tsx` used `border-slate-400` for the
+  unchecked box, **2.56:1** on white, failing the 3:1 WCAG 1.4.11 minimum for a control boundary;
+  and `page.tsx:577` used `text-white/45` for the dark exam panel's card index, **4.26:1** at
+  11px.
+- **A lint rule holds the zero.** `eslint.config.mjs` fails the build on any stock Tailwind
+  colour utility in `src/**` (string *and* template literals; the four frozen routes exempt),
+  with an error message naming the replacement token. Verified to actually fire — probe file
+  exit 1, same file under a frozen route exit 0, real codebase clean. Without this it would have
+  drifted straight back.
+- **The CEFR ramp reaches the course surfaces (T2-E).** `/courses` filter chips and
+  `course-level-goals.tsx` both resolve through `levelKeyFromLabel()` → `levelTokens`. Unselected
+  chips take the label colour + border from the ramp so the row reads as a progression; selected
+  chips fill with `surface` + per-step `ink`. Measured: unselected 5.56–7.16, filled A1 14.56 /
+  A2 11.72 / B1 8.27 (dark ink) and B2 4.84 / C1 7.16 (white ink) — the B1+/B2 crossover works.
+  **The skill ramp was deliberately not applied**: nothing on those surfaces carries a skill in
+  structured data, so it would mean inferring one from prose. Same conclusion the old U2 reached.
+
+**Tier 2 is complete. Tier 3 (typography) is part-done** — board entries T3-A…G exist now.
+
+**Tier 3 A–D shipped 2026-08-16.** The site had a mature colour/shape system and no typography
+layer at all. The key mechanism: **Tailwind v4 lets a size step carry its own
+`--text-*--line-height` and `--text-*--letter-spacing`**, so leading and optical tracking became
+properties of the scale in `globals.css`'s `@theme inline` block rather than something 400 call
+sites must remember. No component needed a `tracking-*` class.
+
+- **Root is back to `100%`.** It had been a hard 16.5px / 17px, which overrode the visitor's own
+  browser font-size setting and put every rem value off the pixel grid (`py-20` = 85px). Reading
+  size was preserved by re-basing `--text-base` to 1.0625rem — copy still renders 17px.
+- **Display steps are fluid `clamp()`**, maxima pinned to previously rendered sizes so nothing
+  grows and nothing overflows. Homepage ladder: 51.2 / 38.4 / 32 / 24 / 22 at 1440, and
+  33.1 / 26.5 / 24 / 22 / 17 at 375. The old h2/h3 collision at 24.75px is gone.
+- **0 headings still compute `letter-spacing: normal`** — it was all of them.
+- 29 `leading-tight` removed from `text-3xl`+ (it is 1.25, *looser* than the steps); 9 arbitrary
+  `text-[…rem]` mapped onto steps; 2 section h2s moved off the h1's own step.
+
+**The trap worth remembering:** `--text-2xl` at 1.625rem exactly equalled `--text-3xl`'s clamp
+*floor*, so at 375px a section h2 and a card title collided again — the same bug the scale exists
+to fix, reintroduced at the small end of the fluid range, and **invisible at 1440**. Always
+measure both ends of a fluid scale. Keep one step of clearance below the 3xl floor.
+
+**Tracking values are tuned for Plus Jakarta Sans** — re-measure if the typeface changes.
+
+**Typeface note (2026-08-16).** The user asked about Adobe Fonts' `school` tag. That collection is
+comic/handwriting faces — Adobe's own description is *"lettering reminiscent of childhood or
+primary education"*, and it contains Comic Sans MS. Wrong register for an adult language school.
+Separately, **Adobe Fonts cannot be self-hosted** (Typekit CDN only), which is a DSGVO problem
+here — same class of issue as the Vercel Toolbar removed in pass 15. The clean path if a change is
+still wanted is **Source Serif 4**: a genuine Adobe Original under the SIL OFL, available via
+`next/font/google` and therefore self-hosted at build time.
+
+**Tier 3 E–F also shipped 2026-08-16.**
+
+- **Reading measure.** `--container-measure: 48ch` → `max-w-measure`, on 36 body paragraphs;
+  headings deliberately unconstrained. **48ch, not the conventional 65ch, because `ch` lies** — it
+  is the width of "0" (0.732em in Plus Jakarta Sans) while the average lowercase character is
+  0.514em, so nominal ch overstates real characters per line by ~1.42×. Copy now measures 68
+  chars at 1440 and 40 at 375; 0 paragraphs exceed 76.
+- **Eyebrows.** 198 tracking values collapsed onto one `--tracking-eyebrow: 0.12em`; 53 uppercase
+  `font-bold` → `font-semibold` per the documented ladder. Homepage went from 22 eyebrow
+  signatures to 2 (12px and 14px, both w600/0.12em).
+- **Nothing renders below 12px any more.** 81 off-scale sizes fixed (`text-[9/10/11px]` → `text-xs`,
+  `text-[15px]` → `text-sm`).
+
+**A verification trap worth remembering:** the first measure value (62ch) was a **silent no-op** —
+its computed `max-width` was *wider* than the grid column the paragraph sat in, so the container
+was doing the constraining and I briefly read that as the token working. When adding a max-width,
+confirm it is actually smaller than the element's available width. Also: `@theme inline` values are
+baked at build time, so a token change needs a **dev-server restart**, not just HMR.
+
+**Only T3-G remains in Tier 3** — the optional typeface change. The user deferred it on
+2026-08-16 ("we will return back to T3-G at some point in the future"), so leave it alone until
+they raise it.
+
+**Tier 4 (restraint / removing ornament) A–D shipped 2026-08-16.**
+
+- **The brand triad no longer fires across the UI.** `.casa-tricolor-rule` keeps its name (25 call
+  sites unchanged) but draws a single `--casa-blue` fade. Also gone: the stats band's hard-stop
+  34%/68% flag stripe, its ticks cycling blue → sun → red → white, and the three red/yellow/blue
+  dots on the hero photo that read as macOS traffic lights. **The triad now appears only in the
+  logo.**
+- **Photos are no longer colour-washed.** `.casa-media-overlay::before` — on 25 photo surfaces —
+  was three layers at 0.6 opacity (ink→blue diagonal + blue radial + sun radial), casting every
+  photograph blue and yellow. Now one neutral ink gradient at 0.28 as a legibility scrim. The
+  hover sweep (`::after`) is kept; it is the one real media micro-interaction.
+- Removed the four stacked decorations from `HeroPhotoCard`.
+
+**A big correction: the review's "dead decorative CSS" finding was mostly wrong.** Four of six
+listed classes were **live**. `casa-card-grid`, `casa-card-spark` and `casa-button-edge` are not
+class names — they are *keyframe-name prefixes*. Grepping them as classes returns 0 while the
+animations fire on pseudo-elements of classes used 25 / 7 / 32 / 20 times. Deleting them would
+have stripped hover behaviour from every photo and every primary button. **A grep for a class name
+does not prove a keyframe is unreachable — trace the animation to its selector.** Only
+`.matt-shadow` and `.japanese-fade` were genuinely dead.
+
+Also fixed: `UI_SYSTEM.md` had documented `casa-soft-rise` (560ms) as the section entrance
+animation. That class has no definition and no consumers — it never shipped. The live mechanism is
+`casa-reveal-init` + `is-visible` at 420ms.
+
+**Deliberately not done — T4-E (border *and* shadow on white cards).** Do not sweep it blind: of
+23 double-treated white elements on the homepage, most are buttons and icon medallions where the
+pairing is correct. Only **13 are real content cards, 11 on canvas**. Whether an outline should go
+depends on whether the card sits on `--casa-canvas` or on a white section, which is not statically
+determinable. Details and source counts are on the work board.
+
+**Verification note:** use **exit codes** for gates, not `grep -c error` on build output — the
+latter gave a false "6 errors" on a build that exited 0.
+- **The coloured-elevation tokens finally have consumers.** `--shadow-primary`/`--shadow-accent`
+  are the resting/hover elevation of `.casa-button-prism` (the primary CTA, 31 call sites), which
+  also closes the §4.4 finding for that class. `.casa-card-surface` moved to
+  `--casa-radius-feature` + `--shadow-card`.
+- **Added `--casa-success-surface` / `--casa-danger-surface`** — the status scale had only `-text`
+  variants, so a filled success badge had nowhere to point and shipped as `emerald-600`, which
+  carries white text at 3.30:1.
+- **Fixed a live AA failure:** 14 places painted text in raw `--casa-coral` at 3.46:1, including
+  every required-field asterisk, while the AA-safe `--casa-coral-text` sat unused. Ten moved; four
+  icon/logo uses stayed raw on purpose (non-text graphics need 3:1, not 4.5:1).
+- The stale `#fed500` yellow is gone — all six now derive from `--casa-sun` via `color-mix`.
+
+**Two traps worth remembering.** (1) **Check whether a surface is dark before mapping slate.**
+`globals.css:397-403` selects on `bg-[var(--casa-ink-deep)]` to flip `--casa-text-subtle` to
+`#cbd5e1` — which is exactly the slate-300 the footer used, so dark surfaces map to
+`--casa-text-subtle` and get the right value free. Mapping it like a light surface would invert
+the contrast. (2) **A canvas contrast probe that fills white before sampling is broken** — every
+transparent ancestor reads back as opaque white and terminates the walk, scoring correct 11.95:1
+footer links as 1.48:1. Use `clearRect`, and expect false failures on gradient-backed CTAs
+(`.casa-button-prism` sets `background`, not `background-color`).
+
+**Process note:** the review ran as 8 parallel agents plus 8 adversarial verifiers. **All 8
+verifiers failed on a session limit**, so every finding was hand-checked instead. Three agent
+claims did not survive (a count of "0 `active:` variants" that is really 4; a wrong file
+attribution for the homepage hero — it is `HeroAPhotoLed`, and `HeroHomePhoto` is one of four
+hero components never rendered anywhere; and an unreproducible photo-caption claim). Treat
+unverified agent counts as leads, not facts.
+
 ## Verified Baseline
 
 The latest implementation pass has already cleared:

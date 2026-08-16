@@ -4,7 +4,107 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Type scale.
+ *
+ * Before this, the site had no typography layer at all: 24 distinct font sizes,
+ * 93 arbitrary `text-[…]` values, zero `clamp()`, and every heading rendering at
+ * `letter-spacing: normal` — a 56px display headline with body-size sidebearings.
+ *
+ * Three things are fixed here rather than at 400 call sites, because Tailwind v4
+ * lets a size step carry its own leading and tracking:
+ *
+ * 1. READING SIZE IS PRESERVED across the root-size fix above. `--text-base` is
+ *    1.0625rem = 17px at a default root, exactly what the old hard 17px root gave.
+ * 2. DISPLAY STEPS ARE FLUID. They used to jump hard at 640px and then sit frozen
+ *    from 640px to 1440px. Maxima are pinned to the *previously rendered* sizes,
+ *    so nothing grows and no fixed-width container can overflow.
+ * 3. OPTICAL TRACKING AND LEADING ARE PART OF THE STEP. Plus Jakarta Sans is
+ *    geometric with sidebearings tuned for body sizes; at display sizes those read
+ *    as gaps. Negative tracking tightens progressively as the size grows.
+ *
+ * Caveat for whoever changes the typeface: the tracking values are tuned for Plus
+ * Jakarta Sans and must be re-measured for anything else.
+ *
+ * NOTE: an explicit `leading-*` utility on an element still beats the step's
+ * line-height. `leading-tight` (1.25) is LOOSER than these display steps, so it
+ * must not be used above text-2xl. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §3.
+ */
 @theme inline {
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.55;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.4;
+  --text-xl--letter-spacing: -0.006em;
+  /*
+   * 1.5rem, not 1.625rem. At 1.625rem it exactly equalled `--text-3xl`'s clamp
+   * floor, so on a 375px viewport a section h2 (text-3xl, 26.5px) and a card
+   * title (text-2xl, 26px) rendered the same size — reintroducing on mobile the
+   * very h2/h3 collision this scale exists to fix. Caught by measuring at 375,
+   * not at 1440. Keep at least one step of clearance below the 3xl floor.
+   */
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.26;
+  --text-2xl--letter-spacing: -0.01em;
+  --text-3xl: clamp(1.625rem, 1.4rem + 1.1vw, 2rem);
+  --text-3xl--line-height: 1.16;
+  --text-3xl--letter-spacing: -0.015em;
+  --text-4xl: clamp(2rem, 1.6rem + 2vw, 2.4rem);
+  --text-4xl--line-height: 1.08;
+  --text-4xl--letter-spacing: -0.019em;
+  --text-5xl: clamp(2.4rem, 1.7rem + 3.4vw, 3.2rem);
+  --text-5xl--line-height: 1.05;
+  --text-5xl--letter-spacing: -0.022em;
+  --text-6xl: clamp(3rem, 2rem + 5vw, 4rem);
+  --text-6xl--line-height: 1.02;
+  --text-6xl--letter-spacing: -0.025em;
+
+  /* Named leading steps, so display headings stop reaching for `leading-tight`. */
+  --leading-display: 1.05;
+  --leading-heading: 1.16;
+  --leading-body: 1.6;
+
+  /*
+   * One tracking value for uppercase micro-labels.
+   *
+   * There were 22 typographic signatures across 189 eyebrows — tracking at
+   * [0.12em] ×169, [0.1em] ×16, [0.08em] ×10, plus one-off [0.11em], [0.13em]
+   * and [0.2em]. Differences that small are imperceptible individually and
+   * guarantee no two sections agree. 0.12em wins because it was already the
+   * overwhelming majority.
+   */
+  --tracking-eyebrow: 0.12em;
+
+  /*
+   * Reading measure. Generates `max-w-measure` from Tailwind's container scale.
+   *
+   * Body copy was running 80–95 characters per line — `max-w-3xl` is 768px,
+   * which at 17px is roughly 90 characters. Editorial copy holds 60–75, which is
+   * the range where the eye reliably finds the next line. `ch` is used rather
+   * than a rem width so the measure follows the font, not a guess about it.
+   *
+   * Headings are deliberately NOT constrained by this — display type wants to
+   * run wider than body copy.
+   */
+  /*
+   * 52ch, measured — not the conventional 65ch.
+   *
+   * `ch` is the width of "0", which in Plus Jakarta Sans is much wider than the
+   * average lowercase letter, so nominal ch badly overstates real characters per
+   * line. Measured in Plus Jakarta Sans: 1ch = 0.732em but the average lowercase
+   * character is 0.514em, so nominal ch overstates real characters by ~1.42x.
+   * 62ch rendered ~74 characters AND did not even bind (the grid column was
+   * narrower than the max-width, so the token was a silent no-op). 48ch binds
+   * and lands ~68 real characters, mid-range. Re-measure if the typeface changes.
+   */
+  --container-measure: 48ch;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -49,24 +149,47 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: var(--casa-bg);
+  --foreground: var(--casa-ink);
+  --card: var(--casa-bg);
+  --card-foreground: var(--casa-ink);
+  --popover: var(--casa-bg);
+  --popover-foreground: var(--casa-ink);
+  /*
+   * shadcn semantic tokens, pointed at the CASA palette.
+   *
+   * These shipped as untouched shadcn defaults — every one was `oklch(… 0 0)`,
+   * i.e. chroma 0, pure neutral grey. So `<Button>` with no variant, all 18
+   * `variant="outline"` buttons, every input, select, textarea, checkbox,
+   * accordion and dropdown rendered off-palette, and call sites worked around it
+   * by hand-patching `bg-[var(--casa-ink-deep)]` on each instance. Rebranding
+   * here fixes every shadcn primitive at once and needs no component edits.
+   *
+   * Contrast measured before adopting, not eyeballed (AA needs 4.5:1):
+   *   white on --primary ............ 17.74   --foreground on white .... 17.85
+   *   --muted-foreground on white ...  5.58   (was 4.54 — this improves)
+   *   --muted-foreground on canvas ...  5.31   on --casa-surface-subtle . 5.02
+   *   --accent-foreground on accent .. 16.22   white on --destructive ... 4.88
+   *
+   * `--border` also feeds the `* { @apply border-border }` rule at the bottom of
+   * this file, so it is the default border colour of every element on the site.
+   * --casa-sand is a touch lighter than the old grey (L 0.802 vs 0.768), which
+   * is the intended hairline weight.
+   *
+   * See docs/PREMIUM_UI_REVIEW_2026-08-16.md §2.2.
+   */
+  --primary: var(--casa-ink-deep);
+  --primary-foreground: #ffffff;
+  --secondary: var(--casa-surface-subtle);
+  --secondary-foreground: var(--casa-ink);
+  --muted: var(--casa-canvas);
+  --muted-foreground: var(--casa-muted);
+  --accent: var(--casa-warm-soft);
+  --accent-foreground: var(--casa-ink);
+  --destructive: var(--casa-red);
+  --border: var(--casa-sand);
+  --input: var(--casa-sand);
+  --ring: var(--casa-blue);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -176,6 +299,16 @@
   --casa-success-text: #107837; /* from #16a34a (3.30:1) */
   --casa-warning-text: #866214; /* from #be8b1d (3.04:1) */
   --casa-danger-text:  #d20612; /* from #e30613 (4.88:1 white, 3.96:1 sand) */
+
+  /*
+   * Filled status surfaces. The scale only had `-text` variants, so a filled
+   * success badge had nowhere to point and shipped as Tailwind `emerald-600`
+   * (#16a34a), which carries white text at only 3.30:1. These reuse the already
+   * AA-derived values, where white clears 4.5:1 — success 5.58, danger 4.88 —
+   * so a filled chip and its label are safe by construction.
+   */
+  --casa-success-surface: #107837;
+  --casa-danger-surface:  var(--casa-red);
   --casa-coral-text:   #b14629; /* from #d66b4d (3.46:1) */
   /*
    * Skill accents — shared vocabulary with the CASA student app.
@@ -453,14 +586,27 @@
 }
 
 @layer base {
+  /*
+   * The root stays at 100%, i.e. whatever the visitor set in their browser.
+   *
+   * It used to be a hard `16.5px`, and `17px` above 1024px. That silently
+   * overrode the user's own font-size preference — someone who sets 20px got
+   * 16.5px — and it put the entire rem-based scale off the pixel grid: `py-20`
+   * computed to 85px, `text-xs` to 12.375px, `h-20` to 85px. Nothing in the
+   * system was a round number, so no specified value ever arrived intact.
+   *
+   * The reading size is not lost: the type scale below re-bases `--text-base`
+   * to 1.0625rem (17px at a default root), so copy renders the same while
+   * spacing returns to a 16px grid AND scales with user preference.
+   * See docs/PREMIUM_UI_REVIEW_2026-08-16.md §3.6.
+   */
   html {
-    font-size: 16.5px;
+    font-size: 100%;
     scroll-padding-top: 7rem;
   }
 
   @media (min-width: 1024px) {
     html {
-      font-size: 17px;
       scroll-padding-top: 8rem;
     }
   }
@@ -485,19 +631,11 @@
   text-wrap: balance;
 }
 
-.matt-shadow {
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
-}
-
-.japanese-fade {
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-}
-
 .hero-grain {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  --hero-accent-a: rgba(254, 213, 0, 0.07);
+  --hero-accent-a: color-mix(in srgb, var(--casa-sun) 7%, transparent);
   --hero-accent-b: rgba(214, 107, 77, 0.06);
   --hero-accent-c: rgba(0, 159, 227, 0.04);
   --hero-base-start: #fffefa;
@@ -542,13 +680,13 @@
 }
 
 .hero-theme-default {
-  --hero-accent-a: rgba(254, 213, 0, 0.065);
+  --hero-accent-a: color-mix(in srgb, var(--casa-sun) 6.5%, transparent);
   --hero-accent-b: rgba(214, 107, 77, 0.05);
   --hero-accent-c: rgba(0, 159, 227, 0.035);
 }
 
 .hero-theme-home {
-  --hero-accent-a: rgba(254, 213, 0, 0.075);
+  --hero-accent-a: color-mix(in srgb, var(--casa-sun) 7.5%, transparent);
   --hero-accent-b: rgba(214, 107, 77, 0.06);
   --hero-accent-c: rgba(0, 159, 227, 0.04);
   --hero-base-start: #fffefb;
@@ -577,7 +715,7 @@
 
 .hero-theme-accommodation {
   --hero-accent-a: rgba(214, 107, 77, 0.085);
-  --hero-accent-b: rgba(254, 213, 0, 0.08);
+  --hero-accent-b: color-mix(in srgb, var(--casa-sun) 8%, transparent);
   --hero-accent-c: rgba(0, 159, 227, 0.04);
   --hero-base-start: #fffcf8;
   --hero-base-mid: #fff9f3;
@@ -620,7 +758,7 @@
 .hero-archetype-d {
   --hero-noise-opacity: 0.031;
   --hero-accent-a: rgba(214, 107, 77, 0.085);
-  --hero-accent-b: rgba(254, 213, 0, 0.075);
+  --hero-accent-b: color-mix(in srgb, var(--casa-sun) 7.5%, transparent);
   --hero-accent-c: rgba(0, 159, 227, 0.035);
 }
 
@@ -639,11 +777,20 @@
 }
 
 .casa-tricolor-rule {
+  /*
+   * Was a red -> yellow -> blue sweep, on 25 surfaces, alongside two hard-stop
+   * flag-stripe gradients, a cycling four-colour tick row and three
+   * traffic-light dots on the hero photo. Firing all three brand colours at once
+   * is the most reliable way a site stops looking premium; confident brands use
+   * one accent per surface and keep the full triad for the logo alone.
+   *
+   * The class name is kept so the 25 call sites need no edit, but it now draws a
+   * single accent that fades out. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §4.1.
+   */
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--casa-red) 86%, transparent),
-    color-mix(in srgb, var(--casa-sun) 88%, transparent) 45%,
-    color-mix(in srgb, var(--casa-blue) 86%, transparent)
+    var(--casa-blue),
+    color-mix(in srgb, var(--casa-blue) 20%, transparent)
   );
 }
 
@@ -659,19 +806,29 @@
   inset: 0;
   pointer-events: none;
   z-index: 2;
-  opacity: 0.6;
-  background:
-    linear-gradient(
-      128deg,
-      color-mix(in srgb, var(--casa-ink-deep) 28%, transparent) 0%,
-      transparent 41%,
-      color-mix(in srgb, var(--casa-blue) 24%, transparent) 100%
-    ),
-    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--casa-blue) 26%, transparent), transparent 64%),
-    radial-gradient(115% 75% at 0% 100%, color-mix(in srgb, var(--casa-sun) 26%, transparent), transparent 65%);
+  /*
+   * A legibility scrim, not a colour wash.
+   *
+   * This was three stacked layers at 0.6 opacity — an ink-to-blue diagonal plus
+   * a blue radial plus a sun radial — applied to all 25 photo surfaces. It put
+   * the brand triad back on every image through the back door and colour-cast
+   * real CASA classroom photography blue and yellow, which is the opposite of
+   * what an overlay is for. The photo library is also ungraded (a 175-point
+   * luminance spread), so a heavy tint was papering over that rather than
+   * fixing it.
+   *
+   * Now: one neutral ink gradient, weighted to the corner where captions and
+   * badges sit, at an opacity that aids text contrast without recolouring the
+   * image. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §4.2.
+   */
+  opacity: 0.28;
+  background: linear-gradient(
+    155deg,
+    transparent 0%,
+    transparent 52%,
+    color-mix(in srgb, var(--casa-ink-deep) 42%, transparent) 100%
+  );
   background-repeat: no-repeat;
-  background-size: 130% 130%, 100% 100%, 100% 100%;
-  background-position: 8% 2%, center, center;
   transform: scale(1.02);
 }
 
@@ -779,10 +936,15 @@
 }
 
 .casa-card-surface {
+  /*
+   * Was a 24px radius (not a step on the 3-tier scale) and the pre-refactor cold
+   * shadow — negative spread at 0.34 in slate ink — which made /news and
+   * /resources read tighter and colder than the rest of the site. Review doc §4.4.
+   */
   border: 1px solid var(--casa-sand);
-  border-radius: 1.5rem;
-  background: #fff;
-  box-shadow: 0 20px 42px -34px rgba(15, 23, 42, 0.34);
+  border-radius: var(--casa-radius-feature);
+  background: var(--casa-bg);
+  box-shadow: var(--shadow-card);
 }
 
 @keyframes casa-card-grid-shift {
@@ -839,9 +1001,20 @@
     );
   background-size: 170% 100%;
   background-position: 0% 50%;
+  /*
+   * Elevation comes from the tokens, not from hand-tuned literals. This class is
+   * UNLAYERED, so it beats any Tailwind `shadow-*` utility a call site passes —
+   * which is why the navbar's `shadow-lg shadow-[…]/20` was dead code. It also
+   * still carried the pre-refactor physics (negative spread, 0.66 opacity, cold
+   * slate) that pass 18 replaced everywhere else, on 31 call sites.
+   *
+   * `--shadow-primary` is the coloured elevation added in pass 18 as "the cue
+   * that reads premium"; this is its first consumer. The inset highlight stays —
+   * it is the "prism" character. See review doc §2.4 and §4.4.
+   */
   box-shadow:
-    0 10px 24px -18px rgba(15, 23, 42, 0.66),
-    0 2px 6px -5px rgba(15, 23, 42, 0.38),
+    var(--shadow-card),
+    var(--shadow-primary),
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
@@ -1090,11 +1263,22 @@
     pointer-events: auto;
   }
 
-  main a,
-  main button {
-    transition-property: color, background-color, border-color, transform, box-shadow, opacity;
-    transition-duration: 170ms;
-    transition-timing-function: ease;
+  /*
+   * Baseline interaction transition.
+   *
+   * This MUST stay inside @layer base. Unlayered rules beat every layered one,
+   * so while this block was unlayered it silently overrode every Tailwind
+   * `duration-*` and `ease-*` utility on any link or button inside <main> —
+   * tuning a component's timing was a no-op. See
+   * docs/PREMIUM_UI_REVIEW_2026-08-16.md §1.2.
+   */
+  @layer base {
+    main a,
+    main button {
+      transition-property: color, background-color, border-color, transform, box-shadow, opacity;
+      transition-duration: 170ms;
+      transition-timing-function: ease;
+    }
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1173,7 +1357,8 @@
       border-color: color-mix(in srgb, var(--casa-blue) 46%, rgba(255, 255, 255, 0.22));
       background-position: 100% 50%;
       box-shadow:
-        0 14px 30px -22px rgba(15, 23, 42, 0.78),
+        var(--shadow-modal),
+        var(--shadow-accent),
         0 0 0 1px color-mix(in srgb, var(--casa-blue) 38%, transparent),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }

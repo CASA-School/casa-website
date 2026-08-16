@@ -45,14 +45,29 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
 
   return (
     <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-ink-deep)] px-6 py-7 text-white md:px-8 md:py-8', className)}>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-amber)]">{displayTitle}</p>
-      <p className="mt-2 max-w-3xl text-sm text-white/80 md:text-[15px]">{displayCredibilityLine}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-amber)]">{displayTitle}</p>
+      <p className="mt-2 max-w-measure text-sm text-white/80 md:text-sm">{displayCredibilityLine}</p>
 
-      <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {/*
+        The column count follows the number of stats that actually survive the
+        `sourceType !== 'internal'` filter above. In English only "Since 1983"
+        clears it, so a fixed `lg:grid-cols-4` stranded one stat beside three
+        empty columns on every page using this band. See
+        docs/PREMIUM_UI_REVIEW_2026-08-16.md §1.6.
+      */}
+      <ul
+        className={cn(
+          'mt-6 grid gap-5',
+          stats.length >= 4 && 'sm:grid-cols-2 lg:grid-cols-4',
+          stats.length === 3 && 'sm:grid-cols-3',
+          stats.length === 2 && 'sm:grid-cols-2',
+          stats.length === 1 && 'max-w-md'
+        )}
+      >
         {stats.slice(0, 4).map((item) => (
           <li key={`${item.value}-${item.label}`} className="border-l border-white/25 pl-3">
             <p className="text-2xl font-black tracking-tight text-white md:text-3xl">{item.value}</p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/70">{item.label}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-eyebrow text-white/70">{item.label}</p>
           </li>
         ))}
       </ul>

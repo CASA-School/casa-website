@@ -104,16 +104,16 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
         className
       )}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
         {copy.eyebrow}
       </p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">{copy.description}</p>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{copy.description}</p>
 
-      <Accordion type="multiple" className="mt-8 divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">
+      <Accordion type="multiple" className="mt-8 divide-y divide-[color:var(--casa-sand)]/70 rounded-xl border border-[color:var(--casa-sand)] overflow-hidden">
         {topics.map((topic) => (
-          <AccordionItem key={topic.id} value={topic.id} className="border-b-0 bg-slate-50/50 px-5 hover:bg-slate-50 transition-colors duration-200">
+          <AccordionItem key={topic.id} value={topic.id} className="border-b-0 bg-[var(--casa-surface-wash)]/50 px-5 hover:bg-[var(--casa-canvas)] transition-colors duration-200">
             <AccordionTrigger className="py-4 text-base font-semibold text-[var(--casa-ink)] hover:no-underline">
               <span className="flex items-center gap-3">
                 <span className="text-xl leading-none" aria-hidden>
@@ -123,7 +123,7 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
               </span>
             </AccordionTrigger>
             <AccordionContent className="pb-5 pt-0">
-              <p className="text-sm leading-relaxed text-slate-600">{topic.body}</p>
+              <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{topic.body}</p>
             </AccordionContent>
           </AccordionItem>
         ))}

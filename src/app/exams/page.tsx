@@ -177,7 +177,7 @@ export default async function ExamsPage({
       </section>
 
       {/* Section 2: Readiness Check */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <ExamsReadinessCheck
             title={locale === 'de' ? 'Prüfungsreife selbst prüfen' : 'Exam readiness self-check'}
@@ -228,7 +228,7 @@ export default async function ExamsPage({
 
       {/* Section 4: Comparison (Conditional) */}
       {compareExams.length >= 2 ? (
-        <section id="exam-compare-section" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30 scroll-mt-28">
+        <section id="exam-compare-section" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30 scroll-mt-28">
           <Container>
             <ComparisonModule
               eyebrow={locale === 'de' ? 'Gespeicherter Vergleich' : 'Saved compare'}
@@ -283,7 +283,7 @@ export default async function ExamsPage({
       {/* Section 5: Steps */}
       <section className={cn(
         "py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40",
-        compareExams.length >= 2 ? "bg-white" : "bg-slate-50/30"
+        compareExams.length >= 2 ? "bg-white" : "bg-[var(--casa-surface-wash)]/30"
       )}>
         <Container>
           <ProcessSteps
@@ -318,7 +318,7 @@ export default async function ExamsPage({
       {/* Section 6: Proof Band */}
       <section className={cn(
         "py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40",
-        compareExams.length >= 2 ? "bg-slate-50/30" : "bg-white"
+        compareExams.length >= 2 ? "bg-[var(--casa-surface-wash)]/30" : "bg-white"
       )}>
         <Container>
           <ProofBand

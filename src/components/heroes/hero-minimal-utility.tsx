@@ -32,9 +32,9 @@ export function HeroMinimalUtility({
       archetype="E"
     >
       <div className="mx-auto max-w-4xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
-        <h1 className="mt-3 text-3xl font-black leading-tight text-[var(--casa-ink)] sm:text-4xl lg:text-5xl">{title}</h1>
-        <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+        <h1 className="mt-3 text-3xl font-black text-[var(--casa-ink)] sm:text-4xl lg:text-5xl">{title}</h1>
+        <p className="mx-auto mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 
         {meta.length > 0 ? (
           <ul className="mt-4 flex flex-wrap items-center justify-center gap-2">

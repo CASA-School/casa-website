@@ -114,7 +114,7 @@ export default async function FaqPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-slate-50/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Persönliche Beratung' : 'Human support'}

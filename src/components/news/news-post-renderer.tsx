@@ -41,7 +41,7 @@ function applyMarks(text: string, marks: RichMark[] | undefined, key: string) {
       continue;
     }
     if (markType === 'code') {
-      node = <code key={`${key}-code`} className="rounded bg-slate-100 px-1 py-0.5 text-[0.95em]">{node}</code>;
+      node = <code key={`${key}-code`} className="rounded bg-[var(--casa-surface-subtle)] px-1 py-0.5 text-[0.95em]">{node}</code>;
       continue;
     }
     if (markType === 'link') {
@@ -114,12 +114,12 @@ function renderNode(node: RichNode, key: string): ReactNode {
       return <li key={key}>{renderInlineContent(node.content, key)}</li>;
     case 'blockquote':
       return (
-        <blockquote key={key} className="rounded-r-xl border-l-4 border-[var(--casa-sky-soft)] bg-slate-50 px-4 py-3 text-slate-700">
+        <blockquote key={key} className="rounded-r-xl border-l-4 border-[var(--casa-sky-soft)] bg-[var(--casa-surface-wash)] px-4 py-3 text-[var(--casa-ink)]">
           {renderInlineContent(node.content, key)}
         </blockquote>
       );
     case 'horizontalRule':
-      return <hr key={key} className="my-6 border-slate-200" />;
+      return <hr key={key} className="my-6 border-[color:var(--casa-sand)]" />;
     case 'image': {
       const src = typeof node.attrs?.src === 'string' ? node.attrs.src : '';
       const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt : '';
@@ -128,10 +128,10 @@ function renderNode(node: RichNode, key: string): ReactNode {
       }
 
       return (
-        <figure key={key} className="my-6 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+        <figure key={key} className="my-6 overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={src} alt={alt} className="h-auto w-full object-cover" loading="lazy" />
-          {alt ? <figcaption className="px-3 py-2 text-xs text-slate-500">{alt}</figcaption> : null}
+          {alt ? <figcaption className="px-3 py-2 text-xs text-[var(--casa-muted)]">{alt}</figcaption> : null}
         </figure>
       );
     }
@@ -191,12 +191,12 @@ export function NewsPostLead({
 }: NewsPostLeadProps) {
   return (
     <div className="max-w-3xl">
-      <p className="mb-3 inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+      <p className="mb-3 inline-flex rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
         {category}
       </p>
-      <h2 className="text-4xl font-bold leading-tight sm:text-5xl">{title}</h2>
-      {summary ? <p className="mt-5 text-lg leading-relaxed text-slate-600">{summary}</p> : null}
-      <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+      <h2 className="text-4xl font-bold sm:text-5xl">{title}</h2>
+      {summary ? <p className="mt-5 text-lg leading-relaxed text-[var(--casa-muted)]">{summary}</p> : null}
+      <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-[var(--casa-muted)]">
         <span className="inline-flex items-center gap-1.5">
           <CalendarDays className="h-4 w-4" />
           {formatNewsDate(publishedAt, locale)}
@@ -218,8 +218,8 @@ export function NewsPostBody({ body, contentJson }: NewsPostBodyProps) {
   const paragraphs = splitNewsBodyIntoParagraphs(body);
 
   return (
-    <article className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[var(--shadow-soft)] sm:p-8">
-      <div className="space-y-5 text-base leading-relaxed text-slate-700">
+    <article className="rounded-3xl border border-[color:var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)] sm:p-8">
+      <div className="space-y-5 text-base leading-relaxed text-[var(--casa-ink)]">
         {richBody ?? paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
       </div>
     </article>

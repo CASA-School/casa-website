@@ -144,7 +144,7 @@ function ResultRow({
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{label}</span>
+        <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{label}</span>
         <span className="mt-0.5 block truncate text-sm font-bold">{result.title}</span>
         <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-[var(--casa-muted)]">{result.snippet}</span>
       </span>
@@ -261,8 +261,8 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
         title={dictionary.open}
         onClick={() => setOpen((current) => !current)}
         className={cn(
-          'flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 p-2 text-slate-600 transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
-          (isActive || open) && 'bg-slate-100 text-slate-900'
+          'flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] p-2 text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
+          (isActive || open) && 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
         )}
       >
         <Search className="h-5 w-5" aria-hidden="true" />
@@ -320,7 +320,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
             {trimmedQuery.length < 2 ? (
               <div className="space-y-4">
                 <section>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {dictionary.destinations}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
@@ -342,7 +342,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
                 </section>
 
                 <section>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {dictionary.suggestions}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -362,11 +362,11 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
             ) : (
               <section className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {dictionary.results}
                   </p>
                   {loading ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--casa-muted)]">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--casa-muted)]">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
                       {dictionary.loading}
                     </span>

@@ -159,11 +159,11 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
             <div className="space-y-4 max-w-4xl">
               <div className="flex flex-wrap items-center gap-2">
                 {position.team ? (
-                  <span className="rounded-full bg-[var(--casa-warm-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-[var(--casa-ink)]">
+                  <span className="rounded-full bg-[var(--casa-warm-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
                     {position.team}
                   </span>
                 ) : null}
-                <span className="rounded-full bg-[var(--casa-blue)]/12 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-[var(--casa-accent-text)]">
+                <span className="rounded-full bg-[var(--casa-blue)]/12 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                   {position.workMode}
                 </span>
               </div>
@@ -185,13 +185,13 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
                   <Clock className="h-4 w-4 text-[var(--casa-accent-text)] shrink-0" />
                   <span>{position.workMode}</span>
                 </span>
-                <span className="text-slate-300 hidden sm:inline">|</span>
+                <span className="text-[var(--casa-sand)] hidden sm:inline">|</span>
                 <span>
                   <span className="font-semibold text-[var(--casa-ink)]">{copy.posted}:</span> {formatDate(position.postedAt, locale)}
                 </span>
                 {position.closesAt ? (
                   <>
-                    <span className="text-slate-300 hidden sm:inline">|</span>
+                    <span className="text-[var(--casa-sand)] hidden sm:inline">|</span>
                     <span>
                       <span className="font-semibold text-[var(--casa-ink)]">{copy.deadline}:</span>{' '}
                       {formatDate(position.closesAt, locale)}
@@ -262,11 +262,11 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
 
             <div className="space-y-6">
               <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-[linear-gradient(165deg,color-mix(in_srgb,var(--casa-sun)_12%,white)_0%,white_76%)] p-6 shadow-[var(--shadow-card)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.13em] text-[var(--casa-muted)]">{copy.processTitle}</p>
+                <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.processTitle}</p>
                 <ol className="mt-4 space-y-3">
                   {copy.processSteps.map((step, index) => (
                     <li key={step} className="flex items-start gap-3 text-sm text-[var(--casa-muted)] leading-relaxed font-medium">
-                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--casa-ink-deep)] text-[11px] font-bold text-white">
+                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--casa-ink-deep)] text-xs font-bold text-white">
                         {index + 1}
                       </span>
                       <span>{step}</span>

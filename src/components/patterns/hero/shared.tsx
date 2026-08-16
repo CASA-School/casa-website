@@ -67,7 +67,7 @@ export function HeroShell({ spec, className, dataTestId, children }: HeroShellPr
   return (
     <section
       className={cn(
-        'hero-grain relative overflow-hidden border-b border-slate-200/70',
+        'hero-grain relative overflow-hidden border-b border-[color:var(--casa-sand)]/70',
         heroThemeClass(spec.themeKey),
         heroArchetypeClassByKey[spec.archetype],
         heroSpacingByArchetype[spec.archetype],
@@ -91,7 +91,7 @@ type HeroMediaCardProps = {
 
 export function HeroMediaCard({ spec, className, compact = false }: HeroMediaCardProps) {
   return (
-    <div className={cn('relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-2 shadow-[var(--shadow-soft)]', compact ? 'min-h-[230px]' : 'min-h-[320px]', className)}>
+    <div className={cn('relative overflow-hidden rounded-3xl border border-[color:var(--casa-sand)]/80 bg-white/95 p-2 shadow-[var(--shadow-soft)]', compact ? 'min-h-[230px]' : 'min-h-[320px]', className)}>
       <div className="absolute inset-2 overflow-hidden rounded-xl">
         <Image
           src={spec.visual.src}

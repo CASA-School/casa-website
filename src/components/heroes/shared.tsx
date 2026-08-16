@@ -90,14 +90,16 @@ export function HeroPhotoCard({
           sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 46vw, 96vw"
           className="object-cover"
         />
-        <div className="pointer-events-none absolute bottom-8 left-8 h-14 w-14 rotate-45 border border-white/65" />
-        <div className="pointer-events-none absolute bottom-8 left-24 right-10 h-px bg-white/50" />
-        <div className="pointer-events-none absolute left-5 top-5 flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[var(--casa-red)]/90" />
-          <span className="h-2 w-2 rounded-full bg-[var(--casa-sun)]/90" />
-          <span className="h-2 w-2 rounded-full bg-[var(--casa-blue)]/90" />
-        </div>
-        <div className="casa-tricolor-rule pointer-events-none absolute bottom-4 left-4 h-1 w-28 rounded-full" />
+        {/*
+          Four unrelated decorations used to sit on top of this photograph: a
+          45-degree rotated square outline, a hairline rule, a tricolour rule,
+          and three red/yellow/blue dots at top-left which on a rounded rectangle
+          read as macOS window traffic lights.
+
+          The photography is real CASA classroom work and was being covered up.
+          Removed rather than restyled — the restraint is the point.
+          See docs/PREMIUM_UI_REVIEW_2026-08-16.md §4.2.
+        */}
       </div>
     </figure>
   );
@@ -134,7 +136,7 @@ export function HeroProofStrip({ items, className, compact = false }: HeroProofS
       {items.slice(0, 4).map((item) => (
         <article key={`${item.value}-${item.label}`} className="rounded-xl bg-white px-3 py-2.5 shadow-[var(--shadow-soft)]">
           <p className={cn('font-black text-[var(--casa-ink)]', compact ? 'text-lg' : 'text-xl')}>{item.value}</p>
-          <p className={cn('mt-1 font-semibold text-slate-600', compact ? 'text-[11px]' : 'text-xs')}>{item.label}</p>
+          <p className={cn('mt-1 font-semibold text-[var(--casa-muted)]', compact ? 'text-xs' : 'text-xs')}>{item.label}</p>
         </article>
       ))}
     </div>

@@ -109,16 +109,16 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
 
   return (
     <section id="klett-level-tests" className={cn('rounded-3xl border border-[color:var(--casa-sand)] bg-white p-7 shadow-[var(--shadow-soft)]', className)}>
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{copy.title}</h2>
-      <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{copy.description}</p>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{copy.description}</p>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {klettLevelTests.map((test) => (
           <article
             key={test.id}
-            className="flex flex-col justify-between rounded-lg border border-slate-200 bg-slate-50/40 p-5 shadow-xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/80"
+            className="flex flex-col justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]/40 p-5 shadow-xs transition-all duration-200 hover:border-[color:var(--casa-sand)] hover:bg-[var(--casa-canvas)]/80"
           >
             <div className="space-y-3">
               <div>
@@ -128,7 +128,7 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
                     readable. The label is always present, so colour is never
                     the only signal. */}
                 <span
-                  className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.12em]"
+                  className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-semibold uppercase tracking-eyebrow"
                   style={(() => {
                     const key = levelKeyFromLabel(test.level);
                     return key
@@ -141,11 +141,11 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-[var(--casa-ink)]">{test.provider}</h3>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--casa-text-subtle)]">
+                <p className="mt-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                   {copy.providerLabel}: Klett Sprachen
                 </p>
               </div>
-              <p className="text-sm leading-relaxed text-slate-600">
+              <p className="text-sm leading-relaxed text-[var(--casa-muted)]">
                 {locale === 'de' ? test.description.de : test.description.en}
               </p>
             </div>

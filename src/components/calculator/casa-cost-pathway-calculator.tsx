@@ -21,7 +21,7 @@ import {
 import type { ContentLocale } from '@/lib/content/types';
 
 const SELECT_CLASS_NAME =
-  'h-11 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 text-sm shadow-none outline-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
+  'h-11 w-full rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 text-sm shadow-none outline-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
 
 const initialState: CasaCalculatorInput = {
   currentLevel: 'A1.1',
@@ -257,7 +257,7 @@ function SegmentedControl<T extends string>({
               className={`min-h-14 rounded-lg border px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] disabled:cursor-not-allowed disabled:opacity-55 ${
                 selected
                   ? 'border-[var(--casa-blue)] bg-[color-mix(in_srgb,var(--casa-blue)_10%,var(--casa-bg))] text-[var(--casa-ink)] shadow-xs'
-                  : 'border-slate-300 bg-slate-50/50 text-slate-700 hover:border-slate-400 hover:text-slate-950 hover:bg-slate-50'
+                  : 'border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]/50 text-[var(--casa-ink)] hover:border-[color:var(--casa-muted)] hover:text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]'
               }`}
             >
               <span className="block font-bold">{option.label}</span>
@@ -286,14 +286,14 @@ function ToggleLine({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 p-3 transition-colors hover:bg-slate-50">
+    <div className="flex items-start gap-3 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]/50 p-3 transition-colors hover:bg-[var(--casa-canvas)]">
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(event) => onCheckedChange(event.target.checked)}
         disabled={disabled}
-        className="mt-0.5 size-4 shrink-0 rounded-sm border-slate-300 text-[var(--casa-accent-text)] accent-[var(--casa-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-0.5 size-4 shrink-0 rounded-sm border-[color:var(--casa-sand)] text-[var(--casa-accent-text)] accent-[var(--casa-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="min-w-0 space-y-1">
         <Label htmlFor={id}>{label}</Label>
@@ -505,7 +505,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                 value={booksOverrideInput}
                 onChange={(event) => setBooksOverrideInput(event.target.value)}
                 placeholder={copy.booksPlaceholder}
-                className="h-11 bg-slate-50 border-slate-300 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
               />
             </div>
           ) : null}
@@ -553,7 +553,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                   min={0}
                   value={formState.accommodationWeeks}
                   onChange={(event) => updateNumericField('accommodationWeeks', event.target.value)}
-                  className="h-11 bg-slate-50 border-slate-300 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                  className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
                 />
               </div>
               <div className="space-y-2">
@@ -564,7 +564,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                   min={0}
                   value={formState.holidayWeeks}
                   onChange={(event) => updateNumericField('holidayWeeks', event.target.value)}
-                  className="h-11 bg-slate-50 border-slate-300 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                  className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
                 />
               </div>
               <ToggleLine
@@ -584,7 +584,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
               min={0}
               value={formState.specialCourseCount}
               onChange={(event) => updateNumericField('specialCourseCount', event.target.value)}
-              className="h-11 bg-slate-50 border-slate-300 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+              className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
             />
           </div>
         </FieldCard>
@@ -596,29 +596,29 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
             <h2 className="text-xl font-bold text-[var(--casa-ink)]">{copy.estimateTitle}</h2>
             {result.isValid ? (
               <div className="rounded-lg bg-[var(--casa-ink-deep)] px-4 py-4 text-white">
-                <p className="text-xs font-bold uppercase tracking-[0.08em] text-white/70">{totalLabel}</p>
+                <p className="text-xs font-semibold uppercase tracking-eyebrow text-white/70">{totalLabel}</p>
                 <p className="mt-1 text-2xl font-black tracking-tight">{totalValue}</p>
               </div>
             ) : (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <p className="rounded-lg border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-3 py-2 text-sm text-[var(--casa-danger-text)]">
                 {copy.validationError}
               </p>
             )}
           </div>
 
           <dl className="grid gap-2 text-sm sm:grid-cols-3 xl:grid-cols-1">
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-xs">
-              <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--casa-muted)]">{copy.path}</dt>
+            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-white px-3 py-2 shadow-xs">
+              <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.path}</dt>
               <dd className="font-semibold text-[var(--casa-ink)]">
                 {derivedInput.currentLevel} - {derivedInput.targetLevel}
               </dd>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-xs">
-              <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--casa-muted)]">{copy.duration}</dt>
+            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-white px-3 py-2 shadow-xs">
+              <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.duration}</dt>
               <dd className="font-semibold text-[var(--casa-ink)]">{durationLabel(result.duration, copy)}</dd>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-xs">
-              <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--casa-muted)]">{copy.mode}</dt>
+            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-white px-3 py-2 shadow-xs">
+              <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.mode}</dt>
               <dd className="font-semibold text-[var(--casa-ink)]">
                 {derivedInput.studyMode === 'intensive' ? copy.intensive : copy.evening}
               </dd>
@@ -626,13 +626,13 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
           </dl>
 
           {lineItems.length > 0 ? (
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-              <dl className="divide-y divide-slate-100 text-sm">
+            <div className="overflow-hidden rounded-lg border border-[color:var(--casa-sand)] bg-white">
+              <dl className="divide-y divide-[color:var(--casa-sand)]/70 text-sm">
                 {lineItems.map((item, index) => (
                   <div
                     key={item.key}
                     className={`flex items-center justify-between gap-4 px-3 py-2.5 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
+                      index % 2 === 0 ? 'bg-white' : 'bg-[var(--casa-surface-wash)]/40'
                     }`}
                   >
                     <dt className="min-w-0 text-[var(--casa-muted)]">{item.key}</dt>
@@ -644,7 +644,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
           ) : null}
 
           {result.breakdown.refundableDeposit > 0 ? (
-            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm">
+            <div className="flex items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-white px-3 py-2.5 text-sm">
               <span className="text-[var(--casa-muted)]">{copy.lineItems.refundableDeposit}</span>
               <span className="font-semibold text-[var(--casa-accent-text)]">
                 {formatCurrency(result.breakdown.refundableDeposit, locale)}
@@ -657,7 +657,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
           <Button
             type="button"
             variant="outline"
-            className="w-full rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            className="w-full rounded-lg border-[color:var(--casa-sand)] bg-white hover:bg-[var(--casa-canvas)] text-[var(--casa-ink)]"
             onClick={resetDefaults}
           >
             {copy.reset}

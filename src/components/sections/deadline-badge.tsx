@@ -19,7 +19,7 @@ export function DeadlineBadge({ deadlineIso, locale, className }: DeadlineBadgeP
     return (
       <span
         className={cn(
-          'inline-flex items-center rounded-full border border-[color:var(--casa-sand)] bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]',
+          'inline-flex items-center rounded-full border border-[color:var(--casa-sand)] bg-white px-2.5 py-1 text-xs font-bold uppercase tracking-eyebrow text-[var(--casa-muted)]',
           className
         )}
       >
@@ -33,12 +33,12 @@ export function DeadlineBadge({ deadlineIso, locale, className }: DeadlineBadgeP
 
   const classes =
     state === 'closed'
-      ? 'border-rose-200 bg-rose-50 text-rose-700'
+      ? 'border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 text-[var(--casa-danger-text)]'
       : state === 'urgent'
-        ? 'border-amber-200 bg-amber-50 text-amber-700'
+        ? 'border-[color:var(--casa-gold-deep)]/30 bg-[var(--casa-gold-deep)]/8 text-[var(--casa-warning-text)]'
         : state === 'soon'
           ? 'border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)] text-[var(--casa-ink)]'
-          : 'border-emerald-200 bg-emerald-50 text-emerald-700';
+          : 'border-[color:var(--casa-success-surface)]/30 bg-[var(--casa-success-surface)]/8 text-[var(--casa-success-text)]';
 
   const text =
     state === 'closed'
@@ -60,7 +60,7 @@ export function DeadlineBadge({ deadlineIso, locale, className }: DeadlineBadgeP
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em]',
+        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-eyebrow',
         classes,
         className
       )}

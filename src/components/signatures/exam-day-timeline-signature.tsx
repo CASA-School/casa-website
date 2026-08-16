@@ -15,7 +15,7 @@ export function ExamDayTimelineSignature({
 }: ExamDayTimelineSignatureProps) {
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7" data-testid="exam-timeline">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Signature</p>
       <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-base text-[var(--casa-muted)] md:text-lg">{description}</p>
 

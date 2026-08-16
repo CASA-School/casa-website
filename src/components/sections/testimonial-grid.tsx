@@ -44,7 +44,7 @@ function FeaturedQuoteTile({
 }) {
   return (
     <article className="h-full rounded-3xl border border-[color:var(--casa-sand)] bg-[color:var(--casa-warm-soft)] p-6 shadow-[var(--shadow-card)] md:p-8">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
         {locale === 'de' ? 'Ausgewählte Stimme' : 'Featured story'}
       </p>
       <span className="casa-tricolor-rule mt-3 block h-1 w-20 rounded-full" aria-hidden />
@@ -53,7 +53,7 @@ function FeaturedQuoteTile({
       </blockquote>
       <div className="mt-6 space-y-1">
         <p className="text-sm font-semibold text-[var(--casa-ink)]">{person}</p>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{role}</p>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{role}</p>
       </div>
     </article>
   );
@@ -72,7 +72,7 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
             className="object-cover"
           />
           <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-[color:var(--casa-ink-deep)]/65 to-transparent" />
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[11px] font-semibold text-[var(--casa-ink)]">
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-xs font-semibold text-[var(--casa-ink)]">
             <PlayCircle className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
             {locale === 'de' ? 'Stimme' : 'Story'}
           </div>
@@ -122,12 +122,12 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
     <section data-reveal="true" className={cn('rounded-3xl bg-white px-6 py-8 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:px-8 md:py-10', className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
             {locale === 'de' ? 'Stimmen' : 'Stories'}
           </p>
           <span className="casa-tricolor-rule mt-2 block h-1 w-24 rounded-full" aria-hidden />
           <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-          <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+          <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
         </div>
 
         {pageCount > 1 ? (

@@ -25,9 +25,9 @@ export function HeroDGallery({
 }: HeroDGalleryProps) {
   return (
     <HeroSurface themeClassName={themeClassName} archetype="D">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
-      <h1 className="mt-3 max-w-4xl text-4xl font-black leading-[1.08] text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
-      <p className="mt-5 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+      <h1 className="mt-3 max-w-4xl text-4xl font-black text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
+      <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 
       {/* Mobile: 1 featured + 2 thumbnail chips. Desktop: asymmetric 3-col */}
       <div className="mt-8 space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-3">

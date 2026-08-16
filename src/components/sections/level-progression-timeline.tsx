@@ -135,7 +135,7 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
       : `Cover of the ${book.title} textbook published by Ernst Klett Sprachen`;
 
   return (
-    <div className="flex gap-4 rounded-xl border border-slate-100 bg-white p-5 shadow-xs">
+    <div className="flex gap-4 rounded-xl border border-[color:var(--casa-sand)]/70 bg-white p-5 shadow-xs">
       <div className="shrink-0">
         {book.coverPermission === 'granted' && book.coverSrc ? (
           <Image
@@ -157,7 +157,7 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
               borderLeft: `5px solid color-mix(in srgb, ${accent.bg} 55%, #0f172a)`,
             }}
           >
-            <span className="text-[9px] font-semibold uppercase leading-tight tracking-[0.1em] text-white/80">
+            <span className="text-xs font-semibold uppercase leading-tight tracking-eyebrow text-white/80">
               {book.seriesLabel}
             </span>
             <span className="text-xl font-black leading-none text-white">{book.level}</span>
@@ -166,10 +166,10 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
       </div>
 
       <div className="flex min-w-0 flex-col">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">{label}</p>
         <p className="mt-2 text-base font-bold leading-tight text-[var(--casa-ink)]">{book.title}</p>
-        <p className="mt-1 text-xs text-slate-500">Ernst Klett Sprachen</p>
-        {book.isbn ? <p className="mt-1 text-xs tabular-nums text-slate-400">ISBN {book.isbn}</p> : null}
+        <p className="mt-1 text-xs text-[var(--casa-muted)]">Ernst Klett Sprachen</p>
+        {book.isbn ? <p className="mt-1 text-xs tabular-nums text-[var(--casa-text-subtle)]">ISBN {book.isbn}</p> : null}
         {book.productUrl ? (
           <a
             href={book.productUrl}
@@ -222,11 +222,11 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
 
   return (
     <section className={cn('rounded-xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8', className)}>
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
-      <p className="mt-2 text-sm text-slate-500">{copy.description}</p>
-      <p className="mt-1 text-sm text-slate-500">{copy.pace}</p>
+      <p className="mt-2 text-sm text-[var(--casa-muted)]">{copy.description}</p>
+      <p className="mt-1 text-sm text-[var(--casa-muted)]">{copy.pace}</p>
 
       {/* Level selector */}
       <div className="mt-7 flex flex-wrap gap-2" role="tablist" aria-label={locale === 'de' ? 'Kursstufen' : 'Course levels'}>
@@ -242,7 +242,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
                 'relative flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200',
                 isActive
                   ? 'shadow-[var(--shadow-soft)]'
-                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
+                  : 'border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] text-[var(--casa-muted)] hover:border-[color:var(--casa-sand)] hover:bg-white'
               )}
               // The selected tab wears its own level colour, so the ramp reads
               // as a progression. `ink` is measured per step because the scale
@@ -260,7 +260,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
               {/* Connector line between tabs */}
               {idx < LEVELS.length - 1 && (
                 <span
-                  className="pointer-events-none absolute -right-[9px] top-1/2 z-10 h-px w-2 -translate-y-1/2 bg-slate-300"
+                  className="pointer-events-none absolute -right-[9px] top-1/2 z-10 h-px w-2 -translate-y-1/2 bg-[var(--casa-sand)]"
                   aria-hidden
                 />
               )}
@@ -277,10 +277,10 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
         className="mt-6 grid gap-4 sm:grid-cols-2"
       >
         {/* Description */}
-        <div className="flex flex-col gap-3 rounded-xl bg-slate-50 p-5 sm:col-span-2">
+        <div className="flex flex-col gap-3 rounded-xl bg-[var(--casa-surface-wash)] p-5 sm:col-span-2">
           <div className="flex items-center gap-2">
             <span
-              className="inline-flex items-center rounded-lg px-2.5 py-0.5 text-sm font-bold tracking-[0.12em]"
+              className="inline-flex items-center rounded-lg px-2.5 py-0.5 text-sm font-bold tracking-eyebrow"
               style={{
                 background: levelTokens[activeLevel.id].surface,
                 color: levelTokens[activeLevel.id].ink,
@@ -294,14 +294,14 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
               </span>
             ) : null}
           </div>
-          <p className="text-sm leading-relaxed text-slate-700">
+          <p className="text-sm leading-relaxed text-[var(--casa-ink)]">
             {locale === 'de' ? activeLevel.description.de : activeLevel.description.en}
           </p>
         </div>
 
         {/* Stats */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-5 shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+        <div className="flex flex-col justify-between rounded-xl border border-[color:var(--casa-sand)]/70 bg-white p-5 shadow-xs">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
             {copy.paceLabel}
           </p>
           <div className="mt-3">
@@ -309,7 +309,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
               {activeLevel.weeks}
               <span className="ml-1 text-sm font-semibold text-[var(--casa-text-subtle)]">{copy.weeks}</span>
             </p>
-            <p className="mt-0.5 text-sm text-slate-500">{copy.rate}</p>
+            <p className="mt-0.5 text-sm text-[var(--casa-muted)]">{copy.rate}</p>
             {activeLevel.isBridge ? (
               <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">{copy.bridgeSourceNote}</p>
             ) : null}
@@ -328,7 +328,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           <span>A1</span>
           <span>C1</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--casa-surface-subtle)]">
           {LEVELS.map((level) => (
             <span
               key={level.id}

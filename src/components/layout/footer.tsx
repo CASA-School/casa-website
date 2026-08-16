@@ -66,12 +66,12 @@ export function Footer({ contentLocale: locale }: FooterProps) {
   } as const;
 
   return (
-    <footer className="border-t border-slate-800 bg-[var(--casa-ink-deep)] text-slate-100">
-      <div className="border-b border-slate-700/70 bg-[var(--casa-ink-panel)]">
+    <footer className="border-t border-white/10 bg-[var(--casa-ink-deep)] text-white">
+      <div className="border-b border-white/10 bg-[var(--casa-ink-panel)]">
         <Container className="py-8">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-sun)]/90">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]/90">
                 {footerText('Consistent Help', locale)}
               </p>
               <h3 className="mt-1 text-xl font-bold text-white">
@@ -89,7 +89,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
               <Button
                 asChild
                 variant="outline"
-                className="rounded-lg casa-button-outline border-slate-500 bg-transparent font-semibold text-white hover:bg-white/10 hover:text-white"
+                className="rounded-lg casa-button-outline border-white/25 bg-transparent font-semibold text-white hover:bg-white/10 hover:text-white"
               >
                 <Link href="/contact">{footerText('Talk to an advisor', locale)}</Link>
               </Button>
@@ -109,7 +109,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
             >
               <Logo className="h-8 w-auto" variant="white" />
             </Link>
-            <p className="text-sm font-medium text-slate-300">
+            <p className="text-sm font-medium text-[var(--casa-text-subtle)]">
               {footerText('Non-profit language school in Bremen. Since 1983.', locale)}
             </p>
           </div>
@@ -121,7 +121,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 href={footerConfig.contact.mapsHref}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
                 {footerConfig.contact.address}
               </a>
@@ -130,7 +130,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
               <Phone className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
               <a
                 href={`tel:${footerConfig.contact.phone}`}
-                className="text-sm text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
                 {footerConfig.contact.phone}
               </a>
@@ -140,7 +140,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 <Mail className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
                 <a
                   href={email.href}
-                  className="text-sm text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                  className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
                   {email.label}
                 </a>
@@ -161,7 +161,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 <Logo className="h-8 w-auto" variant="white" />
               </Link>
             </div>
-            <p className="text-sm font-medium text-slate-300">
+            <p className="text-sm font-medium text-[var(--casa-text-subtle)]">
               {footerText('Non-profit language school in Bremen. Since 1983.', locale)}
             </p>
 
@@ -172,7 +172,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                   href={footerConfig.contact.mapsHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                  className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
                   {footerConfig.contact.address}
                 </a>
@@ -181,7 +181,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 <Phone className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
                 <a
                   href={`tel:${footerConfig.contact.phone}`}
-                  className="text-sm text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                  className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
                   {footerConfig.contact.phone}
                 </a>
@@ -192,7 +192,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                     <Mail className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
                     <a
                       href={email.href}
-                      className="text-sm text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                      className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                     >
                       {email.label}
                     </a>
@@ -200,10 +200,10 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 ))}
               </div>
               <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                   {footerText('Office Hours', locale)}
                 </p>
-                <ul className="space-y-1 text-sm text-slate-300">
+                <ul className="space-y-1 text-sm text-[var(--casa-text-subtle)]">
                   {footerConfig.contact.officeHours.map((entry) => (
                     <li key={entry}>{footerText(entry, locale)}</li>
                   ))}
@@ -214,7 +214,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
 
           {footerConfig.columns.map((col) => (
             <div key={col.title}>
-              <h4 className="mb-6 text-xs font-bold uppercase tracking-[0.12em] text-slate-300">
+              <h4 className="mb-6 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                 {footerText(col.title, locale)}
               </h4>
               <ul className="space-y-3">
@@ -222,7 +222,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className="text-sm text-slate-300 transition-colors hover:text-white hover:underline hover:decoration-[var(--casa-amber)] hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                      className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white hover:underline hover:decoration-[var(--casa-amber)] hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                     >
                       {footerText(item.label, locale)}
                     </Link>
@@ -233,7 +233,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center gap-4 border-t border-slate-700/70 pt-8 md:flex-row md:justify-between">
+        <div className="mt-16 flex flex-col items-center gap-4 border-t border-white/10 pt-8 md:flex-row md:justify-between">
           <p className="text-xs text-[var(--casa-text-subtle)]">
             &copy; {new Date().getFullYear()} CASA - Internationale Sprachschule gemeinnützige GmbH. {footerText('All rights reserved.', locale)}
           </p>
@@ -243,7 +243,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-slate-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                className="text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
                 {footerText(item.label, locale)}
               </Link>
@@ -260,7 +260,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={item.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-300 transition-colors hover:border-[var(--casa-amber)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-[var(--casa-text-subtle)] transition-colors hover:border-[var(--casa-amber)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
                   <Icon className="h-4 w-4" />
                 </a>

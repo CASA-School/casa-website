@@ -104,11 +104,11 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
 
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Resource guide</p>
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Resource guide</p>
               <h1 className="mt-3 text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-5xl">
                 {data.hero.title}
               </h1>
-              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--casa-muted)]">{data.hero.lead}</p>
+              <p className="mt-4 max-w-measure text-lg leading-relaxed text-[var(--casa-muted)]">{data.hero.lead}</p>
               <div className="mt-6 grid gap-3 sm:max-w-[38rem] sm:grid-cols-2">
                 {data.hero.ctas.map((cta, index) => (
                   <Button
@@ -154,7 +154,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
               {data.quickFacts.map((fact) => (
                 <li
                   key={fact}
-                  className={`rounded-xl bg-slate-50/75 px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)] ${preset.quickFactItemClass}`}
+                  className={`rounded-xl bg-[var(--casa-surface-wash)]/75 px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)] ${preset.quickFactItemClass}`}
                 >
                   {fact}
                 </li>
@@ -171,7 +171,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
             <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
             <ol className="mt-5 space-y-4">
               {data.steps.map((step, index) => (
-                <li key={step.title} className={`rounded-xl bg-slate-50/75 p-5 ${preset.stepCardClass}`}>
+                <li key={step.title} className={`rounded-xl bg-[var(--casa-surface-wash)]/75 p-5 ${preset.stepCardClass}`}>
                   <div className="flex items-start gap-3">
                     <span className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${stepBadgeClass(index, preset)}`}>
                       {index + 1}

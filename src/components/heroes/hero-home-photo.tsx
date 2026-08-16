@@ -32,9 +32,9 @@ export function HeroHomePhoto({
     <HeroSurface themeClassName={themeClassName} archetype="A">
       <div className="grid items-start gap-10 lg:grid-cols-[1.08fr_0.92fr]">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
-          <h1 className="mt-3 text-4xl font-black leading-[1.04] text-[var(--casa-ink)] sm:text-5xl lg:text-[3.3rem]">{title}</h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+          <h1 className="mt-3 text-4xl font-black text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
+          <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/85 px-4 py-2 text-xs font-semibold text-[var(--casa-ink)] ring-1 ring-[color:var(--casa-sand)]">
             <span className="h-2 w-2 rounded-full bg-[var(--casa-amber)]" aria-hidden />
@@ -100,7 +100,7 @@ export function HeroHomePhoto({
         </div>
 
         <div className="space-y-4 lg:pt-2">
-          <div className="inline-flex rounded-full bg-[var(--casa-ink-deep)] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white">
+          <div className="inline-flex rounded-full bg-[var(--casa-ink-deep)] px-4 py-2 text-xs font-semibold uppercase tracking-eyebrow text-white">
             {badge}
           </div>
           <HeroPhotoCard photo={photo} className="min-h-[310px]" priority />

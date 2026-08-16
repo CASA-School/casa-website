@@ -219,20 +219,21 @@ export default async function CourseDetailPage({
     .map((fact) => factRows[fact])
     .filter((row): row is NonNullable<typeof row> => Boolean(row));
 
-  const summaryFactOrder: CourseFactKey[] = [
-    'lessons-per-week',
-    'level-range',
-    'next-start',
-    'price',
-    'group-size',
-    'included',
-  ];
-  const detailSummaryItems = summaryFactOrder
+  /*
+   * The hero rail already lists every fact this archetype permits. The sticky
+   * body rail follows the reader down the page, so it repeats only the facts
+   * that carry the decision at the moment they are ready to act.
+   *
+   * Before this, both rails rendered the identical five rows AND a four-tile
+   * `#course-summary` strip sat between them — the same facts three times
+   * inside one 1500px viewport. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §1.5.
+   */
+  const decisionFactOrder: CourseFactKey[] = ['price', 'next-start', 'lead-time', 'lessons-per-week'];
+  const decisionItems = decisionFactOrder
     .filter((fact) => archetypeAllowsFact(archetype, fact))
     .map((fact) => factRows[fact])
     .filter((row): row is NonNullable<typeof row> => Boolean(row))
-    .slice(0, 4)
-    .map((row) => ({ label: row.label, value: row.value }));
+    .slice(0, 2);
 
   const related = courses.filter((course) => course.slug !== detail.course.slug).slice(0, 2);
 
@@ -375,15 +376,6 @@ export default async function CourseDetailPage({
 
       <section className="py-16 md:py-20">
         <Container className="space-y-12 md:space-y-14">
-          <section id="course-summary" aria-label={locale === 'de' ? 'Kursüberblick' : 'Course summary'} className="grid scroll-mt-28 gap-3 sm:grid-cols-2 lg:grid-cols-4 md:scroll-mt-32">
-            {detailSummaryItems.map((item) => (
-              <article key={item.label} className="rounded-lg border border-[color:var(--casa-sand)] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{item.label}</p>
-                <p className="mt-2 text-lg font-black leading-tight text-[var(--casa-ink)]">{item.value}</p>
-              </article>
-            ))}
-          </section>
-
           <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
             <div className="space-y-12 md:space-y-14">
               {archetype.sections.map((sectionKey) => {
@@ -464,7 +456,7 @@ export default async function CourseDetailPage({
                   return (
                   <section key={sectionKey} className="space-y-5">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                         {locale === 'de' ? 'Weitere Optionen' : 'Related routes'}
                       </p>
                       <h2 className="mt-2 text-2xl font-bold leading-tight text-[var(--casa-ink)]">
@@ -495,7 +487,7 @@ export default async function CourseDetailPage({
                               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--casa-muted)]">
                                 {course.narrative?.promise || (locale === 'de' ? 'Strukturierter Deutschkurs mit klaren nächsten Schritten.' : 'Structured German course with clear next steps.')}
                               </p>
-                              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                              <p className="mt-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                                 {course.level_min || 'A1'} - {course.level_max || 'C1'} · {course.lessons_per_week} {locale === 'de' ? 'Lektionen/Woche' : 'lessons/week'}
                               </p>
                             </div>
@@ -514,7 +506,7 @@ export default async function CourseDetailPage({
             <DecisionRail
               locale={locale}
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
-              infoItems={infoItems}
+              infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               notes={contactLine}
               ctas={[primaryDecisionCta, secondaryDecisionCta]}
               deadlineIso={selectedInstance?.start_date}
