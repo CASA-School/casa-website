@@ -25,18 +25,18 @@ export function ProofStrip({
   return (
     <div
       className={cn(
-        'grid gap-3 rounded-xl border border-slate-200/80 bg-white/90 p-3 shadow-[var(--shadow-soft)] sm:grid-cols-2 lg:grid-cols-4',
+        'grid gap-3 rounded-xl border border-[color:var(--casa-sand)]/80 bg-white/90 p-3 shadow-[var(--shadow-soft)] sm:grid-cols-2 lg:grid-cols-4',
         compact && 'p-2 text-sm',
         className
       )}
       data-testid={dataTestId}
     >
       {visible.map((metric) => (
-        <article key={`${metric.value}-${metric.label}`} className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
+        <article key={`${metric.value}-${metric.label}`} className="rounded-xl border border-[color:var(--casa-sand)]/70 bg-white px-3 py-2.5">
           <p className="text-xl font-black text-[var(--casa-ink)]">{metric.value}</p>
-          <p className="mt-1 text-xs font-semibold text-slate-600">{metric.label}</p>
+          <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{metric.label}</p>
           {metric.verificationStatus === 'draft' ? (
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-coral)]">Draft</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-coral-text)]">Draft</p>
           ) : null}
         </article>
       ))}

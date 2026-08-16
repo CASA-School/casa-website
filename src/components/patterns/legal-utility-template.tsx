@@ -62,7 +62,7 @@ export function LegalUtilityTemplate({ hero, breadcrumbs, sections, notice, afte
           />
 
           {notice ? (
-            <div className="rounded-xl border border-[var(--casa-amber)]/45 bg-[var(--casa-warm-soft)]/72 p-5 text-sm leading-relaxed text-[var(--casa-ink)] print:border-slate-300 print:bg-white">
+            <div className="rounded-xl border border-[var(--casa-amber)]/45 bg-[var(--casa-warm-soft)]/72 p-5 text-sm leading-relaxed text-[var(--casa-ink)] print:border-[color:var(--casa-sand)] print:bg-white">
               {notice}
             </div>
           ) : null}

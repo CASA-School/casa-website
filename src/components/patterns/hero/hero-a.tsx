@@ -10,20 +10,20 @@ export function HeroA({ spec, showDraftClaims = false, className, dataTestId }: 
     <HeroShell spec={spec} className={className} dataTestId={dataTestId}>
       <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr]">
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
-          <h1 className="text-4xl font-black leading-[1.04] tracking-tight text-[var(--casa-ink)] sm:text-5xl lg:text-[3.35rem]">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+          <h1 className="text-4xl font-black leading-[1.04] tracking-tight text-[var(--casa-ink)] sm:text-5xl lg:text-5xl">
             {spec.headline}
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">{spec.subheadline}</p>
+          <p className="mt-5 max-w-measure text-lg leading-relaxed text-[var(--casa-muted)]">{spec.subheadline}</p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             {spec.proofMetrics.slice(0, 3).map((metric) => (
               <article
                 key={`${metric.value}-${metric.label}`}
-                className="rounded-xl border border-slate-200/80 bg-white px-3 py-3 shadow-[var(--shadow-soft)]"
+                className="rounded-xl border border-[color:var(--casa-sand)]/80 bg-white px-3 py-3 shadow-[var(--shadow-soft)]"
               >
                 <p className="text-xl font-black text-[var(--casa-ink)]">{metric.value}</p>
-                <p className="mt-1 text-[11px] font-semibold text-slate-600">{metric.label}</p>
+                <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{metric.label}</p>
               </article>
             ))}
           </div>
@@ -33,7 +33,7 @@ export function HeroA({ spec, showDraftClaims = false, className, dataTestId }: 
               {spec.chips.slice(0, 4).map((chip) => (
                 <span
                   key={chip}
-                  className="rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600"
+                  className="rounded-full border border-[color:var(--casa-sand)]/80 bg-white/90 px-3 py-1 text-xs font-semibold text-[var(--casa-muted)]"
                 >
                   {chip}
                 </span>
@@ -47,10 +47,10 @@ export function HeroA({ spec, showDraftClaims = false, className, dataTestId }: 
         <div className="space-y-4">
           <HeroMediaCard spec={spec} className="min-h-[360px]" />
 
-          <blockquote className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[var(--shadow-soft)]">
+          <blockquote className="rounded-xl border border-[color:var(--casa-sand)]/80 bg-white p-4 shadow-[var(--shadow-soft)]">
             <Quote className="h-4 w-4 text-[var(--casa-accent-text)]" />
-            <p className="mt-2 text-sm leading-relaxed text-slate-700">&quot;{spec.story.quote}&quot;</p>
-            <footer className="mt-3 text-xs font-semibold text-slate-500">
+            <p className="mt-2 text-sm leading-relaxed text-[var(--casa-ink)]">&quot;{spec.story.quote}&quot;</p>
+            <footer className="mt-3 text-xs font-semibold text-[var(--casa-muted)]">
               {spec.story.personDisplay} · {spec.story.country}
             </footer>
           </blockquote>

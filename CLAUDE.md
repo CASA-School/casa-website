@@ -163,6 +163,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/GROUP_PRICING_AND_SPECIAL_COURSES.md` | Group price model ported from the coordinator's workbook, its three bugs, and the special-courses rebuild direction |
 | `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` | **Read before changing any course number.** Prices/hours verified against casa-bremen.de, with an explicit unverified list |
 | `docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md` | Site-wide copy review + the four-archetype design for course detail pages |
+| `docs/PREMIUM_UI_REVIEW_2026-08-16.md` | **Current UI/design backlog.** Measured design-layer review across type, spacing, colour, shape, motion, primitives, media and composition, with a 10-step order of work |
 | `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md` | Token comparison with the CASA student app and what should converge |
 | `docs/EXPERIMENTAL_LANDING_PAGES.md` | Review-only routes and rollback steps |
 | `docs/TEAM_UPDATE_2026-06-23.md` | Team-facing status, demo flow, open decisions |

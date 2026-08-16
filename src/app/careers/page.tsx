@@ -100,7 +100,7 @@ export default async function CareersPage() {
           {positions.length === 0 ? (
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-7 shadow-[var(--shadow-card)]">
               <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.noOpeningsTitle}</h2>
-              <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)]">{copy.noOpeningsBody}</p>
+              <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{copy.noOpeningsBody}</p>
               <Link
                 href="/contact?topic=careers"
                 className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
@@ -123,7 +123,7 @@ export default async function CareersPage() {
                   <li key={`${position.slug}-${position.locale}`}>
                     <article className="flex h-full flex-col rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/88 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-ink)]">
+                        <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/88 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
                           <Briefcase className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
                           {copy.openingLabel}
                         </p>
@@ -183,7 +183,7 @@ export default async function CareersPage() {
 
                       {requirementLines.length > 0 ? (
                         <div className="mt-5 rounded-xl bg-[var(--casa-warm-soft)]/35 p-4">
-                          <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--casa-ink)]">{copy.requirements}</h3>
+                          <h3 className="text-sm font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{copy.requirements}</h3>
                           <ul className="mt-2 space-y-1.5">
                             {requirementLines.map((line) => (
                               <li key={line} className="flex gap-2 text-sm leading-relaxed text-[var(--casa-muted)]">

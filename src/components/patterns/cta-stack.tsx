@@ -48,7 +48,7 @@ export function CTAStack({ items, className, orientation = 'horizontal' }: CtaSt
               'rounded-lg font-semibold',
               primary
                 ? 'casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]'
-                : 'casa-button-outline border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                : 'casa-button-outline border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]'
             )}
             data-casa-track="true"
             data-casa-label={item.label}

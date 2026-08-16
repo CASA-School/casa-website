@@ -107,7 +107,7 @@ export default async function AccommodationPage() {
       </section>
 
       {/* Section 2: Playbook */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <AccommodationPlaybook
             title={locale === 'de' ? 'Wohnregeln und Kosten transparent' : 'Housing expectations playbook'}
@@ -174,7 +174,7 @@ export default async function AccommodationPage() {
       </section>
 
       {/* Section 4: Comparison */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <ComparisonModule
             eyebrow={locale === 'de' ? 'Direktvergleich' : 'Side-by-side comparison'}
@@ -252,7 +252,7 @@ export default async function AccommodationPage() {
       ) : null}
 
       {/* Section 6: Steps */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <ProcessSteps
             eyebrow={locale === 'de' ? 'Ablauf' : 'How requests work'}
@@ -283,7 +283,7 @@ export default async function AccommodationPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-slate-50/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <StudentHousingGuide locale={locale} />
         </Container>

@@ -237,7 +237,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 
             <div className="min-w-0 xl:sticky xl:top-28 xl:self-start">
-              <aside className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-slate-50/50 p-6 sm:p-8 space-y-8 shadow-[var(--shadow-soft)]">
+              <aside className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-[var(--casa-surface-wash)]/50 p-6 sm:p-8 space-y-8 shadow-[var(--shadow-soft)]">
                 {/* Response promise */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
@@ -245,19 +245,19 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                       <Clock className="h-5 w-5" aria-hidden />
                     </span>
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{copy.responseTitle}</p>
+                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">{copy.responseTitle}</p>
                       <p className="mt-0.5 text-xl font-bold text-[var(--casa-ink)]">{copy.responseValue}</p>
                     </div>
                   </div>
-                  <p className="text-sm leading-relaxed text-slate-600">{copy.responseBody}</p>
+                  <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{copy.responseBody}</p>
                 </div>
 
                 <hr className="border-[color:var(--casa-sand)]/40" />
 
                 {/* Office Details */}
                 <div className="space-y-5">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">{copy.officeDetails}</h3>
-                  <ul className="space-y-4 text-sm text-slate-700">
+                  <h3 className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">{copy.officeDetails}</h3>
+                  <ul className="space-y-4 text-sm text-[var(--casa-ink)]">
                     <li className="flex gap-3">
                       <MapPin className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
                       <span className="leading-relaxed">{footerConfig.contact.address}</span>

@@ -120,7 +120,7 @@ export function OnboardingQuiz({ locale, availableSlugs }: OnboardingQuizProps) 
 
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{dictionary.eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{dictionary.eyebrow}</p>
       <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{dictionary.title}</h2>
       <p className="mt-3 text-base text-[var(--casa-muted)] md:text-lg">{dictionary.description}</p>
 

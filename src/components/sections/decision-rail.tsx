@@ -32,7 +32,7 @@ export function DecisionRail({
       <StickyInfoCard title={infoTitle} items={infoItems} notes={notes} ctas={ctas} className="lg:static" />
 
       <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
           {locale === 'de' ? 'Anmeldefrist' : 'Registration window'}
         </p>
         <div className="mt-2">

@@ -33,9 +33,9 @@ export function HeroDetailUtility({
     <HeroSurface themeClassName={themeClassName} breadcrumbs={breadcrumbs} archetype="C">
       <div className="grid items-start gap-8 lg:grid-cols-[1.06fr_0.94fr]">
         <div className="space-y-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
-          <h1 className="mt-3 text-4xl font-black leading-tight text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+          <h1 className="mt-3 text-4xl font-black text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
+          <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
           <HeroPhotoCard photo={photo} className="min-h-[190px] max-w-2xl" priority />
         </div>
 

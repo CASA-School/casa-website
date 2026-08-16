@@ -103,7 +103,7 @@ export default async function TeamPage() {
       </section>
 
       {/* Section 2: Editorial Split */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Menschen zuerst' : 'People first'}

@@ -84,9 +84,9 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
   return (
     <>
       <section className="rounded-3xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Signature</p>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Signature</p>
         <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
-        <p className="mt-3 max-w-3xl text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
+        <p className="mt-3 max-w-measure text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
         <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="Team role filters">
           {roles.map((role) => (
@@ -142,7 +142,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
 
                 <div className="space-y-3 p-5">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-accent-text)]">{member.role}</p>
+                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{member.role}</p>
                     <h3 className="mt-2 text-lg font-bold text-[var(--casa-ink)]">{member.name}</h3>
                     <p className="text-sm font-semibold text-[var(--casa-muted)]">{member.title}</p>
                   </div>
@@ -243,7 +243,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                 <div className="p-5 sm:p-6 md:p-7">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-accent-text)]">{activeMember.role}</p>
+                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{activeMember.role}</p>
                       <h3 className="mt-2 text-xl font-bold text-[var(--casa-ink)] sm:text-2xl">{activeMember.name}</h3>
                       <p className="text-sm font-semibold text-[var(--casa-muted)]">{activeMember.title}</p>
                     </div>
@@ -260,7 +260,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                   <p className="mt-5 text-sm leading-relaxed text-[var(--casa-muted)]">{activeMember.bio}</p>
 
                   <div className="mt-5 rounded-xl bg-[var(--casa-warm-soft)]/45 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-accent-text)]">
+                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                       {locale === 'de' ? 'Fokus' : 'Focus'}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-[var(--casa-ink)]">{activeMember.focus}</p>

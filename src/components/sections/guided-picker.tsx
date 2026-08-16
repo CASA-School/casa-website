@@ -75,7 +75,7 @@ export function GuidedPicker({
         <button
           type="button"
           onClick={() => setShowAll(!showAll)}
-          className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+          className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[color:var(--casa-sand)] bg-white px-5 text-sm font-bold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-canvas)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
         >
           {showAll
             ? (locale === 'de' ? 'Weniger anzeigen' : 'Show less')
@@ -105,16 +105,16 @@ export function GuidedPicker({
         : 'lg:grid-cols-3';
   const sectionHeader = (
     <div>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
       {showAccentRule ? (
         <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       ) : null}
       <h2 className={cn('text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl', showAccentRule ? 'mt-2' : 'mt-3')}>
         {title}
       </h2>
-      <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
       {compareType ? (
-        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--casa-muted)]">
+        <p className="mt-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
           {locale === 'de'
             ? 'Guardrail: wählen Sie genau 2 Optionen für den Vergleich.'
             : 'Guardrail: select exactly 2 options to compare.'}
@@ -164,11 +164,11 @@ export function GuidedPicker({
               <li key={item.id ?? item.href} className={cn(index >= 3 && !showAll ? 'hidden md:block' : '')}>
                 <article className="group flex h-full min-h-[13rem] flex-col rounded-lg bg-white p-5 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35">
                   <div className="flex items-start justify-between gap-4">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     {item.meta ? (
-                      <span className="max-w-[9rem] text-right text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--casa-muted)]">
+                      <span className="max-w-[9rem] text-right text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                         {item.meta}
                       </span>
                     ) : null}
@@ -220,10 +220,10 @@ export function GuidedPicker({
               ) : null}
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,16,32,0.05)_0%,rgba(9,16,32,0.86)_100%)]" aria-hidden />
               <div className="relative z-10 mt-auto max-w-xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
+                <p className="text-xs font-semibold uppercase tracking-eyebrow text-white/70">
                   {locale === 'de' ? 'Empfohlener Startpunkt' : 'Recommended starting point'}
                 </p>
-                <h3 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{leadItem.title}</h3>
+                <h3 className="mt-3 text-3xl font-bold md:text-4xl">{leadItem.title}</h3>
                 <p className="mt-4 text-base leading-relaxed text-white/82 md:text-lg">
                   {leadItem.description}
                 </p>
@@ -243,7 +243,7 @@ export function GuidedPicker({
               {supportingItems.map((item, index) => (
                 <li key={item.id ?? item.href} className={cn(index >= 2 && !showAll ? 'hidden md:block' : '')}>
                   <article className="group flex h-full min-h-[11.75rem] flex-col rounded-lg bg-white p-5 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                       {String(index + 2).padStart(2, '0')}
                     </span>
                     <h3 className="mt-4 text-lg font-bold leading-tight text-[var(--casa-ink)]">
@@ -296,7 +296,7 @@ export function GuidedPicker({
                         sizes="(max-width: 768px) 85vw, (min-width: 1280px) 28vw, 44vw"
                         className="object-cover transition-transform duration-500 md:group-hover:scale-[1.03]"
                       />
-                      <span className="absolute left-3 top-3 md:left-4 md:top-4 inline-flex h-7 min-w-7 md:h-9 md:min-w-9 items-center justify-center rounded-lg md:rounded-lg bg-white/90 md:bg-white/92 px-2 text-[11px] md:text-xs font-bold tabular-nums text-[var(--casa-ink)] shadow-[var(--shadow-soft)]">
+                      <span className="absolute left-3 top-3 md:left-4 md:top-4 inline-flex h-7 min-w-7 md:h-9 md:min-w-9 items-center justify-center rounded-lg md:rounded-lg bg-white/90 md:bg-white/92 px-2 text-xs md:text-xs font-bold tabular-nums text-[var(--casa-ink)] shadow-[var(--shadow-soft)]">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                     </div>
@@ -321,7 +321,7 @@ export function GuidedPicker({
             ))}
           </ul>
           {/* Scroll nudge */}
-          <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--casa-muted)] md:hidden">
+          <p className="mt-3 text-center text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)] md:hidden">
             {locale === 'de' ? 'Wischen für weitere Kurse' : 'Swipe to see more courses'}
           </p>
         </div>
@@ -352,18 +352,18 @@ export function GuidedPicker({
                   ) : null}
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                       Option {index + 1}
                     </p>
                     <h3 className="mt-2 text-xl font-bold text-[var(--casa-ink)] md:text-2xl">
                       {item.title}
                     </h3>
                     {item.meta ? (
-                      <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                         {item.meta}
                       </p>
                     ) : null}
-                    <p className="mt-3 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)]">
+                    <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                       {item.description}
                     </p>
                   </div>
@@ -407,10 +407,10 @@ export function GuidedPicker({
               ) : null}
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,16,32,0.2)_0%,rgba(9,16,32,0.82)_100%)]" aria-hidden />
               <div className="relative z-10 mt-auto max-w-xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
+                <p className="text-xs font-semibold uppercase tracking-eyebrow text-white/70">
                   {locale === 'de' ? 'Intensiver Rhythmus' : 'Intensive rhythm'}
                 </p>
-                <h3 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">{featuredItem.title}</h3>
+                <h3 className="mt-3 text-3xl font-bold md:text-4xl">{featuredItem.title}</h3>
                 <p className="mt-4 text-base leading-relaxed text-white/80 md:text-lg">
                   {featuredItem.description}
                 </p>
@@ -443,7 +443,7 @@ export function GuidedPicker({
                   </div>
                 ) : null}
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {locale === 'de' ? 'Abendrhythmus' : 'Evening rhythm'}
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-[var(--casa-ink)]">{item.title}</h3>
@@ -507,7 +507,7 @@ export function GuidedPicker({
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {item.meta ? (
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                       {item.meta}
                     </p>
                   ) : null}

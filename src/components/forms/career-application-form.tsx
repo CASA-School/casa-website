@@ -188,27 +188,27 @@ export function CareerApplicationForm({
       <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate data-casa-track-form="career_application">
         <div className="grid gap-4 2xl:grid-cols-2">
           <label className="space-y-1.5">
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.firstName}</span>
+            <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.firstName}</span>
             <Input value={firstName} onChange={(event) => setFirstName(event.target.value)} required className="h-11" />
           </label>
           <label className="space-y-1.5">
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.lastName}</span>
+            <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.lastName}</span>
             <Input value={lastName} onChange={(event) => setLastName(event.target.value)} required className="h-11" />
           </label>
         </div>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.email}</span>
+          <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.email}</span>
           <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required className="h-11" />
         </label>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.phone}</span>
+          <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.phone}</span>
           <Input value={phone} onChange={(event) => setPhone(event.target.value)} className="h-11" />
         </label>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.linkedin}</span>
+          <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.linkedin}</span>
           <Input
             type="url"
             value={linkedinUrl}
@@ -219,7 +219,7 @@ export function CareerApplicationForm({
         </label>
 
         <div className="space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.cv}</span>
+          <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.cv}</span>
           <label htmlFor="career-cv" className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-4 py-3">
             <Upload className="h-4 w-4 text-[var(--casa-accent-text)]" />
             <span className="text-sm text-[var(--casa-muted)]">{cvFile ? cvFile.name : copy.cvHint}</span>
@@ -234,7 +234,7 @@ export function CareerApplicationForm({
         </div>
 
         <label className="space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{copy.letter}</span>
+          <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.letter}</span>
           <Textarea
             rows={6}
             value={coverLetter}
@@ -263,13 +263,13 @@ export function CareerApplicationForm({
       </form>
 
       {status === 'success' ? (
-        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status" aria-live="polite">
+        <div className="mt-4 rounded-xl border border-[color:var(--casa-success-surface)]/30 bg-[var(--casa-success-surface)]/8 px-3 py-2 text-sm text-[var(--casa-success-text)]" role="status" aria-live="polite">
           <p className="inline-flex items-center gap-2 font-semibold">
             <CheckCircle2 className="h-4 w-4" />
             {message || copy.success}
           </p>
           {requestId ? (
-            <p className="mt-1 text-xs text-emerald-700">
+            <p className="mt-1 text-xs text-[var(--casa-success-text)]">
               {copy.requestId}: <span className="font-mono">{requestId}</span>
             </p>
           ) : null}
@@ -277,7 +277,7 @@ export function CareerApplicationForm({
       ) : null}
 
       {status === 'error' ? (
-        <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" role="alert" aria-live="assertive">
+        <div className="mt-4 rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-3 py-2 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
           <p className="inline-flex items-center gap-2 font-semibold">
             <AlertCircle className="h-4 w-4" />
             {copy.error}

@@ -96,7 +96,7 @@ export function SavedCompareTray({ type, locale, comparePath }: SavedCompareTray
               <span className="block text-xs text-[var(--casa-muted)]">
                 {type === 'course' ? copy[locale].subtitleCourse : copy[locale].subtitleExam}
               </span>
-              <span className="block text-[11px] font-semibold text-[var(--casa-muted)]">
+              <span className="block text-xs font-semibold text-[var(--casa-muted)]">
                 {items.length}/2 {locale === 'de' ? 'gewählt' : 'selected'} · {items.length >= 2 ? copy[locale].ready : copy[locale].guardrail}
               </span>
             </span>
@@ -125,7 +125,7 @@ export function SavedCompareTray({ type, locale, comparePath }: SavedCompareTray
               <button
                 type="button"
                 disabled
-                className="inline-flex cursor-not-allowed items-center rounded-full bg-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-700"
+                className="inline-flex cursor-not-allowed items-center rounded-full bg-[var(--casa-sand)] px-4 py-1.5 text-xs font-semibold text-[var(--casa-ink)]"
               >
                 {copy[locale].compareDisabled}
               </button>
@@ -154,7 +154,7 @@ export function SavedCompareTray({ type, locale, comparePath }: SavedCompareTray
                   const next = removeCompareItem(type, item.id);
                   setItems(next);
                 }}
-                className="inline-flex items-center gap-1 rounded-full border border-[color:var(--casa-sand)] px-2.5 py-1 text-[11px] font-semibold text-[var(--casa-muted)] hover:bg-[var(--casa-warm-soft)]"
+                className="inline-flex items-center gap-1 rounded-full border border-[color:var(--casa-sand)] px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] hover:bg-[var(--casa-warm-soft)]"
               >
                 <X className="h-3.5 w-3.5" />
                 {copy[locale].remove}

@@ -133,7 +133,24 @@ export const componentTokenRules = {
     error: '#dc2626',
   },
   button: {
-    height: '2.75rem',
+    /**
+     * The real height ladder in `src/components/ui/button.tsx`. This field used
+     * to declare a flat `2.75rem` that no button on the site actually used —
+     * the cva `size` scale is the source of truth, so it is mirrored here
+     * instead of contradicted.
+     *
+     * `default` (2.25rem / 36px) is below the 44px touch minimum and is the
+     * reason so many call sites hand-patch `h-11`. Raising it is a site-wide
+     * visual change and is tracked separately in
+     * docs/PREMIUM_UI_REVIEW_2026-08-16.md §6 (tap targets), not here.
+     */
+    heights: {
+      xs: '1.5rem',        // 24px — icon-adjacent only
+      sm: '2rem',          // 32px
+      default: '2.25rem',  // 36px — below the 44px touch minimum
+      lg: '2.75rem',       // 44px — the touch-safe step
+      marketing: '3rem',   // 48px — the four `marketing-*` variants
+    },
     radius: '0.625rem', // rounded-lg — tier 3 interactive
     focusRing: 'color-mix(in srgb, var(--casa-blue) 56%, transparent)',
     primarySurface: 'linear-gradient(118deg, color-mix(in srgb, var(--casa-ink-deep) 94%, black) 0%, var(--casa-ink-deep) 52%, color-mix(in srgb, var(--casa-blue) 16%, var(--casa-ink-deep)) 100%)',

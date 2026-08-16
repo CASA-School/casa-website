@@ -200,7 +200,7 @@ export default async function BecomeHostFamilyPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-slate-50/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
             eyebrow={copy.storyEyebrow}
@@ -261,11 +261,11 @@ export default async function BecomeHostFamilyPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-slate-50/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 md:grid-cols-2">
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.requirementsTitle}</p>
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.requirementsTitle}</p>
               <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
               <ul className="mt-4 space-y-3">
                 {copy.requirementsItems.map((item) => (
@@ -278,7 +278,7 @@ export default async function BecomeHostFamilyPage() {
             </article>
 
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{copy.supportTitle}</p>
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.supportTitle}</p>
               <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
               <ul className="mt-4 space-y-3">
                 {copy.supportItems.map((item) => (

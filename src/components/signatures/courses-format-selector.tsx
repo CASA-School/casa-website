@@ -41,9 +41,9 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
   return (
     <section className="overflow-hidden rounded-lg border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-card)]">
       <div className="p-5 md:p-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{labels?.signature ?? 'Signature'}</p>
-        <h2 className="mt-2 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-        <p className="mt-3 max-w-4xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.signature ?? 'Signature'}</p>
+        <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
 
         <div className="mt-5 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Course format selector">
           {items.map((item) => (
@@ -67,22 +67,22 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
 
       <div className="grid gap-0 border-t border-[color:var(--casa-sand)] lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.82fr)]">
         <article className="p-5 md:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{labels?.bestFor ?? 'Best for'}</p>
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.bestFor ?? 'Best for'}</p>
           <p className="mt-3 text-lg font-bold leading-snug text-[var(--casa-ink)]">{selected.bestFor}</p>
           <dl className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] px-4 py-3">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{labels?.schedule ?? 'Schedule'}</dt>
+              <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{labels?.schedule ?? 'Schedule'}</dt>
               <dd className="mt-1 text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">{selected.schedule}</dd>
             </div>
             <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] px-4 py-3">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{labels?.intensity ?? 'Intensity'}</dt>
+              <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{labels?.intensity ?? 'Intensity'}</dt>
               <dd className="mt-1 text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">{selected.intensity}</dd>
             </div>
           </dl>
         </article>
 
         <article className="bg-[var(--casa-warm-soft)]/42 p-5 md:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{labels?.outcomes ?? 'Likely outcomes'}</p>
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.outcomes ?? 'Likely outcomes'}</p>
           <ul className="mt-4 space-y-3">
             {selected.outcomes.slice(0, 3).map((outcome) => (
               <li key={outcome} className="flex gap-3 text-base leading-relaxed text-[var(--casa-ink)]">

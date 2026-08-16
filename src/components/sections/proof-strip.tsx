@@ -55,9 +55,9 @@ export function ProofStrip({ items, className, compact = false }: ProofStripProp
               {item.value}
             </p>
             <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{item.label}</p>
-            {item.description ? <p className="mt-1 text-[11px] text-[var(--casa-muted)]">{item.description}</p> : null}
+            {item.description ? <p className="mt-1 text-xs text-[var(--casa-muted)]">{item.description}</p> : null}
             {item.isDraft ? (
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--casa-coral)]">Draft</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-coral-text)]">Draft</p>
             ) : null}
           </li>
         ))}

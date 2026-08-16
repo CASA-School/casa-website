@@ -131,10 +131,10 @@ export function PersonaPathways({ locale, className }: PersonaPathwaysProps) {
     <div className={cn('space-y-8 md:space-y-10', className)}>
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
             {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
           </p>
-          <h2 className="max-w-2xl text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+          <h2 className="max-w-2xl text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
             {locale === 'de' ? 'Wo starten Sie?' : "Choose where you're starting from"}
           </h2>
         </div>

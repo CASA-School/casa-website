@@ -83,14 +83,14 @@ export function CountryField({
         disabled={disabled}
         onClick={toggleOpen}
         className={cn(
-          'flex h-11 w-full items-center justify-between rounded-lg border border-slate-300 bg-slate-50 px-4 text-left text-sm text-[var(--casa-ink)] transition-all',
+          'flex h-11 w-full items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 text-left text-sm text-[var(--casa-ink)] transition-all',
           'focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--casa-blue)]/10',
           'disabled:cursor-not-allowed disabled:opacity-50',
           isOpen && 'border-[var(--casa-blue)] bg-white ring-2 ring-[var(--casa-blue)]/10',
           className
         )}
       >
-        <span className={cn(!value && 'text-slate-500')}>
+        <span className={cn(!value && 'text-[var(--casa-muted)]')}>
           {value || placeholder}
         </span>
         <ChevronDown
@@ -103,9 +103,9 @@ export function CountryField({
 
       {/* Dropdown panel — styled identically to the DatePicker popover */}
       {isOpen && (
-        <div className="absolute left-0 z-50 mt-2 w-full rounded-lg border border-slate-200 bg-white shadow-[var(--shadow-modal)] animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute left-0 z-50 mt-2 w-full rounded-lg border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Search */}
-          <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2.5">
+          <div className="flex items-center gap-2 border-b border-[color:var(--casa-sand)]/70 px-3 py-2.5">
             <Search className="h-3.5 w-3.5 shrink-0 text-[var(--casa-text-subtle)]" />
             <input
               ref={searchRef}
@@ -132,7 +132,7 @@ export function CountryField({
                     'flex cursor-pointer items-center justify-between px-3 py-2 text-sm transition-colors',
                     country === value
                       ? 'bg-[var(--casa-blue)]/8 font-semibold text-[var(--casa-accent-text)]'
-                      : 'text-[var(--casa-ink)] hover:bg-slate-50'
+                      : 'text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]'
                   )}
                 >
                   {country}

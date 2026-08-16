@@ -449,7 +449,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
         style={panelStyle}
         className="pointer-events-auto absolute inset-x-2 bottom-2 flex min-h-[520px] max-h-[calc(100svh-0.75rem)] h-[calc(100svh-0.75rem)] flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[min(86vh,680px)] sm:max-h-[86vh] sm:min-h-[560px] sm:w-[min(96vw,460px)]"
       >
-      <header className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-[radial-gradient(160%_120%_at_0%_0%,rgba(0,159,227,0.15),transparent_54%),radial-gradient(140%_140%_at_100%_0%,rgba(254,213,0,0.17),transparent_58%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] px-4 pb-3 pt-3.5">
+      <header className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-[radial-gradient(160%_120%_at_0%_0%,rgba(0,159,227,0.15),transparent_54%),radial-gradient(140%_140%_at_100%_0%,color-mix(in_srgb,var(--casa-sun)_17%,transparent),transparent_58%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] px-4 pb-3 pt-3.5">
         <div className="mb-2 flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <ClaraAvatar active={loading} />
@@ -469,7 +469,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.11em] text-[var(--casa-muted)]">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
             <Sparkles className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
             {copy.localeLabel}
           </span>
@@ -504,7 +504,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                 : 'ml-auto border-transparent bg-[var(--casa-ink-deep)] text-white'
             )}
           >
-            <div className="mb-1.5 flex items-center gap-1 text-[11px] font-semibold opacity-85">
+            <div className="mb-1.5 flex items-center gap-1 text-xs font-semibold opacity-85">
               {message.role === 'assistant' ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
               <span>{message.role === 'assistant' ? copy.assistantLabel : copy.userLabel}</span>
             </div>
@@ -512,13 +512,13 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
             {message.planSteps && message.planSteps.length > 0 ? (
               <div className="mt-3 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-3 py-2.5">
-                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                   {copy.planLabel}
                 </p>
                 <ol className="space-y-1.5">
                   {message.planSteps.map((step, index) => (
                     <li key={step.id} className="flex items-start gap-2 text-xs text-[var(--casa-ink)]">
-                      <span className="mt-[1px] inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-[10px] font-bold text-white">
+                      <span className="mt-[1px] inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
                         {index + 1}
                       </span>
                       <span>{step.label}</span>
@@ -530,7 +530,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
             {message.quickLinks && message.quickLinks.length > 0 ? (
               <div className="mt-3">
-                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                   {copy.linksLabel}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -538,7 +538,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                     <Link
                       key={`${message.id}-${link.href}`}
                       href={link.href}
-                      className="inline-flex items-center gap-1 rounded-full border border-[color:var(--casa-sand)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)]"
+                      className="inline-flex items-center gap-1 rounded-full border border-[color:var(--casa-sand)] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)]"
                     >
                       <Compass className="h-3 w-3 text-[var(--casa-accent-text)]" />
                       {link.label}
@@ -551,10 +551,10 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
             {message.cards && message.cards.length > 0 ? (
               <div className="mt-3 overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white">
                 <div className="flex items-center justify-between gap-2 border-b border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/30 px-3 py-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {copy.resultsLabel}
                   </p>
-                  <p className="text-[11px] font-semibold text-[var(--casa-muted)]">
+                  <p className="text-xs font-semibold text-[var(--casa-muted)]">
                     {message.cards.length} {message.cards.length === 1 ? copy.optionSingular : copy.optionPlural}
                   </p>
                 </div>
@@ -565,7 +565,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                     className="group block border-b border-[color:var(--casa-sand)]/70 bg-white p-3 text-[var(--casa-ink)] transition-colors last:border-b-0 hover:bg-[var(--casa-warm-soft)]/45"
                   >
                     <div className="flex items-start gap-2">
-                      <span className="mt-0.5 rounded-full bg-[var(--casa-blue)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--casa-accent-text)]">
+                      <span className="mt-0.5 rounded-full bg-[var(--casa-blue)]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                         {card.type === 'course' ? copy.courseTypeLabel : card.type}
                       </span>
                       <div className="min-w-0 flex-1">
@@ -579,7 +579,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                         {card.badges.map((badge) => (
                           <span
                             key={`${card.id}-${badge}`}
-                            className="rounded-full border border-[color:var(--casa-sand)] bg-white px-2 py-0.5 text-[10px] font-semibold text-[var(--casa-muted)]"
+                            className="rounded-full border border-[color:var(--casa-sand)] bg-white px-2 py-0.5 text-xs font-semibold text-[var(--casa-muted)]"
                           >
                             {badge}
                           </span>
@@ -590,15 +590,15 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                       <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
                         {card.meta.slice(0, 4).map((item) => (
                           <div key={`${card.id}-${item.label}`} className="min-w-0">
-                            <dt className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--casa-muted)]">
+                            <dt className="truncate text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                               {item.label}
                             </dt>
-                            <dd className="truncate text-[11px] font-semibold text-[var(--casa-ink)]">{item.value}</dd>
+                            <dd className="truncate text-xs font-semibold text-[var(--casa-ink)]">{item.value}</dd>
                           </div>
                         ))}
                       </dl>
                     ) : null}
-                    <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[var(--casa-accent-text)]">
+                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[var(--casa-accent-text)]">
                       {copy.detailsLabel}
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />
                     </span>
@@ -623,7 +623,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
         {messages.length === 0 ? (
           <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--casa-muted)]">{copy.quickActionsTitle}</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.quickActionsTitle}</p>
             <div className="flex flex-wrap gap-2">
               {copy.quickActions.map((action) => (
                 <button
@@ -641,7 +641,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
         {text.trim().length > 0 && !loading ? (
           <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-3">
-            <p className="mb-2 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--casa-muted)]">
+            <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
               <Sparkles className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
               {copy.liveSuggestionsTitle}
             </p>

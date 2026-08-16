@@ -81,11 +81,11 @@ function SearchResultCard({
         </span>
         <span className="min-w-0">
           <span className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-muted)]">{eyebrow}</span>
+            <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{eyebrow}</span>
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="rounded-full border border-[color:var(--casa-sand)] bg-white px-2 py-0.5 text-[10px] font-semibold text-[var(--casa-muted)]"
+                className="rounded-full border border-[color:var(--casa-sand)] bg-white px-2 py-0.5 text-xs font-semibold text-[var(--casa-muted)]"
               >
                 {badge}
               </span>
@@ -98,7 +98,7 @@ function SearchResultCard({
           {meta.length > 0 ? (
             <span className="mt-2 flex flex-wrap gap-1.5">
               {meta.map((item) => (
-                <span key={item} className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-[var(--casa-muted)]">
+                <span key={item} className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-[var(--casa-muted)]">
                   {item}
                 </span>
               ))}

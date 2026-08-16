@@ -503,7 +503,7 @@ export default async function CoursesPage({
       </section>
 
       {/* Section 2: Guided Picker Shortlist */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <GuidedPicker
             eyebrow={locale === 'de' ? 'Kursauswahl' : 'Course shortlist'}
@@ -549,10 +549,10 @@ export default async function CoursesPage({
 
       {/* Section 4: Human Perspective & Course Advising */}
       {leadStory ? (
-        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
           <Container className="space-y-12 md:space-y-16">
             <div className="max-w-3xl mx-auto text-center space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Der menschliche Unterschied' : 'The Human Difference'}
               </p>
               <h2 className="text-3xl font-bold tracking-tight text-[var(--casa-ink)] sm:text-4xl">
@@ -581,11 +581,11 @@ export default async function CoursesPage({
                 </figure>
 
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                     {locale === 'de' ? 'Teilnehmerbericht' : 'Student story'}
                   </p>
                   <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  <h3 className="mt-3 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">
                     {locale === 'de' ? 'Wie sich der passende Kurs im Alltag anfühlt' : 'How the right course format feels in real life'}
                   </h3>
                   <blockquote className="mt-4 text-lg font-medium leading-relaxed text-[var(--casa-ink)]">
@@ -612,11 +612,11 @@ export default async function CoursesPage({
               {/* Part 2: Academic Guidance */}
               <div className="grid items-start gap-10 lg:grid-cols-[1fr_1fr]">
                 <div className="lg:order-1">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                     {locale === 'de' ? 'Kursberatung' : 'Academic guidance'}
                   </p>
                   <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  <h3 className="mt-3 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">
                     {locale === 'de' ? 'Persönliche Lernwege brauchen Orientierung' : 'Human learning journeys need clear guidance'}
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
@@ -658,7 +658,7 @@ export default async function CoursesPage({
       ) : null}
 
       {/* Section 6: Format Comparison Modules */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container className="space-y-12 md:space-y-16">
           <ComparisonModule
             eyebrow={locale === 'de' ? 'Formatvergleich' : 'Format comparison'}

@@ -103,7 +103,7 @@ export default async function PlacementTestPage() {
       />
 
 
-      <section className="py-16 md:py-20 bg-slate-50/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 xl:grid-cols-2">
             <article className="flex h-full flex-col rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
@@ -111,8 +111,8 @@ export default async function PlacementTestPage() {
                 <LaptopMinimalCheck className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold">{copy.onlineTitle}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{copy.onlineBody}</p>
-              <ul className="mt-5 flex-1 space-y-2.5 text-sm text-slate-700">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.onlineBody}</p>
+              <ul className="mt-5 flex-1 space-y-2.5 text-sm text-[var(--casa-ink)]">
                 {copy.onlineBullets.map((bullet) => (
                   <li key={bullet} className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--casa-amber)]" />
@@ -135,8 +135,8 @@ export default async function PlacementTestPage() {
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold">{copy.inPersonTitle}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{copy.inPersonBody}</p>
-              <ul className="mt-5 flex-1 space-y-2.5 text-sm text-slate-700">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.inPersonBody}</p>
+              <ul className="mt-5 flex-1 space-y-2.5 text-sm text-[var(--casa-ink)]">
                 {copy.inPersonBullets.map((bullet) => (
                   <li key={bullet} className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--casa-amber)]" />
@@ -145,7 +145,7 @@ export default async function PlacementTestPage() {
                 ))}
               </ul>
               <div className="mt-6">
-                <Button asChild variant="outline" className="h-11 rounded-lg casa-button-outline border-[var(--casa-ink)] px-5 font-semibold text-[var(--casa-ink)] hover:bg-slate-50">
+                <Button asChild variant="outline" className="h-11 rounded-lg casa-button-outline border-[var(--casa-ink)] px-5 font-semibold text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]">
                   <Link href="/contact?topic=placement-in-person">
                     {copy.inPersonCta}
                     <ArrowRight className="h-4 w-4" />
@@ -157,7 +157,7 @@ export default async function PlacementTestPage() {
         </Container>
       </section>
 
-      <section id="level-progression" className="py-16 md:py-20 bg-slate-50/40 border-t border-[color:var(--casa-sand)]/40">
+      <section id="level-progression" className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/40 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <LevelProgressionTimeline locale={locale} />
         </Container>
@@ -169,7 +169,7 @@ export default async function PlacementTestPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-slate-50/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             <div className="rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
@@ -177,8 +177,8 @@ export default async function PlacementTestPage() {
                 <ClipboardCheck className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold">{copy.prepTitle}</h2>
-              <p className="mt-2 text-sm text-slate-600">{copy.prepBody}</p>
-              <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-slate-700">
+              <p className="mt-2 text-sm text-[var(--casa-muted)]">{copy.prepBody}</p>
+              <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-[var(--casa-ink)]">
                 {narrative.prepChecklist.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
@@ -187,7 +187,7 @@ export default async function PlacementTestPage() {
 
             <div className="rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
               <h2 className="text-2xl font-bold">{copy.continueTitle}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">{copy.continueBody}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.continueBody}</p>
               <div className="mt-5 space-y-3">
                 <Button asChild className="w-full justify-between rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-4 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
                   <Link href="/registration/course">
@@ -195,7 +195,7 @@ export default async function PlacementTestPage() {
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full justify-between rounded-lg casa-button-outline border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50">
+                <Button asChild variant="outline" className="w-full justify-between rounded-lg casa-button-outline border-[color:var(--casa-sand)] bg-white font-semibold text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]">
                   <Link href="/contact">
                     {copy.continueContact}
                     <ArrowRight className="h-4 w-4" />

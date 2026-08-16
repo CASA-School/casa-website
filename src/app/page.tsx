@@ -384,10 +384,10 @@ export default async function HomePage() {
         <Container>
           <div className="grid gap-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {locale === 'de'
                   ? 'Kursgebühren bleiben im Bildungsauftrag.'
                   : 'Course fees stay inside the education mission.'}
@@ -395,7 +395,7 @@ export default async function HomePage() {
             </div>
 
             <div>
-              <p className="text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+              <p className="max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
                   ? 'CASA ist eine gemeinnützige GmbH. Einnahmen werden in Unterrichtsqualität, faire Vergütung, Lernräume und soziale Bildungsprojekte reinvestiert - für Bildung, Völkerverständigung und Integration in Bremen.'
                   : 'CASA is a non-profit gGmbH. Income is reinvested in teaching quality, fair pay, learning spaces, and social education projects - supporting education, intercultural understanding, and integration in Bremen.'}
@@ -492,7 +492,7 @@ export default async function HomePage() {
             <section className="rounded-xl bg-[color:var(--casa-warm-soft)]/32 p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                     {locale === 'de' ? 'Weitere Programme' : 'Additional programs'}
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-[var(--casa-ink)]">
@@ -503,7 +503,7 @@ export default async function HomePage() {
                 </div>
                 <Link
                   href="/courses"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-[var(--casa-ink)] shadow-[var(--shadow-soft)] border border-slate-200 transition-colors hover:border-[var(--casa-blue)]/35 hover:text-[var(--casa-accent-text)]"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-[var(--casa-ink)] shadow-[var(--shadow-soft)] border border-[color:var(--casa-sand)] transition-colors hover:border-[var(--casa-blue)]/35 hover:text-[var(--casa-accent-text)]"
                 >
                   {locale === 'de' ? 'Alle Kurse erkunden' : 'Explore all courses'}
                   <ArrowRight className="h-4 w-4" aria-hidden />
@@ -541,10 +541,10 @@ export default async function HomePage() {
           <Container>
             <div className="grid gap-8 lg:grid-cols-[0.78fr_minmax(0,1.22fr)] lg:items-end">
               <div className="max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-sun)]">
+                <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
                   {locale === 'de' ? 'Zertifikat geplant?' : 'Need a certificate?'}
                 </p>
-                <h2 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">
+                <h2 className="mt-3 text-3xl font-bold md:text-4xl">
                   {locale === 'de'
                     ? 'Ergänzen Sie Ihren Kursweg mit Prüfungsvorbereitung'
                     : 'Add exam preparation to your course plan'}
@@ -574,17 +574,18 @@ export default async function HomePage() {
                     className="group flex min-h-[19rem] flex-col rounded-lg bg-white/[0.06] p-5 ring-1 ring-white/12 transition-all hover:-translate-y-0.5 hover:bg-white/[0.09] hover:ring-white/22 md:p-6"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/45">
+                      {/* /45 measured 4.26:1 on the dark panel — under AA for 11px text. */}
+                      <span className="text-xs font-semibold uppercase tracking-eyebrow text-white/60">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                       {exam.nextDate ? (
-                        <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold text-white/76">
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/76">
                           {locale === 'de' ? 'Nächste Prüfung' : 'Next exam'}: {exam.nextDate}
                         </span>
                       ) : null}
                     </div>
 
-                    <p className="mt-7 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--casa-sun)]">
+                    <p className="mt-7 text-sm font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
                       {exam.title}
                     </p>
                     <h3 className="mt-3 text-2xl font-bold leading-tight text-white">
@@ -636,15 +637,15 @@ export default async function HomePage() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Ankommen in Bremen' : 'Settling in Bremen'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-5xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {locale === 'de'
                   ? 'Unterkunft als Support rund um den Kurs.'
                   : 'Accommodation as support around the course.'}
               </h2>
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+              <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
                   ? 'Wenn Sie für einen Kurs nach Bremen kommen, kann CASA bei WG, Gastfamilie und den nächsten Schritten helfen.'
                   : 'If you are coming to Bremen for a course, CASA can support shared-flat or host-family options and the next practical steps.'}
@@ -686,10 +687,10 @@ export default async function HomePage() {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'So geht es weiter' : 'How enrollment works'}
               </p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-5xl">
+              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {locale === 'de' ? 'Vier Schritte bis zum Start.' : 'Four steps to start.'}
               </h2>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
@@ -731,7 +732,7 @@ export default async function HomePage() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <Icon className="h-6 w-6 text-[var(--casa-accent-text)]" aria-hidden />
-                      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+                      <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                     </div>

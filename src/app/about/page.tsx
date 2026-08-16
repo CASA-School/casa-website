@@ -206,7 +206,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Section 2: Milestones */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <AboutMilestones
             title={locale === 'de' ? 'CASA Meilensteine seit 1983' : 'CASA milestones since 1983'}
@@ -270,15 +270,15 @@ export default async function AboutPage() {
       </section>
 
       {/* Section 4: Leitbild */}
-      <section id="leitbild" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30 scroll-mt-28">
+      <section id="leitbild" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30 scroll-mt-28">
         <Container>
           <article className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-white p-6 shadow-[var(--shadow-card)] md:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{leitbild.eyebrow}</p>
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{leitbild.eyebrow}</p>
             <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{leitbild.title}</h2>
-            <p className="mt-3 max-w-4xl text-base leading-relaxed text-[var(--casa-muted)]">{leitbild.intro}</p>
+            <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{leitbild.intro}</p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <section className="rounded-xl bg-slate-50/60 p-5">
+              <section className="rounded-xl bg-[var(--casa-surface-wash)]/60 p-5">
                 <h3 className="text-lg font-bold text-[var(--casa-ink)]">{leitbild.qualityTitle}</h3>
                 <ul className="mt-3 space-y-2 text-sm text-[var(--casa-muted)]">
                   {leitbild.qualityBullets.map((item) => (
@@ -289,7 +289,7 @@ export default async function AboutPage() {
                   ))}
                 </ul>
               </section>
-              <section className="rounded-xl bg-slate-50/60 p-5">
+              <section className="rounded-xl bg-[var(--casa-surface-wash)]/60 p-5">
                 <h3 className="text-lg font-bold text-[var(--casa-ink)]">{leitbild.approachTitle}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{leitbild.approachText}</p>
                 <ul className="mt-3 space-y-2 text-sm text-[var(--casa-muted)]">
@@ -316,7 +316,7 @@ export default async function AboutPage() {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{tandemGuide.eyebrow}</p>
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{tandemGuide.eyebrow}</p>
               <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{tandemGuide.title}</h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemGuide.intro}</p>
 
@@ -331,12 +331,12 @@ export default async function AboutPage() {
             </div>
 
             <div className="space-y-4">
-              <section className="rounded-xl bg-slate-50/60 p-5">
+              <section className="rounded-xl bg-[var(--casa-surface-wash)]/60 p-5">
                 <h3 className="text-base font-bold text-[var(--casa-ink)]">{tandemGuide.stepsTitle}</h3>
                 <ol className="mt-3 space-y-2">
                   {tandemGuide.steps.map((step, index) => (
                     <li key={step} className="flex items-start gap-2 text-sm text-[var(--casa-muted)]">
-                      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--casa-blue)]/12 text-[11px] font-bold text-[var(--casa-accent-text)]">
+                      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--casa-blue)]/12 text-xs font-bold text-[var(--casa-accent-text)]">
                         {index + 1}
                       </span>
                       <span>{step}</span>
@@ -363,7 +363,7 @@ export default async function AboutPage() {
 
       {/* Section 6: Community Story Block */}
       {stories[1] ? (
-        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-slate-50/30">
+        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
           <Container>
             <HumanStoryBlock
               eyebrow={locale === 'de' ? 'Community-Stimme' : 'Community story'}

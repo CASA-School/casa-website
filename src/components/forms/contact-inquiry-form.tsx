@@ -89,8 +89,8 @@ const initialFields = {
 
 const fieldGroupClassName = 'space-y-1.5';
 const inputClassName =
-  'h-11 data-[size=default]:h-11 rounded-lg border border-slate-300 bg-slate-50 px-3.5 text-sm text-slate-900 placeholder:text-slate-500 shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const labelTextClassName = 'block text-xs font-semibold uppercase tracking-[0.12em] text-slate-700';
+  'h-11 data-[size=default]:h-11 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
+const labelTextClassName = 'block text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]';
 
 type OrganiserChoiceField = keyof typeof ORGANISER_CHOICES;
 
@@ -347,7 +347,7 @@ function BriefTextField({ id, label, value, placeholder, error, max, onChange }:
         onChange={(event) => onChange(event.target.value)}
       />
       {error ? (
-        <p id={errorId} className="text-xs text-rose-600 mt-1">
+        <p id={errorId} className="text-xs text-[var(--casa-danger-text)] mt-1">
           {error}
         </p>
       ) : null}
@@ -382,7 +382,7 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
           className={cn(
             inputClassName,
             'w-full flex items-center justify-between text-left',
-            error && 'border-rose-300 focus-visible:ring-rose-200'
+            error && 'border-[color:var(--casa-danger-surface)]/45 focus-visible:ring-[var(--casa-danger-surface)]/25'
           )}
         >
           <SelectValue placeholder={placeholder} />
@@ -396,7 +396,7 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
         </SelectContent>
       </Select>
       {error ? (
-        <p id={errorId} className="text-xs text-rose-600 mt-1">
+        <p id={errorId} className="text-xs text-[var(--casa-danger-text)] mt-1">
           {error}
         </p>
       ) : null}
@@ -582,26 +582,26 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       className="relative overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-6 shadow-[var(--shadow-card)] sm:p-10"
     >
 
-      <div className="mb-8 border-b border-slate-100 pb-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+      <div className="mb-8 border-b border-[color:var(--casa-sand)]/70 pb-6">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
           <MessageCircle className="h-3.5 w-3.5" aria-hidden />
           {locale === 'de' ? 'CASA-Beratung' : 'CASA admissions'}
         </div>
-        <h2 className="mt-4 text-2xl font-bold leading-tight text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">{copy.formBody}</p>
+        <h2 className="mt-4 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
+        <p className="mt-2 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">{copy.formBody}</p>
       </div>
 
       {status === 'success' ? (
-        <div className="space-y-4 rounded-3xl border border-emerald-200 bg-[linear-gradient(180deg,#ecfdf5_0%,#ffffff_100%)] p-6 shadow-[0_20px_45px_-36px_rgba(16,185,129,0.7)]" role="status" aria-live="polite">
+        <div className="space-y-4 rounded-3xl border border-[color:var(--casa-success-surface)]/30 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--casa-success-surface)_8%,white)_0%,var(--casa-bg)_100%)] p-6 shadow-[0_20px_45px_-36px_rgba(16,185,129,0.7)]" role="status" aria-live="polite">
           <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--casa-success-surface)] text-white">
               <CheckCircle2 className="h-5 w-5" aria-hidden />
             </span>
             <div>
-              <p className="text-base font-bold text-emerald-900">{copy.successTitle}</p>
-              <p className="mt-1 text-sm text-emerald-800">{feedbackMessage || copy.successBody}</p>
+              <p className="text-base font-bold text-[var(--casa-success-text)]">{copy.successTitle}</p>
+              <p className="mt-1 text-sm text-[var(--casa-success-text)]">{feedbackMessage || copy.successBody}</p>
               {requestId ? (
-                <p className="mt-2 text-xs font-medium text-emerald-700">
+                <p className="mt-2 text-xs font-medium text-[var(--casa-success-text)]">
                   Request ID: <span className="font-mono">{requestId}</span>
                 </p>
               ) : null}
@@ -622,9 +622,9 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                     { title: 'Next action', description: 'We send a clear recommendation for course, exam, or accommodation.' },
                   ]
             }
-            className="border-emerald-200/90"
+            className="border-[color:var(--casa-success-surface)]/30"
           />
-          <Button type="button" variant="outline" className="border-emerald-300 bg-white" onClick={resetForm}>
+          <Button type="button" variant="outline" className="border-[color:var(--casa-success-surface)]/40 bg-white" onClick={resetForm}>
             {copy.sendAnother}
           </Button>
         </div>
@@ -638,7 +638,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
         >
           <div className={fieldGroupClassName}>
             <label htmlFor="firstName" className={labelTextClassName}>
-              {copy.firstNameLabel} <span className="text-[var(--casa-coral)]">*</span>
+              {copy.firstNameLabel} <span className="text-[var(--casa-coral-text)]">*</span>
             </label>
             <Input
               required
@@ -654,7 +654,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.firstName ? <p className="text-xs text-rose-600 mt-1">{fieldErrors.firstName}</p> : null}
+            {fieldErrors.firstName ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.firstName}</p> : null}
           </div>
 
           <div className={fieldGroupClassName}>
@@ -674,12 +674,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.lastName ? <p className="text-xs text-rose-600 mt-1">{fieldErrors.lastName}</p> : null}
+            {fieldErrors.lastName ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.lastName}</p> : null}
           </div>
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
             <label htmlFor="email" className={labelTextClassName}>
-              {copy.emailLabel} <span className="text-[var(--casa-coral)]">*</span>
+              {copy.emailLabel} <span className="text-[var(--casa-coral-text)]">*</span>
             </label>
             <Input
               required
@@ -697,12 +697,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.email ? <p className="text-xs text-rose-600 mt-1">{fieldErrors.email}</p> : null}
+            {fieldErrors.email ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.email}</p> : null}
           </div>
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
             <label htmlFor="topic" className={labelTextClassName}>
-              {copy.topicLabel} <span className="text-[var(--casa-coral)]">*</span>
+              {copy.topicLabel} <span className="text-[var(--casa-coral-text)]">*</span>
             </label>
             <Select
               value={fields.topic || undefined}
@@ -720,7 +720,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 className={cn(
                   inputClassName,
                   'w-full flex items-center justify-between text-left',
-                  fieldErrors.topic && 'border-rose-300 focus-visible:ring-rose-200'
+                  fieldErrors.topic && 'border-[color:var(--casa-danger-surface)]/45 focus-visible:ring-[var(--casa-danger-surface)]/25'
                 )}
               >
                 <SelectValue placeholder={copy.topicPlaceholder} />
@@ -733,7 +733,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 ))}
               </SelectContent>
             </Select>
-            {fieldErrors.topic ? <p className="text-xs text-rose-600 mt-1">{fieldErrors.topic}</p> : null}
+            {fieldErrors.topic ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.topic}</p> : null}
           </div>
 
           {/*
@@ -746,10 +746,10 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
           {showBrief ? (
             <fieldset className="sm:col-span-2 rounded-2xl border border-[color:var(--casa-sand)] bg-white/70 p-5 sm:p-6">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {briefLegend}
               </legend>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">{briefCopy.intro}</p>
+              <p className="mt-1 text-xs leading-relaxed text-[var(--casa-muted)]">{briefCopy.intro}</p>
 
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <BriefTextField
@@ -895,12 +895,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
             <label htmlFor="message" className={labelTextClassName}>
-              {copy.messageLabel} <span className="text-[var(--casa-coral)]">*</span>
+              {copy.messageLabel} <span className="text-[var(--casa-coral-text)]">*</span>
             </label>
             
             {/* suggestions */}
             <div className="flex flex-wrap items-center gap-1.5 py-1">
-              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+              <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                 {locale === 'de' ? 'Schnellstart:' : 'Prompts:'}
               </span>
               {promptIdeas.map((idea) => (
@@ -908,7 +908,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                   key={idea}
                   type="button"
                   onClick={() => addPromptIdea(idea)}
-                  className="rounded-full border border-slate-200 bg-slate-50 hover:bg-[var(--casa-warm-soft)]/20 hover:border-[var(--casa-blue)]/20 px-2.5 py-1 text-[11px] font-semibold text-slate-600 transition-colors cursor-pointer"
+                  className="rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] hover:bg-[var(--casa-warm-soft)]/20 hover:border-[var(--casa-blue)]/20 px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] transition-colors cursor-pointer"
                 >
                   + {idea.split(' ').slice(0, 3).join(' ')}...
                 </button>
@@ -934,8 +934,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               }
             />
             <div className="flex justify-between items-center mt-1">
-              {fieldErrors.message ? <p className="text-xs text-rose-600">{fieldErrors.message}</p> : <div />}
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--casa-text-subtle)]">
+              {fieldErrors.message ? <p className="text-xs text-[var(--casa-danger-text)]">{fieldErrors.message}</p> : <div />}
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
                 {locale === 'de'
                   ? `${messageLength}/3000 Zeichen`
                   : `${messageLength}/3000 characters`}
@@ -984,7 +984,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       )}
 
       {status === 'error' ? (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700" role="alert" aria-live="assertive">
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-semibold">{copy.errorTitle}</p>

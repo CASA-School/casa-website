@@ -19,9 +19,9 @@ export function CommunityBand({ title, description, ctas, className }: Community
     <section className={cn('rounded-3xl border border-[color:var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] px-6 py-7 text-white shadow-[var(--shadow-soft)] md:px-8 md:py-8', className)}>
       <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--casa-amber)]">Community</p>
-          <h2 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl">{title}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300 md:text-base">{description}</p>
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-amber)]">Community</p>
+          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">{title}</h2>
+          <p className="mt-3 max-w-measure text-sm leading-relaxed text-[var(--casa-text-subtle)] md:text-base">{description}</p>
         </div>
 
         <div className="flex flex-wrap gap-3 md:justify-end">

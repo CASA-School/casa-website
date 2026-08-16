@@ -140,13 +140,13 @@ export function DatePicker({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-lg border border-slate-300 bg-slate-50 px-4 text-left text-sm text-[var(--casa-ink)] transition-all",
+          "flex h-11 w-full items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 text-left text-sm text-[var(--casa-ink)] transition-all",
           "focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--casa-blue)]/10",
-          hasError ? "border-rose-300 focus:border-rose-500 focus:ring-rose-500/10" : "",
+          hasError ? "border-[color:var(--casa-danger-surface)]/45 focus:border-[color:var(--casa-danger-surface)] focus:ring-[var(--casa-danger-surface)]/10" : "",
           className
         )}
       >
-        <span className={cn(!value && "text-slate-500")}>
+        <span className={cn(!value && "text-[var(--casa-muted)]")}>
           {value ? formatDateLabel(value) : placeholder}
         </span>
         <Calendar className="h-4.5 w-4.5 text-[var(--casa-text-subtle)]" />
@@ -156,25 +156,25 @@ export function DatePicker({
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className={cn(
-            "absolute left-0 z-50 w-72 rounded-lg border border-slate-200 bg-white p-4 shadow-[var(--shadow-modal)] duration-200",
+            "absolute left-0 z-50 w-72 rounded-lg border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-modal)] duration-200",
             align === 'top'
               ? "bottom-full mb-2 animate-in fade-in slide-in-from-bottom-2"
               : "mt-2 animate-in fade-in slide-in-from-top-2"
           )}>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-[color:var(--casa-sand)]/70 pb-3">
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="rounded-lg p-1.5 hover:bg-slate-100 transition-colors"
+                className="rounded-lg p-1.5 hover:bg-[var(--casa-surface-subtle)] transition-colors"
               >
-                <ChevronLeft className="h-4 w-4 text-slate-500" />
+                <ChevronLeft className="h-4 w-4 text-[var(--casa-muted)]" />
               </button>
 
               <div className="flex items-center gap-1.5">
                 <select
                   value={month}
                   onChange={(e) => setMonth(parseInt(e.target.value, 10))}
-                  className="rounded-lg border-0 bg-transparent py-1 px-2 text-xs font-bold text-[var(--casa-ink)] hover:bg-slate-100 focus:ring-0 focus:outline-none cursor-pointer"
+                  className="rounded-lg border-0 bg-transparent py-1 px-2 text-xs font-bold text-[var(--casa-ink)] hover:bg-[var(--casa-surface-subtle)] focus:ring-0 focus:outline-none cursor-pointer"
                 >
                   {months.map((m, idx) => (
                     <option key={m} value={idx}>{m}</option>
@@ -184,7 +184,7 @@ export function DatePicker({
                 <select
                   value={year}
                   onChange={(e) => setYear(parseInt(e.target.value, 10))}
-                  className="rounded-lg border-0 bg-transparent py-1 px-2 text-xs font-bold text-[var(--casa-ink)] hover:bg-slate-100 focus:ring-0 focus:outline-none cursor-pointer"
+                  className="rounded-lg border-0 bg-transparent py-1 px-2 text-xs font-bold text-[var(--casa-ink)] hover:bg-[var(--casa-surface-subtle)] focus:ring-0 focus:outline-none cursor-pointer"
                 >
                   {years.map((y) => (
                     <option key={y} value={y}>{y}</option>
@@ -195,13 +195,13 @@ export function DatePicker({
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="rounded-lg p-1.5 hover:bg-slate-100 transition-colors"
+                className="rounded-lg p-1.5 hover:bg-[var(--casa-surface-subtle)] transition-colors"
               >
-                <ChevronRight className="h-4 w-4 text-slate-500" />
+                <ChevronRight className="h-4 w-4 text-[var(--casa-muted)]" />
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 mt-3 text-center text-[10px] uppercase font-bold tracking-[0.12em] text-[var(--casa-text-subtle)]">
+            <div className="grid grid-cols-7 gap-1 mt-3 text-center text-xs uppercase font-semibold tracking-eyebrow text-[var(--casa-text-subtle)]">
               {daysOfWeek.map((d) => (
                 <div key={d} className="py-1">{d}</div>
               ))}
@@ -226,7 +226,7 @@ export function DatePicker({
                       "h-8 w-8 rounded-lg font-bold transition-all",
                       isSelected
                         ? "bg-[var(--casa-accent-surface)] text-white shadow-[var(--shadow-card)] shadow-[var(--casa-blue)]/10"
-                        : "text-[var(--casa-ink)] hover:bg-slate-100"
+                        : "text-[var(--casa-ink)] hover:bg-[var(--casa-surface-subtle)]"
                     )}
                   >
                     {d}

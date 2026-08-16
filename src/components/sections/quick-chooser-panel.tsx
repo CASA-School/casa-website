@@ -6,7 +6,37 @@ import { useMemo, useState } from 'react';
 import { ArrowRight, Compass } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { cn } from '@/lib/utils';
+
+/**
+ * CEFR chips take the sequential level ramp; every other field stays neutral.
+ *
+ * Levels are *ordered*, so the ramp reads as a progression across the row —
+ * A1 (#daeafa) through C1 (#005c90) — which is the whole point of a sequential
+ * scale over a categorical one. Colour never signals alone here: the chip's
+ * label IS the level.
+ *
+ * `-ink` is stored per step rather than assumed, because the ramp crosses over
+ * between B1+ and B2 (A1–B1+ carry ink, B2/C1 carry white), and `-text` is the
+ * AA-safe colour for the label on an unselected white chip.
+ */
+function levelChipStyle(fieldKey: string, label: string, isActive: boolean) {
+  if (fieldKey !== 'level') {
+    return undefined;
+  }
+
+  const key = levelKeyFromLabel(label);
+  if (!key) {
+    return undefined;
+  }
+
+  const token = levelTokens[key];
+
+  return isActive
+    ? { background: token.surface, color: token.ink, borderColor: token.surface }
+    : { color: token.text, borderColor: token.surface };
+}
 
 export type QuickChooserOption = {
   label: string;
@@ -105,7 +135,7 @@ export function QuickChooserPanel({
       )}
       data-testid="course-finder-filter"
     >
-      <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-ink)]">
+      <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
         <Compass className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
         {badgeLabel}
       </p>
@@ -116,23 +146,28 @@ export function QuickChooserPanel({
       <div className="mt-5 space-y-4">
         {fields.map((field) => (
           <fieldset key={field.key} className="space-y-2">
-            <legend className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-muted)]">
+            <legend className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
               {field.label}
             </legend>
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={field.label}>
               {field.options.map((option) => {
                 const isActive = (values[field.key] ?? '') === option.value;
+                const levelStyle = levelChipStyle(field.key, option.label, isActive);
                 return (
                   <button
                     key={`${field.key}-${option.value || 'any'}`}
                     type="button"
                     role="radio"
                     aria-checked={isActive}
+                    style={levelStyle}
                     className={cn(
                       'rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-blue)]',
                       isActive
                         ? 'border-[color:var(--casa-blue)] bg-[var(--casa-blue)]/12 text-[var(--casa-ink)]'
-                        : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-muted)] hover:bg-[var(--casa-warm-soft)]'
+                        : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-muted)]',
+                      // A level chip carries its own ramp colour inline; the neutral
+                      // warm hover would fight it.
+                      !levelStyle && !isActive && 'hover:bg-[var(--casa-warm-soft)]'
                     )}
                     onClick={() =>
                       setValues((current) => ({
@@ -151,7 +186,7 @@ export function QuickChooserPanel({
       </div>
 
       <div className="mt-5 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/42 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{summaryLabel}</p>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{summaryLabel}</p>
         <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
           {selectedSummary.map((item) => (
             <li key={item.key} className="text-sm text-[var(--casa-ink)]">

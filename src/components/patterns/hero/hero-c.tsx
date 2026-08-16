@@ -11,15 +11,15 @@ export function HeroC({ spec, breadcrumbs, className, dataTestId }: HeroPatternP
       {breadcrumbs && breadcrumbs.length > 0 ? <Breadcrumbs items={breadcrumbs} className="mb-4" /> : null}
 
       <div className="mx-auto max-w-3xl text-center">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
-        <h1 className="text-3xl font-black leading-[1.1] tracking-tight text-[var(--casa-ink)] sm:text-4xl lg:text-[2.75rem]">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{spec.eyebrow}</p>
+        <h1 className="text-3xl font-black leading-[1.1] tracking-tight text-[var(--casa-ink)] sm:text-4xl lg:text-5xl">
           {spec.headline}
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-600">{spec.subheadline}</p>
+        <p className="mx-auto mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{spec.subheadline}</p>
 
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-[var(--casa-muted)]">
           {spec.proofMetrics.slice(0, 2).map((metric) => (
-            <span key={`${metric.value}-${metric.label}`} className="rounded-full border border-slate-200 bg-white px-3 py-1">
+            <span key={`${metric.value}-${metric.label}`} className="rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1">
               {metric.value} · {metric.label}
             </span>
           ))}
