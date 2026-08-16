@@ -22,6 +22,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Production scope only, high and above. An all-scopes audit is dominated by
+      # build-tooling advisories that are not reachable from the deployed site;
+      # gating on that noise is what caused the earlier alert backlog to be ignored.
+      - name: Security audit (production dependencies)
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Lint
         run: npm run lint
 

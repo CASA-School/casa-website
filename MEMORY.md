@@ -982,6 +982,12 @@ The latest implementation pass has already cleared:
 
 ## Immediate Next Focus Areas
 
+- Dependency security was resolved on 2026-08-16: `next` 16.1.6 → 16.3.1, `next-intl`, `ws`, and
+  transitives are patched; production-scope `npm audit` is clean and CI now gates on it. Full
+  record in `docs/DEPENDENCY_SECURITY_2026-08-16.md`. Two consequences to remember: `next` and
+  `eslint-config-next` are pinned and must always move together, and `allowedDevOrigins` in
+  `next.config.ts` is load-bearing for e2e — removing it makes every interactive Playwright test
+  fail while static tests still pass.
 - Re-run PageSpeed/Lighthouse on the deployed URL after the latest accessibility patch is live.
 - Continue tightening accessibility beyond names/labels: contrast, heading hierarchy, and any remaining form semantics.
 - Replace placeholder content and imagery once production-ready assets arrive.
