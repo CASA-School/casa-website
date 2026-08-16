@@ -205,6 +205,11 @@ mock-mode-parity guidance in the same sections is still valid.
   `scheduled-cohort` is the default, so an unregistered course keeps legacy behaviour.
   `professional-track` and `module-catalogue` exist but still need content (work board U5, U6).
 - No canonical production deployment doc yet (Vercel project, domain, rollback owner).
+- **`main` is unprotected and deploys straight to production** (no `vercel.json`, so Vercel's
+  default push-to-`main` deploy applies). This is a **deliberate choice while the site is still
+  being built** — branch protection would add review friction during active iteration, and the
+  site is not final and not yet live. **Enable branch protection before go-live**, at minimum
+  requiring the `quality` workflow to pass. Decision recorded 2026-08-16.
 
 ## Artifacts
 
