@@ -1,3 +1,13 @@
+# The site is still being built and is not live, so routine version-update PRs
+# are noise nobody will read — and unread PRs train you to ignore Dependabot,
+# which is exactly how the 2026-08-16 advisory backlog went unnoticed.
+#
+# `open-pull-requests-limit: 0` disables *version* updates only. Dependabot
+# SECURITY updates are a separate repository feature (Settings → Code security →
+# "Dependabot security updates", enabled 2026-08-16) and are NOT capped by this
+# limit, so vulnerability fixes still arrive as PRs.
+#
+# Raise these limits for a deliberate dependency-refresh pass, and before go-live.
 version: 2
 
 updates:
@@ -6,7 +16,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - dependencies
     # next and eslint-config-next are pinned exactly and must move together;
@@ -39,5 +49,6 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 0
     labels:
       - dependencies
