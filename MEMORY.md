@@ -900,6 +900,37 @@ determinable. Details and source counts are on the work board.
 
 **Verification note:** use **exit codes** for gates, not `grep -c error` on build output — the
 latter gave a false "6 errors" on a build that exited 0.
+
+## Tiers 1–4 merged and deployed to production (2026-08-16)
+
+Shipped via **PR #1** on `CASA-School/casa-website` (rebase-merged, linear history, branch
+deleted). Live and verified on `https://casa-bremen.vercel.app`: root font-size 16px,
+`--primary` #111827, `--container-measure` 48ch, `--tracking-eyebrow` .12em, h1 51.2px at
+−1.13px tracking, heading ladder 51.2/38.4/32/24/22, **0 headings untracked**, **0 text under
+12px**, photo overlay at 0.28.
+
+**CI had been red on `main` for at least 6 commits and nobody noticed**, because it failed at
+`npm ci` in 14s — so lint/typecheck/test/build/knip never ran on any of those commits. Cause:
+`next` pins `@swc/helpers` 0.5.15, but `next-intl`'s nested `@swc/core` needs `>=0.5.17` and no
+nested entry was ever recorded. **CI runs Node 20 / npm 10, which validates this strictly; npm 11
+locally does not**, which is why the drift was invisible — and **Vercel installs with
+`npm install`, not `npm ci`**, so the site kept building fine while CI was broken. Fixed by
+regenerating with `npx npm@10 install --package-lock-only` (purely additive, 12 lines, one nested
+entry, no version changes). `main` CI is now green for the first time in 6 commits.
+
+**Two gotchas for future sessions:**
+
+- **`gh` was active as `Quantutech`, which gets 403 on `CASA-School`.** Both accounts are already
+  authenticated in the keyring; `gh auth switch -u rshafiee-casa` is the fix. Because the git
+  credential helper is `osxkeychain` (not `gh`), pushing also needs
+  `git -c credential.helper='!gh auth git-credential' push …` — or the keychain will keep serving
+  the Quantutech credential. **`gh` was left active as `rshafiee-casa`.**
+- **Local branch `main` tracks `origin/main` (the old Quantutech repo)** and is ~17 commits behind
+  `casa/main`. That is deliberate — it is the fallback MEMORY records. Do not delete or retarget
+  it. Work happens on `casa-main` → `casa/main`.
+
+**Pre-existing and not addressed:** GitHub reports **114 Dependabot vulnerabilities on `main`
+(1 critical, 42 high)**. Unrelated to this work, but the repo is public.
 - **The coloured-elevation tokens finally have consumers.** `--shadow-primary`/`--shadow-accent`
   are the resting/hover elevation of `.casa-button-prism` (the primary CTA, 31 call sites), which
   also closes the §4.4 finding for that class. `.casa-card-surface` moved to
