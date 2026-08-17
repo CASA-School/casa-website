@@ -282,6 +282,28 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
       de: 'Sicherheit wächst, wenn Lernende ausprobieren, lachen und weitersprechen.',
     },
   },
+  /*
+    AWAITING A REAL PHOTOGRAPH. There is no clinical/medical image in the media
+    library, so German for Medical previously borrowed `mentorSupport` — a
+    generic advising shot that is also the /contact and registration hero. That
+    made the one course with a genuinely distinct audience look like every
+    other page.
+
+    The file does not exist yet on purpose. While placeholders are on, the slot
+    renders as numbered colour (37), which is the request for the photograph.
+    See docs/MEDIA_PHOTO_NUMBERS.md.
+  */
+  medicalConsultation: {
+    src: '/media/casa/medical-german-consultation.jpg',
+    alt: {
+      en: 'healthcare professionals practising German for a patient consultation',
+      de: 'medizinische Fachkräfte üben Deutsch für ein Patientengespräch',
+    },
+    caption: {
+      en: 'Medical German is practised through real consultation situations.',
+      de: 'Medizinisches Deutsch wird an echten Gesprächssituationen geübt.',
+    },
+  },
   mentorSupport: {
     src: '/media/casa/advising-session-classroom.jpg',
     alt: {
@@ -531,8 +553,16 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       thumbD: photoLibrary.groupCourseLunch,
       thumbE: photoLibrary.classroomMapVocabulary,
       thumbF: photoLibrary.teamCollaboration,
-      story: photoLibrary.groupCourseLunch,
-      guidance: photoLibrary.groupClassroomTeacherActivity,
+      /*
+        Neither of these may be a course's identity photograph. `story` sits
+        beside a learner quote and `guidance` beside advising copy, so they are
+        about the school rather than about a format — and they previously
+        borrowed german-for-groups' photograph and the site's lead photograph
+        respectively, which put a course's face on a section that is not about
+        that course.
+      */
+      story: photoLibrary.studentPortrait,
+      guidance: photoLibrary.mentorSupport,
     },
   },
   'course-detail': {
@@ -544,16 +574,16 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     ],
     photos: {
       supportCard: photoLibrary.consultationDesk,
-      intensive: photoLibrary.groupClassroomTeacherActivity,
+      intensive: photoLibrary.courseClassroomWide,
       evening: photoLibrary.courseClassroomCircle,
       special: photoLibrary.teacherGuiding,
       groups: photoLibrary.groupCourseLunch,
-      groupsStory: photoLibrary.groupClassroomTeacherActivity,
-      medical: photoLibrary.mentorSupport,
+      groupsStory: photoLibrary.groupCoursePhoneTask,
+      medical: photoLibrary.medicalConsultation,
       company: photoLibrary.teamCollaboration,
       bildungszeit: photoLibrary.campusDiscussion,
       academic: photoLibrary.classroomMapVocabulary,
-      business: photoLibrary.teamCollaboration,
+      business: photoLibrary.whiteboardPractice,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
       testimonialB: photoLibrary.studentTestimonialPortrait2,
       testimonialC: photoLibrary.studentTestimonialPortrait3,

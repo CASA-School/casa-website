@@ -1,25 +1,23 @@
 import type { Metadata } from 'next';
 
-import { CasaImage as Image } from '@/components/ui/casa-image';
 import Link from 'next/link';
+
+import { ArrowRight } from 'lucide-react';
 
 import { HeroBEditorial } from '@/components/heroes';
 import {
   ComparisonModule,
   GuidedPicker,
-  OnboardingQuiz,
   ProofBand,
-  SavedCompareTray,
 } from '@/components/sections';
-import { Button } from '@/components/ui/button';
 import { CoursesFormatSelector } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
+import { getCoursePhoto } from '@/config/courses/course-photos';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCoursePath } from '@/lib/content/course-routes';
-import { formatVisaEligibility } from '@/lib/content/course-pricing';
-import { getCourseFinderData, getCourseRegistrationCatalog, getPageHero, getSocialProof } from '@/lib/content/repository';
+import { getCourseFinderData, getCourseRegistrationCatalog, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -260,18 +258,17 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
 export default async function CoursesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ compare?: string; level?: string; schedule?: string; goal?: string }>;
+  searchParams: Promise<{ level?: string; schedule?: string; goal?: string }>;
 }) {
   const locale = await getContentLocale();
-  const { compare, level, schedule, goal } = await searchParams;
+  const { level, schedule, goal } = await searchParams;
   const rhythm = getLayoutRhythm('courses-index');
   const pageConfig = getPublicPageConfig('courses', locale);
 
-  const [hero, finderData, registrationCatalog, stories] = await Promise.all([
+  const [hero, finderData, registrationCatalog] = await Promise.all([
     Promise.resolve(getPageHero('courses', locale)),
     getCourseFinderData(locale),
     getCourseRegistrationCatalog(locale),
-    Promise.resolve(getSocialProof(locale)),
   ]);
 
   const selectedLevelCandidate = typeof level === 'string' ? level.toUpperCase() : '';
@@ -352,17 +349,14 @@ export default async function CoursesPage({
     featuredCourses.map((course) => [course.id, registrationCatalog.optionsByCourseTypeId[course.id]?.[0] ?? null])
   ) as Record<string, (typeof registrationCatalog.optionsByCourseTypeId)[string][number] | null>;
 
-  const courseOverviewPhotos = [
-    pageConfig.photos.thumbA,
-    pageConfig.photos.thumbB,
-    pageConfig.photos.thumbC,
-    pageConfig.photos.thumbD,
-    pageConfig.photos.thumbE,
-    pageConfig.photos.thumbF,
-  ];
-
-  const guidedItems = featuredCourses.map((course, index) => {
-    const photo = courseOverviewPhotos[index % courseOverviewPhotos.length] ?? pageConfig.photos.thumbA;
+  const guidedItems = featuredCourses.map((course) => {
+    /*
+      Resolved from the course, never from its position in this list. The list
+      is sorted by lessons_per_week and re-filtered by the ?level / ?schedule /
+      ?goal params, so a positional lookup made a card's photograph change when
+      the visitor filtered. See getCoursePhoto for the measurements.
+    */
+    const photo = getCoursePhoto(course.slug, locale);
 
     return {
       id: course.id,
@@ -381,15 +375,6 @@ export default async function CoursesPage({
             : 'TBD'
       }`,
       deadlineIso: nextOptionByCourseId[course.id]?.startDate ?? null,
-      compare: {
-        id: course.id,
-        title: course.name,
-        href: getCoursePath(course.slug),
-        meta:
-          finderData.nextStartByCourseId[course.id]
-            ? `${locale === 'de' ? 'Nächster Start' : 'Next start'} ${formatDate(finderData.nextStartByCourseId[course.id] as string, locale)}`
-            : undefined,
-      },
       media: {
         src: photo.src,
         alt: photo.alt,
@@ -445,11 +430,6 @@ export default async function CoursesPage({
     },
   ];
 
-  const leadStory = stories[0];
-  const availableSlugs = finderData.courses.map((course) => course.slug);
-  const compareIds = compare ? compare.split(',').map((item) => decodeURIComponent(item)) : [];
-  const compareCourses = finderData.courses.filter((course) => compareIds.includes(course.id));
-
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
     { label: locale === 'de' ? 'Kurse' : 'Courses' },
@@ -488,23 +468,21 @@ export default async function CoursesPage({
         themeClassName="hero-theme-courses"
       />
 
-      {/* Section 1: Interactive Finder Quiz */}
-      <section className="py-16 md:py-20 bg-white">
-        <Container className="space-y-6">
-          <OnboardingQuiz locale={locale} availableSlugs={availableSlugs} />
+      {/* Section 1: Guided Picker Shortlist */}
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+        <Container>
+          {/*
+            Moved here from the removed route-finder section. It reports on the
+            hero's course filter, so it belongs immediately above the results it
+            is describing rather than a section away from them.
+          */}
           {fallbackToRecommended ? (
-            <article className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/45 px-4 py-3 text-sm text-[var(--casa-ink)]">
+            <article className="mb-8 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/45 px-4 py-3 text-sm text-[var(--casa-ink)]">
               {locale === 'de'
                 ? 'Keine exakte Kombination gefunden. Wir zeigen die besten verfügbaren Optionen.'
                 : 'No exact match found for this combination. Showing the best available options.'}
             </article>
           ) : null}
-        </Container>
-      </section>
-
-      {/* Section 2: Guided Picker Shortlist */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
-        <Container>
           <GuidedPicker
             eyebrow={locale === 'de' ? 'Kursauswahl' : 'Course shortlist'}
             title={locale === 'de' ? 'Primäre Kursoptionen' : 'Primary course options'}
@@ -515,147 +493,138 @@ export default async function CoursesPage({
             }
             items={guidedItems}
             locale={locale}
-            compareType="course"
+            /*
+              The accepted card design (Variant C on
+              /design-system/course-format-variants). It is also the only
+              presentation that emits per-item DOM ids, so course anchors keep
+              working from the nav and from deep links.
+            */
+            presentation="courseSignalCards"
           />
         </Container>
       </section>
 
-      {/* Section 3: Detailed Format Selector Specs */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
-        <Container>
-          <CoursesFormatSelector
-            title={
-              locale === 'de'
-                ? 'Kursformat-Selektor: So funktioniert jedes Format bei CASA'
-                : 'Course format selector: how each format works at CASA'
-            }
-            description={
-              locale === 'de'
-                ? 'Auf Basis der CASA-Kursstruktur in Bremen vergleichen Sie Rhythmus, Lernumfang und typische Ergebnisse für jede Lernroute.'
-                : 'Based on CASA course structure in Bremen, compare rhythm, workload, and typical outcomes for each learning route.'
-            }
-            items={selectorItems}
-            labels={{
-              signature: locale === 'de' ? 'Kursentscheidung' : 'Course decision',
-              bestFor: locale === 'de' ? 'Am besten geeignet für' : 'Best for',
-              schedule: locale === 'de' ? 'Kursrhythmus' : 'Schedule rhythm',
-              intensity: locale === 'de' ? 'Lernumfang' : 'Learning load',
-              outcomes: locale === 'de' ? 'Wahrscheinliche Lernergebnisse' : 'Likely outcomes',
-              facts: locale === 'de' ? 'So läuft dieses Format bei CASA' : 'How this format works at CASA',
-            }}
-          />
-        </Container>
-      </section>
+      {/*
+        Section 3: Practical facts before choosing.
 
-      {/* Section 4: Human Perspective & Course Advising */}
-      {leadStory ? (
-        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
-          <Container className="space-y-12 md:space-y-16">
-            <div className="max-w-3xl mx-auto text-center space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Der menschliche Unterschied' : 'The Human Difference'}
-              </p>
-              <h2 className="text-3xl font-bold tracking-tight text-[var(--casa-ink)] sm:text-4xl">
-                {locale === 'de' ? 'Unterstützung auf jedem Schritt Ihres Weges' : 'Support on Every Step of Your Journey'}
-              </h2>
-              <p className="text-base text-[var(--casa-muted)] md:text-lg">
-                {locale === 'de'
-                  ? 'Erfahren Sie von unseren Teilnehmenden, wie sich das Lernen anfühlt, und wie wir Sie akademisch begleiten.'
-                  : 'Hear from our students about their learning experience and see how our academic advisors guide you.'}
-              </p>
-            </div>
+        This replaced a "The Human Difference" band whose copy — "Support on
+        Every Step of Your Journey", "Human learning journeys need clear
+        guidance" — asserted warmth without telling anyone anything. On an index
+        page the reader has just met six formats and has concrete unanswered
+        questions, so the band now answers them.
 
-            <div className="rounded-3xl bg-[var(--casa-warm-soft)]/32 border border-[color:var(--casa-sand)]/60 p-6 md:p-10 space-y-12 md:space-y-16 shadow-[var(--shadow-soft)]">
-              {/* Part 1: Student Story */}
-              <div className="grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-                <figure className="overflow-hidden rounded-3xl bg-white shadow-[var(--shadow-card)]">
-                  <div className="casa-media-overlay relative h-80 md:h-[420px]">
-                      <Image
-                      src={pageConfig.photos.story.src}
-                      alt={pageConfig.photos.story.alt}
-                      fill
-                      sizes="(min-width: 1280px) 40vw, (min-width: 1024px) 45vw, 95vw"
-                      className="object-cover"
+        EVERY NUMBER HERE IS FROM docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
+        Deliberately absent: the "EUR 50 enrolment fee" and "EUR 23.99-26.99
+        textbook" figures that buildSelectorCopy renders elsewhere on this page.
+        Neither appears in the verified table, and CLAUDE.md forbids shipping a
+        course number that is not verified there.
+
+        No photographs. The six format cards above already carry the page's
+        images, and four short facts do not need illustrating.
+      */}
+      <section className="py-16 md:py-24 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+        <Container className="space-y-10 md:space-y-12">
+          <div className="mx-auto max-w-[46rem] text-center">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+              {locale === 'de' ? 'Vor der Anmeldung' : 'Before you enrol'}
+            </p>
+            <h2 className="mt-4 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              {locale === 'de' ? 'Vier Dinge, die Sie vorher wissen sollten' : 'Four things worth knowing first'}
+            </h2>
+            <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+              {locale === 'de'
+                ? 'Erst die Fragen, die für alle Formate gelten — dann der Vergleich der Formate selbst.'
+                : 'First the questions that apply to every format, then the formats themselves compared.'}
+            </p>
+          </div>
+
+          <ul className="mx-auto grid max-w-[76rem] gap-x-10 gap-y-10 md:grid-cols-2 md:gap-y-12">
+            {[
+              {
+                title: locale === 'de' ? 'Ihr Niveau steht am Anfang' : 'Your level comes first',
+                body:
+                  locale === 'de'
+                    ? 'Jeder Kurs setzt eine Einstufung voraus. Der Einstufungstest ist kostenlos und dauert wenige Minuten — er entscheidet, in welcher Gruppe Sie starten.'
+                    : 'Every format starts from a placement. The test is free and takes a few minutes, and it decides which group you join.',
+                linkHref: '/placement-test',
+                linkLabel: locale === 'de' ? 'Zum Einstufungstest' : 'Take the placement test',
+              },
+              {
+                title: locale === 'de' ? 'Wie schnell ein Niveau vergeht' : 'How long a level takes',
+                body:
+                  locale === 'de'
+                    ? 'Im Intensivkurs dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen bei 20 UE pro Woche. Im Abendkurs sind es rund 3,5 Monate für ein halbes Niveau, also etwa 1,5 Stufen pro Jahr.'
+                    : 'Intensive covers a full CEFR level in about 8 to 9 weeks at 20 lessons a week. Evening covers half a level in roughly 3.5 months — around 1.5 levels a year.',
+              },
+              {
+                title: locale === 'de' ? 'Prüfungsvorbereitung ist ein eigener Kurs' : 'Exam preparation is a separate course',
+                body:
+                  locale === 'de'
+                    ? 'Die Vorbereitung auf telc gehört ausdrücklich nicht zum Intensivprogramm. Wer ein Zertifikat braucht, bucht sie zusätzlich.'
+                    : 'Preparing for a telc certificate is explicitly not part of the intensive programme. If you need the certificate, book it alongside.',
+                linkHref: '/exams',
+                linkLabel: locale === 'de' ? 'Prüfungen ansehen' : 'See exams',
+              },
+              {
+                title: locale === 'de' ? 'Zwei Formate ohne Listenpreis' : 'Two formats are quoted individually',
+                body:
+                  locale === 'de'
+                    ? 'Deutsch für Gruppen und Firmenunterricht werden nach Bedarf zusammengestellt und individuell angeboten — beim Gruppenkurs inklusive Unterkunft, Kulturprogramm und Nahverkehrsticket.'
+                    : 'German for Groups and Firmenunterricht are built to a brief and quoted individually — the group programme including accommodation, a culture programme and a transit pass.',
+                linkHref: '/contact',
+                linkLabel: locale === 'de' ? 'Angebot anfragen' : 'Request a quote',
+              },
+            ].map((fact) => (
+              <li key={fact.title} className="border-t border-[color:var(--casa-sand)] pt-6">
+                <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{fact.title}</h3>
+                <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{fact.body}</p>
+                {fact.linkHref ? (
+                  <Link
+                    href={fact.linkHref}
+                    className="casa-cta-link group/cta mt-4 inline-flex items-center gap-2 text-sm font-bold text-[var(--casa-ink)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text)] hover:underline"
+                  >
+                    {fact.linkLabel}
+                    <ArrowRight
+                      className="h-4 w-4 transition-transform duration-300 ease-out group-hover/cta:translate-x-1"
+                      aria-hidden
                     />
-                  </div>
-                </figure>
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
 
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                    {locale === 'de' ? 'Teilnehmerbericht' : 'Student story'}
-                  </p>
-                  <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">
-                    {locale === 'de' ? 'Wie sich der passende Kurs im Alltag anfühlt' : 'How the right course format feels in real life'}
-                  </h3>
-                  <blockquote className="mt-4 text-lg font-medium leading-relaxed text-[var(--casa-ink)]">
-                    &quot;{leadStory.quote}&quot;
-                  </blockquote>
-                  <p className="mt-3 text-base font-medium text-[var(--casa-muted)]">
-                    {leadStory.personDisplay} - {leadStory.country}
-                  </p>
-                  <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">
-                    {locale === 'de'
-                      ? 'Mit klarer Struktur und passendem Rhythmus entstehen Fortschritt und Sicherheit gleichzeitig.'
-                      : 'When structure matches your rhythm, progress and confidence grow together.'}
-                  </p>
-                  <Button asChild variant="prism" className="mt-7">
-                    <Link href={compareCourses.length >= 2 ? '/courses?compare=' + compareCourses.map((course) => course.id).join(',') : '/courses'}>
-                      {locale === 'de' ? 'Kurse vergleichen' : 'Compare courses'}
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              <hr className="border-[color:var(--casa-sand)]/60" />
-
-              {/* Part 2: Academic Guidance */}
-              <div className="grid items-start gap-10 lg:grid-cols-[1fr_1fr]">
-                <div className="lg:order-1">
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                    {locale === 'de' ? 'Kursberatung' : 'Academic guidance'}
-                  </p>
-                  <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-                  <h3 className="mt-3 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">
-                    {locale === 'de' ? 'Persönliche Lernwege brauchen Orientierung' : 'Human learning journeys need clear guidance'}
-                  </h3>
-                  <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                    {locale === 'de'
-                      ? 'Unsere Kursberatung verbindet akademische Ziele mit realen Lebenssituationen in Bremen.'
-                      : 'Course advising connects academic goals with real-life realities in Bremen.'}
-                  </p>
-                  <ul className="mt-6 space-y-2.5">
-                    {[
-                      locale === 'de' ? 'Lehrkräfte geben kontinuierliches Feedback' : 'Teachers provide consistent feedback',
-                      locale === 'de' ? 'Kleine Lerngruppen steigern Sprechzeit' : 'Small groups increase speaking time',
-                      locale === 'de' ? 'Flexible Pfade für Studium und Beruf' : 'Flexible pathways for study and career',
-                    ].map((bullet) => (
-                      <li key={bullet} className="flex gap-2 text-base text-[var(--casa-ink)]">
-                        <span aria-hidden className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--casa-blue)]" />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="lg:order-2">
-                  <figure className="overflow-hidden rounded-3xl bg-white/80 shadow-[var(--shadow-card)]">
-                    <div className="casa-media-overlay relative h-80 md:h-[420px]">
-                      <Image
-                        src={pageConfig.photos.guidance.src}
-                        alt={pageConfig.photos.guidance.alt}
-                        fill
-                        sizes="(min-width: 1280px) 42vw, (min-width: 1024px) 45vw, 95vw"
-                        className="object-cover"
-                      />
-                    </div>
-                  </figure>
-                </div>
-              </div>
-            </div>
-          </Container>
-        </section>
-      ) : null}
+          {/*
+            The child block. The band above states what to know before choosing;
+            this answers the question that follows from it, which is why it sits
+            inside the same band on the same surface with a subordinate heading
+            rather than opening a new section.
+          */}
+          <div className="mx-auto max-w-[76rem] border-t border-[color:var(--casa-sand)] pt-10 md:pt-12">
+            <CoursesFormatSelector
+              title={
+                locale === 'de'
+                  ? 'Und so läuft jedes Format konkret ab'
+                  : 'And here is how each format actually runs'
+              }
+              description={
+                locale === 'de'
+                  ? 'Wählen Sie ein Format und sehen Sie Rhythmus, Lernumfang und typische Ergebnisse.'
+                  : 'Pick a format to see its rhythm, weekly load and likely outcomes.'
+              }
+              items={selectorItems}
+              labels={{
+                signature: locale === 'de' ? 'Kursentscheidung' : 'Course decision',
+                bestFor: locale === 'de' ? 'Am besten geeignet für' : 'Best for',
+                schedule: locale === 'de' ? 'Kursrhythmus' : 'Schedule rhythm',
+                intensity: locale === 'de' ? 'Lernumfang' : 'Learning load',
+                outcomes: locale === 'de' ? 'Wahrscheinliche Lernergebnisse' : 'Likely outcomes',
+                facts: locale === 'de' ? 'So läuft dieses Format bei CASA' : 'How this format works at CASA',
+              }}
+            />
+          </div>
+        </Container>
+      </section>
 
       {/* Section 6: Format Comparison Modules */}
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
@@ -709,74 +678,6 @@ export default async function CoursesPage({
             ]}
           />
 
-          {compareCourses.length >= 2 ? (
-            <div id="course-compare-section" className="scroll-mt-28">
-              <ComparisonModule
-                eyebrow={locale === 'de' ? 'Gespeicherter Vergleich' : 'Saved compare'}
-                title={locale === 'de' ? 'Ihre ausgewählten Kurse' : 'Your selected courses'}
-                description={
-                  locale === 'de'
-                    ? 'Vergleich aus dem gespeicherten Tray.'
-                    : 'Comparison from your saved tray.'
-                }
-                leftTitle={compareCourses[0]?.name ?? ''}
-                rightTitle={compareCourses[1]?.name ?? ''}
-                rows={[
-                  {
-                    label: locale === 'de' ? 'Niveau' : 'Level',
-                    left: `${compareCourses[0]?.level_min ?? 'A1'} - ${compareCourses[0]?.level_max ?? 'C1'}`,
-                    right: `${compareCourses[1]?.level_min ?? 'A1'} - ${compareCourses[1]?.level_max ?? 'C1'}`,
-                  },
-                  {
-                    label: locale === 'de' ? 'Lektionen/Woche' : 'Lessons/week',
-                    left: String(compareCourses[0]?.lessons_per_week ?? '-'),
-                    right: String(compareCourses[1]?.lessons_per_week ?? '-'),
-                  },
-                  {
-                    label: locale === 'de' ? 'Nächster Start' : 'Next start',
-                    left: finderData.nextStartByCourseId[compareCourses[0]?.id ?? '']
-                      ? formatDate(String(finderData.nextStartByCourseId[compareCourses[0]?.id ?? '']), locale)
-                      : 'TBD',
-                    right: finderData.nextStartByCourseId[compareCourses[1]?.id ?? '']
-                      ? formatDate(String(finderData.nextStartByCourseId[compareCourses[1]?.id ?? '']), locale)
-                      : 'TBD',
-                  },
-                  {
-                    label: locale === 'de' ? 'Format' : 'Format',
-                    left: compareCourses[0]?.format ?? '-',
-                    right: compareCourses[1]?.format ?? '-',
-                  },
-                  {
-                    label: locale === 'de' ? 'Preis ab' : 'Price from',
-                    left: `${compareCourses[0]?.default_price ?? '-'} ${compareCourses[0]?.currency ?? 'EUR'}`,
-                    right: `${compareCourses[1]?.default_price ?? '-'} ${compareCourses[1]?.currency ?? 'EUR'}`,
-                  },
-                  {
-                    label: locale === 'de' ? 'Visa-geeignet' : 'Visa suitable',
-                    left: formatVisaEligibility(finderData.visaEligibleByCourseId[compareCourses[0]?.id ?? ''] ?? null, locale),
-                    right: formatVisaEligibility(finderData.visaEligibleByCourseId[compareCourses[1]?.id ?? ''] ?? null, locale),
-                  },
-                  {
-                    label: locale === 'de' ? 'Nächster Schritt' : 'Next step',
-                    left: (compareCourses[0]?.level_min ?? 'A1').toUpperCase().startsWith('A')
-                      ? locale === 'de'
-                        ? 'Einstufung zuerst'
-                        : 'Book placement first'
-                      : locale === 'de'
-                        ? 'Zur Kursanmeldung'
-                        : 'Reserve course spot',
-                    right: (compareCourses[1]?.level_min ?? 'A1').toUpperCase().startsWith('A')
-                      ? locale === 'de'
-                        ? 'Einstufung zuerst'
-                        : 'Book placement first'
-                      : locale === 'de'
-                        ? 'Zur Kursanmeldung'
-                        : 'Reserve course spot',
-                  },
-                ]}
-              />
-            </div>
-          ) : null}
         </Container>
       </section>
 
@@ -787,7 +688,6 @@ export default async function CoursesPage({
         </Container>
       </section>
 
-      <SavedCompareTray type="course" locale={locale} comparePath="/courses" />
     </main>
   );
 }

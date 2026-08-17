@@ -44,7 +44,20 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
   }));
 
   return (
-    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-ink-deep)] px-6 py-7 text-white md:px-8 md:py-8', className)}>
+    /*
+      The measure lives HERE, not at the call site.
+
+      Every page used to clamp this itself, and they disagreed: the homepage
+      wrapped it in `max-w-[85rem]` while /courses let it span the full 1680px
+      site frame, so the same component was visibly two different widths on two
+      pages. ProofBand is a painted ink slab whose widest child is a ~800px logo
+      row — at full frame width more than half the panel is empty dark fill.
+
+      Owning the clamp means a page renders <ProofBand /> and gets the agreed
+      treatment, and changing it once changes it everywhere. `className` still
+      composes for anything genuinely page-specific.
+    */
+    <section data-reveal="true" className={cn('mx-auto max-w-[85rem] rounded-3xl bg-[var(--casa-ink-deep)] px-6 py-7 text-white md:px-8 md:py-8', className)}>
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-amber)]">{displayTitle}</p>
       <p className="mt-2 max-w-measure text-sm text-white/80 md:text-sm">{displayCredibilityLine}</p>
 

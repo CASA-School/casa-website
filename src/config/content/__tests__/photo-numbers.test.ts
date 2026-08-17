@@ -81,12 +81,16 @@ describe('photo number registry', () => {
     expect(new Set(paths).size, 'two numbers point at the same src').toBe(paths.length);
   });
 
-  it('points every number at a file that exists', () => {
+  it('points every READY number at a file that exists', () => {
+    // A photograph that has not been taken yet has no file, and that is a
+    // legitimate state: the slot renders as numbered colour, which is how the
+    // gap stays visible. `ready` is the claim that a real image is in place,
+    // so it is `ready` that has to be backed by one.
     const missing = photoSlots
-      .filter((slot) => !existsSync(join(PUBLIC_ROOT, slot.src)))
+      .filter((slot) => slot.ready && !existsSync(join(PUBLIC_ROOT, slot.src)))
       .map((slot) => `${slot.n} -> ${slot.src}`);
 
-    expect(missing, `numbered paths with nothing in public/:\n${missing.join('\n')}`).toEqual([]);
+    expect(missing, `slots marked ready with nothing in public/:\n${missing.join('\n')}`).toEqual([]);
   });
 
   it('describes what each photograph should show', () => {

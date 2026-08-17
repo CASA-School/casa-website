@@ -39,13 +39,26 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
   }
 
   return (
-    <section className="overflow-hidden rounded-lg border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-card)]">
-      <div className="p-5 md:p-7">
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.signature ?? 'Signature'}</p>
-        <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+    /*
+      A CHILD OF THE "BEFORE YOU ENROL" BAND, not a peer of it.
 
-        <div className="mt-5 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Course format selector">
+      This used to be its own section: a shadowed, fully-bordered white card
+      with an h2 the same size as the band heading above it. Two headings at the
+      same weight in the same band read as two competing sections, when the
+      relationship is actually parent -> child: the band states the four things
+      to know, and this answers "so how does each format actually run?".
+
+      So the shell is gone entirely — it sits open on the parent's background —
+      and the heading drops to an h3 a step below the band's h2. The only
+      painted surface left is the tinted outcomes rail, which is the one thing
+      here that should draw the eye.
+    */
+    <section>
+      <div className="text-center">
+        <h3 className="text-xl font-bold leading-snug text-[var(--casa-ink)] md:text-2xl">{title}</h3>
+        <p className="mx-auto mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
+
+        <div className="mt-6 flex justify-center gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Course format selector">
           {items.map((item) => (
             <button
               key={item.id}
@@ -65,7 +78,7 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
         </div>
       </div>
 
-      <div className="grid gap-0 border-t border-[color:var(--casa-sand)] lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.82fr)]">
+      <div className="mt-8 grid gap-0 overflow-hidden rounded-lg border border-[color:var(--casa-sand)] bg-white lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.82fr)]">
         <article className="p-5 md:p-7">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.bestFor ?? 'Best for'}</p>
           <p className="mt-3 text-lg font-bold leading-snug text-[var(--casa-ink)]">{selected.bestFor}</p>

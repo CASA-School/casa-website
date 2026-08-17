@@ -20,8 +20,6 @@ export { ComparisonModule } from './comparison-module';
 export { CommunityStories, type CommunityStory } from './community-stories';
 export { HumanStoryBlock } from './human-story-block';
 export { DeadlineBadge } from './deadline-badge';
-export { OnboardingQuiz } from './onboarding-quiz';
-export { SavedCompareTray } from './saved-compare-tray';
 export { LiveReviewModule, type LiveReviewItem } from './live-review-module';
 export { TeacherSpotlightCard } from './teacher-spotlight-card';
 export { DecisionRail } from './decision-rail';

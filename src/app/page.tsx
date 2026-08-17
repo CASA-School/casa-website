@@ -16,6 +16,7 @@ import { CardRail } from '@/components/ui/card-rail';
 import { Container } from '@/components/ui/container';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
+import { getCoursePhoto } from '@/config/courses/course-photos';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCoursePath } from '@/lib/content/course-routes';
@@ -183,18 +184,14 @@ export default async function HomePage() {
     return records;
   }, []);
 
-  const homepageCoursePhotos = [
-    pageConfig.photos.courseA,
-    pageConfig.photos.courseB,
-    pageConfig.photos.courseC,
-    pageConfig.photos.courseD,
-    pageConfig.photos.courseE,
-    pageConfig.photos.courseF,
-  ];
-
-  const guidedCourses = guidedCourseRecords.map((course, index) => {
+  const guidedCourses = guidedCourseRecords.map((course) => {
     const nextStart = finderData.nextStartByCourseId[course.id];
-    const photo = homepageCoursePhotos[index % homepageCoursePhotos.length] ?? pageConfig.photos.story;
+    /*
+      Same photograph this course carries on /courses and on its own page.
+      Previously indexed by position here too, which is why Intensive German
+      wore a different photograph on each of the three surfaces.
+    */
+    const photo = getCoursePhoto(course.slug, locale);
 
     return {
       id: `course-${course.slug}`,
@@ -445,17 +442,9 @@ export default async function HomePage() {
         photo={pageConfig.photos.hero}
       />
 
-      {/*
-        Held to 68rem rather than the full 1600px site frame. ProofBand is a
-        painted ink slab whose widest child is a ~800px logo row, so at full
-        width more than half the panel was empty dark fill. Same clamp as the
-        course-format band below, so the two read as the same measure.
-      */}
       <section className="py-14 md:py-20" data-track-section="trust-and-search">
         <Container>
-          <div className="mx-auto max-w-[85rem]">
-            <ProofBand locale={locale} />
-          </div>
+          <ProofBand locale={locale} />
         </Container>
       </section>
 

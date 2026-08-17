@@ -8,7 +8,6 @@ import { ArrowRight } from 'lucide-react';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
-import { CompareToggleButton } from './compare-toggle-button';
 import { DeadlineBadge } from './deadline-badge';
 
 export type GuidedPickerItem = {
@@ -20,12 +19,6 @@ export type GuidedPickerItem = {
   ctaLabel: string;
   meta?: string;
   deadlineIso?: string | null;
-  compare?: {
-    id: string;
-    title: string;
-    href: string;
-    meta?: string;
-  };
   media?: {
     src: string;
     alt: string;
@@ -38,7 +31,6 @@ type GuidedPickerProps = {
   description: string;
   items: GuidedPickerItem[];
   locale?: ContentLocale;
-  compareType?: 'course' | 'exam';
   desktopColumns?: 2 | 3;
   presentation?:
     | 'default'
@@ -59,7 +51,6 @@ export function GuidedPicker({
   description,
   items,
   locale = 'en',
-  compareType,
   desktopColumns,
   presentation = 'default',
   showAccentRule = true,
@@ -113,13 +104,6 @@ export function GuidedPicker({
         {title}
       </h2>
       <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
-      {compareType ? (
-        <p className="mt-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-          {locale === 'de'
-            ? 'Guardrail: wählen Sie genau 2 Optionen für den Vergleich.'
-            : 'Guardrail: select exactly 2 options to compare.'}
-        </p>
-      ) : null}
     </div>
   );
 
@@ -547,13 +531,6 @@ export function GuidedPicker({
                     {item.ctaLabel}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </Link>
-                  {compareType && item.compare ? (
-                    <CompareToggleButton
-                      type={compareType}
-                      locale={locale}
-                      item={item.compare}
-                    />
-                  ) : null}
                 </div>
               </article>
             </li>

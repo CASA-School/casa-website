@@ -2,12 +2,10 @@ import type { Metadata } from 'next';
 
 import { HeroCUtilityRail } from '@/components/heroes';
 import {
-  ComparisonModule,
   GuidedPicker,
   HumanStoryBlock,
   ProcessSteps,
   ProofBand,
-  SavedCompareTray,
 } from '@/components/sections';
 import { ExamsReadinessCheck } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
@@ -17,7 +15,6 @@ import { shouldShowDraftClaims } from '@/lib/content/locale';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getExamCatalog, getProofMetrics, getSocialProof } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
-import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = createPublicMetadata({
   title: 'Exams',
@@ -50,13 +47,8 @@ function deadlineClosed(deadline?: string | null) {
   return new Date(deadline).getTime() < Date.now();
 }
 
-export default async function ExamsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ compare?: string }>;
-}) {
+export default async function ExamsPage() {
   const locale = await getContentLocale();
-  const { compare } = await searchParams;
   const rhythm = getLayoutRhythm('exams-index');
   const pageConfig = getPublicPageConfig('exams', locale);
   const showDraftClaims = shouldShowDraftClaims();
@@ -89,12 +81,6 @@ export default async function ExamsPage({
           : 'Reserve exam seat',
       meta: examFeeSummary(item.examType.code, locale),
       deadlineIso: nextSession?.registration_deadline ?? null,
-      compare: {
-        id: item.examType.id,
-        title: item.examType.name,
-        href: examDetailHref(item.examType.code, item.anchorId),
-        meta: item.examType.level || undefined,
-      },
       media: {
         src:
           item.examType.code === 'telc_b2'
@@ -117,9 +103,6 @@ export default async function ExamsPage({
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
     { label: locale === 'de' ? 'Prüfungen' : 'Exams' },
   ];
-
-  const compareIds = compare ? compare.split(',').map((value) => decodeURIComponent(value)) : [];
-  const compareExams = catalog.items.filter((entry) => compareIds.includes(entry.examType.id)).slice(0, 2);
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
@@ -171,7 +154,6 @@ export default async function ExamsPage({
             }
             items={examItems}
             locale={locale}
-            compareType="exam"
           />
         </Container>
       </section>
@@ -226,65 +208,8 @@ export default async function ExamsPage({
         </section>
       ) : null}
 
-      {/* Section 4: Comparison (Conditional) */}
-      {compareExams.length >= 2 ? (
-        <section id="exam-compare-section" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30 scroll-mt-28">
-          <Container>
-            <ComparisonModule
-              eyebrow={locale === 'de' ? 'Gespeicherter Vergleich' : 'Saved compare'}
-              title={locale === 'de' ? 'Ihre ausgewählten Prüfungen' : 'Your selected exams'}
-              description={
-                locale === 'de'
-                  ? 'Vergleich der wichtigsten Registrierungsfaktoren.'
-                  : 'Compare key registration factors side by side.'
-              }
-              leftTitle={compareExams[0].examType.name}
-              rightTitle={compareExams[1].examType.name}
-              rows={[
-                {
-                  label: locale === 'de' ? 'Level' : 'Level',
-                  left: compareExams[0].examType.level || '-',
-                  right: compareExams[1].examType.level || '-',
-                },
-                {
-                  label: locale === 'de' ? 'Preis ab' : 'Price from',
-                  left: `${compareExams[0].examType.default_fee} ${compareExams[0].examType.currency}`,
-                  right: `${compareExams[1].examType.default_fee} ${compareExams[1].examType.currency}`,
-                },
-                {
-                  label: locale === 'de' ? 'Nächste Session' : 'Next session',
-                  left: compareExams[0].sessions[0]?.starts_at
-                    ? new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { dateStyle: 'medium' }).format(new Date(compareExams[0].sessions[0].starts_at))
-                    : locale === 'de' ? 'Wird bestätigt' : 'TBD',
-                  right: compareExams[1].sessions[0]?.starts_at
-                    ? new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { dateStyle: 'medium' }).format(new Date(compareExams[1].sessions[0].starts_at))
-                    : locale === 'de' ? 'Wird bestätigt' : 'TBD',
-                },
-                {
-                  label: locale === 'de' ? 'Anmeldefrist' : 'Registration deadline',
-                  left: compareExams[0].sessions[0]?.registration_deadline
-                    ? new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { dateStyle: 'medium' }).format(new Date(compareExams[0].sessions[0].registration_deadline as string))
-                    : locale === 'de' ? 'Wird bestätigt' : 'TBD',
-                  right: compareExams[1].sessions[0]?.registration_deadline
-                    ? new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { dateStyle: 'medium' }).format(new Date(compareExams[1].sessions[0].registration_deadline as string))
-                    : locale === 'de' ? 'Wird bestätigt' : 'TBD',
-                },
-                {
-                  label: locale === 'de' ? 'Nächster Schritt' : 'Next step',
-                  left: locale === 'de' ? 'Termine prüfen und anmelden' : 'Check dates and register',
-                  right: locale === 'de' ? 'Termine prüfen und anmelden' : 'Check dates and register',
-                },
-              ]}
-            />
-          </Container>
-        </section>
-      ) : null}
-
       {/* Section 5: Steps */}
-      <section className={cn(
-        "py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40",
-        compareExams.length >= 2 ? "bg-white" : "bg-[var(--casa-surface-wash)]/30"
-      )}>
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <ProcessSteps
             eyebrow={locale === 'de' ? 'Vorbereitungsweg' : 'Preparation pathway'}
@@ -316,10 +241,7 @@ export default async function ExamsPage({
       </section>
 
       {/* Section 6: Proof Band */}
-      <section className={cn(
-        "py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40",
-        compareExams.length >= 2 ? "bg-[var(--casa-surface-wash)]/30" : "bg-white"
-      )}>
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
         <Container>
           <ProofBand
             locale={locale}
@@ -333,7 +255,6 @@ export default async function ExamsPage({
         </Container>
       </section>
 
-      <SavedCompareTray type="exam" locale={locale} comparePath="/exams" />
     </main>
   );
 }

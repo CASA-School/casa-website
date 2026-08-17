@@ -140,6 +140,20 @@ export const photoSlots: PhotoSlot[] = [
   { n: 35, src: '/media/casa/team/team-melanie-hoffmann-portrait.jpg', subject: 'Staff portrait — Melanie Hoffmann. Match the framing of 31.', ready: false },
   { n: 36, src: '/media/casa/team/team-sofia-martin-portrait.jpg', subject: 'Staff portrait — Sofia Martin. Match the framing of 31.', ready: false },
 
+  /*
+    ---- Awaited ------------------------------------------------------------
+    Numbered but not yet shot. There is no file at this path, and that is the
+    point: the slot renders as numbered colour, so the gap is visible on the
+    page instead of being hidden behind a borrowed stock-ish photograph.
+  */
+  {
+    n: 37,
+    src: '/media/casa/medical-german-consultation.jpg',
+    subject:
+      'German for Medical. Healthcare professionals practising a patient consultation — scrubs or clinical setting readable, two people talking rather than a lecture. THIS PHOTOGRAPH DOES NOT EXIST YET; the course borrowed a generic advising shot until now.',
+    ready: false,
+  },
+
   // ---- Append new photographs below this line, next number, never resort --
 ];
 
