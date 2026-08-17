@@ -1705,6 +1705,23 @@ h3 {
 }
 
 
+/*
+ * NewsFlash ticker. The track holds the item list twice, so translating by
+ * exactly -50% lands the second copy where the first began and the loop is
+ * seamless with no JS and no measurement.
+ *
+ * Only referenced through `motion-safe:`, so a reduced-motion visitor gets a
+ * static row rather than a slower one.
+ */
+@keyframes casa-ticker {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 .clara-status-pulse {
   animation: clara-status-pulse 1.2s ease-in-out infinite;
 }
