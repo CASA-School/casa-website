@@ -3,19 +3,16 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-import { PageHero } from '@/components/marketing/hero/page-hero';
 import {
-  estimateNewsReadingTime,
   formatNewsDate,
   NewsPostBody,
   NewsPostLead,
 } from '@/components/news/news-post-renderer';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
-import { shouldShowDraftClaims } from '@/lib/content/locale';
+import { TextCta } from '@/components/ui/text-cta';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getNewsList, getNewsPost, getPageHero } from '@/lib/content/repository';
+import { getNewsList, getNewsPost } from '@/lib/content/repository';
 import { publishDueScheduledPosts } from '@/lib/news/publishDueScheduledPosts';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
@@ -36,7 +33,6 @@ export async function generateMetadata({ params }: NewsDetailPageProps): Promise
       path: `/news/${slug}`,
     });
   }
-
   return createPublicMetadata({
     title: post.title,
     description: post.summary,
@@ -49,11 +45,9 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   await publishDueScheduledPosts();
 
   const locale = await getContentLocale();
-  const showDraftClaims = shouldShowDraftClaims();
   const { slug } = await params;
 
-  const [hero, post, newsList] = await Promise.all([
-    Promise.resolve(getPageHero('news-detail', locale)),
+  const [post, newsList] = await Promise.all([
     getNewsPost(slug, locale),
     getNewsList(locale),
   ]);
@@ -61,6 +55,37 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   if (!post) {
     notFound();
   }
+  const copy =
+    locale === 'de'
+      ? {
+          backToIssue: 'Zurück zum NewsFlash',
+
+          eyebrow: 'Artikel des Monats',
+          nextStepTitle: 'Der nächste Schritt',
+
+          nextStepBody:
+            'Aus dem Gelesenen soll Fortschritt werden? Wir empfehlen Ihnen den passenden Kurs und einen realistischen Zeitplan.',
+
+          findCourse: 'Kurs finden',
+          talkToAdmissions: 'Lieber erst beraten lassen',
+
+          relatedTitle: 'Weitere Artikel',
+        }
+      : {
+          backToIssue: 'Back to the NewsFlash',
+
+          eyebrow: 'Article of the month',
+          nextStepTitle: 'Your next step',
+
+          nextStepBody:
+            'Ready to turn this into progress? We can recommend the right course and a realistic timeline.',
+
+          findCourse: 'Find my course',
+          talkToAdmissions: 'Ask an advisor first',
+
+          relatedTitle: 'More articles',
+        };
+
 
   const related = newsList.filter((item) => item.slug !== post.slug).slice(0, 2);
   const articleSchema = {
@@ -79,89 +104,106 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     },
     mainEntityOfPage: toAbsoluteUrl(`/news/${post.slug}`),
   };
-
   return (
     <main className="bg-white text-[var(--casa-ink)]">
       <JsonLdScript id={`news-article-schema-${post.slug}`} data={articleSchema} />
-      <PageHero
-        spec={hero}
-        showDraftClaims={showDraftClaims}
-        breadcrumbs={[
-          { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-          { label: locale === 'de' ? 'News' : 'News', href: '/news' },
-          { label: post.title },
-        ]}
-        utilityItems={[
-          { label: locale === 'de' ? 'Kategorie' : 'Category', value: post.category },
-          { label: locale === 'de' ? 'Autor' : 'Author', value: post.author },
-          { label: locale === 'de' ? 'Lesedauer' : 'Reading time', value: `${estimateNewsReadingTime(post.body)} min` },
-          { label: locale === 'de' ? 'Veröffentlicht' : 'Published', value: formatNewsDate(post.publishedAt, locale) },
-        ]}
-      />
+      {/*
+        NO PageHero here, deliberately.
 
-      <section className="py-16 md:py-20">
+        It rendered a generic marketing headline ("Vom Impuls zum nächsten
+        Sprachlern-Meilenstein") that was not the article's, a striped data
+        panel, a process box, two competing buttons and the school's proof
+        metrics — and then the real article title appeared underneath it. Two
+        headers on one page, and the furniture said nothing about the piece you
+        had clicked to read. The article's own lead is the header.
+
+        Category, author, reading time and date all still appear, inside
+        NewsPostLead where they belong to the article rather than to a panel.
+      */}
+      {/*
+        One editorial column. No sidebar, no card, no conversion panel.
+
+        This carried a two-column layout with the article boxed on the left and a
+        warm CTA block plus a related-articles card on the right — which reads as
+        a landing page that happens to contain prose. An article page has one
+        job, so the measure is a reading measure (44rem, roughly 70 characters at
+        17px) and everything else sits after the piece rather than beside it.
+
+        Also fixed: every string here was hardcoded English, so a German reader
+        got "Back to all news" and "Plan your next step" on a German article.
+      */}
+      <section className="pb-20 pt-10 md:pt-14">
         <Container>
-          <Link href="/news" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)]">
-            <ArrowLeft className="h-4 w-4" />
-            Back to all news
-          </Link>
+          <div className="mx-auto max-w-[44rem]">
+            <Link
+              href="/news"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {copy.backToIssue}
+            </Link>
 
-          <NewsPostLead
-            locale={locale}
-            category={post.category}
-            title={post.title}
-            summary={post.summary}
-            body={post.body}
-            publishedAt={post.publishedAt}
-            author={post.author}
-          />
-        </Container>
-      </section>
+            <div className="mt-10">
+              <NewsPostLead
+                locale={locale}
+                category={post.category}
+                title={post.title}
+                summary={post.summary}
+                body={post.body}
+                publishedAt={post.publishedAt}
+                author={post.author}
+              />
+            </div>
 
-      <section className="pb-14 sm:pb-16">
-        <Container>
-          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-            <NewsPostBody body={post.body} contentJson={post.contentJson} />
+            <div className="mt-8">
+              <NewsPostBody body={post.body} contentJson={post.contentJson} />
+            </div>
 
-            <aside className="space-y-5">
-              <div className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-[var(--casa-warm-soft)]/45 p-6">
-                <h2 className="text-xl font-bold">Plan your next step</h2>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">
-                  Ready to turn this insight into progress? We can recommend the best course and timeline for you.
-                </p>
-                <div className="mt-5 space-y-3">
-                  <Button asChild variant="prism" className="w-full justify-between px-4">
-                    <Link href="/courses">
-                      Find my course path
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline-prism" className="w-full justify-between bg-white px-4">
-                    <Link href="/contact">
-                      Talk to admissions
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
+            {/*
+              A single quiet line at the end, not a panel. The reader who finishes
+              an article is the one worth inviting onward, and one sentence with
+              one link does that without turning the page into a funnel.
+            */}
+            <div className="mt-12 border-t border-[color:var(--casa-sand)] pt-8">
+              <p className="text-[15px] leading-relaxed text-[var(--casa-muted)]">
+                {copy.nextStepBody}
+              </p>
+              <TextCta href="/courses" className="mt-4">
+                {copy.findCourse}
+              </TextCta>
+            </div>
 
-              <div className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-white p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">Related articles</h3>
-                <ul className="mt-4 space-y-4">
+            {related.length > 0 ? (
+              <div className="mt-14 border-t border-[color:var(--casa-sand)] pt-8">
+                <h2 className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+                  {copy.relatedTitle}
+                </h2>
+                <ul className="mt-5 divide-y divide-[color:var(--casa-sand)]">
                   {related.map((item) => (
                     <li key={item.slug}>
-                      <Link href={`/news/${item.slug}`} className="block rounded-xl border border-[color:var(--casa-sand)]/30 p-4 transition-colors hover:border-[color:var(--casa-sand)]/70">
-                        <p className="text-sm font-bold text-[var(--casa-ink)]">{item.title}</p>
-                        <p className="mt-1 text-xs text-[var(--casa-muted)]">{formatNewsDate(item.publishedAt, locale)}</p>
+                      <Link href={`/news/${item.slug}`} className="group flex items-baseline justify-between gap-4 py-4">
+                        <span className="min-w-0">
+                          <span className="block text-lg font-bold leading-snug text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">
+                            {item.title}
+                          </span>
+                          <span className="mt-1 block text-xs text-[var(--casa-muted)]">
+                            {formatNewsDate(item.publishedAt, locale)}
+                          </span>
+                        </span>
+                        <ArrowRight
+                          className="h-4 w-4 shrink-0 text-[var(--casa-muted)] transition-transform duration-300 motion-safe:group-hover:translate-x-1"
+                          aria-hidden
+                        />
                       </Link>
                     </li>
                   ))}
                 </ul>
               </div>
-            </aside>
+            ) : null}
           </div>
         </Container>
       </section>
+
     </main>
   );
 }

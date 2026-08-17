@@ -46,12 +46,8 @@ const heroArchetypes = [
 
 const publicComponentContracts = [
   {
-    title: 'Hero Renderer',
-    file: 'src/components/patterns/hero/hero-renderer.tsx',
-  },
-  {
     title: 'Hero Archetypes',
-    file: 'src/components/patterns/hero/hero-a.tsx ... hero-f.tsx',
+    file: 'src/components/heroes/hero-a-photo-led.tsx ... hero-e-minimal.tsx',
   },
   {
     title: 'Page Pattern Map',

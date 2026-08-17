@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { CalendarDays } from 'lucide-react';
 
 type RichMark = {
   type?: string;
@@ -190,20 +189,32 @@ export function NewsPostLead({
   author,
 }: NewsPostLeadProps) {
   return (
-    <div className="max-w-3xl">
-      <p className="mb-3 inline-flex rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+    <div>
+      {/*
+        A plain eyebrow, not a pill. A bordered chip is a UI control; a category
+        on an article is a label, and the printed page sets it as small caps.
+      */}
+      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
         {category}
       </p>
-      <h2 className="text-4xl font-bold sm:text-5xl">{title}</h2>
-      {summary ? <p className="mt-5 text-lg leading-relaxed text-[var(--casa-muted)]">{summary}</p> : null}
-      <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-[var(--casa-muted)]">
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarDays className="h-4 w-4" />
-          {formatNewsDate(publishedAt, locale)}
-        </span>
-        <span>{estimateNewsReadingTime(body)} min read</span>
-        <span>{author}</span>
-      </div>
+      <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">{title}</h1>
+      {summary ? (
+        <p className="mt-5 text-lg leading-relaxed text-[var(--casa-muted)] sm:text-xl">{summary}</p>
+      ) : null}
+
+      {/*
+        Byline on one line above a rule, the way a magazine sets it. The calendar
+        icon went: a date does not need to be captioned as a date, and the icon
+        was the only graphic in an otherwise typographic block.
+      */}
+      <p className="mt-6 text-sm text-[var(--casa-muted)]">
+        {formatNewsDate(publishedAt, locale)}
+        <span aria-hidden> · </span>
+        {estimateNewsReadingTime(body)} min
+        <span aria-hidden> · </span>
+        {author}
+      </p>
+      <div className="mt-6 h-px w-full bg-[color:var(--casa-sand)]" aria-hidden />
     </div>
   );
 }
@@ -218,10 +229,13 @@ export function NewsPostBody({ body, contentJson }: NewsPostBodyProps) {
   const paragraphs = splitNewsBodyIntoParagraphs(body);
 
   return (
-    <article className="rounded-3xl border border-[color:var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)] sm:p-8">
-      <div className="space-y-5 text-base leading-relaxed text-[var(--casa-ink)]">
-        {richBody ?? paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-      </div>
+    /*
+      No card. An article set inside a bordered, shadowed panel reads as a widget
+      on a dashboard — the border draws a line around the writing and competes
+      with it. Body copy at 17px on a reading measure, on the page itself.
+    */
+    <article className="space-y-5 text-[17px] leading-[1.75] text-[var(--casa-ink)]">
+      {richBody ?? paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
     </article>
   );
 }
