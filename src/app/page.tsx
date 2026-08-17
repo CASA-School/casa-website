@@ -10,6 +10,7 @@ import {
   ProofBand,
   TestimonialGrid,
 } from '@/components/sections';
+import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { TextCta } from '@/components/ui/text-cta';
 import { CardRail } from '@/components/ui/card-rail';
@@ -531,99 +532,7 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="mx-auto mt-12 max-w-[85rem] space-y-12 md:mt-16 md:space-y-20">
-              {flagshipCourses.map((course, index) => (
-                /*
-                  `id` is NOT decoration — it is an in-page link target. The
-                  persona cards above deep-link straight to a format
-                  (e.g. #course-evening-german), and e2e asserts the target
-                  lands in view. GuidedPicker used to render these ids on its
-                  cards; dropping them silently broke those links.
-                  `scroll-mt` clears the sticky 80px navbar.
-                */
-                <div
-                  key={course.id}
-                  id={course.id}
-                  className="grid scroll-mt-28 items-center gap-8 md:scroll-mt-32 md:grid-cols-2 md:gap-14"
-                >
-                  {/*
-                    `md:order-2` only. On phones the DOM order stands for every
-                    row — copy first, photograph second — so the stack never
-                    alternates. An alternating stack on a narrow screen reads as
-                    inconsistent rather than as rhythm, because the pairing that
-                    justifies the flip is not visible.
-                  */}
-                  <div className={cn(index % 2 === 1 && 'md:order-2')}>
-                    {course.meta ? (
-                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                        {course.meta}
-                      </p>
-                    ) : null}
-                    <h3 className="mt-3 text-2xl font-bold leading-tight text-white md:text-4xl">
-                      {course.title}
-                    </h3>
-                    <p className="mt-4 max-w-measure text-base leading-relaxed text-white/72 md:mt-5">
-                      {course.description}
-                    </p>
-                    {/*
-                      `bestFor` and `outcomes` come straight from the course
-                      narrative in the content layer — the row was rendering only
-                      `promise`, which is one sentence, so three quarters of the
-                      copy that already exists for each course was going unused.
-                      Nothing here is invented, and nothing states a price or an
-                      hours figure (see docs/COURSE_FACTS_SOURCE_OF_TRUTH.md).
-                    */}
-                    <p className="mt-3 max-w-measure text-base leading-relaxed text-white/56">
-                      {course.bestFor}
-                    </p>
-                    {course.outcomes.length > 0 ? (
-                      <ul className="mt-6 space-y-2.5">
-                        {course.outcomes.slice(0, 3).map((outcome) => (
-                          <li key={outcome} className="flex items-start gap-2.5 text-sm leading-relaxed text-white/72">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-sun)]" aria-hidden />
-                            <span>{outcome}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {/*
-                      A real control, not a text link. Each row is a separate
-                      decision with its own destination, so the one-solid-button
-                      rule applies per row rather than per band. Outlined rather
-                      than filled: four filled buttons down an ink field would
-                      read as a toolbar, and the fill inverts on hover so the
-                      affordance is unmistakable.
-                    */}
-                    <Link
-                      href={course.href}
-                      className={cn(
-                        'mt-7 inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-3 text-sm font-bold text-white transition-colors md:mt-8',
-                        'hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)]',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]'
-                      )}
-                    >
-                      {course.ctaLabel}
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </Link>
-                  </div>
-
-                  <div
-                    className={cn(
-                      'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-2xl',
-                      index % 2 === 1 && 'md:order-1'
-                    )}
-                  >
-                    <Image
-                      src={course.media.src}
-                      alt={course.media.alt}
-                      fill
-                      sizes="(min-width: 768px) 34vw, 92vw"
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <CourseFormatRows rows={flagshipCourses} tone="dark" className="mt-12 md:mt-16" />
 
           </div>
         </Container>

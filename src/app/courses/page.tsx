@@ -7,9 +7,9 @@ import { ArrowRight } from 'lucide-react';
 import { HeroBEditorial } from '@/components/heroes';
 import {
   ComparisonModule,
-  GuidedPicker,
   ProofBand,
 } from '@/components/sections';
+import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { CoursesFormatSelector } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -17,7 +17,7 @@ import { getCoursePhoto } from '@/config/courses/course-photos';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCoursePath } from '@/lib/content/course-routes';
-import { getCourseFinderData, getCourseRegistrationCatalog, getPageHero } from '@/lib/content/repository';
+import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -265,10 +265,9 @@ export default async function CoursesPage({
   const rhythm = getLayoutRhythm('courses-index');
   const pageConfig = getPublicPageConfig('courses', locale);
 
-  const [hero, finderData, registrationCatalog] = await Promise.all([
+  const [hero, finderData] = await Promise.all([
     Promise.resolve(getPageHero('courses', locale)),
     getCourseFinderData(locale),
-    getCourseRegistrationCatalog(locale),
   ]);
 
   const selectedLevelCandidate = typeof level === 'string' ? level.toUpperCase() : '';
@@ -345,11 +344,8 @@ export default async function CoursesPage({
   const featuredCourses =
     featured.length > 0 ? featured : finderData.courses.slice(0, 6);
 
-  const nextOptionByCourseId = Object.fromEntries(
-    featuredCourses.map((course) => [course.id, registrationCatalog.optionsByCourseTypeId[course.id]?.[0] ?? null])
-  ) as Record<string, (typeof registrationCatalog.optionsByCourseTypeId)[string][number] | null>;
 
-  const guidedItems = featuredCourses.map((course) => {
+  const courseRows = featuredCourses.map((course) => {
     /*
       Resolved from the course, never from its position in this list. The list
       is sorted by lessons_per_week and re-filtered by the ?level / ?schedule /
@@ -357,24 +353,26 @@ export default async function CoursesPage({
       the visitor filtered. See getCoursePhoto for the measurements.
     */
     const photo = getCoursePhoto(course.slug, locale);
+    const nextStart = finderData.nextStartByCourseId[course.id];
 
     return {
-      id: course.id,
+      /*
+        `course-<slug>`, matching the homepage, so a deep link like
+        #course-evening-german resolves on either page rather than only on one.
+      */
+      id: `course-${course.slug}`,
       title: course.name,
       description:
         course.narrative?.promise ||
         (locale === 'de' ? 'Klarer Sprachaufbau mit betreuten Lernschritten.' : 'Structured language growth with supported steps.'),
       bestFor: course.narrative?.audience || (locale === 'de' ? 'Geeignet für internationale Lernende' : 'Best for: international learners'),
+      outcomes: course.narrative?.outcomes ?? [],
       href: getCoursePath(course.slug),
       ctaLabel: locale === 'de' ? 'Kursplan ansehen' : 'View course plan',
-      meta: `${locale === 'de' ? 'Nächster Start' : 'Next start'}: ${
-        finderData.nextStartByCourseId[course.id]
-          ? formatDate(finderData.nextStartByCourseId[course.id] as string, locale)
-          : locale === 'de'
-            ? 'TBD'
-            : 'TBD'
-      }`,
-      deadlineIso: nextOptionByCourseId[course.id]?.startDate ?? null,
+      /* Omitted rather than shown as "TBD" — a kicker reading TBD is noise. */
+      meta: nextStart
+        ? `${locale === 'de' ? 'Nächster Start' : 'Next start'}: ${formatDate(nextStart, locale)}`
+        : undefined,
       media: {
         src: photo.src,
         alt: photo.alt,
@@ -468,39 +466,52 @@ export default async function CoursesPage({
         themeClassName="hero-theme-courses"
       />
 
-      {/* Section 1: Guided Picker Shortlist */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
-        <Container>
+      {/*
+        Section 1: the formats.
+
+        Same composition as the homepage, via the same component. Both pages
+        present the same six formats, so they present them the same way — and
+        `CourseFormatRows` is shared rather than copied, because this codebase
+        has twice been bitten by two pages drawing "the same" thing with their
+        own markup (ProofBand's two widths, and a course's photograph changing
+        between surfaces).
+
+        Two deliberate differences from the homepage. All six formats get a row
+        rather than four flagships plus a rail: this is the index, and ranking
+        formats is a homepage editorial choice that would be a strange thing for
+        an index to do. And the band is ink-deep, which gives /courses the
+        two-surface rhythm it did not have — every band on the page was the same
+        wash, top to bottom.
+      */}
+      <section className="bg-[var(--casa-ink-deep)] py-20 text-white md:py-32">
+        <Container className="space-y-12 md:space-y-14">
+          <div className="mx-auto max-w-[46rem] text-center">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+              {locale === 'de' ? 'Kursauswahl' : 'Course shortlist'}
+            </p>
+            <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
+              {locale === 'de' ? 'Unsere Kursformate im Überblick' : 'Every format we teach'}
+            </h2>
+            <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-white/72 md:text-lg">
+              {locale === 'de'
+                ? 'Sechs Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.'
+                : 'Six routes to the same goal. What differs is the rhythm, not the standard.'}
+            </p>
+          </div>
+
           {/*
-            Moved here from the removed route-finder section. It reports on the
-            hero's course filter, so it belongs immediately above the results it
-            is describing rather than a section away from them.
+            Reports on the hero's course filter, so it sits immediately above the
+            results it describes.
           */}
           {fallbackToRecommended ? (
-            <article className="mb-8 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/45 px-4 py-3 text-sm text-[var(--casa-ink)]">
+            <p className="mx-auto max-w-[46rem] rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-center text-sm text-white/80">
               {locale === 'de'
                 ? 'Keine exakte Kombination gefunden. Wir zeigen die besten verfügbaren Optionen.'
                 : 'No exact match found for this combination. Showing the best available options.'}
-            </article>
+            </p>
           ) : null}
-          <GuidedPicker
-            eyebrow={locale === 'de' ? 'Kursauswahl' : 'Course shortlist'}
-            title={locale === 'de' ? 'Primäre Kursoptionen' : 'Primary course options'}
-            description={
-              locale === 'de'
-                ? 'Die wichtigsten Formate zuerst, damit Ihre Entscheidung leichter fällt.'
-                : 'See the key formats first to make decisions faster.'
-            }
-            items={guidedItems}
-            locale={locale}
-            /*
-              The accepted card design (Variant C on
-              /design-system/course-format-variants). It is also the only
-              presentation that emits per-item DOM ids, so course anchors keep
-              working from the nav and from deep links.
-            */
-            presentation="courseSignalCards"
-          />
+
+          <CourseFormatRows rows={courseRows} tone="dark" />
         </Container>
       </section>
 
