@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

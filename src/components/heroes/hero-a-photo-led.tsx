@@ -5,14 +5,11 @@ type HeroAPhotoLedProps = {
   eyebrow: string;
   title: string;
   description: string;
-  proofLine: string;
-  badge: string;
   ctas: HeroAction[];
   photo: HeroPhoto;
-  trustBadges?: string[];
   proofItems?: HeroProofItem[];
 };
 
 export function HeroAPhotoLed(props: HeroAPhotoLedProps) {
-  return <HeroHomePhoto {...props} themeClassName="hero-theme-home" />;
+  return <HeroHomePhoto {...props} themeClassName="hero-theme-plain" />;
 }

@@ -108,6 +108,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -138,17 +139,72 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
+  /*
+   * Radius scale — compressed, 2026-08-16.
+   *
+   * Two things changed at once, and only the second one is visible.
+   *
+   * 1. The base dropped from 10px to 8px, so every control is crisper.
+   * 2. The SPREAD between steps dropped from 4px to 2px. That is the real
+   *    change. The old scale ran 6/8/10/14/18/22/26 — a 16px spread — so an
+   *    outer shell at 22px was more than twice as round as the button inside
+   *    it, and the page read as a stack of soft-cornered bubbles. The new
+   *    scale runs 5/6/8/10/12/14/16. The hierarchy still exists (a card is
+   *    still rounder than the button it contains) but it is now a whisper
+   *    rather than a shout, which is what makes a page look drawn rather
+   *    than inflated.
+   *
+   * Every `rounded-*` utility and every --casa-radius-* alias derives from
+   * this block, so those 600-odd call sites follow automatically. The
+   * exceptions that do NOT follow are the handful of hardcoded values —
+   * keep them in step by pointing them at a token, not a literal.
+   *
+   * Reference point: the caterlove site runs 3/4/5px. CASA is deliberately
+   * softer than that — it is a school, not a luxury caterer — but it should
+   * no longer look like a 2019 component library.
+   */
+  --radius-sm: calc(var(--radius) - 3px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+  --radius-3xl: calc(var(--radius) + 6px);
+  --radius-4xl: calc(var(--radius) + 8px);
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
+
+  /*
+   * Horizontal ceiling for the whole site.
+   *
+   * Was a bare `max-w-[1440px]` written out in Container, in the navbar's own
+   * wrapper, and inside three dropdown-panel clamps — four literals that had
+   * to agree and no way to tell they were meant to. It is a token now so the
+   * navbar row, the page body and the search popover cannot drift apart.
+   *
+   * 1440 was set when 1440 was the desktop. On a 1728px MacBook it stranded
+   * 144px of empty canvas down each side while the content sat in a column in
+   * the middle; on a 1920px monitor, 240px a side. 1680 keeps a visible margin
+   * at 1728 (24px plus the gutter) instead of running to the bezel, which is
+   * the one thing that separates "wide" from "unfinished".
+   */
+  --casa-container-max: 1680px;
+
+  /*
+   * Page gutter, single source.
+   *
+   * Was `px-5 sm:px-8 lg:px-10` written out twice — once in Container and once
+   * in the navbar's own row, which has to agree with it or the logo stops
+   * sitting on the same optical line as the content beneath it. The max-width
+   * was already a token; the gutter was not, so half the contract was
+   * protected and half was two literals on the honour system.
+   *
+   * Steps at Tailwind's sm (40rem) and lg (64rem) so the rendered values are
+   * unchanged: 20px / 32px / 40px.
+   */
+  --casa-gutter: 1.25rem;
+
   --background: var(--casa-bg);
   --foreground: var(--casa-ink);
   --card: var(--casa-bg);
@@ -439,19 +495,25 @@
    * Radius intent.
    *
    * The numeric scale above (--radius and its derived steps) is Tailwind/shadcn
-   * wiring and stays as-is; changing it would ripple through every rounded-*
-   * utility. What was missing is the app's *hierarchy*: controls are tighter
-   * than cards, cards are tighter than feature surfaces, and a card nested
-   * inside a card takes a smaller radius than its parent. These aliases name
-   * that intent so new components stop guessing.
+   * wiring. What these add is the app's *hierarchy*: controls are tighter than
+   * cards, cards are tighter than feature surfaces, and a card nested inside a
+   * card takes a smaller radius than its parent. These aliases name that intent
+   * so new components stop guessing.
+   *
+   * The px values in the comments below are the post-compression numbers. They
+   * are derived, not authored — retune --radius and the whole set moves.
    */
-  --casa-radius-control: var(--radius-sm);   /* 6px  — chips, small marks */
-  --casa-radius-input: var(--radius-lg);     /* 10px — buttons, inputs */
-  --casa-radius-card: var(--radius-xl);      /* 14px — cards, panels */
-  --casa-radius-feature: var(--radius-3xl);  /* 22px — heroes, feature surfaces */
+  --casa-radius-control: var(--radius-sm);   /* 5px  — chips, small marks */
+  --casa-radius-input: var(--radius-lg);     /* 8px  — buttons, inputs */
+  --casa-radius-card: var(--radius-xl);      /* 10px — cards, panels */
+  --casa-radius-feature: var(--radius-3xl);  /* 14px — heroes, feature surfaces */
 
   --casa-button-height: 2.75rem;
-  --casa-button-radius: 0.625rem; /* rounded-lg — tier 3 interactive */
+  /* Points at the semantic alias rather than restating a literal: this was a
+     hardcoded 0.625rem, so .casa-button-prism and .casa-button-outline would
+     have stayed at 10px while the inputs beside them moved to 8px — the exact
+     two controls that must agree, visibly disagreeing. */
+  --casa-button-radius: var(--casa-radius-input);
   --casa-button-font-size: 0.95rem;
   --casa-button-focus-ring: color-mix(in srgb, var(--casa-blue) 56%, transparent);
   --casa-button-focus-shadow: 0 0 0 2px var(--casa-button-focus-ring);
@@ -495,6 +557,89 @@
    */
   --shadow-primary: 0 12px 28px rgba(0, 159, 227, 0.20);
   --shadow-accent:  0 12px 28px rgba(0, 111, 159, 0.16);
+}
+
+/*
+ * Gutter steps. Deliberately plain media queries rather than Tailwind variants,
+ * because the value has to be readable by both Container and the navbar row
+ * without either of them restating the breakpoints.
+ */
+@media (min-width: 40rem) {
+  :root {
+    --casa-gutter: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --casa-gutter: 2.5rem;
+  }
+}
+
+/*
+ * ============================================================================
+ * Site frame
+ * ============================================================================
+ *
+ * WHERE the site aligns. Invariant. Shared by page content, the navbar row, the
+ * footer and every hero, so the logo, the nav items and the first heading all
+ * land on one vertical line.
+ *
+ * This is deliberately the ONLY width contract. An earlier pass added a second,
+ * opt-in per-section width layer on top of it; it measured correctly and still
+ * did not fix the page, because a band that reads as an undifferentiated slab
+ * reads the same way 300px narrower. What actually distinguishes one band from
+ * the next is composition — an asymmetric heading rail against a content
+ * column — and a background that changes. Width follows from the rail. Do not
+ * reintroduce a width tier without first checking the band has a rail.
+ *
+ * Why this is unlayered CSS rather than Tailwind utilities on the element:
+ * `cn()` is tailwind-merge, so a consumer passing `className="max-w-4xl"` would
+ * SILENTLY REPLACE a width utility instead of being ignored. That is not
+ * hypothetical — /contact shipped 400px narrower than every other page for
+ * exactly this reason (see the postmortem comment in src/app/contact/page.tsx).
+ *
+ * Unlayered rules beat every layered one, and Tailwind v4 emits utilities into
+ * @layer utilities. So these declarations outrank any `max-w-*` a call site can
+ * write, and the contract cannot be broken from the outside. That is the same
+ * cascade behaviour that caused the transition bug documented at the
+ * `@layer base` block further down this file — the difference is that here it
+ * is the point rather than an accident, and it is scoped to one data attribute
+ * that nothing else writes. (An `!important` utility would still win: layer
+ * order reverses for important declarations. Only one exists in the repo.)
+ *
+ * Consequence worth knowing: to change the site width you change
+ * --casa-container-max, never a class at a call site.
+ */
+/*
+ * Display type — Playfair Display, matched to the caterlove-prep-system site.
+ *
+ * Bound to the heading ELEMENTS rather than sprinkled as a `font-display` class,
+ * so every existing h1/h2/h3 on every route picks it up without touching ~200
+ * call sites, and so a new heading cannot forget it.
+ *
+ * h4 and below deliberately stay on Plus Jakarta Sans. Playfair is a
+ * high-contrast Didone whose hairlines break up below roughly 20px, and h4 is
+ * routinely set at 16-18px in cards. The line between display and text is a size
+ * line, not a semantic one.
+ *
+ * The tracking scale in @theme was measured against Plus Jakarta Sans. Playfair
+ * has narrower sidebearings and needs less negative tracking at display sizes,
+ * so headings get a small positive correction here to cancel most of it. If the
+ * display face changes again, re-measure this value.
+ */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.006em;
+}
+
+[data-casa-site-frame] {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--casa-container-max);
+  padding-inline: var(--casa-gutter);
 }
 
 /*
@@ -695,6 +840,31 @@
   --hero-noise-opacity: 0.03;
 }
 
+/*
+ * Neutral hero surface — plain white, no warm base, no grain, no sheen.
+ *
+ * Every other hero theme tints the base towards cream (#fffbf6 and friends) and
+ * layers a noise texture plus a sheen over it. On the homepage that read as a
+ * separate creamy panel sitting above a page that is otherwise white, which is
+ * exactly the "too many background colours" problem.
+ *
+ * This zeroes every variable the .hero-grain machinery consumes rather than
+ * bypassing the component, so the structure, the sheen layers and the
+ * ::before/::after pseudo-elements all still exist — they simply paint nothing.
+ */
+.hero-theme-plain {
+  --hero-accent-a: transparent;
+  --hero-accent-b: transparent;
+  --hero-accent-c: transparent;
+  --hero-base-start: #ffffff;
+  --hero-base-mid: #ffffff;
+  --hero-base-end: #ffffff;
+  --hero-noise-opacity: 0;
+  --hero-sheen-top: 0;
+  --hero-sheen-mid: 0;
+  --hero-sheen-bottom: 0;
+}
+
 .hero-theme-courses {
   --hero-accent-a: rgba(242, 180, 65, 0.09);
   --hero-accent-b: rgba(0, 159, 227, 0.06);
@@ -794,6 +964,91 @@
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Media halo                                                          */
+/*                                                                     */
+/* Every photograph on the site was framed the same way: a rounded     */
+/* rectangle, a grey drop shadow and a dark scrim. That is a 2019      */
+/* component-library reflex — the shadow is the same neutral grey      */
+/* under a classroom, a shared flat and a plate of food, so 30         */
+/* photographs sat on the page as 30 identical grey cards.             */
+/*                                                                     */
+/* Instead: a heavily blurred, over-scaled copy of the SAME photograph */
+/* is painted behind the sharp one. The image lights the page in its   */
+/* own colours — a classroom with warm wood and blue walls throws warm */
+/* and blue; a grey winter street throws grey. No two surfaces get the */
+/* same halo, and none of it has to be authored per photo.             */
+/*                                                                     */
+/* This also sidesteps the library's real problem. The photography is  */
+/* ungraded with a 175-point luminance spread, which is why the old    */
+/* scrim existed at all. A halo made of the photo's own colours cannot */
+/* clash with it the way a fixed ink wash could.                       */
+/*                                                                     */
+/* Cost: one extra raster per surface, painted once, never animated.   */
+/* The halo layer is requested at `sizes="64px"` — it is blurred past  */
+/* 30px, so anything larger is bytes nobody can see.                   */
+/* ------------------------------------------------------------------ */
+.casa-media {
+  position: relative;
+  /* No `overflow: hidden` — the halo is supposed to escape. Clipping is
+     the frame's job, one level down. */
+  isolation: isolate;
+}
+
+.casa-media__halo {
+  position: absolute;
+  /* `inset: 0` and scale OUTWARD from there. An earlier version insetting 6%
+     before scaling 1.1 netted out smaller than the frame, so the only spill
+     was the blur radius itself and the effect was invisible at hero size —
+     measured 694px of halo behind 717px of photograph. */
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Weighted downward so the light pools below the image. A perfectly
+     symmetric glow reads as a lightbox; an offset one reads as elevation —
+     the same job the drop shadow used to do, in the photograph's colours
+     instead of grey. */
+  transform: scale(1.04) translateY(2.5%);
+  filter: blur(34px) saturate(1.6);
+  opacity: 0.7;
+  /* Fades the halo out at its own edges so it lands as light on the page
+     rather than as a second, softer rectangle behind the first. Without
+     this the blur still terminates on a straight line at the element box. */
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 50%, transparent 88%);
+  mask-image: radial-gradient(ellipse at center, #000 50%, transparent 88%);
+}
+
+.casa-media__halo img {
+  object-fit: cover;
+}
+
+/* The sharp photograph. Radius comes from the feature step, so it tracks
+   the scale; the shadow is gone because the halo is now the elevation. */
+.casa-media__frame {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: var(--casa-radius-feature);
+  background: var(--casa-surface-wash);
+}
+
+/*
+ * Forced-colours and reduced-transparency both mean "stop decorating".
+ * The halo carries no information — the sharp photograph beneath it is the
+ * content — so it simply goes away, leaving a plain framed image.
+ */
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .casa-media__halo {
+    display: none;
+  }
+}
+
+@media print {
+  .casa-media__halo {
+    display: none;
+  }
+}
+
 .casa-media-overlay {
   position: relative;
   overflow: hidden;
@@ -832,35 +1087,20 @@
   transform: scale(1.02);
 }
 
-.casa-media-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-  opacity: 0.12;
-  background:
-    linear-gradient(
-      118deg,
-      transparent 0 32%,
-      rgba(255, 255, 255, 0.64) 48%,
-      color-mix(in srgb, var(--casa-blue) 78%, white) 52%,
-      transparent 68% 100%
-    ),
-    linear-gradient(
-      300deg,
-      transparent 0 54%,
-      color-mix(in srgb, var(--casa-sun) 68%, transparent) 74%,
-      transparent 92% 100%
-    );
-  background-repeat: no-repeat;
-  background-size: 240% 100%, 180% 100%;
-  background-position: 102% 0%, -36% 100%;
-  clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 72%, 100% 100%, 0 100%, 0 38%, 19% 28%);
-  filter: blur(0.3px) saturate(1.1);
-  mix-blend-mode: screen;
-  transform: translate3d(0, 0, 0);
-}
+/*
+ * The `::after` prismatic sweep that used to sit here is gone.
+ *
+ * It painted a blue-and-sun diagonal glint through a `clip-path` polygon with
+ * `mix-blend-mode: screen` over every photograph carrying this class. Three
+ * things were wrong with it and only the third mattered: it re-introduced the
+ * brand triad onto photography that §4.1 had just finished removing it from,
+ * it was a `clip-path` + `blur` + `blend-mode` stack repainted on 18 surfaces,
+ * and — the actual point — a decorative glint drawn on top of a photograph is
+ * the single clearest signal that a site was assembled from a component
+ * library rather than designed. The halo above replaces it: same instinct
+ * (the image should feel lit), but the light comes out of the photograph
+ * instead of being stencilled onto it.
+ */
 
 @keyframes casa-media-overlay-breathe {
   0% {
@@ -879,61 +1119,21 @@
   }
 }
 
-@keyframes casa-media-prismatic-sweep {
-  0% {
-    opacity: 0.2;
-    background-position: 102% 0%, -36% 100%;
-    clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 72%, 100% 100%, 0 100%, 0 38%, 19% 28%);
-  }
-
-  28% {
-    opacity: 0.7;
-  }
-
-  54% {
-    background-position: 40% 0%, 12% 100%;
-    clip-path: polygon(0 0, 100% 0, 100% 55%, 73% 67%, 100% 100%, 0 100%, 0 45%, 28% 33%);
-  }
-
-  100% {
-    opacity: 0.22;
-    background-position: -44% 0%, 100% 100%;
-    clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 72%, 100% 100%, 0 100%, 0 38%, 19% 28%);
-  }
-}
-
-.casa-media-overlay-card::before {
-  opacity: 0.52;
-  background:
-    linear-gradient(
-      150deg,
-      color-mix(in srgb, var(--casa-ink-deep) 32%, transparent) 0%,
-      transparent 40%,
-      color-mix(in srgb, var(--casa-blue) 18%, transparent) 100%
-    ),
-    radial-gradient(110% 90% at 88% 8%, color-mix(in srgb, var(--casa-blue) 22%, transparent), transparent 68%),
-    repeating-linear-gradient(
-      122deg,
-      rgba(255, 255, 255, 0.035) 0 9px,
-      rgba(255, 255, 255, 0.08) 9px 12px,
-      rgba(255, 255, 255, 0.028) 12px 20px
-    );
-  background-size: 120% 120%, 100% 100%, 140% 140%;
-  background-position: 6% 4%, center, 0% 0%;
-}
-
-.casa-media-overlay-card::after {
-  opacity: 0.16;
-  background:
-    linear-gradient(118deg, transparent 0 46%, rgba(255, 255, 255, 0.72) 52%, transparent 62%),
-    radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--casa-sun) 72%, transparent) 0 8%, transparent 32%),
-    linear-gradient(300deg, transparent 0 62%, color-mix(in srgb, var(--casa-blue) 62%, transparent) 82%, transparent 100%);
-  background-repeat: no-repeat;
-  background-size: 220% 100%, 100% 100%, 160% 100%;
-  background-position: 112% 0%, center, -26% 100%;
-  clip-path: polygon(0 0, 100% 0, 100% 76%, 87% 88%, 100% 100%, 0 100%, 0 24%, 13% 12%);
-  filter: blur(0);
-}
+/*
+ * `.casa-media-overlay-card` is gone, and with it the prismatic-sweep
+ * keyframes that only it and the deleted ::after used.
+ *
+ * It was the heavy variant, layered on seven surfaces: a 0.52 scrim stacking
+ * an ink-to-blue diagonal, a blue radial and a white repeating pinstripe,
+ * with a clipped sun/blue glint on top. Four unrelated treatments on one
+ * photograph. On the team portraits (team-directory.tsx) it visibly recoloured
+ * faces, which also put it at odds with the source-faithful photo rule in
+ * CLAUDE.md — crop, resize and exposure only.
+ *
+ * The seven call sites keep the base `.casa-media-overlay`, whose single
+ * bottom-weighted ink gradient is what the ones with text on them actually
+ * needed. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §4.2.
+ */
 
 .casa-card-surface {
   /*
@@ -945,40 +1145,6 @@
   border-radius: var(--casa-radius-feature);
   background: var(--casa-bg);
   box-shadow: var(--shadow-card);
-}
-
-@keyframes casa-card-grid-shift {
-  0% {
-    opacity: 0.52;
-    background-position: 6% 4%, center, 0% 0%;
-  }
-
-  50% {
-    opacity: 0.64;
-    background-position: 2% 1%, center, 24% -12%;
-  }
-
-  100% {
-    opacity: 0.52;
-    background-position: 6% 4%, center, 0% 0%;
-  }
-}
-
-@keyframes casa-card-spark-sweep {
-  0% {
-    opacity: 0.2;
-    background-position: 112% 0%, center, -26% 100%;
-  }
-
-  45% {
-    opacity: 0.82;
-    background-position: 44% 0%, center, 18% 100%;
-  }
-
-  100% {
-    opacity: 0.24;
-    background-position: -44% 0%, center, 94% 100%;
-  }
 }
 
 .casa-button-prism {
@@ -1194,7 +1360,9 @@
 }
 
 .casa-cta-link {
-  border-radius: 0.5rem;
+  /* Shapes the focus ring on text CTAs only — a control-scale mark, not a
+     button. Was a hardcoded 0.5rem sitting on no step of the scale. */
+  border-radius: var(--casa-radius-control);
 }
 
 .casa-cta-link:focus-visible {
@@ -1302,24 +1470,14 @@
       animation: casa-media-overlay-breathe 950ms ease-in-out both;
     }
 
-    main article:hover .casa-media-overlay::after,
-    main figure:hover .casa-media-overlay::after,
-    main a:hover .casa-media-overlay::after {
-      animation: casa-media-prismatic-sweep 1100ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
-    }
-
-    main article:hover .casa-media-overlay-card::before,
-    main figure:hover .casa-media-overlay-card::before,
-    main a:hover .casa-media-overlay-card::before {
-      animation: casa-card-grid-shift 960ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
-    }
-
-    main article:hover .casa-media-overlay-card::after,
-    main figure:hover .casa-media-overlay-card::after,
-    main a:hover .casa-media-overlay-card::after {
-      animation: casa-card-spark-sweep 900ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
-    }
-
+    /*
+     * Three hover animations used to fire here — a prismatic sweep on
+     * .casa-media-overlay::after, plus a grid-shift and a spark-sweep on the
+     * -card variant. All three drove pseudo-elements that no longer exist,
+     * and all three were animating decoration painted over a photograph.
+     * The zoom below is the whole hover treatment now: the photo comes
+     * forward, and nothing slides across it.
+     */
     main article:hover .casa-media-overlay > img,
     main article:hover .casa-media-overlay > picture > img,
     main article:hover .casa-media-overlay > span > img,
@@ -1334,22 +1492,6 @@
     main a:hover .casa-media-overlay img[data-nimg] {
       transform: scale(1.07) translate3d(0.4%, -0.6%, 0);
       filter: saturate(1.1) contrast(1.05) brightness(1.02);
-    }
-
-    main article:hover .casa-media-overlay-card > img,
-    main article:hover .casa-media-overlay-card > picture > img,
-    main article:hover .casa-media-overlay-card > span > img,
-    main article:hover .casa-media-overlay-card img[data-nimg],
-    main figure:hover .casa-media-overlay-card > img,
-    main figure:hover .casa-media-overlay-card > picture > img,
-    main figure:hover .casa-media-overlay-card > span > img,
-    main figure:hover .casa-media-overlay-card img[data-nimg],
-    main a:hover .casa-media-overlay-card > img,
-    main a:hover .casa-media-overlay-card > picture > img,
-    main a:hover .casa-media-overlay-card > span > img,
-    main a:hover .casa-media-overlay-card img[data-nimg] {
-      transform: scale(1.064) translate3d(0.1%, -0.9%, 0);
-      filter: saturate(1.07) contrast(1.04) brightness(1.03);
     }
 
     .casa-button-prism:hover,

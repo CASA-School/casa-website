@@ -247,18 +247,6 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                     ? 'So bleiben Preis, Verfügbarkeit und Anfrage-CTA beim Lesen sichtbar.'
                     : 'Keep pricing, availability, and request CTA visible while reading details.'
                 }
-                ctas={[
-                  {
-                    label: locale === 'de' ? 'Unterkunft anfragen' : 'Request accommodation',
-                    href: '/contact?topic=accommodation',
-                    kind: 'primary',
-                  },
-                  {
-                    label: locale === 'de' ? 'Mit Kurs anmelden' : 'Register with course',
-                    href: '/registration/course',
-                    kind: 'secondary',
-                  },
-                ]}
               />
             </div>
           </div>

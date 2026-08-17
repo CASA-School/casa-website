@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 
 import { Container } from '@/components/ui/container';
 import type { HeroSpec } from '@/lib/content/types';

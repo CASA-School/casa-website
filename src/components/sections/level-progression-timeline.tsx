@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 

@@ -457,11 +457,24 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Talk to an advisor', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
-      hero: photoLibrary.studentClass,
+      /*
+        The homepage headline is CASA's Leitbild — "Miteinander reden -
+        aufeinander zugehen". This image shows learners listening and speaking,
+        so it depicts the line rather than decorating it. `studentClass` (people
+        working quietly at a table) illustrated study, not conversation.
+      */
+      hero: photoLibrary.groupClassroomTeacherActivity,
       story: photoLibrary.groupCourseLunch,
-      courseA: photoLibrary.groupClassroomTeacherActivity,
-      courseB: photoLibrary.courseClassroomWide,
-      courseC: photoLibrary.teacherGuiding,
+      /*
+        The four flagship course rows, matched to what each format actually is
+        rather than to whatever was next in the library:
+          Intensive -> a full class mid-lesson, whole room engaged
+          Evening   -> adults in work clothes at the whiteboard after hours
+          Special   -> one-to-one, informal, a single focused session
+      */
+      courseA: photoLibrary.courseClassroomCircle,
+      courseB: photoLibrary.whiteboardPractice,
+      courseC: photoLibrary.consultationDesk,
       courseD: photoLibrary.groupCourseWalking,
       courseE: photoLibrary.mentorSupport,
       courseF: photoLibrary.teamCollaboration,
@@ -550,8 +563,10 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'index-chooser',
     sections: ['exam-cards', 'pathway', 'proof-mini'],
     ctas: [
+      // One entry, not two. "Check exam dates" was a second, differently
+      // labelled CTA pointing at the identical href — the same click, offered
+      // twice, which reads as a choice and is not one.
       { label: { en: 'Reserve exam seat', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
-      { label: { en: 'Check exam dates', de: 'Prüfungstermine prüfen' }, href: '/registration/exam', kind: 'secondary' },
     ],
     photos: {
       thumbA: photoLibrary.examPrepTable,

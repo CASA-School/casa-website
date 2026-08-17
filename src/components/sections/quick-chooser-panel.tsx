@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useMemo, useState } from 'react';
 import { ArrowRight, Compass } from 'lucide-react';
 

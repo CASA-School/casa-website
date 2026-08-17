@@ -31,6 +31,21 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
   }, [initialContentLocale]);
   const [isLocaleMenuOpen, setIsLocaleMenuOpen] = useState(false);
 
+  const isCurrent = useCallback(
+    (href: string) => !!pathname && (pathname === href || pathname.startsWith(`${href}/`)),
+    [pathname]
+  );
+
+  const openSection = navConfig.main.reduce<string | undefined>((match, item, index) => {
+    if (match) return match;
+    if (!('trigger' in item)) return match;
+    const dropdown = item as NavDropdown;
+    const hit =
+      (dropdown.href && isCurrent(dropdown.href)) ||
+      dropdown.sections.some((section) => section.items.some((sub) => isCurrent(sub.href)));
+    return hit ? `item-${index}` : match;
+  }, undefined);
+
   const isExamContext = pathname === '/registration/exam' || pathname === '/exams' || pathname?.startsWith('/exams/');
   const isRegistrationPage = pathname?.startsWith('/registration');
   const registerHref = isExamContext ? '/registration/exam' : '/registration/course';
@@ -51,11 +66,21 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button aria-label="Open navigation menu" variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] lg:hidden">
+        <Button aria-label="Open navigation menu" variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] xl:hidden">
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" showCloseButton={false} className="w-full overflow-y-auto border-l-0 p-0 sm:max-w-md">
+      {/*
+        Full viewport, not a 448px drawer.
+
+        `sm:max-w-md` capped the panel at 28rem, so on a tablet the menu was a
+        narrow column pinned to one edge with two thirds of the screen dimmed
+        behind it — the least useful shape available, since that is exactly the
+        width where there is room to show structure. It now takes the whole
+        viewport at every size and lays its sections out in columns once there
+        is room for them.
+      */}
+      <SheetContent side="right" showCloseButton={false} className="w-full max-w-none overflow-y-auto border-l-0 p-0 sm:max-w-none">
         <SheetTitle className="sr-only">
           {contentLocale === 'de' ? 'Mobiles Navigationsmenü' : 'Mobile navigation menu'}
         </SheetTitle>
@@ -67,7 +92,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
         <div className="flex h-full flex-col bg-white">
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[color:var(--casa-sand)]/70 bg-white/95 p-6 backdrop-blur">
             <Link href="/" aria-label="Go to CASA homepage" className="flex items-center">
-              <Logo className="h-8 w-auto" />
+              <Logo className="h-9 w-auto" />
             </Link>
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -138,15 +163,33 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6">
-            <Accordion type="single" collapsible className="w-full">
+          {/*
+            The drawer used to open with every section collapsed, even when the
+            visitor was already inside one — so arriving from /courses/evening-course
+            and opening the menu showed no indication of where they were, and
+            reaching a sibling course took an extra tap.
+
+            `openSection` resolves the dropdown whose own href or any of whose
+            items matches the current path, and hands it to the accordion as its
+            default. Computed during render from `pathname`, so it follows client
+            navigation without an effect.
+          */}
+          <div className="mx-auto w-full max-w-[64rem] flex-1 overflow-y-auto p-6 sm:p-8">
+            <Accordion type="single" collapsible className="w-full" defaultValue={openSection}>
               {navConfig.main.map((item, index) => {
                 const isDropdown = 'trigger' in item;
                 if (isDropdown) {
                   const dropdown = item as NavDropdown;
                   return (
                     <AccordionItem key={index} value={`item-${index}`} className="border-b border-[color:var(--casa-sand)]/40">
-                      <AccordionTrigger className="py-4 text-lg font-bold text-[var(--casa-ink)] hover:no-underline">
+                      <AccordionTrigger
+                        className={cn(
+                          'font-display py-4 text-lg font-semibold hover:no-underline',
+                          openSection === `item-${index}`
+                            ? 'text-[var(--casa-accent-text)]'
+                            : 'text-[var(--casa-ink)]'
+                        )}
+                      >
                         {localizeNavText(dropdown.trigger, contentLocale)}
                       </AccordionTrigger>
                       <AccordionContent>
@@ -180,7 +223,16 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                 return (
                   <div key={index} className="border-b border-[color:var(--casa-sand)]/40 py-4">
                     <SheetClose asChild>
-                      <Link href={linkItem.href} className="block text-lg font-bold text-[var(--casa-ink)] hover:text-[var(--casa-accent-text)]">
+                      <Link
+                        href={linkItem.href}
+                        aria-current={isCurrent(linkItem.href) ? 'page' : undefined}
+                        className={cn(
+                          'font-display block text-lg font-semibold hover:text-[var(--casa-accent-text)]',
+                          isCurrent(linkItem.href)
+                            ? 'text-[var(--casa-accent-text)]'
+                            : 'text-[var(--casa-ink)]'
+                        )}
+                      >
                         {localizeNavText(linkItem.label, contentLocale)}
                       </Link>
                     </SheetClose>
@@ -190,20 +242,39 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
             </Accordion>
           </div>
 
+          {/*
+            One button, one text link — not two stacked full-width buttons.
+            Both were rendered at the same width and weight, so the drawer
+            closed on a coin toss between them. Registration is the action the
+            filled control is for; admissions is a question, and a question
+            reads correctly as a link.
+          */}
           <div className="border-t border-[color:var(--casa-sand)]/70 bg-[var(--casa-canvas)]/50 p-6">
-            <div className="grid gap-3">
+            <div className="grid gap-4">
               {!isRegistrationPage && (
-                <Button asChild className="h-11 w-full rounded-xl bg-[var(--casa-accent-surface)] font-bold text-white">
+                <Button asChild className="h-11 w-full rounded-lg bg-[var(--casa-accent-surface)] font-bold text-white">
                   <SheetClose asChild>
                     <Link href={registerHref}>{registerText}</Link>
                   </SheetClose>
                 </Button>
               )}
-              <Button asChild variant="outline" className="h-11 w-full rounded-xl casa-button-outline border-[color:var(--casa-sand)] font-bold">
-                <SheetClose asChild>
-                  <Link href="/contact">{contentLocale === 'de' ? 'Beratung anfragen' : 'Talk to Admissions'}</Link>
-                </SheetClose>
-              </Button>
+              <SheetClose asChild>
+                <Link
+                  href="/contact"
+                  className="casa-cta-link inline-flex items-center justify-center gap-2 py-1 text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:underline"
+                >
+                  {contentLocale === 'de' ? 'Beratung anfragen' : 'Talk to Admissions'}
+                  <svg aria-hidden="true" viewBox="0 0 22 8" fill="none" className="h-2 w-[20px] shrink-0">
+                    <path
+                      d="M0 4h20M16.5 0.6L20.4 4l-3.9 3.4"
+                      stroke="currentColor"
+                      strokeWidth="1.3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Link>
+              </SheetClose>
             </div>
           </div>
         </div>

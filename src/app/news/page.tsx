@@ -164,23 +164,37 @@ export default async function NewsPage() {
             <ul className="mt-6 divide-y divide-[color:var(--casa-sand)]/85">
               {otherPosts.slice(0, 8).map((post) => (
                 <li key={post.slug} className="py-5">
-                  <article className="grid gap-3 md:grid-cols-[1.3fr_auto] md:items-start md:gap-6">
+                  {/*
+                    Up to eight bordered buttons used to run down the right edge
+                    of this list, one per post, all reading "Read article". A
+                    list of articles does not need eight buttons to say it is a
+                    list of articles — the headline is the link.
+
+                    The headline anchor's ::after covers the article, so the
+                    whole row is the target, and the trailing text link stays as
+                    the visible affordance. `casa-cta-link` is kept for click
+                    analytics (src/components/analytics/interaction-tracker.tsx).
+                  */}
+                  <article className="group relative grid gap-3 md:grid-cols-[1.3fr_auto] md:items-center md:gap-6">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{post.category}</p>
-                      <h4 className="mt-1 text-xl font-bold text-[var(--casa-ink)]">{post.title}</h4>
+                      <h4 className="mt-1 text-xl font-bold text-[var(--casa-ink)] transition-colors group-hover:text-[var(--casa-accent-text)]">
+                        <Link href={`/news/${post.slug}`} className="after:absolute after:inset-0 after:content-['']">
+                          {post.title}
+                        </Link>
+                      </h4>
                       <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{post.summary}</p>
                       <p className="mt-2 text-sm text-[var(--casa-muted)]">
                         {formatDate(post.publishedAt, locale)} • {estimateReadingTime(post.body)} min
                       </p>
                     </div>
-                    <div>
-                      <Button asChild variant="outline" className="h-9 rounded-lg casa-button-outline border-[color:var(--casa-sand)] px-3 text-sm font-semibold text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]">
-                        <Link href={`/news/${post.slug}`}>
-                          {copy.readArticle}
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </Link>
-                      </Button>
-                    </div>
+                    <span
+                      aria-hidden="true"
+                      className="casa-cta-link inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)] transition-transform duration-300 ease-out group-hover:translate-x-1"
+                    >
+                      {copy.readArticle}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
                   </article>
                 </li>
               ))}

@@ -10,6 +10,16 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['127.0.0.1'],
   images: {
     formats: ['image/avif', 'image/webp'],
+    /*
+     * 30 is for the media halo (src/components/ui/media-frame.tsx), which
+     * requests a second copy of each photograph at `sizes="64px"` purely to
+     * blur it to 34px. Next 16 rejects any `quality` not listed here — without
+     * the 30 entry the optimizer logs
+     * `next-image-unconfigured-qualities` on every halo and serves 75 instead,
+     * which is bytes nobody can see. 75 stays because it is Next's default and
+     * every non-halo image relies on it.
+     */
+    qualities: [30, 75],
   },
 };
 

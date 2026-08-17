@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import Link from 'next/link';
 
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';

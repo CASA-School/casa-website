@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 
@@ -63,7 +63,7 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
   return (
     <article className="group h-full overflow-hidden rounded-3xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 transition-transform hover:-translate-y-0.5">
       <figure>
-        <div className="casa-media-overlay casa-media-overlay-card relative h-52 md:h-56">
+        <div className="casa-media-overlay relative h-52 md:h-56">
           <Image
             src={card.photoSrc}
             alt={card.photoAlt}

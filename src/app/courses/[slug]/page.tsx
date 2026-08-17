@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -431,10 +431,14 @@ export default async function CourseDetailPage({
                     title={processHeading.title}
                     description={processDescription}
                     steps={processStepItems}
-                    cta={{
-                      label: primaryDecisionCta.label,
-                      href: primaryDecisionCta.href,
-                    }}
+                    /*
+                     * No `cta` — it passed `primaryDecisionCta` verbatim, which
+                     * the hero rail already renders at the top of the same page.
+                     * "Book placement first" appeared twice on every course
+                     * detail route, both times as a filled button to the same
+                     * href. The process list explains the steps; the hero asks
+                     * for the click.
+                     */
                   />
                   );
 
@@ -473,7 +477,7 @@ export default async function CourseDetailPage({
                             href={getCoursePath(course.slug)}
                             className="group grid overflow-hidden rounded-lg bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35 sm:grid-cols-[8.5rem_minmax(0,1fr)]"
                           >
-                            <div className="casa-media-overlay casa-media-overlay-card relative min-h-36 sm:min-h-full">
+                            <div className="casa-media-overlay relative min-h-36 sm:min-h-full">
                               <Image
                                 src={relatedPhoto.src}
                                 alt={relatedPhoto.alt}
@@ -508,7 +512,6 @@ export default async function CourseDetailPage({
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               notes={contactLine}
-              ctas={[primaryDecisionCta, secondaryDecisionCta]}
               deadlineIso={selectedInstance?.start_date}
               teacher={spotlightTeacher}
             />

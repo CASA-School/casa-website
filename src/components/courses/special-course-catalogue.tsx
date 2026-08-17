@@ -280,7 +280,7 @@ function ModuleCard({
       <dl className="mt-3 space-y-1 text-xs text-[var(--casa-muted)]">
         <div className="flex gap-1.5">
           <dt className="sr-only">{locale === 'de' ? 'Niveau' : 'Level'}</dt>
-          <dd className="rounded bg-[var(--casa-surface-subtle)] px-1.5 py-0.5 font-bold text-[var(--casa-ink)]">
+          <dd className="rounded-sm bg-[var(--casa-surface-subtle)] px-1.5 py-0.5 font-bold text-[var(--casa-ink)]">
             {courseModule.level}
           </dd>
         </div>

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import Image from 'next/image';
 
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
+import { MediaFrame } from '@/components/ui/media-frame';
 import { cn } from '@/lib/utils';
 
 export type HeroAction = {
@@ -73,34 +73,24 @@ export function HeroPhotoCard({
   priority?: boolean;
 }) {
   return (
-    <figure
-      className={cn(
-        'relative overflow-hidden rounded-3xl bg-[var(--casa-warm-soft)]/35 shadow-[var(--shadow-card)]',
-        className
-      )}
-    >
-      <div className="casa-media-overlay relative h-72 md:h-96">
-        <Image
-          src={photo.src}
-          alt={photo.alt}
-          fill
-          preload={priority}
-          fetchPriority={priority ? 'high' : undefined}
-          loading={priority ? 'eager' : 'lazy'}
-          sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 46vw, 96vw"
-          className="object-cover"
-        />
-        {/*
-          Four unrelated decorations used to sit on top of this photograph: a
-          45-degree rotated square outline, a hairline rule, a tricolour rule,
-          and three red/yellow/blue dots at top-left which on a rounded rectangle
-          read as macOS window traffic lights.
+    /*
+      The hero photograph, and the largest surface the halo runs on.
+      Previously `rounded-3xl` + `shadow-[var(--shadow-card)]` + a warm tint
+      behind it + the shared ink scrim — a floating grey-shadowed card, which
+      is what made the hero read as a stock template. The figure now carries
+      no frame of its own: the radius belongs to `.casa-media__frame` and the
+      elevation comes from the photograph's own colours.
 
-          The photography is real CASA classroom work and was being covered up.
-          Removed rather than restyled — the restraint is the point.
-          See docs/PREMIUM_UI_REVIEW_2026-08-16.md §4.2.
-        */}
-      </div>
+      No scrim here. Nothing is set on top of this image — the eyebrow,
+      headline, lead and CTAs all sit in the column beside it — so a scrim was
+      only ever darkening a photograph for no one's benefit.
+
+      (Earlier passes also removed four decorations that sat on top of this
+      photo: a rotated square outline, a hairline rule, a tricolour rule and
+      three dots that read as macOS traffic lights. Review doc §4.2.)
+    */
+    <figure className={cn('h-72 md:h-96', className)}>
+      <MediaFrame src={photo.src} alt={photo.alt} priority={priority} className="h-full w-full" />
     </figure>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Instagram, Linkedin, Mail, X } from 'lucide-react';
@@ -126,11 +126,27 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
           </p>
         </div>
 
-        <ul className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {/*
+          Four columns from xl, not three.
+
+          The portraits looked "too tall" but the ratio was never wrong —
+          `aspect-[4/5]` is the standard portrait crop and swapping it for
+          something squarer would crop heads once real photographs land. The
+          height came from CARD WIDTH: three columns in the 1360px content
+          measure gives 440px cards, and 440 x 5/4 is a 550px portrait.
+
+          Measured at 1360 with gap-5: 3 cols -> 440px wide / 550px tall;
+          4 cols -> 325px wide / 406px tall. Same crop, a quarter less height,
+          and a team grid reads better dense anyway.
+
+          The lg step is kept at 3 so the cards do not become stamps between
+          1024 and 1280, where the content measure is still under 1200.
+        */}
+        <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visibleMembers.map((member) => (
             <li key={member.id}>
               <article className="h-full overflow-hidden rounded-3xl bg-[var(--casa-bg)] shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
-                <div className="casa-media-overlay casa-media-overlay-card relative aspect-[4/5] overflow-hidden">
+                <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden">
                   <Image
                     src={member.photo.src}
                     alt={member.photo.alt}

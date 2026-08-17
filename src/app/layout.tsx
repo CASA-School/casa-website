@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { SiteShell } from '@/components/layout/site-shell';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -14,6 +14,28 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   weight: ['400', '500', '600', '700', '800'],
+});
+
+/*
+ * Display face for headings, matched to the caterlove-prep-system site
+ * (~/Tasks/10-active/work/caterlove-prep-system/website), which pairs
+ * Playfair Display for display type with a sans for body.
+ *
+ * HEADINGS ONLY. Body, UI and numerals stay on Plus Jakarta Sans, which matters
+ * for two reasons beyond taste:
+ *   - `--container-measure: 48ch` in globals.css is measured against Plus
+ *     Jakarta Sans metrics (1ch = 0.732em) and governs body copy. Leaving body
+ *     on PJS keeps that token honest.
+ *   - Playfair has no tabular figures worth the name; the stat band and every
+ *     `tabular-nums` price and date depend on PJS.
+ *
+ * Playfair is a high-contrast Didone: its hairlines thin out badly below ~20px,
+ * so it is bound to h1/h2/h3 only and never to small text.
+ */
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: ['500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -65,7 +87,7 @@ export default async function RootLayout({
     <html lang={contentLocale}>
       <body
         suppressHydrationWarning
-        className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} font-sans`}
+        className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} ${playfairDisplay.variable} font-sans`}
       >
         <JsonLdScript id="organization-schema" data={organizationSchema} />
         <NextIntlClientProvider messages={messages}>

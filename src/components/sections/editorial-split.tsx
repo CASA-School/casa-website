@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { MediaFrame } from '@/components/ui/media-frame';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -75,16 +75,20 @@ export function EditorialSplit({
           ) : null}
         </div>
 
-        <figure className="overflow-hidden rounded-3xl bg-white/80 shadow-[var(--shadow-card)]">
-          <div className="casa-media-overlay relative h-64 md:h-[360px]">
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              sizes="(min-width: 1280px) 42vw, (min-width: 1024px) 45vw, 95vw"
-              className="object-cover"
-            />
-          </div>
+        {/*
+          Halo, not drop shadow. The figure carried `rounded-3xl` plus
+          `shadow-[var(--shadow-card)]`, which is the same neutral grey lift
+          under every photograph on the site. MediaFrame paints a blurred copy
+          of this photograph behind itself instead, so the surface picks up the
+          image's own colours. See the `.casa-media` block in globals.css.
+        */}
+        <figure className="h-64 md:h-[360px]">
+          <MediaFrame
+            src={photo.src}
+            alt={photo.alt}
+            sizes="(min-width: 1280px) 42vw, (min-width: 1024px) 45vw, 95vw"
+            className="h-full w-full"
+          />
         </figure>
       </div>
     </section>
