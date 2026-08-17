@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -344,12 +344,6 @@ export default async function AlternativeLandingPage() {
             ? 'CASA hilft vom passenden Kurs über Prüfungsvorbereitung bis zum Alltag in Bremen - klar, menschlich und Schritt für Schritt.'
             : 'CASA helps you move from the right course to exam preparation and everyday life in Bremen - clearly, personally, and step by step.'
         }
-        proofLine={
-          locale === 'de'
-            ? 'Kursberatung, telc Vorbereitung und Ankommen in Bremen'
-            : 'Course advice, telc preparation, and settling into Bremen'
-        }
-        badge={locale === 'de' ? 'Offizielles telc Prüfungszentrum' : 'Official telc exam center'}
         ctas={[
           {
             label: locale === 'de' ? 'Kurs finden' : 'Find my course',
@@ -363,7 +357,6 @@ export default async function AlternativeLandingPage() {
           },
         ]}
         photo={pageConfig.photos.hero}
-        trustBadges={(hero.chips ?? []).slice(0, 3)}
       />
 
       <section

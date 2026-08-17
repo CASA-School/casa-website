@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { HeroBEditorial } from '@/components/heroes';
 import { EditorialSplit, HumanStoryBlock, ProofBand, TestimonialGrid } from '@/components/sections';
 import { AboutMilestones } from '@/components/signatures';
-import { Button } from '@/components/ui/button';
+import { TextCta } from '@/components/ui/text-cta';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
@@ -320,13 +319,12 @@ export default async function AboutPage() {
               <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{tandemGuide.title}</h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemGuide.intro}</p>
 
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Button asChild variant="prism">
-                  <Link href="/contact">{tandemGuide.primaryCta}</Link>
-                </Button>
-                <Button asChild variant="outline-prism">
-                  <Link href="/contact">{tandemGuide.secondaryCta}</Link>
-                </Button>
+              {/* Two adjacent buttons with different labels and the identical
+                  /contact href. The /about hero already carries "Talk to
+                  admissions" -> /contact as its primary, so this block was the
+                  second and third route to one page. One text link now. */}
+              <div className="mt-5">
+                <TextCta href="/contact">{tandemGuide.primaryCta}</TextCta>
               </div>
             </div>
 

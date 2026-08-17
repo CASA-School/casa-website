@@ -155,7 +155,19 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
         infoTitle={locale === 'de' ? 'Prüfungsinfos' : 'Exam info rail'}
         infoItems={infoItems}
         notes={locale === 'de' ? 'Sessiondaten und Fristen werden fortlaufend aktualisiert.' : 'Session dates and deadlines are updated continuously.'}
-        ctas={pageConfig.ctas}
+        /*
+         * The hero primary carries the session id.
+         *
+         * The body rail used to render its own duplicate pair of CTAs, and only
+         * that copy was session-aware — `pageConfig.ctas` points at a bare
+         * /registration/exam. Dropping the duplicate would have quietly dropped
+         * the prefill with it, so the session-aware href moves up here and the
+         * page keeps one registration CTA that still knows which sitting the
+         * reader was looking at.
+         */
+        ctas={pageConfig.ctas.map((cta, index) =>
+          index === 0 ? { ...cta, href: examRegistrationHref } : cta
+        )}
         photo={{
           ...pageConfig.photos.supportCard,
           caption: 'Exam preparation table scene - Structured exam practice and strategy.',
@@ -249,18 +261,6 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                   ? 'Behalten Sie Termin, Frist und Anmeldung im Blick, während Sie die Details lesen.'
                   : 'Keep date, deadline, and registration action visible while reading details.'
               }
-              ctas={[
-                {
-                  label: locale === 'de' ? 'Jetzt Prüfung anmelden' : 'Register exam now',
-                  href: examRegistrationHref,
-                  kind: 'primary',
-                },
-                {
-                  label: locale === 'de' ? 'Prüfungsberatung' : 'Exam guidance',
-                  href: '/contact?topic=Exam registration',
-                  kind: 'secondary',
-                },
-              ]}
               deadlineIso={selectedSession?.registration_deadline}
             />
           </div>

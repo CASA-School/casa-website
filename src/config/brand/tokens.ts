@@ -71,11 +71,17 @@ export const componentTokenRules = {
   /**
    * Border-radius scale — 3 tiers, no exceptions.
    *
-   * Tier 1 · rounded-3xl (22px): Outer page cards, modals, full-section wrappers.
-   * Tier 2 · rounded-xl  (14px): Internal content boxes, section banners, tiles,
+   * Tier 1 · rounded-3xl (14px): Outer page cards, modals, full-section wrappers.
+   * Tier 2 · rounded-xl  (10px): Internal content boxes, section banners, tiles,
    *                               tab switcher pills, grouped input panels.
-   * Tier 3 · rounded-lg  (10px): Inputs, selects, textareas, buttons, small badges.
+   * Tier 3 · rounded-lg   (8px): Inputs, selects, textareas, buttons, small badges.
    * Special · rounded-full     : Avatar circles, step indicators — always full.
+   *
+   * The tier NAMES are stable; the px values compressed on 2026-08-16 from
+   * 22/14/10 to 14/10/8. Do not read the numbers here as authoritative — they
+   * are derived from `--radius` in src/app/globals.css, which is the only place
+   * to change them. See the long note in that block for why the spread between
+   * tiers narrowed rather than just the base.
    *
    * Retired values (do not use):
    *   rounded-2xl — use rounded-xl (content boxes) or rounded-3xl (outer shells)

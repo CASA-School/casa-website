@@ -1,109 +1,127 @@
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
-import { HeroPhotoCard, HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
+import { HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
 
 type HeroHomePhotoProps = {
   eyebrow: string;
   title: string;
   description: string;
-  proofLine: string;
-  badge: string;
   ctas: HeroAction[];
   photo: HeroPhoto;
-  trustBadges?: string[];
   proofItems?: HeroProofItem[];
   themeClassName?: string;
 };
 
+/**
+ * Editorial photo hero — copy left, photograph bleeding off the right edge.
+ *
+ * Three things were removed rather than restyled, and the removals are the
+ * point:
+ *
+ *   - The pill chip under the description ("Course advice, telc preparation…")
+ *     restated the description in a smaller, harder-to-read box.
+ *   - The trust-badge row (Bremen · Community-first · Exam pathways · …) was
+ *     four unlinked words that promised navigation and delivered none.
+ *   - The second CTA. Two buttons do not offer a choice, they defer one — see
+ *     the TextCta doc comment for the rule this site already follows.
+ *
+ * What is left is one eyebrow, one headline, one sentence, one button.
+ */
 export function HeroHomePhoto({
   eyebrow,
   title,
   description,
-  proofLine,
-  badge,
   ctas,
   photo,
-  trustBadges = [],
-  themeClassName = 'hero-theme-home',
+  themeClassName = 'hero-theme-plain',
 }: HeroHomePhotoProps) {
+  const [primaryCta] = ctas;
+
   return (
-    <HeroSurface themeClassName={themeClassName} archetype="A">
-      <div className="grid items-start gap-10 lg:grid-cols-[1.08fr_0.92fr]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
-          <h1 className="mt-3 text-4xl font-black text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
-          <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+    <HeroSurface themeClassName={themeClassName} archetype="A" className="overflow-x-clip">
+      <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+        <div className="lg:py-6">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+            {eyebrow}
+          </p>
+          <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--casa-ink)] sm:text-5xl lg:text-6xl">
+            {title}
+          </h1>
+          <p className="mt-6 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+            {description}
+          </p>
 
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/85 px-4 py-2 text-xs font-semibold text-[var(--casa-ink)] ring-1 ring-[color:var(--casa-sand)]">
-            <span className="h-2 w-2 rounded-full bg-[var(--casa-amber)]" aria-hidden />
-            {proofLine}
-          </div>
-
-          <div className="mt-7 flex flex-wrap items-center gap-3">
-            {ctas.slice(0, 3).map((cta, index) => {
-              if (index === 0) {
-                return (
-                  <Button
-                    key={`${cta.href}-${cta.label}`}
-                    asChild
-                    className="casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]"
-                    data-casa-track="true"
-                    data-casa-label={cta.label}
-                  >
-                    <Link href={cta.href}>{cta.label}</Link>
-                  </Button>
-                );
-              }
-
-              if (index === 1) {
-                return (
-                  <Button
-                    key={`${cta.href}-${cta.label}`}
-                    asChild
-                    variant="outline"
-                    className="casa-button-outline border-[color:var(--casa-sand)] text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]"
-                    data-casa-track="true"
-                    data-casa-label={cta.label}
-                  >
-                    <Link href={cta.href}>{cta.label}</Link>
-                  </Button>
-                );
-              }
-
-              return (
-                <Link
-                  key={`${cta.href}-${cta.label}`}
-                  href={cta.href}
-                  className="casa-cta-link text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:underline"
-                  data-casa-track="true"
-                >
-                  {cta.label}
-                </Link>
-              );
-            })}
-          </div>
-
-          {trustBadges.length > 0 ? (
-            <ul className="mt-6 flex flex-wrap gap-3">
-              {trustBadges.slice(0, 4).map((item) => (
-                <li
-                  key={item}
-                  className="text-xs font-semibold text-[var(--casa-muted)]"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
+          {primaryCta ? (
+            <Button
+              asChild
+              className="casa-button-prism mt-8 bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]"
+              data-casa-track="true"
+              data-casa-label={primaryCta.label}
+            >
+              <Link href={primaryCta.href}>{primaryCta.label}</Link>
+            </Button>
           ) : null}
         </div>
 
-        <div className="space-y-4 lg:pt-2">
-          <div className="inline-flex rounded-full bg-[var(--casa-ink-deep)] px-4 py-2 text-xs font-semibold uppercase tracking-eyebrow text-white">
-            {badge}
+        {/*
+          The photograph stops at the site frame, not the viewport.
+
+          It used to bleed right on a negative margin sized to the frame surplus.
+          Inset instead, so its right edge sits on the same gutter the copy's
+          left edge sits on and the hero reads as one balanced block. No margin
+          class at all now — Container's own padding does the work, which is why
+          this cannot drift from the left inset.
+        */}
+        <div className="relative h-[19rem] sm:h-[24rem] lg:h-[33rem]">
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{
+              /*
+                Masked, not cropped. A rounded rectangle on a background is a
+                PLACED object; fading the left edge to transparent means there is
+                no boundary at all, so the hero's warm grain field reads as
+                continuous behind the photograph.
+
+                Two ramps composited: left-to-right for the dissolve, and a
+                gentler top/bottom so the photo does not butt into the section's
+                own border. `-webkit-` duplicated for Safari.
+              */
+              WebkitMaskImage:
+                'linear-gradient(to right, transparent 0%, black 34%), linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
+              maskImage:
+                'linear-gradient(to right, transparent 0%, black 34%), linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
+              WebkitMaskComposite: 'source-in',
+              maskComposite: 'intersect',
+            }}
+          >
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              sizes="(min-width: 1024px) 56vw, 100vw"
+              className="object-cover"
+              priority
+            />
           </div>
-          <HeroPhotoCard photo={photo} className="min-h-[310px]" priority />
+
+          {/*
+            A soft focal fall-off on the leading edge. The mask alone fades
+            opacity; this also softens detail as the photo dissolves, so the
+            transition reads as depth rather than as a fade. Cheap — it blurs
+            what is already painted rather than loading a second image — and
+            `pointer-events-none` keeps it out of the way.
+          */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 w-[34%] backdrop-blur-[5px]"
+            style={{
+              WebkitMaskImage: 'linear-gradient(to right, black 10%, transparent 100%)',
+              maskImage: 'linear-gradient(to right, black 10%, transparent 100%)',
+            }}
+          />
         </div>
       </div>
     </HeroSurface>

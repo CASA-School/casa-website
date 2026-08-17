@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { TextCta } from '@/components/ui/text-cta';
 import { QuickChooserPanel, type QuickChooserField, type QuickChooserThumbnail } from '@/components/sections/quick-chooser-panel';
 
 import { HeroSurface, type HeroAction, type HeroProofItem } from './shared';
@@ -58,30 +59,25 @@ export function HeroIndexChooser({
                 );
               }
 
-              if (index === 1) {
-                return (
-                  <Button
-                    key={`${cta.href}-${cta.label}`}
-                    asChild
-                    variant="outline"
-                    className="casa-button-outline border-[color:var(--casa-sand)] text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]"
-                    data-casa-track="true"
-                    data-casa-label={cta.label}
-                  >
-                    <Link href={cta.href}>{cta.label}</Link>
-                  </Button>
-                );
-              }
 
+              /*
+                Every CTA after the first is a text link.
+              
+                There used to be a middle tier here — index 1 rendered an outline button —
+                and since no `ctas` array in public-page-config.ts has more than two
+                entries, this text-link branch was unreachable on every public route. So
+                every hero on the site shipped exactly two button-weight controls, and the
+                restrained third tier the ladder was built for never rendered once.
+              */
               return (
-                <Link
+                <TextCta
                   key={`${cta.href}-${cta.label}`}
                   href={cta.href}
-                  className="casa-cta-link text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:underline"
                   data-casa-track="true"
+                  data-casa-label={cta.label}
                 >
                   {cta.label}
-                </Link>
+                </TextCta>
               );
             })}
           </div>

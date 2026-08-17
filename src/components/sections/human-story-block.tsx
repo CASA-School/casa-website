@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { MediaFrame } from '@/components/ui/media-frame';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -46,16 +46,20 @@ export function HumanStoryBlock({
           mediaSide === 'right' && 'lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1'
         )}
       >
-        <figure className="overflow-hidden rounded-3xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
-          <div className="casa-media-overlay relative h-72 md:h-80">
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              sizes="(min-width: 1280px) 40vw, (min-width: 1024px) 45vw, 95vw"
-              className="object-cover"
-            />
-          </div>
+        {/*
+          Halo, not drop shadow. The figure carried `rounded-3xl` plus
+          `shadow-[var(--shadow-card)]`, which is the same neutral grey lift
+          under every photograph on the site. MediaFrame paints a blurred copy
+          of this photograph behind itself instead, so the surface picks up the
+          image's own colours. See the `.casa-media` block in globals.css.
+        */}
+        <figure className="h-72 md:h-80">
+          <MediaFrame
+            src={photo.src}
+            alt={photo.alt}
+            sizes="(min-width: 1280px) 40vw, (min-width: 1024px) 45vw, 95vw"
+            className="h-full w-full"
+          />
         </figure>
 
         <div>

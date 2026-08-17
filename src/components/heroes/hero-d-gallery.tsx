@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { MediaFrame } from '@/components/ui/media-frame';
 
 import { Button } from '@/components/ui/button';
+import { TextCta } from '@/components/ui/text-cta';
 
 import { HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
 
@@ -32,18 +33,21 @@ export function HeroDGallery({
       {/* Mobile: 1 featured + 2 thumbnail chips. Desktop: asymmetric 3-col */}
       <div className="mt-8 space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-3">
         {/* Featured image — full width on mobile, 2 cols wide on desktop */}
-        <figure className="md:col-span-2 overflow-hidden rounded-3xl bg-white/70 shadow-[var(--shadow-card)]">
-          <div className="casa-media-overlay relative h-60 sm:h-72 md:h-80 lg:h-88 xl:h-96">
-            <Image
-              src={photos[0].src}
-              alt={photos[0].alt}
-              fill
-              sizes="(min-width: 1280px) 62vw, (min-width: 768px) 64vw, 95vw"
-              className="object-cover"
-              priority
-            />
-            <div className="casa-tricolor-rule pointer-events-none absolute bottom-3 left-3 h-1 w-16 rounded-full" />
-          </div>
+        {/*
+          Halo instead of the grey card shadow — see `.casa-media` in
+          globals.css. The little accent tick that sat in the bottom-left
+          corner of each tile goes with it: a graphic mark stencilled onto a
+          photograph is the same instinct globals.css already retired for the
+          prismatic sweep, and on a three-photo mosaic it fired three times.
+        */}
+        <figure className="md:col-span-2 h-60 sm:h-72 md:h-80 lg:h-88 xl:h-96">
+          <MediaFrame
+            src={photos[0].src}
+            alt={photos[0].alt}
+            sizes="(min-width: 1280px) 62vw, (min-width: 768px) 64vw, 95vw"
+            className="h-full w-full"
+            priority
+          />
         </figure>
 
         {/* Secondary pair — side-by-side chips on mobile, stacked in right col on desktop */}
@@ -51,18 +55,14 @@ export function HeroDGallery({
           {photos.slice(1).map((photo, index) => (
             <figure
               key={`${photo.src}-${index}`}
-              className="overflow-hidden rounded-3xl bg-white/70 shadow-[var(--shadow-card)]"
+              className="h-36 sm:h-44 md:h-[calc(50%-6px)] md:min-h-36 lg:min-h-40 xl:min-h-44"
             >
-              <div className="casa-media-overlay relative h-36 sm:h-44 md:h-[calc(50%-6px)] md:min-h-36 lg:min-h-40 xl:min-h-44">
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  sizes="(min-width: 768px) 30vw, 46vw"
-                  className="object-cover"
-                />
-                <div className="casa-tricolor-rule pointer-events-none absolute bottom-3 left-3 h-1 w-10 rounded-full" />
-              </div>
+              <MediaFrame
+                src={photo.src}
+                alt={photo.alt}
+                sizes="(min-width: 768px) 30vw, 46vw"
+                className="h-full w-full"
+              />
             </figure>
           ))}
         </div>
@@ -85,30 +85,25 @@ export function HeroDGallery({
             );
           }
 
-          if (index === 1) {
-            return (
-              <Button
-                key={`${cta.href}-${cta.label}`}
-                asChild
-                variant="outline"
-                className="casa-button-outline border-[color:var(--casa-sand)] text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]"
-                data-casa-track="true"
-                data-casa-label={cta.label}
-              >
-                <Link href={cta.href}>{cta.label}</Link>
-              </Button>
-            );
-          }
 
+          /*
+            Every CTA after the first is a text link.
+          
+            There used to be a middle tier here — index 1 rendered an outline button —
+            and since no `ctas` array in public-page-config.ts has more than two
+            entries, this text-link branch was unreachable on every public route. So
+            every hero on the site shipped exactly two button-weight controls, and the
+            restrained third tier the ladder was built for never rendered once.
+          */
           return (
-            <Link
+            <TextCta
               key={`${cta.href}-${cta.label}`}
               href={cta.href}
-              className="casa-cta-link text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:underline"
               data-casa-track="true"
+              data-casa-label={cta.label}
             >
               {cta.label}
-            </Link>
+            </TextCta>
           );
         })}
       </div>

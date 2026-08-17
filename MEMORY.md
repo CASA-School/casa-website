@@ -959,6 +959,172 @@ attribution for the homepage hero — it is `HeroAPhotoLed`, and `HeroHomePhoto`
 hero components never rendered anywhere; and an unreproducible photo-caption claim). Treat
 unverified agent counts as leads, not facts.
 
+## Design pass against the caterlove reference (2026-08-16)
+
+Five changes requested after comparing CASA with the caterlove-prep-system site at
+`~/Tasks/10-active/work/caterlove-prep-system/website`. Owner's calls: 1680px ceiling
+(not caterlove's 1720), and a CASA-specific image treatment rather than a port of
+caterlove's edge-fade.
+
+### 1. Width — one token, not four literals
+
+`--casa-container-max: 1680px` in `globals.css` now owns the ceiling. `1440px` had been
+written out separately in `Container`, in the navbar's own wrapper, in three dropdown
+clamps, and in the search-popover's edge math — five literals that had to agree with no
+way to tell they were meant to. Gutters went from `px-6 lg:px-8` to
+`px-5 sm:px-8 lg:px-10`, and the navbar now uses the identical ramp instead of narrowing
+at `lg` to claw back space. Usable content at lg+: 1376px → 1600px.
+
+The search popover's `2xl:right-[calc((100vw-1440px)/2+2rem)]` needed `max()`, not just a
+new number — at viewports between 1536 and the new ceiling the calc goes negative and
+would have pushed the panel off-screen.
+
+`/contact` had `<Container className="max-w-7xl">`; since `cn` is tailwind-merge that
+*replaced* the ceiling, so the page was silently 400px narrower than the site. Removed,
+with the aside capped at 26rem so the row does not stretch.
+
+### 2. Radius — the spread mattered more than the base
+
+Scale went 6/8/10/14/18/22/26 → 5/6/8/10/12/14/16. The base dropping 10px → 8px is the
+small half; the important half is the step delta going 4px → 2px, so an outer shell is no
+longer twice as round as the button inside it. One edit to `--radius` plus the derived
+ladder moves ~550 of ~639 `rounded-*` occurrences. The six that did **not** follow are now
+on-token: `--casa-button-radius` (was a hardcoded `0.625rem`), `.casa-cta-link`,
+`checkbox.tsx` (`rounded-[5px]`), `sheet.tsx` (`rounded-xs`, which resolved to upstream
+Tailwind's 2px), and three bare `rounded` utilities.
+
+### 3. Imagery — a halo made of the photograph
+
+New `.casa-media` / `MediaFrame` (`src/components/ui/media-frame.tsx`). A blurred,
+over-scaled copy of the same photo is painted behind the sharp one, so each image lights
+the page in its own colours instead of casting the same neutral grey shadow as every other
+image. The halo copy is `aria-hidden`, `alt=""`, and requested at `sizes="64px"` /
+`quality={30}` — which is why `next.config.ts` now declares `qualities: [30, 75]`; Next 16
+rejects any unlisted quality.
+
+Removed with it: the `.casa-media-overlay::after` prismatic sweep (a clip-path glint over
+18 photographs), the whole `.casa-media-overlay-card` variant (a 0.52 scrim plus blue cast
+plus pinstripe on 7 surfaces, visibly recolouring faces on the team portraits — also at
+odds with the source-faithful photo rule in CLAUDE.md), and three now-orphaned hover
+keyframes. Ported so far: `HeroPhotoCard`, `HeroDGallery`, `EditorialSplit`,
+`HumanStoryBlock`. Still on the old pattern: `guided-picker`, `testimonial-grid`,
+`team-directory`, `ResourceGuidePage`, `courses/[slug]`.
+
+### 4. Buttons — one solid per decision
+
+Homepage body went from 10 filled/outlined CTAs and zero text links to 1 and 15. Across 16
+public pages: 31 buttons total, 36 text CTAs.
+
+The structural causes, not just the instances:
+- The hero ladder had three tiers (solid → outline → text) but no `ctas` array in
+  `public-page-config.ts` has more than two entries, so the text tier was **unreachable on
+  every route** and every hero shipped two button-weight controls. Removing the middle tier
+  fixed 12+ routes from four files.
+- `StickyInfoCard` is mounted twice on `/courses/[slug]`, `/exams/[code]` and
+  `/accommodation/[type]` — by the hero rail and again by `DecisionRail` — both given the
+  same `ctas`. The body mount no longer takes them.
+- `/exams` had two differently-labelled CTAs pointing at the identical href.
+
+New `TextCta` (`src/components/ui/text-cta.tsx`). **It hardcodes `casa-cta-link`, and any
+future demotion must too**: click analytics matches on that class name in
+`interaction-tracker.tsx`, not on `data-casa-track`.
+
+Nav is one button now. `/contact` was not in `nav.ts` at all, so deleting the second nav
+button would have removed the only desktop route to it — it is now the last item of the
+Our School dropdown, available at every width instead of only above 1400px.
+
+### 5. Footer
+
+3px accent rule across the top. The old separator was `border-t border-white/10` painted
+over the footer's own `#111827`, i.e. invisible against the light page above. First attempt
+put a blue→sun gradient there, which interpolates through **green** in sRGB; it reuses
+`.casa-tricolor-rule` instead. CTA band is one button + one text link. Mobile footer
+828px → 682px; the 16 index links stay in the `md:grid` branch (`display:none`, still
+crawlable) rather than being rendered as a 559px wall.
+
+### Navbar breakpoint moved to xl
+
+At 1024 in German on `/exams` the header overflowed the page by 41px. Trimming padding
+recovers 56px against a 41px deficit — 15px of slack, on labels that change per page and
+locale. The desktop row now turns on at `xl` (1280) and the drawer covers 1024–1279, which
+is what the reference does and for the same measured reason. Verified: 0 horizontal
+overflows across 12 widths × 8 routes × 2 locales.
+
+### Also fixed in passing
+
+`ArrowRight` in `src/lib/icons/streamline-lucide-adapter.tsx` mapped to
+`arrow-round-right`, a 5.25r arc with a head — a return/loop mark that reads as a refresh
+icon at 14–16px, on 50 call sites. Invisible while every one sat as a white glyph inside a
+dark button; obvious the moment those became text links. Added a straight `arrow-right-1`
+matching the existing `arrow-up-1` geometry.
+
+Gates: lint, typecheck, 74 unit tests, build, knip, and 10 e2e all pass.
+
+## Content-width hierarchy — ContentFrame (2026-08-16)
+
+Every band on every page rendered at exactly 1600px. Measured on the homepage before the
+change: 8 bands, **one** distinct content width. Width carried no information, so a 4-up
+chooser, a one-sentence mission statement and a dense stat panel all got the same measure,
+and ~60 components defended themselves with their own ad-hoc `max-w-*` clamps.
+
+**Two contracts, deliberately split.** `Container` is the site frame — WHERE the site aligns
+(page content, navbar row, footer, heroes, dropdown clamps, search popover). Unchanged
+geometry, does not vary. `ContentFrame` is new and controls HOW EXPANSIVE one composition is,
+inside the site frame. Do not merge them: the alignment contract is what keeps the logo on the
+same optical line as the first heading.
+
+**Widths live in CSS, not in class strings.** `[data-casa-site-frame]` and
+`[data-casa-content-frame]` are *unlayered* rules in globals.css. Tailwind v4 emits utilities
+into `@layer utilities`, and unlayered beats any layer, so a call site passing
+`className="max-w-4xl"` through `cn()`/tailwind-merge can no longer silently replace the width
+— the exact bug that shipped /contact 400px narrow. Verified in-browser: the utility class is
+ignored, an inline style still wins as an escape hatch. Two caveats: `!important` reverses
+layer order and would defeat it (only one `!important` exists in the repo today), and this is
+the same cascade behaviour that caused the transition bug documented at the `@layer base` block
+— here it is the point rather than an accident.
+
+Because the width is on the attribute, a ContentFrame can safely *be* the existing grid
+element (`<ContentFrame size="wide" className="grid …">`) instead of adding a wrapper div.
+
+**Tiers** (`--casa-frame-*`, even 160px steps below the 1600px ceiling), each pinned to a
+measured composition rather than chosen for the arithmetic:
+`wide 1440` (PersonaPathways: 4 × (288 clamp + 56 padding) + 3 × 20 gap = 1436),
+`standard 1280` (TestimonialGrid's fixed 224px media height → 1.76:1 crop, vs 2.24:1 letterbox
+at 1600), `compact 1120` (housing-and-life chip row; also a FLOOR — nonprofit-mission's
+three-chip row needs ≥1127px). `full` is the identity state and its real definition is
+"no frame at all".
+
+**Rules learned, worth keeping:**
+- Assign a tier per `<Container>`, never per component. Two compositions sharing one Container
+  that get different tiers produce a 40–60px inset, which reads as misalignment, not hierarchy.
+- Never bake a tier into a shared component — ProofBand renders on 4 routes. Tiers go at the
+  call site in the page.
+- Watch `space-y-*` on a Container: wrapping its children in a frame moves the rhythm. Move the
+  `space-y` onto the frame. (Tailwind v4 implements it as `margin-block-end` on all but the
+  last child, not `margin-top`.)
+- A tier only engages once the container exceeds it, so the ladder exists above ~1520px
+  viewport and folds to today's behaviour below ~1200px. Intended — this is a large-display
+  problem.
+
+Homepage rhythm now 1600 · 1600 · 1440 · 1440 · 1280 ‖ 1600 ‖ 1120 · 1120 · 1280: a taper into
+the dark band, a hard reset there, a tighter taper, and a return to the site edge at the
+footer. Four distinct widths where there was one.
+
+Also landed, behaviour-neutral: `--casa-gutter` replaces the `px-5 sm:px-8 lg:px-10` literal
+that was duplicated in Container and the navbar; `Container` takes a ref (React 19 ref-as-prop,
+not `forwardRef`) so the navbar uses the real component instead of a copy of its classes.
+Verified identical at 375/768/1680 before the tiers were applied.
+
+**Not done — the rest of the site still renders at one width.** Migrate by section archetype
+rather than page by page, so the same composition gets the same role everywhere. Deliberately
+left at full width: the ProofBand trust plinth, because its apparent 880px "natural width" is
+compensation for a data bug (three of four proof metrics are filtered out by
+`sourceType !== 'internal'`), not a width judgement. Fix the data first.
+
+Gates: lint, typecheck, 74 unit tests, build, knip, and 10 e2e all pass. One e2e selector was
+updated — `header > div.mx-auto` → `header > [data-casa-site-frame]`, same element, targeted by
+contract instead of by an incidental utility class.
+
 ## Verified Baseline
 
 The latest implementation pass has already cleared:

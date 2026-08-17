@@ -5,6 +5,7 @@ import { ArrowRight, Building2, CheckCircle2, ClipboardCheck, LaptopMinimalCheck
 import { HeroEMinimal } from '@/components/heroes';
 import { KlettLevelTests, LevelProgressionTimeline } from '@/components/sections';
 import { Button } from '@/components/ui/button';
+import { TextCta } from '@/components/ui/text-cta';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getPlacementNarrative } from '@/lib/content/repository';
@@ -120,13 +121,12 @@ export default async function PlacementTestPage() {
                   </li>
                 ))}
               </ul>
+              {/* The page hero already sends readers to #klett-level-tests as
+                  its primary CTA, so this was the same jump offered a second
+                  time in the same colour. Demoted, not deleted — in-page
+                  wayfinding is useful; a second solid button is not. */}
               <div className="mt-6">
-                <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
-                  <Link href="#klett-level-tests">
-                    {copy.onlineCta}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <TextCta href="#klett-level-tests">{copy.onlineCta}</TextCta>
               </div>
             </article>
 

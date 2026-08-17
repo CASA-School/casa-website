@@ -232,8 +232,23 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
       />
 
       <section className="bg-[linear-gradient(180deg,var(--casa-bg)_0%,#f8fafc_100%)] py-16 md:py-20">
-        <Container className="max-w-7xl">
-          <div id="contact-form" className="grid scroll-mt-28 gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+        {/*
+          `max-w-7xl` used to sit on this Container. Because `cn` is
+          tailwind-merge, that REPLACED the site ceiling rather than layering on
+          it, so /contact silently rendered 160px narrower than every other page
+          — and 400px narrower once the ceiling moved to 1680.
+
+          The override is gone, but the aside is now capped instead: a form plus
+          an icon-and-text contact list stretched across 1600px reads as broken,
+          and the fractional `0.85fr` column would have grown to ~740px. The row
+          keeps a comfortable measure and sits left rather than being centred by
+          a container that lied about the page width.
+        */}
+        <Container>
+          <div
+            id="contact-form"
+            className="grid max-w-[88rem] scroll-mt-28 gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,26rem)]"
+          >
             <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 
             <div className="min-w-0 xl:sticky xl:top-28 xl:self-start">

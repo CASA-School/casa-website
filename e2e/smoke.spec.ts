@@ -4,7 +4,12 @@ test('home renders Hero A and no top announcement bar', async ({ page }) => {
   await page.goto('/');
 
   await expect(page.locator('section[data-hero-archetype="A"]')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1, name: /learn german in bremen with a clear path from course to everyday life/i })).toBeVisible();
+
+  // The h1 is CASA's Leitbild — "Miteinander reden - aufeinander zugehen" —
+  // rendered in English here because e2e runs the default EN locale. Matching a
+  // fragment rather than the full sentence, so a copy tweak does not fail the
+  // test while a MISSING h1 still does.
+  await expect(page.getByRole('heading', { level: 1, name: /move toward one another/i })).toBeVisible();
   await expect(page.getByText('Summer intensive courses are now open')).toHaveCount(0);
 });
 
@@ -53,7 +58,10 @@ test('desktop navbar dropdown is dynamic and courses panel stays inside project 
   await expect(coursesPanel).toBeVisible();
   await expect(coursesPanel.getByText('Intensive German')).toBeVisible();
 
-  const navBounds = await page.locator('header > div.mx-auto').boundingBox();
+  // The nav row is the site frame itself. Selected by its data attribute rather
+  // than by a utility class: width and centring live in the [data-casa-site-frame]
+  // rule now, so `.mx-auto` is no longer in the class list.
+  const navBounds = await page.locator('header > [data-casa-site-frame]').boundingBox();
   const panelBounds = await coursesPanel.boundingBox();
   expect(navBounds).not.toBeNull();
   expect(panelBounds).not.toBeNull();

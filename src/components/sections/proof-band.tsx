@@ -72,17 +72,38 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
         ))}
       </ul>
 
-      <ul className="mt-6 flex flex-wrap items-center gap-2.5" aria-label="Accreditations and partners">
+      {/*
+        Accreditation marks, enlarged 2026-08-16.
+
+        These are the band's actual proof — telc, partner bodies — and they were
+        the smallest thing on it: a 136x56 plate holding a 40px-tall logo, set at
+        95% opacity on a dark field. Small marks read as disclaimers rather than
+        as credentials.
+
+        Now 164x64 with a 48px cap FROM md, on solid white. Solid, not /95: a
+        translucent plate lets ink-deep bleed through and greys the logos, which
+        is the one thing an accreditation mark cannot afford. The plate grows
+        more than the logo does, so the extra size is breathing room around the
+        mark rather than upscaling of source art that may not have the
+        resolution for it.
+
+        The size is responsive, and that is not cosmetic. Measured at 375: the
+        panel interior is 287px, so a 164px plate fits only ONE per row and the
+        five marks became a five-row stack. Holding 136px below md keeps two per
+        row (2x136 + 10px gap = 282), so the strip stays three rows on a phone
+        while desktop gets the larger marks.
+      */}
+      <ul className="mt-7 flex flex-wrap items-center gap-2.5 md:gap-3" aria-label="Accreditations and partners">
         {accreditationLogos.slice(0, 5).map((logo) => (
           <li key={logo.id}>
             <Link
               href={logo.href || '#'}
               target={logo.href ? '_blank' : undefined}
               rel={logo.href ? 'noreferrer' : undefined}
-              className="flex h-14 w-[136px] items-center justify-center rounded-xl bg-white/95 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-amber)]"
+              className="flex h-14 w-[136px] items-center justify-center rounded-xl bg-white px-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-amber)] md:h-16 md:w-[164px] md:px-3"
               aria-label={logo.name}
             >
-              <Image src={logo.imageSrc} alt={logo.name} width={logo.imageWidth} height={logo.imageHeight} className="h-auto w-auto max-h-10 object-contain" />
+              <Image src={logo.imageSrc} alt={logo.name} width={logo.imageWidth} height={logo.imageHeight} className="h-auto w-auto max-h-10 object-contain md:max-h-12" />
             </Link>
           </li>
         ))}

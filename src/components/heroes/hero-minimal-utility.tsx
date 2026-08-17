@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
 import { Button } from '@/components/ui/button';
+import { TextCta } from '@/components/ui/text-cta';
 
 import { HeroSurface, type HeroAction } from './shared';
 
@@ -49,16 +50,29 @@ export function HeroMinimalUtility({
           </ul>
         ) : null}
 
+        {/*
+          Honours `cta.kind`. It previously rendered the solid prism button
+          unconditionally and never read the field, so /search — which passes
+          `kind: 'secondary'` for a plain "Contact" link (src/app/search/page.tsx)
+          — put the site's heaviest button on a utility page whose actual job is
+          the search box beneath it.
+        */}
         {cta ? (
           <div className="mt-5">
-            <Button
-              asChild
-              className="casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]"
-              data-casa-track="true"
-              data-casa-label={cta.label}
-            >
-              <Link href={cta.href}>{cta.label}</Link>
-            </Button>
+            {cta.kind === 'primary' ? (
+              <Button
+                asChild
+                className="casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]"
+                data-casa-track="true"
+                data-casa-label={cta.label}
+              >
+                <Link href={cta.href}>{cta.label}</Link>
+              </Button>
+            ) : (
+              <TextCta href={cta.href} data-casa-track="true" data-casa-label={cta.label}>
+                {cta.label}
+              </TextCta>
+            )}
           </div>
         ) : null}
       </div>

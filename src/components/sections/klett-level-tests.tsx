@@ -2,7 +2,6 @@
 
 import { ExternalLink } from 'lucide-react';
 
-import { buttonVariants } from '@/components/ui/button';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
@@ -149,12 +148,19 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
                 {locale === 'de' ? test.description.de : test.description.en}
               </p>
             </div>
+            {/*
+              A text link, not a filled button. This renders once per level, so
+              the grid used to end in six identical ink-deep buttons reading the
+              same word — which turns a list of six tests into a wall. The
+              external-link glyph already carries the "leaves the site" meaning
+              that the button weight was doing nothing to add.
+            */}
             <div className="mt-5">
               <a
                 href={test.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={buttonVariants({ variant: 'default' }) + ' h-11 rounded-lg bg-[var(--casa-ink-deep)] px-4 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)] no-underline inline-flex items-center gap-1.5'}
+                className="casa-cta-link inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 decoration-[color:var(--casa-sand)] transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current"
               >
                 {copy.launch}
                 <ExternalLink className="h-3.5 w-3.5" />

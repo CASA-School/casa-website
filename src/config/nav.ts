@@ -55,6 +55,8 @@ const deNavText: Record<string, string> = {
   'Intensive learning blocks during approved leave.': 'Intensive Lernblöcke für genehmigte Bildungszeit.',
   Firmenunterricht: 'Firmenunterricht',
   'Custom German training for teams and workplaces.': 'Maßgeschneidertes Deutschtraining für Teams.',
+  'For Companies': 'Für Firmen',
+  'For Groups': 'Für Gruppen',
   Accommodation: 'Unterkunft',
   'Housing Options': 'Wohnoptionen',
   'CASA Shared Flats': 'CASA WGs',
@@ -79,6 +81,9 @@ const deNavText: Record<string, string> = {
   'Practice German through structured exchange partners.': 'Deutsch durch begleiteten Sprachaustausch üben.',
   Opportunities: 'Möglichkeiten',
   'Cost Calculator': 'Kostenrechner',
+  'Talk to Admissions': 'Beratung anfragen',
+  'Ask about levels, dates, fees, or visa paperwork.':
+    'Fragen zu Niveau, Terminen, Gebühren oder Visumsunterlagen.',
   'Estimate monthly costs for study and life in Bremen.': 'Kosten für Kurs und Leben in Bremen schätzen.',
   Careers: 'Karriere',
   'Open roles in teaching, operations, and support.': 'Offene Rollen in Unterricht, Büro und Support.',
@@ -144,26 +149,39 @@ export const navConfig = {
               description: navDescription('Medical German for clinical communication needs.'),
             },
             {
-              label: 'German for Groups',
-              href: '/courses/german-for-groups',
-              icon: 'special',
-              description: navDescription('Tailor-made German plus culture programme for visiting groups.'),
-            },
-            {
               label: 'Educational Leave',
               href: '/courses/bildungszeit',
               icon: 'bildungszeit',
               description: navDescription('Intensive learning blocks during approved leave.'),
             },
-            {
-              label: 'Firmenunterricht',
-              href: '/courses/firmenunterricht',
-              icon: 'inCompany',
-              description: navDescription('Custom German training for teams and workplaces.'),
-            },
           ],
         },
       ],
+    },
+    /*
+     * Plain top-level links, not dropdowns.
+     *
+     * Each has exactly one destination, and a dropdown holding a single item
+     * costs the reader a hover and a decision to reach a page the label already
+     * named.
+     *
+     * Both were REMOVED from the Courses panel rather than duplicated into the
+     * top level. `isActivePath` matches by prefix, so a route listed in two
+     * places lights up two nav items at once — on /courses/firmenunterricht both
+     * "Kurse" and "Für Firmen" read as current, which tells the visitor they are
+     * in two places. One route, one home in the nav.
+     *
+     * Routes verified against src/lib/content/course-routes.ts: the `in-company`
+     * slug maps to /courses/firmenunterricht, and `german-for-groups` maps to
+     * itself.
+     */
+    {
+      label: 'For Companies',
+      href: '/courses/firmenunterricht',
+    },
+    {
+      label: 'For Groups',
+      href: '/courses/german-for-groups',
     },
     {
       trigger: 'Accommodation',
@@ -258,6 +276,20 @@ export const navConfig = {
               href: '/careers',
               icon: 'inCompany',
               description: navDescription('Open roles in teaching, operations, and support.'),
+            },
+            /*
+             * /contact reached the desktop header only as a second filled
+             * button beside "Register Now", and only above 1400px. The button
+             * is gone; the route is not. As a dropdown item it is available at
+             * every width instead of just wide ones, and talking to a human is
+             * now offered at the same weight as the other ways in rather than
+             * competing with registration for the same glance.
+             */
+            {
+              label: 'Talk to Admissions',
+              href: '/contact',
+              icon: 'contact',
+              description: navDescription('Ask about levels, dates, fees, or visa paperwork.'),
             },
           ],
         },

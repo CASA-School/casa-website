@@ -41,7 +41,7 @@ function applyMarks(text: string, marks: RichMark[] | undefined, key: string) {
       continue;
     }
     if (markType === 'code') {
-      node = <code key={`${key}-code`} className="rounded bg-[var(--casa-surface-subtle)] px-1 py-0.5 text-[0.95em]">{node}</code>;
+      node = <code key={`${key}-code`} className="rounded-sm bg-[var(--casa-surface-subtle)] px-1 py-0.5 text-[0.95em]">{node}</code>;
       continue;
     }
     if (markType === 'link') {

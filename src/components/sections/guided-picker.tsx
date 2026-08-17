@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { CasaImage as Image } from '@/components/ui/casa-image';
 import { ArrowRight } from 'lucide-react';
 
 import type { ContentLocale } from '@/lib/content/types';
@@ -288,7 +288,7 @@ export function GuidedPicker({
                   )}
                 >
                   {item.media ? (
-                    <div className="casa-media-overlay casa-media-overlay-card relative h-44 shrink-0 md:shrink-0 overflow-hidden">
+                    <div className="casa-media-overlay relative h-44 shrink-0 md:shrink-0 overflow-hidden">
                       <Image
                         src={item.media.src}
                         alt={item.media.alt}
@@ -308,12 +308,27 @@ export function GuidedPicker({
                     <p className="line-clamp-3 md:line-clamp-none text-sm md:mt-3 leading-relaxed text-[var(--casa-muted)]">
                       {item.description}
                     </p>
+                    {/*
+                      A text link, not a filled button. This renders once per
+                      course-signal card — six of them on the homepage — and six
+                      full-width ink-deep buttons in a scroll rail read as a
+                      toolbar rather than as six courses. The sibling branch
+                      further down this file already used a text affordance for
+                      the same job, so the two branches now agree.
+
+                      `casa-cta-link` is required, not decorative: click
+                      analytics matches on that class name
+                      (src/components/analytics/interaction-tracker.tsx).
+                    */}
                     <Link
                       href={item.href}
-                      className="mt-auto inline-flex h-11 md:h-11 items-center justify-center gap-2 rounded-xl md:rounded-lg bg-[var(--casa-ink-deep)] px-4 md:px-5 text-sm font-bold text-white shadow-[var(--shadow-soft)] transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
+                      className="casa-cta-link group/cta mt-auto inline-flex items-center gap-2 pt-1 text-sm font-bold text-[var(--casa-ink)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text)] hover:underline"
                     >
                       {item.ctaLabel}
-                      <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden />
+                      <ArrowRight
+                        className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover/cta:translate-x-1 md:h-4 md:w-4"
+                        aria-hidden
+                      />
                     </Link>
                   </div>
                 </article>
@@ -340,7 +355,7 @@ export function GuidedPicker({
               <li key={item.id ?? item.href} className={cn(index >= 3 && !showAll ? 'hidden md:block' : '')}>
                 <article className="grid gap-5 rounded-lg bg-white p-4 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35 md:grid-cols-[16rem_minmax(0,1fr)_auto] md:items-center md:p-5">
                   {item.media ? (
-                    <div className="casa-media-overlay casa-media-overlay-card relative h-44 overflow-hidden rounded-lg md:h-36">
+                    <div className="casa-media-overlay relative h-44 overflow-hidden rounded-lg md:h-36">
                       <Image
                         src={item.media.src}
                         alt={item.media.alt}
@@ -432,7 +447,7 @@ export function GuidedPicker({
                 className="grid gap-4 rounded-lg bg-white p-5 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 md:p-6"
               >
                 {item.media ? (
-                  <div className="casa-media-overlay casa-media-overlay-card relative h-56 overflow-hidden rounded-lg">
+                  <div className="casa-media-overlay relative h-56 overflow-hidden rounded-lg">
                     <Image
                       src={item.media.src}
                       alt={item.media.alt}
@@ -489,7 +504,7 @@ export function GuidedPicker({
                 {item.media ? (
                   <div
                     className={cn(
-                      'casa-media-overlay casa-media-overlay-card relative mb-4 overflow-hidden',
+                      'casa-media-overlay relative mb-4 overflow-hidden',
                       isFeaturePair ? 'h-52 rounded-lg md:h-56' : 'h-48 rounded-xl md:h-52'
                     )}
                   >

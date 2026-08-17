@@ -38,6 +38,22 @@ const ICON_DATA: Record<string, StreamlineIconData> = {
   "arrow-round-right": {
     "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9.25.5l2.5 2.5l-2.5 2.5\"/><path d=\"M12.25 8.25A5.25 5.25 0 1 1 7 3h4.75\"/></g>"
   },
+  /*
+   * A straight right arrow, added because there was not one.
+   *
+   * `ArrowRight` used to map to "arrow-round-right" above, which is a 5.25r arc
+   * with a head on it — a return/loop mark, not a direction. Rendered at 14-16px
+   * it reads as a refresh icon, and it is on 50 call sites. That went unnoticed
+   * while every one of them sat inside a filled button as a white glyph on dark;
+   * demoting those CTAs to text links put the same mark next to body-coloured
+   * text where it is unmistakable.
+   *
+   * Geometry matches "arrow-up-1" (the one straight arrow the set already had),
+   * rotated: same 14x14 box, same stroke treatment, same 3.5px head.
+   */
+  "arrow-right-1": {
+    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M.5 7h13M10 3.5L13.5 7L10 10.5\"/>"
+  },
   "arrow-up-1": {
     "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M7 13.5V.5M10.5 4L7 .5L3.5 4\"/>"
   },
@@ -384,7 +400,7 @@ const ICON_NAME_BY_EXPORT = {
   AlertTriangle: "warning-triangle",
   ArrowDown: "arrow-down-2",
   ArrowLeft: "arrow-round-left",
-  ArrowRight: "arrow-round-right",
+  ArrowRight: "arrow-right-1",
   ArrowUp: "arrow-up-1",
   ArrowUpDown: "arrow-curvy-up-down-1",
   BedDouble: "travel-hotel-bed-2-bed-double-bedroom-bedrooms-queen-king-full-hotel",
