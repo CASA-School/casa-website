@@ -16,6 +16,7 @@ import { getCoursePhoto } from '@/config/courses/course-photos';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCoursePath } from '@/lib/content/course-routes';
+import { CEFR_LADDER, countsForField, filterCourses } from '@/lib/content/course-finder';
 import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
@@ -26,6 +27,14 @@ export const metadata: Metadata = createPublicMetadata({
   path: '/courses',
   keywords: ['CASA courses', 'German course Bremen', 'Course formats A1 C1'],
 });
+
+/*
+  The finder's facet values, declared once and reused for validation, for the
+  option lists and for the counts — so a value can never be offered in the UI
+  that the query-param validator then rejects.
+*/
+const SCHEDULE_VALUES = ['intensive', 'evening', 'daytime', 'flexible'] as const;
+const GOAL_VALUES = ['exam', 'medical', 'professional', 'general'] as const;
 
 function formatDate(value: string, locale: 'en' | 'de') {
   return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
@@ -270,79 +279,33 @@ export default async function CoursesPage({
   ]);
 
   const selectedLevelCandidate = typeof level === 'string' ? level.toUpperCase() : '';
-  const selectedLevel = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(selectedLevelCandidate)
+  const selectedLevel = (CEFR_LADDER as readonly string[]).includes(selectedLevelCandidate)
     ? selectedLevelCandidate
     : '';
   const selectedScheduleCandidate = typeof schedule === 'string' ? schedule.toLowerCase() : '';
-  const selectedSchedule = ['weekdays', 'evening'].includes(selectedScheduleCandidate)
+  const selectedSchedule = SCHEDULE_VALUES.includes(selectedScheduleCandidate as (typeof SCHEDULE_VALUES)[number])
     ? selectedScheduleCandidate
     : '';
   const selectedGoalCandidate = typeof goal === 'string' ? goal.toLowerCase() : '';
-  const selectedGoal = ['exam', 'medical', 'general'].includes(selectedGoalCandidate)
+  const selectedGoal = GOAL_VALUES.includes(selectedGoalCandidate as (typeof GOAL_VALUES)[number])
     ? selectedGoalCandidate
     : '';
-  const hasActiveQuickFilters = Boolean(selectedLevel || selectedSchedule || selectedGoal);
-  const cefrOrder = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
-  const featured = finderData.courses
-    .filter((course) => {
-      if (selectedLevel) {
-        const targetIndex = cefrOrder.indexOf(selectedLevel);
-        const minIndex = cefrOrder.indexOf((course.level_min ?? 'A1').toUpperCase());
-        const maxIndex = cefrOrder.indexOf((course.level_max ?? 'C1').toUpperCase());
-        const safeMinIndex = minIndex === -1 ? 0 : minIndex;
-        const safeMaxIndex = maxIndex === -1 ? cefrOrder.length - 1 : maxIndex;
+  const activeFacets = {
+    level: selectedLevel || undefined,
+    schedule: selectedSchedule || undefined,
+    goal: selectedGoal || undefined,
+  };
 
-        if (targetIndex < safeMinIndex || targetIndex > safeMaxIndex) {
-          return false;
-        }
-      }
-
-      if (selectedSchedule) {
-        const scheduleTags = finderData.scheduleTagsByCourseId[course.id] ?? [];
-        if (!scheduleTags.includes(selectedSchedule)) {
-          return false;
-        }
-      }
-
-      if (selectedGoal) {
-        const courseCorpus = [
-          course.slug,
-          course.name,
-          course.format ?? '',
-          course.narrative?.promise ?? '',
-          course.narrative?.audience ?? '',
-          ...(course.narrative?.outcomes ?? []),
-        ]
-          .join(' ')
-          .toLowerCase();
-
-        const examFocused = courseCorpus.includes('exam') || courseCorpus.includes('telc');
-        const medicalFocused =
-          courseCorpus.includes('medical') ||
-          courseCorpus.includes('doctor') ||
-          courseCorpus.includes('medizin') ||
-          courseCorpus.includes('clinic');
-
-        if (selectedGoal === 'exam' && !examFocused) {
-          return false;
-        }
-        if (selectedGoal === 'medical' && !medicalFocused) {
-          return false;
-        }
-        if (selectedGoal === 'general' && (examFocused || medicalFocused)) {
-          return false;
-        }
-      }
-
-      return true;
-    })
-    .slice(0, 6);
-
-  const fallbackToRecommended = hasActiveQuickFilters && featured.length === 0;
-  const featuredCourses =
-    featured.length > 0 ? featured : finderData.courses.slice(0, 6);
-
+  /*
+    No silent fallback. This used to show the whole catalogue whenever a filter
+    matched nothing, with a small notice underneath — so a control that excluded
+    everything looked identical to one that did nothing, which is exactly how
+    "Evening" managed to match no courses for as long as it did. An empty result
+    is now shown as empty, and the counts on each option mean a visitor can see
+    that before clicking.
+  */
+  const featuredCourses = filterCourses(finderData.courses, activeFacets).slice(0, 6);
 
   const courseRows = featuredCourses.map((course) => {
     /*
@@ -393,17 +356,45 @@ export default async function CoursesPage({
     };
   });
 
+  /*
+    Options carry a live count, and one that would return nothing is disabled
+    rather than offered. The count is computed with that field held out (see
+    countsForField), so "Evening (2)" is a promise about what clicking it does
+    given everything else already selected — not a number from the full
+    catalogue that a second filter then contradicts.
+  */
+  const levelValues = [...CEFR_LADDER];
+  const levelCounts = countsForField(finderData.courses, 'level', levelValues, activeFacets);
+  const scheduleCounts = countsForField(finderData.courses, 'schedule', [...SCHEDULE_VALUES], activeFacets);
+  const goalCounts = countsForField(finderData.courses, 'goal', [...GOAL_VALUES], activeFacets);
+
+  const scheduleLabels: Record<(typeof SCHEDULE_VALUES)[number], string> = {
+    intensive: locale === 'de' ? 'Intensiv' : 'Intensive',
+    evening: locale === 'de' ? 'Abend' : 'Evening',
+    daytime: locale === 'de' ? 'Tagsüber' : 'Daytime',
+    flexible: locale === 'de' ? 'Nach Absprache' : 'By arrangement',
+  };
+  const goalLabels: Record<(typeof GOAL_VALUES)[number], string> = {
+    exam: locale === 'de' ? 'Prüfung' : 'Exam prep',
+    medical: locale === 'de' ? 'Medizin' : 'Medical',
+    professional: locale === 'de' ? 'Beruflich' : 'Professional',
+    general: locale === 'de' ? 'Allgemein' : 'General',
+  };
+
+  const withCount = (label: string, count: number) => `${label} (${count})`;
+
   const quickChooserFields = [
     {
       key: 'level',
-      label: locale === 'de' ? 'Level' : 'Level',
+      label: locale === 'de' ? 'Niveau' : 'Level',
       options: [
         { label: locale === 'de' ? 'Alle' : 'All', value: '' },
-        { label: 'A1', value: 'A1' },
-        { label: 'A2', value: 'A2' },
-        { label: 'B1', value: 'B1' },
-        { label: 'B2', value: 'B2' },
-        { label: 'C1', value: 'C1' },
+        ...levelValues.map((value) => ({
+          label: value,
+          value,
+          count: levelCounts[value] ?? 0,
+          disabled: (levelCounts[value] ?? 0) === 0,
+        })),
       ],
     },
     {
@@ -411,8 +402,12 @@ export default async function CoursesPage({
       label: locale === 'de' ? 'Zeitplan' : 'Schedule',
       options: [
         { label: locale === 'de' ? 'Beliebig' : 'Any', value: '' },
-        { label: locale === 'de' ? 'Intensiv' : 'Intensive', value: 'weekdays' },
-        { label: locale === 'de' ? 'Abend' : 'Evening', value: 'evening' },
+        ...SCHEDULE_VALUES.map((value) => ({
+          label: withCount(scheduleLabels[value], scheduleCounts[value] ?? 0),
+          value,
+          count: scheduleCounts[value] ?? 0,
+          disabled: (scheduleCounts[value] ?? 0) === 0,
+        })),
       ],
     },
     {
@@ -420,9 +415,12 @@ export default async function CoursesPage({
       label: locale === 'de' ? 'Ziel' : 'Goal',
       options: [
         { label: locale === 'de' ? 'Beliebig' : 'Any', value: '' },
-        { label: locale === 'de' ? 'Prüfungsvorbereitung' : 'Exam prep', value: 'exam' },
-        { label: locale === 'de' ? 'Medizin' : 'Medical', value: 'medical' },
-        { label: locale === 'de' ? 'Allgemein' : 'General', value: 'general' },
+        ...GOAL_VALUES.map((value) => ({
+          label: withCount(goalLabels[value], goalCounts[value] ?? 0),
+          value,
+          count: goalCounts[value] ?? 0,
+          disabled: (goalCounts[value] ?? 0) === 0,
+        })),
       ],
     },
   ];
@@ -499,18 +497,42 @@ export default async function CoursesPage({
           </div>
 
           {/*
-            Reports on the hero's course filter, so it sits immediately above the
-            results it describes.
+            An honest empty state. The page used to answer an empty filter by
+            rendering the entire catalogue under a small "no exact match" note,
+            which made a filter that excluded everything indistinguishable from
+            one that did nothing. If a combination has no courses it now says so
+            and offers the way back.
           */}
-          {fallbackToRecommended ? (
-            <p className="mx-auto max-w-[46rem] rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-center text-sm text-white/80">
-              {locale === 'de'
-                ? 'Keine exakte Kombination gefunden. Wir zeigen die besten verfügbaren Optionen.'
-                : 'No exact match found for this combination. Showing the best available options.'}
-            </p>
-          ) : null}
-
-          <CourseFormatRows rows={courseRows} tone="dark" />
+          {courseRows.length === 0 ? (
+            <div className="mx-auto max-w-[46rem] rounded-xl border border-white/20 bg-white/5 px-6 py-8 text-center">
+              <p className="text-base font-bold text-white">
+                {locale === 'de'
+                  ? 'Für diese Kombination gibt es derzeit keinen Kurs.'
+                  : 'No course matches that combination right now.'}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-white/72">
+                {locale === 'de'
+                  ? 'Ändern Sie einen Filter, oder lassen Sie uns Ihr Niveau gemeinsam bestimmen.'
+                  : 'Change one filter, or let us work out your level together.'}
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)]"
+                >
+                  {locale === 'de' ? 'Filter zurücksetzen' : 'Clear filters'}
+                </Link>
+                <Link
+                  href="/placement-test"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)]"
+                >
+                  {locale === 'de' ? 'Einstufungstest' : 'Placement test'}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <CourseFormatRows rows={courseRows} tone="dark" />
+          )}
         </Container>
       </section>
 
@@ -636,8 +658,17 @@ export default async function CoursesPage({
         </Container>
       </section>
 
-      {/* Section 3: Proof band */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
+      {/*
+        Section 3: Proof band.
+
+        Continues the wash from the band above rather than switching to white.
+        The proof panel is itself a painted ink slab, so a white band around it
+        made a third surface in three consecutive sections — wash, white, ink —
+        and the white strip read as a gap rather than as a section. On the wash
+        the slab sits on one continuous ground, and the hairline is gone with
+        it: there is no longer a surface change for a rule to mark.
+      */}
+      <section className="py-16 md:py-24 bg-[var(--casa-surface-wash)]/30">
         <Container>
           <ProofBand locale={locale} />
         </Container>

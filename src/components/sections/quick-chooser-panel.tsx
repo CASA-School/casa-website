@@ -41,6 +41,10 @@ function levelChipStyle(fieldKey: string, label: string, isActive: boolean) {
 export type QuickChooserOption = {
   label: string;
   value: string;
+  /** How many courses this option would return. Omit for a non-counting field. */
+  count?: number;
+  /** Set when `count` is 0 — offered but inert is worse than visibly unavailable. */
+  disabled?: boolean;
 };
 
 export type QuickChooserField = {
@@ -153,13 +157,26 @@ export function QuickChooserPanel({
               {field.options.map((option) => {
                 const isActive = (values[field.key] ?? '') === option.value;
                 const levelStyle = levelChipStyle(field.key, option.label, isActive);
+                /*
+                  A disabled chip stays visible rather than disappearing. The
+                  set of levels CASA teaches is itself information, and a row
+                  that silently loses chips as you filter is harder to read than
+                  one where the unavailable ones are simply dimmed.
+
+                  `aria-disabled` rather than `disabled`: the chip keeps its
+                  place in the radio group so arrow-key traversal still reaches
+                  it and a screen reader still announces it, while the click is
+                  refused.
+                */
+                const isUnavailable = option.disabled === true && !isActive;
                 return (
                   <button
                     key={`${field.key}-${option.value || 'any'}`}
                     type="button"
                     role="radio"
                     aria-checked={isActive}
-                    style={levelStyle}
+                    aria-disabled={isUnavailable || undefined}
+                    style={isUnavailable ? undefined : levelStyle}
                     className={cn(
                       'rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-blue)]',
                       isActive
@@ -167,14 +184,19 @@ export function QuickChooserPanel({
                         : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-muted)]',
                       // A level chip carries its own ramp colour inline; the neutral
                       // warm hover would fight it.
-                      !levelStyle && !isActive && 'hover:bg-[var(--casa-warm-soft)]'
+                      !levelStyle && !isActive && !isUnavailable && 'hover:bg-[var(--casa-warm-soft)]',
+                      isUnavailable && 'cursor-not-allowed opacity-40'
                     )}
-                    onClick={() =>
+                    onClick={() => {
+                      if (isUnavailable) {
+                        return;
+                      }
+
                       setValues((current) => ({
                         ...current,
                         [field.key]: option.value,
-                      }))
-                    }
+                      }));
+                    }}
                   >
                     {option.label}
                   </button>
