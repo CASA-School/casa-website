@@ -1,5 +1,6 @@
 import NextImage, { type ImageProps } from 'next/image';
 
+import { photoSlotFor } from '@/config/content/photo-numbers';
 import { cn } from '@/lib/utils';
 
 /**
@@ -32,6 +33,17 @@ import { cn } from '@/lib/utils';
  * NOT used for logos. `proof-band.tsx` and `partner-strip.tsx` render
  * accreditation and partner marks, which are information rather than decoration
  * — replacing those with colour would delete a claim, not defer it.
+ *
+ * NUMBERS. Each field shows the photograph's number from
+ * `src/config/content/photo-numbers.ts`, which is how a replacement is
+ * identified: read "24" off the page, name the file `24.jpg`. The number is
+ * per PHOTOGRAPH, not per slot, so the same number appears in every place that
+ * photograph is used and one delivered file fills all of them.
+ *
+ * Master switch below turns placeholders off site-wide. Per-photograph, set
+ * `ready: true` on its registry entry instead — that slot renders the real
+ * photograph while the rest stay numbered, so photographs can arrive one at a
+ * time rather than all at once.
  */
 const PLACEHOLDERS_ENABLED = true;
 
@@ -56,7 +68,9 @@ function fieldFor(src: ImageProps['src']) {
 }
 
 export function CasaImage({ src, alt, fill, width, height, className, style, ...rest }: ImageProps) {
-  if (!PLACEHOLDERS_ENABLED) {
+  const slot = typeof src === 'string' ? photoSlotFor(src) : undefined;
+
+  if (!PLACEHOLDERS_ENABLED || slot?.ready) {
     return (
       <NextImage
         src={src}
@@ -71,13 +85,27 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
     );
   }
 
+  /*
+   * The halo copy in `media-frame.tsx` is the same photograph rendered a second
+   * time, blurred, behind the frame — it passes `alt=""` to avoid being
+   * announced twice. Numbering it would stack a second, blurred copy of the
+   * same number behind the real one. An empty alt is the site's existing signal
+   * for "decorative duplicate", so it is the signal used here.
+   */
+  const showNumber = alt !== '';
+
   return (
     <div
       aria-hidden
-      data-casa-placeholder=""
+      data-casa-placeholder={slot ? String(slot.n) : 'unnumbered'}
+      data-casa-media-src={typeof src === 'string' ? src : undefined}
       className={cn(
         // `fill` callers position against a relative parent, exactly as next/image does.
         fill ? 'absolute inset-0 h-full w-full' : undefined,
+        // Lets the number scale with the field rather than the viewport, so it
+        // stays readable in a 74px avatar and does not become a billboard in a
+        // full-bleed hero. `cqw` below resolves against this.
+        showNumber ? 'grid place-items-center overflow-hidden [container-type:inline-size]' : undefined,
         className
       )}
       style={{
@@ -85,6 +113,19 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
         ...(fill ? null : { width, height }),
         ...style,
       }}
-    />
+    >
+      {showNumber ? (
+        <span
+          className={cn(
+            'pointer-events-none select-none rounded-[0.25em] bg-[var(--casa-ink-deep)]/85 px-[0.45em] py-[0.12em]',
+            'font-bold tabular-nums leading-none text-white',
+            // Padding and radius are in `em`, so the whole chip scales with this.
+            'text-[clamp(0.625rem,8cqw,2.25rem)]'
+          )}
+        >
+          {slot ? slot.n : '??'}
+        </span>
+      ) : null}
+    </div>
   );
 }
