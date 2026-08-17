@@ -6,7 +6,6 @@ import { ArrowRight } from 'lucide-react';
 
 import { HeroBEditorial } from '@/components/heroes';
 import {
-  ComparisonModule,
   ProofBand,
 } from '@/components/sections';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
@@ -516,7 +515,7 @@ export default async function CoursesPage({
       </section>
 
       {/*
-        Section 3: Practical facts before choosing.
+        Section 2: Practical facts before choosing.
 
         This replaced a "The Human Difference" band whose copy — "Support on
         Every Step of Your Journey", "Human learning journeys need clear
@@ -637,62 +636,7 @@ export default async function CoursesPage({
         </Container>
       </section>
 
-      {/* Section 6: Format Comparison Modules */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
-        <Container className="space-y-12 md:space-y-16">
-          <ComparisonModule
-            eyebrow={locale === 'de' ? 'Formatvergleich' : 'Format comparison'}
-            title={locale === 'de' ? 'Intensivkurs vs Abendkurs' : 'Intensive vs Evening'}
-            description={
-              locale === 'de'
-                ? 'Vergleich für Zeitbudget, Tempo und Lernziele.'
-                : 'A practical comparison of time commitment, pace, and outcomes.'
-            }
-            leftTitle={locale === 'de' ? 'Intensivkurs' : 'Intensive'}
-            rightTitle={locale === 'de' ? 'Abendkurs' : 'Evening'}
-            rows={[
-              {
-                label: locale === 'de' ? 'Zeitplan' : 'Schedule',
-                left: locale === 'de' ? 'Monatliche Starts, abwechselnd Vormittag/Nachmittag' : 'Monthly starts, alternating morning/afternoon cohorts',
-                right: locale === 'de' ? '2 Abende/Woche (Mo/Mi oder Di/Do), 18:30-20:00' : '2 evenings/week (Mon/Wed or Tue/Thu), 18:30-20:00',
-              },
-              {
-                label: locale === 'de' ? 'Geeignet für' : 'Best for',
-                left: locale === 'de' ? 'Schneller Fortschritt' : 'Fast progress',
-                right: locale === 'de' ? 'Berufsbegleitend' : 'Working professionals',
-              },
-              {
-                label: locale === 'de' ? 'Typischer Outcome' : 'Typical outcome',
-                left: locale === 'de' ? 'Schneller Niveausprung' : 'Faster level progression',
-                right: locale === 'de' ? 'Stabile Routine' : 'Stable weekly consistency',
-              },
-              {
-                label: locale === 'de' ? 'Wochenumfang' : 'Weekly load',
-                left: locale === 'de' ? '20 Lektionen pro Woche' : '20 lessons per week',
-                right: locale === 'de' ? '2 Unterrichtsabende pro Woche' : '2 class evenings per week',
-              },
-              {
-                label: locale === 'de' ? 'Lerntempo' : 'Pace',
-                left: locale === 'de' ? 'Komplettes Niveau meist in 8-9 Wochen' : 'Full level typically in 8-9 weeks',
-                right: locale === 'de' ? 'Halbes Niveau in ca. 3,5 Monaten' : 'Half-level in about 3.5 months',
-              },
-              {
-                label: locale === 'de' ? 'Gebühren' : 'Fees',
-                left: locale === 'de' ? '520 EUR (4 Wochen), 940 EUR (8 Wochen), +117,50 EUR je weitere Woche' : 'EUR 520 (4 weeks), EUR 940 (8 weeks), +EUR 117.50 per extra week',
-                right: locale === 'de' ? '476 EUR pro Trimester (+ Lehrwerk)' : 'EUR 476 per trimester (+ textbook)',
-              },
-              {
-                label: locale === 'de' ? 'Zusatzkosten' : 'Additional costs',
-                left: locale === 'de' ? 'Einmalige Einschreibegebühr 50 EUR + Lehrmaterial 23,99-26,99 EUR' : 'One-time enrollment fee EUR 50 + books EUR 23.99-26.99',
-                right: locale === 'de' ? 'Lehrwerk je nach Niveaustufe' : 'Textbook cost depends on level',
-              },
-            ]}
-          />
-
-        </Container>
-      </section>
-
-      {/* Section 7: Proof Band */}
+      {/* Section 3: Proof band */}
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
         <Container>
           <ProofBand locale={locale} />
