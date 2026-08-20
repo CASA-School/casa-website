@@ -58,7 +58,22 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
         <h3 className="text-xl font-bold leading-snug text-[var(--casa-ink)] md:text-2xl">{title}</h3>
         <p className="mx-auto mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
 
-        <div className="mt-6 flex justify-center gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Course format selector">
+        {/*
+          WRAPS. It must not scroll.
+
+          This was `justify-center` on an `overflow-x-auto` row, which is a
+          combination that loses content. `justify-content` distributes overflow
+          to BOTH ends, and `scrollLeft` cannot go below 0, so whatever is pushed
+          off the left is unreachable by any means. Measured with seven formats:
+          the first tab sat at -327px at 375, -142px at 768 and -22px at 1024 —
+          so on every phone and tablet the first format could not be seen or
+          clicked, and the row gave no sign it was hiding one.
+
+          Seven short labels wrap into three or four tidy lines instead, which
+          needs no scroll affordance and cannot clip. `shrink-0` goes with the
+          scrolling; in a wrapping row it would stop long labels from fitting.
+        */}
+        <div className="mt-6 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Course format selector">
           {items.map((item) => (
             <button
               key={item.id}
@@ -68,8 +83,8 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
               onClick={() => setSelectedId(item.id)}
               className={
                 selected.id === item.id
-                  ? 'shrink-0 rounded-lg border border-[color:var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] px-3.5 py-2 text-xs font-bold text-white shadow-[var(--shadow-soft)]'
-                  : 'shrink-0 rounded-lg border border-[color:var(--casa-sand)] bg-white px-3.5 py-2 text-xs font-bold text-[var(--casa-muted)] transition-colors hover:bg-[var(--casa-warm-soft)] hover:text-[var(--casa-ink)]'
+                  ? 'rounded-lg border border-[color:var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] px-3.5 py-2 text-xs font-bold text-white shadow-[var(--shadow-soft)]'
+                  : 'rounded-lg border border-[color:var(--casa-sand)] bg-white px-3.5 py-2 text-xs font-bold text-[var(--casa-muted)] transition-colors hover:bg-[var(--casa-warm-soft)] hover:text-[var(--casa-ink)]'
               }
             >
               {item.title}
@@ -94,7 +109,7 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
           </dl>
         </article>
 
-        <article className="bg-[var(--casa-warm-soft)]/42 p-5 md:p-7">
+        <article className="bg-[var(--casa-warm-soft)]/35 p-5 md:p-7">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.outcomes ?? 'Likely outcomes'}</p>
           <ul className="mt-4 space-y-3">
             {selected.outcomes.slice(0, 3).map((outcome) => (
@@ -106,6 +121,34 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
           </ul>
         </article>
       </div>
+
+      {/*
+        The fees.
+
+        `facts` was already being passed in — carrying 520/940 EUR, 117.50 EUR a
+        week, the 50 EUR enrolment fee and the textbook range — and this component
+        accepted the prop and rendered nothing with it. So every figure was
+        correct in the repository and absent from the site. A reader comparing six
+        formats is comparing cost more than anything else, which is why this sits
+        full width beneath both columns rather than being squeezed into one.
+      */}
+      {selected.facts?.length ? (
+        <div className="mt-4 rounded-lg border border-[color:var(--casa-sand)] bg-white p-5 md:p-7">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+            {labels?.facts ?? 'How this format works'}
+          </p>
+          <ul className="mt-4 grid gap-3 md:grid-cols-3">
+            {selected.facts.map((fact) => (
+              <li
+                key={fact}
+                className="rounded-lg border border-[color:var(--casa-sand)]/70 bg-[var(--casa-bg)] px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)]"
+              >
+                {fact}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
   );
 }

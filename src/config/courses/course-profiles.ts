@@ -38,10 +38,24 @@ export const GENERAL_OFFICE_CONTACT: CourseContact = {
   source: 'casa-bremen.de contact page',
 };
 
+/**
+ * Who is being quoted, on the two archetypes that quote rather than sell.
+ *
+ * `package-inquiry` covers two products that ask the buyer the same question and
+ * deliver very different things. A school group travelling to Bremen buys
+ * lessons *plus* host families, a culture programme and a transit pass. A Bremen
+ * company buys lessons for staff who already live here, and buys none of the
+ * rest of it. Branching on the archetype alone made the Firmenunterricht page
+ * promise "accommodation and culture programme arranged" to an HR manager.
+ */
+export type QuoteAudience = 'group' | 'organisation';
+
 export type CourseProfile = {
   archetype: CourseArchetypeId;
   /** Key into the course-detail photo set in public-page-config. */
   photoKey: string;
+  /** Required on `package-inquiry`; meaningless elsewhere. */
+  quoteAudience?: QuoteAudience;
   /** Omit until a real owner is confirmed. Never guess. */
   contact?: CourseContact;
 };
@@ -50,12 +64,11 @@ export const courseProfiles: Record<string, CourseProfile> = {
   'intensive-german': { archetype: 'scheduled-cohort', photoKey: 'intensive' },
   'evening-german': { archetype: 'scheduled-cohort', photoKey: 'evening' },
   bildungszeit: { archetype: 'scheduled-cohort', photoKey: 'bildungszeit' },
-  'university-prep': { archetype: 'scheduled-cohort', photoKey: 'academic' },
   'special-courses': { archetype: 'module-catalogue', photoKey: 'special' },
   'medical-german': { archetype: 'professional-track', photoKey: 'medical' },
-  'business-german': { archetype: 'professional-track', photoKey: 'business' },
   'german-for-groups': {
     archetype: 'package-inquiry',
+    quoteAudience: 'group',
     photoKey: 'groups',
     // Published on casa-bremen.de as the contact for group quotes.
     contact: {
@@ -65,7 +78,7 @@ export const courseProfiles: Record<string, CourseProfile> = {
       source: 'casa-bremen.de/en/language-courses/german-for-groups/ (verified 2026-08-12)',
     },
   },
-  'in-company': { archetype: 'package-inquiry', photoKey: 'company' },
+  'in-company': { archetype: 'package-inquiry', quoteAudience: 'organisation', photoKey: 'company' },
 };
 
 export function getCourseProfile(slug: string): CourseProfile | undefined {
@@ -86,9 +99,18 @@ export function getCoursePhotoKey(slug: string) {
   return courseProfiles[slug]?.photoKey ?? 'supportCard';
 }
 
+/**
+ * Falls back to 'group', which is the safer default: group copy names concrete
+ * inclusions, and an unregistered quote product is more likely to be a visiting
+ * group than a corporate contract.
+ */
+export function getQuoteAudience(slug: string): QuoteAudience {
+  return courseProfiles[slug]?.quoteAudience ?? 'group';
+}
+
 export type LevelGoalItem = {
   level: string;
-  textbook: 'netzwerk' | 'context';
+  textbook: 'netzwerk' | 'kontext';
   focus: string;
 };
 
@@ -101,7 +123,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
         : 'Structured learning path with clearly defined communication goals.',
     levels: [
       { level: 'A1-B1', textbook: 'netzwerk' as const, focus: locale === 'de' ? 'Grundlagen aufbauen mit dem Lehrwerk Netzwerk' : 'Build core foundations using Netzwerk textbook' },
-      { level: 'B2-C1', textbook: 'context' as const, focus: locale === 'de' ? 'Ausdrucksweise verfeinern mit dem Lehrwerk Context' : 'Refine vocabulary and communication using Context textbook' },
+      { level: 'B2-C1', textbook: 'kontext' as const, focus: locale === 'de' ? 'Ausdrucksweise verfeinern mit dem Lehrwerk Kontext' : 'Refine vocabulary and communication using the Kontext textbook' },
     ],
   };
 
@@ -110,28 +132,28 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       title: locale === 'de' ? 'Lernziele nach Niveaustufen' : 'Learning goals by level',
       description:
         locale === 'de'
-          ? 'Unser Unterricht folgt den anerkannten Lehrwerken Netzwerk und Context für einen strukturierten Fortschritt.'
-          : 'Our classes follow the recognized Netzwerk and Context textbooks for structured progress.',
+          ? 'Unser Unterricht folgt den anerkannten Lehrwerken Netzwerk und Kontext für einen strukturierten Fortschritt.'
+          : 'Our classes follow the recognized Netzwerk and Kontext textbooks for structured progress.',
       levels: [
         { level: 'A1', textbook: 'netzwerk', focus: locale === 'de' ? 'Sich vorstellen, einfache Fragen stellen, Alltagsgespräche führen' : 'Introduce yourself, ask simple questions, hold basic conversations' },
         { level: 'A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Über Erfahrungen berichten, einfache Mitteilungen verfassen' : 'Share personal experiences, write simple messages' },
         { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Meinungen ausdrücken, längere Texte verstehen, Präsentationen halten' : 'Express opinions, understand longer texts, give presentations' },
-        { level: 'B2', textbook: 'context', focus: locale === 'de' ? 'Komplexe Argumente verstehen, an Fachdiskussionen teilnehmen' : 'Understand complex arguments, participate in specialized discussions' },
-        { level: 'C1', textbook: 'context', focus: locale === 'de' ? 'Fließende, spontane Gesprächsführung, akademische Texte analysieren' : 'Fluent, spontaneous speaking, analyze academic texts' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Komplexe Argumente verstehen, an Fachdiskussionen teilnehmen' : 'Understand complex arguments, participate in specialized discussions' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Fließende, spontane Gesprächsführung, akademische Texte analysieren' : 'Fluent, spontaneous speaking, analyze academic texts' },
       ],
     },
     'evening-german': {
       title: locale === 'de' ? 'Lernziele nach Niveaustufen' : 'Learning goals by level',
       description:
         locale === 'de'
-          ? 'Kontinuierlicher Lernweg am Abend mit den bewährten Lehrwerken Netzwerk und Context.'
-          : 'Continuous learning path in the evening using the proven Netzwerk and Context textbooks.',
+          ? 'Kontinuierlicher Lernweg am Abend mit den bewährten Lehrwerken Netzwerk und Kontext.'
+          : 'Continuous learning path in the evening using the proven Netzwerk and Kontext textbooks.',
       levels: [
         { level: 'A1', textbook: 'netzwerk', focus: locale === 'de' ? 'Einfache Sätze verstehen, Grundwortschatz für den Alltag aufbauen' : 'Understand simple sentences, build core vocabulary for daily life' },
         { level: 'A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Alltagssituationen bewältigen, kurze Berichte schreiben' : 'Handle routine situations, write short descriptions' },
         { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Hauptpunkte bei vertrauten Themen verstehen, eigene Meinungen begründen' : 'Understand main points on familiar topics, justify personal opinions' },
-        { level: 'B2', textbook: 'context', focus: locale === 'de' ? 'Komplexe Texte verstehen, spontane Gespräche im Beruf führen' : 'Understand complex texts, hold spontaneous conversations at work' },
-        { level: 'C1', textbook: 'context', focus: locale === 'de' ? 'Anspruchsvolle Texte lesen, flexibler Sprachgebrauch im Beruf' : 'Read demanding texts, use language flexibly in professional contexts' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Komplexe Texte verstehen, spontane Gespräche im Beruf führen' : 'Understand complex texts, hold spontaneous conversations at work' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Anspruchsvolle Texte lesen, flexibler Sprachgebrauch im Beruf' : 'Read demanding texts, use language flexibly in professional contexts' },
       ],
     },
     'german-for-groups': {
@@ -143,7 +165,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       levels: [
         { level: 'A1-A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Alltagssprache für Ausflüge, Gastfamilie und Orientierung in Bremen' : 'Everyday language for excursions, the host family, and getting around Bremen' },
         { level: 'B1-B2', textbook: 'netzwerk', focus: locale === 'de' ? 'Freies Sprechen zu Themen, die die Gruppe selbst mitbringt' : 'Free speaking on topics the group brings with them' },
-        { level: 'C1', textbook: 'context', focus: locale === 'de' ? 'Vertiefung nach Absprache, etwa Projektarbeit oder Fachthemen' : 'Deeper work by arrangement, such as project work or subject-specific topics' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Vertiefung nach Absprache, etwa Projektarbeit oder Fachthemen' : 'Deeper work by arrangement, such as project work or subject-specific topics' },
       ],
     },
     'medical-german': {
@@ -153,8 +175,8 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
           ? 'Fachsprache Medizin auf den Niveaus B2 und C1 mit Fokus auf Klinikalltag und Fachkommunikation.'
           : 'Medical German terminology at levels B2 and C1 focusing on hospital routines and professional communication.',
       levels: [
-        { level: 'B2', textbook: 'context', focus: locale === 'de' ? 'Anamnesegespräche führen, Patientenaufklärung und Dokumentation' : 'Conduct anamnesis interviews, patient explanations and documentation' },
-        { level: 'C1', textbook: 'context', focus: locale === 'de' ? 'Kollegiale Fachgespräche führen, Ärztebriefe verfassen, Visiten simulieren' : 'Lead professional consultations with colleagues, write medical reports, simulate ward rounds' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Anamnesegespräche führen, Patientenaufklärung und Dokumentation' : 'Conduct anamnesis interviews, patient explanations and documentation' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Kollegiale Fachgespräche führen, Ärztebriefe verfassen, Visiten simulieren' : 'Lead professional consultations with colleagues, write medical reports, simulate ward rounds' },
       ],
     },
     'in-company': {
@@ -165,7 +187,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
           : 'Tailored course goals adapted to your team\'s specific language levels.',
       levels: [
         { level: 'A1-B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Grundlegende Arbeitsplatzkommunikation, E-Mail-Korrespondenz und Telefonate' : 'Basic workplace communication, email correspondence, and phone calls' },
-        { level: 'B2-C1', textbook: 'context', focus: locale === 'de' ? 'Meetings moderieren, Verhandlungen führen, Präsentationen auf Deutsch' : 'Moderate meetings, lead negotiations, deliver presentations in German' },
+        { level: 'B2-C1', textbook: 'kontext', focus: locale === 'de' ? 'Meetings moderieren, Verhandlungen führen, Präsentationen auf Deutsch' : 'Moderate meetings, lead negotiations, deliver presentations in German' },
       ],
     },
   };

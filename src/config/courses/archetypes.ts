@@ -27,6 +27,14 @@ export type CourseSectionKey =
   /** The week-grid module picker. Only `module-catalogue` renders this. */
   | 'module-catalogue'
   | 'level-goals'
+  /**
+   * CASA's published term table. Only archetypes with dated cohorts list it —
+   * a quoted product has no terms, and rendering an empty table would read as
+   * "no courses" rather than "dates by arrangement".
+   */
+  | 'term-table'
+  /** The fee table and the conditions of booking. Every archetype has these. */
+  | 'practical-details'
   | 'audience'
   | 'next-steps'
   | 'testimonials'
@@ -76,7 +84,16 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
   'scheduled-cohort': {
     id: 'scheduled-cohort',
     buyingQuestion: 'Which start date and level, and what does it cost?',
-    sections: ['summary-strip', 'level-goals', 'audience', 'next-steps', 'testimonials', 'related-courses'],
+    sections: [
+      'summary-strip',
+      'level-goals',
+      'term-table',
+      'practical-details',
+      'audience',
+      'next-steps',
+      'testimonials',
+      'related-courses',
+    ],
     facts: ['next-start', 'duration', 'lessons-per-week', 'level-range', 'price'],
     cta: 'register-or-place',
     showsStartDateSelector: true,
@@ -86,7 +103,18 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
     buyingQuestion: 'Which module, and does the slot fit my week?',
     // The catalogue leads: on this archetype the page IS the picker, and the
     // reader cannot evaluate anything else until they have found their module.
-    sections: ['summary-strip', 'module-catalogue', 'level-goals', 'audience', 'next-steps', 'related-courses'],
+    sections: [
+      'summary-strip',
+      'module-catalogue',
+      'practical-details',
+      'level-goals',
+      'audience',
+      'next-steps',
+      // Added once real testimonials existed: CASA publishes one from a learner
+      // who took the B1/B2 grammar module, and this is the page it belongs on.
+      'testimonials',
+      'related-courses',
+    ],
     facts: ['duration', 'lessons-per-week', 'level-range', 'price'],
     cta: 'reserve-module',
     showsStartDateSelector: true,
@@ -94,7 +122,16 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
   'professional-track': {
     id: 'professional-track',
     buyingQuestion: 'Does this get me to my licence or my role?',
-    sections: ['summary-strip', 'level-goals', 'audience', 'next-steps', 'testimonials', 'related-courses'],
+    // No term table: CASA publishes no dates for the professional formats.
+    sections: [
+      'summary-strip',
+      'level-goals',
+      'practical-details',
+      'audience',
+      'next-steps',
+      'testimonials',
+      'related-courses',
+    ],
     facts: ['next-start', 'duration', 'lessons-per-week', 'level-range', 'price'],
     cta: 'advisory-call',
     showsStartDateSelector: true,
@@ -102,9 +139,23 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
   'package-inquiry': {
     id: 'package-inquiry',
     buyingQuestion: 'Can you build this for my group or company, and what will it cost?',
-    // No testimonials: the quotes we have are learner voices, and the reader
-    // here is an organiser buying on someone else's behalf.
-    sections: ['summary-strip', 'audience', 'level-goals', 'next-steps', 'related-courses'],
+    /*
+     * Testimonials were excluded here on the grounds that "the quotes we have
+     * are learner voices, and the reader here is an organiser buying on someone
+     * else's behalf". That was true of the invented quotes. It is not true of
+     * CASA's real ones: Elena is the teacher who accompanied a school group from
+     * Siberia and writes about the host families and the children, and Majd
+     * writes about a company course. Both are exactly this reader.
+     */
+    sections: [
+      'summary-strip',
+      'audience',
+      'level-goals',
+      'practical-details',
+      'next-steps',
+      'testimonials',
+      'related-courses',
+    ],
     // Deliberately no 'price' and no 'next-start'.
     facts: ['lessons-per-week', 'group-size', 'included', 'lead-time', 'level-range'],
     cta: 'request-quote',

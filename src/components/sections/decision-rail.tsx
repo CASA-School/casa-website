@@ -1,8 +1,8 @@
-import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
+import type { ContentLocale } from '@/lib/content/types';
 
 import { StickyInfoCard, type StickyInfoItem } from './sticky-info-card';
 import { DeadlineBadge } from './deadline-badge';
-import { TeacherSpotlightCard } from './teacher-spotlight-card';
+import { TeachingStaffCard } from './teaching-staff-card';
 
 type DecisionRailProps = {
   locale: ContentLocale;
@@ -10,7 +10,12 @@ type DecisionRailProps = {
   infoItems: StickyInfoItem[];
   notes?: string;
   deadlineIso?: string | null;
-  teacher?: TeamSpotlight | null;
+  /**
+   * The collective statement about CASA's teachers. This used to be a
+   * `TeamSpotlight` rendering one named person with a portrait — invented, and on
+   * every course page. See components/sections/teaching-staff-card.
+   */
+  teachingStaff?: { title: string; body: string } | null;
 };
 
 export function DecisionRail({
@@ -19,7 +24,7 @@ export function DecisionRail({
   infoItems,
   notes,
   deadlineIso,
-  teacher,
+  teachingStaff,
 }: DecisionRailProps) {
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -48,9 +53,10 @@ export function DecisionRail({
         </div>
       </div>
 
-      {teacher ? (
-        <TeacherSpotlightCard
-          teacher={teacher}
+      {teachingStaff ? (
+        <TeachingStaffCard
+          title={teachingStaff.title}
+          body={teachingStaff.body}
           ctaLabel={locale === 'de' ? 'Mehr zum Team' : 'Meet the team'}
         />
       ) : null}

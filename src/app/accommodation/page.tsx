@@ -8,7 +8,7 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getAccommodationNarratives, getSocialProof } from '@/lib/content/repository';
+import { getAccommodationNarratives, getSocialProofById } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -24,10 +24,12 @@ export default async function AccommodationPage() {
   const pageConfig = getPublicPageConfig('accommodation', locale);
 
   const narratives = getAccommodationNarratives(locale);
-  const stories = getSocialProof(locale);
+
   const flat = narratives.find((item) => item.id === 'flat');
   const host = narratives.find((item) => item.id === 'host');
-  const leadStory = stories[0];
+  // Elena, deliberately: the accompanying teacher of a school group, and the only
+  // published voice that talks about the host families this page is selling.
+  const leadStory = getSocialProofById('elena-groups', locale);
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
@@ -107,7 +109,7 @@ export default async function AccommodationPage() {
       </section>
 
       {/* Section 2: Playbook */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <AccommodationPlaybook
             title={locale === 'de' ? 'Wohnregeln und Kosten transparent' : 'Housing expectations playbook'}
@@ -174,7 +176,7 @@ export default async function AccommodationPage() {
       </section>
 
       {/* Section 4: Comparison */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ComparisonModule
             eyebrow={locale === 'de' ? 'Direktvergleich' : 'Side-by-side comparison'}
@@ -252,7 +254,7 @@ export default async function AccommodationPage() {
       ) : null}
 
       {/* Section 6: Steps */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
             eyebrow={locale === 'de' ? 'Ablauf' : 'How requests work'}
@@ -283,7 +285,7 @@ export default async function AccommodationPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <StudentHousingGuide locale={locale} />
         </Container>

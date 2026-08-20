@@ -3,6 +3,9 @@ import { CasaImage as Image } from '@/components/ui/casa-image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { CoursePracticalDetails } from '@/components/courses/course-practical-details';
+import { CourseTermTable } from '@/components/courses/course-term-table';
+import type { CourseTermGroup } from '@/components/courses/course-term-table';
 import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
 import { HeroCUtilityRail } from '@/components/heroes';
 import { DecisionRail, EditorialSplit, ProcessSteps, TestimonialGrid } from '@/components/sections';
@@ -11,13 +14,15 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getCanonicalCourseRouteSlug, getCoursePath } from '@/lib/content/course-routes';
+import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
-import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile } from '@/config/courses/course-profiles';
+import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
+import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { getCourseContact, hasNamedCourseContact } from '@/config/courses/course-profiles';
-import { getCourseDetail, getCourses, getSocialProof, getTeamSpotlights } from '@/lib/content/repository';
+import { teachingStaffStatement } from '@/config/content/team-spotlights';
+import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
 function formatDate(value: string, locale: 'en' | 'de') {
@@ -69,11 +74,10 @@ export default async function CourseDetailPage({
   const rhythm = getLayoutRhythm('course-detail');
   const pageConfig = getPublicPageConfig('course-detail', locale);
 
-  const [detail, courses, socialProof, teamSpotlights] = await Promise.all([
+  const [detail, courses, socialProof] = await Promise.all([
     getCourseDetail(slug, locale),
     getCourses(locale),
-    Promise.resolve(getSocialProof(locale)),
-    Promise.resolve(getTeamSpotlights(locale)),
+    Promise.resolve(getSocialProofForCourse(getCourseContentSlug(slug), locale)),
   ]);
 
   if (!detail) {
@@ -93,6 +97,64 @@ export default async function CourseDetailPage({
   const courseStoryPhoto = pageConfig.photos[`${coursePhotoKey}Story`] ?? coursePhoto;
   const courseLevelGoals = getCourseLevelGoals(detail.course.slug, locale);
   const archetype = getCourseArchetype(getCourseProfile(detail.course.slug)?.archetype);
+  // Only meaningful on `package-inquiry`, where two very different products
+  // share one page shape. See QuoteAudience in config/courses/course-profiles.
+  const quoteAudience = getQuoteAudience(detail.course.slug);
+  const isGroupQuote = archetype.cta === 'request-quote' && quoteAudience === 'group';
+  const isOrganisationQuote = archetype.cta === 'request-quote' && quoteAudience === 'organisation';
+
+  const practicalFacts = localizePracticalFacts(detail.course.slug, locale);
+
+  /*
+   * Group the published terms by weekly slot.
+   *
+   * The group label has to carry the days as well as the time. The intensive
+   * course's two cohorts are not "the same course at two times of day": mornings
+   * run Mon-Fri and afternoons Mon-Thu, so choosing the afternoon is choosing a
+   * four-day week. That difference belongs in the label a reader compares on,
+   * not in a footnote.
+   */
+  const termGroups: CourseTermGroup[] = (() => {
+    const dayNames = {
+      en: { Mon: 'Mon', Tue: 'Tue', Wed: 'Wed', Thu: 'Thu', Fri: 'Fri', Sat: 'Sat', Sun: 'Sun' },
+      de: { Mon: 'Mo', Tue: 'Di', Wed: 'Mi', Thu: 'Do', Fri: 'Fr', Sat: 'Sa', Sun: 'So' },
+    }[locale];
+
+    const groups = new Map<string, CourseTermGroup>();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const courseInstance of detail.instances) {
+      const schedule = courseInstance.schedule as { days?: string[]; time?: string } | null;
+      const days = Array.isArray(schedule?.days) ? schedule.days : [];
+      const time = typeof schedule?.time === 'string' ? schedule.time : '';
+
+      // Contiguous weekday runs read as a range; anything else as a list.
+      const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const indices = days.map((day) => order.indexOf(day)).filter((index) => index >= 0);
+      const isRun =
+        indices.length > 2 && indices.every((index, position) => position === 0 || index === indices[position - 1] + 1);
+      const dayLabel = isRun
+        ? `${dayNames[days[0] as keyof typeof dayNames]}–${dayNames[days[days.length - 1] as keyof typeof dayNames]}`
+        : days.map((day) => dayNames[day as keyof typeof dayNames] ?? day).join('/');
+
+      const slotLabel = [dayLabel, time.replace('-', '–')].filter(Boolean).join(', ');
+
+      if (!groups.has(slotLabel)) {
+        groups.set(slotLabel, { slotLabel, terms: [] });
+      }
+
+      groups.get(slotLabel)?.terms.push({
+        id: courseInstance.id,
+        rangeLabel: `${formatDate(courseInstance.start_date, locale)} – ${formatDate(courseInstance.end_date, locale)}`,
+        href: `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`,
+        isSelected: courseInstance.id === selectedInstance?.id,
+        isPast: new Date(courseInstance.end_date) < today,
+      });
+    }
+
+    return [...groups.values()];
+  })();
 
   // Each course format has an Ansprechpartner. Formats without a confirmed
   // owner fall back to the general office rather than naming someone who has
@@ -187,7 +249,15 @@ export default async function CourseDetailPage({
     },
     'lessons-per-week': {
       label: locale === 'de' ? 'Lektionen/Woche' : 'Lessons/week',
-      value: String(detail.course.lessons_per_week),
+      // 0 is the "CASA publishes no weekly load" sentinel, not a real zero.
+      // Firmenunterricht is agreed per contract; German for Medical simply has
+      // no published figure. Rendering "0" would read as "no lessons".
+      value:
+        detail.course.lessons_per_week > 0
+          ? String(detail.course.lessons_per_week)
+          : locale === 'de'
+            ? 'Nach Absprache'
+            : 'By arrangement',
     },
     'level-range': {
       label: locale === 'de' ? 'Niveaubereich' : 'Level range',
@@ -204,9 +274,13 @@ export default async function CourseDetailPage({
     included: {
       label: locale === 'de' ? 'Inklusive' : 'Included',
       value:
-        locale === 'de'
-          ? 'Unterricht, Kulturprogramm, Unterkunft'
-          : 'Lessons, culture programme, accommodation',
+        quoteAudience === 'group'
+          ? locale === 'de'
+            ? 'Unterricht, Kulturprogramm, Unterkunft, Nahverkehrsticket'
+            : 'Lessons, culture programme, accommodation, transit pass'
+          : locale === 'de'
+            ? 'Lehrplan nach Bedarfsanalyse, Unterricht im Betrieb oder bei CASA'
+            : 'Syllabus built from a needs analysis, taught on site or at CASA',
     },
     'lead-time': {
       label: locale === 'de' ? 'Vorlaufzeit' : 'Lead time',
@@ -237,27 +311,39 @@ export default async function CourseDetailPage({
 
   const related = courses.filter((course) => course.slug !== detail.course.slug).slice(0, 2);
 
-  const testimonialPortraits = [
-    pageConfig.photos.testimonialA,
-    pageConfig.photos.testimonialB,
-    pageConfig.photos.testimonialC,
-  ];
-  const testimonialCards = socialProof.map((story, index) => ({
+  // No portraits: these are real named learners and the only portrait files on
+  // hand are synthetic. See components/sections/testimonial-grid.
+  /*
+   * Three cards, not seven.
+   *
+   * `getSocialProofForCourse` returns this course's own learner first and then the
+   * rest of the pool, which made the carousel four pages deep on every course page
+   * — and nobody pages through a carousel to page four. Three is the grid's own
+   * column count, so it fills one row with no pagination at all: the course's own
+   * voice leading, two others for breadth.
+   */
+  const testimonialCards = socialProof.slice(0, 3).map((story) => ({
     id: story.id,
     person: story.personDisplay,
     country: story.country,
     quote: story.quote,
-    photoSrc: testimonialPortraits[index % testimonialPortraits.length].src,
-    photoAlt: testimonialPortraits[index % testimonialPortraits.length].alt,
-    photoCaption: '',
   }));
 
-  const spotlightTeacher =
-    teamSpotlights.find((member) => member.role.toLowerCase().includes('teacher')) ?? teamSpotlights[0] ?? null;
+  /*
+   * The rail used to pick "a team member whose role contains 'teacher'" and, if
+   * none matched, simply the first person in the list — then rendered them as
+   * this course's teacher with a portrait and an endorsement. Both the person and
+   * the endorsement were invented. CASA does not name individual classroom
+   * teachers, so the rail now carries what CASA does say about all of them.
+   */
+  const teachingStaff = teachingStaffStatement[locale];
 
   const processHeading = nextStepsHeading(archetype, locale);
-  const processDescription =
-    archetype.cta === 'request-quote'
+  const processDescription = isOrganisationQuote
+    ? locale === 'de'
+      ? 'Von der Studienberatung bis zum Ausbildungsplan - beides unverbindlich.'
+      : 'From needs consultation to training plan, both without obligation.'
+    : archetype.cta === 'request-quote'
       ? locale === 'de'
         ? 'Von der ersten Anfrage bis zum bestätigten Programm.'
         : 'From first enquiry to a confirmed programme.'
@@ -266,8 +352,34 @@ export default async function CourseDetailPage({
         : 'What happens next before your first class day.';
 
   // Quote products have a different journey: nobody registers, someone briefs.
-  const processStepItems =
-    archetype.cta === 'request-quote'
+  const processStepItems = isOrganisationQuote
+    ? [
+        {
+          step: '1',
+          title: locale === 'de' ? 'Studienberatung' : 'Needs consultation',
+          description:
+            locale === 'de'
+              ? 'Wir klären Lernbedürfnisse, Lernziele und Sprachkompetenzen im Team.'
+              : 'We establish learning needs, goals, and the language levels in your team.',
+        },
+        {
+          step: '2',
+          title: locale === 'de' ? 'Ausbildungsplan' : 'Training plan',
+          description:
+            locale === 'de'
+              ? 'Daraus entwickeln wir den Lehrplan für Ihre Mitarbeitenden.'
+              : 'From that we build the syllabus for your employees.',
+        },
+        {
+          step: '3',
+          title: locale === 'de' ? 'Unverbindliches Angebot' : 'No-obligation quote',
+          description:
+            locale === 'de'
+              ? 'Beratung und Angebot sind stets unverbindlich.'
+              : 'Both the consultation and the quote are always without obligation.',
+        },
+      ]
+    : isGroupQuote
       ? [
           {
             step: '1',
@@ -314,8 +426,11 @@ export default async function CourseDetailPage({
 
   // "For whom" bullets were identical on all nine pages. An organiser needs
   // different reassurance than a learner picking a start date.
-  const audienceTitle =
-    archetype.cta === 'request-quote'
+  const audienceTitle = isOrganisationQuote
+    ? locale === 'de'
+      ? 'Für Unternehmen, die Sprache als Teil der Qualifikation planen'
+      : 'For companies planning language work as part of staff qualification'
+    : isGroupQuote
       ? locale === 'de'
         ? 'Für Gruppen, die mit einem klaren Ziel nach Bremen kommen'
         : 'For groups coming to Bremen with a clear goal'
@@ -323,8 +438,18 @@ export default async function CourseDetailPage({
         ? 'Dieser Kurs passt zu Lernenden, die Struktur und Menschlichkeit suchen'
         : 'This course fits learners who want structure and human support';
 
-  const audienceBullets =
-    archetype.cta === 'request-quote'
+  const audienceBullets = isOrganisationQuote
+    ? [
+        locale === 'de' ? 'Lehrplan gemeinsam festgelegt, nicht von der Stange' : 'A syllabus agreed with you, not off the shelf',
+        // CASA states this requirement plainly on the Firmenunterricht page.
+        locale === 'de'
+          ? 'Teilnehmende sollten etwa auf demselben Sprachniveau sein'
+          : 'Participants should be at roughly the same language level',
+        locale === 'de'
+          ? 'Sprachliche und interkulturelle Qualifikation aus einer Hand'
+          : 'Language and intercultural training from one provider',
+      ]
+    : isGroupQuote
       ? [
           locale === 'de' ? 'Inhalte und Tempo nach Absprache' : 'Content and pace agreed with you',
           locale === 'de' ? 'Unterkunft und Kulturprogramm organisiert' : 'Accommodation and culture programme arranged',
@@ -382,6 +507,33 @@ export default async function CourseDetailPage({
                 switch (sectionKey) {
                 case 'module-catalogue':
                   return <SpecialCourseCatalogue key={sectionKey} locale={locale} />;
+
+                case 'term-table':
+                  return (
+                  <CourseTermTable
+                    key={sectionKey}
+                    groups={termGroups}
+                    locale={locale}
+                    note={
+                      detail.course.slug === 'bildungszeit'
+                        ? locale === 'de'
+                          ? 'Die Bildungszeit umfasst zwei parallele Intensivkurse — einen am Vormittag, einen am Nachmittag. Der Einstieg ist immer montags möglich.'
+                          : 'Bildungszeit is two intensive courses in parallel, one in the morning and one in the afternoon. You can join on any Monday.'
+                        : undefined
+                    }
+                  />
+                  );
+
+                case 'practical-details':
+                  return practicalFacts ? (
+                  <CoursePracticalDetails
+                    key={sectionKey}
+                    fees={practicalFacts.fees}
+                    feeNote={practicalFacts.feeNote}
+                    conditions={practicalFacts.conditions}
+                    locale={locale}
+                  />
+                  ) : null;
 
                 case 'level-goals':
                   return (
@@ -513,7 +665,7 @@ export default async function CourseDetailPage({
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               notes={contactLine}
               deadlineIso={selectedInstance?.start_date}
-              teacher={spotlightTeacher}
+              teachingStaff={teachingStaff}
             />
           </div>
         </Container>

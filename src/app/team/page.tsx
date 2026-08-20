@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 
 import { HeroBEditorial } from '@/components/heroes';
-import { EditorialSplit, TestimonialGrid } from '@/components/sections';
+import { EditorialSplit } from '@/components/sections';
 import { TeamDirectory } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getSocialProof, getTeamSpotlights } from '@/lib/content/repository';
+import { getTeamSpotlights } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -22,40 +22,7 @@ export default async function TeamPage() {
   const rhythm = getLayoutRhythm('team');
   const pageConfig = getPublicPageConfig('team', locale);
 
-  const [team, stories] = await Promise.all([
-    Promise.resolve(getTeamSpotlights(locale)),
-    Promise.resolve(getSocialProof(locale)),
-  ]);
-
-  const testimonialPortraits = [
-    pageConfig.photos.testimonialA,
-    pageConfig.photos.testimonialB,
-    pageConfig.photos.testimonialC,
-  ];
-  const testimonialCards = stories.map((story, index) => ({
-    id: story.id,
-    person: story.personDisplay,
-    country: story.country,
-    quote: story.quote,
-    photoSrc: testimonialPortraits[index % testimonialPortraits.length].src,
-    photoAlt: testimonialPortraits[index % testimonialPortraits.length].alt,
-    photoCaption: '',
-  }));
-
-  const featuredQuote = stories[0]
-    ? {
-        quote: stories[0].quote,
-        person: stories[0].personDisplay,
-        role: stories[0].country,
-      }
-    : {
-        quote:
-          locale === 'de'
-            ? 'Das Team hat mir geholfen, mich schnell in Bremen zurechtzufinden.'
-            : 'The team helped me settle into Bremen quickly and confidently.',
-        person: locale === 'de' ? 'CASA Lernende' : 'CASA learner',
-        role: locale === 'de' ? 'Bremen' : 'Bremen',
-      };
+  const team = getTeamSpotlights(locale);
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
@@ -103,7 +70,7 @@ export default async function TeamPage() {
       </section>
 
       {/* Section 2: Editorial Split */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Menschen zuerst' : 'People first'}
@@ -126,22 +93,17 @@ export default async function TeamPage() {
         </Container>
       </section>
 
-      {/* Section 3: Testimonial Grid */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
-        <Container>
-          <TestimonialGrid
-            title={locale === 'de' ? 'Wie Lernende das Team erleben' : 'How learners describe the team experience'}
-            description={
-              locale === 'de'
-                ? 'Stimmen zur Rolle von Lehrkräften und Support im Alltag.'
-                : 'Stories about teaching and support impact in day-to-day learning.'
-            }
-            cards={testimonialCards}
-            featuredQuote={featuredQuote}
-            locale={locale}
-          />
-        </Container>
-      </section>
+      {/*
+        NO TESTIMONIAL GRID HERE.
+
+        This was the third full grid of the same seven quotes, under a heading
+        about "the team experience" — but CASA's testimonials are about courses,
+        and the two that mention a person mention Claudia Gröne, who is already
+        listed by name in the directory above. The page's job is who works here.
+
+        The teaching-quality claim it used to lean on is now stated directly, in
+        CASA's own words, in the EditorialSplit above.
+      */}
     </main>
   );
 }

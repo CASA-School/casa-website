@@ -55,9 +55,27 @@ export type ProofMetric = {
 export type SocialProofItem = {
   id: string;
   locale: ContentLocale;
+  /**
+   * The text that renders: an editorially trimmed excerpt, ~100-170 characters,
+   * so testimonial cards are a consistent height. See config/content/social-proof.
+   */
   quote: string;
+  /** Verbatim, as CASA publishes it. Kept so the excerpt stays auditable. */
+  quoteFull: string;
+  /** The learner's first name, as CASA publishes it. */
   personDisplay: string;
+  /**
+   * What the learner studied — "Evening courses A2 to B2, and the telc B2 exam".
+   *
+   * Named `country` because it used to hold invented nationalities alongside
+   * invented quotes. CASA publishes what a learner did, not where they are from,
+   * and beside a course testimonial that is the more useful attribution.
+   */
   country: string;
+  /** The course this testimonial is about. Absent means school-wide. */
+  courseSlug?: string;
+  /** The exam this learner sat, if any. Absent means they did not mention one. */
+  examCode?: string;
   sourcePlatform: 'instagram' | 'google_reviews' | 'website';
   sourceUrl: string;
   verificationStatus: VerificationStatus;
@@ -101,20 +119,36 @@ export type CulturalProgramItem = {
   cadence: string;
 };
 
+/**
+ * A member of staff as CASA publishes them.
+ *
+ * `focus`, `highlight`, `bio`, `photo` and `socials` were all required, and all
+ * five were therefore invented for six people who do not exist. They are now
+ * optional, because casa-bremen.de publishes a name, a role and a list of
+ * responsibilities and nothing else — and a required field is an instruction to
+ * make something up when there is nothing to put in it.
+ *
+ * `photo` stays in the type for when real portraits arrive with consent. Until
+ * then it is absent and the directory renders a monogram. Do not point it at the
+ * synthetic images in public/media/casa/team/ (CLAUDE.md hard rule 3).
+ */
 export type TeamSpotlight = {
   id: string;
   locale: ContentLocale;
   name: string;
   title: string;
+  /** Directory filter group, e.g. "Courses & exams". */
   role: string;
-  focus: string;
-  highlight: string;
-  bio: string;
-  photo: {
+  /** Published responsibilities, e.g. "Intensive courses, telc examinations". */
+  areas?: string;
+  focus?: string;
+  highlight?: string;
+  bio?: string;
+  photo?: {
     src: string;
     alt: string;
   };
-  socials: Array<{
+  socials?: Array<{
     platform: 'linkedin' | 'instagram' | 'email';
     href: string;
     label: string;

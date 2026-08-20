@@ -48,11 +48,14 @@ const primaryCourseOrder = [
   'in-company',
 ] as const;
 
-const additionalProgramOrder = [
-  'bildungszeit',
-  'university-prep',
-  'business-german',
-] as const;
+/**
+ * Formats that sit outside the four main routes.
+ *
+ * 'university-prep' and 'business-german' used to be listed here. CASA does not
+ * offer either -- they were development placeholders that rendered to the public
+ * as real products. See docs/CONTENT_PARITY_WITH_CASA_BREMEN_DE.md.
+ */
+const additionalProgramOrder = ['bildungszeit'] as const;
 
 const courseTitleOverrides: Partial<Record<string, Record<ContentLocale, string>>> = {
   'intensive-german': {
@@ -82,13 +85,13 @@ const additionalProgramLabels: Record<string, Record<ContentLocale, string>> = {
     en: 'Bildungszeit',
     de: 'Bildungszeit',
   },
-  'university-prep': {
-    en: 'University preparation',
-    de: 'Studienvorbereitung',
+  'medical-german': {
+    en: 'German for Medical',
+    de: 'Deutsch für Medizin',
   },
-  'business-german': {
-    en: 'Business German',
-    de: 'Business Deutsch',
+  'in-company': {
+    en: 'Firmenunterricht',
+    de: 'Firmenunterricht',
   },
 };
 
@@ -323,24 +326,14 @@ export default async function HomepageReorganizedPage() {
   const featuredStoryId = featuredSource?.id;
   const nonFeaturedStories = stories.filter((story) => story.id !== featuredStoryId);
   const storiesForCards = nonFeaturedStories.length >= 2 ? nonFeaturedStories : stories;
-  const testimonialCards = storiesForCards.map((story, index) => ({
+  // No portraits. These are CASA's real published testimonials with real first
+  // names, and the three testimonial images are synthetic — cycling them by
+  // index put a generated face on a named learner. CLAUDE.md hard rule 2.
+  const testimonialCards = storiesForCards.map((story) => ({
     id: story.id,
     person: story.personDisplay,
     country: story.country,
     quote: story.quote,
-    photoSrc:
-      index % 3 === 0
-        ? pageConfig.photos.testimonialA.src
-        : index % 3 === 1
-          ? pageConfig.photos.testimonialB.src
-          : pageConfig.photos.testimonialC.src,
-    photoAlt:
-      index % 3 === 0
-        ? pageConfig.photos.testimonialA.alt
-        : index % 3 === 1
-          ? pageConfig.photos.testimonialB.alt
-          : pageConfig.photos.testimonialC.alt,
-    photoCaption: '',
   }));
 
 
@@ -408,7 +401,7 @@ export default async function HomepageReorganizedPage() {
             {trustProofItems.map((item) => (
               <div
                 key={`${item.value}-${item.label}`}
-                className="rounded-lg bg-[color:var(--casa-warm-soft)]/34 px-4 py-4 ring-1 ring-[color:var(--casa-sand)]"
+                className="rounded-lg bg-[color:var(--casa-warm-soft)]/35 px-4 py-4 ring-1 ring-[color:var(--casa-sand)]"
               >
                 <dt className="text-2xl font-black leading-none text-[var(--casa-ink)]">{item.value}</dt>
                 <dd className="mt-2 text-sm font-bold leading-snug text-[var(--casa-muted)]">{item.label}</dd>
@@ -573,7 +566,7 @@ export default async function HomepageReorganizedPage() {
           </div>
 
           {additionalPrograms.length > 0 ? (
-            <section className="rounded-xl bg-[color:var(--casa-warm-soft)]/32 p-5 md:p-6">
+            <section className="rounded-xl bg-[color:var(--casa-warm-soft)]/35 p-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">
@@ -814,7 +807,7 @@ export default async function HomepageReorganizedPage() {
       </section>
 
       <section
-        className="bg-[color:var(--casa-warm-soft)]/36 py-16 md:py-20"
+        className="bg-[color:var(--casa-warm-soft)]/35 py-16 md:py-20"
         data-reveal-disabled="true"
         data-track-section="reorganized-stories"
       >

@@ -1,259 +1,186 @@
 import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
 
-const teamPhotoLibrary = {
-  anna: {
-    src: '/media/casa/team/team-anna-keller-portrait.jpg',
-    altEn: 'Temporary portrait-style image for Anna Keller',
-    altDe: 'Temporäres Portraitbild für Anna Keller',
-  },
-  david: {
-    src: '/media/casa/team/team-david-stein-portrait.jpg',
-    altEn: 'Temporary portrait-style image for David Stein',
-    altDe: 'Temporäres Portraitbild für David Stein',
-  },
-  melanie: {
-    src: '/media/casa/team/team-melanie-hoffmann-portrait.jpg',
-    altEn: 'Temporary portrait-style image for Melanie Hoffmann',
-    altDe: 'Temporäres Portraitbild für Melanie Hoffmann',
-  },
-  kareem: {
-    src: '/media/casa/team/team-kareem-yilmaz-portrait.jpg',
-    altEn: 'Temporary portrait-style image for Kareem Yilmaz',
-    altDe: 'Temporäres Portraitbild für Kareem Yilmaz',
-  },
-  sofia: {
-    src: '/media/casa/team/team-sofia-martin-portrait.jpg',
-    altEn: 'Temporary portrait-style image for Sofia Martin',
-    altDe: 'Temporäres Portraitbild für Sofia Martin',
-  },
-  lucas: {
-    src: '/media/casa/team/team-lucas-brandt-portrait.jpg',
-    altEn: 'Temporary portrait-style image for Lucas Brandt',
-    altDe: 'Temporäres Portraitbild für Lucas Brandt',
-  },
+/**
+ * The CASA team, as CASA publishes it.
+ *
+ * WHAT CHANGED AND WHY
+ *
+ * This file used to contain six invented people — Anna Keller "Senior German
+ * Teacher", David Stein "Academic Coordinator", Melanie Hoffmann, Kareem Yilmaz,
+ * Sofia Martin, Lucas Brandt — each with a synthetic portrait, a written bio, a
+ * "focus" area and LinkedIn/Instagram links pointing at the platforms' home
+ * pages. None of them exist. Anna Keller was additionally rendered as the
+ * teacher spotlight on every single course detail page.
+ *
+ * casa-bremen.de/ueber-uns/casa-team publishes twelve real people with their
+ * real responsibilities. Those names and roles are public information, so using
+ * them is not the decision CLAUDE.md hard rule 3 governs — that rule is about
+ * the *portraits*, and it still holds.
+ *
+ * SO: real names and real published responsibilities, and nothing else.
+ *
+ * - No photographs. The files in public/media/casa/team/ are synthetic images
+ *   generated for six invented people. Attaching a synthetic face to a real
+ *   colleague's name is worse than the invented staff were, not better. The
+ *   directory renders a monogram until real portraits are on file, with consent.
+ * - No bios and no "focus" prose. CASA publishes a role and a list of areas.
+ *   Anything past that would be fiction about a named person.
+ * - No social links. Only one staff email is published anywhere on the site
+ *   (i.eismann@casa-bremen.de, as the group-programme contact), and it already
+ *   lives in config/courses/course-profiles.ts where it is actually used.
+ *
+ * `areas` is the responsibility list CASA prints beside a name. It is the one
+ * genuinely informative field here, and it is what makes the directory useful:
+ * a reader with a telc question can see who handles telc exams.
+ *
+ * VERIFIED 2026-08-18 against casa-bremen.de/ueber-uns/casa-team.
+ * Staff change. Re-check this list before launch and at each term.
+ */
+
+type TeamMemberSource = {
+  id: string;
+  name: string;
+  /** The job title CASA prints. German is the source; EN is our translation. */
+  title: { en: string; de: string };
+  /** Directory filter group. Ours, for navigation — not a CASA job grade. */
+  group: 'leadership' | 'courses' | 'office' | 'volunteer';
+  /** Published responsibilities, verbatim in intent. */
+  areas?: { en: string; de: string };
 };
 
+const GROUP_LABELS: Record<TeamMemberSource['group'], Record<ContentLocale, string>> = {
+  leadership: { en: 'Leadership', de: 'Leitung' },
+  courses: { en: 'Courses & exams', de: 'Kurse & Prüfungen' },
+  office: { en: 'Office & advice', de: 'Verwaltung & Beratung' },
+  volunteer: { en: 'Volunteer service', de: 'Bundesfreiwilligendienst' },
+};
+
+const TEAM: TeamMemberSource[] = [
+  {
+    id: 'bettina-rick',
+    name: 'Bettina Rick',
+    title: { en: 'Managing Director', de: 'Geschäftsführerin' },
+    group: 'leadership',
+  },
+  {
+    id: 'claudia-groene',
+    name: 'Claudia Gröne',
+    title: { en: 'Director of Studies', de: 'Studienleitung' },
+    group: 'leadership',
+  },
+  {
+    id: 'mariella-baier',
+    name: 'Mariella Baier',
+    title: { en: 'Head of Evening Courses', de: 'Abendkursleitung' },
+    group: 'leadership',
+  },
+  {
+    id: 'tanja-langenickel',
+    name: 'Tanja Langenickel',
+    title: { en: 'Courses & partnerships', de: 'Kurse & Kooperationen' },
+    group: 'courses',
+    areas: {
+      en: 'Intensive courses, partnerships, in-company training',
+      de: 'Intensivkurse, Kooperationen, Firmenunterricht',
+    },
+  },
+  {
+    id: 'natalia-sostres',
+    name: 'Natàlia Sostres',
+    title: { en: 'Courses & telc exams', de: 'Kurse & telc Prüfungen' },
+    group: 'courses',
+    areas: {
+      en: 'Intensive courses, telc examinations',
+      de: 'Intensivkurse, telc Prüfungen',
+    },
+  },
+  {
+    id: 'mareike-thomeczek',
+    name: 'Mareike Thomeczek',
+    title: { en: 'Courses & accommodation', de: 'Kurse & Unterkunft' },
+    group: 'courses',
+    areas: {
+      en: 'Intensive courses, CASA accommodation, agencies',
+      de: 'Intensivkurse, CASA Unterkunft, Agenturen',
+    },
+  },
+  {
+    id: 'alissa-trouillet',
+    name: 'Alissa Trouillet',
+    title: { en: 'Courses & quality management', de: 'Kurse & Qualitätsmanagement' },
+    group: 'courses',
+    areas: {
+      en: 'Intensive courses, evening and special courses, medical and nursing courses, quality management',
+      de: 'Intensivkurse, Abendkurse, Spezialkurse, Medizin- und Pflegekurse, Qualitätsmanagement',
+    },
+  },
+  {
+    id: 'meike-grosse-hundrup',
+    name: 'Meike Große Hundrup',
+    title: { en: 'Administration & advice', de: 'Verwaltung/Beratung' },
+    group: 'office',
+  },
+  {
+    id: 'manuela-meerhoff',
+    name: 'Manuela Meerhoff',
+    title: { en: 'Accounts', de: 'Buchhaltung' },
+    group: 'office',
+  },
+  {
+    id: 'ina-eismann',
+    name: 'Ina Eismann',
+    title: { en: 'Accounts & group programmes', de: 'Buchhaltung & Gruppenprogramme' },
+    group: 'office',
+    areas: {
+      en: 'Accounts, and the contact for group course quotes',
+      de: 'Buchhaltung und Ansprechpartnerin für Gruppenangebote',
+    },
+  },
+  {
+    id: 'lara-nobmann',
+    name: 'Lara Nobmann',
+    title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
+    group: 'volunteer',
+  },
+  {
+    id: 'ilona-sher',
+    name: 'Ilona Sher',
+    title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
+    group: 'volunteer',
+  },
+];
+
+function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotlight {
+  return {
+    id: member.id,
+    locale,
+    name: member.name,
+    title: member.title[locale],
+    role: GROUP_LABELS[member.group][locale],
+    areas: member.areas?.[locale],
+  };
+}
+
 export const teamSpotlightsByLocale: Record<ContentLocale, TeamSpotlight[]> = {
-  en: [
-    {
-      id: 'anna-keller',
-      locale: 'en',
-      name: 'Anna Keller',
-      title: 'Senior German Teacher',
-      role: 'Teachers',
-      focus: 'Speaking confidence and fluency progression from A2 to C1',
-      highlight: 'Known for practical speaking drills and calm, motivating feedback.',
-      bio: 'Anna has supported international learners for over a decade and specializes in helping students move from classroom German to real daily confidence in Bremen.',
-      photo: {
-        src: teamPhotoLibrary.anna.src,
-        alt: teamPhotoLibrary.anna.altEn,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'Anna on LinkedIn' },
-        { platform: 'instagram', href: 'https://www.instagram.com', label: 'Anna on Instagram' },
-        { platform: 'email', href: 'mailto:anna@casa-bremen.de', label: 'Email Anna' },
-      ],
-    },
-    {
-      id: 'david-stein',
-      locale: 'en',
-      name: 'David Stein',
-      title: 'Academic Coordinator',
-      role: 'Coordination',
-      focus: 'Course pathways, placement alignment, and progress planning',
-      highlight: 'Builds clear level progression plans across intensive and evening tracks.',
-      bio: 'David ensures learners enter the right level and keeps course pathways aligned with personal goals, exams, and long-term academic outcomes.',
-      photo: {
-        src: teamPhotoLibrary.david.src,
-        alt: teamPhotoLibrary.david.altEn,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'David on LinkedIn' },
-        { platform: 'email', href: 'mailto:david@casa-bremen.de', label: 'Email David' },
-      ],
-    },
-    {
-      id: 'melanie-hoffmann',
-      locale: 'en',
-      name: 'Melanie Hoffmann',
-      title: 'Student Services Lead',
-      role: 'Office',
-      focus: 'Onboarding, registrations, and daily student support',
-      highlight: 'Helps students navigate paperwork and practical steps smoothly.',
-      bio: 'Melanie works closely with learners before and after arrival to reduce uncertainty and keep enrollment, schedules, and support requests clearly organized.',
-      photo: {
-        src: teamPhotoLibrary.melanie.src,
-        alt: teamPhotoLibrary.melanie.altEn,
-      },
-      socials: [
-        { platform: 'instagram', href: 'https://www.instagram.com', label: 'Melanie on Instagram' },
-        { platform: 'email', href: 'mailto:melanie@casa-bremen.de', label: 'Email Melanie' },
-      ],
-    },
-    {
-      id: 'kareem-yilmaz',
-      locale: 'en',
-      name: 'Kareem Yilmaz',
-      title: 'Exam Office Manager',
-      role: 'Coordination',
-      focus: 'telc B2 and C1 Hochschule sessions, deadlines, and candidate operations',
-      highlight: 'Coordinates exam logistics with high reliability and clarity.',
-      bio: 'Kareem oversees exam administration and candidate communication so every session runs with predictable standards and transparent next steps.',
-      photo: {
-        src: teamPhotoLibrary.kareem.src,
-        alt: teamPhotoLibrary.kareem.altEn,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'Kareem on LinkedIn' },
-        { platform: 'email', href: 'mailto:kareem@casa-bremen.de', label: 'Email Kareem' },
-      ],
-    },
-    {
-      id: 'sofia-martin',
-      locale: 'en',
-      name: 'Sofia Martin',
-      title: 'Community Programs Coordinator',
-      role: 'Office',
-      focus: 'Cultural activities, tandem formats, and weekend excursions',
-      highlight: 'Designs programs where language learning meets social belonging.',
-      bio: 'Sofia leads activities that help learners practice language in social contexts while building confidence and friendships across cultures.',
-      photo: {
-        src: teamPhotoLibrary.sofia.src,
-        alt: teamPhotoLibrary.sofia.altEn,
-      },
-      socials: [
-        { platform: 'instagram', href: 'https://www.instagram.com', label: 'Sofia on Instagram' },
-        { platform: 'email', href: 'mailto:sofia@casa-bremen.de', label: 'Email Sofia' },
-      ],
-    },
-    {
-      id: 'lucas-brandt',
-      locale: 'en',
-      name: 'Lucas Brandt',
-      title: 'Accommodation Coordinator',
-      role: 'Office',
-      focus: 'Shared flats, host family matching, and arrival support',
-      highlight: 'Bridges housing setup with student wellbeing and course readiness.',
-      bio: 'Lucas supports housing requests and move-in coordination so students can settle quickly and focus on learning from day one.',
-      photo: {
-        src: teamPhotoLibrary.lucas.src,
-        alt: teamPhotoLibrary.lucas.altEn,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'Lucas on LinkedIn' },
-        { platform: 'email', href: 'mailto:lucas@casa-bremen.de', label: 'Email Lucas' },
-      ],
-    },
-  ],
-  de: [
-    {
-      id: 'anna-keller',
-      locale: 'de',
-      name: 'Anna Keller',
-      title: 'Senior Deutschlehrerin',
-      role: 'Teachers',
-      focus: 'Sprechsicherheit und Flüssigkeit von A2 bis C1',
-      highlight: 'Bekannt für praxisnahe Sprechübungen und klares Feedback.',
-      bio: 'Anna begleitet internationale Lernende seit vielen Jahren und hilft dabei, Unterrichtsdeutsch in alltagstaugliche Sicherheit zu verwandeln.',
-      photo: {
-        src: teamPhotoLibrary.anna.src,
-        alt: teamPhotoLibrary.anna.altDe,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'Anna auf LinkedIn' },
-        { platform: 'instagram', href: 'https://www.instagram.com', label: 'Anna auf Instagram' },
-        { platform: 'email', href: 'mailto:anna@casa-bremen.de', label: 'Anna schreiben' },
-      ],
-    },
-    {
-      id: 'david-stein',
-      locale: 'de',
-      name: 'David Stein',
-      title: 'Akademische Koordination',
-      role: 'Coordination',
-      focus: 'Kurspfade, Einstufung und Fortschrittsplanung',
-      highlight: 'Plant klare Lernwege zwischen Intensiv- und Abendkursen.',
-      bio: 'David stellt sicher, dass Lernende passend einsteigen und ihren Weg Richtung Prüfung, Studium oder Beruf transparent planen können.',
-      photo: {
-        src: teamPhotoLibrary.david.src,
-        alt: teamPhotoLibrary.david.altDe,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'David auf LinkedIn' },
-        { platform: 'email', href: 'mailto:david@casa-bremen.de', label: 'David schreiben' },
-      ],
-    },
-    {
-      id: 'melanie-hoffmann',
-      locale: 'de',
-      name: 'Melanie Hoffmann',
-      title: 'Leitung Student Services',
-      role: 'Office',
-      focus: 'Onboarding, Anmeldung und Begleitung im Alltag',
-      highlight: 'Sorgt für klare Prozesse und schnelle Rückmeldungen.',
-      bio: 'Melanie begleitet Lernende vor und nach der Anreise, damit Einschreibung, Kursstart und Organisation in Bremen reibungslos funktionieren.',
-      photo: {
-        src: teamPhotoLibrary.melanie.src,
-        alt: teamPhotoLibrary.melanie.altDe,
-      },
-      socials: [
-        { platform: 'instagram', href: 'https://www.instagram.com', label: 'Melanie auf Instagram' },
-        { platform: 'email', href: 'mailto:melanie@casa-bremen.de', label: 'Melanie schreiben' },
-      ],
-    },
-    {
-      id: 'kareem-yilmaz',
-      locale: 'de',
-      name: 'Kareem Yilmaz',
-      title: 'Prüfungskoordination',
-      role: 'Coordination',
-      focus: 'telc B2 und C1 Hochschule Termine, Fristen und Kommunikation',
-      highlight: 'Führt Prüfungsabläufe mit hoher Verlässlichkeit.',
-      bio: 'Kareem steuert die gesamte Prüfungsorganisation und sorgt für transparente Kommunikation mit Kandidatinnen und Kandidaten.',
-      photo: {
-        src: teamPhotoLibrary.kareem.src,
-        alt: teamPhotoLibrary.kareem.altDe,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'Kareem auf LinkedIn' },
-        { platform: 'email', href: 'mailto:kareem@casa-bremen.de', label: 'Kareem schreiben' },
-      ],
-    },
-    {
-      id: 'sofia-martin',
-      locale: 'de',
-      name: 'Sofia Martin',
-      title: 'Community-Programme',
-      role: 'Office',
-      focus: 'Kulturelle Angebote, Tandem und Wochenendprogramme',
-      highlight: 'Schafft Begegnungsräume für Sprache und Zugehörigkeit.',
-      bio: 'Sofia organisiert Aktivitäten, in denen Lernende Deutsch außerhalb des Klassenzimmers anwenden und neue soziale Netze aufbauen.',
-      photo: {
-        src: teamPhotoLibrary.sofia.src,
-        alt: teamPhotoLibrary.sofia.altDe,
-      },
-      socials: [
-        { platform: 'instagram', href: 'https://www.instagram.com', label: 'Sofia auf Instagram' },
-        { platform: 'email', href: 'mailto:sofia@casa-bremen.de', label: 'Sofia schreiben' },
-      ],
-    },
-    {
-      id: 'lucas-brandt',
-      locale: 'de',
-      name: 'Lucas Brandt',
-      title: 'Unterkunftskoordinator',
-      role: 'Office',
-      focus: 'WG-/Gastfamilien-Matching und Anreisebegleitung',
-      highlight: 'Verbindet Wohnorganisation mit einem guten Lernstart.',
-      bio: 'Lucas begleitet Unterkunftsanfragen und Check-in-Abläufe, damit Lernende schnell ankommen und sich auf ihren Kurs konzentrieren können.',
-      photo: {
-        src: teamPhotoLibrary.lucas.src,
-        alt: teamPhotoLibrary.lucas.altDe,
-      },
-      socials: [
-        { platform: 'linkedin', href: 'https://www.linkedin.com', label: 'Lucas auf LinkedIn' },
-        { platform: 'email', href: 'mailto:lucas@casa-bremen.de', label: 'Lucas schreiben' },
-      ],
-    },
-  ],
+  en: TEAM.map((member) => toSpotlight(member, 'en')),
+  de: TEAM.map((member) => toSpotlight(member, 'de')),
+};
+
+/**
+ * What CASA says about its teachers, collectively.
+ *
+ * Individual classroom teachers are not named on casa-bremen.de, so there is no
+ * honest way to render a named "teacher spotlight" — which is exactly what the
+ * invented Anna Keller was doing on every course page. This is the claim CASA
+ * does make about its teaching staff, and it belongs to all of them.
+ */
+export const teachingStaffStatement: Record<ContentLocale, { title: string; body: string }> = {
+  en: {
+    title: 'Our teachers',
+    body: 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages, and most have lived or worked abroad — so we know from the inside that learning a language is not always easy, and we do our best to make it easier.',
+  },
+  de: {
+    title: 'Unsere Lehrkräfte',
+    body: 'Unsere Lehrkräfte sind Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen, und die meisten haben durch Auslandsaufenthalte selbst erfahren, was es heißt, eine Fremdsprache zu lernen. Wir wissen also, dass es nicht immer leicht ist — und tun unser Bestes, um es so leicht wie möglich zu machen.',
+  },
 };

@@ -125,20 +125,32 @@ export const photoSlots: PhotoSlot[] = [
 
   /*
    * ---- Team portraits ----------------------------------------------------
-   * These six are the ones that CANNOT ship. CLAUDE.md hard rule 3: the files
-   * currently at these paths are SYNTHETIC placeholders standing in for layout
-   * only, and must be replaced with verified portraits of real staff before
-   * launch. They must never be presented as real staff in the meantime.
+   * UNUSED, AND THAT IS DELIBERATE.
    *
-   * Same frame for all six, or the grid will read as six different sittings:
-   * head-and-shoulders, consistent eyeline, square crop, plain background.
+   * The files at these paths are synthetic images that were generated for six
+   * invented people — Anna Keller, David Stein, Kareem Yilmaz, Lucas Brandt,
+   * Melanie Hoffmann, Sofia Martin — none of whom work at CASA. /team now lists
+   * the twelve real colleagues casa-bremen.de publishes, and it renders a
+   * monogram for each, because putting a generated face beside a real
+   * colleague's name would be a worse misrepresentation than the invented staff
+   * were (CLAUDE.md hard rule 3).
+   *
+   * The numbers stay so the photo brief survives: twelve real portraits, taken
+   * with each person's consent, will slot in here. Until then nothing on the site
+   * points at these paths. Six numbers were already allocated to this block, so
+   * six live here and the other six are appended at the end — this file never
+   * reassigns a number (see the test).
+   *
+   * Same frame for all of them, or the grid reads as separate sittings:
+   * head-and-shoulders, consistent eyeline, square crop, plain background, and it
+   * has to hold up at 74px.
    */
-  { n: 31, src: '/media/casa/team/team-anna-keller-portrait.jpg', subject: 'Staff portrait — Anna Keller. Square, head and shoulders, plain ground. Also used as the teacher-spotlight face on every course page, so it must work at 74px.', ready: false },
-  { n: 32, src: '/media/casa/team/team-david-stein-portrait.jpg', subject: 'Staff portrait — David Stein. Match the framing of 31.', ready: false },
-  { n: 33, src: '/media/casa/team/team-kareem-yilmaz-portrait.jpg', subject: 'Staff portrait — Kareem Yilmaz. Match the framing of 31.', ready: false },
-  { n: 34, src: '/media/casa/team/team-lucas-brandt-portrait.jpg', subject: 'Staff portrait — Lucas Brandt. Match the framing of 31.', ready: false },
-  { n: 35, src: '/media/casa/team/team-melanie-hoffmann-portrait.jpg', subject: 'Staff portrait — Melanie Hoffmann. Match the framing of 31.', ready: false },
-  { n: 36, src: '/media/casa/team/team-sofia-martin-portrait.jpg', subject: 'Staff portrait — Sofia Martin. Match the framing of 31.', ready: false },
+  { n: 31, src: '/media/casa/team/team-portrait-01.jpg', subject: 'Staff portrait 1 of 12 — a real CASA colleague, consent on file. Square, head and shoulders, plain ground, must hold up at 74px.', ready: false },
+  { n: 32, src: '/media/casa/team/team-portrait-02.jpg', subject: 'Staff portrait 2 of 12. Match the framing of 31.', ready: false },
+  { n: 33, src: '/media/casa/team/team-portrait-03.jpg', subject: 'Staff portrait 3 of 12. Match the framing of 31.', ready: false },
+  { n: 34, src: '/media/casa/team/team-portrait-04.jpg', subject: 'Staff portrait 4 of 12. Match the framing of 31.', ready: false },
+  { n: 35, src: '/media/casa/team/team-portrait-05.jpg', subject: 'Staff portrait 5 of 12. Match the framing of 31.', ready: false },
+  { n: 36, src: '/media/casa/team/team-portrait-06.jpg', subject: 'Staff portrait 6 of 12. Match the framing of 31. The remaining six are appended at the end of this list, because numbers are never reassigned.', ready: false },
 
   /*
     ---- Awaited ------------------------------------------------------------
@@ -153,6 +165,18 @@ export const photoSlots: PhotoSlot[] = [
       'German for Medical. Healthcare professionals practising a patient consultation — scrubs or clinical setting readable, two people talking rather than a lecture. THIS PHOTOGRAPH DOES NOT EXIST YET; the course borrowed a generic advising shot until now.',
     ready: false,
   },
+
+  /*
+    The remaining six staff portraits. CASA publishes twelve colleagues and this
+    block only had six numbers, so the balance is appended here rather than
+    renumbering the list. Same brief as 31.
+  */
+  { n: 38, src: '/media/casa/team/team-portrait-07.jpg', subject: 'Staff portrait 7 of 12. Match the framing of 31.', ready: false },
+  { n: 39, src: '/media/casa/team/team-portrait-08.jpg', subject: 'Staff portrait 8 of 12. Match the framing of 31.', ready: false },
+  { n: 40, src: '/media/casa/team/team-portrait-09.jpg', subject: 'Staff portrait 9 of 12. Match the framing of 31.', ready: false },
+  { n: 41, src: '/media/casa/team/team-portrait-10.jpg', subject: 'Staff portrait 10 of 12. Match the framing of 31.', ready: false },
+  { n: 42, src: '/media/casa/team/team-portrait-11.jpg', subject: 'Staff portrait 11 of 12. Match the framing of 31.', ready: false },
+  { n: 43, src: '/media/casa/team/team-portrait-12.jpg', subject: 'Staff portrait 12 of 12. Match the framing of 31.', ready: false },
 
   // ---- Append new photographs below this line, next number, never resort --
 ];

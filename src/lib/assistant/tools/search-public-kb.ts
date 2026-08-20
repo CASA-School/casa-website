@@ -382,7 +382,7 @@ function buildAccommodationDetailPassages(): KbPassage[] {
       topic: 'accommodation',
       keywords: ['accommodation', 'flat', 'wg', 'host family', 'price', '580', 'deposit', 'kaution', 'room', 'housing'],
       content:
-        'CASA offers two accommodation types. Shared flat (WG): private furnished room, shared kitchen and bathroom, 580 EUR for 4 weeks, then 145 EUR per additional week. A 50 EUR non-refundable placement fee and 580 EUR refundable deposit apply. Host family: daily spoken German and cultural immersion; holiday surcharge of 145 EUR/week when applicable. Preferences (allergies, quiet hours, etc.) can be noted during registration. Accommodation is not guaranteed — confirmed case by case. Request early, as cancellations are normally planned around a 4-week window.',
+        'CASA offers two accommodation types, both available only to students on the intensive courses — and the shared flats only to participants of legal age. Shared flat (WG): private furnished room, shared kitchen and bathroom, WLAN, bedding provided, bring your own towels, no smoking. Host family: own furnished room, kitchen and bathroom normally shared, self-catering. Both cost 580 EUR for 4 weeks, then 145 EUR per additional week, with a 50 EUR placement fee and a 580 EUR deposit refunded if the flat and keys come back as received. The Christmas and Easter closure weeks add 145 EUR/week. A shared-flat room is not guaranteed: if none is free, CASA places the student with a host family instead. CASA cannot help with finding a flat of your own but will send useful links on request.',
     },
     {
       id: 'accommodation-detail-de',
@@ -517,7 +517,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['evening', 'abend', 'course', '476', 'price', 'after work', 'part time', 'monday wednesday', 'tuesday thursday'],
       content:
-        'Evening German: A2–C1, 4 lessons/week. Mon/Wed or Tue/Thu, 18:30–20:00. EUR 476 per term. Ideal for learners studying alongside work or other commitments. Next starts: 24 Aug (Mon/Wed) and 25 Aug (Tue/Thu) 2026.',
+        'Evening German: A1–C1, 4 lessons/week. Mon/Wed or Tue/Thu, 18:30–20:00. EUR 476 per trimester plus the course book. Ideal for learners studying alongside work or other commitments. Next starts: 24 Aug (Mon/Wed) and 25 Aug (Tue/Thu) 2026.',
     },
     {
       id: 'course-evening-de',
@@ -527,7 +527,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['abend', 'abendkurs', 'kurs', '476', 'preis', 'nach der arbeit', 'teilzeit', 'montag mittwoch', 'dienstag donnerstag'],
       content:
-        'Abendkurs Deutsch: A2–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 EUR pro Semester. Ideal für Lernende neben Arbeit oder Studium. Nächste Starts: 24. Aug. (Mo/Mi) und 25. Aug. (Di/Do) 2026.',
+        'Abendkurs Deutsch: A1–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 EUR pro Trimester zzgl. Lehrwerk. Ideal für Lernende neben Arbeit oder Studium. Nächste Starts: 24. Aug. (Mo/Mi) und 25. Aug. (Di/Do) 2026.',
     },
     {
       id: 'course-medical-en',

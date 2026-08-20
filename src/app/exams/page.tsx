@@ -13,7 +13,7 @@ import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { shouldShowDraftClaims } from '@/lib/content/locale';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getExamCatalog, getProofMetrics, getSocialProof } from '@/lib/content/repository';
+import { getExamCatalog, getProofMetrics, getSocialProofById } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -53,12 +53,13 @@ export default async function ExamsPage() {
   const pageConfig = getPublicPageConfig('exams', locale);
   const showDraftClaims = shouldShowDraftClaims();
 
-  const [catalog, proofMetrics, stories] = await Promise.all([
+  const [catalog, proofMetrics, candidateStory] = await Promise.all([
     getExamCatalog(locale),
     Promise.resolve(getProofMetrics(locale)),
-    Promise.resolve(getSocialProof(locale)),
+    Promise.resolve(getSocialProofById('fatameh-evening', locale)),
   ]);
-  const leadStory = stories[0];
+  // Fatameh is the only CASA learner who writes about sitting an exam.
+  const leadStory = candidateStory;
 
   const examItems = catalog.items.slice(0, 4).map((item) => {
     const nextSession = item.sessions[0];
@@ -159,7 +160,7 @@ export default async function ExamsPage() {
       </section>
 
       {/* Section 2: Readiness Check */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ExamsReadinessCheck
             title={locale === 'de' ? 'Prüfungsreife selbst prüfen' : 'Exam readiness self-check'}
@@ -209,7 +210,7 @@ export default async function ExamsPage() {
       ) : null}
 
       {/* Section 5: Steps */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
             eyebrow={locale === 'de' ? 'Vorbereitungsweg' : 'Preparation pathway'}

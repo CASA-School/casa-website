@@ -9,7 +9,7 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getExamDetail, getSocialProof } from '@/lib/content/repository';
+import { getExamDetail, getSocialProofForExam } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
 type ExamDetailPageProps = {
@@ -73,14 +73,17 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
   const rhythm = getLayoutRhythm('exam-detail');
   const pageConfig = getPublicPageConfig('exam-detail', locale);
 
-  const [detail, socialProof] = await Promise.all([
-    getExamDetail(code, locale),
-    Promise.resolve(getSocialProof(locale)),
-  ]);
+  // Resolved from the exam itself rather than the route param: the same exam is
+  // reachable as /exams/b2 and /exams/telc_b2, and only the row carries the
+  // canonical code that testimonials are keyed on. The lookup is synchronous
+  // config, so doing it after the fetch costs nothing.
+  const detail = await getExamDetail(code, locale);
 
   if (!detail) {
     notFound();
   }
+
+  const socialProof = getSocialProofForExam(detail.examType.code, locale);
 
   const requestedSessionId = typeof session === 'string' ? session : '';
   const selectedSession =
@@ -120,19 +123,23 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     ? `/registration/exam?sessionId=${encodeURIComponent(selectedSession.id)}`
     : '/registration/exam';
 
-  const testimonialPortraits = [
-    pageConfig.photos.testimonialA,
-    pageConfig.photos.testimonialB,
-    pageConfig.photos.testimonialC,
-  ];
-  const testimonialCards = socialProof.map((story, index) => ({
+  /*
+   * Only learners who actually sat THIS exam.
+   *
+   * This used to draw from the shared pool, so both exam pages showed the same
+   * two quotes under "Stories from exam preparation" — one about a grammar module
+   * and one about an intensive course, neither about an exam. CASA publishes
+   * exactly one exam testimonial (Fatameh, telc B2), so the C1 Hochschule page
+   * renders no stories section at all, which is the honest answer.
+   *
+   * No portraits: these are real named learners and the only portrait files on
+   * hand are synthetic. See components/sections/testimonial-grid.
+   */
+  const testimonialCards = socialProof.map((story) => ({
     id: story.id,
     person: story.personDisplay,
     country: story.country,
     quote: story.quote,
-    photoSrc: testimonialPortraits[index % testimonialPortraits.length].src,
-    photoAlt: testimonialPortraits[index % testimonialPortraits.length].alt,
-    photoCaption: '',
   }));
 
   const examSchema = {
@@ -233,16 +240,18 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                 ]}
               />
 
-              <TestimonialGrid
-                title={locale === 'de' ? 'Erfahrungen aus der Prüfungsvorbereitung' : 'Stories from exam preparation'}
-                description={
-                  locale === 'de'
-                    ? 'Wie Kandidat:innen den Weg bis zum Abschluss erleben.'
-                    : 'How candidates experience the path toward certification.'
-                }
-                cards={testimonialCards}
-                locale={locale}
-              />
+              {testimonialCards.length > 0 ? (
+                <TestimonialGrid
+                  title={locale === 'de' ? 'Erfahrungen mit dieser Prüfung' : 'Stories from candidates who sat it'}
+                  description={
+                    locale === 'de'
+                      ? 'Von Lernenden, die diese Prüfung bei CASA abgelegt haben.'
+                      : 'From learners who took this exam at CASA.'
+                  }
+                  cards={testimonialCards}
+                  locale={locale}
+                />
+              ) : null}
 
               <Link
                 href="/exams"

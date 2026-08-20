@@ -9,6 +9,7 @@ import {
   ProofBand,
 } from '@/components/sections';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
+import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { CoursesFormatSelector } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -78,7 +79,29 @@ type SelectorCourseLike = {
   } | null;
 };
 
+/*
+ * `facts` used to be written out inline in every branch below, in both locales,
+ * repeating the same figures that config/courses/course-practical-facts.ts now
+ * holds for the detail pages. Two copies of "117.50 EUR per additional week" is
+ * one too many -- the next person to correct a price fixes whichever they found
+ * first, and the other quietly disagrees.
+ *
+ * The registry is the single source. `registryFacts` summarises it, so a format
+ * with no branch here still gets real facts rather than the "CASA supports
+ * progression from A1 to C1" filler that German for Groups was rendering.
+ */
 function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', scheduleTags: string[]) {
+  const practical = localizePracticalFacts(course.slug, locale);
+  const registryFacts = practical
+    ? [
+        practical.fees?.length
+          ? `${locale === 'de' ? 'Kosten' : 'Costs'}: ${practical.fees
+              .map((fee) => `${fee.label} ${fee.amount}`)
+              .join(' · ')}`
+          : practical.feeNote,
+        ...practical.conditions.slice(0, 2),
+      ].filter((entry): entry is string => Boolean(entry))
+    : [];
   const fallbackOutcomes =
     locale === 'de'
       ? ['Mehr Sicherheit im Sprechen', 'Strukturierte Lernroutine', 'Klare nächste Lernschritte']
@@ -108,17 +131,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
           : 'Monthly starts, alternating morning and afternoon cohorts',
       intensity: locale === 'de' ? '20 Lektionen/Woche (45 Min. pro Lektion)' : '20 lessons/week (45 minutes each)',
       outcomes: baseOutcomes,
-      facts: locale === 'de'
-          ? [
-              'Gebühren: 4 Wochen 520 EUR, 8 Wochen (komplettes Niveau) 940 EUR, jede weitere Woche 117,50 EUR.',
-              'Einmalige Einschreibegebühr: 50 EUR. Lehrmaterial: 23,99 bis 26,99 EUR.',
-              'Ein ganzes Niveau dauert im Intensivformat in der Regel etwa 8 bis 9 Wochen.',
-            ]
-          : [
-              'Fees: 4 weeks EUR 520, 8 weeks (full level) EUR 940, each additional week EUR 117.50.',
-              'One-time enrollment fee: EUR 50. Textbooks: EUR 23.99 to EUR 26.99.',
-              'In intensive format, one full CEFR level usually takes around 8 to 9 weeks.',
-            ],
+      facts: registryFacts,
     };
   }
 
@@ -134,17 +147,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
           : 'Year-round, usually 2 evenings/week (Mon/Wed or Tue/Thu), 18:30 to 20:00',
       intensity: locale === 'de' ? 'Halbes Niveau in ca. 3,5 Monaten' : 'Half-level progression in about 3.5 months',
       outcomes: baseOutcomes,
-      facts: locale === 'de'
-          ? [
-              'Kursgebühr pro Trimester: 476 EUR plus Lehrwerk (variiert je nach Niveaustufe).',
-              'A1.1 startet am Kursbeginn; mit Vorkenntnissen ist ein Einstieg oft auch laufend möglich (bei freien Plätzen).',
-              'Innerhalb eines Jahres sind typischerweise etwa 1,5 Niveaustufen (CEFR) möglich.',
-            ]
-          : [
-              'Course fee per trimester: EUR 476 plus textbook (varies by level).',
-              'A1.1 starts at term start; with prior knowledge, joining ongoing classes is often possible (if seats are open).',
-              'Within one year, learners typically complete around 1.5 CEFR sub-levels.',
-            ],
+      facts: registryFacts,
     };
   }
 
@@ -157,18 +160,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
       schedule: locale === 'de' ? 'Freitags, 13:00 bis 16:30 Uhr, 26.06. bis 28.08.2026' : 'Fridays, 13:00 to 16:30, 26 Jun to 28 Aug 2026',
       intensity: baseIntensity,
       outcomes: baseOutcomes,
-      facts:
-        locale === 'de'
-          ? [
-              'Schwerpunkt auf Patientengesprächen, Anamnese, Übergaben und Dokumentation.',
-              'Fachsprache wird über Fallbeispiele und Rollenspiele gefestigt.',
-              'Kursgebühr: 400 EUR, plus 50 EUR Einschreibegebühr bei Erstanmeldung.',
-            ]
-          : [
-              'Focus areas include consultations, case history language, handovers, and documentation.',
-              'Medical language is trained through role-plays and case-based practice.',
-              'Course fee: EUR 400, plus EUR 50 enrollment fee for first-time registration.',
-            ],
+      facts: registryFacts,
     };
   }
 
@@ -181,18 +173,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
       schedule: locale === 'de' ? 'Kompakte Tagesblöcke nach bestätigter Planung' : 'Compact daytime blocks after confirmed planning',
       intensity: baseIntensity,
       outcomes: baseOutcomes,
-      facts:
-        locale === 'de'
-          ? [
-              'Das Format ist auf kurze, wirksame Lernphasen mit hoher Unterrichtsdichte ausgerichtet.',
-              'Typischer Fokus: spürbarer Fortschritt in begrenzter Zeit.',
-              'CASA klärt vor der Anmeldung, ob Bildungszeit/AZAV für den konkreten Fall passt.',
-            ]
-          : [
-              'The format is designed for short, high-impact phases with high lesson density.',
-              'Typical focus: visible progress within a limited time window.',
-              'CASA confirms whether Bildungszeit/AZAV fits the specific case before registration.',
-            ],
+      facts: registryFacts,
     };
   }
 
@@ -205,17 +186,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
       schedule: locale === 'de' ? 'Nach Teambedarf: vor Ort, online oder hybrid' : 'Based on team needs: on-site, online, or hybrid',
       intensity: baseIntensity,
       outcomes: baseOutcomes,
-      facts: locale === 'de'
-          ? [
-              'Einstieg über Bedarfsanalyse mit Lernzielen pro Rolle oder Abteilung.',
-              'Branchenspezifisches Vokabular wird direkt in Meetings und Prozessen geübt.',
-              'Unterrichtszeiten lassen sich an Schicht- oder Projektlogik anpassen.',
-            ]
-          : [
-              'Starts with needs analysis and role-specific learning targets.',
-              'Industry vocabulary is trained directly in meeting and workflow scenarios.',
-              'Schedules can be adapted to shift plans and project cycles.',
-            ],
+      facts: registryFacts,
     };
   }
 
@@ -228,18 +199,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
       schedule: baseSchedule,
       intensity: baseIntensity,
       outcomes: baseOutcomes,
-      facts:
-        locale === 'de'
-          ? [
-              'Kompakte Module setzen gezielt an konkreten Lernlücken an.',
-              'Gut kombinierbar mit Intensiv- oder Abendkursen.',
-              'Praxisorientiertes Feedback sorgt für schnellen Transfer in den Alltag.',
-            ]
-          : [
-              'Compact modules focus on specific learning gaps quickly.',
-              'Easy to combine with intensive or evening pathways.',
-              'Practice-first feedback helps transfer skills to daily life fast.',
-            ],
+      facts: registryFacts,
     };
   }
 
@@ -248,18 +208,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
     schedule: baseSchedule,
     intensity: baseIntensity,
     outcomes: baseOutcomes,
-    facts:
-      locale === 'de'
-        ? [
-            'CASA begleitet den Lernweg von A1 bis C1 mit klaren Niveauzielen.',
-            'Eine Einstufung hilft, das passende Startlevel festzulegen.',
-            'Starttermine und Plätze werden durch das Office-Team bestätigt.',
-          ]
-        : [
-            'CASA supports progression from A1 to C1 with clear level milestones.',
-            'Placement support helps define your strongest starting point.',
-            'Start dates and seat availability are confirmed with the office team.',
-          ],
+    facts: registryFacts,
   };
 }
 
@@ -305,7 +254,36 @@ export default async function CoursesPage({
     is now shown as empty, and the counts on each option mean a visitor can see
     that before clicking.
   */
-  const featuredCourses = filterCourses(finderData.courses, activeFacets).slice(0, 6);
+  /*
+   * No slice.
+   *
+   * This used to take the first six, which silently dropped a real format the
+   * moment CASA had a seventh -- and it did: seeding Bildungszeit into the
+   * database pushed German for Medical out of the format selector while its card
+   * still linked from the same page. A catalogue page that hides one of the
+   * things it is cataloguing is worse than a slightly longer list, and the
+   * filters above already narrow it when a reader wants that.
+   */
+  const featuredCourses = filterCourses(finderData.courses, activeFacets);
+
+  /*
+   * The heading said "Six routes" as a literal, and went wrong as soon as a
+   * seventh format existed. Spelled from the array so it cannot drift again.
+   */
+  const courseCountWord = (() => {
+    const words: Record<number, { en: string; de: string }> = {
+      1: { en: 'One', de: 'Ein' },
+      2: { en: 'Two', de: 'Zwei' },
+      3: { en: 'Three', de: 'Drei' },
+      4: { en: 'Four', de: 'Vier' },
+      5: { en: 'Five', de: 'Fünf' },
+      6: { en: 'Six', de: 'Sechs' },
+      7: { en: 'Seven', de: 'Sieben' },
+      8: { en: 'Eight', de: 'Acht' },
+    };
+
+    return words[featuredCourses.length] ?? { en: String(featuredCourses.length), de: String(featuredCourses.length) };
+  })();
 
   const courseRows = featuredCourses.map((course) => {
     /*
@@ -491,8 +469,8 @@ export default async function CoursesPage({
             </h2>
             <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-white/72 md:text-lg">
               {locale === 'de'
-                ? 'Sechs Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.'
-                : 'Six routes to the same goal. What differs is the rhythm, not the standard.'}
+                ? `${courseCountWord.de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.`
+                : `${courseCountWord.en} routes to the same goal. What differs is the rhythm, not the standard.`}
             </p>
           </div>
 
@@ -546,15 +524,17 @@ export default async function CoursesPage({
         questions, so the band now answers them.
 
         EVERY NUMBER HERE IS FROM docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
-        Deliberately absent: the "EUR 50 enrolment fee" and "EUR 23.99-26.99
-        textbook" figures that buildSelectorCopy renders elsewhere on this page.
-        Neither appears in the verified table, and CLAUDE.md forbids shipping a
-        course number that is not verified there.
+
+        The 50 EUR enrolment fee and the 23.99-26.99 EUR textbook range used to be
+        withheld from this band as unverified. Both are published on
+        casa-bremen.de -- the 50 EUR fee on three separate pages -- and are now in
+        the verified table, so buildSelectorCopy's figures reach the reader instead
+        of being built and dropped by a component that ignored the prop.
 
         No photographs. The six format cards above already carry the page's
         images, and four short facts do not need illustrating.
       */}
-      <section className="py-16 md:py-24 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-24 border-t border-[color:var(--casa-sand)]/40">
         <Container className="space-y-10 md:space-y-12">
           <div className="mx-auto max-w-[46rem] text-center">
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
@@ -668,7 +648,7 @@ export default async function CoursesPage({
         the slab sits on one continuous ground, and the hairline is gone with
         it: there is no longer a surface change for a rule to mark.
       */}
-      <section className="py-16 md:py-24 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-24">
         <Container>
           <ProofBand locale={locale} />
         </Container>

@@ -19,10 +19,6 @@ const LEVEL_REQUIRED_SLUGS = new Set([
   'medical-german',
   'bildungszeit',
   'exam-preparation',
-  'university-prep',
-  'business-german',
-  'summer-intensive',
-  'integration-german',
 ]);
 
 /**

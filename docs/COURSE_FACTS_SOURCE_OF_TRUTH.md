@@ -57,6 +57,42 @@ is the one place the live site quotes clock hours, and it says 30–40 hours per
 | Firmenunterricht | by arrangement | by arrangement | **no published price — non-binding consultation** | by arrangement | `/sprachkurse/firmenunterricht/` |
 | German for Medical | not published | not published | not published | **B2 and C1 entry** | `/en/language-courses/german-for-medical-professionals/` |
 
+### Fees that sit alongside the course price
+
+Verified 2026-08-18 against the German pages. These were previously treated as unverified and
+withheld from the site; each is published on casa-bremen.de, and the €50 fee appears on three
+separate pages, which is why it is now safe to render.
+
+| Fee | Amount | Applies to | Source |
+| --- | --- | --- | --- |
+| One-time enrolment fee (*Einschreibe-/Anmeldegebühr*) | **€50** | first registration at CASA | `/sprachkurse/deutsch-intensiv`, `/sprachkurse/bildungszeit-deutsch`, `/pruefungszentrum/telc-deutsch-c1-hochschule` |
+| Each additional week, intensive | **€117.50** | intensive beyond a booked block | `/sprachkurse/deutsch-intensiv` |
+| Textbook, one book | **€23.99–26.99** | varies by level | `/sprachkurse/deutsch-intensiv` |
+| Textbooks, two books | **€46–54** | Bildungszeit (two parallel courses) | `/sprachkurse/bildungszeit-deutsch` |
+| telc B2 preparation course | **€260** | 07.09–07.10.26, Mon/Wed 18:30–20:00 | `/pruefungszentrum/telc-deutsch-b2` |
+| telc C1 Hochschule preparation course | **€520** | 4-week block, plus €50 on first registration | `/pruefungszentrum/telc-deutsch-c1-hochschule` |
+| telc B2 exam | **€190** full / **€160** partial (written or oral) | ~09:00–17:00 at the school | `/pruefungszentrum/telc-deutsch-b2` |
+| telc C1 Hochschule exam | **€210** full / **€185** partial | always a Friday, ~08:30–17:00 | `/pruefungszentrum/telc-deutsch-c1-hochschule` |
+| Accommodation, 4 weeks | **€580** | host family or CASA WG | `/unterkunft/wohnen-in-einer-gastfamilie`, `/unterkunft/die-casa-wg` |
+| Accommodation, each additional week | **€145** | also the Christmas/Easter closure surcharge | same |
+| Placement fee (*Vermittlungsgebühr*) | **€50** | accommodation placement | same |
+| Deposit (*Deponat*) | **€580** | refunded if flat and keys are as received | same |
+
+### Published term table
+
+Seeded in `db/seeds/0001_public_baseline.sql` and mirrored in `public-fixtures.ts`.
+
+| Format | Slot | Terms |
+| --- | --- | --- |
+| Intensive | morning, **Mon–Fri** 09:00–12:30 | 31.08–23.10.26 · 26.10–18.12.26 · 04.01–26.02.27 · 01.03–30.04.27 |
+| Intensive | afternoon, **Mon–Thu** 13:00–17:30 | 03.08–24.09.26 · 28.09–19.11.26 · 23.11.26–28.01.27 · 01.02–01.04.27 |
+| Evening | Mon/Wed 18:30–20:00 | 24.08–16.12.26 (A2.1, A2.2, B1.2, B2.1, B2.2, C1.1) |
+| Evening | Tue/Thu 18:30–20:00 | 25.08–17.12.26 (A1.1, A1.2, B1.1, C1.2) |
+| Bildungszeit | full day, morning + afternoon in parallel | follows the intensive terms; join any Monday |
+
+**The afternoon intensive is four days, not five.** Getting this wrong overstates the weekly
+commitment by a fifth, and it is the single easiest fact on this page to mis-copy.
+
 ### Corrections to earlier assumptions
 
 Two things I flagged as suspect in `COPY_AND_COURSE_ARCHETYPE_REVIEW.md` turned out to be

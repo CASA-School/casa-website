@@ -3,7 +3,7 @@ import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 
 type LevelGoalItem = {
   level: string;
-  textbook: 'netzwerk' | 'context';
+  textbook: 'netzwerk' | 'kontext';
   focus: string;
 };
 
@@ -45,14 +45,13 @@ export function CourseLevelGoals({
   locale = 'en',
 }: CourseLevelGoalsProps) {
   const netzwerkLevels = levels.filter((l) => l.textbook === 'netzwerk');
-  const contextLevels = levels.filter((l) => l.textbook === 'context');
+  const kontextLevels = levels.filter((l) => l.textbook === 'kontext');
 
   const copy = {
     netzwerkLabel: locale === 'de' ? 'Lehrwerk Netzwerk (A1 – B1)' : 'Netzwerk Textbook (A1 – B1)',
     netzwerkDesc: locale === 'de' ? 'Fokus auf Alltagswörter, Grammatik-Grundlagen und Dialoge' : 'Focus on daily vocabulary, grammar basics, and dialogues',
-    // The Klett series is spelled "Kontext" (see src/config/content/klett-textbooks.ts).
-    contextLabel: locale === 'de' ? 'Lehrwerk Kontext (B1+ – C1)' : 'Kontext Textbook (B1+ – C1)',
-    contextDesc: locale === 'de' ? 'Fokus auf komplexe Satzstrukturen, Fachsprache und Diskussionen' : 'Focus on complex structures, professional terminology, and debate',
+    kontextLabel: locale === 'de' ? 'Lehrwerk Kontext (B1+ – C1)' : 'Kontext Textbook (B1+ – C1)',
+    kontextDesc: locale === 'de' ? 'Fokus auf komplexe Satzstrukturen, Fachsprache und Diskussionen' : 'Focus on complex structures, professional terminology, and debate',
   };
 
   return (
@@ -80,7 +79,7 @@ export function CourseLevelGoals({
       </div>
 
       {/* Level Columns Grid */}
-      <div className="p-6 md:p-8 bg-[var(--casa-surface-wash)]/20">
+      <div className="p-6 md:p-8 bg-[var(--casa-surface-wash)]">
         <div className="grid gap-6 md:grid-cols-2">
           {/* Netzwerk Column */}
           {netzwerkLevels.length > 0 ? (
@@ -112,18 +111,18 @@ export function CourseLevelGoals({
           ) : null}
 
           {/* Context Column */}
-          {contextLevels.length > 0 ? (
+          {kontextLevels.length > 0 ? (
             <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 md:p-6 shadow-[var(--shadow-soft)] flex flex-col">
               <div className="border-b border-[color:var(--casa-sand)]/60 pb-4 mb-4">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--casa-gold-deep)]/8 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-warning-text)] border border-[color:var(--casa-gold-deep)]/30">
-                  {copy.contextLabel}
+                  {copy.kontextLabel}
                 </span>
                 <p className="mt-2 text-xs text-[var(--casa-muted)] font-medium leading-relaxed">
-                  {copy.contextDesc}
+                  {copy.kontextDesc}
                 </p>
               </div>
               <ul className="space-y-4 flex-1">
-                {contextLevels.map((item) => (
+                {kontextLevels.map((item) => (
                   <li key={item.level} className="flex gap-3 items-start">
                     <span
                       style={levelChipStyle(item.level)}

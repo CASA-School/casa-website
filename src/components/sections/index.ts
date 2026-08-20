@@ -21,7 +21,7 @@ export { CommunityStories, type CommunityStory } from './community-stories';
 export { HumanStoryBlock } from './human-story-block';
 export { DeadlineBadge } from './deadline-badge';
 export { LiveReviewModule, type LiveReviewItem } from './live-review-module';
-export { TeacherSpotlightCard } from './teacher-spotlight-card';
+export { TeachingStaffCard } from './teaching-staff-card';
 export { DecisionRail } from './decision-rail';
 export { NextStepsTimeline } from './next-steps-timeline';
 export { UnifiedSearchPanel, type UnifiedSearchScope } from './unified-search-panel';

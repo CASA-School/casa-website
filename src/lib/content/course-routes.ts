@@ -6,8 +6,6 @@ const publicCourseSlugs: Record<string, string> = {
   'medical-german': 'german-for-medical',
   'in-company': 'firmenunterricht',
   bildungszeit: 'bildungszeit',
-  'university-prep': 'university-preparation',
-  'business-german': 'business-german',
 };
 
 const contentCourseSlugs = Object.fromEntries(

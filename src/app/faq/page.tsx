@@ -18,6 +18,15 @@ export const metadata: Metadata = createPublicMetadata({
   keywords: ['CASA FAQ', 'Course FAQ', 'Exam FAQ', 'Accommodation FAQ'],
 });
 
+/*
+ * Cancellation is its own topic.
+ *
+ * casa-bremen.de/faq has four sections and one of them is
+ * "Kündigungsbedingungen" — the four-week notice period, the 100 EUR processing
+ * fee, and that a cancellation only counts in writing. Folding that into
+ * "General" buries the answer somebody is most anxious to find, so it gets its
+ * own filter chip.
+ */
 function toTopic(category: string, locale: 'en' | 'de') {
   const value = category.toLowerCase();
   const labels =
@@ -28,7 +37,8 @@ function toTopic(category: string, locale: 'en' | 'de') {
           exams: 'Prüfungen',
           accommodation: 'Unterkunft',
           visa: 'Visum',
-          general: 'Alltag',
+          cancellation: 'Kündigung',
+          general: 'Allgemeines',
         }
       : {
           registration: 'Registration',
@@ -36,6 +46,7 @@ function toTopic(category: string, locale: 'en' | 'de') {
           exams: 'Exams',
           accommodation: 'Accommodation',
           visa: 'Visa',
+          cancellation: 'Cancellation',
           general: 'General',
         };
 
@@ -44,6 +55,7 @@ function toTopic(category: string, locale: 'en' | 'de') {
   if (value.includes('exam') || value.includes('pruef') || value.includes('pruf')) return labels.exams;
   if (value.includes('accomm') || value.includes('unterkunft')) return labels.accommodation;
   if (value.includes('visa') || value.includes('visum')) return labels.visa;
+  if (value.includes('cancel') || value.includes('kuend') || value.includes('künd')) return labels.cancellation;
   return labels.general;
 }
 
@@ -57,8 +69,8 @@ export default async function FaqPage() {
 
   const topics =
     locale === 'de'
-      ? ['Alle', 'Anmeldung', 'Kurse', 'Prüfungen', 'Unterkunft', 'Visum', 'Alltag']
-      : ['All', 'Registration', 'Courses', 'Exams', 'Accommodation', 'Visa', 'General'];
+      ? ['Alle', 'Anmeldung', 'Kurse', 'Prüfungen', 'Visum', 'Unterkunft', 'Kündigung', 'Allgemeines']
+      : ['All', 'Registration', 'Courses', 'Exams', 'Visa', 'Accommodation', 'Cancellation', 'General'];
 
   const normalized = faqItems.map((item) => ({
     id: item.id,
@@ -114,7 +126,7 @@ export default async function FaqPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Persönliche Beratung' : 'Human support'}

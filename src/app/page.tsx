@@ -29,6 +29,7 @@ import {
 } from '@/lib/content/repository';
 import type { ContentLocale, CourseNarrative, CourseTypeRow } from '@/lib/content/types';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { publicCourseOrder } from '@/config/courses/course-order';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -47,20 +48,28 @@ function formatDate(value: string, locale: 'en' | 'de') {
   }).format(new Date(value));
 }
 
-const homepageCourseOrder = [
-  'intensive-german',
-  'evening-german',
-  'special-courses',
-  'german-for-groups',
-  'medical-german',
-  'in-company',
-] as const;
+/**
+ * Formats that sit outside the four main routes.
+ *
+ * 'university-prep' and 'business-german' used to be listed here. CASA does not
+ * offer either -- they were development placeholders that rendered to the public
+ * as real products. See docs/CONTENT_PARITY_WITH_CASA_BREMEN_DE.md.
+ */
+const additionalProgramOrder = ['bildungszeit'] as const;
 
-const additionalProgramOrder = [
-  'bildungszeit',
-  'university-prep',
-  'business-german',
-] as const;
+/**
+ * Derived from the published order, not restated.
+ *
+ * This used to be its own literal list here, which is how the homepage came to
+ * disagree with /courses about where Intensive German ranks — see
+ * config/courses/course-order.ts. The homepage's only real editorial decision is
+ * which formats it presents as full rows versus which it hands to the
+ * "Specialised formats" rail, and that decision is the slice below, not a
+ * second sequence.
+ */
+const homepageCourseOrder = publicCourseOrder.filter(
+  (slug) => !additionalProgramOrder.includes(slug as (typeof additionalProgramOrder)[number])
+);
 
 const homepageExamOrder = [
   'telc_b2',
@@ -98,14 +107,6 @@ const additionalProgramLabels: Record<string, Record<ContentLocale, string>> = {
   bildungszeit: {
     en: 'Bildungszeit',
     de: 'Bildungszeit',
-  },
-  'university-prep': {
-    en: 'University preparation',
-    de: 'Studienvorbereitung',
-  },
-  'business-german': {
-    en: 'Business German',
-    de: 'Business Deutsch',
   },
 };
 
@@ -349,24 +350,19 @@ export default async function HomePage() {
   const storiesForCards = nonFeaturedStories.length >= 2 ? nonFeaturedStories : stories;
 
 
-  const testimonialCards = storiesForCards.map((story, index) => ({
+  // No portraits. These are CASA's real published testimonials with real first
+  // names, and the three testimonial images are synthetic — cycling them by
+  // index put a generated face on a named learner. CLAUDE.md hard rule 2.
+  /*
+   * Four cards behind a featured tile: two visible per page beside it, so exactly
+   * two pages. The pool is seven, which paged three deep and buried the last
+   * three quotes where nobody would reach them.
+   */
+  const testimonialCards = storiesForCards.slice(0, 4).map((story) => ({
     id: story.id,
     person: story.personDisplay,
     country: story.country,
     quote: story.quote,
-    photoSrc:
-      index % 3 === 0
-        ? pageConfig.photos.testimonialA.src
-        : index % 3 === 1
-          ? pageConfig.photos.testimonialB.src
-          : pageConfig.photos.testimonialC.src,
-    photoAlt:
-      index % 3 === 0
-        ? pageConfig.photos.testimonialA.alt
-        : index % 3 === 1
-          ? pageConfig.photos.testimonialB.alt
-          : pageConfig.photos.testimonialC.alt,
-    photoCaption: '',
   }));
 
 
@@ -579,17 +575,28 @@ export default async function HomePage() {
                 margin is exactly (V - W)/2: the distance from this box's right
                 edge to the viewport's. The left edge never moves, so the first
                 card stays locked to the same grid line as the heading above it.
+
+                `data-[scrollable=false]:` cancels the bleed when the cards all
+                fit, which at desktop widths they do — there are three of them.
+                Without it the row kept reaching for the viewport edge and simply
+                stopped 216px short of it, which reads as a cut-off carousel
+                rather than as three cards. CardRail sets the attribute.
               */}
               <CardRail
                 ariaLabel={locale === 'de' ? 'Weitere Kursformate' : 'More course formats'}
-                railClassName="mr-[calc(50%-50vw)] scroll-pl-0 pr-10"
+                railClassName="mr-[calc(50%-50vw)] scroll-pl-0 pr-10 data-[scrollable=false]:mr-0 data-[scrollable=false]:pr-0"
                 controlsClassName="max-w-[42rem]"
               >
                 {moreOptions.map((option, index) => (
                   <li
                     key={option.key}
                     id={option.anchorId}
-                    className="w-[78vw] shrink-0 snap-start scroll-mt-28 sm:w-[46vw] md:scroll-mt-32 xl:w-[24rem]"
+                    className={cn(
+                      'w-[78vw] shrink-0 snap-start scroll-mt-28 sm:w-[46vw] md:scroll-mt-32 xl:w-[24rem]',
+                      // Fill the row rather than sitting at a fixed 24rem with
+                      // whitespace after them, on the widths where all three fit.
+                      'xl:group-data-[scrollable=false]/rail:w-auto xl:group-data-[scrollable=false]/rail:flex-1'
+                    )}
                   >
                     <Link
                       href={option.href}

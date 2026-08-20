@@ -148,62 +148,6 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
         'https://www.casa-bremen.de/en/language-courses/german-for-groups/'
       ),
     },
-    {
-      slug: 'university-prep',
-      locale: 'en',
-      audience: 'Future university applicants needing academic German readiness.',
-      promise: 'Academic-language pathway for lectures, writing, and admissions requirements.',
-      outcomes: ['Academic writing structure', 'Lecture comprehension', 'University admission readiness'],
-      teachingStyle: ['Academic text analysis', 'Presentation training', 'Exam pathway guidance'],
-      studentStory: makeStory(
-        'This course bridged the gap between language classes and real university expectations.',
-        'Karina S.',
-        'Ukraine',
-        'https://www.casa-bremen.de/unsere-sprachschule/'
-      ),
-    },
-    {
-      slug: 'business-german',
-      locale: 'en',
-      audience: 'Professionals who need polished German in business settings.',
-      promise: 'Professional communication skills for meetings, calls, and negotiations.',
-      outcomes: ['Business vocabulary depth', 'Professional tone control', 'Client interaction confidence'],
-      teachingStyle: ['Role-based communication', 'Meeting simulations', 'Formal writing modules'],
-      studentStory: makeStory(
-        'I can now lead supplier calls in German without switching to English.',
-        'Ivana P.',
-        'Serbia',
-        'https://maps.google.com/?q=CASA+Internationale+Sprachschule+Bremen'
-      ),
-    },
-    {
-      slug: 'summer-intensive',
-      locale: 'en',
-      audience: 'Students joining Bremen during summer for fast language immersion.',
-      promise: 'High-energy summer format combining class intensity with community activities.',
-      outcomes: ['Rapid speaking growth', 'Cultural integration', 'Strong short-term momentum'],
-      teachingStyle: ['Intensive daytime classes', 'Activity-linked language tasks', 'Community projects'],
-      studentStory: makeStory(
-        'Summer at CASA gave me language skills and an international friend network.',
-        'Camila F.',
-        'Chile',
-        'https://www.instagram.com/casa_sprachschule/'
-      ),
-    },
-    {
-      slug: 'integration-german',
-      locale: 'en',
-      audience: 'New residents building language confidence for daily life in Germany.',
-      promise: 'Practical German for administration, housing, healthcare, and social life.',
-      outcomes: ['Daily-life communication', 'Administrative vocabulary', 'Social participation confidence'],
-      teachingStyle: ['Scenario-based practice', 'Community orientation support', 'Step-by-step language routines'],
-      studentStory: makeStory(
-        'I finally understood official letters and could solve appointments on my own.',
-        'Olena M.',
-        'Poland',
-        'https://www.casa-bremen.de/leitbild/'
-      ),
-    },
   ],
   de: [
     {
@@ -335,62 +279,6 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
         'Gruppenleitung',
         'Bremen',
         'https://www.casa-bremen.de/sprachkurse/deutsch-fuer-gruppen/'
-      ),
-    },
-    {
-      slug: 'university-prep',
-      locale: 'de',
-      audience: 'Studieninteressierte mit akademischen Sprachzielen.',
-      promise: 'Systematischer Weg zu akademischem Deutsch und Hochschulreife.',
-      outcomes: ['Besseres wissenschaftliches Schreiben', 'Sichereres Vorlesungsverstehen', 'Studienvorbereitung'],
-      teachingStyle: ['Textanalyse', 'Präsentationstraining', 'Prüfungsorientierung'],
-      studentStory: makeStory(
-        'Dieser Kurs hat mir den Übergang in die Hochschule wirklich erleichtert.',
-        'Karina S.',
-        'Ukraine',
-        'https://www.casa-bremen.de/unsere-sprachschule/'
-      ),
-    },
-    {
-      slug: 'business-german',
-      locale: 'de',
-      audience: 'Fach- und Führungskräfte mit beruflichem Sprachbedarf.',
-      promise: 'Professionelles Deutsch für Meetings, E-Mails und Kundengespräche.',
-      outcomes: ['Mehr sprachliche Präzision', 'Sicheres Auftreten', 'Bessere Kundenkommunikation'],
-      teachingStyle: ['Rollenspezifische Szenarien', 'Meeting-Simulationen', 'Formelles Schreiben'],
-      studentStory: makeStory(
-        'Ich kann heute Lieferantengespräche komplett auf Deutsch führen.',
-        'Ivana P.',
-        'Serbien',
-        'https://maps.google.com/?q=CASA+Internationale+Sprachschule+Bremen'
-      ),
-    },
-    {
-      slug: 'summer-intensive',
-      locale: 'de',
-      audience: 'Teilnehmende mit Sommeraufenthalt in Bremen.',
-      promise: 'Intensives Lernen kombiniert mit Gemeinschaft und Kultur.',
-      outcomes: ['Schneller Sprechfortschritt', 'Kulturelle Integration', 'Starke Motivation'],
-      teachingStyle: ['Intensivunterricht tagsüber', 'Aktivitätsbezogene Aufgaben', 'Community-Elemente'],
-      studentStory: makeStory(
-        'Der Sommer bei CASA hat mir Sprache und internationale Freundschaften gebracht.',
-        'Camila F.',
-        'Chile',
-        'https://www.instagram.com/casa_sprachschule/'
-      ),
-    },
-    {
-      slug: 'integration-german',
-      locale: 'de',
-      audience: 'Neu zugezogene mit Fokus auf Alltag und Orientierung.',
-      promise: 'Praktisches Deutsch für Behörden, Wohnen, Gesundheit und Alltag.',
-      outcomes: ['Mehr Alltagssicherheit', 'Behördenvokabular', 'Schnellere soziale Teilhabe'],
-      teachingStyle: ['Situationsbezogene Aufgaben', 'Orientierung im Alltag', 'Klare Lernroutinen'],
-      studentStory: makeStory(
-        'Ich verstehe jetzt Briefe und kann Termine endlich selbst regeln.',
-        'Olena M.',
-        'Polen',
-        'https://www.casa-bremen.de/leitbild/'
       ),
     },
   ],

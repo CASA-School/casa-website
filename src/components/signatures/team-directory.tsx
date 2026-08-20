@@ -8,6 +8,33 @@ import { Instagram, Linkedin, Mail, X } from 'lucide-react';
 
 import type { TeamSpotlight } from '@/lib/content/types';
 
+/**
+ * Initials, shown where a member has no portrait.
+ *
+ * CASA publishes twelve real colleagues and no photographs of them, and the only
+ * images on hand are synthetic portraits generated for six people who do not
+ * exist (CLAUDE.md hard rule 3). Putting a made-up face beside a real name would
+ * be a worse misrepresentation than the invented staff this replaced, so the card
+ * shows initials and waits for real portraits taken with consent.
+ */
+function Monogram({ name }: { name: string }) {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+
+  return (
+    <span
+      aria-hidden
+      className="flex h-full w-full items-center justify-center bg-[var(--casa-warm-soft)] text-3xl font-bold tracking-tight text-[var(--casa-accent-text)]"
+    >
+      {initials}
+    </span>
+  );
+}
+
 type TeamDirectoryProps = {
   title: string;
   description: string;
@@ -16,10 +43,15 @@ type TeamDirectoryProps = {
   contactHref: string;
 };
 
-function SocialIcon({ platform }: { platform: TeamSpotlight['socials'][number]['platform'] }) {
+function SocialIcon({ platform }: { platform: NonNullable<TeamSpotlight['socials']>[number]['platform'] }) {
   if (platform === 'linkedin') return <Linkedin className="h-4 w-4" aria-hidden />;
   if (platform === 'instagram') return <Instagram className="h-4 w-4" aria-hidden />;
   return <Mail className="h-4 w-4" aria-hidden />;
+}
+
+/** True when the modal would show more than the card already does. */
+function hasFullProfile(member: TeamSpotlight) {
+  return Boolean(member.bio || member.photo || member.socials?.length);
 }
 
 export function TeamDirectory({ title, description, team, contactLabel, contactHref }: TeamDirectoryProps) {
@@ -42,7 +74,8 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
     }
 
     return roleFiltered.filter((member) =>
-      [member.name, member.title, member.role, member.focus, member.highlight]
+      [member.name, member.title, member.role, member.areas, member.focus, member.highlight]
+        .filter(Boolean)
         .join(' ')
         .toLowerCase()
         .includes(query),
@@ -147,13 +180,17 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
             <li key={member.id}>
               <article className="h-full overflow-hidden rounded-3xl bg-[var(--casa-bg)] shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
                 <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden">
-                  <Image
-                    src={member.photo.src}
-                    alt={member.photo.alt}
-                    fill
-                    sizes="(min-width: 1280px) 24vw, (min-width: 640px) 44vw, 92vw"
-                    className="object-cover"
-                  />
+                  {member.photo ? (
+                    <Image
+                      src={member.photo.src}
+                      alt={member.photo.alt}
+                      fill
+                      sizes="(min-width: 1280px) 24vw, (min-width: 640px) 44vw, 92vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <Monogram name={member.name} />
+                  )}
                 </div>
 
                 <div className="space-y-3 p-5">
@@ -163,11 +200,21 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                     <p className="text-sm font-semibold text-[var(--casa-muted)]">{member.title}</p>
                   </div>
 
-                  <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{member.highlight}</p>
+                  {/*
+                    `areas` first: CASA publishes a responsibility list, and it is
+                    the useful line on the card — someone with a telc question can
+                    see who handles telc exams. `highlight` is kept as a fallback
+                    for when written profiles exist.
+                  */}
+                  {member.areas || member.highlight ? (
+                    <p className="text-sm leading-relaxed text-[var(--casa-muted)]">
+                      {member.areas ?? member.highlight}
+                    </p>
+                  ) : null}
 
                   <div className="flex items-center justify-between gap-3 pt-1">
                     <ul className="flex items-center gap-2">
-                      {member.socials.map((social) => (
+                      {(member.socials ?? []).map((social) => (
                         <li key={social.href}>
                           <a
                             href={social.href}
@@ -182,13 +229,22 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                       ))}
                     </ul>
 
-                    <button
-                      type="button"
-                      onClick={() => setActiveMemberId(member.id)}
-                      className="rounded-lg bg-[var(--casa-ink-deep)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-blue)]"
-                    >
-                      {locale === 'de' ? 'Vollprofil ansehen' : 'View full profile'}
-                    </button>
+                    {/*
+                      Only offer the modal when it has something the card does not
+                      already show. With CASA's published data — a name, a role and
+                      a list of areas — the modal would repeat the card verbatim,
+                      and a button that opens the same three lines is a dead end
+                      dressed as an action.
+                    */}
+                    {hasFullProfile(member) ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveMemberId(member.id)}
+                        className="rounded-lg bg-[var(--casa-ink-deep)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-blue)]"
+                      >
+                        {locale === 'de' ? 'Vollprofil ansehen' : 'View full profile'}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </article>
@@ -248,13 +304,17 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
             >
               <div className="max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain sm:max-h-[calc(100dvh-3rem)] md:grid md:grid-cols-[0.9fr_1.1fr]">
                 <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden md:aspect-auto md:h-auto md:min-h-full">
-                  <Image
-                    src={activeMember.photo.src}
-                    alt={activeMember.photo.alt}
-                    fill
-                    sizes="(min-width: 1024px) 36vw, 92vw"
-                    className="object-cover"
-                  />
+                  {activeMember.photo ? (
+                    <Image
+                      src={activeMember.photo.src}
+                      alt={activeMember.photo.alt}
+                      fill
+                      sizes="(min-width: 1024px) 36vw, 92vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <Monogram name={activeMember.name} />
+                  )}
                 </div>
                 <div className="p-5 sm:p-6 md:p-7">
                   <div className="flex items-start justify-between gap-4">
@@ -273,17 +333,23 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                     </button>
                   </div>
 
-                  <p className="mt-5 text-sm leading-relaxed text-[var(--casa-muted)]">{activeMember.bio}</p>
+                  {activeMember.bio ? (
+                    <p className="mt-5 text-sm leading-relaxed text-[var(--casa-muted)]">{activeMember.bio}</p>
+                  ) : null}
 
-                  <div className="mt-5 rounded-xl bg-[var(--casa-warm-soft)]/45 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                      {locale === 'de' ? 'Fokus' : 'Focus'}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[var(--casa-ink)]">{activeMember.focus}</p>
-                  </div>
+                  {activeMember.areas || activeMember.focus ? (
+                    <div className="mt-5 rounded-xl bg-[var(--casa-warm-soft)]/35 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+                        {locale === 'de' ? 'Zuständig für' : 'Responsible for'}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-[var(--casa-ink)]">
+                        {activeMember.areas ?? activeMember.focus}
+                      </p>
+                    </div>
+                  ) : null}
 
                   <ul className="mt-5 flex flex-wrap items-center gap-2">
-                    {activeMember.socials.map((social) => (
+                    {(activeMember.socials ?? []).map((social) => (
                       <li key={social.href}>
                         <a
                           href={social.href}

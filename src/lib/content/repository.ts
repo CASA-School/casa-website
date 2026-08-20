@@ -2,7 +2,7 @@ import { getDb, logDatabaseFallback } from '@/lib/db/server';
 import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import { heroSpecsByLocale } from '@/config/content/heroes';
 import { proofMetricsByLocale } from '@/config/content/proof-metrics';
-import { socialProofByLocale } from '@/config/content/social-proof';
+import { socialProofById, socialProofByLocale, socialProofForCourse, socialProofForExam } from '@/config/content/social-proof';
 import { courseNarrativesByLocale } from '@/config/content/course-narratives';
 import { examNarrativesByLocale } from '@/config/content/exam-narratives';
 import { accommodationNarrativesByLocale } from '@/config/content/accommodation-narratives';
@@ -11,6 +11,7 @@ import { culturalProgramsByLocale } from '@/config/content/cultural-programs';
 import { teamSpotlightsByLocale } from '@/config/content/team-spotlights';
 import { listMockRows } from '@/lib/mock/store';
 import { getCourseContentSlug } from '@/lib/content/course-routes';
+import { sortByPublicCourseOrder } from '@/config/courses/course-order';
 import {
   fallbackCourseInstances,
   fallbackCourseTypes,
@@ -116,11 +117,18 @@ const sparseCourseTopUpSlugs = [
   'in-company',
 ] as const;
 
-const hiddenPublicCourseSlugs = new Set([
-  'exam-preparation',
-  'summer-intensive',
-  'integration-german',
-]);
+/**
+ * Real products that are not presented as course cards.
+ *
+ * Exam preparation is sold through the two Prüfungszentrum pages (with its own
+ * fees: 260 EUR for telc B2, 520 EUR for telc C1 Hochschule), so a seventh
+ * course card would duplicate it.
+ *
+ * 'summer-intensive' and 'integration-german' used to be hidden here. Both are
+ * now deleted outright, because CASA offers neither -- and the German FAQ says
+ * so explicitly for Integrationskurse.
+ */
+const hiddenPublicCourseSlugs = new Set(['exam-preparation']);
 
 const publicExamCodes = new Set([
   'telc_b2',
@@ -191,9 +199,19 @@ function fillSparseCourseTypes(courses: CourseTypeRow[], minimumCount = 6) {
 
       return !existingSlugs.has(course.slug);
     });
-  const remainingFallbacks = fallbackCourseTypes
-    .filter((course) => !existingSlugs.has(course.slug) && !sparseCourseTopUpSlugs.includes(course.slug as (typeof sparseCourseTopUpSlugs)[number]))
-    .sort((a, b) => b.lessons_per_week - a.lessons_per_week);
+  /*
+    Topped up in published order, not by weekly load. This slices to a count, so
+    the sort decides WHICH formats a sparse database gets filled in with — and
+    the ones that matter most should be first, not the ones with the most
+    lessons. See config/courses/course-order.ts.
+  */
+  const remainingFallbacks = sortByPublicCourseOrder(
+    fallbackCourseTypes.filter(
+      (course) =>
+        !existingSlugs.has(course.slug) &&
+        !sparseCourseTopUpSlugs.includes(course.slug as (typeof sparseCourseTopUpSlugs)[number])
+    )
+  );
   const fallbackAdditions = [...preferredFallbacks, ...remainingFallbacks]
     .slice(0, minimumCount - courses.length);
 
@@ -404,6 +422,29 @@ function getAvailableLevels(levelMin: string | null, levelMax: string | null): s
   return Array.from(CASA_LEVEL_SEQUENCE).slice(startIndex, resolvedEnd + 1);
 }
 
+/**
+ * Coerces a Postgres `date` to the ISO `YYYY-MM-DD` string the row types claim.
+ *
+ * `CourseInstanceRow.start_date` is typed `string`, and it is one in fallback
+ * mode -- but @neondatabase/serverless hydrates a `date` column into a JS `Date`,
+ * so in Neon mode the same field is an object. Nothing caught it while each
+ * course had at most one instance, because Array.sort never calls its comparator
+ * on a one-element array. Seeding CASA's real eight-term intensive table made
+ * `a.startDate.localeCompare(...)` throw and took the homepage down with a 500.
+ *
+ * Same class of mode gap as the numeric(10,2) price strings documented in
+ * lib/content/course-pricing.ts. Normalise at the boundary so the declared type
+ * is true for both runtime modes.
+ */
+function toIsoDateString(value: string | Date): string {
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  // Already a date-only string, or a timestamp we only want the date part of.
+  return String(value).slice(0, 10);
+}
+
 function buildCourseRegistrationOption(
   instance: CourseInstanceRow,
   courseType: CourseTypeRow,
@@ -417,8 +458,8 @@ function buildCourseRegistrationOption(
     id: instance.id,
     courseTypeId: courseType.id,
     dateRangeLabel: formatDateRangeLabel(instance.start_date, instance.end_date, locale),
-    startDate: instance.start_date,
-    endDate: instance.end_date,
+    startDate: toIsoDateString(instance.start_date),
+    endDate: toIsoDateString(instance.end_date),
     scheduleLabel: formatScheduleLabel(instance.schedule, locale),
     locationLabel: instance.location || (locale === 'de' ? 'CASA Bremen Campus' : 'CASA Bremen Campus'),
     fee: courseType.default_price,
@@ -495,6 +536,28 @@ export function getSocialProof(locale: ContentLocale): SocialProofItem[] {
   return socialProofByLocale[locale] ?? socialProofByLocale.en;
 }
 
+/**
+ * Testimonials for a course, its own learner's words first.
+ *
+ * Every course page used to render the same first two quotes from the shared
+ * pool, so the intensive page and the Firmenunterricht page carried identical
+ * "stories about this course". CASA publishes a testimonial per course; this
+ * puts each one where it belongs and tops up from the pool behind it.
+ */
+export function getSocialProofForCourse(slug: string, locale: ContentLocale): SocialProofItem[] {
+  return socialProofForCourse(slug, locale);
+}
+
+/** One named voice, for pages with room for exactly one. */
+export function getSocialProofById(id: string, locale: ContentLocale): SocialProofItem | null {
+  return socialProofById(id, locale);
+}
+
+/** Empty when no CASA learner has published anything about this exam. */
+export function getSocialProofForExam(code: string, locale: ContentLocale): SocialProofItem[] {
+  return socialProofForExam(code, locale);
+}
+
 export function getCourseNarrative(slug: string, locale: ContentLocale): CourseNarrative | null {
   const localized = courseNarrativesByLocale[locale] ?? courseNarrativesByLocale.en;
   return localized.find((entry) => entry.slug === slug) ?? courseNarrativesByLocale.en.find((entry) => entry.slug === slug) ?? null;
@@ -547,7 +610,10 @@ export async function getCourses(locale: ContentLocale): Promise<CourseWithNarra
             updated_at
           FROM course_types
           WHERE is_active = true
-          ORDER BY lessons_per_week DESC
+          -- Deterministic only. The order a reader sees is the published one in
+          -- config/courses/course-order.ts, applied in JS below so Neon-backed
+          -- and fixture modes cannot disagree about it.
+          ORDER BY slug
         `
       );
 
@@ -561,16 +627,24 @@ export async function getCourses(locale: ContentLocale): Promise<CourseWithNarra
   }
 
   if (courses.length === 0) {
-    courses = [...fallbackCourseTypes].sort((a, b) => b.lessons_per_week - a.lessons_per_week);
+    courses = sortByPublicCourseOrder(fallbackCourseTypes);
   } else {
     courses = fillSparseCourseTypes(courses);
   }
 
   courses = filterPublicCourseTypes(courses);
   if (courses.length === 0) {
-    courses = filterPublicCourseTypes([...fallbackCourseTypes].sort((a, b) => b.lessons_per_week - a.lessons_per_week));
+    courses = filterPublicCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
   }
 
+  /*
+    Applied once, here, after every branch above has settled — so the Neon rows,
+    the fixture fallback and a sparse database topped up from fixtures all leave
+    this function in the same published order. Every public surface that lists
+    formats reads this function, which is what makes /courses and the homepage
+    agree without either of them restating the sequence.
+  */
+  courses = sortByPublicCourseOrder(courses);
   courses = applyPublicCourseDisplayNames(courses, locale);
 
   return attachCourseNarratives(courses, locale);
@@ -774,7 +848,10 @@ export async function getCourseRegistrationCatalog(
             updated_at
           FROM course_types
           WHERE is_active = true
-          ORDER BY lessons_per_week DESC
+          -- Deterministic only. The order a reader sees is the published one in
+          -- config/courses/course-order.ts, applied in JS below so Neon-backed
+          -- and fixture modes cannot disagree about it.
+          ORDER BY slug
         `
       );
 
@@ -839,14 +916,18 @@ export async function getCourseRegistrationCatalog(
   }
 
   if (courseTypes.length === 0) {
-    courseTypes = [...fallbackCourseTypes].sort((a, b) => b.lessons_per_week - a.lessons_per_week);
+    courseTypes = sortByPublicCourseOrder(fallbackCourseTypes);
   }
 
   courseTypes = filterPublicCourseTypes(courseTypes);
   if (courseTypes.length === 0) {
-    courseTypes = filterPublicCourseTypes([...fallbackCourseTypes].sort((a, b) => b.lessons_per_week - a.lessons_per_week));
+    courseTypes = filterPublicCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
   }
 
+  // Same published order as the course index — the registration form's course
+  // dropdown is the third place a visitor meets this list, and it should not be
+  // the one place that disagrees.
+  courseTypes = sortByPublicCourseOrder(courseTypes);
   courseTypes = applyPublicCourseDisplayNames(courseTypes, locale);
 
   if (selectedCourseTypeId && !courseTypes.some((courseType) => courseType.id === selectedCourseTypeId)) {
@@ -864,7 +945,7 @@ export async function getCourseRegistrationCatalog(
   instances = instances.filter((instance) => publicCourseTypeIds.has(instance.course_type_id));
 
   if (instances.length === 0) {
-    const fallbackPublicCourseTypes = filterPublicCourseTypes([...fallbackCourseTypes].sort((a, b) => b.lessons_per_week - a.lessons_per_week));
+    const fallbackPublicCourseTypes = filterPublicCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
     const fallbackPublicCourseTypeIds = new Set(fallbackPublicCourseTypes.map((courseType) => courseType.id));
     const fallbackPublicInstances = [...fallbackCourseInstances]
       .filter((item) => item.status === 'scheduled' && fallbackPublicCourseTypeIds.has(item.course_type_id))

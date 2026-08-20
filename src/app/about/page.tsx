@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import { HeroBEditorial } from '@/components/heroes';
-import { EditorialSplit, HumanStoryBlock, ProofBand, TestimonialGrid } from '@/components/sections';
+import { EditorialSplit, HumanStoryBlock, ProofBand } from '@/components/sections';
 import { AboutMilestones } from '@/components/signatures';
 import { TextCta } from '@/components/ui/text-cta';
 import { Container } from '@/components/ui/container';
@@ -9,7 +9,7 @@ import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { shouldShowDraftClaims } from '@/lib/content/locale';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getProofMetrics, getSocialProof } from '@/lib/content/repository';
+import { getProofMetrics, getSocialProofById } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -25,9 +25,11 @@ export default async function AboutPage() {
   const pageConfig = getPublicPageConfig('about', locale);
   const showDraftClaims = shouldShowDraftClaims();
 
-  const [proofMetrics, stories] = await Promise.all([
+  const [proofMetrics, communityStory] = await Promise.all([
     Promise.resolve(getProofMetrics(locale)),
-    Promise.resolve(getSocialProof(locale)),
+    // Laura, deliberately: she writes that CASA "makes justice to its name", which
+    // is the claim this page's own headline makes. Picked by id, not by index.
+    Promise.resolve(getSocialProofById('laura-medical', locale)),
   ]);
 
   const proofStats = proofMetrics
@@ -35,36 +37,6 @@ export default async function AboutPage() {
     .filter((metric) => !metric.value.includes('1983'))
     .slice(0, 4)
     .map((metric) => ({ value: metric.value, label: metric.label }));
-
-  const testimonialPortraits = [
-    pageConfig.photos.testimonialA,
-    pageConfig.photos.testimonialB,
-    pageConfig.photos.testimonialC,
-  ];
-  const testimonialCards = stories.map((story, index) => ({
-    id: story.id,
-    person: story.personDisplay,
-    country: story.country,
-    quote: story.quote,
-    photoSrc: testimonialPortraits[index % testimonialPortraits.length].src,
-    photoAlt: testimonialPortraits[index % testimonialPortraits.length].alt,
-    photoCaption: '',
-  }));
-
-  const featuredQuote = stories[0]
-    ? {
-        quote: stories[0].quote,
-        person: stories[0].personDisplay,
-        role: stories[0].country,
-      }
-    : {
-        quote:
-          locale === 'de'
-            ? 'CASA fühlt sich wie ein Ort an, an dem Menschen wirklich gesehen werden.'
-            : 'CASA feels like a place where people are truly seen.',
-        person: locale === 'de' ? 'CASA Lernende' : 'CASA learner',
-        role: locale === 'de' ? 'Bremen' : 'Bremen',
-      };
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
@@ -205,7 +177,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Section 2: Milestones */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <AboutMilestones
             title={locale === 'de' ? 'CASA Meilensteine seit 1983' : 'CASA milestones since 1983'}
@@ -269,7 +241,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Section 4: Leitbild */}
-      <section id="leitbild" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30 scroll-mt-28">
+      <section id="leitbild" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 scroll-mt-28">
         <Container>
           <article className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-white p-6 shadow-[var(--shadow-card)] md:p-10">
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{leitbild.eyebrow}</p>
@@ -277,7 +249,7 @@ export default async function AboutPage() {
             <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{leitbild.intro}</p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <section className="rounded-xl bg-[var(--casa-surface-wash)]/60 p-5">
+              <section className="rounded-xl bg-[var(--casa-surface-wash)] p-5">
                 <h3 className="text-lg font-bold text-[var(--casa-ink)]">{leitbild.qualityTitle}</h3>
                 <ul className="mt-3 space-y-2 text-sm text-[var(--casa-muted)]">
                   {leitbild.qualityBullets.map((item) => (
@@ -288,7 +260,7 @@ export default async function AboutPage() {
                   ))}
                 </ul>
               </section>
-              <section className="rounded-xl bg-[var(--casa-surface-wash)]/60 p-5">
+              <section className="rounded-xl bg-[var(--casa-surface-wash)] p-5">
                 <h3 className="text-lg font-bold text-[var(--casa-ink)]">{leitbild.approachTitle}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{leitbild.approachText}</p>
                 <ul className="mt-3 space-y-2 text-sm text-[var(--casa-muted)]">
@@ -302,7 +274,7 @@ export default async function AboutPage() {
               </section>
             </div>
 
-            <section className="mt-4 rounded-xl bg-[var(--casa-warm-soft)]/22 p-5">
+            <section className="mt-4 rounded-xl bg-[var(--casa-warm-soft)]/35 p-5">
               <h3 className="text-lg font-bold text-[var(--casa-ink)]">{leitbild.aimsTitle}</h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{leitbild.aimsText}</p>
             </section>
@@ -329,7 +301,7 @@ export default async function AboutPage() {
             </div>
 
             <div className="space-y-4">
-              <section className="rounded-xl bg-[var(--casa-surface-wash)]/60 p-5">
+              <section className="rounded-xl bg-[var(--casa-surface-wash)] p-5">
                 <h3 className="text-base font-bold text-[var(--casa-ink)]">{tandemGuide.stepsTitle}</h3>
                 <ol className="mt-3 space-y-2">
                   {tandemGuide.steps.map((step, index) => (
@@ -343,7 +315,7 @@ export default async function AboutPage() {
                 </ol>
               </section>
 
-              <section className="rounded-xl bg-[var(--casa-warm-soft)]/22 p-5">
+              <section className="rounded-xl bg-[var(--casa-warm-soft)]/35 p-5">
                 <h3 className="text-base font-bold text-[var(--casa-ink)]">{tandemGuide.benefitsTitle}</h3>
                 <ul className="mt-3 space-y-2">
                   {tandemGuide.benefits.map((item) => (
@@ -360,8 +332,8 @@ export default async function AboutPage() {
       </section>
 
       {/* Section 6: Community Story Block */}
-      {stories[1] ? (
-        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/30">
+      {communityStory ? (
+        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
           <Container>
             <HumanStoryBlock
               eyebrow={locale === 'de' ? 'Community-Stimme' : 'Community story'}
@@ -370,9 +342,9 @@ export default async function AboutPage() {
                   ? 'Was Menschen bei CASA spüren'
                   : 'What people feel at CASA'
               }
-              quote={stories[1].quote}
-              person={stories[1].personDisplay}
-              context={stories[1].country}
+              quote={communityStory.quote}
+              person={communityStory.personDisplay}
+              context={communityStory.country}
               photo={{
                 src: pageConfig.photos.hero.src,
                 alt: pageConfig.photos.hero.alt,
@@ -388,22 +360,17 @@ export default async function AboutPage() {
         </section>
       ) : null}
 
-      {/* Section 7: Testimonial Grid */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
-        <Container>
-          <TestimonialGrid
-            title={locale === 'de' ? 'Wie Lernende CASA erleben' : 'How learners experience CASA'}
-            description={
-              locale === 'de'
-                ? 'Stimmen aus Unterricht und Alltag in Bremen.'
-                : 'Stories from class life and everyday Bremen.'
-            }
-            cards={testimonialCards}
-            featuredQuote={featuredQuote}
-            locale={locale}
-          />
-        </Container>
-      </section>
+      {/*
+        NO TESTIMONIAL GRID HERE.
+
+        Section 6 directly above is already a learner quote, and this was a grid of
+        the same seven quotes plus a featured tile — two testimonial treatments
+        back to back, the second one restating the first at four times the height.
+        The seven quotes were rendering on nine separate surfaces across the site,
+        which is how social proof stops reading as proof.
+
+        A mission page earns one voice. It has one.
+      */}
     </main>
   );
 }
