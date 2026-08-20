@@ -31,7 +31,6 @@ type CourseLevelGoalsProps = {
   levels: LevelGoalItem[];
   practices: string[];
   practiceTitle?: string;
-  eyebrow?: string;
   locale: 'en' | 'de';
 };
 
@@ -41,7 +40,6 @@ export function CourseLevelGoals({
   levels,
   practices,
   practiceTitle = 'What you will practice',
-  eyebrow = 'Course Goals',
   locale = 'en',
 }: CourseLevelGoalsProps) {
   const netzwerkLevels = levels.filter((l) => l.textbook === 'netzwerk');
@@ -74,22 +72,66 @@ export function CourseLevelGoals({
     kontextDesc: locale === 'de' ? 'Fokus auf komplexe Satzstrukturen, Fachsprache und Diskussionen' : 'Focus on complex structures, professional terminology, and debate',
   };
 
+  const column = (
+    items: LevelGoalItem[],
+    label: string,
+    blurb: string,
+    accent: string
+  ) =>
+    items.length === 0 ? null : (
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-eyebrow" style={{ color: accent }}>
+          {label}
+        </p>
+        <p className="mt-1.5 text-xs leading-relaxed text-[var(--casa-muted)]">{blurb}</p>
+        <ul className="mt-5 divide-y divide-[color:var(--casa-sand)]/70">
+          {items.map((item) => (
+            <li key={item.level} className="flex items-start gap-3 py-3.5 first:pt-0">
+              <span
+                style={levelChipStyle(item.level)}
+                className="mt-px inline-flex min-w-[2.25rem] shrink-0 items-center justify-center rounded-md bg-[var(--casa-accent-surface)] px-2 py-1 text-xs font-bold leading-none text-white"
+              >
+                {item.level}
+              </span>
+              <p className="text-sm leading-relaxed text-[var(--casa-ink)]">{item.focus}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+
+  /*
+   * NO CARD, AND NO CARDS INSIDE IT.
+   *
+   * This was a rounded-3xl white panel with a border AND a shadow, containing two
+   * more rounded-xl white panels each with a border AND a shadow, each containing
+   * a pill. Measured on a course detail page: 15 card-like blocks, 7 of them
+   * carrying both a hairline and an elevation, 5 nested inside another card, and
+   * three different radii — 14px, 10px and 8px. Boxes inside boxes is what made
+   * these pages read as a stack of equal slabs rather than as a document, and it
+   * is PREMIUM_UI_REVIEW §4.5 (the border-plus-shadow doubling) showing up at
+   * page scale.
+   *
+   * The structure survives entirely in type and hairlines: the two textbook
+   * groups are columns split by a vertical rule, each level is a divided row, and
+   * the practices sit in the one tinted block on the section — because that is
+   * the single thing here that should catch the eye.
+   */
   return (
-    <section className="overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-card)]">
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)] border-b border-[color:var(--casa-sand)]">
-        {/* Main Content Area */}
-        <div className="p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+    <section>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.65fr)] lg:gap-12">
+        <div>
+          <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
         </div>
 
-        {/* Practice Highlights Side Rail */}
-        <aside className="bg-[var(--casa-blue)]/5 p-6 border-l lg:border-l border-[color:var(--casa-sand)] md:p-8 flex flex-col justify-center">
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{practiceTitle}</p>
-          <ul className="mt-4 space-y-3">
+        <aside className="rounded-xl bg-[var(--casa-warm-soft)]/35 p-5 md:p-6">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+            {practiceTitle}
+          </p>
+          <ul className="mt-3.5 space-y-2.5">
             {practices.slice(0, 4).map((practice) => (
-              <li key={practice} className="flex gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)] font-medium">
+              <li key={practice} className="flex gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)]">
                 <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
                 <span>{practice}</span>
               </li>
@@ -98,67 +140,14 @@ export function CourseLevelGoals({
         </aside>
       </div>
 
-      {/* Level Columns Grid */}
-      <div className="p-6 md:p-8 bg-[var(--casa-surface-wash)]">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Netzwerk Column */}
-          {netzwerkLevels.length > 0 ? (
-            <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 md:p-6 shadow-[var(--shadow-soft)] flex flex-col">
-              <div className="border-b border-[color:var(--casa-sand)]/60 pb-4 mb-4">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--casa-blue)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                  {copy.netzwerkLabel}
-                </span>
-                <p className="mt-2 text-xs text-[var(--casa-muted)] font-medium leading-relaxed">
-                  {copy.netzwerkDesc}
-                </p>
-              </div>
-              <ul className="space-y-4 flex-1">
-                {netzwerkLevels.map((item) => (
-                  <li key={item.level} className="flex gap-3 items-start">
-                    <span
-                      style={levelChipStyle(item.level)}
-                      className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[var(--casa-accent-surface)] px-2 py-1 min-w-[2rem] text-xs font-bold text-white leading-none"
-                    >
-                      {item.level}
-                    </span>
-                    <p className="text-sm font-semibold leading-relaxed text-[var(--casa-ink)] pt-0.5">
-                      {item.focus}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          {/* Context Column */}
-          {kontextLevels.length > 0 ? (
-            <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 md:p-6 shadow-[var(--shadow-soft)] flex flex-col">
-              <div className="border-b border-[color:var(--casa-sand)]/60 pb-4 mb-4">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--casa-gold-deep)]/8 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-warning-text)] border border-[color:var(--casa-gold-deep)]/30">
-                  {copy.kontextLabel}
-                </span>
-                <p className="mt-2 text-xs text-[var(--casa-muted)] font-medium leading-relaxed">
-                  {copy.kontextDesc}
-                </p>
-              </div>
-              <ul className="space-y-4 flex-1">
-                {kontextLevels.map((item) => (
-                  <li key={item.level} className="flex gap-3 items-start">
-                    <span
-                      style={levelChipStyle(item.level)}
-                      className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[var(--casa-accent-surface)] px-2 py-1 min-w-[2rem] text-xs font-bold text-white leading-none"
-                    >
-                      {item.level}
-                    </span>
-                    <p className="text-sm font-semibold leading-relaxed text-[var(--casa-ink)] pt-0.5">
-                      {item.focus}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+      {/*
+        A vertical rule between the two textbook groups on desktop, a horizontal
+        one when they stack. The `md:` divider is the only thing separating them —
+        no panel, no fill.
+      */}
+      <div className="mt-10 grid gap-8 border-t border-[color:var(--casa-sand)] pt-8 md:grid-cols-2 md:gap-10 md:divide-x md:divide-[color:var(--casa-sand)] [&>*+*]:md:pl-10">
+        {column(netzwerkLevels, copy.netzwerkLabel, copy.netzwerkDesc, 'var(--casa-accent-text)')}
+        {column(kontextLevels, copy.kontextLabel, copy.kontextDesc, 'var(--casa-gold-deep)')}
       </div>
     </section>
   );

@@ -23,14 +23,23 @@ export function TeachingStaffCard({
   body,
   ctaLabel,
   ctaHref = '/team',
+  unstyled = false,
 }: {
   title: string;
   body: string;
   ctaLabel: string;
   ctaHref?: string;
+  /** Drops the card surface when this is a row of the decision rail's card. */
+  unstyled?: boolean;
 }) {
   return (
-    <article className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]">
+    <article
+      className={
+        unstyled
+          ? undefined
+          : 'rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]'
+      }
+    >
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{title}</p>
       <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{body}</p>
       <Link

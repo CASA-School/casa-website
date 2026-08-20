@@ -40,23 +40,22 @@ export function CoursePracticalDetails({
   }
 
   const copy = {
-    eyebrow: locale === 'de' ? 'Vor der Anmeldung' : 'Before you book',
     title: locale === 'de' ? 'Kosten und Bedingungen' : 'Costs and conditions',
     fees: locale === 'de' ? 'Kosten' : 'Costs',
     conditions: locale === 'de' ? 'Gut zu wissen' : 'Good to know',
   };
 
+  /*
+   * Same treatment as the term table: the section is the section, not a slab.
+   * The price list keeps its own hairline rows, which is the structure that
+   * actually earns a rule here — a reader scans figures down a column.
+   */
   return (
-    <section className="overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-card)]">
-      <div className="border-b border-[color:var(--casa-sand)] p-6 md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-          {copy.eyebrow}
-        </p>
-        <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
-      </div>
+    <section>
+      <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
 
-      <div className="grid gap-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div className="border-b border-[color:var(--casa-sand)] p-6 md:border-b-0 md:border-r md:p-8">
+      <div className="mt-7 grid gap-8 border-t border-[color:var(--casa-sand)] pt-7 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-10 md:divide-x md:divide-[color:var(--casa-sand)]">
+        <div>
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.fees}</p>
 
           {/*
@@ -96,7 +95,7 @@ export function CoursePracticalDetails({
           ) : null}
         </div>
 
-        <div className="bg-[var(--casa-surface-wash)] p-6 md:p-8">
+        <div className="md:pl-10">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
             {copy.conditions}
           </p>

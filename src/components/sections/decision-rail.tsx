@@ -42,24 +42,40 @@ export function DecisionRail({
         prices; it does not need to re-ask. `ctas` stays in the props so the
         prop shape is unchanged for any future non-hero consumer.
       */}
-      <StickyInfoCard title={infoTitle} items={infoItems} notes={notes} className="lg:static" />
+      {/*
+        ONE card, divided — not three stacked ones.
 
-      <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]">
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-          {locale === 'de' ? 'Anmeldefrist' : 'Registration window'}
-        </p>
-        <div className="mt-2">
-          <DeadlineBadge deadlineIso={deadlineIso} locale={locale} />
+        The rail rendered three separate elevated boxes (facts, registration
+        window, teaching staff) at three different radii and two different
+        shadows, and then several hundred pixels of empty gutter beneath them,
+        because the body column is much taller. Three small boxes in a column
+        read as three unrelated widgets; they are one reference card the reader
+        scrolls back to. Divided rows hold the same structure with one edge
+        instead of three.
+      */}
+      <div className="overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
+        <StickyInfoCard title={infoTitle} items={infoItems} notes={notes} unstyled />
+
+        <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+            {locale === 'de' ? 'Anmeldefrist' : 'Registration window'}
+          </p>
+          <div className="mt-2">
+            <DeadlineBadge deadlineIso={deadlineIso} locale={locale} />
+          </div>
         </div>
-      </div>
 
-      {teachingStaff ? (
-        <TeachingStaffCard
-          title={teachingStaff.title}
-          body={teachingStaff.body}
-          ctaLabel={locale === 'de' ? 'Mehr zum Team' : 'Meet the team'}
-        />
-      ) : null}
+        {teachingStaff ? (
+          <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
+            <TeachingStaffCard
+              title={teachingStaff.title}
+              body={teachingStaff.body}
+              ctaLabel={locale === 'de' ? 'Mehr zum Team' : 'Meet the team'}
+              unstyled
+            />
+          </div>
+        ) : null}
+      </div>
     </aside>
   );
 }

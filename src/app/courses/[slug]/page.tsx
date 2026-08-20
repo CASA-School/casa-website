@@ -568,7 +568,6 @@ export default async function CourseDetailPage({
                   return (
                   <CourseLevelGoals
                     key={sectionKey}
-                    eyebrow={locale === 'de' ? 'Kursziele' : 'Course Goals'}
                     title={courseLevelGoals.title}
                     description={courseLevelGoals.description}
                     levels={courseLevelGoals.levels}
@@ -588,7 +587,6 @@ export default async function CourseDetailPage({
                   return (
                   <EditorialSplit
                     key={sectionKey}
-                    eyebrow={locale === 'de' ? 'Für wen' : 'For whom'}
                     title={audienceTitle}
                     description={
                       detail.course.narrative?.audience ||
@@ -608,7 +606,6 @@ export default async function CourseDetailPage({
                   return (
                   <ProcessSteps
                     key={sectionKey}
-                    eyebrow={processHeading.eyebrow}
                     title={processHeading.title}
                     description={processDescription}
                     steps={processStepItems}
@@ -640,14 +637,9 @@ export default async function CourseDetailPage({
                 case 'related-courses':
                   return (
                   <section key={sectionKey} className="space-y-5">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                        {locale === 'de' ? 'Weitere Optionen' : 'Related routes'}
-                      </p>
-                      <h2 className="mt-2 text-2xl font-bold leading-tight text-[var(--casa-ink)]">
-                        {locale === 'de' ? 'Andere Kurswege vergleichen' : 'Compare other course paths'}
-                      </h2>
-                    </div>
+                    <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)]">
+                      {locale === 'de' ? 'Andere Kurswege vergleichen' : 'Compare other course paths'}
+                    </h2>
                     <div className="grid gap-4 md:grid-cols-2">
                       {related.map((course) => {
                         const relatedPhoto = pageConfig.photos[getCoursePhotoKey(course.slug)] ?? pageConfig.photos.supportCard;
@@ -656,7 +648,7 @@ export default async function CourseDetailPage({
                           <Link
                             key={course.id}
                             href={getCoursePath(course.slug)}
-                            className="group grid overflow-hidden rounded-lg bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35 sm:grid-cols-[8.5rem_minmax(0,1fr)]"
+                            className="group grid overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35 sm:grid-cols-[8.5rem_minmax(0,1fr)]"
                           >
                             <div className="casa-media-overlay relative min-h-36 sm:min-h-full">
                               <Image

@@ -23,13 +23,24 @@ type StickyInfoCardProps = {
     kind: 'primary' | 'secondary';
   }>;
   className?: string;
+  /**
+   * Drops the card's own surface so it can be a SECTION of a larger card.
+   *
+   * The body rail on course, exam and accommodation detail pages composes this
+   * with two more blocks; giving each its own shell produced three stacked boxes
+   * at three radii. With `unstyled` the rail owns one surface and separates its
+   * parts with rules. The hero mount keeps the shell.
+   */
+  unstyled?: boolean;
 };
 
-export function StickyInfoCard({ title, items, notes, ctas = [], className }: StickyInfoCardProps) {
+export function StickyInfoCard({ title, items, notes, ctas = [], className, unstyled = false }: StickyInfoCardProps) {
   return (
     <aside
       className={cn(
-        'rounded-3xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 lg:sticky lg:top-24',
+        unstyled
+          ? 'px-6 pb-5 pt-6'
+          : 'rounded-xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 lg:sticky lg:top-24',
         className
       )}
     >

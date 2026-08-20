@@ -44,29 +44,24 @@ export function CourseTermTable({
   }
 
   const copy = {
-    eyebrow: locale === 'de' ? 'Termine' : 'Dates',
     title: locale === 'de' ? 'Kurstermine' : 'Course dates',
     past: locale === 'de' ? 'beendet' : 'finished',
   };
 
+  /*
+   * Open on the page, not in a card. And no "DATES" eyebrow above a heading that
+   * reads "Course dates" — the label restated the heading in smaller capitals,
+   * which is one of 27 eyebrow instances measured on a single course page.
+   */
   return (
-    <section className="overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-card)]">
-      <div className="border-b border-[color:var(--casa-sand)] p-6 md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-          {copy.eyebrow}
-        </p>
-        <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
-      </div>
+    <section>
+      <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
 
-      <div className="grid gap-0 md:grid-cols-2">
+      <div className="mt-7 grid gap-8 border-t border-[color:var(--casa-sand)] pt-7 md:grid-cols-2 md:gap-10 md:divide-x md:divide-[color:var(--casa-sand)]">
         {groups.map((group, index) => (
           <div
             key={group.slotLabel}
-            className={
-              index === 0 && groups.length > 1
-                ? 'border-b border-[color:var(--casa-sand)] p-6 md:border-b-0 md:border-r md:p-8'
-                : 'p-6 md:p-8'
-            }
+            className={index > 0 ? 'md:pl-10' : undefined}
           >
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
               {group.slotLabel}

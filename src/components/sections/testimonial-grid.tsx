@@ -54,7 +54,7 @@ function FeaturedQuoteTile({
   locale: ContentLocale;
 }) {
   return (
-    <article className="h-full rounded-3xl border border-[color:var(--casa-sand)] bg-[color:var(--casa-warm-soft)] p-6 shadow-[var(--shadow-card)] md:p-8">
+    <article className="h-full rounded-xl border border-[color:var(--casa-sand)] bg-[color:var(--casa-warm-soft)] p-6 shadow-[var(--shadow-card)] md:p-8">
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
         {locale === 'de' ? 'Ausgewählte Stimme' : 'Featured story'}
       </p>
@@ -79,7 +79,7 @@ function FeaturedQuoteTile({
 
 function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: ContentLocale }) {
   return (
-    <article className="group h-full overflow-hidden rounded-3xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 transition-transform hover:-translate-y-0.5">
+    <article className="group h-full overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 transition-transform hover:-translate-y-0.5">
       {card.photoSrc ? (
         <figure>
           <div className="casa-media-overlay relative h-52 md:h-56">
@@ -164,14 +164,23 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
   const canGoNext = clampedPage < pageCount - 1;
 
   return (
-    <section data-reveal="true" className={cn('rounded-3xl bg-white px-6 py-8 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:px-8 md:py-10', className)}>
+    /*
+      No shell. This was a white card with a hairline and a shadow whose only
+      contents were three more white cards with hairlines and shadows — the
+      clearest instance of the card-in-card nesting measured across the course
+      pages, and it renders on the homepage too. The cards are the cards.
+    */
+    <section data-reveal="true" className={cn(className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-            {locale === 'de' ? 'Stimmen' : 'Stories'}
-          </p>
-          <span className="casa-tricolor-rule mt-2 block h-1 w-24 rounded-full" aria-hidden />
-          <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+          {/*
+            "STORIES" in capitals above a heading that already reads "How
+            learners describe this course" is the label describing the CMS field
+            rather than telling the reader anything (copy review §A6). The
+            accent rule stays — it is the one mark that opens the section.
+          */}
+          <span className="casa-tricolor-rule block h-1 w-24 rounded-full" aria-hidden />
+          <h2 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
         </div>
 

@@ -11,7 +11,13 @@ export type EditorialSplitPhoto = {
 };
 
 type EditorialSplitProps = {
-  eyebrow: string;
+  /**
+   * Optional. Course detail pages dropped their section eyebrows — a heading
+   * that reads "How learners describe this course" does not need "STORIES" in
+   * capitals above it, and 24 uppercase labels were measured on one page. Other
+   * surfaces still pass one.
+   */
+  eyebrow?: string;
   title: string;
   description: string;
   bullets: string[];
@@ -44,7 +50,9 @@ export function EditorialSplit({
         )}
       >
         <div>
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+          {eyebrow ? (
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+          ) : null}
           <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
           <ul className="mt-6 space-y-2.5">
