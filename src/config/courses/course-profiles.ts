@@ -179,6 +179,42 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
         { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Kollegiale Fachgespräche führen, Ärztebriefe verfassen, Visiten simulieren' : 'Lead professional consultations with colleagues, write medical reports, simulate ward rounds' },
       ],
     },
+    /*
+     * Bildungszeit was falling through to the generic fallback, which opens
+     * "A1-B1: build core foundations using Netzwerk". The course starts at B1
+     * (level_min in the catalogue, and the live site says so plainly), so the
+     * page was telling an A1 reader they could join a course that does not admit
+     * them. Levels here match the catalogue range, B1 to C1.
+     */
+    bildungszeit: {
+      title: locale === 'de' ? 'Lernziele nach Niveaustufen' : 'Learning goals by level',
+      description:
+        locale === 'de'
+          ? 'Zwei parallele Intensivkurse pro Tag verdichten den Fortschritt. Der Einstieg setzt B1 voraus.'
+          : 'Two intensive courses a day compress the progress. Entry starts at B1.',
+      levels: [
+        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Meinungen begründen, längere Gespräche im Beruf führen' : 'Justify opinions and hold longer conversations at work' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Komplexe Argumente verstehen, an Fachdiskussionen teilnehmen' : 'Understand complex arguments and take part in specialist discussion' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Spontan und flexibel sprechen, anspruchsvolle Texte verarbeiten' : 'Speak spontaneously and flexibly, work through demanding texts' },
+      ],
+    },
+    /*
+     * Also previously on the A1-B1 fallback, while the catalogue's own modules
+     * run A2/B1 to C1+. A module page should state the module range, not a
+     * course range it does not have.
+     */
+    'special-courses': {
+      title: locale === 'de' ? 'Was die Module abdecken' : 'What the modules cover',
+      description:
+        locale === 'de'
+          ? 'Jedes Modul nennt seine eigene Stufe. Die Bandbreite reicht von A2/B1 bis C1+.'
+          : 'Every module states its own level. The catalogue spans A2/B1 to C1+.',
+      levels: [
+        { level: 'A2/B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Basisgrammatik sichern, bevor sie im Sprechen im Weg steht' : 'Lock down core grammar before it gets in the way of speaking' },
+        { level: 'B1/B2', textbook: 'kontext', focus: locale === 'de' ? 'Schreiben und Aussprache gezielt trainieren' : 'Targeted work on writing and pronunciation' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Prüfungstraining für telc C1 Hochschule, mündlich und schriftlich' : 'Exam training for telc C1 Hochschule, spoken and written' },
+      ],
+    },
     'in-company': {
       title: locale === 'de' ? 'Lernziele nach Niveaustufen' : 'Learning goals by level',
       description:

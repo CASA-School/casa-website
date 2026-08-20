@@ -47,10 +47,30 @@ export function CourseLevelGoals({
   const netzwerkLevels = levels.filter((l) => l.textbook === 'netzwerk');
   const kontextLevels = levels.filter((l) => l.textbook === 'kontext');
 
+  /*
+   * The range in each label is THIS COURSE'S levels, not the Klett series'.
+   *
+   * These were hard-coded as "(A1 – B1)" and "(B1+ – C1)", which are the ranges
+   * the two textbook series cover. On a course that covers all of them that reads
+   * correctly. On Bildungszeit — B1 upward, and the one format on the site that
+   * is not open at A1 — the page announced "Netzwerk Textbook (A1 – B1)" directly
+   * above a single B1 row, which is the series' range being read as the course's.
+   * German for Medical (B2 and C1) had the same problem in the other direction.
+   *
+   * Derived from the rows actually rendered, so a label can no longer disagree
+   * with the list underneath it.
+   */
+  const range = (items: LevelGoalItem[]) =>
+    items.length === 0
+      ? ''
+      : items.length === 1
+        ? items[0].level
+        : `${items[0].level} – ${items[items.length - 1].level}`;
+
   const copy = {
-    netzwerkLabel: locale === 'de' ? 'Lehrwerk Netzwerk (A1 – B1)' : 'Netzwerk Textbook (A1 – B1)',
+    netzwerkLabel: `${locale === 'de' ? 'Lehrwerk Netzwerk' : 'Netzwerk Textbook'} (${range(netzwerkLevels)})`,
     netzwerkDesc: locale === 'de' ? 'Fokus auf Alltagswörter, Grammatik-Grundlagen und Dialoge' : 'Focus on daily vocabulary, grammar basics, and dialogues',
-    kontextLabel: locale === 'de' ? 'Lehrwerk Kontext (B1+ – C1)' : 'Kontext Textbook (B1+ – C1)',
+    kontextLabel: `${locale === 'de' ? 'Lehrwerk Kontext' : 'Kontext Textbook'} (${range(kontextLevels)})`,
     kontextDesc: locale === 'de' ? 'Fokus auf komplexe Satzstrukturen, Fachsprache und Diskussionen' : 'Focus on complex structures, professional terminology, and debate',
   };
 

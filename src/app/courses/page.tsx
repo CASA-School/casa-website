@@ -157,7 +157,20 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
         locale === 'de'
           ? 'Ärztinnen, Ärzte und medizinische Fachkräfte mit Ziel klinischer Sprachsicherheit.'
           : 'Doctors and healthcare professionals preparing for clinical communication.',
-      schedule: locale === 'de' ? 'Freitags, 13:00 bis 16:30 Uhr, 26.06. bis 28.08.2026' : 'Fridays, 13:00 to 16:30, 26 Jun to 28 Aug 2026',
+      /*
+       * NOT the Friday dates that used to be here.
+       *
+       * "26.06.-28.08.2026" came from a news post that
+       * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md records as checked and INCONCLUSIVE:
+       * it would not render its article body on direct fetch and no longer
+       * appears in the live /aktuelles list. CASA publishes no dates, no weekly
+       * hours and no fee for this course, and course-practical-facts.ts already
+       * says so honestly. This was the one place the site still asserted them.
+       */
+      schedule:
+        locale === 'de'
+          ? 'Termine und Umfang pro Gruppe, auf Anfrage'
+          : 'Dates and weekly hours per group, on request',
       intensity: baseIntensity,
       outcomes: baseOutcomes,
       facts: registryFacts,

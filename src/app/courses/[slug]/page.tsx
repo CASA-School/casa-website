@@ -19,6 +19,7 @@ import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
 import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
+import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { getCourseContact, hasNamedCourseContact } from '@/config/courses/course-profiles';
 import { teachingStaffStatement } from '@/config/content/team-spotlights';
@@ -339,7 +340,19 @@ export default async function CourseDetailPage({
   const teachingStaff = teachingStaffStatement[locale];
 
   const processHeading = nextStepsHeading(archetype, locale);
-  const processDescription = isOrganisationQuote
+  /*
+   * Per-course first, archetype second.
+   *
+   * The archetype knows the SHAPE of the journey; only the course knows what the
+   * steps are. Bildungszeit is arranged with an employer, German for Medical
+   * starts with a conversation rather than a registration — its archetype CTA is
+   * already `advisory-call`, while the steps it inherited opened with "Complete
+   * registration", an action that does not exist for it. See
+   * config/courses/course-page-content.ts.
+   */
+  const courseNextSteps = getCourseNextSteps(detail.course.slug, locale);
+  const courseAudience = getCourseAudienceContent(detail.course.slug, locale);
+  const processDescription = courseNextSteps?.description ?? (isOrganisationQuote
     ? locale === 'de'
       ? 'Von der Studienberatung bis zum Ausbildungsplan - beides unverbindlich.'
       : 'From needs consultation to training plan, both without obligation.'
@@ -349,10 +362,10 @@ export default async function CourseDetailPage({
         : 'From first enquiry to a confirmed programme.'
       : locale === 'de'
         ? 'So geht es weiter bis zum ersten Unterrichtstag.'
-        : 'What happens next before your first class day.';
+        : 'What happens next before your first class day.');
 
   // Quote products have a different journey: nobody registers, someone briefs.
-  const processStepItems = isOrganisationQuote
+  const processStepItems = courseNextSteps?.steps ?? (isOrganisationQuote
     ? [
         {
           step: '1',
@@ -406,27 +419,43 @@ export default async function CourseDetailPage({
                 : 'A no-obligation quote covering everything included.',
           },
         ]
-      : [
+      : /*
+         * Placement first, registration second.
+         *
+         * These ran the other way round — "Complete registration", then "Confirm
+         * placement" — which contradicts the site's own rule, stated plainly on
+         * /courses: "Every format starts from a placement. The test is free and
+         * it decides which group you join." You cannot pick a group before you
+         * know your level, so the old order asked the reader to commit and then
+         * find out what they had committed to.
+         */
+        [
           {
             step: '1',
-            title: locale === 'de' ? 'Anmeldung abschließen' : 'Complete registration',
-            description: locale === 'de' ? 'Terminauswahl und Datenbestätigung.' : 'Select date and confirm learner details.',
+            title: locale === 'de' ? 'Einstufung machen' : 'Take the placement test',
+            description:
+              locale === 'de'
+                ? 'Kostenlos und in wenigen Minuten — sie entscheidet über die Gruppe.'
+                : 'Free, a few minutes, and it decides which group you join.',
           },
           {
             step: '2',
-            title: locale === 'de' ? 'Einstufung bestätigen' : 'Confirm placement',
-            description: locale === 'de' ? 'Niveauabgleich für passgenauen Einstieg.' : 'Placement alignment for a better fit.',
+            title: locale === 'de' ? 'Termin buchen' : 'Book your start date',
+            description:
+              locale === 'de'
+                ? 'Starttermin wählen und Angaben bestätigen.'
+                : 'Choose a start date and confirm your details.',
           },
           {
             step: '3',
             title: locale === 'de' ? 'Start vorbereiten' : 'Prepare your start',
             description: locale === 'de' ? 'Unterlagen, Zeitplan, optional Unterkunft.' : 'Materials, schedule, optional housing support.',
           },
-        ];
+        ]);
 
   // "For whom" bullets were identical on all nine pages. An organiser needs
   // different reassurance than a learner picking a start date.
-  const audienceTitle = isOrganisationQuote
+  const audienceTitle = courseAudience?.title ?? (isOrganisationQuote
     ? locale === 'de'
       ? 'Für Unternehmen, die Sprache als Teil der Qualifikation planen'
       : 'For companies planning language work as part of staff qualification'
@@ -436,9 +465,9 @@ export default async function CourseDetailPage({
         : 'For groups coming to Bremen with a clear goal'
       : locale === 'de'
         ? 'Dieser Kurs passt zu Lernenden, die Struktur und Menschlichkeit suchen'
-        : 'This course fits learners who want structure and human support';
+        : 'This course fits learners who want structure and human support');
 
-  const audienceBullets = isOrganisationQuote
+  const audienceBullets = courseAudience?.bullets ?? (isOrganisationQuote
     ? [
         locale === 'de' ? 'Lehrplan gemeinsam festgelegt, nicht von der Stange' : 'A syllabus agreed with you, not off the shelf',
         // CASA states this requirement plainly on the Firmenunterricht page.
@@ -459,7 +488,7 @@ export default async function CourseDetailPage({
           locale === 'de' ? 'Klare Lernziele pro Woche' : 'Clear weekly learning goals',
           locale === 'de' ? 'Praxisorientierte Aufgaben und Feedback' : 'Practice tasks with direct feedback',
           locale === 'de' ? 'Nächste Schritte Richtung Prüfung oder Alltag' : 'Next-step orientation for exams or daily life',
-        ];
+        ]);
 
   const courseSchema = {
     '@context': 'https://schema.org',
