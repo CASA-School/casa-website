@@ -115,9 +115,19 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
       'testimonials',
       'related-courses',
     ],
-    facts: ['duration', 'lessons-per-week', 'level-range', 'price'],
+    /*
+     * No 'duration'. Every module runs 12 weeks, but the rail derives duration
+     * from scheduled instances and this course has none, so the row rendered
+     * "On request" beside a price of 192 EUR that is exact.
+     */
+    facts: ['lessons-per-week', 'level-range', 'price'],
     cta: 'reserve-module',
-    showsStartDateSelector: true,
+    /*
+     * No start-date selector either: it offered one while declaring no
+     * 'next-start'. On a catalogue the reader is choosing a module, not a date,
+     * and each module carries its own start in the week grid.
+     */
+    showsStartDateSelector: false,
   },
   'professional-track': {
     id: 'professional-track',
@@ -132,9 +142,20 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
       'testimonials',
       'related-courses',
     ],
-    facts: ['next-start', 'duration', 'lessons-per-week', 'level-range', 'price'],
+    /*
+     * ONLY the level range, because that is the only thing CASA publishes.
+     * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md records German for Medical as
+     * "not published / not published / not published / B2 and C1 entry", and a
+     * dated news post suggesting 26.06-28.08.2026 as checked and inconclusive.
+     * With the full scheduled-cohort fact set declared here, the page asserted a
+     * next start date and a price for a course that has neither: four of its five
+     * rail rows rendered "To be announced", "On request", "By arrangement",
+     * "On request".
+     */
+    facts: ['level-range'],
     cta: 'advisory-call',
-    showsStartDateSelector: true,
+    // There are no dates to select.
+    showsStartDateSelector: false,
   },
   'package-inquiry': {
     id: 'package-inquiry',

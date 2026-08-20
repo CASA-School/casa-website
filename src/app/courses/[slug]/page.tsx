@@ -289,10 +289,20 @@ export default async function CourseDetailPage({
     },
   };
 
+  /*
+   * A row reading "By arrangement" is not a fact, it is the absence of one, and
+   * Firmenunterricht rendered three of them in a five-row rail. The archetype
+   * decides which facts a page MAY show; this drops the ones with no answer for
+   * this particular course. German for Groups keeps its real 20 lessons a week
+   * and loses only its group size. `level-range` is always real, so the rail can
+   * never empty out.
+   */
+  const byArrangement = locale === 'de' ? 'Nach Absprache' : 'By arrangement';
   const infoItems = archetype.facts
     .filter((fact) => archetypeAllowsFact(archetype, fact))
     .map((fact) => factRows[fact])
-    .filter((row): row is NonNullable<typeof row> => Boolean(row));
+    .filter((row): row is NonNullable<typeof row> => Boolean(row))
+    .filter((row) => row.value !== byArrangement);
 
   /*
    * The hero rail already lists every fact this archetype permits. The sticky
