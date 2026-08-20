@@ -480,9 +480,15 @@ export function GuidedPicker({
               <article
                 className={cn(
                   'group flex h-full flex-col bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35',
-                  isFeaturePair
-                    ? 'overflow-hidden rounded-lg p-5 md:p-6'
-                    : 'rounded-3xl p-6'
+                  /*
+                    Both branches take the card radius. This picked `rounded-lg`
+                    (8px, the ladder's INPUT step) for one variant and
+                    `rounded-3xl` (14px, the FEATURE step) for the other, so one
+                    component produced two card radii and neither was the 10px
+                    the ladder names for a card. See the surface/radius notes in
+                    globals.css.
+                  */
+                  isFeaturePair ? 'overflow-hidden rounded-xl p-5 md:p-6' : 'rounded-xl p-6'
                 )}
               >
                 {item.media ? (

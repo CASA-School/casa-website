@@ -117,7 +117,6 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
   return (
     <>
       <section className="rounded-3xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Signature</p>
         <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
         <p className="mt-3 max-w-measure text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 

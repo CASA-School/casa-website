@@ -263,7 +263,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
 
             <DecisionRail
               locale={locale}
-              infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision rail'}
+              infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
               infoItems={infoItems}
               notes={
                 locale === 'de'

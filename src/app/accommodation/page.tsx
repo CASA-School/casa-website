@@ -5,6 +5,7 @@ import { ComparisonModule, EditorialSplit, GuidedPicker, HumanStoryBlock, Proces
 import { AccommodationPlaybook } from '@/components/signatures';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
+import { accommodationPriceSummary } from '@/config/content/accommodation-costs';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -85,7 +86,7 @@ export default async function AccommodationPage() {
                 bestFor: locale === 'de' ? 'Gut für: eigenständiger Alltag' : 'Best for: independent routines',
                 href: '/accommodation/flat',
                 ctaLabel: locale === 'de' ? 'Details' : 'Details',
-                meta: locale === 'de' ? 'Ab 580 EUR / 4 Wochen' : 'From 580 EUR / 4 weeks',
+                meta: locale === 'de' ? 'Ab €580 / 4 Wochen' : 'From €580 / 4 weeks',
                 media: {
                   src: pageConfig.photos.thumbA.src,
                   alt: pageConfig.photos.thumbA.alt,
@@ -97,7 +98,7 @@ export default async function AccommodationPage() {
                 bestFor: locale === 'de' ? 'Gut für: tägliche Sprachpraxis' : 'Best for: daily language immersion',
                 href: '/accommodation/host',
                 ctaLabel: locale === 'de' ? 'Details' : 'Details',
-                meta: locale === 'de' ? 'Ab 580 EUR / 4 Wochen' : 'From 580 EUR / 4 weeks',
+                meta: locale === 'de' ? 'Ab €580 / 4 Wochen' : 'From €580 / 4 weeks',
                 media: {
                   src: pageConfig.photos.thumbB.src,
                   alt: pageConfig.photos.thumbB.alt,
@@ -118,29 +119,40 @@ export default async function AccommodationPage() {
                 ? 'Verfügbarkeit, Kaution, Vermittlungsgebühr und Support werden vor der Buchung geklärt.'
                 : 'Availability, deposit, placement fee, and support expectations are clarified before booking.'
             }
+            /*
+              Figures come from config/content/accommodation-costs.ts, and the
+              currency is written one way. This block previously wrote "EUR 580"
+              while the option pages wrote "580 EUR" and the course pages write
+              "€580" — three formats, two of them on this page alone.
+
+              It also said the Christmas/Easter weeks "may add EUR 145", while
+              the flat page called the same 145 the additional-week rate. It is
+              both, which is what the source table says, so both are stated.
+            */
             cards={[
               {
-                title: locale === 'de' ? 'Kostenbasis 2026' : '2026 planning basis',
+                title: locale === 'de' ? 'Kostenbasis' : 'What it costs',
                 detail:
                   locale === 'de'
-                    ? '580 EUR für 4 Wochen, 145 EUR je weitere Woche, plus 50 EUR Vermittlungsgebühr.'
-                    : 'EUR 580 for 4 weeks, EUR 145 per additional week, plus EUR 50 placement fee.',
+                    ? `${accommodationPriceSummary(locale)}, plus €50 Vermittlungsgebühr — für Gastfamilie und WG identisch.`
+                    : `${accommodationPriceSummary(locale)}, plus a €50 placement fee. The same for a host family and a shared flat.`,
               },
               {
                 title: locale === 'de' ? 'Kaution und Zustand' : 'Deposit and condition',
                 detail:
                   locale === 'de'
-                    ? 'Die 580 EUR Kaution wird nach Auszug je nach Zimmer- und Schlüsselzustand abgerechnet.'
-                    : 'The EUR 580 deposit is settled after departure based on room and key condition.',
+                    ? 'Die Kaution von €580 wird zurückerstattet, wenn Zimmer und Schlüssel so übergeben werden wie erhalten.'
+                    : 'The €580 deposit is refunded when the room and the keys come back as they were handed over.',
               },
               {
                 title: locale === 'de' ? 'Ferien und Fristen' : 'Holidays and timing',
                 detail:
                   locale === 'de'
-                    ? 'Weihnachts- und Osterzeiten können 145 EUR pro Woche extra kosten; Storno wird mit 4 Wochen Vorlauf geplant.'
-                    : 'Christmas and Easter periods may add EUR 145 per week; cancellations are planned around a 4-week period.',
+                    ? 'Für die Schließzeiten zu Weihnachten und Ostern gilt derselbe Wochensatz von €145. Storno wird mit 4 Wochen Vorlauf geplant.'
+                    : 'The Christmas and Easter closure weeks carry the same €145 weekly rate. Cancellations are planned around a 4-week period.',
               },
             ]}
+            checklistTitle={locale === 'de' ? 'Checkliste vor dem Einzug' : 'Before you move in'}
             checklist={[
               locale === 'de' ? 'Hausregeln vor Einzug lesen' : 'Review house rules before move-in',
               locale === 'de' ? 'Notfallkontakt speichern' : 'Save emergency contact details',
@@ -208,6 +220,16 @@ export default async function AccommodationPage() {
                 label: locale === 'de' ? 'Privatsphäre' : 'Privacy',
                 left: locale === 'de' ? 'Hoch - eigenes Zimmer in WG-Umfeld' : 'Higher - own room with independent routine',
                 right: locale === 'de' ? 'Mittel - Familienalltag mit gemeinsamen Zeiten' : 'Moderate - shared family rhythm',
+              },
+              {
+                /*
+                  The first row on purpose. Two options priced identically, shown
+                  side by side with no cost row, invited the reader to assume one
+                  was cheaper — and the two pages did disagree about the 145.
+                */
+                label: locale === 'de' ? 'Kosten' : 'Cost',
+                left: accommodationPriceSummary(locale),
+                right: accommodationPriceSummary(locale),
               },
               {
                 label: locale === 'de' ? 'Nebenkosten' : 'Utilities',

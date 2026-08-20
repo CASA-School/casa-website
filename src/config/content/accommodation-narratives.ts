@@ -1,5 +1,20 @@
 import type { AccommodationNarrative, ContentLocale } from '@/lib/content/types';
 
+/**
+ * What distinguishes the two options — deliberately NOT what they cost.
+ *
+ * The price bullets used to live here, per option, and they disagreed: the flat
+ * listed "580 EUR for 4 weeks, plus 145 EUR for each additional week" and the
+ * 50 EUR placement fee, while the host family listed only "holiday surcharge is
+ * planned at 145 EUR per week". Same accommodation price, two different stories
+ * about it, and the reader comparing them could only conclude the options were
+ * priced differently.
+ *
+ * They are not. Cost is now stated once, for both, in
+ * config/content/accommodation-costs.ts. These highlights carry the thing that
+ * actually differs: a shared flat gives you your own rhythm, a host family gives
+ * you German at the dinner table.
+ */
 export const accommodationNarrativesByLocale: Record<ContentLocale, AccommodationNarrative[]> = {
   en: [
     {
@@ -11,8 +26,8 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       highlights: [
         'Private room with furnished essentials',
         'Shared kitchen and bathroom',
-        '580 EUR for 4 weeks, plus 145 EUR for each additional week',
-        '50 EUR placement fee and 580 EUR refundable deposit',
+        'You keep your own routine — no household mealtimes to plan around',
+        'Housemates are usually other international learners',
       ],
     },
     {
@@ -22,9 +37,9 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       summary:
         'Ideal for students who want daily spoken German and local cultural experience beyond the classroom.',
       highlights: [
-        'Real-life language exposure every day',
-        'Supportive family environment',
-        'Holiday surcharge is planned at 145 EUR per week when applicable',
+        'German spoken at home every day, not only in class',
+        'A household that already hosts international learners',
+        'Meals and daily rhythm shared with the family',
         'Availability and cancellation timing are confirmed before booking',
       ],
     },
@@ -39,8 +54,8 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       highlights: [
         'Möblierte Einzelzimmer',
         'Gemeinsame Küche und Badnutzung',
-        '580 EUR für 4 Wochen, danach 145 EUR je weitere Woche',
-        '50 EUR Vermittlungsgebühr und 580 EUR rückerstattbare Kaution',
+        'Eigener Tagesrhythmus, keine gemeinsamen Essenszeiten',
+        'Mitbewohnende sind meist andere internationale Lernende',
       ],
     },
     {
@@ -50,9 +65,9 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       summary:
         'Geeignet für Lernende, die Deutsch im Alltag sprechen und das Leben vor Ort intensiv erleben möchten.',
       highlights: [
-        'Tägliche Sprachpraxis im echten Alltag',
-        'Persönliches Umfeld mit Orientierung',
-        'Ferienzuschlag bei Bedarf: 145 EUR pro Woche',
+        'Deutsch wird zu Hause täglich gesprochen, nicht nur im Unterricht',
+        'Ein Haushalt, der schon internationale Lernende aufnimmt',
+        'Mahlzeiten und Tagesablauf werden mit der Familie geteilt',
         'Verfügbarkeit und Stornofrist werden vor Buchung bestätigt',
       ],
     },

@@ -264,7 +264,7 @@ export default async function BecomeHostFamilyPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 md:grid-cols-2">
-            <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
+            <article className="rounded-xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.requirementsTitle}</p>
               <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
               <ul className="mt-4 space-y-3">
@@ -277,7 +277,7 @@ export default async function BecomeHostFamilyPage() {
               </ul>
             </article>
 
-            <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
+            <article className="rounded-xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.supportTitle}</p>
               <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
               <ul className="mt-4 space-y-3">

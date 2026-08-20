@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { HeroCUtilityRail } from '@/components/heroes';
 import { ComparisonModule, DecisionRail, EditorialSplit, ProcessSteps } from '@/components/sections';
 import { AccommodationArrivalChecklist } from '@/components/signatures';
+import { localizeAccommodationCosts } from '@/config/content/accommodation-costs';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
@@ -63,6 +64,16 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
         ? 'Gastfamilien'
         : 'Host families';
 
+  /*
+    The sticky rail's own two rows. Deliberately price + availability: what a
+    reader needs at the moment they decide, not the full fee schedule they have
+    already scrolled past twice.
+  */
+  const decisionItems = [
+    { label: locale === 'de' ? 'Preis ab' : 'Price from', value: locale === 'de' ? '€580 / 4 Wochen' : '€580 / 4 weeks' },
+    { label: locale === 'de' ? 'Verfügbarkeit' : 'Availability', value: locale === 'de' ? 'Auf Anfrage' : 'On request' },
+  ];
+
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
     { label: locale === 'de' ? 'Unterkunft' : 'Accommodation', href: '/accommodation' },
@@ -71,10 +82,17 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
 
   const infoItems = [
     { label: locale === 'de' ? 'Typ' : 'Type', value: optionTitle },
-    { label: locale === 'de' ? 'Preis ab' : 'Price from', value: locale === 'de' ? '580 EUR / 4 Wochen' : '580 EUR / 4 weeks' },
-    { label: locale === 'de' ? 'Weitere Woche' : 'Extra week', value: locale === 'de' ? '145 EUR' : 'EUR 145' },
-    { label: locale === 'de' ? 'Vermittlung' : 'Placement fee', value: locale === 'de' ? '50 EUR' : 'EUR 50' },
-    { label: locale === 'de' ? 'Kaution' : 'Deposit', value: locale === 'de' ? '580 EUR' : 'EUR 580' },
+    /*
+      One currency format. These four lines managed three of them: "580 EUR / 4
+      weeks", then "EUR 145", "EUR 50", "EUR 580" — suffix and prefix alternating
+      inside a single rail, with German using suffix throughout and English
+      flipping between the two. Site-wide the count was 111 suffix, 57 prefix and
+      52 symbol.
+    */
+    { label: locale === 'de' ? 'Preis ab' : 'Price from', value: locale === 'de' ? '€580 / 4 Wochen' : '€580 / 4 weeks' },
+    { label: locale === 'de' ? 'Weitere Woche' : 'Extra week', value: '€145' },
+    { label: locale === 'de' ? 'Vermittlung' : 'Placement fee', value: '€50' },
+    { label: locale === 'de' ? 'Kaution' : 'Deposit', value: '€580' },
     { label: locale === 'de' ? 'Verfügbarkeit' : 'Availability', value: locale === 'de' ? 'Auf Anfrage' : 'On request' },
   ];
 
@@ -88,12 +106,12 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
         title={detail.headline}
         description={detail.summary}
         breadcrumbs={breadcrumbs}
-        infoTitle={locale === 'de' ? 'Unterkunftsinfos' : 'Accommodation info rail'}
+        infoTitle={locale === 'de' ? 'Unterkunftsinfos' : 'Accommodation details'}
         infoItems={infoItems}
         notes={
           locale === 'de'
-            ? 'Verfügbarkeit wird nach Anfrage bestätigt. Ferienzeiten können 145 EUR pro Woche extra kosten; Storno wird mit 4 Wochen Vorlauf geplant.'
-            : 'Availability is confirmed after your request. Holiday periods may add EUR 145 per week; cancellations are planned around a 4-week period.'
+            ? 'Verfügbarkeit wird nach Anfrage bestätigt. Für die Schließzeiten gilt derselbe Wochensatz von €145; Storno wird mit 4 Wochen Vorlauf geplant.'
+            : 'Availability is confirmed after your request. The closure weeks carry the same €145 weekly rate; cancellations are planned around a 4-week period.'
         }
         ctas={pageConfig.ctas}
         photo={{
@@ -117,6 +135,9 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                     ? 'Printbare Checkliste für Anreise, Orientierung und erste Woche.'
                     : 'Printable checklist for arrival, orientation, and your first week.'
                 }
+                neighborhoodTitle={locale === 'de' ? 'Im Stadtteil' : 'In the neighbourhood'}
+                checklistTitle={locale === 'de' ? 'Vor der Ankunft' : 'Before you arrive'}
+                printLabel={locale === 'de' ? 'Checkliste drucken' : 'Print checklist'}
                 neighborhoodNotes={[
                   locale === 'de' ? 'ÖPNV-Anbindung und Wege zur Schule prüfen' : 'Check public transport access to school',
                   locale === 'de' ? 'Nächste Supermärkte und Apotheken lokalisieren' : 'Locate nearby groceries and pharmacies',
@@ -145,8 +166,50 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 }}
               />
 
+              {/*
+                The cost, stated in full, identically on both option pages.
+
+                It used to be two of the four `highlights` bullets — and the two
+                options told different stories about the same figures: the flat
+                listed the 4-week price, the additional-week rate, the placement
+                fee and the deposit; the host family listed only a "holiday
+                surcharge" of the same 145. Same price, two accounts of it.
+                Everything here comes from config/content/accommodation-costs.ts.
+              */}
+              <section>
+                <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  {locale === 'de' ? 'Was die Unterkunft kostet' : 'What the accommodation costs'}
+                </h2>
+                <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
+                  {locale === 'de'
+                    ? 'Für die Gastfamilie und für die CASA-WG gelten dieselben Sätze. Die Wahl ist eine Frage des Alltags, nicht des Preises.'
+                    : 'A host family and a CASA shared flat cost the same. Choosing between them is a question of daily life, not of price.'}
+                </p>
+                <dl className="mt-7 border-t border-[color:var(--casa-sand)]">
+                  {localizeAccommodationCosts(locale).map((cost) => (
+                    <div
+                      key={cost.label}
+                      className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 border-b border-[color:var(--casa-sand)]/60 py-3.5"
+                    >
+                      <dt className="text-sm leading-relaxed text-[var(--casa-ink)]">
+                        {cost.label}
+                        {cost.note ? (
+                          <span className="mt-1 block text-xs leading-relaxed text-[var(--casa-muted)]">
+                            {cost.note}
+                          </span>
+                        ) : null}
+                      </dt>
+                      {/* Tabular figures so the amounts form a column a reader can scan. */}
+                      <dd className="whitespace-nowrap text-base font-bold tabular-nums text-[var(--casa-ink)]">
+                        {cost.amount}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+
               <ComparisonModule
-                eyebrow={locale === 'de' ? 'Vergleich' : 'Comparison bullets'}
+                eyebrow={locale === 'de' ? 'Vergleich' : 'Comparison'}
                 title={locale === 'de' ? 'Ist diese Option die richtige für Sie?' : 'Is this option right for you?'}
                 description={
                   locale === 'de'
@@ -240,12 +303,24 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
             <div className="min-w-0">
               <DecisionRail
                 locale={locale}
-                infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision rail'}
-                infoItems={infoItems}
+                infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
+                /*
+                  Two rows, not the hero's six.
+
+                  The hero rail above already lists type, price from, extra week,
+                  placement fee, deposit and availability, and the "What the
+                  accommodation costs" table states all four figures in full — so
+                  passing `infoItems` here printed the same numbers a THIRD time
+                  inside one page. This is the same defect PREMIUM_UI_REVIEW §1.5
+                  found on course detail, fixed there by `decisionFactOrder` and
+                  never applied here. A sticky rail is what the reader scrolls
+                  back to, so it carries only what decides the click.
+                */
+                infoItems={decisionItems}
                 notes={
                   locale === 'de'
-                    ? 'So bleiben Preis, Verfügbarkeit und Anfrage-CTA beim Lesen sichtbar.'
-                    : 'Keep pricing, availability, and request CTA visible while reading details.'
+                    ? 'So bleiben Preis und Verfügbarkeit beim Lesen sichtbar.'
+                    : 'Keeps the price and availability visible while you read.'
                 }
               />
             </div>
