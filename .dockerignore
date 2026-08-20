@@ -1,0 +1,38 @@
+# Everything here is either rebuilt in the image, secret, or irrelevant to it.
+# This file is also what keeps `az acr build`'s upload small — without it the
+# whole node_modules tree and .next cache are tarred and sent to the registry.
+
+.git
+.github
+node_modules
+.next
+out
+build
+
+# Secrets. .env.local holds DATABASE_URL and the webhook URLs; the container gets
+# its configuration from Container App secrets and env vars instead.
+.env
+.env.*
+!.env.example
+
+# Tests and their artefacts — the image runs the app, it does not run the suite.
+e2e
+playwright-report
+test-results
+coverage
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+
+# Deliverables and docs. `output/` is already gitignored; both are dead weight in
+# a runtime image.
+output
+docs
+*.md
+!README.md
+
+.DS_Store
+.vscode
+.idea
+.claude

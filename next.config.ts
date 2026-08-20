@@ -3,6 +3,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   typedRoutes: false,
+  /*
+   * Required by the container image, ignored by Vercel.
+   *
+   * Traces the exact files the server needs and emits `.next/standalone` with
+   * its own minimal node_modules, so the runtime stage of the Dockerfile copies
+   * a directory instead of installing dependencies. Without it the image has to
+   * carry the full production tree.
+   *
+   * Vercel does not need this and does not use it — it builds with its own
+   * adapter — so setting it here costs the Vercel deploy nothing while the Azure
+   * Container App depends on it.
+   */
+  output: 'standalone',
   // Next 16.3 blocks cross-origin requests to dev-server resources by default.
   // Playwright drives the dev server over 127.0.0.1:3001, which the dev server
   // treats as a different origin to localhost, so its own JS chunks get blocked

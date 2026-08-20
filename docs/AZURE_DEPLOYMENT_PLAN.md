@@ -1,7 +1,45 @@
 # Azure Deployment Plan
 
-Date: 2026-08-12
-Status: plan — nothing provisioned yet.
+Date: 2026-08-12 · **Updated 2026-08-20**
+Status: **the website is deployed and live on Azure.** Provisioning below is done;
+the database cutover is not. See "What is live now".
+
+## What is live now (2026-08-20)
+
+```
+https://ca-casa-website.livelycliff-6187a034.germanywestcentral.azurecontainerapps.io/
+```
+
+| Resource | Name | Notes |
+| --- | --- | --- |
+| Resource group | `rg-casa-website-prod` | germanywestcentral |
+| Container App | `ca-casa-website` | shared `cae-casa-prod` env, external ingress, port 3000 |
+| Scaling | `minReplicas: 0`, `maxReplicas: 2` | 0.5 vCPU / 1 GiB |
+| Image | `acrcasaprodf8d745.azurecr.io/casa-website` | pinned by digest, built by `az acr build` |
+| Identity | `id-casa-website-prod` | `AcrPull` on the shared registry; no registry admin credentials |
+
+Deploy with `./infra/azure/deploy.sh` — it builds in ACR (no local Docker) and
+rolls a new revision pinned to the image digest.
+
+**It runs with no `DATABASE_URL`, on purpose.** Public content falls back to the
+in-repo fixtures, which is a supported runtime mode, so the whole site is
+testable now without waiting for the driver port below. The one thing that mode
+disables is career application submission, because the CV upload needs database
+storage. Everything else — every public route, image optimisation via `sharp`,
+the forms up to the point of persistence — is live and verified.
+
+### The Vercel URL cannot be reused
+
+`casa-bremen.vercel.app` is a hostname Vercel owns and serves; nothing can point
+it at an Azure Container App. Container Apps issues its own free HTTPS FQDN on
+the environment domain, which is the URL above and needs no DNS work and no
+certificate. A custom domain such as `test.casa-bremen.de` is a separate step:
+CNAME to the app FQDN plus an `asuid` TXT record for verification, then
+`az containerapp hostname add` and a managed certificate.
+
+Both deploy targets are live in parallel right now — `main` still triggers a
+Vercel build, and `deploy.sh` pushes to Azure. Turning the Vercel project off is
+a decision for cutover, not a prerequisite.
 
 CASA is consolidating onto Azure so the website, the student app, and the future dashboard sit in
 one tenant and can be integrated. The student app already runs there, so this plan mirrors its
