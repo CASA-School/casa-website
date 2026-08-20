@@ -36,7 +36,7 @@ export function EditorialSplit({
   className,
 }: EditorialSplitProps) {
   return (
-    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/36 px-6 py-8 md:px-9 md:py-10', className)}>
+    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10', className)}>
       <div
         className={cn(
           'grid items-start gap-10 lg:grid-cols-[1fr_1fr]',

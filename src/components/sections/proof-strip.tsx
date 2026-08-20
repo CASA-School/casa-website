@@ -35,7 +35,7 @@ export function ProofStrip({ items, className, compact = false }: ProofStripProp
     <section
       aria-label="CASA proof points"
       className={cn(
-        'rounded-3xl bg-[var(--casa-warm-soft)]/32 px-6 py-7',
+        'rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-7',
         compact ? 'p-3' : 'p-4 md:p-5',
         className
       )}

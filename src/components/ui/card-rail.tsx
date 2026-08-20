@@ -21,6 +21,9 @@ import { cn } from '@/lib/utils';
  *   3. STATE. The arrows disable at each end instead of sitting there dead, and
  *      a progress bar tracks real scroll position, so the control reflects the
  *      rail rather than merely gesturing at it.
+ *   4. SILENCE. None of the above renders unless the row actually overflows.
+ *      This was the missing one, and it is the reason the pattern read as broken
+ *      on desktop rather than as absent — see `scrollable` below.
  *
  * Scrolling uses `scrollBy({ behavior })`, and the behaviour is resolved from
  * `prefers-reduced-motion` at call time rather than baked into CSS, so a user
@@ -47,6 +50,25 @@ export function CardRail({
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
   const [progress, setProgress] = useState(0);
+  /*
+   * Does this rail actually scroll?
+   *
+   * Everything below — the two arrows, the progress bar, the edge bleed — is an
+   * answer to "the row continues past the viewport". When the cards all fit,
+   * none of it has anything to say, and the controls become the failure they
+   * were added to prevent: measured on the homepage's three-card band, overflow
+   * was exactly 0 at both 1280 and 1440, so a reader got two permanently dimmed
+   * arrows and a progress bar whose dark segment sat at a fixed 38% and tracked
+   * nothing. It read as a broken slider rather than as three cards.
+   *
+   * Starts false so the server render and the first paint carry no controls.
+   * The alternative — assume scrollable until measured — shows the dead chrome
+   * to every desktop visitor for a frame, which is the exact artefact this
+   * removes. Mobile pays a small insertion instead, below the cards.
+   */
+  const [scrollable, setScrollable] = useState(false);
+  /** Visible fraction of the row — the honest width for the progress thumb. */
+  const [thumb, setThumb] = useState(1);
 
   const sync = useCallback(() => {
     const el = railRef.current;
@@ -54,6 +76,9 @@ export function CardRail({
 
     const max = el.scrollWidth - el.clientWidth;
     // A 1px tolerance: sub-pixel layout means scrollLeft rarely hits max exactly.
+    setScrollable(max > 1);
+    // Floored at 12% so a very long rail still leaves a grabbable-looking mark.
+    setThumb(el.scrollWidth > 0 ? Math.max(0.12, el.clientWidth / el.scrollWidth) : 1);
     setAtStart(el.scrollLeft <= 1);
     setAtEnd(el.scrollLeft >= max - 1);
     setProgress(max > 0 ? el.scrollLeft / max : 0);
@@ -102,73 +127,97 @@ export function CardRail({
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className={cn(scrollable && 'space-y-4')}>
       <ul
         ref={railRef}
         aria-label={ariaLabel}
+        /*
+          Exposed on the element itself so a call site can cancel its own edge
+          bleed from the same place it declared it — see the homepage band, which
+          adds `data-[scrollable=false]:mr-0`. A bleed that runs to the viewport
+          edge with nothing left to reveal is just a gap.
+        */
+        data-scrollable={scrollable ? 'true' : 'false'}
         className={cn(
-          'course-rail-scroll flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2',
+          // `group/rail` so an item can react to data-scrollable — the cards on
+          // the homepage band stretch to fill the row when nothing scrolls.
+          'group/rail course-rail-scroll flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2',
           railClassName,
           'motion-safe:scroll-smooth',
           // The rail is focusable so keyboard users can scroll it with arrow keys.
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-4'
         )}
-        tabIndex={0}
+        /*
+          A rail that cannot scroll is not a scroll region, so it must not be a
+          tab stop. Leaving tabIndex=0 on it costs a keyboard user a stop on an
+          element where every arrow key is a no-op.
+        */
+        tabIndex={scrollable ? 0 : -1}
       >
         {children}
       </ul>
 
-      <div className={cn('flex items-center gap-4', controlsClassName)}>
-        <div className="flex gap-2">
-          {([-1, 1] as const).map((direction) => {
-            const spent = direction === -1 ? atStart : atEnd;
+      {scrollable ? (
+        <div className={cn('flex items-center gap-4', controlsClassName)}>
+          <div className="flex gap-2">
+            {([-1, 1] as const).map((direction) => {
+              const spent = direction === -1 ? atStart : atEnd;
 
-            return (
-              <button
-                key={direction}
-                type="button"
-                onClick={() => nudge(direction)}
-                /*
-                 * Deliberately NOT `disabled`, and this is the important part.
-                 *
-                 * `disabled` makes the control's usability depend on React state
-                 * being correct. If the effect that syncs that state has not run
-                 * — hydration still in flight, an error higher in the tree, a
-                 * listener that never fired — the button is inert with no way
-                 * for the user to recover, and it looks like a broken site
-                 * rather than a slow one. Observed exactly that while building
-                 * this: the rail was scrolled to its end and `atEnd` was still
-                 * false, so the state and the DOM disagreed.
-                 *
-                 * nudge() clamps to [0, max], so pressing at either end is a
-                 * harmless no-op. The button therefore always works, and the
-                 * state is used only to DIM it — a hint, not a gate.
-                 * aria-disabled announces the same hint without removing the
-                 * control from the tab order.
-                 */
-                aria-disabled={spent}
-                aria-label={direction === -1 ? 'Previous courses' : 'Next courses'}
-                className={cn(
-                  'inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] transition-[color,border-color,opacity]',
-                  'hover:border-[var(--casa-blue)]/40 hover:text-[var(--casa-accent-text)]',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2',
-                  spent && 'opacity-35'
-                )}
-              >
-                <ArrowRight className={cn('h-4 w-4', direction === -1 && 'rotate-180')} aria-hidden />
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={direction}
+                  type="button"
+                  onClick={() => nudge(direction)}
+                  /*
+                   * Deliberately NOT `disabled`, and this is the important part.
+                   *
+                   * `disabled` makes the control's usability depend on React state
+                   * being correct. If the effect that syncs that state has not run
+                   * — hydration still in flight, an error higher in the tree, a
+                   * listener that never fired — the button is inert with no way
+                   * for the user to recover, and it looks like a broken site
+                   * rather than a slow one. Observed exactly that while building
+                   * this: the rail was scrolled to its end and `atEnd` was still
+                   * false, so the state and the DOM disagreed.
+                   *
+                   * nudge() clamps to [0, max], so pressing at either end is a
+                   * harmless no-op. The button therefore always works, and the
+                   * state is used only to DIM it — a hint, not a gate.
+                   * aria-disabled announces the same hint without removing the
+                   * control from the tab order.
+                   */
+                  aria-disabled={spent}
+                  aria-label={direction === -1 ? 'Previous courses' : 'Next courses'}
+                  className={cn(
+                    'inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] transition-[color,border-color,opacity]',
+                    'hover:border-[var(--casa-blue)]/40 hover:text-[var(--casa-accent-text)]',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2',
+                    spent && 'opacity-35'
+                  )}
+                >
+                  <ArrowRight className={cn('h-4 w-4', direction === -1 && 'rotate-180')} aria-hidden />
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Decorative: the arrows already carry the state for assistive tech. */}
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-[color:var(--casa-sand)]" aria-hidden>
-          <div
-            className="h-full rounded-full bg-[var(--casa-ink-deep)] transition-[width,margin] duration-150 ease-out"
-            style={{ width: '38%', marginLeft: `${progress * 62}%` }}
-          />
+          {/*
+            Decorative: the arrows already carry the state for assistive tech.
+
+            The thumb is sized from the real visible fraction rather than the fixed
+            38% it used to hard-code. A scrollbar whose thumb is always the same
+            width says nothing about how much of the row is off-screen, which is
+            the one thing it exists to say — three cards and thirty cards drew the
+            same bar.
+          */}
+          <div className="h-1 flex-1 overflow-hidden rounded-full bg-[color:var(--casa-sand)]" aria-hidden>
+            <div
+              className="h-full rounded-full bg-[var(--casa-ink-deep)] transition-[width,margin] duration-150 ease-out"
+              style={{ width: `${thumb * 100}%`, marginLeft: `${progress * (1 - thumb) * 100}%` }}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

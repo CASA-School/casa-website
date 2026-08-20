@@ -162,7 +162,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
           return (
             <article
               key={pathway.title}
-              className="group relative flex min-h-[18.5rem] flex-col justify-between overflow-hidden rounded-lg border border-[color:var(--casa-sand)] bg-[linear-gradient(180deg,#fff_0%,color-mix(in_srgb,var(--casa-warm-soft)_22%,#fff)_100%)] p-6 shadow-[var(--shadow-modal)] transition duration-300 hover:-translate-y-1 hover:border-[color:var(--casa-blue)]/35 hover:shadow-[var(--shadow-hero)] md:p-7"
+              className="group relative flex min-h-[18.5rem] flex-col justify-between overflow-hidden rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-6 shadow-[var(--shadow-modal)] transition duration-300 hover:-translate-y-1 hover:border-[color:var(--casa-blue)]/35 hover:shadow-[var(--shadow-hero)] md:p-7"
               data-casa-persona={pathway.key}
             >
               <span

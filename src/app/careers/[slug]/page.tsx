@@ -137,7 +137,14 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       {/* Banner / Hero Section */}
-      <section className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_6%,transparent),transparent_55%),radial-gradient(120%_100%_at_100%_0%,color-mix(in_srgb,var(--casa-sun)_8%,transparent),transparent_60%)] py-12 md:py-16">
+      {/*
+        One accent, not two. This was a blue radial in the top-left AND a sun
+        radial in the top-right — the same both-brand-colours-at-once treatment
+        the site's nine hero themes were doing, on the one hero that does not go
+        through HeroSurface. The blue corner wash now matches the strength used on
+        every other form and detail panel.
+      */}
+      <section className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] py-12 md:py-16">
         <Container className="space-y-6">
           <Breadcrumbs
             items={[
@@ -215,7 +222,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
       </section>
 
       {/* Details Section */}
-      <section className="py-12 md:py-16 bg-[radial-gradient(140%_80%_at_0%_0%,rgba(0,159,227,0.03),transparent_50%),var(--casa-bg)]">
+      <section className="py-12 md:py-16 bg-white">
         <Container>
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(380px,0.8fr)] xl:items-start">
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 md:p-10 shadow-[var(--shadow-card)] space-y-8">
@@ -261,7 +268,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
             </article>
 
             <div className="space-y-6">
-              <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-[linear-gradient(165deg,color-mix(in_srgb,var(--casa-sun)_12%,white)_0%,white_76%)] p-6 shadow-[var(--shadow-card)]">
+              <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-6 shadow-[var(--shadow-card)]">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.processTitle}</p>
                 <ol className="mt-4 space-y-3">
                   {copy.processSteps.map((step, index) => (

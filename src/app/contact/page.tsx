@@ -231,7 +231,15 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
         meta={hero.proofMetrics.slice(0, 1).map((item) => `${item.value} ${item.label}`)}
       />
 
-      <section className="bg-[linear-gradient(180deg,var(--casa-bg)_0%,#f8fafc_100%)] py-16 md:py-20">
+      {/*
+        Plain white, not a white -> #f8fafc fade.
+
+        The fade spanned 4 RGB units over 600px of height, so it read as flat
+        anyway, and it ended on stock Tailwind slate-50 — a palette the brand
+        tokens exist to replace (PREMIUM_UI_REVIEW §2.1). White on the page canvas
+        is a real 11-unit step and says the same thing honestly.
+      */}
+      <section className="bg-white py-16 md:py-20">
         {/*
           `max-w-7xl` used to sit on this Container. Because `cn` is
           tailwind-merge, that REPLACED the site ceiling rather than layering on
@@ -252,7 +260,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 
             <div className="min-w-0 xl:sticky xl:top-28 xl:self-start">
-              <aside className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-[var(--casa-surface-wash)]/50 p-6 sm:p-8 space-y-8 shadow-[var(--shadow-soft)]">
+              <aside className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-[var(--casa-surface-wash)] p-6 sm:p-8 space-y-8 shadow-[var(--shadow-soft)]">
                 {/* Response promise */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">

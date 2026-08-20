@@ -104,7 +104,7 @@ export default async function PlacementTestPage() {
       />
 
 
-      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 xl:grid-cols-2">
             <article className="flex h-full flex-col rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
@@ -157,7 +157,7 @@ export default async function PlacementTestPage() {
         </Container>
       </section>
 
-      <section id="level-progression" className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/40 border-t border-[color:var(--casa-sand)]/40">
+      <section id="level-progression" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <LevelProgressionTimeline locale={locale} />
         </Container>
@@ -169,7 +169,7 @@ export default async function PlacementTestPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             <div className="rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">

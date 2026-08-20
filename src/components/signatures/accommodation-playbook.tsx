@@ -25,7 +25,7 @@ export function AccommodationPlaybook({ title, description, cards, checklist }: 
           ))}
         </div>
 
-        <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/34 p-4">
+        <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4">
           <h3 className="text-sm font-bold text-[var(--casa-ink)]">Housing checklist</h3>
           <ul className="mt-2 space-y-2">
             {checklist.map((item) => (

@@ -117,7 +117,7 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
         {klettLevelTests.map((test) => (
           <article
             key={test.id}
-            className="flex flex-col justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]/40 p-5 shadow-xs transition-all duration-200 hover:border-[color:var(--casa-sand)] hover:bg-[var(--casa-canvas)]/80"
+            className="flex flex-col justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-5 shadow-xs transition-all duration-200 hover:border-[color:var(--casa-sand)] hover:bg-[var(--casa-canvas)]/80"
           >
             <div className="space-y-3">
               <div>

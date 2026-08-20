@@ -139,7 +139,7 @@ export function UnifiedSearchPanel({ locale, defaultScope = 'all', className }: 
           <a
             key={chip.label}
             href={`/search?q=${encodeURIComponent(chip.query)}&scope=all`}
-            className="rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/36 px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] transition-colors hover:border-[var(--casa-blue)]/30 hover:bg-[var(--casa-blue)]/8 hover:text-[var(--casa-ink)]"
+            className="rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] transition-colors hover:border-[var(--casa-blue)]/30 hover:bg-[var(--casa-blue)]/8 hover:text-[var(--casa-ink)]"
           >
             {chip.label}
           </a>

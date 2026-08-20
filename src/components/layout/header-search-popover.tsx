@@ -138,7 +138,7 @@ function ResultRow({
     <Link
       href={result.href}
       onClick={onNavigate}
-      className="group flex items-start gap-3 rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 py-2.5 text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:bg-[var(--casa-warm-soft)]/40"
+      className="group flex items-start gap-3 rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 py-2.5 text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:bg-[var(--casa-warm-soft)]/35"
     >
       <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
         <Icon className="h-4 w-4" aria-hidden="true" />
@@ -340,7 +340,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
                           key={item.href}
                           href={item.href}
                           onClick={() => setOpen(false)}
-                          className="flex items-center gap-2 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] px-3 py-2 text-sm font-bold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:bg-[var(--casa-warm-soft)]/40"
+                          className="flex items-center gap-2 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] px-3 py-2 text-sm font-bold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:bg-[var(--casa-warm-soft)]/35"
                         >
                           <Icon className="h-4 w-4 text-[var(--casa-accent-text)]" aria-hidden="true" />
                           {item.label}

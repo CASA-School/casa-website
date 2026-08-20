@@ -347,7 +347,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         <div className="space-y-6">
         {step === 1 && (
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[linear-gradient(180deg,#ffffff_0%,#fffaf1_100%)] p-5">
+            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
                   <GraduationCap className="h-5 w-5" aria-hidden />
@@ -461,7 +461,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
             )}
 
             {selectedOption ? (
-              <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_6%,transparent),transparent_55%)] p-5 shadow-[var(--shadow-card)]">
+              <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-5 shadow-[var(--shadow-card)]">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--casa-sand)]/70 pb-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
@@ -492,7 +492,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
 
         {step === 2 && (
           <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[linear-gradient(180deg,#ffffff_0%,#fffaf1_100%)] p-5">
+            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-coral)]/10 text-[var(--casa-coral)]">
                   <UserRound className="h-5 w-5" aria-hidden />
@@ -642,7 +642,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
               </Label>
             </div>
 
-            <div className="space-y-3 rounded-lg border border-[color:var(--casa-sand)] bg-[linear-gradient(180deg,#ffffff_0%,#fffaf1_100%)] p-4">
+            <div className="space-y-3 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4">
               <div className="flex items-center gap-2">
                 <Home className="h-4 w-4 text-[var(--casa-gold-deep)]" aria-hidden />
                 <p className="text-sm font-bold text-[var(--casa-ink)]">
@@ -715,7 +715,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
 
         {step === 3 && (
           <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-5">
+            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-5">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-ink-deep)] text-white">
                   <ShieldCheck className="h-5 w-5" aria-hidden />

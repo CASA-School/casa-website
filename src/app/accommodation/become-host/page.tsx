@@ -200,7 +200,7 @@ export default async function BecomeHostFamilyPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
             eyebrow={copy.storyEyebrow}
@@ -261,7 +261,7 @@ export default async function BecomeHostFamilyPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-[var(--casa-surface-wash)]/30 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <div className="grid gap-6 md:grid-cols-2">
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">

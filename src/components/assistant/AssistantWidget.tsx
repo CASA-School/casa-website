@@ -449,7 +449,17 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
         style={panelStyle}
         className="pointer-events-auto absolute inset-x-2 bottom-2 flex min-h-[520px] max-h-[calc(100svh-0.75rem)] h-[calc(100svh-0.75rem)] flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[min(86vh,680px)] sm:max-h-[86vh] sm:min-h-[560px] sm:w-[min(96vw,460px)]"
       >
-      <header className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-[radial-gradient(160%_120%_at_0%_0%,rgba(0,159,227,0.15),transparent_54%),radial-gradient(140%_140%_at_100%_0%,color-mix(in_srgb,var(--casa-sun)_17%,transparent),transparent_58%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] px-4 pb-3 pt-3.5">
+      {/*
+        THREE stacked layers became one, and it is the same one every other panel
+        on the site uses: a blue corner wash on white.
+
+        This was a blue radial at 0.15 top-left, a 17% sun radial top-right and a
+        white -> #f8fbff base fade — the brand triad plus a raw-hex ramp, in a
+        400px overlay that sits over every page. Clara keeps her identity in the
+        avatar gradient below, which is an icon and may hold the full palette for
+        the same reason the logo does.
+      */}
+      <header className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-white bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] px-4 pb-3 pt-3.5">
         <div className="mb-2 flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <ClaraAvatar active={loading} />
@@ -492,7 +502,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
       <div
         ref={scrollRef}
-        className="clara-scroll flex-1 space-y-3 overflow-y-auto bg-[linear-gradient(180deg,#fefefe_0%,#f8fafc_100%)] px-4 py-3"
+        className="clara-scroll flex-1 space-y-3 overflow-y-auto bg-[var(--casa-canvas)] px-4 py-3"
       >
         {visibleMessages.map((message) => (
           <article
@@ -550,7 +560,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
             {message.cards && message.cards.length > 0 ? (
               <div className="mt-3 overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white">
-                <div className="flex items-center justify-between gap-2 border-b border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/30 px-3 py-2">
+                <div className="flex items-center justify-between gap-2 border-b border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {copy.resultsLabel}
                   </p>
@@ -562,7 +572,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                   <Link
                     key={card.id}
                     href={card.href}
-                    className="group block border-b border-[color:var(--casa-sand)]/70 bg-white p-3 text-[var(--casa-ink)] transition-colors last:border-b-0 hover:bg-[var(--casa-warm-soft)]/45"
+                    className="group block border-b border-[color:var(--casa-sand)]/70 bg-white p-3 text-[var(--casa-ink)] transition-colors last:border-b-0 hover:bg-[var(--casa-warm-soft)]/35"
                   >
                     <div className="flex items-start gap-2">
                       <span className="mt-0.5 rounded-full bg-[var(--casa-blue)]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">

@@ -38,7 +38,7 @@ export function HumanStoryBlock({
   return (
     <section
       data-reveal="true"
-      className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/32 px-6 py-8 md:px-9 md:py-10', className)}
+      className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10', className)}
     >
       <div
         className={cn(

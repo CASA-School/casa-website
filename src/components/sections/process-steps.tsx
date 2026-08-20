@@ -23,7 +23,7 @@ type ProcessStepsProps = {
 
 export function ProcessSteps({ eyebrow, title, description, steps, cta, className }: ProcessStepsProps) {
   return (
-    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/30 px-6 py-8 md:px-9 md:py-10', className)}>
+    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10', className)}>
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>

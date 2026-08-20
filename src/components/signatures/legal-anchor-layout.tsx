@@ -19,7 +19,7 @@ export function LegalAnchorLayout({ title, intro, sections }: LegalAnchorLayoutP
       <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm text-[var(--casa-muted)] md:text-base">{intro}</p>
 
-      <nav aria-label="Legal section anchors" className="mt-4 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/34 p-4 print:hidden">
+      <nav aria-label="Legal section anchors" className="mt-4 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4 print:hidden">
         <ul className="flex flex-wrap gap-2">
           {sections.map((section) => (
             <li key={section.id}>

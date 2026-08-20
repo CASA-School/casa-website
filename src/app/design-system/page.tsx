@@ -26,15 +26,6 @@ export const metadata: Metadata = {
   },
 };
 
-const heroThemes = [
-  { key: 'home', className: 'hero-theme-home' },
-  { key: 'courses', className: 'hero-theme-courses' },
-  { key: 'exams', className: 'hero-theme-exams' },
-  { key: 'accommodation', className: 'hero-theme-accommodation' },
-  { key: 'about', className: 'hero-theme-about' },
-  { key: 'default', className: 'hero-theme-default' },
-] as const;
-
 const heroArchetypes = [
   { key: 'A', name: 'Illustration Signature', usage: 'Home only' },
   { key: 'B', name: 'Editorial Left / Index Right', usage: 'Courses + Exams indexes' },
@@ -252,17 +243,27 @@ export default function DesignSystemPage() {
             ))}
           </div>
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {heroThemes.map((theme) => (
-              <article key={theme.key} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <div className={`hero-grain ${theme.className} h-24 border-b border-slate-200`} />
-                <div className="p-4">
-                  <p className="text-sm font-bold capitalize text-slate-800">{theme.key}</p>
-                  <p className="mt-1 text-xs text-slate-500">Theme class: {theme.className}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+          {/*
+            One hero surface, not six swatches.
+
+            This grid used to render `hero-theme-home / courses / exams /
+            accommodation / about / default` side by side as six distinct
+            backgrounds. They no longer exist: `.hero-grain` paints nothing and
+            the theme classes resolve to no rule, so six swatches here would be
+            six identical empty rectangles labelled as if they differed — a
+            design-system page documenting a system it no longer has.
+          */}
+          <article className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="hero-grain h-24 border-b border-slate-200" />
+            <div className="p-4">
+              <p className="text-sm font-bold text-slate-800">Hero surface</p>
+              <p className="mt-1 text-xs text-slate-500">
+                `.hero-grain` — positioning only, no paint. The hero inherits its page ground; the
+                section&apos;s bottom border marks where it ends. The `hero-theme-*` and
+                `hero-archetype-*` class names are still passed by call sites and resolve to nothing.
+              </p>
+            </div>
+          </article>
 
           <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">

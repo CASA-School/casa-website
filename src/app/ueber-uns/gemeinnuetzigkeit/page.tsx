@@ -275,7 +275,7 @@ export default async function NonProfitStatusPage() {
         </Container>
       </section>
 
-      <section className="border-b border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/45 py-16 md:py-20">
+      <section className="border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
         <Container>
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
@@ -326,7 +326,7 @@ export default async function NonProfitStatusPage() {
             </div>
             <ul className="grid gap-4 md:grid-cols-2">
               {copy.impactItems.map((item) => (
-                <li key={item} className="rounded-lg bg-[var(--casa-warm-soft)]/28 p-5 text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">
+                <li key={item} className="rounded-lg bg-[var(--casa-warm-soft)]/35 p-5 text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">
                   {item}
                 </li>
               ))}
@@ -335,7 +335,7 @@ export default async function NonProfitStatusPage() {
         </Container>
       </section>
 
-      <section id="integrationsprojekte" className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 bg-[var(--casa-surface-wash)]/45 py-16 md:py-20">
+      <section id="integrationsprojekte" className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
             <div>

@@ -238,7 +238,7 @@ export default async function LayoutPatternsPage() {
           mechanism="The photograph occupies the right half and runs to the viewport edge, but its left edge is dissolved with a mask rather than cut with a border-radius. Nothing separates image from page: the type sits on the same field the photo fades into, which is what makes it read as attached rather than placed."
         />
 
-        <section className="relative overflow-x-clip bg-[var(--casa-warm-soft)]/40">
+        <section className="relative overflow-x-clip bg-[var(--casa-warm-soft)]/35">
           <div className="relative grid items-center gap-10 py-16 md:min-h-[34rem] md:grid-cols-2 md:gap-0 md:py-0">
             <Container className="md:!mr-0 md:max-w-[calc(var(--casa-container-max)/2)]">
               <div className="max-w-[34rem] md:py-20">

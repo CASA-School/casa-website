@@ -257,7 +257,7 @@ function SegmentedControl<T extends string>({
               className={`min-h-14 rounded-lg border px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] disabled:cursor-not-allowed disabled:opacity-55 ${
                 selected
                   ? 'border-[var(--casa-blue)] bg-[color-mix(in_srgb,var(--casa-blue)_10%,var(--casa-bg))] text-[var(--casa-ink)] shadow-xs'
-                  : 'border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]/50 text-[var(--casa-ink)] hover:border-[color:var(--casa-muted)] hover:text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]'
+                  : 'border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] text-[var(--casa-ink)] hover:border-[color:var(--casa-muted)] hover:text-[var(--casa-ink)] hover:bg-[var(--casa-canvas)]'
               }`}
             >
               <span className="block font-bold">{option.label}</span>
@@ -286,7 +286,7 @@ function ToggleLine({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)]/50 p-3 transition-colors hover:bg-[var(--casa-canvas)]">
+    <div className="flex items-start gap-3 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-3 transition-colors hover:bg-[var(--casa-canvas)]">
       <input
         id={id}
         type="checkbox"
@@ -469,9 +469,9 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
           />
 
           <div className="grid gap-2 text-xs font-semibold text-[var(--casa-muted)] md:grid-cols-3">
-            <p className="rounded-xl bg-[var(--casa-warm-soft)]/38 px-3 py-2">{copy.priceHints.intensive}</p>
-            <p className="rounded-xl bg-[var(--casa-warm-soft)]/38 px-3 py-2">{copy.priceHints.evening}</p>
-            <p className="rounded-xl bg-[var(--casa-warm-soft)]/38 px-3 py-2">{copy.priceHints.accommodation}</p>
+            <p className="rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2">{copy.priceHints.intensive}</p>
+            <p className="rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2">{copy.priceHints.evening}</p>
+            <p className="rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2">{copy.priceHints.accommodation}</p>
           </div>
         </FieldCard>
 
@@ -591,7 +591,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
       </div>
 
       <aside className="space-y-5 xl:sticky xl:top-28">
-        <section className="space-y-4 rounded-lg border border-[var(--casa-sand)] bg-[var(--casa-bg)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--casa-blue)_6%,var(--casa-bg))_0%,var(--casa-bg)_52%,color-mix(in_srgb,var(--casa-sun)_8%,var(--casa-bg))_100%)] p-5 shadow-[var(--shadow-card)]">
+        <section className="space-y-4 rounded-lg border border-[var(--casa-sand)] bg-[var(--casa-bg)] p-5 shadow-[var(--shadow-card)]">
           <div className="space-y-3">
             <h2 className="text-xl font-bold text-[var(--casa-ink)]">{copy.estimateTitle}</h2>
             {result.isValid ? (
@@ -632,7 +632,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                   <div
                     key={item.key}
                     className={`flex items-center justify-between gap-4 px-3 py-2.5 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-[var(--casa-surface-wash)]/40'
+                      index % 2 === 0 ? 'bg-white' : 'bg-[var(--casa-surface-wash)]'
                     }`}
                   >
                     <dt className="min-w-0 text-[var(--casa-muted)]">{item.key}</dt>

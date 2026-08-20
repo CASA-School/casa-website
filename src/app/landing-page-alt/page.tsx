@@ -369,7 +369,7 @@ export default async function AlternativeLandingPage() {
             {proofItems.map((item) => (
               <div
                 key={`${item.value}-${item.label}`}
-                className="rounded-lg bg-[color:var(--casa-warm-soft)]/34 px-4 py-4 ring-1 ring-[color:var(--casa-sand)]/70"
+                className="rounded-lg bg-[color:var(--casa-warm-soft)]/35 px-4 py-4 ring-1 ring-[color:var(--casa-sand)]/70"
               >
                 <dt className="text-2xl font-black leading-none text-[var(--casa-ink)]">{item.value}</dt>
                 <dd className="mt-2 text-sm font-bold leading-snug text-[var(--casa-muted)]">{item.label}</dd>
@@ -842,7 +842,7 @@ export default async function AlternativeLandingPage() {
       </section>
 
       <section
-        className="bg-[color:var(--casa-warm-soft)]/38 py-16 md:py-20"
+        className="bg-[color:var(--casa-warm-soft)]/35 py-16 md:py-20"
         data-reveal-disabled="true"
         data-track-section="alt-stories"
       >

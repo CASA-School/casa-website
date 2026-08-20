@@ -123,7 +123,7 @@ export default async function CareersPage() {
                   <li key={`${position.slug}-${position.locale}`}>
                     <article className="flex h-full flex-col rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/88 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
+                        <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
                           <Briefcase className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
                           {copy.openingLabel}
                         </p>

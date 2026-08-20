@@ -113,7 +113,7 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
 
       <Accordion type="multiple" className="mt-8 divide-y divide-[color:var(--casa-sand)]/70 rounded-xl border border-[color:var(--casa-sand)] overflow-hidden">
         {topics.map((topic) => (
-          <AccordionItem key={topic.id} value={topic.id} className="border-b-0 bg-[var(--casa-surface-wash)]/50 px-5 hover:bg-[var(--casa-canvas)] transition-colors duration-200">
+          <AccordionItem key={topic.id} value={topic.id} className="border-b-0 bg-[var(--casa-surface-wash)] px-5 hover:bg-[var(--casa-canvas)] transition-colors duration-200">
             <AccordionTrigger className="py-4 text-base font-semibold text-[var(--casa-ink)] hover:no-underline">
               <span className="flex items-center gap-3">
                 <span className="text-xl leading-none" aria-hidden>

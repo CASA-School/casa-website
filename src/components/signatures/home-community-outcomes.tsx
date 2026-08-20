@@ -73,7 +73,7 @@ export function HomeCommunityOutcomes({ title, description, stories, outcomes }:
           </div>
         </article>
 
-        <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/36 p-5">
+        <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
           <h3 className="text-xl font-bold text-[var(--casa-ink)]">Outcomes learners mention most</h3>
           <ul className="mt-4 space-y-2">
             {outcomes.slice(0, 5).map((outcome) => (

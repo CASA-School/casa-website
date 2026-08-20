@@ -35,7 +35,7 @@ export function ExamsReadinessCheck({ title, description, checklist }: ExamsRead
 
       <ul className="mt-4 space-y-2">
         {checklist.map((item) => (
-          <li key={item} className="rounded-xl bg-[var(--casa-surface-wash)]/80 px-3 py-2.5">
+          <li key={item} className="rounded-xl bg-[var(--casa-surface-wash)] px-3 py-2.5">
             <label className="flex items-start gap-2 text-sm text-[var(--casa-ink)]">
               <input
                 type="checkbox"

@@ -48,7 +48,7 @@ export default async function CalculatorPage() {
   const copy = pageCopy[locale];
 
   return (
-    <main className="min-h-screen bg-[var(--casa-canvas)] bg-[radial-gradient(130%_90%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%),radial-gradient(120%_90%_at_100%_0%,color-mix(in_srgb,var(--casa-sun)_10%,transparent),transparent_58%)] py-16 text-[var(--casa-ink)] md:py-20">
+    <main className="min-h-screen bg-[var(--casa-canvas)] py-16 text-[var(--casa-ink)] md:py-20">
       <Container className="space-y-6">
         <Breadcrumbs
           items={[
@@ -56,7 +56,16 @@ export default async function CalculatorPage() {
             { label: copy.breadcrumbCurrent },
           ]}
         />
-        <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white bg-[linear-gradient(165deg,color-mix(in_srgb,var(--casa-blue)_8%,transparent)_0%,transparent_44%,color-mix(in_srgb,var(--casa-sun)_12%,transparent)_100%)] px-6 py-6 shadow-[var(--shadow-card)] md:px-8 md:py-7">
+        {/*
+          A white card, like every other card on the site.
+
+          This carried two brand colours in one sweep — blue in at 0%, sun out at
+          100% — and the page ground carried the same pair as radials. Two of the
+          site's last three multi-colour gradients were on this one route. The
+          border and shadow already separate the card; the colours were only
+          telling the reader that the calculator is a different product.
+        */}
+        <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white px-6 py-6 shadow-[var(--shadow-card)] md:px-8 md:py-7">
           <p className="inline-flex rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
             {copy.eyebrow}
           </p>

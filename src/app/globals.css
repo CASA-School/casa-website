@@ -295,6 +295,42 @@
   --casa-surface-subtle: #eef4f5;
   --casa-surface-wash: #fbfdfd;
 
+  /*
+   * THE SURFACE LADDER. Four grounds, and that is the whole list.
+   *
+   *   --casa-canvas     #f6fafb   the page. `main` paints it; bands inherit it.
+   *   --casa-bg / white #ffffff   a raised band, a card, an input.
+   *   --casa-ink-deep   #111827   an inverted band.
+   *   --casa-warm-soft  #fff3da   a warm panel INSIDE one of the above.
+   *
+   * `--casa-surface-wash` is a panel tint, never a band, and only ever used
+   * BARE. `--casa-surface-subtle` is the one step darker than canvas, for
+   * pressed and active states.
+   *
+   * These rules exist because the alternative was measured, on 2026-08-19, and
+   * it was: 17 distinct band-scale backgrounds across 34 routes.
+   *
+   *   - `--casa-warm-soft` was used at SIXTEEN alpha values across 48 call sites
+   *     (20 22 28 30 32 34 35 36 38 40 42 45 60 72 85 88). Everything from 20 to
+   *     45 — 41 of those sites — resolves within 5.4 RGB units on white, which is
+   *     one tint spelled eight ways. Now three: /35 quiet, /60 mid, /85 solid.
+   *   - `--casa-surface-wash` at /30 over the canvas resolves to #f8fbfc, **1.8
+   *     units from the canvas behind it**. Twenty band-scale sections were
+   *     painting a surface no reader could see, so their pages looked flat while
+   *     the source looked deliberate. They now inherit the canvas, and the
+   *     white-to-canvas alternation those bands were reaching for is stronger for
+   *     it: 11 units instead of 8.6.
+   *
+   * Before adding a fifth ground or an alpha step, composite it against what it
+   * sits on and check the distance is above ~8. Below that it is not a surface,
+   * it is a token.
+   *
+   * KNOWN GAP: the `.casa-surface-light` selector list below matches the exact
+   * class `bg-[var(--casa-warm-soft)]` and NOT `bg-[var(--casa-warm-soft)]/35`,
+   * so alpha'd warm panels do not reset --casa-accent-text. Pre-existing; worth
+   * fixing with an attribute selector when someone is in there.
+   */
+
   --casa-sand: #e2e8f0;
   --casa-ink: #0f172a;
   /* Was #64748b (4.76:1 on white but 4.32:1 on --casa-warm-soft and 3.86:1 on
@@ -759,12 +795,20 @@ h3 {
   * {
     @apply border-border outline-ring/50;
   }
+  /*
+   * No background-image.
+   *
+   * This carried a blue radial at 0% 0% and a sun radial at 100% 0% on every one
+   * of the 34 routes — the same two-colour brand wash the heroes were doing, one
+   * layer further down. It was also almost entirely occluded: `main` paints the
+   * page ground over the full width, so the only place the gradient reached a
+   * reader was the 80px strip behind the translucent sticky header, at scroll 0.
+   * A tinted corner nobody can attribute to anything is exactly the "I have lost
+   * track of the backgrounds" problem in miniature.
+   */
   body {
     @apply bg-background text-foreground;
     line-height: 1.6;
-    background-image:
-      radial-gradient(at 0% 0%, rgba(0, 159, 227, 0.03) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(242, 180, 65, 0.05) 0px, transparent 50%);
   }
 
   :target {
@@ -776,174 +820,47 @@ h3 {
   text-wrap: balance;
 }
 
+/*
+ * Hero surface.
+ *
+ * ONE surface, for every hero on the site. It paints nothing: the hero inherits
+ * whatever ground its page already has, and the border-b on the section marks
+ * where it ends.
+ *
+ * There used to be nine. `.hero-grain` read seven custom properties, and five
+ * page themes plus six archetype overrides combined into nine distinct resolved
+ * backgrounds — five different near-white base tints (white, two creams, two
+ * blue-whites) with, on eight of the nine, all three brand colours firing at
+ * once as radial washes, plus a noise texture and a white sheen over the top.
+ *
+ * That is the finding of PREMIUM_UI_REVIEW §4.1 — "using all three brand colours
+ * simultaneously is the most reliable way a site stops looking premium" —
+ * surviving in the one place that review did not reach. It was fixed in
+ * casa-tricolor-rule, in the stats band and on the hero photograph, while the
+ * heroes went on tinting a whole band per page section of the site. The homepage
+ * had already opted out through `hero-theme-plain` and lost nothing by it.
+ *
+ * The positioning properties stay, because layout depends on them: `relative`
+ * and `isolation` establish the stacking context that `.hero-grain-content`
+ * z-indexes against, and `overflow: hidden` clips the hero photograph's own
+ * rounding. Only the paint is gone.
+ *
+ * `.hero-theme-*` and `.hero-archetype-*` are deliberately NOT redefined here.
+ * Around 20 call sites still pass those class names — the same choice made for
+ * casa-tricolor-rule, whose 25 call sites needed no edit — and they now resolve
+ * to nothing, which is the intent. Do not reintroduce a per-page tint by
+ * defining one: a page's identity comes from its photography and its copy, not
+ * from a different white.
+ */
 .hero-grain {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  --hero-accent-a: color-mix(in srgb, var(--casa-sun) 7%, transparent);
-  --hero-accent-b: rgba(214, 107, 77, 0.06);
-  --hero-accent-c: rgba(0, 159, 227, 0.04);
-  --hero-base-start: #fffefa;
-  --hero-base-mid: #fffdf9;
-  --hero-base-end: #fffdfb;
-  --hero-noise-opacity: 0.028;
-  --hero-sheen-top: 0.14;
-  --hero-sheen-mid: 0.06;
-  --hero-sheen-bottom: 0.11;
-  background:
-    radial-gradient(circle at 14% 24%, var(--hero-accent-a), transparent 62%),
-    radial-gradient(circle at 86% 10%, var(--hero-accent-b), transparent 64%),
-    radial-gradient(circle at 52% 102%, var(--hero-accent-c), transparent 70%),
-    linear-gradient(150deg, var(--hero-base-start) 0%, var(--hero-base-mid) 50%, var(--hero-base-end) 100%);
-}
-
-.hero-grain::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: var(--hero-noise-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
-}
-
-.hero-grain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, var(--hero-sheen-top)) 0%,
-    rgba(255, 255, 255, var(--hero-sheen-mid)) 46%,
-    rgba(255, 255, 255, var(--hero-sheen-bottom)) 100%
-  );
 }
 
 .hero-grain-content {
   position: relative;
   z-index: 2;
-}
-
-.hero-theme-default {
-  --hero-accent-a: color-mix(in srgb, var(--casa-sun) 6.5%, transparent);
-  --hero-accent-b: rgba(214, 107, 77, 0.05);
-  --hero-accent-c: rgba(0, 159, 227, 0.035);
-}
-
-.hero-theme-home {
-  --hero-accent-a: color-mix(in srgb, var(--casa-sun) 7.5%, transparent);
-  --hero-accent-b: rgba(214, 107, 77, 0.06);
-  --hero-accent-c: rgba(0, 159, 227, 0.04);
-  --hero-base-start: #fffefb;
-  --hero-base-mid: #fffbf6;
-  --hero-base-end: #fffaf7;
-  --hero-noise-opacity: 0.03;
-}
-
-/*
- * Neutral hero surface — plain white, no warm base, no grain, no sheen.
- *
- * Every other hero theme tints the base towards cream (#fffbf6 and friends) and
- * layers a noise texture plus a sheen over it. On the homepage that read as a
- * separate creamy panel sitting above a page that is otherwise white, which is
- * exactly the "too many background colours" problem.
- *
- * This zeroes every variable the .hero-grain machinery consumes rather than
- * bypassing the component, so the structure, the sheen layers and the
- * ::before/::after pseudo-elements all still exist — they simply paint nothing.
- */
-.hero-theme-plain {
-  --hero-accent-a: transparent;
-  --hero-accent-b: transparent;
-  --hero-accent-c: transparent;
-  --hero-base-start: #ffffff;
-  --hero-base-mid: #ffffff;
-  --hero-base-end: #ffffff;
-  --hero-noise-opacity: 0;
-  --hero-sheen-top: 0;
-  --hero-sheen-mid: 0;
-  --hero-sheen-bottom: 0;
-}
-
-.hero-theme-courses {
-  --hero-accent-a: rgba(242, 180, 65, 0.09);
-  --hero-accent-b: rgba(0, 159, 227, 0.06);
-  --hero-accent-c: rgba(17, 24, 39, 0.04);
-  --hero-base-start: #fffdf8;
-  --hero-base-mid: #f8fbff;
-  --hero-base-end: #f7f9ff;
-}
-
-.hero-theme-exams {
-  --hero-accent-a: rgba(0, 159, 227, 0.09);
-  --hero-accent-b: rgba(17, 24, 39, 0.06);
-  --hero-accent-c: rgba(214, 107, 77, 0.055);
-  --hero-base-start: #f9fcff;
-  --hero-base-mid: #f5f9ff;
-  --hero-base-end: #f7fbfe;
-}
-
-.hero-theme-accommodation {
-  --hero-accent-a: rgba(214, 107, 77, 0.085);
-  --hero-accent-b: color-mix(in srgb, var(--casa-sun) 8%, transparent);
-  --hero-accent-c: rgba(0, 159, 227, 0.04);
-  --hero-base-start: #fffcf8;
-  --hero-base-mid: #fff9f3;
-  --hero-base-end: #fffaf5;
-}
-
-.hero-theme-about {
-  --hero-accent-a: rgba(17, 24, 39, 0.08);
-  --hero-accent-b: rgba(0, 159, 227, 0.07);
-  --hero-accent-c: rgba(242, 180, 65, 0.06);
-  --hero-base-start: #f9fbff;
-  --hero-base-mid: #f4f8ff;
-  --hero-base-end: #f8fbfe;
-}
-
-.hero-archetype-a {
-  --hero-noise-opacity: 0.033;
-  --hero-sheen-top: 0.17;
-  --hero-sheen-mid: 0.07;
-  --hero-sheen-bottom: 0.12;
-}
-
-.hero-archetype-b {
-  --hero-noise-opacity: 0.027;
-  --hero-accent-a: rgba(0, 159, 227, 0.07);
-  --hero-accent-b: rgba(242, 180, 65, 0.065);
-  --hero-accent-c: rgba(17, 24, 39, 0.04);
-}
-
-.hero-archetype-c {
-  --hero-noise-opacity: 0.02;
-  --hero-accent-a: rgba(0, 159, 227, 0.03);
-  --hero-accent-b: rgba(242, 180, 65, 0.03);
-  --hero-accent-c: rgba(17, 24, 39, 0.02);
-  --hero-sheen-top: 0.11;
-  --hero-sheen-mid: 0.04;
-  --hero-sheen-bottom: 0.08;
-}
-
-.hero-archetype-d {
-  --hero-noise-opacity: 0.031;
-  --hero-accent-a: rgba(214, 107, 77, 0.085);
-  --hero-accent-b: color-mix(in srgb, var(--casa-sun) 7.5%, transparent);
-  --hero-accent-c: rgba(0, 159, 227, 0.035);
-}
-
-.hero-archetype-e {
-  --hero-noise-opacity: 0.028;
-  --hero-accent-a: rgba(0, 159, 227, 0.082);
-  --hero-accent-b: rgba(17, 24, 39, 0.06);
-  --hero-accent-c: rgba(214, 107, 77, 0.04);
-}
-
-.hero-archetype-f {
-  --hero-noise-opacity: 0.032;
-  --hero-accent-a: rgba(0, 159, 227, 0.08);
-  --hero-accent-b: rgba(242, 180, 65, 0.07);
-  --hero-accent-c: rgba(17, 24, 39, 0.045);
 }
 
 .casa-tricolor-rule {

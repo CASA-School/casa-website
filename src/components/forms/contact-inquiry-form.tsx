@@ -908,7 +908,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                   key={idea}
                   type="button"
                   onClick={() => addPromptIdea(idea)}
-                  className="rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] hover:bg-[var(--casa-warm-soft)]/20 hover:border-[var(--casa-blue)]/20 px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] transition-colors cursor-pointer"
+                  className="rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] hover:bg-[var(--casa-warm-soft)]/35 hover:border-[var(--casa-blue)]/20 px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] transition-colors cursor-pointer"
                 >
                   + {idea.split(' ').slice(0, 3).join(' ')}...
                 </button>

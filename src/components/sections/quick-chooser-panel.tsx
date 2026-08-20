@@ -207,7 +207,7 @@ export function QuickChooserPanel({
         ))}
       </div>
 
-      <div className="mt-5 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/42 p-4">
+      <div className="mt-5 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4">
         <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{summaryLabel}</p>
         <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
           {selectedSummary.map((item) => (

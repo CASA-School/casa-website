@@ -21,7 +21,7 @@ export function ExamDayTimelineSignature({
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
         <Timeline items={timeline} />
-        <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/34 p-4" data-testid="exam-what-to-bring">
+        <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4" data-testid="exam-what-to-bring">
           <h3 className="text-base font-bold text-[var(--casa-ink)]">What to bring</h3>
           <ul className="mt-2 space-y-2">
             {bringItems.map((item) => (

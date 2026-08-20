@@ -35,7 +35,7 @@ const visualPresetBySlug: Record<ResourceGuideData['slug'], ResourceVisualPreset
     deepDiveGridClass: 'lg:grid-cols-2',
     deepDiveCardClass: 'bg-white',
     bulletDotClass: 'bg-[var(--casa-blue)]',
-    checklistClass: 'bg-[var(--casa-warm-soft)]/45',
+    checklistClass: 'bg-[var(--casa-warm-soft)]/35',
     officialCardClass: 'bg-white',
     badgeClasses: [
       'bg-[var(--casa-accent-surface)] text-white',
@@ -47,7 +47,7 @@ const visualPresetBySlug: Record<ResourceGuideData['slug'], ResourceVisualPreset
     heroThemeClass: 'hero-theme-accommodation',
     heroArchetypeClass: 'hero-archetype-d',
     quickFactsGridClass: 'md:grid-cols-2 lg:grid-cols-3',
-    quickFactItemClass: 'border-[var(--casa-amber)]/40 bg-[var(--casa-warm-soft)]/30',
+    quickFactItemClass: 'border-[var(--casa-amber)]/40 bg-[var(--casa-warm-soft)]/35',
     stepCardClass: 'border-l-4 border-l-[var(--casa-blue)] bg-[var(--casa-bg)]',
     deepDiveGridClass: 'lg:grid-cols-2',
     deepDiveCardClass: 'bg-[var(--casa-bg)]',
@@ -154,7 +154,9 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
               {data.quickFacts.map((fact) => (
                 <li
                   key={fact}
-                  className={`rounded-xl bg-[var(--casa-surface-wash)]/75 px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)] ${preset.quickFactItemClass}`}
+                  /* Surface comes from the preset — a base tint here would be a second
+                     background class on the same element, resolved by CSS order. */
+                  className={`rounded-xl px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)] ${preset.quickFactItemClass}`}
                 >
                   {fact}
                 </li>
@@ -171,7 +173,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
             <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
             <ol className="mt-5 space-y-4">
               {data.steps.map((step, index) => (
-                <li key={step.title} className={`rounded-xl bg-[var(--casa-surface-wash)]/75 p-5 ${preset.stepCardClass}`}>
+                <li key={step.title} className={`rounded-xl p-5 ${preset.stepCardClass}`}>
                   <div className="flex items-start gap-3">
                     <span className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${stepBadgeClass(index, preset)}`}>
                       {index + 1}
@@ -211,7 +213,7 @@ export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-4 rounded-xl bg-[var(--casa-warm-soft)]/22 px-3 py-2.5 text-sm font-semibold text-[var(--casa-ink)]">
+                <p className="mt-4 rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2.5 text-sm font-semibold text-[var(--casa-ink)]">
                   {section.cta}
                 </p>
               </article>

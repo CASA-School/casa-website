@@ -38,7 +38,7 @@ export function PhotoStorySplit({
   className,
 }: PhotoStorySplitProps) {
   return (
-    <section className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/32 px-6 py-7 md:px-8 md:py-9', className)}>
+    <section className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-7 md:px-8 md:py-9', className)}>
       <div className={cn('grid items-start gap-6 lg:grid-cols-2', mediaSide === 'left' && 'lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1')}>
         <div>
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>

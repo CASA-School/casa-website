@@ -23,8 +23,12 @@ export default async function CourseRegistrationPage({
   const requestedInstanceId = typeof courseId === 'string' ? courseId : undefined;
   const registrationData = await getCourseRegistrationCatalog(locale, requestedInstanceId);
 
+  /*
+    The page canvas. Was --casa-sand/30, which composites to #f6f8fa — 2.2 RGB
+    units from --casa-canvas, i.e. the same ground spelled a fifth way.
+  */
   return (
-    <main className="min-h-screen bg-[var(--casa-sand)]/30 text-[var(--casa-ink)]">
+    <main className="min-h-screen bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       {/* Main navigation header */}
       <Navbar contentLocale={locale} />
 
