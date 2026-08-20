@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowRight, CheckCircle2, GraduationCap, Handshake, MessageCircle, Users } from 'lucide-react';
+import { CheckCircle2, GraduationCap, Handshake, MessageCircle, Users } from 'lucide-react';
 
 import { HeroBEditorial } from '@/components/heroes';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
@@ -123,11 +121,6 @@ export default async function NonProfitStatusPage() {
             text: 'Orientierung im Alltag, Kulturprogramme und unterstützende Lernräume verbinden Unterricht mit echter gesellschaftlicher Teilhabe.',
           },
         ],
-        ctaTitle: 'Unsere gemeinnützige Arbeit praktisch erleben',
-        ctaText:
-          'Unsere Mission zeigt sich in Unterricht, Beratung, Begegnung und konkreten Wegen in Studium, Alltag und Stadtgesellschaft.',
-        ctaPrimary: 'Kontakt aufnehmen',
-        ctaSecondary: 'Leitbild lesen',
       }
     : {
         breadcrumbs: [
@@ -214,11 +207,6 @@ export default async function NonProfitStatusPage() {
             text: 'Daily-life orientation, cultural programming, and supportive learning spaces connect class with real social participation.',
           },
         ],
-        ctaTitle: 'See the mission in practice',
-        ctaText:
-          'The mission becomes visible through teaching, advising, encounter, and practical pathways into university, daily life, and city society.',
-        ctaPrimary: 'Contact us',
-        ctaSecondary: 'Read our mission',
       };
 
   return (
@@ -244,34 +232,51 @@ export default async function NonProfitStatusPage() {
         themeClassName="hero-theme-about"
       />
 
-      <section className="border-b border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Öffentlicher Auftrag' : 'Public-benefit purpose'}
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
-                {copy.introTitle}
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                {copy.introText}
-              </p>
-            </div>
+      {/*
+        The principles are BELOW the intro, not beside it.
 
-            <div className="grid gap-4 md:grid-cols-3">
-              {copy.principles.map((principle) => (
-                <article
-                  key={principle.title}
-                  className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-card)]"
-                >
-                  <CheckCircle2 className="h-5 w-5 text-[var(--casa-accent-text)]" aria-hidden />
-                  <h3 className="mt-4 text-lg font-bold text-[var(--casa-ink)]">{principle.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{principle.text}</p>
-                </article>
-              ))}
-            </div>
+        They used to be three cards in the right column of an
+        `lg:grid-cols-[0.82fr_1.18fr]` split, which at 1024 gave each card 167px
+        — the narrowest measure anywhere on the site — for a heading plus three
+        lines of body. Measured across 375/768/1024/1280/1440, that was the worst
+        width in the audit. Full width gives each one 350-420px on a desktop and
+        the intro keeps a readable measure instead of being squeezed to 371px.
+
+        Cards became hairlines, matching the "four things worth knowing" band on
+        /courses. Three claims of a mission statement are not UI controls, and a
+        border plus a shadow on each was the elevation the design review flagged
+        (§4.5) rather than a reason to look.
+      */}
+      <section className="border-b border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
+        <Container className="space-y-10 md:space-y-14">
+          <div className="max-w-[46rem]">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+              {locale === 'de' ? 'Öffentlicher Auftrag' : 'Public-benefit purpose'}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+              {copy.introTitle}
+            </h2>
+            <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+              {copy.introText}
+            </p>
           </div>
+
+          <ul className="grid gap-8 md:grid-cols-3 md:gap-10">
+            {copy.principles.map((principle) => (
+              <li key={principle.title} className="border-t border-[color:var(--casa-sand)] pt-6">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2
+                    className="mt-0.5 h-5 w-5 shrink-0 text-[var(--casa-accent-text)]"
+                    aria-hidden
+                  />
+                  <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">
+                    {principle.title}
+                  </h3>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{principle.text}</p>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
@@ -288,10 +293,23 @@ export default async function NonProfitStatusPage() {
               <p className="mt-5 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {copy.fundingText}
               </p>
-              <ul className="mt-6 grid gap-3">
+              {/*
+                A list, not four elevated pills. Each of these was a white
+                shadowed box of `font-bold` body copy, which is two kinds of
+                emphasis on a plain enumeration — bold everything and nothing
+                reads as emphasised. Hairlines carry the same structure at a
+                fraction of the weight.
+              */}
+              <ul className="mt-7 space-y-4">
                 {copy.fundingBullets.map((item) => (
-                  <li key={item} className="flex items-start gap-3 rounded-lg bg-white px-4 py-3 text-sm font-bold text-[var(--casa-ink)] shadow-[var(--shadow-soft)]">
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--casa-amber-strong)]" aria-hidden />
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 border-t border-[color:var(--casa-sand)] pt-4 text-sm leading-relaxed text-[var(--casa-ink)]"
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]"
+                      aria-hidden
+                    />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -300,9 +318,15 @@ export default async function NonProfitStatusPage() {
 
             <section className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)] md:p-8">
               <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.legalTitle}</h2>
+              {/*
+                `minmax(9rem, …)` on the label column because a fractional one
+                collapsed to 133px at 1024 and broke "Steuerliche Einordnung"
+                across three lines. A floor lets the value column give up the
+                width instead.
+              */}
               <dl className="mt-6 divide-y divide-[color:var(--casa-sand)]/60">
                 {copy.legalRows.map(([label, value]) => (
-                  <div key={label} className="grid gap-1 py-4 sm:grid-cols-[0.36fr_0.64fr] sm:gap-4">
+                  <div key={label} className="grid gap-1 py-4 sm:grid-cols-[minmax(9rem,0.34fr)_1fr] sm:gap-5">
                     <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{label}</dt>
                     <dd className="text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">{value}</dd>
                   </div>
@@ -324,9 +348,17 @@ export default async function NonProfitStatusPage() {
                 {copy.impactTitle}
               </h2>
             </div>
-            <ul className="grid gap-4 md:grid-cols-2">
+            {/*
+              One warm panel, divided — the same figure as the homepage's
+              non-profit band, so the two surfaces that carry this story look
+              related. Four separate tinted boxes read as four unrelated chips.
+            */}
+            <ul className="divide-y divide-[color:var(--casa-sand)]/70 overflow-hidden rounded-2xl bg-[var(--casa-warm-soft)]/35">
               {copy.impactItems.map((item) => (
-                <li key={item} className="rounded-lg bg-[var(--casa-warm-soft)]/35 p-5 text-sm font-semibold leading-relaxed text-[var(--casa-ink)]">
+                <li
+                  key={item}
+                  className="px-5 py-4 text-sm font-semibold leading-relaxed text-[var(--casa-ink)] md:px-7 md:py-5"
+                >
                   {item}
                 </li>
               ))}
@@ -375,30 +407,21 @@ export default async function NonProfitStatusPage() {
         </Container>
       </section>
 
-      <section className="bg-[var(--casa-ink-deep)] py-14 text-white md:py-16">
-        <Container>
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
-                {locale === 'de' ? 'Nächster Schritt' : 'Next step'}
-              </p>
-              <h2 className="mt-2 text-3xl font-bold">{copy.ctaTitle}</h2>
-              <p className="mt-3 text-base leading-relaxed text-white/72">{copy.ctaText}</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild variant="marketing-sun">
-                <Link href="/contact">
-                  {copy.ctaPrimary}
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="casa-button-outline border-white/35 bg-transparent text-white hover:bg-white/10 hover:text-white">
-                <Link href="/about#mission">{copy.ctaSecondary}</Link>
-              </Button>
-            </div>
-          </div>
-        </Container>
-      </section>
+      {/*
+        No closing CTA band here, deliberately (2026-08-20).
+
+        This page used to end with an ink-deep "Next step" band carrying Contact
+        us and Read our mission — landing directly on top of the footer's own
+        ink-panel CTA band, "Ready to start German in Bremen?", with a hairline
+        between them. Two inverted bands of near-identical shape, stacked, both
+        asking for the next action: the second one taught the reader that neither
+        was important.
+
+        Nothing was lost by removing it. The footer already carries the
+        conversion ask on every route, and "Read our mission" is wayfinding
+        rather than a call to action — it is still the hero's secondary CTA at
+        the top of this page, which is where a reader looks for it.
+      */}
     </main>
   );
 }

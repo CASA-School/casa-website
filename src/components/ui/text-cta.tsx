@@ -31,6 +31,15 @@ export function TextCta({
       href={href}
       className={cn(
         'casa-cta-link group inline-flex items-center gap-2.5 text-sm font-semibold underline-offset-4 transition-colors hover:underline',
+        /*
+          `py-3 -my-3` gives the link a 45px hit area without moving it.
+          Measured at 21px tall before this — the height of its own text — which
+          is under half the 44px touch guideline, and this is the affordance the
+          site uses for every "and also" action, 11 files' worth. The negative
+          margin returns the layout box to the text height, so no surrounding
+          spacing shifts; only the tappable area grows.
+        */
+        'py-3 -my-3',
         onDark
           ? 'text-white/85 hover:text-white'
           : 'text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]',

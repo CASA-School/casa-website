@@ -678,8 +678,6 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <BandSeam />
-
       {/*
         Non-profit band — moved below the course formats, 2026-08-16.
 
@@ -694,13 +692,30 @@ export default async function HomePage() {
         two-column aside — so the requirement is met more strongly than before,
         not less. Do not remove this band.
 
-        The three commitments were boxed chips on a tinted card; they are now set
-        directly on the field with a rule above each. Boxes made them look like
-        UI controls rather than claims.
+        ON THE CANVAS, and no BandSeam above it any more (2026-08-20).
+
+        The band used to be transparent, which on this page means white, sitting
+        between a white band and the ink-deep exam field with a centred hairline
+        marking the seam. So the one statement the Ad Grants review asks the site
+        to make plainly was also the flattest thing on the page: no surface of
+        its own, and a rule doing the work a surface should do. It now sits on
+        --casa-canvas, an 11-unit step from the white above it, which is a real
+        boundary — and the seam goes, for the reason BandSeam's own comment gives
+        about the ink-deep bands: drawing a line where the eye already sees the
+        change is what makes a page look fussy.
+
+        The three commitments were bare on the field with a rule above each,
+        stretched across the full 85rem while the statement above them was
+        clamped to 46rem — three one-line claims spanning 432px each at 1440,
+        centred text over left-aligned columns. They are now one raised panel,
+        clamped to the statement's own measure, divided rather than boxed: a
+        horizontal rule between them when stacked, a vertical one when abreast.
+        That is also what fixes the mid-width jump, which went 1 column straight
+        to 3 at 640px and gave each claim 213px at 768.
       */}
       <section
         id="gemeinnuetzigkeit"
-        className="py-16 md:py-24"
+        className="bg-[var(--casa-canvas)] py-16 md:py-24"
         data-track-section="nonprofit-mission"
       >
         <Container>
@@ -708,19 +723,34 @@ export default async function HomePage() {
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
               {locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
             </p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
+            {/* text-balance: without it "mission." sits alone on line two at 1440. */}
+            <h2 className="mt-4 text-balance text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
               {locale === 'de'
                 ? 'Kursgebühren bleiben im Bildungsauftrag.'
                 : 'Course fees stay inside the education mission.'}
             </h2>
-            <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+            {/* text-pretty: "projects." was landing alone on a fourth line at 375. */}
+            <p className="mx-auto mt-5 max-w-measure text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
               {locale === 'de'
                 ? 'CASA ist eine gemeinnützige GmbH. Einnahmen werden in Unterrichtsqualität, faire Vergütung, Lernräume und soziale Bildungsprojekte reinvestiert.'
                 : 'CASA is a non-profit gGmbH. Income is reinvested in teaching quality, fair pay, learning spaces, and social education projects.'}
             </p>
           </div>
 
-          <ul className="mx-auto mt-12 grid max-w-[85rem] gap-8 sm:grid-cols-3 md:mt-14">
+          {/*
+            One panel, divided — not three cards, and not three bare columns.
+
+            `divide-y ... md:divide-y-0 md:divide-x` is the whole responsive
+            story: stacked, the claims are separated by a horizontal rule; abreast
+            they are separated by a vertical one. No breakpoint has to be tuned
+            and nothing reflows into an awkward width, because the panel is
+            clamped to 64rem rather than running to the 85rem grid.
+
+            `items-start` on the icon row so a title that wraps to two lines at
+            tablet width keeps the shield aligned to its first line rather than
+            floating to the vertical centre.
+          */}
+          <ul className="mx-auto mt-10 grid max-w-[64rem] divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-card)] md:mt-12 md:grid-cols-3 md:divide-x md:divide-y-0">
             {[
               {
                 title: locale === 'de' ? 'Keine Gewinnausschüttung' : 'No profit distribution',
@@ -744,17 +774,20 @@ export default async function HomePage() {
                     : 'Social education work across Bremen.',
               },
             ].map((item) => (
-              <li key={item.title} className="border-t border-[color:var(--casa-sand)] pt-5">
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="h-4 w-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-                  <p className="text-base font-bold text-[var(--casa-ink)]">{item.title}</p>
+              <li key={item.title} className="p-6 md:p-7">
+                <div className="flex items-start gap-2.5">
+                  <ShieldCheck
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-accent-text)]"
+                    aria-hidden
+                  />
+                  <p className="text-base font-bold leading-snug text-[var(--casa-ink)]">{item.title}</p>
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{item.text}</p>
+                <p className="mt-2.5 text-sm leading-relaxed text-[var(--casa-muted)]">{item.text}</p>
               </li>
             ))}
           </ul>
 
-          <div className="mt-12 text-center">
+          <div className="mt-10 text-center md:mt-12">
             <TextCta href="/ueber-uns/gemeinnuetzigkeit">
               {locale === 'de'
                 ? 'Wie CASA Kursgebühren gemeinnützig einsetzt'
