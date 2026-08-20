@@ -59,6 +59,31 @@ export type CourseFactKey =
   | 'included'
   | 'lead-time';
 
+/**
+ * THE PAGE'S ARCHITECTURE, not just its section order.
+ *
+ * The archetypes varied which sections rendered, in what order, and which facts
+ * the rail was allowed to show — but every course page was still the same shape.
+ * Measured on all seven: an identical `700px / 620px` two-column body grid, a
+ * facts rail on the right of every one of them. So the formats that publish
+ * nothing wore the chrome of the formats that publish everything, and looked
+ * broken rather than different. German for Medical rendered five rail rows of
+ * which FOUR carried no information: "To be announced", "On request", "By
+ * arrangement", "On request".
+ *
+ *   `facts-rail`  Real dates, real prices, a real level ladder. The rail earns
+ *                 its place because the decision is which start date and level.
+ *                 Intensive, Evening, Bildungszeit.
+ *   `catalogue`   The page IS the picker. Full width, no rail — a reader cannot
+ *                 evaluate anything until they have found their module.
+ *                 Special Courses.
+ *   `brief`       Nothing is published because nothing is fixed. One column at a
+ *                 reading measure, no rail to leave empty, closing on the
+ *                 enquiry that is the only real action on the page.
+ *                 German for Medical, Groups, Firmenunterricht.
+ */
+export type CourseLayout = 'facts-rail' | 'catalogue' | 'brief';
+
 export type CourseCtaPolicy =
   /** Register for a dated instance; beginners are sent to placement first. */
   | 'register-or-place'
@@ -74,6 +99,8 @@ export type CourseArchetype = {
   /** What the visitor is actually trying to decide. Kept as prose on purpose. */
   buyingQuestion: string;
   sections: CourseSectionKey[];
+  /** How the page is built. See CourseLayout. */
+  layout: CourseLayout;
   facts: CourseFactKey[];
   cta: CourseCtaPolicy;
   /** Whether the hero may offer a start-date selector. */
@@ -94,6 +121,7 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
       'testimonials',
       'related-courses',
     ],
+    layout: 'facts-rail',
     facts: ['next-start', 'duration', 'lessons-per-week', 'level-range', 'price'],
     cta: 'register-or-place',
     showsStartDateSelector: true,
@@ -115,9 +143,22 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
       'testimonials',
       'related-courses',
     ],
-    facts: ['duration', 'lessons-per-week', 'level-range', 'price'],
+    layout: 'catalogue',
+    /*
+     * No 'duration'. Every module in the catalogue runs 12 weeks, but the rail
+     * computes duration from scheduled instances and this course has none, so
+     * the row rendered "On request" beside a price of 192 EUR that is exact.
+     */
+    facts: ['lessons-per-week', 'level-range', 'price'],
     cta: 'reserve-module',
-    showsStartDateSelector: true,
+    /*
+     * False, and the architecture test is what caught it: this archetype offered
+     * a hero start-date selector while declaring no `next-start` fact. On a
+     * catalogue the reader is not choosing a date, they are choosing a module —
+     * and each module carries its own start in the week grid. A selector above
+     * that asks the question the grid answers.
+     */
+    showsStartDateSelector: false,
   },
   'professional-track': {
     id: 'professional-track',
@@ -132,9 +173,18 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
       'testimonials',
       'related-courses',
     ],
-    facts: ['next-start', 'duration', 'lessons-per-week', 'level-range', 'price'],
+    layout: 'brief',
+    /*
+     * ONLY the level range, because that is the only thing CASA publishes.
+     * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md: "German for Medical — not published
+     * / not published / not published / B2 and C1 entry". This archetype used to
+     * declare the full scheduled-cohort fact set, so the page asserted a next
+     * start date and a price for a course that has neither.
+     */
+    facts: ['level-range'],
     cta: 'advisory-call',
-    showsStartDateSelector: true,
+    // There are no dates to select.
+    showsStartDateSelector: false,
   },
   'package-inquiry': {
     id: 'package-inquiry',
@@ -156,6 +206,7 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
       'testimonials',
       'related-courses',
     ],
+    layout: 'brief',
     // Deliberately no 'price' and no 'next-start'.
     facts: ['lessons-per-week', 'group-size', 'included', 'lead-time', 'level-range'],
     cta: 'request-quote',

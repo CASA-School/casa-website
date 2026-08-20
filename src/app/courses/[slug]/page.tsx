@@ -20,6 +20,9 @@ import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/con
 import type { CourseFactKey } from '@/config/courses/archetypes';
 import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
+import { ContactInquiryForm } from '@/components/forms/contact-inquiry-form';
+import { cn } from '@/lib/utils';
+import { contactTopicOptions, formCopyByLocale } from '@/config/content/contact-form';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { getCourseContact, hasNamedCourseContact } from '@/config/courses/course-profiles';
 import { teachingStaffStatement } from '@/config/content/team-spotlights';
@@ -289,10 +292,22 @@ export default async function CourseDetailPage({
     },
   };
 
+  /*
+   * A row whose value is "By arrangement" is not a fact, it is the absence of
+   * one, and three of them in a five-row rail is what made Firmenunterricht read
+   * as a broken course page rather than a bespoke one. The archetype decides
+   * which facts a page MAY show; this drops the ones that turned out to have no
+   * answer for this particular course. German for Groups keeps its real 20
+   * lessons a week and loses only its group size.
+   *
+   * `level-range` is always real, so the rail can never empty out.
+   */
+  const byArrangement = locale === 'de' ? 'Nach Absprache' : 'By arrangement';
   const infoItems = archetype.facts
     .filter((fact) => archetypeAllowsFact(archetype, fact))
     .map((fact) => factRows[fact])
-    .filter((row): row is NonNullable<typeof row> => Boolean(row));
+    .filter((row): row is NonNullable<typeof row> => Boolean(row))
+    .filter((row) => row.value !== byArrangement);
 
   /*
    * The hero rail already lists every fact this archetype permits. The sticky
@@ -338,6 +353,47 @@ export default async function CourseDetailPage({
    * teachers, so the rail now carries what CASA does say about all of them.
    */
   const teachingStaff = teachingStaffStatement[locale];
+
+  const isFactsRail = archetype.layout === 'facts-rail';
+  const isBrief = archetype.layout === 'brief';
+
+  /*
+   * Which enquiry this page opens. `medical-german` is a learner topic — a doctor
+   * enquiring for themselves — while the two package products are organiser
+   * topics, and the contact schema asks each a different set of brief questions
+   * (see ORGANISER_TOPIC_KEYS in lib/validation/contact.ts).
+   */
+  const briefTopicKey =
+    detail.course.slug === 'medical-german'
+      ? 'medical-german'
+      : detail.course.slug === 'in-company'
+        ? 'company-courses'
+        : 'group-booking';
+
+  const briefCopy =
+    detail.course.slug === 'medical-german'
+      ? {
+          title: locale === 'de' ? 'Kurs anfragen' : 'Ask about this course',
+          description:
+            locale === 'de'
+              ? 'Nennen Sie Fachgebiet, aktuelles Niveau und Zeitrahmen — wir melden uns mit Umfang, Terminen und Kosten für Ihre Situation.'
+              : 'Tell us your specialism, your current level and your timeframe, and we come back with the scope, the dates and the cost for your situation.',
+        }
+      : detail.course.slug === 'in-company'
+        ? {
+            title: locale === 'de' ? 'Firmenkurs anfragen' : 'Brief us on your company course',
+            description:
+              locale === 'de'
+                ? 'Beratung und Angebot sind stets unverbindlich. Je genauer die Angaben, desto genauer das Angebot.'
+                : 'Both the consultation and the quote are always without obligation. The more precise the brief, the more precise the quote.',
+          }
+        : {
+            title: locale === 'de' ? 'Gruppenprogramm anfragen' : 'Brief us on your group',
+            description:
+              locale === 'de'
+                ? 'Gruppengröße, Alter, Zeitraum und Schwerpunkte — Sie erhalten ein individuelles, unverbindliches Angebot.'
+                : 'Group size, ages, dates and what you want to focus on. You get an individual, no-obligation offer.',
+          };
 
   const processHeading = nextStepsHeading(archetype, locale);
   /*
@@ -528,10 +584,31 @@ export default async function CourseDetailPage({
         themeClassName="hero-theme-courses"
       />
 
-      <section className="py-16 md:py-20">
+      {/*
+        THREE PAGE SHAPES, chosen by the archetype's `layout`.
+
+        Every course page used to be this same two-column grid with a facts rail
+        on the right — measured identically at 700px/620px on all seven. See
+        CourseLayout in config/courses/archetypes.ts for why that fails: a format
+        that publishes no dates and no price then wears the chrome of one that
+        publishes both, and reads as broken rather than as different.
+      */}
+      <section className={isBrief ? 'py-16 md:py-24' : 'py-16 md:py-20'}>
         <Container className="space-y-12 md:space-y-14">
-          <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-            <div className="space-y-12 md:space-y-14">
+          <div
+            className={
+              isFactsRail
+                ? 'grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start'
+                : undefined
+            }
+          >
+            {/*
+              `brief` runs one column at a reading measure — 58rem, close to the
+              site's `max-w-measure` for prose but wide enough for the two-column
+              blocks inside a section. `catalogue` takes the full grid, because
+              the week picker is the page.
+            */}
+            <div className={cn('space-y-12 md:space-y-14', isBrief && 'mx-auto max-w-[58rem]')}>
               {archetype.sections.map((sectionKey) => {
                 switch (sectionKey) {
                 case 'module-catalogue':
@@ -680,6 +757,7 @@ export default async function CourseDetailPage({
               })}
             </div>
 
+            {isFactsRail ? (
             <DecisionRail
               locale={locale}
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
@@ -688,7 +766,38 @@ export default async function CourseDetailPage({
               deadlineIso={selectedInstance?.start_date}
               teachingStaff={teachingStaff}
             />
+            ) : null}
           </div>
+
+          {/*
+            THE ENQUIRY, on the pages whose only real action is one.
+
+            `brief` covers German for Medical, German for Groups and
+            Firmenunterricht. None of them publishes a date, a weekly load or a
+            price, so none of them can end in "register" — and until now they
+            ended in a facts rail whose rows said "On request". This is the same
+            ContactInquiryForm that /contact mounts, with the topic preselected,
+            so the validation, the API route and the webhook fan-out stay
+            single-sourced rather than duplicated per course.
+          */}
+          {isBrief ? (
+            <div className="mx-auto max-w-[58rem] border-t border-[color:var(--casa-sand)] pt-12 md:pt-14">
+              <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                {briefCopy.title}
+              </h2>
+              <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
+                {briefCopy.description}
+              </p>
+              <div className="mt-8">
+                <ContactInquiryForm
+                  locale={locale}
+                  topics={contactTopicOptions(locale)}
+                  initialTopicKey={briefTopicKey}
+                  copy={formCopyByLocale[locale]}
+                />
+              </div>
+            </div>
+          ) : null}
         </Container>
       </section>
     </main>
