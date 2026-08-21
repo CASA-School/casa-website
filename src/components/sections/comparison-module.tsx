@@ -53,20 +53,35 @@ export function ComparisonModule({
         className
       )}
     >
-      <p
-        className={cn(
-          'text-xs font-semibold uppercase tracking-eyebrow',
-          isDark ? 'text-[var(--casa-sun)]' : 'text-[var(--casa-accent-text)]'
-        )}
-      >
-        {eyebrow}
-      </p>
-      {/* The accent rule is the light-surface mark; on ink the eyebrow carries it. */}
-      {isDark ? null : <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />}
-      <h2 className={cn('mt-2 text-2xl font-bold leading-tight sm:text-3xl', strong)}>{title}</h2>
-      <p className={cn('mt-3 max-w-measure text-base leading-relaxed md:text-lg', muted)}>{description}</p>
+      {/*
+        The heading block is clamped to a reading measure, and centred on the
+        inverted field the way the ink-deep band on /courses is.
 
-      <div className="mt-8 overflow-x-auto">
+        Measured before this: five of the nine headings on /accommodation ran the
+        full 1360px container, while every heading on the homepage and /courses
+        sits between 518 and 736px. A 1360px-wide h2 over a 1360px table is why
+        those pages read as one repeated full-width block — nothing in the
+        composition ever narrows.
+      */}
+      <div className={cn('max-w-[46rem]', isDark && 'mx-auto text-center')}>
+        <p
+          className={cn(
+            'text-xs font-semibold uppercase tracking-eyebrow',
+            isDark ? 'text-[var(--casa-sun)]' : 'text-[var(--casa-accent-text)]'
+          )}
+        >
+          {eyebrow}
+        </p>
+        {/* The accent rule is the light-surface mark; on ink the eyebrow carries it. */}
+        {isDark ? null : <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />}
+        <h2 className={cn('mt-2 text-balance text-2xl font-bold leading-tight sm:text-3xl', strong)}>{title}</h2>
+        <p className={cn('mt-3 max-w-measure text-base leading-relaxed md:text-lg', isDark && 'mx-auto', muted)}>
+          {description}
+        </p>
+      </div>
+
+      {/* The table itself stays wide, but not edge-to-edge on the inverted field. */}
+      <div className={cn('mt-8 overflow-x-auto', isDark && 'mx-auto max-w-[76rem]')}>
         <table className="w-full min-w-full border-collapse text-left text-base md:min-w-[520px]">
           <thead>
             <tr>

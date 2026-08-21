@@ -39,8 +39,11 @@ export function AccommodationPlaybook({
 }: AccommodationPlaybookProps) {
   return (
     <section>
-      <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
+      {/* Clamped to a reading measure — the h2 was spanning the full container. */}
+      <div className="max-w-[46rem]">
+        <h2 className="text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
+      </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
         <dl className="border-t border-[color:var(--casa-sand)]">

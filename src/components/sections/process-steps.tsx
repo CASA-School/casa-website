@@ -42,12 +42,17 @@ export function ProcessSteps({
         tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10' : undefined,
         className
       )}>
-      {eyebrow ? (
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
-      ) : null}
-      <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-      <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
+      {/* Clamped: this heading was running the full container. See ComparisonModule. */}
+      <div className="max-w-[46rem]">
+        {eyebrow ? (
+          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+        ) : null}
+        <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
+        <h2 className="mt-2 text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+          {description}
+        </p>
+      </div>
 
       <ol className="mt-8 grid gap-7 md:grid-cols-3">
         {steps.map((item) => (

@@ -95,12 +95,13 @@ export function GuidedPicker({
         ? 'lg:grid-cols-2'
         : 'lg:grid-cols-3';
   const sectionHeader = (
-    <div>
+    /* Clamped to a reading measure, so the h2 does not span the full container. */
+    <div className="max-w-[46rem]">
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
       {showAccentRule ? (
         <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       ) : null}
-      <h2 className={cn('text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl', showAccentRule ? 'mt-2' : 'mt-3')}>
+      <h2 className={cn('text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl', showAccentRule ? 'mt-2' : 'mt-3')}>
         {title}
       </h2>
       <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
