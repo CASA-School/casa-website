@@ -14,10 +14,16 @@ export type CourseFormatRow = {
   id: string;
   title: string;
   description: string;
-  bestFor: string;
+  /** Optional second line. A row that has nothing to add here simply omits it. */
+  bestFor?: string;
   outcomes: string[];
-  href: string;
-  ctaLabel: string;
+  /**
+   * Optional. Course rows each have their own destination; a row that is
+   * explaining something rather than offering a choice has none, and rendering a
+   * button to nowhere is worse than rendering no button.
+   */
+  href?: string;
+  ctaLabel?: string;
   /** Optional kicker, e.g. "Next start: 3 Mar 2026". */
   meta?: string;
   media: { src: string; alt: string };
@@ -50,10 +56,18 @@ export type CourseFormatRow = {
 export function CourseFormatRows({
   rows,
   tone = 'dark',
+  maxOutcomes = 3,
   className,
 }: {
   rows: CourseFormatRow[];
   tone?: 'dark' | 'light';
+  /**
+   * Course rows show three outcomes so six formats stay comparable at a glance.
+   * A page reusing this composition to explain something may need the full list —
+   * the host-family rows on /accommodation/become-host itemise a room, and
+   * dropping items two at a time would be losing content to a layout default.
+   */
+  maxOutcomes?: number;
   className?: string;
 }) {
   const isDark = tone === 'dark';
@@ -95,17 +109,19 @@ export function CourseFormatRows({
             >
               {row.description}
             </p>
-            <p
-              className={cn(
-                'mt-3 max-w-measure text-base leading-relaxed',
-                isDark ? 'text-white/56' : 'text-[var(--casa-muted)]/80'
-              )}
-            >
-              {row.bestFor}
-            </p>
+            {row.bestFor ? (
+              <p
+                className={cn(
+                  'mt-3 max-w-measure text-base leading-relaxed',
+                  isDark ? 'text-white/56' : 'text-[var(--casa-muted)]/80'
+                )}
+              >
+                {row.bestFor}
+              </p>
+            ) : null}
             {row.outcomes.length > 0 ? (
               <ul className="mt-6 space-y-2.5">
-                {row.outcomes.slice(0, 3).map((outcome) => (
+                {row.outcomes.slice(0, maxOutcomes).map((outcome) => (
                   <li
                     key={outcome}
                     className={cn(
@@ -132,19 +148,21 @@ export function CourseFormatRows({
               buttons down a field would read as a toolbar, and the fill inverts
               on hover so the affordance stays unmistakable.
             */}
-            <Link
-              href={row.href}
-              className={cn(
-                'mt-7 inline-flex items-center gap-2 rounded-lg border px-5 py-3 text-sm font-bold transition-colors md:mt-8',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                isDark
-                  ? 'border-white/30 text-white hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)] focus-visible:ring-[var(--casa-sun)] focus-visible:ring-offset-[var(--casa-ink-deep)]'
-                  : 'border-[color:var(--casa-ink-deep)]/25 text-[var(--casa-ink)] hover:border-[color:var(--casa-ink-deep)] hover:bg-[var(--casa-ink-deep)] hover:text-white focus-visible:ring-[var(--casa-blue)]'
-              )}
-            >
-              {row.ctaLabel}
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+            {row.href && row.ctaLabel ? (
+              <Link
+                href={row.href}
+                className={cn(
+                  'mt-7 inline-flex items-center gap-2 rounded-lg border px-5 py-3 text-sm font-bold transition-colors md:mt-8',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  isDark
+                    ? 'border-white/30 text-white hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)] focus-visible:ring-[var(--casa-sun)] focus-visible:ring-offset-[var(--casa-ink-deep)]'
+                    : 'border-[color:var(--casa-ink-deep)]/25 text-[var(--casa-ink)] hover:border-[color:var(--casa-ink-deep)] hover:bg-[var(--casa-ink-deep)] hover:text-white focus-visible:ring-[var(--casa-blue)]'
+                )}
+              >
+                {row.ctaLabel}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            ) : null}
           </div>
 
           <div

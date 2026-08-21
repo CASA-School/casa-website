@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { HeroDGallery } from '@/components/heroes';
 import { ComparisonModule, EditorialSplit, ProcessSteps } from '@/components/sections';
+import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -348,46 +349,50 @@ export default async function BecomeHostFamilyPage() {
       </section>
 
       {/*
-        THE HOMEPAGE STANDARD, not a bespoke layout.
+        THE COURSE-FORMAT ROWS COMPOSITION, on white.
 
-        These two sections were hand-rolled here as a bare two-column grid while
-        the rest of the site renders exactly this shape — eyebrow, serif heading,
-        supporting sentence, bullet list, one photograph — through EditorialSplit,
-        which is what the "Why CASA" band on the homepage is. Building a
-        one-off instead of reusing it is how the accommodation pages drifted into
-        looking like a different site.
+        These two were EditorialSplit panels running the full container. They are
+        not the single "Why CASA" panel that component is for — they are a PAIR of
+        alternating copy-and-photograph rows, which is exactly what the course
+        formats are on the homepage and on /courses. So they use that component:
+        the same 85rem measure, the same md:grid-cols-2 with the photograph
+        flipping side on every other row, the same 12/20 vertical rhythm.
 
-        `mediaSide` alternates so two consecutive splits do not read as one long
-        panel. Content is from CASA's own check-in/check-out form; see
-        docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md.
+        `tone="light"` on a white band rather than the ink-deep field the homepage
+        uses, because this page already spends its one inverted band on the
+        comparison above. `maxOutcomes={5}` because a room has five items to list
+        and the course default of three exists to keep six formats comparable, not
+        to cap content.
       */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
-        <Container className="space-y-14 md:space-y-20">
-          <EditorialSplit
-            tone="plain"
-            eyebrow={copy.roomEyebrow}
-            title={copy.roomTitle}
-            description={copy.roomDescription}
-            bullets={copy.roomItems}
-            mediaSide="left"
-            photo={{
-              src: hostFamilyPhotos.arrival.src,
-              alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
-              caption: locale === 'de' ? hostFamilyPhotos.arrival.caption.de : hostFamilyPhotos.arrival.caption.en,
-            }}
-          />
-
-          <EditorialSplit
-            tone="plain"
-            eyebrow={copy.agreementEyebrow}
-            title={copy.agreementTitle}
-            description={copy.agreementDescription}
-            bullets={copy.agreementBullets}
-            photo={{
-              src: hostFamilyPhotos.home.src,
-              alt: locale === 'de' ? hostFamilyPhotos.home.alt.de : hostFamilyPhotos.home.alt.en,
-              caption: locale === 'de' ? hostFamilyPhotos.home.caption.de : hostFamilyPhotos.home.caption.en,
-            }}
+      <section className="border-t border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-24">
+        <Container>
+          <CourseFormatRows
+            tone="light"
+            maxOutcomes={5}
+            rows={[
+              {
+                id: 'host-room',
+                title: copy.roomTitle,
+                description: copy.roomDescription,
+                outcomes: copy.roomItems,
+                meta: copy.roomEyebrow,
+                media: {
+                  src: hostFamilyPhotos.arrival.src,
+                  alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
+                },
+              },
+              {
+                id: 'host-agreement',
+                title: copy.agreementTitle,
+                description: copy.agreementDescription,
+                outcomes: copy.agreementBullets,
+                meta: copy.agreementEyebrow,
+                media: {
+                  src: hostFamilyPhotos.home.src,
+                  alt: locale === 'de' ? hostFamilyPhotos.home.alt.de : hostFamilyPhotos.home.alt.en,
+                },
+              },
+            ]}
           />
         </Container>
       </section>
