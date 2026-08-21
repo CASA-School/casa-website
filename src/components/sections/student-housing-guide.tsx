@@ -107,7 +107,7 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
   return (
     <section
       className={cn(
-        'rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-8',
+        'rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-9',
         className
       )}
     >

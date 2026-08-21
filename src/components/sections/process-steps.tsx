@@ -39,7 +39,9 @@ export function ProcessSteps({
 }: ProcessStepsProps) {
   return (
     <section data-reveal="true" className={cn(
-        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10' : undefined,
+        /* Same inset in both tones — see EditorialSplit. */
+        'casa-editorial-measure px-6 py-8 md:px-9 md:py-10',
+        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
         className
       )}>
       {/* Clamped: this heading was running the full container. See ComparisonModule. */}

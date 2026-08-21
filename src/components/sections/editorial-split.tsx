@@ -56,7 +56,15 @@ export function EditorialSplit({
     <section
       data-reveal="true"
       className={cn(
-        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10' : undefined,
+        /*
+          The inset is the same in both tones. `plain` drops the fill only:
+          dropping the padding too moved the content column 36px left, so a page
+          alternating filled and unfilled panels had its text edge stepping in and
+          out. Measured on /accommodation/become-host — panel headings at x=76,
+          unfilled ones at x=40.
+        */
+        'casa-editorial-measure px-6 py-8 md:px-9 md:py-10',
+        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
         className
       )}
     >

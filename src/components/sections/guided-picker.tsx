@@ -478,68 +478,73 @@ export function GuidedPicker({
         >
           {items.map((item, index) => (
             <li key={item.id ?? item.href} className={cn(index >= 3 && !showAll ? 'hidden md:block' : '')}>
-              <article
+              {/*
+                ONE LINK, EDGE-TO-EDGE MEDIA.
+
+                The retired version was a bordered white card with a separately
+                rounded image floating inside it, a small-caps price line, a
+                "Best for:" line prefixed with its own label, and a "Details →"
+                text link at the bottom — five stacked text sizes and two nested
+                rounded rectangles, which is the 2015 content card.
+
+                Now the photograph fills the card to its own edges (one radius,
+                clipped by the card), the price rides on the image as a chip
+                instead of as a caps line, "best for" is a chip rather than a
+                labelled sentence, and the WHOLE card is the link, so the arrow is
+                an affordance rather than a second control competing with it.
+              */}
+              <Link
+                href={item.href}
+                aria-label={`${item.title} — ${item.ctaLabel}`}
                 className={cn(
-                  'group flex h-full flex-col bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35',
-                  /*
-                    Both branches take the card radius. This picked `rounded-lg`
-                    (8px, the ladder's INPUT step) for one variant and
-                    `rounded-3xl` (14px, the FEATURE step) for the other, so one
-                    component produced two card radii and neither was the 10px
-                    the ladder names for a card. See the surface/radius notes in
-                    globals.css.
-                  */
-                  isFeaturePair ? 'overflow-hidden rounded-xl p-5 md:p-6' : 'rounded-xl p-6'
+                  'group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70',
+                  'transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-hero)] hover:ring-[var(--casa-blue)]/35',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2'
                 )}
               >
                 {item.media ? (
-                  <div
-                    className={cn(
-                      'casa-media-overlay relative mb-4 overflow-hidden',
-                      isFeaturePair ? 'h-52 rounded-lg md:h-56' : 'h-48 rounded-xl md:h-52'
-                    )}
-                  >
+                  <div className="casa-media-overlay relative h-52 shrink-0 overflow-hidden md:h-60">
                     <Image
                       src={item.media.src}
                       alt={item.media.alt}
                       fill
                       sizes="(min-width: 1280px) 28vw, (min-width: 1024px) 42vw, (min-width: 640px) 44vw, 92vw"
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                    {item.meta ? (
+                      <span className="absolute bottom-3 left-3 rounded-md bg-white/92 px-2.5 py-1 text-xs font-bold text-[var(--casa-ink)] backdrop-blur">
+                        {item.meta}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="text-xl font-bold leading-snug text-[var(--casa-ink)]">{item.title}</p>
+                    <ArrowRight
+                      className="mt-1 h-5 w-5 shrink-0 text-[var(--casa-muted)] transition-all duration-300 group-hover:translate-x-1 group-hover:text-[var(--casa-accent-text)]"
+                      aria-hidden
                     />
                   </div>
-                ) : null}
-                <p className={cn('font-bold text-[var(--casa-ink)]', isFeaturePair ? 'text-xl' : 'text-base')}>
-                  {item.title}
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {item.meta ? (
-                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                      {item.meta}
-                    </p>
+
+                  {item.deadlineIso ? (
+                    <div className="mt-3">
+                      <DeadlineBadge deadlineIso={item.deadlineIso} locale={locale} />
+                    </div>
                   ) : null}
-                  {item.deadlineIso ? <DeadlineBadge deadlineIso={item.deadlineIso} locale={locale} /> : null}
+
+                  <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
+
+                  {showBestFor && item.bestFor ? (
+                    <div className="mt-auto pt-5">
+                      <span className="inline-flex rounded-md bg-[var(--casa-warm-soft)]/50 px-2.5 py-1 text-xs font-semibold text-[var(--casa-ink)]">
+                        {item.bestFor}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
-                <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
-                {showBestFor ? (
-                  <div className="mt-5 border-t border-[color:var(--casa-sand)]/80 pt-3">
-                    <p className="text-xs font-semibold text-[var(--casa-accent-text)]">{item.bestFor}</p>
-                  </div>
-                ) : null}
-                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4">
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      'inline-flex items-center gap-2 text-sm font-bold transition-colors',
-                      isFeaturePair
-                        ? 'rounded-lg bg-[var(--casa-ink-deep)] px-4 py-2.5 text-white shadow-[var(--shadow-soft)] hover:bg-[var(--casa-ink-deep-hover)]'
-                        : 'text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]'
-                    )}
-                  >
-                    {item.ctaLabel}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
-                  </Link>
-                </div>
-              </article>
+              </Link>
             </li>
           ))}
         </ul>

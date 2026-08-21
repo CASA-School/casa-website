@@ -38,6 +38,17 @@ const hostFamilyPhotos = {
       de: 'Gastfreundschaft beginnt mit einem klaren, praktischen Ankommensort.',
     },
   },
+  partnership: {
+    src: '/media/casa/host-family-room.jpg',
+    alt: {
+      en: 'host family room prepared for an arriving student',
+      de: 'Gastfamilienzimmer, vorbereitet für eine ankommende Lernende',
+    },
+    caption: {
+      en: 'CASA stays the contact for both sides for the whole stay.',
+      de: 'CASA bleibt für beide Seiten während des gesamten Aufenthalts Ansprechpartner.',
+    },
+  },
   home: {
     src: '/media/casa/student-room-alternative-1.jpg',
     alt: {
@@ -112,19 +123,16 @@ export default async function BecomeHostFamilyPage() {
           comparisonTitle: 'Einzelkursteilnehmende oder Gruppenaufenthalte',
           comparisonDescription:
             'CASA vermittelt sowohl langfristigere Aufenthalte für Intensivkurse als auch kurze Aufenthalte für Gruppenprogramme.',
-          requirementsTitle: 'Was CASA von Gastgeberhaushalten erwartet',
-          requirementsItems: [
-            'Verlässliche Kommunikation zu Einzug, Regeln und Tagesablauf',
-            'Respektvoller, kulturoffener Umgang im gemeinsamen Alltag',
-            'Verfügbare Kapazität im vereinbarten Zeitraum',
-            'Bereitschaft, Fragen frühzeitig mit CASA zu klären',
-          ],
-          supportTitle: 'Was CASA organisiert',
-          supportItems: [
-            'Passendes Matching nach Kursformat und Aufenthaltsdauer',
-            'Vorabinformationen zu Profil, Zeitraum und besonderen Hinweisen',
-            'Ansprechperson bei Rückfragen während des Aufenthalts',
-            'Den Satz für Ihr Format erhalten Sie schriftlich, bevor Sie zusagen',
+          partnershipEyebrow: 'Die Zusammenarbeit',
+          partnershipTitle: 'Wer was übernimmt',
+          partnershipDescription:
+            'Gastgeben ist eine Aufteilung, keine Übergabe. Sie bringen das Zuhause und den Alltag; CASA bringt das Matching, die Vorbereitung und eine Ansprechperson, die während des ganzen Aufenthalts erreichbar bleibt.',
+          partnershipBullets: [
+            'Sie sagen zu: ein verlässlicher Alltag, offener Umgang und der vereinbarte Zeitraum',
+            'CASA wählt aus: passend nach Kursformat, Aufenthaltsdauer und Profil',
+            'CASA informiert vorab: Profil, Zeitraum und besondere Hinweise, bevor jemand ankommt',
+            'CASA bleibt erreichbar: eine Ansprechperson für beide Seiten, nicht nur am Anfang',
+            'Schriftlich vor der Zusage: der Satz für Ihr Format',
           ],
           processEyebrow: 'Nächster Schritt',
           processTitle: 'In drei Schritten Gastgeberhaushalt werden',
@@ -194,19 +202,16 @@ export default async function BecomeHostFamilyPage() {
           comparisonTitle: 'Individual course participants or group stays',
           comparisonDescription:
             'CASA places both longer-stay intensive learners and short-term educational groups with host households.',
-          requirementsTitle: 'What CASA expects from host households',
-          requirementsItems: [
-            'Reliable communication around arrival, rules, and daily rhythm',
-            'Respectful and culturally open interaction in shared living',
-            'Confirmed availability for the agreed hosting period',
-            'Willingness to coordinate early with CASA when needed',
-          ],
-          supportTitle: 'What CASA handles',
-          supportItems: [
-            'Matching by course format, duration, and student profile',
-            'Clear pre-arrival information and planning details',
-            'Dedicated support contact during hosting period',
-            'The rate for your format, in writing, before you agree to anything',
+          partnershipEyebrow: 'The partnership',
+          partnershipTitle: 'Who carries what',
+          partnershipDescription:
+            'Hosting is a division of work, not a handover. You bring the home and the daily rhythm; CASA brings the matching, the preparation, and a contact who stays reachable for the whole stay.',
+          partnershipBullets: [
+            'You commit to: a dependable daily rhythm, an open household, and the dates you agreed',
+            'CASA chooses the match: by course format, length of stay, and student profile',
+            'CASA briefs you first: the profile, the dates, and anything particular, before anyone arrives',
+            'CASA stays reachable: one contact for both sides, not only at the start',
+            'In writing before you agree: the rate for your format',
           ],
           processEyebrow: 'Next step',
           processTitle: 'Become a host household in three steps',
@@ -365,7 +370,17 @@ export default async function BecomeHostFamilyPage() {
         to cap content.
       */}
       <section className="border-t border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-24">
+        {/*
+          `px-6 md:px-9` so these rows share the panels' content column. Without
+          it the row headings sat at x=40 while every panel heading on the page
+          sat at x=76, and a 36px step in the text edge is exactly what makes a
+          page look like its sections are different widths.
+        */}
         <Container>
+          {/* Inside the gutter, not replacing it: Container's padding-inline comes
+              from CSS, so px-9 on it would override the 40px gutter rather than
+              add to it. */}
+          <div className="px-6 md:px-9">
           <CourseFormatRows
             tone="light"
             maxOutcomes={5}
@@ -392,48 +407,37 @@ export default async function BecomeHostFamilyPage() {
                   alt: locale === 'de' ? hostFamilyPhotos.home.alt.de : hostFamilyPhotos.home.alt.en,
                 },
               },
+              {
+                id: 'host-partnership',
+                title: copy.partnershipTitle,
+                description: copy.partnershipDescription,
+                outcomes: copy.partnershipBullets,
+                meta: copy.partnershipEyebrow,
+                media: {
+                  src: hostFamilyPhotos.partnership.src,
+                  alt:
+                    locale === 'de'
+                      ? hostFamilyPhotos.partnership.alt.de
+                      : hostFamilyPhotos.partnership.alt.en,
+                },
+              },
             ]}
           />
-        </Container>
-      </section>
-
-      {/*
-        Two bullet lists, so NOT the EditorialSplit type — there is no photograph
-        and forcing one would be decoration. This is the other established
-        pattern: open on the page, a rule above each column, which is how the
-        "four things worth knowing" band on /courses is built. It was two white
-        cards with hairlines and shadows, adding two more filled rectangles to a
-        page that was already nothing but filled rectangles.
-      */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
-        <Container>
-          <div className="grid gap-10 md:grid-cols-2 md:gap-14">
-            {[
-              { title: copy.requirementsTitle, items: copy.requirementsItems },
-              { title: copy.supportTitle, items: copy.supportItems },
-            ].map((block) => (
-              <div key={block.title} className="border-t border-[color:var(--casa-sand)] pt-6">
-                <h2 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{block.title}</h2>
-                <ul className="mt-4 space-y-3">
-                  {block.items.map((item) => (
-                    <li
-                      key={item}
-                      className="flex gap-2.5 text-sm leading-relaxed text-[var(--casa-muted)]"
-                    >
-                      <span
-                        aria-hidden
-                        className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]"
-                      />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
           </div>
         </Container>
       </section>
 
+      {/*
+        The "what CASA expects" / "what CASA handles" pair used to be a separate
+        two-column block here. It is now the THIRD row of the section above —
+        "Who carries what" — because that is what those two lists were: one
+        division of labour, split across two headings that made the reader do the
+        joining. Merged, reworded so each line names who does the thing, and it
+        gains the composition and the photograph the other two rows have.
+
+        It also removes the last section on this page whose text sat at a
+        different left edge from the panels around it.
+      */}
       <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps

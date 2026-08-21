@@ -66,7 +66,10 @@ export default async function AccommodationPage() {
 
       {/* Section 1: Options Shortlist */}
       <section className="py-16 md:py-20 bg-white">
+        {/* px-6 md:px-9 inside the gutter, so every section on this page shares
+            one content column — the panels get theirs from their own padding. */}
         <Container>
+          <div className="px-6 md:px-9">
           <Breadcrumbs items={breadcrumbs} className="mb-8" />
           <GuidedPicker
             eyebrow={locale === 'de' ? 'Wohnoptionen' : 'Accommodation options'}
@@ -103,12 +106,14 @@ export default async function AccommodationPage() {
               },
             ]}
           />
+        </div>
         </Container>
       </section>
 
       {/* Section 2: Playbook */}
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
+          <div className="px-6 md:px-9">
           <AccommodationPlaybook
             title={locale === 'de' ? 'Wohnregeln und Kosten transparent' : 'Housing expectations playbook'}
             description={
@@ -157,6 +162,7 @@ export default async function AccommodationPage() {
               locale === 'de' ? 'Zimmerzustand beim Einzug dokumentieren' : 'Document room condition on arrival',
             ]}
           />
+        </div>
         </Container>
       </section>
 
@@ -334,7 +340,7 @@ export default async function AccommodationPage() {
       */}
       <section className="border-t border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
         <Container>
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between md:px-9">
             <div className="max-w-measure">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {locale === 'de' ? 'Gastgeben' : 'Hosting'}

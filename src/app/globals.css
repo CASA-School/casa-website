@@ -679,6 +679,27 @@ h3 {
 }
 
 /*
+ * THE EDITORIAL PANEL MEASURE.
+ *
+ * One width for every panel-type section: EditorialSplit, ProcessSteps,
+ * HumanStoryBlock, ComparisonModule on a light surface, the accommodation
+ * playbook. 76rem, centred inside whatever container it sits in.
+ *
+ * It exists because "why is this section full width" came up three times in a
+ * row and each answer was per-component. Measured: every one of those panels was
+ * 1360px at left 40 / right 40 — the full container, identical to the card grids
+ * and course-format rows around them. Nothing in the page ever narrowed, so a
+ * panel was indistinguishable in width from a grid.
+ *
+ * The ladder is now 85rem for grids and photo rows that want the whole frame,
+ * 76rem for a panel, 46rem for a heading block inside either.
+ */
+.casa-editorial-measure {
+  margin-inline: auto;
+  max-width: 76rem;
+}
+
+/*
  * Surface context — drives --casa-accent-text (see :root above).
  *
  * Prefer the semantic classes on new work. The Tailwind arbitrary-value

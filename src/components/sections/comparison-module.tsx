@@ -49,7 +49,7 @@ export function ComparisonModule({
       className={cn(
         isDark
           ? 'px-0 py-0'
-          : 'rounded-xl bg-white px-6 py-8 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:px-9 md:py-10',
+          : 'casa-editorial-measure rounded-xl bg-white px-6 py-8 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:px-9 md:py-10',
         className
       )}
     >
