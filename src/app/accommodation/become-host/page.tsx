@@ -268,9 +268,20 @@ export default async function BecomeHostFamilyPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
+      {/*
+        THE PAGE'S ONE INVERTED FIELD.
+
+        Measured before this, become-host ran wash / warm / white / warm / open /
+        warm — three warm panels and not a single dark band, while the homepage
+        takes its rhythm from four ink-deep fields punctuating the light ones. A
+        page of light and warm only reads as one long tunnel however good each
+        section is. The comparison is the moment a prospective host decides which
+        format suits them, so it is the section that earns the weight.
+      */}
+      <section className="bg-[var(--casa-ink-deep)] py-16 md:py-24">
         <Container>
           <ComparisonModule
+            tone="dark"
             eyebrow={copy.comparisonEyebrow}
             title={copy.comparisonTitle}
             description={copy.comparisonDescription}
@@ -351,8 +362,9 @@ export default async function BecomeHostFamilyPage() {
         docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md.
       */}
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
-        <Container className="space-y-8 md:space-y-10">
+        <Container className="space-y-14 md:space-y-20">
           <EditorialSplit
+            tone="plain"
             eyebrow={copy.roomEyebrow}
             title={copy.roomTitle}
             description={copy.roomDescription}
@@ -366,6 +378,7 @@ export default async function BecomeHostFamilyPage() {
           />
 
           <EditorialSplit
+            tone="plain"
             eyebrow={copy.agreementEyebrow}
             title={copy.agreementTitle}
             description={copy.agreementDescription}

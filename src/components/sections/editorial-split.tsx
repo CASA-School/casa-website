@@ -23,6 +23,16 @@ type EditorialSplitProps = {
   bullets: string[];
   photo: EditorialSplitPhoto;
   mediaSide?: 'left' | 'right';
+  /**
+   * `warm` is the homepage standard for this section type. `plain` is the same
+   * composition with no fill, for when a page needs more than one of these.
+   *
+   * Three warm panels down one page is a tunnel — measured on
+   * /accommodation/become-host, which ran warm / white / warm / open / warm with
+   * no inverted band at all. The component is still the standard; how many times
+   * a page may PAINT it is a separate question, and the answer is once.
+   */
+  tone?: 'warm' | 'plain';
   ctas?: Array<{
     label: string;
     href: string;
@@ -39,10 +49,17 @@ export function EditorialSplit({
   photo,
   mediaSide = 'right',
   ctas = [],
+  tone = 'warm',
   className,
 }: EditorialSplitProps) {
   return (
-    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10', className)}>
+    <section
+      data-reveal="true"
+      className={cn(
+        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10' : undefined,
+        className
+      )}
+    >
       <div
         className={cn(
           'grid items-start gap-10 lg:grid-cols-[1fr_1fr]',

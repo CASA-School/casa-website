@@ -164,6 +164,7 @@ export default async function AccommodationPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
         <Container>
             <EditorialSplit
+            tone="plain"
             eyebrow={locale === 'de' ? 'Ankommen' : 'Human story'}
             title={locale === 'de' ? 'Unterkunft als Teil des Lernerfolgs' : 'Housing as part of language progress'}
             description={
@@ -184,10 +185,20 @@ export default async function AccommodationPage() {
         </Container>
       </section>
 
-      {/* Section 4: Comparison */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+      {/*
+        Section 4: Comparison — AND THE PAGE'S ONE INVERTED FIELD.
+
+        Nine sections on this page and, measured, not one of them was dark: the
+        run was wash / white / warm / warm / white / warm / warm / white / light.
+        The homepage's rhythm comes from four ink-deep fields breaking up the
+        light ones, and without any the page reads as a tunnel however well each
+        band is built. Choosing between a shared flat and a host family is the
+        decision this page exists for, so that is the band that gets the weight.
+      */}
+      <section className="bg-[var(--casa-ink-deep)] py-16 md:py-24">
         <Container>
           <ComparisonModule
+            tone="dark"
             eyebrow={locale === 'de' ? 'Direktvergleich' : 'Side-by-side comparison'}
             title={locale === 'de' ? 'WGs vs Gastfamilien' : 'Shared Flats vs Host Families'}
             description={
@@ -276,6 +287,7 @@ export default async function AccommodationPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
+            tone="plain"
             eyebrow={locale === 'de' ? 'Ablauf' : 'How requests work'}
             title={locale === 'de' ? 'Unterkunftsanfrage in drei Schritten' : 'Request accommodation in three steps'}
             description={

@@ -12,6 +12,12 @@ export type ProcessStep = {
 type ProcessStepsProps = {
   /** Optional — see EditorialSplit. */
   eyebrow?: string;
+  /**
+   * `plain` drops the warm fill. Default stays `warm` so nothing changes where
+   * this is a page's single accent — /accommodation had FOUR warm panels in nine
+   * sections, which is what made it read as a tunnel.
+   */
+  tone?: 'warm' | 'plain';
   title: string;
   description: string;
   steps: ProcessStep[];
@@ -22,9 +28,20 @@ type ProcessStepsProps = {
   className?: string;
 };
 
-export function ProcessSteps({ eyebrow, title, description, steps, cta, className }: ProcessStepsProps) {
+export function ProcessSteps({
+  eyebrow,
+  title,
+  description,
+  steps,
+  cta,
+  tone = 'warm',
+  className,
+}: ProcessStepsProps) {
   return (
-    <section data-reveal="true" className={cn('rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10', className)}>
+    <section data-reveal="true" className={cn(
+        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10' : undefined,
+        className
+      )}>
       {eyebrow ? (
         <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
       ) : null}
