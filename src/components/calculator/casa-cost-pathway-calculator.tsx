@@ -94,10 +94,16 @@ const calculatorCopy = {
       accommodationHolidaySurcharge: 'Holiday surcharge',
       refundableDeposit: 'Refundable deposit',
     },
+    /*
+      Currency as the € symbol, matching the rest of the calculator's own output
+      and the accommodation pages. These hints wrote "580 EUR" while the figures
+      the calculator computes beside them render as "€580" — two formats in one
+      panel, on the one page that quotes both course and housing costs.
+    */
     priceHints: {
-      intensive: 'Intensive: 520 EUR / 4 weeks, 940 EUR / full level',
-      evening: 'Evening: 476 EUR / trimester',
-      accommodation: 'Housing: 580 EUR / 4 weeks, then 145 EUR / week',
+      intensive: 'Intensive: €520 / 4 weeks, €940 / full level',
+      evening: 'Evening: €476 / trimester',
+      accommodation: 'Housing: €580 / 4 weeks, then €145 / week',
     },
     validationError: 'Target level must be higher than current level.',
     weeks: 'weeks',
@@ -157,9 +163,9 @@ const calculatorCopy = {
       refundableDeposit: 'Rückerstattbare Kaution',
     },
     priceHints: {
-      intensive: 'Intensiv: 520 EUR / 4 Wochen, 940 EUR / ganzes Niveau',
-      evening: 'Abendkurs: 476 EUR / Trimester',
-      accommodation: 'Wohnen: 580 EUR / 4 Wochen, danach 145 EUR / Woche',
+      intensive: 'Intensiv: €520 / 4 Wochen, €940 / ganzes Niveau',
+      evening: 'Abendkurs: €476 / Trimester',
+      accommodation: 'Wohnen: €580 / 4 Wochen, danach €145 / Woche',
     },
     validationError: 'Das Zielniveau muss höher sein als das aktuelle Niveau.',
     weeks: 'Wochen',

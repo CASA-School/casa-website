@@ -6,6 +6,7 @@ import { HeroCUtilityRail } from '@/components/heroes';
 import { ComparisonModule, DecisionRail, EditorialSplit, ProcessSteps } from '@/components/sections';
 import { AccommodationArrivalChecklist } from '@/components/signatures';
 import { localizeAccommodationCosts } from '@/config/content/accommodation-costs';
+import { checkInSummary } from '@/config/content/accommodation-checkin-form';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
@@ -208,6 +209,43 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 </dl>
               </section>
 
+              {/*
+                What stands behind the deposit rule.
+
+                The costs table above says the €580 deposit comes back "when the
+                room and the keys come back as they were handed over", which until
+                now was an assertion with no mechanism shown. There is a
+                mechanism: CASA's check-in/check-out form, which the host and the
+                student complete together at arrival and again at departure. This
+                lists what it records — never the form's own fields, because its
+                house rules, liability terms and signatures are between those two
+                parties. See docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md.
+              */}
+              <section>
+                <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                  {locale === 'de' ? 'Übergabe wird gemeinsam dokumentiert' : 'The handover is documented together'}
+                </h2>
+                <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
+                  {locale === 'de'
+                    ? 'Bei der Ankunft und bei der Abreise füllen Gastgeber und Lernende dasselbe Formular gemeinsam aus. Deshalb ist die Rückzahlung der Kaution keine Ermessensfrage — beide Seiten haben denselben Zustand festgehalten.'
+                    : 'At arrival and again at departure, the host and the student fill in the same form together. That is why returning the deposit is not a matter of judgement — both sides recorded the same condition.'}
+                </p>
+                <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {checkInSummary(locale).map((item) => (
+                    <li
+                      key={item}
+                      className="flex gap-2.5 border-t border-[color:var(--casa-sand)] pt-3 text-sm leading-relaxed text-[var(--casa-ink)]"
+                    >
+                      <span
+                        aria-hidden
+                        className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]"
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
               <ComparisonModule
                 eyebrow={locale === 'de' ? 'Vergleich' : 'Comparison'}
                 title={locale === 'de' ? 'Ist diese Option die richtige für Sie?' : 'Is this option right for you?'}
@@ -344,7 +382,13 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 */
                 name: 'Mareike Thomeczek',
                 role: locale === 'de' ? 'Kurse & Unterkunft' : 'Courses & accommodation',
-                email: 'info@casa-bremen.de',
+                /*
+                  CASA's accommodation inbox, published in the footer of their own
+                  check-in/check-out form (docs/assets/). It was nowhere in this
+                  repository, so this rail was routing accommodation enquiries to
+                  the general office instead.
+                */
+                email: 'accommodation@casa-bremen.de',
               }}
             />
           </div>
