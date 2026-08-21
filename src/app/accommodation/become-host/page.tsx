@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 
 import { HeroDGallery } from '@/components/heroes';
 import { ComparisonModule, EditorialSplit, ProcessSteps } from '@/components/sections';
-import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -81,6 +80,31 @@ export default async function BecomeHostFamilyPage() {
             'Gute ÖPNV-Erreichbarkeit zur CASA Sprachschule',
             'Klare Hausregeln und gegenseitige Erwartungen',
           ],
+          /*
+            Aus dem CASA Check-in/Check-out-Formular selbst
+            (docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md). Genau die Positionen, die
+            das Formular bei An- und Abreise bewertet — daran kann ein Haushalt
+            vorab selbst prüfen, ob das Zimmer passt.
+          */
+          roomTitle: 'Was das Zimmer mitbringen sollte',
+          roomDescription:
+            'Bei An- und Abreise halten Gastgeber und Lernende den Zustand gemeinsam auf einem Formular fest. Bewertet werden genau diese Positionen:',
+          roomItems: [
+            'Bett und Matratze',
+            'Schreibtisch und Stuhl',
+            'Kleiderschrank sowie Regal oder Nachttisch',
+            'Funktionsfähige Lampe',
+            'Bettwäsche (Anzahl wird festgehalten)',
+          ],
+          agreementTitle: 'Was Sie festlegen — und was schriftlich steht',
+          agreementDescription:
+            'Hausregeln und Mitbenutzung bestimmen Sie. Beides wird zusammen mit dem Zimmerzustand dokumentiert und von beiden Seiten unterschrieben — bei der Ankunft und bei der Abreise. Das schützt Ihren Haushalt genauso wie die Lernenden.',
+          agreementRules: ['Rauchen', 'Besuch', 'Reinigung'],
+          agreementShared: ['Küche', 'Bad', 'Waschmaschine', 'WLAN'],
+          agreementRulesLabel: 'Hausregeln, die Sie setzen',
+          agreementSharedLabel: 'Mitbenutzung, die Sie anbieten',
+          contactTitle: 'Ansprechperson für Unterkunft',
+          contactBody: 'Fragen zum Gastgebersein beantwortet das Unterkunftsteam direkt.',
           comparisonEyebrow: 'Aufnahmeformate',
           comparisonTitle: 'Einzelkursteilnehmende oder Gruppenaufenthalte',
           comparisonDescription:
@@ -97,7 +121,7 @@ export default async function BecomeHostFamilyPage() {
             'Passendes Matching nach Kursformat und Aufenthaltsdauer',
             'Vorabinformationen zu Profil, Zeitraum und besonderen Hinweisen',
             'Ansprechperson bei Rückfragen während des Aufenthalts',
-            'Transparente Aufwandsentschädigung je nach Format',
+            'Den Satz für Ihr Format erhalten Sie schriftlich, bevor Sie zusagen',
           ],
           processEyebrow: 'Nächster Schritt',
           processTitle: 'In drei Schritten Gastgeberhaushalt werden',
@@ -136,6 +160,31 @@ export default async function BecomeHostFamilyPage() {
             'Good public transport connection to CASA',
             'Clear house rules and shared expectations',
           ],
+          /*
+            Taken from CASA's own check-in/check-out form
+            (docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md). These are exactly the
+            items the form rates at arrival and departure, so a household can
+            check its own room against the list before enquiring.
+          */
+          roomTitle: 'What the room needs',
+          roomDescription:
+            'At arrival and again at departure, the host and the student record the condition together on one form. These are the items it rates:',
+          roomItems: [
+            'A bed and a mattress',
+            'A desk and a chair',
+            'A wardrobe, plus a shelf or bedside table',
+            'A working lamp',
+            'Bed linen — the count is recorded',
+          ],
+          agreementTitle: 'What you set, and what goes in writing',
+          agreementDescription:
+            'The house rules and the shared facilities are yours to decide. Both are written down alongside the room\u2019s condition and signed by both sides, at arrival and at departure. That protects your household as much as it protects the student.',
+          agreementRules: ['Smoking', 'Visitors', 'Cleaning'],
+          agreementShared: ['Kitchen', 'Bathroom', 'Washing machine', 'WLAN'],
+          agreementRulesLabel: 'House rules you set',
+          agreementSharedLabel: 'Facilities you share',
+          contactTitle: 'Your accommodation contact',
+          contactBody: 'The accommodation team answers questions about hosting directly.',
           comparisonEyebrow: 'Hosting formats',
           comparisonTitle: 'Individual course participants or group stays',
           comparisonDescription:
@@ -152,7 +201,7 @@ export default async function BecomeHostFamilyPage() {
             'Matching by course format, duration, and student profile',
             'Clear pre-arrival information and planning details',
             'Dedicated support contact during hosting period',
-            'Transparent compensation model by hosting format',
+            'The rate for your format, in writing, before you agree to anything',
           ],
           processEyebrow: 'Next step',
           processTitle: 'Become a host household in three steps',
@@ -171,6 +220,7 @@ export default async function BecomeHostFamilyPage() {
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       <HeroDGallery
+        breadcrumbs={copy.breadcrumbs}
         eyebrow={copy.eyebrow}
         title={copy.title}
         description={copy.description}
@@ -194,11 +244,12 @@ export default async function BecomeHostFamilyPage() {
         ctas={copy.heroCtas}
       />
 
-      <section className="py-6 md:py-8 bg-white">
-        <Container>
-          <Breadcrumbs items={copy.breadcrumbs} />
-        </Container>
-      </section>
+      {/*
+        The breadcrumb band that used to sit here is gone — it rendered BELOW the
+        hero, so this page put its breadcrumbs in a different place from
+        /accommodation/host and /accommodation/flat, which carry them above the
+        h1. HeroDGallery now forwards them to HeroSurface like every other hero.
+      */}
 
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
@@ -212,7 +263,13 @@ export default async function BecomeHostFamilyPage() {
               alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
               caption: locale === 'de' ? hostFamilyPhotos.arrival.caption.de : hostFamilyPhotos.arrival.caption.en,
             }}
-            ctas={copy.heroCtas}
+            /*
+              No `ctas` here. This passed `heroCtas` verbatim, so the identical
+              "Apply as host family" / "View accommodation" pair rendered in the
+              hero and again 400px later, with the process section's own CTA
+              making three asks on one page. The hero asks; the process section
+              closes. Same reasoning as the course detail next-steps block.
+            */
           />
         </Container>
       </section>
@@ -239,7 +296,15 @@ export default async function BecomeHostFamilyPage() {
               {
                 label: locale === 'de' ? 'Verpflegung' : 'Meals',
                 left: locale === 'de' ? 'Nach vereinbartem Hostingmodell' : 'Based on agreed hosting model',
-                right: locale === 'de' ? 'Häufig mit Halbpension organisiert' : 'Often coordinated with half-board',
+                /*
+                  Was "Often coordinated with half-board" / "Häufig mit
+                  Halbpension organisiert". The verified fact is narrower —
+                  COURSE_FACTS_SOURCE_OF_TRUTH.md records group host-family
+                  stays as "single or double, meals optional". Half-board is
+                  breakfast and dinner specifically, which is not what "optional"
+                  states, so this now says what is actually published.
+                */
+                right: locale === 'de' ? 'Verpflegung optional, nach Absprache' : 'Meals optional, agreed per stay',
               },
               {
                 label: locale === 'de' ? 'Tagesstruktur' : 'Daily rhythm',
@@ -252,12 +317,103 @@ export default async function BecomeHostFamilyPage() {
                 right: locale === 'de' ? 'Koordination, Ablaufabstimmung, Supportkontakt' : 'Coordination, scheduling alignment, and support contact',
               },
               {
+                /*
+                  "Transparent by placement model" said the word transparent and
+                  no number, in a row headed Compensation, on the one page whose
+                  reader's first question is what they receive — and the sidebar
+                  said "transparent compensation model" as well, so the claim
+                  appeared three times and the figure zero. CASA's per-format host
+                  rate is not published anywhere in this repository and is not
+                  invented here. What the page can promise honestly is when the
+                  host learns it. Ask CASA for the rates and put them here.
+                */
                 label: locale === 'de' ? 'Aufwandsentschädigung' : 'Compensation',
-                left: locale === 'de' ? 'Transparent je Placementmodell' : 'Transparent by placement model',
-                right: locale === 'de' ? 'Transparent je Gruppensetting' : 'Transparent by group arrangement',
+                left:
+                  locale === 'de'
+                    ? 'Satz je Placement, schriftlich vor der Zusage'
+                    : 'A per-placement rate, in writing before you agree',
+                right:
+                  locale === 'de'
+                    ? 'Satz je Gruppenaufenthalt, schriftlich vor der Zusage'
+                    : 'A per-group rate, in writing before you agree',
               },
             ]}
           />
+        </Container>
+      </section>
+
+      {/*
+        The two sections a prospective host actually needs, and neither existed.
+
+        Everything here comes from CASA's own check-in/check-out form — the room
+        items it rates, the three house rules the host sets, the four shared
+        facilities it lists — so a household can measure itself against the real
+        document before enquiring. See docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md.
+        The form is not published; these are the parts that concern the host.
+      */}
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+        <Container className="grid gap-10 lg:grid-cols-2 lg:gap-14">
+          <div>
+            <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{copy.roomTitle}</h2>
+            <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
+              {copy.roomDescription}
+            </p>
+            <ul className="mt-6 border-t border-[color:var(--casa-sand)]">
+              {copy.roomItems.map((item) => (
+                <li
+                  key={item}
+                  className="flex gap-3 border-b border-[color:var(--casa-sand)]/60 py-3 text-sm leading-relaxed text-[var(--casa-ink)]"
+                >
+                  <span aria-hidden className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+              {copy.agreementTitle}
+            </h2>
+            <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
+              {copy.agreementDescription}
+            </p>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+              {[
+                { label: copy.agreementRulesLabel, items: copy.agreementRules },
+                { label: copy.agreementSharedLabel, items: copy.agreementShared },
+              ].map((block) => (
+                <div key={block.label}>
+                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+                    {block.label}
+                  </p>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {block.items.map((item) => (
+                      <li
+                        key={item}
+                        className="rounded-md bg-[var(--casa-warm-soft)]/35 px-3 py-1.5 text-sm text-[var(--casa-ink)]"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 border-t border-[color:var(--casa-sand)] pt-6">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+                {copy.contactTitle}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.contactBody}</p>
+              <a
+                href="mailto:accommodation@casa-bremen.de"
+                className="casa-cta-link mt-3 inline-flex text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
+              >
+                accommodation@casa-bremen.de
+              </a>
+            </div>
+          </div>
         </Container>
       </section>
 

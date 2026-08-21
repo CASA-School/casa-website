@@ -5,6 +5,7 @@ import { ComparisonModule, EditorialSplit, GuidedPicker, HumanStoryBlock, Proces
 import { AccommodationPlaybook } from '@/components/signatures';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
+import { TextCta } from '@/components/ui/text-cta';
 import { accommodationPriceSummary } from '@/config/content/accommodation-costs';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
@@ -310,6 +311,41 @@ export default async function AccommodationPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <StudentHousingGuide locale={locale} />
+        </Container>
+      </section>
+
+      {/*
+        THE OTHER SIDE OF THIS SECTION.
+
+        /accommodation/become-host was reachable only from the nav dropdown: this
+        page linked to /contact, /accommodation/flat and /accommodation/host and
+        nowhere else, so a Bremen household who arrived here — the exact audience
+        for it — had no route to it. Host families are also what makes the host
+        option on this page possible, which is why the invitation belongs at the
+        end of the student journey rather than competing with it at the top.
+      */}
+      <section className="border-t border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
+        <Container>
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-measure">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+                {locale === 'de' ? 'Gastgeben' : 'Hosting'}
+              </p>
+              <h2 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                {locale === 'de'
+                  ? 'Sie wohnen in Bremen und haben ein Zimmer frei?'
+                  : 'Do you live in Bremen with a room to spare?'}
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">
+                {locale === 'de'
+                  ? 'CASA vermittelt seit 1983 Lernende an Gastgeber in Bremen. Familien, Paare und Einzelpersonen können gastgeben.'
+                  : 'CASA has matched learners with households in Bremen since 1983. Families, couples and single-person households can all host.'}
+              </p>
+            </div>
+            <TextCta href="/accommodation/become-host" className="shrink-0">
+              {locale === 'de' ? 'Gastfamilie werden' : 'Become a host family'}
+            </TextCta>
+          </div>
         </Container>
       </section>
     </main>

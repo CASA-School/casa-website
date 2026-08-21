@@ -4,6 +4,8 @@ import { MediaFrame } from '@/components/ui/media-frame';
 import { Button } from '@/components/ui/button';
 import { TextCta } from '@/components/ui/text-cta';
 
+import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
+
 import { HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
 
 type HeroDGalleryProps = {
@@ -14,6 +16,13 @@ type HeroDGalleryProps = {
   ctas: HeroAction[];
   proofItems?: HeroProofItem[];
   themeClassName?: string;
+  /**
+   * Forwarded to HeroSurface, which renders them above the h1 like every other
+   * hero. Without this prop, /accommodation/become-host had to place its own
+   * breadcrumb band BELOW the hero — so the one page using this hero put its
+   * breadcrumbs in a different position from its two sibling pages.
+   */
+  breadcrumbs?: BreadcrumbItem[];
 };
 
 export function HeroDGallery({
@@ -23,9 +32,10 @@ export function HeroDGallery({
   photos,
   ctas,
   themeClassName = 'hero-theme-accommodation',
+  breadcrumbs,
 }: HeroDGalleryProps) {
   return (
-    <HeroSurface themeClassName={themeClassName} archetype="D">
+    <HeroSurface themeClassName={themeClassName} archetype="D" breadcrumbs={breadcrumbs}>
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
       <h1 className="mt-3 max-w-4xl text-4xl font-black text-[var(--casa-ink)] sm:text-5xl">{title}</h1>
       <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
