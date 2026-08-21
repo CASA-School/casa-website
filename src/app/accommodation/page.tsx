@@ -48,18 +48,14 @@ export default async function AccommodationPage() {
             ? 'Shared flats oder Host families: beide Wege werden durch CASA begleitet und transparent erklärt.'
             : 'Shared flats or host families: both pathways are supported by CASA with transparent expectations.'
         }
+        /* One photograph — see the note in HeroDGallery about the three-tile mosaic. */
         photos={[
           {
             ...pageConfig.photos.thumbA,
-            caption: 'Shared flat bedroom with desk and balcony - Independent living close to CASA.',
-          },
-          {
-            ...pageConfig.photos.thumbB,
-            caption: 'Host family kitchen table - Daily immersion and cultural exchange.',
-          },
-          {
-            ...pageConfig.photos.thumbC,
-            caption: 'Shared flat kitchen with study materials - Practical everyday student life.',
+            caption:
+              locale === 'de'
+                ? 'Wohnen bei CASA: eigenes Zimmer, kurzer Weg zur Sprachschule.'
+                : 'Living with CASA: your own room, a short way to the school.',
           },
         ]}
         ctas={pageConfig.ctas}

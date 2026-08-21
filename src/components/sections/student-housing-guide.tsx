@@ -107,7 +107,7 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
   return (
     <section
       className={cn(
-        'rounded-xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8',
+        'rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-8',
         className
       )}
     >
@@ -118,7 +118,13 @@ export function StudentHousingGuide({ locale, className }: StudentHousingGuidePr
       <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
       <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{copy.description}</p>
 
-      <Accordion type="multiple" className="mt-8 divide-y divide-[color:var(--casa-sand)]/70 rounded-xl border border-[color:var(--casa-sand)] overflow-hidden">
+      {/*
+        No box of its own. The accordion sat in a bordered, rounded container
+        INSIDE this section's own bordered card — a card in a card, which is the
+        nesting removed from the course pages. Its own dividers already separate
+        the rows, so the outer rule was doing nothing the inner ones weren't.
+      */}
+      <Accordion type="multiple" className="mt-8 divide-y divide-[color:var(--casa-sand)]/70 border-t border-[color:var(--casa-sand)]">
         {topics.map((topic) => (
           <AccordionItem key={topic.id} value={topic.id} className="border-b-0 bg-[var(--casa-surface-wash)] px-5 hover:bg-[var(--casa-canvas)] transition-colors duration-200">
             <AccordionTrigger className="py-4 text-base font-semibold text-[var(--casa-ink)] hover:no-underline">

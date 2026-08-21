@@ -221,7 +221,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
         };
 
   return (
-    <section className={cn('rounded-xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8', className)}>
+    <section className={cn('rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-8', className)}>
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.eyebrow}</p>
       <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
       <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>

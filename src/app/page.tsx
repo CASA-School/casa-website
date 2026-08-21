@@ -607,7 +607,7 @@ export default async function HomePage() {
                           --casa-canvas tint. The page is pure white now, so that
                           step is almost invisible and the cards lose their edge.
                         */
-                        'group flex h-full flex-col rounded-2xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300',
+                        'group flex h-full flex-col rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300',
                         'motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-modal)]',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2'
                       )}
@@ -750,7 +750,7 @@ export default async function HomePage() {
             tablet width keeps the shield aligned to its first line rather than
             floating to the vertical centre.
           */}
-          <ul className="mx-auto mt-10 grid max-w-[64rem] divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-card)] md:mt-12 md:grid-cols-3 md:divide-x md:divide-y-0">
+          <ul className="mx-auto mt-10 grid max-w-[64rem] divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] md:mt-12 md:grid-cols-3 md:divide-x md:divide-y-0">
             {[
               {
                 title: locale === 'de' ? 'Keine Gewinnausschüttung' : 'No profit distribution',
@@ -834,7 +834,7 @@ export default async function HomePage() {
                   <Link
                     key={exam.href}
                     href={exam.href}
-                    className="group flex min-h-[19rem] flex-col rounded-lg bg-white/[0.06] p-5 ring-1 ring-white/12 transition-all hover:-translate-y-0.5 hover:bg-white/[0.09] hover:ring-white/22 md:p-6"
+                    className="group flex min-h-[19rem] flex-col rounded-xl bg-white/[0.06] p-5 ring-1 ring-white/12 transition-all hover:-translate-y-0.5 hover:bg-white/[0.09] hover:ring-white/22 md:p-6"
                   >
                     <div className="flex items-start justify-between gap-4">
                       {/* /45 measured 4.26:1 on the dark panel — under AA for 11px text. */}
@@ -881,7 +881,7 @@ export default async function HomePage() {
       >
         <Container>
           <div className="mx-auto grid max-w-[85rem] gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-            <div className="relative overflow-hidden rounded-lg bg-[var(--casa-ink-deep)] shadow-[var(--shadow-modal)]">
+            <div className="relative overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] shadow-[var(--shadow-modal)]">
               <div className="relative aspect-[4/3]">
                 <Image
                   src={accommodationPhoto.src}

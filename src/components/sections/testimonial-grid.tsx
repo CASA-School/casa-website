@@ -54,7 +54,7 @@ function FeaturedQuoteTile({
   locale: ContentLocale;
 }) {
   return (
-    <article className="h-full rounded-xl border border-[color:var(--casa-sand)] bg-[color:var(--casa-warm-soft)] p-6 shadow-[var(--shadow-card)] md:p-8">
+    <article className="h-full rounded-xl bg-[color:var(--casa-warm-soft)] p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)] md:p-8">
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
         {locale === 'de' ? 'Ausgewählte Stimme' : 'Featured story'}
       </p>

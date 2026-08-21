@@ -86,6 +86,7 @@ export default async function BecomeHostFamilyPage() {
             das Formular bei An- und Abreise bewertet — daran kann ein Haushalt
             vorab selbst prüfen, ob das Zimmer passt.
           */
+          roomEyebrow: 'Das Zimmer',
           roomTitle: 'Was das Zimmer mitbringen sollte',
           roomDescription:
             'Bei An- und Abreise halten Gastgeber und Lernende den Zustand gemeinsam auf einem Formular fest. Bewertet werden genau diese Positionen:',
@@ -96,15 +97,16 @@ export default async function BecomeHostFamilyPage() {
             'Funktionsfähige Lampe',
             'Bettwäsche (Anzahl wird festgehalten)',
           ],
+          agreementEyebrow: 'Vereinbarungen',
           agreementTitle: 'Was Sie festlegen — und was schriftlich steht',
           agreementDescription:
             'Hausregeln und Mitbenutzung bestimmen Sie. Beides wird zusammen mit dem Zimmerzustand dokumentiert und von beiden Seiten unterschrieben — bei der Ankunft und bei der Abreise. Das schützt Ihren Haushalt genauso wie die Lernenden.',
-          agreementRules: ['Rauchen', 'Besuch', 'Reinigung'],
-          agreementShared: ['Küche', 'Bad', 'Waschmaschine', 'WLAN'],
-          agreementRulesLabel: 'Hausregeln, die Sie setzen',
-          agreementSharedLabel: 'Mitbenutzung, die Sie anbieten',
-          contactTitle: 'Ansprechperson für Unterkunft',
-          contactBody: 'Fragen zum Gastgebersein beantwortet das Unterkunftsteam direkt.',
+          agreementBullets: [
+            'Hausregeln, die Sie setzen: Rauchen, Besuch, Reinigung',
+            'Mitbenutzung, die Sie anbieten: Küche, Bad, Waschmaschine, WLAN',
+            'Alles wird bei Ankunft und Abreise von beiden Seiten unterschrieben',
+            'Fragen beantwortet das Unterkunftsteam: accommodation@casa-bremen.de',
+          ],
           comparisonEyebrow: 'Aufnahmeformate',
           comparisonTitle: 'Einzelkursteilnehmende oder Gruppenaufenthalte',
           comparisonDescription:
@@ -166,6 +168,7 @@ export default async function BecomeHostFamilyPage() {
             items the form rates at arrival and departure, so a household can
             check its own room against the list before enquiring.
           */
+          roomEyebrow: 'The room',
           roomTitle: 'What the room needs',
           roomDescription:
             'At arrival and again at departure, the host and the student record the condition together on one form. These are the items it rates:',
@@ -176,15 +179,16 @@ export default async function BecomeHostFamilyPage() {
             'A working lamp',
             'Bed linen — the count is recorded',
           ],
+          agreementEyebrow: 'The agreement',
           agreementTitle: 'What you set, and what goes in writing',
           agreementDescription:
             'The house rules and the shared facilities are yours to decide. Both are written down alongside the room\u2019s condition and signed by both sides, at arrival and at departure. That protects your household as much as it protects the student.',
-          agreementRules: ['Smoking', 'Visitors', 'Cleaning'],
-          agreementShared: ['Kitchen', 'Bathroom', 'Washing machine', 'WLAN'],
-          agreementRulesLabel: 'House rules you set',
-          agreementSharedLabel: 'Facilities you share',
-          contactTitle: 'Your accommodation contact',
-          contactBody: 'The accommodation team answers questions about hosting directly.',
+          agreementBullets: [
+            'House rules you set: smoking, visitors, cleaning',
+            'Facilities you share: kitchen, bathroom, washing machine, WLAN',
+            'All of it signed by both sides, at arrival and at departure',
+            'Questions go to the accommodation team: accommodation@casa-bremen.de',
+          ],
           comparisonEyebrow: 'Hosting formats',
           comparisonTitle: 'Individual course participants or group stays',
           comparisonDescription:
@@ -229,16 +233,6 @@ export default async function BecomeHostFamilyPage() {
             src: hostFamilyPhotos.dinner.src,
             alt: locale === 'de' ? hostFamilyPhotos.dinner.alt.de : hostFamilyPhotos.dinner.alt.en,
             caption: locale === 'de' ? hostFamilyPhotos.dinner.caption.de : hostFamilyPhotos.dinner.caption.en,
-          },
-          {
-            src: hostFamilyPhotos.arrival.src,
-            alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
-            caption: locale === 'de' ? hostFamilyPhotos.arrival.caption.de : hostFamilyPhotos.arrival.caption.en,
-          },
-          {
-            src: hostFamilyPhotos.home.src,
-            alt: locale === 'de' ? hostFamilyPhotos.home.alt.de : hostFamilyPhotos.home.alt.en,
-            caption: locale === 'de' ? hostFamilyPhotos.home.caption.de : hostFamilyPhotos.home.caption.en,
           },
         ]}
         ctas={copy.heroCtas}
@@ -343,108 +337,81 @@ export default async function BecomeHostFamilyPage() {
       </section>
 
       {/*
-        The two sections a prospective host actually needs, and neither existed.
+        THE HOMEPAGE STANDARD, not a bespoke layout.
 
-        Everything here comes from CASA's own check-in/check-out form — the room
-        items it rates, the three house rules the host sets, the four shared
-        facilities it lists — so a household can measure itself against the real
-        document before enquiring. See docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md.
-        The form is not published; these are the parts that concern the host.
+        These two sections were hand-rolled here as a bare two-column grid while
+        the rest of the site renders exactly this shape — eyebrow, serif heading,
+        supporting sentence, bullet list, one photograph — through EditorialSplit,
+        which is what the "Why CASA" band on the homepage is. Building a
+        one-off instead of reusing it is how the accommodation pages drifted into
+        looking like a different site.
+
+        `mediaSide` alternates so two consecutive splits do not read as one long
+        panel. Content is from CASA's own check-in/check-out form; see
+        docs/ACCOMMODATION_CHECK_IN_OUT_FORM.md.
       */}
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
-        <Container className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-          <div>
-            <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{copy.roomTitle}</h2>
-            <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
-              {copy.roomDescription}
-            </p>
-            <ul className="mt-6 border-t border-[color:var(--casa-sand)]">
-              {copy.roomItems.map((item) => (
-                <li
-                  key={item}
-                  className="flex gap-3 border-b border-[color:var(--casa-sand)]/60 py-3 text-sm leading-relaxed text-[var(--casa-ink)]"
-                >
-                  <span aria-hidden className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <Container className="space-y-8 md:space-y-10">
+          <EditorialSplit
+            eyebrow={copy.roomEyebrow}
+            title={copy.roomTitle}
+            description={copy.roomDescription}
+            bullets={copy.roomItems}
+            mediaSide="left"
+            photo={{
+              src: hostFamilyPhotos.arrival.src,
+              alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
+              caption: locale === 'de' ? hostFamilyPhotos.arrival.caption.de : hostFamilyPhotos.arrival.caption.en,
+            }}
+          />
 
-          <div>
-            <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
-              {copy.agreementTitle}
-            </h2>
-            <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
-              {copy.agreementDescription}
-            </p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              {[
-                { label: copy.agreementRulesLabel, items: copy.agreementRules },
-                { label: copy.agreementSharedLabel, items: copy.agreementShared },
-              ].map((block) => (
-                <div key={block.label}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                    {block.label}
-                  </p>
-                  <ul className="mt-3 flex flex-wrap gap-2">
-                    {block.items.map((item) => (
-                      <li
-                        key={item}
-                        className="rounded-md bg-[var(--casa-warm-soft)]/35 px-3 py-1.5 text-sm text-[var(--casa-ink)]"
-                      >
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 border-t border-[color:var(--casa-sand)] pt-6">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {copy.contactTitle}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.contactBody}</p>
-              <a
-                href="mailto:accommodation@casa-bremen.de"
-                className="casa-cta-link mt-3 inline-flex text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
-              >
-                accommodation@casa-bremen.de
-              </a>
-            </div>
-          </div>
+          <EditorialSplit
+            eyebrow={copy.agreementEyebrow}
+            title={copy.agreementTitle}
+            description={copy.agreementDescription}
+            bullets={copy.agreementBullets}
+            photo={{
+              src: hostFamilyPhotos.home.src,
+              alt: locale === 'de' ? hostFamilyPhotos.home.alt.de : hostFamilyPhotos.home.alt.en,
+              caption: locale === 'de' ? hostFamilyPhotos.home.caption.de : hostFamilyPhotos.home.caption.en,
+            }}
+          />
         </Container>
       </section>
 
+      {/*
+        Two bullet lists, so NOT the EditorialSplit type — there is no photograph
+        and forcing one would be decoration. This is the other established
+        pattern: open on the page, a rule above each column, which is how the
+        "four things worth knowing" band on /courses is built. It was two white
+        cards with hairlines and shadows, adding two more filled rectangles to a
+        page that was already nothing but filled rectangles.
+      */}
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
-          <div className="grid gap-6 md:grid-cols-2">
-            <article className="rounded-xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.requirementsTitle}</p>
-              <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-              <ul className="mt-4 space-y-3">
-                {copy.requirementsItems.map((item) => (
-                  <li key={item} className="flex gap-3 text-base text-[var(--casa-ink)]">
-                    <span aria-hidden className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--casa-blue)]" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-
-            <article className="rounded-xl bg-white p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{copy.supportTitle}</p>
-              <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-              <ul className="mt-4 space-y-3">
-                {copy.supportItems.map((item) => (
-                  <li key={item} className="flex gap-3 text-base text-[var(--casa-ink)]">
-                    <span aria-hidden className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--casa-blue)]" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
+          <div className="grid gap-10 md:grid-cols-2 md:gap-14">
+            {[
+              { title: copy.requirementsTitle, items: copy.requirementsItems },
+              { title: copy.supportTitle, items: copy.supportItems },
+            ].map((block) => (
+              <div key={block.title} className="border-t border-[color:var(--casa-sand)] pt-6">
+                <h2 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{block.title}</h2>
+                <ul className="mt-4 space-y-3">
+                  {block.items.map((item) => (
+                    <li
+                      key={item}
+                      className="flex gap-2.5 text-sm leading-relaxed text-[var(--casa-muted)]"
+                    >
+                      <span
+                        aria-hidden
+                        className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]"
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </Container>
       </section>
