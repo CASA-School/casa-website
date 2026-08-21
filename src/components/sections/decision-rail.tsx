@@ -16,6 +16,17 @@ type DecisionRailProps = {
    * every course page. See components/sections/teaching-staff-card.
    */
   teachingStaff?: { title: string; body: string } | null;
+  /**
+   * The one named person who answers about this thing.
+   *
+   * Same rule as CourseContact in config/courses/course-profiles.ts: only a
+   * person CASA already publishes in that role, or one staff have confirmed. A
+   * named contact is a commitment that a real person replies, and getting it
+   * wrong sends enquiries nowhere. `email` is expected to be a published
+   * address — CASA prints names and roles for its team but not individual
+   * mailboxes, so the office inbox is the honest route to a named person.
+   */
+  contact?: { name: string; role: string; email: string } | null;
 };
 
 export function DecisionRail({
@@ -25,6 +36,7 @@ export function DecisionRail({
   notes,
   deadlineIso,
   teachingStaff,
+  contact,
 }: DecisionRailProps) {
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -64,6 +76,22 @@ export function DecisionRail({
             <DeadlineBadge deadlineIso={deadlineIso} locale={locale} />
           </div>
         </div>
+
+        {contact ? (
+          <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+              {locale === 'de' ? 'Ansprechperson' : 'Your contact'}
+            </p>
+            <p className="mt-2 text-sm font-bold text-[var(--casa-ink)]">{contact.name}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-[var(--casa-muted)]">{contact.role}</p>
+            <a
+              href={`mailto:${contact.email}`}
+              className="casa-cta-link mt-3 inline-flex text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
+            >
+              {contact.email}
+            </a>
+          </div>
+        ) : null}
 
         {teachingStaff ? (
           <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">

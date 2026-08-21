@@ -1,3 +1,4 @@
+import { ACCOMMODATION_FEES } from '@/config/calculator/pricing';
 import type { ContentLocale } from '@/lib/content/types';
 
 /**
@@ -32,10 +33,23 @@ export type AccommodationCost = {
   note?: { en: string; de: string };
 };
 
+/*
+ * DERIVED, not restated.
+ *
+ * config/calculator/pricing.ts already held these figures as ACCOMMODATION_FEES
+ * (base4Weeks, commissionFee, deposit, perAdditionalWeek), sourced from
+ * Wohnen_2023.pdf and the FAQ, and the cost calculator has been quoting from
+ * them all along. Writing them out again here would have been a second source
+ * for one set of numbers — exactly the duplication this file exists to remove on
+ * the accommodation pages. They agree today; deriving is what keeps them
+ * agreeing.
+ */
+const eur = (value: number) => `€${value}`;
+
 export const accommodationCosts: AccommodationCost[] = [
   {
     label: { en: 'First 4 weeks', de: 'Erste 4 Wochen' },
-    amount: '€580',
+    amount: eur(ACCOMMODATION_FEES.base4Weeks),
     note: {
       en: 'The same for a host family and for a CASA shared flat.',
       de: 'Für die Gastfamilie und für die CASA-WG identisch.',
@@ -43,7 +57,7 @@ export const accommodationCosts: AccommodationCost[] = [
   },
   {
     label: { en: 'Each additional week', de: 'Jede weitere Woche' },
-    amount: '€145',
+    amount: eur(ACCOMMODATION_FEES.perAdditionalWeek),
     note: {
       // One figure, two occasions. Both are in the verified table.
       en: 'Also the surcharge for the Christmas and Easter closure weeks.',
@@ -52,7 +66,7 @@ export const accommodationCosts: AccommodationCost[] = [
   },
   {
     label: { en: 'Placement fee', de: 'Vermittlungsgebühr' },
-    amount: '€50',
+    amount: eur(ACCOMMODATION_FEES.commissionFee),
     note: {
       en: 'Charged once, for arranging the placement.',
       de: 'Einmalig, für die Vermittlung.',
@@ -60,7 +74,7 @@ export const accommodationCosts: AccommodationCost[] = [
   },
   {
     label: { en: 'Deposit', de: 'Deponat' },
-    amount: '€580',
+    amount: eur(ACCOMMODATION_FEES.deposit),
     note: {
       en: 'Refunded when the room and the keys come back as they were handed over.',
       de: 'Wird zurückerstattet, wenn Zimmer und Schlüssel so übergeben werden wie erhalten.',
@@ -84,7 +98,10 @@ export function localizeAccommodationCosts(locale: ContentLocale) {
  * to itemise four charges.
  */
 export function accommodationPriceSummary(locale: ContentLocale) {
+  const base = eur(ACCOMMODATION_FEES.base4Weeks);
+  const week = eur(ACCOMMODATION_FEES.perAdditionalWeek);
+
   return locale === 'de'
-    ? '€580 für 4 Wochen, danach €145 pro Woche'
-    : '€580 for 4 weeks, then €145 a week';
+    ? `${base} für 4 Wochen, danach ${week} pro Woche`
+    : `${base} for 4 weeks, then ${week} a week`;
 }

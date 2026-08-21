@@ -300,8 +300,17 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
               </Link>
             </div>
 
-            <div className="min-w-0">
-              <DecisionRail
+            {/*
+              DecisionRail is a DIRECT grid child, as on course detail.
+
+              It was wrapped in a plain `min-w-0` div, and `position: sticky`
+              resolves against its nearest block container — a div that is only as
+              tall as the rail itself, so there was no range to stick within and
+              the rail simply scrolled away. The course page mounts it unwrapped,
+              where `lg:self-start` inside an `items-start` grid gives it the full
+              column height to stick in.
+            */}
+            <DecisionRail
                 locale={locale}
                 infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
                 /*
@@ -317,13 +326,27 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                   back to, so it carries only what decides the click.
                 */
                 infoItems={decisionItems}
-                notes={
-                  locale === 'de'
-                    ? 'So bleiben Preis und Verfügbarkeit beim Lesen sichtbar.'
-                    : 'Keeps the price and availability visible while you read.'
-                }
-              />
-            </div>
+                /*
+                  No `notes`. It read "Keeps the price and availability visible
+                  while you read" — copy that explains the component to the
+                  visitor instead of telling them anything, which is the same
+                  class of leak as the "Signature" eyebrow and the "info rail"
+                  heading. The card now ends on a named person, which is the
+                  useful thing to end on.
+                */
+              contact={{
+                /*
+                  Published on casa-bremen.de/ueber-uns/casa-team as "Kurse &
+                  Unterkunft", with CASA accommodation among her stated areas —
+                  verified 2026-08-18 in config/content/team-spotlights.ts. CASA
+                  prints names and roles but not individual mailboxes, so the
+                  route is the published office address.
+                */
+                name: 'Mareike Thomeczek',
+                role: locale === 'de' ? 'Kurse & Unterkunft' : 'Courses & accommodation',
+                email: 'info@casa-bremen.de',
+              }}
+            />
           </div>
         </Container>
       </section>

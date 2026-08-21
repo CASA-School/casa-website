@@ -265,11 +265,11 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
               locale={locale}
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
               infoItems={infoItems}
-              notes={
-                locale === 'de'
-                  ? 'Behalten Sie Termin, Frist und Anmeldung im Blick, während Sie die Details lesen.'
-                  : 'Keep date, deadline, and registration action visible while reading details.'
-              }
+              /*
+                No `notes`. Same leak as the accommodation rail carried: copy
+                that explains what the sticky card is for rather than telling the
+                reader anything about the exam.
+              */
               deadlineIso={selectedSession?.registration_deadline}
             />
           </div>
