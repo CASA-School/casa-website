@@ -1,3 +1,5 @@
+import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
+
 import { HeroHomePhoto } from './hero-home-photo';
 import type { HeroAction, HeroPhoto, HeroProofItem } from './shared';
 
@@ -8,6 +10,7 @@ type HeroAPhotoLedProps = {
   ctas: HeroAction[];
   photo: HeroPhoto;
   proofItems?: HeroProofItem[];
+  breadcrumbs?: BreadcrumbItem[];
 };
 
 export function HeroAPhotoLed(props: HeroAPhotoLedProps) {

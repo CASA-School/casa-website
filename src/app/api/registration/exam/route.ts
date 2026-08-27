@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         {
           status: 'error',
           message: failureMessage(payload.locale),
-          supportPath: '/contact?topic=Exam guidance',
+          supportPath: '/contact?topic=exam-registration',
         },
         { status: 502 }
       );
