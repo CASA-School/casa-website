@@ -89,7 +89,7 @@ export function CourseLevelGoals({
             <li key={item.level} className="flex items-start gap-3 py-3.5 first:pt-0">
               <span
                 style={levelChipStyle(item.level)}
-                className="mt-px inline-flex min-w-[2.25rem] shrink-0 items-center justify-center rounded-md bg-[var(--casa-accent-surface)] px-2 py-1 text-xs font-bold leading-none text-white"
+                className="mt-px inline-flex min-w-[2.25rem] shrink-0 items-center justify-center rounded-lg bg-[var(--casa-accent-surface)] px-2 py-1 text-xs font-bold leading-none text-white"
               >
                 {item.level}
               </span>

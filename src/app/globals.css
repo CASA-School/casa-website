@@ -140,40 +140,55 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   /*
-   * Radius scale — compressed, 2026-08-16.
+   * Radius scale — 6px base, three values, 2026-08-27.
    *
-   * Two things changed at once, and only the second one is visible.
+   * The scale used to expose seven distinct steps (5/6/8/10/12/14/16) and the
+   * code used six of them. That is more shape vocabulary than a page can
+   * actually read. The gap between a 10px card and a 12px card is invisible
+   * when you hold them side by side, but it is not invisible when both are on
+   * screen at once — it reads as an edge that never quite settles. Worse, six
+   * live steps gave every new component six defensible answers to "how round
+   * is this?", which is how the drift started.
    *
-   * 1. The base dropped from 10px to 8px, so every control is crisper.
-   * 2. The SPREAD between steps dropped from 4px to 2px. That is the real
-   *    change. The old scale ran 6/8/10/14/18/22/26 — a 16px spread — so an
-   *    outer shell at 22px was more than twice as round as the button inside
-   *    it, and the page read as a stack of soft-cornered bubbles. The new
-   *    scale runs 5/6/8/10/12/14/16. The hierarchy still exists (a card is
-   *    still rounder than the button it contains) but it is now a whisper
-   *    rather than a shout, which is what makes a page look drawn rather
-   *    than inflated.
+   * There are now THREE rendered values, from a 6px base:
    *
-   * Every `rounded-*` utility and every --casa-radius-* alias derives from
-   * this block, so those 600-odd call sites follow automatically. The
-   * exceptions that do NOT follow are the handful of hardcoded values —
-   * keep them in step by pointing them at a token, not a literal.
+   *   4px  control   buttons, inputs, chips, badges  → --casa-radius-control/-input
+   *   6px  card      cards, panels, content boxes    → --casa-radius-card
+   *   8px  feature   heroes, outer shells            → --casa-radius-feature
    *
-   * Reference point: the caterlove site runs 3/4/5px. CASA is deliberately
-   * softer than that — it is a school, not a luxury caterer — but it should
-   * no longer look like a 2019 component library.
+   * Controls sit BELOW the base on purpose. A button is the smallest rounded
+   * object on a page and the most repeated, so it is the first thing that
+   * reads as inflated; keeping it one step under the card it sits inside
+   * preserves the nesting hierarchy at the only place the eye checks for it.
+   *
+   * All seven Tailwind names still resolve — they collapse onto the three
+   * values — so the ~600 existing call sites keep working and land on the
+   * correct tier automatically. The canonical name per tier is
+   * `rounded-lg` / `rounded-xl` / `rounded-3xl`. The other names are kept
+   * mapped rather than deleted because an unmapped `--radius-*` falls through
+   * to Tailwind's own default, and a silent `rounded-4xl` at 32px is a much
+   * worse failure than a redundant alias. Same reason `--radius-xs` is mapped
+   * here for the first time: it was falling through to 2px.
+   *
+   * Hardcoded literals do NOT follow this block. Keep them in step by
+   * pointing them at a token, not at a number.
+   *
+   * Reference point: the caterlove site runs 3/4/5px. CASA at 4/6/8 is a
+   * shade softer — it is a school, not a luxury caterer — without going back
+   * to looking like a 2019 component library.
    */
-  --radius-sm: calc(var(--radius) - 3px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 2px);
-  --radius-2xl: calc(var(--radius) + 4px);
-  --radius-3xl: calc(var(--radius) + 6px);
-  --radius-4xl: calc(var(--radius) + 8px);
+  --radius-xs: calc(var(--radius) - 2px);   /* 4px */
+  --radius-sm: calc(var(--radius) - 2px);   /* 4px */
+  --radius-md: calc(var(--radius) - 2px);   /* 4px */
+  --radius-lg: calc(var(--radius) - 2px);   /* 4px — canonical: control */
+  --radius-xl: var(--radius);               /* 6px — canonical: card */
+  --radius-2xl: var(--radius);              /* 6px */
+  --radius-3xl: calc(var(--radius) + 2px);  /* 8px — canonical: feature */
+  --radius-4xl: calc(var(--radius) + 2px);  /* 8px */
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.375rem;
 
   /*
    * Horizontal ceiling for the whole site.
@@ -536,19 +551,29 @@
    * card takes a smaller radius than its parent. These aliases name that intent
    * so new components stop guessing.
    *
-   * The px values in the comments below are the post-compression numbers. They
-   * are derived, not authored — retune --radius and the whole set moves.
+   * `control` and `input` deliberately resolve to the SAME 4px. There is no
+   * hidden distinction between them — a chip and a button are the same shape
+   * tier. Both names are kept because they read differently at the call site,
+   * and collapsing them would make every consumer pick the wrong-sounding one.
+   *
+   * Each alias points at a canonical utility name (lg/xl/3xl) rather than at
+   * one of the collapsed aliases, so this block and the Tailwind classes in
+   * components describe the same three tiers in the same vocabulary.
+   *
+   * The px values below are derived, not authored — retune --radius and the
+   * whole set moves.
    */
-  --casa-radius-control: var(--radius-sm);   /* 5px  — chips, small marks */
-  --casa-radius-input: var(--radius-lg);     /* 8px  — buttons, inputs */
-  --casa-radius-card: var(--radius-xl);      /* 10px — cards, panels */
-  --casa-radius-feature: var(--radius-3xl);  /* 14px — heroes, feature surfaces */
+  --casa-radius-control: var(--radius-lg);   /* 4px — chips, small marks */
+  --casa-radius-input: var(--radius-lg);     /* 4px — buttons, inputs */
+  --casa-radius-card: var(--radius-xl);      /* 6px — cards, panels */
+  --casa-radius-feature: var(--radius-3xl);  /* 8px — heroes, feature surfaces */
 
   --casa-button-height: 2.75rem;
-  /* Points at the semantic alias rather than restating a literal: this was a
-     hardcoded 0.625rem, so .casa-button-prism and .casa-button-outline would
-     have stayed at 10px while the inputs beside them moved to 8px — the exact
-     two controls that must agree, visibly disagreeing. */
+  /* Points at the semantic alias rather than restating a literal. When this was
+     a hardcoded 0.625rem, .casa-button-prism and .casa-button-outline sat at
+     10px while the inputs beside them moved to 8px — the exact two controls
+     that must agree, visibly disagreeing. Now both land on the 4px control
+     tier from one place. */
   --casa-button-radius: var(--casa-radius-input);
   --casa-button-font-size: 0.95rem;
   --casa-button-focus-ring: color-mix(in srgb, var(--casa-blue) 56%, transparent);

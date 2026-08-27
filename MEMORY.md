@@ -1125,6 +1125,59 @@ Gates: lint, typecheck, 74 unit tests, build, knip, and 10 e2e all pass. One e2e
 updated — `header > div.mx-auto` → `header > [data-casa-site-frame]`, same element, targeted by
 contract instead of by an incidental utility class.
 
+## Radius — six live steps down to three (2026-08-27)
+
+The 2026-08-16 pass above compressed the radius *spread*. This pass cut the *vocabulary*,
+which was the part still leaking. An audit found the scale exposed seven steps, the code
+used six of them, and both documents describing the system were wrong in different
+directions.
+
+**Base 8px → 6px. Three rendered values: 4 / 6 / 8.**
+
+| Tier | Canonical class | Value | Role |
+| --- | --- | --- | --- |
+| control | `rounded-lg` | 4px | buttons, inputs, selects, badges, chips |
+| card | `rounded-xl` | 6px | content boxes, panels, tiles, banners |
+| feature | `rounded-3xl` | 8px | outer shells, heroes, modals |
+| pill | `rounded-full` | — | avatars, step indicators |
+
+Controls sit **below** the base deliberately — a button is the smallest and most repeated
+rounded object on a page, so it reads as inflated first, and keeping it one step under its
+container is where the nesting hierarchy is actually legible.
+
+**The method matters more than the numbers.** Rather than rename ~600 call sites, all seven
+Tailwind `--radius-*` steps were collapsed onto the three values in `@theme inline`. Tailwind
+then merges them itself — the compiled CSS emits
+`.rounded-lg,.rounded-md,.rounded-sm{…-2px}`, `.rounded-xl,.rounded-2xl{…}`,
+`.rounded-3xl,.rounded-4xl{…+2px}`. That resolved the drift *by construction*: the retired
+tiers became visually identical to their canonical neighbours, so the follow-up call-site
+cleanup (43 renames) carried zero visual risk. `--radius-xs` was mapped for the first time;
+it had been falling through to Tailwind's 2px.
+
+Non-canonical steps are kept **mapped, not deleted** — an unmapped `--radius-*` falls
+through to Tailwind's default, and a silent `rounded-4xl` at 32px is a worse failure than a
+redundant alias.
+
+**Trap worth remembering:** bare `rounded` does *not* read `--radius`. Tailwind emits a
+hardcoded `.25rem` for it (verified in the compiled CSS). It equals the control tier today
+purely by coincidence and is the one radius class that will not follow if the base is
+retuned again. Banned in `usage-rules.ts` for that reason.
+
+Docs corrected in the same pass, all three of which were already wrong before this change:
+`UI_SYSTEM.md` documented a `0.625rem` base with `-4/+4/+8/+12/+16` offsets that had not
+matched `globals.css` since 2026-08-16; `tokens.ts` contradicted itself (its comment block
+said 14/10/8 while the inline comments on the same values said 22/14/10) and carried a stale
+`0.625rem` button literal; `usage-rules.ts` listed only two retired classes.
+
+Two deliberate off-scale exceptions remain, flagged in place: `rounded-[0.25em]` on the
+inline image-credit mark (em-relative so it tracks font size) and `rounded-[1px]` on the
+news masthead rule (an editorial rule, not a container). `rounded-sm` stays in the shadcn
+primitives under `src/components/ui` as shipped upstream — it renders as the control tier
+anyway, and leaving those files verbatim keeps a future shadcn sync a clean diff.
+
+**Not done:** nothing enforces this. There is no lint rule banning the retired classes, which
+is why they regrew after the last pass. That is the obvious next step if drift reappears.
+
 ## Verified Baseline
 
 The latest implementation pass has already cleared:

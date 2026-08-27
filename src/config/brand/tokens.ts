@@ -69,30 +69,39 @@ export const semanticTokens = {
 
 export const componentTokenRules = {
   /**
-   * Border-radius scale — 3 tiers, no exceptions.
+   * Border-radius scale — 3 tiers, 3 values, no exceptions.
    *
-   * Tier 1 · rounded-3xl (14px): Outer page cards, modals, full-section wrappers.
-   * Tier 2 · rounded-xl  (10px): Internal content boxes, section banners, tiles,
-   *                               tab switcher pills, grouped input panels.
-   * Tier 3 · rounded-lg   (8px): Inputs, selects, textareas, buttons, small badges.
-   * Special · rounded-full     : Avatar circles, step indicators — always full.
+   * Tier 1 · rounded-3xl (8px): Outer page cards, modals, full-section wrappers.
+   * Tier 2 · rounded-xl  (6px): Internal content boxes, section banners, tiles,
+   *                              tab switcher pills, grouped input panels.
+   * Tier 3 · rounded-lg  (4px): Inputs, selects, textareas, buttons, badges, chips.
+   * Special · rounded-full    : Avatar circles, step indicators — always full.
    *
-   * The tier NAMES are stable; the px values compressed on 2026-08-16 from
-   * 22/14/10 to 14/10/8. Do not read the numbers here as authoritative — they
-   * are derived from `--radius` in src/app/globals.css, which is the only place
-   * to change them. See the long note in that block for why the spread between
-   * tiers narrowed rather than just the base.
+   * These three names are the ONLY radius classes CASA code should use. The
+   * numbers below are derived from `--radius` in src/app/globals.css, which is
+   * the only place to change them — see the long note in that block for why the
+   * scale collapsed from six live steps to three.
    *
-   * Retired values (do not use):
-   *   rounded-2xl — use rounded-xl (content boxes) or rounded-3xl (outer shells)
-   *   rounded-md  — use rounded-lg (interactive) or rounded-xl (content boxes)
-   *   rounded-sm  — reserved for shadcn UI dropdown item internals only
+   * Retired — these still resolve, but they now render identically to the tier
+   * above and carry no distinct meaning, so using one just hides which tier you
+   * meant:
+   *   rounded-2xl → same as rounded-xl    (card tier, 6px)
+   *   rounded-4xl → same as rounded-3xl   (feature tier, 8px)
+   *   rounded-md, rounded-sm, rounded-xs → same as rounded-lg
+   *   bare `rounded` → Tailwind emits a hardcoded .25rem for this one; it does
+   *                    NOT read --radius. It happens to equal tier 3 today, but
+   *                    it is the one radius class that will not follow if the
+   *                    base is ever retuned. Verified in the compiled CSS.
+   *
+   * `rounded-sm` remains in the shadcn primitives under src/components/ui as
+   * shipped upstream. That is deliberate — it renders as tier 3 anyway, and
+   * leaving those files verbatim keeps a future shadcn sync a clean diff.
    */
   radius: {
-    outerShell: 'rounded-3xl',  // 22px — page cards, modals
-    contentBox: 'rounded-xl',   // 14px — internal cards, tiles, banners
-    interactive: 'rounded-lg',  // 10px — inputs, buttons, selects
-    circle: 'rounded-full',     // 9999px — avatars, step circles
+    outerShell: 'rounded-3xl',  // 8px — page cards, modals
+    contentBox: 'rounded-xl',   // 6px — internal cards, tiles, banners
+    interactive: 'rounded-lg',  // 4px — inputs, buttons, selects, badges
+    circle: 'rounded-full',     // pill — avatars, step circles
   },
   /**
    * Shadow scale — 4 elevation tiers, spotlight style.
@@ -157,7 +166,7 @@ export const componentTokenRules = {
       lg: '2.75rem',       // 44px — the touch-safe step
       marketing: '3rem',   // 48px — the four `marketing-*` variants
     },
-    radius: '0.625rem', // rounded-lg — tier 3 interactive
+    radius: '0.25rem', // = --casa-button-radius → tier 3 control, 4px (base is 6px)
     focusRing: 'color-mix(in srgb, var(--casa-blue) 56%, transparent)',
     primarySurface: 'linear-gradient(118deg, color-mix(in srgb, var(--casa-ink-deep) 94%, black) 0%, var(--casa-ink-deep) 52%, color-mix(in srgb, var(--casa-blue) 16%, var(--casa-ink-deep)) 100%)',
     outlineSurface: 'var(--casa-bg)',

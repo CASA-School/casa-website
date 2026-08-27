@@ -512,7 +512,7 @@ export function GuidedPicker({
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                     {item.meta ? (
-                      <span className="absolute bottom-3 left-3 rounded-md bg-white/92 px-2.5 py-1 text-xs font-bold text-[var(--casa-ink)] backdrop-blur">
+                      <span className="absolute bottom-3 left-3 rounded-lg bg-white/92 px-2.5 py-1 text-xs font-bold text-[var(--casa-ink)] backdrop-blur">
                         {item.meta}
                       </span>
                     ) : null}
@@ -538,7 +538,7 @@ export function GuidedPicker({
 
                   {showBestFor && item.bestFor ? (
                     <div className="mt-auto pt-5">
-                      <span className="inline-flex rounded-md bg-[var(--casa-warm-soft)]/50 px-2.5 py-1 text-xs font-semibold text-[var(--casa-ink)]">
+                      <span className="inline-flex rounded-lg bg-[var(--casa-warm-soft)]/50 px-2.5 py-1 text-xs font-semibold text-[var(--casa-ink)]">
                         {item.bestFor}
                       </span>
                     </div>

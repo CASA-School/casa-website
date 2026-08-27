@@ -347,7 +347,7 @@ export default async function LayoutPatternsPage() {
               >
                 {courses.map((course, index) => (
                   <li key={course.title} className="w-[78vw] shrink-0 snap-start sm:w-[42vw] xl:w-[26rem]">
-                    <article className="group h-full overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-card)]">
+                    <article className="group h-full overflow-hidden rounded-xl bg-white shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-card)]">
                       <div className="casa-media-overlay relative aspect-[16/10] overflow-hidden">
                         <Image
                           src={course.photo.src}
@@ -416,7 +416,7 @@ export default async function LayoutPatternsPage() {
                     </Link>
                   </div>
 
-                  <div className={cn('casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-2xl', index % 2 === 1 && 'md:order-1')}>
+                  <div className={cn('casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl', index % 2 === 1 && 'md:order-1')}>
                     <Image
                       src={pillar.photo.src}
                       alt={pillar.photo.alt}
@@ -485,7 +485,7 @@ export default async function LayoutPatternsPage() {
               >
                 {sampleReviews.map((review, index) => (
                   <li key={index} className="w-[78vw] shrink-0 snap-start sm:w-[40vw] xl:w-[22rem]">
-                    <figure className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-[var(--shadow-soft)]">
+                    <figure className="flex h-full flex-col rounded-xl bg-white p-6 shadow-[var(--shadow-soft)]">
                       <div className="flex items-center gap-2">
                         <span className="inline-flex h-7 min-w-7 items-center justify-center rounded bg-[var(--casa-ink-deep)] px-2 text-xs font-bold tabular-nums text-white">
                           {review.score}
@@ -577,7 +577,7 @@ export default async function LayoutPatternsPage() {
                     </Link>
                   </div>
 
-                  <div className={cn('casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-2xl', index % 2 === 1 && 'md:order-1')}>
+                  <div className={cn('casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl', index % 2 === 1 && 'md:order-1')}>
                     <Image
                       src={format.photo.src}
                       alt={format.photo.alt}

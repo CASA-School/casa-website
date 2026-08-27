@@ -132,7 +132,7 @@ export const ARCHITECTURES: Architecture[] = [
           <li key={course.href} className="h-full">
             <article
               className={cn(
-                'group flex h-full overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-soft)] transition-all duration-300',
+                'group flex h-full overflow-hidden rounded-xl bg-white shadow-[var(--shadow-soft)] transition-all duration-300',
                 'motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-card)]'
               )}
             >
@@ -237,7 +237,7 @@ export const ARCHITECTURES: Architecture[] = [
                 href={course.href}
                 aria-label={`${course.ctaLabel}: ${course.title}`}
                 className={cn(
-                  'casa-cta-link group relative flex h-full overflow-hidden rounded-2xl no-underline shadow-[var(--shadow-soft)] transition-all duration-300',
+                  'casa-cta-link group relative flex h-full overflow-hidden rounded-xl no-underline shadow-[var(--shadow-soft)] transition-all duration-300',
                   'motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-card)]',
                   isFeature
                     ? 'casa-surface-dark min-h-[24rem] flex-col justify-end bg-[var(--casa-ink-deep)]'
@@ -318,7 +318,7 @@ export const ARCHITECTURES: Architecture[] = [
               href={course.href}
               aria-label={`${course.ctaLabel}: ${course.title}`}
               className={cn(
-                'casa-cta-link casa-surface-dark group relative flex h-full min-h-[24rem] flex-col justify-end overflow-hidden rounded-2xl bg-[var(--casa-ink-deep)] no-underline shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-card)]',
+                'casa-cta-link casa-surface-dark group relative flex h-full min-h-[24rem] flex-col justify-end overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] no-underline shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-card)]',
                 FOCUS_RING
               )}
             >
@@ -376,7 +376,7 @@ export const ARCHITECTURES: Architecture[] = [
               href={course.href}
               aria-label={`${course.ctaLabel}: ${course.title}`}
               className={cn(
-                'casa-cta-link casa-surface-dark group relative flex h-full min-h-[22rem] flex-col justify-end overflow-hidden rounded-2xl bg-[var(--casa-ink-deep)] no-underline shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-card)]',
+                'casa-cta-link casa-surface-dark group relative flex h-full min-h-[22rem] flex-col justify-end overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] no-underline shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-card)]',
                 FOCUS_RING
               )}
             >
