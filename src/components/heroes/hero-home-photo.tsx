@@ -3,6 +3,8 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
+import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
+
 import { HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
 
 type HeroHomePhotoProps = {
@@ -13,6 +15,8 @@ type HeroHomePhotoProps = {
   photo: HeroPhoto;
   proofItems?: HeroProofItem[];
   themeClassName?: string;
+  /** Optional. The homepage passes none; subpages need them. */
+  breadcrumbs?: BreadcrumbItem[];
 };
 
 /**
@@ -37,11 +41,17 @@ export function HeroHomePhoto({
   ctas,
   photo,
   themeClassName = 'hero-theme-plain',
+  breadcrumbs,
 }: HeroHomePhotoProps) {
   const [primaryCta] = ctas;
 
   return (
-    <HeroSurface themeClassName={themeClassName} archetype="A" className="overflow-x-clip">
+    <HeroSurface
+      themeClassName={themeClassName}
+      archetype="A"
+      className="overflow-x-clip"
+      breadcrumbs={breadcrumbs}
+    >
       <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
         <div className="lg:py-6">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">

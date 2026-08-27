@@ -7,8 +7,8 @@ import { CoursePracticalDetails } from '@/components/courses/course-practical-de
 import { CourseTermTable } from '@/components/courses/course-term-table';
 import type { CourseTermGroup } from '@/components/courses/course-term-table';
 import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
-import { HeroCUtilityRail } from '@/components/heroes';
-import { DecisionRail, EditorialSplit, ProcessSteps, TestimonialGrid } from '@/components/sections';
+import { HeroAPhotoLed, HeroCUtilityRail } from '@/components/heroes';
+import { DecisionRail, EditorialSplit, HumanStoryBlock, ProcessSteps, TestimonialGrid } from '@/components/sections';
 import { CourseLevelGoals } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -16,6 +16,7 @@ import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
+import { GruppenPackages } from '@/components/gruppen/gruppen-packages';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
 import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
@@ -516,6 +517,50 @@ export default async function CourseDetailPage({
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
 
+      {/*
+        CASA Gruppen takes the HOMEPAGE hero, not the course-detail one.
+
+        The shared course hero puts a bordered "Course info" card on the right —
+        lessons/week, level range, lead time. Those are a learner's facts, and
+        this reader is an organiser buying a trip for other people, so the panel
+        both said the wrong things and made the one genuinely distinct product on
+        the site look like another catalogue row.
+
+        HeroAPhotoLed is the composition the homepage already uses and the one
+        this page wants: the photograph carrying the page, and — per that
+        component's own rule — one eyebrow, one headline, one sentence, one
+        button.
+      */}
+      {isGroupQuote ? (
+        <HeroAPhotoLed
+          eyebrow={locale === 'de' ? 'CASA Gruppen' : 'CASA Gruppen'}
+          title={
+            locale === 'de'
+              ? 'Mit der ganzen Klasse nach Bremen'
+              : 'Bring the whole class to Bremen'
+          }
+          description={
+            locale === 'de'
+              ? 'Eine Sprachreise, bei der Unterricht, Gastfamilie, Kantine und Nachmittagsprogramm eine einzige Buchung sind. Sie bringen die Gruppe; wir organisieren alles ab der Ankunft.'
+              : 'A German language trip where the classroom, the host family, the canteen and the afternoon programme are one booking. You bring the group; we arrange everything from the moment they land.'
+          }
+          ctas={[
+            {
+              label: locale === 'de' ? 'Gruppenangebot anfragen' : 'Request a group quote',
+              href: '/contact?topic=group-booking',
+              kind: 'primary',
+            },
+          ]}
+          photo={{
+            src: '/media/casa/group-course-bremen-musicians.jpg',
+            alt:
+              locale === 'de'
+                ? 'Eine CASA-Gruppe am Denkmal der Bremer Stadtmusikanten'
+                : 'A CASA group at the Bremen Town Musicians monument',
+          }}
+          breadcrumbs={breadcrumbs}
+        />
+      ) : (
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Kursdetail' : 'Course detail'}
         title={detail.course.name}
@@ -537,6 +582,7 @@ export default async function CourseDetailPage({
         }}
         themeClassName="hero-theme-courses"
       />
+      )}
 
       <section className="py-16 md:py-20">
         <Container className="space-y-12 md:space-y-14">
@@ -546,6 +592,10 @@ export default async function CourseDetailPage({
                 switch (sectionKey) {
                 case 'module-catalogue':
                   return <SpecialCourseCatalogue key={sectionKey} locale={locale} />;
+
+                case 'group-packages':
+                  // Firmenunterricht shares this archetype and has no packages.
+                  return isGroupQuote ? <GruppenPackages key={sectionKey} locale={locale} /> : null;
 
                 case 'term-table':
                   return (
@@ -630,7 +680,55 @@ export default async function CourseDetailPage({
                   />
                   );
 
-                case 'testimonials':
+                case 'testimonials': {
+                  /*
+                    A quoted product is bought by an organiser, not a learner —
+                    this archetype's own rationale says so. The generic three-up
+                    put an evening-course learner and a telc candidate in front
+                    of a teacher planning a school trip, including one quote
+                    opening "I hated language courses my entire life".
+
+                    CASA has the right voice on file: Elena, the accompanying
+                    teacher of a school group from Siberia, writing about the
+                    host families. One real quote from the actual buyer beats
+                    three from people who are not.
+                  */
+                  if (archetype.cta === 'request-quote') {
+                    /*
+                      socialProofForCourse returns this course's own voices
+                      first and then every other one, so a plain [0] is only
+                      correct when the course actually has one. Filter, so a
+                      quote-only course with nothing on file renders nothing
+                      rather than borrowing an unrelated learner.
+                    */
+                    const [story] = socialProof.filter(
+                      (entry) => entry.courseSlug === getCourseContentSlug(slug)
+                    );
+                    if (!story) return null;
+
+                    return (
+                      <HumanStoryBlock
+                        key={sectionKey}
+                        eyebrow={locale === 'de' ? 'Aus einer Gruppenreise' : 'From a group visit'}
+                        title={
+                          locale === 'de'
+                            ? 'Was eine begleitende Lehrkraft berichtet'
+                            : 'What an accompanying teacher wrote'
+                        }
+                        quote={story.quote}
+                        person={story.personDisplay}
+                        context={story.country}
+                        photo={{
+                          src: '/media/casa/group-course-walking-bremen.jpg',
+                          alt:
+                            locale === 'de'
+                              ? 'Eine CASA-Gruppe unterwegs in Bremen'
+                              : 'A CASA group out in Bremen',
+                        }}
+                      />
+                    );
+                  }
+
                   return (
                   <TestimonialGrid
                     key={sectionKey}
@@ -644,6 +742,7 @@ export default async function CourseDetailPage({
                     locale={locale}
                   />
                   );
+                }
                 case 'related-courses':
                   return (
                   <section key={sectionKey} className="space-y-5">
@@ -696,6 +795,9 @@ export default async function CourseDetailPage({
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               notes={contactLine}
               deadlineIso={selectedInstance?.start_date}
+              // Gated on the CTA policy, not the slug, so Firmenunterricht is
+              // covered too: neither page has anything to register for.
+              showDeadline={archetype.cta !== 'request-quote'}
               teachingStaff={teachingStaff}
             />
           </div>

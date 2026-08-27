@@ -23,9 +23,17 @@ export type CourseArchetypeId =
 
 /** Body sections, rendered in the order the archetype lists them. */
 export type CourseSectionKey =
-  | 'summary-strip'
   /** The week-grid module picker. Only `module-catalogue` renders this. */
   | 'module-catalogue'
+  /**
+   * The four CASA Gruppen packages. Only `package-inquiry` lists it, and the
+   * page renders it only for the group audience — Firmenunterricht shares this
+   * archetype but has no package set, because a company course is scoped per
+   * company. The packages carry their own "from" prices, which is not a breach
+   * of the no-`price` fact rule below: that rule governs the facts rail, whose
+   * single price would have to stand for four different programmes.
+   */
+  | 'group-packages'
   | 'level-goals'
   /**
    * CASA's published term table. Only archetypes with dated cohorts list it —
@@ -85,7 +93,6 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
     id: 'scheduled-cohort',
     buyingQuestion: 'Which start date and level, and what does it cost?',
     sections: [
-      'summary-strip',
       'level-goals',
       'term-table',
       'practical-details',
@@ -104,7 +111,6 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
     // The catalogue leads: on this archetype the page IS the picker, and the
     // reader cannot evaluate anything else until they have found their module.
     sections: [
-      'summary-strip',
       'module-catalogue',
       'practical-details',
       'level-goals',
@@ -134,7 +140,6 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
     buyingQuestion: 'Does this get me to my licence or my role?',
     // No term table: CASA publishes no dates for the professional formats.
     sections: [
-      'summary-strip',
       'level-goals',
       'practical-details',
       'audience',
@@ -169,13 +174,16 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
      * writes about a company course. Both are exactly this reader.
      */
     sections: [
-      'summary-strip',
-      'audience',
-      'level-goals',
+      'group-packages',
       'practical-details',
+      'audience',
+      // No 'level-goals'. The textbook/level ladder is a learner's question,
+      // and this reader is an organiser buying for a class whose levels are
+      // mixed and sorted on arrival.
       'next-steps',
       'testimonials',
-      'related-courses',
+      // No 'related-courses'. The list is an arbitrary slice of the catalogue
+      // and serves a school-trip organiser two products they cannot buy.
     ],
     // Deliberately no 'price' and no 'next-start'.
     facts: ['lessons-per-week', 'group-size', 'included', 'lead-time', 'level-range'],
