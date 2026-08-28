@@ -26,6 +26,5 @@ export { DecisionRail } from './decision-rail';
 export { NextStepsTimeline } from './next-steps-timeline';
 export { UnifiedSearchPanel, type UnifiedSearchScope } from './unified-search-panel';
 export { PersonaPathways } from './persona-pathways';
-export { KlettLevelTests } from './klett-level-tests';
 export { LevelProgressionTimeline } from './level-progression-timeline';
 export { StudentHousingGuide } from './student-housing-guide';

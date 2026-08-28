@@ -1334,6 +1334,31 @@ h3 {
   text-decoration: underline;
 }
 
+/*
+ * Focus ring for a label wrapping a visually-hidden input.
+ *
+ * The placement test's answer options are `<label>`s containing an `sr-only`
+ * native radio or checkbox — deliberate, because that is what buys arrow-key
+ * navigation and roving focus for free (see placement-ui.ts). The indicator
+ * therefore has to sit on the label and be driven by the input's state.
+ *
+ * An outline rather than a ring, because an outline paints outside the box and
+ * cannot be confused with the card's own border, which already carries the
+ * selected state. It lives here next to `.casa-cta-link:focus-visible` so the
+ * CASA focus treatments stay together.
+ *
+ * NOTE FOR ANYONE DEBUGGING A MISSING FOCUS RING ANYWHERE ON THIS SITE:
+ * `outline-width` and `box-shadow` are both animatable, so a control carrying
+ * `transition-all` fades its focus indicator in. At 200ms a keyboard user
+ * tabbing at speed never sees it, and a computed-style read taken at focus time
+ * returns `outline-width: 0px` — which looks exactly like a cascade problem and
+ * is not one. Scope the transition instead.
+ */
+.casa-option-focus:has(:focus-visible) {
+  outline: 2px solid var(--casa-blue);
+  outline-offset: 2px;
+}
+
 @keyframes casa-button-outline-trace {
   0% {
     opacity: 0;
