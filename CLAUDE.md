@@ -225,14 +225,25 @@ mock-mode-parity guidance in the same sections is still valid.
   is the single switch, and flipping it also activates the `matching` interaction
   (the bank's only matching item is a listening item). Details in
   `docs/PLACEMENT_TEST_IMPLEMENTATION.md` §6.2.
-- No canonical production deployment doc yet (Vercel project, domain, rollback owner).
-- **`main` is unprotected and deploys straight to production** (no `vercel.json`, so Vercel's
-  default push-to-`main` deploy applies). This is a **deliberate choice while the site is still
-  being built** — branch protection would add review friction during active iteration, and the
-  site is not final and not yet live. **Enable branch protection before go-live**, at minimum
-  requiring the `quality` workflow to pass. Decision recorded 2026-08-16.
+- **Deployment is Azure Container Apps, not Vercel.** Verified 2026-08-27: the Vercel
+  project is gone (`casa-bremen.vercel.app` returns 404) and nothing in the repo or in
+  CI deploys to it. The site runs as `ca-casa-website` in `rg-casa-website-prod`, on the
+  shared `cae-casa-prod` environment, at
+  `https://ca-casa-website.livelycliff-6187a034.germanywestcentral.azurecontainerapps.io/`.
+  See `docs/AZURE_DEPLOYMENT_PLAN.md`.
+- **Pushing to `main` does NOT deploy.** There is no deployment workflow in
+  `.github/workflows/` — `quality.yml` is the only one, and it never deploys. A release is
+  a deliberate manual run of `./infra/azure/deploy.sh`, which builds in ACR and pins the
+  revision to the image digest. Merging is therefore safe; shipping is a separate act.
+- `main` is unprotected. That is a **deliberate choice while the site is still being
+  built** — branch protection would add review friction during active iteration, and the
+  site is not final and not yet live. **Enable branch protection before go-live**, at
+  minimum requiring the `quality` workflow to pass. Decision recorded 2026-08-16.
+- No canonical production deployment doc yet (domain, rollback owner). The custom domain
+  for the website is still unassigned: `lernen.casa-bremen.de` points at the *student app*,
+  and `www.casa-bremen.de` still resolves to the old site at 195.34.167.82.
 
 ## Artifacts
 
 Generated presentation and report artifacts belong under `output/`, which is
-gitignored and excluded from local Vercel uploads. They are deliverables, not source.
+gitignored and excluded from the Docker build context. They are deliverables, not source.
