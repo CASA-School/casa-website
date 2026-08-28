@@ -20,6 +20,28 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
   const pathname = usePathname();
   const isRegistrationPage = pathname?.startsWith('/registration');
 
+  /**
+   * The running placement test is an app surface, not a page.
+   *
+   * It drops MORE chrome than the registration wizard does, and for reasons that
+   * are specific to it rather than stylistic:
+   *
+   *  - **No footer.** On a 375x667 phone the site footer measured 721px against a
+   *    1725px page — 42% of a surface whose entire job is one question at a time.
+   *  - **No site navbar.** 80px of sticky chrome, permanently, plus dropdowns to
+   *    eight other destinations. The test route renders its own compact header
+   *    with the one control that belongs here: leave the test.
+   *  - **No assistant launcher.** It floats bottom-right, exactly where the
+   *    sticky answer bar goes, and offering an AI helper during a language
+   *    assessment is wrong on its own terms.
+   *
+   * Scoped to `/placement-test/test` only. The landing page and the result page
+   * are ordinary pages and keep the full site frame — a learner reading their
+   * result should be able to get to courses and registration from it.
+   */
+  const isFocusedTestSurface = pathname === '/placement-test/test';
+  const hideSiteChrome = isRegistrationPage || isFocusedTestSurface;
+
   return (
     <>
       <InteractionTracker />
@@ -30,12 +52,12 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
       >
         Skip to content
       </a>
-      {!isRegistrationPage && <Navbar contentLocale={contentLocale} />}
+      {!hideSiteChrome && <Navbar contentLocale={contentLocale} />}
       <div id="site-content" className="flex-1 flex flex-col">
         {children}
       </div>
-      {!isRegistrationPage && <Footer contentLocale={contentLocale} />}
-      <AssistantLauncher />
+      {!hideSiteChrome && <Footer contentLocale={contentLocale} />}
+      {!isFocusedTestSurface && <AssistantLauncher />}
     </>
   );
 }

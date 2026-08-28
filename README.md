@@ -39,6 +39,8 @@ The previous dashboard and role-based portal work has been removed from the acti
 - `/news/[slug]`
 - `/search`
 - `/placement-test`
+- `/placement-test/test` (the test itself; `noindex`)
+- `/placement-test/result/[token]` (a result; `noindex`, token-gated)
 - `/imprint`
 - `/privacy`
 - `/terms`
@@ -50,8 +52,15 @@ The previous dashboard and role-based portal work has been removed from the acti
   - `CAREERS_APPLICATION_WEBHOOK_URL`
   - `COURSE_REGISTRATION_WEBHOOK_URL`
   - `EXAM_REGISTRATION_WEBHOOK_URL`
+  - `PLACEMENT_RESULT_WEBHOOK_URL`
 
 Career application submissions require `DATABASE_URL` because uploaded CV files are stored in Postgres before any webhook fan-out happens.
+
+The placement test is CASA's own instrument — it replaced the external Klett
+placement links in August 2026. It runs without `DATABASE_URL` (from an
+in-process store, with the learner told that progress is not durable), but needs it
+for durable attempts, cross-device resume, and the writing task. See
+`docs/PLACEMENT_TEST_IMPLEMENTATION.md`.
 
 ## Dashboard-Derived Public Metrics
 
