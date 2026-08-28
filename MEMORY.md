@@ -1125,6 +1125,163 @@ Gates: lint, typecheck, 74 unit tests, build, knip, and 10 e2e all pass. One e2e
 updated — `header > div.mx-auto` → `header > [data-casa-site-frame]`, same element, targeted by
 contract instead of by an incidental utility class.
 
+## CASA's own Einstufungstest replaces the Klett links (2026-08-23)
+
+`/placement-test` no longer sends people to `einstufungstests.klett-sprachen.de`.
+`KlettLevelTests` is deleted. CASA now has its own adaptive placement test.
+
+**Why the old arrangement had to go, beyond the third-party dependency:** it
+offered six external links, one per level, so the learner had to already know
+their level to choose which test to take — the exact question a placement test
+exists to answer. And CASA never saw the outcome, so `/registration/course` still
+had to ask people to self-report a level, with a hint pointing at "a link in the
+navigation". That loop is now closed: the hint is a direct link to the test.
+
+CASA remains a Klett **curriculum** school (Netzwerk neu → Kontext). Only the
+placement *instrument* moved in-house. The textbook config is untouched.
+
+**Where the assessment design came from.** A handoff package was produced outside
+this repo; only part of it exists on this machine. `TEACHER_REVIEW_BOOK.md` had
+the entire item bank (163 items, 33 reading stimuli, 33 listening scripts, 18
+writing prompts, 12 speaking prompts, two rubrics) and was ported by a committed
+script, `scripts/placement/port-item-bank.mjs` (`npm run placement:port`), which
+asserts the upstream verification report's checksums and reproduced all of them
+exactly. The routing thresholds, cut scores, confidence model, review rules,
+intake questions, and result copy were **absent** from the package and are
+authored here, in one versioned file: `src/config/placement/policy.ts`.
+
+**Shape.** One integrated attempt, forward only, server-driven:
+intake → router → level module → optional boundary module → writing → result.
+The learner never picks a level; that is the output. With listening withheld
+(no audio exists yet), the conclusive-evidence stop added on 2026-08-25 makes an
+attempt router 4–10 + level 12 + boundary 6 = 16–28 objective items plus writing.
+
+**Three boundaries that are deliberate, not unfinished:**
+
+1. **No staff review UI here.** The package assumes a review queue with reviewer
+   roles; `CLAUDE.md` forbids reintroducing auth or dashboard surfaces. The
+   website owns the test, the engine, and persistence; the dashboard workspace
+   owns review, reached by `PLACEMENT_RESULT_WEBHOOK_URL`.
+2. **Listening is built but gated.** 33 scripts, no recordings. Showing the
+   transcript would turn a listening construct into a reading one *and* leak
+   protected content, so the items are withheld and scores normalise over what
+   was delivered. `LISTENING_AUDIO_AVAILABLE` is the one switch — and flipping it
+   also activates the `matching` interaction, because the bank's only matching
+   item is a listening item.
+3. **Speaking is a teacher conversation, not an upload.** Satisfies the package's
+   B1+ requirement without needing an object-storage decision CASA has not made.
+
+**Five bugs the verification pass found, each invisible to a green build:**
+
+- `answeredShare` divided answered scores by the score set — which only holds
+  items that *have* a response — so it always read 100% and the
+  `incomplete_objective_evidence` review trigger could never fire. A learner who
+  quit after three questions scored as a complete attempt. `servedItemCount` is
+  now a required, separate input to `finalisePlacement`.
+- "Your progress is saved" was a lie whenever the migration was unapplied: the
+  flag came from `isDatabaseConfigured()`, which only checks the env var. Now it
+  reports whether the insert actually returned a row.
+- The incomplete-evidence confidence penalty was flat, so 20% answered scored the
+  same as 69%.
+- The choice cards were `role="radio"` buttons, promising ARIA keyboard behaviour
+  that was not implemented. Rebuilt as visually-hidden native inputs in styled
+  labels, which gives arrow keys and roving focus for free. **Consequence for
+  e2e:** clicking the input fails (the label intercepts, correctly) — click the
+  label, and target the `data-casa-placement` hooks.
+- The inline cloze read `{{b1}}` aloud and named its selects after internal blank
+  ids. Item ids are also no longer emitted into the DOM at all: a group named
+  `placement-choice-A1-RD-STRETCH-003` told anyone reading the markup which band
+  the router had landed on, mid-test.
+
+**Answer-key containment** is enforced two ways, because either alone is
+defeatable: a structural test runs the real sanitiser over the real bank and
+asserts no protected field survives, and an import-graph test asserts no
+`'use client'` module can transitively reach an answer-bearing module. Verified
+against the built client bundle too — no key, accepted answer, or transcript in
+`.next/static`.
+
+**Progressive disclosure**, since it was the explicit brief: the landing page
+offers one action instead of six level cards; one item per screen; the progress
+rail names the *phase* rather than a total, because the total is not knowable
+until routing resolves; the fine-tuning phase appears only once it exists; the
+result unfolds band → what happens next → which course → what you can do →
+per-skill detail behind a disclosure.
+
+**The running test is an app surface, not a page** (same day, second pass). The
+first build measured badly on a phone: at 375x667 the site footer was 721px of a
+1725px page, the navbar took 80px of sticky chrome, the assistant launcher floated
+over the answer area, and **the Next button sat 272px below the fold on every one
+of ~28 items**. Now `/placement-test/test` renders through
+`src/components/placement/test-shell.tsx`: a fixed `100svh`/`100dvh` column with a
+48px header, one scrolling region, and a pinned action bar with safe-area padding.
+`SiteShell` drops the navbar, footer, and assistant on that route only — it
+already had the pattern for `/registration/*`. Content now fits the viewport at
+375x667 and the document does not scroll at all.
+
+Verified by measurement at 320/375/390/768/1024/1280 plus phone landscape
+(667x375): no horizontal overflow anywhere, the document never scrolls, and the
+action bar stays pinned even where a long C1 reading stimulus makes the content
+region scroll. Landing page and result page checked at 375 too.
+
+Three things there that are easy to undo by accident:
+- `m-auto` on the inner wrapper, **not** `justify-center` — the latter clips the
+  top of content taller than the box, which is what a long reading stimulus is.
+- The phase rail is a segmented bar; the non-current phase names are **not**
+  visible text any more. The e2e spec asserts the new contract.
+- The item prompt is a hidden `<h2>` plus a visible `<p>`. `globals.css` binds
+  Playfair to heading elements, and a Didone at 17px is the wrong face for a
+  sentence with `___` gaps. A paragraph avoids the cascade question entirely.
+
+**A trap worth remembering site-wide: `transition-all` hides focus indicators.**
+The placement answer options had no visible focus ring for keyboard users, and
+the cause was not the cascade and not a utility failing to compile — it was that
+`outline-width` and `box-shadow` are animatable, so under `transition-all` the
+ring eased in over 200ms. A user tabbing at speed never saw it, and a
+computed-style read taken at focus time returned `outline-width: 0px`, which
+looks exactly like a compile failure. Any control on this site carrying
+`transition-all` plus a focus ring has the same fade. Scope the transition.
+
+Two hours went into that diagnosis partly because of a self-inflicted detour:
+`ring-[var(--casa-blue)]/20` was suspected of not compiling a ring colour, on the
+strength of a grep against the wrong CSS chunk. It compiles fine
+(`--tw-ring-color: var(--casa-blue)` plus a `color-mix` upgrade under
+`@supports`). Nine call sites were changed and then reverted. When checking
+whether a utility compiled, grep the large CSS chunk, not the first one `find`
+returns.
+
+Gates: lint, typecheck, 231 unit tests (118 of them placement), build, knip, and
+17 e2e all pass. Migration `0005_placement_test.sql` applied to live Neon.
+**Not deployed** — this is committed-quality work sitting in the working tree.
+
+Start from `docs/PLACEMENT_TEST_IMPLEMENTATION.md` (§8b for the layout);
+CASA's outstanding decisions are in `docs/PLACEMENT_TEST_OPEN_DECISIONS.md`.
+
+### Placement review and adaptive-flow hardening (2026-08-25)
+
+The desktop intake is now a three-panel surface at large breakpoints, while
+question screens remain reading-width. The intake copy states the real contract:
+only “no German at all” changes the route; goal and recency are unscored teacher
+context. Those fields are now included in the result webhook.
+
+The router stops after two consecutive fully answered tiers are uncleared,
+because the existing scoring policy ignores every higher tier after that wall.
+A low learner therefore moves to the A1 module after four live router questions
+instead of being shown B1–C1 questions that cannot affect the result. Attempt
+URLs now carry the private token and `/api/placement/resume` restores the exact
+next item. The response API rejects future items and answer rewrites while still
+accepting an identical network retry.
+
+The academic limitation remains explicit: all 163 items are
+`PILOT_UNREVIEWED`, listening is gated, 147 items are single-choice, and the
+two-item live router tiers make the 0.50 cut score too dependent on one answer.
+Do not change the cut score by intuition; review the bank, restore a third item
+per tier, and calibrate against teacher placement and first-week movement. Full
+review: `docs/PLACEMENT_TEST_REVIEW_2026-08-25.md`.
+
+Gates: lint, typecheck, 235 unit tests, build, and 19 e2e all pass. Desktop
+browser checks covered intake, the first four router items, early route, typed
+recall, private-link reload, and console output.
+
 ## Radius — six live steps down to three (2026-08-27)
 
 The 2026-08-16 pass above compressed the radius *spread*. This pass cut the *vocabulary*,
@@ -1312,6 +1469,7 @@ The latest implementation pass has already cleared:
 - Add a future public-safe `website_metrics.json` flow once the dashboard bridge exports it.
 - Use `docs/TEAM_UPDATE_2026-06-23.md` as the current presentation handoff when briefing the CASA team.
 - Keep documenting major architectural or UX shifts here so future work starts from current context instead of re-discovery.
+- The placement test is in `shadow` mode and its content is `PILOT_UNREVIEWED`. Before it can be treated as a real placement instrument CASA needs: two DaF reviewers per item, the 33 listening recordings, an approved retention schedule, and cut scores revised from pilot data. Checklist at the end of `docs/PLACEMENT_TEST_OPEN_DECISIONS.md`.
 - Before rebuilding group, special, or corporate course pages, extend the course content model with an explicit page archetype/section registry instead of branching ad hoc inside `src/app/courses/[slug]/page.tsx`. The concrete four-archetype design is in `docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md`; `pricing_mode` and the quote CTA already shipped as its first slice.
 - Never publish a course price or weekly-hours figure that is not in `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md`. The fixtures are not a source of truth.
 - Two sources of truth for course facts currently disagree: `buildSelectorCopy` in `src/app/courses/page.tsx` carries accurate, detailed fee text, while `public-fixtures.ts` drives the detail page. Fold the former into the profile layer when the archetype registry lands.

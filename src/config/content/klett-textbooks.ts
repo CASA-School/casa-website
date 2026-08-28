@@ -2,9 +2,14 @@
  * Ernst Klett Sprachen textbooks used in CASA's intensive courses.
  *
  * CASA teaches from two Klett series — `Netzwerk neu` up to B1 and `Kontext`
- * from B1+ — which matches the placement tests CASA already links to
- * (`src/components/sections/klett-level-tests.tsx`) and the book-price tiers in
+ * from B1+ — which matches the book-price tiers in
  * `src/config/calculator/pricing.ts:95-99`.
+ *
+ * NOTE (2026-08-23): CASA no longer links to Klett's *placement tests*. Those
+ * six external links were replaced by CASA's own adaptive Einstufungstest
+ * (docs/PLACEMENT_TEST_IMPLEMENTATION.md). The textbooks below are unaffected:
+ * CASA remains a Klett curriculum school. Only the placement instrument moved
+ * in house.
  *
  * Titles, ISBNs and product URLs below were read directly out of the
  * klett-sprachen.de product-page markup on 2026-08-12 and independently

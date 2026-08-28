@@ -35,6 +35,7 @@ npm run test:e2e     # playwright
 npm run knip         # unused deps/files gate (also runs in CI)
 npm run db:migrate   # applies db/migrations
 npm run db:seed      # applies db/seeds
+npm run placement:port  # re-ports the placement item bank from its source markdown
 ```
 
 CI (`.github/workflows/quality.yml`) runs lint → typecheck → test → build → knip
@@ -60,7 +61,9 @@ tables; career applications persist to Postgres including the uploaded CV file
 
 **Fallback** (`DATABASE_URL` unset): public content falls back to in-repo fixtures;
 careers use the in-memory dataset in `src/lib/mock/store.ts`; career application
-submission is disabled because CV upload requires database storage.
+submission is disabled because CV upload requires database storage. The placement
+test still runs end to end from an in-process store, and tells the learner plainly
+that progress is not being saved.
 
 Keep both modes working. Do not break fallback parity when changing data flows.
 
@@ -73,6 +76,7 @@ Keep both modes working. Do not break fallback parity when changing data flows.
 | `CAREERS_APPLICATION_WEBHOOK_URL` | Career application fan-out |
 | `COURSE_REGISTRATION_WEBHOOK_URL` | Course registration fan-out |
 | `EXAM_REGISTRATION_WEBHOOK_URL` | Exam registration fan-out |
+| `PLACEMENT_RESULT_WEBHOOK_URL` | Placement result hand-off to the CASA dashboard |
 | `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS` | Optional flag for unverified public claims |
 
 All webhooks are optional. Presence checks live in `src/lib/db/env.ts`; there is no
@@ -137,7 +141,16 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 4. **Photo edits stay source-faithful** — crop, resize, light exposure/color
    correction only.
 5. **Accommodation photos are contextual, not availability claims.**
-6. **Nonprofit framing is load-bearing.** CASA's Google Ad Grants review flagged the
+6. **Placement test content and results.** All 163 placement items are
+   `PILOT_UNREVIEWED` and need two qualified DaF reviewers before live use. Never
+   present a result as a certificate, and never use pass/fail language — the
+   result is a course recommendation a teacher confirms. Never ship an answer key,
+   accepted-answer list, or listening transcript to the client: everything
+   server→client goes through `src/lib/placement/sanitise.ts`, and
+   `answer-containment.test.ts` enforces it. Cut scores in
+   `src/config/placement/policy.ts` are pilot hypotheses — bump `POLICY_VERSION`
+   when you change them so stored attempts stay interpretable.
+7. **Nonprofit framing is load-bearing.** CASA's Google Ad Grants review flagged the
    site as too commercial. Prices and registration are fine, but they must sit inside
    a visibly public-benefit narrative. See `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md`
    before touching the homepage, nav, footer, or `/ueber-uns/gemeinnuetzigkeit`.
@@ -162,6 +175,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
 | `docs/GROUP_PRICING_AND_SPECIAL_COURSES.md` | Group price model ported from the coordinator's workbook, its three bugs, and the special-courses rebuild direction |
 | `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` | **Read before changing any course number.** Prices/hours verified against casa-bremen.de, with an explicit unverified list |
+| `docs/PLACEMENT_TEST_IMPLEMENTATION.md` | **Read before touching `/placement-test` or `src/lib/placement`.** CASA's own Einstufungstest: assessment design, the item-bank port, the engine, the listening gate, answer-key containment |
+| `docs/PLACEMENT_TEST_OPEN_DECISIONS.md` | Placement decisions CASA must own, and what the repo defaults to meanwhile |
 | `docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md` | Site-wide copy review + the four-archetype design for course detail pages |
 | `docs/PREMIUM_UI_REVIEW_2026-08-16.md` | **Current UI/design backlog.** Measured design-layer review across type, spacing, colour, shape, motion, primitives, media and composition, with a 10-step order of work |
 | `docs/DEPENDENCY_SECURITY_2026-08-16.md` | **Read before touching dependencies.** Advisory triage and resolution, why the CI audit gate is production-scope only, and the `ws` / `next-intl` reachability findings |
@@ -204,6 +219,12 @@ mock-mode-parity guidance in the same sections is still valid.
   longer knows any course slug. A page's facts rail and section order come from its archetype;
   `scheduled-cohort` is the default, so an unregistered course keeps legacy behaviour.
   `professional-track` and `module-catalogue` exist but still need content (work board U5, U6).
+- Placement test is on `shadow` release mode with listening withheld: no audio
+  exists for the 33 scored listening scripts, so the pilot measures language use
+  and reading only. `LISTENING_AUDIO_AVAILABLE` in `src/config/placement/policy.ts`
+  is the single switch, and flipping it also activates the `matching` interaction
+  (the bank's only matching item is a listening item). Details in
+  `docs/PLACEMENT_TEST_IMPLEMENTATION.md` §6.2.
 - No canonical production deployment doc yet (Vercel project, domain, rollback owner).
 - **`main` is unprotected and deploys straight to production** (no `vercel.json`, so Vercel's
   default push-to-`main` deploy applies). This is a **deliberate choice while the site is still

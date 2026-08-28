@@ -451,11 +451,23 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     ))}
                   </SelectContent>
                 </Select>
+                {/*
+                  This field asks the learner to self-report a level, so it has
+                  to hand them the way to find out. It used to say "link in the
+                  navigation", which made the reader hunt for the one thing the
+                  sentence was about — and at the time that link led to six
+                  external Klett tests that required knowing your level to pick
+                  one. Now it is a direct link to CASA's own test.
+                */}
                 <p className="text-xs text-[var(--casa-muted)] leading-relaxed">
-                  {t(
-                    "Not sure? Take the placement test first — link in the navigation.",
-                    "Unsicher? Nutzen Sie zuerst den Einstufungstest — Link in der Navigation."
-                  )}
+                  {t('Not sure which level you are?', 'Unsicher, welches Niveau Sie haben?')}{' '}
+                  <Link
+                    href="/placement-test/test"
+                    className="casa-cta-link font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 decoration-[color:var(--casa-sand)] transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current"
+                  >
+                    {t('Take the placement test', 'Einstufungstest machen')}
+                  </Link>
+                  {t(' — it takes about 15 minutes.', ' — das dauert etwa 15 Minuten.')}
                 </p>
               </div>
             )}

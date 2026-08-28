@@ -84,8 +84,9 @@ const LEVELS: Level[] = [
     // Not a CEFR level of its own: CASA bills B1+ as a single half-level step
     // (one entry in CASA_LEVEL_SEQUENCE, src/config/calculator/pricing.ts:25),
     // and it is where the textbook switches from Netzwerk neu to Kontext
-    // (pricing.ts:98). Wording follows klett-level-tests.tsx:57 rather than
-    // inventing a descriptor for a level the CEFR does not define.
+    // (pricing.ts:98). The descriptor is deliberately factual rather than
+    // invented: the CEFR defines no B1+, so it is described by what changes at
+    // it. Kept verbatim from the retired Klett link panel it replaced.
     id: 'b1plus',
     label: 'B1+',
     weeks: WEEKS_FOR_BRIDGE_STAFF_CONFIRMED,

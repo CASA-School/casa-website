@@ -23,3 +23,12 @@ test-results/
 
 # Development-only coordination
 .agentic/
+
+# Protected internal material with no build-time or runtime use.
+#
+# The placement item bank's source markdown carries answer keys and listening
+# transcripts. The generated `.server.ts` modules necessarily ship (the server
+# scores from them), but the raw book is only ever read by
+# `npm run placement:port`, which is a manual developer step — so there is no
+# reason for it to be on a deployment at all.
+scripts/placement/source-item-bank.md
