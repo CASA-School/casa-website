@@ -105,3 +105,29 @@ export function accommodationPriceSummary(locale: ContentLocale) {
     ? `${base} für 4 Wochen, danach ${week} pro Woche`
     : `${base} for 4 weeks, then ${week} a week`;
 }
+
+/**
+ * The four costs, shortened for the hero rail.
+ *
+ * Derived from `accommodationCosts` above rather than written out again — the
+ * whole point of that list. What this adds is a QUALIFIER short enough to sit
+ * under a figure, because three of the four numbers mislead without one:
+ *
+ *   €580 first 4 weeks   reads as "one option is cheaper" without "either option"
+ *   €145 per extra week  reads as a second, separate charge without the holidays
+ *   €580 deposit         reads as a second €580 charge without "refundable"
+ *
+ * The full sentences stay on `accommodationCosts`, which the playbook renders.
+ */
+export function accommodationHeroFacts(locale: ContentLocale) {
+  const hints =
+    locale === 'de'
+      ? ['Gastfamilie oder WG', 'auch Ferienwochen', 'einmalig', 'erstattungsfähig']
+      : ['Host family or shared flat', 'Also holiday weeks', 'One-off', 'Refundable'];
+
+  return accommodationCosts.map((cost, index) => ({
+    label: cost.label[locale],
+    value: cost.amount,
+    hint: hints[index],
+  }));
+}

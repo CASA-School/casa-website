@@ -13,6 +13,7 @@ import {
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { TextCta } from '@/components/ui/text-cta';
+import { BandSeam } from '@/components/ui/band-seam';
 import { CardRail } from '@/components/ui/card-rail';
 import { Container } from '@/components/ui/container';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
@@ -123,29 +124,6 @@ function examDetailHref(code: string) {
   }
 
   return '/exams';
-}
-
-/**
- * A short centred hairline between two bands of the SAME surface.
- *
- * Only between light bands, and deliberately not full-width. A rule that runs
- * edge to edge reads as a structural break — the kind of thing that separates
- * a header from a body — which is far more weight than "these are two different
- * thoughts" deserves. 6rem of hairline centred in the frame marks the seam
- * without claiming to divide the page.
- *
- * There is none around the two ink-deep bands: a light-to-dark boundary is
- * roughly a 90-point step in lightness and needs no help. Drawing a line where
- * the eye can already see the change is what makes a page look fussy.
- */
-function BandSeam() {
-  return (
-    <div aria-hidden className="py-1">
-      <Container>
-        <span className="mx-auto block h-px w-24 bg-[color:var(--casa-sand)]" />
-      </Container>
-    </div>
-  );
 }
 
 export default async function HomePage() {

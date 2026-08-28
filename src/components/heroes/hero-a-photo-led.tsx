@@ -1,7 +1,7 @@
 import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
 
 import { HeroHomePhoto } from './hero-home-photo';
-import type { HeroAction, HeroPhoto, HeroProofItem } from './shared';
+import type { HeroAction, HeroFact, HeroPhoto, HeroProofItem } from './shared';
 
 type HeroAPhotoLedProps = {
   eyebrow: string;
@@ -9,6 +9,7 @@ type HeroAPhotoLedProps = {
   description: string;
   ctas: HeroAction[];
   photo: HeroPhoto;
+  facts?: HeroFact[];
   proofItems?: HeroProofItem[];
   breadcrumbs?: BreadcrumbItem[];
 };

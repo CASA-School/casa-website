@@ -3,10 +3,10 @@ import type { Metadata } from 'next';
 import { HeroDGallery } from '@/components/heroes';
 import { ComparisonModule, EditorialSplit, GuidedPicker, HumanStoryBlock, ProcessSteps, StudentHousingGuide } from '@/components/sections';
 import { AccommodationPlaybook } from '@/components/signatures';
-import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
+import { BandSeam } from '@/components/ui/band-seam';
 import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
-import { accommodationPriceSummary } from '@/config/content/accommodation-costs';
+import { accommodationHeroFacts, accommodationPriceSummary } from '@/config/content/accommodation-costs';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -40,7 +40,20 @@ export default async function AccommodationPage() {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
+      {/*
+        The homepage's hero, composed from the same two shared parts — see the
+        note in HeroDGallery. Three things arrive with it:
+
+        - The breadcrumbs move INTO the hero. They used to render 400px lower,
+          inside the options section, so this page put them somewhere no other
+          accommodation page did.
+        - The cost rail. The four figures that decide this page's question were
+          only in the playbook, two scrolls down, while the hero asked for a
+          housing match with no price anywhere near the ask.
+        - The photo caption is gone with the photo's frame.
+      */}
       <HeroDGallery
+        breadcrumbs={breadcrumbs}
         eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
         title={locale === 'de' ? 'Wohnen in Bremen mit Klarheit und Vertrauen' : 'Live in Bremen with clarity and trust'}
         description={
@@ -48,29 +61,20 @@ export default async function AccommodationPage() {
             ? 'Shared flats oder Host families: beide Wege werden durch CASA begleitet und transparent erklärt.'
             : 'Shared flats or host families: both pathways are supported by CASA with transparent expectations.'
         }
-        /* One photograph — see the note in HeroDGallery about the three-tile mosaic. */
-        photos={[
-          {
-            ...pageConfig.photos.thumbA,
-            caption:
-              locale === 'de'
-                ? 'Wohnen bei CASA: eigenes Zimmer, kurzer Weg zur Sprachschule.'
-                : 'Living with CASA: your own room, a short way to the school.',
-          },
-        ]}
+        photos={[pageConfig.photos.thumbA]}
         ctas={pageConfig.ctas}
+        facts={accommodationHeroFacts(locale)}
       />
 
       <div id="flat" className="scroll-mt-28" />
       <div id="host" className="scroll-mt-28" />
 
       {/* Section 1: Options Shortlist */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="bg-white py-16 md:py-24">
         {/* px-6 md:px-9 inside the gutter, so every section on this page shares
             one content column — the panels get theirs from their own padding. */}
         <Container>
           <div className="px-6 md:px-9">
-          <Breadcrumbs items={breadcrumbs} className="mb-8" />
           <GuidedPicker
             eyebrow={locale === 'de' ? 'Wohnoptionen' : 'Accommodation options'}
             title={locale === 'de' ? 'Zwei Hauptoptionen für Ihren Aufenthalt' : 'Two primary options for your stay'}
@@ -110,11 +114,19 @@ export default async function AccommodationPage() {
         </Container>
       </section>
 
-      {/* Section 2: Playbook */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+      {/*
+        Section 2: Playbook.
+
+        No `border-t`. Every light band on this page carried one, six in all, and
+        five of them drew a hairline where the ground already changes — see the
+        BandSeam doc comment for the measurement. Here the band above is white and
+        this one is the canvas, an 11-unit step the eye reads on its own.
+      */}
+      <section className="py-16 md:py-24">
         <Container>
           <div className="px-6 md:px-9">
           <AccommodationPlaybook
+            eyebrow={locale === 'de' ? 'Kosten und Bedingungen' : 'Costs and conditions'}
             title={locale === 'de' ? 'Wohnregeln und Kosten transparent' : 'Housing expectations playbook'}
             description={
               locale === 'de'
@@ -167,7 +179,7 @@ export default async function AccommodationPage() {
       </section>
 
       {/* Section 3: Mission */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
+      <section className="bg-white py-16 md:py-24">
         <Container>
             <EditorialSplit
             tone="plain"
@@ -201,7 +213,15 @@ export default async function AccommodationPage() {
         band is built. Choosing between a shared flat and a host family is the
         decision this page exists for, so that is the band that gets the weight.
       */}
-      <section className="bg-[var(--casa-ink-deep)] py-16 md:py-24">
+      {/*
+        128px of vertical air, not 96. The homepage gives both of its ink-deep
+        fields `py-20 md:py-32` while every light band around them takes 96, and
+        that difference is most of why they read as punctuation rather than as
+        another section. This band was on 96 — the same value as the seven light
+        bands around it — so the page's one inverted field was the only one of the
+        site's four not given the weight the composition depends on.
+      */}
+      <section className="bg-[var(--casa-ink-deep)] py-20 md:py-32">
         <Container>
           <ComparisonModule
             tone="dark"
@@ -267,7 +287,7 @@ export default async function AccommodationPage() {
 
       {/* Section 5: Story */}
       {leadStory ? (
-        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
+        <section className="bg-white py-16 md:py-24">
           <Container>
             <HumanStoryBlock
               eyebrow={locale === 'de' ? 'Wohn-Erfahrung' : 'Housing story'}
@@ -289,11 +309,23 @@ export default async function AccommodationPage() {
         </section>
       ) : null}
 
-      {/* Section 6: Steps */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+      {/*
+        Section 6: Steps — and THE PAGE'S ONE RAIL COMPOSITION.
+
+        Measured before this, all nine bands on this page were the same shape:
+        heading block on top, content full width beneath it. That is a different
+        problem from the surface rhythm the previous pass fixed, and it survives
+        any amount of work on the individual bands — the homepage's own answer is
+        to put the heading in a narrow left rail beside a wider content column
+        (`0.82fr / 1.18fr`, the persona-pathways band), and it uses that shape
+        three times. This is the section it suits best here: three short steps
+        that do not need the full 1216px, next to a heading that explains them.
+      */}
+      <section className="py-16 md:py-24">
         <Container>
           <ProcessSteps
             tone="plain"
+            layout="rail"
             eyebrow={locale === 'de' ? 'Ablauf' : 'How requests work'}
             title={locale === 'de' ? 'Unterkunftsanfrage in drei Schritten' : 'Request accommodation in three steps'}
             description={
@@ -322,7 +354,15 @@ export default async function AccommodationPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+      {/*
+        The one place a seam is earned: the band above is the canvas and so is
+        this one, so there is no change of ground to mark the boundary. A short
+        centred hairline says "different thought" without the structural weight of
+        a rule across the whole frame.
+      */}
+      <BandSeam />
+
+      <section className="py-16 md:py-24">
         <Container>
           <StudentHousingGuide locale={locale} />
         </Container>
@@ -338,7 +378,7 @@ export default async function AccommodationPage() {
         option on this page possible, which is why the invitation belongs at the
         end of the student journey rather than competing with it at the top.
       */}
-      <section className="border-t border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
+      <section className="bg-white py-16 md:py-24">
         <Container>
           <div className="flex flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between md:px-9">
             <div className="max-w-measure">

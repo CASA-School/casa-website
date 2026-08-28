@@ -18,6 +18,18 @@ type ProcessStepsProps = {
    * sections, which is what made it read as a tunnel.
    */
   tone?: 'warm' | 'plain';
+  /**
+   * `rail` moves the heading block into a left rail and the steps into a wider
+   * right column — the homepage's own `0.82fr / 1.18fr` composition (see the
+   * persona-pathways band in src/app/page.tsx).
+   *
+   * It exists because a page whose every band is "heading on top, full-width
+   * content below" reads as one repeated block however good each band is.
+   * Measured on /accommodation before this: nine bands, nine times that shape.
+   * Default stays `stack`, so the five other pages mounting this component are
+   * untouched — same precedent as `tone`.
+   */
+  layout?: 'stack' | 'rail';
   title: string;
   description: string;
   steps: ProcessStep[];
@@ -35,8 +47,53 @@ export function ProcessSteps({
   steps,
   cta,
   tone = 'warm',
+  layout = 'stack',
   className,
 }: ProcessStepsProps) {
+  const isRail = layout === 'rail';
+
+  const heading = (
+    /* Clamped: this heading was running the full container. See ComparisonModule. */
+    <div className="max-w-[46rem]">
+      {eyebrow ? (
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+      ) : null}
+      <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
+      <h2 className="mt-2 text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+        {description}
+      </p>
+    </div>
+  );
+
+  const stepList = (
+    /*
+      Three across in both layouts. A 2-up grid for three numbered steps orphans
+      the third into a half-empty row, and the rail composition is already
+      asymmetric — one orphan on top of that reads as a mistake rather than as a
+      choice. The rail's right column is ~694px at 1280, so each step gets ~215px.
+    */
+    <ol className={cn('grid gap-7 md:grid-cols-3', !isRail && 'mt-8')}>
+      {steps.map((item) => (
+        <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
+          <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
+            {item.step}
+          </span>
+          <h3 className="text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
+          <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
+        </li>
+      ))}
+    </ol>
+  );
+
+  const action = cta ? (
+    <div className={cn(isRail ? 'mt-8' : 'mt-7')}>
+      <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
+        <Link href={cta.href}>{cta.label}</Link>
+      </Button>
+    </div>
+  ) : null;
+
   return (
     <section data-reveal="true" className={cn(
         /* Same inset in both tones — see EditorialSplit. */
@@ -44,37 +101,21 @@ export function ProcessSteps({
         tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
         className
       )}>
-      {/* Clamped: this heading was running the full container. See ComparisonModule. */}
-      <div className="max-w-[46rem]">
-        {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
-        ) : null}
-        <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-        <h2 className="mt-2 text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-          {description}
-        </p>
-      </div>
-
-      <ol className="mt-8 grid gap-7 md:grid-cols-3">
-        {steps.map((item) => (
-          <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
-            <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
-              {item.step}
-            </span>
-            <h3 className="text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
-            <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
-          </li>
-        ))}
-      </ol>
-
-      {cta ? (
-        <div className="mt-7">
-          <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
-            <Link href={cta.href}>{cta.label}</Link>
-          </Button>
+      {isRail ? (
+        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+          <div>
+            {heading}
+            {action}
+          </div>
+          <div className="mt-2 lg:mt-0">{stepList}</div>
         </div>
-      ) : null}
+      ) : (
+        <>
+          {heading}
+          {stepList}
+          {action}
+        </>
+      )}
     </section>
   );
 }
