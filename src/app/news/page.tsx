@@ -236,7 +236,7 @@ export default async function NewsPage() {
               detail that makes the page look made rather than generated.
               `aria-hidden`, obviously.
             */}
-            <aside className="relative overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--casa-coral)_14%,#fff)] p-7">
+            <aside className="relative overflow-hidden rounded-xl bg-[color-mix(in_srgb,var(--casa-coral)_14%,#fff)] p-7">
               <span
                 aria-hidden
                 className="absolute -left-6 top-8 h-7 w-28 -rotate-12 bg-[color-mix(in_srgb,var(--casa-coral)_34%,#fff)]/80"
@@ -287,7 +287,7 @@ export default async function NewsPage() {
               editor, so unlike the Hauptbeitrag lower down it has no URL of its
               own and carries a level tag instead of a byline.
             */}
-            <article className="rounded-2xl bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:col-span-2">
+            <article className="rounded-xl bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:col-span-2">
               <h2 className="text-2xl font-bold uppercase tracking-tight text-[var(--casa-ink)] sm:text-3xl">
                 {localizedText(newsFlashIssue.feature.title, locale)}
               </h2>
@@ -344,7 +344,7 @@ export default async function NewsPage() {
             </article>
 
             {/* Wort des Monats — the issue's closing rubric. */}
-            <aside className="rounded-2xl bg-[var(--casa-warm-soft)] p-7">
+            <aside className="rounded-xl bg-[var(--casa-warm-soft)] p-7">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-gold-deep)]">
                 {copy.wordTitle}
               </p>
@@ -361,7 +361,7 @@ export default async function NewsPage() {
               blue is the equivalent in this palette, and `casa-surface-dark`
               flips the accent tokens so nothing inside needs a hardcoded colour.
             */}
-            <aside className="casa-surface-dark flex flex-col justify-center rounded-2xl bg-[var(--casa-ink-deep)] p-7 text-white">
+            <aside className="casa-surface-dark flex flex-col justify-center rounded-xl bg-[var(--casa-ink-deep)] p-7 text-white">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
                 {copy.quoteTitle}
               </p>
@@ -380,7 +380,7 @@ export default async function NewsPage() {
               that IS the content. A colour block here would defeat the point of
               the block.
             */}
-            <aside className="flex items-start gap-4 rounded-2xl bg-white p-7 shadow-[var(--shadow-card)]">
+            <aside className="flex items-start gap-4 rounded-xl bg-white p-7 shadow-[var(--shadow-card)]">
               <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-[var(--casa-sun)]">
                 <NextImage
                   src={newsFlashIssue.editor.photo.src}
@@ -413,7 +413,7 @@ export default async function NewsPage() {
               const rubric = RUBRIC_STYLE[notice.kind];
 
               return (
-                <aside key={notice.id} className={cn('rounded-2xl p-7', rubric.panel)}>
+                <aside key={notice.id} className={cn('rounded-xl p-7', rubric.panel)}>
                   <div className="flex items-start gap-3">
                     <span className={cn('inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', rubric.medallion)}>
                       <RubricIcon className="h-4 w-4" aria-hidden />
@@ -438,7 +438,7 @@ export default async function NewsPage() {
               search indexing; only the notices around it come from the issue
               config.
             */}
-            <article id="featured" className="rounded-2xl bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:col-span-2">
+            <article id="featured" className="rounded-xl bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {copy.featured}
               </p>

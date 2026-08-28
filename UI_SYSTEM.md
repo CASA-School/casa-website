@@ -58,15 +58,48 @@ pass, 284 of ~370 weighted elements in shipping code were `font-black`, so every
 eyebrow, stat and card title rendered at the same 800 and nothing read as emphasis.
 
 ### Radius
-- Base radius token: `--radius: 0.625rem`.
-- Derived radii:
-  - `sm`: `calc(var(--radius) - 4px)`
-  - `md`: `calc(var(--radius) - 2px)`
-  - `lg`: `var(--radius)`
-  - `xl`: `calc(var(--radius) + 4px)`
-  - `2xl`: `calc(var(--radius) + 8px)`
-  - `3xl`: `calc(var(--radius) + 12px)`
-  - `4xl`: `calc(var(--radius) + 16px)`
+Base radius token: `--radius: 0.375rem` (6px), in `src/app/globals.css`. It is the
+only place to change the scale.
+
+**Three tiers, three values.** These are the only radius classes CASA code should use:
+
+| Tier | Class | Value | Use for |
+| --- | --- | --- | --- |
+| Feature | `rounded-3xl` | 8px | Outer page cards, modals, hero and full-section wrappers |
+| Card | `rounded-xl` | 6px | Internal content boxes, section banners, tiles, panels |
+| Control | `rounded-lg` | 4px | Buttons, inputs, selects, textareas, badges, chips |
+| Pill | `rounded-full` | — | Avatar circles, step indicators |
+
+Controls sit *below* the base on purpose: a button is the smallest and most
+repeated rounded object on a page, so it is the first thing that reads as
+inflated, and keeping it a step under its container preserves the nesting
+hierarchy where the eye actually checks for it.
+
+Semantic aliases naming the same three tiers, for hand-written CSS:
+`--casa-radius-control` / `--casa-radius-input` (both 4px — one tier, two
+readable names), `--casa-radius-card` (6px), `--casa-radius-feature` (8px).
+`--casa-button-radius` derives from `--casa-radius-input`.
+
+All seven Tailwind `--radius-*` steps are still mapped, but they collapse onto
+those three values, so ~600 existing call sites land on the right tier without
+edits. That also means `rounded-2xl`, `rounded-4xl`, `rounded-md`, `rounded-sm`,
+`rounded-xs` and a bare `rounded` are **retired**: they still render, but they
+render as one of the three tiers while hiding which tier was meant. The bare
+`rounded` is the sharpest trap: Tailwind emits a hardcoded `.25rem` for it rather
+than reading `--radius`, so it silently equals tier 3 today but is the one radius
+class that will *not* follow if the base is retuned. The non-canonical steps are
+kept mapped rather than deleted because
+an unmapped `--radius-*` falls through to Tailwind's own default, and a silent
+`rounded-4xl` at 32px is a worse failure than a redundant alias.
+
+*(Corrected 2026-08-27: this section previously documented a `0.625rem` base with
+`-4/-2/+4/+8/+12/+16` offsets. Neither the base nor any offset had matched
+`globals.css` since the 2026-08-16 compression.)*
+
+Two deliberate exceptions remain in the codebase, both flagged in place:
+`rounded-[0.25em]` on the inline image credit mark (em-relative so it tracks font
+size) and `rounded-[1px]` on the news masthead rule (an editorial rule, not a
+container).
 
 ## Layout and Motion Conventions
 - Shared container: `max-w-[1440px] px-6 lg:px-8`.

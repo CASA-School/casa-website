@@ -109,10 +109,10 @@ export const photoSlots: PhotoSlot[] = [
   { n: 19, src: '/media/casa/study-materials-map.jpg', subject: 'Study materials laid out with a map.', ready: false },
 
   // ---- Groups, excursions, Bremen -----------------------------------------
-  { n: 20, src: '/media/casa/group-course-bremen-musicians.jpg', subject: 'Group at the Bremen Town Musicians statue.', ready: false },
+  { n: 20, src: '/media/casa/group-course-bremen-musicians.jpg', subject: 'Group at the Bremen Town Musicians statue.', ready: true },
   { n: 21, src: '/media/casa/group-course-lunch-table.jpg', subject: 'Group eating together, social rather than instructional.', ready: false },
   { n: 22, src: '/media/casa/group-course-phone-task.jpg', subject: 'Learners on a phone-based task out in the city.', ready: false },
-  { n: 23, src: '/media/casa/group-course-walking-bremen.jpg', subject: 'Group walking through Bremen together, city legible behind them.', ready: false },
+  { n: 23, src: '/media/casa/group-course-walking-bremen.jpg', subject: 'Group walking through Bremen together, city legible behind them.', ready: true },
   { n: 24, src: '/media/casa/student-group-activity-outdoor.jpg', subject: 'Outdoor group activity, daylight, clearly not a classroom.', ready: false },
   { n: 25, src: '/media/casa/bremen-schnoor-houses.jpg', subject: 'The Schnoor quarter houses — Bremen as a place to live, no people needed.', ready: false },
 

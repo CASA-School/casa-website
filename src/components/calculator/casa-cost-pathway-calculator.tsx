@@ -299,7 +299,7 @@ function ToggleLine({
         checked={checked}
         onChange={(event) => onCheckedChange(event.target.checked)}
         disabled={disabled}
-        className="mt-0.5 size-4 shrink-0 rounded-sm border-[color:var(--casa-sand)] text-[var(--casa-accent-text)] accent-[var(--casa-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-0.5 size-4 shrink-0 rounded-lg border-[color:var(--casa-sand)] text-[var(--casa-accent-text)] accent-[var(--casa-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="min-w-0 space-y-1">
         <Label htmlFor={id}>{label}</Label>

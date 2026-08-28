@@ -167,7 +167,7 @@ export function CourseFormatRows({
 
           <div
             className={cn(
-              'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-2xl',
+              'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl',
               index % 2 === 1 && 'md:order-1'
             )}
           >

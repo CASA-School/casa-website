@@ -93,7 +93,6 @@ describe('course archetypes', () => {
     // Same five facts as the pre-registry page.
     expect(scheduled.facts).toEqual(['next-start', 'duration', 'lessons-per-week', 'level-range', 'price']);
     expect(scheduled.sections).toEqual([
-      'summary-strip',
       'level-goals',
       // Both added 2026-08-18. CASA publishes a term table and a fee table for
       // every dated format, and the pages carried neither.

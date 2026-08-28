@@ -21,6 +21,14 @@ type Fee = {
  * expectation-setting sentences, including the unwelcome ones: exam preparation
  * is not included, placement can move you, A1.1 cannot join mid-course.
  *
+ * UNLESS there is no fee table. A quote-only format (CASA Gruppen,
+ * Firmenunterricht) publishes no figures at all — just the sentence saying the
+ * price is quoted per group. Held in the same two-column frame, that one line
+ * sat alone opposite five conditions and left half the section empty, which
+ * reads as missing content rather than as a deliberately short answer. With no
+ * table, the note leads the section at full width and the conditions spread
+ * across two columns beneath it.
+ *
  * Data comes from config/courses/course-practical-facts.ts. Never hardcode a
  * figure in here.
  */
@@ -50,6 +58,46 @@ export function CoursePracticalDetails({
    * The price list keeps its own hairline rows, which is the structure that
    * actually earns a rule here — a reader scans figures down a column.
    */
+  const hasFeeTable = Boolean(fees?.length);
+
+  if (!hasFeeTable) {
+    return (
+      <section>
+        <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+          {copy.title}
+        </h2>
+
+        {feeNote ? (
+          <p className="mt-6 flex max-w-measure gap-3 border-t border-[color:var(--casa-sand)] pt-6 text-base leading-relaxed text-[var(--casa-ink)]">
+            <HelpCircle
+              aria-hidden
+              className="mt-1 h-5 w-5 shrink-0 text-[var(--casa-accent-text)]"
+            />
+            <span>{feeNote}</span>
+          </p>
+        ) : null}
+
+        {conditions.length ? (
+          <>
+            <p className="mt-9 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+              {copy.conditions}
+            </p>
+            <ul className="mt-2 grid gap-x-12 gap-y-0 md:grid-cols-2">
+              {conditions.map((condition) => (
+                <li
+                  key={condition}
+                  className="border-t border-[color:var(--casa-sand)] py-4 text-sm leading-relaxed text-[var(--casa-ink)]"
+                >
+                  {condition}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </section>
+    );
+  }
+
   return (
     <section>
       <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>

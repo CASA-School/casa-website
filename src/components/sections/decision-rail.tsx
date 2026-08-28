@@ -11,6 +11,13 @@ type DecisionRailProps = {
   notes?: string;
   deadlineIso?: string | null;
   /**
+   * Defaults to true. Set false on archetypes where nobody registers — a
+   * quote-only page rendering "Registration window: Rolling registration"
+   * contradicts its own copy. This component also serves /exams/[code] and
+   * /accommodation/[type], so the default must stay true.
+   */
+  showDeadline?: boolean;
+  /**
    * The collective statement about CASA's teachers. This used to be a
    * `TeamSpotlight` rendering one named person with a portrait — invented, and on
    * every course page. See components/sections/teaching-staff-card.
@@ -35,6 +42,7 @@ export function DecisionRail({
   infoItems,
   notes,
   deadlineIso,
+  showDeadline = true,
   teachingStaff,
   contact,
 }: DecisionRailProps) {
@@ -68,14 +76,16 @@ export function DecisionRail({
       <div className="overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
         <StickyInfoCard title={infoTitle} items={infoItems} notes={notes} unstyled />
 
-        <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-            {locale === 'de' ? 'Anmeldefrist' : 'Registration window'}
-          </p>
-          <div className="mt-2">
-            <DeadlineBadge deadlineIso={deadlineIso} locale={locale} />
+        {showDeadline ? (
+          <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+              {locale === 'de' ? 'Anmeldefrist' : 'Registration window'}
+            </p>
+            <div className="mt-2">
+              <DeadlineBadge deadlineIso={deadlineIso} locale={locale} />
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {contact ? (
           <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">

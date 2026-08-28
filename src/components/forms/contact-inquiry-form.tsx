@@ -745,7 +745,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
           </p>
 
           {showBrief ? (
-            <fieldset className="sm:col-span-2 rounded-2xl border border-[color:var(--casa-sand)] bg-white/70 p-5 sm:p-6">
+            <fieldset className="sm:col-span-2 rounded-xl border border-[color:var(--casa-sand)] bg-white/70 p-5 sm:p-6">
               <legend className="px-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {briefLegend}
               </legend>

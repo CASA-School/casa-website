@@ -36,7 +36,7 @@ export function CefrBandBadge({ bands, className }: { bands: CefrBand[]; classNa
       {bands.map((band) => (
         <span
           key={band}
-          className="inline-flex h-5 min-w-5 items-center justify-center rounded px-1.5 text-[11px] font-bold leading-none"
+          className="inline-flex h-5 min-w-5 items-center justify-center rounded-lg px-1.5 text-[11px] font-bold leading-none"
           style={{ backgroundColor: BAND_TOKENS[band].bg, color: BAND_TOKENS[band].ink }}
         >
           {band}

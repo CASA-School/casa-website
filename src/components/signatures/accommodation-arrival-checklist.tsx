@@ -86,7 +86,7 @@ export function AccommodationArrivalChecklist({
               <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)]">
                 <span
                   aria-hidden
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded-[3px] border border-[color:var(--casa-sand)] bg-white"
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded-lg border border-[color:var(--casa-sand)] bg-white"
                 />
                 <span>{item}</span>
               </li>

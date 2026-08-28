@@ -102,7 +102,7 @@ export default function DesignSystemPage() {
                 Source-of-truth guidelines for conversion UX, brand character, and public interface consistency.
               </p>
             </div>
-            <div className="inline-flex rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            <div className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-3">
               <Logo className="h-8 w-auto" />
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function DesignSystemPage() {
         <Section title="Voice and Tone" description="Language style must feel human, professional, and action-oriented.">
           <div className="grid gap-5 md:grid-cols-3">
             {voicePrinciples.map((principle) => (
-              <article key={principle.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <article key={principle.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm font-bold text-[var(--casa-ink)]">{principle.title}</p>
                 <p className="mt-2 text-sm text-slate-600">{principle.description}</p>
               </article>
@@ -148,13 +148,13 @@ export default function DesignSystemPage() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Semantic Tokens</p>
                 <pre className="mt-3 overflow-x-auto text-xs leading-relaxed text-slate-700">
 {JSON.stringify(semanticTokens, null, 2)}
                 </pre>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Component Token Rules</p>
                 <pre className="mt-3 overflow-x-auto text-xs leading-relaxed text-slate-700">
 {JSON.stringify(componentTokenRules, null, 2)}
@@ -169,7 +169,7 @@ export default function DesignSystemPage() {
           description="Rounded and triangle primitives derived from the CASA mark for decorative accents, media framing, and section rhythm."
         >
           <div className="grid gap-4 lg:grid-cols-2">
-            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Rounded Shape</p>
               <div className="mt-4 flex items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
                 <CasaRoundedShape tone="sun" className="h-16 w-24" />
@@ -181,7 +181,7 @@ export default function DesignSystemPage() {
               </p>
             </article>
 
-            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Triangle Shape</p>
               <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
                 <CasaTriangleShape tone="red" className="h-14 w-14" />
@@ -208,7 +208,7 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="CTA Priority Matrix" description="Every public route follows one primary intent path, one secondary path, and one tertiary support path.">
-          <div className="overflow-x-auto rounded-2xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                 <tr>
@@ -235,7 +235,7 @@ export default function DesignSystemPage() {
         <Section title="Hero Pattern Library" description="One shared hero contract with six archetypes and page-specific usage rules.">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {heroArchetypes.map((archetype) => (
-              <article key={archetype.key} className="rounded-2xl border border-slate-200 bg-white p-4">
+              <article key={archetype.key} className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--casa-accent-text)]">Hero {archetype.key}</p>
                 <p className="mt-2 text-base font-bold text-[var(--casa-ink)]">{archetype.name}</p>
                 <p className="mt-1 text-xs text-slate-500">{archetype.usage}</p>
@@ -253,7 +253,7 @@ export default function DesignSystemPage() {
             six identical empty rectangles labelled as if they differed — a
             design-system page documenting a system it no longer has.
           */}
-          <article className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <article className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="hero-grain h-24 border-b border-slate-200" />
             <div className="p-4">
               <p className="text-sm font-bold text-slate-800">Hero surface</p>
@@ -265,7 +265,7 @@ export default function DesignSystemPage() {
             </div>
           </article>
 
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
+          <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                 <tr>
@@ -301,7 +301,7 @@ export default function DesignSystemPage() {
         <Section title="Registration UX Standards" description="Public registration pages must stay professional, clear, and support-safe.">
           <div className="grid gap-4 sm:grid-cols-2">
             {registrationUxStandards.map((item) => (
-              <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <div key={item} className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
                 {item}
               </div>
             ))}
@@ -317,7 +317,7 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="Button Variant Catalog" description="Standardized button variants consolidated inside the Button primitive component.">
-          <div className="flex flex-wrap gap-4 items-center rounded-2xl border border-slate-200 bg-slate-50 p-6">
+          <div className="flex flex-wrap gap-4 items-center rounded-xl border border-slate-200 bg-slate-50 p-6">
             <div className="flex flex-col items-center gap-2">
               <span className="text-xs font-bold text-slate-500">Prism (Default CTA)</span>
               <Button variant="prism">Prism Button</Button>
@@ -350,7 +350,7 @@ export default function DesignSystemPage() {
         <Section title="Section Spacing Standards" description="Public-facing layouts must maintain generous visual rhythm between major page features.">
           <div className="grid gap-4 sm:grid-cols-2">
             {sectionSpacingRules.map((item) => (
-              <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <div key={item} className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
                 {item}
               </div>
             ))}
@@ -359,7 +359,7 @@ export default function DesignSystemPage() {
 
         <Section title="Media and Component Contracts" description="Use authentic CASA visuals and keep every guideline tied to production code.">
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Media Rules</p>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
                 {mediaRules.map((rule) => (
@@ -370,7 +370,7 @@ export default function DesignSystemPage() {
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Production Contracts</p>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
                 {publicComponentContracts.map((entry) => (

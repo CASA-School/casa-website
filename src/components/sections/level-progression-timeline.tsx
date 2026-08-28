@@ -143,7 +143,7 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
             alt={coverAlt}
             width={96}
             height={132}
-            className="h-[8.25rem] w-24 rounded-md object-cover shadow-[var(--shadow-card)]"
+            className="h-[8.25rem] w-24 rounded-lg object-cover shadow-[var(--shadow-card)]"
           />
         ) : (
           // Stand-in until a licensed cover is on file. Deliberately does not
@@ -151,7 +151,7 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
           // be the real cover.
           <div
             aria-hidden
-            className="flex h-[8.25rem] w-24 flex-col justify-between overflow-hidden rounded-md p-2.5 shadow-[var(--shadow-card)]"
+            className="flex h-[8.25rem] w-24 flex-col justify-between overflow-hidden rounded-lg p-2.5 shadow-[var(--shadow-card)]"
             style={{
               background: `linear-gradient(150deg, ${accent.bg} 0%, color-mix(in srgb, ${accent.bg} 68%, #0f172a) 100%)`,
               borderLeft: `5px solid color-mix(in srgb, ${accent.bg} 55%, #0f172a)`,

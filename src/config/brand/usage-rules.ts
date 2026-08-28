@@ -128,7 +128,7 @@ export const sectionSpacingRules = [
   'Separate sibling sections with a subtle border divider (border-t border-[color:var(--casa-sand)]/40) when background shifts.',
   'Place distinct page features inside independent <section> wrappers and <Container> components rather than nesting them in a single massive container.',
   'Avoid nested boxing: Do not nest bordered elements (cards inside cards) or place borders inside colored containers. Use flat, borderless inner panels with soft background fills instead.',
-  'Border-radius: exactly 3 tiers — rounded-3xl for outer page cards and modals, rounded-xl for internal content boxes and section banners, rounded-lg for inputs, selects, and buttons. rounded-full only for circles. Do not use rounded-md or rounded-2xl in new code.',
+  'Border-radius: exactly 3 tiers, 3 values, off a 6px base — rounded-3xl (8px) for outer page cards and modals, rounded-xl (6px) for internal content boxes and section banners, rounded-lg (4px) for inputs, selects, buttons, badges and chips. rounded-full only for circles and pills. Every other radius class now renders identically to one of these three, so using one only hides which tier you meant: do not use rounded-2xl, rounded-4xl, rounded-md, rounded-sm, rounded-xs, a bare rounded, or an arbitrary rounded-[Npx] in new code.',
 ] as const;
 
 export const interactionRules = [

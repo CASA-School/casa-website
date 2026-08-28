@@ -353,7 +353,7 @@ export default async function NonProfitStatusPage() {
               non-profit band, so the two surfaces that carry this story look
               related. Four separate tinted boxes read as four unrelated chips.
             */}
-            <ul className="divide-y divide-[color:var(--casa-sand)]/70 overflow-hidden rounded-2xl bg-[var(--casa-warm-soft)]/35">
+            <ul className="divide-y divide-[color:var(--casa-sand)]/70 overflow-hidden rounded-xl bg-[var(--casa-warm-soft)]/35">
               {copy.impactItems.map((item) => (
                 <li
                   key={item}

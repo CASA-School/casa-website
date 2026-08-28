@@ -16,8 +16,8 @@ type HeroHomePhotoProps = {
    *
    * Archetype D has forwarded breadcrumbs since /accommodation/become-host had to
    * render its own band below the hero for want of it. A needs the same for the
-   * same reason: /courses/german-for-groups is moving onto this hero, and a course
-   * page two levels deep cannot drop its breadcrumb trail on the way.
+   * same reason: /courses/german-for-groups moved onto this hero in 41d2b05, and a
+   * course page two levels deep cannot drop its breadcrumb trail on the way.
    */
   breadcrumbs?: BreadcrumbItem[];
 };
