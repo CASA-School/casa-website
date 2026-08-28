@@ -1,4 +1,18 @@
+import { cn } from '@/lib/utils';
+
 type AccommodationPlaybookProps = {
+  /**
+   * Optional, and it is not the old one.
+   *
+   * The eyebrow this component used to render was the literal word "Signature" —
+   * the internal name for this class of component, shipped to visitors as a
+   * label, untranslated — so it was removed. That left this the ONLY band on
+   * /accommodation with neither an eyebrow nor the accent rule, while the eight
+   * around it have both: a section that starts with a bare h2 in a run of
+   * sections that do not. Removing the wrong label was right; leaving the slot
+   * empty was the part that was still wrong.
+   */
+  eyebrow?: string;
   title: string;
   description: string;
   cards: Array<{
@@ -31,6 +45,7 @@ type AccommodationPlaybookProps = {
  * meant to act on.
  */
 export function AccommodationPlaybook({
+  eyebrow,
   title,
   description,
   cards,
@@ -53,7 +68,13 @@ export function AccommodationPlaybook({
     */
     <section className="casa-editorial-measure">
       <div className="max-w-[46rem]">
-        <h2 className="text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+        {eyebrow ? (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+            <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
+          </>
+        ) : null}
+        <h2 className={cn('text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl', eyebrow && 'mt-2')}>{title}</h2>
         <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{description}</p>
       </div>
 

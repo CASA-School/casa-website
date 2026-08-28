@@ -1125,6 +1125,96 @@ Gates: lint, typecheck, 74 unit tests, build, knip, and 10 e2e all pass. One e2e
 updated — `header > div.mx-auto` → `header > [data-casa-site-frame]`, same element, targeted by
 contract instead of by an incidental utility class.
 
+## One hero for home, groups and /accommodation (2026-08-27)
+
+The three heroes a visitor is most likely to see in one session did not agree with
+each other, and each wrote its own type scale. Measured at 1440px before this:
+
+```
+/                          h1 64px    weight 700   line-height 1.25
+/courses/german-for-groups h1 51.2px  weight 900   line-height 1.05
+/accommodation             h1 51.2px  weight 900   line-height 1.25
+```
+
+Three sizes, two weights, three line-heights. /accommodation also put its photograph
+in a rounded `MediaFrame` **with a caption** where the homepage masks its photograph
+into the page ground, and rendered its breadcrumbs 400px lower, inside the options
+section, rather than in the hero.
+
+**Fixed by extracting the design, not by editing three files.** `shared.tsx` now owns
+two primitives every hero composes:
+
+- `HeroLede` — eyebrow, h1, lead, CTA row, plus an optional decision-fact rail. It
+  also owns the CTA policy: first action is the solid button, every later one a
+  `TextCta`.
+- `HeroBleedPhoto` — the homepage's masked photograph, lifted out unchanged.
+
+`HeroHomePhoto` (A), `HeroDGallery` (D) and `HeroCUtilityRail` (C) are now
+compositions of those. A is byte-identical after the refactor — verified: hero 641px,
+h1 64/700/80, lede 608x514, description 608. D is A's composition exactly, so it also
+took A's `min-h` floor in `HeroSurface`; C keeps its own composition (a course page's
+facts card must stay in the fold) and shares only the lede.
+
+Cost of one scale on C: hero grows 9-75px depending on how the title wraps. Worst
+case /accommodation/flat 855 -> 930. Accepted.
+
+The /accommodation hero also gained a cost rail — `accommodationHeroFacts()` in
+`config/content/accommodation-costs.ts`, derived from the existing list, adding only a
+short qualifier per figure ("Refundable", "Host family or shared flat") because three
+of the four numbers mislead without one. The page previously asked for a housing match
+with no price within two scrolls of the ask.
+
+### The rest of the page: band vocabulary, not more modules
+
+The 2026-08-21 pass fixed the surface rhythm (one inverted field per page); what was
+left was measurable and different. Before -> after on /accommodation:
+
+```
+border-t across the full 1360px frame     6 bands  ->  0
+band padding                              80 x7    ->  96 x7
+inverted-field padding                    96       ->  128  (the homepage's own)
+bands with an eyebrow + accent rule       8 of 9   ->  9 of 9
+bands shaped "heading on top, full width" 9 of 9   ->  8 of 9
+```
+
+Five of the six borders drew a hairline where the ground already changes — one against
+the ink-deep field (a ~90-point step in lightness), four against white (11 units).
+`BandSeam` was private to `src/app/page.tsx`, which is *why* /accommodation reached for
+a full-width rule instead; it now lives at `src/components/ui/band-seam.tsx` and marks
+the page's one boundary where the ground does not change.
+
+`ProcessSteps` gained `layout="rail"` (the homepage's `0.82fr / 1.18fr`
+persona-pathways composition) and `AccommodationPlaybook` gained an optional `eyebrow`
+— it had been the only band with a bare h2 since the literal word "Signature" was
+removed as its label. Both default to current behaviour, so the five other pages
+mounting `ProcessSteps` are untouched. Same precedent as `tone`.
+
+**Deliberately not borrowed:** the groups page's sticky "Your decision" rail.
+/accommodation is a chooser, not a single product — its decision is answered by the two
+option cards and the inverted comparison field, and the hero rail already carries the
+facts a sticky card would repeat.
+
+Gates: lint, typecheck, test (113), build, knip, e2e (10). `/accommodation` is still
+pinned to archetype D and the e2e hero-archetype map passes unchanged.
+
+### Overlap with the unmerged CASA Gruppen work
+
+`claude/casa-gruppen-rebuilt` (worktree `.claude/worktrees/casa-gruppen-page-72e485`,
+uncommitted at the time of writing) moves `/courses/german-for-groups` off archetype C
+and onto **`HeroAPhotoLed` — the homepage hero** — and adds an optional `breadcrumbs`
+prop to `HeroHomePhoto`/`HeroAPhotoLed` so a course page two levels deep keeps its
+trail. That is the same conclusion this pass reached from the other side.
+
+`src/components/heroes/hero-home-photo.tsx` is the only file both branches touch. This
+pass already contains that branch's change — `breadcrumbs` is accepted and forwarded to
+`HeroSurface` on both A components — so resolving the merge is "take this side". Nothing
+else overlaps: the gruppen branch does not touch `shared.tsx`,
+`hero-c-utility-rail.tsx` or `hero-d-gallery.tsx`.
+
+Consequence worth knowing: once that branch lands, groups renders `HeroLede`, so it can
+pass `facts` (lessons/week, level range, lead time) into the hero rail the same way
+/accommodation passes its four costs. `HeroAPhotoLed` already forwards the prop.
+
 ## Verified Baseline
 
 The latest implementation pass has already cleared:

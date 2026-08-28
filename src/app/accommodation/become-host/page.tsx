@@ -234,11 +234,11 @@ export default async function BecomeHostFamilyPage() {
         eyebrow={copy.eyebrow}
         title={copy.title}
         description={copy.description}
+        /* No caption: the hero photograph has no frame for one to sit under. */
         photos={[
           {
             src: hostFamilyPhotos.dinner.src,
             alt: locale === 'de' ? hostFamilyPhotos.dinner.alt.de : hostFamilyPhotos.dinner.alt.en,
-            caption: locale === 'de' ? hostFamilyPhotos.dinner.caption.de : hostFamilyPhotos.dinner.caption.en,
           },
         ]}
         ctas={copy.heroCtas}

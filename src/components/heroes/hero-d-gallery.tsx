@@ -1,12 +1,14 @@
-import Link from 'next/link';
-import { MediaFrame } from '@/components/ui/media-frame';
-
-import { Button } from '@/components/ui/button';
-import { TextCta } from '@/components/ui/text-cta';
-
 import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
 
-import { HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
+import {
+  HeroBleedPhoto,
+  HeroLede,
+  HeroSurface,
+  type HeroAction,
+  type HeroFact,
+  type HeroPhoto,
+  type HeroProofItem,
+} from './shared';
 
 type HeroDGalleryProps = {
   eyebrow: string;
@@ -18,6 +20,12 @@ type HeroDGalleryProps = {
    */
   photos: HeroPhoto[];
   ctas: HeroAction[];
+  /**
+   * The decision figures, set as a rail under the actions. /accommodation passes
+   * its four costs; /accommodation/become-host passes none, because a household
+   * offering a room is not choosing between price points.
+   */
+  facts?: HeroFact[];
   proofItems?: HeroProofItem[];
   themeClassName?: string;
   /**
@@ -29,86 +37,79 @@ type HeroDGalleryProps = {
   breadcrumbs?: BreadcrumbItem[];
 };
 
+/**
+ * The accommodation hero — the homepage's composition, sharing its code.
+ *
+ * WHAT CHANGED, AND WHY IT WAS THE SAME FIX TWICE.
+ *
+ * This hero used to render a three-image mosaic; that became one photograph in a
+ * rounded `MediaFrame` with a caption under it. Measured against the homepage at
+ * 1440px, the single frame was still the odd one out in every dimension that
+ * matters: h1 51.2px against 64px, weight 900 against 700, and a photograph
+ * placed ON the ground as a bordered card instead of masked INTO it. The page a
+ * visitor reaches from the homepage nav looked like it came from another site.
+ *
+ * So the composition is not re-implemented here — it is `HeroLede` plus
+ * `HeroBleedPhoto`, the same two components the homepage hero is made of, in the
+ * homepage's own `0.92fr / 1.08fr` grid. The only thing this file still decides
+ * is that accommodation carries a cost rail and the homepage does not.
+ *
+ * The photo caption is gone with the frame. A caption needs an edge to sit
+ * under, and a photograph that dissolves into the page has none; the alt text
+ * still describes the room.
+ *
+ * `photos` stays an array rather than a single `photo` prop so the archetype
+ * registry and the e2e assertion are untouched (/accommodation is pinned to
+ * archetype D). Only the first photograph is rendered.
+ */
 export function HeroDGallery({
   eyebrow,
   title,
   description,
   photos,
   ctas,
+  facts,
   themeClassName = 'hero-theme-accommodation',
   breadcrumbs,
 }: HeroDGalleryProps) {
-  /*
-   * ONE PHOTOGRAPH, AND A TWO-COLUMN COMPOSITION.
-   *
-   * This hero used to render a three-image mosaic: one featured tile two columns
-   * wide plus two stacked thumbnails. Three arbitrary crops of the same subject
-   * say less than one photograph does, and while the media library is still
-   * numbered placeholders they read as three empty rectangles with numbers in
-   * them. Every other hero on the site — home, courses, course detail, exams,
-   * accommodation detail — is copy on one side and a single image on the other,
-   * so this was the only page type composing itself differently, and it was the
-   * one composing itself worst.
-   *
-   * `photos` stays an array rather than a single `photo` prop so the archetype
-   * registry and the e2e assertion are untouched (/accommodation is pinned to
-   * archetype D). Only the first photograph is rendered, and both call sites now
-   * pass one instead of three.
-   */
   const [lead] = photos;
 
   return (
-    <HeroSurface themeClassName={themeClassName} archetype="D" breadcrumbs={breadcrumbs}>
-      <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-14">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
-          <h1 className="mt-3 text-balance text-4xl font-black leading-tight text-[var(--casa-ink)] sm:text-5xl">
-            {title}
-          </h1>
-          <p className="mt-5 max-w-measure text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-            {description}
-          </p>
+    <HeroSurface
+      themeClassName={themeClassName}
+      archetype="D"
+      breadcrumbs={breadcrumbs}
+      className="overflow-x-clip"
+    >
+      {/*
+        `lg:items-stretch`, and the photograph takes the row height.
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            {ctas.slice(0, 3).map((cta, index) =>
-              index === 0 ? (
-                <Button
-                  key={`${cta.href}-${cta.label}`}
-                  asChild
-                  className="casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]"
-                  data-casa-track="true"
-                  data-casa-label={cta.label}
-                >
-                  <Link href={cta.href}>{cta.label}</Link>
-                </Button>
-              ) : (
-                /* Every CTA after the first is a text link — one solid control per band. */
-                <TextCta key={`${cta.href}-${cta.label}`} href={cta.href}>
-                  {cta.label}
-                </TextCta>
-              )
-            )}
-          </div>
-        </div>
+        The homepage centres its two columns because its lede is shorter than its
+        photograph, so centring is what balances them. Here the cost rail makes
+        the lede TALLER than a 33rem photo, and centring left the photograph
+        floating in a 632px row with empty bands above and below it. Stretching
+        is the same intent — the two columns read as one block — applied to a
+        column that is now the taller of the two.
+      */}
+      <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch lg:gap-6">
+        <HeroLede
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          ctas={ctas}
+          facts={facts}
+          /*
+            No `lg:py-6`. The homepage pads its lede to balance a column that is
+            shorter than the photograph beside it; here the cost rail already
+            makes this the taller column, so the same padding only adds 48px of
+            hero height for nothing.
+          */
+        />
 
         {lead ? (
-          <figure className="h-64 sm:h-80 lg:h-[26rem]">
-            <MediaFrame
-              src={lead.src}
-              alt={lead.alt}
-              sizes="(min-width: 1024px) 46vw, 95vw"
-              className="h-full w-full"
-              priority
-            />
-            {lead.caption ? (
-              <figcaption className="mt-3 text-xs leading-relaxed text-[var(--casa-muted)]">
-                {lead.caption}
-              </figcaption>
-            ) : null}
-          </figure>
+          <HeroBleedPhoto photo={lead} className="lg:h-full" sizes="(min-width: 1024px) 56vw, 100vw" />
         ) : null}
       </div>
     </HeroSurface>
   );
-
 }
