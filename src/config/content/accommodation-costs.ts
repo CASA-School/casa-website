@@ -31,6 +31,15 @@ export type AccommodationCost = {
   label: { en: string; de: string };
   amount: string;
   note?: { en: string; de: string };
+  /**
+   * Money that comes back. Only the deposit.
+   *
+   * Set here rather than inferred from the note, because the strip that renders
+   * these sets a refundable amount in muted ink and the difference matters: the
+   * deposit is €580 and the first four weeks are also €580, so at one weight a
+   * reader sums the column to roughly €1,355 instead of the €775 they part with.
+   */
+  refundable?: true;
 };
 
 /*
@@ -75,6 +84,7 @@ export const accommodationCosts: AccommodationCost[] = [
   {
     label: { en: 'Deposit', de: 'Deponat' },
     amount: eur(ACCOMMODATION_FEES.deposit),
+    refundable: true,
     note: {
       en: 'Refunded when the room and the keys come back as they were handed over.',
       de: 'Wird zurückerstattet, wenn Zimmer und Schlüssel so übergeben werden wie erhalten.',
@@ -87,6 +97,8 @@ export function localizeAccommodationCosts(locale: ContentLocale) {
     label: cost.label[locale],
     amount: cost.amount,
     note: cost.note?.[locale],
+    /* Shaped for FeeStrip, which reads `tone` rather than `refundable`. */
+    tone: cost.refundable ? ('refundable' as const) : ('charge' as const),
   }));
 }
 
@@ -104,30 +116,4 @@ export function accommodationPriceSummary(locale: ContentLocale) {
   return locale === 'de'
     ? `${base} für 4 Wochen, danach ${week} pro Woche`
     : `${base} for 4 weeks, then ${week} a week`;
-}
-
-/**
- * The four costs, shortened for the hero rail.
- *
- * Derived from `accommodationCosts` above rather than written out again — the
- * whole point of that list. What this adds is a QUALIFIER short enough to sit
- * under a figure, because three of the four numbers mislead without one:
- *
- *   €580 first 4 weeks   reads as "one option is cheaper" without "either option"
- *   €145 per extra week  reads as a second, separate charge without the holidays
- *   €580 deposit         reads as a second €580 charge without "refundable"
- *
- * The full sentences stay on `accommodationCosts`, which the playbook renders.
- */
-export function accommodationHeroFacts(locale: ContentLocale) {
-  const hints =
-    locale === 'de'
-      ? ['Gastfamilie oder WG', 'auch Ferienwochen', 'einmalig', 'erstattungsfähig']
-      : ['Host family or shared flat', 'Also holiday weeks', 'One-off', 'Refundable'];
-
-  return accommodationCosts.map((cost, index) => ({
-    label: cost.label[locale],
-    value: cost.amount,
-    hint: hints[index],
-  }));
 }
