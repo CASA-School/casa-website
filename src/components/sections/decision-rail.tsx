@@ -1,8 +1,9 @@
 import type { ContentLocale } from '@/lib/content/types';
 
+import { PersonMonogram } from '@/components/ui/person-monogram';
+
 import { StickyInfoCard, type StickyInfoItem } from './sticky-info-card';
 import { DeadlineBadge } from './deadline-badge';
-import { TeachingStaffCard } from './teaching-staff-card';
 
 type DecisionRailProps = {
   locale: ContentLocale;
@@ -18,22 +19,15 @@ type DecisionRailProps = {
    */
   showDeadline?: boolean;
   /**
-   * The collective statement about CASA's teachers. This used to be a
-   * `TeamSpotlight` rendering one named person with a portrait — invented, and on
-   * every course page. See components/sections/teaching-staff-card.
-   */
-  teachingStaff?: { title: string; body: string } | null;
-  /**
    * The one named person who answers about this thing.
    *
-   * Same rule as CourseContact in config/courses/course-profiles.ts: only a
-   * person CASA already publishes in that role, or one staff have confirmed. A
-   * named contact is a commitment that a real person replies, and getting it
-   * wrong sends enquiries nowhere. `email` is expected to be a published
-   * address — CASA prints names and roles for its team but not individual
-   * mailboxes, so the office inbox is the honest route to a named person.
+   * Comes from config/content/contacts.ts, which assigns a colleague to each
+   * surface and reads the spelling off the verified roster. A named contact is a
+   * commitment that a real person replies, so it is never written at a call
+   * site. `email` is a published inbox — CASA prints names and roles but only
+   * one individual mailbox, so the role address is the honest route.
    */
-  contact?: { name: string; role: string; email: string } | null;
+  contact?: { name: string; role: string; booking: boolean } | null;
 };
 
 export function DecisionRail({
@@ -43,7 +37,6 @@ export function DecisionRail({
   notes,
   deadlineIso,
   showDeadline = true,
-  teachingStaff,
   contact,
 }: DecisionRailProps) {
   return (
@@ -87,30 +80,79 @@ export function DecisionRail({
           </div>
         ) : null}
 
+        {/*
+          THE PERSON, AND NOTHING ELSE — the card's last row.
+
+          What used to follow this row was `teachingStaff`: "Our teachers are
+          native speakers with university degrees..." — 44 words of collective
+          statement, identical on every course, exam and accommodation card, plus
+          a "Meet the team" link. It is a fine claim and it belongs on /about and
+          /team, where it is still rendered. In a reference card that a reader
+          scrolls back to for a price and a date it was the longest thing on the
+          card and answered nothing they had come back for.
+
+          So the card now ends on a face, a name, a role and an address. The
+          avatar is initials rather than a photograph, and stays that way until
+          real portraits exist with consent — see ui/person-monogram.
+        */}
         {contact ? (
           <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
               {locale === 'de' ? 'Ansprechperson' : 'Your contact'}
             </p>
-            <p className="mt-2 text-sm font-bold text-[var(--casa-ink)]">{contact.name}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-[var(--casa-muted)]">{contact.role}</p>
-            <a
-              href={`mailto:${contact.email}`}
-              className="casa-cta-link mt-3 inline-flex text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
-            >
-              {contact.email}
-            </a>
-          </div>
-        ) : null}
+            {/*
+              `min-w-0` on the text column and `break-words` on the name.
 
-        {teachingStaff ? (
-          <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
-            <TeachingStaffCard
-              title={teachingStaff.title}
-              body={teachingStaff.body}
-              ctaLabel={locale === 'de' ? 'Mehr zum Team' : 'Meet the team'}
-              unstyled
-            />
+              The card is 280px wide inside a 320px phone, and the avatar takes
+              48 of it. Without `min-w-0` a flex child refuses to shrink past its
+              content, so "Meike Große Hundrup" would have pushed the row wider
+              than the card — the same min-content trap the card's buttons hit.
+              With it the name wraps instead, which is what should happen.
+            */}
+            <div className="mt-3 flex items-center gap-3">
+              <PersonMonogram name={contact.name} size="sm" />
+              <div className="min-w-0">
+                <p className="break-words text-sm font-bold leading-snug text-[var(--casa-ink)]">{contact.name}</p>
+                <p className="mt-0.5 break-words text-xs leading-snug text-[var(--casa-muted)]">{contact.role}</p>
+              </div>
+            </div>
+            {/*
+              BOOK A CALL — rendered only where the person offers one, and
+              INERT until CASA has a scheduling destination.
+
+              `disabled` rather than a link to `#` or to /contact. A control that
+              looks live and does nothing on click is worse than a visibly
+              unavailable one, and pointing it at the contact form would make it
+              a second, differently-labelled route to a page the nav already
+              reaches — the duplicate-CTA problem this card was cleaned up to
+              remove. Give it an `href` and it becomes a real button; nothing
+              else here changes.
+
+              This replaced the printed mailto address. See the `email` note in
+              config/content/contacts.ts: the addresses are still recorded, just
+              not set as the last line of a card meant to hold a few facts.
+            */}
+            {contact.booking ? (
+              <button
+                type="button"
+                /*
+                  `aria-disabled`, not `disabled`. Full visual weight, because
+                  this is the control CASA will approve on sight and a greyed-out
+                  primary in a finished card reads as breakage — but a screen
+                  reader is told it is unavailable rather than promised an action
+                  that has no destination yet.
+
+                  IT DOES NOTHING WHEN CLICKED, and that is the open item: give
+                  this an `href` (a scheduling URL, or /contact?topic=group-booking
+                  as an interim) and it becomes a real control with no other
+                  change here.
+                */
+                aria-disabled="true"
+                className="casa-button-prism mt-4 inline-flex w-full items-center justify-center rounded-lg bg-[var(--casa-ink-deep)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
+              >
+                {locale === 'de' ? 'Termin buchen' : 'Book a call'}
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>

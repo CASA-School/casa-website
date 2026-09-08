@@ -7,13 +7,12 @@ import {
   getCourseArchetype,
 } from '@/config/courses/archetypes';
 import {
-  GENERAL_OFFICE_CONTACT,
   courseProfiles,
-  getCourseContact,
+  getCourseContactKey,
   getCoursePhotoKey,
   getQuoteAudience,
-  hasNamedCourseContact,
 } from '@/config/courses/course-profiles';
+import { CASA_CONTACT_KEYS, getCasaContact } from '@/config/content/contacts';
 import { specialCourseModules } from '@/config/courses/special-course-modules';
 import { skillTokens } from '@/config/brand/tokens';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
@@ -197,37 +196,78 @@ describe('course archetypes', () => {
     }
   });
 
-  it('gives every course format a contact, falling back to the office', () => {
-    const hidden = new Set(['exam-preparation']);
+  /*
+   * These three used to guard the opposite property: that NO course named a
+   * person, because at the time only german-for-groups had a published owner and
+   * the risk was someone inventing a plausible-looking colleague. CASA assigned
+   * owners to five more formats on 2026-09-08, so the risk moved — it is now
+   * that a name drifts from the verified roster, or that a format is quietly
+   * reassigned to someone who does not handle it.
+   */
+  it('resolves every assigned contact to a name on the verified roster', () => {
+    for (const key of CASA_CONTACT_KEYS) {
+      const contact = getCasaContact(key, 'en');
 
-    for (const course of fallbackCourseTypes.filter((c) => !hidden.has(c.slug))) {
-      const contact = getCourseContact(course.slug);
-
-      // Never null — an unassigned format resolves to the general office.
-      expect(contact.email).toMatch(/@casa-bremen\.de$/);
+      // Falling back to the office name means the teamId did not match anyone.
+      expect(contact.name, `${key} does not resolve to a roster entry`).not.toBe('CASA Bremen');
       expect(contact.name.length).toBeGreaterThan(0);
+      expect(contact.role.length).toBeGreaterThan(0);
     }
   });
 
-  it('only names a person where CASA already publishes one', () => {
-    // Ina Eismann is published on casa-bremen.de as the group-quote contact.
-    expect(hasNamedCourseContact('german-for-groups')).toBe(true);
-    expect(getCourseContact('german-for-groups').name).toBe('Ina Eismann');
+  it('holds CASA\'s 2026-09-08 allocation, so a reassignment has to be deliberate', () => {
+    const expected: Record<string, string> = {
+      'intensive-german': 'Natàlia Sostres',
+      'evening-german': 'Alissa Trouillet',
+      'special-courses': 'Alissa Trouillet',
+      'medical-german': 'Meike Große Hundrup',
+      bildungszeit: 'Meike Große Hundrup',
+      // Also Meike, but through the `company` key, which carries the call.
+      'in-company': 'Meike Große Hundrup',
+      'german-for-groups': 'Ina Eismann',
+    };
 
-    // Everything else falls back until staff confirm an owner. Guards against
-    // someone inventing a plausible-looking contact.
-    for (const slug of ['intensive-german', 'evening-german', 'medical-german', 'in-company']) {
-      expect(hasNamedCourseContact(slug), `${slug} should not name a person yet`).toBe(false);
-      expect(getCourseContact(slug)).toBe(GENERAL_OFFICE_CONTACT);
+    for (const [slug, name] of Object.entries(expected)) {
+      const key = getCourseContactKey(slug);
+      expect(key, `${slug} should have a contact key`).toBeDefined();
+      expect(getCasaContact(key!, 'en').name, `${slug} contact`).toBe(name);
+    }
+
+    // Every routed format is covered, so a new one arriving without an owner is
+    // a visible gap rather than a silent fallback.
+    for (const slug of Object.keys(courseProfiles)) {
+      expect(getCourseContactKey(slug), `${slug} has no contact key`).toBeDefined();
     }
   });
 
-  it('records where every named contact was verified from', () => {
-    for (const [slug, profile] of Object.entries(courseProfiles)) {
-      if (profile.contact) {
-        expect(profile.contact.source, `${slug} contact needs a source`).toMatch(/\S/);
-      }
+  it('offers a call only where CASA has committed to one', () => {
+    /*
+     * Two so far: group programmes and Firmenunterricht. Both are cases where
+     * the buyer is scoping a programme for other people rather than picking a
+     * level. Everyone else shows no button until CASA says otherwise, and this
+     * asserts the negative too — a call is a commitment on a real calendar, so
+     * switching one on should be a deliberate edit that trips this test.
+     */
+    const offersACall = ['groups', 'company'];
+
+    for (const key of CASA_CONTACT_KEYS) {
+      expect(
+        getCasaContact(key, 'en').booking,
+        `${key} ${offersACall.includes(key) ? 'should offer a call' : 'should not offer a call yet'}`
+      ).toBe(offersACall.includes(key));
     }
+
+    // Same colleague on both, and only one of her three formats offers it —
+    // which is why contacts are keyed by surface and not by person.
+    expect(getCasaContact('company', 'en').name).toBe(getCasaContact('professional', 'en').name);
+    expect(getCasaContact('professional', 'en').booking).toBe(false);
+  });
+
+  it('spells the two names that are easy to get wrong', () => {
+    // à on the SECOND a, not the first; and ß, not ss. Both come off the roster
+    // rather than being typed per surface, and this is what that buys.
+    expect(getCasaContact('accommodation', 'en').name).toBe('Natàlia Sostres');
+    expect(getCasaContact('professional', 'en').name).toBe('Meike Große Hundrup');
   });
 
   it('gives every public course a profile and a resolvable photo key', () => {

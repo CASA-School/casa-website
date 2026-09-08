@@ -11,6 +11,7 @@ import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getExamDetail, getSocialProofForExam } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { getCasaContact } from '@/config/content/contacts';
 
 type ExamDetailPageProps = {
   params: Promise<{ code: string }>;
@@ -25,25 +26,31 @@ function formatDate(value: string, locale: 'en' | 'de') {
   }).format(new Date(value));
 }
 
+/**
+ * THE AMOUNTS ONLY — each row's label already says which fee it is.
+ *
+ * These were full sentences, and the decision card rendered them under labels
+ * saying the same thing:
+ *
+ *   EXAM FEE        Full exam EUR 190
+ *   PREPARATION     Preparation EUR 260
+ *   PARTIAL REPEAT  Partial repeat EUR 160
+ *
+ * Three rows each naming themselves twice, in the card a candidate scrolls back
+ * to for the figure. The label carries the meaning now and the value carries the
+ * number. Amounts unchanged, still per docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
+ */
 function getExamFeeDetails(code: string, locale: 'en' | 'de') {
   if (code === 'telc_b2') {
-    return {
-      full: locale === 'de' ? 'Vollprüfung 190 EUR' : 'Full exam EUR 190',
-      partial: locale === 'de' ? 'Teilprüfung 160 EUR' : 'Partial repeat EUR 160',
-      prep: locale === 'de' ? 'Vorbereitung 260 EUR' : 'Preparation EUR 260',
-    };
+    return { full: 'EUR 190', partial: 'EUR 160', prep: 'EUR 260' };
   }
 
   if (code === 'telc_c1_hochschule') {
-    return {
-      full: locale === 'de' ? 'Vollprüfung 210 EUR' : 'Full exam EUR 210',
-      partial: locale === 'de' ? 'Teilprüfung 185 EUR' : 'Partial repeat EUR 185',
-      prep: locale === 'de' ? 'Vorbereitung 520 EUR' : 'Preparation EUR 520',
-    };
+    return { full: 'EUR 210', partial: 'EUR 185', prep: 'EUR 520' };
   }
 
   return {
-    full: locale === 'de' ? 'Gebühr wird bestätigt' : 'Fee confirmed by office',
+    full: locale === 'de' ? 'Wird bestätigt' : 'Confirmed by office',
     partial: locale === 'de' ? 'Nach Rücksprache' : 'After office confirmation',
     prep: locale === 'de' ? 'Nach Rücksprache' : 'After office confirmation',
   };
@@ -100,9 +107,12 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     { label: detail.examType.name },
   ];
 
+  const nextDateLabel = locale === 'de' ? 'Nächster Termin' : 'Next date';
+  const levelLabel = locale === 'de' ? 'Niveau' : 'Level';
+
   const infoItems = [
     {
-      label: locale === 'de' ? 'Nächster Termin' : 'Next date',
+      label: nextDateLabel,
       value: selectedSession ? formatDate(selectedSession.starts_at, locale) : 'TBD',
       selector:
         selectedSessionOptions.length > 1 && selectedSession
@@ -112,12 +122,39 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
             }
           : undefined,
     },
-    { label: locale === 'de' ? 'Niveau' : 'Level', value: detail.examType.level || '-' },
+    { label: levelLabel, value: detail.examType.level || '-' },
     { label: locale === 'de' ? 'Prüfungsgebühr' : 'Exam fee', value: getExamFeeDetails(detail.examType.code, locale).full },
     { label: locale === 'de' ? 'Vorbereitung' : 'Preparation', value: getExamFeeDetails(detail.examType.code, locale).prep },
     { label: locale === 'de' ? 'Teilprüfung' : 'Partial repeat', value: getExamFeeDetails(detail.examType.code, locale).partial },
-    { label: locale === 'de' ? 'Ort' : 'Location', value: locale === 'de' ? 'CASA Bremen Prüfungszentrum' : 'CASA Bremen Exam Center' },
+    /*
+      NO LOCATION ROW. It read "CASA Bremen Exam Center", which is the same
+      building for every exam CASA runs — a constant cannot inform a choice, and
+      it was a row of card height on a hero that did not fit a 768px viewport.
+
+      The three fee rows above DO stay, unlike the four prices on the
+      accommodation card: those are itemised further down their page, and these
+      are not published anywhere else on this one. Trimming this card further
+      needs a fees section in the page body first.
+    */
   ];
+
+  /*
+   * THE DECISION ROWS, NOT EVERY ROW.
+   *
+   * `infoItems` above has six: next date, level, exam fee, preparation, partial
+   * repeat, location. That is right for the hero card, which is where the
+   * decision is offered and where a candidate is comparing. It was wrong for the
+   * sticky card further down, which was rendering the identical six — so all
+   * three fee figures appeared twice on one page, and the card a reader scrolls
+   * back to for "when is it" was mostly a price list.
+   *
+   * /courses/[slug] has always drawn this distinction (`decisionItems` there is
+   * a two-row subset of the same source); the exam page simply never did. Date
+   * and level are what carry the decision at the moment of acting — the fees
+   * stay in the hero card and the location is the same building for every exam
+   * CASA runs, so it decides nothing.
+   */
+  const decisionItems = infoItems.filter((item) => item.label === nextDateLabel || item.label === levelLabel);
 
   const examRegistrationHref = selectedSession
     ? `/registration/exam?sessionId=${encodeURIComponent(selectedSession.id)}`
@@ -159,7 +196,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
         title={detail.examType.name}
         description={detail.narrative?.summary || (locale === 'de' ? 'Klarer Ablauf bis zum Ergebnis.' : 'Clear process from registration to results.')}
         breadcrumbs={breadcrumbs}
-        infoTitle={locale === 'de' ? 'Prüfungsinfos' : 'Exam info rail'}
+        /* Not "Exam info rail" — "rail" is our word for the component, not a
+           thing a visitor has a name for. The German string never said it. */
+        infoTitle={locale === 'de' ? 'Prüfungsinfos' : 'Exam info'}
         infoItems={infoItems}
         notes={locale === 'de' ? 'Sessiondaten und Fristen werden fortlaufend aktualisiert.' : 'Session dates and deadlines are updated continuously.'}
         /*
@@ -264,13 +303,20 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
             <DecisionRail
               locale={locale}
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
-              infoItems={infoItems}
+              infoItems={decisionItems}
               /*
                 No `notes`. Same leak as the accommodation rail carried: copy
                 that explains what the sticky card is for rather than telling the
                 reader anything about the exam.
               */
               deadlineIso={selectedSession?.registration_deadline}
+              /*
+                Tanja Langenickel, per CASA's 2026-09-08 allocation. This card
+                had no contact row at all — it ended on the `notes` line removed
+                above, so a candidate deciding on a telc entry was given a date,
+                a price and nobody to ask.
+              */
+              contact={getCasaContact('exams', locale)}
             />
           </div>
         </Container>

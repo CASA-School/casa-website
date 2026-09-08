@@ -19,11 +19,10 @@ import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { GruppenPackages } from '@/components/gruppen/gruppen-packages';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
-import { getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
+import { getCourseContactKey, getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
+import { getCasaContact } from '@/config/content/contacts';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
-import { getCourseContact, hasNamedCourseContact } from '@/config/courses/course-profiles';
-import { teachingStaffStatement } from '@/config/content/team-spotlights';
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
@@ -161,15 +160,7 @@ export default async function CourseDetailPage({
   // Each course format has an Ansprechpartner. Formats without a confirmed
   // owner fall back to the general office rather than naming someone who has
   // not agreed to answer.
-  const courseContact = getCourseContact(detail.course.slug);
-  const namedContact = hasNamedCourseContact(detail.course.slug);
-  const contactLine = namedContact
-    ? locale === 'de'
-      ? `Ihre Ansprechpartnerin: ${courseContact.name}, ${courseContact.role.de}.`
-      : `Your contact: ${courseContact.name}, ${courseContact.role.en}.`
-    : locale === 'de'
-      ? 'Fragen beantwortet das CASA Kursberatungsteam.'
-      : 'The CASA course advice team answers questions on this format.';
+  const courseContactKey = getCourseContactKey(detail.course.slug);
   const beginnerTrack = (detail.course.level_min ?? 'A1').toUpperCase().startsWith('A');
 
   // Quote-only products (group packages, Firmenunterricht) are bought by an
@@ -319,6 +310,14 @@ export default async function CourseDetailPage({
     .filter((fact) => archetypeAllowsFact(archetype, fact))
     .map((fact) => factRows[fact])
     .filter((row): row is NonNullable<typeof row> => Boolean(row))
+    /*
+      Same `byArrangement` drop the hero rail above applies — this rail was
+      missing it, so Firmenunterricht's card read "LESSONS/WEEK: By arrangement"
+      while its own hero, built from the same `factRows`, correctly showed no
+      such row. `.slice(0, 2)` runs after the filter, so dropping a non-fact
+      promotes a real one instead of leaving the card a row shorter.
+    */
+    .filter((row) => row.value !== byArrangement)
     .slice(0, 2);
 
   const related = courses.filter((course) => course.slug !== detail.course.slug).slice(0, 2);
@@ -348,7 +347,6 @@ export default async function CourseDetailPage({
    * the endorsement were invented. CASA does not name individual classroom
    * teachers, so the rail now carries what CASA does say about all of them.
    */
-  const teachingStaff = teachingStaffStatement[locale];
 
   const processHeading = nextStepsHeading(archetype, locale);
   /*
@@ -568,9 +566,18 @@ export default async function CourseDetailPage({
         breadcrumbs={breadcrumbs}
         infoTitle={locale === 'de' ? 'Kursinfo' : 'Course info'}
         infoItems={infoItems}
+        /*
+          The hero card no longer repeats `contactLine` on quote-only formats —
+          the decision rail below names that person properly, with an avatar and
+          an address, so saying it here too was the same fact twice on one page.
+          A quoted format still needs its own line, because "confirmed during
+          registration" is false where there is nothing to register for.
+        */
         notes={
           archetype.cta === 'request-quote'
-            ? contactLine
+            ? locale === 'de'
+              ? 'Umfang und Preis werden im Angebot bestätigt.'
+              : 'Scope and price are confirmed in the quote.'
             : locale === 'de'
               ? 'Termine und Verfügbarkeit werden bei der Anmeldung bestätigt.'
               : 'Dates and availability are confirmed during registration.'
@@ -587,7 +594,19 @@ export default async function CourseDetailPage({
       <section className="py-16 md:py-20">
         <Container className="space-y-12 md:space-y-14">
           <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-            <div className="space-y-12 md:space-y-14">
+            {/*
+              `space-y-16 md:space-y-24`, up from 12/14.
+
+              Measured on /courses/intensive-german: Learning goals, Course
+              dates and Costs and conditions sat 56px apart — three h2-led
+              sections, each with its own hairline and its own internal rhythm,
+              separated by less than the gap between two paragraphs of the FAQ.
+              They read as one continuous run rather than as three answers to
+              three different questions. The page's bands elsewhere sit 128–192px
+              apart (py-16 to py-24 each side); 64/96px is the same scale applied
+              inside a column that shares the frame with a sticky rail.
+            */}
+            <div className="space-y-16 md:space-y-24">
               {archetype.sections.map((sectionKey) => {
                 switch (sectionKey) {
                 case 'module-catalogue':
@@ -793,12 +812,23 @@ export default async function CourseDetailPage({
               locale={locale}
               infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
-              notes={contactLine}
+              /*
+                No `notes`. It was `contactLine` — "Your contact: Ina Eismann,
+                Group programmes." — which is the row directly below it, in
+                prose, without the avatar or the address. One statement of who
+                answers, not two.
+              */
               deadlineIso={selectedInstance?.start_date}
               // Gated on the CTA policy, not the slug, so Firmenunterricht is
               // covered too: neither page has anything to register for.
               showDeadline={archetype.cta !== 'request-quote'}
-              teachingStaff={teachingStaff}
+              /*
+                The named owner of this format, from CASA's 2026-09-08
+                allocation in config/content/contacts.ts. Every routed format has
+                one; a format without a `contactKey` renders no row rather than
+                falling back to a name that does not handle it.
+              */
+              contact={courseContactKey ? getCasaContact(courseContactKey, locale) : null}
             />
           </div>
         </Container>
