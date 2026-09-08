@@ -71,8 +71,6 @@ const deNavText: Record<string, string> = {
   'Academic German certification for university goals.': 'Akademisches Deutsch für Hochschulziele.',
   'Our School': 'Unsere Schule',
   Community: 'Community',
-  'Mission & Values': 'Leitbild & Werte',
-  'How CASA teaches with structure, care, and trust.': 'Wie CASA mit Struktur, Sorgfalt und Vertrauen unterrichtet.',
   'Non-profit status': 'Gemeinnützigkeit',
   'How fees support public-benefit education.': 'Wie Gebühren gemeinnützige Bildung tragen.',
   'The Team': 'Team',
@@ -154,31 +152,46 @@ export const navConfig = {
               icon: 'bildungszeit',
               description: navDescription('Intensive learning blocks during approved leave.'),
             },
+            /*
+             * Firmenunterricht belongs in this panel, not beside it.
+             *
+             * It was a top-level link, which presented it as a product sitting
+             * alongside the course catalogue. It is not: `/courses/firmenunterricht`
+             * is a course route, `in-company` is an entry in `publicCourseOrder`
+             * and in `courseProfiles`, and it already renders as one of the seven
+             * format rows on /courses. The nav was the only surface still saying
+             * otherwise.
+             *
+             * "For Companies" rather than the course's own name, which is
+             * "Firmenunterricht" in both locales: it is the label a visitor has
+             * been clicking, and this section already names its rows by audience
+             * ("German for Medical").
+             */
+            {
+              label: 'For Companies',
+              href: '/courses/firmenunterricht',
+              icon: 'inCompany',
+              description: navDescription('Custom German training for teams and workplaces.'),
+            },
           ],
         },
       ],
     },
     /*
-     * Plain top-level links, not dropdowns.
+     * A plain top-level link, not a dropdown: it has exactly one destination,
+     * and a dropdown holding a single item costs the reader a hover and a
+     * decision to reach a page the label already named.
      *
-     * Each has exactly one destination, and a dropdown holding a single item
-     * costs the reader a hover and a decision to reach a page the label already
-     * named.
+     * ONE of these, not two. "For Companies" moved into the Courses panel where
+     * the rest of the catalogue lives — see the note on that entry. Gruppen
+     * stays at the top level because it is the one product on this site that is
+     * not a course a learner enrols in: an organiser books lessons, host
+     * families, meals and a culture programme as a single trip, and the page
+     * sells that rather than a level.
      *
-     * Both were REMOVED from the Courses panel rather than duplicated into the
-     * top level. `isActivePath` matches by prefix, so a route listed in two
-     * places lights up two nav items at once — on /courses/firmenunterricht both
-     * "Kurse" and "Für Firmen" read as current, which tells the visitor they are
-     * in two places. One route, one home in the nav.
-     *
-     * Routes verified against src/lib/content/course-routes.ts: the `in-company`
-     * slug maps to /courses/firmenunterricht, and `german-for-groups` maps to
-     * itself.
+     * Route verified against src/lib/content/course-routes.ts: `german-for-groups`
+     * maps to itself.
      */
-    {
-      label: 'For Companies',
-      href: '/courses/firmenunterricht',
-    },
     {
       label: 'For Groups',
       href: '/courses/german-for-groups',
@@ -242,12 +255,17 @@ export const navConfig = {
         {
           title: 'Community',
           items: [
-            {
-              label: 'Mission & Values',
-              href: '/about#mission',
-              icon: 'mission',
-              description: navDescription('How CASA teaches with structure, care, and trust.'),
-            },
+            /*
+             * NO "Mission & Values" ROW. It pointed at `/about#mission`, which is
+             * a section of /about rather than a page of its own — and /about is
+             * already where this dropdown's own trigger goes. So the panel
+             * offered the same page twice, once whole and once scrolled part-way
+             * down, and only the second one carried a name and an icon.
+             *
+             * The `#mission` anchor still exists and is still linked from
+             * /ueber-uns/gemeinnuetzigkeit ("Read our mission") and from the
+             * footer. Nothing about /about changed; only the duplicate way in.
+             */
             {
               label: 'Non-profit status',
               href: '/ueber-uns/gemeinnuetzigkeit',
