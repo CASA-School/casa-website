@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
+import { SpecialCourseDialog } from '@/components/courses/special-course-dialog';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { skillTokens } from '@/config/brand/tokens';
 import {
   SPECIAL_COURSE_TERM_LABEL,
@@ -60,6 +62,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           reset: 'Filter zurücksetzen',
           termNote: `Termine für ${SPECIAL_COURSE_TERM_LABEL}. Alle Kurse 18:30–20:00 Uhr; Termine werden bei der Anmeldung bestätigt.`,
           countLabel: (n: number) => `${n} ${n === 1 ? 'Modul' : 'Module'}`,
+          readMore: 'Mehr erfahren',
         }
       : {
           eyebrow: 'Module catalogue',
@@ -73,6 +76,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           reset: 'Reset filters',
           termNote: `Dates for ${SPECIAL_COURSE_TERM_LABEL}. All modules run 18:30–20:00; dates are confirmed during registration.`,
           countLabel: (n: number) => `${n} ${n === 1 ? 'module' : 'modules'}`,
+          readMore: 'Read more',
         };
 
   const levels = useMemo(
@@ -176,7 +180,11 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
               <ul className="mt-3 space-y-3">
                 {column.modules.map((courseModule) => (
                   <li key={courseModule.id}>
-                    <ModuleCard courseModule={courseModule} locale={locale} />
+                    <ModuleCard
+                      courseModule={courseModule}
+                      locale={locale}
+                      readMoreLabel={copy.readMore}
+                    />
                   </li>
                 ))}
               </ul>
@@ -259,15 +267,24 @@ function FilterChip({
 function ModuleCard({
   courseModule,
   locale,
+  readMoreLabel,
 }: {
   courseModule: SpecialCourseModule;
   locale: ContentLocale;
+  readMoreLabel: string;
 }) {
   const skill = skillTokens[courseModule.skill];
 
   return (
+    /*
+      `flex flex-col` and a `mt-auto` footer, so the trigger sits on the card's
+      bottom edge whatever the title does above it. The grid stretches every card
+      in a weekday column to the tallest, and Monday's telc C1 title runs to three
+      lines against Basisgrammatik's one — without this the buttons in a column
+      land at three different heights.
+    */
     <article
-      className="h-full rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]"
+      className="flex h-full flex-col rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]"
       style={{ borderLeft: `4px solid ${skill.surface}` }}
     >
       {/* Skill is signalled by colour AND this label — never colour alone. */}
@@ -291,6 +308,31 @@ function ModuleCard({
           </dd>
         </div>
       </dl>
+
+      {/*
+        One Dialog per card rather than one for the section with shared state:
+        Radix returns focus to the trigger that opened it, which is what a reader
+        tabbing a grid of eight expects, and it is what the Gruppen packages do.
+
+        The accessible name carries the module title — eight buttons all reading
+        "Read more" is a screen-reader list with no way to tell them apart, and
+        the visible label stays short because the card has ~200px for it.
+      */}
+      <div className="mt-auto pt-4">
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              aria-label={`${readMoreLabel}: ${courseModule.title[locale] ?? courseModule.title.en}`}
+              className="inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
+            >
+              {readMoreLabel}
+              <span aria-hidden>&rarr;</span>
+            </button>
+          </DialogTrigger>
+          <SpecialCourseDialog courseModule={courseModule} locale={locale} />
+        </Dialog>
+      </div>
     </article>
   );
 }
