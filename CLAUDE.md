@@ -232,6 +232,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
+| `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
 | `docs/GROUP_PRICING_AND_SPECIAL_COURSES.md` | Group price model ported from the coordinator's workbook, its three bugs, and the special-courses rebuild direction |
 | `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` | **Read before changing any course number.** Prices/hours verified against casa-bremen.de, with an explicit unverified list |
@@ -271,9 +272,15 @@ is still valid.
   and until the DNS record is created the workspace is reachable at `/admin` on the
   public host in development only. Creating it is a prerequisite for go-live, along
   with `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` being left unset in production.
-- **No FileMaker bridge.** Every workspace queue table has an `external_ref` column
-  and nothing writes to one. Field mapping is deliberately unspecified rather than
-  guessed at.
+- **No FileMaker bridge yet — but it is designed.** `docs/FILEMAKER_BRIDGE.md`
+  (2026-09-08). Every workspace queue table has an `external_ref` column and nothing
+  writes to one. Key facts for anyone picking this up: FileMaker already has the
+  intake pipeline (`Contact → PreBooking → WaitingRoom → Booking`, with `TestStudent`
+  for placement); the bridge should create Contact+PreBooking pairs and **never**
+  write `Booking` directly; the Data API can write through `[Full Access]`/`Reduced`
+  accounts today, so a dedicated `WebIntake` account with its own privilege set is a
+  precondition, not a nicety; FileMaker is LAN-only, so the push must run on-prem.
+  Blocked on the decisions in that document's §7.
 - **No retention policy.** Enquiries, registrations, placement attempts and stored
   CVs are all personal data, none of it deleted on a schedule. A period needs a
   named privacy owner at CASA.

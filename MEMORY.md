@@ -1583,6 +1583,34 @@ schedule, and enquiries, registrations, placement attempts and CVs are all
 personal data needing a named privacy owner. `admin.casa-bremen.de` itself: the
 DNS record does not exist yet.
 
+## FileMaker bridge — understood and designed, not built (2026-09-08)
+
+Read both existing integrations and the `SchoolMan` DDR end to end; full record
+in `docs/FILEMAKER_BRIDGE.md`. What matters most:
+
+- **FileMaker already models our pipeline.** `Contact` (4,736) → `PreBooking`
+  (5,621) → `WaitingRoom` (1,760) → `Booking` (21,506), with `TestStudent`
+  (5,625) and a level-recommendation range on the PreBooking. `NewContact`
+  creates a Contact+PreBooking pair; `Go_PreBooking_Booking.Parameter` (145
+  steps) converts. The bridge should land registrations as pairs and never
+  write `Booking`.
+- **Both existing bridges are read-only by discipline, not enforcement.**
+  `fmrest` is on `[Full Access]`, `Reduced`, `Teacher_II`, `ClassBook`. A write
+  bridge needs a dedicated `WebIntake` account + privilege set first.
+- **The student app has no live bridge** — a reviewed roster file from the
+  dashboard bridge, then its own API. Same shape as our proposed human gate.
+- **FileMaker is LAN-only, no VPN.** Azure cannot reach it. The push has to run
+  on an office Mac (an on-prem agent), where the existing bridge already runs.
+- **Vocabularies map cleanly**: `PartExamReference` = our written/oral/full
+  exactly; `CourseTypeReference` (14), `ExamReference` (5),
+  `LevelStepReference` (13) = `BAND_SEQUENCE`. `PlatformReference` (24) and
+  `SourceReference` (9) still need a live read.
+- **The DDR XML is UTF-16.** Open it as utf-8 and every regex silently finds
+  nothing; three passes were lost to that before `file` was run on it.
+
+Eight decisions in the doc's §7, the first being whether a write into FileMaker
+is wanted at all versus a reviewed export file. Werner owns most of the rest.
+
 ## Verified Baseline
 
 The latest implementation pass (2026-09-08, staff workspace) cleared all six:

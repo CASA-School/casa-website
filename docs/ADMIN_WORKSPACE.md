@@ -394,7 +394,7 @@ CI does not have — CI does not run e2e at all.
 
 | Item | Note |
 | --- | --- |
-| **FileMaker bridge** | `external_ref` columns exist; nothing writes them. Field mapping is unspecified — deliberately, rather than guessing at FileMaker's field names |
+| **FileMaker bridge** | Designed, not built — `docs/FILEMAKER_BRIDGE.md`. FileMaker already models our pipeline as `Contact → PreBooking → Booking`; the bridge lands registrations as Contact+PreBooking pairs and never writes Bookings. Blocked on eight decisions listed there, the first being whether a write is wanted at all |
 | **Retention policy** | Nothing is deleted on a schedule. Enquiries, registrations, placement attempts and CVs are all personal data and a period needs a named owner at CASA |
 | **Outbound email** | No sending. Every reply is a `mailto:` |
 | **Catalogue editing** | Read-only. `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` is the authority on those numbers, and an edit form here would let the workspace contradict the published facts |
