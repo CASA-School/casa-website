@@ -1,0 +1,40 @@
+# Local Postgres for the CASA staff workspace.
+#
+# The workspace at /admin writes — enquiries, registrations, placement reviews,
+# staff accounts — so unlike the public site it cannot run from in-repo
+# fixtures. This gives it a real database on a laptop with no cloud account.
+#
+# Port 5433, not 5432, deliberately: 5432 is usually already taken by a
+# system-wide Postgres or another project's container, and a silent connection
+# to the wrong database is worse than a refused one.
+#
+# On Azure this is replaced by the PostgreSQL Flexible Server in
+# rg-casa-website-prod (docs/AZURE_DEPLOYMENT_PLAN.md). Nothing in the
+# application knows the difference: both are plain Postgres reached through
+# DATABASE_URL by the `pg` driver.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: casa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: casa
+      POSTGRES_PASSWORD: casa_local_dev
+      POSTGRES_DB: casa
+      # Deterministic collation, so an ORDER BY on names sorts the same here as
+      # it will on the managed server.
+      POSTGRES_INITDB_ARGS: '--locale=C --encoding=UTF8'
+    ports:
+      - '5433:5432'
+    volumes:
+      - casa-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # `pg_isready` returns success while the server is still running initdb's
+      # bootstrap, so the database name is named explicitly.
+      test: ['CMD-SHELL', 'pg_isready -U casa -d casa']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  casa-pgdata:

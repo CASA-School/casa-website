@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { storeExamRegistration } from '@/lib/admin/intake';
+
 import { examRegistrationSubmissionSchema } from '@/lib/validation/registration-submissions';
 
 const REQUEST_TIMEOUT_MS = 8000;
@@ -51,6 +53,28 @@ export async function POST(request: NextRequest) {
   const submittedAt = new Date().toISOString();
   const webhookUrl = process.env.EXAM_REGISTRATION_WEBHOOK_URL;
 
+  /*
+   * Stored in the staff workspace before the fan-out, and independently of it.
+   * See `src/app/api/contact/route.ts` for why the two are not coupled.
+   */
+  const stored = await storeExamRegistration({
+    requestId,
+    examTypeId: payload.examTypeId,
+    examSessionId: payload.examSessionId,
+    examTypeLabel: payload.examTypeLabel,
+    examSessionLabel: payload.examSessionLabel,
+    registrationType: payload.registrationType,
+    salutation: payload.salutation,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    email: payload.email,
+    phone: payload.phone,
+    nationality: payload.nationality,
+    birthDate: payload.birthDate,
+    officialNameConfirmed: payload.officialNameConfirmed,
+    locale: payload.locale,
+  });
+
   if (webhookUrl) {
     try {
       const response = await fetch(webhookUrl, {
@@ -99,6 +123,7 @@ export async function POST(request: NextRequest) {
     status: 'accepted',
     requestId,
     mode: webhookUrl ? 'webhook' : 'preview',
+    stored,
     message: successMessage(payload.locale),
   });
 }

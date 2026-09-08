@@ -7,7 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { NextStepsTimeline } from '@/components/sections';
+/*
+ * From its own module, NOT the `@/components/sections` barrel.
+ *
+ * This is a client component, and the barrel re-exports `proof-band`, which
+ * imports the content repository, which imports the database client. Pulling
+ * the barrel therefore asked the bundler to put a Postgres driver in the
+ * browser bundle. It survived while the driver was Neon's HTTP client, which
+ * happens to resolve in a browser target; it broke the build the moment the
+ * driver became `pg`, whose `util/types` require has no browser equivalent.
+ *
+ * A barrel that mixes server and client modules cannot be imported from a
+ * client component at all. Import the leaf.
+ */
+import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';

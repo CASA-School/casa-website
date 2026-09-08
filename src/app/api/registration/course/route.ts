@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { storeCourseRegistration } from '@/lib/admin/intake';
+
 import { courseRegistrationSubmissionSchema } from '@/lib/validation/registration-submissions';
 
 const REQUEST_TIMEOUT_MS = 8000;
@@ -51,6 +53,35 @@ export async function POST(request: NextRequest) {
   const submittedAt = new Date().toISOString();
   const webhookUrl = process.env.COURSE_REGISTRATION_WEBHOOK_URL;
 
+  /*
+   * Stored in the staff workspace before the fan-out, and independently of it.
+   * See the same block in `src/app/api/contact/route.ts` for why the two are
+   * not coupled: a storage failure must not tell a learner their registration
+   * failed, and a webhook timeout must not lose the row.
+   */
+  const stored = await storeCourseRegistration({
+    requestId,
+    courseTypeId: payload.courseTypeId,
+    courseInstanceId: payload.courseInstanceId,
+    courseTypeLabel: payload.courseTypeLabel,
+    courseInstanceLabel: payload.courseInstanceLabel,
+    salutation: payload.salutation,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    email: payload.email,
+    phone: payload.phone,
+    nationality: payload.nationality,
+    birthDate: payload.birthDate,
+    currentLevel: payload.currentLevel,
+    visaRequired: payload.visaRequired,
+    accommodationRequired: payload.accommodationRequired,
+    accommodationType: payload.accommodationType,
+    smoker: payload.smoker,
+    allergies: payload.allergies,
+    notes: payload.notes,
+    locale: payload.locale,
+  });
+
   if (webhookUrl) {
     try {
       const response = await fetch(webhookUrl, {
@@ -99,6 +130,7 @@ export async function POST(request: NextRequest) {
     status: 'accepted',
     requestId,
     mode: webhookUrl ? 'webhook' : 'preview',
+    stored,
     message: successMessage(payload.locale),
   });
 }

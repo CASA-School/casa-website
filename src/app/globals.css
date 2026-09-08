@@ -105,6 +105,25 @@
    */
   --container-measure: 48ch;
 
+  /*
+   * Workspace colours, so the staff dashboard writes `bg-ws-panel` and
+   * `border-ws-line` instead of forty copies of `border-[var(--ws-line)]`.
+   * The values themselves are defined on `.casa-workspace` (below), not on
+   * `:root` — these utilities are `inline`, so they emit the `var()` and let
+   * the cascade resolve it, which means they are inert on the public site.
+   */
+  --color-ws-canvas: var(--ws-canvas);
+  --color-ws-sunk: var(--ws-sunk);
+  --color-ws-line: var(--ws-line);
+  --color-ws-line-firm: var(--ws-line-firm);
+  --color-ws-line-soft: var(--ws-line-soft);
+  --color-ws-panel: var(--ws-panel);
+  --color-ws-panel-raised: var(--ws-panel-raised);
+  --color-ws-panel-line: var(--ws-panel-line);
+  --color-ws-on-panel: var(--ws-on-panel);
+  --color-ws-on-panel-muted: var(--ws-on-panel-muted);
+  --color-ws-marker: var(--ws-marker);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -751,6 +770,92 @@ h3 {
   --level-b1plus-text: var(--level-b1plus-on-dark);
   --level-b2-text: var(--level-b2-on-dark);
   --level-c1-text: var(--level-c1-on-dark);
+}
+
+/*
+ * THE STAFF WORKSPACE (`/admin`, admin.casa-bremen.de).
+ *
+ * A dense tool read at arm's length for a whole working day, not an editorial
+ * page skimmed once. Three things have to change for that, and all three are
+ * scoped to `.casa-workspace` so the public site keeps exactly the palette it
+ * was designed with.
+ *
+ * 1. HAIRLINES GET REAL SEPARATION. `--casa-sand` (#e2e8f0) is a beautiful
+ *    edge on a white card sitting alone in white space. Put forty table rows
+ *    inside it and it disappears — the eye reads a grey wash instead of rows.
+ *    The workspace therefore has three line weights where the site has one:
+ *    a firm rule for structure a row can be counted against, a soft one for
+ *    repetition inside a group, and a sunken tone that lets a table header sit
+ *    behind its own rows without a border.
+ *
+ * 2. THE GROUND DROPS ONE STEP. The site's canvas (#f6fafb) is 1.02:1 against
+ *    a white card — a difference you can measure and cannot see once the card
+ *    fills the viewport. `--ws-canvas` is darker, so a white card reads as
+ *    raised rather than as the page.
+ *
+ * 3. READING SIZE COMES DOWN. `--text-base` is 17px, tuned for one column of
+ *    prose. A table of names, dates and money at 17px forces horizontal
+ *    scrolling on a laptop and reads as a website pretending to be software.
+ *    The workspace sets its body to 15px and keeps 17px for the few places
+ *    that are genuinely prose: a visitor's message, a cover letter.
+ *
+ * Colour discipline is inherited, not relaxed. Every accent still resolves
+ * through `--casa-accent-text` and friends, so contrast stays AA on both the
+ * ink sidebar and the white cards.
+ */
+.casa-workspace {
+  /* Structure. 3.0:1 against white — countable at a glance in a full table. */
+  --ws-line-firm: #c3ccda;
+  /* Repetition. Between rows of one group, where firm would read as a grid. */
+  --ws-line: #dbe2ec;
+  /* The faintest useful edge, for nested boxes inside an already-bordered card. */
+  --ws-line-soft: #e9eef4;
+  /* A recessed band: table headers, toolbars, an inset panel. */
+  --ws-sunk: #eef2f7;
+  --ws-canvas: #f1f5f9;
+
+  /* The sidebar. `--casa-ink-deep` is the site's inverted band; the workspace
+     wants one step deeper so the white content area reads as the lit surface
+     and the panel as the frame around it. */
+  --ws-panel: #0d1420;
+  --ws-panel-raised: #18212f;
+  --ws-panel-line: #26303f;
+  --ws-on-panel: #f4f8fb;
+  /* 8.4:1 on --ws-panel. Muted enough to recede, never so muted it fails AA. */
+  --ws-on-panel-muted: #9aa8bc;
+
+  /* CASA's sun, used once and only once per screen: the marker on the nav item
+     you are standing on. It is the school's signature colour and the only
+     saturated warm note in the workspace, which is exactly what makes "you are
+     here" register before the label is read. */
+  --ws-marker: var(--casa-sun);
+
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+/* The sidebar is a dark surface, so the accent and subtle text tokens have to
+   flip the same way the public site's dark bands do. Declared here rather than
+   relying on the `.bg-[var(--casa-ink-deep)]` selectors above, because the
+   panel paints `--ws-panel` and would otherwise keep the light-surface tokens
+   and fail contrast. */
+.casa-workspace-panel {
+  --casa-accent-text: var(--casa-accent-on-dark);
+  --casa-accent-text-hover: var(--casa-accent-on-dark-hover);
+  --casa-text-subtle: var(--ws-on-panel-muted);
+}
+
+/*
+ * Numerals in the workspace are tabular by default.
+ *
+ * Every list here is a column of counts, dates and money read down rather than
+ * across, and proportional figures make a column of numbers ragged — `11` is
+ * visibly narrower than `88` in Plus Jakarta Sans. Opting in per call site was
+ * tried on the public site and produced exactly the inconsistency you would
+ * expect; in a tool it is the default that is correct.
+ */
+.casa-workspace :is(td, th, .ws-num, time, [data-slot='stat-value']) {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Light surfaces reset the accent, so a white card inside a dark section does

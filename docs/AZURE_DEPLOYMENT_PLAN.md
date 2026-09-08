@@ -41,8 +41,13 @@ Both deploy targets are live in parallel right now — `main` still triggers a
 Vercel build, and `deploy.sh` pushes to Azure. Turning the Vercel project off is
 a decision for cutover, not a prerequisite.
 
-CASA is consolidating onto Azure so the website, the student app, and the future dashboard sit in
-one tenant and can be integrated. The student app already runs there, so this plan mirrors its
+CASA is consolidating onto Azure so the website, the student app, and the dashboard sit in
+one tenant and can be integrated. The dashboard is no longer "future": it ships
+in this repository as the staff workspace on `admin.casa-bremen.de`, which
+means the Container App needs a **second custom hostname** (CNAME plus an
+`asuid` TXT record, then `az containerapp hostname add` and a managed
+certificate) rather than only the marketing one. Both hostnames route to the
+same revision; `src/proxy.ts` decides which tree serves which. The student app already runs there, so this plan mirrors its
 topology rather than inventing a second pattern.
 
 ## Confirmed live resources (read from the subscription, 2026-08-12)
@@ -108,24 +113,39 @@ for a brochure site that is a reasonable trade, and it materially changes the cr
 
 ## Code work required
 
-### 1. Database driver — the real work
+### 1. Database driver — ~~the real work~~ **DONE 2026-09-08**
 
-`@neondatabase/serverless` talks to Neon's endpoint and does not work against Azure Postgres.
-The port is **two files**, not one:
+`@neondatabase/serverless` has been removed from the repository. It was forced
+rather than chosen: the staff workspace at `/admin`
+(`docs/ADMIN_WORKSPACE.md`) writes, so it needs a database in local
+development, and the Neon driver cannot reach a Postgres container any more
+than it can reach Azure.
 
-- `src/lib/db/server.ts` — swap `neon()` for a `pg.Pool`. Everything in
-  `src/lib/content/repository.ts` already goes through `queryRows`/`queryFirst`, which use only
-  `db.query(sql, params)`, so it is satisfied by a thin wrapper.
-- `src/app/api/careers/apply/route.ts` — **this one needs rewriting.** It uses Neon-specific API
-  directly: the tagged-template form and `db.transaction([...])` to write the application and the
-  CV file together. There is no `pg` equivalent; it becomes an explicit
-  `BEGIN` / `INSERT` / `INSERT` / `COMMIT` on a pooled client.
+What landed:
 
-That route is the only write path on the public site, so it needs a real test before cutover —
-not just a build.
+- **One `pg` pool for the whole application**, in `src/lib/admin/db.ts`.
+  `src/lib/db/server.ts` builds the public site's client on it and deliberately
+  preserves Neon's result shape — `query()` resolves to the rows, not a
+  `QueryResult` — because ~40 readers in `src/lib/content/repository.ts` and
+  `src/lib/placement/repository.server.ts` were written against it and there is
+  nothing in `QueryResult` they want.
+- **`src/app/api/careers/apply/route.ts` rewritten** as an explicit
+  `BEGIN` / `INSERT` / `INSERT` / `COMMIT` through `withDatabaseTransaction`.
+  **Still needs a real test against the managed server before cutover, not just
+  a build** — it is the only write path the public site had before the
+  workspace, and an application row without its CV row looks complete in the
+  queue and cannot be acted on.
+- `scripts/db/migrate.mjs` and `scripts/db/apply-sql-directory.mjs` share
+  `scripts/db/client.mjs`, also on `pg`.
+- `src/lib/admin/db.ts` imports `server-only`. Without it, a client component
+  that reaches it through a barrel fails with `Can't resolve 'util/types'` from
+  inside `node_modules/pg` — thirty lines of import trace from the mistake.
+  That is exactly how the barrel import in `contact-inquiry-form.tsx` was found.
 
-`scripts/db/migrate.mjs` and `scripts/db/apply-sql-directory.mjs` also import the Neon driver and
-need the same swap.
+Verified against Postgres 17 in Docker (`docker-compose.yml`): all six
+migrations apply, the seed applies, and both products read and write.
+**Not yet verified against Azure Postgres** — that is the remaining step, and
+the one that matters is the careers upload.
 
 ### 2. Containerisation
 
@@ -170,7 +190,7 @@ applicants' CVs is a policy question, not a technical one.
 1. ~~Provision `rg-casa-website-prod`~~ **done 2026-08-12** — empty, germanywestcentral, tagged
    `project=casa-website`. Costs nothing while empty. Provision the PostgreSQL Flexible Server
    (B1ms, 32 GB) next; that is the first line item that actually bills.
-2. Port the driver (two files above) behind `DATABASE_URL`, and prove the careers upload path
+2. ~~Port the driver behind `DATABASE_URL`~~ **done 2026-09-08** (see §1). Still prove the careers upload path
    against Azure Postgres.
 3. Move the schema: `npm run db:migrate` against the new server, then `npm run db:seed`.
    Migrations are now tracked and transactional, so this is safe to repeat — see below.

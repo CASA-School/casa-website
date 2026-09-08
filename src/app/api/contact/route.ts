@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { storeEnquiry } from '@/lib/admin/intake';
 import { getGroupInquiryWebhookUrl } from '@/lib/db/env';
 import { contactInquirySchema, organiserBriefFields } from '@/lib/validation/contact';
 
@@ -78,6 +79,34 @@ export async function POST(request: NextRequest) {
     (organiserBrief ? getGroupInquiryWebhookUrl() : null) || process.env.CONTACT_WEBHOOK_URL;
   const submittedAt = new Date().toISOString();
 
+  /*
+   * Stored in the staff workspace FIRST, and independently of the webhook.
+   *
+   * Before this, an enquiry existed only as a webhook POST and, with no webhook
+   * configured, as a line in the server log — so nobody could tell whether one
+   * had been answered. It now lands in a queue with a status and an owner
+   * (/admin/enquiries).
+   *
+   * The two are deliberately not coupled. `storeEnquiry` never throws: a
+   * storage failure must not fail a request whose fan-out succeeded, because
+   * the visitor would be told their enquiry did not arrive when it did. The
+   * reverse holds too — the row is written before the fetch, so a webhook
+   * timeout does not lose the enquiry.
+   */
+  const stored = await storeEnquiry({
+    requestId,
+    locale,
+    firstName: payload.firstName,
+    lastName: payload.lastName || null,
+    email: payload.email,
+    topic: payload.topic,
+    topicKey: payload.topicKey || null,
+    message: payload.message,
+    source: payload.source,
+    organiserBrief,
+    userAgent: request.headers.get('user-agent') || null,
+  });
+
   if (webhookUrl) {
     try {
       const response = await fetch(webhookUrl, {
@@ -133,6 +162,7 @@ export async function POST(request: NextRequest) {
     status: 'accepted',
     requestId,
     mode: webhookUrl ? 'webhook' : 'preview',
+    stored,
     message: successMessage(locale),
   });
 }

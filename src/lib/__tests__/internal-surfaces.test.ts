@@ -15,7 +15,7 @@ const guardedRoutes = [
 
 function readLayout(route: string) {
   // Vitest runs from the repo root, where vitest.config.ts lives.
-  return readFileSync(path.resolve(process.cwd(), 'src/app', route, 'layout.tsx'), 'utf8');
+  return readFileSync(path.resolve(process.cwd(), 'src/app/(site)', route, 'layout.tsx'), 'utf8');
 }
 
 /** Start from a clean slate: no flag, no Vercel env, and not production. */
@@ -105,7 +105,7 @@ describe('internalSurfacesEnabled', () => {
 });
 
 describe('internal surface route layouts', () => {
-  it.each(guardedRoutes)('src/app/%s/layout.tsx still calls the guard', (route) => {
+  it.each(guardedRoutes)('src/app/(site)/%s/layout.tsx still calls the guard', (route) => {
     const source = readLayout(route);
 
     // noindex metadata is not access control, so the 404 is the only thing

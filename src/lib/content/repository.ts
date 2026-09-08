@@ -426,8 +426,10 @@ function getAvailableLevels(levelMin: string | null, levelMax: string | null): s
  * Coerces a Postgres `date` to the ISO `YYYY-MM-DD` string the row types claim.
  *
  * `CourseInstanceRow.start_date` is typed `string`, and it is one in fallback
- * mode -- but @neondatabase/serverless hydrates a `date` column into a JS `Date`,
- * so in Neon mode the same field is an object. Nothing caught it while each
+ * mode -- but the Postgres driver hydrates a `date` column into a JS `Date`,
+ * so with a database attached the same field is an object. (This was first hit
+ * on `@neondatabase/serverless`; `pg`, which replaced it, does exactly the
+ * same, so the coercion is still load-bearing.) Nothing caught it while each
  * course had at most one instance, because Array.sort never calls its comparator
  * on a one-element array. Seeding CASA's real eight-term intensive table made
  * `a.startDate.localeCompare(...)` throw and took the homepage down with a 500.

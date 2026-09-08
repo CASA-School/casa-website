@@ -4,20 +4,31 @@ Guidance for Claude Code when working in this repository.
 
 ## Project
 
-CASA is a public-facing marketing website for **CASA Bremen**, an international
-language school operating as a *gemeinnützige GmbH* (German nonprofit). The site's
-job is discovery, trust-building, and lead capture — courses, exams, accommodation,
-registration, careers, news, and contact.
+This repository holds **two products**, one Next build, one container.
 
-The previous role-based portal/dashboard has been **removed from the active
-application code**. Do not reintroduce auth, roles, or dashboard surfaces. The
-`package.json` name is still `casa-portal`; that is historical, not current scope.
+**1. The public website** for **CASA Bremen**, an international language school
+operating as a *gemeinnützige GmbH* (German nonprofit). Its job is discovery,
+trust-building, and lead capture — courses, exams, accommodation, registration,
+careers, news, and contact. Routes live under `src/app/(site)`.
+
+**2. The staff workspace** at `/admin`, served on `admin.casa-bremen.de`. An
+internal tool for CASA's administrative staff: everything the public site
+receives lands in a queue with a status and an owner. Routes live under
+`src/app/(admin)`. **Read `docs/ADMIN_WORKSPACE.md` before touching it.**
+
+The workspace is NOT the old portal. The previous role-based student/teacher
+portal was removed and is not coming back — do not reintroduce learner-facing
+auth, learner roles, or a student dashboard. The workspace has three staff
+roles, no learner surface, and no relation to that code. The `package.json`
+name is still `casa-portal`; that is historical, not current scope.
 
 ## Stack
 
 - Next.js `16.1.6` (App Router) · React `19.2.4` · TypeScript
 - Tailwind CSS v4 + shadcn patterns + Radix (`radix-ui`), `tw-animate-css`
-- Neon Postgres via `@neondatabase/serverless`
+- Postgres via `pg` — a local container in development (`docker-compose.yml`),
+  Azure Flexible Server or Neon in deployment. One shared pool
+  (`src/lib/admin/db.ts`) serves both products
 - `zod` + `react-hook-form` for validation and forms
 - `next-intl` — routing is EN-only today; the content layer supports `en`/`de`
 - Vitest + jsdom (unit) · Playwright (e2e, dev server on `127.0.0.1:3001`)
@@ -33,10 +44,19 @@ npm run typecheck    # tsc --noEmit
 npm run test         # vitest run
 npm run test:e2e     # playwright
 npm run knip         # unused deps/files gate (also runs in CI)
+npm run db:up        # Postgres 17 in Docker, port 5433
+npm run db:down      # stop it
+npm run db:reset     # drop the volume, migrate, seed, recreate the owner account
 npm run db:migrate   # applies db/migrations
 npm run db:seed      # applies db/seeds
+npm run admin:seed   # creates the first staff workspace account
 npm run placement:port  # re-ports the placement item bank from its source markdown
 ```
+
+`E2E_PORT=3017 npm run test:e2e` runs Playwright on its own port. Use it:
+`reuseExistingServer` is on and several checkouts of this repository run on one
+machine, so a dev server left on 3001 by another worktree is silently reused
+and the suite tests somebody else's code.
 
 CI (`.github/workflows/quality.yml`) runs lint → typecheck → test → build → knip
 on every PR and on pushes to `main`. It does **not** run e2e.
@@ -55,23 +75,33 @@ If a gate is skipped, say exactly why.
 
 ## Runtime modes
 
-**Neon-backed** (`DATABASE_URL` set): public content reads come from Neon-backed
-tables; career applications persist to Postgres including the uploaded CV file
+**Database-backed** (`DATABASE_URL` set): public content reads come from
+Postgres; contact enquiries and course/exam registrations persist to the
+workspace queues; career applications persist including the uploaded CV file
 (`career_application_files`).
 
 **Fallback** (`DATABASE_URL` unset): public content falls back to in-repo fixtures;
 careers use the in-memory dataset in `src/lib/mock/store.ts`; career application
 submission is disabled because CV upload requires database storage. The placement
 test still runs end to end from an in-process store, and tells the learner plainly
-that progress is not being saved.
+that progress is not being saved. Enquiries and registrations still fan out to
+their webhooks; each route reports `stored: false`.
 
-Keep both modes working. Do not break fallback parity when changing data flows.
+Keep both modes working for the PUBLIC SITE. Do not break fallback parity when
+changing data flows.
+
+**The staff workspace has one mode.** With no `DATABASE_URL` it renders a "not
+connected" notice and refuses to run, deliberately: a fixture queue showing zero
+enquiries is indistinguishable from a quiet morning, and would let staff
+conclude nothing had come in.
 
 ## Environment variables
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Enables Neon-backed reads + career application persistence |
+| `DATABASE_URL` | Database-backed reads, the workspace queues, career application persistence. **Required by `/admin`** |
+| `ADMIN_DB_POOL_MAX` | Pool size, default 5 (an Azure B1ms allows ~50 connections total) |
+| `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` | Reopens `/admin` on the public host in production. For the window between deploying and pointing the admin DNS record |
 | `CONTACT_WEBHOOK_URL` | Contact form fan-out |
 | `CAREERS_APPLICATION_WEBHOOK_URL` | Career application fan-out |
 | `COURSE_REGISTRATION_WEBHOOK_URL` | Course registration fan-out |
@@ -79,27 +109,42 @@ Keep both modes working. Do not break fallback parity when changing data flows.
 | `PLACEMENT_RESULT_WEBHOOK_URL` | Placement result hand-off to the CASA dashboard |
 | `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS` | Optional flag for unverified public claims |
 
-All webhooks are optional. Presence checks live in `src/lib/db/env.ts`; there is no
-central typed env schema yet.
+All webhooks are optional, and each fires *alongside* storing the record in the
+workspace rather than instead of it. Presence checks live in `src/lib/db/env.ts`;
+there is no central typed env schema yet. `/admin/settings` reports which are
+connected without ever printing a value.
 
 ## Layout
 
 ```
-src/app          public routes + API handlers under src/app/api
+src/app/(site)   public routes — has its own root layout
+src/app/(admin)  staff workspace at /admin — has its own root layout
+src/app/api      public route handlers (no layout)
+src/proxy.ts     host routing: admin.casa-bremen.de -> /admin, and /admin 404s
+                 on the public host in production
 src/components   ui primitives (src/components/ui) + domain modules
                  (heroes, sections, layout, forms, registration, courses,
                   news, resources, signatures, assistant, calculator, ...)
+src/components/admin   the workspace's own design layer — shell, ui.tsx, icons
 src/config       nav, footer, brand tokens, page patterns, content fixtures
 src/content      locale content modules
 src/lib          content repository, db helpers, api envelope, search,
                  assistant, validation, analytics, seo, mock fallback
+src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql)
-db/seeds         baseline public data
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0006_admin_workspace.sql)
+db/seeds         baseline public data — applied to real databases, so no fake people
+scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
+docker-compose.yml  local Postgres
 e2e              Playwright specs
 docs             setup, ERD, audits, backlog, compliance, team update
 ```
+
+**`src/app` has no `layout.tsx` of its own, on purpose.** Next allows a second
+root layout only when the app root has none, and the two products share nothing
+above the design tokens. Route groups are not URL segments, so every public
+path is unchanged.
 
 ## Conventions
 
@@ -127,9 +172,12 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 
 ## Hard rules
 
-1. **No FileMaker, no dashboard row-level data.** The internal CASA dashboard /
-   FileMaker bridge is a separate workspace. The website may use only reviewed,
-   public-safe *aggregate* metrics. Current approved values (2026-06-17 sync):
+1. **No FileMaker, no dashboard row-level data ON THE PUBLIC SITE.** The
+   FileMaker bridge is still unbuilt and is a separate piece of work; the staff
+   workspace at `/admin` carries an `external_ref` column per queue for it and
+   writes nothing there yet. **Public pages** may use only reviewed,
+   public-safe *aggregate* metrics — never a row from any operational table,
+   including the workspace's own. Current approved values (2026-06-17 sync):
    `30,000+ learners supported`, `150+ countries represented`,
    `7-80+ age range represented`, `45,000+ course bookings`.
    The `40+ staff/teachers` claim is **draft** and must not ship unverified.
@@ -150,7 +198,18 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    `answer-containment.test.ts` enforces it. Cut scores in
    `src/config/placement/policy.ts` are pilot hypotheses — bump `POLICY_VERSION`
    when you change them so stored attempts stay interpretable.
-7. **Nonprofit framing is load-bearing.** CASA's Google Ad Grants review flagged the
+7. **The staff workspace is behind four independent checks, and each is
+   load-bearing.** (a) The layout gate in
+   `src/app/(admin)/admin/(workspace)/layout.tsx`. (b) `requireStaff()` at the
+   top of EVERY server action — an action is a public HTTP endpoint and does not
+   go through the layout that rendered its form. (c) Its own check inside the CV
+   download route handler, for the same reason. (d) `src/proxy.ts`, which 404s
+   `/admin` on the public host in production. Do not remove one on the grounds
+   that another covers it; they cover different request paths.
+   `docs/ADMIN_WORKSPACE.md` §Security model has the detail, and
+   `src/lib/admin/__tests__/host-routing.test.ts` asserts all four.
+
+8. **Nonprofit framing is load-bearing.** CASA's Google Ad Grants review flagged the
    site as too commercial. Prices and registration are fine, but they must sit inside
    a visibly public-benefit narrative. See `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md`
    before touching the homepage, nav, footer, or `/ueber-uns/gemeinnuetzigkeit`.
@@ -172,6 +231,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PUBLIC_UI_BACKLOG.md` | Sequenced PR-A / PR-B / PR-C plan |
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
+| `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
 | `docs/GROUP_PRICING_AND_SPECIAL_COURSES.md` | Group price model ported from the coordinator's workbook, its three bugs, and the special-courses rebuild direction |
 | `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` | **Read before changing any course number.** Prices/hours verified against casa-bremen.de, with an explicit unverified list |
@@ -191,14 +251,35 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 especially the required reporting format (evidence → root cause → fix → files →
 verification).
 
-Sections 2 and 3 are **stale**. They instruct agents to reuse `requirePageRoles`,
-`requireApiRoles`, and `requirePortalApiContext`, and to align with route protection
-in `src/proxy.ts`. None of those exist in the codebase — they were removed with the
-portal. Ignore those specific instructions. The `apiSuccess` / `apiError` and
-mock-mode-parity guidance in the same sections is still valid.
+Sections 2 and 3 are **partly stale**. `requirePageRoles`, `requireApiRoles` and
+`requirePortalApiContext` do not exist — they were removed with the portal, and
+nothing replaced them. Ignore those specific names.
+
+`src/proxy.ts` DOES exist again as of 2026-09-08, but it is not what section 3
+means by "route protection": it does host routing for the staff workspace
+(`admin.casa-bremen.de` → `/admin`, and `/admin` 404s on the public host in
+production) and has no database connection, so it cannot authenticate anything.
+The workspace's auth gate is its layout plus `requireStaff()` in every server
+action — see `docs/ADMIN_WORKSPACE.md`. Do not add a role check to `proxy.ts`.
+
+The `apiSuccess` / `apiError` and mock-mode-parity guidance in the same sections
+is still valid.
 
 ## Known open items
 
+- **`admin.casa-bremen.de` does not exist yet.** `src/proxy.ts` already routes it,
+  and until the DNS record is created the workspace is reachable at `/admin` on the
+  public host in development only. Creating it is a prerequisite for go-live, along
+  with `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` being left unset in production.
+- **No FileMaker bridge.** Every workspace queue table has an `external_ref` column
+  and nothing writes to one. Field mapping is deliberately unspecified rather than
+  guessed at.
+- **No retention policy.** Enquiries, registrations, placement attempts and stored
+  CVs are all personal data, none of it deleted on a schedule. A period needs a
+  named privacy owner at CASA.
+- **No outbound email from the workspace.** Every "Reply" button is a `mailto:`,
+  and there is no self-service password reset — an owner sets one from the Team
+  screen.
 - ~~`lucide-react` missing~~ **Resolved (verified 2026-08-12).** `lucide-react` is still
   absent from `package.json` and `node_modules`, but `tsconfig.json` now maps it via a
   `paths` alias to `./src/lib/icons/streamline-lucide-adapter`. `npm run typecheck` and
@@ -226,6 +307,11 @@ mock-mode-parity guidance in the same sections is still valid.
   (the bank's only matching item is a listening item). Details in
   `docs/PLACEMENT_TEST_IMPLEMENTATION.md` §6.2.
 - No canonical production deployment doc yet (Vercel project, domain, rollback owner).
+- `@neondatabase/serverless` is gone; both products run on one `pg` pool. The
+  remaining Azure work in `docs/AZURE_DEPLOYMENT_PLAN.md` §1 is done — the
+  careers CV upload is now an explicit `BEGIN`/`INSERT`/`INSERT`/`COMMIT` and
+  still needs a real test against the managed server before cutover, not just a
+  build.
 - **`main` is unprotected and deploys straight to production** (no `vercel.json`, so Vercel's
   default push-to-`main` deploy applies). This is a **deliberate choice while the site is still
   being built** — branch protection would add review friction during active iteration, and the

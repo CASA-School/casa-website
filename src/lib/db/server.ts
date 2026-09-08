@@ -1,41 +1,84 @@
-import { neon } from '@neondatabase/serverless';
+import type { PoolClient } from 'pg';
 
-import { getDatabaseUrl, isDatabaseConfigured } from './env';
+import { getPool, isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
 
 /**
- * Database client.
+ * Database client for the public site.
  *
- * NOTE FOR THE AZURE MIGRATION (docs/AZURE_DEPLOYMENT_PLAN.md).
+ * PORTED OFF `@neondatabase/serverless`, 2026-09-08. That driver talks to
+ * Neon's own HTTP/WebSocket endpoint and cannot reach a plain Postgres server,
+ * which made it the blocker `docs/AZURE_DEPLOYMENT_PLAN.md` §1 named: the
+ * public site could not read the Azure Flexible Server, and — once the staff
+ * workspace arrived — could not read the local container either. Local
+ * development had a real database that half the application could not see.
  *
- * `@neondatabase/serverless` talks to Neon's own endpoint and will not work
- * against Azure Database for PostgreSQL. Swapping it is not quite a one-file
- * change, because the client is used in two different styles:
+ * Both halves now share the one `pg` pool in `src/lib/admin/db.ts`. `pg` speaks
+ * the plain wire protocol, so the same code reaches the Docker container, Azure
+ * Postgres, and Neon.
  *
- * 1. `src/lib/content/repository.ts` — goes through `queryRows`/`queryFirst`,
- *    which use only `db.query(sql, params)`. Fully portable; a `pg.Pool`
- *    wrapper satisfies it as-is.
+ * THE SHAPE OF `query` IS DELIBERATELY NEON'S, NOT `pg`'s.
  *
- * 2. `src/app/api/careers/apply/route.ts` — uses Neon-specific API directly:
- *    the tagged-template form (`` db`INSERT ...` ``) and `db.transaction([...])`
- *    for the two-statement application + CV insert. This has no `pg` equivalent
- *    and must be rewritten as an explicit
- *    `BEGIN` / `INSERT` / `INSERT` / `COMMIT` on a pooled client.
- *
- * So the Azure port is: this file, plus that one route handler. Everything else
- * is already driver-agnostic. Do not "simplify" this to a `{ query }` wrapper
- * without rewriting the careers route first — that breaks CV upload, which is
- * the only write path on the public site.
+ * `pg` resolves to a `QueryResult` and the rows are on `.rows`; Neon resolved
+ * to the rows themselves. Around forty call sites in
+ * `src/lib/content/repository.ts` and `src/lib/placement/repository.server.ts`
+ * read the result as an array, all of them through `queryRows`/`queryFirst`
+ * helpers that were written against the Neon shape. Unwrapping `.rows` here
+ * keeps the port to this file plus the one route handler that used the
+ * tagged-template API, instead of touching every reader — and there is nothing
+ * in `QueryResult` those readers want.
  */
-let database: ReturnType<typeof neon> | null = null;
 
-export const getDb = () => {
-  if (!isDatabaseConfigured()) {
+/**
+ * Re-exported so `getDb()`'s callers can ask the same question the same way.
+ * `src/lib/db/env.ts` exports an identical predicate — both read
+ * `DATABASE_URL`, and neither is worth collapsing into the other while the
+ * public site and the workspace still have separate entry points.
+ */
+export const isDatabaseConfigured = isWorkspaceDatabaseConfigured;
+
+type PublicDatabase = {
+  query: <T>(sql: string, params?: unknown[]) => Promise<T[]>;
+};
+
+export const getDb = (): PublicDatabase | null => {
+  if (!isWorkspaceDatabaseConfigured()) {
     return null;
   }
 
-  database ??= neon(getDatabaseUrl());
-  return database;
+  return {
+    query: async <T>(sql: string, params: unknown[] = []) => {
+      const result = await getPool().query(sql, params);
+      return result.rows as T[];
+    },
+  };
 };
+
+/**
+ * Runs `work` inside a transaction on one pooled connection.
+ *
+ * Replaces Neon's `db.transaction([...])`, which took an array of prepared
+ * tagged-template queries. There is no `pg` equivalent, and the reason the
+ * careers upload needed one has not changed: the application row and the CV
+ * bytes must land together or not at all, or the queue grows an application
+ * whose CV does not exist.
+ */
+export async function withDatabaseTransaction<T>(
+  work: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  const client = await getPool().connect();
+
+  try {
+    await client.query('BEGIN');
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 
 /**
  * A driver error can quote the connection string back, and that string carries
@@ -62,8 +105,8 @@ function redactConnectionString(message: string) {
  */
 export function logDatabaseFallback(scope: string, error: unknown) {
   const source = error instanceof Error ? error : null;
-  // Neon wraps connection failures, so the reachability signal (ECONNREFUSED,
-  // DNS) lives on `cause` rather than in the top-level message.
+  // Connection failures carry the reachability signal (ECONNREFUSED, DNS) on
+  // `cause` rather than in the top-level message.
   const cause = source?.cause;
 
   console.error('[db] query failed, serving fallback content', {

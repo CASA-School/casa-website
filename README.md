@@ -1,9 +1,22 @@
-# CASA Public Site
+# CASA — public site and staff workspace
 
 ## Purpose
-CASA is now scoped as a public-facing website for CASA Bremen. The current product surface is focused on discovery, trust, and lead capture for launch: courses, exams, accommodation, news, careers, contact, and public registration.
 
-The previous dashboard and role-based portal work has been removed from the active application code. Any future dashboard approach should be treated as a separate project decision rather than part of the current launch scope.
+Two products, one Next build, one container.
+
+**The public website** for CASA Bremen: discovery, trust, and lead capture —
+courses, exams, accommodation, news, careers, contact, and public registration.
+Routes under `src/app/(site)`.
+
+**The staff workspace** at `/admin`, served on `admin.casa-bremen.de`. An
+internal tool for CASA's administrative staff: everything the public site
+receives lands in a queue with a status and an owner, instead of leaving as a
+webhook POST nobody could query. Routes under `src/app/(admin)`. See
+[docs/ADMIN_WORKSPACE.md](docs/ADMIN_WORKSPACE.md).
+
+The workspace is not the old portal. The previous role-based student/teacher
+portal was removed and is not coming back; the workspace has three staff roles,
+no learner-facing surface, and no relation to that code.
 
 ## Current Product Scope
 
@@ -18,6 +31,22 @@ The previous dashboard and role-based portal work has been removed from the acti
 - `Careers`
 - `Search`
 - Legal and utility pages
+
+### Staff workspace routes
+
+All `noindex`, all behind a staff session, and all 404 on the public host in a
+production build.
+
+- `/admin` — overview: what is waiting, what has a deadline
+- `/admin/sign-in`
+- `/admin/enquiries`, `/admin/enquiries/[id]`
+- `/admin/registrations/course`, `/admin/registrations/course/[id]`
+- `/admin/registrations/exam`, `/admin/registrations/exam/[id]`
+- `/admin/placement`, `/admin/placement/[id]` — confirm an Einstufungstest recommendation
+- `/admin/applications`, `/admin/applications/[id]`, `/admin/applications/[id]/cv`
+- `/admin/catalogue`, `/admin/catalogue/exams` — live demand against the published catalogue
+- `/admin/activity` — who changed what
+- `/admin/team` (owner/admin only), `/admin/settings`
 
 ### Supported routes
 - `/`
@@ -44,17 +73,31 @@ The previous dashboard and role-based portal work has been removed from the acti
 - `/imprint`
 - `/privacy`
 - `/terms`
+- `/team`
+- `/calculator`
+- `/resources/why-germany`, `/resources/study-in-germany`, `/resources/living-in-germany`
+- `/projekte/integrationsprojekte`
+- `/accommodation/become-host`
+- `/design-system`, `/design-alternatives`, `/landing-page-alt`, `/homepage-reorganized`
+  — internal review surfaces, 404 on a production build unless
+  `CASA_ENABLE_INTERNAL_SURFACES=true`
 
 ## Integrations
-- Neon Postgres for public content reads and career application persistence when configured.
-- Webhook-based submission fan-out for:
+- Postgres via `pg` — a local container (`npm run db:up`) in development, Azure
+  Flexible Server or Neon in deployment. Public content reads, the workspace
+  queues, and career application persistence.
+- Webhook submission fan-out. Each fires **alongside** storing the record in the
+  workspace, never instead of it:
   - `CONTACT_WEBHOOK_URL`
   - `CAREERS_APPLICATION_WEBHOOK_URL`
   - `COURSE_REGISTRATION_WEBHOOK_URL`
   - `EXAM_REGISTRATION_WEBHOOK_URL`
   - `PLACEMENT_RESULT_WEBHOOK_URL`
 
-Career application submissions require `DATABASE_URL` because uploaded CV files are stored in Postgres before any webhook fan-out happens.
+Career application submissions require `DATABASE_URL` because uploaded CV files
+are stored in Postgres before any webhook fan-out happens. The staff workspace
+requires it outright — it has no fixture fallback, deliberately, because an
+empty queue and an unreachable database look identical.
 
 The placement test is CASA's own instrument — it replaced the external Klett
 placement links in August 2026. It runs without `DATABASE_URL` (from an

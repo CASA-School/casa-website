@@ -53,9 +53,36 @@ test('desktop navbar dropdown is dynamic and courses panel stays inside project 
   await expect(accommodationTrigger).toBeVisible();
   await expect(examsTrigger).toBeVisible();
 
-  await coursesTrigger.hover();
   const coursesPanel = page.getByTestId('nav-panel-courses');
-  await expect(coursesPanel).toBeVisible();
+
+  /*
+   * Hover, then re-hover FROM SOMEWHERE ELSE until the panel opens.
+   *
+   * Two things make the naive version flaky, and both had to be fixed:
+   *
+   * 1. The panel opens from `onMouseEnter` in
+   *    `src/components/layout/navbar.tsx`, so it does nothing until React has
+   *    hydrated. `toBeVisible` on the trigger does not imply that — the
+   *    server-rendered markup is visible immediately — so a single hover can
+   *    land on a page that is painted but not yet listening.
+   *
+   * 2. Retrying `hover()` alone does not help, because the pointer is already
+   *    on the trigger and the browser fires no new `mouseenter`. The retry
+   *    looks like it is doing something and is a no-op. The `mouse.move` away
+   *    is what makes each attempt a real crossing.
+   *
+   * Latent since this test was written; it surfaced when a fourth spec file
+   * was added ahead of it alphabetically and shifted the dev server's compile
+   * timing. `toPass` is the documented pattern for an interaction whose effect
+   * depends on interactivity — `toBeVisible` alone only retries the assertion,
+   * never the action.
+   */
+  await expect(async () => {
+    await page.mouse.move(0, 0);
+    await coursesTrigger.hover();
+    await expect(coursesPanel).toBeVisible({ timeout: 1_500 });
+  }).toPass({ timeout: 15_000 });
+
   await expect(coursesPanel.getByText('Intensive German')).toBeVisible();
 
   // The nav row is the site frame itself. Selected by its data attribute rather

@@ -1,3 +1,18 @@
+/*
+ * Root layout for the PUBLIC website.
+ *
+ * `src/app` deliberately has no `layout.tsx` of its own. There are two products
+ * in this repository now — the marketing site and the staff workspace at
+ * `/admin` (admin.casa-bremen.de) — and they share nothing above the design
+ * tokens: different fonts in use, different chrome, different body ground, and
+ * the workspace must never render the public navigation or footer. Next only
+ * allows a second root layout when the app root has none, so both live in a
+ * route group: `(site)` here, `(admin)` beside it. Route groups do not appear in
+ * URLs, so every public path is unchanged.
+ *
+ * The shared parts — `globals.css` and the metadata icon files — stay at the
+ * `src/app` root, which is why the stylesheet import below reaches up one level.
+ */
 import type {Metadata} from 'next';
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
@@ -8,7 +23,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { footerConfig } from '@/config/footer';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
-import './globals.css';
+import '../globals.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],

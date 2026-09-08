@@ -10,5 +10,24 @@
   // Currently empty: `special-course-modules.ts` was ignored here until work
   // board U6 landed, and is now imported by
   // `src/components/courses/special-course-catalogue.tsx`.
-  "ignore": []
+  "ignore": [
+    // Operator scripts, run by hand against a DATABASE_URL rather than
+    // imported. `seed-demo.mjs` fills the staff workspace with plausible
+    // records for a design review or a demo; it deliberately does NOT live in
+    // `db/seeds/`, because that directory is applied to real databases and
+    // fake people do not belong in a real queue (docs/ADMIN_WORKSPACE.md).
+    //
+    // Removal condition: delete when CASA has real traffic in the workspace
+    // and nobody needs a populated demo any more.
+    "scripts/admin/seed-demo.mjs",
+
+    // Reached only through the `server-only` alias in vitest.config.ts, which
+    // knip does not follow. See the comment there: the real package throws from
+    // its browser entry point, which every jsdom suite that transitively
+    // imports the database layer would hit on import.
+    //
+    // Removal condition: delete when `server-only` is no longer imported by
+    // `src/lib/admin/db.ts`, or when knip resolves vitest aliases.
+    "src/test/server-only-stub.ts"
+  ]
 }

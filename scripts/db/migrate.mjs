@@ -27,10 +27,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Client, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-
-neonConfig.webSocketConstructor = ws;
+import { connect, requireConnectionString } from './client.mjs';
 
 const MIGRATIONS_DIR = 'db/migrations';
 /** Arbitrary but stable key so two runners cannot migrate concurrently. */
@@ -41,11 +38,7 @@ const statusOnly = args.includes('--status');
 const baselineArg = args.find((a) => a.startsWith('--baseline='));
 const baselineTo = baselineArg ? baselineArg.split('=')[1] : null;
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  console.error('DATABASE_URL is required.');
-  process.exit(1);
-}
+requireConnectionString();
 
 function versionOf(filename) {
   return filename.replace(/\.sql$/, '');
@@ -67,12 +60,10 @@ async function loadMigrations() {
   );
 }
 
-const client = new Client({ connectionString });
+const client = await connect();
 let locked = false;
 
 try {
-  await client.connect();
-
   await client.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version     text PRIMARY KEY,

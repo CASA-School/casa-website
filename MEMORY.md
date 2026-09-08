@@ -1335,15 +1335,169 @@ anyway, and leaving those files verbatim keeps a future shadcn sync a clean diff
 **Not done:** nothing enforces this. There is no lint rule banning the retired classes, which
 is why they regrew after the last pass. That is the obvious next step if drift reappears.
 
+## The staff workspace — CASA's dashboard, first pass (2026-09-08)
+
+**This repository now holds two products.** The public marketing site, and a
+staff workspace at `/admin` served on `admin.casa-bremen.de`. One Next build,
+one container. Full record in `docs/ADMIN_WORKSPACE.md` — read it before
+touching anything under `src/app/(admin)`, `src/lib/admin` or
+`src/components/admin`.
+
+This reverses the "no dashboard surfaces" instruction that CLAUDE.md and
+`db/migrations/0005` carried, on an explicit request from CASA. It is **not** a
+revival of the removed role-based portal: three staff roles, no learner-facing
+auth, no student dashboard, no relation to that code. That prohibition still
+stands.
+
+### The problem it solves
+
+Every inbound message used to leave the building immediately. Contact enquiries
+and course/exam registrations were POSTed to a webhook and, with no webhook
+configured, written to the server log. Nothing was queryable, nothing had a
+status, and nobody could tell whether a lead had been answered — FileMaker held
+that answer, by hand, later. Five queues now hold it: enquiries, course
+registrations, exam registrations, placement recommendations awaiting a
+teacher, and job applications.
+
+### Structural changes worth knowing about
+
+**Route groups.** Every public route moved into `src/app/(site)`, and
+`src/app/layout.tsx` moved with it. `src/app` deliberately has no root layout
+now: Next allows a second one only when the app root has none, and the two
+products share nothing above the design tokens. Route groups are not URL
+segments, so no public path changed. `src/app/(admin)/admin/sign-in` sits
+*outside* the `(workspace)` group, or the auth gate redirects to itself.
+
+**`src/proxy.ts` exists again**, and it is host routing, not route protection —
+`admin.casa-bremen.de` rewrites onto `/admin`, and `/admin` 404s on the public
+host in production. It has no database connection and cannot authenticate
+anything. The CLAUDE.md AGENTS.md caveat was updated to say so, because section
+3 of AGENTS.md still refers to a `proxy.ts` that did role checks.
+
+**`@neondatabase/serverless` is gone.** This was forced rather than chosen: the
+Neon driver talks to Neon's own endpoint, so it could reach neither the local
+container nor the Azure Flexible Server — the workspace would have had no
+database in development. Both products now run on one `pg` pool
+(`src/lib/admin/db.ts`). That completes `docs/AZURE_DEPLOYMENT_PLAN.md` §1,
+including the careers CV upload, which is now an explicit
+`BEGIN`/`INSERT`/`INSERT`/`COMMIT` and still wants a real test against the
+managed server before cutover. `src/lib/db/server.ts` keeps Neon's result shape
+on purpose — `query()` resolves to rows, not a `QueryResult` — because ~40
+readers were written against it.
+
+**Local Postgres.** `docker-compose.yml`, port 5433 (not 5432: a silent
+connection to the wrong database is worse than a refused one). `npm run db:up`,
+`db:reset`, `admin:seed`.
+
+**Migration 0006** adds `staff_users`, `staff_sessions`, `enquiries`,
+`course_registrations`, `exam_registrations`, `placement_reviews`,
+`staff_notes`, `staff_activity`, plus `assigned_to` on `career_applications`.
+One `work_status` enum for all four queues. Registrations store their product
+twice — by id and by the label the visitor saw — because a cohort can be
+rescheduled after someone signs up for it, and "what they signed up for" is not
+a question a live join can answer.
+
+**The public routes now persist.** `src/lib/admin/intake.ts` writes the row
+*before* the webhook fires, and never throws: a storage failure must not tell a
+visitor their enquiry failed when the fan-out succeeded, and a webhook timeout
+must not lose the row. The webhooks all stay — CASA may have automations wired
+to them that nobody has inventoried.
+
+### Placement review is the one screen that changes an outcome
+
+`0005_placement_test.sql` said in its own header that review "belongs to the
+CASA dashboard workspace". `placement_reviews` is that table. Hard rule 6
+applies to this surface and CLAUDE.md now says so explicitly: **the workspace is
+a client.** Nothing under `src/lib/admin` reads `placement_responses.value` or
+imports the item bank. A teacher gets the engine's own output — band,
+confidence, skill profile, answered share, review reasons, rationale, intake,
+and the learner's writing. `placement-containment.test.ts` asserts the
+construction and is not vacuous: adding `item.answer` to
+`src/lib/admin/placement.ts` fails it.
+
+A note is **required** when the confirmed level differs from the
+recommendation. The schema cannot express that, and it matters — a disagreement
+with the instrument is the only evidence CASA will have for whether the pilot
+cut scores are right.
+
+### Design direction
+
+Reference was the caterlove-prep-system workspace (dark rail, editorial
+display type, gap-px stat band, hairline tables), rebuilt on CASA's own tokens.
+Scoped to `.casa-workspace` in `globals.css` so the public palette is untouched.
+Three things change for a tool read at arm's length all day: three line weights
+instead of one (`--casa-sand` disappears behind forty table rows), a ground one
+step darker than the site's canvas (which is 1.02:1 against white), and 15px
+body instead of 17px. CASA's sun is used **once per screen**, as the marker on
+the nav item you are standing on.
+
+Every primitive in `src/components/admin/ui.tsx` is a server component; every
+mutation is a plain form posting to a server action. One client component,
+`nav-link.tsx`.
+
+### Four independent auth checks, now a hard rule
+
+The layout gate; `requireStaff()` in every server action (an action is a public
+endpoint and does not go through the layout that rendered its form); the CV
+download route's own check (a route handler is not a child of the layout
+either); and `proxy.ts`. They cover different request paths — do not remove one
+because another looks like it covers it. `host-routing.test.ts` asserts all
+four, including that every exported action calls `requireStaff()`.
+
+### Bugs found by looking at it, not by the types
+
+- Inbound chart bars rendered at zero height. The row was `items-end`, which
+  shrinks each column to its content, so the bars' `h-full` resolved against
+  the height of a weekday label.
+- Every table row was shifted one column right of its header. `TableRow` put
+  the stretched row link in an extra zero-width `<td>` — six headers, seven
+  cells, and a placement recommendation appearing under "Confidence". The
+  anchor now lives inside the first real `Cell`.
+- `getPool()` attached its `error` listener after an `??=`, so it ran on every
+  call. Node warned about a listener leak eleven requests in. Surfaced by a
+  Playwright run, not by any test that was looking for it.
+- Queue tables overflowed horizontally at 1440px. Fixed by a `compact` date
+  form that drops the current year in lists, plus tighter truncation.
+- "a enquiry" in every third line of the activity trail.
+
+### Watch out for
+
+- **`E2E_PORT`.** `playwright.config.ts` now takes it. `reuseExistingServer` is
+  on and several checkouts of this repo run on one machine — three specs failed
+  against a stale server from another worktree that did not contain the feature
+  they were asserting. Next also refuses a second `next dev` for the same
+  directory, so stop your own dev server first.
+- **Barrel imports from client components.** `contact-inquiry-form.tsx` pulled
+  `@/components/sections`, which re-exports `proof-band` → repository → db.
+  Harmless with the Neon driver, a build failure with `pg`
+  (`Can't resolve 'util/types'`). `src/lib/admin/db.ts` now imports
+  `server-only` so the next one names the right file.
+
+### Not built
+
+FileMaker bridge (`external_ref` columns exist, nothing writes them; field
+mapping deliberately unspecified rather than guessed). Outbound email — every
+reply is a `mailto:`, and there is no self-service password reset. Catalogue
+editing — read-only, because `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` is the
+authority on those numbers. A retention policy — nothing is deleted on a
+schedule, and enquiries, registrations, placement attempts and CVs are all
+personal data needing a named privacy owner. `admin.casa-bremen.de` itself: the
+DNS record does not exist yet.
+
 ## Verified Baseline
 
-The latest implementation pass has already cleared:
+The latest implementation pass (2026-09-08, staff workspace) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`
 - `npm run build`
-- `npm run test`
-- `npm run test:e2e`
+- `npm run test` — 313 unit tests, 27 files
+- `npm run knip`
+- `E2E_PORT=3017 npm run test:e2e` — 24 public + 13 workspace specs
+
+Verified in the browser as well, at 1440px and 375px: sign-in, every queue, a
+placement review, and a full mutation round trip (assign → note → status change)
+with the activity trail confirmed in the database.
 
 ## Known Product Direction
 
@@ -1373,4 +1527,9 @@ The latest implementation pass has already cleared:
 - The placement test is in `shadow` mode and its content is `PILOT_UNREVIEWED`. Before it can be treated as a real placement instrument CASA needs: two DaF reviewers per item, the 33 listening recordings, an approved retention schedule, and cut scores revised from pilot data. Checklist at the end of `docs/PLACEMENT_TEST_OPEN_DECISIONS.md`.
 - Before rebuilding group, special, or corporate course pages, extend the course content model with an explicit page archetype/section registry instead of branching ad hoc inside `src/app/courses/[slug]/page.tsx`. The concrete four-archetype design is in `docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md`; `pricing_mode` and the quote CTA already shipped as its first slice.
 - Never publish a course price or weekly-hours figure that is not in `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md`. The fixtures are not a source of truth.
+- The staff workspace exists (2026-09-08). Before it can be used for real work
+  CASA needs: the `admin.casa-bremen.de` DNS record and certificate, a decision
+  on the FileMaker bridge's field mapping, a retention period with a named
+  privacy owner, and real staff accounts created with passwords handed over in
+  person. `docs/ADMIN_WORKSPACE.md` §Open items is the list.
 - Two sources of truth for course facts currently disagree: `buildSelectorCopy` in `src/app/courses/page.tsx` carries accurate, detailed fee text, while `public-fixtures.ts` drives the detail page. Fold the former into the profile layer when the archetype registry lands.

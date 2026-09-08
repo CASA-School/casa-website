@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import { normalizeContentLocale } from '@/lib/content/locale';
-import { getDb } from '@/lib/db/server';
 import { isDatabaseConfigured } from '@/lib/db/env';
+import { withDatabaseTransaction } from '@/lib/db/server';
 import { careerApplicationSchema } from '@/lib/validation/career-applications';
 
 const MAX_CV_FILE_SIZE_BYTES = 8 * 1024 * 1024;
@@ -142,69 +142,74 @@ export async function POST(request: Request) {
   }
 
   try {
-    const db = getDb();
-    if (!db) {
+    if (!isDatabaseConfigured()) {
       throw new Error('Database is not available');
     }
 
     const cvBytes = Buffer.from(await cvFile.arrayBuffer());
 
-    await db.transaction([
-      db`
-        INSERT INTO career_applications (
-          id,
-          career_position_id,
-          position_slug,
-          position_title,
-          locale,
-          first_name,
-          last_name,
-          email,
-          phone,
-          linkedin_url,
-          cover_letter,
-          cv_file_name,
-          cv_file_size,
-          cv_mime_type,
-          cv_storage_path,
-          source
-        )
-        VALUES (
-          ${requestId}::uuid,
-          ${data.positionId || null}::uuid,
-          ${data.positionSlug},
-          ${data.positionTitle},
-          ${data.locale},
-          ${data.firstName},
-          ${data.lastName},
-          ${data.email},
-          ${data.phone || null},
-          ${data.linkedinUrl || null},
-          ${data.coverLetter},
-          ${cvFile.name},
-          ${cvFile.size},
-          ${cvFile.type || null},
-          ${null},
-          'careers-page'
-        )
-      `,
-      db`
-        INSERT INTO career_application_files (
-          career_application_id,
-          file_name,
-          file_size,
-          mime_type,
-          file_bytes
-        )
-        VALUES (
-          ${requestId}::uuid,
-          ${cvFile.name},
-          ${cvFile.size},
-          ${cvFile.type || null},
-          ${cvBytes}
-        )
-      `,
-    ]);
+    /*
+     * One transaction, two inserts.
+     *
+     * Ported from Neon's `db.transaction([...])` when the driver moved to `pg`
+     * (see src/lib/db/server.ts). The reason it needs a transaction is
+     * unchanged: an application row whose CV row is missing looks like a
+     * complete application in the workspace queue and cannot be acted on, and
+     * an orphaned CV is personal data nobody knows they are holding. Either
+     * both land or neither does.
+     */
+    await withDatabaseTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO career_applications (
+           id,
+           career_position_id,
+           position_slug,
+           position_title,
+           locale,
+           first_name,
+           last_name,
+           email,
+           phone,
+           linkedin_url,
+           cover_letter,
+           cv_file_name,
+           cv_file_size,
+           cv_mime_type,
+           cv_storage_path,
+           source
+         )
+         VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+                 $13, $14, NULL, 'careers-page')`,
+        [
+          requestId,
+          data.positionId || null,
+          data.positionSlug,
+          data.positionTitle,
+          data.locale,
+          data.firstName,
+          data.lastName,
+          data.email,
+          data.phone || null,
+          data.linkedinUrl || null,
+          data.coverLetter,
+          cvFile.name,
+          cvFile.size,
+          cvFile.type || null,
+        ]
+      );
+
+      await client.query(
+        `INSERT INTO career_application_files (
+           career_application_id,
+           file_name,
+           file_size,
+           mime_type,
+           file_bytes
+         )
+         VALUES ($1::uuid, $2, $3, $4, $5)`,
+        [requestId, cvFile.name, cvFile.size, cvFile.type || null, cvBytes]
+      );
+    });
   } catch (error) {
     console.error('[careers-apply-api] submission failed', error);
     return NextResponse.json(
