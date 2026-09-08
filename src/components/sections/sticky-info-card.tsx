@@ -75,7 +75,27 @@ export function StickyInfoCard({ title, items, notes, ctas = [], className, unst
               asChild
               variant={cta.kind === 'primary' ? 'default' : 'outline'}
               className={cn(
-                'w-full justify-center',
+                /*
+                  These labels may WRAP on a narrow phone, unlike every other
+                  button on the site.
+
+                  `Button`'s base class carries `whitespace-nowrap`, which is
+                  right for a button sitting in a row of controls. Here the
+                  buttons are full-width inside a padded card, and the longest
+                  label — "Talk through the programme" — is 243px of
+                  unbreakable text. With the card's own `p-6` that made the
+                  card's min-content 291px, so at a 320px viewport the hero
+                  column could not shrink to the 280px gutter and the right
+                  margin collapsed on /courses/german-for-medical and
+                  /courses/firmenunterricht. (No viewport overflow — the frame
+                  just lost its inset, which is worse to look at than a
+                  two-line button.)
+
+                  `h-auto min-h-9` so a wrapped label grows the button instead
+                  of being clipped by the fixed `h-9`, and `sm:` restores the
+                  single line from 640px up, where it always fitted.
+                */
+                'w-full justify-center whitespace-normal py-2 text-center leading-snug h-auto min-h-9 sm:whitespace-nowrap sm:py-0',
                 cta.kind === 'primary'
                   ? 'casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)]'
                   : 'casa-button-outline border-[color:var(--casa-sand)] text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]'

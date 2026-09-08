@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { HeroCUtilityRail } from '@/components/heroes';
+import { HeroAPhotoLed } from '@/components/heroes';
 import {
   GuidedPicker,
   HumanStoryBlock,
@@ -11,9 +11,8 @@ import { ExamsReadinessCheck } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
-import { shouldShowDraftClaims } from '@/lib/content/locale';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getExamCatalog, getProofMetrics, getSocialProofById } from '@/lib/content/repository';
+import { getExamCatalog, getSocialProofById } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -51,11 +50,9 @@ export default async function ExamsPage() {
   const locale = await getContentLocale();
   const rhythm = getLayoutRhythm('exams-index');
   const pageConfig = getPublicPageConfig('exams', locale);
-  const showDraftClaims = shouldShowDraftClaims();
 
-  const [catalog, proofMetrics, candidateStory] = await Promise.all([
+  const [catalog, candidateStory] = await Promise.all([
     getExamCatalog(locale),
-    Promise.resolve(getProofMetrics(locale)),
     Promise.resolve(getSocialProofById('fatameh-evening', locale)),
   ]);
   // Fatameh is the only CASA learner who writes about sitting an exam.
@@ -94,12 +91,6 @@ export default async function ExamsPage() {
     };
   });
 
-  const proofStats = proofMetrics
-    .filter((metric) => showDraftClaims || metric.verificationStatus === 'verified')
-    .slice(0, 3)
-    .map((metric) => ({ value: metric.value, label: metric.label }));
-  const heroProofStats = proofStats.filter((item) => !item.value.includes('1983'));
-
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
     { label: locale === 'de' ? 'Prüfungen' : 'Exams' },
@@ -107,7 +98,26 @@ export default async function ExamsPage() {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <HeroCUtilityRail
+      {/*
+        THE SITE'S STANDARD HERO. This was HeroCUtilityRail — the course/exam
+        DETAIL hero, with a bordered "Exam quick facts" card on the right. On a
+        detail page that card is right: the reader has already chosen the exam
+        and wants its four numbers. On this index the reader has not chosen yet,
+        and a card of aggregate figures answered a question nobody had arrived
+        with while making the index look like one more detail page.
+
+        The card's five rows are not relocated into the hero. Levels, fees,
+        preparation prices and session dates are all still on this page — the
+        option cards below carry the per-exam fee, and the detail pages carry
+        the rest — and the fifth row restated the button anyway ("Next step /
+        check date, reserve seat").
+
+        `thumbC` (learners writing in class), not `thumbA`. thumbA is the
+        close-up of exam notes that the telc B2 option card renders below; a
+        detail crop that small also has nothing left to read once the bleed
+        mask dissolves a third of its width.
+      */}
+      <HeroAPhotoLed
         eyebrow={locale === 'de' ? 'Prüfungen' : 'Exams'}
         title={locale === 'de' ? 'Prüfungswege mit klarer Orientierung' : 'Exam pathways with clear orientation'}
         description={
@@ -116,25 +126,8 @@ export default async function ExamsPage() {
             : 'Compare telc Deutsch B2 and telc Deutsch C1 Hochschule, prepare with structure, and register on time.'
         }
         breadcrumbs={breadcrumbs}
-        infoTitle={locale === 'de' ? 'Prüfungen kurz gefasst' : 'Exam quick facts'}
-        infoItems={[
-          { label: locale === 'de' ? 'Niveaus' : 'Levels', value: 'B2 / C1' },
-          { label: locale === 'de' ? 'Termine' : 'Sessions', value: locale === 'de' ? 'Nach Prüfungsplan 2026' : 'Published 2026 exam dates' },
-          { label: locale === 'de' ? 'Preis ab' : 'Price from', value: '190 EUR' },
-          { label: locale === 'de' ? 'Vorbereitung' : 'Preparation', value: locale === 'de' ? 'B2 260 EUR / C1 520 EUR' : 'B2 EUR 260 / C1 EUR 520' },
-          {
-            label: locale === 'de' ? 'Nächster Schritt' : 'Next step',
-            value: locale === 'de' ? 'Termin prüfen / anmelden' : 'Check date / reserve seat',
-          },
-        ]}
-        notes={locale === 'de' ? 'Termine und Fristen werden vom CASA Prüfungsbüro bestätigt.' : 'Dates and deadlines are confirmed by the CASA exam office.'}
-        ctas={pageConfig.ctas}
-        photo={{
-          ...pageConfig.photos.thumbA,
-          caption: 'Exam preparation table scene - Structured exam practice and strategy.',
-        }}
-        proofItems={heroProofStats}
-        themeClassName="hero-theme-exams"
+        ctas={pageConfig.ctas.slice(0, 1)}
+        photo={pageConfig.photos.thumbC}
       />
 
       <div id="b2" className="scroll-mt-28" />

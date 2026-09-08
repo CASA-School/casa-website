@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TextCta } from '@/components/ui/text-cta';
 import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
-import { QuickChooserPanel, type QuickChooserField, type QuickChooserThumbnail } from '@/components/sections/quick-chooser-panel';
 
 import { HeroPhotoCard, HeroSurface, type HeroAction, type HeroPhoto, type HeroProofItem } from './shared';
 
@@ -15,22 +14,17 @@ type HeroBEditorialProps = {
   ctas: HeroAction[];
   proofItems?: HeroProofItem[];
   breadcrumbs?: BreadcrumbItem[];
-  useQuickChooser?: boolean;
-  chooser?: {
-    title: string;
-    description: string;
-    fields: QuickChooserField[];
-    submitLabel: string;
-    submitHref: string;
-    badgeLabel?: string;
-    summaryLabel?: string;
-    secondaryLabel?: string;
-    secondaryHref?: string;
-    thumbnails?: QuickChooserThumbnail[];
-    initialValues?: Record<string, string>;
-  };
   themeClassName?: string;
 };
+
+/**
+ * Kept for /team and /ueber-uns/gemeinnuetzigkeit only.
+ *
+ * The `useQuickChooser` / `chooser` props are gone: /courses was their only
+ * caller, and its finder now renders as its own section below the standard
+ * hero rather than as the hero's right-hand column. Nothing else on the site
+ * ever passed them, so the branch was unreachable the moment /courses moved.
+ */
 
 export function HeroBEditorial({
   eyebrow,
@@ -39,8 +33,6 @@ export function HeroBEditorial({
   photo,
   ctas,
   breadcrumbs,
-  useQuickChooser = false,
-  chooser,
   themeClassName = 'hero-theme-about',
 }: HeroBEditorialProps) {
   return (
@@ -92,25 +84,9 @@ export function HeroBEditorial({
 
         </div>
 
-        {useQuickChooser && chooser ? (
-          <QuickChooserPanel
-            title={chooser.title}
-            description={chooser.description}
-            fields={chooser.fields}
-            submitLabel={chooser.submitLabel}
-            submitHref={chooser.submitHref}
-            badgeLabel={chooser.badgeLabel}
-            summaryLabel={chooser.summaryLabel}
-            secondaryLabel={chooser.secondaryLabel}
-            secondaryHref={chooser.secondaryHref}
-            thumbnails={chooser.thumbnails}
-            initialValues={chooser.initialValues}
-          />
-        ) : (
-          <div className="relative lg:pt-6">
-            <HeroPhotoCard photo={photo} className="min-h-[300px]" priority />
-          </div>
-        )}
+        <div className="relative lg:pt-6">
+          <HeroPhotoCard photo={photo} className="min-h-[300px]" priority />
+        </div>
       </div>
     </HeroSurface>
   );

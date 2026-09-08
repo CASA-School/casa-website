@@ -515,8 +515,26 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Find my course path', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
     ],
     photos: {
-      hero: photoLibrary.groupClassroomTeacherActivity,
+      /*
+        TWO CONSTRAINTS, and they rule out most of the library.
+
+        Not `groupClassroomTeacherActivity`: that is the homepage's hero photo,
+        and /about now renders the homepage's hero composition. The same picture
+        in the same layout makes the page a homepage clone rather than a sibling.
+
+        Not a course's identity photograph either — `campusDiscussion` is
+        bildungszeit's face, `courseClassroomWide` is Intensive's, and so on
+        through `course-detail.photos` below. Putting one format's photograph on
+        a page about the school is the mistake the `story`/`guidance` note on
+        /courses already warns about.
+
+        `schoolEntrance` satisfies both and depicts the headline rather than
+        decorating it: "A house of encounter in Bremen" is the house.
+      */
+      hero: photoLibrary.schoolEntrance,
       mission: photoLibrary.groupCourseBremenMusicians,
+      /* The community-story block's photo, which used to borrow `hero`. */
+      story: photoLibrary.groupClassroomTeacherActivity,
       team: photoLibrary.teamCollaboration,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
       testimonialB: photoLibrary.studentTestimonialPortrait2,
@@ -547,7 +565,20 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Get level recommendation', de: 'Einstufung starten' }, href: '/placement-test', kind: 'secondary' },
     ],
     photos: {
-      thumbA: photoLibrary.groupClassroomTeacherActivity,
+      /*
+        The hero photograph, and it may not be any one format's face.
+
+        `courseClassroomWide` (thumbB) is Intensive German's identity
+        photograph, `teacherGuiding` (thumbC) is Special Courses', and
+        `groupClassroomTeacherActivity` — what this slot used to hold — is the
+        homepage's hero. An index of six formats led by one format's photograph
+        ranks them, which is the editorial choice the homepage makes and an
+        index should not.
+
+        `groupConversation` is a whole class with the teacher at the board and
+        belongs to no format in `course-detail.photos`.
+      */
+      thumbA: photoLibrary.groupConversation,
       thumbB: photoLibrary.courseClassroomWide,
       thumbC: photoLibrary.teacherGuiding,
       thumbD: photoLibrary.groupCourseLunch,
