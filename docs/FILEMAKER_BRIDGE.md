@@ -10,6 +10,39 @@ app's rollout tooling. Nothing here touched the live server.
 **Status: design.** Nothing in this document is built. Section 7 lists what
 must be decided, and by whom, before it can be.
 
+**Revised 2026-09-09** after the direction was confirmed: CASA *will* write to
+FileMaker, and the bridge is the first step of a larger plan — see §0. The
+first draft said "never write Bookings"; that is now "not in phase 1".
+
+---
+
+## 0. The plan this serves
+
+FileMaker is not being replaced by a bridge. It is being **strangled**: kept
+as the record of truth while CASA's own system grows around it, first as the
+place where new work *enters*, then as the place where data *lives*, until
+FileMaker has nothing left to own and is retired. Three phases, each of which
+is useful on its own and none of which requires a big-bang cutover:
+
+| Phase | What CASA's system does | What FileMaker does | Truth lives in |
+| --- | --- | --- | --- |
+| **1 — Intake** | Receives enquiries and registrations, staff triage them, one click pushes each into FileMaker as a `Contact`+`PreBooking` pair. | Everything from there: conversion, dates, costs, payments, letters. | FileMaker |
+| **2 — Full registration** | Creates complete registrations — course, exam, **accommodation, payment** — by running **FileMaker's own scripts** through the Data API (§3a). Reads FileMaker's people, bookings, courses and ledgers back into its own Postgres so staff see one picture. | Executes the business logic it already has; remains the system the finance team works in. | FileMaker, mirrored |
+| **3 — Migration** | Owns the data. FileMaker's tables are imported into the normalised model the migration project has already drafted (§3b) and the direction of writes flips. | Read-only archive, then off. | CASA's system |
+
+Two consequences run through the whole document:
+
+- **The workspace schema must converge with the migration model**, not invent a
+  third one. `filemaker-schoolman-migration` has already reduced 231 FileMaker
+  tables to a 79-table student model and a staging/import design
+  (`casa_student.*`, `casa_staging.*` in `bridge/postgres_student_model.sql`).
+  That is the target; the workspace's tables should be its first live
+  inhabitants, not its rival.
+- **Nothing that FileMaker does in 145 steps gets re-implemented in TypeScript
+  during phases 1–2.** It gets *called*. Re-implementation happens once, in
+  phase 3, against imported data, when FileMaker is no longer the thing being
+  kept consistent.
+
 ---
 
 ## 1. What the two existing bridges do — and the one thing they have in common
@@ -148,18 +181,78 @@ same class of change as the one field that was added in July.
 
 ### Direction of truth
 
-**FileMaker stays the record of truth for people and bookings.** The workspace
-is the intake queue *upstream* of it. Data flows one way — workspace →
-FileMaker — and FileMaker's identifiers flow back so the workspace can show
-"this is now Contact 4801 / PreBooking 5622" and later "converted to Booking
-170990". No two-way synchronisation of person data in this phase.
+**Through phases 1 and 2, FileMaker stays the record of truth for people,
+bookings and money.** The workspace is the surface where work enters. Writes
+flow workspace → FileMaker; FileMaker's identifiers flow back so the workspace
+can show "this is now Contact 4801 / PreBooking 5622" and, later, "Booking
+170990, paid 03.10". From phase 2 the workspace also **reads FileMaker back**
+— people, bookings, courses, cost and payment ledgers — through the read bridge
+that already exists, into its own Postgres, so staff see one picture without
+opening two applications.
 
-That mirrors what both existing integrations already assume, and it is the
-opposite of the long-term migration (`filemaker-schoolman-migration`, where
-Postgres becomes truth). The two are compatible because the workspace's
-`external_ref` is designed to hold FileMaker's IDs in the same shape the
+Every FileMaker identifier the workspace learns is stored in the shape the
 migration model uses (`source_database`, `source_layout`, `source_record_id`,
-`mod_id`) — so when truth flips, the links already exist.
+`source_primary_key`, `mod_id`). That is what makes phase 3 a flip rather than
+a rebuild: when truth moves, the links already exist.
+
+### 3a. Creating *complete* registrations without forking the logic
+
+Phase 2 needs course, exam, accommodation and payment registrations created
+from the workspace. Re-implementing `Go_PreBooking_Booking.Parameter` (145
+steps: identity row, platform, level, visa, dates, cost lines, related rows)
+and its siblings in TypeScript would fork the truth on day one — every fix
+Werner makes in FileMaker would have to be made twice.
+
+The FileMaker Data API can **run a FileMaker script server-side**:
+`GET /layouts/{layout}/script/{scriptName}?script.param=…`, or `script` /
+`script.param` alongside a record create. So the mechanism is:
+
+1. The workspace creates the `Contact`+`PreBooking` pair and children (phase 1).
+2. For a full registration it then calls the **conversion script by name** with
+   the PreBooking ID as parameter, and reads back `__ID_Booking`.
+3. Cost lines and a first payment are created the same way — by calling the
+   scripts staff use (`NewCostDetailSample_PreBooking`,
+   `NewLetterDownPayment_PreBooking`, and the `PaymentIn` path), not by
+   inserting into `CostDetail`/`PaymentIn` directly.
+
+The catch, and it is real: **scripts run by the Data API execute without a
+user interface.** Steps like `Show Custom Dialog`, `New Window`, `Freeze
+Window` and window-targeted `Go to Related Record` are not compatible and are
+skipped or fail. `Go_PreBooking_Booking.Parameter` uses all four in its first
+fifteen steps. So Werner does not expose the existing scripts; he writes
+**server-safe variants** — `WebIntake_ConvertPreBooking`,
+`WebIntake_AddCostDetail`, `WebIntake_RecordPayment` — that perform the same
+data steps with the UI steps removed and a JSON result set via `Exit Script`.
+That is a contained, testable piece of FileMaker work, and it keeps the logic
+in one place. It has to be proven on the test copy (§7 item 8) before anything
+else in phase 2.
+
+Payment is the part with the most consequences if wrong. It is last in the
+order of work, it is never automatic, and every write to `PaymentIn` is one
+staff action with a name against it.
+
+### 3b. Growing the workspace's own database toward the migration model
+
+Phase 3 is only possible if phases 1–2 have been *filling the target model*
+rather than a convenient one. Concretely:
+
+- The workspace's Postgres adopts `casa_student.*` and `casa_staging.*` from
+  `bridge/postgres_student_model.sql` — `students`, `organizations`,
+  `reference_values`, `student_source_links`, `import_batches` — as the place
+  FileMaker read-backs land. One database for CASA's own system, not the
+  workspace's plus the analytics bridge's plus a migration staging area.
+- Every new domain the workspace grows (accommodation, cost lines, payments)
+  is modelled by asking "what will this table be when FileMaker is gone", and
+  checked against the DDR field catalog for what FileMaker actually stores.
+- Reference vocabularies (`CourseTypeReference`, `LevelStepReference`,
+  `PlatformReference`, …) are imported into `casa_student.reference_values`
+  once, with FileMaker's IDs kept as `source_primary_key`, and the workspace's
+  own enums become views over them.
+
+The hard, valuable work of phase 3 is not the code. It is the 23 quality issues
+the migration project's draft import batch already surfaced — duplicate person
+IDs, conflicting legacy bookings, unresolved joins — each of which is a
+decision for Werner or Finance, not for an agent.
 
 ### Where each queue lands
 
@@ -167,10 +260,12 @@ migration model uses (`source_database`, `source_layout`, `source_record_id`,
 | --- | --- | --- |
 | `enquiries` (general) | `Contact` only, plus a `WorkFlow` row of reference "Nachfragen / Enquiry" | A question is not yet a wish for a course. |
 | `enquiries` (group / company) | `Contact` with `_ID_Corporate` / `_ID_Institution` where a match exists; the brief into `Comment` | Organiser briefs are estimates, never bookings. |
-| `course_registrations` | `Contact` + `PreBooking` pair (as `NewContact` does), then `Person` + `Email` + `Phone` + `Address` children, `_ID_Course` / `_ID_CourseTypeReference` / `_ID_Level` / `_ID_VisaRequired` / accommodation refs on the PreBooking | **Never straight into `Booking`.** Staff convert in FileMaker with the existing script, as today. |
+| `course_registrations` | `Contact` + `PreBooking` pair (as `NewContact` does), then `Person` + `Email` + `Phone` + `Address` children, `_ID_Course` / `_ID_CourseTypeReference` / `_ID_Level` / `_ID_VisaRequired` / accommodation refs on the PreBooking | Phase 1: staff convert in FileMaker as today. Phase 2: the workspace calls the server-safe conversion script (§3a) and reads back `__ID_Booking`. Never a direct insert into `Booking`. |
 | `exam_registrations` | same pair; `_ID_ExamReference`, part via `PartExamReference` | |
 | `placement_reviews` | `TestStudent` on the person's PreBooking: `Result`, `CommentTest`, `_ID_LevelStepReference`; `_ID_Recommendation_min/max` on the PreBooking | Only after a teacher confirmed. CLAUDE.md rule 6: a recommendation, never a certificate. |
 | `career_applications` | none | Hiring is not in the student pipeline. Stays workspace-only. |
+| *(phase 2)* accommodation request | `DateAccommodation` via script; `PreBooking._ID_Accommodation*Reference` in phase 1 | No workspace table yet — the public site has no accommodation booking flow. New domain, not just bridge work. |
+| *(phase 2)* payment | `CostDetail` + `PaymentIn` via `WebIntake_*` scripts only | No workspace table yet. Last in order; never automatic; one named staff action per write. |
 
 ### The trigger is a person, per record
 
@@ -298,12 +393,13 @@ Nothing until §7 is decided. When it is:
 
 ---
 
-## 6. What this deliberately does not do
+## 6. What phase 1 deliberately does not do
 
-- **Write Bookings.** Conversion has 145 steps of business logic (identity row,
-  platform, dates, costs, related rows). Re-implementing it outside FileMaker
-  would fork the truth. Staff convert with the script they use today.
-- **Edit existing FileMaker people.** Match and link, never modify.
+- **Write Bookings, costs or payments.** That is phase 2, and only through
+  FileMaker's own scripts run server-side (§3a) — never by inserting into
+  `Booking`, `CostDetail` or `PaymentIn` from outside.
+- **Edit existing FileMaker people.** Match and link, never modify. (Holds
+  through phase 2 as well.)
 - **Sync two ways.** No FileMaker→workspace flow beyond IDs and status.
 - **Run unattended.** No scheduler pushes records. A person does.
 - **Touch the relationship graph, scripts or existing layouts.** Additions only:
@@ -323,6 +419,9 @@ Nothing until §7 is decided. When it is:
 | 6 | FileMaker `Course.__ID_Course` for each workspace `course_instance` | data task | Without it a registration lands with a course *type* but no cohort. The catalogue needs a `filemaker_course_id` column filled from `Course_API`. |
 | 7 | On-prem agent vs network path (§3) | Rahman / CASA IT | Where the code runs. |
 | 8 | Test environment | Werner | The DDR came from a backup; a hosted copy of `SchoolMan` (or the `SchoolMan2024` archive) is where the first pushes should land, not production. |
+| 9 | *(phase 2)* Server-safe script variants `WebIntake_ConvertPreBooking`, `WebIntake_AddCostDetail`, `WebIntake_RecordPayment`, and `fmrest` script-execution rights on the `WebIntake` privilege set | Werner | The only way to create complete registrations without re-implementing FileMaker's logic (§3a). Must be proven on item 8 first. |
+| 10 | *(phase 2)* Accommodation and payment as workspace domains — public flows, tables, who may record a payment | Rahman / Finance | Neither exists anywhere in the website or workspace today. Payment is last and never automatic. |
+| 11 | *(phase 3)* Adopt `casa_student.*` as the workspace's own model and merge the analytics bridge's Postgres into it | Rahman + the migration project | One database for CASA's system. The 23 draft-import quality issues are decisions, not bugs. |
 
 Items 5 and 6 are read-only and can be done as soon as someone with the
 `FileMaker SRV` credential is on the school LAN. Items 2–4 and 8 are one
