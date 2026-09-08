@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { CasaMark } from './casa-mark';
 import { Icon } from './icons';
 import { NavLink } from './nav-link';
+import { Logo } from '@/components/ui/logo';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
 import { canManageStaff } from '@/lib/admin/auth';
 
@@ -47,16 +47,22 @@ export function WorkspaceShell({
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <aside className="casa-workspace-panel w-full shrink-0 self-start border-b border-ws-panel-line bg-ws-panel text-ws-on-panel lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-r lg:border-b-0">
         <div className="flex h-full flex-col gap-7 overflow-y-auto px-4 py-4 lg:py-6">
+          {/*
+            The logo carries the CASA wordmark itself, so nothing here sets the
+            name in type beside it — two "CASA"s in two different typefaces is
+            what made the first version of this look wrong. "Workspace" sits
+            under the mark as an eyebrow, naming which CASA product this is.
+
+            `crop="mark"` drops the "Internationale Sprachschule" line, which
+            at this width would render about four pixels tall.
+          */}
           <Link
             href="/admin"
-            className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[var(--ws-marker)]/70"
+            className="block rounded-lg px-1.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[var(--ws-marker)]/70"
           >
-            <CasaMark className="h-5 w-auto shrink-0" />
-            <span className="min-w-0">
-              <span className="block text-sm leading-none font-bold tracking-tight">CASA</span>
-              <span className="mt-1 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted">
-                Workspace
-              </span>
+            <Logo className="h-[1.35rem] w-auto" variant="white" crop="mark" />
+            <span className="mt-2 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted">
+              Workspace
             </span>
           </Link>
 

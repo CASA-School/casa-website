@@ -3,9 +3,9 @@ import { headers } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { CasaMark } from '@/components/admin/casa-mark';
 import { DatabaseUnavailable } from '@/components/admin/database-unavailable';
 import { Button, Field, Input } from '@/components/admin/ui';
+import { Logo } from '@/components/ui/logo';
 import { getStaffUser, pruneExpiredSessions, signIn, writeSessionCookie } from '@/lib/admin/auth';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
 
@@ -78,13 +78,21 @@ export default async function SignInPage({
        * starts feeling like a template.
        */}
       <div className="casa-workspace-panel flex flex-col justify-between gap-10 bg-ws-panel px-8 py-10 text-ws-on-panel lg:w-[46%] lg:px-14 lg:py-14">
-        <div className="flex items-center gap-2.5">
-          <CasaMark className="h-5 w-auto" />
-          <span>
-            <span className="block text-sm leading-none font-bold tracking-tight">CASA</span>
-            <span className="mt-1 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted">
-              Workspace
-            </span>
+        {/*
+          The full lock-up here, subtitle included: this panel is wide enough to
+          set "Internationale Sprachschule" at a readable size, and the sign-in
+          screen is the one place a person might arrive without already knowing
+          which organisation's tool they are opening.
+
+          h-14, not smaller. The subtitle occupies the bottom 93 of the
+          lock-up's 325 viewBox units, so its cap height is roughly a fifth of
+          whatever height is set here — below 56px it stops being legible and
+          the reason for showing the full lock-up disappears with it.
+        */}
+        <div>
+          <Logo className="h-14 w-auto" variant="white" />
+          <span className="mt-3 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted">
+            Workspace
           </span>
         </div>
 

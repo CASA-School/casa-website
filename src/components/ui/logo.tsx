@@ -1,18 +1,56 @@
 import { cn } from '@/lib/utils';
 
+/**
+ * The CASA logo. One copy of the master artwork, for the whole application.
+ *
+ * The mark is symmetrical and it matters: a red sail on water, the CASA
+ * wordmark, then a sun setting over water. Taking half of it leaves a stray
+ * red triangle that reads as nothing. If you need it smaller, use `crop`
+ * below — do not slice paths out of this file.
+ */
 type LogoProps = {
   className?: string;
   variant?: 'default' | 'white';
+  /**
+   * How much of the lock-up to show.
+   *
+   * `full` (default) is the master artwork: mark, wordmark, and
+   * "Internationale Sprachschule" beneath. `mark` crops the viewBox to the
+   * top row and drops the subtitle line.
+   *
+   * The crop exists because the subtitle sets at roughly a third of the
+   * lock-up's height, so anywhere the logo is under ~200px wide — a workspace
+   * sidebar, a compact header — it renders that line at four or five pixels:
+   * present, illegible, and a smear. Better to omit it than to ship it
+   * unreadable.
+   *
+   * Cropping the viewBox is a crop; the paths are untouched. CLAUDE.md rule 4
+   * (source-faithful edits) applies to the brand mark as much as to
+   * photography. Measured bounds of the inner artwork: the top row ends at
+   * y=193 and the subtitle begins at y=232, both in viewBox units.
+   */
+  crop?: 'full' | 'mark';
 };
 
-export function Logo({ className = 'h-8 w-auto', variant = 'default' }: LogoProps) {
+const VIEW_BOX = {
+  full: '0 0 1155 325',
+  /* 196, not 193: the artwork starts at y=3, so this keeps the optical
+     padding even top and bottom. */
+  mark: '0 0 1155 196',
+} as const;
+
+export function Logo({
+  className = 'h-8 w-auto',
+  variant = 'default',
+  crop = 'full',
+}: LogoProps) {
   return (
     <svg
       className={cn(
         className,
         variant === 'white' && 'brightness-0 saturate-0 invert'
       )}
-      viewBox="0 0 1155 325" 
+      viewBox={VIEW_BOX[crop]}
       xmlns="http://www.w3.org/2000/svg" 
       fillRule="evenodd" 
       clipRule="evenodd" 
