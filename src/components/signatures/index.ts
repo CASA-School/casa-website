@@ -1,7 +1,6 @@
 export { HomeCommunityOutcomes } from './home-community-outcomes';
 export { CoursesFormatSelector } from './courses-format-selector';
 export { CourseLevelGoals } from './course-level-goals';
-export { AccommodationPlaybook } from './accommodation-playbook';
 export { AccommodationArrivalChecklist } from './accommodation-arrival-checklist';
 export { ExamsReadinessCheck } from './exams-readiness-check';
 export { ExamDayTimelineSignature } from './exam-day-timeline-signature';
