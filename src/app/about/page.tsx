@@ -1,15 +1,14 @@
 import type { Metadata } from 'next';
 
-import { HeroBEditorial } from '@/components/heroes';
+import { HeroAPhotoLed } from '@/components/heroes';
 import { EditorialSplit, HumanStoryBlock, ProofBand } from '@/components/sections';
 import { AboutMilestones } from '@/components/signatures';
 import { TextCta } from '@/components/ui/text-cta';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
-import { shouldShowDraftClaims } from '@/lib/content/locale';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getProofMetrics, getSocialProofById } from '@/lib/content/repository';
+import { getSocialProofById } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPublicMetadata({
@@ -23,20 +22,10 @@ export default async function AboutPage() {
   const locale = await getContentLocale();
   const rhythm = getLayoutRhythm('about');
   const pageConfig = getPublicPageConfig('about', locale);
-  const showDraftClaims = shouldShowDraftClaims();
 
-  const [proofMetrics, communityStory] = await Promise.all([
-    Promise.resolve(getProofMetrics(locale)),
-    // Laura, deliberately: she writes that CASA "makes justice to its name", which
-    // is the claim this page's own headline makes. Picked by id, not by index.
-    Promise.resolve(getSocialProofById('laura-medical', locale)),
-  ]);
-
-  const proofStats = proofMetrics
-    .filter((metric) => showDraftClaims || metric.verificationStatus === 'verified')
-    .filter((metric) => !metric.value.includes('1983'))
-    .slice(0, 4)
-    .map((metric) => ({ value: metric.value, label: metric.label }));
+  // Laura, deliberately: she writes that CASA "makes justice to its name", which
+  // is the claim this page's own headline makes. Picked by id, not by index.
+  const communityStory = getSocialProofById('laura-medical', locale);
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
@@ -143,7 +132,28 @@ export default async function AboutPage() {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <HeroBEditorial
+      {/*
+        THE SITE'S STANDARD HERO. This was HeroBEditorial, which wrote its own h1
+        at `text-5xl font-black` — 51.2px at weight 900 against the homepage's
+        64px at 700 — and put the photograph in a bordered card beside the copy.
+        `public-page-config.ts` has said `heroType: 'home-photo'` for this route
+        all along; the page just never rendered it.
+
+        No fact rail, and one control rather than two. The proof metrics that
+        used to be passed here went to a prop HeroBEditorial accepted and never
+        rendered — they have been in the ProofBand section immediately below the
+        whole time — and `pageConfig.ctas`' second entry ("Find my course path")
+        rendered as a text link beside the button. `.slice(0, 1)` is the hero's
+        stated rule: one eyebrow, one headline, one sentence, one button.
+
+        No photo caption: a caption needs an edge to sit under, and a photograph
+        masked into the ground has none. The alt text still describes the scene.
+
+        The photograph itself moved — see the note on `about.photos.hero` in
+        public-page-config.ts. The community-story block below keeps the one
+        this hero used to render, under its own `story` key.
+      */}
+      <HeroAPhotoLed
         eyebrow={locale === 'de' ? 'Unsere Schule' : 'Our School'}
         title={locale === 'de' ? 'Ein Haus der Begegnung in Bremen' : 'A house of encounter in Bremen'}
         description={
@@ -151,14 +161,9 @@ export default async function AboutPage() {
             ? 'CASA ist ein Ort, an dem Sprache, Menschen und Zukunftsperspektiven zusammenfinden.'
             : 'CASA is where language learning, human connection, and future opportunities meet.'
         }
-        photo={{
-          ...pageConfig.photos.hero,
-          caption: 'International students practicing together after class - Learning continues outside the classroom.',
-        }}
-        ctas={pageConfig.ctas}
-        proofItems={proofStats}
+        photo={pageConfig.photos.hero}
+        ctas={pageConfig.ctas.slice(0, 1)}
         breadcrumbs={breadcrumbs}
-        themeClassName="hero-theme-about"
       />
 
       {/* Section 1: Proof Band */}
@@ -346,8 +351,8 @@ export default async function AboutPage() {
               person={communityStory.personDisplay}
               context={communityStory.country}
               photo={{
-                src: pageConfig.photos.hero.src,
-                alt: pageConfig.photos.hero.alt,
+                src: pageConfig.photos.story.src,
+                alt: pageConfig.photos.story.alt,
               }}
               supportingText={
                 locale === 'de'

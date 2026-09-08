@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { ArrowRight } from 'lucide-react';
 
-import { HeroBEditorial } from '@/components/heroes';
+import { HeroAPhotoLed } from '@/components/heroes';
 import {
   ProofBand,
 } from '@/components/sections';
@@ -17,9 +17,10 @@ import { getCoursePhoto } from '@/config/courses/course-photos';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCoursePath } from '@/lib/content/course-routes';
-import { CEFR_LADDER, countsForField, filterCourses } from '@/lib/content/course-finder';
+import { CEFR_LADDER, filterCourses } from '@/lib/content/course-finder';
 import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { BandHeading } from '@/components/sections/band-heading';
 
 export const metadata: Metadata = createPublicMetadata({
   title: 'German Courses',
@@ -348,73 +349,15 @@ export default async function CoursesPage({
   });
 
   /*
-    Options carry a live count, and one that would return nothing is disabled
-    rather than offered. The count is computed with that field held out (see
-    countsForField), so "Evening (2)" is a promise about what clicking it does
-    given everything else already selected — not a number from the full
-    catalogue that a second filter then contradicts.
+    NO COURSE FINDER. The level/schedule/goal panel is gone at CASA's request —
+    seven formats do not need a facet search, and the ink-deep band below lists
+    every one of them with its own facts.
+
+    The QUERY PARAMS still work. `activeFacets` above continues to narrow
+    `courseRows`, so `/courses?goal=exam` remains a valid link and the honest
+    empty state below still has a job. What went is the UI that offered the
+    filter, plus the per-option counts that existed only to label its chips.
   */
-  const levelValues = [...CEFR_LADDER];
-  const levelCounts = countsForField(finderData.courses, 'level', levelValues, activeFacets);
-  const scheduleCounts = countsForField(finderData.courses, 'schedule', [...SCHEDULE_VALUES], activeFacets);
-  const goalCounts = countsForField(finderData.courses, 'goal', [...GOAL_VALUES], activeFacets);
-
-  const scheduleLabels: Record<(typeof SCHEDULE_VALUES)[number], string> = {
-    intensive: locale === 'de' ? 'Intensiv' : 'Intensive',
-    evening: locale === 'de' ? 'Abend' : 'Evening',
-    daytime: locale === 'de' ? 'Tagsüber' : 'Daytime',
-    flexible: locale === 'de' ? 'Nach Absprache' : 'By arrangement',
-  };
-  const goalLabels: Record<(typeof GOAL_VALUES)[number], string> = {
-    exam: locale === 'de' ? 'Prüfung' : 'Exam prep',
-    medical: locale === 'de' ? 'Medizin' : 'Medical',
-    professional: locale === 'de' ? 'Beruflich' : 'Professional',
-    general: locale === 'de' ? 'Allgemein' : 'General',
-  };
-
-  const withCount = (label: string, count: number) => `${label} (${count})`;
-
-  const quickChooserFields = [
-    {
-      key: 'level',
-      label: locale === 'de' ? 'Niveau' : 'Level',
-      options: [
-        { label: locale === 'de' ? 'Alle' : 'All', value: '' },
-        ...levelValues.map((value) => ({
-          label: value,
-          value,
-          count: levelCounts[value] ?? 0,
-          disabled: (levelCounts[value] ?? 0) === 0,
-        })),
-      ],
-    },
-    {
-      key: 'schedule',
-      label: locale === 'de' ? 'Zeitplan' : 'Schedule',
-      options: [
-        { label: locale === 'de' ? 'Beliebig' : 'Any', value: '' },
-        ...SCHEDULE_VALUES.map((value) => ({
-          label: withCount(scheduleLabels[value], scheduleCounts[value] ?? 0),
-          value,
-          count: scheduleCounts[value] ?? 0,
-          disabled: (scheduleCounts[value] ?? 0) === 0,
-        })),
-      ],
-    },
-    {
-      key: 'goal',
-      label: locale === 'de' ? 'Ziel' : 'Goal',
-      options: [
-        { label: locale === 'de' ? 'Beliebig' : 'Any', value: '' },
-        ...GOAL_VALUES.map((value) => ({
-          label: withCount(goalLabels[value], goalCounts[value] ?? 0),
-          value,
-          count: goalCounts[value] ?? 0,
-          disabled: (goalCounts[value] ?? 0) === 0,
-        })),
-      ],
-    },
-  ];
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
@@ -423,36 +366,28 @@ export default async function CoursesPage({
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <HeroBEditorial
+      {/*
+        THE SITE'S STANDARD HERO. This was HeroBEditorial, whose own h1 resolved
+        to 51.2px at weight 900 against the 64px/700 every other index now
+        renders, and which put the course finder where the photograph goes.
+
+        THE FINDER MOVED OUT, it was not deleted — it is the section directly
+        below, with the same props and the same `course-finder-filter` test id.
+        It was never really hero furniture: a three-field filter that rewrites
+        the page's own query params is the first thing you DO on this page, not
+        the thing that tells you where you are. In the hero it also had to be
+        the photograph's replacement, so /courses was the one index with no
+        photograph at all.
+      */}
+      <HeroAPhotoLed
         eyebrow={hero.eyebrow}
         title={locale === 'de' ? 'Kursformate für Ihre Ziele' : 'Course formats for your goals'}
         description={locale === 'de' ? 'Entdecken Sie CASA-Kursformate mit menschlicher Orientierung, klaren Vergleichen und praktischen nächsten Schritten.' : 'Explore CASA course formats with human-centered guidance, clear comparisons, and practical next steps.'}
         photo={pageConfig.photos.thumbA}
-        ctas={pageConfig.ctas}
-        proofItems={[]}
+        ctas={pageConfig.ctas.slice(0, 1)}
         breadcrumbs={breadcrumbs}
-        useQuickChooser={rhythm.allowQuickChooser}
-        chooser={{
-          title: locale === 'de' ? 'Kursfinder' : 'Course finder',
-          description:
-            locale === 'de'
-              ? 'Wählen Sie Niveau, Zeitplan und Ziel. Wir zeigen passende Kurse sofort.'
-              : 'Pick level, schedule, and goal. We show matching courses instantly.',
-          badgeLabel: locale === 'de' ? 'Lernroute' : 'Learning route',
-          summaryLabel: locale === 'de' ? 'Ihre Auswahl' : 'Your selection',
-          fields: quickChooserFields,
-          submitLabel: locale === 'de' ? 'Kurse filtern' : 'Filter courses',
-          submitHref: '/courses',
-          secondaryLabel: locale === 'de' ? 'Alle Kurse' : 'View all courses',
-          secondaryHref: '/courses',
-          initialValues: {
-            level: selectedLevel,
-            schedule: selectedSchedule,
-            goal: selectedGoal,
-          },
-        }}
-        themeClassName="hero-theme-courses"
       />
+
 
       {/*
         Section 1: the formats.
@@ -473,19 +408,15 @@ export default async function CoursesPage({
       */}
       <section className="bg-[var(--casa-ink-deep)] py-20 text-white md:py-32">
         <Container className="space-y-12 md:space-y-14">
-          <div className="mx-auto max-w-[46rem] text-center">
-            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-              {locale === 'de' ? 'Kursauswahl' : 'Course shortlist'}
-            </p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
-              {locale === 'de' ? 'Unsere Kursformate im Überblick' : 'Every format we teach'}
-            </h2>
-            <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-white/72 md:text-lg">
-              {locale === 'de'
+          <BandHeading
+            eyebrow={locale === 'de' ? 'Kursauswahl' : 'Course shortlist'}
+            title={locale === 'de' ? 'Unsere Kursformate im Überblick' : 'Every format we teach'}
+            description={
+              locale === 'de'
                 ? `${courseCountWord.de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.`
-                : `${courseCountWord.en} routes to the same goal. What differs is the rhythm, not the standard.`}
-            </p>
-          </div>
+                : `${courseCountWord.en} routes to the same goal. What differs is the rhythm, not the standard.`
+            }
+          />
 
           {/*
             An honest empty state. The page used to answer an empty filter by
@@ -549,19 +480,16 @@ export default async function CoursesPage({
       */}
       <section className="py-16 md:py-24 border-t border-[color:var(--casa-sand)]/40">
         <Container className="space-y-10 md:space-y-12">
-          <div className="mx-auto max-w-[46rem] text-center">
-            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-              {locale === 'de' ? 'Vor der Anmeldung' : 'Before you enrol'}
-            </p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-              {locale === 'de' ? 'Vier Dinge, die Sie vorher wissen sollten' : 'Four things worth knowing first'}
-            </h2>
-            <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-              {locale === 'de'
+          <BandHeading
+            tone="light"
+            eyebrow={locale === 'de' ? 'Vor der Anmeldung' : 'Before you enrol'}
+            title={locale === 'de' ? 'Vier Dinge, die Sie vorher wissen sollten' : 'Four things worth knowing first'}
+            description={
+              locale === 'de'
                 ? 'Erst die Fragen, die für alle Formate gelten — dann der Vergleich der Formate selbst.'
-                : 'First the questions that apply to every format, then the formats themselves compared.'}
-            </p>
-          </div>
+                : 'First the questions that apply to every format, then the formats themselves compared.'
+            }
+          />
 
           <ul className="mx-auto grid max-w-[76rem] gap-x-10 gap-y-10 md:grid-cols-2 md:gap-y-12">
             {[
