@@ -37,15 +37,25 @@ export function InfoRailSelect({ label, selectedValue, options }: InfoRailSelect
         }
       }}
     >
+      {/*
+        The trigger takes the primitive's brand defaults — 44px, 4px control
+        radius, sand border, accent chevron — rather than the h-10 / rounded-xl
+        / bg-white set it used to override them with, which was a third trigger
+        look on a site whose forms had already settled on one. What it adds is
+        the card's own value type: `text-base font-semibold`, because this
+        control sits in a column of values ("A1 – C1", "from €520") that are
+        17px/600, and at the primitive's 14px it read as a smaller, secondary
+        fact instead of the date it is.
+      */}
       <SelectTrigger
         aria-label={label}
-        className="h-10 w-full rounded-xl border-[color:var(--casa-sand)] bg-white text-left text-sm font-semibold text-[var(--casa-ink)] focus-visible:ring-[var(--casa-blue)]/30"
+        className="w-full bg-[var(--casa-surface-wash)] text-left text-base font-semibold text-[var(--casa-ink)]"
       >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+          <SelectItem key={option.value} value={option.value} className="text-base">
             {option.label}
           </SelectItem>
         ))}
