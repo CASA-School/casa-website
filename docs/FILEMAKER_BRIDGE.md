@@ -309,6 +309,11 @@ rather than a convenient one. Concretely:
   once, with FileMaker's IDs kept as `source_primary_key`, and the workspace's
   own enums become views over them.
 
+What must **not** be carried across is catalogued, with measurements, in
+`docs/FILEMAKER_LESSONS.md` — thirteen sections from identity keys to
+credentials. Every phase-2 table and every phase-3 import rule is checked
+against it.
+
 The hard, valuable work of phase 3 is not the code. It is the 23 quality issues
 the migration project's draft import batch already surfaced — duplicate person
 IDs, conflicting legacy bookings, unresolved joins — each of which is a

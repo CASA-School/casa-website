@@ -1611,6 +1611,17 @@ in `docs/FILEMAKER_BRIDGE.md`. What matters most:
 Eight decisions in the doc's §7, the first being whether a write into FileMaker
 is wanted at all versus a reviewed export file. Werner owns most of the rest.
 
+**2026-09-09 — direction confirmed and verified live.** CASA will write to
+FileMaker, keep it as truth, and grow its own system around it until FileMaker
+can be retired (`docs/FILEMAKER_BRIDGE.md` §0). A read-only Data API probe
+confirmed every vocabulary id, ~1,000 contacts a year, and that `FileMaker SRV`
+is Werner's own [Full Access] account (also his macOS login). This morning's
+backup set was copied from the Mini over SMB with checksums. And
+`docs/FILEMAKER_LESSONS.md` now catalogues what must not be carried into the
+new system — headline numbers: 501 probable duplicate people, 55% of persons
+without a student id, 65% of test results as free text, 71% of pre-bookings
+with no platform, 4 in 5 still at the default status.
+
 ## Verified Baseline
 
 The latest implementation pass (2026-09-08, staff workspace) cleared all six:
