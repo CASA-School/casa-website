@@ -1335,6 +1335,105 @@ anyway, and leaving those files verbatim keeps a future shadcn sync a clean diff
 **Not done:** nothing enforces this. There is no lint rule banning the retired classes, which
 is why they regrew after the last pass. That is the obvious next step if drift reappears.
 
+## One hero for home, groups and /accommodation (2026-08-27)
+
+The three heroes a visitor is most likely to see in one session did not agree with
+each other, and each wrote its own type scale. Measured at 1440px before this:
+
+```
+/                          h1 64px    weight 700   line-height 1.25
+/courses/german-for-groups h1 51.2px  weight 900   line-height 1.05
+/accommodation             h1 51.2px  weight 900   line-height 1.25
+```
+
+Three sizes, two weights, three line-heights. /accommodation also put its photograph
+in a rounded `MediaFrame` **with a caption** where the homepage masks its photograph
+into the page ground, and rendered its breadcrumbs 400px lower, inside the options
+section, rather than in the hero.
+
+**Fixed by extracting the design, not by editing three files.** `shared.tsx` now owns
+two primitives every hero composes:
+
+- `HeroLede` — eyebrow, h1, lead, CTA row, plus an optional decision-fact rail. It
+  also owns the CTA policy: first action is the solid button, every later one a
+  `TextCta`.
+- `HeroBleedPhoto` — the homepage's masked photograph, lifted out unchanged.
+
+`HeroHomePhoto` (A), `HeroDGallery` (D) and `HeroCUtilityRail` (C) are now
+compositions of those. A is byte-identical after the refactor — verified: hero 641px,
+h1 64/700/80, lede 608x514, description 608. D is A's composition exactly, so it also
+took A's `min-h` floor in `HeroSurface`; C keeps its own composition (a course page's
+facts card must stay in the fold) and shares only the lede.
+
+Cost of one scale on C: hero grows 9-75px depending on how the title wraps. Worst
+case /accommodation/flat 855 -> 930. Accepted.
+
+The /accommodation hero also gained a cost rail — `accommodationHeroFacts()` in
+`config/content/accommodation-costs.ts`, derived from the existing list, adding only a
+short qualifier per figure ("Refundable", "Host family or shared flat") because three
+of the four numbers mislead without one. The page previously asked for a housing match
+with no price within two scrolls of the ask.
+
+### The rest of the page: band vocabulary, not more modules
+
+The 2026-08-21 pass fixed the surface rhythm (one inverted field per page); what was
+left was measurable and different. Before -> after on /accommodation:
+
+```
+border-t across the full 1360px frame     6 bands  ->  0
+band padding                              80 x7    ->  96 x7
+inverted-field padding                    96       ->  128  (the homepage's own)
+bands with an eyebrow + accent rule       8 of 9   ->  9 of 9
+bands shaped "heading on top, full width" 9 of 9   ->  8 of 9
+```
+
+Five of the six borders drew a hairline where the ground already changes — one against
+the ink-deep field (a ~90-point step in lightness), four against white (11 units).
+`BandSeam` was private to `src/app/page.tsx`, which is *why* /accommodation reached for
+a full-width rule instead; it now lives at `src/components/ui/band-seam.tsx` and marks
+the page's one boundary where the ground does not change.
+
+`ProcessSteps` gained `layout="rail"` (the homepage's `0.82fr / 1.18fr`
+persona-pathways composition) and `AccommodationPlaybook` gained an optional `eyebrow`
+— it had been the only band with a bare h2 since the literal word "Signature" was
+removed as its label. Both default to current behaviour, so the five other pages
+mounting `ProcessSteps` are untouched. Same precedent as `tone`.
+
+**Deliberately not borrowed:** the groups page's sticky "Your decision" rail.
+/accommodation is a chooser, not a single product — its decision is answered by the two
+option cards and the inverted comparison field, and the hero rail already carries the
+facts a sticky card would repeat.
+
+Gates: lint, typecheck, test (113), build, knip, e2e (10). `/accommodation` is still
+pinned to archetype D and the e2e hero-archetype map passes unchanged.
+
+### Merged with the CASA Gruppen work (41d2b05)
+
+The gruppen feature landed on `casa/main` while this pass was in flight, and it had
+reached the same conclusion from the other side: it moves `/courses/german-for-groups`
+off archetype C onto **`HeroAPhotoLed` — the homepage hero** — and adds an optional
+`breadcrumbs` prop to `HeroHomePhoto`/`HeroAPhotoLed` so a course page two levels deep
+keeps its trail.
+
+`src/components/heroes/hero-home-photo.tsx` was the only real conflict, in three hunks,
+all of them the same change written twice: this side already carried `breadcrumbs`
+forwarded to `HeroSurface`. Resolved to this side, which is also the only correct
+resolution — the other side leaves `Button` imported and unused once the body is the
+`HeroLede` composition. `hero-a-photo-led.tsx` auto-merged. Nothing else overlapped:
+the gruppen commit does not touch `shared.tsx`, `hero-c-utility-rail.tsx` or
+`hero-d-gallery.tsx`.
+
+Two consequences of the merge:
+
+- **Groups now renders `HeroLede`**, so it can pass `facts` (lessons/week, level range,
+  lead time) into the hero rail the same way /accommodation passes its four costs.
+  `HeroAPhotoLed` already forwards the prop; nothing is wired to use it yet.
+- **Groups is archetype A now, not C.** The C lede change in this pass therefore serves
+  the eight course, three exam and two accommodation-detail pages rather than groups.
+  It was kept anyway: without it those pages would sit at 51.2px/900 while home, groups
+  and accommodation all sit at 64px/700, which is the divergence this pass exists to
+  remove.
+
 ## The staff workspace — CASA's dashboard, first pass (2026-09-08)
 
 **This repository now holds two products.** The public marketing site, and a
@@ -1491,9 +1590,15 @@ The latest implementation pass (2026-09-08, staff workspace) cleared all six:
 - `npm run lint`
 - `npm run typecheck`
 - `npm run build`
-- `npm run test` — 313 unit tests, 27 files
+- `npm run test` — 314 unit tests, 27 files
 - `npm run knip`
-- `E2E_PORT=3017 npm run test:e2e` — 24 public + 13 workspace specs
+- `E2E_PORT=3017 npm run test:e2e` — 36 specs, 23 public + 13 workspace
+
+Re-run after merging the eight commits that had landed on `casa/main` in the
+meantime (heroes, band headings, the contacts registry, the select dropdown).
+The only merge conflicts were in this file and `CLAUDE.md`, both of them two
+sides appending different sections; the public route moves into `(site)`
+resolved as renames and carried upstream's content edits with them.
 
 Verified in the browser as well, at 1440px and 375px: sign-in, every queue, a
 placement review, and a full mutation round trip (assign → note → status change)

@@ -73,7 +73,7 @@ export function CourseTermTable({
                   className="border-b border-[color:var(--casa-sand)]/60 last:border-b-0"
                 >
                   {term.isPast ? (
-                    <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3 text-sm tabular-nums text-[var(--casa-muted)]">
+                    <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3.5 text-base tabular-nums text-[var(--casa-muted)]">
                       <span className="line-through decoration-1">{term.rangeLabel}</span>
                       <span className="text-xs uppercase tracking-eyebrow">{copy.past}</span>
                     </span>
@@ -81,19 +81,26 @@ export function CourseTermTable({
                     <Link
                       href={term.href}
                       aria-current={term.isSelected ? 'true' : undefined}
+                      /*
+                        Dates at body size (was `text-sm`), and the "current"
+                        marker LEADS the date instead of trailing it. With
+                        `justify-between` the dot was pushed to the far edge of
+                        the column — which in the two-column layout is the
+                        divider, so it floated in the gutter looking like a
+                        stray pixel rather than marking a row. A leading dot is
+                        the ordinary "you are here" idiom and stays attached to
+                        the thing it marks.
+                      */
                       className={
                         term.isSelected
-                          ? 'flex items-baseline justify-between gap-4 py-3 text-sm font-bold tabular-nums text-[var(--casa-ink)]'
-                          : 'flex items-baseline justify-between gap-4 py-3 text-sm tabular-nums text-[var(--casa-ink)] transition-colors hover:text-[var(--casa-accent-text)]'
+                          ? 'flex items-baseline gap-3 py-3.5 text-base font-bold tabular-nums text-[var(--casa-ink)]'
+                          : 'flex items-baseline gap-3 py-3.5 text-base tabular-nums text-[var(--casa-ink)] transition-colors hover:text-[var(--casa-accent-text)]'
                       }
                     >
-                      <span>{term.rangeLabel}</span>
                       {term.isSelected ? (
-                        <span
-                          aria-hidden
-                          className="mt-[0.3rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]"
-                        />
+                        <span aria-hidden className="h-2 w-2 shrink-0 translate-y-[-1px] rounded-full bg-[var(--casa-blue)]" />
                       ) : null}
+                      <span>{term.rangeLabel}</span>
                     </Link>
                   )}
                 </li>

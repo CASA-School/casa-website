@@ -31,6 +31,15 @@ export type AccommodationCost = {
   label: { en: string; de: string };
   amount: string;
   note?: { en: string; de: string };
+  /**
+   * Money that comes back. Only the deposit.
+   *
+   * Set here rather than inferred from the note, because the strip that renders
+   * these sets a refundable amount in muted ink and the difference matters: the
+   * deposit is €580 and the first four weeks are also €580, so at one weight a
+   * reader sums the column to roughly €1,355 instead of the €775 they part with.
+   */
+  refundable?: true;
 };
 
 /*
@@ -75,6 +84,7 @@ export const accommodationCosts: AccommodationCost[] = [
   {
     label: { en: 'Deposit', de: 'Deponat' },
     amount: eur(ACCOMMODATION_FEES.deposit),
+    refundable: true,
     note: {
       en: 'Refunded when the room and the keys come back as they were handed over.',
       de: 'Wird zurückerstattet, wenn Zimmer und Schlüssel so übergeben werden wie erhalten.',
@@ -87,6 +97,8 @@ export function localizeAccommodationCosts(locale: ContentLocale) {
     label: cost.label[locale],
     amount: cost.amount,
     note: cost.note?.[locale],
+    /* Shaped for FeeStrip, which reads `tone` rather than `refundable`. */
+    tone: cost.refundable ? ('refundable' as const) : ('charge' as const),
   }));
 }
 

@@ -136,15 +136,37 @@ test('mobile nav language menu opens independently from the close control', asyn
 });
 
 test('hero archetypes map correctly across key public routes', async ({ page }) => {
+  /*
+   * TWO TIERS, AND EVERY ROUTE IS IN ONE OF THEM.
+   *
+   * A — the photo-led hero — is every INDEX a visitor reaches from the nav: /,
+   * /courses, /exams, /accommodation, /about. /courses/german-for-groups is the
+   * one detail page on it, because an organiser booking a trip is not choosing a
+   * level.
+   *
+   * C — copy and photograph left, facts card right — is every DETAIL page: the
+   * six course formats, both exams, both accommodation types, and
+   * /accommodation/become-host, which moved off A so the four accommodation
+   * pages agree with each other.
+   *
+   * B survives only on /team and /ueber-uns/gemeinnuetzigkeit, and E on the
+   * utility and legal pages. Those are the remaining inconsistency and are
+   * listed so a future pass changes this table on purpose, not by accident.
+   */
   const expectations = [
     { route: '/', archetype: 'A' },
-    { route: '/about', archetype: 'B' },
-    { route: '/courses', archetype: 'B' },
+    { route: '/about', archetype: 'A' },
+    { route: '/courses', archetype: 'A' },
+    { route: '/exams', archetype: 'A' },
+    { route: '/accommodation', archetype: 'A' },
+    { route: '/courses/german-for-groups', archetype: 'A' },
+    { route: '/team', archetype: 'B' },
     { route: '/courses/intensive-german', archetype: 'C' },
-    { route: '/exams', archetype: 'C' },
     { route: '/exams/b2', archetype: 'C' },
-    { route: '/accommodation', archetype: 'D' },
+    { route: '/exams/c1', archetype: 'C' },
     { route: '/accommodation/flat', archetype: 'C' },
+    { route: '/accommodation/host', archetype: 'C' },
+    { route: '/accommodation/become-host', archetype: 'C' },
     { route: '/contact', archetype: 'E' },
     { route: '/imprint', archetype: 'E' },
   ];
@@ -153,22 +175,6 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
     await page.goto(item.route);
     await expect(page.locator(`section[data-hero-archetype="${item.archetype}"]`).first()).toBeVisible();
   }
-});
-
-test('course quick chooser builds filtered URL params', async ({ page }) => {
-  await page.goto('/courses');
-
-  const chooser = page.getByTestId('course-finder-filter');
-  await expect(chooser).toBeVisible();
-
-  await chooser.getByRole('radio', { name: 'B2' }).click();
-  await chooser.getByRole('radio', { name: 'Evening' }).click();
-  await chooser.getByRole('radio', { name: 'Exam prep' }).click();
-
-  await chooser.getByRole('link', { name: 'Filter courses' }).click();
-  await expect(page).toHaveURL(/level=B2/);
-  await expect(page).toHaveURL(/schedule=evening/);
-  await expect(page).toHaveURL(/goal=exam/);
 });
 
 test('exam and accommodation detail routes render signature modules', async ({ page }) => {

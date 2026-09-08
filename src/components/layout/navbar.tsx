@@ -100,10 +100,11 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   /*
    * Most specific top-level entry wins.
    *
-   * `isActivePath` matches by prefix, so /courses/firmenunterricht satisfies
-   * BOTH the Courses dropdown (href '/courses') and the "For Companies" link
-   * (href '/courses/firmenunterricht') — two nav items reading as current, which
-   * tells the visitor they are in two places at once.
+   * `isActivePath` matches by prefix, so /courses/german-for-groups satisfies
+   * BOTH the Courses dropdown (href '/courses') and the "For Groups" link
+   * (href '/courses/german-for-groups') — two nav items reading as current,
+   * which tells the visitor they are in two places at once. Gruppen is the last
+   * top-level entry under /courses; "For Companies" used to be the second.
    *
    * Removing the route from the Courses panel does not fix that: the conflict is
    * the dropdown's own href, not its contents. So instead of asking each entry

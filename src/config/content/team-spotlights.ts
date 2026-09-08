@@ -161,6 +161,20 @@ function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotl
   };
 }
 
+/**
+ * One roster entry by id, so a name is never re-typed elsewhere.
+ *
+ * config/content/contacts.ts assigns people to surfaces by id and reads the
+ * spelling from here. `Natàlia Sostres` and `Meike Große Hundrup` are the reason
+ * this exists: a second hand-typed copy of either name is a spelling that
+ * eventually disagrees with this one.
+ */
+export function teamContactById(id: string): { name: string; title: { en: string; de: string } } | undefined {
+  const member = TEAM.find((entry) => entry.id === id);
+
+  return member ? { name: member.name, title: member.title } : undefined;
+}
+
 export const teamSpotlightsByLocale: Record<ContentLocale, TeamSpotlight[]> = {
   en: TEAM.map((member) => toSpotlight(member, 'en')),
   de: TEAM.map((member) => toSpotlight(member, 'de')),

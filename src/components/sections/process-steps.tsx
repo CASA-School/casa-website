@@ -37,6 +37,48 @@ export function ProcessSteps({
   tone = 'warm',
   className,
 }: ProcessStepsProps) {
+  const heading = (
+    /* Clamped: this heading was running the full container. See ComparisonModule. */
+    <div className="max-w-[46rem]">
+      {eyebrow ? (
+        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
+      ) : null}
+      <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
+      <h2 className="mt-2 text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+      <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+        {description}
+      </p>
+    </div>
+  );
+
+  const stepList = (
+    /*
+      Three across. A 2-up grid for three numbered steps orphans the third into a
+      half-empty row. At full width each step gets ~390px at 1280 rather than the
+      ~215px the removed `rail` layout left it, which is the difference between
+      one line per step title and two.
+    */
+    <ol className="mt-8 grid gap-7 md:grid-cols-3">
+      {steps.map((item) => (
+        <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
+          <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
+            {item.step}
+          </span>
+          <h3 className="text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
+          <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
+        </li>
+      ))}
+    </ol>
+  );
+
+  const action = cta ? (
+    <div className="mt-7">
+      <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
+        <Link href={cta.href}>{cta.label}</Link>
+      </Button>
+    </div>
+  ) : null;
+
   return (
     <section data-reveal="true" className={cn(
         /* Same inset in both tones — see EditorialSplit. */
@@ -44,37 +86,19 @@ export function ProcessSteps({
         tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
         className
       )}>
-      {/* Clamped: this heading was running the full container. See ComparisonModule. */}
-      <div className="max-w-[46rem]">
-        {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
-        ) : null}
-        <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-        <h2 className="mt-2 text-balance text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-          {description}
-        </p>
-      </div>
+      {/*
+        ONE COMPOSITION — heading, steps, action.
 
-      <ol className="mt-8 grid gap-7 md:grid-cols-3">
-        {steps.map((item) => (
-          <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
-            <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
-              {item.step}
-            </span>
-            <h3 className="text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
-            <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
-          </li>
-        ))}
-      </ol>
-
-      {cta ? (
-        <div className="mt-7">
-          <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
-            <Link href={cta.href}>{cta.label}</Link>
-          </Button>
-        </div>
-      ) : null}
+        There used to be a `layout` prop offering a `rail` variant with the
+        heading in a left column. /accommodation was its only caller, for reasons
+        that stopped applying once that page went from nine bands to five (see
+        the note at that call site), and the rail's own geometry worked against
+        it: a short heading column beside a tall steps column opens the band with
+        a void, and three steps in a 1.18fr column get ~215px each.
+      */}
+      {heading}
+      {stepList}
+      {action}
     </section>
   );
 }

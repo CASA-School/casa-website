@@ -14,15 +14,22 @@ import type { AccommodationNarrative, ContentLocale } from '@/lib/content/types'
  * config/content/accommodation-costs.ts. These highlights carry the thing that
  * actually differs: a shared flat gives you your own rhythm, a host family gives
  * you German at the dinner table.
+ *
+ * HEADLINES ARE SHORT ON PURPOSE. `headline` and `summary` are the h1 and the
+ * lead sentence of the hero on /accommodation/flat and /accommodation/host.
+ * Measured at 1280x720 before this, "Shared flats for independent student life"
+ * wrapped to THREE lines of 64px type — 240px of headline against the 80px a
+ * course format uses — and the hero ran 210px past the fold. Every word added
+ * here costs a line of the hero at desktop width, so the distinguishing detail
+ * belongs in `highlights` and in the page body, not in the h1.
  */
 export const accommodationNarrativesByLocale: Record<ContentLocale, AccommodationNarrative[]> = {
   en: [
     {
       id: 'flat',
       locale: 'en',
-      headline: 'Shared flats for independent student life',
-      summary:
-        'A practical setup for students who want autonomy while staying connected to an international learning community.',
+      headline: 'Shared flats',
+      summary: 'Your own room and your own rhythm, alongside other international learners.',
       highlights: [
         'Private room with furnished essentials',
         'Shared kitchen and bathroom',
@@ -33,9 +40,8 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
     {
       id: 'host',
       locale: 'en',
-      headline: 'Host families for cultural immersion',
-      summary:
-        'Ideal for students who want daily spoken German and local cultural experience beyond the classroom.',
+      headline: 'Host families',
+      summary: 'German at the dinner table, in a Bremen household that already hosts learners.',
       highlights: [
         'German spoken at home every day, not only in class',
         'A household that already hosts international learners',
@@ -48,9 +54,8 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
     {
       id: 'flat',
       locale: 'de',
-      headline: 'WGs für selbstständiges Wohnen während des Sprachkurses',
-      summary:
-        'Eine praktische Wohnform für Lernende, die Unabhängigkeit und internationale Gemeinschaft verbinden wollen.',
+      headline: 'CASA WGs',
+      summary: 'Eigenes Zimmer, eigener Tagesrhythmus — zusammen mit anderen internationalen Lernenden.',
       highlights: [
         'Möblierte Einzelzimmer',
         'Gemeinsame Küche und Badnutzung',
@@ -61,9 +66,8 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
     {
       id: 'host',
       locale: 'de',
-      headline: 'Gastfamilien für tiefe kulturelle Einblicke',
-      summary:
-        'Geeignet für Lernende, die Deutsch im Alltag sprechen und das Leben vor Ort intensiv erleben möchten.',
+      headline: 'Gastfamilien',
+      summary: 'Deutsch am Küchentisch, in einem Bremer Haushalt mit Gastgeber-Erfahrung.',
       highlights: [
         'Deutsch wird zu Hause täglich gesprochen, nicht nur im Unterricht',
         'Ein Haushalt, der schon internationale Lernende aufnimmt',

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { HeroDGallery } from '@/components/heroes';
+import { HeroCUtilityRail } from '@/components/heroes';
 import { ComparisonModule, EditorialSplit, ProcessSteps } from '@/components/sections';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { Container } from '@/components/ui/container';
@@ -70,9 +70,15 @@ export default async function BecomeHostFamilyPage() {
     locale === 'de'
       ? {
           eyebrow: 'Gastfamilie bei CASA',
-          title: 'Gastfamilie werden und internationale Lernwege begleiten',
+          /*
+            Kurz gehalten: die Überschrift lief bei 1280px auf vier Zeilen
+            (320px) und der Hero 351px über den sichtbaren Bereich hinaus. Wer
+            hosten darf — Familie, Paar, Einzelperson — steht weiter unten auf
+            der Seite, wo der Satz Platz hat.
+          */
+          title: 'Gastfamilie werden',
           description:
-            'Seit 1983 vermittelt CASA Lernende an Gastgeber in Bremen. Ob Familie, Paar oder Einzelperson: entscheidend sind Offenheit, Zuverlässigkeit und Freude am interkulturellen Austausch.',
+            'Seit 1983 vermitteln wir Lernende an Bremer Gastgeber. Entscheidend sind Offenheit und Zuverlässigkeit.',
           breadcrumbs: [
             { label: 'Start', href: '/' },
             { label: 'Unterkunft', href: '/accommodation' },
@@ -149,9 +155,29 @@ export default async function BecomeHostFamilyPage() {
         }
       : {
           eyebrow: 'Host with CASA',
-          title: 'Become a host family and support international learners',
+          /*
+            "Become a host", not "Become a host family".
+            
+            Two reasons, and the second is the better one.
+            
+            MEASURED: at 1280px this column is 615px wide, and "Become a host
+            family" needs 631px on one line of 64px type — 16px too wide, so it
+            wrapped to two lines and took the hero 66px past a 720px viewport.
+            Not a `text-wrap: balance` artifact; genuinely too long. The German
+            ("Gastfamilie werden", 578px) fits and is unchanged.
+            
+            ACCURATE: this page's own description says families, couples and
+            single-person households can all host. "Host family" is the term
+            CASA uses in the nav and the breadcrumb, but as a headline it
+            under-describes who is being invited.
+            
+            The full sentence about who may host is directly below, where it has
+            room. The original headline also carried "and support international
+            learners", which ran to four lines (320px) and 351px past the fold.
+          */
+          title: 'Become a host',
           description:
-            'Since 1983, CASA has matched students with welcoming homes in Bremen. Families, couples, and single-person households can all host when they offer reliability, openness, and interest in intercultural exchange.',
+            'Since 1983 we have matched students with homes in Bremen. What matters is reliability and an open household.',
           breadcrumbs: [
             { label: 'Home', href: '/' },
             { label: 'Accommodation', href: '/accommodation' },
@@ -229,26 +255,64 @@ export default async function BecomeHostFamilyPage() {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <HeroDGallery
-        breadcrumbs={copy.breadcrumbs}
+      {/*
+        THE COURSE-FORMAT HERO, so the four accommodation pages agree.
+
+        /accommodation/flat, /accommodation/host, /exams/b2 and /exams/c1 all
+        render HeroCUtilityRail — copy and photograph left, a facts card right.
+        This page was the only detail page in either section still on
+        HeroAPhotoLed, which put its columns the other way round (615/721 at
+        1440 against the shared 700/620) and gave it no facts card at all, so a
+        household arriving from /accommodation met a different layout.
+
+        THE CARD'S THREE ROWS are the questions a household actually arrives
+        with, and each is a fact already established further down this page: the
+        room requirements from CASA's own check-in/check-out form, the stay
+        length from the hosting-format comparison, and the rate — which CASA
+        does not publish, so the row says so rather than inventing a figure.
+
+        Both CTAs, not one. Archetype A's rule is a single button because they
+        sit in the lede; in this hero they are stacked full-width inside the
+        card, which is where the course formats have carried two all along.
+      */}
+      <HeroCUtilityRail
         eyebrow={copy.eyebrow}
         title={copy.title}
         description={copy.description}
-        photos={[
+        breadcrumbs={copy.breadcrumbs}
+        infoTitle={locale === 'de' ? 'Gastgeben im Überblick' : 'Hosting at a glance'}
+        infoItems={[
           {
-            src: hostFamilyPhotos.dinner.src,
-            alt: locale === 'de' ? hostFamilyPhotos.dinner.alt.de : hostFamilyPhotos.dinner.alt.en,
-            caption: locale === 'de' ? hostFamilyPhotos.dinner.caption.de : hostFamilyPhotos.dinner.caption.en,
+            label: locale === 'de' ? 'Sie stellen' : 'You provide',
+            value: locale === 'de' ? 'Möbliertes Einzelzimmer' : 'A furnished single room',
+          },
+          {
+            label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical stay',
+            value: locale === 'de' ? '1 bis 4 Wochen oder länger' : '1 to 4 weeks, or longer',
+          },
+          {
+            label: locale === 'de' ? 'Vergütung' : 'Rate',
+            value: locale === 'de' ? 'Vorab schriftlich' : 'In writing, before you agree',
           },
         ]}
+        notes={
+          locale === 'de'
+            ? 'CASA wählt das Matching, informiert Sie vorab und bleibt für beide Seiten erreichbar.'
+            : 'CASA chooses the match, briefs you first, and stays reachable for both sides.'
+        }
         ctas={copy.heroCtas}
+        photo={{
+          src: hostFamilyPhotos.dinner.src,
+          alt: locale === 'de' ? hostFamilyPhotos.dinner.alt.de : hostFamilyPhotos.dinner.alt.en,
+        }}
+        themeClassName="hero-theme-accommodation"
       />
 
       {/*
         The breadcrumb band that used to sit here is gone — it rendered BELOW the
         hero, so this page put its breadcrumbs in a different place from
-        /accommodation/host and /accommodation/flat, which carry them above the
-        h1. HeroDGallery now forwards them to HeroSurface like every other hero.
+        /accommodation/host and /accommodation/flat. Every hero forwards them to
+        HeroSurface, above the h1.
       */}
 
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">

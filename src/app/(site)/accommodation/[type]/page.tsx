@@ -14,6 +14,8 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import { getAccommodationDetail } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 import type { AccommodationTypeKey } from '@/lib/content/types';
+import { getCasaContact } from '@/config/content/contacts';
+import { FeeStrip } from '@/components/sections/fee-strip';
 
 type AccommodationDetailPageProps = {
   params: Promise<{ type: string }>;
@@ -81,19 +83,27 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
     { label: optionTitle },
   ];
 
+  /*
+   * TWO ROWS. This card had six, and four of them were prices.
+   *
+   * The full cost breakdown — €580 first four weeks, €145 each extra week, €50
+   * placement, €580 refundable deposit — is itemised further down this page from
+   * `accommodationCosts`, where each figure carries the qualifier that makes it
+   * readable ("refundable", "also the closure weeks"). Repeating all four here
+   * as bare amounts put the invoice above the fold and pushed the hero 210px
+   * past a 720px viewport.
+   *
+   * "Type: Shared flats" went too: it restated the h1 directly above it, which
+   * became obvious once the headline was shortened to the option's name.
+   *
+   * What is left is the two things a reader needs before scrolling — roughly
+   * what it costs, and whether a room is even available.
+   *
+   * One currency format, kept from the previous list: these lines once managed
+   * three between them, alternating prefix and suffix inside a single card.
+   */
   const infoItems = [
-    { label: locale === 'de' ? 'Typ' : 'Type', value: optionTitle },
-    /*
-      One currency format. These four lines managed three of them: "580 EUR / 4
-      weeks", then "EUR 145", "EUR 50", "EUR 580" — suffix and prefix alternating
-      inside a single rail, with German using suffix throughout and English
-      flipping between the two. Site-wide the count was 111 suffix, 57 prefix and
-      52 symbol.
-    */
     { label: locale === 'de' ? 'Preis ab' : 'Price from', value: locale === 'de' ? '€580 / 4 Wochen' : '€580 / 4 weeks' },
-    { label: locale === 'de' ? 'Weitere Woche' : 'Extra week', value: '€145' },
-    { label: locale === 'de' ? 'Vermittlung' : 'Placement fee', value: '€50' },
-    { label: locale === 'de' ? 'Kaution' : 'Deposit', value: '€580' },
     { label: locale === 'de' ? 'Verfügbarkeit' : 'Availability', value: locale === 'de' ? 'Auf Anfrage' : 'On request' },
   ];
 
@@ -109,10 +119,22 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
         breadcrumbs={breadcrumbs}
         infoTitle={locale === 'de' ? 'Unterkunftsinfos' : 'Accommodation details'}
         infoItems={infoItems}
+        /*
+          One line, not three.
+
+          This said: "Availability is confirmed after your request. The closure
+          weeks carry the same €145 weekly rate; cancellations are planned
+          around a 4-week period." Three lines of small print at the top of the
+          page — and measured on the rendered page, the closure weeks appear
+          four more times, the €145 six more and the cancellation window twice
+          more, all in the costs and arrival sections where they have room to be
+          explained. The one thing a reader needs before scrolling is that the
+          room is not confirmed yet.
+        */
         notes={
           locale === 'de'
-            ? 'Verfügbarkeit wird nach Anfrage bestätigt. Für die Schließzeiten gilt derselbe Wochensatz von €145; Storno wird mit 4 Wochen Vorlauf geplant.'
-            : 'Availability is confirmed after your request. The closure weeks carry the same €145 weekly rate; cancellations are planned around a 4-week period.'
+            ? 'Verfügbarkeit wird nach Ihrer Anfrage bestätigt.'
+            : 'Availability is confirmed after your request.'
         }
         ctas={pageConfig.ctas}
         photo={{
@@ -186,27 +208,24 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                     ? 'Für die Gastfamilie und für die CASA-WG gelten dieselben Sätze. Die Wahl ist eine Frage des Alltags, nicht des Preises.'
                     : 'A host family and a CASA shared flat cost the same. Choosing between them is a question of daily life, not of price.'}
                 </p>
-                <dl className="mt-7 border-t border-[color:var(--casa-sand)]">
-                  {localizeAccommodationCosts(locale).map((cost) => (
-                    <div
-                      key={cost.label}
-                      className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 border-b border-[color:var(--casa-sand)]/60 py-3.5"
-                    >
-                      <dt className="text-sm leading-relaxed text-[var(--casa-ink)]">
-                        {cost.label}
-                        {cost.note ? (
-                          <span className="mt-1 block text-xs leading-relaxed text-[var(--casa-muted)]">
-                            {cost.note}
-                          </span>
-                        ) : null}
-                      </dt>
-                      {/* Tabular figures so the amounts form a column a reader can scan. */}
-                      <dd className="whitespace-nowrap text-base font-bold tabular-nums text-[var(--casa-ink)]">
-                        {cost.amount}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
+                {/*
+                  THE SHARED FIGURE STRIP, not a table written here.
+
+                  This was a `<dl>` in this file: label left, amount right-aligned
+                  at `text-base` against a hairline. The seven course formats
+                  publish the same shape from a different config and had the same
+                  markup until CoursePracticalDetails was rebuilt — at which point
+                  these two option pages were the last surface still showing the
+                  small right-aligned amount. Both read `FeeStrip` now, so the two
+                  cannot drift apart again.
+
+                  Four costs, so the strip lays them out 2x2. Everything still
+                  comes from config/content/accommodation-costs.ts.
+                */}
+                <FeeStrip
+                  figures={localizeAccommodationCosts(locale)}
+                  className="mt-7"
+                />
               </section>
 
               {/*
@@ -372,24 +391,14 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                   heading. The card now ends on a named person, which is the
                   useful thing to end on.
                 */
-              contact={{
-                /*
-                  Published on casa-bremen.de/ueber-uns/casa-team as "Kurse &
-                  Unterkunft", with CASA accommodation among her stated areas —
-                  verified 2026-08-18 in config/content/team-spotlights.ts. CASA
-                  prints names and roles but not individual mailboxes, so the
-                  route is the published office address.
-                */
-                name: 'Mareike Thomeczek',
-                role: locale === 'de' ? 'Kurse & Unterkunft' : 'Courses & accommodation',
-                /*
-                  CASA's accommodation inbox, published in the footer of their own
-                  check-in/check-out form (docs/assets/). It was nowhere in this
-                  repository, so this rail was routing accommodation enquiries to
-                  the general office instead.
-                */
-                email: 'accommodation@casa-bremen.de',
-              }}
+              /*
+                Natàlia Sostres, per CASA's 2026-09-08 allocation — this row used
+                to name Mareike Thomeczek, written inline here rather than in a
+                shared list. The name and its spelling now come off the verified
+                roster via config/content/contacts.ts, so accommodation, courses
+                and exams all read one source.
+              */
+              contact={getCasaContact('accommodation', locale)}
             />
           </div>
         </Container>

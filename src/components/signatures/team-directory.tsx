@@ -7,33 +7,8 @@ import { createPortal } from 'react-dom';
 import { Instagram, Linkedin, Mail, X } from 'lucide-react';
 
 import type { TeamSpotlight } from '@/lib/content/types';
+import { PersonMonogram } from '@/components/ui/person-monogram';
 
-/**
- * Initials, shown where a member has no portrait.
- *
- * CASA publishes twelve real colleagues and no photographs of them, and the only
- * images on hand are synthetic portraits generated for six people who do not
- * exist (CLAUDE.md hard rule 3). Putting a made-up face beside a real name would
- * be a worse misrepresentation than the invented staff this replaced, so the card
- * shows initials and waits for real portraits taken with consent.
- */
-function Monogram({ name }: { name: string }) {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
-
-  return (
-    <span
-      aria-hidden
-      className="flex h-full w-full items-center justify-center bg-[var(--casa-warm-soft)] text-3xl font-bold tracking-tight text-[var(--casa-accent-text)]"
-    >
-      {initials}
-    </span>
-  );
-}
 
 type TeamDirectoryProps = {
   title: string;
@@ -188,7 +163,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                       className="object-cover"
                     />
                   ) : (
-                    <Monogram name={member.name} />
+                    <PersonMonogram size="lg" name={member.name} />
                   )}
                 </div>
 
@@ -312,7 +287,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                       className="object-cover"
                     />
                   ) : (
-                    <Monogram name={activeMember.name} />
+                    <PersonMonogram size="lg" name={activeMember.name} />
                   )}
                 </div>
                 <div className="p-5 sm:p-6 md:p-7">

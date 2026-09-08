@@ -13,6 +13,7 @@ import {
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { TextCta } from '@/components/ui/text-cta';
+import { BandSeam } from '@/components/ui/band-seam';
 import { CardRail } from '@/components/ui/card-rail';
 import { Container } from '@/components/ui/container';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
@@ -31,6 +32,7 @@ import type { ContentLocale, CourseNarrative, CourseTypeRow } from '@/lib/conten
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { publicCourseOrder } from '@/config/courses/course-order';
 import { cn } from '@/lib/utils';
+import { BandHeading } from '@/components/sections/band-heading';
 
 export const metadata: Metadata = createPublicMetadata({
   title: 'Learn German in Bremen',
@@ -123,29 +125,6 @@ function examDetailHref(code: string) {
   }
 
   return '/exams';
-}
-
-/**
- * A short centred hairline between two bands of the SAME surface.
- *
- * Only between light bands, and deliberately not full-width. A rule that runs
- * edge to edge reads as a structural break — the kind of thing that separates
- * a header from a body — which is far more weight than "these are two different
- * thoughts" deserves. 6rem of hairline centred in the frame marks the seam
- * without claiming to divide the page.
- *
- * There is none around the two ink-deep bands: a light-to-dark boundary is
- * roughly a 90-point step in lightness and needs no help. Drawing a line where
- * the eye can already see the change is what makes a page look fussy.
- */
-function BandSeam() {
-  return (
-    <div aria-hidden className="py-1">
-      <Container>
-        <span className="mx-auto block h-px w-24 bg-[color:var(--casa-sand)]" />
-      </Container>
-    </div>
-  );
 }
 
 export default async function HomePage() {
@@ -512,24 +491,21 @@ export default async function HomePage() {
             the distinction here instead of colour.
           */}
           <div id="course-recommendation" className="scroll-mt-28 md:scroll-mt-32">
-            <div className="mx-auto max-w-[46rem] text-center">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Kurs finden' : 'Find your course'}
-              </p>
-              <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
-                {locale === 'de'
+            <BandHeading
+              eyebrow={locale === 'de' ? 'Kurs finden' : 'Find your course'}
+              title={
+                locale === 'de'
                   ? 'Finden Sie das Kursformat, das zu Ihrem Ziel passt'
-                  : 'Find the course format that matches your goal'}
-              </h2>
-              <p className="mx-auto mt-5 max-w-measure text-base leading-relaxed text-white/72 md:text-lg">
-                {locale === 'de'
+                  : 'Find the course format that matches your goal'
+              }
+              description={
+                locale === 'de'
                   ? 'Starten Sie mit den wichtigsten Formaten. Wenn Sie unsicher sind, hilft CASA beim passenden Niveau und Lerntempo.'
-                  : 'Start with the main formats. If you are unsure, CASA can help you choose the right level and pace.'}
-              </p>
-            </div>
+                  : 'Start with the main formats. If you are unsure, CASA can help you choose the right level and pace.'
+              }
+            />
 
             <CourseFormatRows rows={flagshipCourses} tone="dark" className="mt-12 md:mt-16" />
-
           </div>
         </Container>
       </section>
@@ -719,23 +695,24 @@ export default async function HomePage() {
         data-track-section="nonprofit-mission"
       >
         <Container>
-          <div className="mx-auto max-w-[46rem] text-center">
-            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-              {locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
-            </p>
-            {/* text-balance: without it "mission." sits alone on line two at 1440. */}
-            <h2 className="mt-4 text-balance text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-              {locale === 'de'
+          {/*
+            The `text-balance` / `text-pretty` fixes this band needed are defaults
+            inside BandHeading now — see its note. They were discovered here.
+          */}
+          <BandHeading
+            tone="light"
+            eyebrow={locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
+            title={
+              locale === 'de'
                 ? 'Kursgebühren bleiben im Bildungsauftrag.'
-                : 'Course fees stay inside the education mission.'}
-            </h2>
-            {/* text-pretty: "projects." was landing alone on a fourth line at 375. */}
-            <p className="mx-auto mt-5 max-w-measure text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-              {locale === 'de'
+                : 'Course fees stay inside the education mission.'
+            }
+            description={
+              locale === 'de'
                 ? 'CASA ist eine gemeinnützige GmbH. Einnahmen werden in Unterrichtsqualität, faire Vergütung, Lernräume und soziale Bildungsprojekte reinvestiert.'
-                : 'CASA is a non-profit gGmbH. Income is reinvested in teaching quality, fair pay, learning spaces, and social education projects.'}
-            </p>
-          </div>
+                : 'CASA is a non-profit gGmbH. Income is reinvested in teaching quality, fair pay, learning spaces, and social education projects.'
+            }
+          />
 
           {/*
             One panel, divided — not three cards, and not three bare columns.
@@ -959,11 +936,11 @@ export default async function HomePage() {
             array and must not be added without verification.
           */}
           <div>
-            <div className="mx-auto max-w-[46rem] text-center">
-              <h2 className="text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de' ? 'Was Lernende bei CASA schätzen' : 'What learners value at CASA'}
-              </h2>
-            </div>
+            {/* No eyebrow and no lead here — the figures below are the content. */}
+            <BandHeading
+              tone="light"
+              title={locale === 'de' ? 'Was Lernende bei CASA schätzen' : 'What learners value at CASA'}
+            />
 
             {/*
               `tabular-nums` is load-bearing, not decoration: the figures share a
