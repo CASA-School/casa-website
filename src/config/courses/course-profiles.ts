@@ -1,3 +1,4 @@
+import type { CasaContactKey } from '@/config/content/contacts';
 import type { ContentLocale } from '@/lib/content/types';
 import type { CourseArchetypeId } from './archetypes';
 
@@ -21,22 +22,6 @@ import type { CourseArchetypeId } from './archetypes';
  * Leave a format without a contact and it falls back to the general office —
  * which is honest, and better than inventing an owner.
  */
-export type CourseContact = {
-  name: string;
-  /** Role as CASA would describe it, not an internal job title. */
-  role: { en: string; de: string };
-  email: string;
-  /** Where this was verified from. Keep it so the next person can re-check. */
-  source: string;
-};
-
-/** Used whenever a format has no named owner yet. */
-export const GENERAL_OFFICE_CONTACT: CourseContact = {
-  name: 'CASA Bremen',
-  role: { en: 'Course advice team', de: 'Kursberatung' },
-  email: 'info@casa-bremen.de',
-  source: 'casa-bremen.de contact page',
-};
 
 /**
  * Who is being quoted, on the two archetypes that quote rather than sell.
@@ -57,28 +42,41 @@ export type CourseProfile = {
   /** Required on `package-inquiry`; meaningless elsewhere. */
   quoteAudience?: QuoteAudience;
   /** Omit until a real owner is confirmed. Never guess. */
-  contact?: CourseContact;
+  /**
+   * Which entry in config/content/contacts.ts answers about this format.
+   *
+   * This replaced a `contact?: CourseContact` object written out per profile,
+   * plus its own `GENERAL_OFFICE_CONTACT` fallback. Only german-for-groups ever
+   * filled it in, and once CASA named an owner for five more formats there were
+   * two places holding "who answers" — one keyed by course, one keyed by
+   * surface, each with its own copy of a colleague's name. Now there is one, and
+   * the name is read off the verified roster rather than typed here.
+   */
+  contactKey?: CasaContactKey;
 };
 
 export const courseProfiles: Record<string, CourseProfile> = {
-  'intensive-german': { archetype: 'scheduled-cohort', photoKey: 'intensive' },
-  'evening-german': { archetype: 'scheduled-cohort', photoKey: 'evening' },
-  bildungszeit: { archetype: 'scheduled-cohort', photoKey: 'bildungszeit' },
-  'special-courses': { archetype: 'module-catalogue', photoKey: 'special' },
-  'medical-german': { archetype: 'professional-track', photoKey: 'medical' },
+  /*
+   * `contactKey` points at config/content/contacts.ts, which holds CASA's
+   * 2026-09-08 allocation and reads each name off the verified roster.
+   *
+   * Every format now names an owner, Intensive German included — it was the one
+   * gap in the first pass and CASA assigned it to Natàlia Sostres, which is also
+   * what their team page already implies (intensive courses are among her
+   * published areas).
+   */
+  'intensive-german': { archetype: 'scheduled-cohort', photoKey: 'intensive', contactKey: 'intensive' },
+  'evening-german': { archetype: 'scheduled-cohort', photoKey: 'evening', contactKey: 'eveningAndSpecial' },
+  bildungszeit: { archetype: 'scheduled-cohort', photoKey: 'bildungszeit', contactKey: 'professional' },
+  'special-courses': { archetype: 'module-catalogue', photoKey: 'special', contactKey: 'eveningAndSpecial' },
+  'medical-german': { archetype: 'professional-track', photoKey: 'medical', contactKey: 'professional' },
   'german-for-groups': {
     archetype: 'package-inquiry',
     quoteAudience: 'group',
     photoKey: 'groups',
-    // Published on casa-bremen.de as the contact for group quotes.
-    contact: {
-      name: 'Ina Eismann',
-      role: { en: 'Group programmes', de: 'Gruppenprogramme' },
-      email: 'i.eismann@casa-bremen.de',
-      source: 'casa-bremen.de/en/language-courses/german-for-groups/ (verified 2026-08-12)',
-    },
+    contactKey: 'groups',
   },
-  'in-company': { archetype: 'package-inquiry', quoteAudience: 'organisation', photoKey: 'company' },
+  'in-company': { archetype: 'package-inquiry', quoteAudience: 'organisation', photoKey: 'company', contactKey: 'company' },
 };
 
 export function getCourseProfile(slug: string): CourseProfile | undefined {
@@ -86,13 +84,9 @@ export function getCourseProfile(slug: string): CourseProfile | undefined {
 }
 
 /** Never returns null — an unassigned format falls back to the general office. */
-export function getCourseContact(slug: string): CourseContact {
-  return courseProfiles[slug]?.contact ?? GENERAL_OFFICE_CONTACT;
-}
-
-/** True when a real person owns this format, rather than the shared inbox. */
-export function hasNamedCourseContact(slug: string): boolean {
-  return Boolean(courseProfiles[slug]?.contact);
+/** The contacts.ts key for a format, if CASA named an owner for it. */
+export function getCourseContactKey(slug: string): CasaContactKey | undefined {
+  return courseProfiles[slug]?.contactKey;
 }
 
 export function getCoursePhotoKey(slug: string) {
