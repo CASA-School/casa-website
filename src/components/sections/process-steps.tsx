@@ -18,18 +18,6 @@ type ProcessStepsProps = {
    * sections, which is what made it read as a tunnel.
    */
   tone?: 'warm' | 'plain';
-  /**
-   * `rail` moves the heading block into a left rail and the steps into a wider
-   * right column — the homepage's own `0.82fr / 1.18fr` composition (see the
-   * persona-pathways band in src/app/page.tsx).
-   *
-   * It exists because a page whose every band is "heading on top, full-width
-   * content below" reads as one repeated block however good each band is.
-   * Measured on /accommodation before this: nine bands, nine times that shape.
-   * Default stays `stack`, so the five other pages mounting this component are
-   * untouched — same precedent as `tone`.
-   */
-  layout?: 'stack' | 'rail';
   title: string;
   description: string;
   steps: ProcessStep[];
@@ -47,11 +35,8 @@ export function ProcessSteps({
   steps,
   cta,
   tone = 'warm',
-  layout = 'stack',
   className,
 }: ProcessStepsProps) {
-  const isRail = layout === 'rail';
-
   const heading = (
     /* Clamped: this heading was running the full container. See ComparisonModule. */
     <div className="max-w-[46rem]">
@@ -68,12 +53,12 @@ export function ProcessSteps({
 
   const stepList = (
     /*
-      Three across in both layouts. A 2-up grid for three numbered steps orphans
-      the third into a half-empty row, and the rail composition is already
-      asymmetric — one orphan on top of that reads as a mistake rather than as a
-      choice. The rail's right column is ~694px at 1280, so each step gets ~215px.
+      Three across. A 2-up grid for three numbered steps orphans the third into a
+      half-empty row. At full width each step gets ~390px at 1280 rather than the
+      ~215px the removed `rail` layout left it, which is the difference between
+      one line per step title and two.
     */
-    <ol className={cn('grid gap-7 md:grid-cols-3', !isRail && 'mt-8')}>
+    <ol className="mt-8 grid gap-7 md:grid-cols-3">
       {steps.map((item) => (
         <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
           <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
@@ -87,7 +72,7 @@ export function ProcessSteps({
   );
 
   const action = cta ? (
-    <div className={cn(isRail ? 'mt-8' : 'mt-7')}>
+    <div className="mt-7">
       <Button asChild className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]">
         <Link href={cta.href}>{cta.label}</Link>
       </Button>
@@ -101,21 +86,19 @@ export function ProcessSteps({
         tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
         className
       )}>
-      {isRail ? (
-        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-          <div>
-            {heading}
-            {action}
-          </div>
-          <div className="mt-2 lg:mt-0">{stepList}</div>
-        </div>
-      ) : (
-        <>
-          {heading}
-          {stepList}
-          {action}
-        </>
-      )}
+      {/*
+        ONE COMPOSITION — heading, steps, action.
+
+        There used to be a `layout` prop offering a `rail` variant with the
+        heading in a left column. /accommodation was its only caller, for reasons
+        that stopped applying once that page went from nine bands to five (see
+        the note at that call site), and the rail's own geometry worked against
+        it: a short heading column beside a tall steps column opens the band with
+        a void, and three steps in a 1.18fr column get ~215px each.
+      */}
+      {heading}
+      {stepList}
+      {action}
     </section>
   );
 }

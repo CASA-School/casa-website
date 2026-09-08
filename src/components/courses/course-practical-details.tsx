@@ -1,5 +1,8 @@
 import { HelpCircle } from 'lucide-react';
 
+import { FeeStrip } from '@/components/sections/fee-strip';
+import { cn } from '@/lib/utils';
+
 type Fee = {
   label: string;
   amount: string;
@@ -15,19 +18,36 @@ type Fee = {
  * extra week is €117.50, or that a first registration adds €50. The fee table is
  * the part of a course page people screenshot.
  *
- * Two columns rather than one, because they answer different questions — "what
- * will this cost me" and "what am I agreeing to" — and a reader almost always
- * arrives with one of them, not both. The conditions column carries the
- * expectation-setting sentences, including the unwelcome ones: exam preparation
- * is not included, placement can move you, A1.1 cannot join mid-course.
+ * WHY THIS WAS REBUILT — it split by the wrong axis.
  *
- * UNLESS there is no fee table. A quote-only format (CASA Gruppen,
- * Firmenunterricht) publishes no figures at all — just the sentence saying the
- * price is quoted per group. Held in the same two-column frame, that one line
- * sat alone opposite five conditions and left half the section empty, which
- * reads as missing content rather than as a deliberately short answer. With no
- * table, the note leads the section at full width and the conditions spread
- * across two columns beneath it.
+ * The section used to be two columns, costs on the left and conditions on the
+ * right, divided by a full-height rule. That splits by CATEGORY, and the two
+ * categories do not carry comparable volumes. Counted across the seven formats
+ * in config/courses/course-practical-facts.ts:
+ *
+ *   evening-german    1 fee   5 conditions
+ *   special-courses   1 fee   3 conditions
+ *   bildungszeit      4 fees  4 conditions
+ *   medical-german    0 fees  4 conditions
+ *   in-company        0 fees  3 conditions
+ *   german-for-groups 0 fees  5 conditions
+ *
+ * One of the seven is balanced. On the Evening Course the left column held a
+ * single €476 row against five bullets, so ~40% of the section was empty and the
+ * divider drew a line down the middle of the void to prove it. Three formats
+ * have no fees at all and needed a whole second branch of markup to avoid the
+ * same hole.
+ *
+ * SO IT SPLITS BY READING ORDER INSTEAD: the figures first, at full width, then
+ * the conditions beneath them in two columns. Nothing sits opposite anything, so
+ * no ratio of fees to conditions can leave a gap — and the 0-fee case is the
+ * same layout with the strip omitted rather than a second implementation.
+ *
+ * THE FIGURES ARE `FeeStrip`, not markup of our own. /accommodation/flat and
+ * /accommodation/host publish the same shape — label, amount, optional note —
+ * and had their own `<dl>` written inline in the page, so they kept the small
+ * right-aligned amount after this section moved on. One implementation now; see
+ * sections/fee-strip for why the amount leads and why the cells carry no rules.
  *
  * Data comes from config/courses/course-practical-facts.ts. Never hardcode a
  * figure in here.
@@ -53,110 +73,95 @@ export function CoursePracticalDetails({
     conditions: locale === 'de' ? 'Gut zu wissen' : 'Good to know',
   };
 
+  const feeList = fees ?? [];
+
   /*
-   * Same treatment as the term table: the section is the section, not a slab.
-   * The price list keeps its own hairline rows, which is the structure that
-   * actually earns a rule here — a reader scans figures down a column.
+   * With a single fee, its own label ("Course fee per trimester") already says
+   * these are costs, and the section eyebrow above it made two stacked lines of
+   * uppercase micro-type saying the same thing. The eyebrow earns its place only
+   * when it is heading a set.
    */
-  const hasFeeTable = Boolean(fees?.length);
-
-  if (!hasFeeTable) {
-    return (
-      <section>
-        <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
-          {copy.title}
-        </h2>
-
-        {feeNote ? (
-          <p className="mt-6 flex max-w-measure gap-3 border-t border-[color:var(--casa-sand)] pt-6 text-base leading-relaxed text-[var(--casa-ink)]">
-            <HelpCircle
-              aria-hidden
-              className="mt-1 h-5 w-5 shrink-0 text-[var(--casa-accent-text)]"
-            />
-            <span>{feeNote}</span>
-          </p>
-        ) : null}
-
-        {conditions.length ? (
-          <>
-            <p className="mt-9 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-              {copy.conditions}
-            </p>
-            <ul className="mt-2 grid gap-x-12 gap-y-0 md:grid-cols-2">
-              {conditions.map((condition) => (
-                <li
-                  key={condition}
-                  className="border-t border-[color:var(--casa-sand)] py-4 text-sm leading-relaxed text-[var(--casa-ink)]"
-                >
-                  {condition}
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
-      </section>
-    );
-  }
+  const showCostsEyebrow = feeList.length > 1;
 
   return (
     <section>
       <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{copy.title}</h2>
 
-      <div className="mt-7 grid gap-8 border-t border-[color:var(--casa-sand)] pt-7 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-10 md:divide-x md:divide-[color:var(--casa-sand)]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.fees}</p>
-
+      {feeList.length > 0 ? (
+        <>
           {/*
-            Rows are a two-column grid, not a wrapping flex row. With flex-wrap,
-            a fee carrying a note ("Charged once, on your first registration at
-            CASA") pushed its own amount onto the next line, so €50 sat under the
-            caveat instead of in the column of figures the reader is scanning. The
-            amount holds its column whatever the label does beside it.
+            The list draws its own top rule now, so the eyebrow no longer carries
+            one — two hairlines 24px apart is the doubling this section keeps
+            being cleaned of.
           */}
-          {fees?.length ? (
-            <dl className="mt-5 space-y-0">
-              {fees.map((fee) => (
-                <div
-                  key={fee.label}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 border-b border-[color:var(--casa-sand)]/60 py-3 last:border-b-0"
-                >
-                  <dt className="text-sm leading-relaxed text-[var(--casa-ink)]">
-                    {fee.label}
-                    {fee.note ? (
-                      <span className="mt-1 block text-xs leading-relaxed text-[var(--casa-muted)]">{fee.note}</span>
-                    ) : null}
-                  </dt>
-                  {/* Tabular figures so the amounts form a readable column. */}
-                  <dd className="whitespace-nowrap text-base font-bold tabular-nums text-[var(--casa-ink)]">
-                    {fee.amount}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-
-          {feeNote ? (
-            <p className="mt-5 flex gap-2.5 text-sm leading-relaxed text-[var(--casa-muted)]">
-              <HelpCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-accent-text)]" />
-              <span>{feeNote}</span>
+          {showCostsEyebrow ? (
+            <p className="mt-7 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+              {copy.fees}
             </p>
           ) : null}
-        </div>
 
-        <div className="md:pl-10">
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+          <FeeStrip figures={feeList} className={showCostsEyebrow ? 'mt-4' : 'mt-7'} />
+        </>
+      ) : null}
+
+      {/*
+        `feeNote` carries the sentence that stands in for a price on a quote-only
+        format ("priced per group, after a briefing"), and on a format WITH fees
+        it carries the caveat beside them. One treatment for both: the question
+        mark, and the sentence at reading measure.
+      */}
+      {feeNote ? (
+        <p
+          className={cn(
+            'flex max-w-measure gap-3 text-base leading-relaxed text-[var(--casa-ink)]',
+            feeList.length > 0
+              ? 'mt-7 text-sm text-[var(--casa-muted)]'
+              : 'mt-7 border-t border-[color:var(--casa-sand)] pt-6'
+          )}
+        >
+          <HelpCircle aria-hidden className="mt-1 h-5 w-5 shrink-0 text-[var(--casa-accent-text)]" />
+          <span>{feeNote}</span>
+        </p>
+      ) : null}
+
+      {conditions.length ? (
+        <>
+          {/*
+            The rule is conditional. `FeeStrip` closes itself with a bottom
+            hairline, so when a fee list rendered above this the eyebrow's own
+            `border-t` put a second rule 30px under the first — the hairline
+            doubling this section has been cleaned of twice. With no list (a
+            quote-only format) there is nothing above to close, so the rule is
+            what separates the conditions from the note.
+          */}
+          <p
+            className={cn(
+              'text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]',
+              feeList.length > 0 ? 'mt-9' : 'mt-10 border-t border-[color:var(--casa-sand)] pt-6'
+            )}
+          >
             {copy.conditions}
           </p>
-          <ul className="mt-5 space-y-4">
+
+          {/*
+            Two columns at full width, and the list fills them in column order so
+            an odd count leaves its gap at the bottom of the second column rather
+            than a ragged hole mid-list. `break-inside-avoid` keeps a bullet from
+            splitting across the column break.
+          */}
+          <ul className="mt-5 md:columns-2 md:gap-x-12">
             {conditions.map((condition) => (
-              <li key={condition} className="flex gap-3 text-sm leading-relaxed text-[var(--casa-ink)]">
-                <span aria-hidden className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
+              <li
+                key={condition}
+                className="mb-4 flex break-inside-avoid gap-3 text-base leading-relaxed text-[var(--casa-ink)] last:mb-0"
+              >
+                <span aria-hidden className="mt-[0.6rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
                 <span>{condition}</span>
               </li>
             ))}
           </ul>
-        </div>
-      </div>
+        </>
+      ) : null}
     </section>
   );
 }
