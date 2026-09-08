@@ -49,3 +49,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# gstack tooling state. Carried over from the admin-dashboard worktree, which
+# added it locally and never committed it.
+.gstack/
