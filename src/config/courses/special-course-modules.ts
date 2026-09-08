@@ -16,6 +16,31 @@ import type { ContentLocale } from '@/lib/content/types';
  * `skill` drives the module's accent colour via the shared skill tokens, so a
  * writing module reads teal here and in the student app.
  */
+/**
+ * The per-module detail the dialog shows beyond the schedule.
+ *
+ * EVERY FIELD IS OPTIONAL AND EVERY ONE IS CURRENTLY UNSET — deliberately.
+ * docs/GROUP_PRICING_AND_SPECIAL_COURSES.md Part 2 lists "say who each module is
+ * for in one line" as the single most useful missing sentence, and it is still
+ * missing: casa-bremen.de/sprachkurse/deutsch-spezialkurse publishes the
+ * timetable and the price, not a description of each module. Nothing here may be
+ * written from inference — a module's content is a claim about what CASA teaches
+ * (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md).
+ *
+ * The dialog renders each section only when its field is present, so filling
+ * these in is a data-only change with no component work.
+ */
+export type SpecialCourseDetail = {
+  /** One or two sentences on what the module does. */
+  intro?: { en: string; de: string };
+  /** Who it suits — the sentence the doc asks for. */
+  forWhom?: { en: string; de: string };
+  /** What a participant practises, as short parallel phrases. */
+  practises?: { en: string; de: string }[];
+  /** Entry expectations beyond the CEFR level, if CASA states any. */
+  requirements?: { en: string; de: string };
+};
+
 export type SpecialCourseModule = {
   id: string;
   category: { en: string; de: string };
@@ -28,7 +53,16 @@ export type SpecialCourseModule = {
   endDate: string;
   priceEur: number;
   skill: SkillKey;
+  /** Absent on every module today. See SpecialCourseDetail. */
+  detail?: SpecialCourseDetail;
 };
+
+/** Constant across all eight modules, so the dialog states it once per module. */
+export const SPECIAL_COURSE_CONSTANTS = {
+  weeks: 12,
+  minutesPerSession: 90,
+  sessionsPerWeek: 1,
+} as const;
 
 export const SPECIAL_COURSE_TERM_LABEL = 'Herbst 2026';
 
