@@ -274,7 +274,9 @@ is still valid.
   with `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` being left unset in production.
 - **No FileMaker bridge yet — but it is designed.** `docs/FILEMAKER_BRIDGE.md`
   (2026-09-08). Every workspace queue table has an `external_ref` column and nothing
-  writes to one. Key facts for anyone picking this up: FileMaker already has the
+  writes to one. **The shared Data API credential (`FileMaker SRV`) is the owner's own
+  `[Full Access]` account — use it for reads only, never a write or a script call.** Key
+  facts for anyone picking this up: FileMaker already has the
   intake pipeline (`Contact → PreBooking → WaitingRoom → Booking`, with `TestStudent`
   for placement); the bridge should create Contact+PreBooking pairs and **never**
   write `Booking` directly; the Data API can write through `[Full Access]`/`Reduced`

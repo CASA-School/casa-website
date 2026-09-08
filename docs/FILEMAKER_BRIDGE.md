@@ -10,6 +10,11 @@ app's rollout tooling. Nothing here touched the live server.
 **Status: design.** Nothing in this document is built. Section 7 lists what
 must be decided, and by whom, before it can be.
 
+**Verified live 2026-09-09** — read-only Data API probe from this machine over
+WireGuard, as the account every previous agent used. Counts, layouts and every
+vocabulary ID below marked *(live)* come from that probe, not from the July
+DDR. Nothing was written.
+
 **Revised 2026-09-09** after the direction was confirmed: CASA *will* write to
 FileMaker, and the bridge is the first step of a larger plan — see §0. The
 first draft said "never write Bookings"; that is now "not in phase 1".
@@ -62,7 +67,7 @@ Postgres, and exports dashboard files. Facts that matter for us:
 | Reads | `GET /layouts/{layout}/records?_limit=5000&_offset=n`. Only fields *on the layout* are returned. |
 | Layouts | `Person`, `Booking_API`, `Course_API` — plus `DateBooking`, `Email`, `StaffMember` for rosters. The `_API` ones were **added to FileMaker specifically for this bridge**. |
 | Keys | `Person.__ID_Person`, `Booking.__ID_Booking` (auto-enter serials, unique). Booking→Person via `Booking_API._ID_Student → Person._ID_Student → Person.__ID_Person`, validated ≈99.7%. |
-| Credential | 1Password entry `FileMaker SRV`, passed via stdin. Never in files, logs or arguments. |
+| Credential | 1Password entry `FileMaker SRV`, passed via stdin. Never in files, logs or arguments. **Resolves to `Werner Riebe` — the owner's own `[Full Access]` account** *(live)*; it sees all 328 layouts and could alter schema. `FileMaker-SRV` (hyphen) is a stale duplicate. |
 | Dates | Data API returns `MM/DD/YYYY`; converted at the boundary. |
 | Safety | Staged snapshots, quality gates that refuse under-sized or key-less publishes, `source_policy.json`, atomic publish. |
 
@@ -80,8 +85,11 @@ own API. Two systems, a reviewed file between them, and a human who confirms.
 **Both are read-only, and read-only by discipline, not by enforcement.** The
 DDR shows the `fmrest` extended privilege is carried by `[Full Access]`,
 `Reduced`, `Teacher_II` and `ClassBook` — and *not* by `[Read-Only Access]`.
-Whichever of those `FileMaker SRV` is, the Data API has always been able to
-write through it. Nobody has, because every handoff says not to.
+`FileMaker SRV` *is* `[Full Access]` — it is Werner's personal account. The
+Data API has always been able to write, and to change design, through it.
+Nobody has, because every handoff says not to. That is the whole safety model
+today, and it is why a `WebIntake` account (§3) is the first thing to create,
+not the last.
 
 The one time anyone changed FileMaker's *structure* for these projects, it was
 a person in FileMaker Pro adding one stored field
@@ -119,6 +127,29 @@ up with the workspace's queues almost one to one:
       └── Source → SourceReference (9)  "where did they come from"
 ```
 
+**Live counts, 2026-09-09** *(live)*: Contact 4,926 · PreBooking 5,888 ·
+WaitingRoom 1,880 · TestStudent 5,814 · Person 15,344 · Booking 22,206 ·
+Course 1,318. Against the 2026-07-06 backup that is +190 contacts and +267
+pre-bookings in two months. Contacts per year: 2022 1,107 · 2023 1,118 ·
+2024 997 · 2025 1,013 · 2026 to date 691 — **about a thousand a year, three to
+four a working day.** 99.8% of contacts are linked to a Person.
+
+**FileMaker already expects the website.** `TypeContactReference` *(live)*:
+1 = *Online Anmeldung*, 2 = *Email Nachfrage*, 3 = *Telefonische Anfrage*,
+4 = *Besuch im Büro*. `SourceReference` *(live)*: 1 = *Internet | Homepage*,
+2 = *Direktanmeldung Büro*, 3 = *Freunde & Bekannte*, 4 = *Firma*, 5 = *Gelbe
+Seiten*, 6 = *Zeitung*, 7 = *Agentur*, 8 = *andere*, 9 = *OBS*. A web
+registration is contact type 1 with source 1 — both values pre-date this
+project.
+
+**Status is `DecisionReference`** *(live)*: 1 = *ja*, 2 = *nein*, 3 = *offer*,
+4 = *u.B.* (unter Bearbeitung), 5 = *grau*, 6 = *Undefined*. New Contact,
+PreBooking and WaitingRoom rows auto-enter **4**; conversion sets **1**. Current
+distribution across all 5,888 pre-bookings: 4 → 4,755 · 2 → 589 · 1 → 540 ·
+5 → 4. Four in five pre-bookings still sit at the default — FileMaker's own
+status is rarely maintained, which is exactly the gap the workspace's
+status-with-an-owner fills.
+
 What the scripts do (read from the DDR, not guessed):
 
 - **`NewContact`** — creates a `Contact` *and* a `PreBooking`, sets
@@ -136,24 +167,31 @@ What the scripts do (read from the DDR, not guessed):
   `_ID_Platform = <parameter>`, level, visa, course type, course, dates copied
   from the PreBooking; then ~100 more steps for dates, costs and related rows.
 
-Status semantics that follow from this: a new `Contact`/`PreBooking`/
-`WaitingRoom` row auto-enters status **4** (open); conversion sets **1**
-(completed). The full label sets live in the generic `SelectionDetail` (85) /
-`SelectionReference` (23) / `DecisionReference` (7) tables, which have **not**
-been exported locally — see §7.
+`_ID_EnrolmentDone` on a Booking (`SelectionDetail`, *live*): 1 = *ja*,
+2 = *nein*, 3 = *storno*, 4 = *u.B.*, 5 = *???*, 6 = *Undefined*. Both creation
+scripts set **5** on a new Booking.
 
-### Vocabularies that map directly onto ours
+### Vocabularies that map directly onto ours — with the IDs a write uses *(live)*
 
-| FileMaker reference | Rows | Maps to |
-| --- | ---: | --- |
-| `CourseTypeReference` | 14 | `course_types` — Intensivkurs, Abendkurs, Prüfungsvorbereitung, Firmenunterricht, Spezialkurs, Geschlossene Gruppe, … |
-| `ExamReference` | 5 | `exam_types` — TestDaF, B1 Prüfung, B2 telc, C1 Hochschule, TestAS |
-| `PartExamReference` | 3 | `exam_registrations.registration_type` — schriftlich / mündlich / beides = written / oral / full. **Exact match.** |
-| `LevelStepReference` | 13 | `BAND_SEQUENCE` in `src/config/placement/policy.ts` — CASA's own sub-levels |
-| `LevelReferenceSchool` | 10 | A1 … C1, TD, CH, SK, ND |
-| `PlatformReference` | 24 | which CASA "platform" a booking belongs to — **unread, needed** |
-| `SourceReference` | 9 | origin channel — **unread, needed**; the website must become one of these |
-| `TypeContactReference` | 4 | kind of contact — **unread** |
+| FileMaker reference | IDs → labels | Maps to |
+| --- | --- | --- |
+| `CourseTypeReference` | 1 Intensivkurs · 2 Abendkurs · 3 Sommerkurs · 4 Einzelunterricht · 5 Geschlossene Gruppe · 7 Prüfungsvorbereitung · 9 Juniorkurs · 10 Firmenunterricht · 11 Spezialkurs · 12 Superintensivkurs · 15 Online Kurs · 16 Zusatzkurs; two *OBS* rows returned no ID | `course_types` |
+| `ExamReference` | 1 TestDaF · **B1 Prüfung returned no ID** · 3 B2 telc · 4 C1 Hochschule · 5 TestAS | `exam_types` (seed today has only telc B2 and C1) |
+| `PartExamReference` | 1 schriftlich (written) · 2 mündlich (oral) · 3 both (full) | `exam_registrations.registration_type` — **but it lives on `SingleDateExam`/`SingleDateStudent`, not on PreBooking** (§4) |
+| `LevelStepReference` | 1 A1.1 · 2 A1.2 · 3 A2.1 · 4 A2.2 · 5 B1.1 · 6 B1.2 · **7 B1+1 · 8 B1+2** · 9 B2.1 · 10 B2.2 · 11 C1.1 · 12 C1.2 · **13 C1.3** | `BAND_SEQUENCE` has a single `B1+` and no `C1.3` — map `B1+` → min 7 / max 8 |
+| `LevelReferenceSchool` | A1 A2 B1 B1+ B2 C1 TD CH SK ND (IDs are decimals, e.g. 3.5) | `PreBooking._ID_Level` |
+| `PlatformReference` | **22 Course** · 2 NationalAirport (*TestDaF und Prüfungen*) · 1 InternationalAirport (*Sommer-, Juniorkurse, Schulklassen*) · 6 BusStop (*Geschlossene Gruppen*) · Underground (*Firmenunterricht*, no ID returned) · 4 CentralStation (*Englisch/Spanisch Abend*) · 8 TransitHall (*Wohnungsvermittlung*) · 25 PreBooking · 26 Contact · 24 WaitingRoom · 27 Offer | courses → 22, exams → 2, accommodation → 8, groups → 1/6, company → Underground |
+| `TypeContactReference` | 1 Online Anmeldung · 2 Email · 3 Telefon · 4 Besuch | every web record → **1** |
+| `SourceReference` | 1 Internet \| Homepage · … · 7 Agentur · 9 OBS | every web record → **1** |
+| `DecisionReference` | 1 ja · 2 nein · 3 offer · 4 u.B. · 5 grau · 6 Undefined | `_ID_StatusPreBooking`, `_ID_StatusContact`, `WaitingRoom._ID_Status` |
+| `Flag` | 206 rows; `Country_1` German, `Country_2` English, `CountryLong_1` carries the ISO code (`DE - Germany`) | `nationality` → match on ISO code, never on spelling |
+| `TypeOfferReference` | 1 Kurs · 2 Unterkunft · 3 Internship | what a PreBooking is *for* |
+| `SelectionDetail` › *TypeTest* | includes **Einstufungstest** | `TestStudent._ID_Test` for placement results |
+| `SelectionDetail` › *MissingItemContact* | course dates · desired level · address · phone · email · homeland · date of birth · placement result · birthplace · mother tongue · ID number · bank details · country of birth | **FileMaker's own definition of a complete registration.** The public form collects seven of thirteen; the six it lacks are the phase-2 form work. |
+
+Data-quality note *(live)*: `Contact._ID_TypeContactReference` holds a mix of
+IDs and typed labels (`'1'`, `'Email'`, `'Besuch im Büro'`, even `'1\r3'`).
+The bridge writes IDs only; the read-back must tolerate labels.
 
 ### What a write can and cannot reach
 
@@ -169,10 +207,25 @@ Today's layouts in the relevant contexts are **UI layouts**, built for people:
 | `Person` | 6 incl. `Student_API` | `Student_API` (read) | 27 |
 | `Booking` | 13 incl. `Booking_API` | `Booking_API` (read) | 43 |
 
+Live metadata *(live)* is a little kinder than the DDR suggested: the
+`PreBooking` layout does carry `_ID_Course`, `_ID_CourseTypeReference`,
+`_ID_Level`, `_ID_LevelStepReference`, `_ID_VisaRequired`,
+`_ID_Recommendation_min/max`, `_ID_ExamReference`, `_ID_Exam`, `_ID_Platform`,
+`_ID_StatusPreBooking` as own fields — but not `Comment`, `DateOfCreation`,
+`ZStartDate/ZEndDate`, `_ID_Person`, `_ID_Contact` or any accommodation
+reference. `Contact` carries the FKs and `_ID_TypeContactReference` but no
+names and no comment. `TestStudent` lacks `_ID_PreBooking`, `_ID_Test` and the
+level fields. And all three are UI layouts with `Add_row`/`Delete_row` buttons
+whose script triggers are unknown.
+
 So the same thing that was done for the read bridge is needed for a write
-bridge: **`Contact_API` and `PreBooking_API` layouts**, created in FileMaker
-Pro, exposing exactly the fields the bridge sets and reads back, with no
-buttons and no script triggers. A layout is a safe, reversible addition — the
+bridge: **`Contact_API` and `PreBooking_API` layouts** (and a `TestStudent_API`
+for phase 2), created in FileMaker Pro, exposing exactly the fields the bridge
+sets and reads back, with no buttons and no script triggers. The `Person`
+layout already has `Email`, `Phone` and `PreBooking_Person` portals, and the
+Data API can create related rows through portals in the same request — a
+`Person_API` with those portals turns "person plus contact channels" into one
+call. A layout is a safe, reversible addition — the
 same class of change as the one field that was added in July.
 
 ---
@@ -226,6 +279,13 @@ data steps with the UI steps removed and a JSON result set via `Exit Script`.
 That is a contained, testable piece of FileMaker work, and it keeps the logic
 in one place. It has to be proven on the test copy (§7 item 8) before anything
 else in phase 2.
+
+**The Data API only exists on FileMaker Server.** FileMaker Pro is installed on
+this machine and the July backup copies are on disk, but a `.fmp12` opened in
+Pro cannot serve the API. So the local copy is where scripts and `_API`
+layouts are *developed and checked*; API tests need a copy **hosted** on the
+Mini as a second file (`SchoolMan_Test`). The Data API's `/databases` call
+lists what the server hosts today — see §7 item 8.
 
 Payment is the part with the most consequences if wrong. It is last in the
 order of work, it is never automatic, and every write to `PaymentIn` is one
@@ -349,27 +409,33 @@ reference-table ID must come from a live read of the vocabulary (§7).
 | Workspace column | Table.field | Note |
 | --- | --- | --- |
 | `request_id` | `Contact.WebIntakeRef`, `PreBooking.WebIntakeRef` | new fields; idempotency key |
+| *(constant)* | `Contact._ID_TypeContactReference = 1` (Online Anmeldung) · `Contact._ID_StatusContact = 4` · `PreBooking._ID_StatusPreBooking = 4` · `PreBooking._ID_Platform = 22` for a course, `2` for an exam | all IDs verified live |
 | `first_name` / `last_name` | `Person.ZFirstName` / `Person.ZSurName` | |
 | `salutation` | `Person._ID_GenderReference` | `mr/ms/mx/neutral` → ask |
 | `birth_date` | `Person.DateOfBirth` | send as `MM/DD/YYYY` |
-| `nationality` | `Person._ID_Homeland` → `Flag` table | text → ID lookup; unmatched stays blank + workspace flag, never a guessed country |
+| `nationality` | `Person._ID_Homeland` → `Flag.__ID_Flag` | match on the ISO code inside `Flag.CountryLong_1`; unmatched stays blank + workspace flag, never a guessed country |
 | `email` | `Email` row: `_ID_Person`, plus the address field | the `Email` field is auto-enter calc — the stored source field must be confirmed live |
 | `phone` | `Phone` row: `_ID_Person`, `PhoneText` | |
 | — (no address collected today) | `Address` | the public form does not ask; do not invent one |
-| `course_type_id` → `course_types.slug` | `PreBooking._ID_CourseTypeReference` | 14-row map, labels verified |
+| `course_type_id` → `course_types.slug` | `PreBooking._ID_CourseTypeReference` | IDs verified live (1 Intensiv, 2 Abend, 7 Prüfungsvorbereitung, 10 Firma, 11 Spezial, 5 Gruppe, …) |
 | `course_instance_id` | `PreBooking._ID_Course` | needs a `Course.__ID_Course` per cohort — the catalogue does not carry FileMaker course IDs yet (§7) |
-| `current_level` (self-declared) | `PreBooking._ID_Level` | 10-row map; store in `Comment` as "self-declared" too |
-| `visa_required` | `PreBooking._ID_VisaRequired` | → ask (likely 1/2) |
+| `current_level` (self-declared) | `PreBooking._ID_LevelStepReference` (1–13) and `_ID_Level` | our `B1+` → 7; store in `Comment` as "self-declared" too |
+| `visa_required` | `PreBooking._ID_VisaRequired` | `Decision_Yes_No`: 1 = ja, 2 = nein *(live)* |
 | `accommodation_required`, `accommodation_type` | `PreBooking._ID_AccommodationTypeReference` (`flat`/`host` → ask) | room/catering refs left blank |
 | `allergies`, `notes`, `smoker` | `PreBooking.Comment` | prefixed lines; no dedicated fields exist |
-| `locale`, `source` | `Source` row on the eventual Booking is FileMaker's mechanism; on PreBooking: `Comment` line `Quelle: Website (en)` until a `SourceReference` "Website" exists | |
+| `locale`, `source` | `SourceReference` **1 = Internet \| Homepage already exists**; a `Source` row is attached to the Booking at conversion — phase 2 passes source 1 to the conversion script. Phase 1: `Comment` line `Quelle: Website (en)` | |
 | `submitted_at` | `PreBooking.DateOfCreation` is auto-enter — leave; put the ISO timestamp in `Comment` | |
 | *(returned)* `__ID_Contact`, `__ID_PreBooking`, `__ID_Person` | → `external_ref` | structured, §5 |
 
-`exam_registrations` differs in three cells: `_ID_ExamReference` (5-row map),
-part via `PartExamReference` (3-row map, exact), and `official_name_confirmed`
-into `Comment` as a line — there is no field for it, and it matters enough to
-be written down.
+`exam_registrations` differs in three cells: `_ID_ExamReference` (1 TestDaF ·
+3 B2 telc · 4 C1 Hochschule · 5 TestAS; **the B1 row's ID must be confirmed**),
+`_ID_Platform = 2`, and `official_name_confirmed` into `Comment` as a line —
+there is no field for it, and it matters enough to be written down. The exam
+**part** (`registration_type`) has **no home on the PreBooking**:
+`PartExamReference` (1 written · 2 oral · 3 both) is referenced from the
+sitting rows `SingleDateExam`/`SingleDateStudent` created at conversion. Phase
+1 writes it to `Comment`; phase 2 passes it to the server-safe conversion
+script.
 
 ---
 
@@ -415,10 +481,11 @@ Nothing until §7 is decided. When it is:
 | 2 | `Contact_API` + `PreBooking_API` layouts | Werner (FileMaker Pro) | Nothing can be written without them. |
 | 3 | `WebIntake` account + privilege set | Werner | Without it the bridge would run as a full-access account. Refuse to build it that way. |
 | 4 | `WebIntakeRef` field on `Contact` and `PreBooking` | Werner | Idempotency. `Url` could be reused only if Werner says it is free. |
-| 5 | Which `PlatformReference` the website belongs to; a `SourceReference` "Website"; the ID→label sets for `SelectionDetail`, `DecisionReference`, `TypeContactReference`, `VisaRequired`, accommodation refs | live read-only fetch via the existing bridge, then Werner confirms | Every `→ ask` cell in §4. **One staged read of six small reference tables. No PII.** |
-| 6 | FileMaker `Course.__ID_Course` for each workspace `course_instance` | data task | Without it a registration lands with a course *type* but no cohort. The catalogue needs a `filemaker_course_id` column filled from `Course_API`. |
+| 5 | ~~Reference vocabularies~~ **Resolved live 2026-09-09** (§2). Two loose ends: the `B1 Prüfung` `ExamReference` row and the two *OBS* course types and the *Underground* platform returned no ID — confirm in FileMaker Pro whether the serial is blank or the API layout hides it. | Werner (five minutes) | Three `→ ask` cells in §4. |
+| 6 | FileMaker `Course.__ID_Course` for each workspace `course_instance`, and a real `exam_types` table | data task | The workspace's `course_instances` (13) and `exam_types` (2) are **fixtures**, not CASA's catalogue. `Course_API` has 1,318 courses with dates and types *(live)*; the catalogue needs a `filemaker_course_id` column and an import from it before a registration can name a cohort. |
 | 7 | On-prem agent vs network path (§3) | Rahman / CASA IT | Where the code runs. |
-| 8 | Test environment | Werner | The DDR came from a backup; a hosted copy of `SchoolMan` (or the `SchoolMan2024` archive) is where the first pushes should land, not production. |
+| 8 | Test environment: a **hosted** `SchoolMan_Test` on the Mini | Werner | The Data API only exists on Server (§3a); the local July copies plus FileMaker Pro cover script and layout development, not API tests. |
+| 8a | A fresh backup copy for local development | Rahman | The July copies are two months old. SSH key access as `casamini` is **not currently accepted** (2026-09-09; the Mini also throttled after a few refused attempts) and nothing is saved in this Mac's Keychain. Either Werner re-authorises the `casa_mac_support_ed25519` key, or Rahman mounts `smb://10.0.60.10/Macintosh HD` once in Finder — the password never passes through an agent — and the copy from `/Library/FileMaker Server/Data/Backups/FMS_<date>_0000/Databases/` is checksummed into `output/filemaker_backups/` as in July. |
 | 9 | *(phase 2)* Server-safe script variants `WebIntake_ConvertPreBooking`, `WebIntake_AddCostDetail`, `WebIntake_RecordPayment`, and `fmrest` script-execution rights on the `WebIntake` privilege set | Werner | The only way to create complete registrations without re-implementing FileMaker's logic (§3a). Must be proven on item 8 first. |
 | 10 | *(phase 2)* Accommodation and payment as workspace domains — public flows, tables, who may record a payment | Rahman / Finance | Neither exists anywhere in the website or workspace today. Payment is last and never automatic. |
 | 11 | *(phase 3)* Adopt `casa_student.*` as the workspace's own model and merge the analytics bridge's Postgres into it | Rahman + the migration project | One database for CASA's system. The 23 draft-import quality issues are decisions, not bugs. |
