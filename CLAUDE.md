@@ -172,6 +172,11 @@ in `docs/ADMIN_WORKSPACE.md` or a code comment. Every workspace feature is a
 module in `src/lib/admin/access.ts`, gated by role and per-person exception;
 design a new screen by answering "who may see this" first.
 
+**Progressive disclosure, especially in forms.** Ask for the fields that make a
+record valid and useful; put the rest behind a collapsed `<details>` step or on
+the record's own edit screen. A list page never carries a grid of inputs.
+FileMaker's all-fields-on-one-layout interface is the anti-pattern.
+
 **Diffs.** Keep them minimal and targeted. Do not add abstractions when an existing
 pattern already covers the case. If a fact is not verifiable in the repo, mark it
 `TODO` or `ASSUMPTION` rather than inventing it.

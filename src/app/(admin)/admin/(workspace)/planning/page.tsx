@@ -127,50 +127,61 @@ export default async function PlanningPage({
           })}
 
         <Card title="Add a room">
-          <form action={createRoomAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <Field label="Location" htmlFor="new-room-location" className="lg:col-span-2">
-              <Select id="new-room-location" name="locationId" required defaultValue="">
-                <option value="" disabled>
-                  Choose
-                </option>
-                {locations
-                  .filter((l) => l.isActive)
-                  .map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name}
-                    </option>
-                  ))}
-              </Select>
-            </Field>
-            <Field label="Name" htmlFor="new-room-name" className="lg:col-span-2">
-              <Input id="new-room-name" name="name" required maxLength={80} />
-            </Field>
-            <Field label="Nickname" htmlFor="new-room-nickname">
-              <Input id="new-room-nickname" name="nickname" maxLength={40} />
-            </Field>
-            <Field label="Floor" htmlFor="new-room-floor">
-              <Input id="new-room-floor" name="floor" type="number" min={-3} max={30} />
-            </Field>
-            <Field label="Kind" htmlFor="new-room-kind">
-              <Select id="new-room-kind" name="kind" defaultValue="classroom">
-                {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
+          <form action={createRoomAction} className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+              <Field label="Location" htmlFor="new-room-location">
+                <Select id="new-room-location" name="locationId" required defaultValue="">
+                  <option value="" disabled>
+                    Choose
                   </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Capacity" htmlFor="new-room-capacity">
-              <Input id="new-room-capacity" name="capacity" type="number" min={0} max={500} />
-            </Field>
-            <Field label="Maximum" htmlFor="new-room-max">
-              <Input id="new-room-max" name="capacityMax" type="number" min={0} max={500} />
-            </Field>
-            <div className="flex items-end lg:col-span-3">
+                  {locations
+                    .filter((l) => l.isActive)
+                    .map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.name}
+                      </option>
+                    ))}
+                </Select>
+              </Field>
+              <Field label="Name" htmlFor="new-room-name">
+                <Input id="new-room-name" name="name" required maxLength={80} />
+              </Field>
               <Button type="submit" variant="secondary">
                 Add room
               </Button>
             </div>
+
+            {/* Progressive disclosure: these refine the room and can be set later
+                on its own page. Collapsed by default, no JavaScript needed. */}
+            <details className="group">
+              <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
+                <span className="group-open:hidden">More</span>
+                <span className="hidden group-open:inline">Less</span>
+              </summary>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <Field label="Nickname" htmlFor="new-room-nickname">
+                  <Input id="new-room-nickname" name="nickname" maxLength={40} />
+                </Field>
+                <Field label="Floor" htmlFor="new-room-floor">
+                  <Input id="new-room-floor" name="floor" type="number" min={-3} max={30} />
+                </Field>
+                <Field label="Kind" htmlFor="new-room-kind">
+                  <Select id="new-room-kind" name="kind" defaultValue="classroom">
+                    {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                <Field label="Capacity" htmlFor="new-room-capacity">
+                  <Input id="new-room-capacity" name="capacity" type="number" min={0} max={500} />
+                </Field>
+                <Field label="Maximum" htmlFor="new-room-max">
+                  <Input id="new-room-max" name="capacityMax" type="number" min={0} max={500} />
+                </Field>
+              </div>
+            </details>
           </form>
         </Card>
       </div>

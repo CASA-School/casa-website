@@ -229,6 +229,16 @@ security hole dressed as a feature.
 
 ---
 
+## Progressive disclosure
+
+Every form asks first for what makes the record valid and useful, and reveals
+the rest on demand. The plain-form convention makes this cheap: a collapsed
+`<details>` element needs no JavaScript. Concretely — creating a room asks for
+location and name; nickname, floor, kind and capacities open under *More*, and
+everything is editable on the room's own page. Screens follow the same rule:
+a list shows the summary, the record page shows the detail. FileMaker's
+layouts with every field visible (`Course` has 173) are what this replaces.
+
 ## Copy on screens — labels, not explanations
 
 The product is used daily by staff and must stay presentable. A screen shows
