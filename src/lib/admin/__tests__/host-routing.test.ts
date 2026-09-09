@@ -117,12 +117,12 @@ describe('workspace auth gate', () => {
       'activity',
       'team',
     ];
-    for (const module of modules) {
+    for (const name of modules) {
       const layout = readFileSync(
-        path.resolve(process.cwd(), `src/app/(admin)/admin/(workspace)/${module}/layout.tsx`),
+        path.resolve(process.cwd(), `src/app/(admin)/admin/(workspace)/${name}/layout.tsx`),
         'utf8'
       );
-      expect(layout, module).toContain(`requireModule('${module}')`);
+      expect(layout, name).toContain(`requireModule('${name}')`);
     }
   });
 
