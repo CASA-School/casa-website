@@ -188,7 +188,7 @@ that changes data requires a window to be open.
 
 | # | Defect | Evidence | Cost |
 | --- | --- | --- | --- |
-| 10.1 | **One personal, full-access credential for everything.** | `FileMaker SRV` is Werner's own `[Full Access]` account; it is also his macOS login on the server *(live, both verified 2026-09-09)*. Every bridge run has used it. | "Read-only" is a promise, not a property. Rotating it locks out the owner. |
+| 10.1 | **One personal, full-access credential for everything.** | `FileMaker SRV` is a departed employee's own `[Full Access]` account, still in use; it is also his macOS login on the server *(live, both verified 2026-09-09)*. Every bridge run has used it. | "Read-only" is a promise, not a property. Rotating it locks out the owner. |
 | 10.2 | **Single machine, LAN-only, backs up to itself.** | Mac Mini `10.0.60.10`; nightly backups under `/Library/FileMaker Server/Data/Backups` on the same disk, plus NAS Time Machine. No VPN for services (WireGuard for people only). | Azure cannot reach it; a disk failure takes the live file and its backups together. |
 | 10.3 | **No test environment; changes made live by hand.** | The server hosts exactly two databases, `SchoolMan` and `SchoolMan2024` *(live)*. Structural changes are made in FileMaker Pro with XML snapshots as the safety net. | A wrong relationship edit was attempted and rolled back live in July. |
 | 10.4 | **Spelling and language drift in identifiers.** | `Enrolment` (×23) beside English `Enrollment` elsewhere; `Accommdation` ×6; `Origen` ×7; `Historial`; `Adressee`; `Messanger`; `Charakter`; `Projet` layout. German, English and metaphor mixed in one table. | Every mapping is hand-checked because nothing can be pattern-matched. |
@@ -348,10 +348,17 @@ Keep these; they are the opposite of §1–§10 by construction:
 
 ---
 
-## 13. Questions only Werner can answer
+## 13. Open questions, and who can still answer them
 
 Understanding *why* a defect exists is the difference between avoiding it and
 re-creating it in a new shape.
+
+**These were written when the database's author still worked at CASA. He has
+since left (2026-09-09), so several of these intents are probably
+unrecoverable.** Where that is so, the answer is to **measure the data** and
+record what it shows, rather than to wait for an explanation. Ask the user and
+the administration team what still matters operationally; treat the rest as
+archaeology and do not carry it into the new system.
 
 1. What do `Runner`, `Unicorn`, `LastDance`, `Rookie` mean, and is that a status
    or a marketing label?

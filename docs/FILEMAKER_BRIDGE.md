@@ -60,14 +60,14 @@ Postgres, and exports dashboard files. Facts that matter for us:
 
 | | |
 | --- | --- |
-| Server | FileMaker Pro 22 Server, `SchoolMan`, Werner's Mac Mini at `10.0.60.10`. **LAN only, no VPN.** |
+| Server | FileMaker Pro 22 Server, `SchoolMan`, the office Mac Mini at `10.0.60.10` (hostname `Werners-Mini.fritz.box`). **LAN only, no VPN.** |
 | Protocol | `https://10.0.60.10/fmi/data/vLatest/databases/SchoolMan`. Self-signed TLS. OData is down (503); ODBC/JDBC port is closed. |
 | Transport | `curl`, not Python's HTTPS stack — the latter fails on the LAN route. |
 | Session | `POST /sessions` with basic auth → bearer token → `DELETE /sessions/{token}`. |
 | Reads | `GET /layouts/{layout}/records?_limit=5000&_offset=n`. Only fields *on the layout* are returned. |
 | Layouts | `Person`, `Booking_API`, `Course_API` — plus `DateBooking`, `Email`, `StaffMember` for rosters. The `_API` ones were **added to FileMaker specifically for this bridge**. |
 | Keys | `Person.__ID_Person`, `Booking.__ID_Booking` (auto-enter serials, unique). Booking→Person via `Booking_API._ID_Student → Person._ID_Student → Person.__ID_Person`, validated ≈99.7%. |
-| Credential | 1Password entry `FileMaker SRV`, passed via stdin. Never in files, logs or arguments. **Resolves to `Werner Riebe` — the owner's own `[Full Access]` account** *(live)*; it sees all 328 layouts and could alter schema. `FileMaker-SRV` (hyphen) is a stale duplicate. |
+| Credential | 1Password entry `FileMaker SRV`, passed via stdin. Never in files, logs or arguments. **Resolves to `Werner Riebe` — a departed employee's personal `[Full Access]` account** *(live)*; it sees all 328 layouts and could alter schema. `FileMaker-SRV` (hyphen) is a stale duplicate. |
 | Dates | Data API returns `MM/DD/YYYY`; converted at the boundary. |
 | Safety | Staged snapshots, quality gates that refuse under-sized or key-less publishes, `source_policy.json`, atomic publish. |
 
@@ -85,7 +85,9 @@ own API. Two systems, a reviewed file between them, and a human who confirms.
 **Both are read-only, and read-only by discipline, not by enforcement.** The
 DDR shows the `fmrest` extended privilege is carried by `[Full Access]`,
 `Reduced`, `Teacher_II` and `ClassBook` — and *not* by `[Read-Only Access]`.
-`FileMaker SRV` *is* `[Full Access]` — it is Werner's personal account. The
+`FileMaker SRV` *is* `[Full Access]` — it is the personal account of an
+employee who has since left CASA, which makes retiring it a live task and not
+just hygiene. The
 Data API has always been able to write, and to change design, through it.
 Nobody has, because every handoff says not to. That is the whole safety model
 today, and it is why a `WebIntake` account (§3) is the first thing to create,
@@ -254,7 +256,7 @@ Phase 2 needs course, exam, accommodation and payment registrations created
 from the workspace. Re-implementing `Go_PreBooking_Booking.Parameter` (145
 steps: identity row, platform, level, visa, dates, cost lines, related rows)
 and its siblings in TypeScript would fork the truth on day one — every fix
-Werner makes in FileMaker would have to be made twice.
+made in FileMaker would have to be made twice.
 
 The FileMaker Data API can **run a FileMaker script server-side**:
 `GET /layouts/{layout}/script/{scriptName}?script.param=…`, or `script` /
@@ -272,7 +274,7 @@ The catch, and it is real: **scripts run by the Data API execute without a
 user interface.** Steps like `Show Custom Dialog`, `New Window`, `Freeze
 Window` and window-targeted `Go to Related Record` are not compatible and are
 skipped or fail. `Go_PreBooking_Booking.Parameter` uses all four in its first
-fifteen steps. So Werner does not expose the existing scripts; he writes
+fifteen steps. So the existing scripts are not exposed; CASA writes
 **server-safe variants** — `WebIntake_ConvertPreBooking`,
 `WebIntake_AddCostDetail`, `WebIntake_RecordPayment` — that perform the same
 data steps with the UI steps removed and a JSON result set via `Exit Script`.
@@ -317,7 +319,7 @@ against it.
 The hard, valuable work of phase 3 is not the code. It is the 23 quality issues
 the migration project's draft import batch already surfaced — duplicate person
 IDs, conflicting legacy bookings, unresolved joins — each of which is a
-decision for Werner or Finance, not for an agent.
+decision for CASA's administration or Finance, not for an agent.
 
 ### Where each queue lands
 
@@ -482,16 +484,16 @@ Nothing until §7 is decided. When it is:
 
 | # | Item | Owner | Why it blocks |
 | --- | --- | --- | --- |
-| 1 | **Is a write into FileMaker wanted at all**, versus a reviewed export file staff import with FileMaker's own `Import.Parameter_Booking`-style scripts? | Rahman / Werner | The whole mechanism. The file route is lower-risk and matches the student app; the API route removes re-typing. |
-| 2 | `Contact_API` + `PreBooking_API` layouts | Werner (FileMaker Pro) | Nothing can be written without them. |
-| 3 | `WebIntake` account + privilege set | Werner | Without it the bridge would run as a full-access account. Refuse to build it that way. |
-| 4 | `WebIntakeRef` field on `Contact` and `PreBooking` | Werner | Idempotency. `Url` could be reused only if Werner says it is free. |
-| 5 | ~~Reference vocabularies~~ **Resolved live 2026-09-09** (§2). Two loose ends: the `B1 Prüfung` `ExamReference` row and the two *OBS* course types and the *Underground* platform returned no ID — confirm in FileMaker Pro whether the serial is blank or the API layout hides it. | Werner (five minutes) | Three `→ ask` cells in §4. |
+| 1 | **Is a write into FileMaker wanted at all**, versus a reviewed export file staff import with FileMaker's own `Import.Parameter_Booking`-style scripts? | Rahman / CASA | The whole mechanism. The file route is lower-risk and matches the student app; the API route removes re-typing. |
+| 2 | `Contact_API` + `PreBooking_API` layouts | CASA, in FileMaker Pro | Nothing can be written without them. |
+| 3 | `WebIntake` account + privilege set | CASA | Without it the bridge would run as a full-access account. Refuse to build it that way. |
+| 4 | `WebIntakeRef` field on `Contact` and `PreBooking` | CASA | Idempotency. `Url` could be reused only if CASA confirms it is free. |
+| 5 | ~~Reference vocabularies~~ **Resolved live 2026-09-09** (§2). Two loose ends: the `B1 Prüfung` `ExamReference` row and the two *OBS* course types and the *Underground* platform returned no ID — confirm in FileMaker Pro whether the serial is blank or the API layout hides it. | CASA (five minutes) | Three `→ ask` cells in §4. |
 | 6 | FileMaker `Course.__ID_Course` for each workspace `course_instance`, and a real `exam_types` table | data task | The workspace's `course_instances` (13) and `exam_types` (2) are **fixtures**, not CASA's catalogue. `Course_API` has 1,318 courses with dates and types *(live)*; the catalogue needs a `filemaker_course_id` column and an import from it before a registration can name a cohort. |
 | 7 | On-prem agent vs network path (§3) | Rahman / CASA IT | Where the code runs. |
-| 8 | Test environment: a **hosted** `SchoolMan_Test` on the Mini | Werner | The Data API only exists on Server (§3a); the local July copies plus FileMaker Pro cover script and layout development, not API tests. |
-| 8a | A fresh backup copy for local development | Rahman | The July copies are two months old. SSH key access as `casamini` is **not currently accepted** (2026-09-09; the Mini also throttled after a few refused attempts) and nothing is saved in this Mac's Keychain. Either Werner re-authorises the `casa_mac_support_ed25519` key, or Rahman mounts `smb://10.0.60.10/Macintosh HD` once in Finder — the password never passes through an agent — and the copy from `/Library/FileMaker Server/Data/Backups/FMS_<date>_0000/Databases/` is checksummed into `output/filemaker_backups/` as in July. |
-| 9 | *(phase 2)* Server-safe script variants `WebIntake_ConvertPreBooking`, `WebIntake_AddCostDetail`, `WebIntake_RecordPayment`, and `fmrest` script-execution rights on the `WebIntake` privilege set | Werner | The only way to create complete registrations without re-implementing FileMaker's logic (§3a). Must be proven on item 8 first. |
+| 8 | Test environment: a **hosted** `SchoolMan_Test` on the Mini | CASA | The Data API only exists on Server (§3a); the local July copies plus FileMaker Pro cover script and layout development, not API tests. |
+| 8a | A fresh backup copy for local development | Rahman | The July copies are two months old. SSH key access as `casamini` is **not currently accepted** (2026-09-09; the Mini also throttled after a few refused attempts) and nothing is saved in this Mac's Keychain. Either CASA re-authorises the `casa_mac_support_ed25519` key, or Rahman mounts `smb://10.0.60.10/Macintosh HD` once in Finder — the password never passes through an agent — and the copy from `/Library/FileMaker Server/Data/Backups/FMS_<date>_0000/Databases/` is checksummed into `output/filemaker_backups/` as in July. |
+| 9 | *(phase 2)* Server-safe script variants `WebIntake_ConvertPreBooking`, `WebIntake_AddCostDetail`, `WebIntake_RecordPayment`, and `fmrest` script-execution rights on the `WebIntake` privilege set | CASA | The only way to create complete registrations without re-implementing FileMaker's logic (§3a). Must be proven on item 8 first. |
 | 10 | *(phase 2)* Accommodation and payment as workspace domains — public flows, tables, who may record a payment | Rahman / Finance | Neither exists anywhere in the website or workspace today. Payment is last and never automatic. |
 | 11 | *(phase 3)* Adopt `casa_student.*` as the workspace's own model and merge the analytics bridge's Postgres into it | Rahman + the migration project | One database for CASA's system. The 23 draft-import quality issues are decisions, not bugs. |
 

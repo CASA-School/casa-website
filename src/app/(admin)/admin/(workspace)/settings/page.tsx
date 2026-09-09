@@ -1,7 +1,9 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { Badge, Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
 import { roleLabel } from '@/components/admin/shell';
+import { Badge, Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { getStaffUser } from '@/lib/admin/auth';
 import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/config/placement/policy';
 
@@ -144,6 +146,18 @@ export default async function SettingsPage() {
               },
             ]}
           />
+        </Card>
+        <Card
+          title="Setup"
+          description="Prices, and the lists the workspace offers everywhere else."
+        >
+          <Link
+            href="/admin/settings/setup"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)] transition-colors hover:text-[var(--casa-accent-text-hover)]"
+          >
+            Open setup
+            <span aria-hidden="true">{Icon.chevronRight}</span>
+          </Link>
         </Card>
       </div>
     </>

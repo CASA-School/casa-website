@@ -180,6 +180,12 @@ skipping the dialog is refused. Access is per module *and level*
 for exactly what it does; delete is `full`. New screens join an existing
 sidebar group or a nested item — the rail never becomes a flat list.
 
+**A client component must not import a module that reaches `src/lib/admin/db.ts`.**
+It pulls `pg` and `server-only` into the browser bundle and the build fails on
+`dns` / `net` / `util/types`. Put constants a client component needs in their own
+module (`configuration-labels.ts` is the pattern). Typecheck and lint pass while
+this is broken; only `next build` or loading the page catches it.
+
 **Types are tables, prices are rates.** Every vocabulary (course type, level,
 accommodation type, catering, room type, charge type, material) is a table with
 a stable `code` and its `filemaker_id`. Every price is a row in `rates` with a

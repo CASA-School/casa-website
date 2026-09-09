@@ -192,7 +192,11 @@ export function WorkspaceShell({
                   Team
                 </NavLink>
               ) : null}
-              <NavLink href="/admin/settings" icon={Icon.settings}>
+              <NavLink
+                href="/admin/settings"
+                icon={Icon.settings}
+                items={[{ href: '/admin/settings/setup', label: 'Setup' }]}
+              >
                 Settings
               </NavLink>
             </NavGroup>

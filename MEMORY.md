@@ -1609,13 +1609,13 @@ in `docs/FILEMAKER_BRIDGE.md`. What matters most:
   nothing; three passes were lost to that before `file` was run on it.
 
 Eight decisions in the doc's §7, the first being whether a write into FileMaker
-is wanted at all versus a reviewed export file. Werner owns most of the rest.
+is wanted at all versus a reviewed export file. CASA's administration owns the rest.
 
 **2026-09-09 — direction confirmed and verified live.** CASA will write to
 FileMaker, keep it as truth, and grow its own system around it until FileMaker
 can be retired (`docs/FILEMAKER_BRIDGE.md` §0). A read-only Data API probe
 confirmed every vocabulary id, ~1,000 contacts a year, and that `FileMaker SRV`
-is Werner's own [Full Access] account (also his macOS login). This morning's
+is a departed employee's own [Full Access] account (also that macOS login). This morning's
 backup set was copied from the Mini over SMB with checksums. And
 `docs/FILEMAKER_LESSONS.md` now catalogues what must not be carried into the
 new system — headline numbers: 501 probable duplicate people, 55% of persons
@@ -1785,6 +1785,26 @@ the agreement.
 Deliberately not ported: `PlatformReference` (a product line, sales channel and
 layout selector in one), `Course.CoursePrice`, `CostDetailSample`, and any
 course or accommodation price — there is no defensible value to import.
+
+## Setup screen, and who the team is (2026-09-09, later)
+
+Two corrections from the user.
+
+**Werner has left CASA.** The workspace's users and decision-makers are the
+user and the **administration team**. Every doc that routed a decision to him
+was corrected: `docs/FILEMAKER_BRIDGE.md` §7 owners are now CASA,
+`docs/FILEMAKER_LESSONS.md` §13 became "Open questions, and who can still
+answer them" with the note that several intents are **unrecoverable** and the
+answer is to measure the data rather than wait for an explanation. The literal
+account name `Werner Riebe` stays only where it is a factual property of the
+credential — and that account belonging to someone who has left is now a live
+access-control problem, not just hygiene.
+
+**Setup is not prominent.** These values are set once and left, so they are
+`/admin/settings/setup` — nested under Settings at the bottom of the rail, two
+tabs (Prices, Lists). Read needs `settings`; changing a price needs `settings`
+at `full`. A price is ended with `valid_to`, never deleted once it has priced a
+booking.
 
 ## Verified Baseline
 

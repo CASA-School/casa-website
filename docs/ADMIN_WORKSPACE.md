@@ -420,6 +420,20 @@ joins to the catalogue, and by the label the visitor actually saw. A cohort can
 be rescheduled or withdrawn after someone registers for it, and "what they
 signed up for" is not a question a live join can answer.
 
+### Setup lives under Settings, not in the navigation
+
+The vocabularies and the price list are values CASA fixes once and leaves for a
+season, so they are **`/admin/settings/setup`** — a nested item under Settings
+at the bottom of the sidebar, with two tabs (Prices, Lists). Reading it needs
+`settings`, which everyone has; changing a price needs `settings` at `full`,
+because every future booking is priced from those rows. A price is **ended**
+(`valid_to = today`) rather than deleted, and deleting is refused once a
+booking has been priced from it.
+
+Adding a new *kind* of list is a migration, deliberately: the vocabulary is
+schema, and a screen that invents entity types is how FileMaker grew to 231
+tables.
+
 ### 0011 — the school's vocabulary, and a real price list
 
 Read live from FileMaker's 99 reference tables and written up in
