@@ -281,3 +281,30 @@ export async function assignRoom(
   });
   return { ok: true };
 }
+
+/**
+ * Removes a room. Refused while any cohort is planned into it — the cohort
+ * must be moved first, so nothing loses its room silently. Rooms have no
+ * history of their own, so this is a real delete; the FileMaker link goes too.
+ */
+export async function deleteRoom(
+  id: string,
+  actor: StaffUser
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const room = await getRoom(id);
+  if (!room) return { ok: false, reason: 'That room no longer exists.' };
+  if (room.upcomingCohorts > 0) {
+    return { ok: false, reason: `${room.name} still has cohorts planned. Move them first.` };
+  }
+  await query(`DELETE FROM filemaker_links WHERE entity = 'room' AND entity_id = $1`, [id]);
+  await query(`UPDATE course_instances SET room_id = NULL WHERE room_id = $1`, [id]);
+  await query(`DELETE FROM rooms WHERE id = $1`, [id]);
+  await logActivity({
+    actor,
+    entity: 'room',
+    entityId: id,
+    action: 'room_deleted',
+    detail: { name: room.name, location: room.locationName },
+  });
+  return { ok: true };
+}

@@ -15,7 +15,7 @@ export type StaffAccount = {
   createdAt: Date;
   activeSessions: number;
   /** Per-person module exceptions; absent modules follow the role default. */
-  moduleExceptions: { module: string; allowed: boolean }[];
+  moduleExceptions: { module: string; level: string }[];
 };
 
 export async function listStaff(): Promise<StaffAccount[]> {
@@ -28,7 +28,7 @@ export async function listStaff(): Promise<StaffAccount[]> {
     last_seen_at: Date | null;
     created_at: Date;
     active_sessions: string;
-    exceptions: { module: string; allowed: boolean }[] | null;
+    exceptions: { module: string; level: string }[] | null;
   }>(
     `SELECT u.id,
             u.email,
@@ -40,7 +40,7 @@ export async function listStaff(): Promise<StaffAccount[]> {
             (SELECT count(*) FROM staff_sessions s
               WHERE s.staff_user_id = u.id AND s.expires_at > now())
               AS active_sessions,
-            (SELECT json_agg(json_build_object('module', a.module, 'allowed', a.allowed))
+            (SELECT json_agg(json_build_object('module', a.module, 'level', a.level))
                FROM staff_module_access a WHERE a.staff_user_id = u.id) AS exceptions
        FROM staff_users u
       ORDER BY u.is_active DESC, u.name ASC`
@@ -232,29 +232,22 @@ export async function setStaffPassword({
 }
 
 /**
- * Sets the modules one person may open, as exceptions to their role default.
- * Modules that match the default are not stored, so a later change to the
- * default reaches everyone who was never given an exception.
+ * Sets what one person may do per module, as exceptions to their role default.
+ * Levels equal to the default are not stored, so a later change to the default
+ * reaches everyone who was never given an exception.
  */
-export async function setStaffModules(
+export async function setStaffAccess(
   staffUserId: string,
-  modules: readonly string[],
-  roleDefault: readonly string[],
-  adjustable: readonly string[],
+  levels: Readonly<Record<string, string>>,
+  roleDefault: Readonly<Record<string, string>>,
   grantedBy: string
 ): Promise<void> {
-  const wanted = new Set(modules);
-  const rows: [string, boolean][] = [];
-  for (const m of adjustable) {
-    const byDefault = roleDefault.includes(m);
-    const now = wanted.has(m);
-    if (now !== byDefault) rows.push([m, now]);
-  }
   await query(`DELETE FROM staff_module_access WHERE staff_user_id = $1`, [staffUserId]);
-  for (const [module, allowed] of rows) {
+  for (const [module, level] of Object.entries(levels)) {
+    if (roleDefault[module] === level) continue;
     await query(
-      `INSERT INTO staff_module_access (staff_user_id, module, allowed, granted_by) VALUES ($1, $2, $3, $4)`,
-      [staffUserId, module, allowed, grantedBy]
+      `INSERT INTO staff_module_access (staff_user_id, module, level, granted_by) VALUES ($1, $2, $3, $4)`,
+      [staffUserId, module, level, grantedBy]
     );
   }
 }

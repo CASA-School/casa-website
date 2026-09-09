@@ -1,20 +1,12 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import {
-  Badge,
-  Button,
-  Card,
-  DateText,
-  DetailList,
-  Field,
-  Input,
-  PageHeader,
-  Select,
-  Textarea,
-} from '@/components/admin/ui';
+import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { Badge, Card, DateText, DetailList, PageHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
 import { floorLabel, getRoom, roomCohorts, ROOM_KIND_LABELS } from '@/lib/admin/rooms';
-import { updateRoomAction } from '../../actions';
+import { deleteRoomAction } from '../../actions';
+import { EditRoomForm } from '../../room-forms';
 
 /** One room: what it is, what runs in it, and the form that changes it. */
 export default async function RoomPage({
@@ -24,7 +16,11 @@ export default async function RoomPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const [{ id }, query, user] = await Promise.all([
+    params,
+    searchParams,
+    requireModule('planning'),
+  ]);
   const room = await getRoom(id);
   if (!room) notFound();
   const cohorts = await roomCohorts(room.id);
@@ -37,6 +33,27 @@ export default async function RoomPage({
         eyebrow={room.locationName}
         title={room.nickname ? `${room.name} · ${room.nickname}` : room.name}
         description={`${ROOM_KIND_LABELS[room.kind]} · ${floorLabel(room.floor)}`}
+        actions={
+          <div className="flex items-center gap-2">
+            {canAccess(user, 'planning', 'edit') ? (
+              <FormDialog trigger="Edit" title={room.name}>
+                <EditRoomForm room={room} />
+              </FormDialog>
+            ) : null}
+            {canAccess(user, 'planning', 'full') ? (
+              <form action={deleteRoomAction}>
+                <input type="hidden" name="roomId" value={room.id} />
+                <ConfirmSubmit
+                  title={`Delete ${room.name}?`}
+                  description="The room is removed from the list and from every cohort that pointed at it. This cannot be undone."
+                  size="md"
+                >
+                  Delete
+                </ConfirmSubmit>
+              </form>
+            ) : null}
+          </div>
+        }
       />
 
       {query.error ? (
@@ -97,82 +114,30 @@ export default async function RoomPage({
           </Card>
         </div>
 
-        <Card title="Edit">
-          <form action={updateRoomAction} className="space-y-3">
-            <input type="hidden" name="roomId" value={room.id} />
-            <Field label="Name" htmlFor="room-name">
-              <Input id="room-name" name="name" defaultValue={room.name} required maxLength={80} />
-            </Field>
-            <Field label="Nickname" htmlFor="room-nickname">
-              <Input
-                id="room-nickname"
-                name="nickname"
-                defaultValue={room.nickname ?? ''}
-                maxLength={40}
-              />
-            </Field>
-            <Field label="Kind" htmlFor="room-kind">
-              <Select id="room-kind" name="kind" defaultValue={room.kind}>
-                {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Capacity" htmlFor="room-capacity">
-                <Input
-                  id="room-capacity"
-                  name="capacity"
-                  type="number"
-                  min={0}
-                  max={500}
-                  defaultValue={room.capacity ?? ''}
-                />
-              </Field>
-              <Field label="Maximum" htmlFor="room-max">
-                <Input
-                  id="room-max"
-                  name="capacityMax"
-                  type="number"
-                  min={0}
-                  max={500}
-                  defaultValue={room.capacityMax ?? ''}
-                />
-              </Field>
-            </div>
-            <label className="flex items-center gap-2.5 text-sm">
-              <input
-                type="checkbox"
-                name="isBookable"
-                defaultChecked={room.isBookable}
-                className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
-              />
-              Bookable for courses
-            </label>
-            <label className="flex items-center gap-2.5 text-sm">
-              <input
-                type="checkbox"
-                name="isActive"
-                defaultChecked={room.isActive}
-                className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
-              />
-              Active
-            </label>
-            <Field label="Notes" htmlFor="room-notes">
-              <Textarea id="room-notes" name="notes" rows={3} defaultValue={room.notes ?? ''} />
-            </Field>
-            <Button type="submit" className="w-full">
-              Save
-            </Button>
-          </form>
-          <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs text-[var(--casa-text-subtle)]">
-            <Link href="/admin/catalogue" className="font-medium text-[var(--casa-accent-text)]">
-              Assign cohorts to rooms
-            </Link>{' '}
-            from the courses screen.
-          </p>
+        <Card title="Status">
+          <DetailList
+            items={[
+              {
+                label: 'Bookable',
+                value: room.isBookable ? (
+                  <Badge tone="positive">Yes</Badge>
+                ) : (
+                  <Badge tone="neutral">No</Badge>
+                ),
+              },
+              {
+                label: 'Active',
+                value: room.isActive ? (
+                  <Badge tone="positive">Yes</Badge>
+                ) : (
+                  <Badge tone="quiet">No</Badge>
+                ),
+              },
+              { label: 'Capacity', value: room.capacity ?? '—' },
+              { label: 'Maximum', value: room.capacityMax ?? '—' },
+              { label: 'Notes', value: room.notes },
+            ]}
+          />
         </Card>
       </div>
     </>

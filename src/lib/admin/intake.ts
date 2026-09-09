@@ -108,7 +108,7 @@ async function createPerson(
       `SELECT p.id, p.first_name, p.last_name,
               ${email ? `EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND e.normalized = $1)` : 'false'} AS by_email
          FROM people p
-        WHERE p.merged_into IS NULL AND (${conditions.join(' OR ')})
+        WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND (${conditions.join(' OR ')})
         ORDER BY p.created_at LIMIT 10`,
       params
     );

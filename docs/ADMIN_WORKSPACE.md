@@ -48,7 +48,7 @@ published catalogue), **Activity** (who changed what), **Team** and
 
 ```bash
 npm run db:up        # Postgres 17 in Docker, on port 5433
-npm run db:migrate   # schema, including 0006, 0007 and 0008
+npm run db:migrate   # schema, including 0006 to 0009
 npm run db:seed      # baseline catalogue, plus CASA's rooms and locations
 npm run db:seed      # baseline public data (courses, exams)
 ```
@@ -196,26 +196,54 @@ deactivated account — and verifies against a throwaway hash when no account
 matched, so an unknown address costs the same ~100 ms as a real one. Response
 time leaks nothing and the form is not an account-enumeration oracle.
 
-### Roles and modules
+### Roles, modules and levels
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, planning, catalogue, activity, team, settings. A role
-grants a default set; a per-person exception (`staff_module_access`, 0008)
-adds or removes a module for one account. Three places read the resolved set
-and nothing else decides access: the sidebar (what to show), each module's
-`layout.tsx` (what to serve — every module directory has one), and every
-server action (what to execute). Hiding a link is not access control.
+applications, people, planning, catalogue, activity, team, settings. For each
+module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
+opens the screens, `edit` creates and changes, `full` also deletes and does
+the irreversible things. A role sets the default level per module; a
+per-person exception (`staff_module_access`, 0008/0009) overrides one module
+for one account. Three places read the resolved access and nothing else
+decides it: the sidebar (what to show), each module's `layout.tsx` (what to
+serve — every module directory has one, asking for `view`), and every server
+action (what to execute, asking for the level the mutation needs). Hiding a
+link is not access control.
 
-| Role | Default modules |
+| Role | Default |
 | --- | --- |
-| `staff` | Everything except Planning and Team |
-| `admin` | Everything, plus setting other people's modules on the Team screen |
+| `staff` | `edit` on Enquiries, Registrations, Placement, Applications, People, Courses & exams, Activity; `view` on Overview and Settings; `none` on Rooms and Team |
+| `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
-Overview and Settings cannot be removed; Team is never granted by exception.
-Changing someone's modules ends their sessions, so a narrowed set takes effect
-at once. The Team screen shows the matrix and edits it for `staff` accounts.
+Overview and Settings never drop below `view`; Team is never granted by
+exception. Changing someone's levels ends their sessions, so a narrowed set
+takes effect at once. The Team screen shows the matrix and edits it for
+`staff` accounts.
+
+### Create, edit, delete
+
+Every module that holds records offers the three, the way FileMaker does, with
+two differences. Forms open in a **dialog** (`FormDialog` in
+`src/components/admin/dialogs.tsx`) from a button in the page header, so a list
+stays a list. And every destructive action goes through **`ConfirmSubmit`**: a
+button inside the form that opens a confirmation, and on confirm submits the
+form with a hidden `confirmed=1` that the server action checks — a request that
+skipped the dialog is refused, so the confirmation is not only visual.
+Deletes are soft where history matters (`people.deleted_at`; a room is removed
+outright because nothing refers to it once its cohorts are moved). Today:
+people (add, edit, delete), rooms (add, edit, delete, assign to cohort), staff
+accounts (add, deactivate with confirmation).
+
+### Navigation
+
+Three collapsible groups — **Inbox** (enquiries, registrations, placement,
+applications), **School** (people, rooms, courses & exams), **Administration**
+(activity, team, settings) — with nested items under Registrations, People and
+Courses & exams. A group opens itself when a screen inside it is current and
+remembers a manual open/close in the browser. New screens go into an existing
+group or a nested item; the rail never grows a flat list.
 
 CASA cannot be left with no active owner; the workspace refuses the change that
 would do it. **Deactivation, not deletion** — a deleted account takes its name
@@ -361,8 +389,9 @@ and the white cards.
 
 ## The database
 
-`db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql` and
-`0008_rooms_and_module_access.sql`. Tables from 0006:
+`db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql`,
+`0008_rooms_and_module_access.sql` and `0009_access_levels_and_soft_delete.sql`.
+Tables from 0006:
 
 | Table | Holds |
 | --- | --- |
@@ -400,7 +429,7 @@ cleaned on the way in).
 | `locations` | A site (`Am Dobben 14–16`, `Kinderklinik`…), client premises, or online. `kind` says which |
 | `rooms` | `name`, `nickname` (the city name staff use), `floor`, `kind` (classroom / office / meeting / other), `capacity` (planning) and `capacity_max` (ceiling), `is_bookable`, `is_active` |
 | `course_instances.room_id` | The room a cohort runs in. Optional. Only bookable active classrooms may be assigned |
-| `staff_module_access` | Per-person module exceptions; see *Roles and modules* |
+| `staff_module_access` | Per-person `(module, level)` exceptions; see *Roles, modules and levels* |
 
 Screens: **Rooms** (`/admin/planning`, by location, with an add form) and a room
 page with its cohorts and an edit form; the catalogue's cohort table gains a

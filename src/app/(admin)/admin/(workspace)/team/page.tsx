@@ -19,8 +19,9 @@ import {
   TableRow,
   relativeDays,
 } from '@/components/admin/ui';
+import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { roleLabel } from '@/components/admin/shell';
-import { ADJUSTABLE, MODULE_LABELS, resolveModules } from '@/lib/admin/access';
+import { ADJUSTABLE, LEVEL_LABELS, LEVELS, MODULE_LABELS, resolveAccess } from '@/lib/admin/access';
 import { canDeleteStaff } from '@/lib/admin/auth';
 import { requireModule } from '@/lib/admin/guard';
 import { MIN_PASSWORD_LENGTH } from '@/lib/admin/password';
@@ -142,13 +143,19 @@ export default async function TeamPage({
                         name="isActive"
                         value={account.isActive ? 'false' : 'true'}
                       />
-                      <Button
-                        type="submit"
-                        variant={account.isActive ? 'danger' : 'secondary'}
-                        size="sm"
-                      >
-                        {account.isActive ? 'Deactivate' : 'Reactivate'}
-                      </Button>
+                      {account.isActive ? (
+                        <ConfirmSubmit
+                          title={`Deactivate ${account.name}?`}
+                          description="They are signed out everywhere and can no longer open the workspace. Their name stays on everything they did. You can reactivate them later."
+                          confirmLabel="Deactivate"
+                        >
+                          Deactivate
+                        </ConfirmSubmit>
+                      ) : (
+                        <Button type="submit" variant="secondary" size="sm">
+                          Reactivate
+                        </Button>
+                      )}
                     </form>
                   )}
                 </Cell>
@@ -168,7 +175,7 @@ export default async function TeamPage({
             {staff
               .filter((account) => account.isActive)
               .map((account) => {
-                const modules = resolveModules(account.role, account.moduleExceptions);
+                const access = resolveAccess(account.role, account.moduleExceptions);
                 const fixed = account.id === user.id || account.role !== 'staff';
                 return (
                   <TableRow key={account.id}>
@@ -178,52 +185,40 @@ export default async function TeamPage({
                         {roleLabel(account.role)}
                       </span>
                     </Cell>
-                    {fixed ? (
-                      <>
-                        {ADJUSTABLE.map((m) => (
-                          <Cell key={m} className="text-center">
-                            <span
-                              aria-label={modules.includes(m) ? 'Yes' : 'No'}
-                              className={
-                                modules.includes(m)
-                                  ? 'text-[var(--casa-success-text)]'
-                                  : 'text-ws-line-firm'
-                              }
-                            >
-                              {modules.includes(m) ? '●' : '○'}
-                            </span>
-                          </Cell>
-                        ))}
-                        <Cell align="right" className="text-xs text-[var(--casa-text-subtle)]">
-                          {account.id === user.id ? '' : 'All modules'}
+                    {ADJUSTABLE.map((m) =>
+                      fixed ? (
+                        <Cell key={m} className="text-sm text-[var(--casa-text-subtle)]">
+                          {LEVEL_LABELS[access[m]]}
                         </Cell>
-                      </>
-                    ) : (
-                      <>
-                        {ADJUSTABLE.map((m) => (
-                          <Cell key={m} className="text-center">
-                            <input
-                              form={`access-${account.id}`}
-                              type="checkbox"
-                              name="modules"
-                              value={m}
-                              defaultChecked={modules.includes(m)}
-                              aria-label={`${MODULE_LABELS[m]} for ${account.name}`}
-                              className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
-                            />
-                          </Cell>
-                        ))}
-                        <Cell align="right">
-                          <form id={`access-${account.id}`} action={setModuleAccessAction}>
-                            <input type="hidden" name="staffUserId" value={account.id} />
-                            <input type="hidden" name="role" value={account.role} />
-                            <Button type="submit" variant="ghost" size="sm">
-                              Save
-                            </Button>
-                          </form>
+                      ) : (
+                        <Cell key={m}>
+                          <Select
+                            form={`access-${account.id}`}
+                            name={`level:${m}`}
+                            defaultValue={access[m]}
+                            aria-label={`${MODULE_LABELS[m]} for ${account.name}`}
+                            className="w-auto py-1 text-xs"
+                          >
+                            {LEVELS.map((level) => (
+                              <option key={level} value={level}>
+                                {LEVEL_LABELS[level]}
+                              </option>
+                            ))}
+                          </Select>
                         </Cell>
-                      </>
+                      )
                     )}
+                    <Cell align="right">
+                      {fixed ? null : (
+                        <form id={`access-${account.id}`} action={setModuleAccessAction}>
+                          <input type="hidden" name="staffUserId" value={account.id} />
+                          <input type="hidden" name="role" value={account.role} />
+                          <Button type="submit" variant="ghost" size="sm">
+                            Save
+                          </Button>
+                        </form>
+                      )}
+                    </Cell>
                   </TableRow>
                 );
               })}

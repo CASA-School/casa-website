@@ -176,6 +176,8 @@ erDiagram
     uuid merged_into FK
     text created_by
     timestamptz created_at
+    timestamptz deleted_at
+    uuid deleted_by FK
   }
 
   EMAILS {
@@ -314,7 +316,7 @@ erDiagram
   STAFF_MODULE_ACCESS {
     uuid staff_user_id PK
     text module PK
-    bool allowed
+    text level
     uuid granted_by FK
   }
 ```

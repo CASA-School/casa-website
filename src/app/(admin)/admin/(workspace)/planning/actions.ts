@@ -4,9 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requireModule } from '@/lib/admin/guard';
-import { assignRoom, createRoom, updateRoom, type RoomKind } from '@/lib/admin/rooms';
+import { assignRoom, createRoom, deleteRoom, updateRoom, type RoomKind } from '@/lib/admin/rooms';
 
-/** Planning module mutations. Every one starts with the module guard. */
+/** Planning module mutations. Creating and editing need `edit`; deleting needs `full`. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const KINDS = new Set<string>(['classroom', 'office', 'meeting', 'other']);
@@ -31,7 +31,7 @@ function text(formData: FormData, field: string, max: number): string | null {
 }
 
 export async function updateRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning');
+  const actor = await requireModule('planning', 'edit');
   const roomId = id(formData, 'roomId');
   const kind = String(formData.get('kind') ?? '');
   if (!KINDS.has(kind)) throw new Error('Invalid kind');
@@ -67,7 +67,7 @@ export async function updateRoomAction(formData: FormData): Promise<void> {
 }
 
 export async function createRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning');
+  const actor = await requireModule('planning', 'edit');
   const locationId = id(formData, 'locationId');
   const name = text(formData, 'name', 80);
   if (!name) redirect(`/admin/planning?error=${encodeURIComponent('A room needs a name.')}`);
@@ -98,7 +98,7 @@ export async function createRoomAction(formData: FormData): Promise<void> {
 
 /** From the catalogue: put a cohort in a room. An empty value clears it. */
 export async function assignRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning');
+  const actor = await requireModule('planning', 'edit');
   const courseInstanceId = id(formData, 'courseInstanceId');
   const raw = String(formData.get('roomId') ?? '');
   const roomId = raw === '' ? null : raw;
@@ -110,4 +110,18 @@ export async function assignRoomAction(formData: FormData): Promise<void> {
   redirect(
     result.ok ? '/admin/catalogue' : `/admin/catalogue?error=${encodeURIComponent(result.reason)}`
   );
+}
+
+/** Only after the confirmation dialog: the hidden `confirmed` field must be set. */
+export async function deleteRoomAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('planning', 'full');
+  const roomId = id(formData, 'roomId');
+  if (formData.get('confirmed') !== '1') redirect(`/admin/planning/rooms/${roomId}`);
+
+  const result = await deleteRoom(roomId, actor);
+  revalidatePath('/admin/planning', 'layout');
+  revalidatePath('/admin/catalogue');
+  if (!result.ok)
+    redirect(`/admin/planning/rooms/${roomId}?error=${encodeURIComponent(result.reason)}`);
+  redirect('/admin/planning');
 }

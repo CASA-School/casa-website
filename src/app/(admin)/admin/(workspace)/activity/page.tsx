@@ -28,7 +28,7 @@ export default async function ActivityPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Reference"
+        eyebrow="Administration"
         title="Activity"
         description="Every status change, assignment, note and placement decision, against the name of whoever made it."
       />

@@ -75,7 +75,7 @@ function readQueueEntity(formData: FormData): QueueEntity {
 
 export async function updateStatusAction(formData: FormData): Promise<void> {
   const entity = readQueueEntity(formData);
-  const actor = await requireModule(MODULE_FOR[entity]);
+  const actor = await requireModule(MODULE_FOR[entity], 'edit');
   const id = readId(formData);
   const status = String(formData.get('status') ?? '');
 
@@ -94,7 +94,7 @@ export async function updateStatusAction(formData: FormData): Promise<void> {
 
 export async function assignAction(formData: FormData): Promise<void> {
   const entity = readQueueEntity(formData);
-  const actor = await requireModule(MODULE_FOR[entity]);
+  const actor = await requireModule(MODULE_FOR[entity], 'edit');
   const id = readId(formData);
   const raw = String(formData.get('staffUserId') ?? '');
 
@@ -121,7 +121,7 @@ export async function addNoteAction(formData: FormData): Promise<void> {
     throw new Error('Invalid entity');
   }
 
-  const actor = await requireModule(MODULE_FOR[entity]);
+  const actor = await requireModule(MODULE_FOR[entity], 'edit');
 
   if (body.trim().length === 0) {
     return;
@@ -146,7 +146,7 @@ export async function addNoteAction(formData: FormData): Promise<void> {
  * scores in `src/config/placement/policy.ts` are right.
  */
 export async function confirmPlacementAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('placement');
+  const actor = await requireModule('placement', 'edit');
   const attemptId = readId(formData, 'attemptId');
   const confirmedLevel = String(formData.get('confirmedLevel') ?? '').trim();
   const note = String(formData.get('note') ?? '').trim();
@@ -200,7 +200,7 @@ function readReturnTo(formData: FormData, fallback: string): string {
  * no foreign key — reads follow `merged_into` — so it is reversible.
  */
 export async function linkPersonAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('people');
+  const actor = await requireModule('people', 'edit');
   const duplicateId = readId(formData, 'duplicateId');
   const survivorId = readId(formData, 'survivorId');
   const returnTo = readReturnTo(formData, '/admin/people');
@@ -211,7 +211,7 @@ export async function linkPersonAction(formData: FormData): Promise<void> {
 }
 
 export async function unlinkPersonAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('people');
+  const actor = await requireModule('people', 'edit');
   const personId = readId(formData, 'personId');
   await unlinkPerson({ personId, actor });
   revalidatePath('/admin', 'layout');
@@ -219,7 +219,7 @@ export async function unlinkPersonAction(formData: FormData): Promise<void> {
 }
 
 export async function resolveFlagAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('people');
+  const actor = await requireModule('people', 'edit');
   const flagId = readId(formData, 'flagId');
   await resolveFlag(flagId, actor);
   revalidatePath('/admin', 'layout');
@@ -232,7 +232,7 @@ export async function resolveFlagAction(formData: FormData): Promise<void> {
  * reviewer's decision, on the review, against their name.
  */
 export async function attachReviewPersonAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('placement');
+  const actor = await requireModule('placement', 'edit');
   const attemptId = readId(formData, 'attemptId');
   const raw = String(formData.get('personId') ?? '');
   const personId = raw === '' ? null : raw;

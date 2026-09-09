@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { ADJUSTABLE, isModule, roleDefault } from '@/lib/admin/access';
+import { ADJUSTABLE, isLevel, roleDefault, type AccessLevel } from '@/lib/admin/access';
 import { canDeleteStaff, revokeAllSessions, type StaffRole } from '@/lib/admin/auth';
 import { requireModule } from '@/lib/admin/guard';
 import { describePasswordProblem } from '@/lib/admin/password';
 import {
   createStaffAccount,
   setStaffActive,
-  setStaffModules,
+  setStaffAccess,
   setStaffPassword,
   setStaffRole,
 } from '@/lib/admin/staff';
@@ -29,7 +29,7 @@ const ROLES = new Set<string>(['owner', 'admin', 'staff']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The Team module is owner/admin by role and never granted by exception. */
-const requireManager = () => requireModule('team');
+const requireManager = () => requireModule('team', 'full');
 
 function back(message: string, kind: 'error' | 'ok' = 'error'): never {
   redirect(`/admin/team?${kind}=${encodeURIComponent(message)}`);
@@ -91,6 +91,12 @@ export async function setActiveAction(formData: FormData): Promise<void> {
     back('Unknown account.');
   }
 
+  // Deactivating signs the person out everywhere; it goes through the
+  // confirmation dialog, and a request that skipped it is refused.
+  if (!isActive && formData.get('confirmed') !== '1') {
+    back('Deactivation was not confirmed.');
+  }
+
   const result = await setStaffActive({ staffUserId, isActive, actor });
 
   if (!result.ok) {
@@ -144,7 +150,7 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
   back('Password set. Every session for that account is closed.', 'ok');
 }
 
-/** Which modules one person may open. Checkboxes; unchecked means no. */
+/** What one person may do in each module. Levels equal to the role default are not stored. */
 export async function setModuleAccessAction(formData: FormData): Promise<void> {
   const manager = await requireManager();
   const staffUserId = String(formData.get('staffUserId') ?? '');
@@ -154,18 +160,14 @@ export async function setModuleAccessAction(formData: FormData): Promise<void> {
   const role = String(formData.get('role') ?? '');
   if (!ROLES.has(role)) back('Invalid role.');
 
-  const modules = formData
-    .getAll('modules')
-    .map(String)
-    .filter((m) => isModule(m) && (ADJUSTABLE as readonly string[]).includes(m));
+  const levels: Record<string, AccessLevel> = {};
+  for (const name of ADJUSTABLE) {
+    const level = String(formData.get(`level:${name}`) ?? '');
+    if (!isLevel(level)) back('Invalid access level.');
+    levels[name] = level;
+  }
 
-  await setStaffModules(
-    staffUserId,
-    modules,
-    roleDefault(role as StaffRole),
-    ADJUSTABLE,
-    manager.id
-  );
+  await setStaffAccess(staffUserId, levels, roleDefault(role as StaffRole), manager.id);
   // A narrowed set must take effect now, not when the session next reloads.
   await revokeAllSessions(staffUserId);
   revalidatePath('/admin/team');

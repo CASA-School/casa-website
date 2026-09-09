@@ -133,7 +133,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0008_rooms_and_module_access.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0009_access_levels_and_soft_delete.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -171,6 +171,14 @@ presentable. No rationale, caveats or "not built yet" notes in the UI — those 
 in `docs/ADMIN_WORKSPACE.md` or a code comment. Every workspace feature is a
 module in `src/lib/admin/access.ts`, gated by role and per-person exception;
 design a new screen by answering "who may see this" first.
+
+**Create, edit, delete — with a confirmation on anything destructive.** Every
+record module offers the three. Forms open in `FormDialog`; deletes go through
+`ConfirmSubmit`, and the server action checks the hidden `confirmed` field, so
+skipping the dialog is refused. Access is per module *and level*
+(`none`/`view`/`edit`/`full`): an action asks `requireModule(module, level)`
+for exactly what it does; delete is `full`. New screens join an existing
+sidebar group or a nested item — the rail never becomes a flat list.
 
 **Progressive disclosure, especially in forms.** Ask for the fields that make a
 record valid and useful; put the rest behind a collapsed `<details>` step or on

@@ -26,7 +26,7 @@ export default async function ExamCataloguePage() {
   return (
     <>
       <PageHeader
-        eyebrow="Reference"
+        eyebrow="School"
         title="Exams"
         description="telc sittings CASA has scheduled, and how many candidates have registered for each."
       />
@@ -85,11 +85,7 @@ export default async function ExamCataloguePage() {
                               : 'mt-0.5 block text-xs text-[var(--casa-text-subtle)]'
                           }
                         >
-                          {closed
-                            ? 'closed'
-                            : daysLeft === 0
-                              ? 'today'
-                              : `${daysLeft} days left`}
+                          {closed ? 'closed' : daysLeft === 0 ? 'today' : `${daysLeft} days left`}
                         </span>
                       </>
                     ) : (

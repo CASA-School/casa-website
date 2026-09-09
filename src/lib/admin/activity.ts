@@ -156,6 +156,22 @@ export function describeActivity(entry: ActivityEntry): string {
       return `added a note to ${subject}`;
     case 'cv_downloaded':
       return `downloaded the CV on ${subject}`;
+    case 'person_created':
+      return 'added a person';
+    case 'person_updated':
+      return 'edited a person';
+    case 'person_deleted':
+      return 'deleted a person';
+    case 'room_created':
+      return 'added a room';
+    case 'room_updated':
+      return 'edited a room';
+    case 'room_deleted':
+      return 'deleted a room';
+    case 'room_assigned':
+      return 'put a cohort in a room';
+    case 'room_unassigned':
+      return 'took a cohort out of its room';
     case 'person_linked':
       return 'linked a duplicate person record to the existing one';
     case 'person_unlinked':
@@ -197,6 +213,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'person' && entry.entityId) {
     return `/admin/people/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'room' && entry.entityId) {
+    return `/admin/planning/rooms/${entry.entityId}`;
   }
 
   return null;

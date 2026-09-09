@@ -50,7 +50,7 @@ export default async function CataloguePage({
   return (
     <>
       <PageHeader
-        eyebrow="Reference"
+        eyebrow="School"
         title="Courses"
         description="What CASA publishes, and how many people have registered against each dated option."
       />

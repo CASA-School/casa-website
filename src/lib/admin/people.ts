@@ -1,5 +1,7 @@
 import { query, queryFirst, withTransaction } from './db';
 import type { StaffUser } from './auth';
+import { logActivity } from './activity';
+import { countryCodeFromName, normalizeEmail, normalizePhone, parseIsoDate } from './normalize';
 import { displayName } from './normalize';
 
 /**
@@ -81,13 +83,16 @@ const toSummary = (r: Row): PersonSummary => ({
 });
 
 export async function getPersonSummary(id: string): Promise<PersonSummary | null> {
-  const row = await queryFirst<Row>(`${SELECT} WHERE p.id = $1`, [id]);
+  const row = await queryFirst<Row>(`${SELECT} WHERE p.id = $1 AND p.deleted_at IS NULL`, [id]);
   return row ? toSummary(row) : null;
 }
 
 /** The canonical person for an id, with channels and anything linked into it. */
 export async function getPerson(id: string): Promise<PersonDetail | null> {
-  const row = await queryFirst<Row>(`${SELECT} WHERE p.id = canonical_person_id($1)`, [id]);
+  const row = await queryFirst<Row>(
+    `${SELECT} WHERE p.id = canonical_person_id($1) AND p.deleted_at IS NULL`,
+    [id]
+  );
   if (!row) return null;
 
   // Channels come from the whole cluster: a duplicate that was linked may have
@@ -137,7 +142,7 @@ export async function listPeople({
   total: number;
 }> {
   const params: unknown[] = [];
-  let where = `WHERE p.merged_into IS NULL`;
+  let where = `WHERE p.merged_into IS NULL AND p.deleted_at IS NULL`;
   if (search) {
     params.push(`%${search}%`);
     where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR EXISTS (
@@ -250,7 +255,7 @@ export async function findDuplicateCandidates({
       'FROM people p',
       `, ${email ? `EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND e.normalized = $1)` : 'false'} AS by_email FROM people p`
     )}
-     WHERE p.merged_into IS NULL
+     WHERE p.merged_into IS NULL AND p.deleted_at IS NULL
        AND p.id <> canonical_person_id($${params.length}::uuid)
        AND (${conditions.join(' OR ')})
      ORDER BY p.created_at
@@ -366,4 +371,138 @@ export async function latestConfirmedLevel(canonicalId: string): Promise<{
         reviewerName: row.reviewer,
       }
     : null;
+}
+
+// ------------------------------------------------------------------- CRUD
+
+export type PersonInput = {
+  salutation: string | null;
+  firstName: string;
+  lastName: string | null;
+  birthDate: string | null;
+  nationality: string | null;
+  email: string | null;
+  phone: string | null;
+};
+
+export type Country = { code: string; nameEn: string };
+
+export async function listCountries(): Promise<Country[]> {
+  const rows = await query<{ code: string; name_en: string }>(
+    `SELECT code, name_en FROM countries ORDER BY name_en`
+  );
+  return rows.map((r) => ({ code: r.code, nameEn: r.name_en }));
+}
+
+/**
+ * A person created by a staff member. Typed values are resolved exactly as
+ * intake resolves them; a nationality that does not match stays as written.
+ */
+export async function createPersonByStaff(input: PersonInput, actor: StaffUser): Promise<string> {
+  return withTransaction(async (client) => {
+    const { rows } = await client.query<{ id: string }>(
+      `INSERT INTO people (salutation, first_name, last_name, birth_date, nationality_code, nationality_raw, created_by)
+       VALUES ($1::salutation, $2, $3, $4::date, $5, $6, $7)
+       RETURNING id`,
+      [
+        input.salutation || null,
+        input.firstName.trim(),
+        input.lastName?.trim() || null,
+        parseIsoDate(input.birthDate),
+        countryCodeFromName(input.nationality),
+        input.nationality?.trim() || null,
+        `staff:${actor.id}`,
+      ]
+    );
+    const id = rows[0].id;
+    if (input.email?.trim()) {
+      await client.query(
+        `INSERT INTO emails (person_id, address, normalized) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+        [id, input.email.trim(), normalizeEmail(input.email)]
+      );
+    }
+    if (input.phone?.trim()) {
+      await client.query(
+        `INSERT INTO phones (person_id, number, normalized) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+        [id, input.phone.trim(), normalizePhone(input.phone)]
+      );
+    }
+    await client.query(
+      `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action)
+       VALUES ($1, $2, 'person', $3, 'person_created')`,
+      [actor.id, actor.name, id]
+    );
+    return id;
+  });
+}
+
+/**
+ * Edits the person's own facts. Email and phone given here become the primary
+ * channel; earlier ones are kept, since a registration may still carry them.
+ */
+export async function updatePerson(
+  id: string,
+  input: PersonInput,
+  actor: StaffUser
+): Promise<void> {
+  await withTransaction(async (client) => {
+    await client.query(
+      `UPDATE people
+          SET salutation = $2::salutation, first_name = $3, last_name = $4, birth_date = $5::date,
+              nationality_code = $6, nationality_raw = $7
+        WHERE id = $1 AND deleted_at IS NULL`,
+      [
+        id,
+        input.salutation || null,
+        input.firstName.trim(),
+        input.lastName?.trim() || null,
+        parseIsoDate(input.birthDate),
+        countryCodeFromName(input.nationality),
+        input.nationality?.trim() || null,
+      ]
+    );
+    if (input.email?.trim()) {
+      const normalized = normalizeEmail(input.email);
+      await client.query(`UPDATE emails SET is_primary = false WHERE person_id = $1`, [id]);
+      await client.query(
+        `INSERT INTO emails (person_id, address, normalized, is_primary) VALUES ($1, $2, $3, true)
+         ON CONFLICT (person_id, normalized) DO UPDATE SET address = EXCLUDED.address, is_primary = true`,
+        [id, input.email.trim(), normalized]
+      );
+    }
+    if (input.phone?.trim()) {
+      const normalized = normalizePhone(input.phone);
+      await client.query(`UPDATE phones SET is_primary = false WHERE person_id = $1`, [id]);
+      await client.query(
+        `INSERT INTO phones (person_id, number, normalized, is_primary) VALUES ($1, $2, $3, true)
+         ON CONFLICT (person_id, normalized) DO UPDATE SET number = EXCLUDED.number, is_primary = true`,
+        [id, input.phone.trim(), normalized]
+      );
+    }
+  });
+  await logActivity({ actor, entity: 'person', entityId: id, action: 'person_updated' });
+}
+
+/**
+ * Soft delete. The row and everything that points at it stay; every read
+ * filters it out. Refused while other rows are linked into this one — unlink
+ * them first, so no history vanishes by accident.
+ */
+export async function deletePerson(
+  id: string,
+  actor: StaffUser
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const linked = await queryFirst<{ n: string }>(
+    `SELECT count(*) AS n FROM people WHERE merged_into = $1`,
+    [id]
+  );
+  if (Number(linked?.n ?? 0) > 0) {
+    return { ok: false, reason: 'Other records are linked to this person. Unlink them first.' };
+  }
+  await query(
+    `UPDATE people SET deleted_at = now(), deleted_by = $2 WHERE id = $1 AND deleted_at IS NULL`,
+    [id, actor.id]
+  );
+  await logActivity({ actor, entity: 'person', entityId: id, action: 'person_deleted' });
+  return { ok: true };
 }

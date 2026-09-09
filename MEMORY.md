@@ -1706,9 +1706,36 @@ Three rules from the user after seeing the person panel, and what they became:
 Also: `eslint.config.mjs` now ignores `.claude/**` and `output/**` — linting
 from the main checkout was scanning a worktree's node_modules.
 
+## CRUD, confirmations, access levels, grouped navigation — 0009 (2026-09-09)
+
+Five rules from the user, applied in one pass:
+
+- **Access by level, not only by module.** `staff_module_access.allowed` became
+  `level` (none / view / edit / full). `requireModule(module, level)` is the one
+  guard; layouts ask `view`, create/edit actions ask `edit`, deletes ask `full`.
+  Staff default to `edit` on their modules; admin and owner to `full`. The Team
+  matrix is a level select per module.
+- **Dialogs.** `src/components/admin/dialogs.tsx`: `FormDialog` (a create/edit
+  form in a popup, opened from the page header) and `ConfirmSubmit` (the button
+  for destructive actions — opens a confirmation, then submits the enclosing
+  form with `confirmed=1`, which the action checks server-side).
+- **CRUD.** People: add, edit (primary email/phone become new channel rows),
+  soft delete (`deleted_at`, refused while other rows are linked in). Rooms: add,
+  edit, delete (refused while cohorts are planned in). Staff: deactivate now
+  confirms.
+- **Navigation.** `NavGroup` (collapsible, opens on the current route, remembers
+  manual state in localStorage via `useSyncExternalStore`) and nested `items`
+  under a `NavLink`. Groups: Inbox, School, Administration.
+- **Progressive disclosure** in every new form: the create forms show two or
+  three fields and a `More` step.
+
+Gotcha: the `react-hooks/set-state-in-effect` lint rule forbids reading
+localStorage into state in an effect; `useSyncExternalStore` with a null
+server snapshot is the pattern that passes and avoids a hydration mismatch.
+
 ## Verified Baseline
 
-The latest implementation pass (2026-09-09, migration 0008) cleared all six:
+The latest implementation pass (2026-09-09, migration 0009) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`

@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import { cookies } from 'next/headers';
 
-import { resolveModules, type WorkspaceModule } from './access';
+import { resolveAccess, type Access } from './access';
 import { query, queryFirst } from './db';
 import { verifyPassword } from './password';
 
@@ -35,8 +35,8 @@ export type StaffUser = {
   email: string;
   name: string;
   role: StaffRole;
-  /** The modules this person may open — role default plus exceptions. */
-  modules: WorkspaceModule[];
+  /** What this person may do in each module — role default plus exceptions. */
+  access: Access;
 };
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -97,7 +97,7 @@ export async function signIn(
       email: row.email,
       name: row.name,
       role: row.role,
-      modules: resolveModules(row.role, []),
+      access: resolveAccess(row.role, []),
     },
     token,
   };
@@ -149,7 +149,7 @@ type SessionRow = {
   email: string;
   name: string;
   role: StaffRole;
-  exceptions: { module: string; allowed: boolean }[] | null;
+  exceptions: { module: string; level: string }[] | null;
 };
 
 /**
@@ -176,7 +176,7 @@ export async function getStaffUser(): Promise<StaffUser | null> {
               u.email,
               u.name,
               u.role,
-              (SELECT json_agg(json_build_object('module', a.module, 'allowed', a.allowed))
+              (SELECT json_agg(json_build_object('module', a.module, 'level', a.level))
                  FROM staff_module_access a WHERE a.staff_user_id = u.id) AS exceptions
          FROM staff_sessions s
          JOIN staff_users u ON u.id = s.staff_user_id
@@ -217,7 +217,7 @@ export async function getStaffUser(): Promise<StaffUser | null> {
     email: row.email,
     name: row.name,
     role: row.role,
-    modules: resolveModules(row.role, row.exceptions ?? []),
+    access: resolveAccess(row.role, row.exceptions ?? []),
   };
 }
 

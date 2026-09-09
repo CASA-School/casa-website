@@ -1,13 +1,17 @@
 import type { StaffRole, StaffUser } from './auth';
 
 /**
- * Modules, and who may open them.
+ * Modules, and how much of each a person may do.
  *
- * The workspace is a set of modules. Each has one entry here — its route
- * prefix, its label, and the roles that get it by default — and every screen
- * in it sits under a layout that calls `requireModule`. A person's effective
- * set is the role default plus or minus the exceptions in
- * `staff_module_access`, resolved once per request in `getStaffUser`.
+ * The workspace is a set of modules. Each has one entry here — its label, its
+ * route, the level each role gets by default — and every screen in it sits
+ * under a layout that calls `requireModule`. A person's effective access is
+ * the role default overlaid with the exceptions in `staff_module_access`,
+ * resolved once per request in `getStaffUser`.
+ *
+ * Levels are ordered. `view` reads, `edit` creates and changes, `full` also
+ * deletes and does the irreversible things. An action asks for the level it
+ * needs; a screen asks for `view`.
  *
  * Three places read this and nowhere else decides access: the sidebar (what
  * to show), the module layouts (what to serve), and the server actions (what
@@ -31,6 +35,18 @@ export const MODULES = [
 
 export type WorkspaceModule = (typeof MODULES)[number];
 
+export const LEVELS = ['none', 'view', 'edit', 'full'] as const;
+export type AccessLevel = (typeof LEVELS)[number];
+
+export const LEVEL_LABELS: Record<AccessLevel, string> = {
+  none: 'No access',
+  view: 'View',
+  edit: 'Edit',
+  full: 'Full',
+};
+
+const RANK: Record<AccessLevel, number> = { none: 0, view: 1, edit: 2, full: 3 };
+
 export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   overview: 'Overview',
   enquiries: 'Enquiries',
@@ -38,7 +54,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   placement: 'Placement',
   applications: 'Applications',
   people: 'People',
-  planning: 'Planning',
+  planning: 'Rooms',
   catalogue: 'Courses & exams',
   activity: 'Activity',
   team: 'Team',
@@ -62,47 +78,63 @@ export const MODULE_HREFS: Record<WorkspaceModule, string> = {
 /** Modules that cannot be taken away: the frame the rest hangs on. */
 export const ALWAYS_ON: readonly WorkspaceModule[] = ['overview', 'settings'];
 
-/** Modules a per-person exception may switch. */
+/** Modules a per-person exception may change. Team is owner/admin by role only. */
 export const ADJUSTABLE: readonly WorkspaceModule[] = MODULES.filter(
   (m) => !ALWAYS_ON.includes(m) && m !== 'team'
 );
 
-const ROLE_DEFAULTS: Record<StaffRole, readonly WorkspaceModule[]> = {
-  owner: MODULES,
-  admin: MODULES,
-  staff: [
-    'overview',
-    'enquiries',
-    'registrations',
-    'placement',
-    'applications',
-    'people',
-    'catalogue',
-    'activity',
-    'settings',
-  ],
+export type Access = Record<WorkspaceModule, AccessLevel>;
+
+const STAFF_MODULES: readonly WorkspaceModule[] = [
+  'enquiries',
+  'registrations',
+  'placement',
+  'applications',
+  'people',
+  'catalogue',
+  'activity',
+];
+
+function fill(level: AccessLevel, only?: readonly WorkspaceModule[]): Access {
+  const out = {} as Access;
+  for (const m of MODULES) out[m] = only && !only.includes(m) ? 'none' : level;
+  return out;
+}
+
+const ROLE_DEFAULTS: Record<StaffRole, Access> = {
+  owner: fill('full'),
+  admin: fill('full'),
+  staff: { ...fill('edit', STAFF_MODULES), overview: 'view', settings: 'view' },
 };
 
 export const isModule = (value: string): value is WorkspaceModule =>
   (MODULES as readonly string[]).includes(value);
 
-/** Role default combined with a person's exceptions. */
-export function resolveModules(
+export const isLevel = (value: string): value is AccessLevel =>
+  (LEVELS as readonly string[]).includes(value);
+
+/** Role default overlaid with a person's exceptions. */
+export function resolveAccess(
   role: StaffRole,
-  exceptions: readonly { module: string; allowed: boolean }[]
-): WorkspaceModule[] {
-  const set = new Set<WorkspaceModule>(ROLE_DEFAULTS[role]);
+  exceptions: readonly { module: string; level: string }[]
+): Access {
+  const access: Access = { ...ROLE_DEFAULTS[role] };
   for (const e of exceptions) {
-    if (!isModule(e.module) || !ADJUSTABLE.includes(e.module)) continue;
-    // Team is owner/admin only and is never granted by exception.
-    if (e.allowed) set.add(e.module);
-    else set.delete(e.module);
+    if (!isModule(e.module) || !isLevel(e.level) || !ADJUSTABLE.includes(e.module)) continue;
+    access[e.module] = e.level;
   }
-  for (const m of ALWAYS_ON) set.add(m);
-  return MODULES.filter((m) => set.has(m));
+  for (const m of ALWAYS_ON) if (access[m] === 'none') access[m] = 'view';
+  return access;
 }
 
-export const canAccess = (user: StaffUser, module: WorkspaceModule): boolean =>
-  user.modules.includes(module);
+export const roleDefault = (role: StaffRole): Access => ROLE_DEFAULTS[role];
 
-export const roleDefault = (role: StaffRole): readonly WorkspaceModule[] => ROLE_DEFAULTS[role];
+export const hasLevel = (held: AccessLevel, needed: AccessLevel): boolean =>
+  RANK[held] >= RANK[needed];
+
+/** May this person do `level` in `module`? Defaults to opening it. */
+export const canAccess = (
+  user: StaffUser,
+  module: WorkspaceModule,
+  level: AccessLevel = 'view'
+): boolean => hasLevel(user.access[module], level);

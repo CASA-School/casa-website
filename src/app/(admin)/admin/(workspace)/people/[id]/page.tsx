@@ -2,6 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { unlinkPersonAction } from '../../actions';
+import { deletePersonAction } from '../actions';
+import { PersonForm } from '../person-form';
+import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { canAccess } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
 import { Icon } from '@/components/admin/icons';
 import {
   Badge,
@@ -18,6 +23,7 @@ import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import {
   getPerson,
   latestConfirmedLevel,
+  listCountries,
   personTimeline,
   type TimelineItem,
 } from '@/lib/admin/people';
@@ -53,20 +59,32 @@ const KIND_LABELS: Record<TimelineItem['kind'], string> = {
  * undo, because a wrong link is the one identity mistake that must stay cheap
  * to reverse.
  */
-export default async function PersonPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function PersonPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const [{ id }, { error }, user] = await Promise.all([
+    params,
+    searchParams,
+    requireModule('people'),
+  ]);
   const person = await getPerson(id);
 
   if (!person) {
     notFound();
   }
 
-  const [timeline, confirmed, flags, activity, fileMakerLinks] = await Promise.all([
+  const canEdit = canAccess(user, 'people', 'edit');
+  const [timeline, confirmed, flags, activity, fileMakerLinks, countries] = await Promise.all([
     personTimeline(person.id),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
     activityFor('person', person.id),
     listFileMakerLinks('person', person.id),
+    canEdit ? listCountries() : Promise.resolve([]),
   ]);
 
   const title = [SALUTATIONS[person.salutation ?? ''] ?? '', person.displayName]
@@ -85,7 +103,37 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
             ? 'Opened from a linked record.'
             : `In touch since ${person.createdAt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}.`
         }
+        actions={
+          <div className="flex items-center gap-2">
+            {canEdit ? (
+              <FormDialog trigger="Edit" title={person.displayName}>
+                <PersonForm person={person} countries={countries} />
+              </FormDialog>
+            ) : null}
+            {canAccess(user, 'people', 'full') ? (
+              <form action={deletePersonAction}>
+                <input type="hidden" name="personId" value={person.id} />
+                <ConfirmSubmit
+                  title={`Delete ${person.displayName}?`}
+                  description="The person disappears from every list. Their registrations and enquiries stay in the queues. An owner can restore the record."
+                  size="md"
+                >
+                  Delete
+                </ConfirmSubmit>
+              </form>
+            ) : null}
+          </div>
+        }
       />
+
+      {error ? (
+        <p
+          role="alert"
+          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
+        >
+          {error}
+        </p>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
         <div className="space-y-5">

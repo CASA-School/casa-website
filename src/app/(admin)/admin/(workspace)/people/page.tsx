@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Pagination } from '@/components/admin/pagination';
 import {
@@ -15,7 +16,10 @@ import {
 } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
-import { listPeople } from '@/lib/admin/people';
+import { canAccess } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
+import { listCountries, listPeople } from '@/lib/admin/people';
+import { PersonForm } from './person-form';
 
 /**
  * The person register.
@@ -39,20 +43,40 @@ export default async function PeoplePage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, flagCounts] = await Promise.all([
+  const user = await requireModule('people');
+  const canEdit = canAccess(user, 'people', 'edit');
+  const [{ items, total }, flagCounts, countries] = await Promise.all([
     listPeople({ search, limit: PAGE_SIZE, offset: offsetFor(page) }),
     openFlagsByCode(),
+    canEdit ? listCountries() : Promise.resolve([]),
   ]);
+  const error = firstParam(params.error);
 
   const flagEntries = (Object.entries(flagCounts) as [FlagCode, number][]).filter(([, n]) => n > 0);
 
   return (
     <>
       <PageHeader
-        eyebrow="Reference"
+        eyebrow="School"
         title="People"
         description="Everyone who has enquired, registered or sat a placement."
+        actions={
+          canEdit ? (
+            <FormDialog trigger="Add person" title="Add a person" triggerVariant="primary">
+              <PersonForm countries={countries} />
+            </FormDialog>
+          ) : null
+        }
       />
+
+      {error ? (
+        <p
+          role="alert"
+          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
+        >
+          {error}
+        </p>
+      ) : null}
 
       {flagEntries.length > 0 ? (
         <Card title="Needs a look" className="mb-5">
