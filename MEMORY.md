@@ -1754,9 +1754,41 @@ Still to port from the Booking and Course screens: teacher on the cohort,
 weekday schedule rows and holidays, the accommodation booking, letters and
 receipts (DE/EN), the learning-progress comment, the day calendar home screen.
 
+## The background setup: types and a real price list — 0011 (2026-09-09)
+
+The user asked me to dive into FileMaker's background configuration before
+building more, so the workspace does not accumulate clutter. Survey written up
+in `docs/CATALOGUE_AND_PRICING.md`; lessons §11.7 has the headline.
+
+**Vocabulary: good, ported.** SchoolMan has 231 tables of which **99 are
+reference tables** — eighteen years of careful terminology. Ported: 6 charge
+categories, 32 charge types, 6 accommodation types, 5 catering options, 4 room
+types, 3 day sessions with hours, 36 books with ISBN and level, plus German
+names, short codes, down payments and teaching mode on course types, short
+codes on exams, CEFR band and colour on levels. Every row keeps `filemaker_id`.
+
+**Prices: not data.** They live (1) typed per course, (2) typed per cost line
+across 76,362 rows, (3) copied per group offer — 171 distinct variants of
+"Kurspreis" in a 400-row sample — and (4) **inside a script**:
+`SetPrice_Exam_NationalAirport` sets telc B2 at 190/160 and C1 Hochschule at
+210/185 from a `Case()` in 28,062 characters of FileMaker script.
+`_ID_PriceCourseSet` is not a price set, it is an "already priced" flag.
+Accommodation has no price field at all.
+
+**The fix:** `rates` — scope, target, narrowing conditions (level, session,
+catering, room type, exam parts, quantity band), amount + unit + VAT, and a
+validity period; `applicable_rate()` picks the narrowest match on a date.
+Verified: telc B2 resolves to 190 for both parts, 160 for one; books at 7% VAT.
+`booking_charges` keeps its own amount — the rate is provenance, the charge is
+the agreement.
+
+Deliberately not ported: `PlatformReference` (a product line, sales channel and
+layout selector in one), `Course.CoursePrice`, `CostDetailSample`, and any
+course or accommodation price — there is no defensible value to import.
+
 ## Verified Baseline
 
-The latest implementation pass (2026-09-09, migration 0010) cleared all six:
+The latest implementation pass (2026-09-09, migration 0011) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`

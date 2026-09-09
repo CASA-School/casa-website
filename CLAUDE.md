@@ -133,7 +133,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0010_bookings_and_payments.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0011_catalogue_types_and_rates.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -179,6 +179,13 @@ skipping the dialog is refused. Access is per module *and level*
 (`none`/`view`/`edit`/`full`): an action asks `requireModule(module, level)`
 for exactly what it does; delete is `full`. New screens join an existing
 sidebar group or a nested item — the rail never becomes a flat list.
+
+**Types are tables, prices are rates.** Every vocabulary (course type, level,
+accommodation type, catering, room type, charge type, material) is a table with
+a stable `code` and its `filemaker_id`. Every price is a row in `rates` with a
+unit and a validity period, resolved by `applicable_rate()`; a cost line still
+stores the agreed `amount`. Never type a price into a column or a condition
+into code. See `docs/CATALOGUE_AND_PRICING.md`.
 
 **Progressive disclosure, especially in forms.** Ask for the fields that make a
 record valid and useful; put the rest behind a collapsed `<details>` step or on
@@ -253,6 +260,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or free-text column.** Measured defects in CASA's FileMaker and the rule each one gives the new schema; 0007 is its first application |
+| `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
 | `docs/FILEMAKER_BRIDGE.md` | The strangler plan: three phases from write-through to retirement, server-safe scripts, the decisions still open |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |

@@ -48,7 +48,7 @@ published catalogue), **Activity** (who changed what), **Team** and
 
 ```bash
 npm run db:up        # Postgres 17 in Docker, on port 5433
-npm run db:migrate   # schema, including 0006 to 0010
+npm run db:migrate   # schema, including 0006 to 0011
 npm run db:seed      # baseline catalogue, plus CASA's rooms and locations
 npm run db:seed      # baseline public data (courses, exams)
 ```
@@ -392,8 +392,9 @@ and the white cards.
 ## The database
 
 `db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql`,
-`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`
-and `0010_bookings_and_payments.sql`. Tables from 0006:
+`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`,
+`0010_bookings_and_payments.sql` and `0011_catalogue_types_and_rates.sql`.
+Tables from 0006:
 
 | Table | Holds |
 | --- | --- |
@@ -418,6 +419,33 @@ Course and exam registrations record their product **twice**: by id, so the row
 joins to the catalogue, and by the label the visitor actually saw. A cohort can
 be rescheduled or withdrawn after someone registers for it, and "what they
 signed up for" is not a question a live join can answer.
+
+### 0011 — the school's vocabulary, and a real price list
+
+Read live from FileMaker's 99 reference tables and written up in
+`docs/CATALOGUE_AND_PRICING.md`. The vocabulary was ported nearly unchanged —
+`charge_categories` (6), `charge_types` (32, FileMaker's `CostDetailReference`),
+`accommodation_types` (6), `catering_options` (5),
+`accommodation_room_types` (4), `day_times` (3, with their hours),
+`materials` (36 books with ISBN and level), plus `name_de` / `short_code` /
+`down_payment` / `teaching_mode` on `course_types`, `short_code` /
+`parts_separable` on `exam_types` and `cefr_band` / `colour_hex` on `levels`.
+Every row keeps its `filemaker_id`.
+
+What FileMaker did not have is a price list: prices are typed per course, per
+cost line, copied per group offer, or hard-coded in a `Case()` inside a script.
+`rates` replaces all four. One row prices one thing — scope and target, the
+conditions that narrow it (level, session, catering, room type, exam parts,
+quantity band), the amount with its unit and VAT, and a **validity period**.
+`applicable_rate()` returns the narrowest match on a date. `booking_charges`
+gains `rate_id`, `quantity` and `unit_amount` but keeps its own `amount`,
+because the rate is where the number came from and the charge is what was
+agreed.
+
+Seeded: the 36 book prices, the four exam fees recovered from the script, the
+50 € enrolment fee. Course and accommodation prices are deliberately empty —
+CASA enters them once, per period (`docs/CATALOGUE_AND_PRICING.md` §5 lists
+the decisions).
 
 ### 0010 — bookings, periods, cost lines, payments
 

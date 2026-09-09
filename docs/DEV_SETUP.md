@@ -36,7 +36,7 @@ Leave `DATABASE_URL` unset. Then:
 
 ```bash
 npm run db:up        # Postgres 17 in Docker, port 5433
-npm run db:migrate   # schema, 0001 … 0010
+npm run db:migrate   # schema, 0001 … 0011
 npm run db:seed      # baseline public data: course types, cohorts, exams
 ```
 

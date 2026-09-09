@@ -305,6 +305,33 @@ Accommodation, Agency, Corporate, Internship, Offer, Letter, Group, Staff, Cours
 | New bookings at `_ID_EnrolmentDone = 5 (???)` | `booking_status` reserved / confirmed / completed / cancelled — chosen, never unknown |
 | Not yet ported | teacher on the cohort, weekday schedule rows, holidays, accommodation booking, letters/receipts, learning-progress comment |
 
+### 11.7 The price list is source code (2026-09-09)
+
+The full survey is `docs/CATALOGUE_AND_PRICING.md`. The finding in one table:
+
+| Where a price lives in FileMaker | Evidence |
+| --- | --- |
+| Typed per course | `Course.CoursePrice`, 1,318 course records |
+| Typed per cost line | `CostDetail.CostGross`, 76,362 rows |
+| Copied per group offer | `CostDetailSample`, 1,744 rows; 171 distinct (line, price, unit) variants in a 400-row sample. "Kurspreis" appears at 900, 880, 860, 500, 416, 378, 260, 240 and 45×32 |
+| **Inside a script** | `SetPrice_Exam_NationalAirport` sets the exam fee from a `Case()`: telc B2 190 (both parts) / 160 (one), C1 Hochschule 210 / 185. Changing a fee means editing 28,062 characters of script |
+| Nowhere | `Accommodation` (139 rows) has no money field at all. Rent is typed per line |
+
+`Booking::_ID_PriceCourseSet` is not a link to a price set — there is no price
+set. It is a flag the script sets to 1 so it refuses to price the same booking
+twice.
+
+**Rule.** Every priced thing has a row in `rates`: amount, unit, currency,
+VAT, the conditions that narrow it, and a **validity period**.
+`applicable_rate()` picks the narrowest match on a date. A cost line keeps its
+own `amount` as well, because the rate is where the number came from and the
+charge is what was agreed (§2, applied to money). No price in a script, no
+price in a label, no price that only exists on one booking.
+
+Also confirmed here: the multi-value foreign key defect (§2.3) is alive in the
+setup tables — `Accommodation.Management::_ID_AccommodationCateringOffer`
+holds `'4\r6\r1\r2\r3'`, five catering options in one cell.
+
 ## 12. What the workspace already does right
 
 Keep these; they are the opposite of §1–§10 by construction:
