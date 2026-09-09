@@ -44,7 +44,14 @@ export type PlacementAttemptDetail = PlacementListItem & {
   reviewNote: string | null;
   speakingCheckDone: boolean;
   decidedAt: Date | null;
-  writing: { promptId: string; text: string; wordCount: number; submittedAt: Date }[];
+  /** The person the reviewer attached this decision to, if any. */
+  reviewPerson: { id: string; name: string } | null;
+  writing: {
+    promptId: string;
+    text: string;
+    wordCount: number;
+    submittedAt: Date;
+  }[];
   responseCount: number;
 };
 
@@ -61,6 +68,8 @@ type Row = {
   submitted_at: Date | null;
   confirmed_level: string | null;
   review_note: string | null;
+  review_person_id: string | null;
+  review_person_name: string | null;
   speaking_check_done: boolean | null;
   decided_at: Date | null;
   reviewer_name: string | null;
@@ -81,10 +90,13 @@ const SELECT = `
          r.note AS review_note,
          r.speaking_check_done,
          r.decided_at,
-         u.name AS reviewer_name
+         u.name AS reviewer_name,
+         rp.id AS review_person_id,
+         trim(rp.first_name || ' ' || coalesce(rp.last_name, '')) AS review_person_name
     FROM placement_attempts a
     LEFT JOIN placement_reviews r ON r.attempt_id = a.id
     LEFT JOIN staff_users u ON u.id = r.reviewed_by
+    LEFT JOIN people rp ON rp.id = canonical_person_id(r.person_id)
 `;
 
 const toListItem = (row: Row): PlacementListItem => ({
@@ -187,6 +199,10 @@ export async function getPlacementAttempt(id: string): Promise<PlacementAttemptD
     reviewNote: row.review_note,
     speakingCheckDone: row.speaking_check_done ?? false,
     decidedAt: row.decided_at,
+    reviewPerson:
+      row.review_person_id && row.review_person_name
+        ? { id: row.review_person_id, name: row.review_person_name }
+        : null,
     writing: writing.map((w) => ({
       promptId: w.prompt_id,
       text: w.text,
@@ -223,26 +239,19 @@ export async function confirmPlacement({
 }): Promise<void> {
   await query(
     `INSERT INTO placement_reviews
-       (attempt_id, reviewed_by, confirmed_level, note, recommended_band,
+       (attempt_id, reviewed_by, confirmed_level, confirmed_level_code, note, recommended_band,
         policy_version, speaking_check_done)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     VALUES ($1, $2, $3, (SELECT code FROM levels WHERE code = $3), $4, $5, $6, $7)
      ON CONFLICT (attempt_id) DO UPDATE
        SET reviewed_by = EXCLUDED.reviewed_by,
            confirmed_level = EXCLUDED.confirmed_level,
+           confirmed_level_code = EXCLUDED.confirmed_level_code,
            note = EXCLUDED.note,
            recommended_band = EXCLUDED.recommended_band,
            policy_version = EXCLUDED.policy_version,
            speaking_check_done = EXCLUDED.speaking_check_done,
            decided_at = now()`,
-    [
-      attemptId,
-      actor.id,
-      confirmedLevel,
-      note,
-      recommendedBand,
-      policyVersion,
-      speakingCheckDone,
-    ]
+    [attemptId, actor.id, confirmedLevel, note, recommendedBand, policyVersion, speakingCheckDone]
   );
 
   await logActivity({
@@ -268,4 +277,34 @@ export async function placementReviewBacklog(): Promise<number> {
   );
 
   return Number(row?.n ?? 0);
+}
+
+/**
+ * Names the person a review is about. Optional and reversible (null detaches).
+ * Refuses when there is no review yet: a person is attached to a DECISION, not
+ * to an anonymous attempt.
+ */
+export async function attachReviewToPerson({
+  attemptId,
+  personId,
+  actor,
+}: {
+  attemptId: string;
+  personId: string | null;
+  actor: StaffUser;
+}): Promise<void> {
+  const updated = await query<{ attempt_id: string }>(
+    `UPDATE placement_reviews SET person_id = $2 WHERE attempt_id = $1 RETURNING attempt_id`,
+    [attemptId, personId]
+  );
+  if (updated.length === 0) {
+    throw new Error('Confirm the level before attaching a person.');
+  }
+  await logActivity({
+    actor,
+    entity: 'placement_attempt',
+    entityId: attemptId,
+    action: personId ? 'review_attached_to_person' : 'review_detached_from_person',
+    detail: personId ? { person: personId } : undefined,
+  });
 }

@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 
-import { addNoteAction, confirmPlacementAction } from '../../actions';
+import Link from 'next/link';
+
+import { addNoteAction, attachReviewPersonAction, confirmPlacementAction } from '../../actions';
 import {
   Badge,
   Button,
@@ -8,6 +10,7 @@ import {
   DateText,
   DetailList,
   Field,
+  Input,
   Meter,
   PageHeader,
   Select,
@@ -17,6 +20,7 @@ import {
 import { Icon } from '@/components/admin/icons';
 import { activityFor } from '@/lib/admin/activity';
 import { listNotes } from '@/lib/admin/notes';
+import { listPeople } from '@/lib/admin/people';
 import { getPlacementAttempt } from '@/lib/admin/placement';
 import {
   CONFIDENCE_COPY,
@@ -50,7 +54,7 @@ export default async function PlacementAttemptPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; person?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const attempt = await getPlacementAttempt(id);
@@ -59,9 +63,13 @@ export default async function PlacementAttemptPage({
     notFound();
   }
 
-  const [notes, activity] = await Promise.all([
+  const personSearch = query.person?.trim() || undefined;
+  const [notes, activity, personMatches] = await Promise.all([
     listNotes('placement_attempt', attempt.id),
     activityFor('placement_attempt', attempt.id),
+    personSearch && attempt.confirmedLevel
+      ? listPeople({ search: personSearch, limit: 8 }).then((r) => r.items)
+      : Promise.resolve([]),
   ]);
 
   const decision = attempt.decision;
@@ -192,10 +200,9 @@ export default async function PlacementAttemptPage({
 
                 {!LISTENING_AUDIO_AVAILABLE ? (
                   <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-                    Listening is not measured in this pilot — no audio exists for
-                    the scored listening scripts yet, so the test covers language
-                    use and reading only. A learner who listens far better or
-                    worse than they read will not show it here.
+                    Listening is not measured in this pilot — no audio exists for the scored
+                    listening scripts yet, so the test covers language use and reading only. A
+                    learner who listens far better or worse than they read will not show it here.
                   </p>
                 ) : null}
               </Card>
@@ -245,10 +252,16 @@ export default async function PlacementAttemptPage({
             <Card title="Attempt in progress">
               <DetailList
                 items={[
-                  { label: 'Started', value: <DateText value={attempt.createdAt} withTime /> },
+                  {
+                    label: 'Started',
+                    value: <DateText value={attempt.createdAt} withTime />,
+                  },
                   { label: 'Responses so far', value: attempt.responseCount },
                   { label: 'Current stage', value: attempt.status },
-                  { label: 'Screener pointed at', value: attempt.routerTargetLevel },
+                  {
+                    label: 'Screener pointed at',
+                    value: attempt.routerTargetLevel,
+                  },
                 ]}
               />
             </Card>
@@ -321,9 +334,8 @@ export default async function PlacementAttemptPage({
                 role="alert"
                 className="mb-3 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-3.5 py-2.5 text-sm text-[var(--casa-danger-text)]"
               >
-                You chose a different level from the recommendation. Say why —
-                a disagreement is the only evidence CASA has for whether the
-                pilot cut scores are right.
+                You chose a different level from the recommendation. Say why — a disagreement is the
+                only evidence CASA has for whether the pilot cut scores are right.
               </p>
             ) : null}
 
@@ -349,11 +361,7 @@ export default async function PlacementAttemptPage({
                 </Select>
               </Field>
 
-              <Field
-                label="Note"
-                hint="required if you disagree"
-                htmlFor="placement-note"
-              >
+              <Field label="Note" hint="required if you disagree" htmlFor="placement-note">
                 <Textarea
                   id="placement-note"
                   name="note"
@@ -386,12 +394,88 @@ export default async function PlacementAttemptPage({
             </form>
 
             <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-              This records your decision beside the engine&apos;s. It never
-              overwrites the recommendation, and it is not a certificate — the
-              learner is told a course to start in, not a level they have
-              achieved.
+              This records your decision beside the engine&apos;s. It never overwrites the
+              recommendation, and it is not a certificate — the learner is told a course to start
+              in, not a level they have achieved.
             </p>
           </Card>
+
+          {attempt.confirmedLevel ? (
+            <Card
+              title="Who this is"
+              description={
+                attempt.reviewPerson
+                  ? undefined
+                  : 'The test is taken anonymously. If you know who sat it, attach them so the level shows on their record.'
+              }
+            >
+              {attempt.reviewPerson ? (
+                <div className="flex items-center justify-between gap-3">
+                  <Link
+                    href={`/admin/people/${attempt.reviewPerson.id}`}
+                    className="text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                  >
+                    {attempt.reviewPerson.name}
+                  </Link>
+                  <form action={attachReviewPersonAction}>
+                    <input type="hidden" name="attemptId" value={attempt.id} />
+                    <input type="hidden" name="personId" value="" />
+                    <Button type="submit" variant="ghost" size="sm">
+                      Detach
+                    </Button>
+                  </form>
+                </div>
+              ) : (
+                <>
+                  <form method="get" className="flex gap-2">
+                    <Input
+                      type="search"
+                      name="person"
+                      defaultValue={personSearch ?? ''}
+                      placeholder="Name or email"
+                      aria-label="Find a person"
+                    />
+                    <Button type="submit" variant="secondary" size="md">
+                      Find
+                    </Button>
+                  </form>
+                  {personSearch ? (
+                    personMatches.length === 0 ? (
+                      <p className="mt-3 text-xs text-[var(--casa-text-subtle)]">
+                        Nobody on file matches that. A person is created when they enquire or
+                        register; there is no way to add one from here yet.
+                      </p>
+                    ) : (
+                      <ul className="mt-3 divide-y divide-ws-line-soft">
+                        {personMatches.map((match) => (
+                          <li
+                            key={match.id}
+                            className="flex items-center justify-between gap-2 py-2"
+                          >
+                            <span className="min-w-0 text-sm">
+                              <span className="block truncate font-medium">
+                                {match.displayName}
+                              </span>
+                              <span className="block truncate text-xs text-[var(--casa-text-subtle)]">
+                                {match.primaryEmail ?? match.nationalityName ?? ''}
+                              </span>
+                            </span>
+                            <form action={attachReviewPersonAction}>
+                              <input type="hidden" name="attemptId" value={attempt.id} />
+                              <input type="hidden" name="personId" value={match.id} />
+                              <Button type="submit" variant="secondary" size="sm">
+                                Attach
+                              </Button>
+                            </form>
+                          </li>
+                        ))}
+                      </ul>
+                    )
+                  ) : null}
+                </>
+              )}
+            </Card>
+          ) : null}
 
           <Card title="Notes">
             <PlacementNotes attemptId={attempt.id} notes={notes} />
@@ -428,7 +512,12 @@ function PlacementNotes({
   notes,
 }: {
   attemptId: string;
-  notes: readonly { id: string; body: string; authorName: string | null; createdAt: Date }[];
+  notes: readonly {
+    id: string;
+    body: string;
+    authorName: string | null;
+    createdAt: Date;
+  }[];
 }) {
   return (
     <>

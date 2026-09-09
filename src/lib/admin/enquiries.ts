@@ -22,6 +22,9 @@ export type EnquiryListItem = {
   status: WorkStatus;
   assigneeName: string | null;
   submittedAt: Date;
+  personId: string | null;
+  /** Unresolved record_flags — "needs a look" markers in a list. */
+  openFlags: number;
 };
 
 export type EnquiryDetail = EnquiryListItem & {
@@ -32,7 +35,6 @@ export type EnquiryDetail = EnquiryListItem & {
   organiserBrief: Record<string, unknown> | null;
   userAgent: string | null;
   assignedTo: string | null;
-  externalRef: string | null;
 };
 
 type Row = {
@@ -52,7 +54,8 @@ type Row = {
   assigned_to: string | null;
   assignee_name: string | null;
   user_agent: string | null;
-  external_ref: string | null;
+  person_id: string | null;
+  open_flags: string;
   submitted_at: Date;
 };
 
@@ -73,7 +76,9 @@ const SELECT = `
          e.assigned_to,
          u.name AS assignee_name,
          e.user_agent,
-         e.external_ref,
+         e.person_id,
+         (SELECT count(*) FROM record_flags f
+           WHERE f.entity = 'enquiry' AND f.entity_id = e.id AND f.resolved_at IS NULL) AS open_flags,
          e.submitted_at
     FROM enquiries e
     LEFT JOIN staff_users u ON u.id = e.assigned_to
@@ -81,7 +86,7 @@ const SELECT = `
 
 const toListItem = (row: Row): EnquiryListItem => ({
   id: row.id,
-  kind: (row.kind === 'group' || row.kind === 'company' ? row.kind : 'general'),
+  kind: row.kind === 'group' || row.kind === 'company' ? row.kind : 'general',
   firstName: row.first_name,
   lastName: row.last_name,
   email: row.email,
@@ -90,6 +95,8 @@ const toListItem = (row: Row): EnquiryListItem => ({
   status: normaliseStatus(row.status),
   assigneeName: row.assignee_name,
   submittedAt: row.submitted_at,
+  personId: row.person_id,
+  openFlags: Number(row.open_flags ?? 0),
 });
 
 export async function listEnquiries({
@@ -156,6 +163,5 @@ export async function getEnquiry(id: string): Promise<EnquiryDetail | null> {
     organiserBrief: row.organiser_brief,
     userAgent: row.user_agent,
     assignedTo: row.assigned_to,
-    externalRef: row.external_ref,
   };
 }

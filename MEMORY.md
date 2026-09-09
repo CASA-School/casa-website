@@ -1574,7 +1574,7 @@ four, including that every exported action calls `requireStaff()`.
 
 ### Not built
 
-FileMaker bridge (`external_ref` columns exist, nothing writes them; field
+FileMaker bridge (`filemaker_links` exists since 0007, nothing writes it; field
 mapping deliberately unspecified rather than guessed). Outbound email — every
 reply is a `mailto:`, and there is no self-service password reset. Catalogue
 editing — read-only, because `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` is the
@@ -1622,14 +1622,70 @@ new system — headline numbers: 501 probable duplicate people, 55% of persons
 without a student id, 65% of test results as free text, 71% of pre-bookings
 with no platform, 4 in 5 still at the default status.
 
+## Person register, typed facts and flags — migration 0007 (2026-09-09)
+
+The first schema change made *because of* FileMaker rather than in spite of it.
+`docs/FILEMAKER_LESSONS.md` measured what the old system got wrong; 0007 is the
+set of rules that stops the new one repeating it.
+
+### What changed
+
+- **`people`** — one row per human from first contact, with `emails` and
+  `phones` as typed channels. Duplicates are **linked, not merged**:
+  `merged_into` points at the survivor, `canonical_person_id()` follows the
+  chain at read time, nothing is rewritten, and a link is undone from the
+  person page. Intake never decides identity; it raises a
+  `duplicate_candidate` flag (same normalised email, or same surname and date
+  of birth) and a staff member presses *Same person*.
+- **Raw plus typed** on every queue: `birth_date_raw`/`birth_date`,
+  `nationality_raw`/`nationality_code` (→ `countries`, whose `name_en` is
+  byte-identical to the public form's list), `declared_level_raw`/
+  `declared_level_code` (→ `levels`). Enums for salutation and accommodation.
+- **`record_flags`** instead of silent correction. Four codes raised by intake
+  in the same transaction as the row. Cleared by a named person, on the
+  record, never from a list.
+- **`filemaker_links`** replaces the `external_ref` text column — a record id
+  without a file and layout is not a link.
+- **Declared vs confirmed.** `current_level` became `declared_level_*`;
+  `placement_reviews.confirmed_level_code` is the teacher's decision, and the
+  two sit side by side on the registration. A review can be attached to a
+  person once a level is confirmed; the attempt stays anonymous.
+
+### Screens
+
+**People** in the sidebar (badge = open flags), `/admin/people/flags` as the
+work list, a person page with the full timeline across all queues, and a
+**Person** panel on top of every record rail.
+
+### Verified
+
+Migrations 0001–0007 from an empty database; 324 unit tests; lint, typecheck,
+build, knip; 36 e2e on port 3017. End to end through the public API: two
+course registrations and one exam registration for the same person produced
+three `people` rows, typed `BR`/`B1.1` on the clean one, and exactly the
+expected flags on the others — `duplicate_candidate` (by surname+DOB, then by
+case-insensitive email), `nationality_unmatched` ("Brazilian"),
+`level_unmatched` ("Intermediate"). Those three test rows are left in the
+local database so the panel can be seen working.
+
+### Watch out for
+
+- A Postgres parameter cannot be both `text` and `::date` in one statement
+  (`variable_coerce_param_hook`); the seed passes `birth` twice.
+- `--clear` in `seed-demo.mjs` keys on `source = 'demo-seed'`; rows seeded
+  *before* 0007 carry `source = 'registration-form'` and must be removed by
+  hand on a long-lived local database.
+- The Browser pane's `preview_start` serves the **main checkout**, not a
+  worktree; a worktree's dev server has to be started from that directory.
+
 ## Verified Baseline
 
-The latest implementation pass (2026-09-08, staff workspace) cleared all six:
+The latest implementation pass (2026-09-09, migration 0007) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`
 - `npm run build`
-- `npm run test` — 314 unit tests, 27 files
+- `npm run test` — 324 unit tests, 28 files
 - `npm run knip`
 - `E2E_PORT=3017 npm run test:e2e` — 36 specs, 23 public + 13 workspace
 

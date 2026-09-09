@@ -133,7 +133,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0006_admin_workspace.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0007_people_and_flags.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -174,7 +174,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 
 1. **No FileMaker, no dashboard row-level data ON THE PUBLIC SITE.** The
    FileMaker bridge is still unbuilt and is a separate piece of work; the staff
-   workspace at `/admin` carries an `external_ref` column per queue for it and
+   workspace at `/admin` carries a `filemaker_links` table for it (0007) and
    writes nothing there yet. **Public pages** may use only reviewed,
    public-safe *aggregate* metrics — never a row from any operational table,
    including the workspace's own. Current approved values (2026-06-17 sync):
@@ -232,6 +232,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
+| `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or free-text column.** Measured defects in CASA's FileMaker and the rule each one gives the new schema; 0007 is its first application |
+| `docs/FILEMAKER_BRIDGE.md` | The strangler plan: three phases from write-through to retirement, server-safe scripts, the decisions still open |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
@@ -274,8 +276,8 @@ is still valid.
   public host in development only. Creating it is a prerequisite for go-live, along
   with `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` being left unset in production.
 - **No FileMaker bridge yet — but it is designed.** `docs/FILEMAKER_BRIDGE.md`
-  (2026-09-08). Every workspace queue table has an `external_ref` column and nothing
-  writes to one. **The shared Data API credential (`FileMaker SRV`) is the owner's own
+  (2026-09-08). Migration 0007 replaced the per-queue `external_ref` text column
+  with a `filemaker_links` table and a person register; nothing writes links yet. **The shared Data API credential (`FileMaker SRV`) is the owner's own
   `[Full Access]` account — use it for reads only, never a write or a script call.** Key
   facts for anyone picking this up: FileMaker already has the
   intake pipeline (`Contact → PreBooking → WaitingRoom → Booking`, with `TestStudent`

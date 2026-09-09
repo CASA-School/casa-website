@@ -55,6 +55,22 @@ export const Icon = {
       <circle cx="8" cy="11.5" r="0.9" fill="currentColor" stroke="none" />
     </svg>
   ),
+  /** Two people — the register of everyone who has been in touch. */
+  people: (
+    <svg {...box}>
+      <circle cx="6" cy="5.25" r="2.25" />
+      <path d="M2 13.25a4 4 0 0 1 8 0" />
+      <path d="M10.5 3.4a2.1 2.1 0 0 1 0 3.7" />
+      <path d="M11.25 9.6a3.6 3.6 0 0 1 2.75 3.65" />
+    </svg>
+  ),
+  /** A small flag — this record needs a look. */
+  flag: (
+    <svg {...box}>
+      <path d="M3.5 14V2.5" />
+      <path d="M3.5 3h8.25l-1.5 2.75 1.5 2.75H3.5" />
+    </svg>
+  ),
   /** A person and a document — a job application. */
   applications: (
     <svg {...box}>
@@ -140,6 +156,12 @@ export const Icon = {
   note: (
     <svg {...box}>
       <path d="M2.5 4.4a.9.9 0 0 1 .9-.9h9.2a.9.9 0 0 1 .9.9v5.2a.9.9 0 0 1-.9.9H6.75L3.5 13.25V10.5h-.1a.9.9 0 0 1-.9-.9V4.4Z" />
+    </svg>
+  ),
+  /** A chevron — this row opens something. */
+  chevronRight: (
+    <svg {...box}>
+      <path d="m6 3.5 4.5 4.5L6 12.5" />
     </svg>
   ),
   /** A tick in a circle. */

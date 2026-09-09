@@ -1,10 +1,13 @@
 import { notFound } from 'next/navigation';
 
+import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
-import { Badge, Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { getEnquiry } from '@/lib/admin/enquiries';
+import { listFlags } from '@/lib/admin/flags';
 import { listNotes } from '@/lib/admin/notes';
+import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labels';
 
@@ -30,11 +33,19 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
     notFound();
   }
 
-  const [notes, activity, staff] = await Promise.all([
+  const [notes, activity, staff, flags, person] = await Promise.all([
     listNotes('enquiry', enquiry.id),
     activityFor('enquiry', enquiry.id),
     listAssignableStaff(),
+    listFlags('enquiry', enquiry.id),
+    enquiry.personId ? getPersonSummary(enquiry.personId) : null,
   ]);
+  const candidates = person
+    ? await findDuplicateCandidates({
+        email: enquiry.email,
+        excludePersonId: person.id,
+      })
+    : [];
 
   const fullName = [enquiry.firstName, enquiry.lastName].filter(Boolean).join(' ');
 
@@ -123,26 +134,28 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           ) : null}
         </div>
 
-        <RecordRail
-          entity="enquiry"
-          id={enquiry.id}
-          status={enquiry.status}
-          assignedTo={enquiry.assignedTo}
-          assignableStaff={staff}
-          notes={notes}
-          activity={activity}
-        />
+        <div className="space-y-5">
+          <PersonPanel
+            person={person}
+            candidates={candidates}
+            flags={flags}
+            returnTo={`/admin/enquiries/${enquiry.id}`}
+          />
+          <RecordRail
+            entity="enquiry"
+            id={enquiry.id}
+            status={enquiry.status}
+            assignedTo={enquiry.assignedTo}
+            assignableStaff={staff}
+            notes={notes}
+            activity={activity}
+          />
+        </div>
       </div>
 
       {enquiry.userAgent ? (
         <p className="mt-6 text-xs text-[var(--casa-text-subtle)]">
           Submitted from <span className="font-mono">{enquiry.userAgent}</span>
-        </p>
-      ) : null}
-
-      {enquiry.externalRef ? (
-        <p className="mt-2 text-xs text-[var(--casa-text-subtle)]">
-          FileMaker reference <Badge tone="quiet">{enquiry.externalRef}</Badge>
         </p>
       ) : null}
     </>

@@ -1,7 +1,11 @@
-# CASA Public Data Model
+# CASA Data Model
 
 ## Scope
-This ERD reflects the current public-site-only product scope. Historical portal and role-oriented schema work still exists in older migration files, but it is not part of the intended active model.
+Two models share one database. The first is the public site's content and
+intake tables (0001–0005). The second, below it, is the staff workspace's
+queues and its person register (0006–0007). Historical portal and
+role-oriented schema work still exists in older migration files, but it is
+not part of the intended active model.
 
 ```mermaid
 erDiagram
@@ -142,6 +146,145 @@ erDiagram
     timestamptz updated_at
   }
 ```
+
+## Staff workspace and person register (0006, 0007)
+
+```mermaid
+erDiagram
+  PEOPLE ||--o{ EMAILS : has
+  PEOPLE ||--o{ PHONES : has
+  PEOPLE o|--o{ PEOPLE : merged_into
+  COUNTRIES ||--o{ PEOPLE : nationality_code
+  PEOPLE ||--o{ ENQUIRIES : person_id
+  PEOPLE ||--o{ COURSE_REGISTRATIONS : person_id
+  PEOPLE ||--o{ EXAM_REGISTRATIONS : person_id
+  PEOPLE ||--o{ PLACEMENT_REVIEWS : person_id
+  LEVELS ||--o{ COURSE_REGISTRATIONS : declared_level_code
+  LEVELS ||--o{ PLACEMENT_REVIEWS : confirmed_level_code
+  STAFF_USERS ||--o{ STAFF_SESSIONS : holds
+  STAFF_USERS ||--o{ RECORD_FLAGS : resolved_by
+  STAFF_USERS ||--o{ FILEMAKER_LINKS : linked_by
+
+  PEOPLE {
+    uuid id PK
+    salutation salutation
+    text first_name
+    text last_name
+    date birth_date
+    char2 nationality_code FK
+    text nationality_raw
+    uuid merged_into FK
+    text created_by
+    timestamptz created_at
+  }
+
+  EMAILS {
+    uuid id PK
+    uuid person_id FK
+    text address
+    text normalized
+    text kind
+    bool is_primary
+  }
+
+  PHONES {
+    uuid id PK
+    uuid person_id FK
+    text number
+    text normalized
+    text kind
+    bool is_primary
+  }
+
+  COUNTRIES {
+    char2 code PK
+    text name_en
+    text name_de
+    int filemaker_flag_id
+  }
+
+  LEVELS {
+    text code PK
+    int position
+    int filemaker_level_step_id
+  }
+
+  COURSE_REGISTRATIONS {
+    uuid id PK
+    uuid request_id
+    uuid person_id FK
+    text nationality_raw
+    char2 nationality_code FK
+    text birth_date_raw
+    date birth_date
+    text declared_level_raw
+    text declared_level_code FK
+    accommodation_type accommodation_type
+    work_status status
+    uuid assigned_to FK
+    text source
+  }
+
+  EXAM_REGISTRATIONS {
+    uuid id PK
+    uuid request_id
+    uuid person_id FK
+    text nationality_raw
+    char2 nationality_code FK
+    text birth_date_raw
+    date birth_date
+    bool official_name_confirmed
+    work_status status
+    text source
+  }
+
+  ENQUIRIES {
+    uuid id PK
+    uuid request_id
+    uuid person_id FK
+    text kind
+    jsonb organiser_brief
+    work_status status
+    text source
+  }
+
+  PLACEMENT_REVIEWS {
+    uuid attempt_id PK
+    uuid person_id FK
+    text confirmed_level
+    text confirmed_level_code FK
+    uuid reviewed_by FK
+    timestamptz decided_at
+  }
+
+  RECORD_FLAGS {
+    uuid id PK
+    text entity
+    uuid entity_id
+    text code
+    jsonb detail
+    timestamptz resolved_at
+    uuid resolved_by FK
+  }
+
+  FILEMAKER_LINKS {
+    uuid id PK
+    text entity
+    uuid entity_id
+    text source_database
+    text source_layout
+    text source_record_id
+    text source_primary_key
+    int source_mod_id
+    uuid linked_by FK
+  }
+```
+
+`record_flags` and `filemaker_links` are polymorphic by `(entity, entity_id)`
+and carry no foreign key to the row, the same pattern as `staff_notes`.
+`canonical_person_id(uuid)` is the read-time function that follows
+`people.merged_into`; every reader that groups by person calls it rather than
+reading `person_id` directly.
 
 ## Notes
 - `course_instances.schedule` should remain structured JSON.

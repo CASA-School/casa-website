@@ -1,9 +1,12 @@
 import { notFound } from 'next/navigation';
 
+import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Badge, BirthDate, Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
+import { listFlags } from '@/lib/admin/flags';
 import { listNotes } from '@/lib/admin/notes';
+import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { getExamRegistration, registrationTypeLabel } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
@@ -34,11 +37,21 @@ export default async function ExamRegistrationPage({
     notFound();
   }
 
-  const [notes, activity, staff] = await Promise.all([
+  const [notes, activity, staff, flags, person] = await Promise.all([
     listNotes('exam_registration', registration.id),
     activityFor('exam_registration', registration.id),
     listAssignableStaff(),
+    listFlags('exam_registration', registration.id),
+    registration.personId ? getPersonSummary(registration.personId) : null,
   ]);
+  const candidates = person
+    ? await findDuplicateCandidates({
+        email: registration.email,
+        lastName: registration.lastName,
+        birthDate: registration.birthDate?.toISOString().slice(0, 10) ?? null,
+        excludePersonId: person.id,
+      })
+    : [];
 
   return (
     <>
@@ -95,9 +108,9 @@ export default async function ExamRegistrationPage({
             </p>
             {!registration.officialNameConfirmed ? (
               <p className="mt-3 text-xs leading-relaxed text-[var(--casa-danger-text)]">
-                The public form requires this confirmation, so an unconfirmed
-                entry means the record predates that requirement or was created
-                another way. Confirm by phone before the entry is filed.
+                The public form requires this confirmation, so an unconfirmed entry means the record
+                predates that requirement or was created another way. Confirm by phone before the
+                entry is filed.
               </p>
             ) : null}
           </Card>
@@ -128,10 +141,18 @@ export default async function ExamRegistrationPage({
                     </a>
                   ),
                 },
-                { label: 'Nationality', value: registration.nationality },
+                {
+                  label: 'Nationality',
+                  value: registration.nationalityName ?? (
+                    <span className="flex items-center gap-2">
+                      {registration.nationalityRaw}
+                      <Badge tone="warning">as written</Badge>
+                    </span>
+                  ),
+                },
                 {
                   label: 'Date of birth',
-                  value: <BirthDate value={registration.birthDate} />,
+                  value: <BirthDate value={registration.birthDate ?? registration.birthDateRaw} />,
                 },
                 {
                   label: 'Registered in',
@@ -142,15 +163,23 @@ export default async function ExamRegistrationPage({
           </Card>
         </div>
 
-        <RecordRail
-          entity="exam_registration"
-          id={registration.id}
-          status={registration.status}
-          assignedTo={registration.assignedTo}
-          assignableStaff={staff}
-          notes={notes}
-          activity={activity}
-        />
+        <div className="space-y-5">
+          <PersonPanel
+            person={person}
+            candidates={candidates}
+            flags={flags}
+            returnTo={`/admin/registrations/exam/${registration.id}`}
+          />
+          <RecordRail
+            entity="exam_registration"
+            id={registration.id}
+            status={registration.status}
+            assignedTo={registration.assignedTo}
+            assignableStaff={staff}
+            notes={notes}
+            activity={activity}
+          />
+        </div>
       </div>
     </>
   );

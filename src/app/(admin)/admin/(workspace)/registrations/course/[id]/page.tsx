@@ -1,9 +1,16 @@
 import { notFound } from 'next/navigation';
 
+import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Badge, BirthDate, Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
+import { listFlags } from '@/lib/admin/flags';
 import { listNotes } from '@/lib/admin/notes';
+import {
+  findDuplicateCandidates,
+  getPersonSummary,
+  latestConfirmedLevel,
+} from '@/lib/admin/people';
 import { getCourseRegistration } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
@@ -39,11 +46,24 @@ export default async function CourseRegistrationPage({
     notFound();
   }
 
-  const [notes, activity, staff] = await Promise.all([
+  const [notes, activity, staff, flags, person] = await Promise.all([
     listNotes('course_registration', registration.id),
     activityFor('course_registration', registration.id),
     listAssignableStaff(),
+    listFlags('course_registration', registration.id),
+    registration.personId ? getPersonSummary(registration.personId) : null,
   ]);
+  const [candidates, confirmed] = person
+    ? await Promise.all([
+        findDuplicateCandidates({
+          email: registration.email,
+          lastName: registration.lastName,
+          birthDate: registration.birthDate?.toISOString().slice(0, 10) ?? null,
+          excludePersonId: person.id,
+        }),
+        latestConfirmedLevel(person.canonicalId),
+      ])
+    : [[], null];
 
   const needsSomething =
     registration.visaRequired ||
@@ -77,15 +97,35 @@ export default async function CourseRegistrationPage({
             <DetailList
               items={[
                 { label: 'Course', value: registration.courseTypeLabel },
-                { label: 'Option chosen', value: registration.courseInstanceLabel },
+                {
+                  label: 'Option chosen',
+                  value: registration.courseInstanceLabel,
+                },
                 {
                   label: 'Declared level',
-                  value: registration.currentLevel ? (
+                  value: registration.declaredLevelRaw ? (
                     <span className="flex items-center gap-2">
-                      {registration.currentLevel}
+                      {registration.declaredLevelCode ?? registration.declaredLevelRaw}
                       <Badge tone="quiet">self-declared</Badge>
+                      {!registration.declaredLevelCode ? (
+                        <Badge tone="warning">not a CASA level</Badge>
+                      ) : null}
                     </span>
                   ) : null,
+                },
+                {
+                  label: 'Confirmed level',
+                  value: confirmed ? (
+                    <span className="flex items-center gap-2">
+                      {confirmed.level}
+                      <Badge tone="positive">placement</Badge>
+                      <span className="text-xs text-[var(--casa-text-subtle)]">
+                        {confirmed.reviewerName ?? 'A former colleague'}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-[var(--casa-text-subtle)]">No placement yet</span>
+                  ),
                 },
                 {
                   label: 'Reference',
@@ -93,11 +133,10 @@ export default async function CourseRegistrationPage({
                 },
               ]}
             />
-            {registration.currentLevel ? (
+            {registration.declaredLevelRaw && !confirmed ? (
               <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-                A declared level is what the learner believes, not a placement.
-                The Einstufungstest and a teacher decide the class — check the
-                Placement queue before assigning a group.
+                A declared level is what the learner believes, not a placement. The Einstufungstest
+                and a teacher decide the class — check the Placement queue before assigning a group.
               </p>
             ) : null}
           </Card>
@@ -128,10 +167,18 @@ export default async function CourseRegistrationPage({
                     </a>
                   ),
                 },
-                { label: 'Nationality', value: registration.nationality },
+                {
+                  label: 'Nationality',
+                  value: registration.nationalityName ?? (
+                    <span className="flex items-center gap-2">
+                      {registration.nationalityRaw}
+                      <Badge tone="warning">as written</Badge>
+                    </span>
+                  ),
+                },
                 {
                   label: 'Date of birth',
-                  value: <BirthDate value={registration.birthDate} />,
+                  value: <BirthDate value={registration.birthDate ?? registration.birthDateRaw} />,
                 },
                 {
                   label: 'Registered in',
@@ -175,22 +222,34 @@ export default async function CourseRegistrationPage({
                     value: registration.smoker ? 'Yes' : 'No',
                   },
                   { label: 'Allergies', value: registration.allergies },
-                  { label: 'Their notes', value: registration.notes, wide: true },
+                  {
+                    label: 'Their notes',
+                    value: registration.notes,
+                    wide: true,
+                  },
                 ]}
               />
             </Card>
           ) : null}
         </div>
 
-        <RecordRail
-          entity="course_registration"
-          id={registration.id}
-          status={registration.status}
-          assignedTo={registration.assignedTo}
-          assignableStaff={staff}
-          notes={notes}
-          activity={activity}
-        />
+        <div className="space-y-5">
+          <PersonPanel
+            person={person}
+            candidates={candidates}
+            flags={flags}
+            returnTo={`/admin/registrations/course/${registration.id}`}
+          />
+          <RecordRail
+            entity="course_registration"
+            id={registration.id}
+            status={registration.status}
+            assignedTo={registration.assignedTo}
+            assignableStaff={staff}
+            notes={notes}
+            activity={activity}
+          />
+        </div>
       </div>
     </>
   );

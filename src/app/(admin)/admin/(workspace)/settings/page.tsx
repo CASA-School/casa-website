@@ -82,9 +82,9 @@ export default async function SettingsPage() {
             ]}
           />
           <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-            To change your own password, ask an owner or administrator to set a
-            new one from the Team screen. There is no self-service reset —
-            it would need outbound email the workspace does not have.
+            To change your own password, ask an owner or administrator to set a new one from the
+            Team screen. There is no self-service reset — it would need outbound email the workspace
+            does not have.
           </p>
         </Card>
 
@@ -101,8 +101,7 @@ export default async function SettingsPage() {
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold">{integration.label}</span>
                   <span className="block text-xs text-[var(--casa-text-subtle)]">
-                    <code className="font-mono">{integration.variable}</code> ·{' '}
-                    {integration.note}
+                    <code className="font-mono">{integration.variable}</code> · {integration.note}
                   </span>
                 </span>
                 <Badge tone={integration.configured ? 'positive' : 'quiet'}>
@@ -157,43 +156,30 @@ export default async function SettingsPage() {
           />
         </Card>
 
-        <Card
-          title="Not built yet"
-          description="Named here rather than shown as a broken button."
-        >
+        <Card title="Not built yet" description="Named here rather than shown as a broken button.">
           <ul className="space-y-2.5 text-sm leading-relaxed text-[var(--casa-muted)]">
             <li>
-              <span className="font-semibold text-[var(--casa-ink)]">
-                The FileMaker bridge.
-              </span>{' '}
-              Every queue table carries an <code className="font-mono text-xs">external_ref</code>{' '}
-              column for it, and nothing writes to one yet. Until the bridge
-              exists, the workspace and FileMaker are two separate records of the
-              same person.
+              <span className="font-semibold text-[var(--casa-ink)]">The FileMaker bridge.</span>{' '}
+              The workspace keeps its own person register and a{' '}
+              <code className="font-mono text-xs">filemaker_links</code> table for it, and nothing
+              writes a link yet. Until the bridge exists, the workspace and FileMaker are two
+              separate records of the same person.
             </li>
             <li>
-              <span className="font-semibold text-[var(--casa-ink)]">Sending email.</span>{' '}
-              Every &ldquo;Reply&rdquo; button opens your own mail client. A
-              compose box here would need outbound infrastructure and a
-              from-address a visitor can reply to.
+              <span className="font-semibold text-[var(--casa-ink)]">Sending email.</span> Every
+              &ldquo;Reply&rdquo; button opens your own mail client. A compose box here would need
+              outbound infrastructure and a from-address a visitor can reply to.
             </li>
             <li>
-              <span className="font-semibold text-[var(--casa-ink)]">
-                Editing the catalogue.
-              </span>{' '}
+              <span className="font-semibold text-[var(--casa-ink)]">Editing the catalogue.</span>{' '}
               Prices and hours are governed by{' '}
-              <code className="font-mono text-xs">
-                docs/COURSE_FACTS_SOURCE_OF_TRUTH.md
-              </code>
-              , so the Courses screen reads and does not write.
+              <code className="font-mono text-xs">docs/COURSE_FACTS_SOURCE_OF_TRUTH.md</code>, so
+              the Courses screen reads and does not write.
             </li>
             <li>
-              <span className="font-semibold text-[var(--casa-ink)]">
-                A retention policy.
-              </span>{' '}
-              Nothing here is deleted on a schedule. Enquiries, registrations,
-              placement attempts and CVs are all personal data and a period has
-              to be decided by a named owner at CASA.
+              <span className="font-semibold text-[var(--casa-ink)]">A retention policy.</span>{' '}
+              Nothing here is deleted on a schedule. Enquiries, registrations, placement attempts
+              and CVs are all personal data and a period has to be decided by a named owner at CASA.
             </li>
           </ul>
         </Card>

@@ -20,6 +20,7 @@
     "db:migrate:status": "node scripts/db/migrate.mjs --status",
     "db:baseline": "node scripts/db/migrate.mjs --baseline=0001",
     "db:seed": "node scripts/db/apply-sql-directory.mjs db/seeds",
+    "db:countries": "node scripts/db/generate-countries-sql.mjs",
     "placement:port": "node scripts/placement/port-item-bank.mjs",
     "admin:seed": "node scripts/admin/seed-staff.mjs"
   },

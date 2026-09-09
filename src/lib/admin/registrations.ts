@@ -25,6 +25,8 @@ export type RegistrationListItem = {
   status: WorkStatus;
   assigneeName: string | null;
   submittedAt: Date;
+  personId: string | null;
+  openFlags: number;
   /** Course only. Set when the learner asked for a room. */
   accommodationRequired?: boolean;
   /** Course only, self-declared. Exam only: which part they are sitting. */
@@ -39,9 +41,16 @@ export type CourseRegistrationDetail = {
   lastName: string;
   email: string;
   phone: string;
-  nationality: string;
-  birthDate: string;
-  currentLevel: string | null;
+  /** What was submitted, verbatim. */
+  nationalityRaw: string;
+  /** ISO 3166-1 alpha-2 when the name resolved; null (and flagged) when it did not. */
+  nationalityCode: string | null;
+  nationalityName: string | null;
+  birthDateRaw: string;
+  birthDate: Date | null;
+  /** The learner's own claim. A placement decides the class, not this. */
+  declaredLevelRaw: string | null;
+  declaredLevelCode: string | null;
   courseTypeLabel: string | null;
   courseInstanceLabel: string | null;
   courseTypeId: string | null;
@@ -53,10 +62,11 @@ export type CourseRegistrationDetail = {
   allergies: string | null;
   notes: string | null;
   locale: string;
+  source: string;
   status: WorkStatus;
   assignedTo: string | null;
   assigneeName: string | null;
-  externalRef: string | null;
+  personId: string | null;
   submittedAt: Date;
 };
 
@@ -68,8 +78,11 @@ export type ExamRegistrationDetail = {
   lastName: string;
   email: string;
   phone: string;
-  nationality: string;
-  birthDate: string;
+  nationalityRaw: string;
+  nationalityCode: string | null;
+  nationalityName: string | null;
+  birthDateRaw: string;
+  birthDate: Date | null;
   examTypeLabel: string | null;
   examSessionLabel: string | null;
   examTypeId: string | null;
@@ -77,10 +90,11 @@ export type ExamRegistrationDetail = {
   registrationType: string;
   officialNameConfirmed: boolean;
   locale: string;
+  source: string;
   status: WorkStatus;
   assignedTo: string | null;
   assigneeName: string | null;
-  externalRef: string | null;
+  personId: string | null;
   submittedAt: Date;
 };
 
@@ -90,8 +104,7 @@ const REGISTRATION_TYPE_LABELS: Record<string, string> = {
   oral: 'Oral part only',
 };
 
-export const registrationTypeLabel = (value: string) =>
-  REGISTRATION_TYPE_LABELS[value] ?? value;
+export const registrationTypeLabel = (value: string) => REGISTRATION_TYPE_LABELS[value] ?? value;
 
 function statusFilter(
   column: string,
@@ -149,10 +162,12 @@ export async function listCourseRegistrations({
     email: string;
     course_type_label: string | null;
     course_instance_label: string | null;
-    current_level: string | null;
+    declared_level: string | null;
     accommodation_required: boolean;
     status: string;
     assignee_name: string | null;
+    person_id: string | null;
+    open_flags: string;
     submitted_at: Date;
   }>(
     `SELECT r.id,
@@ -161,10 +176,13 @@ export async function listCourseRegistrations({
             r.email,
             r.course_type_label,
             r.course_instance_label,
-            r.current_level,
+            coalesce(r.declared_level_code, r.declared_level_raw) AS declared_level,
             r.accommodation_required,
             r.status::text AS status,
             u.name AS assignee_name,
+            r.person_id,
+            (SELECT count(*) FROM record_flags f
+              WHERE f.entity = 'course_registration' AND f.entity_id = r.id AND f.resolved_at IS NULL) AS open_flags,
             r.submitted_at
        FROM course_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
@@ -187,8 +205,10 @@ export async function listCourseRegistrations({
       status: normaliseStatus(row.status),
       assigneeName: row.assignee_name,
       submittedAt: row.submitted_at,
+      personId: row.person_id,
+      openFlags: Number(row.open_flags ?? 0),
       accommodationRequired: row.accommodation_required,
-      detailNote: row.current_level,
+      detailNote: row.declared_level,
     })),
   };
 }
@@ -235,6 +255,8 @@ export async function listExamRegistrations({
     registration_type: string;
     status: string;
     assignee_name: string | null;
+    person_id: string | null;
+    open_flags: string;
     submitted_at: Date;
   }>(
     `SELECT r.id,
@@ -246,6 +268,9 @@ export async function listExamRegistrations({
             r.registration_type,
             r.status::text AS status,
             u.name AS assignee_name,
+            r.person_id,
+            (SELECT count(*) FROM record_flags f
+              WHERE f.entity = 'exam_registration' AND f.entity_id = r.id AND f.resolved_at IS NULL) AS open_flags,
             r.submitted_at
        FROM exam_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
@@ -268,14 +293,14 @@ export async function listExamRegistrations({
       status: normaliseStatus(row.status),
       assigneeName: row.assignee_name,
       submittedAt: row.submitted_at,
+      personId: row.person_id,
+      openFlags: Number(row.open_flags ?? 0),
       detailNote: registrationTypeLabel(row.registration_type),
     })),
   };
 }
 
-export async function getCourseRegistration(
-  id: string
-): Promise<CourseRegistrationDetail | null> {
+export async function getCourseRegistration(id: string): Promise<CourseRegistrationDetail | null> {
   const found = await queryFirst<{
     id: string;
     request_id: string;
@@ -284,9 +309,13 @@ export async function getCourseRegistration(
     last_name: string;
     email: string;
     phone: string;
-    nationality: string;
-    birth_date: string;
-    current_level: string | null;
+    nationality_raw: string;
+    nationality_code: string | null;
+    nationality_name: string | null;
+    birth_date_raw: string;
+    birth_date: Date | null;
+    declared_level_raw: string | null;
+    declared_level_code: string | null;
     course_type_label: string | null;
     course_instance_label: string | null;
     course_type_id: string | null;
@@ -298,40 +327,47 @@ export async function getCourseRegistration(
     allergies: string | null;
     notes: string | null;
     locale: string;
+    source: string;
     status: string;
     assigned_to: string | null;
     assignee_name: string | null;
-    external_ref: string | null;
+    person_id: string | null;
     submitted_at: Date;
   }>(
     `SELECT r.id,
             r.request_id,
-            r.salutation,
+            r.salutation::text AS salutation,
             r.first_name,
             r.last_name,
             r.email,
             r.phone,
-            r.nationality,
+            r.nationality_raw,
+            r.nationality_code,
+            c.name_en AS nationality_name,
+            r.birth_date_raw,
             r.birth_date,
-            r.current_level,
+            r.declared_level_raw,
+            r.declared_level_code,
             r.course_type_label,
             r.course_instance_label,
             r.course_type_id,
             r.course_instance_id,
             r.visa_required,
             r.accommodation_required,
-            r.accommodation_type,
+            r.accommodation_type::text AS accommodation_type,
             r.smoker,
             r.allergies,
             r.notes,
             r.locale,
+            r.source,
             r.status::text AS status,
             r.assigned_to,
             u.name AS assignee_name,
-            r.external_ref,
+            r.person_id,
             r.submitted_at
        FROM course_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
+       LEFT JOIN countries c ON c.code = r.nationality_code
       WHERE r.id = $1`,
     [id]
   );
@@ -348,9 +384,13 @@ export async function getCourseRegistration(
     lastName: found.last_name,
     email: found.email,
     phone: found.phone,
-    nationality: found.nationality,
+    nationalityRaw: found.nationality_raw,
+    nationalityCode: found.nationality_code,
+    nationalityName: found.nationality_name,
+    birthDateRaw: found.birth_date_raw,
     birthDate: found.birth_date,
-    currentLevel: found.current_level,
+    declaredLevelRaw: found.declared_level_raw,
+    declaredLevelCode: found.declared_level_code,
     courseTypeLabel: found.course_type_label,
     courseInstanceLabel: found.course_instance_label,
     courseTypeId: found.course_type_id,
@@ -362,10 +402,11 @@ export async function getCourseRegistration(
     allergies: found.allergies,
     notes: found.notes,
     locale: found.locale,
+    source: found.source,
     status: normaliseStatus(found.status),
     assignedTo: found.assigned_to,
     assigneeName: found.assignee_name,
-    externalRef: found.external_ref,
+    personId: found.person_id,
     submittedAt: found.submitted_at,
   };
 }
@@ -379,8 +420,11 @@ export async function getExamRegistration(id: string): Promise<ExamRegistrationD
     last_name: string;
     email: string;
     phone: string;
-    nationality: string;
-    birth_date: string;
+    nationality_raw: string;
+    nationality_code: string | null;
+    nationality_name: string | null;
+    birth_date_raw: string;
+    birth_date: Date | null;
     exam_type_label: string | null;
     exam_session_label: string | null;
     exam_type_id: string | null;
@@ -388,20 +432,24 @@ export async function getExamRegistration(id: string): Promise<ExamRegistrationD
     registration_type: string;
     official_name_confirmed: boolean;
     locale: string;
+    source: string;
     status: string;
     assigned_to: string | null;
     assignee_name: string | null;
-    external_ref: string | null;
+    person_id: string | null;
     submitted_at: Date;
   }>(
     `SELECT r.id,
             r.request_id,
-            r.salutation,
+            r.salutation::text AS salutation,
             r.first_name,
             r.last_name,
             r.email,
             r.phone,
-            r.nationality,
+            r.nationality_raw,
+            r.nationality_code,
+            c.name_en AS nationality_name,
+            r.birth_date_raw,
             r.birth_date,
             r.exam_type_label,
             r.exam_session_label,
@@ -410,13 +458,15 @@ export async function getExamRegistration(id: string): Promise<ExamRegistrationD
             r.registration_type,
             r.official_name_confirmed,
             r.locale,
+            r.source,
             r.status::text AS status,
             r.assigned_to,
             u.name AS assignee_name,
-            r.external_ref,
+            r.person_id,
             r.submitted_at
        FROM exam_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
+       LEFT JOIN countries c ON c.code = r.nationality_code
       WHERE r.id = $1`,
     [id]
   );
@@ -433,7 +483,10 @@ export async function getExamRegistration(id: string): Promise<ExamRegistrationD
     lastName: found.last_name,
     email: found.email,
     phone: found.phone,
-    nationality: found.nationality,
+    nationalityRaw: found.nationality_raw,
+    nationalityCode: found.nationality_code,
+    nationalityName: found.nationality_name,
+    birthDateRaw: found.birth_date_raw,
     birthDate: found.birth_date,
     examTypeLabel: found.exam_type_label,
     examSessionLabel: found.exam_session_label,
@@ -442,10 +495,11 @@ export async function getExamRegistration(id: string): Promise<ExamRegistrationD
     registrationType: found.registration_type,
     officialNameConfirmed: found.official_name_confirmed,
     locale: found.locale,
+    source: found.source,
     status: normaliseStatus(found.status),
     assignedTo: found.assigned_to,
     assigneeName: found.assignee_name,
-    externalRef: found.external_ref,
+    personId: found.person_id,
     submittedAt: found.submitted_at,
   };
 }

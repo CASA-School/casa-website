@@ -4,8 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { getStaffUser, type StaffUser } from '@/lib/admin/auth';
+import { resolveFlag } from '@/lib/admin/flags';
 import { addNote, type NoteEntity } from '@/lib/admin/notes';
-import { confirmPlacement, getPlacementAttempt } from '@/lib/admin/placement';
+import { linkPerson, unlinkPerson } from '@/lib/admin/people';
+import { attachReviewToPerson, confirmPlacement, getPlacementAttempt } from '@/lib/admin/placement';
 import {
   queuePath,
   setQueueAssignee,
@@ -178,4 +180,65 @@ export async function confirmPlacementAction(formData: FormData): Promise<void> 
   revalidatePath(`/admin/placement/${attemptId}`);
   revalidatePath('/admin/placement');
   revalidatePath('/admin');
+}
+
+/**
+ * `returnTo` is where the form lives. Only workspace paths are accepted, so a
+ * crafted form cannot turn a staff action into an open redirect.
+ */
+function readReturnTo(formData: FormData, fallback: string): string {
+  const value = String(formData.get('returnTo') ?? '');
+  return /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(value) ? value : fallback;
+}
+
+/**
+ * A staff member says two person rows are one human.
+ *
+ * This is the only way two rows become one: never a script, never intake
+ * (docs/FILEMAKER_LESSONS.md §1.2). `linkPerson` refuses a cycle and rewrites
+ * no foreign key — reads follow `merged_into` — so it is reversible.
+ */
+export async function linkPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireStaff();
+  const duplicateId = readId(formData, 'duplicateId');
+  const survivorId = readId(formData, 'survivorId');
+  const returnTo = readReturnTo(formData, '/admin/people');
+
+  const result = await linkPerson({ duplicateId, survivorId, actor });
+  revalidatePath('/admin', 'layout');
+  redirect(result.ok ? returnTo : `${returnTo}?error=${encodeURIComponent(result.reason)}`);
+}
+
+export async function unlinkPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireStaff();
+  const personId = readId(formData, 'personId');
+  await unlinkPerson({ personId, actor });
+  revalidatePath('/admin', 'layout');
+  redirect(readReturnTo(formData, `/admin/people/${personId}`));
+}
+
+export async function resolveFlagAction(formData: FormData): Promise<void> {
+  const actor = await requireStaff();
+  const flagId = readId(formData, 'flagId');
+  await resolveFlag(flagId, actor);
+  revalidatePath('/admin', 'layout');
+  redirect(readReturnTo(formData, '/admin'));
+}
+
+/**
+ * Attaches a placement review to a person. The ATTEMPT stays anonymous — the
+ * learner gave no name and 0005 keeps it that way. Naming the person is the
+ * reviewer's decision, on the review, against their name.
+ */
+export async function attachReviewPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireStaff();
+  const attemptId = readId(formData, 'attemptId');
+  const raw = String(formData.get('personId') ?? '');
+  const personId = raw === '' ? null : raw;
+  if (personId !== null && !UUID.test(personId)) throw new Error('Invalid personId');
+
+  await attachReviewToPerson({ attemptId, personId, actor });
+  revalidatePath(`/admin/placement/${attemptId}`);
+  revalidatePath('/admin/people', 'layout');
+  redirect(`/admin/placement/${attemptId}`);
 }

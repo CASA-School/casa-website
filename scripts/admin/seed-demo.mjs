@@ -9,9 +9,13 @@
  *   DATABASE_URL=... node scripts/admin/seed-demo.mjs
  *   DATABASE_URL=... node scripts/admin/seed-demo.mjs --clear
  *
- * Every row is tagged `source = 'demo-seed'` (or, where there is no source
- * column, an `external_ref` of `demo-seed`) so `--clear` can remove exactly
- * these and nothing else.
+ * Every row is tagged `source = 'demo-seed'`, every person `created_by =
+ * 'demo-seed'`, so `--clear` can remove exactly these and nothing else.
+ *
+ * Since 0007 each learner is also a PERSON with typed channels, created here
+ * explicitly — the same shape intake produces. One nationality is left as a
+ * demonym on purpose ('Turkish'), so the `nationality_unmatched` flag path is
+ * visible in the demo.
  */
 import { randomUUID } from 'node:crypto';
 
@@ -31,19 +35,51 @@ const daysAgo = (n, hour = 10) => {
 
 try {
   if (clear) {
+    // Flags point at rows by id without a foreign key; clear them first.
+    await client.query(
+      `DELETE FROM record_flags WHERE entity_id IN (
+         SELECT id FROM enquiries WHERE source = $1
+         UNION ALL SELECT id FROM course_registrations WHERE source = $1
+         UNION ALL SELECT id FROM exam_registrations WHERE source = $1)`,
+      [TAG]
+    );
     const results = await Promise.all([
       client.query(`DELETE FROM enquiries WHERE source = $1`, [TAG]),
-      client.query(`DELETE FROM course_registrations WHERE external_ref = $1`, [TAG]),
-      client.query(`DELETE FROM exam_registrations WHERE external_ref = $1`, [TAG]),
+      client.query(`DELETE FROM course_registrations WHERE source = $1`, [TAG]),
+      client.query(`DELETE FROM exam_registrations WHERE source = $1`, [TAG]),
+      // Cascades to emails and phones.
+      client.query(`DELETE FROM people WHERE created_by = $1`, [TAG]),
       // Cascades to placement_responses, placement_writing_submissions and
       // placement_reviews, so the demo attempts leave nothing behind.
       client.query(`DELETE FROM placement_attempts WHERE token LIKE $1`, [`${TAG}-%`]),
     ]);
 
-    console.log(
-      `\nRemoved ${results.reduce((sum, r) => sum + r.rowCount, 0)} demo records.\n`
-    );
+    console.log(`\nRemoved ${results.reduce((sum, r) => sum + r.rowCount, 0)} demo records.\n`);
     process.exit(0);
+  }
+
+  /** A person with typed channels — what intake makes for every submission. */
+  async function newPerson({ salutation, first, last, email, phone, birth, country, at }) {
+    const { rows } = await client.query(
+      `INSERT INTO people (salutation, first_name, last_name, birth_date, nationality_code, nationality_raw, created_by, created_at)
+       VALUES ($1::salutation, $2, $3, $4::date, (SELECT code FROM countries WHERE lower(name_en) = lower($5)), $5, $6, $7)
+       RETURNING id, nationality_code`,
+      [salutation ?? null, first, last, birth ?? null, country ?? null, TAG, at]
+    );
+    const person = rows[0];
+    if (email) {
+      await client.query(
+        `INSERT INTO emails (person_id, address, normalized, created_at) VALUES ($1, $2, lower(trim($2)), $3)`,
+        [person.id, email, at]
+      );
+    }
+    if (phone) {
+      await client.query(
+        `INSERT INTO phones (person_id, number, normalized, created_at) VALUES ($1, $2, regexp_replace($2, '[^0-9+]', '', 'g'), $3)`,
+        [person.id, phone, at]
+      );
+    }
+    return person;
   }
 
   const enquiries = [
@@ -143,11 +179,18 @@ try {
   ];
 
   for (const item of enquiries) {
+    const at = daysAgo(item.days);
+    const person = await newPerson({
+      first: item.first,
+      last: item.last,
+      email: item.email,
+      at,
+    });
     await client.query(
       `INSERT INTO enquiries
          (request_id, kind, locale, first_name, last_name, email, topic, topic_key,
-          message, source, organiser_brief, status, submitted_at, created_at)
-       VALUES ($1, $2, 'en', $3, $4, $5, $6, $7, $8, $9, $10, $11::work_status, $12, $12)`,
+          message, source, organiser_brief, status, person_id, submitted_at, created_at)
+       VALUES ($1, $2, 'en', $3, $4, $5, $6, $7, $8, $9, $10, $11::work_status, $12, $13, $13)`,
       [
         randomUUID(),
         item.kind,
@@ -164,7 +207,8 @@ try {
         TAG,
         item.brief ? JSON.stringify(item.brief) : null,
         item.status,
-        daysAgo(item.days),
+        person.id,
+        at,
       ]
     );
   }
@@ -180,27 +224,85 @@ try {
   );
 
   const learners = [
-    ['ms', 'Beatriz', 'Almeida', 'b.almeida@example.com', 'Brazilian', '1998-03-14', 'B1.1', true, true, 'host'],
-    ['mr', 'Ivan', 'Petrov', 'i.petrov@example.com', 'Bulgarian', '1995-11-02', 'A2.2', false, false, null],
-    ['ms', 'Nadia', 'Haddad', 'n.haddad@example.com', 'Lebanese', '2001-06-27', 'B1.2', true, true, 'flat'],
-    ['mr', 'Chen', 'Wei', 'chen.wei@example.com', 'Chinese', '1999-01-19', 'A1.2', true, false, null],
-    ['mx', 'Robin', 'Vos', 'r.vos@example.com', 'Dutch', '1993-09-08', 'B2.1', false, false, null],
+    [
+      'ms',
+      'Beatriz',
+      'Almeida',
+      'b.almeida@example.com',
+      'Brazil',
+      '1998-03-14',
+      'B1.1',
+      true,
+      true,
+      'host',
+    ],
+    [
+      'mr',
+      'Ivan',
+      'Petrov',
+      'i.petrov@example.com',
+      'Bulgaria',
+      '1995-11-02',
+      'A2.2',
+      false,
+      false,
+      null,
+    ],
+    [
+      'ms',
+      'Nadia',
+      'Haddad',
+      'n.haddad@example.com',
+      'Lebanon',
+      '2001-06-27',
+      'B1.2',
+      true,
+      true,
+      'flat',
+    ],
+    ['mr', 'Chen', 'Wei', 'chen.wei@example.com', 'China', '1999-01-19', 'A1.2', true, false, null],
+    [
+      'mx',
+      'Robin',
+      'Vos',
+      'r.vos@example.com',
+      'Netherlands (the)',
+      '1993-09-08',
+      'B2.1',
+      false,
+      false,
+      null,
+    ],
   ];
 
   for (const [index, learner] of learners.entries()) {
     const instance = instances.rows[index % Math.max(instances.rowCount, 1)];
     const [salutation, first, last, email, nationality, birth, level, visa, room, roomType] =
       learner;
+    const phone = `+49 421 ${100000 + index * 1117}`;
+    const at = daysAgo(index + 1, 9 + index);
+    const person = await newPerson({
+      salutation,
+      first,
+      last,
+      email,
+      phone,
+      birth,
+      country: nationality,
+      at,
+    });
 
     await client.query(
       `INSERT INTO course_registrations
          (request_id, course_type_id, course_instance_id, course_type_label,
           course_instance_label, salutation, first_name, last_name, email, phone,
-          nationality, birth_date, current_level, visa_required,
+          nationality_raw, nationality_code, birth_date_raw, birth_date,
+          declared_level_raw, declared_level_code, visa_required,
           accommodation_required, accommodation_type, smoker, notes, locale,
-          status, external_ref, submitted_at, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-               $16, false, $17, 'en', $18::work_status, $19, $20, $20)`,
+          status, source, person_id, submitted_at, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6::salutation, $7, $8, $9, $10,
+               $11, $12, $13, $14::date, $15, (SELECT code FROM levels WHERE code = $15), $16,
+               $17, $18::accommodation_type, false, $19, 'en', $20::work_status, $21, $22, $23, $23)`,
       [
         randomUUID(),
         instance?.course_type_id ?? null,
@@ -211,8 +313,10 @@ try {
         first,
         last,
         email,
-        `+49 421 ${100000 + index * 1117}`,
+        phone,
         nationality,
+        person.nationality_code,
+        birth,
         birth,
         level,
         visa,
@@ -221,7 +325,8 @@ try {
         index === 0 ? 'Arriving two days before the course starts.' : null,
         index < 3 ? 'new' : index === 3 ? 'in_progress' : 'done',
         TAG,
-        daysAgo(index + 1, 9 + index),
+        person.id,
+        at,
       ]
     );
   }
@@ -235,23 +340,37 @@ try {
   );
 
   const candidates = [
-    ['mr', 'Samuel', 'Adeyemi', 's.adeyemi@example.com', 'Nigerian', '1996-04-22', 'full'],
+    ['mr', 'Samuel', 'Adeyemi', 's.adeyemi@example.com', 'Nigeria', '1996-04-22', 'full'],
+    // Left as a demonym on purpose: this is what an unmatched nationality looks like.
     ['ms', 'Elif', 'Demir', 'e.demir@example.com', 'Turkish', '1994-12-05', 'oral'],
-    ['ms', 'Marta', 'Kowalska', 'm.kowalska@example.com', 'Polish', '2000-08-30', 'full'],
+    ['ms', 'Marta', 'Kowalska', 'm.kowalska@example.com', 'Poland', '2000-08-30', 'full'],
   ];
 
   for (const [index, candidate] of candidates.entries()) {
     const session = sessions.rows[index % Math.max(sessions.rowCount, 1)];
     const [salutation, first, last, email, nationality, birth, type] = candidate;
+    const phone = `+49 421 ${200000 + index * 913}`;
+    const at = daysAgo(index + 2, 14);
+    const person = await newPerson({
+      salutation,
+      first,
+      last,
+      email,
+      phone,
+      birth,
+      country: nationality,
+      at,
+    });
 
-    await client.query(
+    const { rows: inserted } = await client.query(
       `INSERT INTO exam_registrations
          (request_id, exam_type_id, exam_session_id, exam_type_label, exam_session_label,
           registration_type, salutation, first_name, last_name, email, phone,
-          nationality, birth_date, official_name_confirmed, locale, status,
-          external_ref, submitted_at, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'en',
-               $15::work_status, $16, $17, $17)`,
+          nationality_raw, nationality_code, birth_date_raw, birth_date,
+          official_name_confirmed, locale, status, source, person_id, submitted_at, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::salutation, $8, $9, $10, $11,
+               $12, $13, $14, $15::date, $16, 'en', $17::work_status, $18, $19, $20, $20)
+       RETURNING id`,
       [
         randomUUID(),
         session?.exam_type_id ?? null,
@@ -263,15 +382,25 @@ try {
         first,
         last,
         email,
-        `+49 421 ${200000 + index * 913}`,
+        phone,
         nationality,
+        person.nationality_code,
+        birth,
         birth,
         index !== 1,
         index === 0 ? 'new' : index === 1 ? 'new' : 'in_progress',
         TAG,
-        daysAgo(index + 2, 14),
+        person.id,
+        at,
       ]
     );
+    if (!person.nationality_code) {
+      await client.query(
+        `INSERT INTO record_flags (entity, entity_id, code, detail) VALUES ('exam_registration', $1, 'nationality_unmatched', $2)
+         ON CONFLICT (entity, entity_id, code) WHERE resolved_at IS NULL DO NOTHING`,
+        [inserted[0].id, JSON.stringify({ raw: nationality })]
+      );
+    }
   }
 
   /*
@@ -366,7 +495,10 @@ try {
         lastContact: 'Three months ago',
       },
       days: 8,
-      confirm: { level: 'A2.1', note: 'Agreed with the recommendation after a short conversation.' },
+      confirm: {
+        level: 'A2.1',
+        note: 'Agreed with the recommendation after a short conversation.',
+      },
     },
   ];
 
@@ -438,7 +570,11 @@ try {
           owner.id,
           owner.name,
           attemptId,
-          JSON.stringify({ level: attempt.confirm.level, recommended: attempt.band, agreed: true }),
+          JSON.stringify({
+            level: attempt.confirm.level,
+            recommended: attempt.band,
+            agreed: true,
+          }),
         ]
       );
     }

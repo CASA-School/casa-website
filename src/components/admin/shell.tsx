@@ -30,6 +30,8 @@ export type NavBadges = {
   examRegistrations: number;
   applications: number;
   placement: number;
+  /** Open record flags across every table — what the People screen resolves. */
+  flags: number;
 };
 
 export function WorkspaceShell({
@@ -95,6 +97,9 @@ export function WorkspaceShell({
             </NavLink>
 
             <NavGroupLabel>Reference</NavGroupLabel>
+            <NavLink href="/admin/people" icon={Icon.people} badge={badges.flags}>
+              People
+            </NavLink>
             <NavLink href="/admin/catalogue" icon={Icon.catalogue}>
               Courses &amp; exams
             </NavLink>

@@ -156,6 +156,16 @@ export function describeActivity(entry: ActivityEntry): string {
       return `added a note to ${subject}`;
     case 'cv_downloaded':
       return `downloaded the CV on ${subject}`;
+    case 'person_linked':
+      return 'linked a duplicate person record to the existing one';
+    case 'person_unlinked':
+      return 'undid a person link';
+    case 'flag_resolved':
+      return `cleared a flag on ${subject}`;
+    case 'review_attached_to_person':
+      return 'attached a placement review to a person';
+    case 'review_detached_from_person':
+      return 'detached a placement review from a person';
     case 'placement_confirmed':
       return `confirmed a placement at ${String(entry.detail?.level ?? 'a level')}`;
     case 'staff_invited':
@@ -183,6 +193,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'placement_attempt' && entry.entityId) {
     return `/admin/placement/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'person' && entry.entityId) {
+    return `/admin/people/${entry.entityId}`;
   }
 
   return null;

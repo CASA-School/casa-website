@@ -80,9 +80,7 @@ export function Field({
         className="mb-1.5 flex items-baseline justify-between gap-3 text-xs font-semibold text-[var(--casa-ink)]"
       >
         <span>{label}</span>
-        {hint ? (
-          <span className="font-normal text-[var(--casa-text-subtle)]">{hint}</span>
-        ) : null}
+        {hint ? <span className="font-normal text-[var(--casa-text-subtle)]">{hint}</span> : null}
       </label>
       {children}
     </div>
@@ -94,8 +92,7 @@ const buttonVariants = {
     'bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)] shadow-[0_1px_2px_rgba(15,23,42,0.18)]',
   secondary:
     'border border-ws-line-firm bg-white text-[var(--casa-ink)] hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]',
-  ghost:
-    'text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]',
+  ghost: 'text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]',
   danger:
     'border border-ws-line-firm bg-white text-[var(--casa-danger-text)] hover:border-[var(--casa-danger-text)]/50 hover:bg-[var(--casa-danger-text)]/6',
 } as const;
@@ -540,11 +537,7 @@ export function Meter({
   }[tone];
 
   return (
-    <div
-      className="h-1.5 overflow-hidden rounded-full bg-ws-line"
-      role="img"
-      aria-label={label}
-    >
+    <div className="h-1.5 overflow-hidden rounded-full bg-ws-line" role="img" aria-label={label}>
       {/* Zero renders as nothing rather than as a sliver: a 1px stub reads as
           "a little" when the honest answer is "none". */}
       {share > 0 ? (
@@ -606,36 +599,41 @@ export function DateText({
 }
 
 /**
- * A date of birth, as the visitor's form recorded it.
+ * A date of birth.
  *
- * `birth_date` is a `text` column, not a `date`: the public wizard sends
- * whatever its picker produced, and normalising an unrecognised format on the
- * way in would risk silently swapping a day for a month. So this formats the
- * ISO shape the current form produces — the one case it can be certain about —
- * and prints anything else verbatim rather than guessing.
- *
- * Verbatim is the safe failure here. A date read for identity checks against a
- * passport must not be reformatted on a maybe.
+ * Since 0007 every queue row carries two columns: `birth_date` (a real `date`,
+ * set when the submitted text parsed as one) and `birth_date_raw` (the text,
+ * verbatim). Pass the typed value first and the raw as fallback:
+ * `<BirthDate value={row.birthDate ?? row.birthDateRaw} />`. A `Date` or an
+ * ISO string is formatted; anything else is printed exactly as it arrived —
+ * a date read for identity checks against a passport must not be reformatted
+ * on a maybe. The row is flagged `birth_date_unparsed` in that case, so the
+ * verbatim text is never the only signal.
  */
-export function BirthDate({ value }: { value: string | null | undefined }) {
+export function BirthDate({ value }: { value: Date | string | null | undefined }) {
   if (!value) {
     return <span className="text-[var(--casa-text-subtle)]">—</span>;
   }
 
-  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  const iso =
+    value instanceof Date
+      ? Number.isNaN(value.getTime())
+        ? null
+        : value.toISOString().slice(0, 10)
+      : (/^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim())?.[0] ?? null);
 
   if (!iso) {
-    return <span>{value}</span>;
+    return <span>{String(value)}</span>;
   }
 
-  const date = new Date(`${iso[0]}T00:00:00Z`);
+  const date = new Date(`${iso}T00:00:00Z`);
 
   if (Number.isNaN(date.getTime())) {
-    return <span>{value}</span>;
+    return <span>{String(value)}</span>;
   }
 
   return (
-    <time dateTime={iso[0]}>
+    <time dateTime={iso}>
       {date.toLocaleDateString('en-GB', {
         day: 'numeric',
         month: 'long',

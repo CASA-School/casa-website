@@ -30,10 +30,12 @@ published catalogue), **Activity** (who changed what), **Team** and
 
 ### What it is not
 
-- **Not a replacement for FileMaker yet.** Every queue table carries an
-  `external_ref` column for the future bridge and nothing writes to one. Until
-  the bridge exists, the workspace and FileMaker are two independent records of
-  the same person.
+- **Not a replacement for FileMaker yet.** It is the system that will replace
+  it, growing around it (`docs/FILEMAKER_BRIDGE.md` §0). Since migration 0007
+  the workspace keeps its own person register and a `filemaker_links` table
+  for the bridge to point rows at their FileMaker counterparts; nothing writes
+  those links yet. Until it does, the workspace and FileMaker are two records
+  of the same person.
 - **Not the removed portal.** The role-based student/teacher portal that used to
   live in this repository is gone and is not coming back. This is a
   staff-facing operations tool with three roles, no learner-facing surface, and
@@ -46,7 +48,7 @@ published catalogue), **Activity** (who changed what), **Team** and
 
 ```bash
 npm run db:up        # Postgres 17 in Docker, on port 5433
-npm run db:migrate   # schema, including 0006_admin_workspace.sql
+npm run db:migrate   # schema, including 0006_admin_workspace.sql and 0007_people_and_flags.sql
 npm run db:seed      # baseline public data (courses, exams)
 ```
 
@@ -81,8 +83,10 @@ node scripts/admin/seed-demo.mjs --clear    # remove exactly those again
 
 This is **not** in `db/seeds/`, and that is deliberate: that directory gets
 applied to real databases, and fake people do not belong in a real queue. Every
-row it writes is tagged (`source = 'demo-seed'`, or `external_ref` where there
-is no source column) so `--clear` removes those and nothing else.
+row it writes is tagged `source = 'demo-seed'` and every person it creates
+`created_by = 'demo-seed'`, so `--clear` removes those and nothing else. One
+exam candidate is deliberately seeded with a demonym ("Turkish") so the
+`nationality_unmatched` flag path is visible.
 
 ### Everything from scratch
 
@@ -224,6 +228,14 @@ security hole dressed as a feature.
    response and the server log names the cause.
 3. **Status is staff-owned, content is visitor-owned.** Nothing in the workspace
    rewrites what a person submitted.
+4. **Every submission creates a person, in the same transaction.** Since 0007 a
+   queue row is never written without a `people` row, its email and phone as
+   typed channels, and the flags for whatever intake could not settle
+   (`duplicate_candidate`, `nationality_unmatched`, `level_unmatched`,
+   `birth_date_unparsed`). Text that types is typed alongside the raw column;
+   text that does not is kept verbatim and flagged, never corrected. Intake
+   never decides two rows are the same human — it raises the question, a staff
+   member answers it by linking (`docs/FILEMAKER_LESSONS.md` §1, §2.4, §11).
 
 | Public route | Table |
 | --- | --- |
@@ -313,7 +325,8 @@ and the white cards.
 
 ## The database
 
-`db/migrations/0006_admin_workspace.sql`. Tables:
+`db/migrations/0006_admin_workspace.sql` and `0007_people_and_flags.sql`.
+Tables from 0006:
 
 | Table | Holds |
 | --- | --- |
@@ -338,6 +351,43 @@ Course and exam registrations record their product **twice**: by id, so the row
 joins to the catalogue, and by the label the visitor actually saw. A cohort can
 be rescheduled or withdrawn after someone registers for it, and "what they
 signed up for" is not a question a live join can answer.
+
+### 0007 — people, typed facts, flags, links
+
+Written after reading FileMaker (`docs/FILEMAKER_LESSONS.md`), and every table
+in it answers a measured defect there.
+
+| Table | Holds | Answers |
+| --- | --- | --- |
+| `people` | One row per human. `merged_into` points a duplicate at its survivor; `canonical_person_id(uuid)` follows the chain at read time | 501 probable duplicate people across three tables that shared nothing (§1) |
+| `emails`, `phones` | Typed contact channels, raw plus `normalized`, per person | Contact fields spread over five columns with no normalisation (§2.1) |
+| `countries` | ISO 3166-1 alpha-2, `name_en` byte-identical to the public form's country list, `name_de`, and `filemaker_flag_id` for the import | Demonyms in a country field; a Flag table keyed by label (§4.4) |
+| `levels` | CASA's eleven levels with `filemaker_level_step_id` | Levels as free text, 65% of test results unparseable (§3) |
+| `record_flags` | `(entity, entity_id, code, detail)`, resolved by a named person; one open flag per code per row | Silent correction, and default statuses nobody ever changed (§11) |
+| `filemaker_links` | `(entity, entity_id) → (source_database, source_layout, source_record_id, source_primary_key, mod_id)` | Replaces the single `external_ref` text column, which could name a record but not say in which file or layout (§1.4) |
+
+Column changes on the queues: every `text` fact that can be typed now has a
+**raw-plus-typed pair** — `birth_date_raw` + `birth_date date`,
+`nationality_raw` + `nationality_code`, `declared_level_raw` +
+`declared_level_code` — and `salutation` / `accommodation_type` are enums.
+`current_level` was renamed to `declared_level_*` on purpose: it is what the
+learner believes, and `placement_reviews.confirmed_level_code` is what a
+teacher decided. The two are shown side by side on a course registration and
+must never be conflated. `external_ref` is dropped; `source` is added to the
+registrations so `'demo-seed'` rows are identifiable everywhere.
+
+The backfill creates one person per existing row (`created_by =
+'migration-0007'`), raises flags for anything that did not type, and links
+nothing — identity is a staff decision, not a migration's.
+
+The screens: **People** (`/admin/people`, the register, with the open-flag
+band and its work list at `/admin/people/flags`), a person's own page with
+everything that ever came in under them, and the **Person** panel at the top
+of every queue detail rail — the linked person, the duplicate candidates with
+a *Same person* button each, and the flags with a *Clear*. Linking sets
+`merged_into` and resolves the flag; it rewrites no row and is undone from the
+person page. A placement review can be attached to a person once a level is
+confirmed; the attempt itself stays anonymous (rule 6).
 
 ### Driver
 
