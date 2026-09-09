@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { createCourseInstance } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { assignRoom, createRoom, deleteRoom, updateRoom, type RoomKind } from '@/lib/admin/rooms';
 
@@ -124,4 +125,50 @@ export async function deleteRoomAction(formData: FormData): Promise<void> {
   if (!result.ok)
     redirect(`/admin/planning/rooms/${roomId}?error=${encodeURIComponent(result.reason)}`);
   redirect('/admin/planning');
+}
+
+const DAYS = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+const SESSIONS = new Set(['morning', 'afternoon', 'evening']);
+
+/** Schedules a cohort from the catalogue. Planning `edit`. */
+export async function createCohortAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('planning', 'edit');
+  const back = '/admin/catalogue';
+  const courseTypeId = id(formData, 'courseTypeId');
+  const startDate = String(formData.get('startDate') ?? '');
+  const endDate = String(formData.get('endDate') ?? '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    redirect(`${back}?error=${encodeURIComponent('Start and end dates are required.')}`);
+  }
+  if (endDate < startDate)
+    redirect(`${back}?error=${encodeURIComponent('The end date is before the start.')}`);
+  const capacity = optionalInt(formData, 'capacity') ?? 0;
+  const session = String(formData.get('session') ?? '');
+  const days = formData
+    .getAll('days')
+    .map(String)
+    .filter((d) => DAYS.has(d));
+  const time = text(formData, 'time', 40);
+  const levelCode = text(formData, 'levelCode', 8);
+  const roomRaw = String(formData.get('roomId') ?? '');
+  if (roomRaw && !UUID.test(roomRaw)) throw new Error('Invalid roomId');
+
+  const cohortId = await createCourseInstance(
+    {
+      courseTypeId,
+      startDate,
+      endDate,
+      capacity,
+      levelCode,
+      session: SESSIONS.has(session) ? (session as 'morning' | 'afternoon' | 'evening') : null,
+      days,
+      time,
+      roomId: roomRaw || null,
+      title: text(formData, 'title', 120),
+    },
+    actor
+  );
+  revalidatePath('/admin/catalogue');
+  revalidatePath('/admin/planning', 'layout');
+  redirect(`${back}?created=${cohortId}`);
 }

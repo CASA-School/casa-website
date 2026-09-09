@@ -64,6 +64,13 @@ export const Icon = {
       <path d="M11.25 9.6a3.6 3.6 0 0 1 2.75 3.65" />
     </svg>
   ),
+  /** A ticket — a booked place. */
+  bookings: (
+    <svg {...box}>
+      <path d="M2.5 5.5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v1.25a1.25 1.25 0 0 0 0 2.5v1.25a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V9.25a1.25 1.25 0 0 0 0-2.5V5.5Z" />
+      <path d="M6.25 4.5v7" strokeDasharray="1.5 1.5" />
+    </svg>
+  ),
   /** A door in a wall — rooms. */
   rooms: (
     <svg {...box}>

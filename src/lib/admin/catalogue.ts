@@ -1,4 +1,4 @@
-import { query } from './db';
+import { query, queryFirst } from './db';
 
 /**
  * The course and exam catalogue, read with the numbers staff actually need:
@@ -39,6 +39,10 @@ export type CourseInstanceSummary = {
   status: string;
   registrationCount: number;
   room: { id: string; name: string; nickname: string | null; capacity: number | null } | null;
+  levelCode: string | null;
+  session: 'morning' | 'afternoon' | 'evening' | null;
+  title: string | null;
+  bookingCount: number;
 };
 
 export type ExamSessionSummary = {
@@ -127,6 +131,10 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
     room_name: string | null;
     room_nickname: string | null;
     room_capacity: number | null;
+    level_code: string | null;
+    session: 'morning' | 'afternoon' | 'evening' | null;
+    title: string | null;
+    booking_count: string;
   }>(
     `SELECT i.id,
             t.name AS course_type_name,
@@ -140,7 +148,12 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
               WHERE r.course_instance_id = i.id AND r.status <> 'spam')
               AS registration_count,
             rm.id AS room_id, rm.name AS room_name, rm.nickname AS room_nickname,
-            rm.capacity AS room_capacity
+            rm.capacity AS room_capacity,
+            i.level_code, i.session, i.title,
+            (SELECT count(DISTINCT bp.booking_id) FROM booking_periods bp
+               JOIN bookings b ON b.id = bp.booking_id
+              WHERE bp.course_instance_id = i.id AND b.deleted_at IS NULL AND b.status <> 'cancelled')
+              AS booking_count
        FROM course_instances i
        JOIN course_types t ON t.id = i.course_type_id
        LEFT JOIN rooms rm ON rm.id = i.room_id
@@ -168,7 +181,67 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
           capacity: row.room_capacity,
         }
       : null,
+    levelCode: row.level_code,
+    session: row.session,
+    title: row.title,
+    bookingCount: Number(row.booking_count),
   }));
+}
+
+export const SESSION_LABELS = {
+  morning: 'Morning',
+  afternoon: 'Afternoon',
+  evening: 'Evening',
+} as const;
+
+/**
+ * Schedules a cohort — what FileMaker's Course screen creates. The schedule
+ * JSON keeps the shape the public site already renders (`days`, `time`).
+ */
+export async function createCourseInstance(
+  input: {
+    courseTypeId: string;
+    startDate: string;
+    endDate: string;
+    capacity: number;
+    levelCode: string | null;
+    session: 'morning' | 'afternoon' | 'evening' | null;
+    days: string[];
+    time: string | null;
+    roomId: string | null;
+    title: string | null;
+  },
+  actor: { id: string; name: string }
+): Promise<string> {
+  const row = await queryFirst<{ id: string }>(
+    `INSERT INTO course_instances
+       (course_type_id, start_date, end_date, capacity, schedule, status, level_code, session, room_id, title)
+     VALUES ($1, $2::date, $3::date, $4, $5::jsonb, 'scheduled', $6, $7, $8, $9)
+     RETURNING id`,
+    [
+      input.courseTypeId,
+      input.startDate,
+      input.endDate,
+      input.capacity,
+      JSON.stringify({ days: input.days, time: input.time ?? '' }),
+      input.levelCode,
+      input.session,
+      input.roomId,
+      input.title,
+    ]
+  );
+  if (!row) throw new Error('Cohort was not created');
+  await query(
+    `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail)
+     VALUES ($1, $2, 'course_instance', $3, 'cohort_created', $4)`,
+    [
+      actor.id,
+      actor.name,
+      row.id,
+      JSON.stringify({ courseType: input.courseTypeId, start: input.startDate }),
+    ]
+  );
+  return row.id;
 }
 
 export async function listUpcomingExamSessions(limit = 25): Promise<ExamSessionSummary[]> {

@@ -172,6 +172,28 @@ export function describeActivity(entry: ActivityEntry): string {
       return 'put a cohort in a room';
     case 'room_unassigned':
       return 'took a cohort out of its room';
+    case 'booking_created':
+      return 'created a booking';
+    case 'booking_updated':
+      return 'edited a booking';
+    case 'booking_extended':
+      return 'extended a booking';
+    case 'booking_period_removed':
+      return 'removed dates from a booking';
+    case 'charge_added':
+      return 'added a cost line';
+    case 'charge_removed':
+      return 'removed a cost line';
+    case 'payment_recorded':
+      return 'recorded a payment';
+    case 'payment_voided':
+      return 'voided a payment';
+    case 'booking_cancelled':
+      return 'cancelled a booking';
+    case 'booking_deleted':
+      return 'deleted a booking';
+    case 'cohort_created':
+      return 'scheduled a cohort';
     case 'person_linked':
       return 'linked a duplicate person record to the existing one';
     case 'person_unlinked':
@@ -217,6 +239,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'room' && entry.entityId) {
     return `/admin/planning/rooms/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'booking' && entry.entityId) {
+    return `/admin/bookings/${entry.entityId}`;
   }
 
   return null;

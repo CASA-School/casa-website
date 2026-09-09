@@ -4,7 +4,15 @@ import { notFound } from 'next/navigation';
 import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction } from '../actions';
 import { PersonForm } from '../person-form';
+import { NewBookingForm } from '../../bookings/booking-forms';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import {
+  BOOKING_STATUS_LABELS,
+  BOOKING_STATUS_TONES,
+  listCohortOptions,
+  personBookings,
+} from '@/lib/admin/bookings';
+import { listCourseTypes } from '@/lib/admin/catalogue';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { Icon } from '@/components/admin/icons';
@@ -78,13 +86,28 @@ export default async function PersonPage({
   }
 
   const canEdit = canAccess(user, 'people', 'edit');
-  const [timeline, confirmed, flags, activity, fileMakerLinks, countries] = await Promise.all([
+  const canBook = canAccess(user, 'bookings', 'edit');
+  const seesBookings = canAccess(user, 'bookings');
+  const [
+    timeline,
+    confirmed,
+    flags,
+    activity,
+    fileMakerLinks,
+    countries,
+    bookings,
+    cohorts,
+    courseTypes,
+  ] = await Promise.all([
     personTimeline(person.id),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
     activityFor('person', person.id),
     listFileMakerLinks('person', person.id),
     canEdit ? listCountries() : Promise.resolve([]),
+    seesBookings ? personBookings(person.id) : Promise.resolve([]),
+    canBook ? listCohortOptions() : Promise.resolve([]),
+    canBook ? listCourseTypes() : Promise.resolve([]),
   ]);
 
   const title = [SALUTATIONS[person.salutation ?? ''] ?? '', person.displayName]
@@ -105,6 +128,20 @@ export default async function PersonPage({
         }
         actions={
           <div className="flex items-center gap-2">
+            {canBook ? (
+              <FormDialog
+                trigger="New booking"
+                title={`Book ${person.displayName}`}
+                triggerVariant="primary"
+              >
+                <NewBookingForm
+                  personId={person.id}
+                  cohorts={cohorts}
+                  courseTypes={courseTypes}
+                  returnTo={`/admin/people/${person.id}`}
+                />
+              </FormDialog>
+            ) : null}
             {canEdit ? (
               <FormDialog trigger="Edit" title={person.displayName}>
                 <PersonForm person={person} countries={countries} />
@@ -137,6 +174,51 @@ export default async function PersonPage({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
         <div className="space-y-5">
+          {seesBookings ? (
+            <Card title="Bookings">
+              {bookings.length === 0 ? (
+                <p className="text-sm text-[var(--casa-text-subtle)]">No bookings.</p>
+              ) : (
+                <ul className="divide-y divide-ws-line-soft">
+                  {bookings.map((b) => (
+                    <li key={b.id}>
+                      <Link
+                        href={`/admin/bookings/${b.id}`}
+                        className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-ws-sunk"
+                      >
+                        <span className="min-w-0 text-sm">
+                          <span className="flex items-center gap-2 font-medium">
+                            {b.courseTypeName ?? 'Booking'}
+                            <Badge tone={BOOKING_STATUS_TONES[b.status]}>
+                              {BOOKING_STATUS_LABELS[b.status]}
+                            </Badge>
+                          </span>
+                          <span className="block text-xs text-[var(--casa-text-subtle)]">
+                            {b.startDate ? (
+                              <>
+                                <DateText value={b.startDate} /> – <DateText value={b.endDate} />
+                              </>
+                            ) : (
+                              'No dates'
+                            )}
+                          </span>
+                        </span>
+                        <span
+                          className={`text-sm font-semibold tabular-nums ${b.charged - b.paid > 0 ? 'text-[var(--casa-warning-text)]' : 'text-[var(--casa-success-text)]'}`}
+                        >
+                          {new Intl.NumberFormat('de-DE', {
+                            style: 'currency',
+                            currency: b.currency,
+                          }).format(b.charged - b.paid)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          ) : null}
+
           <Card title="History">
             {timeline.length === 0 ? (
               <p className="text-sm text-[var(--casa-text-subtle)]">Nothing yet.</p>

@@ -16,7 +16,8 @@ export type FlagEntity =
   | 'course_registration'
   | 'exam_registration'
   | 'career_application'
-  | 'placement_attempt';
+  | 'placement_attempt'
+  | 'booking';
 
 export type FlagCode =
   | 'duplicate_candidate'
@@ -24,7 +25,8 @@ export type FlagCode =
   | 'level_unmatched'
   | 'birth_date_unparsed'
   | 'person_unlinked'
-  | 'cohort_withdrawn';
+  | 'cohort_withdrawn'
+  | 'period_without_cohort';
 
 export const FLAG_LABELS: Record<FlagCode, string> = {
   duplicate_candidate: 'May be an existing person',
@@ -33,6 +35,7 @@ export const FLAG_LABELS: Record<FlagCode, string> = {
   birth_date_unparsed: 'Date of birth not readable',
   person_unlinked: 'Not linked to a person',
   cohort_withdrawn: 'Chosen cohort no longer runs',
+  period_without_cohort: 'Booked dates have no cohort yet',
 };
 
 export type RecordFlag = {
@@ -182,6 +185,7 @@ const HREF: Record<FlagEntity, string> = {
   exam_registration: '/admin/registrations/exam',
   career_application: '/admin/applications',
   placement_attempt: '/admin/placement',
+  booking: '/admin/bookings',
 };
 
 /** Every open flag, optionally of one kind, oldest first — a work list. */
@@ -195,7 +199,8 @@ export async function listOpenFlags(code?: FlagCode, limit = 100): Promise<OpenF
            (SELECT e.first_name || ' ' || coalesce(e.last_name, '') FROM enquiries e WHERE f.entity = 'enquiry' AND e.id = f.entity_id),
            (SELECT r.first_name || ' ' || r.last_name FROM course_registrations r WHERE f.entity = 'course_registration' AND r.id = f.entity_id),
            (SELECT r.first_name || ' ' || r.last_name FROM exam_registrations r WHERE f.entity = 'exam_registration' AND r.id = f.entity_id),
-           (SELECT p.first_name || ' ' || coalesce(p.last_name, '') FROM people p WHERE f.entity = 'person' AND p.id = f.entity_id)
+           (SELECT p.first_name || ' ' || coalesce(p.last_name, '') FROM people p WHERE f.entity = 'person' AND p.id = f.entity_id),
+           (SELECT p.first_name || ' ' || coalesce(p.last_name, '') FROM bookings b JOIN people p ON p.id = b.person_id WHERE f.entity = 'booking' AND b.id = f.entity_id)
          ) AS subject
        FROM record_flags f`
     )}

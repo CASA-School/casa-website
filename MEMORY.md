@@ -1733,9 +1733,30 @@ Gotcha: the `react-hooks/set-state-in-effect` lint rule forbids reading
 localStorage into state in an effect; `useSyncExternalStore` with a null
 server snapshot is the pattern that passes and avoids a hydration mismatch.
 
+## Bookings — the first phase-2 module, from FileMaker's own screens (2026-09-09)
+
+The user opened FileMaker Pro (SchoolMan, live) on this Mac and asked that the
+workspace keep referring to it. Captured with `screencapture` on display 2
+(`-D 2`), navigated with `tell application "FileMaker Pro" to go to layout …`,
+strictly read-only. What the Booking, Course, PreBooking, Contact and home
+screens showed is written up in `docs/FILEMAKER_LESSONS.md` §11.6.
+
+Migration 0010: `bookings`, `booking_periods` (dates as rows; an extension is a
+period), `booking_charges` (cost lines, cancellations negative), `payments`
+(subject, method, who; **voided, never deleted**); `course_instances` gains
+`level_code`, `session`, `title`. Module `bookings` (staff: edit). Screens:
+list with tabs and balance; booking page with Extend / Edit / Cancel / Delete
+in the header and Add line / Record payment dialogs; New booking from a person;
+Create booking from a course registration (prefilled, marks it done); Schedule
+cohort in the catalogue.
+
+Still to port from the Booking and Course screens: teacher on the cohort,
+weekday schedule rows and holidays, the accommodation booking, letters and
+receipts (DE/EN), the learning-progress comment, the day calendar home screen.
+
 ## Verified Baseline
 
-The latest implementation pass (2026-09-09, migration 0009) cleared all six:
+The latest implementation pass (2026-09-09, migration 0010) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`

@@ -1,6 +1,12 @@
 import { notFound } from 'next/navigation';
 
+import { NewBookingForm } from '../../../bookings/booking-forms';
+import { FormDialog } from '@/components/admin/dialogs';
 import { PersonPanel } from '@/components/admin/person-panel';
+import { canAccess } from '@/lib/admin/access';
+import { listCohortOptions } from '@/lib/admin/bookings';
+import { listCourseTypes } from '@/lib/admin/catalogue';
+import { requireModule } from '@/lib/admin/guard';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Badge, BirthDate, Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
@@ -39,12 +45,17 @@ export default async function CourseRegistrationPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, user] = await Promise.all([params, requireModule('registrations')]);
   const registration = await getCourseRegistration(id);
 
   if (!registration) {
     notFound();
   }
+
+  const canBook = canAccess(user, 'bookings', 'edit') && Boolean(registration.personId);
+  const [cohorts, courseTypes] = canBook
+    ? await Promise.all([listCohortOptions(), listCourseTypes()])
+    : [[], []];
 
   const [notes, activity, staff, flags, person] = await Promise.all([
     listNotes('course_registration', registration.id),
@@ -80,14 +91,32 @@ export default async function CourseRegistrationPage({
         title={`${registration.firstName} ${registration.lastName}`}
         description={registration.courseTypeLabel ?? undefined}
         actions={
-          <a
-            href={`mailto:${registration.email}?subject=${encodeURIComponent(
-              `CASA registration — ${registration.courseTypeLabel ?? 'your course'}`
-            )}`}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
-          >
-            Reply by email
-          </a>
+          <div className="flex items-center gap-2">
+            {canBook && registration.personId ? (
+              <FormDialog
+                trigger="Create booking"
+                title="Create a booking"
+                triggerVariant="primary"
+              >
+                <NewBookingForm
+                  personId={registration.personId}
+                  cohorts={cohorts}
+                  courseTypes={courseTypes}
+                  preselectedCohortId={registration.courseInstanceId}
+                  sourceRegistrationId={registration.id}
+                  returnTo={`/admin/registrations/course/${registration.id}`}
+                />
+              </FormDialog>
+            ) : null}
+            <a
+              href={`mailto:${registration.email}?subject=${encodeURIComponent(
+                `CASA registration — ${registration.courseTypeLabel ?? 'your course'}`
+              )}`}
+              className="inline-flex h-9 items-center rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
+            >
+              Reply by email
+            </a>
+          </div>
         }
       />
 

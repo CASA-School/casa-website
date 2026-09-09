@@ -147,7 +147,7 @@ erDiagram
   }
 ```
 
-## Staff workspace, person register, rooms and access (0006–0008)
+## Staff workspace, person register, rooms, access and bookings (0006–0010)
 
 ```mermaid
 erDiagram
@@ -318,6 +318,63 @@ erDiagram
     text module PK
     text level
     uuid granted_by FK
+  }
+```
+
+```mermaid
+erDiagram
+  PEOPLE ||--o{ BOOKINGS : person_id
+  COURSE_TYPES o|--o{ BOOKINGS : course_type_id
+  COURSE_REGISTRATIONS o|--o| BOOKINGS : source_registration_id
+  BOOKINGS ||--|{ BOOKING_PERIODS : dates
+  COURSE_INSTANCES o|--o{ BOOKING_PERIODS : course_instance_id
+  BOOKINGS ||--o{ BOOKING_CHARGES : cost_lines
+  BOOKINGS ||--o{ PAYMENTS : received
+
+  BOOKINGS {
+    uuid id PK
+    uuid person_id FK
+    uuid course_type_id FK
+    booking_status status
+    text currency
+    text payer
+    text payer_name
+    bool visa_required
+    text notes
+    uuid source_registration_id FK
+    timestamptz cancelled_at
+    text cancel_reason
+    timestamptz deleted_at
+  }
+
+  BOOKING_PERIODS {
+    uuid id PK
+    uuid booking_id FK
+    uuid course_instance_id FK
+    date start_date
+    date end_date
+    text kind
+  }
+
+  BOOKING_CHARGES {
+    uuid id PK
+    uuid booking_id FK
+    text kind
+    text description
+    numeric amount
+  }
+
+  PAYMENTS {
+    uuid id PK
+    uuid booking_id FK
+    numeric amount
+    text method
+    date received_at
+    text subject
+    text reference
+    uuid recorded_by FK
+    timestamptz voided_at
+    text void_reason
   }
 ```
 

@@ -32,6 +32,8 @@ export type NavBadges = {
   placement: number;
   /** Open record flags across every table — what the People screen resolves. */
   flags: number;
+  /** Bookings still reserved, not yet confirmed. */
+  reserved: number;
 };
 
 export function WorkspaceShell({
@@ -151,6 +153,11 @@ export function WorkspaceShell({
                     ]}
                   >
                     People
+                  </NavLink>
+                ) : null}
+                {canAccess(user, 'bookings') ? (
+                  <NavLink href="/admin/bookings" icon={Icon.bookings} badge={badges.reserved}>
+                    Bookings
                   </NavLink>
                 ) : null}
                 {canAccess(user, 'planning') ? (

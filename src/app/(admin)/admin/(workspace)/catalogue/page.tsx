@@ -16,9 +16,16 @@ import {
   TableRow,
 } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { listCourseTypes, listUpcomingCourseInstances } from '@/lib/admin/catalogue';
+import {
+  listCourseTypes,
+  listUpcomingCourseInstances,
+  SESSION_LABELS,
+} from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { listBookableRooms } from '@/lib/admin/rooms';
+import { CohortForm } from './cohort-form';
+import { FormDialog } from '@/components/admin/dialogs';
+import { query } from '@/lib/admin/db';
 
 /**
  * Courses, with live demand against them.
@@ -36,15 +43,20 @@ import { listBookableRooms } from '@/lib/admin/rooms';
 export default async function CataloguePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; created?: string }>;
 }) {
   const user = await requireModule('catalogue');
-  const plans = canAccess(user, 'planning');
-  const [{ error }, types, instances, rooms] = await Promise.all([
+  const plans = canAccess(user, 'planning', 'edit');
+  const [{ error }, types, instances, rooms, levels] = await Promise.all([
     searchParams,
     listCourseTypes(),
     listUpcomingCourseInstances(20),
     plans ? listBookableRooms() : Promise.resolve([]),
+    plans
+      ? query<{ code: string }>(`SELECT code FROM levels ORDER BY position`).then((r) =>
+          r.map((x) => x.code)
+        )
+      : Promise.resolve([]),
   ]);
 
   return (
@@ -53,6 +65,17 @@ export default async function CataloguePage({
         eyebrow="School"
         title="Courses"
         description="What CASA publishes, and how many people have registered against each dated option."
+        actions={
+          plans ? (
+            <FormDialog
+              trigger="Schedule cohort"
+              title="Schedule a cohort"
+              triggerVariant="primary"
+            >
+              <CohortForm courseTypes={types} rooms={rooms} levels={levels} />
+            </FormDialog>
+          ) : null
+        }
       />
 
       <CatalogueTabs active="courses" />
@@ -84,7 +107,17 @@ export default async function CataloguePage({
 
                 return (
                   <TableRow key={instance.id}>
-                    <Cell className="font-semibold">{instance.courseTypeName}</Cell>
+                    <Cell className="font-semibold">
+                      <span className="block">{instance.title ?? instance.courseTypeName}</span>
+                      <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
+                        {[
+                          instance.levelCode,
+                          instance.session ? SESSION_LABELS[instance.session] : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ') || instance.courseTypeName}
+                      </span>
+                    </Cell>
                     <Cell className="text-sm text-[var(--casa-muted)]">
                       <DateText value={instance.startDate} /> —{' '}
                       <DateText value={instance.endDate} />
@@ -131,6 +164,7 @@ export default async function CataloguePage({
                         </Badge>
                       ) : null}
                     </Cell>
+                    <Cell className="text-sm font-semibold">{instance.bookingCount || '—'}</Cell>
                     <Cell className="w-40">
                       <span className="mb-1.5 block text-sm">
                         {instance.registrationCount}

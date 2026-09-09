@@ -248,6 +248,63 @@ Every imported row carries a `filemaker_links` entry (`Classroom` /
 `LocationReference` record ids), so phase 3 updates these rows rather than
 duplicating them.
 
+### 11.6 Bookings — what the team's screen does (2026-09-09, FileMaker Pro UI)
+
+Seen on the live `Booking`, `Course`, `PreBooking` and `Contact` layouts and on
+the home screen (`SingleDayCalendar_Overview`), with the owner's permission.
+
+**Booking layout.** Left: the person (salutation, name, address, born, age,
+profession, homeland, email and phone with a *Nutzung* — use — qualifier, payer
+"1 = Institution zahlt, 2 = Selbstzahler", agency/institution such as *Otto
+Benecke Stiftung*), payment comments with the author ticked (Mareike / Tanja /
+Birte), letters. Middle: course type · session (*vormittag*) · level · the course
+as a formula title "CH | 02.05.22 – 01.07.22 Intensiv | Birte K. | Augsburg"
+(location code, dates, type, teacher, room nickname), *Beginn / Ende / Wochen /
+UEs / Status*, `SetCoursePrice`, `ResetSchedule`, a learning-progress comment,
+accommodation dates and type, workflow. Below: the person's booking history
+(name, type, location, dates, amounts). Bottom-left: **cost lines** —
+*Einschreibegebühr 50 · Kurspreis 8 Wochen 860 · Bücher 17,99 · Storno −50 /
+−860 / −17,99* — with gross total, commission, balances. Bottom-right:
+**payments** — amount, method (*Karte*), subject (*Miete CASA WG, Deponat
+Wohnung, Deponat Schlüssel, Endreinigung, Bücher*), date, staff name, receipt
+buttons DE/EN. Right rail: teacher and dates, Schedule / Course / Historial,
+Pecunia letters, calendar.
+
+**Course layout.** Platform · type (*Abendkurs*) · language · location · level
+(B2 / B2.1) · teacher · title; *Beginn / Ende / DauerWochen 17,1 / Kapazität*;
+session (*abends 18:30–20:00*); room (*EG 4 Nürnberg*); UEs, Treffen, Preis; a
+weekday schedule portal (day, time, UE, teacher, room) with `Set_5Days` /
+`Set_4Days`; holidays; single dates; the course list with type, level, dates,
+teachers, time, room, headcount; a calendar with public holidays marked.
+
+**PreBooking / Contact layouts.** Person and address; language; level grid
+(A1 … C1.3); course type as 12 numbered options (Intensivkurs, Abendkurs,
+Sommerkurs, Einzelunterricht, Geschlossene Gruppe, Juniorkurs,
+Prüfungsvorbereitung, Firmenunterricht, Juniorkurs, Spezialkurs,
+Superintensiv…); session; platform; *Beginn / Ende*; the course picker; test
+results (*Netzwerk A1 36/40 90 %*); recommendation; *Inland / Ausland*; *Visum
+beantragt*; accommodation dates; workflow with `EmailWorkFlow`; the conversion
+buttons `Go_International` / `Go_Central` / `Go_National` / `Go_Waiting` and
+`Extension`.
+
+**Home screen.** A day-by-day operations calendar: first-day and last-day
+students per day, the reception shift (who, from–to), teachers on duty with
+their course dates, room plan, teacher plan, timetable, room and teacher
+conflicts, vacant teachers, workflow, office talk. The module bar across the
+top is the team's mental map: Booking, IntAirport, CentralStation, BusStop,
+NationalAirport, Exam, Contact, WaitingRoom, DateAcco, DateBooking; Management,
+Accommodation, Agency, Corporate, Internship, Offer, Letter, Group, Staff, Course.
+
+| Found | Rule applied (migration 0010) |
+| --- | --- |
+| Money as cost lines on the booking, cancellations as negative lines | `booking_charges` with a `kind`; balance computed, never stored |
+| Payments one by one with subject, method, date, staff | `payments` with `subject`, `method` (the six from `MethodPaymentReference`), `recorded_by`; **voided, never deleted** |
+| Extension = flag + more `DateBooking` weeks | `booking_periods` rows of kind `extension`; the booking's dates are min/max over periods |
+| Payer encoded as 1/2 beside an institution name | `bookings.payer` (self / agency / company / other) + `payer_name` |
+| Course title as a formula of location · dates · type · teacher · room | Cohort label built from typed columns; `course_instances` gains `level_code`, `session`, `title` |
+| New bookings at `_ID_EnrolmentDone = 5 (???)` | `booking_status` reserved / confirmed / completed / cancelled — chosen, never unknown |
+| Not yet ported | teacher on the cohort, weekday schedule rows, holidays, accommodation booking, letters/receipts, learning-progress comment |
+
 ## 12. What the workspace already does right
 
 Keep these; they are the opposite of §1–§10 by construction:

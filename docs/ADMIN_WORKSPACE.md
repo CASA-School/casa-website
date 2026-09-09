@@ -48,7 +48,7 @@ published catalogue), **Activity** (who changed what), **Team** and
 
 ```bash
 npm run db:up        # Postgres 17 in Docker, on port 5433
-npm run db:migrate   # schema, including 0006 to 0009
+npm run db:migrate   # schema, including 0006 to 0010
 npm run db:seed      # baseline catalogue, plus CASA's rooms and locations
 npm run db:seed      # baseline public data (courses, exams)
 ```
@@ -213,7 +213,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Enquiries, Registrations, Placement, Applications, People, Courses & exams, Activity; `view` on Overview and Settings; `none` on Rooms and Team |
+| `staff` | `edit` on Enquiries, Registrations, Placement, Applications, People, Bookings, Courses & exams, Activity; `view` on Overview and Settings; `none` on Rooms and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -231,15 +231,17 @@ stays a list. And every destructive action goes through **`ConfirmSubmit`**: a
 button inside the form that opens a confirmation, and on confirm submits the
 form with a hidden `confirmed=1` that the server action checks — a request that
 skipped the dialog is refused, so the confirmation is not only visual.
-Deletes are soft where history matters (`people.deleted_at`; a room is removed
-outright because nothing refers to it once its cohorts are moved). Today:
-people (add, edit, delete), rooms (add, edit, delete, assign to cohort), staff
-accounts (add, deactivate with confirmation).
+Deletes are soft where history matters (`people.deleted_at`,
+`bookings.deleted_at`; a room is removed outright because nothing refers to it
+once its cohorts are moved; a payment is voided, never deleted). Today: people
+(add, edit, delete), bookings (create, edit, extend, cost lines, payments,
+cancel, delete), cohorts (schedule, assign room), rooms (add, edit, delete),
+staff accounts (add, deactivate with confirmation).
 
 ### Navigation
 
 Three collapsible groups — **Inbox** (enquiries, registrations, placement,
-applications), **School** (people, rooms, courses & exams), **Administration**
+applications), **School** (people, bookings, rooms, courses & exams), **Administration**
 (activity, team, settings) — with nested items under Registrations, People and
 Courses & exams. A group opens itself when a screen inside it is current and
 remembers a manual open/close in the browser. New screens go into an existing
@@ -390,8 +392,8 @@ and the white cards.
 ## The database
 
 `db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql`,
-`0008_rooms_and_module_access.sql` and `0009_access_levels_and_soft_delete.sql`.
-Tables from 0006:
+`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`
+and `0010_bookings_and_payments.sql`. Tables from 0006:
 
 | Table | Holds |
 | --- | --- |
@@ -416,6 +418,32 @@ Course and exam registrations record their product **twice**: by id, so the row
 joins to the catalogue, and by the label the visitor actually saw. A cohort can
 be rescheduled or withdrawn after someone registers for it, and "what they
 signed up for" is not a question a live join can answer.
+
+### 0010 — bookings, periods, cost lines, payments
+
+The first phase-2 table, modelled on what the team does on FileMaker's
+Booking screen (docs/FILEMAKER_LESSONS.md §11.6). A **booking** is a
+person's place on a course: `bookings` (person, course type, status
+reserved / confirmed / completed / cancelled, payer, visa, notes, the
+registration it came from), `booking_periods` (the dates, each pointing at a
+cohort — an extension is another period), `booking_charges` (cost lines:
+enrolment fee, course price, books, a cancellation as a negative line) and
+`payments` (amount, method, subject, date, who took it; **voided, never
+deleted**). Balance = charges − payments, computed on read.
+
+Screens: **Bookings** (`/admin/bookings`, tabs Current / Upcoming / Reserved /
+Past / Cancelled / All, balance column) and a booking page: dates, cost lines,
+payments, each with its own dialog to add and its own confirmation to remove
+or void; Extend, Edit, Cancel and Delete in the header. A booking is created
+from a **person** (New booking) or from a **course registration** (Create
+booking — the cohort, dates and catalogue price are prefilled and the
+registration is marked done). The catalogue gains **Schedule cohort**
+(course, dates, seats; level, session, days, time, room, title under More) and
+a Booked column; `course_instances` gains `level_code`, `session`, `title`.
+
+Not ported yet from the Booking screen: teacher on the cohort, weekday
+schedule rows and holidays, the accommodation booking, letters and receipts,
+the learning-progress comment.
 
 ### 0008 — rooms, locations, module access
 
