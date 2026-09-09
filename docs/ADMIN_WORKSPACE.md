@@ -48,7 +48,8 @@ published catalogue), **Activity** (who changed what), **Team** and
 
 ```bash
 npm run db:up        # Postgres 17 in Docker, on port 5433
-npm run db:migrate   # schema, including 0006_admin_workspace.sql and 0007_people_and_flags.sql
+npm run db:migrate   # schema, including 0006, 0007 and 0008
+npm run db:seed      # baseline catalogue, plus CASA's rooms and locations
 npm run db:seed      # baseline public data (courses, exams)
 ```
 
@@ -156,8 +157,9 @@ child of it, so a page cannot forget to check.
 
 A server action is a public HTTP endpoint. Nothing about a POST to one goes
 through the layout that rendered the form, so the gate does not protect it.
-Every exported action in `actions.ts` and `team/actions.ts` starts with
-`requireStaff()`, and `src/lib/admin/__tests__/host-routing.test.ts` asserts
+Every exported action in `actions.ts`, `team/actions.ts` and
+`planning/actions.ts` starts with `requireModule(<module>)` from
+`src/lib/admin/guard.ts`, and `src/lib/admin/__tests__/host-routing.test.ts` asserts
 that they all do.
 
 ### 3. The CV download route checks for itself
@@ -194,13 +196,26 @@ deactivated account — and verifies against a throwaway hash when no account
 matched, so an unknown address costs the same ~100 ms as a real one. Response
 time leaks nothing and the form is not an account-enumeration oracle.
 
-### Roles
+### Roles and modules
 
-| Role | Can |
+The workspace is a set of **modules**, registered once in
+`src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
+applications, people, planning, catalogue, activity, team, settings. A role
+grants a default set; a per-person exception (`staff_module_access`, 0008)
+adds or removes a module for one account. Three places read the resolved set
+and nothing else decides access: the sidebar (what to show), each module's
+`layout.tsx` (what to serve — every module directory has one), and every
+server action (what to execute). Hiding a link is not access control.
+
+| Role | Default modules |
 | --- | --- |
-| `staff` | Work every queue: read, set statuses, take ownership, write notes, confirm placements |
-| `admin` | The above, plus the Team screen |
+| `staff` | Everything except Planning and Team |
+| `admin` | Everything, plus setting other people's modules on the Team screen |
 | `owner` | The above, plus granting the owner role |
+
+Overview and Settings cannot be removed; Team is never granted by exception.
+Changing someone's modules ends their sessions, so a narrowed set takes effect
+at once. The Team screen shows the matrix and edits it for `staff` accounts.
 
 CASA cannot be left with no active owner; the workspace refuses the change that
 would do it. **Deactivation, not deletion** — a deleted account takes its name
@@ -211,6 +226,17 @@ keeps the history readable. There is no delete button.
 There is no self-service password reset. It would need outbound email the
 workspace does not have, and a reset link from an address nobody monitors is a
 security hole dressed as a feature.
+
+---
+
+## Copy on screens — labels, not explanations
+
+The product is used daily by staff and must stay presentable. A screen shows
+labels, values, badges and controls. It does **not** carry explanatory notes —
+why a value is kept as written, what a declared level is not, which module is
+not built yet. That reasoning belongs here, in `docs/`, or in a code comment.
+The test in `placement-containment.test.ts` checks the placement screen for
+forbidden *labels* rather than for the presence of a disclaimer for this reason.
 
 ---
 
@@ -325,8 +351,8 @@ and the white cards.
 
 ## The database
 
-`db/migrations/0006_admin_workspace.sql` and `0007_people_and_flags.sql`.
-Tables from 0006:
+`db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql` and
+`0008_rooms_and_module_access.sql`. Tables from 0006:
 
 | Table | Holds |
 | --- | --- |
@@ -351,6 +377,25 @@ Course and exam registrations record their product **twice**: by id, so the row
 joins to the catalogue, and by the label the visitor actually saw. A cohort can
 be rescheduled or withdrawn after someone registers for it, and "what they
 signed up for" is not a question a live join can answer.
+
+### 0008 — rooms, locations, module access
+
+Ported from FileMaker's `Classroom` (29), `LocationReference` (8) and `Floor`,
+read live on 2026-09-09 and seeded by `db/seeds/0002_locations_and_rooms.sql`
+with `filemaker_links` rows for every row (§12 of the lessons doc has what was
+cleaned on the way in).
+
+| Table | Holds |
+| --- | --- |
+| `locations` | A site (`Am Dobben 14–16`, `Kinderklinik`…), client premises, or online. `kind` says which |
+| `rooms` | `name`, `nickname` (the city name staff use), `floor`, `kind` (classroom / office / meeting / other), `capacity` (planning) and `capacity_max` (ceiling), `is_bookable`, `is_active` |
+| `course_instances.room_id` | The room a cohort runs in. Optional. Only bookable active classrooms may be assigned |
+| `staff_module_access` | Per-person module exceptions; see *Roles and modules* |
+
+Screens: **Rooms** (`/admin/planning`, by location, with an add form) and a room
+page with its cohorts and an edit form; the catalogue's cohort table gains a
+Room column, with a picker for anyone who holds Planning and an *Over room
+capacity* badge when a cohort's seats exceed the room's.
 
 ### 0007 — people, typed facts, flags, links
 

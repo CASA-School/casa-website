@@ -77,22 +77,52 @@ describe('workspace auth gate', () => {
     expect(gate()).toContain('isWorkspaceDatabaseConfigured');
   });
 
-  it('checks the session inside every mutation, not only in the layout', () => {
+  it('checks access inside every mutation, not only in the layout', () => {
     // A server action is a public endpoint; the layout that rendered the form
-    // is not in its request path.
-    const actions = readFileSync(
-      path.resolve(process.cwd(), 'src/app/(admin)/admin/(workspace)/actions.ts'),
-      'utf8'
-    );
+    // is not in its request path. Every action file in the workspace is held
+    // to the same rule: each exported action resolves the actor through the
+    // module guard before it does anything else.
+    const files = [
+      'src/app/(admin)/admin/(workspace)/actions.ts',
+      'src/app/(admin)/admin/(workspace)/team/actions.ts',
+      'src/app/(admin)/admin/(workspace)/planning/actions.ts',
+    ];
 
-    const exported = actions.match(/export async function \w+Action/g) ?? [];
-    expect(exported.length).toBeGreaterThan(0);
+    for (const file of files) {
+      const actions = readFileSync(path.resolve(process.cwd(), file), 'utf8');
+      const exported = actions.match(/export async function \w+Action/g) ?? [];
+      expect(exported.length, file).toBeGreaterThan(0);
 
-    // Every exported action body must start by resolving the actor.
-    for (const declaration of exported) {
-      const start = actions.indexOf(declaration);
-      const body = actions.slice(start, start + 400);
-      expect(body, `${declaration} must call requireStaff()`).toContain('requireStaff()');
+      for (const declaration of exported) {
+        const start = actions.indexOf(declaration);
+        const body = actions.slice(start, start + 500);
+        expect(
+          body,
+          `${file}: ${declaration} must call requireModule() or requireManager()`
+        ).toMatch(/requireModule\(|requireManager\(/);
+      }
+    }
+  });
+
+  it('gates every module directory with a layout', () => {
+    // The sidebar hides links; the layout is what refuses the request.
+    const modules = [
+      'enquiries',
+      'registrations',
+      'placement',
+      'applications',
+      'people',
+      'planning',
+      'catalogue',
+      'activity',
+      'team',
+    ];
+    for (const module of modules) {
+      const layout = readFileSync(
+        path.resolve(process.cwd(), `src/app/(admin)/admin/(workspace)/${module}/layout.tsx`),
+        'utf8'
+      );
+      expect(layout, module).toContain(`requireModule('${module}')`);
     }
   });
 

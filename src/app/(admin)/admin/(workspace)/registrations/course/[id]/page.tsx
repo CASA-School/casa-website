@@ -108,7 +108,7 @@ export default async function CourseRegistrationPage({
                       {registration.declaredLevelCode ?? registration.declaredLevelRaw}
                       <Badge tone="quiet">self-declared</Badge>
                       {!registration.declaredLevelCode ? (
-                        <Badge tone="warning">not a CASA level</Badge>
+                        <Badge tone="warning">unrecognised</Badge>
                       ) : null}
                     </span>
                   ) : null,
@@ -124,7 +124,7 @@ export default async function CourseRegistrationPage({
                       </span>
                     </span>
                   ) : (
-                    <span className="text-[var(--casa-text-subtle)]">No placement yet</span>
+                    <span className="text-[var(--casa-text-subtle)]">—</span>
                   ),
                 },
                 {
@@ -133,12 +133,6 @@ export default async function CourseRegistrationPage({
                 },
               ]}
             />
-            {registration.declaredLevelRaw && !confirmed ? (
-              <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-                A declared level is what the learner believes, not a placement. The Einstufungstest
-                and a teacher decide the class — check the Placement queue before assigning a group.
-              </p>
-            ) : null}
           </Card>
 
           <Card title="Applicant">
@@ -172,7 +166,7 @@ export default async function CourseRegistrationPage({
                   value: registration.nationalityName ?? (
                     <span className="flex items-center gap-2">
                       {registration.nationalityRaw}
-                      <Badge tone="warning">as written</Badge>
+                      <Badge tone="warning">unrecognised</Badge>
                     </span>
                   ),
                 },

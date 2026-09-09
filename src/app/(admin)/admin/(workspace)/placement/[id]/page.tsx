@@ -28,7 +28,7 @@ import {
   REVIEW_REASON_COPY,
   SKILL_LABELS,
 } from '@/lib/admin/placement-copy';
-import { BAND_SEQUENCE, LISTENING_AUDIO_AVAILABLE } from '@/config/placement/policy';
+import { BAND_SEQUENCE } from '@/config/placement/policy';
 import type { PlacementSkill } from '@/lib/placement/types';
 
 /**
@@ -197,14 +197,6 @@ export default async function PlacementAttemptPage({
                     </li>
                   ))}
                 </ul>
-
-                {!LISTENING_AUDIO_AVAILABLE ? (
-                  <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-                    Listening is not measured in this pilot — no audio exists for the scored
-                    listening scripts yet, so the test covers language use and reading only. A
-                    learner who listens far better or worse than they read will not show it here.
-                  </p>
-                ) : null}
               </Card>
 
               {decision.reviewReasons.length > 0 ? (
@@ -392,23 +384,10 @@ export default async function PlacementAttemptPage({
                 {attempt.confirmedLevel ? 'Revise the decision' : 'Confirm level'}
               </Button>
             </form>
-
-            <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-              This records your decision beside the engine&apos;s. It never overwrites the
-              recommendation, and it is not a certificate — the learner is told a course to start
-              in, not a level they have achieved.
-            </p>
           </Card>
 
           {attempt.confirmedLevel ? (
-            <Card
-              title="Who this is"
-              description={
-                attempt.reviewPerson
-                  ? undefined
-                  : 'The test is taken anonymously. If you know who sat it, attach them so the level shows on their record.'
-              }
-            >
+            <Card title="Person">
               {attempt.reviewPerson ? (
                 <div className="flex items-center justify-between gap-3">
                   <Link
@@ -441,10 +420,7 @@ export default async function PlacementAttemptPage({
                   </form>
                   {personSearch ? (
                     personMatches.length === 0 ? (
-                      <p className="mt-3 text-xs text-[var(--casa-text-subtle)]">
-                        Nobody on file matches that. A person is created when they enquire or
-                        register; there is no way to add one from here yet.
-                      </p>
+                      <p className="mt-3 text-xs text-[var(--casa-text-subtle)]">No match.</p>
                     ) : (
                       <ul className="mt-3 divide-y divide-ws-line-soft">
                         {personMatches.map((match) => (

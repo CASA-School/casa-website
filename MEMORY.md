@@ -1536,12 +1536,12 @@ mutation is a plain form posting to a server action. One client component,
 
 ### Four independent auth checks, now a hard rule
 
-The layout gate; `requireStaff()` in every server action (an action is a public
+The layout gate; `requireModule()` in every server action (an action is a public
 endpoint and does not go through the layout that rendered its form); the CV
 download route's own check (a route handler is not a child of the layout
 either); and `proxy.ts`. They cover different request paths — do not remove one
 because another looks like it covers it. `host-routing.test.ts` asserts all
-four, including that every exported action calls `requireStaff()`.
+four, including that every exported action calls the module guard.
 
 ### Bugs found by looking at it, not by the types
 
@@ -1678,14 +1678,42 @@ local database so the panel can be seen working.
 - The Browser pane's `preview_start` serves the **main checkout**, not a
   worktree; a worktree's dev server has to be started from that directory.
 
+## Modules, access, rooms — migration 0008 (2026-09-09)
+
+Three rules from the user after seeing the person panel, and what they became:
+
+1. **No explanatory copy in the product.** Every "the value is kept as written",
+   "a declared level is not a placement", the Settings "Not built yet" card and
+   the placement footnotes were removed from screens. Labels, values, badges,
+   controls only; the rationale lives in `docs/` and code comments. CLAUDE.md
+   Conventions now says so; `placement-containment.test.ts` checks for forbidden
+   labels rather than for a disclaimer.
+2. **Modules with per-role access.** `src/lib/admin/access.ts` is the registry
+   (eleven modules, role defaults, `ALWAYS_ON`, `ADJUSTABLE`).
+   `staff_module_access` stores per-person exceptions; `getStaffUser()` resolves
+   the set once per request into `user.modules`. Every module directory has a
+   `layout.tsx` calling `requireModule()`, every action calls it, the sidebar
+   filters on it, and the Team screen has the matrix. Changing access revokes
+   sessions.
+3. **Backend logic from FileMaker — rooms first.** `Classroom` /
+   `LocationReference` / `Floor` read live (GET only) and ported into
+   `locations` + `rooms` with `kind`, `capacity`/`capacity_max`, `nickname`,
+   `is_bookable`; `course_instances.room_id`; a Rooms screen under Planning; a
+   room picker in the catalogue with an over-capacity badge. Lessons §11.5
+   lists what was cleaned. Data is in `db/seeds/0002_locations_and_rooms.sql`
+   with `filemaker_links` for every row.
+
+Also: `eslint.config.mjs` now ignores `.claude/**` and `output/**` — linting
+from the main checkout was scanning a worktree's node_modules.
+
 ## Verified Baseline
 
-The latest implementation pass (2026-09-09, migration 0007) cleared all six:
+The latest implementation pass (2026-09-09, migration 0008) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`
 - `npm run build`
-- `npm run test` — 324 unit tests, 28 files
+- `npm run test` — 325 unit tests, 28 files
 - `npm run knip`
 - `E2E_PORT=3017 npm run test:e2e` — 36 specs, 23 public + 13 workspace
 

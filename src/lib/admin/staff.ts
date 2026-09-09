@@ -14,6 +14,8 @@ export type StaffAccount = {
   lastSeenAt: Date | null;
   createdAt: Date;
   activeSessions: number;
+  /** Per-person module exceptions; absent modules follow the role default. */
+  moduleExceptions: { module: string; allowed: boolean }[];
 };
 
 export async function listStaff(): Promise<StaffAccount[]> {
@@ -26,6 +28,7 @@ export async function listStaff(): Promise<StaffAccount[]> {
     last_seen_at: Date | null;
     created_at: Date;
     active_sessions: string;
+    exceptions: { module: string; allowed: boolean }[] | null;
   }>(
     `SELECT u.id,
             u.email,
@@ -36,7 +39,9 @@ export async function listStaff(): Promise<StaffAccount[]> {
             u.created_at,
             (SELECT count(*) FROM staff_sessions s
               WHERE s.staff_user_id = u.id AND s.expires_at > now())
-              AS active_sessions
+              AS active_sessions,
+            (SELECT json_agg(json_build_object('module', a.module, 'allowed', a.allowed))
+               FROM staff_module_access a WHERE a.staff_user_id = u.id) AS exceptions
        FROM staff_users u
       ORDER BY u.is_active DESC, u.name ASC`
   );
@@ -47,6 +52,7 @@ export async function listStaff(): Promise<StaffAccount[]> {
     name: row.name,
     role: row.role,
     isActive: row.is_active,
+    moduleExceptions: row.exceptions ?? [],
     lastSeenAt: row.last_seen_at,
     createdAt: row.created_at,
     activeSessions: Number(row.active_sessions),
@@ -223,4 +229,32 @@ export async function setStaffPassword({
   ]);
 
   await revokeAllSessions(staffUserId);
+}
+
+/**
+ * Sets the modules one person may open, as exceptions to their role default.
+ * Modules that match the default are not stored, so a later change to the
+ * default reaches everyone who was never given an exception.
+ */
+export async function setStaffModules(
+  staffUserId: string,
+  modules: readonly string[],
+  roleDefault: readonly string[],
+  adjustable: readonly string[],
+  grantedBy: string
+): Promise<void> {
+  const wanted = new Set(modules);
+  const rows: [string, boolean][] = [];
+  for (const m of adjustable) {
+    const byDefault = roleDefault.includes(m);
+    const now = wanted.has(m);
+    if (now !== byDefault) rows.push([m, now]);
+  }
+  await query(`DELETE FROM staff_module_access WHERE staff_user_id = $1`, [staffUserId]);
+  for (const [module, allowed] of rows) {
+    await query(
+      `INSERT INTO staff_module_access (staff_user_id, module, allowed, granted_by) VALUES ($1, $2, $3, $4)`,
+      [staffUserId, module, allowed, grantedBy]
+    );
+  }
 }

@@ -147,7 +147,7 @@ erDiagram
   }
 ```
 
-## Staff workspace and person register (0006, 0007)
+## Staff workspace, person register, rooms and access (0006–0008)
 
 ```mermaid
 erDiagram
@@ -277,6 +277,45 @@ erDiagram
     text source_primary_key
     int source_mod_id
     uuid linked_by FK
+  }
+```
+
+```mermaid
+erDiagram
+  LOCATIONS ||--o{ ROOMS : holds
+  ROOMS o|--o{ COURSE_INSTANCES : room_id
+  STAFF_USERS ||--o{ STAFF_MODULE_ACCESS : exceptions
+
+  LOCATIONS {
+    uuid id PK
+    text name
+    text short_name
+    text kind
+    bool is_active
+  }
+
+  ROOMS {
+    uuid id PK
+    uuid location_id FK
+    text name
+    text short_name
+    text nickname
+    smallint floor
+    room_kind kind
+    smallint capacity
+    smallint capacity_max
+    bool is_bookable
+    bool is_active
+    text colour
+    text zone
+    text notes
+  }
+
+  STAFF_MODULE_ACCESS {
+    uuid staff_user_id PK
+    text module PK
+    bool allowed
+    uuid granted_by FK
   }
 ```
 

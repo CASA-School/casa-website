@@ -49,7 +49,7 @@ export default async function FlagsPage({
         backLabel="People"
         eyebrow="Needs a look"
         title={filter ? FLAG_LABELS[filter] : 'Everything flagged'}
-        description="Values intake kept as written because it could not settle them, and records that may belong to someone already on file."
+        description="Records with a value that could not be matched, or that may belong to someone already on file."
       />
 
       {filter ? (
@@ -62,10 +62,7 @@ export default async function FlagsPage({
       ) : null}
 
       {flags.length === 0 ? (
-        <EmptyState
-          title="Nothing needs a look"
-          description="Every flag intake has raised has been answered by someone."
-        />
+        <EmptyState title="Nothing needs a look" description="All flags have been cleared." />
       ) : (
         <Card bleed>
           <Table

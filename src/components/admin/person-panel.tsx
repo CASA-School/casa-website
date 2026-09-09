@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { linkPersonAction, resolveFlagAction } from '@/app/(admin)/admin/(workspace)/actions';
-import { Badge, Button, Card, DateText } from './ui';
+import { Button, Card, DateText } from './ui';
 import { Icon } from './icons';
 import { FLAG_LABELS, type RecordFlag } from '@/lib/admin/flags';
 import type { PersonSummary } from '@/lib/admin/people';
@@ -41,16 +41,7 @@ export function PersonPanel({
   const linked = person && person.canonicalId !== person.id;
 
   return (
-    <Card
-      title="Person"
-      description={
-        person
-          ? linked
-            ? 'This record was linked to an existing person.'
-            : 'The person this record belongs to.'
-          : 'Recorded before the person register existed.'
-      }
-    >
+    <Card title="Person" description={linked ? 'Linked to an existing person.' : undefined}>
       {person ? (
         <Link
           href={`/admin/people/${person.canonicalId}`}
@@ -81,10 +72,6 @@ export function PersonPanel({
         <div className="mt-4 rounded-lg border border-[var(--casa-warning-text)]/30 bg-[var(--casa-warning-text)]/8 p-3">
           <p className="flex items-center gap-1.5 text-xs font-semibold text-[var(--casa-warning-text)]">
             {Icon.flag} {FLAG_LABELS.duplicate_candidate}
-          </p>
-          <p className="mt-1 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-            Same email, or same surname and date of birth. If it is the same person, link this
-            record to them — nothing is deleted and it can be undone.
           </p>
           <ul className="mt-3 space-y-2">
             {candidates.map((candidate) => (
@@ -118,7 +105,7 @@ export function PersonPanel({
             <input type="hidden" name="flagId" value={duplicateFlag.id} />
             <input type="hidden" name="returnTo" value={returnTo} />
             <Button type="submit" variant="ghost" size="sm">
-              Different person, clear this
+              Not a duplicate
             </Button>
           </form>
         </div>
@@ -137,8 +124,7 @@ export function PersonPanel({
                 </span>
                 {typeof flag.detail?.raw === 'string' ? (
                   <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                    Submitted as <span className="font-mono">“{flag.detail.raw}”</span>. The value
-                    is kept as written; nothing was corrected.
+                    “{flag.detail.raw}”
                   </span>
                 ) : null}
               </span>
@@ -157,12 +143,6 @@ export function PersonPanel({
             </li>
           ))}
         </ul>
-      ) : null}
-
-      {person && open.length === 0 ? (
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-[var(--casa-text-subtle)]">
-          <Badge tone="positive">Clear</Badge> Nothing about this record needs a look.
-        </p>
       ) : null}
     </Card>
   );

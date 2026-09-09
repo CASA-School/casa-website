@@ -38,6 +38,7 @@ export type CourseInstanceSummary = {
   location: string | null;
   status: string;
   registrationCount: number;
+  room: { id: string; name: string; nickname: string | null; capacity: number | null } | null;
 };
 
 export type ExamSessionSummary = {
@@ -122,6 +123,10 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
     location: string | null;
     status: string;
     registration_count: string;
+    room_id: string | null;
+    room_name: string | null;
+    room_nickname: string | null;
+    room_capacity: number | null;
   }>(
     `SELECT i.id,
             t.name AS course_type_name,
@@ -133,9 +138,12 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
             i.status,
             (SELECT count(*) FROM course_registrations r
               WHERE r.course_instance_id = i.id AND r.status <> 'spam')
-              AS registration_count
+              AS registration_count,
+            rm.id AS room_id, rm.name AS room_name, rm.nickname AS room_nickname,
+            rm.capacity AS room_capacity
        FROM course_instances i
        JOIN course_types t ON t.id = i.course_type_id
+       LEFT JOIN rooms rm ON rm.id = i.room_id
       WHERE i.start_date >= current_date - interval '14 days'
       ORDER BY i.start_date ASC
       LIMIT $1`,
@@ -152,6 +160,14 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
     location: row.location,
     status: row.status,
     registrationCount: Number(row.registration_count),
+    room: row.room_id
+      ? {
+          id: row.room_id,
+          name: row.room_name ?? '',
+          nickname: row.room_nickname,
+          capacity: row.room_capacity,
+        }
+      : null,
   }));
 }
 

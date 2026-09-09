@@ -64,6 +64,14 @@ export const Icon = {
       <path d="M11.25 9.6a3.6 3.6 0 0 1 2.75 3.65" />
     </svg>
   ),
+  /** A door in a wall — rooms. */
+  rooms: (
+    <svg {...box}>
+      <path d="M2.5 13.5h11" />
+      <path d="M4.5 13.5V3.4a.9.9 0 0 1 .9-.9h5.2a.9.9 0 0 1 .9.9v10.1" />
+      <circle cx="9.4" cy="8.4" r="0.7" fill="currentColor" stroke="none" />
+    </svg>
+  ),
   /** A small flag — this record needs a look. */
   flag: (
     <svg {...box}>

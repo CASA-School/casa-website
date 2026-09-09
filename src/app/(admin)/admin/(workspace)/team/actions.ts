@@ -3,11 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { canDeleteStaff, canManageStaff, getStaffUser, type StaffRole } from '@/lib/admin/auth';
+import { ADJUSTABLE, isModule, roleDefault } from '@/lib/admin/access';
+import { canDeleteStaff, revokeAllSessions, type StaffRole } from '@/lib/admin/auth';
+import { requireModule } from '@/lib/admin/guard';
 import { describePasswordProblem } from '@/lib/admin/password';
 import {
   createStaffAccount,
   setStaffActive,
+  setStaffModules,
   setStaffPassword,
   setStaffRole,
 } from '@/lib/admin/staff';
@@ -15,8 +18,8 @@ import {
 /**
  * Staff account mutations.
  *
- * Every one re-checks the role. `canManageStaff` is already used to hide the
- * Team link from the sidebar, but hiding a link is not a permission — a server
+ * Every one re-checks access. The sidebar hides the Team link from anyone
+ * without the module, but hiding a link is not a permission — a server
  * action is a public endpoint, and a staff member who knows the action exists
  * can post to it directly. This is the check that actually holds.
  */
@@ -25,22 +28,8 @@ const ROLES = new Set<string>(['owner', 'admin', 'staff']);
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function requireManager() {
-  const user = await getStaffUser();
-
-  if (!user) {
-    redirect('/admin/sign-in');
-  }
-
-  if (!canManageStaff(user.role)) {
-    // Not a 403 page: a staff member who reaches this did not follow a link,
-    // and there is nothing useful to say to them about a screen they may not
-    // see. The workspace behaves as though it does not exist.
-    redirect('/admin');
-  }
-
-  return user;
-}
+/** The Team module is owner/admin by role and never granted by exception. */
+const requireManager = () => requireModule('team');
 
 function back(message: string, kind: 'error' | 'ok' = 'error'): never {
   redirect(`/admin/team?${kind}=${encodeURIComponent(message)}`);
@@ -153,4 +142,32 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/team');
   back('Password set. Every session for that account is closed.', 'ok');
+}
+
+/** Which modules one person may open. Checkboxes; unchecked means no. */
+export async function setModuleAccessAction(formData: FormData): Promise<void> {
+  const manager = await requireManager();
+  const staffUserId = String(formData.get('staffUserId') ?? '');
+  if (!UUID.test(staffUserId)) back('Invalid account.');
+  if (staffUserId === manager.id) back('Ask another administrator to change your own access.');
+
+  const role = String(formData.get('role') ?? '');
+  if (!ROLES.has(role)) back('Invalid role.');
+
+  const modules = formData
+    .getAll('modules')
+    .map(String)
+    .filter((m) => isModule(m) && (ADJUSTABLE as readonly string[]).includes(m));
+
+  await setStaffModules(
+    staffUserId,
+    modules,
+    roleDefault(role as StaffRole),
+    ADJUSTABLE,
+    manager.id
+  );
+  // A narrowed set must take effect now, not when the session next reloads.
+  await revokeAllSessions(staffUserId);
+  revalidatePath('/admin/team');
+  back('Access updated.', 'ok');
 }

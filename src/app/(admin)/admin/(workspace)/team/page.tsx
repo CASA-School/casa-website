@@ -1,9 +1,8 @@
-import { redirect } from 'next/navigation';
-
 import {
   createStaffAction,
   resetPasswordAction,
   setActiveAction,
+  setModuleAccessAction,
   setRoleAction,
 } from './actions';
 import {
@@ -21,7 +20,9 @@ import {
   relativeDays,
 } from '@/components/admin/ui';
 import { roleLabel } from '@/components/admin/shell';
-import { canDeleteStaff, canManageStaff, getStaffUser } from '@/lib/admin/auth';
+import { ADJUSTABLE, MODULE_LABELS, resolveModules } from '@/lib/admin/access';
+import { canDeleteStaff } from '@/lib/admin/auth';
+import { requireModule } from '@/lib/admin/guard';
 import { MIN_PASSWORD_LENGTH } from '@/lib/admin/password';
 import { listStaff } from '@/lib/admin/staff';
 
@@ -44,15 +45,7 @@ export default async function TeamPage({
 }: {
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const user = await getStaffUser();
-
-  if (!user) {
-    redirect('/admin/sign-in');
-  }
-
-  if (!canManageStaff(user.role)) {
-    redirect('/admin');
-  }
+  const user = await requireModule('team');
 
   const [params, staff] = await Promise.all([searchParams, listStaff()]);
   const isOwner = canDeleteStaff(user.role);
@@ -85,15 +78,7 @@ export default async function TeamPage({
 
       <div className="space-y-5">
         <Card title="Accounts" bleed>
-          <Table
-            head={[
-              'Name',
-              'Role',
-              'Last seen',
-              'Sessions',
-              { label: '', align: 'right' },
-            ]}
-          >
+          <Table head={['Name', 'Role', 'Last seen', 'Sessions', { label: '', align: 'right' }]}>
             {staff.map((account) => (
               <TableRow key={account.id}>
                 <Cell className="font-semibold">
@@ -172,6 +157,79 @@ export default async function TeamPage({
           </Table>
         </Card>
 
+        <Card title="Access" bleed>
+          <Table
+            head={[
+              'Account',
+              ...ADJUSTABLE.map((m) => MODULE_LABELS[m]),
+              { label: '', align: 'right' },
+            ]}
+          >
+            {staff
+              .filter((account) => account.isActive)
+              .map((account) => {
+                const modules = resolveModules(account.role, account.moduleExceptions);
+                const fixed = account.id === user.id || account.role !== 'staff';
+                return (
+                  <TableRow key={account.id}>
+                    <Cell className="font-semibold">
+                      <span className="block">{account.name}</span>
+                      <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
+                        {roleLabel(account.role)}
+                      </span>
+                    </Cell>
+                    {fixed ? (
+                      <>
+                        {ADJUSTABLE.map((m) => (
+                          <Cell key={m} className="text-center">
+                            <span
+                              aria-label={modules.includes(m) ? 'Yes' : 'No'}
+                              className={
+                                modules.includes(m)
+                                  ? 'text-[var(--casa-success-text)]'
+                                  : 'text-ws-line-firm'
+                              }
+                            >
+                              {modules.includes(m) ? '●' : '○'}
+                            </span>
+                          </Cell>
+                        ))}
+                        <Cell align="right" className="text-xs text-[var(--casa-text-subtle)]">
+                          {account.id === user.id ? '' : 'All modules'}
+                        </Cell>
+                      </>
+                    ) : (
+                      <>
+                        {ADJUSTABLE.map((m) => (
+                          <Cell key={m} className="text-center">
+                            <input
+                              form={`access-${account.id}`}
+                              type="checkbox"
+                              name="modules"
+                              value={m}
+                              defaultChecked={modules.includes(m)}
+                              aria-label={`${MODULE_LABELS[m]} for ${account.name}`}
+                              className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                            />
+                          </Cell>
+                        ))}
+                        <Cell align="right">
+                          <form id={`access-${account.id}`} action={setModuleAccessAction}>
+                            <input type="hidden" name="staffUserId" value={account.id} />
+                            <input type="hidden" name="role" value={account.role} />
+                            <Button type="submit" variant="ghost" size="sm">
+                              Save
+                            </Button>
+                          </form>
+                        </Cell>
+                      </>
+                    )}
+                  </TableRow>
+                );
+              })}
+          </Table>
+        </Card>
+
         <div className="grid gap-5 lg:grid-cols-2">
           <Card
             title="Add an account"
@@ -194,9 +252,7 @@ export default async function TeamPage({
                 <Select id="new-role" name="role" defaultValue="staff">
                   <option value="staff">Staff — works the queues</option>
                   <option value="admin">Administrator — also manages accounts</option>
-                  {isOwner ? (
-                    <option value="owner">Owner — can grant the owner role</option>
-                  ) : null}
+                  {isOwner ? <option value="owner">Owner — can grant the owner role</option> : null}
                 </Select>
               </Field>
               <Field
@@ -260,23 +316,22 @@ export default async function TeamPage({
                 <div>
                   <dt className="font-semibold">Staff</dt>
                   <dd className="text-[var(--casa-text-subtle)]">
-                    Works every queue: reads records, sets statuses, takes
-                    ownership, writes notes, confirms placements.
+                    Works every queue: reads records, sets statuses, takes ownership, writes notes,
+                    confirms placements.
                   </dd>
                 </div>
                 <div>
                   <dt className="font-semibold">Administrator</dt>
                   <dd className="text-[var(--casa-text-subtle)]">
-                    Everything above, plus this screen — creating accounts,
-                    changing roles, setting passwords, deactivating people.
+                    Everything above, plus this screen — creating accounts, changing roles, setting
+                    passwords, deactivating people.
                   </dd>
                 </div>
                 <div>
                   <dt className="font-semibold">Owner</dt>
                   <dd className="text-[var(--casa-text-subtle)]">
-                    Everything above, plus granting the owner role. CASA cannot
-                    be left with no active owner — the workspace refuses the
-                    change that would do it.
+                    Everything above, plus granting the owner role. CASA cannot be left with no
+                    active owner — the workspace refuses the change that would do it.
                   </dd>
                 </div>
               </dl>

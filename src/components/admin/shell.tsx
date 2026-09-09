@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import { Icon } from './icons';
 import { NavLink } from './nav-link';
 import { Logo } from '@/components/ui/logo';
+import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
-import { canManageStaff } from '@/lib/admin/auth';
 
 /**
  * The workspace frame.
@@ -75,40 +75,63 @@ export function WorkspaceShell({
             <NavLink href="/admin" icon={Icon.overview}>
               Overview
             </NavLink>
-            <NavLink href="/admin/enquiries" icon={Icon.enquiries} badge={badges.enquiries}>
-              Enquiries
-            </NavLink>
-            <NavLink
-              href="/admin/registrations"
-              icon={Icon.registrations}
-              badge={badges.courseRegistrations + badges.examRegistrations}
-            >
-              Registrations
-            </NavLink>
-            <NavLink href="/admin/placement" icon={Icon.placement} badge={badges.placement}>
-              Placement
-            </NavLink>
-            <NavLink
-              href="/admin/applications"
-              icon={Icon.applications}
-              badge={badges.applications}
-            >
-              Applications
-            </NavLink>
+            {canAccess(user, 'enquiries') ? (
+              <NavLink href="/admin/enquiries" icon={Icon.enquiries} badge={badges.enquiries}>
+                Enquiries
+              </NavLink>
+            ) : null}
+            {canAccess(user, 'registrations') ? (
+              <NavLink
+                href="/admin/registrations"
+                icon={Icon.registrations}
+                badge={badges.courseRegistrations + badges.examRegistrations}
+              >
+                Registrations
+              </NavLink>
+            ) : null}
+            {canAccess(user, 'placement') ? (
+              <NavLink href="/admin/placement" icon={Icon.placement} badge={badges.placement}>
+                Placement
+              </NavLink>
+            ) : null}
+            {canAccess(user, 'applications') ? (
+              <NavLink
+                href="/admin/applications"
+                icon={Icon.applications}
+                badge={badges.applications}
+              >
+                Applications
+              </NavLink>
+            ) : null}
 
-            <NavGroupLabel>Reference</NavGroupLabel>
-            <NavLink href="/admin/people" icon={Icon.people} badge={badges.flags}>
-              People
-            </NavLink>
-            <NavLink href="/admin/catalogue" icon={Icon.catalogue}>
-              Courses &amp; exams
-            </NavLink>
-            <NavLink href="/admin/activity" icon={Icon.note}>
-              Activity
-            </NavLink>
+            {canAccess(user, 'people') ||
+            canAccess(user, 'planning') ||
+            canAccess(user, 'catalogue') ? (
+              <NavGroupLabel>School</NavGroupLabel>
+            ) : null}
+            {canAccess(user, 'people') ? (
+              <NavLink href="/admin/people" icon={Icon.people} badge={badges.flags}>
+                People
+              </NavLink>
+            ) : null}
+            {canAccess(user, 'planning') ? (
+              <NavLink href="/admin/planning" icon={Icon.rooms}>
+                Rooms
+              </NavLink>
+            ) : null}
+            {canAccess(user, 'catalogue') ? (
+              <NavLink href="/admin/catalogue" icon={Icon.catalogue}>
+                Courses &amp; exams
+              </NavLink>
+            ) : null}
 
             <NavGroupLabel>Administration</NavGroupLabel>
-            {canManageStaff(user.role) ? (
+            {canAccess(user, 'activity') ? (
+              <NavLink href="/admin/activity" icon={Icon.note}>
+                Activity
+              </NavLink>
+            ) : null}
+            {canAccess(user, 'team') ? (
               <NavLink href="/admin/team" icon={Icon.team}>
                 Team
               </NavLink>

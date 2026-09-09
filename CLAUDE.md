@@ -133,7 +133,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0007_people_and_flags.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0008_rooms_and_module_access.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -165,6 +165,12 @@ Respect `prefers-reduced-motion` and existing `focus-visible` patterns.
 and repository-backed view models rather than hardcoded inline content. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
+
+**Workspace screens: labels, not explanations.** The staff workspace must stay
+presentable. No rationale, caveats or "not built yet" notes in the UI — those go
+in `docs/ADMIN_WORKSPACE.md` or a code comment. Every workspace feature is a
+module in `src/lib/admin/access.ts`, gated by role and per-person exception;
+design a new screen by answering "who may see this" first.
 
 **Diffs.** Keep them minimal and targeted. Do not add abstractions when an existing
 pattern already covers the case. If a fact is not verifiable in the repo, mark it
@@ -200,7 +206,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    when you change them so stored attempts stay interpretable.
 7. **The staff workspace is behind four independent checks, and each is
    load-bearing.** (a) The layout gate in
-   `src/app/(admin)/admin/(workspace)/layout.tsx`. (b) `requireStaff()` at the
+   `src/app/(admin)/admin/(workspace)/layout.tsx`, plus a `layout.tsx` per
+   module calling `requireModule()`. (b) `requireModule()` at the
    top of EVERY server action — an action is a public HTTP endpoint and does not
    go through the layout that rendered its form. (c) Its own check inside the CV
    download route handler, for the same reason. (d) `src/proxy.ts`, which 404s
@@ -263,7 +270,7 @@ nothing replaced them. Ignore those specific names.
 means by "route protection": it does host routing for the staff workspace
 (`admin.casa-bremen.de` → `/admin`, and `/admin` 404s on the public host in
 production) and has no database connection, so it cannot authenticate anything.
-The workspace's auth gate is its layout plus `requireStaff()` in every server
+The workspace's auth gate is its layouts plus `requireModule()` in every server
 action — see `docs/ADMIN_WORKSPACE.md`. Do not add a role check to `proxy.ts`.
 
 The `apiSuccess` / `apiError` and mock-mode-parity guidance in the same sections

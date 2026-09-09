@@ -1,16 +1,24 @@
+import Link from 'next/link';
+
+import { assignRoomAction } from '../planning/actions';
 import { CatalogueTabs } from '@/components/admin/catalogue-tabs';
 import {
   Badge,
+  Button,
   Card,
   Cell,
   DateText,
   EmptyState,
   Meter,
   PageHeader,
+  Select,
   Table,
   TableRow,
 } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import { listCourseTypes, listUpcomingCourseInstances } from '@/lib/admin/catalogue';
+import { requireModule } from '@/lib/admin/guard';
+import { listBookableRooms } from '@/lib/admin/rooms';
 
 /**
  * Courses, with live demand against them.
@@ -25,10 +33,18 @@ import { listCourseTypes, listUpcomingCourseInstances } from '@/lib/admin/catalo
  * What the workspace adds is the one thing the source of truth cannot hold:
  * how many people have actually registered for the cohort starting in ten days.
  */
-export default async function CataloguePage() {
-  const [types, instances] = await Promise.all([
+export default async function CataloguePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const user = await requireModule('catalogue');
+  const plans = canAccess(user, 'planning');
+  const [{ error }, types, instances, rooms] = await Promise.all([
+    searchParams,
     listCourseTypes(),
     listUpcomingCourseInstances(20),
+    plans ? listBookableRooms() : Promise.resolve([]),
   ]);
 
   return (
@@ -41,31 +57,26 @@ export default async function CataloguePage() {
 
       <CatalogueTabs active="courses" />
 
-      <div className="space-y-5">
-        <Card
-          title="Upcoming cohorts"
-          description="Seats taken against capacity. A registration counts here as soon as it arrives, before staff confirm it."
-          bleed
+      {error ? (
+        <p
+          role="alert"
+          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
         >
+          {error}
+        </p>
+      ) : null}
+
+      <div className="space-y-5">
+        <Card title="Upcoming cohorts" bleed>
           {instances.length === 0 ? (
             <div className="px-5 py-4">
-              <EmptyState
-                title="No cohorts scheduled"
-                description="Course instances come from the course_instances table. Seed or import them before staff can plan against this screen."
-              />
+              <EmptyState title="No cohorts scheduled" description="Nothing is dated yet." />
             </div>
           ) : (
-            <Table
-              head={[
-                'Course',
-                'Runs',
-                'Location',
-                'Seats',
-                { label: 'Status', align: 'right' },
-              ]}
-            >
+            <Table head={['Course', 'Runs', 'Room', 'Seats', { label: 'Status', align: 'right' }]}>
               {instances.map((instance) => {
-                const full = instance.capacity > 0 && instance.registrationCount >= instance.capacity;
+                const full =
+                  instance.capacity > 0 && instance.registrationCount >= instance.capacity;
                 const nearlyFull =
                   instance.capacity > 0 &&
                   !full &&
@@ -78,8 +89,47 @@ export default async function CataloguePage() {
                       <DateText value={instance.startDate} /> —{' '}
                       <DateText value={instance.endDate} />
                     </Cell>
-                    <Cell className="text-sm text-[var(--casa-text-subtle)]">
-                      {instance.location ?? '—'}
+                    <Cell className="text-sm">
+                      {plans ? (
+                        <form action={assignRoomAction} className="flex items-center gap-1.5">
+                          <input type="hidden" name="courseInstanceId" value={instance.id} />
+                          <Select
+                            name="roomId"
+                            defaultValue={instance.room?.id ?? ''}
+                            aria-label={`Room for ${instance.courseTypeName}`}
+                            className="w-auto py-1 text-xs"
+                          >
+                            <option value="">No room</option>
+                            {rooms.map((room) => (
+                              <option key={room.id} value={room.id}>
+                                {room.nickname ? `${room.name} · ${room.nickname}` : room.name}
+                                {room.capacity !== null ? ` (${room.capacity})` : ''}
+                              </option>
+                            ))}
+                          </Select>
+                          <Button type="submit" variant="ghost" size="sm">
+                            Set
+                          </Button>
+                        </form>
+                      ) : instance.room ? (
+                        <Link
+                          href={`/admin/planning/rooms/${instance.room.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          {instance.room.nickname ?? instance.room.name}
+                        </Link>
+                      ) : (
+                        <span className="text-[var(--casa-text-subtle)]">
+                          {instance.location ?? '—'}
+                        </span>
+                      )}
+                      {instance.room?.capacity !== null &&
+                      instance.room?.capacity !== undefined &&
+                      instance.capacity > instance.room.capacity ? (
+                        <Badge tone="warning" className="mt-1">
+                          Over room capacity
+                        </Badge>
+                      ) : null}
                     </Cell>
                     <Cell className="w-40">
                       <span className="mb-1.5 block text-sm">
@@ -112,11 +162,7 @@ export default async function CataloguePage() {
           )}
         </Card>
 
-        <Card
-          title="Course types"
-          description="The published catalogue. Prices and hours are governed by docs/COURSE_FACTS_SOURCE_OF_TRUTH.md and are not editable here."
-          bleed
-        >
+        <Card title="Course types" bleed>
           <Table
             head={[
               'Course',
@@ -137,9 +183,7 @@ export default async function CataloguePage() {
                   </span>
                 </Cell>
                 <Cell className="text-sm">{type.levelRange ?? '—'}</Cell>
-                <Cell className="text-sm text-[var(--casa-text-subtle)]">
-                  {type.format ?? '—'}
-                </Cell>
+                <Cell className="text-sm text-[var(--casa-text-subtle)]">{type.format ?? '—'}</Cell>
                 <Cell align="right" className="text-sm">
                   {type.lessonsPerWeek || '—'}
                 </Cell>

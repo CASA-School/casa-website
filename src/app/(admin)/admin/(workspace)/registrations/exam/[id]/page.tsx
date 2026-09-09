@@ -146,7 +146,7 @@ export default async function ExamRegistrationPage({
                   value: registration.nationalityName ?? (
                     <span className="flex items-center gap-2">
                       {registration.nationalityRaw}
-                      <Badge tone="warning">as written</Badge>
+                      <Badge tone="warning">unrecognised</Badge>
                     </span>
                   ),
                 },

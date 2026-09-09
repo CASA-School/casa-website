@@ -22,8 +22,7 @@ import { FORBIDDEN_CLIENT_FIELDS } from '@/lib/placement/sanitise';
  * the import is the day the guarantee is gone.
  */
 
-const read = (relative: string) =>
-  readFileSync(path.resolve(process.cwd(), relative), 'utf8');
+const read = (relative: string) => readFileSync(path.resolve(process.cwd(), relative), 'utf8');
 
 /**
  * The same file with its comments removed.
@@ -88,11 +87,14 @@ describe('the review screen states what it is', () => {
     const list = read('src/app/(admin)/admin/(workspace)/placement/page.tsx');
     const detail = read('src/app/(admin)/admin/(workspace)/placement/[id]/page.tsx');
 
-    // The banner has to say these words in order to forbid them, so the check
-    // is that the recommendation itself is never labelled with them.
+    // The list banner names the instrument for what it is.
     expect(list).toContain('recommendation');
     expect(list).toContain('shadow');
-    expect(detail).toContain('not a certificate');
+    // The detail screen labels nothing with the words CLAUDE.md rule 6 forbids.
+    // The rationale lives in docs/PLACEMENT_TEST_IMPLEMENTATION.md, not on the
+    // screen: the workspace shows labels and values, not explanations.
+    const visible = detail.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+    expect(visible).not.toMatch(/\b(certificate|passed|failed|pass\/fail)\b/i);
   });
 
   it('explains every review reason the engine can emit', () => {
@@ -104,10 +106,6 @@ describe('the review screen states what it is', () => {
   });
 
   it('labels every skill the engine scores', () => {
-    expect(Object.keys(SKILL_LABELS).sort()).toEqual([
-      'language_use',
-      'listening',
-      'reading',
-    ]);
+    expect(Object.keys(SKILL_LABELS).sort()).toEqual(['language_use', 'listening', 'reading']);
   });
 });

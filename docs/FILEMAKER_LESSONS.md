@@ -229,6 +229,25 @@ script.
 
 ---
 
+### 11.5 Rooms — the first table ported (2026-09-09)
+
+`Classroom` (29 rows), `LocationReference` (8) and `Floor` (5) were read live
+and became `locations` / `rooms` in migration 0008. What the port changed:
+
+| Found | Rule applied |
+| --- | --- |
+| Booleans as `1`/`2`; one row carries `21` | Real booleans. Anything that is not `1` is false |
+| Offices (`1. OG Werner`, `2. OG Buchhaltung`, `Studienleitung`, `Keller Lehrer`, `KG Studien`) and the `EG 7 Glaskasten` in the classroom table, with capacity 0–3 | `rooms.kind` — classroom / office / meeting / other. Only classrooms can be planned into |
+| `CapStudent` and `MaxStudent`, two capacities, no definition | Named: `capacity` (planning) and `capacity_max` (ceiling), with a check that max ≥ capacity. `0/0` becomes NULL |
+| `CityClassRoom` — the room's everyday name ("Berlin", "Hamburg") | A first-class `nickname` column, unique |
+| `_ID_Shown` (in the picker or not) separate from `_ID_Active` | `is_bookable` and `is_active`, both meaningful |
+| Location `Inhouse` / `InhouseOn` / `OnlineGroup` / `OnlineOne` mixed with buildings | `locations.kind` — site / client / online |
+| Per-date occupancy in `SingleDateOccupancy` (5,616 rows) and `SingleDayOccupancyClassroom` | Not ported. A cohort → room assignment plus dates answers the same question without a materialised row per day |
+
+Every imported row carries a `filemaker_links` entry (`Classroom` /
+`LocationReference` record ids), so phase 3 updates these rows rather than
+duplicating them.
+
 ## 12. What the workspace already does right
 
 Keep these; they are the opposite of §1–§10 by construction:

@@ -137,24 +137,16 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
               </div>
             ) : (
               <p className="text-sm text-[var(--casa-text-subtle)]">
-                The application names{' '}
-                <span className="font-medium">{application.cvFileName}</span> but no
-                file is stored against it. Ask the candidate to send it directly.
+                The application names <span className="font-medium">{application.cvFileName}</span>{' '}
+                but no file is stored against it. Ask the candidate to send it directly.
               </p>
             )}
-
-            <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-              A CV is personal data under GDPR. Download it only when you are
-              acting on the application, and do not forward it outside the
-              hiring conversation.
-            </p>
           </Card>
 
           {application.rawStatus === 'submitted' ? (
             <p className="text-xs text-[var(--casa-text-subtle)]">
-              <Badge tone="quiet">Untouched</Badge>{' '}
-              Still carrying the status the public form wrote. Setting a status
-              here is what puts it in the pipeline.
+              <Badge tone="quiet">Untouched</Badge> Still carrying the status the public form wrote.
+              Setting a status here is what puts it in the pipeline.
             </p>
           ) : null}
         </div>

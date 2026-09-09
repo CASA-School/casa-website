@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { getStaffUser, type StaffUser } from '@/lib/admin/auth';
+import type { WorkspaceModule } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
 import { resolveFlag } from '@/lib/admin/flags';
 import { addNote, type NoteEntity } from '@/lib/admin/notes';
 import { linkPerson, unlinkPerson } from '@/lib/admin/people';
@@ -20,7 +21,7 @@ import {
 /**
  * Every mutation the workspace makes.
  *
- * All of them start with `requireStaff()`. A server action is a public HTTP
+ * All of them start with `requireModule()`. A server action is a public HTTP
  * endpoint — the layout's auth gate does not protect it, because nothing about
  * a POST to an action goes through the layout that rendered the form. Treating
  * an action as "inside the app" is the single most common way an admin surface
@@ -31,16 +32,6 @@ import {
  * arrives is re-validated here against the same allowlists the reads use.
  */
 
-async function requireStaff(): Promise<StaffUser> {
-  const user = await getStaffUser();
-
-  if (!user) {
-    redirect('/admin/sign-in');
-  }
-
-  return user;
-}
-
 const QUEUE_ENTITIES = new Set<string>([
   'enquiry',
   'course_registration',
@@ -49,6 +40,15 @@ const QUEUE_ENTITIES = new Set<string>([
 ]);
 
 const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt']);
+
+/** Which module owns a record type — the module the actor must hold. */
+const MODULE_FOR: Record<string, WorkspaceModule> = {
+  enquiry: 'enquiries',
+  course_registration: 'registrations',
+  exam_registration: 'registrations',
+  career_application: 'applications',
+  placement_attempt: 'placement',
+};
 
 /** A uuid, or nothing. Guards the id before it reaches a `uuid` column. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -74,8 +74,8 @@ function readQueueEntity(formData: FormData): QueueEntity {
 }
 
 export async function updateStatusAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
   const entity = readQueueEntity(formData);
+  const actor = await requireModule(MODULE_FOR[entity]);
   const id = readId(formData);
   const status = String(formData.get('status') ?? '');
 
@@ -93,8 +93,8 @@ export async function updateStatusAction(formData: FormData): Promise<void> {
 }
 
 export async function assignAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
   const entity = readQueueEntity(formData);
+  const actor = await requireModule(MODULE_FOR[entity]);
   const id = readId(formData);
   const raw = String(formData.get('staffUserId') ?? '');
 
@@ -113,7 +113,6 @@ export async function assignAction(formData: FormData): Promise<void> {
 }
 
 export async function addNoteAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
   const id = readId(formData, 'entityId');
   const entity = String(formData.get('entity') ?? '');
   const body = String(formData.get('body') ?? '');
@@ -121,6 +120,8 @@ export async function addNoteAction(formData: FormData): Promise<void> {
   if (!NOTE_ENTITIES.has(entity)) {
     throw new Error('Invalid entity');
   }
+
+  const actor = await requireModule(MODULE_FOR[entity]);
 
   if (body.trim().length === 0) {
     return;
@@ -145,7 +146,7 @@ export async function addNoteAction(formData: FormData): Promise<void> {
  * scores in `src/config/placement/policy.ts` are right.
  */
 export async function confirmPlacementAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
+  const actor = await requireModule('placement');
   const attemptId = readId(formData, 'attemptId');
   const confirmedLevel = String(formData.get('confirmedLevel') ?? '').trim();
   const note = String(formData.get('note') ?? '').trim();
@@ -199,7 +200,7 @@ function readReturnTo(formData: FormData, fallback: string): string {
  * no foreign key — reads follow `merged_into` — so it is reversible.
  */
 export async function linkPersonAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
+  const actor = await requireModule('people');
   const duplicateId = readId(formData, 'duplicateId');
   const survivorId = readId(formData, 'survivorId');
   const returnTo = readReturnTo(formData, '/admin/people');
@@ -210,7 +211,7 @@ export async function linkPersonAction(formData: FormData): Promise<void> {
 }
 
 export async function unlinkPersonAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
+  const actor = await requireModule('people');
   const personId = readId(formData, 'personId');
   await unlinkPerson({ personId, actor });
   revalidatePath('/admin', 'layout');
@@ -218,7 +219,7 @@ export async function unlinkPersonAction(formData: FormData): Promise<void> {
 }
 
 export async function resolveFlagAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
+  const actor = await requireModule('people');
   const flagId = readId(formData, 'flagId');
   await resolveFlag(flagId, actor);
   revalidatePath('/admin', 'layout');
@@ -231,7 +232,7 @@ export async function resolveFlagAction(formData: FormData): Promise<void> {
  * reviewer's decision, on the review, against their name.
  */
 export async function attachReviewPersonAction(formData: FormData): Promise<void> {
-  const actor = await requireStaff();
+  const actor = await requireModule('placement');
   const attemptId = readId(formData, 'attemptId');
   const raw = String(formData.get('personId') ?? '');
   const personId = raw === '' ? null : raw;

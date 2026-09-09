@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import { cookies } from 'next/headers';
 
+import { resolveModules, type WorkspaceModule } from './access';
 import { query, queryFirst } from './db';
 import { verifyPassword } from './password';
 
@@ -34,6 +35,8 @@ export type StaffUser = {
   email: string;
   name: string;
   role: StaffRole;
+  /** The modules this person may open — role default plus exceptions. */
+  modules: WorkspaceModule[];
 };
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -87,7 +90,15 @@ export async function signIn(
   );
 
   return {
-    user: { id: row.id, email: row.email, name: row.name, role: row.role },
+    // Exceptions are resolved on the next request by getStaffUser; the sign-in
+    // result only needs the role default to redirect correctly.
+    user: {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      role: row.role,
+      modules: resolveModules(row.role, []),
+    },
     token,
   };
 }
@@ -138,6 +149,7 @@ type SessionRow = {
   email: string;
   name: string;
   role: StaffRole;
+  exceptions: { module: string; allowed: boolean }[] | null;
 };
 
 /**
@@ -163,7 +175,9 @@ export async function getStaffUser(): Promise<StaffUser | null> {
               u.id,
               u.email,
               u.name,
-              u.role
+              u.role,
+              (SELECT json_agg(json_build_object('module', a.module, 'allowed', a.allowed))
+                 FROM staff_module_access a WHERE a.staff_user_id = u.id) AS exceptions
          FROM staff_sessions s
          JOIN staff_users u ON u.id = s.staff_user_id
         WHERE s.token_hash = $1
@@ -198,7 +212,13 @@ export async function getStaffUser(): Promise<StaffUser | null> {
     );
   }
 
-  return { id: row.id, email: row.email, name: row.name, role: row.role };
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    modules: resolveModules(row.role, row.exceptions ?? []),
+  };
 }
 
 /** Role gate for the few screens only an owner or admin may open. */

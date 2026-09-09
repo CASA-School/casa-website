@@ -82,19 +82,16 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
         title={title}
         description={
           person.id !== id
-            ? 'The record you opened was linked to this one. You are looking at the surviving record.'
+            ? 'Opened from a linked record.'
             : `In touch since ${person.createdAt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}.`
         }
       />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
         <div className="space-y-5">
-          <Card title="History" description="Everything from this person, newest first.">
+          <Card title="History">
             {timeline.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">
-                Nothing yet. A person row with no history is usually one that was created by hand or
-                by an import.
-              </p>
+              <p className="text-sm text-[var(--casa-text-subtle)]">Nothing yet.</p>
             ) : (
               <ol className="divide-y divide-ws-line-soft">
                 {timeline.map((item) => (
@@ -130,10 +127,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           </Card>
 
           {person.linkedDuplicates.length > 0 ? (
-            <Card
-              title="Linked records"
-              description="Rows a colleague decided were this same person. Their history is folded into the list above."
-            >
+            <Card title="Linked records">
               <ul className="divide-y divide-ws-line-soft">
                 {person.linkedDuplicates.map((dup) => (
                   <li key={dup.id} className="flex items-center justify-between gap-3 py-2.5">
@@ -147,7 +141,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                       <input type="hidden" name="personId" value={dup.id} />
                       <input type="hidden" name="returnTo" value={`/admin/people/${person.id}`} />
                       <Button type="submit" variant="ghost" size="sm">
-                        Not the same person
+                        Unlink
                       </Button>
                     </form>
                   </li>
@@ -201,7 +195,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                     (person.nationalityRaw ? (
                       <span className="flex items-center gap-2">
                         {person.nationalityRaw}
-                        <Badge tone="warning">as written</Badge>
+                        <Badge tone="warning">unrecognised</Badge>
                       </span>
                     ) : null),
                 },
@@ -222,7 +216,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                       </span>
                     </span>
                   ) : (
-                    <span className="text-[var(--casa-text-subtle)]">No placement yet</span>
+                    <span className="text-[var(--casa-text-subtle)]">—</span>
                   ),
                 },
                 { label: 'Record created by', value: person.createdBy },
@@ -246,10 +240,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           ) : null}
 
           {fileMakerLinks.length > 0 ? (
-            <Card
-              title="In FileMaker"
-              description="The records this person already has in SchoolMan. Kept as links, never copied, until the migration."
-            >
+            <Card title="In FileMaker">
               <ul className="space-y-1.5 text-sm">
                 {fileMakerLinks.map((link) => (
                   <li key={link.id} className="flex items-center justify-between gap-2">

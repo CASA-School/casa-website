@@ -1,6 +1,6 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 
 /**
  * Tailwind's stock colour ramps are not CASA's palette.
@@ -16,25 +16,59 @@ import nextTs from "eslint-config-next/typescript";
  * The mapping to use is in docs/PARALLEL_AGENT_WORK_BOARD.md → "Tier 2 · T2-C".
  */
 const TAILWIND_PALETTES = [
-  "slate", "gray", "zinc", "neutral", "stone",
-  "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal",
-  "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose",
-].join("|");
+  'slate',
+  'gray',
+  'zinc',
+  'neutral',
+  'stone',
+  'red',
+  'orange',
+  'amber',
+  'yellow',
+  'lime',
+  'green',
+  'emerald',
+  'teal',
+  'cyan',
+  'sky',
+  'blue',
+  'indigo',
+  'violet',
+  'purple',
+  'fuchsia',
+  'pink',
+  'rose',
+].join('|');
 
 const COLOR_UTILITIES = [
-  "bg", "text", "border", "ring", "ring-offset", "outline", "divide", "shadow",
-  "from", "via", "to", "fill", "stroke", "placeholder", "caret", "accent", "decoration",
-].join("|");
+  'bg',
+  'text',
+  'border',
+  'ring',
+  'ring-offset',
+  'outline',
+  'divide',
+  'shadow',
+  'from',
+  'via',
+  'to',
+  'fill',
+  'stroke',
+  'placeholder',
+  'caret',
+  'accent',
+  'decoration',
+].join('|');
 
 // Matches e.g. `text-slate-600`, `hover:bg-rose-50`, `md:border-emerald-200/90`.
 const DEFAULT_PALETTE_CLASS = String.raw`(?:^|[\s"'\`])(?:[a-z-]+:)*(?:${COLOR_UTILITIES})-(?:${TAILWIND_PALETTES})-(?:50|9[05]0|[1-8]00)(?:\/\d{1,3})?(?=[\s"'\`]|$)`;
 
 const NO_DEFAULT_PALETTE_MESSAGE =
-  "Use a CASA token, not a stock Tailwind colour. Map it via docs/PARALLEL_AGENT_WORK_BOARD.md " +
+  'Use a CASA token, not a stock Tailwind colour. Map it via docs/PARALLEL_AGENT_WORK_BOARD.md ' +
   "-> 'Tier 2 · T2-C' (e.g. text-slate-600 -> text-[var(--casa-muted)], border-slate-200 -> " +
-  "border-[color:var(--casa-sand)]). On a DARK surface use text-[var(--casa-text-subtle)], which " +
-  "globals.css flips to #cbd5e1 automatically. CASA brand colours fail AA as text - point text at " +
-  "the surface-aware --casa-*-text tokens, never at a raw brand value.";
+  'border-[color:var(--casa-sand)]). On a DARK surface use text-[var(--casa-text-subtle)], which ' +
+  'globals.css flips to #cbd5e1 automatically. CASA brand colours fail AA as text - point text at ' +
+  'the surface-aware --casa-*-text tokens, never at a raw brand value.';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -42,24 +76,28 @@ const eslintConfig = defineConfig([
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    // Sibling checkouts and generated deliverables live inside this directory
+    // (`.claude/worktrees/*` carries its own node_modules and .next).
+    '.claude/**',
+    'output/**',
   ]),
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: ['src/**/*.{ts,tsx}'],
     ignores: [
       // Frozen comparison artifacts. Restyling them would invalidate the
       // comparison they exist for — see docs/EXPERIMENTAL_LANDING_PAGES.md.
-      "src/app/(site)/design-system/**",
-      "src/app/(site)/design-alternatives/**",
-      "src/app/(site)/landing-page-alt/**",
-      "src/app/(site)/homepage-reorganized/**",
+      'src/app/(site)/design-system/**',
+      'src/app/(site)/design-alternatives/**',
+      'src/app/(site)/landing-page-alt/**',
+      'src/app/(site)/homepage-reorganized/**',
     ],
     rules: {
-      "no-restricted-syntax": [
-        "error",
+      'no-restricted-syntax': [
+        'error',
         {
           selector: `Literal[value=/${DEFAULT_PALETTE_CLASS}/]`,
           message: NO_DEFAULT_PALETTE_MESSAGE,

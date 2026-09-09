@@ -51,15 +51,11 @@ export default async function PeoplePage({
       <PageHeader
         eyebrow="Reference"
         title="People"
-        description="Everyone who has enquired, registered or sat a placement. One row per person, however many times they have written in."
+        description="Everyone who has enquired, registered or sat a placement."
       />
 
       {flagEntries.length > 0 ? (
-        <Card
-          title="Needs a look"
-          description="Raised by intake when a value could not be settled. Cleared on the record itself."
-          className="mb-5"
-        >
+        <Card title="Needs a look" className="mb-5">
           <ul className="flex flex-wrap gap-2">
             {flagEntries.map(([code, n]) => (
               <li key={code}>
@@ -90,11 +86,7 @@ export default async function PeoplePage({
       {items.length === 0 ? (
         <EmptyState
           title={search ? 'Nobody matches that search' : 'No people yet'}
-          description={
-            search
-              ? 'Try a shorter term, or part of an email address.'
-              : 'A person is created the moment anything arrives through the public site.'
-          }
+          description={search ? 'Try a shorter term.' : 'People appear here as records arrive.'}
         />
       ) : (
         <Card bleed>
@@ -114,7 +106,7 @@ export default async function PeoplePage({
                     (person.nationalityRaw ? (
                       <span className="flex items-center gap-2">
                         {person.nationalityRaw}
-                        <Badge tone="warning">as written</Badge>
+                        <Badge tone="warning">unrecognised</Badge>
                       </span>
                     ) : (
                       <span className="text-[var(--casa-text-subtle)]">—</span>
