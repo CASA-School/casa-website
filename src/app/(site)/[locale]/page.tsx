@@ -39,11 +39,19 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Learn German in Bremen',
-    description:
-      'CASA combines human-centered teaching, clear learning pathways, and trusted exam preparation in Bremen.',
     path: '/',
-    keywords: ['CASA Bremen', 'Learn German', 'Language school Bremen', 'telc Deutsch B2', 'telc C1 Hochschule'],
+    keywords: ['CASA Bremen', 'Learn German', 'Deutsch lernen Bremen', 'Language school Bremen', 'telc Deutsch B2', 'telc C1 Hochschule'],
+    ...(locale === 'de'
+      ? {
+          title: 'Deutsch lernen in Bremen',
+          description:
+            'CASA verbindet Unterricht mit Menschen im Mittelpunkt, klaren Lernwegen und verlässlicher Prüfungsvorbereitung in Bremen.',
+        }
+      : {
+          title: 'Learn German in Bremen',
+          description:
+            'CASA combines human-centered teaching, clear learning pathways, and trusted exam preparation in Bremen.',
+        }),
   });
 }
 
