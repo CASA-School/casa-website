@@ -50,6 +50,7 @@ npm run db:reset     # drop the volume, migrate, seed, recreate the owner accoun
 npm run db:migrate   # applies db/migrations
 npm run db:seed      # applies db/seeds
 npm run admin:seed   # creates the first staff workspace account
+npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
 npm run placement:port  # re-ports the placement item bank from its source markdown
 ```
 
@@ -186,6 +187,13 @@ skipping the dialog is refused. Access is per module *and level*
 (`none`/`view`/`edit`/`full`): an action asks `requireModule(module, level)`
 for exactly what it does; delete is `full`. New screens join an existing
 sidebar group or a nested item — the rail never becomes a flat list.
+
+**Raw SQL column names are checked by nothing.** `tsc`, eslint and `next build`
+all pass on `ORDER BY position` against a table whose column is `sort_order` —
+the query is a string. After writing or editing a query, run
+`npm run admin:check` (dev server up): it loads all 25 workspace screens with a
+real session and reports any that 500. Note `levels` orders by `sort_order`;
+every other vocabulary table uses `position`.
 
 **A client component must not import a module that reaches `src/lib/admin/db.ts`.**
 It pulls `pg` and `server-only` into the browser bundle and the build fails on

@@ -155,14 +155,6 @@ export async function resolveFlagsByCode(
   );
 }
 
-/** Total open flags across the workspace, for the overview. */
-export async function openFlagTotal(): Promise<number> {
-  const [row] = await query<{ n: string }>(
-    `SELECT count(*) AS n FROM record_flags WHERE resolved_at IS NULL`
-  );
-  return Number(row?.n ?? 0);
-}
-
 /** Open flags by kind, for the People screen's "needs a look" band. */
 export async function openFlagsByCode(): Promise<Partial<Record<FlagCode, number>>> {
   const rows = await query<{ code: FlagCode; n: string }>(

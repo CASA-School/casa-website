@@ -4,7 +4,6 @@ import { WorkspaceShell, type NavBadges } from '@/components/admin/shell';
 import { getStaffUser, signOut } from '@/lib/admin/auth';
 import { bookingCounts } from '@/lib/admin/bookings';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
-import { openFlagTotal } from '@/lib/admin/flags';
 import { placementReviewBacklog } from '@/lib/admin/placement';
 import { unhandledCount } from '@/lib/admin/queues';
 import { DatabaseUnavailable } from '@/components/admin/database-unavailable';
@@ -42,23 +41,15 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     redirect('/admin/sign-in');
   }
 
-  const [
-    enquiries,
-    courseRegistrations,
-    examRegistrations,
-    applications,
-    placement,
-    flags,
-    bookings,
-  ] = await Promise.all([
-    unhandledCount('enquiry'),
-    unhandledCount('course_registration'),
-    unhandledCount('exam_registration'),
-    unhandledCount('career_application'),
-    placementReviewBacklog(),
-    openFlagTotal(),
-    bookingCounts(),
-  ]);
+  const [enquiries, courseRegistrations, examRegistrations, applications, placement, bookings] =
+    await Promise.all([
+      unhandledCount('enquiry'),
+      unhandledCount('course_registration'),
+      unhandledCount('exam_registration'),
+      unhandledCount('career_application'),
+      placementReviewBacklog(),
+      bookingCounts(),
+    ]);
 
   const badges: NavBadges = {
     enquiries,
@@ -66,7 +57,6 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     examRegistrations,
     applications,
     placement,
-    flags,
     reserved: bookings.reserved,
   };
 

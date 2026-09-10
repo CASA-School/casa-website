@@ -22,7 +22,8 @@
     "db:seed": "node scripts/db/apply-sql-directory.mjs db/seeds",
     "db:countries": "node scripts/db/generate-countries-sql.mjs",
     "placement:port": "node scripts/placement/port-item-bank.mjs",
-    "admin:seed": "node scripts/admin/seed-staff.mjs"
+    "admin:seed": "node scripts/admin/seed-staff.mjs",
+    "admin:check": "node --env-file-if-exists=.env.local scripts/admin/check-routes.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

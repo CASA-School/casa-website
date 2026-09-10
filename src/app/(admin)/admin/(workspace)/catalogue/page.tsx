@@ -53,7 +53,7 @@ export default async function CataloguePage({
     listUpcomingCourseInstances(20),
     plans ? listBookableRooms() : Promise.resolve([]),
     plans
-      ? query<{ code: string }>(`SELECT code FROM levels ORDER BY position`).then((r) =>
+      ? query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`).then((r) =>
           r.map((x) => x.code)
         )
       : Promise.resolve([]),

@@ -47,7 +47,7 @@ export async function vocabularySummaries(): Promise<VocabularySummary[]> {
             (array_agg(name_en ORDER BY position))[1:4] FROM day_times
      UNION ALL
      SELECT 'levels', count(*)::text, count(*)::text,
-            (array_agg(code ORDER BY position))[1:4] FROM levels
+            (array_agg(code ORDER BY sort_order))[1:4] FROM levels
      UNION ALL
      SELECT 'materials', count(*)::text, count(*) FILTER (WHERE is_active)::text,
             (array_agg(title ORDER BY title))[1:3] FROM materials
@@ -215,7 +215,7 @@ export async function rateTargets(): Promise<{
     query<{ code: string; name: string }>(
       `SELECT code, name_en AS name FROM charge_types WHERE is_active ORDER BY position`
     ),
-    query<{ code: string }>(`SELECT code FROM levels ORDER BY position`),
+    query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`),
     query<{ code: string; name: string }>(
       `SELECT code, name_en AS name FROM day_times ORDER BY position`
     ),

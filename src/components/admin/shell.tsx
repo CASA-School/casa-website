@@ -30,8 +30,6 @@ export type NavBadges = {
   examRegistrations: number;
   applications: number;
   placement: number;
-  /** Open record flags across every table — what the People screen resolves. */
-  flags: number;
   /** Bookings still reserved, not yet confirmed. */
   reserved: number;
 };
@@ -129,15 +127,16 @@ export function WorkspaceShell({
                 label="School"
                 hrefs={['/admin/people', '/admin/bookings', '/admin/planning', '/admin/catalogue']}
               >
+                {/*
+                  No badge and no nested item for flagged records. Identity
+                  problems arrive with FileMaker's 501 probable duplicates, not
+                  today, and a permanent counter in the rail advertises a
+                  problem the team does not have. The flags still show on the
+                  record they belong to, and the work list is one click from
+                  the Students screen when there is something in it.
+                */}
                 {canAccess(user, 'people') ? (
-                  <NavLink
-                    href="/admin/people"
-                    icon={Icon.people}
-                    badge={badges.flags}
-                    items={[
-                      { href: '/admin/people/flags', label: 'Needs a look', badge: badges.flags },
-                    ]}
-                  >
+                  <NavLink href="/admin/people" icon={Icon.people}>
                     Students
                   </NavLink>
                 ) : null}
