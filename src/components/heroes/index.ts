@@ -3,7 +3,6 @@ export { HeroIndexChooser } from './hero-index-chooser';
 export { HeroDetailUtility } from './hero-detail-utility';
 export { HeroMinimalUtility } from './hero-minimal-utility';
 export { HeroAPhotoLed } from './hero-a-photo-led';
-export { HeroBEditorial } from './hero-b-editorial';
 export { HeroCUtilityRail } from './hero-c-utility-rail';
 export { HeroEMinimal } from './hero-e-minimal';
 export type { HeroAction, HeroPhoto, HeroQuickLink } from './shared';

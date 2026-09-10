@@ -2047,3 +2047,17 @@ an empty directory, removed. Detection by cookie or Accept-Language is deliberat
 
 **Not done, and next:** interface strings into message catalogs before a third language;
 redirects for the old site's English paths; news and career slugs pass through.
+
+## 23. The last two pages left the old hero tier (2026-09-10)
+
+`/team` and `/ueber-uns/gemeinnuetzigkeit` were the only callers of `HeroBEditorial`: a
+smaller, heavier h1 than every other page, a framed photo card instead of the bleed, and
+two actions where the rest of the site offers one. Both now render `HeroAPhotoLed`, the
+tier `/`, `/about` and `/courses` use, with one action each: "Beratung anfragen" on the
+team page and "Wirkung ansehen" on the mission page, whose second action, "Leitbild
+lesen", is what the breadcrumb already does. `HeroBEditorial` and its height rule are
+deleted; the smoke test's archetype table lists both pages under A. E stays on the
+utility and legal pages on purpose. The hero photo caption on both pages went with the
+framed card, so the "Bildunterschrift" row in the Gemeinnützigkeit review document no
+longer has a place on the page.
+

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { HeroBEditorial } from '@/components/heroes';
+import { HeroAPhotoLed } from '@/components/heroes';
 import { EditorialSplit } from '@/components/sections';
 import { TeamDirectory } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
@@ -37,24 +37,24 @@ export default async function TeamPage() {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <HeroBEditorial
-        eyebrow={locale === 'de' ? 'Team' : 'Team'}
+      {/*
+        THE SITE'S STANDARD HERO, one action. This page and /ueber-uns/gemeinnuetzigkeit
+        were the last two on HeroBEditorial: a smaller, heavier h1 than every other
+        page, a framed photo card instead of the bleed, and two actions where the
+        rest of the site offers one. The course finder the second action pointed at
+        is one click away in the navigation.
+      */}
+      <HeroAPhotoLed
+        eyebrow="Team"
         title={locale === 'de' ? 'Menschen, die Lernwege möglich machen' : 'People who make learner journeys possible'}
         description={
           locale === 'de'
             ? 'Lehrkräfte, Koordination und Support arbeiten gemeinsam dafür, dass jede lernende Person Fortschritte macht.'
             : 'Teachers, coordinators, and student support work as one team to help every learner move forward.'
         }
-        photo={{
-          ...pageConfig.photos.team,
-          caption: 'Teacher giving feedback during speaking exercise - Personal feedback in small groups.',
-        }}
-        ctas={[
-          { label: locale === 'de' ? 'Beratung anfragen' : 'Talk to admissions', href: '/contact', kind: 'primary' },
-          { label: locale === 'de' ? 'Passenden Kurs finden' : 'Find my course path', href: '/courses', kind: 'secondary' },
-        ]}
+        photo={pageConfig.photos.team}
+        ctas={[{ label: locale === 'de' ? 'Beratung anfragen' : 'Talk to admissions', href: '/contact', kind: 'primary' }]}
         breadcrumbs={breadcrumbs}
-        themeClassName="hero-theme-about"
       />
 
       {/* Section 1: Team Directory */}
