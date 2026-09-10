@@ -77,11 +77,14 @@ export function NavLink({
         >
           {icon}
         </span>
-        <span className="min-w-0 flex-1">{children}</span>
+        <span data-nav-label className="min-w-0 flex-1">
+          {children}
+        </span>
         <Count value={badge} />
         {items && items.length > 0 ? (
           <span
             aria-hidden="true"
+            data-nav-label
             className={cn(
               'hidden text-ws-on-panel-muted/70 transition-transform lg:inline',
               branchOpen ? 'rotate-90' : ''
@@ -103,7 +106,10 @@ export function NavLink({
       </Link>
 
       {items && items.length > 0 && branchOpen ? (
-        <ul className="mt-0.5 hidden space-y-0.5 border-l border-white/10 pl-3 ml-[1.15rem] lg:block">
+        <ul
+          data-nav-children
+          className="mt-0.5 hidden space-y-0.5 border-l border-white/10 pl-3 ml-[1.15rem] lg:block"
+        >
           {items.map((item) => {
             const current = isCurrent(pathname, item.href);
             return (
@@ -119,7 +125,9 @@ export function NavLink({
                       : 'text-ws-on-panel-muted hover:text-ws-on-panel'
                   )}
                 >
-                  <span className="min-w-0 flex-1">{item.label}</span>
+                  <span data-nav-label className="min-w-0 flex-1">
+                    {item.label}
+                  </span>
                   <Count value={item.badge} />
                 </Link>
               </li>
@@ -205,6 +213,7 @@ export function NavGroup({
         onClick={toggle}
         aria-expanded={open}
         aria-controls={`nav-group-${id}`}
+        data-nav-group-label
         className="mt-5 mb-1 hidden w-full items-center justify-between rounded-md px-2.5 py-1 text-[0.56rem] font-bold tracking-[0.2em] uppercase text-ws-on-panel-muted/70 transition-colors hover:text-ws-on-panel-muted lg:flex"
       >
         {label}

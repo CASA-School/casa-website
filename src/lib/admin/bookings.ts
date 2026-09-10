@@ -130,6 +130,14 @@ export type BookingDetail = BookingListItem & {
   sourceRegistrationId: string | null;
   cancelledAt: Date | null;
   cancelReason: string | null;
+  /** What was booked (0013), whether or not a rate has priced it. */
+  accommodation: {
+    typeName: string;
+    roomTypeName: string | null;
+    cateringName: string | null;
+    from: Date | null;
+    to: Date | null;
+  } | null;
   periods: BookingPeriod[];
   charges: BookingCharge[];
   payments: Payment[];
@@ -245,13 +253,25 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       source_registration_id: string | null;
       cancelled_at: Date | null;
       cancel_reason: string | null;
+      accommodation_type_name: string | null;
+      accommodation_room_type_name: string | null;
+      accommodation_catering_name: string | null;
+      accommodation_from: Date | null;
+      accommodation_to: Date | null;
     }
   >(
     `${LIST.replace(
       'FROM bookings b',
       `, b.course_type_id, b.payer, b.payer_name, b.visa_required, b.notes, b.source_registration_id,
-         b.cancelled_at, b.cancel_reason
-    FROM bookings b`
+         b.cancelled_at, b.cancel_reason,
+         at.name_en AS accommodation_type_name,
+         art.name_en AS accommodation_room_type_name,
+         co.name_en AS accommodation_catering_name,
+         b.accommodation_from, b.accommodation_to
+    FROM bookings b
+    LEFT JOIN accommodation_types at ON at.code = b.accommodation_type_code
+    LEFT JOIN accommodation_room_types art ON art.code = b.accommodation_room_type_code
+    LEFT JOIN catering_options co ON co.code = b.accommodation_catering_code`
     )} WHERE b.id = $1 AND b.deleted_at IS NULL`,
     [id]
   );
@@ -311,6 +331,15 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     sourceRegistrationId: row.source_registration_id,
     cancelledAt: row.cancelled_at,
     cancelReason: row.cancel_reason,
+    accommodation: row.accommodation_type_name
+      ? {
+          typeName: row.accommodation_type_name,
+          roomTypeName: row.accommodation_room_type_name,
+          cateringName: row.accommodation_catering_name,
+          from: row.accommodation_from,
+          to: row.accommodation_to,
+        }
+      : null,
     periods: periods.map((p) => ({
       id: p.id,
       courseInstanceId: p.course_instance_id,
@@ -354,6 +383,12 @@ export type NewBooking = {
   payerName: string | null;
   visaRequired: boolean;
   notes: string | null;
+  /** What was booked, whether or not a rate covers it yet (0013). */
+  accommodationTypeCode?: string | null;
+  accommodationRoomTypeCode?: string | null;
+  accommodationCateringCode?: string | null;
+  accommodationFrom?: string | null;
+  accommodationTo?: string | null;
   /**
    * Opening cost lines. `rateId` records which published rate produced the
    * amount, where one did — that provenance is what stops a rate being
@@ -402,8 +437,12 @@ async function addPeriodOn(
 export async function createBooking(input: NewBooking, actor: StaffUser): Promise<string> {
   return withTransaction(async (client) => {
     const { rows } = await client.query<{ id: string }>(
-      `INSERT INTO bookings (person_id, course_type_id, status, payer, payer_name, visa_required, notes, source_registration_id, created_by)
-       VALUES ($1, $2, $3::booking_status, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      `INSERT INTO bookings
+         (person_id, course_type_id, status, payer, payer_name, visa_required, notes,
+          source_registration_id, accommodation_type_code, accommodation_room_type_code,
+          accommodation_catering_code, accommodation_from, accommodation_to, created_by)
+       VALUES ($1, $2, $3::booking_status, $4, $5, $6, $7, $8, $9, $10, $11, $12::date, $13::date, $14)
+       RETURNING id`,
       [
         input.personId,
         input.courseTypeId,
@@ -413,6 +452,11 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
         input.visaRequired,
         input.notes,
         input.sourceRegistrationId ?? null,
+        input.accommodationTypeCode ?? null,
+        input.accommodationRoomTypeCode ?? null,
+        input.accommodationCateringCode ?? null,
+        input.accommodationFrom ?? null,
+        input.accommodationTo ?? null,
         actor.id,
       ]
     );

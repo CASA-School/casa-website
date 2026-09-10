@@ -313,7 +313,9 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
     examParts: String(formData.get('examParts') ?? '2') === '1' ? 1 : 2,
     ...dates,
     levelCode: levelRaw,
-    tuitionAmount: kind === 'course' ? money(formData, 'tuitionAmount') : null,
+    // No money comes from the wizard: the cohort's price is resolved on the
+    // server. An override only exists when a colleague edits the booking.
+    tuitionOverride: null,
     includeEnrolmentFee: formData.get('includeEnrolmentFee') === '1',
     materialIds,
     accommodationTypeCode: text(formData, 'accommodationTypeCode', 40),
@@ -321,11 +323,9 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
     cateringCode: text(formData, 'cateringCode', 40),
     accommodationFrom: text(formData, 'accommodationFrom', 10),
     accommodationTo: text(formData, 'accommodationTo', 10),
-    accommodationAmount: money(formData, 'accommodationAmount'),
   };
 
   const lines = await priceSelection(selection);
-  if (lines.length === 0) fail(safeBack, 'Nothing to charge yet. Choose a course or an exam.');
 
   const bookingId = await createBooking(
     {
@@ -338,6 +338,11 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
       payerName: text(formData, 'payerName', 120),
       visaRequired: formData.get('visaRequired') === 'on',
       notes: text(formData, 'notes', 2000),
+      accommodationTypeCode: selection.accommodationTypeCode,
+      accommodationRoomTypeCode: selection.roomTypeCode,
+      accommodationCateringCode: selection.cateringCode,
+      accommodationFrom: selection.accommodationFrom,
+      accommodationTo: selection.accommodationTo,
       charges: lines.map((line) => ({
         kind: line.kind as ChargeKind,
         description: line.description,

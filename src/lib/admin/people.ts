@@ -30,6 +30,8 @@ export type PersonSummary = {
   nationalityRaw: string | null;
   mergedInto: string | null;
   createdBy: string;
+  /** `createdBy` as a person or a place, never `staff:<uuid>`. */
+  createdByLabel: string;
   createdAt: Date;
 };
 
@@ -52,6 +54,7 @@ type Row = {
   nationality_raw: string | null;
   merged_into: string | null;
   created_by: string;
+  created_by_name: string | null;
   created_at: Date;
 };
 
@@ -61,9 +64,13 @@ const SELECT = `
          p.salutation::text AS salutation,
          p.first_name, p.last_name, p.birth_date,
          p.nationality_code, c.name_en AS nationality_name, p.nationality_raw,
-         p.merged_into, p.created_by, p.created_at
+         p.merged_into, p.created_by, p.created_at,
+         cu.name AS created_by_name
     FROM people p
     LEFT JOIN countries c ON c.code = p.nationality_code
+    LEFT JOIN staff_users cu
+      ON left(p.created_by, 6) = 'staff:'
+     AND cu.id::text = substr(p.created_by, 7)
 `;
 
 const toSummary = (r: Row): PersonSummary => ({
@@ -79,8 +86,22 @@ const toSummary = (r: Row): PersonSummary => ({
   nationalityRaw: r.nationality_raw,
   mergedInto: r.merged_into,
   createdBy: r.created_by,
+  createdByLabel: r.created_by_name ?? describeOrigin(r.created_by),
   createdAt: r.created_at,
 });
+
+/**
+ * Where a record came from, in words. `created_by` is a text column because
+ * the origin is not always a person: the public site, a demo seed and a
+ * migration all create people.
+ */
+function describeOrigin(createdBy: string): string {
+  if (createdBy === 'public-site') return 'The website';
+  if (createdBy === 'demo-seed') return 'Demo data';
+  if (createdBy.startsWith('migration-')) return 'Imported';
+  if (createdBy.startsWith('staff:')) return 'A colleague';
+  return createdBy;
+}
 
 export async function getPersonSummary(id: string): Promise<PersonSummary | null> {
   const row = await queryFirst<Row>(`${SELECT} WHERE p.id = $1 AND p.deleted_at IS NULL`, [id]);

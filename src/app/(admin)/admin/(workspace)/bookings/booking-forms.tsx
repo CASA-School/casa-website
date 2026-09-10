@@ -9,6 +9,7 @@ import {
   type CohortOption,
 } from '@/lib/admin/bookings';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
+import { OptionalSection } from '@/components/admin/optional-section';
 import { toDateInputValue } from '@/lib/dates';
 import {
   addChargeAction,
@@ -28,13 +29,9 @@ import {
  */
 
 const More = ({ children }: { children: React.ReactNode }) => (
-  <details className="group">
-    <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
-      <span className="group-open:hidden">More</span>
-      <span className="hidden group-open:inline">Less</span>
-    </summary>
+  <OptionalSection requires={['startDate', 'endDate']} heading="Cost line">
     <div className="mt-3 space-y-3">{children}</div>
-  </details>
+  </OptionalSection>
 );
 
 function PayerFields({ payer = 'self', payerName = '' }: { payer?: string; payerName?: string }) {

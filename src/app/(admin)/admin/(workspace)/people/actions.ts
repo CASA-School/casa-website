@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { todayInputValue } from '@/lib/dates';
 import { requireModule } from '@/lib/admin/guard';
 import {
   createPersonByStaff,
@@ -29,7 +30,12 @@ function readPerson(formData: FormData): PersonInput | string {
   if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return 'That email address does not look right.';
   const birthDate = text('birthDate', 10);
-  if (birthDate && !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return 'Date of birth must be a date.';
+  if (birthDate) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return 'Date of birth must be a date.';
+    // A date in the future is a typo, and a picker makes it easy to make.
+    if (birthDate >= todayInputValue()) return 'That date of birth is in the future.';
+    if (birthDate < '1900-01-01') return 'That date of birth is too long ago.';
+  }
   return {
     salutation: salutation || null,
     firstName,

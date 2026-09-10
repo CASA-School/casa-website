@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
+import { SidebarToggle } from './sidebar-toggle';
 import { Logo } from '@/components/ui/logo';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
@@ -58,12 +59,21 @@ export function WorkspaceShell({
             `crop="mark"` drops the "Internationale Sprachschule" line, which
             at this width would render about four pixels tall.
           */}
+          {/*
+            Hidden when the rail is collapsed: the wordmark is nearly six times
+            as wide as it is tall, so at icon width it would be a sliver of the
+            letter C, and CASA has no separate emblem to put there instead.
+          */}
           <Link
             href="/admin"
+            data-nav-label
             className="block rounded-lg px-1.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[var(--ws-marker)]/70"
           >
             <Logo className="h-[1.35rem] w-auto" variant="white" crop="mark" />
-            <span className="mt-2 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted">
+            <span
+              data-nav-label
+              className="mt-2 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted"
+            >
               Workspace
             </span>
           </Link>
@@ -230,19 +240,21 @@ export function WorkspaceShell({
           </div>
 
           <div className="mt-auto hidden space-y-3 border-t border-ws-panel-line pt-4 lg:block">
+            <SidebarToggle />
             <Link
               href="/"
+              title="Back to website"
               className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-ws-on-panel-muted transition-colors hover:text-ws-on-panel"
             >
               <span aria-hidden="true" className="shrink-0">
                 {Icon.back}
               </span>
-              Back to website
+              <span data-nav-label>Back to website</span>
             </Link>
 
-            <div className="flex items-center gap-2.5 px-2.5">
+            <div data-nav-identity className="flex items-center gap-2.5 px-2.5">
               <Avatar name={user.name} size={34} />
-              <span className="min-w-0 flex-1">
+              <span data-nav-label className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold">{user.name}</span>
                 <span className="block text-[0.7rem] text-ws-on-panel-muted">
                   {roleLabel(user.role)}

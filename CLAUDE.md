@@ -134,7 +134,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0012_day_board.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0013_booking_accommodation.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -219,10 +219,17 @@ unit and a validity period, resolved by `applicable_rate()`; a cost line still
 stores the agreed `amount`. Never type a price into a column or a condition
 into code. See `docs/CATALOGUE_AND_PRICING.md`.
 
-**Progressive disclosure, especially in forms.** Ask for the fields that make a
-record valid and useful; put the rest behind a collapsed `<details>` step or on
-the record's own edit screen. A list page never carries a grid of inputs.
-FileMaker's all-fields-on-one-layout interface is the anti-pattern.
+**Progressive disclosure, especially in forms — and never a "More / Less"
+toggle.** Ask for the fields that make a record valid and useful; reveal the
+rest with `OptionalSection`, which opens by itself once the named required
+inputs hold a value. A list page never carries a grid of inputs. FileMaker's
+all-fields-on-one-layout interface is the anti-pattern, and a toggle is the
+interface admitting it does not know what matters.
+
+**No prices while booking.** A colleague choosing a course for a learner is not
+quoting them. The wizard shows choices; amounts appear on the booking once it
+exists, per line and as a total. `priceSelection()` on the server decides every
+amount — the wizard sends no money at all.
 
 **Diffs.** Keep them minimal and targeted. Do not add abstractions when an existing
 pattern already covers the case. If a fact is not verifiable in the repo, mark it

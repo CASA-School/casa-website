@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { Badge, Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
+import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import {
   levelBand,
   levelSiblings,
@@ -11,6 +11,7 @@ import {
 } from '@/lib/admin/booking-offer-types';
 import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dates';
+import { OptionalSection } from '@/components/admin/optional-section';
 
 /**
  * The booking wizard.
@@ -21,13 +22,13 @@ import { toDateInputValue } from '@/lib/dates';
  * do?" before "which dates?" — rather than presenting a form with every field
  * on it, which is the FileMaker layout this replaces.
  *
- * PRICES COME FROM THE SETUP, NOT FROM TYPING. Choosing a cohort brings its
- * price; choosing a level and answering yes to books adds the right books for
- * that level, one per half. The totals here are a PREVIEW — the server
- * re-resolves every rate-backed line when the booking is created, so nothing a
- * browser sends can invent a price. Where CASA has published no rate yet
- * (tuition, accommodation) the amount is a staff-agreed figure and stays
- * editable on the review step.
+ * NO PRICES ON THIS SCREEN, DELIBERATELY. A colleague booking a learner is
+ * choosing what they get, not quoting them: the cohort's fee, the enrolment
+ * fee and each book are already set in Settings, so showing them here is both
+ * noise and a chance to disagree with the record. The cost appears once the
+ * booking exists — per line and as a total — on the booking itself and on the
+ * student's page. `priceSelection()` on the server is the only thing that
+ * decides an amount.
  */
 
 type Step = 'what' | 'course' | 'level' | 'accommodation' | 'review';
@@ -39,8 +40,6 @@ const STEPS: readonly { key: Step; label: string }[] = [
   { key: 'accommodation', label: 'Accommodation' },
   { key: 'review', label: 'Review' },
 ];
-
-type Line = { key: string; label: string; detail?: string; amount: number | null };
 
 export function BookingWizard({
   personId,
@@ -88,9 +87,6 @@ export function BookingWizard({
   const [catering, setCatering] = useState<string>('');
   const [accFrom, setAccFrom] = useState<string>('');
   const [accTo, setAccTo] = useState<string>('');
-  const [accAmount, setAccAmount] = useState<string>('');
-
-  const [tuition, setTuition] = useState<string>('');
   const [includeFee, setIncludeFee] = useState(true);
 
   const exam = offer.exams.find((e) => e.id === examTypeId) ?? null;
@@ -104,71 +100,9 @@ export function BookingWizard({
 
   const chosenBooks = books.filter((b) => !excludedBooks.has(b.id));
 
-  const lines = useMemo<Line[]>(() => {
-    const out: Line[] = [];
-    if (includeFee && offer.enrolmentFee !== null) {
-      out.push({ key: 'fee', label: 'Enrolment fee', amount: offer.enrolmentFee });
-    }
-    if (kind === 'course' && cohort) {
-      const typed = tuition.trim() === '' ? cohort.tuition : Number(tuition.replace(',', '.'));
-      out.push({
-        key: 'tuition',
-        label: cohort.label,
-        detail: `${cohort.weeks} ${cohort.weeks === 1 ? 'week' : 'weeks'}`,
-        amount: Number.isFinite(typed as number) ? (typed as number) : null,
-      });
-    }
-    if (kind === 'exam' && exam) {
-      out.push({
-        key: 'exam',
-        label: exam.name,
-        detail: examParts === 1 ? 'one part' : 'both parts',
-        amount: examParts === 1 ? exam.feeOnePart : exam.feeBothParts,
-      });
-    }
-    if (wantsBooks) {
-      for (const book of chosenBooks) {
-        out.push({ key: `book-${book.id}`, label: book.title, amount: book.price });
-      }
-    }
-    if (wantsAccommodation && accType) {
-      const name = offer.accommodation.find((a) => a.code === accType)?.name ?? 'Accommodation';
-      const amount = accAmount.trim() === '' ? null : Number(accAmount.replace(',', '.'));
-      out.push({
-        key: 'accommodation',
-        label: name,
-        detail: [
-          offer.roomTypes.find((r) => r.code === roomType)?.name,
-          offer.catering.find((c) => c.code === catering)?.name,
-        ]
-          .filter(Boolean)
-          .join(', '),
-        amount: Number.isFinite(amount as number) ? (amount as number) : null,
-      });
-    }
-    return out;
-  }, [
-    includeFee,
-    offer,
-    kind,
-    cohort,
-    tuition,
-    exam,
-    examParts,
-    wantsBooks,
-    chosenBooks,
-    wantsAccommodation,
-    accType,
-    roomType,
-    catering,
-    accAmount,
-  ]);
-
-  const total = lines.reduce((sum, line) => sum + (line.amount ?? 0), 0);
-  const unpriced = lines.filter((line) => line.amount === null);
-
-  const money = (n: number) =>
-    new Intl.NumberFormat('de-DE', { style: 'currency', currency: offer.currency }).format(n);
+  const chosenAccommodation = wantsAccommodation
+    ? (offer.accommodation.find((a) => a.code === accType) ?? null)
+    : null;
 
   const visible = STEPS.filter((s) => (kind === 'exam' ? s.key !== 'level' : true));
   const index = visible.findIndex((s) => s.key === step);
@@ -239,10 +173,7 @@ export function BookingWizard({
                     selected={examTypeId === e.id}
                     onSelect={() => setExamTypeId(e.id)}
                     title={e.name}
-                    trailing={e.feeBothParts !== null ? money(e.feeBothParts) : undefined}
-                  >
-                    {e.feeOnePart !== null ? `${money(e.feeOnePart)} for a single part` : undefined}
-                  </Choice>
+                  />
                 ))}
               </div>
               <div className="flex gap-2">
@@ -311,11 +242,9 @@ export function BookingWizard({
                       selected={cohort?.id === c.id}
                       onSelect={() => {
                         setCohort(c);
-                        setTuition('');
                         if (c.levelCode) setLevelCode(c.levelCode);
                       }}
                       title={c.label}
-                      trailing={c.tuition !== null ? money(c.tuition) : 'price not set'}
                     >
                       {[
                         `${c.weeks} ${c.weeks === 1 ? 'week' : 'weeks'}`,
@@ -392,8 +321,8 @@ export function BookingWizard({
                 {wantsBooks && books.length > 0 ? (
                   <ul className="mt-2 divide-y divide-ws-line-soft rounded-lg border border-ws-line">
                     {books.map((b) => (
-                      <li key={b.id} className="flex items-center justify-between gap-3 px-3 py-2">
-                        <label className="flex min-w-0 flex-1 items-center gap-2.5 text-sm">
+                      <li key={b.id} className="px-3 py-2">
+                        <label className="flex min-w-0 items-center gap-2.5 text-sm">
                           <input
                             type="checkbox"
                             checked={!excludedBooks.has(b.id)}
@@ -407,9 +336,6 @@ export function BookingWizard({
                           />
                           <span className="min-w-0 truncate">{b.title}</span>
                         </label>
-                        <span className="shrink-0 text-sm tabular-nums">
-                          {b.price !== null ? money(b.price) : '—'}
-                        </span>
                       </li>
                     ))}
                   </ul>
@@ -509,20 +435,6 @@ export function BookingWizard({
                       onChange={(e) => setAccTo(e.target.value)}
                     />
                   </Field>
-                  <Field
-                    label="Amount"
-                    hint="no published rate yet"
-                    htmlFor="acc-amount"
-                    className="sm:col-span-2"
-                  >
-                    <Input
-                      id="acc-amount"
-                      inputMode="decimal"
-                      value={accAmount}
-                      onChange={(e) => setAccAmount(e.target.value)}
-                      className="text-right"
-                    />
-                  </Field>
                 </div>
               ) : null}
             </div>
@@ -576,109 +488,69 @@ export function BookingWizard({
           <input type="hidden" name="cateringCode" value={wantsAccommodation ? catering : ''} />
           <input type="hidden" name="accommodationFrom" value={wantsAccommodation ? accFrom : ''} />
           <input type="hidden" name="accommodationTo" value={wantsAccommodation ? accTo : ''} />
-          <input
-            type="hidden"
-            name="accommodationAmount"
-            value={wantsAccommodation ? accAmount : ''}
-          />
-
-          <ul className="divide-y divide-ws-line-soft rounded-lg border border-ws-line">
-            {lines.map((line) => (
-              <li key={line.key} className="flex items-baseline justify-between gap-3 px-3 py-2.5">
-                <span className="min-w-0">
-                  <span className="block truncate text-sm">{line.label}</span>
-                  {line.detail ? (
-                    <span className="block text-xs text-[var(--casa-text-subtle)]">
-                      {line.detail}
-                    </span>
-                  ) : null}
-                </span>
-                <span className="shrink-0 text-sm font-semibold tabular-nums">
-                  {line.amount !== null ? (
-                    money(line.amount)
-                  ) : (
-                    <Badge tone="warning">no price</Badge>
-                  )}
-                </span>
-              </li>
-            ))}
-            <li className="flex items-baseline justify-between gap-3 bg-ws-sunk px-3 py-2.5">
-              <span className="text-sm font-semibold">Total</span>
-              <span className="text-sm font-semibold tabular-nums">{money(total)}</span>
-            </li>
-          </ul>
-
-          {kind === 'course' && cohort ? (
-            <Field
-              label="Course fee"
-              hint={cohort.tuition !== null ? 'from the catalogue' : 'no published rate'}
-              htmlFor="review-tuition"
-            >
-              <Input
-                id="review-tuition"
-                name="tuitionAmount"
-                inputMode="decimal"
-                value={tuition === '' ? (cohort.tuition?.toFixed(2) ?? '') : tuition}
-                onChange={(e) => setTuition(e.target.value)}
-                className="text-right"
-              />
-            </Field>
-          ) : null}
-
-          {unpriced.length > 0 ? (
-            <p className="text-xs text-[var(--casa-warning-text)]">
-              {unpriced.length} {unpriced.length === 1 ? 'line has' : 'lines have'} no price. Set it
-              here, or add the rate under Settings.
-            </p>
-          ) : null}
-
-          <details className="group">
-            <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
-              <span className="group-open:hidden">More</span>
-              <span className="hidden group-open:inline">Less</span>
-            </summary>
-            <div className="mt-3 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Status" htmlFor="review-status">
-                  <Select id="review-status" name="status" defaultValue="reserved">
-                    <option value="reserved">Reserved</option>
-                    <option value="confirmed">Confirmed</option>
-                  </Select>
-                </Field>
-                <Field label="Who pays" htmlFor="review-payer">
-                  <Select id="review-payer" name="payer" defaultValue="self">
-                    <option value="self">Learner</option>
-                    <option value="agency">Agency</option>
-                    <option value="company">Company</option>
-                    <option value="other">Other</option>
-                  </Select>
-                </Field>
+          <dl className="divide-y divide-ws-line-soft rounded-lg border border-ws-line">
+            {summaryRows({
+              kind,
+              cohort,
+              exam,
+              examParts,
+              levelCode,
+              levelScope,
+              books: wantsBooks ? chosenBooks : [],
+              accommodation: chosenAccommodation,
+              accFrom,
+              accTo,
+            }).map((row) => (
+              <div key={row.label} className="flex items-baseline gap-4 px-3 py-2.5">
+                <dt className="w-28 shrink-0 text-xs font-medium text-[var(--casa-muted)]">
+                  {row.label}
+                </dt>
+                <dd className="min-w-0 flex-1 text-sm text-[var(--casa-ink)]">{row.value}</dd>
               </div>
-              <Field label="Payer name" htmlFor="review-payer-name">
-                <Input id="review-payer-name" name="payerName" maxLength={120} />
+            ))}
+          </dl>
+
+          <OptionalSection requires={['personId']} heading="Status, payer and notes" alwaysOpen>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Status" htmlFor="review-status">
+                <Select id="review-status" name="status" defaultValue="reserved">
+                  <option value="reserved">Reserved</option>
+                  <option value="confirmed">Confirmed</option>
+                </Select>
               </Field>
-              <label className="flex items-center gap-2.5 text-sm">
-                <input
-                  type="checkbox"
-                  checked={includeFee}
-                  onChange={(e) => setIncludeFee(e.target.checked)}
-                  className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
-                />
-                Charge the enrolment fee
-              </label>
-              <label className="flex items-center gap-2.5 text-sm">
-                <input
-                  type="checkbox"
-                  name="visaRequired"
-                  className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
-                />
-                Visa required
-              </label>
-              <Field label="Notes" htmlFor="review-notes">
-                <Textarea id="review-notes" name="notes" rows={2} />
+              <Field label="Who pays" htmlFor="review-payer">
+                <Select id="review-payer" name="payer" defaultValue="self">
+                  <option value="self">Learner</option>
+                  <option value="agency">Agency</option>
+                  <option value="company">Company</option>
+                  <option value="other">Other</option>
+                </Select>
               </Field>
             </div>
-          </details>
+            <Field label="Payer name" htmlFor="review-payer-name">
+              <Input id="review-payer-name" name="payerName" maxLength={120} />
+            </Field>
+            <label className="flex items-center gap-2.5 text-sm">
+              <input
+                type="checkbox"
+                checked={includeFee}
+                onChange={(e) => setIncludeFee(e.target.checked)}
+                className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+              />
+              Charge the enrolment fee
+            </label>
+            <label className="flex items-center gap-2.5 text-sm">
+              <input
+                type="checkbox"
+                name="visaRequired"
+                className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+              />
+              Visa required
+            </label>
+            <Field label="Notes" htmlFor="review-notes">
+              <Textarea id="review-notes" name="notes" rows={2} />
+            </Field>
+          </OptionalSection>
 
           <div className="flex items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
             <Button type="button" variant="ghost" onClick={() => go(-1)}>
@@ -692,19 +564,9 @@ export function BookingWizard({
           <Button type="button" variant="ghost" onClick={() => go(-1)} disabled={index === 0}>
             Back
           </Button>
-          <span className="flex items-center gap-3">
-            {total > 0 ? (
-              <span className="text-sm text-[var(--casa-text-subtle)]">
-                Running total{' '}
-                <span className="font-semibold text-[var(--casa-ink)] tabular-nums">
-                  {money(total)}
-                </span>
-              </span>
-            ) : null}
-            <Button type="button" onClick={() => go(1)} disabled={!canAdvance}>
-              Continue
-            </Button>
-          </span>
+          <Button type="button" onClick={() => go(1)} disabled={!canAdvance}>
+            Continue
+          </Button>
         </div>
       )}
     </div>
@@ -786,3 +648,75 @@ function Toggle({
     </button>
   );
 }
+
+/**
+ * What the booking will say, in the order it was chosen. Words, not amounts:
+ * the cost is resolved on the server and shown on the booking afterwards.
+ */
+function summaryRows({
+  kind,
+  cohort,
+  exam,
+  examParts,
+  levelCode,
+  levelScope,
+  books,
+  accommodation,
+  accFrom,
+  accTo,
+}: {
+  kind: 'course' | 'exam';
+  cohort: CohortOffer | null;
+  exam: { name: string } | null;
+  examParts: 1 | 2;
+  levelCode: string | null;
+  levelScope: 'half' | 'whole';
+  books: readonly { id: string; title: string }[];
+  accommodation: { name: string } | null;
+  accFrom: string;
+  accTo: string;
+}): { label: string; value: string }[] {
+  const rows: { label: string; value: string }[] = [];
+
+  if (kind === 'course' && cohort) {
+    rows.push({ label: 'Course', value: cohort.label });
+    rows.push({
+      label: 'Runs for',
+      value: `${cohort.weeks} ${cohort.weeks === 1 ? 'week' : 'weeks'}`,
+    });
+  }
+  if (kind === 'exam' && exam) {
+    rows.push({ label: 'Exam', value: exam.name });
+    rows.push({ label: 'Sitting', value: examParts === 1 ? 'One part' : 'Both parts' });
+  }
+  if (levelCode) {
+    rows.push({
+      label: 'Level',
+      value:
+        levelScope === 'whole' && levelSiblings(levelCode).length > 1
+          ? `The whole ${levelBand(levelCode)}`
+          : levelCode,
+    });
+  }
+  rows.push({
+    label: 'Books',
+    value: books.length === 0 ? 'None' : books.map((b) => b.title).join(', '),
+  });
+  rows.push({
+    label: 'Accommodation',
+    value: accommodation
+      ? [accommodation.name, accFrom && accTo ? `${german(accFrom)} – ${german(accTo)}` : null]
+          .filter(Boolean)
+          .join(' · ')
+      : 'None',
+  });
+
+  return rows;
+}
+
+const german = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  });

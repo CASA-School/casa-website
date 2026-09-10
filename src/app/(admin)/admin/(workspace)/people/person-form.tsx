@@ -1,7 +1,8 @@
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import type { Country, PersonDetail } from '@/lib/admin/people';
+import { OptionalSection } from '@/components/admin/optional-section';
 import { createPersonAction, updatePersonAction } from './actions';
-import { toDateInputValue } from '@/lib/dates';
+import { toDateInputValue, todayInputValue } from '@/lib/dates';
 
 const SALUTATIONS = [
   ['', '—'],
@@ -42,6 +43,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
           id="person-birth"
           name="birthDate"
           type="date"
+          max={todayInputValue()}
           defaultValue={toDateInputValue(person?.birthDate)}
         />
       </Field>
@@ -104,17 +106,13 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
         />
       </Field>
 
-      {editing ? (
-        more
-      ) : (
-        <details className="group">
-          <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
-            <span className="group-open:hidden">More</span>
-            <span className="hidden group-open:inline">Less</span>
-          </summary>
-          <div className="mt-3">{more}</div>
-        </details>
-      )}
+      <OptionalSection
+        requires={['firstName', 'email']}
+        heading="A few more details"
+        alwaysOpen={editing}
+      >
+        {more}
+      </OptionalSection>
 
       <div className="flex justify-end pt-1">
         <Button type="submit">{editing ? 'Save' : 'Add person'}</Button>

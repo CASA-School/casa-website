@@ -213,8 +213,8 @@ export type BookingSelection = {
   startDate: string;
   endDate: string;
   levelCode: string | null;
-  /** Agreed with the learner: no published rate covers CASA's tuition yet. */
-  tuitionAmount: number | null;
+  /** Agreed with the learner, only where a colleague overrides the catalogue. */
+  tuitionOverride: number | null;
   includeEnrolmentFee: boolean;
   materialIds: string[];
   accommodationTypeCode: string | null;
@@ -222,8 +222,6 @@ export type BookingSelection = {
   cateringCode: string | null;
   accommodationFrom: string | null;
   accommodationTo: string | null;
-  /** Agreed: accommodation has no published rate either. */
-  accommodationAmount: number | null;
 };
 
 export type PricedLine = {
@@ -239,10 +237,13 @@ export type PricedLine = {
 /**
  * The authoritative cost of a selection.
  *
- * Rate-backed lines are resolved here, on the server, from `rates` — the
- * browser's total is a preview and is never trusted. Staff-agreed lines
- * (tuition, accommodation) are taken from the form because no rate covers
- * them yet; both are clamped to a sane range by the action before they arrive.
+ * Every line is resolved HERE, from `rates` and the catalogue. The wizard
+ * sends choices and no money at all, which is why staff never see a price
+ * while they are booking: the cost appears on the booking once it exists.
+ *
+ * The one exception is a deliberate override — a colleague changing the course
+ * fee on the booking itself — which arrives as `tuitionOverride` and is
+ * clamped by the action.
  */
 export async function priceSelection(selection: BookingSelection): Promise<PricedLine[]> {
   const on = selection.startDate;
@@ -268,25 +269,43 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
     }
   }
 
-  if (selection.kind === 'course' && selection.tuitionAmount !== null) {
-    const label = await queryFirst<{ label: string }>(
+  if (selection.kind === 'course' && selection.courseInstanceId) {
+    // The published rate for this cohort, else the catalogue's own price.
+    const course = await queryFirst<{
+      label: string;
+      rate_id: string | null;
+      rate_amount: string | null;
+      default_price: string;
+    }>(
       `SELECT coalesce(i.title, t.name)
               || coalesce(' ' || i.level_code, '')
               || ' · ' || to_char(i.start_date, 'DD.MM.YY') || ' – ' || to_char(i.end_date, 'DD.MM.YY')
-              AS label
-         FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
+              AS label,
+              r.id AS rate_id, r.amount AS rate_amount, t.default_price
+         FROM course_instances i
+         JOIN course_types t ON t.id = i.course_type_id
+         LEFT JOIN rates r ON r.id = applicable_rate(
+           'course_type'::rate_scope, $2::date, i.course_type_id, NULL, NULL, NULL, NULL,
+           NULL, NULL, i.level_code, i.session, NULL, NULL)
         WHERE i.id = $1`,
-      [selection.courseInstanceId]
+      [selection.courseInstanceId, on]
     );
-    lines.push({
-      kind: 'tuition',
-      chargeTypeCode: 'tuition',
-      description: label?.label ?? 'Course fee',
-      amount: selection.tuitionAmount,
-      quantity: null,
-      unitAmount: null,
-      rateId: null,
-    });
+    if (course) {
+      const resolved =
+        selection.tuitionOverride ??
+        (course.rate_amount !== null ? Number(course.rate_amount) : Number(course.default_price));
+      if (resolved > 0) {
+        lines.push({
+          kind: 'tuition',
+          chargeTypeCode: 'tuition',
+          description: course.label,
+          amount: resolved,
+          quantity: null,
+          unitAmount: null,
+          rateId: selection.tuitionOverride === null ? course.rate_id : null,
+        });
+      }
+    }
   }
 
   if (selection.kind === 'exam' && selection.examTypeId) {
@@ -342,11 +361,19 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
     }
   }
 
-  if (selection.accommodationTypeCode && selection.accommodationAmount !== null) {
-    const type = await queryFirst<{ name_en: string }>(
-      `SELECT name_en FROM accommodation_types WHERE code = $1`,
-      [selection.accommodationTypeCode]
-    );
+  if (selection.accommodationTypeCode) {
+    const [type, rate] = await Promise.all([
+      queryFirst<{ name_en: string }>(`SELECT name_en FROM accommodation_types WHERE code = $1`, [
+        selection.accommodationTypeCode,
+      ]),
+      queryFirst<{ id: string; amount: string }>(
+        `SELECT id, amount FROM rates WHERE id = applicable_rate(
+           'accommodation'::rate_scope, $1::date, NULL, NULL, NULL, $2, $3, $4,
+           NULL, NULL, NULL, NULL, NULL)`,
+        [on, selection.accommodationTypeCode, selection.cateringCode, selection.roomTypeCode]
+      ),
+    ]);
+    if (!rate) return lines;
     const extras = [
       selection.roomTypeCode
         ? (
@@ -373,10 +400,10 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
       kind: 'accommodation',
       chargeTypeCode: 'accommodation_rent',
       description: `${type?.name_en ?? 'Accommodation'}${extras.length ? ` (${extras.join(', ')})` : ''}${period}`,
-      amount: selection.accommodationAmount,
+      amount: Number(rate.amount),
       quantity: null,
       unitAmount: null,
-      rateId: null,
+      rateId: rate.id,
     });
   }
 

@@ -1,6 +1,7 @@
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import { ROOM_KIND_LABELS, type Location, type Room } from '@/lib/admin/rooms';
 import { createRoomAction, updateRoomAction } from './actions';
+import { OptionalSection } from '@/components/admin/optional-section';
 
 /**
  * The two room forms, rendered inside dialogs.
@@ -33,37 +34,31 @@ export function CreateRoomForm({ locations }: { locations: Location[] }) {
         <Input id="new-room-name" name="name" required maxLength={80} autoFocus />
       </Field>
 
-      <details className="group">
-        <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
-          <span className="group-open:hidden">More</span>
-          <span className="hidden group-open:inline">Less</span>
-        </summary>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <Field label="Nickname" htmlFor="new-room-nickname">
-            <Input id="new-room-nickname" name="nickname" maxLength={40} />
+      <OptionalSection requires={['locationId', 'name']} heading="Details">
+        <Field label="Nickname" htmlFor="new-room-nickname">
+          <Input id="new-room-nickname" name="nickname" maxLength={40} />
+        </Field>
+        <Field label="Floor" htmlFor="new-room-floor">
+          <Input id="new-room-floor" name="floor" type="number" min={-3} max={30} />
+        </Field>
+        <Field label="Kind" htmlFor="new-room-kind">
+          <Select id="new-room-kind" name="kind" defaultValue="classroom">
+            {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Capacity" htmlFor="new-room-capacity">
+            <Input id="new-room-capacity" name="capacity" type="number" min={0} max={500} />
           </Field>
-          <Field label="Floor" htmlFor="new-room-floor">
-            <Input id="new-room-floor" name="floor" type="number" min={-3} max={30} />
+          <Field label="Maximum" htmlFor="new-room-max">
+            <Input id="new-room-max" name="capacityMax" type="number" min={0} max={500} />
           </Field>
-          <Field label="Kind" htmlFor="new-room-kind">
-            <Select id="new-room-kind" name="kind" defaultValue="classroom">
-              {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Capacity" htmlFor="new-room-capacity">
-              <Input id="new-room-capacity" name="capacity" type="number" min={0} max={500} />
-            </Field>
-            <Field label="Maximum" htmlFor="new-room-max">
-              <Input id="new-room-max" name="capacityMax" type="number" min={0} max={500} />
-            </Field>
-          </div>
         </div>
-      </details>
+      </OptionalSection>
 
       <div className="flex justify-end pt-1">
         <Button type="submit">Add room</Button>

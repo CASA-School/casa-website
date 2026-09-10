@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import { RATE_UNIT_LABELS } from '@/lib/admin/configuration-labels';
+import { OptionalSection } from '@/components/admin/optional-section';
 import { createRateAction } from './actions';
 import { todayInputValue } from '@/lib/dates';
 
@@ -161,110 +162,104 @@ export function RateForm({ targets }: { targets: Targets }) {
         </Field>
       </div>
 
-      <details className="group">
-        <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
-          <span className="group-open:hidden">More</span>
-          <span className="hidden group-open:inline">Less</span>
-        </summary>
-        <div className="mt-3 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Until" hint="empty = open" htmlFor="rate-to">
-              <Input id="rate-to" name="validTo" type="date" />
-            </Field>
-            <Field label="VAT %" htmlFor="rate-vat">
-              <Input
-                id="rate-vat"
-                name="vatRate"
-                inputMode="decimal"
-                className="text-right"
-                defaultValue="0"
-              />
-            </Field>
-          </div>
-          {scope === 'course_type' ? (
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Level" hint="any" htmlFor="rate-level">
-                <Select id="rate-level" name="levelCode" defaultValue="">
-                  <option value="">Any</option>
-                  {targets.levels.map((l) => (
-                    <option key={l} value={l}>
-                      {l}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label="Session" hint="any" htmlFor="rate-session">
-                <Select id="rate-session" name="dayTimeCode" defaultValue="">
-                  <option value="">Any</option>
-                  {targets.dayTimes.map((t) => (
-                    <option key={t.code} value={t.code}>
-                      {t.name}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            </div>
-          ) : null}
-          {scope === 'accommodation' ? (
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Room" hint="any" htmlFor="rate-room">
-                <Select id="rate-room" name="roomTypeCode" defaultValue="">
-                  <option value="">Any</option>
-                  {targets.roomTypes.map((t) => (
-                    <option key={t.code} value={t.code}>
-                      {t.name}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label="Catering" hint="any" htmlFor="rate-catering">
-                <Select id="rate-catering" name="cateringCode" defaultValue="">
-                  <option value="">Any</option>
-                  {targets.catering.map((t) => (
-                    <option key={t.code} value={t.code}>
-                      {t.name}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            </div>
-          ) : null}
-          {scope === 'exam_type' ? (
-            <Field label="Parts sat" hint="any" htmlFor="rate-parts">
-              <Select id="rate-parts" name="parts" defaultValue="">
-                <option value="">Any</option>
-                <option value="1">One part</option>
-                <option value="2">Both parts</option>
-              </Select>
-            </Field>
-          ) : null}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="From quantity" hint="e.g. 5 weeks" htmlFor="rate-min">
-              <Input
-                id="rate-min"
-                name="minQuantity"
-                type="number"
-                min={0}
-                max={999}
-                className="text-right"
-              />
-            </Field>
-            <Field label="To quantity" htmlFor="rate-max">
-              <Input
-                id="rate-max"
-                name="maxQuantity"
-                type="number"
-                min={0}
-                max={999}
-                className="text-right"
-              />
-            </Field>
-          </div>
-          <Field label="Note" htmlFor="rate-note">
-            <Input id="rate-note" name="note" maxLength={200} />
+      <OptionalSection requires={['amount', 'validFrom']} heading="Conditions and validity">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Until" hint="empty = open" htmlFor="rate-to">
+            <Input id="rate-to" name="validTo" type="date" />
+          </Field>
+          <Field label="VAT %" htmlFor="rate-vat">
+            <Input
+              id="rate-vat"
+              name="vatRate"
+              inputMode="decimal"
+              className="text-right"
+              defaultValue="0"
+            />
           </Field>
         </div>
-      </details>
+        {scope === 'course_type' ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Level" hint="any" htmlFor="rate-level">
+              <Select id="rate-level" name="levelCode" defaultValue="">
+                <option value="">Any</option>
+                {targets.levels.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Session" hint="any" htmlFor="rate-session">
+              <Select id="rate-session" name="dayTimeCode" defaultValue="">
+                <option value="">Any</option>
+                {targets.dayTimes.map((t) => (
+                  <option key={t.code} value={t.code}>
+                    {t.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+        ) : null}
+        {scope === 'accommodation' ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Room" hint="any" htmlFor="rate-room">
+              <Select id="rate-room" name="roomTypeCode" defaultValue="">
+                <option value="">Any</option>
+                {targets.roomTypes.map((t) => (
+                  <option key={t.code} value={t.code}>
+                    {t.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Catering" hint="any" htmlFor="rate-catering">
+              <Select id="rate-catering" name="cateringCode" defaultValue="">
+                <option value="">Any</option>
+                {targets.catering.map((t) => (
+                  <option key={t.code} value={t.code}>
+                    {t.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+        ) : null}
+        {scope === 'exam_type' ? (
+          <Field label="Parts sat" hint="any" htmlFor="rate-parts">
+            <Select id="rate-parts" name="parts" defaultValue="">
+              <option value="">Any</option>
+              <option value="1">One part</option>
+              <option value="2">Both parts</option>
+            </Select>
+          </Field>
+        ) : null}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="From quantity" hint="e.g. 5 weeks" htmlFor="rate-min">
+            <Input
+              id="rate-min"
+              name="minQuantity"
+              type="number"
+              min={0}
+              max={999}
+              className="text-right"
+            />
+          </Field>
+          <Field label="To quantity" htmlFor="rate-max">
+            <Input
+              id="rate-max"
+              name="maxQuantity"
+              type="number"
+              min={0}
+              max={999}
+              className="text-right"
+            />
+          </Field>
+        </div>
+        <Field label="Note" htmlFor="rate-note">
+          <Input id="rate-note" name="note" maxLength={200} />
+        </Field>
+      </OptionalSection>
 
       <div className="flex justify-end pt-1">
         <Button type="submit">Add price</Button>

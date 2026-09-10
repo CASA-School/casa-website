@@ -1905,6 +1905,44 @@ the same value showed the 14th, so the two disagreed on screen. Fixed with
 `src/lib/dates.ts` and a regression test. Nothing but looking at a rendered
 screen catches this class of thing.
 
+## Prices out of the wizard, forms that reveal themselves, a collapsing rail (2026-09-10, later)
+
+Four corrections from the owner.
+
+**"Who are you showing the prices to? And twice."** The wizard was quoting: a
+price on every cohort, both an exam's full and single-part fee, and a running
+total. Administrative staff see the cost **once the booking is finished** — per
+line and as a total, on the booking and in the student's list. So the wizard
+now shows no money at all. `priceSelection()` on the server decides every
+amount; the course fee resolves from the cohort's rate or the catalogue's
+published price, and the wizard sends nothing.
+
+**Accommodation was being thrown away.** Removing the amount field would have
+lost the whole answer, because the only place it landed was a cost line and
+CASA has no accommodation rate yet. Migration 0013 puts the type, room,
+catering and dates on `bookings`, shown on the booking page; a charge line
+appears once a rate covers it.
+
+**"I am not a big fan of more or less."** `OptionalSection` replaces every
+`<details>More` in the workspace. It watches the fields that matter and opens
+once they hold a value — name and email in **Add a person** and the rest is
+simply there. It reads the form's DOM through `useSyncExternalStore`, so the
+wrapped fields stay server-rendered and any form can use it by naming inputs.
+
+**The rail collapses**, to 4.25rem of icons. `data-workspace-nav` on the root
+element plus CSS in `globals.css`, with a pre-paint script in the admin layout
+so it does not fold itself on every navigation. The wordmark hides when
+collapsed — 5.9:1 aspect, and CASA has no separate emblem.
+
+Also: a future date of birth is now refused by the action and by the picker's
+`max`; "Record created by staff:<uuid>" became "Added by", resolved to a name.
+
+Two dev-loop notes worth keeping: `suppressHydrationWarning` is required on
+`<html>` when a pre-paint script writes an attribute there, and **Turbopack
+served a stale CSS chunk** for a `globals.css` edit — the production build had
+the rules and the dev server did not, so `rm -rf .next/dev` and restart before
+concluding CSS does not work.
+
 ## Verified Baseline
 
 The latest implementation pass (2026-09-10, migration 0012) cleared all six:

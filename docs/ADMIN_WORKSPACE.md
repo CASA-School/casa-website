@@ -241,18 +241,24 @@ next, because that is the order a colleague asks a learner:
 5. **Review** — every line with its amount, the total, and the few remaining
    fields under *More*.
 
-**Where the prices come from.** A **rate** is set once in Settings and resolved
-by `applicable_rate()` — the enrolment fee, each book, an exam entry. Those are
-authoritative and **re-resolved on the server** when the booking is created, so
-nothing a browser posts can invent one; `booking_charges.rate_id` records which
-rate produced each line, which is why a rate that has priced a booking cannot
-be deleted. An **agreed amount** is typed by a staff member — the tuition and
-accommodation, where CASA has published no rate yet — and stays editable on the
-review step. `src/lib/admin/booking-offer.ts` holds both halves:
-`bookingOffer()` reads the catalogue, `priceSelection()` is the server's truth.
+**No prices on this screen, deliberately.** A colleague booking a learner is
+choosing what they get, not quoting them, so the wizard shows no amounts and no
+total. Every price is already set in Settings; showing it here would be noise
+and a chance to disagree with the record. The cost appears **once the booking
+exists** — per line and as a total — on the booking itself and in the student's
+Bookings list.
 
-The running total is visible from the first step, so nobody reaches the end and
-finds a surprise.
+`priceSelection()` on the server decides every amount: the enrolment fee, each
+book and an exam entry from `rates`; the course fee from the cohort's rate, or
+the catalogue's published price when no rate covers it yet.
+`booking_charges.rate_id` records which rate produced each line, which is why a
+rate that has priced a booking cannot be deleted. `bookingOffer()` reads the
+catalogue for the wizard's choices — and carries no money the wizard can show.
+
+**Accommodation is part of the booking, not only a cost line** (0013). The type,
+room, catering and dates are columns on `bookings`, so the answer is kept even
+though CASA has published no accommodation rate yet; a `booking_charges` line
+appears once a rate does cover it.
 
 ### Create, edit, delete
 
@@ -350,6 +356,40 @@ location and name; nickname, floor, kind and capacities open under *More*, and
 everything is editable on the room's own page. Screens follow the same rule:
 a list shows the summary, the record page shows the detail. FileMaker's
 layouts with every field visible (`Course` has 173) are what this replaces.
+
+## Forms reveal themselves
+
+There is no "More / Less" toggle anywhere. A toggle asks a colleague to decide
+whether they want to see fields before they know what the fields are, and then
+to click — the interface admitting it does not know what matters.
+`OptionalSection` (`src/components/admin/optional-section.tsx`) watches the
+fields that *do* matter and opens once they hold a value: type a name and an
+email into **Add a person** and salutation, date of birth, nationality and
+phone are simply there.
+
+It reads the form's DOM through a `useSyncExternalStore` snapshot rather than
+holding form state, so the fields it wraps stay server-rendered and
+uncontrolled — any form can use it by naming its required inputs. The server
+snapshot is open, so a render without JavaScript shows every field.
+`alwaysOpen` is for editing and for a final review step.
+
+## The sidebar collapses
+
+`SidebarToggle` writes `data-workspace-nav` on the root element and the folding
+is CSS in `globals.css`; `src/app/(admin)/layout.tsx` sets the attribute before
+first paint from the same localStorage key, so a colleague who works collapsed
+never watches the rail fold itself. The rail's links and groups know nothing
+about it — they carry `data-nav-label` on whatever is text and the selectors
+hide it, which keeps a piece of chrome out of a dozen components.
+
+Collapsed the rail is 4.25rem of icons: labels, group headings and nested items
+go, a badge becomes a marker dot, and hairlines replace the group headings. The
+wordmark hides too — it is nearly six times as wide as it is tall, so at icon
+width it would be a sliver of the letter C, and CASA has no separate emblem to
+put there. Desktop only: on a phone the rail is already a scrolling strip.
+
+`suppressHydrationWarning` on `<html>` is required and deliberate: the
+pre-paint script writes an attribute the server render does not have.
 
 ## Design standards
 
@@ -501,7 +541,7 @@ and the white cards.
 ## The database
 
 `db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql`,
-`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`, `0012_day_board.sql`,
+`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`, `0012_day_board.sql`, `0013_booking_accommodation.sql`,
 `0010_bookings_and_payments.sql` and `0011_catalogue_types_and_rates.sql`.
 Tables from 0006:
 

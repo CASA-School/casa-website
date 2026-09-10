@@ -337,7 +337,7 @@ export default async function PersonPage({
                     <span className="text-[var(--casa-text-subtle)]">—</span>
                   ),
                 },
-                { label: 'Record created by', value: person.createdBy },
+                { label: 'Added by', value: person.createdByLabel },
               ]}
             />
           </Card>

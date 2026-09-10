@@ -49,8 +49,24 @@ export const metadata: Metadata = {
 
 export default function WorkspaceRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} ${playfairDisplay.variable}`}>
+    <html
+      lang="en"
+      className={`${plusJakartaSans.variable} ${playfairDisplay.variable}`}
+      suppressHydrationWarning
+    >
       <body className="casa-workspace bg-ws-canvas font-[family-name:var(--font-sans)] text-[var(--casa-ink)] antialiased">
+        {/*
+          Before first paint: the sidebar's collapsed state, read from the same
+          key `SidebarToggle` writes. Without this a colleague who works
+          collapsed watches the rail fold itself on every navigation. Wrapped
+          in try/catch because a private window throws on localStorage access.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var v=localStorage.getItem('casa-workspace-nav');if(v)document.documentElement.dataset.workspaceNav=v}catch(e){}",
+          }}
+        />
         {children}
       </body>
     </html>
