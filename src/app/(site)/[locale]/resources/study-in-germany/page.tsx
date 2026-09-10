@@ -1,22 +1,26 @@
 import type { Metadata } from 'next';
 
 import { ResourceGuidePage } from '@/components/resources/ResourceGuidePage';
-import { studyInGermanyGuide } from '@/content/resourcesGuides.en';
-import { createPublicMetadata } from '@/lib/seo';
+import { getResourceGuide } from '@/content/resource-guides';
 import { getContentLocale } from '@/lib/content/locale.server';
+import { createPublicMetadata } from '@/lib/seo';
+
+const SLUG = 'study-in-germany' as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
+  const guide = getResourceGuide(SLUG, locale);
 
   return createPublicMetadata({
     locale,
-    title: studyInGermanyGuide.metaTitle.replace(/\s\|\sCASA Bremen$/, ''),
-    description: studyInGermanyGuide.metaDescription,
-    path: studyInGermanyGuide.path,
+    title: guide.metaTitle,
+    description: guide.metaDescription,
+    path: guide.path,
   });
 }
 
 export default async function StudyInGermanyResourcePage() {
   const locale = await getContentLocale();
-  return <ResourceGuidePage data={studyInGermanyGuide} locale={locale} />;
+
+  return <ResourceGuidePage data={getResourceGuide(SLUG, locale)} locale={locale} />;
 }

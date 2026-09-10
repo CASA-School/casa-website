@@ -4,12 +4,7 @@ import { HeroEMinimal } from '@/components/heroes';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
-import {
-  livingInGermanyGuide,
-  studyInGermanyGuide,
-  whyGermanyGuide,
-  type ResourceGuideData,
-} from '@/content/resourcesGuides.en';
+import { getOtherResourceGuides, type ResourceGuideData } from '@/content/resource-guides';
 import type { ContentLocale } from '@/lib/content/types';
 
 /*
@@ -47,10 +42,10 @@ import type { ContentLocale } from '@/lib/content/types';
  *   - Alternating white and canvas grounds separate the sections, so no section
  *     needs a card, a tint or a rule of its own.
  *
- * LANGUAGE. The structure is translated — breadcrumbs, contents, section
- * headings, the action. The guide's own prose is English in both languages until
- * it is translated, and the German page says so in the hero rather than in a
- * footnote nobody reads.
+ * LANGUAGE. Both languages are real content now: `src/content/resource-guides/`
+ * holds an English and a German set with the same structure, and a test keeps
+ * them from drifting apart. The chrome below is what belongs to the layout
+ * rather than to a guide.
  */
 
 const chrome = {
@@ -65,7 +60,6 @@ const chrome = {
     sources: 'Official sources',
     related: 'The other guides',
     disclaimer: 'Requirements change. Check the official source for your country before you act on any of this.',
-    meta: [] as string[],
   },
   de: {
     home: 'Start',
@@ -78,17 +72,8 @@ const chrome = {
     sources: 'Offizielle Quellen',
     related: 'Die anderen Ratgeber',
     disclaimer: 'Anforderungen ändern sich. Prüfen Sie die offizielle Quelle für Ihr Land, bevor Sie handeln.',
-    meta: ['Dieser Ratgeber ist auf Englisch'],
   },
-} satisfies Record<ContentLocale, Record<string, string | string[]>>;
-
-/** The hero's one action, in the reader's language. */
-const actionLabel: Record<ContentLocale, Record<string, string>> = {
-  en: { '/courses': 'Explore CASA courses', '/placement-test': 'Take the placement test' },
-  de: { '/courses': 'Kurse ansehen', '/placement-test': 'Einstufungstest starten' },
-};
-
-const allGuides = [studyInGermanyGuide, livingInGermanyGuide, whyGermanyGuide];
+} satisfies Record<ContentLocale, Record<string, string>>;
 
 /**
  * One section of the document: an anchor, an <h2> at the section scale, an
@@ -137,7 +122,7 @@ function DocSection({
 export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; locale: ContentLocale }) {
   const t = chrome[locale];
   const primary = data.hero.ctas[0];
-  const related = allGuides.filter((guide) => guide.slug !== data.slug);
+  const related = getOtherResourceGuides(data.slug, locale);
 
   const contents = [
     { id: 'overview', label: t.glance },
@@ -158,12 +143,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
           { label: t.resources, href: '/resources/study-in-germany' },
           { label: data.hero.title },
         ]}
-        cta={
-          primary
-            ? { label: actionLabel[locale][primary.href] ?? primary.label, href: primary.href, kind: 'primary' }
-            : undefined
-        }
-        meta={t.meta}
+        cta={primary ? { label: primary.label, href: primary.href, kind: 'primary' } : undefined}
       />
 
       {/*

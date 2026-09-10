@@ -2113,3 +2113,36 @@ Structure is translated, prose is not: the German page shows German breadcrumbs,
 contents, section headings and action, says "Dieser Ratgeber ist auf Englisch" in the
 hero, and keeps each guide's own English headings (`stepsTitle`) with the English body.
 Translating the trimmed guides is the next copy step.
+
+## 26. The resource guides in German, and the copy actually rewritten (2026-09-10)
+
+**German exists.** `src/content/resourcesGuides.en.ts` is replaced by
+`src/content/resource-guides/` — `types.ts`, `en.ts`, `de.ts`, and an `index.ts` with
+`getResourceGuide(slug, locale)` and `getOtherResourceGuides(slug, locale)`. All three
+guides are now written in German, `Sie` form, with the German terms a reader meets on a
+form left in German (Anmeldung, Wohnungsgeberbestätigung, Semesterbeitrag,
+Haftpflichtversicherung). The routes and the page take the locale, so the English caveat
+line in the hero is gone. **The German still needs a native review before launch**, on
+the same list as the Gemeinnützigkeit text.
+
+**The copy was the real problem, not only the layout.** Half the bullets in the Living
+and Why guides were single words — "Rent", "Food", "Transport", "Housing", "Paperwork" —
+which is a category label, not information. Every bullet is now a sentence that adds
+something the heading above it does not already say. Each guide's "How CASA helps"
+section is gone; CASA appears once per guide, where it answers the reader's question.
+
+**Two rules recorded in `en.ts` for whoever edits next:** no figure that is not verified
+(rents, blocked-account amounts, permitted working hours and premiums all vary by
+nationality, city and year — point at the official source), and every bullet is a
+sentence.
+
+`src/content/resource-guides/__tests__/parity.test.ts` locks the two languages together:
+same guides, same counts of facts, steps, sections, bullets-per-section, questions and
+links, the same internal hrefs, and it fails if a German prose field is identical to the
+English one or contains a transliterated umlaut. Ten new assertions, 350 tests green.
+
+**One link is deliberately not translated.** The Studierendenwerke deep link keeps its
+`/en/` path in both languages: the German path could only be guessed, and that site
+answers 403 to any automated request, so a guess could not be verified. Swap it once
+someone has opened the German page in a browser.
+
