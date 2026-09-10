@@ -1,317 +1,232 @@
-import { CasaImage as Image } from '@/components/ui/casa-image';
 import { Link } from '@/i18n/navigation';
 
-import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
-import { Button } from '@/components/ui/button';
-import { Container } from '@/components/ui/container';
+import { HeroAPhotoLed } from '@/components/heroes';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import type { ResourceGuideData } from '@/content/resourcesGuides.en';
+import { Container } from '@/components/ui/container';
+import { TextCta } from '@/components/ui/text-cta';
+import {
+  livingInGermanyGuide,
+  studyInGermanyGuide,
+  whyGermanyGuide,
+  type ResourceGuideData,
+} from '@/content/resourcesGuides.en';
+import type { ContentLocale } from '@/lib/content/types';
 
-type ResourceGuidePageProps = {
-  data: ResourceGuideData;
+/*
+ * One layout for the three resource guides, rebuilt 2026-09-10.
+ *
+ * What it replaced: its own hero (a framed photo card with a caption, a
+ * rotated-square ornament, a tricolour rule, two blur blobs, two buttons), then
+ * seven card-shaped sections that said the same things in different sizes — six
+ * quick facts, eight steps, six "deep dive" cards each ending in an "Action:"
+ * line, two decorative photo cards, an eight-item checklist that restated the
+ * eight steps, a FAQ and the official links. Per-guide colour presets made the
+ * three guides look like three sites.
+ *
+ * What it is now: the site's standard hero with one action, then five plain
+ * sections — facts, roadmap, topics, questions, sources — as hairline lists on
+ * white and canvas, the way /courses and /ueber-uns/gemeinnuetzigkeit are built.
+ * Cross-links replace the topics that duplicated another guide.
+ *
+ * The body copy is English in both languages until the guides are translated;
+ * the chrome (breadcrumbs, eyebrows, headings, the primary action) follows the
+ * visitor's language, and the German page says so in one line.
+ */
+
+const chrome = {
+  en: {
+    home: 'Home',
+    resources: 'Resources',
+    eyebrow: 'Resource guide',
+    glance: 'At a glance',
+    roadmap: 'Roadmap',
+    topics: 'In more depth',
+    faq: 'Questions people ask',
+    sources: 'Official sources',
+    disclaimer: 'Requirements change. Check the official source for your country before you act on any of this.',
+    related: 'More guides',
+    languageNote: null,
+  },
+  de: {
+    home: 'Start',
+    resources: 'Ressourcen',
+    eyebrow: 'Ratgeber',
+    glance: 'Auf einen Blick',
+    roadmap: 'Schritt für Schritt',
+    topics: 'Vertiefung',
+    faq: 'Häufige Fragen',
+    sources: 'Offizielle Quellen',
+    disclaimer: 'Anforderungen ändern sich. Prüfen Sie die offizielle Quelle für Ihr Land, bevor Sie handeln.',
+    related: 'Weitere Ratgeber',
+    languageNote: 'Dieser Ratgeber liegt derzeit auf Englisch vor.',
+  },
+} satisfies Record<ContentLocale, Record<string, string | null>>;
+
+/** The one hero action per language; the guides' own labels are English. */
+const primaryActionLabel: Record<ContentLocale, Record<string, string>> = {
+  en: { '/courses': 'Explore CASA courses', '/placement-test': 'Take the placement test' },
+  de: { '/courses': 'Kurse ansehen', '/placement-test': 'Einstufungstest starten' },
 };
 
-type ResourceVisualPreset = {
-  heroThemeClass: string;
-  heroArchetypeClass: string;
-  quickFactsGridClass: string;
-  quickFactItemClass: string;
-  stepCardClass: string;
-  deepDiveGridClass: string;
-  deepDiveCardClass: string;
-  bulletDotClass: string;
-  checklistClass: string;
-  officialCardClass: string;
-  badgeClasses: [string, string, string];
-};
+const allGuides = [studyInGermanyGuide, livingInGermanyGuide, whyGermanyGuide];
 
-const visualPresetBySlug: Record<ResourceGuideData['slug'], ResourceVisualPreset> = {
-  'study-in-germany': {
-    heroThemeClass: 'hero-theme-about',
-    heroArchetypeClass: 'hero-archetype-b',
-    quickFactsGridClass: 'md:grid-cols-2',
-    quickFactItemClass: 'bg-[var(--casa-bg)]',
-    stepCardClass: 'bg-[var(--casa-bg)]',
-    deepDiveGridClass: 'lg:grid-cols-2',
-    deepDiveCardClass: 'bg-white',
-    bulletDotClass: 'bg-[var(--casa-blue)]',
-    checklistClass: 'bg-[var(--casa-warm-soft)]/35',
-    officialCardClass: 'bg-white',
-    badgeClasses: [
-      'bg-[var(--casa-accent-surface)] text-white',
-      'bg-[var(--casa-sun)] text-[var(--casa-ink)]',
-      'bg-[var(--casa-red)] text-white',
-    ],
-  },
-  'living-in-germany': {
-    heroThemeClass: 'hero-theme-accommodation',
-    heroArchetypeClass: 'hero-archetype-d',
-    quickFactsGridClass: 'md:grid-cols-2 lg:grid-cols-3',
-    quickFactItemClass: 'border-[var(--casa-amber)]/40 bg-[var(--casa-warm-soft)]/35',
-    stepCardClass: 'border-l-4 border-l-[var(--casa-blue)] bg-[var(--casa-bg)]',
-    deepDiveGridClass: 'lg:grid-cols-2',
-    deepDiveCardClass: 'bg-[var(--casa-bg)]',
-    bulletDotClass: 'bg-[var(--casa-amber-strong)]',
-    checklistClass: 'bg-[var(--casa-warm-soft)]/60',
-    officialCardClass: 'bg-[var(--casa-bg)]',
-    badgeClasses: [
-      'bg-[var(--casa-amber-strong)] text-white',
-      'bg-[var(--casa-accent-surface)] text-white',
-      'bg-[var(--casa-red)] text-white',
-    ],
-  },
-  'why-germany': {
-    heroThemeClass: 'hero-theme-courses',
-    heroArchetypeClass: 'hero-archetype-f',
-    quickFactsGridClass: 'md:grid-cols-2 xl:grid-cols-3',
-    quickFactItemClass: 'border-[var(--casa-blue)]/25 bg-white',
-    stepCardClass: 'bg-white shadow-[var(--shadow-soft)]',
-    deepDiveGridClass: 'lg:grid-cols-3',
-    deepDiveCardClass: 'bg-white',
-    bulletDotClass: 'bg-[var(--casa-red)]',
-    checklistClass: 'bg-[var(--casa-bg)]',
-    officialCardClass: 'bg-white',
-    badgeClasses: [
-      'bg-[var(--casa-red)] text-white',
-      'bg-[var(--casa-accent-surface)] text-white',
-      'bg-[var(--casa-sun)] text-[var(--casa-ink)]',
-    ],
-  },
-};
-
-function stepBadgeClass(index: number, preset: ResourceVisualPreset) {
-  return preset.badgeClasses[index % preset.badgeClasses.length];
+function Eyebrow({ children }: { children: string }) {
+  return <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{children}</p>;
 }
 
-export function ResourceGuidePage({ data }: ResourceGuidePageProps) {
-  const preset = visualPresetBySlug[data.slug];
+export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; locale: ContentLocale }) {
+  const t = chrome[locale];
+  const primary = data.hero.ctas[0];
+  const related = allGuides.filter((guide) => guide.slug !== data.slug);
 
   return (
-    <main className="bg-[var(--casa-bg)] text-[var(--casa-ink)]">
-      <section
-        className={`${preset.heroThemeClass} ${preset.heroArchetypeClass} hero-grain relative border-b border-[color:var(--casa-sand)] py-10 md:py-14`}
-      >
-        <div className="pointer-events-none absolute -left-16 top-8 h-48 w-48 rounded-full bg-[var(--casa-sun)]/16 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[var(--casa-blue)]/12 blur-3xl" />
-        <Container className="hero-grain-content space-y-8">
-          <Breadcrumbs
-            items={[
-              { label: 'Home', href: '/' },
-              { label: 'Resources' },
-              { label: data.hero.title },
-            ]}
-          />
+    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
+      <HeroAPhotoLed
+        eyebrow={t.eyebrow}
+        title={data.hero.title}
+        description={data.hero.lead}
+        photo={{ src: data.hero.heroImage.src, alt: data.hero.heroImage.alt }}
+        ctas={
+          primary
+            ? [{ label: primaryActionLabel[locale][primary.href] ?? primary.label, href: primary.href, kind: 'primary' }]
+            : []
+        }
+        breadcrumbs={[
+          { label: t.home, href: '/' },
+          { label: t.resources, href: '/resources/study-in-germany' },
+          { label: data.hero.title },
+        ]}
+      />
 
-          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Resource guide</p>
-              <h1 className="mt-3 text-4xl font-black leading-[1.08] tracking-tight text-[var(--casa-ink)] sm:text-5xl">
-                {data.hero.title}
-              </h1>
-              <p className="mt-4 max-w-measure text-lg leading-relaxed text-[var(--casa-muted)]">{data.hero.lead}</p>
-              <div className="mt-6 grid gap-3 sm:max-w-[38rem] sm:grid-cols-2">
-                {data.hero.ctas.map((cta, index) => (
-                  <Button
-                    key={`${cta.href}-${cta.label}`}
-                    asChild
-                    variant={index === 0 ? 'prism' : 'outline-prism'}
-                    className="h-10 w-full justify-center"
-                  >
-                    <Link href={cta.href}>{cta.label}</Link>
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <figure className="casa-card-surface overflow-hidden">
-              <div className="casa-media-overlay relative aspect-[4/3]">
-                <Image
-                  src={data.hero.heroImage.src}
-                  alt={data.hero.heroImage.alt}
-                  fill
-                  priority
-                  sizes="(min-width: 1280px) 46vw, (min-width: 768px) 50vw, 100vw"
-                  className="object-cover"
-                />
-                <div className="pointer-events-none absolute bottom-8 left-8 h-10 w-10 rotate-45 border border-white/65" />
-                <div className="casa-tricolor-rule pointer-events-none absolute bottom-4 left-4 h-1 w-24 rounded-full" />
-              </div>
-              <figcaption className="border-t border-[color:var(--casa-sand)] bg-white px-4 py-3 text-sm text-[var(--casa-muted)]">
-                {data.hero.heroImage.caption}
-              </figcaption>
-            </figure>
-          </div>
-        </Container>
-      </section>
-
-      <section className="pt-16 pb-12 md:pt-20 md:pb-14">
+      {/* Facts: the four things a reader should know before the roadmap. */}
+      <section className="border-b border-[color:var(--casa-sand)]/40 bg-white py-14 md:py-16">
         <Container>
-          <article className="casa-card-surface relative overflow-hidden p-6 md:p-7">
-            <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full border border-[color:var(--casa-sand)]/90" />
-            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">At a glance</h2>
-            <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-            <ul className={`mt-4 grid gap-3 ${preset.quickFactsGridClass}`}>
-              {data.quickFacts.map((fact) => (
-                <li
-                  key={fact}
-                  /* Surface comes from the preset — a base tint here would be a second
-                     background class on the same element, resolved by CSS order. */
-                  className={`rounded-xl px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)] ${preset.quickFactItemClass}`}
-                >
-                  {fact}
-                </li>
-              ))}
-            </ul>
-          </article>
-        </Container>
-      </section>
-
-      <section className="pb-12 md:pb-14">
-        <Container>
-          <article className="casa-card-surface p-6 md:p-7">
-            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{data.stepsTitle}</h2>
-            <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-            <ol className="mt-5 space-y-4">
-              {data.steps.map((step, index) => (
-                <li key={step.title} className={`rounded-xl p-5 ${preset.stepCardClass}`}>
-                  <div className="flex items-start gap-3">
-                    <span className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${stepBadgeClass(index, preset)}`}>
-                      {index + 1}
-                    </span>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-[var(--casa-ink)]">{step.title}</h3>
-                      <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
-                      {step.action ? <p className="text-sm font-semibold text-[var(--casa-ink)]">{step.action}</p> : null}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </article>
-        </Container>
-      </section>
-
-      <section className="pb-12 md:pb-14">
-        <Container className="space-y-6">
-          <h2 className="text-2xl font-bold text-[var(--casa-ink)]">Deep dive</h2>
-          <span className="casa-tricolor-rule block h-1 w-20 rounded-full" aria-hidden />
-          <div className={`grid gap-4 ${preset.deepDiveGridClass}`}>
-            {data.sections.map((section, index) => (
-              <article
-                key={section.title}
-                className={`casa-card-surface relative overflow-hidden p-6 ${
-                  data.slug === 'why-germany' && index === 0 ? 'lg:col-span-2' : ''
-                } ${preset.deepDiveCardClass}`}
+          {t.languageNote ? <p className="mb-6 text-sm text-[var(--casa-muted)]">{t.languageNote}</p> : null}
+          <Eyebrow>{t.glance}</Eyebrow>
+          <ul className="mt-6 grid gap-x-10 gap-y-5 md:grid-cols-2">
+            {data.quickFacts.map((fact) => (
+              <li
+                key={fact}
+                className="border-t border-[color:var(--casa-sand)] pt-4 text-base leading-relaxed text-[var(--casa-ink)]"
               >
-                <h3 className="text-xl font-bold text-[var(--casa-ink)]">{section.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{section.intro}</p>
+                {fact}
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+
+      {/* Roadmap: the guide's spine. Number, title, what to do. */}
+      <section className="border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
+        <Container>
+          <div className="max-w-[46rem]">
+            <Eyebrow>{t.roadmap}</Eyebrow>
+            <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">{data.stepsTitle}</h2>
+          </div>
+          <ol className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2">
+            {data.steps.map((step, index) => (
+              <li key={step.title} className="border-t border-[color:var(--casa-sand)] pt-5">
+                <div className="flex items-start gap-4">
+                  <span className="w-8 shrink-0 text-2xl font-bold leading-none tabular-nums text-[var(--casa-accent-text)]">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{step.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
+                    {step.action ? <p className="mt-2 text-sm leading-relaxed text-[var(--casa-ink)]">{step.action}</p> : null}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Container>
+      </section>
+
+      {/* Topics: what the roadmap cannot say in one line each. */}
+      <section className="border-b border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
+        <Container>
+          <Eyebrow>{t.topics}</Eyebrow>
+          <div className="mt-6 grid gap-x-10 gap-y-10 md:grid-cols-2">
+            {data.sections.map((section) => (
+              <article key={section.title} className="border-t border-[color:var(--casa-sand)] pt-6">
+                <h2 className="text-xl font-bold leading-snug text-[var(--casa-ink)]">{section.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{section.intro}</p>
                 <ul className="mt-4 space-y-2">
                   {section.bullets.map((bullet) => (
-                    <li key={bullet} className="flex gap-2 text-sm leading-relaxed text-[var(--casa-ink)]">
-                      <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${preset.bulletDotClass}`} aria-hidden />
+                    <li key={bullet} className="flex gap-3 text-sm leading-relaxed text-[var(--casa-ink)]">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
                       <span>{bullet}</span>
                     </li>
                   ))}
                 </ul>
-                <p className="mt-4 rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2.5 text-sm font-semibold text-[var(--casa-ink)]">
-                  {section.cta}
-                </p>
+                {section.link ? (
+                  <TextCta href={section.link.href} className="mt-5">
+                    {section.link.label}
+                  </TextCta>
+                ) : null}
               </article>
             ))}
           </div>
         </Container>
       </section>
 
-      <section className="pb-12 md:pb-14">
+      {/* Questions. */}
+      <section className="border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
         <Container>
-          <div className="grid gap-4 md:grid-cols-2">
-            {data.imageSlots.map((image) => (
-              <figure key={image.src} className="casa-card-surface overflow-hidden">
-                <div className="casa-media-overlay relative aspect-[16/10]">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    sizes="(min-width: 1024px) 48vw, 100vw"
-                    className="object-cover"
-                  />
-                  <div className="casa-tricolor-rule pointer-events-none absolute bottom-4 left-4 h-1 w-20 rounded-full" />
-                </div>
-                <figcaption className="border-t border-[color:var(--casa-sand)] bg-white px-4 py-3 text-sm text-[var(--casa-muted)]">
-                  {image.caption}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      <section className="pb-12 md:pb-14">
-        <Container>
-          <article className={`casa-card-surface relative overflow-hidden p-6 md:p-7 ${preset.checklistClass}`}>
-            <div className="pointer-events-none absolute -left-8 -top-8 h-24 w-24 rounded-full bg-[var(--casa-sun)]/20 blur-xl" />
-            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{data.checklistTitle}</h2>
-            <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-            <ul className="mt-4 space-y-2">
-              {data.checklistItems.map((item) => (
-                <li key={item} className="flex gap-2 text-sm leading-relaxed text-[var(--casa-ink)]">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </Container>
-      </section>
-
-      <section className="pb-12 md:pb-14">
-        <Container>
-          <article className="casa-card-surface p-6 md:p-7">
-            <h2 className="text-2xl font-bold text-[var(--casa-ink)]">FAQ</h2>
-            <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-            <Accordion type="single" collapsible className="mt-4">
+          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
+            <Eyebrow>{t.faq}</Eyebrow>
+            <Accordion type="single" collapsible className="border-t border-[color:var(--casa-sand)]">
               {data.faq.map((item) => (
                 <AccordionItem key={item.question} value={item.question} className="border-[color:var(--casa-sand)]">
-                  <AccordionTrigger className="text-base font-semibold text-[var(--casa-ink)] hover:no-underline">
+                  <AccordionTrigger className="py-4 text-left text-base font-semibold text-[var(--casa-ink)] hover:no-underline">
                     {item.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm leading-relaxed text-[var(--casa-muted)]">
-                    {item.answer}
-                  </AccordionContent>
+                  <AccordionContent className="text-sm leading-relaxed text-[var(--casa-muted)]">{item.answer}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
-          </article>
+          </div>
         </Container>
       </section>
 
-      <section className="pb-12 md:pb-14">
-        <Container className="space-y-4">
-          <h2 className="text-2xl font-bold text-[var(--casa-ink)]">Official links</h2>
-          <span className="block h-px w-24 bg-[color:var(--casa-sand)]" aria-hidden />
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.officialLinks.map((link) => (
-              <article
-                key={link.url}
-                className={`relative overflow-hidden rounded-xl border border-[color:var(--casa-sand)] p-4 shadow-[var(--shadow-soft)] ${preset.officialCardClass}`}
-              >
-                <h3 className="text-base font-bold text-[var(--casa-ink)]">{link.label}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{link.description}</p>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex text-sm font-semibold text-[var(--casa-accent-text)] hover:underline"
-                >
-                  Visit source
-                </a>
-              </article>
-            ))}
-          </div>
+      {/* Sources, and the other two guides. */}
+      <section className="bg-white py-16 md:py-20">
+        <Container>
+          <div className="grid gap-12 lg:grid-cols-2">
+            <div>
+              <Eyebrow>{t.sources}</Eyebrow>
+              <ul className="mt-6 divide-y divide-[color:var(--casa-sand)] border-t border-[color:var(--casa-sand)]">
+                {data.officialLinks.map((link) => (
+                  <li key={link.url} className="py-4">
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-base font-semibold text-[var(--casa-accent-text)] hover:underline"
+                    >
+                      {link.label}
+                    </a>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)]">{link.description}</p>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 text-sm leading-relaxed text-[var(--casa-muted)]">{t.disclaimer}</p>
+            </div>
 
-          <aside className="rounded-xl border border-[color:var(--casa-amber)]/40 bg-[var(--casa-warm-soft)] px-4 py-3 text-sm text-[var(--casa-ink)]">
-            Information can change. Always verify official requirements with your embassy/university.
-          </aside>
+            <div>
+              <Eyebrow>{t.related}</Eyebrow>
+              <ul className="mt-6 divide-y divide-[color:var(--casa-sand)] border-t border-[color:var(--casa-sand)]">
+                {related.map((guide) => (
+                  <li key={guide.slug} className="py-4">
+                    <Link href={guide.path} className="text-base font-semibold text-[var(--casa-ink)] hover:text-[var(--casa-accent-text)]">
+                      {guide.hero.title}
+                    </Link>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)]">{guide.hero.lead}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </Container>
       </section>
     </main>

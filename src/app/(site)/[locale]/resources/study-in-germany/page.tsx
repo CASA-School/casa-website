@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function StudyInGermanyResourcePage() {
-  return <ResourceGuidePage data={studyInGermanyGuide} />;
+export default async function StudyInGermanyResourcePage() {
+  const locale = await getContentLocale();
+  return <ResourceGuidePage data={studyInGermanyGuide} locale={locale} />;
 }
