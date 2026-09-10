@@ -85,7 +85,7 @@ staff conclude nothing had come in.
   layer, per-domain reads, and the write path from the public site (`intake.ts`).
 - `src/lib/mock`: fallback dataset for public careers content.
 - `src/config`: nav, brand tokens, page patterns, and content fixtures.
-- `db/migrations`: SQL-first schema, `0001` … `0011_catalogue_types_and_rates.sql`.
+- `db/migrations`: SQL-first schema, `0001` … `0012_day_board.sql`.
 - `db/seeds`: baseline public data. Applied to real databases, so no fake people.
 - `scripts/admin`: `seed-staff.mjs` (first account), `seed-demo.mjs` (demo records).
 - `docs`: setup and review documents.

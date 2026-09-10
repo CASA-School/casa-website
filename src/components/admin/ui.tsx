@@ -24,6 +24,22 @@ import { cn } from '@/lib/utils';
  *
  * Radius follows the three-tier scale in `src/config/brand/tokens.ts`: 4px for
  * controls, 6px for cards and panels, 8px for the outer shells. No fourth value.
+ *
+ * TWO RULES THIS FILE ENFORCES FOR EVERY SCREEN
+ *
+ * 1. A SECTION IS ONE WHITE BLOCK, and the canvas between sections is what
+ *    separates them. A card's header is therefore white with a rule under it,
+ *    not a grey band: a grey header the same value as the page gap made two
+ *    stacked cards read as one continuous strip. The only recessed band inside
+ *    a card is a table header or a toolbar (`--ws-sunk`), which then reads
+ *    unambiguously as a sub-level rather than as the page showing through.
+ *
+ * 2. A FIELD TITLE IS A LABEL, NOT AN EYEBROW. Field names in `DetailList` and
+ *    `StatBand` are 12px sentence case in `--casa-muted`. They used to be
+ *    10.4px bold uppercase with letter-spacing — a decorative treatment doing
+ *    a functional job, which is slower to read and, next to a value and a
+ *    badge, genuinely hard to parse. Uppercase eyebrows are reserved for
+ *    `PageHeader`, where there is one per screen and it is decorative.
  */
 
 const focusRing =
@@ -160,7 +176,7 @@ export function Card({
       )}
     >
       {title || actions ? (
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-ws-line bg-ws-sunk px-5 py-3.5">
+        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-ws-line px-5 py-3.5">
           <div className="min-w-0">
             {title ? (
               <h2 className="font-[family-name:var(--font-display)] text-base leading-tight text-[var(--casa-ink)]">
@@ -275,9 +291,7 @@ export function StatBand({
 
         const body = (
           <>
-            <p className="text-[0.65rem] font-bold tracking-eyebrow uppercase text-[var(--casa-text-subtle)]">
-              {item.label}
-            </p>
+            <p className="text-xs font-medium text-[var(--casa-muted)]">{item.label}</p>
             <p
               data-slot="stat-value"
               className={cn(
@@ -501,9 +515,7 @@ export function DetailList({
     <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
       {items.map((item) => (
         <div key={item.label} className={item.wide ? 'sm:col-span-2' : undefined}>
-          <dt className="text-[0.65rem] font-bold tracking-eyebrow uppercase text-[var(--casa-text-subtle)]">
-            {item.label}
-          </dt>
+          <dt className="text-xs font-medium text-[var(--casa-muted)]">{item.label}</dt>
           <dd className="mt-1 text-sm leading-relaxed break-words text-[var(--casa-ink)]">
             {item.value === null || item.value === undefined || item.value === '' ? (
               <span className="text-[var(--casa-text-subtle)]">—</span>

@@ -1806,9 +1806,45 @@ tabs (Prices, Lists). Read needs `settings`; changing a price needs `settings`
 at `full`. A price is ended with `valid_to`, never deleted once it has priced a
 booking.
 
+## Today, and a design pass on contrast and labels (2026-09-10)
+
+The owner asked for the UI to be built out for a staff demo — friendly, not
+threatening — and warned against adding more modules. So: no new domain
+tables beyond one, and two measured design defects fixed.
+
+**`/admin` is now Today**, the daily surface: a Monday-first week strip with a
+dot on days that have unfinished tasks, the four queue counts, **the day
+board**, "Happening today" (course starts and ends, exams, first days, read
+from existing records) and "Coming up". Migration 0012 adds `day_tasks` — one
+table, no workflow. An unfinished task stays on its own date and shows as
+"Still open from earlier"; nothing rolls it forward. Colour on the board means
+state, never category.
+
+**The fortnight chart and "Just arrived" moved to Activity.** Both look
+backwards. That is a consolidation, not a deletion — Today gained a purpose and
+Activity became the record.
+
+**Navigation** is Today + Inbox + School + Management, eight top-level items.
+Job applications moved to Management and are no longer a `staff` default,
+because they are a few colleagues' work. Rooms nests under Courses & exams. The
+register is labelled **Students**.
+
+**Two design defects, both measured:**
+- `--ws-sunk` (card headers) was within **1.01:1** of `--ws-canvas` (the page),
+  so the gap above a card and the next card's header were the same grey and
+  stacked sections merged into one strip. Card headers are now white with a
+  rule; the canvas darkened to `#e8edf4`. Ladder: white 1.0 → sunk 0.90 →
+  canvas 0.84, and `--casa-text-subtle` still clears AA on the canvas at 4.7:1.
+- Field labels in `DetailList` and `StatBand` were 10.4px bold uppercase
+  letter-spaced. Now 12px sentence case in `--casa-muted`.
+
+Also: one primary button per screen (the registration header had two dark
+buttons), and the 36-character request uuid moved out of the field list into a
+card footer.
+
 ## Verified Baseline
 
-The latest implementation pass (2026-09-09, migration 0011) cleared all six:
+The latest implementation pass (2026-09-10, migration 0012) cleared all six:
 
 - `npm run lint`
 - `npm run typecheck`

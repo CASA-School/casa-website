@@ -74,23 +74,17 @@ export function WorkspaceShell({
             aria-label="Workspace"
             className="-mx-1 flex snap-x gap-1 overflow-x-auto px-1 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0"
           >
-            <NavLink href="/admin" icon={Icon.overview}>
-              Overview
+            <NavLink href="/admin" icon={Icon.calendar}>
+              Today
             </NavLink>
 
             {canAccess(user, 'enquiries') ||
             canAccess(user, 'registrations') ||
-            canAccess(user, 'placement') ||
-            canAccess(user, 'applications') ? (
+            canAccess(user, 'placement') ? (
               <NavGroup
                 id="inbox"
                 label="Inbox"
-                hrefs={[
-                  '/admin/enquiries',
-                  '/admin/registrations',
-                  '/admin/placement',
-                  '/admin/applications',
-                ]}
+                hrefs={['/admin/enquiries', '/admin/registrations', '/admin/placement']}
               >
                 {canAccess(user, 'enquiries') ? (
                   <NavLink href="/admin/enquiries" icon={Icon.enquiries} badge={badges.enquiries}>
@@ -123,25 +117,17 @@ export function WorkspaceShell({
                     Placement
                   </NavLink>
                 ) : null}
-                {canAccess(user, 'applications') ? (
-                  <NavLink
-                    href="/admin/applications"
-                    icon={Icon.applications}
-                    badge={badges.applications}
-                  >
-                    Applications
-                  </NavLink>
-                ) : null}
               </NavGroup>
             ) : null}
 
             {canAccess(user, 'people') ||
+            canAccess(user, 'bookings') ||
             canAccess(user, 'planning') ||
             canAccess(user, 'catalogue') ? (
               <NavGroup
                 id="school"
                 label="School"
-                hrefs={['/admin/people', '/admin/planning', '/admin/catalogue']}
+                hrefs={['/admin/people', '/admin/bookings', '/admin/planning', '/admin/catalogue']}
               >
                 {canAccess(user, 'people') ? (
                   <NavLink
@@ -152,7 +138,7 @@ export function WorkspaceShell({
                       { href: '/admin/people/flags', label: 'Needs a look', badge: badges.flags },
                     ]}
                   >
-                    People
+                    Students
                   </NavLink>
                 ) : null}
                 {canAccess(user, 'bookings') ? (
@@ -160,16 +146,16 @@ export function WorkspaceShell({
                     Bookings
                   </NavLink>
                 ) : null}
-                {canAccess(user, 'planning') ? (
-                  <NavLink href="/admin/planning" icon={Icon.rooms}>
-                    Rooms
-                  </NavLink>
-                ) : null}
                 {canAccess(user, 'catalogue') ? (
                   <NavLink
                     href="/admin/catalogue"
                     icon={Icon.catalogue}
-                    items={[{ href: '/admin/catalogue/exams', label: 'Exams' }]}
+                    items={[
+                      { href: '/admin/catalogue/exams', label: 'Exams' },
+                      ...(canAccess(user, 'planning')
+                        ? [{ href: '/admin/planning', label: 'Rooms' }]
+                        : []),
+                    ]}
                   >
                     Courses &amp; exams
                   </NavLink>
@@ -179,9 +165,18 @@ export function WorkspaceShell({
 
             <NavGroup
               id="admin"
-              label="Administration"
-              hrefs={['/admin/activity', '/admin/team', '/admin/settings']}
+              label="Management"
+              hrefs={['/admin/applications', '/admin/activity', '/admin/team', '/admin/settings']}
             >
+              {canAccess(user, 'applications') ? (
+                <NavLink
+                  href="/admin/applications"
+                  icon={Icon.applications}
+                  badge={badges.applications}
+                >
+                  Applications
+                </NavLink>
+              ) : null}
               {canAccess(user, 'activity') ? (
                 <NavLink href="/admin/activity" icon={Icon.note}>
                   Activity

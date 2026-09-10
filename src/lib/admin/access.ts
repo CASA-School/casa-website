@@ -88,11 +88,18 @@ export const ADJUSTABLE: readonly WorkspaceModule[] = MODULES.filter(
 
 export type Access = Record<WorkspaceModule, AccessLevel>;
 
+/**
+ * What a `staff` account gets by default.
+ *
+ * `applications` is deliberately absent: job applications are management's, not
+ * the administration team's daily work, so an administrator grants that module
+ * per person on the Team screen. `planning` (rooms) is absent for the same
+ * reason — one or two people schedule, everyone else reads the cohort.
+ */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',
   'registrations',
   'placement',
-  'applications',
   'people',
   'bookings',
   'catalogue',
@@ -108,7 +115,10 @@ function fill(level: AccessLevel, only?: readonly WorkspaceModule[]): Access {
 const ROLE_DEFAULTS: Record<StaffRole, Access> = {
   owner: fill('full'),
   admin: fill('full'),
-  staff: { ...fill('edit', STAFF_MODULES), overview: 'view', settings: 'view' },
+  // Overview is `edit` for everyone: it carries the shared day board, which
+  // the whole administration team writes on. Settings stays read-only —
+  // prices and vocabularies are the super admin's.
+  staff: { ...fill('edit', STAFF_MODULES), overview: 'edit', settings: 'view' },
 };
 
 export const isModule = (value: string): value is WorkspaceModule =>

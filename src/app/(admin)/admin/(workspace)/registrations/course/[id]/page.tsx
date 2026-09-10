@@ -112,7 +112,7 @@ export default async function CourseRegistrationPage({
               href={`mailto:${registration.email}?subject=${encodeURIComponent(
                 `CASA registration — ${registration.courseTypeLabel ?? 'your course'}`
               )}`}
-              className="inline-flex h-9 items-center rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
+              className="inline-flex h-9 items-center rounded-lg border border-ws-line-firm bg-white px-4 text-sm font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
             >
               Reply by email
             </a>
@@ -122,7 +122,14 @@ export default async function CourseRegistrationPage({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
         <div className="space-y-5">
-          <Card title="Registered for">
+          <Card
+            title="Registered for"
+            footer={
+              <p className="text-xs text-[var(--casa-text-subtle)]">
+                Submission reference <code className="font-mono">{registration.requestId}</code>
+              </p>
+            }
+          >
             <DetailList
               items={[
                 { label: 'Course', value: registration.courseTypeLabel },
@@ -155,10 +162,6 @@ export default async function CourseRegistrationPage({
                   ) : (
                     <span className="text-[var(--casa-text-subtle)]">—</span>
                   ),
-                },
-                {
-                  label: 'Reference',
-                  value: <code className="font-mono text-xs">{registration.requestId}</code>,
                 },
               ]}
             />

@@ -810,9 +810,19 @@ h3 {
   --ws-line: #dbe2ec;
   /* The faintest useful edge, for nested boxes inside an already-bordered card. */
   --ws-line-soft: #e9eef4;
-  /* A recessed band: table headers, toolbars, an inset panel. */
-  --ws-sunk: #eef2f7;
-  --ws-canvas: #f1f5f9;
+  /* A recessed band INSIDE a card: table headers, toolbars, an inset panel. */
+  --ws-sunk: #f0f4f9;
+  /*
+   * The ground BETWEEN sections, and the reason a card reads as a card.
+   *
+   * This was #f1f5f9, one step from `--ws-sunk` and therefore invisible next
+   * to it: a card's grey header and the gap above the next card resolved to
+   * the same value, so two stacked sections merged into one band and nobody
+   * could tell where one ended. The ladder now measures white 1.0 →
+   * sunk 0.90 → canvas 0.84 in relative luminance, about 1.08:1 per step,
+   * and `--casa-text-subtle` still clears AA on the canvas at 4.7:1.
+   */
+  --ws-canvas: #e8edf4;
 
   /* The sidebar. `--casa-ink-deep` is the site's inverted band; the workspace
      wants one step deeper so the white content area reads as the lit surface

@@ -133,7 +133,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         next-intl config
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0011_catalogue_types_and_rates.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0012_day_board.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -165,6 +165,13 @@ Respect `prefers-reduced-motion` and existing `focus-visible` patterns.
 and repository-backed view models rather than hardcoded inline content. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
+
+**Workspace design standards.** A section is one white block and the canvas
+between sections separates them — a card header is white with a rule, never a
+grey band the same value as the page. A field title is a label (12px sentence
+case), not an uppercase eyebrow. One primary button per screen. Never show a
+raw uuid as a field. `docs/ADMIN_WORKSPACE.md` §Design standards has the
+measurements and the defect each rule came from.
 
 **Workspace screens: labels, not explanations.** The staff workspace must stay
 presentable. No rationale, caveats or "not built yet" notes in the UI — those go

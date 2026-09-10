@@ -213,7 +213,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Enquiries, Registrations, Placement, Applications, People, Bookings, Courses & exams, Activity; `view` on Overview and Settings; `none` on Rooms and Team |
+| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -240,12 +240,53 @@ staff accounts (add, deactivate with confirmation).
 
 ### Navigation
 
-Three collapsible groups — **Inbox** (enquiries, registrations, placement,
-applications), **School** (people, bookings, rooms, courses & exams), **Administration**
-(activity, team, settings) — with nested items under Registrations, People and
-Courses & exams. A group opens itself when a screen inside it is current and
-remembers a manual open/close in the browser. New screens go into an existing
-group or a nested item; the rail never grows a flat list.
+**Today** on its own at the top, then three collapsible groups:
+
+| Group | Holds |
+| --- | --- |
+| **Inbox** | Enquiries, Registrations (→ Courses, Exams), Placement — what the public site sent, waiting to be worked |
+| **School** | Students, Bookings, Courses & exams (→ Exams, Rooms) — the records the school keeps |
+| **Management** | Applications, Activity, Team, Settings (→ Setup) — not the administration team's daily work |
+
+Eight top-level items. A group opens itself when a screen inside it is current
+and remembers a manual open/close in the browser. New screens join an existing
+group or become a nested item; the rail never grows a flat list.
+
+Three deliberate placements. **Job applications sit in Management, not Inbox** —
+they are a few colleagues' work, so `staff` accounts get that module by
+exception rather than by default. **Rooms is nested under Courses & exams**,
+because scheduling is what a room is for. And the register is labelled
+**Students**, which is the word the team uses, even though the table holds
+everyone who has ever been in touch.
+
+### Today — the daily surface
+
+`/admin` is a day, not a summary. The team opens it every morning, and
+FileMaker's home screen (`SingleDayCalendar_Overview`) is the same idea, which
+is why they recognise it.
+
+- A **week strip** of seven days, Monday first, with a dot on any day that has
+  unfinished tasks. Links, not a picker: every day is one click, back works,
+  and a URL can be pasted to a colleague. `?date=YYYY-MM-DD`; today has no
+  parameter.
+- **Waiting on us** — the four queue counts, plus open tasks for the day.
+- **The day board** (`day_tasks`, migration 0012). Anyone with `overview` at
+  `edit` — which is everyone — writes what needs doing, optionally assigns it
+  and files it under an area. Ticking it records who ticked it. An unfinished
+  task **stays on its own date** and appears under "Still open from earlier";
+  nothing rolls it forward, because a task that moves by itself is a task
+  nobody notices they have missed.
+- **Happening today** — courses starting and ending, exam sittings and first
+  days, read from the records the team already keeps.
+- **Coming up** — the deadline items.
+
+Colour on the board means **state**, never category: the overdue block is the
+only warm thing on the screen and a finished task recedes. The area is a word,
+because six categorical hues on a screen read every morning is noise.
+
+The fortnight trend and the newest inbound records moved to **Activity**. Both
+look backwards, and a daily screen that also carries last week's chart is a
+screen nobody reads twice.
 
 CASA cannot be left with no active owner; the workspace refuses the change that
 would do it. **Deactivation, not deletion** — a deleted account takes its name
@@ -268,6 +309,29 @@ location and name; nickname, floor, kind and capacities open under *More*, and
 everything is editable on the room's own page. Screens follow the same rule:
 a list shows the summary, the record page shows the detail. FileMaker's
 layouts with every field visible (`Course` has 173) are what this replaces.
+
+## Design standards
+
+Four rules, each of which came from a real defect on a real screen.
+
+1. **A section is one white block; the canvas between sections separates
+   them.** A card's header is white with a rule under it. It used to be
+   `--ws-sunk`, which was within 1.01:1 of the page canvas — so the gap above
+   a card and the header of the next card resolved to the same grey and two
+   stacked sections merged into one strip. The surface ladder is now white 1.0
+   → `--ws-sunk` 0.90 → `--ws-canvas` 0.84 in relative luminance, roughly
+   1.08:1 a step, and `--ws-sunk` appears only *inside* a card (table headers,
+   toolbars, a card footer) where it reads as a sub-level.
+2. **A field title is a label, not an eyebrow.** `DetailList` and `StatBand`
+   labels are 12px sentence case in `--casa-muted`. They were 10.4px bold
+   uppercase with letter-spacing — decoration doing a functional job, slower
+   to read and, beside a value and a badge, genuinely hard to parse. Uppercase
+   eyebrows survive only in `PageHeader`, one per screen.
+3. **One primary button per screen.** Two dark buttons in a header make the
+   consequential action and the routine one look equally weighty.
+4. **No raw identifier as a field.** A 36-character uuid labelled "Reference"
+   with the same weight as the course name is confusing information. Keep it,
+   but in a card footer.
 
 ## Copy on screens — labels, not explanations
 
@@ -392,7 +456,7 @@ and the white cards.
 ## The database
 
 `db/migrations/0006_admin_workspace.sql`, `0007_people_and_flags.sql`,
-`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`,
+`0008_rooms_and_module_access.sql`, `0009_access_levels_and_soft_delete.sql`, `0012_day_board.sql`,
 `0010_bookings_and_payments.sql` and `0011_catalogue_types_and_rates.sql`.
 Tables from 0006:
 
@@ -460,6 +524,14 @@ Seeded: the 36 book prices, the four exam fees recovered from the script, the
 50 € enrolment fee. Course and accommodation prices are deliberately empty —
 CASA enters them once, per period (`docs/CATALOGUE_AND_PRICING.md` §5 lists
 the decisions).
+
+### 0012 — the day board
+
+One table, `day_tasks`: the date it belongs to, a title, an optional detail, an
+area (students / courses / accommodation / exams / payments / anything else), an
+optional owner, and who finished it and when. A task is not a workflow — no
+stages, no dependencies, no recurrence — and `done_at` plus `done_by` answers
+"who finished it" without a second table.
 
 ### 0010 — bookings, periods, cost lines, payments
 

@@ -88,6 +88,8 @@ describe('workspace auth gate', () => {
       'src/app/(admin)/admin/(workspace)/planning/actions.ts',
       'src/app/(admin)/admin/(workspace)/people/actions.ts',
       'src/app/(admin)/admin/(workspace)/bookings/actions.ts',
+      'src/app/(admin)/admin/(workspace)/day-board/actions.ts',
+      'src/app/(admin)/admin/(workspace)/settings/setup/actions.ts',
     ];
 
     for (const file of files) {
