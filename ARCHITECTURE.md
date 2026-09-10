@@ -24,7 +24,7 @@ public host in production. It is host routing, not authentication — it has no
 database connection. See `docs/ADMIN_WORKSPACE.md`.
 
 ## Tech Stack Summary
-- Framework: Next.js `16.3.1` with App Router.
+- Framework: Next.js `16.3.4` with App Router.
 - Language/runtime: TypeScript + React `19.2.4`.
 - Styling: Tailwind CSS v4, shadcn UI patterns, Radix primitives, `tw-animate-css`.
 - Data/storage: Postgres via `pg`. A local container (`docker-compose.yml`,

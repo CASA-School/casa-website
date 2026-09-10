@@ -24,7 +24,7 @@ name is still `casa-portal`; that is historical, not current scope.
 
 ## Stack
 
-- Next.js `16.1.6` (App Router) · React `19.2.4` · TypeScript
+- Next.js `16.3.4` (App Router) · React `19.2.4` · TypeScript
 - Tailwind CSS v4 + shadcn patterns + Radix (`radix-ui`), `tw-animate-css`
 - Postgres via `pg` — a local container in development (`docker-compose.yml`),
   Azure Flexible Server or Neon in deployment. One shared pool

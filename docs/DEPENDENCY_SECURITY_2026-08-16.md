@@ -147,3 +147,43 @@ is more lenient. Lockfile drift between the two already broke CI once.
 - A `vitest.config.ts` deprecation warning now appears during `npm run test`: ESM syntax in a
   file loaded as CommonJS. Harmless today; fix by renaming to `.mts` or setting
   `"type": "module"` before Vite makes `configLoader: 'native'` the default.
+
+---
+
+## 2026-09-10 — `next` 16.3.1 → 16.3.4
+
+CI had been red on **every** push since 2026-09-09, and the failing step was
+`Security audit (production dependencies)`, not lint or the tests. Three
+advisories had appeared against the pinned tree:
+
+| Package | Severity | Advisory |
+| --- | --- | --- |
+| `next` 16.0.0–16.3.2 | **critical** | Unauthenticated RCE on Windows-hosted servers (GHSA-p293-qw3h-jr36), and unauthenticated RCE in the Image Optimization API when AVIF files are used (GHSA-2xp9-vwfh-vxw4) |
+| `sharp` <0.35.4 | high | libheif vulnerabilities, reached through `next` |
+| `baseline-browser-mapping` <2.11.0 | moderate | Process termination on invalid input, a denial of service |
+
+**The AVIF one is the reason this mattered rather than merely being red.** The
+Windows RCE does not apply — CASA runs on Linux in Azure Container Apps — but
+the Image Optimization path does, on any host, and the public site optimises
+images.
+
+Fixed by bumping `next` and `eslint-config-next` together to **16.3.4** (the
+pinned-pair rule above still holds), which also pulled `sharp` forward, plus
+`npm audit fix` for the transitive `baseline-browser-mapping`. Production-scope
+audit is now **0 vulnerabilities** and the gate exits 0.
+
+Two notes for whoever does this next:
+
+- `npm audit fix --omit=dev` **prunes dev dependencies from `node_modules`** —
+  `eslint: command not found` immediately afterwards is that, not a broken
+  config. `npm install` restores them.
+- `npm audit fix` also pinned `typescript` and `@types/node` to exact versions
+  that no advisory required. Those were reverted to their ranges; the only
+  intended `package.json` change is the `next` pair.
+
+Dev-scope advisories remain (`@humanfs/node` via eslint, `browserslist`,
+`hono`) and are still out of scope by the reasoning in §"Why the CI audit gate
+is production-scope only": clearing them means moving eslint and knip majors,
+which risks the toolchain to fix code that never ships.
+
+Verified on 16.3.4: lint, typecheck, build, knip, 329 unit tests, 36 e2e.
