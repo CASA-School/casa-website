@@ -2093,15 +2093,25 @@ density, no way to navigate 4,500px. Eyebrow-as-heading is the pattern
 The placeholder photo block was also the largest object on a page that needs no
 photograph.
 
-**What it is now, and the rule behind it: a reference guide is a DOCUMENT, so it is built
-like one and not like a course page.** The compact centred hero the FAQ and legal pages
-use, no hero photograph. A contents list under it, because length is only a liability
-while the reader cannot skip. Every section is a real `<h2>` at the section scale with an
-anchor, rendered by one local `DocSection` so the hierarchy cannot drift back to labels.
-The body is clamped to a 60rem column and **centred**, matching the centred hero — the
-first attempt at this clamped it but left it on the grid's left edge, which put 400px of
-dead space down every section. Alternating white and canvas grounds separate the
-sections, so no section needs a card, a tint or a rule of its own.
+**The second attempt over-corrected in the other direction, and the product owner caught
+it.** It moved the guides to the compact centred hero that /contact, /faq, /careers,
+/search and the legal pages use, on the argument that a reference page needs no
+photograph, and centred the body column to match. But the photo-led hero is the standard
+on eight of the site's content routes (/, /about, /courses, course detail,
+/accommodation, /exams, /team, /ueber-uns/gemeinnuetzigkeit), a guide is a content page
+rather than a utility page, and **the thing that actually looked wrong in the hero was a
+numbered PLACEHOLDER filling the frame — a temporary artifact, and no basis for a
+permanent structural decision.** Rendering the same page with a real photograph (the Why
+Germany hero uses slot 23, which is live) settles it.
+
+**What it is now.** The site's standard photo-led hero, one action, with a registry
+photograph per guide, so each renders its numbered placeholder until the real one
+arrives. Then the document parts that were the point of the rebuild: a contents list
+under the hero, every section a real `<h2>` at the section scale with an anchor, rendered
+by one local `DocSection` so the hierarchy cannot drift back to labels, and alternating
+white and canvas grounds so no section needs a card, a tint or a rule of its own. The
+body is aligned to the grid like every other page under this hero — heading clamped to a
+readable measure, content spanning the container, the roadmap in two numbered columns.
 
 Content removed for all three guides: `checklistItems` (restated the steps), `finalCTA`
 (never rendered), `imageSlots`, `heroImage`, the hero captions and the "Action:" label on

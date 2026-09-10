@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation';
 
-import { HeroEMinimal } from '@/components/heroes';
+import { HeroAPhotoLed } from '@/components/heroes';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
@@ -29,16 +29,22 @@ import type { ContentLocale } from '@/lib/content/types';
  * mid-decision, looking for one answer. So it is built like one and not like the
  * course pages:
  *
- *   - The compact centred hero the FAQ and the legal pages use. No hero
- *     photograph: on a reference page a decorative photo earns nothing, and it
- *     was the largest thing on the screen.
+ *   - THE SITE'S STANDARD HERO, the photo-led one. This was briefly the compact
+ *     centred hero that /contact, /faq and /search use, on the argument that a
+ *     reference page needs no photograph. The product owner's correction was
+ *     right: the photo-led hero is the standard on eight of the site's content
+ *     routes, a guide is a content page rather than a utility page, and the
+ *     thing that actually looked wrong was a numbered PLACEHOLDER filling the
+ *     frame — a temporary artifact, and no basis for a permanent decision.
  *   - A contents list directly under it. Length is an asset in a guide as long
  *     as the reader can skip; it was a liability while they could not.
  *   - Every section is a real <h2> at the site's section scale with its own
  *     anchor. `DocSection` renders all of them, so the hierarchy cannot drift
  *     back to labels.
- *   - The body is clamped to a document column instead of running to the 85rem
- *     grid, which is what made the copy feel stranded rather than set.
+ *   - The body is aligned to the grid, like every other page under this hero:
+ *     each heading clamped to a readable measure, the content beneath it using
+ *     the full container. It was briefly a centred column, which only worked
+ *     under the centred hero and made the guides an outlier under this one.
  *   - Alternating white and canvas grounds separate the sections, so no section
  *     needs a card, a tint or a rule of its own.
  *
@@ -101,19 +107,18 @@ function DocSection({
     >
       <Container>
         {/*
-          CENTRED, not left-aligned in the 85rem grid. Clamping the column to a
-          document measure and leaving it on the grid's left edge put 400px of
-          dead space down the right of every section, under a hero that is
-          itself centred. A centred article and a centred hero are one page; a
-          left column under a centred hero is two.
+          Heading clamped, content full width — the shape every other page under
+          the photo-led hero uses. A centred column read well under the centred
+          hero and made these three pages an outlier once the standard hero came
+          back.
         */}
-        <div className="mx-auto max-w-[60rem]">
+        <div className="max-w-[46rem]">
           <h2 className="text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-[2.125rem]">{title}</h2>
           {lead ? (
             <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{lead}</p>
           ) : null}
-          <div className="mt-9">{children}</div>
         </div>
+        <div className="mt-9">{children}</div>
       </Container>
     </section>
   );
@@ -134,16 +139,17 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      <HeroEMinimal
+      <HeroAPhotoLed
         eyebrow={t.eyebrow}
         title={data.hero.title}
         description={data.hero.lead}
+        photo={data.hero.photo}
+        ctas={primary ? [{ label: primary.label, href: primary.href, kind: 'primary' }] : []}
         breadcrumbs={[
           { label: t.home, href: '/' },
           { label: t.resources, href: '/resources/study-in-germany' },
           { label: data.hero.title },
         ]}
-        cta={primary ? { label: primary.label, href: primary.href, kind: 'primary' } : undefined}
       />
 
       {/*
@@ -152,7 +158,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
       */}
       <nav aria-label={t.contents} className="border-b border-[color:var(--casa-sand)] bg-white py-6">
         <Container>
-          <div className="mx-auto flex max-w-[60rem] flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-8">
             <p className="shrink-0 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
               {t.contents}
             </p>
@@ -197,21 +203,19 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
         and the reader had to guess the order.
       */}
       <DocSection id="roadmap" title={data.stepsTitle} ground="white">
-        <ol className="border-l border-[color:var(--casa-sand)]">
+        <ol className="grid gap-x-14 gap-y-9 md:grid-cols-2">
           {data.steps.map((step, index) => (
-            <li key={step.title} className="relative pb-9 pl-7 last:pb-0 md:pl-9">
-              <span
-                className="absolute -left-[7px] top-2 h-3.5 w-3.5 rounded-full border-2 border-white bg-[var(--casa-blue)]"
-                aria-hidden
-              />
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+            <li key={step.title} className="flex gap-5 border-t border-[color:var(--casa-sand)] pt-5">
+              <span className="w-9 shrink-0 text-2xl font-bold leading-none tabular-nums text-[var(--casa-accent-text)]">
                 {String(index + 1).padStart(2, '0')}
-              </p>
-              <h3 className="mt-1.5 text-xl font-bold leading-snug text-[var(--casa-ink)]">{step.title}</h3>
-              <p className="mt-2 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
-              {step.action ? (
-                <p className="mt-2.5 max-w-measure text-base leading-relaxed text-[var(--casa-ink)]">{step.action}</p>
-              ) : null}
+              </span>
+              <div>
+                <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{step.title}</h3>
+                <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
+                {step.action ? (
+                  <p className="mt-2.5 text-base leading-relaxed text-[var(--casa-ink)]">{step.action}</p>
+                ) : null}
+              </div>
             </li>
           ))}
         </ol>
@@ -242,7 +246,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
       </DocSection>
 
       <DocSection id="questions" title={t.faq} ground="white">
-        <Accordion type="single" collapsible className="border-t border-[color:var(--casa-sand)]">
+        <Accordion type="single" collapsible className="max-w-[60rem] border-t border-[color:var(--casa-sand)]">
           {data.faq.map((item) => (
             <AccordionItem key={item.question} value={item.question} className="border-[color:var(--casa-sand)]">
               <AccordionTrigger className="py-5 text-left text-lg font-semibold text-[var(--casa-ink)] hover:no-underline">
@@ -257,9 +261,9 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
       </DocSection>
 
       <DocSection id="sources" title={t.sources} lead={t.disclaimer}>
-        <ul className="divide-y divide-[color:var(--casa-sand)] border-y border-[color:var(--casa-sand)]">
+        <ul className="grid gap-x-14 border-t border-[color:var(--casa-sand)] md:grid-cols-2">
           {data.officialLinks.map((link) => (
-            <li key={link.url} className="py-4">
+            <li key={link.url} className="border-b border-[color:var(--casa-sand)] py-4">
               <a
                 href={link.url}
                 target="_blank"

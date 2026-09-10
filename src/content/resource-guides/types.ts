@@ -53,6 +53,12 @@ export type ResourceGuideData = {
     /** One line, for the cross-links on the other two guides. */
     summary: string;
     lead: string;
+    /**
+     * The hero photograph. A registry path from
+     * src/config/content/photo-numbers.ts, so it renders as its numbered
+     * placeholder until a real photograph is delivered for that slot.
+     */
+    photo: { src: string; alt: string };
     /** The first entry is the hero's one action. */
     ctas: ResourceGuideCta[];
   };
