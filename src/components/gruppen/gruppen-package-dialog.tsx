@@ -1,5 +1,6 @@
 'use client';
 
+import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { EselBuilder } from '@/components/gruppen/esel-builder';
@@ -147,7 +148,7 @@ export function GruppenPackageDialog({
                 </span>
               </p>
               <Button asChild variant="prism" className="h-11 whitespace-normal px-6">
-                <a href="/contact?topic=group-booking">{t.request}</a>
+                <Link href="/contact?topic=group-booking">{t.request}</Link>
               </Button>
             </div>
           </div>

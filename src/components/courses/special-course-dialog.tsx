@@ -1,5 +1,6 @@
 'use client';
 
+import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { skillTokens } from '@/config/brand/tokens';
@@ -217,7 +218,7 @@ export function SpecialCourseDialog({
             </span>
           </p>
           <Button asChild variant="prism" className="h-11 whitespace-normal px-6">
-            <a href="/registration/course">{t.register}</a>
+            <Link href="/registration/course">{t.register}</Link>
           </Button>
         </div>
       </div>

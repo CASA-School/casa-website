@@ -1,8 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
+import { useRouter } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { Check, Globe, Menu, X } from 'lucide-react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -11,7 +12,7 @@ import { Logo } from '@/components/ui/logo';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { iconMap } from '@/config/icon-map';
 import { localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
-import { CONTENT_LOCALE_COOKIE } from '@/lib/content/locale';
+import { localizeHref } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
@@ -57,10 +58,10 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
     (locale: ContentLocale) => {
       setIsLocaleMenuOpen(false);
       setContentLocale(locale);
-      document.cookie = `${CONTENT_LOCALE_COOKIE}=${locale}; path=/; max-age=31536000; samesite=lax`;
-      router.refresh();
+      // The language is part of the URL: open this page in the other language.
+      router.push(localizeHref(`${pathname ?? '/'}${window.location.search}${window.location.hash}`, locale));
     },
-    [router]
+    [pathname, router]
   );
 
   return (

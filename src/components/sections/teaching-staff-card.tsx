@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 /**
  * What CASA says about its teachers, in the course-page rail.

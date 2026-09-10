@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode, RefObject } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { X } from 'lucide-react';
 
 import { Logo } from '@/components/ui/logo';

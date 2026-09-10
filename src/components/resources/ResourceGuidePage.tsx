@@ -1,5 +1,5 @@
 import { CasaImage as Image } from '@/components/ui/casa-image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Button } from '@/components/ui/button';

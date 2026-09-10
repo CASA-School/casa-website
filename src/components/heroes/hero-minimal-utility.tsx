@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
 import { Button } from '@/components/ui/button';

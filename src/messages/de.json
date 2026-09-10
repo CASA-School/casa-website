@@ -1,0 +1,12 @@
+{
+  "app": {
+    "title": "CASA Bremen",
+    "subtitle": "Internationale Sprachschule"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "submit": "Anmelden"
+  }
+}

@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { localizeHref } from '@/i18n/pathnames';
 import { AlertTriangle, ArrowRight, Loader2, ShieldAlert } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -214,7 +215,9 @@ export function PlacementRunner({
       } catch (cause) {
         // A stale private link should recover to a fresh test instead of
         // leaving the learner on an error-only screen.
-        window.history.replaceState(null, '', '/placement-test/test');
+        // The address bar must carry the public URL of this language, or a
+        // reload lands on the German root form and the result follows it.
+        window.history.replaceState(null, '', localizeHref('/placement-test/test', locale));
         setState({ kind: 'intake' });
         setError(cause instanceof Error ? cause.message : copy.errorGeneric);
       } finally {
@@ -223,7 +226,7 @@ export function PlacementRunner({
     };
 
     void restore();
-  }, [advance, copy.errorGeneric, goToResult, post, resumeToken]);
+  }, [advance, copy.errorGeneric, goToResult, locale, post, resumeToken]);
 
   const startAttempt = async (answers: IntakeAnswers) => {
     setBusy(true);
@@ -239,7 +242,7 @@ export function PlacementRunner({
       window.history.replaceState(
         null,
         '',
-        `/placement-test/test?attempt=${encodeURIComponent(attempt.token)}`
+        localizeHref(`/placement-test/test?attempt=${encodeURIComponent(attempt.token)}`, locale)
       );
 
       // A true beginner is already placed; there is no item to show.
