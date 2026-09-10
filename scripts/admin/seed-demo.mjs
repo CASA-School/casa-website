@@ -266,7 +266,7 @@ try {
       'Robin',
       'Vos',
       'r.vos@example.com',
-      'Netherlands (the)',
+      'Netherlands (Kingdom of the)',
       '1993-09-08',
       'B2.1',
       false,

@@ -27,7 +27,7 @@ export const MODULES = [
   'applications',
   'people',
   'bookings',
-  'planning',
+  'rooms',
   'catalogue',
   'activity',
   'team',
@@ -56,7 +56,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   applications: 'Applications',
   people: 'People',
   bookings: 'Bookings',
-  planning: 'Rooms',
+  rooms: 'Rooms',
   catalogue: 'Courses & exams',
   activity: 'Activity',
   team: 'Team',
@@ -71,7 +71,7 @@ export const MODULE_HREFS: Record<WorkspaceModule, string> = {
   applications: '/admin/applications',
   people: '/admin/people',
   bookings: '/admin/bookings',
-  planning: '/admin/planning',
+  rooms: '/admin/settings/rooms',
   catalogue: '/admin/catalogue',
   activity: '/admin/activity',
   team: '/admin/team',
@@ -93,8 +93,9 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  *
  * `applications` is deliberately absent: job applications are management's, not
  * the administration team's daily work, so an administrator grants that module
- * per person on the Team screen. `planning` (rooms) is absent for the same
- * reason — one or two people schedule, everyone else reads the cohort.
+ * per person on the Team screen. `rooms` is absent for the same reason — a room
+ * and its capacity are defined once and change rarely, so one or two people
+ * maintain them and everyone else just reads the cohort they are attached to.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',

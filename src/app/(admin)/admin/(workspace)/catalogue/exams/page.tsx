@@ -1,4 +1,3 @@
-import { CatalogueTabs } from '@/components/admin/catalogue-tabs';
 import {
   Badge,
   Card,
@@ -30,8 +29,6 @@ export default async function ExamCataloguePage() {
         title="Exams"
         description="telc sittings CASA has scheduled, and how many candidates have registered for each."
       />
-
-      <CatalogueTabs active="exams" />
 
       {sessions.length === 0 ? (
         <EmptyState

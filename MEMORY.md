@@ -1842,6 +1842,35 @@ Also: one primary button per screen (the registration header had two dark
 buttons), and the 36-character request uuid moved out of the field list into a
 card footer.
 
+## Navigation corrected on the owner's reading (2026-09-10, later)
+
+Three IA errors of mine, named by the owner and fixed.
+
+**Setup was in the main rail.** "Rooms, types of courses, types of exams, types
+of accommodation — these are operational things that get defined once and remain
+so for a very long time. A room with a certain capacity is not going to change
+daily." So Rooms moved from `/admin/planning` to `/admin/settings/rooms`, the
+module was renamed `planning` → `rooms` (no `staff_module_access` rows existed,
+so no migration), and Settings now carries one tab strip: Types & prices,
+Rooms.
+
+**Placement stood alone.** "A student wants to do B1, they need to do the level
+test for A1 and A2, so it becomes part of the person/student profile." The
+review list is now nested under Students.
+
+**"Courses & exams" then Rooms was misorganisation.** Courses is big on its own
+and exams is a project of its own, so they are two rail items and
+`CatalogueTabs` is deleted — the rail makes that choice, and making it twice
+was the clutter.
+
+Also fixed while looking: the page title said "People" while the rail said
+"Students"; table column heads were still 10.4px bold uppercase (the same
+defect as `DetailList`, which I had missed); the "Needs a look" card above the
+search box became one quiet line; and the demo seed carried an outdated ISO
+country name ("Netherlands (the)") that the `countries` table and the public
+form both spell "Netherlands (Kingdom of the)", so every Dutch demo row was
+flagged unrecognised. The form and the table do agree — it was only the seed.
+
 ## Verified Baseline
 
 The latest implementation pass (2026-09-10, migration 0012) cleared all six:

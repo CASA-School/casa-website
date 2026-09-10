@@ -34,8 +34,9 @@ import { cn } from '@/lib/utils';
  *    a card is a table header or a toolbar (`--ws-sunk`), which then reads
  *    unambiguously as a sub-level rather than as the page showing through.
  *
- * 2. A FIELD TITLE IS A LABEL, NOT AN EYEBROW. Field names in `DetailList` and
- *    `StatBand` are 12px sentence case in `--casa-muted`. They used to be
+ * 2. A FIELD TITLE IS A LABEL, NOT AN EYEBROW. Field names in `DetailList`,
+ *    `StatBand` and a `Table`'s column heads are 12px sentence case in
+ *    `--casa-muted`. They used to be
  *    10.4px bold uppercase with letter-spacing — a decorative treatment doing
  *    a functional job, which is slower to read and, next to a value and a
  *    badge, genuinely hard to parse. Uppercase eyebrows are reserved for
@@ -413,7 +414,7 @@ export function Table({
                   key={index}
                   scope="col"
                   className={cn(
-                    'px-4 py-2.5 text-[0.65rem] font-bold tracking-eyebrow uppercase whitespace-nowrap text-[var(--casa-text-subtle)]',
+                    'px-4 py-2.5 text-xs font-medium whitespace-nowrap text-[var(--casa-muted)]',
                     align === 'right' ? 'text-right' : 'text-left'
                   )}
                 >

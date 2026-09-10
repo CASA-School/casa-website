@@ -8,17 +8,18 @@ import { CreateRoomForm } from './room-forms';
 /**
  * Rooms, by location.
  *
- * The planning module's first screen. A course is planned into a classroom
- * with a capacity, so this is the table the catalogue's room picker draws on.
- * Offices and meeting rooms are listed too — they exist in the building and
- * staff look for them here — but only classrooms are bookable.
+ * Setup, reached from Settings rather than the main rail: a room and its
+ * capacity are defined once and then change rarely, so this is not a screen
+ * anyone opens on a Tuesday morning. What it feeds is the catalogue's room
+ * picker. Offices and meeting rooms are listed too — they exist in the
+ * building and staff look for them here — but only classrooms are bookable.
  */
 export default async function PlanningPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const user = await requireModule('planning');
+  const user = await requireModule('rooms');
   const [{ error }, rooms, locations] = await Promise.all([
     searchParams,
     listRooms(),
@@ -35,11 +36,13 @@ export default async function PlanningPage({
   return (
     <>
       <PageHeader
-        eyebrow="Planning"
+        eyebrow="Settings"
         title="Rooms"
+        backHref="/admin/settings"
+        backLabel="Settings"
         description="Where courses run, and how many learners each room holds."
         actions={
-          canAccess(user, 'planning', 'edit') ? (
+          canAccess(user, 'rooms', 'edit') ? (
             <FormDialog trigger="Add room" title="Add a room" triggerVariant="primary">
               <CreateRoomForm locations={locations} />
             </FormDialog>
@@ -88,7 +91,7 @@ export default async function PlanningPage({
                 >
                   {list.map((room) => (
                     <TableRow key={room.id} interactive>
-                      <Cell href={`/admin/planning/rooms/${room.id}`} className="font-semibold">
+                      <Cell href={`/admin/settings/rooms/${room.id}`} className="font-semibold">
                         <span className="flex items-center gap-2">
                           {room.name}
                           {room.nickname ? <Badge tone="quiet">{room.nickname}</Badge> : null}

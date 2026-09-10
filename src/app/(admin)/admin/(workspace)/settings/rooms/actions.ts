@@ -32,19 +32,19 @@ function text(formData: FormData, field: string, max: number): string | null {
 }
 
 export async function updateRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning', 'edit');
+  const actor = await requireModule('rooms', 'edit');
   const roomId = id(formData, 'roomId');
   const kind = String(formData.get('kind') ?? '');
   if (!KINDS.has(kind)) throw new Error('Invalid kind');
   const name = text(formData, 'name', 80);
   if (!name)
-    redirect(`/admin/planning/rooms/${roomId}?error=${encodeURIComponent('A room needs a name.')}`);
+    redirect(`/admin/settings/rooms/${roomId}?error=${encodeURIComponent('A room needs a name.')}`);
 
   const capacity = optionalInt(formData, 'capacity');
   const capacityMax = optionalInt(formData, 'capacityMax');
   if (capacity !== null && capacityMax !== null && capacityMax < capacity) {
     redirect(
-      `/admin/planning/rooms/${roomId}?error=${encodeURIComponent('The maximum cannot be below the planning capacity.')}`
+      `/admin/settings/rooms/${roomId}?error=${encodeURIComponent('The maximum cannot be below the planning capacity.')}`
     );
   }
 
@@ -62,16 +62,16 @@ export async function updateRoomAction(formData: FormData): Promise<void> {
     },
     actor
   );
-  revalidatePath('/admin/planning', 'layout');
+  revalidatePath('/admin/settings/rooms', 'layout');
   revalidatePath('/admin/catalogue');
-  redirect(`/admin/planning/rooms/${roomId}?ok=1`);
+  redirect(`/admin/settings/rooms/${roomId}?ok=1`);
 }
 
 export async function createRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning', 'edit');
+  const actor = await requireModule('rooms', 'edit');
   const locationId = id(formData, 'locationId');
   const name = text(formData, 'name', 80);
-  if (!name) redirect(`/admin/planning?error=${encodeURIComponent('A room needs a name.')}`);
+  if (!name) redirect(`/admin/settings/rooms?error=${encodeURIComponent('A room needs a name.')}`);
   const kind = String(formData.get('kind') ?? 'classroom');
   if (!KINDS.has(kind)) throw new Error('Invalid kind');
   const floorRaw = String(formData.get('floor') ?? '').trim();
@@ -93,13 +93,13 @@ export async function createRoomAction(formData: FormData): Promise<void> {
     },
     actor
   );
-  revalidatePath('/admin/planning', 'layout');
-  redirect(`/admin/planning/rooms/${roomId}`);
+  revalidatePath('/admin/settings/rooms', 'layout');
+  redirect(`/admin/settings/rooms/${roomId}`);
 }
 
 /** From the catalogue: put a cohort in a room. An empty value clears it. */
 export async function assignRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning', 'edit');
+  const actor = await requireModule('rooms', 'edit');
   const courseInstanceId = id(formData, 'courseInstanceId');
   const raw = String(formData.get('roomId') ?? '');
   const roomId = raw === '' ? null : raw;
@@ -107,7 +107,7 @@ export async function assignRoomAction(formData: FormData): Promise<void> {
 
   const result = await assignRoom(courseInstanceId, roomId, actor);
   revalidatePath('/admin/catalogue');
-  revalidatePath('/admin/planning', 'layout');
+  revalidatePath('/admin/settings/rooms', 'layout');
   redirect(
     result.ok ? '/admin/catalogue' : `/admin/catalogue?error=${encodeURIComponent(result.reason)}`
   );
@@ -115,16 +115,16 @@ export async function assignRoomAction(formData: FormData): Promise<void> {
 
 /** Only after the confirmation dialog: the hidden `confirmed` field must be set. */
 export async function deleteRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning', 'full');
+  const actor = await requireModule('rooms', 'full');
   const roomId = id(formData, 'roomId');
-  if (formData.get('confirmed') !== '1') redirect(`/admin/planning/rooms/${roomId}`);
+  if (formData.get('confirmed') !== '1') redirect(`/admin/settings/rooms/${roomId}`);
 
   const result = await deleteRoom(roomId, actor);
-  revalidatePath('/admin/planning', 'layout');
+  revalidatePath('/admin/settings/rooms', 'layout');
   revalidatePath('/admin/catalogue');
   if (!result.ok)
-    redirect(`/admin/planning/rooms/${roomId}?error=${encodeURIComponent(result.reason)}`);
-  redirect('/admin/planning');
+    redirect(`/admin/settings/rooms/${roomId}?error=${encodeURIComponent(result.reason)}`);
+  redirect('/admin/settings/rooms');
 }
 
 const DAYS = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
@@ -132,7 +132,7 @@ const SESSIONS = new Set(['morning', 'afternoon', 'evening']);
 
 /** Schedules a cohort from the catalogue. Planning `edit`. */
 export async function createCohortAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('planning', 'edit');
+  const actor = await requireModule('rooms', 'edit');
   const back = '/admin/catalogue';
   const courseTypeId = id(formData, 'courseTypeId');
   const startDate = String(formData.get('startDate') ?? '');
@@ -169,6 +169,6 @@ export async function createCohortAction(formData: FormData): Promise<void> {
     actor
   );
   revalidatePath('/admin/catalogue');
-  revalidatePath('/admin/planning', 'layout');
+  revalidatePath('/admin/settings/rooms', 'layout');
   redirect(`${back}?created=${cohortId}`);
 }

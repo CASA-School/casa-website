@@ -3,7 +3,7 @@ import type { StaffUser } from './auth';
 import { logActivity } from './activity';
 
 /**
- * Rooms and locations — the planning module's data layer.
+ * Rooms and locations — setup, not daily work.
  *
  * Ported from FileMaker's `Classroom` / `LocationReference` and cleaned on the
  * way in (db/seeds/0002_locations_and_rooms.sql). A room has a `kind`, so a

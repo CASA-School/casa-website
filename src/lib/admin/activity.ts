@@ -238,7 +238,7 @@ export function activityHref(entry: ActivityEntry): string | null {
   }
 
   if (entry.entity === 'room' && entry.entityId) {
-    return `/admin/planning/rooms/${entry.entityId}`;
+    return `/admin/settings/rooms/${entry.entityId}`;
   }
 
   if (entry.entity === 'booking' && entry.entityId) {

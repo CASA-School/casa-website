@@ -2,7 +2,7 @@ import { Button, Field, Input, Select } from '@/components/admin/ui';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import type { Room } from '@/lib/admin/rooms';
-import { createCohortAction } from '../planning/actions';
+import { createCohortAction } from '../settings/rooms/actions';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 
-import { assignRoomAction } from '../planning/actions';
-import { CatalogueTabs } from '@/components/admin/catalogue-tabs';
+import { assignRoomAction } from '../settings/rooms/actions';
 import {
   Badge,
   Button,
@@ -46,7 +45,7 @@ export default async function CataloguePage({
   searchParams: Promise<{ error?: string; created?: string }>;
 }) {
   const user = await requireModule('catalogue');
-  const plans = canAccess(user, 'planning', 'edit');
+  const plans = canAccess(user, 'rooms', 'edit');
   const [{ error }, types, instances, rooms, levels] = await Promise.all([
     searchParams,
     listCourseTypes(),
@@ -77,8 +76,6 @@ export default async function CataloguePage({
           ) : null
         }
       />
-
-      <CatalogueTabs active="courses" />
 
       {error ? (
         <p
@@ -146,7 +143,7 @@ export default async function CataloguePage({
                         </form>
                       ) : instance.room ? (
                         <Link
-                          href={`/admin/planning/rooms/${instance.room.id}`}
+                          href={`/admin/settings/rooms/${instance.room.id}`}
                           className="font-medium hover:underline"
                         >
                           {instance.room.nickname ?? instance.room.name}

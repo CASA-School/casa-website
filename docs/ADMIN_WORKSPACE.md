@@ -244,20 +244,29 @@ staff accounts (add, deactivate with confirmation).
 
 | Group | Holds |
 | --- | --- |
-| **Inbox** | Enquiries, Registrations (→ Courses, Exams), Placement — what the public site sent, waiting to be worked |
-| **School** | Students, Bookings, Courses & exams (→ Exams, Rooms) — the records the school keeps |
-| **Management** | Applications, Activity, Team, Settings (→ Setup) — not the administration team's daily work |
+| **Inbox** | Enquiries, Registrations (→ Courses, Exams) — what the public site sent, waiting to be worked |
+| **School** | Students (→ Placement tests), Bookings, Courses, Exams — the records the school keeps |
+| **Management** | Applications, Activity, Team, Settings (→ Types & prices, Rooms) |
 
-Eight top-level items. A group opens itself when a screen inside it is current
-and remembers a manual open/close in the browser. New screens join an existing
-group or become a nested item; the rail never grows a flat list.
+Nine top-level items, and the placements are the argument:
 
-Three deliberate placements. **Job applications sit in Management, not Inbox** —
-they are a few colleagues' work, so `staff` accounts get that module by
-exception rather than by default. **Rooms is nested under Courses & exams**,
-because scheduling is what a room is for. And the register is labelled
-**Students**, which is the word the team uses, even though the table holds
-everyone who has ever been in touch.
+- **Setup is not navigation.** Rooms, the type lists and the price list are
+  defined once and left for a season — a room's capacity does not change on a
+  Tuesday — so they live under **Settings**, at the bottom, sharing one tab
+  strip. Rooms moved from `/admin/planning` to `/admin/settings/rooms` and the
+  module is called `rooms`, because "planning" described a screen that turned
+  out to be setup.
+- **Placement belongs to the student.** A learner who wants B1 sits the A1 and
+  A2 test on the way there, so the result is part of their profile. The review
+  list is nested under **Students** rather than standing beside the queues.
+- **Courses and Exams are two items, not one screen with a tab strip.** A term
+  of courses and a telc sitting share a catalogue table and almost nothing
+  else. The old `CatalogueTabs` is gone: the rail makes that choice now, and
+  offering it twice was the clutter.
+- **Job applications sit in Management**, and `staff` accounts do not get that
+  module by default — an administrator grants it per person.
+- The register is labelled **Students**, the word the team uses, and the screen
+  says the same. A rail label and a page title that disagree is a bug.
 
 ### Today — the daily surface
 
@@ -322,14 +331,18 @@ Four rules, each of which came from a real defect on a real screen.
    → `--ws-sunk` 0.90 → `--ws-canvas` 0.84 in relative luminance, roughly
    1.08:1 a step, and `--ws-sunk` appears only *inside* a card (table headers,
    toolbars, a card footer) where it reads as a sub-level.
-2. **A field title is a label, not an eyebrow.** `DetailList` and `StatBand`
-   labels are 12px sentence case in `--casa-muted`. They were 10.4px bold
+2. **A field title is a label, not an eyebrow.** `DetailList`, `StatBand` and a
+   `Table`'s column heads are 12px sentence case in `--casa-muted`. They were 10.4px bold
    uppercase with letter-spacing — decoration doing a functional job, slower
    to read and, beside a value and a badge, genuinely hard to parse. Uppercase
    eyebrows survive only in `PageHeader`, one per screen.
 3. **One primary button per screen.** Two dark buttons in a header make the
    consequential action and the routine one look equally weighty.
-4. **No raw identifier as a field.** A 36-character uuid labelled "Reference"
+4. **Plumbing does not get a badge.** A counter in the rail, or a titled card
+   above a search box, advertises a problem the team may not have — there is
+   one open record flag in the database, a demonym. Flags show on the record
+   they belong to and as one quiet line on the register.
+5. **No raw identifier as a field.** A 36-character uuid labelled "Reference"
    with the same weight as the course name is confusing information. Keep it,
    but in a card footer.
 

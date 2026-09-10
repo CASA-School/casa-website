@@ -85,7 +85,7 @@ describe('workspace auth gate', () => {
     const files = [
       'src/app/(admin)/admin/(workspace)/actions.ts',
       'src/app/(admin)/admin/(workspace)/team/actions.ts',
-      'src/app/(admin)/admin/(workspace)/planning/actions.ts',
+      'src/app/(admin)/admin/(workspace)/settings/rooms/actions.ts',
       'src/app/(admin)/admin/(workspace)/people/actions.ts',
       'src/app/(admin)/admin/(workspace)/bookings/actions.ts',
       'src/app/(admin)/admin/(workspace)/day-board/actions.ts',
@@ -109,25 +109,29 @@ describe('workspace auth gate', () => {
   });
 
   it('gates every module directory with a layout', () => {
-    // The sidebar hides links; the layout is what refuses the request.
-    const modules = [
-      'enquiries',
-      'registrations',
-      'placement',
-      'applications',
-      'people',
-      'bookings',
-      'planning',
-      'catalogue',
-      'activity',
-      'team',
+    // The sidebar hides links; the layout is what refuses the request. Paths
+    // are listed explicitly because a module's directory is not always its
+    // name — `rooms` lives under Settings, since it is setup rather than
+    // daily work.
+    const gates: readonly [string, string][] = [
+      ['enquiries', 'enquiries'],
+      ['registrations', 'registrations'],
+      ['placement', 'placement'],
+      ['applications', 'applications'],
+      ['people', 'people'],
+      ['bookings', 'bookings'],
+      ['rooms', 'settings/rooms'],
+      ['catalogue', 'catalogue'],
+      ['activity', 'activity'],
+      ['team', 'team'],
     ];
-    for (const name of modules) {
+
+    for (const [module, dir] of gates) {
       const layout = readFileSync(
-        path.resolve(process.cwd(), `src/app/(admin)/admin/(workspace)/${name}/layout.tsx`),
+        path.resolve(process.cwd(), `src/app/(admin)/admin/(workspace)/${dir}/layout.tsx`),
         'utf8'
       );
-      expect(layout, name).toContain(`requireModule('${name}')`);
+      expect(layout, dir).toContain(`requireModule('${module}')`);
     }
   });
 

@@ -76,13 +76,11 @@ export function WorkspaceShell({
               Today
             </NavLink>
 
-            {canAccess(user, 'enquiries') ||
-            canAccess(user, 'registrations') ||
-            canAccess(user, 'placement') ? (
+            {canAccess(user, 'enquiries') || canAccess(user, 'registrations') ? (
               <NavGroup
                 id="inbox"
                 label="Inbox"
-                hrefs={['/admin/enquiries', '/admin/registrations', '/admin/placement']}
+                hrefs={['/admin/enquiries', '/admin/registrations']}
               >
                 {canAccess(user, 'enquiries') ? (
                   <NavLink href="/admin/enquiries" icon={Icon.enquiries} badge={badges.enquiries}>
@@ -110,33 +108,40 @@ export function WorkspaceShell({
                     Registrations
                   </NavLink>
                 ) : null}
-                {canAccess(user, 'placement') ? (
-                  <NavLink href="/admin/placement" icon={Icon.placement} badge={badges.placement}>
-                    Placement
-                  </NavLink>
-                ) : null}
               </NavGroup>
             ) : null}
 
             {canAccess(user, 'people') ||
             canAccess(user, 'bookings') ||
-            canAccess(user, 'planning') ||
             canAccess(user, 'catalogue') ? (
               <NavGroup
                 id="school"
                 label="School"
-                hrefs={['/admin/people', '/admin/bookings', '/admin/planning', '/admin/catalogue']}
+                hrefs={['/admin/people', '/admin/placement', '/admin/bookings', '/admin/catalogue']}
               >
                 {/*
-                  No badge and no nested item for flagged records. Identity
-                  problems arrive with FileMaker's 501 probable duplicates, not
-                  today, and a permanent counter in the rail advertises a
-                  problem the team does not have. The flags still show on the
-                  record they belong to, and the work list is one click from
-                  the Students screen when there is something in it.
+                  Placement is nested under Students, not a queue of its own. A
+                  learner who wants B1 sits the A1 and A2 test on the way there,
+                  so the result belongs to their profile; the list is where a
+                  teacher goes to confirm one, which is a step in that story
+                  rather than a separate area of the school.
                 */}
                 {canAccess(user, 'people') ? (
-                  <NavLink href="/admin/people" icon={Icon.people}>
+                  <NavLink
+                    href="/admin/people"
+                    icon={Icon.people}
+                    items={
+                      canAccess(user, 'placement')
+                        ? [
+                            {
+                              href: '/admin/placement',
+                              label: 'Placement tests',
+                              badge: badges.placement,
+                            },
+                          ]
+                        : []
+                    }
+                  >
                     Students
                   </NavLink>
                 ) : null}
@@ -145,19 +150,18 @@ export function WorkspaceShell({
                     Bookings
                   </NavLink>
                 ) : null}
+                {/* Courses and exams are two areas of work, not one screen with
+                    a tab strip: a term of courses and a telc sitting share a
+                    catalogue table and almost nothing else. */}
                 {canAccess(user, 'catalogue') ? (
-                  <NavLink
-                    href="/admin/catalogue"
-                    icon={Icon.catalogue}
-                    items={[
-                      { href: '/admin/catalogue/exams', label: 'Exams' },
-                      ...(canAccess(user, 'planning')
-                        ? [{ href: '/admin/planning', label: 'Rooms' }]
-                        : []),
-                    ]}
-                  >
-                    Courses &amp; exams
-                  </NavLink>
+                  <>
+                    <NavLink href="/admin/catalogue" icon={Icon.catalogue}>
+                      Courses
+                    </NavLink>
+                    <NavLink href="/admin/catalogue/exams" icon={Icon.placement}>
+                      Exams
+                    </NavLink>
+                  </>
                 ) : null}
               </NavGroup>
             ) : null}
@@ -186,10 +190,17 @@ export function WorkspaceShell({
                   Team
                 </NavLink>
               ) : null}
+              {/* Rooms, the type lists and the price list all live here: they
+                  are defined once and then left alone for a season. */}
               <NavLink
                 href="/admin/settings"
                 icon={Icon.settings}
-                items={[{ href: '/admin/settings/setup', label: 'Setup' }]}
+                items={[
+                  { href: '/admin/settings/setup', label: 'Types & prices' },
+                  ...(canAccess(user, 'rooms')
+                    ? [{ href: '/admin/settings/rooms', label: 'Rooms' }]
+                    : []),
+                ]}
               >
                 Settings
               </NavLink>

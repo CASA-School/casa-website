@@ -58,7 +58,7 @@ export default async function PeoplePage({
     <>
       <PageHeader
         eyebrow="School"
-        title="People"
+        title="Students"
         description="Everyone who has enquired, registered or sat a placement."
         actions={
           canEdit ? (
@@ -79,22 +79,18 @@ export default async function PeoplePage({
       ) : null}
 
       {flagEntries.length > 0 ? (
-        <Card title="Needs a look" className="mb-5">
-          <ul className="flex flex-wrap gap-2">
-            {flagEntries.map(([code, n]) => (
-              <li key={code}>
-                <Link
-                  href={`/admin/people/flags?code=${code}`}
-                  className="inline-flex items-center gap-2 rounded-lg border border-ws-line-soft px-3 py-1.5 text-sm transition-colors hover:border-[var(--casa-blue)]/45 hover:bg-ws-sunk"
-                >
-                  <span className="text-[var(--casa-warning-text)]">{Icon.flag}</span>
-                  {FLAG_LABELS[code]}
-                  <Badge tone="warning">{n}</Badge>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Card>
+        <p className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--casa-text-subtle)]">
+          {flagEntries.map(([code, n]) => (
+            <Link
+              key={code}
+              href={`/admin/people/flags?code=${code}`}
+              className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[var(--casa-ink)]"
+            >
+              <span className="text-[var(--casa-warning-text)]">{Icon.flag}</span>
+              {n} {FLAG_LABELS[code].toLowerCase()}
+            </Link>
+          ))}
+        </p>
       ) : null}
 
       <form method="get" action="/admin/people" className="mb-4 flex max-w-md gap-2">

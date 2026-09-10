@@ -170,8 +170,13 @@ structural refactor.
 **Workspace design standards.** A section is one white block and the canvas
 between sections separates them — a card header is white with a rule, never a
 grey band the same value as the page. A field title is a label (12px sentence
-case), not an uppercase eyebrow. One primary button per screen. Never show a
-raw uuid as a field. `docs/ADMIN_WORKSPACE.md` §Design standards has the
+case), not an uppercase eyebrow — in `DetailList`, `StatBand` and table column
+heads. One primary button per screen. Never show a raw uuid as a field, and
+never give plumbing a badge in the rail.
+
+**Setup is not navigation.** Rooms, the type lists and the price list are
+defined once and left for a season; they live under Settings, not the main
+rail. A nav label and the page title it opens must say the same word. `docs/ADMIN_WORKSPACE.md` §Design standards has the
 measurements and the defect each rule came from.
 
 **Workspace screens: labels, not explanations.** The staff workspace must stay

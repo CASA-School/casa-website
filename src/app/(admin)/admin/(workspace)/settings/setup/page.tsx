@@ -58,8 +58,8 @@ export default async function SetupPage({
         backHref="/admin/settings"
         backLabel="Settings"
         eyebrow="Settings"
-        title="Setup"
-        description="Prices and the lists the workspace offers everywhere else."
+        title="Types & prices"
+        description="Set once, and left alone for a season."
         actions={
           active === 'prices' && canEdit && targets ? (
             <FormDialog trigger="Add price" title="Add a price" triggerVariant="primary">
@@ -71,12 +71,13 @@ export default async function SetupPage({
 
       <div className="mb-5 inline-flex gap-1 rounded-xl border border-ws-line bg-white p-1">
         {[
-          { key: 'prices', label: 'Prices' },
-          { key: 'types', label: 'Lists' },
+          { key: 'prices', label: 'Prices', href: '/admin/settings/setup?tab=prices' },
+          { key: 'types', label: 'Lists', href: '/admin/settings/setup?tab=types' },
+          { key: 'rooms', label: 'Rooms', href: '/admin/settings/rooms' },
         ].map((t) => (
           <Link
             key={t.key}
-            href={`/admin/settings/setup?tab=${t.key}`}
+            href={t.href}
             aria-current={t.key === active ? 'page' : undefined}
             className={cn(
               'rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-colors',

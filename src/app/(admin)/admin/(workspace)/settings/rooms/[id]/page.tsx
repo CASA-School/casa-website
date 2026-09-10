@@ -5,8 +5,8 @@ import { Badge, Card, DateText, DetailList, PageHeader } from '@/components/admi
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { floorLabel, getRoom, roomCohorts, ROOM_KIND_LABELS } from '@/lib/admin/rooms';
-import { deleteRoomAction } from '../../actions';
-import { EditRoomForm } from '../../room-forms';
+import { deleteRoomAction } from '../actions';
+import { EditRoomForm } from '../room-forms';
 
 /** One room: what it is, what runs in it, and the form that changes it. */
 export default async function RoomPage({
@@ -16,11 +16,7 @@ export default async function RoomPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const [{ id }, query, user] = await Promise.all([
-    params,
-    searchParams,
-    requireModule('planning'),
-  ]);
+  const [{ id }, query, user] = await Promise.all([params, searchParams, requireModule('rooms')]);
   const room = await getRoom(id);
   if (!room) notFound();
   const cohorts = await roomCohorts(room.id);
@@ -28,19 +24,19 @@ export default async function RoomPage({
   return (
     <>
       <PageHeader
-        backHref="/admin/planning"
+        backHref="/admin/settings/rooms"
         backLabel="All rooms"
         eyebrow={room.locationName}
         title={room.nickname ? `${room.name} · ${room.nickname}` : room.name}
         description={`${ROOM_KIND_LABELS[room.kind]} · ${floorLabel(room.floor)}`}
         actions={
           <div className="flex items-center gap-2">
-            {canAccess(user, 'planning', 'edit') ? (
+            {canAccess(user, 'rooms', 'edit') ? (
               <FormDialog trigger="Edit" title={room.name}>
                 <EditRoomForm room={room} />
               </FormDialog>
             ) : null}
-            {canAccess(user, 'planning', 'full') ? (
+            {canAccess(user, 'rooms', 'full') ? (
               <form action={deleteRoomAction}>
                 <input type="hidden" name="roomId" value={room.id} />
                 <ConfirmSubmit
