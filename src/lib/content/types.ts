@@ -162,7 +162,6 @@ export type CourseNarrative = {
   promise: string;
   outcomes: string[];
   teachingStyle: string[];
-  studentStory: HeroStorySnippet;
 };
 
 export type ExamNarrative = {

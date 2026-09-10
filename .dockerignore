@@ -36,3 +36,6 @@ docs
 .vscode
 .idea
 .claude
+
+# Unapproved photo candidates awaiting a decision. Never part of the image.
+public/media/casa/editorial-2026
