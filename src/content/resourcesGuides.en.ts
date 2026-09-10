@@ -36,9 +36,10 @@ export type ResourceGuideData = {
   hero: {
     title: string;
     lead: string;
+    /** One line, for the cross-links on the other two guides. */
+    summary: string;
     /** The first entry is the hero's one action. */
     ctas: ResourceGuideCta[];
-    heroImage: { src: string; alt: string };
   };
   quickFacts: string[];
   stepsTitle: string;
@@ -56,12 +57,10 @@ export const studyInGermanyGuide: ResourceGuideData = {
     'A practical guide to studying and settling in Germany-applications, language, housing, daily life, finances, visa basics, and how CASA helps you prepare.',
   hero: {
     title: 'Study & Life in Germany',
+    summary:
+      'Applications, language, housing and the visa basics, in the order they happen.',
     lead: "A simple roadmap from 'I want to study' to 'I can settle in' - with the application, language, housing, and daily-life steps international students usually miss.",
     ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
-    heroImage: {
-      src: '/media/casa/study-materials-map.jpg',
-      alt: 'CASA study materials placed on a map for course planning',
-    },
   },
   quickFacts: [
     'Public universities usually charge a semester contribution, not full tuition.',
@@ -212,15 +211,13 @@ export const livingInGermanyGuide: ResourceGuideData = {
     'A practical arrival guide for international students: budget, health insurance, housing, registration, work rules, and everyday life tips.',
   hero: {
     title: 'Living in Germany',
+    summary:
+      'Registration, banking, insurance and the first thirty days after you land.',
     lead: 'A practical guide for your first weeks, so you spend less time confused and more time building your new life.',
     ctas: [
       { label: 'Explore Accommodation Options', href: '/accommodation' },
       { label: 'Explore CASA Courses', href: '/courses' },
     ],
-    heroImage: {
-      src: '/media/casa/bremen-schnoor-houses.jpg',
-      alt: 'historic houses in the Schnoor quarter of Bremen',
-    },
   },
   quickFacts: [
     'Budget realistically: rent is the biggest variable.',
@@ -388,15 +385,13 @@ export const whyGermanyGuide: ResourceGuideData = {
     'Why students choose Germany: value, quality, career options, and a great base for Europe-plus why learning German early matters.',
   hero: {
     title: 'Why Germany',
+    summary:
+      'What Germany actually offers a student, and where German makes the difference.',
     lead: 'Germany is a practical choice: strong education, a structured society, and real opportunities, especially when you speak the language.',
     ctas: [
       { label: 'Explore CASA Courses', href: '/courses' },
       { label: 'Talk to CASA', href: '/contact' },
     ],
-    heroImage: {
-      src: '/media/casa/bremen-schnoor-houses.jpg',
-      alt: 'historic Bremen street architecture in the Schnoor quarter',
-    },
   },
   quickFacts: [
     'Planable costs (semester contribution + living expenses).',

@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation';
 
-import { HeroAPhotoLed } from '@/components/heroes';
+import { HeroEMinimal } from '@/components/heroes';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
@@ -13,24 +13,44 @@ import {
 import type { ContentLocale } from '@/lib/content/types';
 
 /*
- * One layout for the three resource guides, rebuilt 2026-09-10.
+ * THE THREE RESOURCE GUIDES — a document, not a marketing page.
  *
- * What it replaced: its own hero (a framed photo card with a caption, a
- * rotated-square ornament, a tricolour rule, two blur blobs, two buttons), then
- * seven card-shaped sections that said the same things in different sizes — six
- * quick facts, eight steps, six "deep dive" cards each ending in an "Action:"
- * line, two decorative photo cards, an eight-item checklist that restated the
- * eight steps, a FAQ and the official links. Per-guide colour presets made the
- * three guides look like three sites.
+ * Two rebuilds happened on 2026-09-10 and the first one was wrong, so both are
+ * recorded here.
  *
- * What it is now: the site's standard hero with one action, then five plain
- * sections — facts, roadmap, topics, questions, sources — as hairline lists on
- * white and canvas, the way /courses and /ueber-uns/gemeinnuetzigkeit are built.
- * Cross-links replace the topics that duplicated another guide.
+ * It began as its own hero (a framed photo card with a caption, a rotated-square
+ * ornament, a tricolour rule, two blur blobs, two buttons) followed by seven
+ * card-shaped sections that restated each other, in three per-guide colour
+ * schemes.
  *
- * The body copy is English in both languages until the guides are translated;
- * the chrome (breadcrumbs, eyebrows, headings, the primary action) follows the
- * visitor's language, and the German page says so in one line.
+ * The first rebuild put it on the marketing hero and replaced the cards with
+ * hairline lists. That removed the ornament and gave nothing back: five of the
+ * six sections were marked only by a 12px uppercase eyebrow, so below the
+ * headline the page was one uniform grey column at 14px with no hierarchy, no
+ * density and no way to navigate 4,500px of it. The eyebrow-as-heading is the
+ * pattern the workspace design standards forbid for exactly this reason.
+ *
+ * What it is now. This page is a REFERENCE DOCUMENT: someone reads it once,
+ * mid-decision, looking for one answer. So it is built like one and not like the
+ * course pages:
+ *
+ *   - The compact centred hero the FAQ and the legal pages use. No hero
+ *     photograph: on a reference page a decorative photo earns nothing, and it
+ *     was the largest thing on the screen.
+ *   - A contents list directly under it. Length is an asset in a guide as long
+ *     as the reader can skip; it was a liability while they could not.
+ *   - Every section is a real <h2> at the site's section scale with its own
+ *     anchor. `DocSection` renders all of them, so the hierarchy cannot drift
+ *     back to labels.
+ *   - The body is clamped to a document column instead of running to the 85rem
+ *     grid, which is what made the copy feel stranded rather than set.
+ *   - Alternating white and canvas grounds separate the sections, so no section
+ *     needs a card, a tint or a rule of its own.
+ *
+ * LANGUAGE. The structure is translated — breadcrumbs, contents, section
+ * headings, the action. The guide's own prose is English in both languages until
+ * it is translated, and the German page says so in the hero rather than in a
+ * footnote nobody reads.
  */
 
 const chrome = {
@@ -38,40 +58,80 @@ const chrome = {
     home: 'Home',
     resources: 'Resources',
     eyebrow: 'Resource guide',
-    glance: 'At a glance',
-    roadmap: 'Roadmap',
+    contents: 'On this page',
+    glance: 'What to know first',
     topics: 'In more depth',
     faq: 'Questions people ask',
     sources: 'Official sources',
+    related: 'The other guides',
     disclaimer: 'Requirements change. Check the official source for your country before you act on any of this.',
-    related: 'More guides',
-    languageNote: null,
+    meta: [] as string[],
   },
   de: {
     home: 'Start',
     resources: 'Ressourcen',
     eyebrow: 'Ratgeber',
-    glance: 'Auf einen Blick',
-    roadmap: 'Schritt für Schritt',
+    contents: 'Inhalt',
+    glance: 'Das Wichtigste zuerst',
     topics: 'Vertiefung',
     faq: 'Häufige Fragen',
     sources: 'Offizielle Quellen',
+    related: 'Die anderen Ratgeber',
     disclaimer: 'Anforderungen ändern sich. Prüfen Sie die offizielle Quelle für Ihr Land, bevor Sie handeln.',
-    related: 'Weitere Ratgeber',
-    languageNote: 'Dieser Ratgeber liegt derzeit auf Englisch vor.',
+    meta: ['Dieser Ratgeber ist auf Englisch'],
   },
-} satisfies Record<ContentLocale, Record<string, string | null>>;
+} satisfies Record<ContentLocale, Record<string, string | string[]>>;
 
-/** The one hero action per language; the guides' own labels are English. */
-const primaryActionLabel: Record<ContentLocale, Record<string, string>> = {
+/** The hero's one action, in the reader's language. */
+const actionLabel: Record<ContentLocale, Record<string, string>> = {
   en: { '/courses': 'Explore CASA courses', '/placement-test': 'Take the placement test' },
   de: { '/courses': 'Kurse ansehen', '/placement-test': 'Einstufungstest starten' },
 };
 
 const allGuides = [studyInGermanyGuide, livingInGermanyGuide, whyGermanyGuide];
 
-function Eyebrow({ children }: { children: string }) {
-  return <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{children}</p>;
+/**
+ * One section of the document: an anchor, an <h2> at the section scale, an
+ * optional lead, and a body clamped to the document column.
+ */
+function DocSection({
+  id,
+  title,
+  lead,
+  ground = 'canvas',
+  children,
+}: {
+  id: string;
+  title: string;
+  lead?: string;
+  ground?: 'canvas' | 'white';
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className={`scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 py-14 md:py-18 ${
+        ground === 'white' ? 'bg-white' : ''
+      }`}
+    >
+      <Container>
+        {/*
+          CENTRED, not left-aligned in the 85rem grid. Clamping the column to a
+          document measure and leaving it on the grid's left edge put 400px of
+          dead space down the right of every section, under a hero that is
+          itself centred. A centred article and a centred hero are one page; a
+          left column under a centred hero is two.
+        */}
+        <div className="mx-auto max-w-[60rem]">
+          <h2 className="text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-[2.125rem]">{title}</h2>
+          {lead ? (
+            <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{lead}</p>
+          ) : null}
+          <div className="mt-9">{children}</div>
+        </div>
+      </Container>
+    </section>
+  );
 }
 
 export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; locale: ContentLocale }) {
@@ -79,156 +139,177 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
   const primary = data.hero.ctas[0];
   const related = allGuides.filter((guide) => guide.slug !== data.slug);
 
+  const contents = [
+    { id: 'overview', label: t.glance },
+    { id: 'roadmap', label: data.stepsTitle },
+    { id: 'detail', label: t.topics },
+    { id: 'questions', label: t.faq },
+    { id: 'sources', label: t.sources },
+  ];
+
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      <HeroAPhotoLed
+      <HeroEMinimal
         eyebrow={t.eyebrow}
         title={data.hero.title}
         description={data.hero.lead}
-        photo={{ src: data.hero.heroImage.src, alt: data.hero.heroImage.alt }}
-        ctas={
-          primary
-            ? [{ label: primaryActionLabel[locale][primary.href] ?? primary.label, href: primary.href, kind: 'primary' }]
-            : []
-        }
         breadcrumbs={[
           { label: t.home, href: '/' },
           { label: t.resources, href: '/resources/study-in-germany' },
           { label: data.hero.title },
         ]}
+        cta={
+          primary
+            ? { label: actionLabel[locale][primary.href] ?? primary.label, href: primary.href, kind: 'primary' }
+            : undefined
+        }
+        meta={t.meta}
       />
 
-      {/* Facts: the four things a reader should know before the roadmap. */}
-      <section className="border-b border-[color:var(--casa-sand)]/40 bg-white py-14 md:py-16">
+      {/*
+        The contents. A guide is read by people looking for one answer, so the
+        first thing below the headline is the list of answers it holds.
+      */}
+      <nav aria-label={t.contents} className="border-b border-[color:var(--casa-sand)] bg-white py-6">
         <Container>
-          {t.languageNote ? <p className="mb-6 text-sm text-[var(--casa-muted)]">{t.languageNote}</p> : null}
-          <Eyebrow>{t.glance}</Eyebrow>
-          <ul className="mt-6 grid gap-x-10 gap-y-5 md:grid-cols-2">
-            {data.quickFacts.map((fact) => (
-              <li
-                key={fact}
-                className="border-t border-[color:var(--casa-sand)] pt-4 text-base leading-relaxed text-[var(--casa-ink)]"
-              >
-                {fact}
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </section>
-
-      {/* Roadmap: the guide's spine. Number, title, what to do. */}
-      <section className="border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
-        <Container>
-          <div className="max-w-[46rem]">
-            <Eyebrow>{t.roadmap}</Eyebrow>
-            <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">{data.stepsTitle}</h2>
-          </div>
-          <ol className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2">
-            {data.steps.map((step, index) => (
-              <li key={step.title} className="border-t border-[color:var(--casa-sand)] pt-5">
-                <div className="flex items-start gap-4">
-                  <span className="w-8 shrink-0 text-2xl font-bold leading-none tabular-nums text-[var(--casa-accent-text)]">
+          <div className="mx-auto flex max-w-[60rem] flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-8">
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+              {t.contents}
+            </p>
+            <ol className="flex flex-wrap gap-x-7 gap-y-2">
+              {contents.map((item, index) => (
+                <li key={item.id} className="flex items-baseline gap-2">
+                  <span className="text-xs font-semibold tabular-nums text-[var(--casa-muted)]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <div>
-                    <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
-                    {step.action ? <p className="mt-2 text-sm leading-relaxed text-[var(--casa-ink)]">{step.action}</p> : null}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </Container>
-      </section>
-
-      {/* Topics: what the roadmap cannot say in one line each. */}
-      <section className="border-b border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-20">
-        <Container>
-          <Eyebrow>{t.topics}</Eyebrow>
-          <div className="mt-6 grid gap-x-10 gap-y-10 md:grid-cols-2">
-            {data.sections.map((section) => (
-              <article key={section.title} className="border-t border-[color:var(--casa-sand)] pt-6">
-                <h2 className="text-xl font-bold leading-snug text-[var(--casa-ink)]">{section.title}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{section.intro}</p>
-                <ul className="mt-4 space-y-2">
-                  {section.bullets.map((bullet) => (
-                    <li key={bullet} className="flex gap-3 text-sm leading-relaxed text-[var(--casa-ink)]">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-                {section.link ? (
-                  <TextCta href={section.link.href} className="mt-5">
-                    {section.link.label}
-                  </TextCta>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* Questions. */}
-      <section className="border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
-        <Container>
-          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
-            <Eyebrow>{t.faq}</Eyebrow>
-            <Accordion type="single" collapsible className="border-t border-[color:var(--casa-sand)]">
-              {data.faq.map((item) => (
-                <AccordionItem key={item.question} value={item.question} className="border-[color:var(--casa-sand)]">
-                  <AccordionTrigger className="py-4 text-left text-base font-semibold text-[var(--casa-ink)] hover:no-underline">
-                    {item.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-sm leading-relaxed text-[var(--casa-muted)]">{item.answer}</AccordionContent>
-                </AccordionItem>
+                  <a
+                    href={`#${item.id}`}
+                    className="text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
+                  >
+                    {item.label}
+                  </a>
+                </li>
               ))}
-            </Accordion>
+            </ol>
           </div>
         </Container>
-      </section>
+      </nav>
 
-      {/* Sources, and the other two guides. */}
-      <section className="bg-white py-16 md:py-20">
-        <Container>
-          <div className="grid gap-12 lg:grid-cols-2">
-            <div>
-              <Eyebrow>{t.sources}</Eyebrow>
-              <ul className="mt-6 divide-y divide-[color:var(--casa-sand)] border-t border-[color:var(--casa-sand)]">
-                {data.officialLinks.map((link) => (
-                  <li key={link.url} className="py-4">
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-base font-semibold text-[var(--casa-accent-text)] hover:underline"
-                    >
-                      {link.label}
-                    </a>
-                    <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)]">{link.description}</p>
+      {/*
+        The four facts as one panel rather than four hairlines spread across the
+        full grid — a summary is one object, and at 85rem each line was a
+        fragment with ten rem of air beside it.
+      */}
+      <DocSection id="overview" title={t.glance}>
+        <ul className="grid gap-x-10 gap-y-4 rounded-xl bg-[var(--casa-warm-soft)]/45 p-6 md:grid-cols-2 md:p-8">
+          {data.quickFacts.map((fact) => (
+            <li key={fact} className="flex gap-3 text-base leading-relaxed text-[var(--casa-ink)]">
+              <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
+              <span>{fact}</span>
+            </li>
+          ))}
+        </ul>
+      </DocSection>
+
+      {/*
+        The roadmap is the guide's spine, so it is a single sequence with a rule
+        running down it — not a two-column grid, where step 2 sat beside step 1
+        and the reader had to guess the order.
+      */}
+      <DocSection id="roadmap" title={data.stepsTitle} ground="white">
+        <ol className="border-l border-[color:var(--casa-sand)]">
+          {data.steps.map((step, index) => (
+            <li key={step.title} className="relative pb-9 pl-7 last:pb-0 md:pl-9">
+              <span
+                className="absolute -left-[7px] top-2 h-3.5 w-3.5 rounded-full border-2 border-white bg-[var(--casa-blue)]"
+                aria-hidden
+              />
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+                {String(index + 1).padStart(2, '0')}
+              </p>
+              <h3 className="mt-1.5 text-xl font-bold leading-snug text-[var(--casa-ink)]">{step.title}</h3>
+              <p className="mt-2 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
+              {step.action ? (
+                <p className="mt-2.5 max-w-measure text-base leading-relaxed text-[var(--casa-ink)]">{step.action}</p>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+      </DocSection>
+
+      <DocSection id="detail" title={t.topics}>
+        <div className="grid gap-x-12 gap-y-11 lg:grid-cols-2">
+          {data.sections.map((section) => (
+            <article key={section.title}>
+              <h3 className="text-xl font-bold leading-snug text-[var(--casa-ink)]">{section.title}</h3>
+              <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{section.intro}</p>
+              <ul className="mt-4 space-y-2.5">
+                {section.bullets.map((bullet) => (
+                  <li key={bullet} className="flex gap-3 text-base leading-relaxed text-[var(--casa-ink)]">
+                    <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
+                    <span>{bullet}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-6 text-sm leading-relaxed text-[var(--casa-muted)]">{t.disclaimer}</p>
-            </div>
+              {section.link ? (
+                <TextCta href={section.link.href} className="mt-5">
+                  {section.link.label}
+                </TextCta>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </DocSection>
 
-            <div>
-              <Eyebrow>{t.related}</Eyebrow>
-              <ul className="mt-6 divide-y divide-[color:var(--casa-sand)] border-t border-[color:var(--casa-sand)]">
-                {related.map((guide) => (
-                  <li key={guide.slug} className="py-4">
-                    <Link href={guide.path} className="text-base font-semibold text-[var(--casa-ink)] hover:text-[var(--casa-accent-text)]">
-                      {guide.hero.title}
-                    </Link>
-                    <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)]">{guide.hero.lead}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Container>
-      </section>
+      <DocSection id="questions" title={t.faq} ground="white">
+        <Accordion type="single" collapsible className="border-t border-[color:var(--casa-sand)]">
+          {data.faq.map((item) => (
+            <AccordionItem key={item.question} value={item.question} className="border-[color:var(--casa-sand)]">
+              <AccordionTrigger className="py-5 text-left text-lg font-semibold text-[var(--casa-ink)] hover:no-underline">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="max-w-measure pb-5 text-base leading-relaxed text-[var(--casa-muted)]">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </DocSection>
+
+      <DocSection id="sources" title={t.sources} lead={t.disclaimer}>
+        <ul className="divide-y divide-[color:var(--casa-sand)] border-y border-[color:var(--casa-sand)]">
+          {data.officialLinks.map((link) => (
+            <li key={link.url} className="py-4">
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-base font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
+              >
+                {link.label}
+              </a>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)]">{link.description}</p>
+            </li>
+          ))}
+        </ul>
+
+      </DocSection>
+
+      <DocSection id="related" title={t.related} ground="white">
+        <ul className="grid gap-x-12 gap-y-6 sm:grid-cols-2">
+          {related.map((guide) => (
+            <li key={guide.slug} className="border-t border-[color:var(--casa-sand)] pt-5">
+              <Link
+                href={guide.path}
+                className="text-lg font-bold leading-snug text-[var(--casa-ink)] underline-offset-4 hover:text-[var(--casa-accent-text)] hover:underline"
+              >
+                {guide.hero.title}
+              </Link>
+              <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{guide.hero.summary}</p>
+            </li>
+          ))}
+        </ul>
+      </DocSection>
     </main>
   );
 }

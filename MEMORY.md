@@ -2078,22 +2078,38 @@ numbered placeholders instead, and the registry keeps the old paths as the deliv
 targets for the new pictures. The product owner expected them gone. The ~100 new shots
 in the untracked `editorial-2026/` pool are not wired to any slot yet.
 
-## 25. The resource guides rebuilt on the standard hero (2026-09-10)
+## 25. The resource guides became a document (2026-09-10, two attempts)
 
-`ResourceGuidePage` had its own hero (framed photo card with caption, rotated-square
-ornament, tricolour rule, two blur blobs, two buttons) and seven card sections that
-restated each other: six facts, eight steps, six "deep dive" cards each ending in an
-"Action:" line, two decorative photo cards, an eight-item checklist that repeated the
-eight steps, FAQ, official links, plus per-guide colour presets. It is now the standard
-hero with one action and five plain hairline sections: facts (four, the ones the steps do
-not repeat), roadmap (the eight steps, "Action:" labels gone), four topics (the two that
-duplicated the Living and Why guides became cross-links; the CASA tie-in folded into the
-language topic with a text link to the placement test), questions, official sources (the
-non-official summary site dropped) and the other two guides. Removed from the content
-types for all three guides: `checklistItems`, `finalCTA` (never rendered), `imageSlots`,
-hero captions and the topic "Action:" lines. Glued hyphens in the prose fixed.
+`/resources/*` began the day with its own hero — a framed photo card with a caption, a
+rotated-square ornament, a tricolour rule, two blur blobs, two buttons — and seven
+card-shaped sections that restated each other, in three per-guide colour schemes.
 
-The body copy is still English under the German URLs; the chrome follows the language
-and the German page says so in one line. Translating the Study & Life guide is the next
-copy step, after the trimmed English is approved.
+**The first rebuild was wrong and the product owner said so.** It moved the page to the
+marketing hero and replaced the cards with hairline lists: the ornament went and nothing
+came back. Five of six sections were marked only by a 12px uppercase eyebrow, so below
+the headline the page was one uniform grey column of 14px text — no hierarchy, no
+density, no way to navigate 4,500px. Eyebrow-as-heading is the pattern
+`docs/ADMIN_WORKSPACE.md` §Design standards forbids in the workspace, for this reason.
+The placeholder photo block was also the largest object on a page that needs no
+photograph.
 
+**What it is now, and the rule behind it: a reference guide is a DOCUMENT, so it is built
+like one and not like a course page.** The compact centred hero the FAQ and legal pages
+use, no hero photograph. A contents list under it, because length is only a liability
+while the reader cannot skip. Every section is a real `<h2>` at the section scale with an
+anchor, rendered by one local `DocSection` so the hierarchy cannot drift back to labels.
+The body is clamped to a 60rem column and **centred**, matching the centred hero — the
+first attempt at this clamped it but left it on the grid's left edge, which put 400px of
+dead space down every section. Alternating white and canvas grounds separate the
+sections, so no section needs a card, a tint or a rule of its own.
+
+Content removed for all three guides: `checklistItems` (restated the steps), `finalCTA`
+(never rendered), `imageSlots`, `heroImage`, the hero captions and the "Action:" label on
+every topic. Two of the six topics duplicated the Living and Why guides and became
+cross-links; a one-line `summary` per guide feeds those links. Glued hyphens in the prose
+are fixed.
+
+Structure is translated, prose is not: the German page shows German breadcrumbs,
+contents, section headings and action, says "Dieser Ratgeber ist auf Englisch" in the
+hero, and keeps each guide's own English headings (`stepsTitle`) with the English body.
+Translating the trimmed guides is the next copy step.
