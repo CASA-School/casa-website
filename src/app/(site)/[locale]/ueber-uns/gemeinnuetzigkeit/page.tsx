@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { CheckCircle2, GraduationCap, Handshake, MessageCircle, Users } from 'lucide-react';
 
-import { HeroBEditorial } from '@/components/heroes';
+import { HeroAPhotoLed } from '@/components/heroes';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -67,10 +67,7 @@ export default async function NonProfitStatusPage() {
           title: 'Eine Sprachschule im öffentlichen Interesse',
           description:
             'CASA ist als gemeinnützige GmbH organisiert. Unser Auftrag ist Bildung, Völkerverständigung und soziale Integration in Bremen - nicht Gewinnausschüttung.',
-          ctas: [
-            { label: 'Wirkung ansehen', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const },
-            { label: 'Leitbild lesen', href: '/about#mission', kind: 'secondary' as const },
-          ],
+          ctas: [{ label: 'Wirkung ansehen', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
         introTitle: 'Warum CASA eine gGmbH ist',
         introText:
@@ -153,10 +150,7 @@ export default async function NonProfitStatusPage() {
           title: 'A language school serving the public interest',
           description:
             'CASA is organized as a non-profit gGmbH. Our purpose is education, intercultural understanding, and social integration in Bremen - not profit distribution.',
-          ctas: [
-            { label: 'See the impact', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const },
-            { label: 'Read our mission', href: '/about#mission', kind: 'secondary' as const },
-          ],
+          ctas: [{ label: 'See the impact', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
         introTitle: 'Why CASA is a gGmbH',
         introText:
@@ -232,7 +226,13 @@ export default async function NonProfitStatusPage() {
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <JsonLdScript id="nonprofit-status-schema" data={pageSchema(locale)} />
-      <HeroBEditorial
+      {/*
+        THE SITE'S STANDARD HERO, one action: the claim in the headline, the
+        evidence one click below it. "Leitbild lesen" used to sit here as a second
+        action; the breadcrumb already leads to Unsere Schule, and the page has no
+        closing band for the same reason (see the note at the end).
+      */}
+      <HeroAPhotoLed
         eyebrow={copy.hero.eyebrow}
         title={copy.hero.title}
         description={copy.hero.description}
@@ -242,14 +242,9 @@ export default async function NonProfitStatusPage() {
             locale === 'de'
               ? 'CASA Lernende arbeiten gemeinsam an einem Tisch im Unterricht'
               : 'CASA learners working together at a classroom table',
-          caption:
-            locale === 'de'
-              ? 'Deutschunterricht als Zugang zu Alltag, Studium und Teilhabe.'
-              : 'German education as access to daily life, study, and participation.',
         }}
         ctas={copy.hero.ctas}
         breadcrumbs={copy.breadcrumbs}
-        themeClassName="hero-theme-about"
       />
 
       {/*

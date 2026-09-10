@@ -152,9 +152,10 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
    * /accommodation/become-host, which moved off A so the four accommodation
    * pages agree with each other.
    *
-   * B survives only on /team and /ueber-uns/gemeinnuetzigkeit, and E on the
-   * utility and legal pages. Those are the remaining inconsistency and are
-   * listed so a future pass changes this table on purpose, not by accident.
+   * /team and /ueber-uns/gemeinnuetzigkeit joined A on 2026-09-10, which retired
+   * B. E stays on the utility and legal pages on purpose: a legal page has no
+   * photograph to lead with. Listed so a future pass changes this table on
+   * purpose, not by accident.
    */
   const expectations = [
     { route: '/en', archetype: 'A' },
@@ -163,7 +164,8 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
     { route: '/en/exams', archetype: 'A' },
     { route: '/en/accommodation', archetype: 'A' },
     { route: '/en/courses/german-for-groups', archetype: 'A' },
-    { route: '/en/team', archetype: 'B' },
+    { route: '/en/team', archetype: 'A' },
+    { route: '/en/ueber-uns/gemeinnuetzigkeit', archetype: 'A' },
     { route: '/en/courses/intensive-german', archetype: 'C' },
     { route: '/en/exams/b2', archetype: 'C' },
     { route: '/en/exams/c1', archetype: 'C' },

@@ -56,10 +56,10 @@ type HeroSurfaceProps = {
 
 export function HeroSurface({ children, className, themeClassName, breadcrumbs, archetype }: HeroSurfaceProps) {
   /*
-   * D shares A's floor, not B's.
+   * D shares A's floor.
    *
    * D used to be a three-image mosaic and then a framed photo card, and it was
-   * grouped with B on 48/54vh accordingly. It is now A's composition exactly —
+   * grouped with the retired B tier on 48/54vh accordingly. It is now A's composition exactly —
    * the same HeroLede beside the same HeroBleedPhoto — so leaving it a step
    * shorter meant the one dimension HeroSurface still controls was the one
    * dimension where the accommodation hero and the homepage hero disagreed.
@@ -67,11 +67,9 @@ export function HeroSurface({ children, className, themeClassName, breadcrumbs, 
   const heightClass =
     archetype === 'A' || archetype === 'D'
       ? 'min-h-[52vh] md:min-h-[58vh]'
-      : archetype === 'B'
-        ? 'min-h-[48vh] md:min-h-[54vh]'
-        : archetype === 'C' || archetype === 'E'
-          ? 'min-h-[40vh] md:min-h-[46vh]'
-          : 'min-h-[46vh] md:min-h-[52vh]';
+      : archetype === 'C' || archetype === 'E'
+        ? 'min-h-[40vh] md:min-h-[46vh]'
+        : 'min-h-[46vh] md:min-h-[52vh]';
 
   return (
     <section
