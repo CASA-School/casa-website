@@ -2061,3 +2061,20 @@ utility and legal pages on purpose. The hero photo caption on both pages went wi
 framed card, so the "Bildunterschrift" row in the Gemeinnützigkeit review document no
 longer has a place on the page.
 
+## 24. The hero photograph is a photograph again (2026-09-10)
+
+`HeroBleedPhoto` dissolved the left third of every hero picture into the page, blurred
+that zone and faded the top and bottom edges. Checked on a real photograph at 1440 and
+375 (captures in `output/review/hero-photo-treatment/`): a third of the picture given
+away, a person in that third smeared, and on a phone — photo under the text, nothing to
+dissolve into — the left and top simply fogged. The mask and the blur are gone; the photo
+sits crisp from the grid gutter to the site frame with `--casa-radius-feature`, the radius
+every other photograph carries. This is the last photo effect on the site; the
+`MediaFrame` halo behind framed photographs is a separate treatment and was not touched.
+
+**Photo library note for whoever picks this up:** the files under `public/media/casa/`
+are the OLD collection. They were never deleted; on 2026-08-17 the site was switched to
+numbered placeholders instead, and the registry keeps the old paths as the delivery
+targets for the new pictures. The product owner expected them gone. The ~100 new shots
+in the untracked `editorial-2026/` pool are not wired to any slot yet.
+
