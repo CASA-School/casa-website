@@ -102,20 +102,8 @@ teacher-spotlight face at 74px on every course page, so it must survive a small 
 | The two NewsFlash photographs (Lisa Dao, Kicktipp winners) | Real, verified images that already bypass the placeholder wrapper. |
 | Klett textbook covers (`klett-textbooks.ts`) | Licensing unresolved, `coverSrc` unset, so no slot renders. |
 
-## Spare images already on disk
+## Spare images
 
-Eleven files sit in `public/media/casa/` unreferenced by any page. They are not slots and
-have no numbers, but they are available if one suits a slot better than what is there:
-
-- `bremen-musicians-reflection-glasses.jpg`
-- `bremen-phone-photo-program.jpg`
-- `bremen-town-musicians-square.jpg`
-- `bremen-town-musicians-tall.jpg`
-- `classroom-workbook-pair.jpg`
-- `group-course-stairs-bremen.jpg`
-- `junior-vocabulary-notes.jpg`
-- `school-building-illustration-header.jpg`
-- `student-group-excursion.jpg`
-- `student-room-alternative-2.jpg`
-- `student-room-alternative-3.jpg`
-
+None. The old library, including its eleven unreferenced files, was removed on 2026-09-10.
+The pool in `public/media/casa/editorial-2026/` is the only source for new slots; its
+contact sheet is `output/review/new-photo-pool.jpg`.
