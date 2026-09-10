@@ -262,18 +262,23 @@ export function HeroLede({
 }
 
 /**
- * THE HERO PHOTOGRAPH — masked into the page ground rather than framed on it.
+ * THE HERO PHOTOGRAPH — a photograph, placed on the grid.
  *
- * Lifted out of HeroHomePhoto unchanged so /accommodation renders the homepage's
- * photograph treatment by sharing its implementation, not by copying its
- * classes. Before this, the accommodation hero put the same subject in a rounded
- * MediaFrame with a caption under it, which is the "floating card on a
- * background" composition every other pass on this site has been removing.
+ * Until 2026-09-10 this masked the picture into the page: the left third
+ * dissolved to transparent, a 5px backdrop blur softened that zone, and the top
+ * and bottom edges faded. Judged on a real photograph at both breakpoints
+ * (output/review/hero-photo-treatment/), the three effects cost more than they
+ * gave: a third of every hero photograph was given away, a person standing in
+ * that third became a smear, and on a phone — where the photo sits UNDER the
+ * text and has nothing to dissolve into — they simply fogged the left and top
+ * of the picture. On the numbered placeholders they produced a blurred smudge.
  *
- * The photograph stops at the site frame, not the viewport: the grid column's
- * right edge sits on the same gutter the copy's left edge sits on, so the hero
- * reads as one balanced block. No margin class at all — Container's own padding
- * does the work, which is why this cannot drift from the left inset.
+ * What remains is the composition: the photograph starts at the grid gutter
+ * and runs to the site frame, no frame, no shadow, and the corner radius every
+ * other photograph on the site carries (`--casa-radius-feature`, the same value
+ * `.casa-media__frame` uses). One system, not an effect.
+ *
+ * The name stays for the call site's sake: the photo still reaches the frame.
  */
 export function HeroBleedPhoto({
   photo,
@@ -285,46 +290,13 @@ export function HeroBleedPhoto({
   sizes?: string;
 }) {
   return (
-    <div className={cn('relative h-[19rem] sm:h-[24rem] lg:h-[33rem]', className)}>
-      <div
-        className="absolute inset-0 overflow-hidden"
-        style={{
-          /*
-            Masked, not cropped. A rounded rectangle on a background is a PLACED
-            object; fading the left edge to transparent means there is no
-            boundary at all, so the hero's ground reads as continuous behind the
-            photograph.
-
-            Two ramps composited: left-to-right for the dissolve, and a gentler
-            top/bottom so the photo does not butt into the section's own border.
-            `-webkit-` duplicated for Safari.
-          */
-          WebkitMaskImage:
-            'linear-gradient(to right, transparent 0%, black 34%), linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
-          maskImage:
-            'linear-gradient(to right, transparent 0%, black 34%), linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
-          WebkitMaskComposite: 'source-in',
-          maskComposite: 'intersect',
-        }}
-      >
-        <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" priority />
-      </div>
-
-      {/*
-        A soft focal fall-off on the leading edge. The mask alone fades opacity;
-        this also softens detail as the photo dissolves, so the transition reads
-        as depth rather than as a fade. Cheap — it blurs what is already painted
-        rather than loading a second image — and `pointer-events-none` keeps it
-        out of the way.
-      */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 w-[34%] backdrop-blur-[5px]"
-        style={{
-          WebkitMaskImage: 'linear-gradient(to right, black 10%, transparent 100%)',
-          maskImage: 'linear-gradient(to right, black 10%, transparent 100%)',
-        }}
-      />
+    <div
+      className={cn(
+        'relative h-[19rem] overflow-hidden rounded-[var(--casa-radius-feature)] sm:h-[24rem] lg:h-[33rem]',
+        className
+      )}
+    >
+      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" priority />
     </div>
   );
 }

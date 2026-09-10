@@ -27,7 +27,7 @@ type HeroHomePhotoProps = {
  *
  * This is the site's reference hero, and it is now two shared parts rather than
  * one page's private layout: `HeroLede` owns the type scale and the CTA policy,
- * `HeroBleedPhoto` owns the masked photograph. /accommodation composes the same
+ * `HeroBleedPhoto` owns the photograph. /accommodation composes the same
  * two, so a change to either lands on both pages instead of on one.
  *
  * Three things were removed rather than restyled, and the removals are the
