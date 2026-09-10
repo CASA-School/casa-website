@@ -30,7 +30,8 @@ name is still `casa-portal`; that is historical, not current scope.
   Azure Flexible Server or Neon in deployment. One shared pool
   (`src/lib/admin/db.ts`) serves both products
 - `zod` + `react-hook-form` for validation and forms
-- `next-intl` — routing is EN-only today; the content layer supports `en`/`de`
+- `next-intl` — German at the root of the domain, English under `/en`; the URL map is
+  `src/i18n/pathnames.ts`. **Read `docs/I18N_ROUTING.md` before adding a route or a language**
 - Vitest + jsdom (unit) · Playwright (e2e, dev server on `127.0.0.1:3001`)
 
 ## Commands
@@ -118,7 +119,8 @@ connected without ever printing a value.
 ## Layout
 
 ```
-src/app/(site)   public routes — has its own root layout
+src/app/(site)/[locale]  public routes, German at the root and English under /en —
+                 has its own root layout
 src/app/(admin)  staff workspace at /admin — has its own root layout
 src/app/api      public route handlers (no layout)
 src/proxy.ts     host routing: admin.casa-bremen.de -> /admin, and /admin 404s
@@ -132,7 +134,7 @@ src/content      locale content modules
 src/lib          content repository, db helpers, api envelope, search,
                  assistant, validation, analytics, seo, mock fallback
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
-src/i18n         next-intl config
+src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
 db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0013_booking_accommodation.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
@@ -152,6 +154,13 @@ path is unchanged.
 **Server-first.** Default to Server Components. Add `'use client'` only for hooks,
 browser APIs, or interactivity. Never call server-only helpers (`cookies`,
 redirects) inside client components. Guard `window` / `document` / `localStorage`.
+
+**Links and paths.** In the public site import `Link`, `useRouter` and `usePathname`
+from `@/i18n/navigation`, never from `next/link` or `next/navigation`, and write internal
+English paths (`/courses/intensive-german`); the wrapper renders the German or `/en` URL.
+Server redirects go through `redirectLocalized`. A new route is one entry in
+`src/i18n/pathnames.ts` (a test fails without it). Every page has `generateMetadata` that
+resolves `getContentLocale()` and passes `locale` to `createPublicMetadata`.
 
 **API envelope.** All route handlers return `{ data, error }` via `apiSuccess` /
 `apiError` in `src/lib/api/response.ts`. Validate every request payload with `zod`
@@ -299,6 +308,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/ERD.md` | Mermaid data model |
 | `docs/PUBLIC_UI_AUDIT.md` | Route inventory + responsive findings (375/768/1280) |
 | `docs/PUBLIC_UI_BACKLOG.md` | Sequenced PR-A / PR-B / PR-C plan |
+| `docs/I18N_ROUTING.md` | **Read before adding a route or a language.** German at the root, English under `/en`, the URL map, the rules, how to add a language |
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
@@ -374,9 +384,6 @@ is still valid.
 - `/design-system` is an internal surface; check its indexing behavior.
 - `docs/DEV_SETUP.md` claims Node 25+ / npm 11+, but CI pins Node 20 and local
   development has run on Node 22. Treat the doc's version floor as unverified.
-- Several routes exist that the `README.md` route list omits: `/team`, `/calculator`,
-  `/resources/*`, `/projekte/integrationsprojekte`, `/ueber-uns/gemeinnuetzigkeit`,
-  `/accommodation/become-host`, `/design-system`.
 - ~~Course detail pages assume one universal template~~ **Resolved 2026-08-12.** The archetype
   registry is `src/config/courses/archetypes.ts` + `course-profiles.ts`. Add a course by adding
   a profile entry, never by branching inside `src/app/courses/[slug]/page.tsx` — that file no

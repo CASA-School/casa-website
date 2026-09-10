@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useMemo, useState } from 'react';
 import { ArrowRight, Compass } from 'lucide-react';

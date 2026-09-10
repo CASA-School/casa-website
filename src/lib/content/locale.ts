@@ -1,7 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
 
-export const CONTENT_LOCALE_COOKIE = 'casa_locale';
-
 const SUPPORTED_LOCALES: ContentLocale[] = ['en', 'de'];
 
 export function isContentLocale(value: string | null | undefined): value is ContentLocale {

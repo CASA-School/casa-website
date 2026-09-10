@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test('home renders Hero A and no top announcement bar', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/en');
 
   await expect(page.locator('section[data-hero-archetype="A"]')).toBeVisible();
 
   // The h1 is CASA's Leitbild — "Miteinander reden - aufeinander zugehen" —
-  // rendered in English here because e2e runs the default EN locale. Matching a
+  // rendered in English under /en; the German root is covered below. Matching a
   // fragment rather than the full sentence, so a copy tweak does not fail the
   // test while a MISSING h1 still does.
   await expect(page.getByRole('heading', { level: 1, name: /move toward one another/i })).toBeVisible();
@@ -15,7 +15,7 @@ test('home renders Hero A and no top announcement bar', async ({ page }) => {
 
 test('homepage decision cards guide visitors to in-page sections', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/en');
 
   const decisionSection = page.locator('section[data-track-section="persona-pathways"]');
   await decisionSection
@@ -31,7 +31,7 @@ test('homepage decision cards guide visitors to in-page sections', async ({ page
   ];
 
   for (const check of inPageChecks) {
-    await page.goto('/');
+    await page.goto('/en');
     const card = decisionSection.locator(`[data-casa-persona="${check.persona}"]`);
     await card.getByRole('link', { name: /choose this path/i }).click();
     await expect(page).toHaveURL(new RegExp(`${check.hash}$`));
@@ -43,7 +43,7 @@ test('homepage decision cards guide visitors to in-page sections', async ({ page
 });
 
 test('desktop navbar dropdown is dynamic and courses panel stays inside project container', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/en');
 
   const coursesTrigger = page.getByTestId('nav-trigger-courses');
   const accommodationTrigger = page.getByTestId('nav-trigger-accommodation');
@@ -106,7 +106,7 @@ test('desktop navbar dropdown is dynamic and courses panel stays inside project 
 test('mobile nav language menu opens independently from the close control', async ({ page }) => {
   await page.context().clearCookies();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/en');
 
   await page.getByRole('button', { name: 'Open navigation menu' }).click();
   const sheet = page.locator('[data-slot="sheet-content"]');
@@ -121,6 +121,9 @@ test('mobile nav language menu opens independently from the close control', asyn
   await expect(sheet).toBeVisible();
 
   await page.getByTestId('mobile-locale-option-de').click();
+
+  // The language lives in the URL, so switching navigates to the German root.
+  await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 
   // Reopen mobile nav menu if it closed automatically during refresh/hydration
   if (await sheet.isHidden()) {
@@ -154,21 +157,21 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
    * listed so a future pass changes this table on purpose, not by accident.
    */
   const expectations = [
-    { route: '/', archetype: 'A' },
-    { route: '/about', archetype: 'A' },
-    { route: '/courses', archetype: 'A' },
-    { route: '/exams', archetype: 'A' },
-    { route: '/accommodation', archetype: 'A' },
-    { route: '/courses/german-for-groups', archetype: 'A' },
-    { route: '/team', archetype: 'B' },
-    { route: '/courses/intensive-german', archetype: 'C' },
-    { route: '/exams/b2', archetype: 'C' },
-    { route: '/exams/c1', archetype: 'C' },
-    { route: '/accommodation/flat', archetype: 'C' },
-    { route: '/accommodation/host', archetype: 'C' },
-    { route: '/accommodation/become-host', archetype: 'C' },
-    { route: '/contact', archetype: 'E' },
-    { route: '/imprint', archetype: 'E' },
+    { route: '/en', archetype: 'A' },
+    { route: '/en/about', archetype: 'A' },
+    { route: '/en/courses', archetype: 'A' },
+    { route: '/en/exams', archetype: 'A' },
+    { route: '/en/accommodation', archetype: 'A' },
+    { route: '/en/courses/german-for-groups', archetype: 'A' },
+    { route: '/en/team', archetype: 'B' },
+    { route: '/en/courses/intensive-german', archetype: 'C' },
+    { route: '/en/exams/b2', archetype: 'C' },
+    { route: '/en/exams/c1', archetype: 'C' },
+    { route: '/en/accommodation/flat', archetype: 'C' },
+    { route: '/en/accommodation/host', archetype: 'C' },
+    { route: '/en/accommodation/become-host', archetype: 'C' },
+    { route: '/en/contact', archetype: 'E' },
+    { route: '/en/imprint', archetype: 'E' },
   ];
 
   for (const item of expectations) {
@@ -178,20 +181,20 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
 });
 
 test('exam and accommodation detail routes render signature modules', async ({ page }) => {
-  await page.goto('/exams/b2');
+  await page.goto('/en/exams/b2');
   await expect(page.getByTestId('exam-timeline')).toBeVisible();
   await expect(page.getByTestId('exam-what-to-bring')).toBeVisible();
 
-  await page.goto('/accommodation/flat');
+  await page.goto('/en/accommodation/flat');
   await expect(page.getByRole('heading', { name: /neighborhood \+ arrival checklist/i })).toBeVisible();
 });
 
 test('legacy hash anchors still resolve on exams and accommodation indexes', async ({ page }) => {
   const targets = [
-    { path: '/exams#b2', selector: '#b2' },
-    { path: '/exams#c1', selector: '#c1' },
-    { path: '/accommodation#flat', selector: '#flat' },
-    { path: '/accommodation#host', selector: '#host' },
+    { path: '/en/exams#b2', selector: '#b2' },
+    { path: '/en/exams#c1', selector: '#c1' },
+    { path: '/en/accommodation#flat', selector: '#flat' },
+    { path: '/en/accommodation#host', selector: '#host' },
   ];
 
   for (const target of targets) {
@@ -226,4 +229,32 @@ test('registration pages render main navbar without register CTA button', async 
     // The regular footer should not be present
     await expect(page.locator('footer')).toHaveCount(0);
   }
+});
+
+test('German is the language of the root, English lives under /en, and each page names the other', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+  await expect(page.getByRole('heading', { level: 1, name: /miteinander reden/i })).toBeVisible();
+
+  // The old site's German paths are the German URLs, and every page carries its
+  // canonical URL plus the other language and x-default on the German root.
+  const response = await page.goto('/sprachkurse/deutsch-intensiv');
+  expect(response?.status()).toBe(200);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/sprachkurse\/deutsch-intensiv$/);
+  await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute('href', /\/en\/courses\/intensive-german$/);
+  await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute('href', /\/sprachkurse\/deutsch-intensiv$/);
+
+  // Non-canonical forms redirect to the one German URL: an English path at the
+  // root, an English slug under a German segment, and a /de/ prefix.
+  await page.goto('/courses/intensive-german');
+  await expect(page).toHaveURL(/\/sprachkurse\/deutsch-intensiv$/);
+  await page.goto('/sprachkurse/intensive-german');
+  await expect(page).toHaveURL(/\/sprachkurse\/deutsch-intensiv$/);
+  await page.goto('/de/kontakt');
+  await expect(page).toHaveURL(/\/kontakt$/);
+
+  await page.goto('/en/courses/intensive-german');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/en\/courses\/intensive-german$/);
+  await expect(page.locator('link[rel="alternate"][hreflang="de"]')).toHaveAttribute('href', /\/sprachkurse\/deutsch-intensiv$/);
 });

@@ -23,7 +23,7 @@ import { expect, test, type Page } from '@playwright/test';
  */
 
 async function startAttempt(page: Page, priorLearning = 'some_courses') {
-  await page.goto('/placement-test/test');
+  await page.goto('/en/placement-test/test');
 
   const pick = (question: string, value: string) =>
     page
@@ -134,7 +134,7 @@ async function answerCurrentItem(page: Page) {
 }
 
 test('the landing page offers one way in and no level self-diagnosis', async ({ page }) => {
-  await page.goto('/placement-test');
+  await page.goto('/en/placement-test');
 
   await expect(page.getByRole('link', { name: /start the (placement )?test/i }).first()).toBeVisible();
   await expect(page.getByText(/about 15–30 minutes/i).first()).toBeVisible();
@@ -306,17 +306,17 @@ test('a completed attempt reaches a result that a teacher still confirms', async
 
 test('an unknown result token is a 404, not a blank page', async ({ page }) => {
   // The token is the only protection on a page that states a language level.
-  const response = await page.goto('/placement-test/result/0000000000000000000000000000000000000000');
+  const response = await page.goto('/en/placement-test/result/0000000000000000000000000000000000000000');
   expect(response?.status()).toBe(404);
 });
 
 test('registration links straight to the test instead of naming the navigation', async ({ page }) => {
-  await page.goto('/registration/course');
+  await page.goto('/en/registration/course');
 
   // The level field is conditional on the selected course type, so this only
   // asserts the link when the field is on screen.
   const hint = page.getByRole('link', { name: /take the placement test/i });
   if (await hint.count()) {
-    await expect(hint).toHaveAttribute('href', '/placement-test/test');
+    await expect(hint).toHaveAttribute('href', '/en/placement-test/test');
   }
 });

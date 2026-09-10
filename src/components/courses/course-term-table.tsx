@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 export type CourseTermGroup = {
   /** e.g. "Morning · Mon–Fri, 09:00–12:30" */

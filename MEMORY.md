@@ -199,7 +199,7 @@ render a second page-title `<header>`.
 
 ### Still Open After Pass 15
 
-- **Bilingual is not production ready.** Locale is cookie-only on a single URL:
+- ~~**Bilingual is not production ready.**~~ **Resolved in pass 22 (2026-09-10), see below.** Locale was cookie-only on a single URL:
   German is invisible to search engines, `hreflang` in `src/lib/seo.ts` points
   `en` and `de` at the *same* canonical URL, `og:locale` is absent, 28 of 29
   audited routes serve identical `<title>`/`description` in both locales, and
@@ -2023,3 +2023,27 @@ with the activity trail confirmed in the database.
   privacy owner, and real staff accounts created with passwords handed over in
   person. `docs/ADMIN_WORKSPACE.md` §Open items is the list.
 - Two sources of truth for course facts currently disagree: `buildSelectorCopy` in `src/app/courses/page.tsx` carries accurate, detailed fee text, while `public-fixtures.ts` drives the detail page. Fold the former into the profile layer when the archetype registry lands.
+
+## 22. The language moved into the URL (2026-09-10)
+
+**Decision (product owner, 2026-09-10):** one domain; German at the root under the old
+site's paths; every other language under its own prefix; German and English at launch;
+Arabic, Turkish, Spanish, French, Italian, Chinese later, ordered by enquiry data.
+`docs/I18N_ROUTING.md` is the reference.
+
+**What changed.** The public route tree moved to `src/app/(site)/[locale]`. `src/i18n/`
+holds the languages, the URL map with the old German slugs for courses, exams and
+accommodation, and `Link`/`useRouter`/`usePathname` wrappers that localise internal paths
+from the current URL. `src/proxy.ts` resolves the language, redirects every non-canonical
+form (`/de/…`, `/courses` at the root, an English slug under a German segment) with 308 and
+hands next-intl the internal path. `getContentLocale()` reads the request language, so the
+991 inline ternaries kept working with no edit; the `casa_locale` cookie and its switcher
+are gone, the switcher navigates instead. Every page now has `generateMetadata` with the
+locale, so canonical, hreflang, `x-default` and `og:locale` are right; the four detail
+pages that fetched their record in `'en'` for the title fetch it in the request language.
+A sitemap and robots file exist for the first time. The suggest API takes `locale` in the
+query because a route handler's URL has no language. `/projekte/integrationsprojekte` was
+an empty directory, removed. Detection by cookie or Accept-Language is deliberately off.
+
+**Not done, and next:** interface strings into message catalogs before a third language;
+redirects for the old site's English paths; news and career slugs pass through.

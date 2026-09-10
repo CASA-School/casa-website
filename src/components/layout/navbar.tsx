@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
+import { useRouter } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { Globe, Menu } from 'lucide-react';
 
 import { Logo } from '@/components/ui/logo';
@@ -13,7 +14,7 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 import { localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
-import { CONTENT_LOCALE_COOKIE } from '@/lib/content/locale';
+import { localizeHref } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
 import {
   DropdownMenu,
@@ -307,10 +308,10 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   const switchContentLocale = useCallback(
     (locale: ContentLocale) => {
       setContentLocale(locale);
-      document.cookie = `${CONTENT_LOCALE_COOKIE}=${locale}; path=/; max-age=31536000; samesite=lax`;
-      router.refresh();
+      // The language is part of the URL: open this page in the other language.
+      router.push(localizeHref(`${pathname ?? '/'}${window.location.search}${window.location.hash}`, locale));
     },
-    [router]
+    [pathname, router]
   );
 
   return (

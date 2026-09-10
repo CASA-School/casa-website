@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -222,7 +221,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
 
       try {
         const response = await fetch(
-          `/api/search/suggest?q=${encodeURIComponent(trimmedQuery)}&scope=all&limit=3`,
+          `/api/search/suggest?q=${encodeURIComponent(trimmedQuery)}&scope=all&limit=3&locale=${locale}`,
           { signal: controller.signal }
         );
         const payload = (await response.json()) as ApiResponse<PublicSearchResponse>;
@@ -248,7 +247,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [open, trimmedQuery]);
+  }, [locale, open, trimmedQuery]);
 
   return (
     <div ref={rootRef} className="relative">

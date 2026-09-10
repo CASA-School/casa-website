@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Logo } from '@/components/ui/logo';
 import { footerConfig } from '@/config/footer';
 import { Container } from '@/components/ui/container';

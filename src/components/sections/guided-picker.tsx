@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { CasaImage as Image } from '@/components/ui/casa-image';
 import { ArrowRight } from 'lucide-react';
 

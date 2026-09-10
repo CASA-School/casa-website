@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';

@@ -49,6 +49,9 @@ production build.
 - `/admin/team` (owner/admin only), `/admin/settings`
 
 ### Supported routes
+German is served at the root under the old site's paths (`/sprachkurse/deutsch-intensiv`),
+English under `/en`; the list uses the internal English paths. See `docs/I18N_ROUTING.md`.
+
 - `/`
 - `/about`
 - `/ueber-uns/gemeinnuetzigkeit`
@@ -76,7 +79,6 @@ production build.
 - `/team`
 - `/calculator`
 - `/resources/why-germany`, `/resources/study-in-germany`, `/resources/living-in-germany`
-- `/projekte/integrationsprojekte`
 - `/accommodation/become-host`
 - `/design-system`, `/design-alternatives`, `/landing-page-alt`, `/homepage-reorganized`
   — internal review surfaces, 404 on a production build unless

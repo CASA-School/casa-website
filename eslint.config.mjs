@@ -90,10 +90,11 @@ const eslintConfig = defineConfig([
     ignores: [
       // Frozen comparison artifacts. Restyling them would invalidate the
       // comparison they exist for — see docs/EXPERIMENTAL_LANDING_PAGES.md.
-      'src/app/(site)/design-system/**',
-      'src/app/(site)/design-alternatives/**',
-      'src/app/(site)/landing-page-alt/**',
-      'src/app/(site)/homepage-reorganized/**',
+      // The `*` is the [locale] segment; brackets are glob syntax.
+      'src/app/(site)/*/design-system/**',
+      'src/app/(site)/*/design-alternatives/**',
+      'src/app/(site)/*/landing-page-alt/**',
+      'src/app/(site)/*/homepage-reorganized/**',
     ],
     rules: {
       'no-restricted-syntax': [

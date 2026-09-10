@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
  * to the builder, which stays on the page because it is a task, not a read.
  */
 
-const ROUTE = '/courses/german-for-groups';
+const ROUTE = '/en/courses/german-for-groups';
 
 test('a package card opens a dialog named after the package', async ({ page }) => {
   await page.goto(ROUTE);
