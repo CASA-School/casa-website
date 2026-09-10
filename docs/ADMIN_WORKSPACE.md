@@ -222,6 +222,38 @@ exception. Changing someone's levels ends their sessions, so a narrowed set
 takes effect at once. The Team screen shows the matrix and edits it for
 `staff` accounts.
 
+### The booking wizard
+
+`/admin/people/<id>` → **New booking**, and the same wizard from a course
+registration with the cohort already chosen. Five steps, each narrowing the
+next, because that is the order a colleague asks a learner:
+
+1. **What** — a course, or an exam on its own.
+2. **Which** — the course types that have upcoming cohorts, then only that
+   type's cohorts, each with its weeks, session, seats free and price.
+3. **Level & books** — the level (prefilled from the cohort when it has one),
+   then *how much of it*: `A2` is taught as `A2.1` then `A2.2` and one book
+   covers one half, so "the whole A2" adds both books and "A2.1 only" adds one.
+   Then: do they want the book? The right books appear, priced, and any one of
+   them can be unticked.
+4. **Accommodation** — no, or a bookable type with room, catering and dates
+   prefilled from the cohort.
+5. **Review** — every line with its amount, the total, and the few remaining
+   fields under *More*.
+
+**Where the prices come from.** A **rate** is set once in Settings and resolved
+by `applicable_rate()` — the enrolment fee, each book, an exam entry. Those are
+authoritative and **re-resolved on the server** when the booking is created, so
+nothing a browser posts can invent one; `booking_charges.rate_id` records which
+rate produced each line, which is why a rate that has priced a booking cannot
+be deleted. An **agreed amount** is typed by a staff member — the tuition and
+accommodation, where CASA has published no rate yet — and stays editable on the
+review step. `src/lib/admin/booking-offer.ts` holds both halves:
+`bookingOffer()` reads the catalogue, `priceSelection()` is the server's truth.
+
+The running total is visible from the first step, so nobody reaches the end and
+finds a surprise.
+
 ### Create, edit, delete
 
 Every module that holds records offers the three, the way FileMaker does, with

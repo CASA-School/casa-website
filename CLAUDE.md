@@ -206,6 +206,12 @@ It pulls `pg` and `server-only` into the browser bundle and the build fails on
 module (`configuration-labels.ts` is the pattern). Typecheck and lint pass while
 this is broken; only `next build` or loading the page catches it.
 
+**A Postgres `date` is not a UTC instant.** `pg` returns it as a `Date` at
+LOCAL midnight, so `toISOString().slice(0, 10)` lands on the previous day for
+any positive offset — it rendered every stored birth date a day early. Use
+`toDateInputValue` / `todayInputValue` from `src/lib/dates.ts`; there is a
+regression test in `src/lib/__tests__/dates.test.ts`.
+
 **Types are tables, prices are rates.** Every vocabulary (course type, level,
 accommodation type, catering, room type, charge type, material) is a table with
 a stable `code` and its `filemaker_id`. Every price is a row in `rates` with a

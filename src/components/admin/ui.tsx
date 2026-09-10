@@ -7,6 +7,7 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 
+import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
 /**
@@ -628,11 +629,11 @@ export function BirthDate({ value }: { value: Date | string | null | undefined }
     return <span className="text-[var(--casa-text-subtle)]">—</span>;
   }
 
+  // From LOCAL components. `toISOString()` here rendered every stored date a
+  // day early for any positive UTC offset — 1998-03-14 showed as 13 March.
   const iso =
     value instanceof Date
-      ? Number.isNaN(value.getTime())
-        ? null
-        : value.toISOString().slice(0, 10)
+      ? toDateInputValue(value) || null
       : (/^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim())?.[0] ?? null);
 
   if (!iso) {

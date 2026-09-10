@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
 
-import { NewBookingForm } from '../../../bookings/booking-forms';
+import { createBookingFromWizardAction } from '../../../bookings/actions';
+import { BookingWizard } from '../../../bookings/booking-wizard';
 import { FormDialog } from '@/components/admin/dialogs';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { canAccess } from '@/lib/admin/access';
-import { listCohortOptions } from '@/lib/admin/bookings';
-import { listCourseTypes } from '@/lib/admin/catalogue';
+import { bookingOffer } from '@/lib/admin/booking-offer';
 import { requireModule } from '@/lib/admin/guard';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Badge, BirthDate, Card, DetailList, PageHeader } from '@/components/admin/ui';
@@ -19,6 +19,7 @@ import {
 } from '@/lib/admin/people';
 import { getCourseRegistration } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
+import { toDateInputValue } from '@/lib/dates';
 
 const SALUTATIONS: Record<string, string> = {
   mr: 'Mr',
@@ -53,9 +54,7 @@ export default async function CourseRegistrationPage({
   }
 
   const canBook = canAccess(user, 'bookings', 'edit') && Boolean(registration.personId);
-  const [cohorts, courseTypes] = canBook
-    ? await Promise.all([listCohortOptions(), listCourseTypes()])
-    : [[], []];
+  const offer = canBook ? await bookingOffer() : null;
 
   const [notes, activity, staff, flags, person] = await Promise.all([
     listNotes('course_registration', registration.id),
@@ -69,7 +68,7 @@ export default async function CourseRegistrationPage({
         findDuplicateCandidates({
           email: registration.email,
           lastName: registration.lastName,
-          birthDate: registration.birthDate?.toISOString().slice(0, 10) ?? null,
+          birthDate: toDateInputValue(registration.birthDate) || null,
           excludePersonId: person.id,
         }),
         latestConfirmedLevel(person.canonicalId),
@@ -92,19 +91,21 @@ export default async function CourseRegistrationPage({
         description={registration.courseTypeLabel ?? undefined}
         actions={
           <div className="flex items-center gap-2">
-            {canBook && registration.personId ? (
+            {canBook && offer && registration.personId ? (
               <FormDialog
                 trigger="Create booking"
-                title="Create a booking"
+                title={`Book ${registration.firstName} ${registration.lastName}`}
                 triggerVariant="primary"
+                width="lg"
               >
-                <NewBookingForm
+                <BookingWizard
                   personId={registration.personId}
-                  cohorts={cohorts}
-                  courseTypes={courseTypes}
+                  personName={`${registration.firstName} ${registration.lastName}`}
+                  offer={offer}
                   preselectedCohortId={registration.courseInstanceId}
                   sourceRegistrationId={registration.id}
                   returnTo={`/admin/registrations/course/${registration.id}`}
+                  action={createBookingFromWizardAction}
                 />
               </FormDialog>
             ) : null}

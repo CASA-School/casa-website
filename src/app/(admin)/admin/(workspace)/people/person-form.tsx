@@ -1,6 +1,7 @@
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import type { Country, PersonDetail } from '@/lib/admin/people';
 import { createPersonAction, updatePersonAction } from './actions';
+import { toDateInputValue } from '@/lib/dates';
 
 const SALUTATIONS = [
   ['', '—'],
@@ -41,7 +42,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
           id="person-birth"
           name="birthDate"
           type="date"
-          defaultValue={person?.birthDate ? person.birthDate.toISOString().slice(0, 10) : ''}
+          defaultValue={toDateInputValue(person?.birthDate)}
         />
       </Field>
       <Field label="Nationality" htmlFor="person-nationality">

@@ -9,9 +9,9 @@ import {
   type CohortOption,
 } from '@/lib/admin/bookings';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
+import { toDateInputValue } from '@/lib/dates';
 import {
   addChargeAction,
-  createBookingAction,
   extendBookingAction,
   recordPaymentAction,
   updateBookingAction,
@@ -27,9 +27,6 @@ import {
  * the dates are simply typed.
  */
 
-const iso = (d: Date | string | null | undefined) =>
-  d ? new Date(d).toISOString().slice(0, 10) : '';
-
 const More = ({ children }: { children: React.ReactNode }) => (
   <details className="group">
     <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]">
@@ -39,131 +36,6 @@ const More = ({ children }: { children: React.ReactNode }) => (
     <div className="mt-3 space-y-3">{children}</div>
   </details>
 );
-
-export function NewBookingForm({
-  personId,
-  cohorts,
-  courseTypes,
-  preselectedCohortId,
-  sourceRegistrationId,
-  returnTo,
-}: {
-  personId: string;
-  cohorts: CohortOption[];
-  courseTypes: CourseTypeSummary[];
-  preselectedCohortId?: string | null;
-  sourceRegistrationId?: string | null;
-  returnTo: string;
-}) {
-  const chosen = cohorts.find((c) => c.id === preselectedCohortId) ?? null;
-  return (
-    <form action={createBookingAction} className="space-y-3">
-      <input type="hidden" name="personId" value={personId} />
-      <input type="hidden" name="returnTo" value={returnTo} />
-      {sourceRegistrationId ? (
-        <input type="hidden" name="sourceRegistrationId" value={sourceRegistrationId} />
-      ) : null}
-
-      <Field label="Cohort" htmlFor="booking-cohort">
-        <Select id="booking-cohort" name="courseInstanceId" defaultValue={chosen?.id ?? ''}>
-          <option value="">No cohort yet — dates only</option>
-          {cohorts.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
-        </Select>
-      </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Start" htmlFor="booking-start">
-          <Input
-            id="booking-start"
-            name="startDate"
-            type="date"
-            required
-            defaultValue={iso(chosen?.startDate)}
-          />
-        </Field>
-        <Field label="End" htmlFor="booking-end">
-          <Input
-            id="booking-end"
-            name="endDate"
-            type="date"
-            required
-            defaultValue={iso(chosen?.endDate)}
-          />
-        </Field>
-      </div>
-      <div className="grid grid-cols-[1fr_auto] gap-3">
-        <Field label="Course price" htmlFor="booking-tuition-label">
-          <Input
-            id="booking-tuition-label"
-            name="tuitionLabel"
-            defaultValue="Course price"
-            maxLength={120}
-          />
-        </Field>
-        <Field label="Amount" htmlFor="booking-tuition">
-          <Input
-            id="booking-tuition"
-            name="tuition"
-            inputMode="decimal"
-            className="w-28 text-right"
-            defaultValue={chosen && chosen.defaultPrice > 0 ? chosen.defaultPrice.toFixed(2) : ''}
-          />
-        </Field>
-      </div>
-
-      <More>
-        <Field label="Course type" htmlFor="booking-type">
-          <Select id="booking-type" name="courseTypeId" defaultValue={chosen?.courseTypeId ?? ''}>
-            <option value="">From the cohort</option>
-            {courseTypes.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Status" htmlFor="booking-status">
-            <Select id="booking-status" name="status" defaultValue="reserved">
-              {BOOKING_STATUSES.filter((s) => s !== 'cancelled' && s !== 'completed').map((s) => (
-                <option key={s} value={s}>
-                  {BOOKING_STATUS_LABELS[s]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Enrolment fee" htmlFor="booking-fee">
-            <Input
-              id="booking-fee"
-              name="enrolmentFee"
-              inputMode="decimal"
-              className="text-right"
-            />
-          </Field>
-        </div>
-        <PayerFields />
-        <label className="flex items-center gap-2.5 text-sm">
-          <input
-            type="checkbox"
-            name="visaRequired"
-            className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
-          />
-          Visa required
-        </label>
-        <Field label="Notes" htmlFor="booking-notes">
-          <Textarea id="booking-notes" name="notes" rows={2} />
-        </Field>
-      </More>
-
-      <div className="flex justify-end pt-1">
-        <Button type="submit">Create booking</Button>
-      </div>
-    </form>
-  );
-}
 
 function PayerFields({ payer = 'self', payerName = '' }: { payer?: string; payerName?: string }) {
   return (
@@ -260,7 +132,13 @@ export function ExtendBookingForm({
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="From" htmlFor="extend-start">
-          <Input id="extend-start" name="startDate" type="date" required defaultValue={iso(next)} />
+          <Input
+            id="extend-start"
+            name="startDate"
+            type="date"
+            required
+            defaultValue={toDateInputValue(next)}
+          />
         </Field>
         <Field label="To" htmlFor="extend-end">
           <Input id="extend-end" name="endDate" type="date" required />
@@ -370,7 +248,7 @@ export function PaymentForm({ bookingId, balance }: { bookingId: string; balance
               id="pay-date"
               name="receivedAt"
               type="date"
-              defaultValue={iso(new Date())}
+              defaultValue={toDateInputValue(new Date())}
               required
             />
           </Field>

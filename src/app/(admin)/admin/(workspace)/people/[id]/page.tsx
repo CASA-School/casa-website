@@ -4,15 +4,11 @@ import { notFound } from 'next/navigation';
 import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction } from '../actions';
 import { PersonForm } from '../person-form';
-import { NewBookingForm } from '../../bookings/booking-forms';
+import { BookingWizard } from '../../bookings/booking-wizard';
+import { createBookingFromWizardAction } from '../../bookings/actions';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
-import {
-  BOOKING_STATUS_LABELS,
-  BOOKING_STATUS_TONES,
-  listCohortOptions,
-  personBookings,
-} from '@/lib/admin/bookings';
-import { listCourseTypes } from '@/lib/admin/catalogue';
+import { bookingOffer } from '@/lib/admin/booking-offer';
+import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, personBookings } from '@/lib/admin/bookings';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { Icon } from '@/components/admin/icons';
@@ -88,27 +84,17 @@ export default async function PersonPage({
   const canEdit = canAccess(user, 'people', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit');
   const seesBookings = canAccess(user, 'bookings');
-  const [
-    timeline,
-    confirmed,
-    flags,
-    activity,
-    fileMakerLinks,
-    countries,
-    bookings,
-    cohorts,
-    courseTypes,
-  ] = await Promise.all([
-    personTimeline(person.id),
-    latestConfirmedLevel(person.id),
-    listFlags('person', person.id),
-    activityFor('person', person.id),
-    listFileMakerLinks('person', person.id),
-    canEdit ? listCountries() : Promise.resolve([]),
-    seesBookings ? personBookings(person.id) : Promise.resolve([]),
-    canBook ? listCohortOptions() : Promise.resolve([]),
-    canBook ? listCourseTypes() : Promise.resolve([]),
-  ]);
+  const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer] =
+    await Promise.all([
+      personTimeline(person.id),
+      latestConfirmedLevel(person.id),
+      listFlags('person', person.id),
+      activityFor('person', person.id),
+      listFileMakerLinks('person', person.id),
+      canEdit ? listCountries() : Promise.resolve([]),
+      seesBookings ? personBookings(person.id) : Promise.resolve([]),
+      canBook ? bookingOffer() : Promise.resolve(null),
+    ]);
 
   const title = [SALUTATIONS[person.salutation ?? ''] ?? '', person.displayName]
     .filter(Boolean)
@@ -118,8 +104,8 @@ export default async function PersonPage({
     <>
       <PageHeader
         backHref="/admin/people"
-        backLabel="All people"
-        eyebrow="Person"
+        backLabel="All students"
+        eyebrow="Student"
         title={title}
         description={
           person.id !== id
@@ -128,17 +114,19 @@ export default async function PersonPage({
         }
         actions={
           <div className="flex items-center gap-2">
-            {canBook ? (
+            {canBook && offer ? (
               <FormDialog
                 trigger="New booking"
                 title={`Book ${person.displayName}`}
                 triggerVariant="primary"
+                width="lg"
               >
-                <NewBookingForm
+                <BookingWizard
                   personId={person.id}
-                  cohorts={cohorts}
-                  courseTypes={courseTypes}
+                  personName={person.displayName}
+                  offer={offer}
                   returnTo={`/admin/people/${person.id}`}
+                  action={createBookingFromWizardAction}
                 />
               </FormDialog>
             ) : null}

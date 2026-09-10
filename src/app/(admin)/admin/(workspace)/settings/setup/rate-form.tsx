@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import { RATE_UNIT_LABELS } from '@/lib/admin/configuration-labels';
 import { createRateAction } from './actions';
+import { todayInputValue } from '@/lib/dates';
 
 type Targets = {
   courseTypes: { id: string; name: string }[];
@@ -155,7 +156,7 @@ export function RateForm({ targets }: { targets: Targets }) {
             name="validFrom"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={todayInputValue()}
           />
         </Field>
       </div>

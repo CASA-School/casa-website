@@ -12,6 +12,7 @@ import {
   type TaskArea,
 } from '@/lib/admin/day-board';
 import { requireModule } from '@/lib/admin/guard';
+import { todayInputValue } from '@/lib/dates';
 
 /**
  * Day board mutations.
@@ -27,7 +28,7 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** Back to the day the task belongs to; Today is the workspace's home. */
 function back(date: string, error?: string): never {
   const params = new URLSearchParams();
-  if (DATE.test(date) && date !== new Date().toISOString().slice(0, 10)) params.set('date', date);
+  if (DATE.test(date) && date !== todayInputValue()) params.set('date', date);
   if (error) params.set('error', error);
   const query = params.toString();
   redirect(`/admin${query ? `?${query}` : ''}`);
@@ -35,7 +36,7 @@ function back(date: string, error?: string): never {
 
 function readDate(formData: FormData, field = 'onDate'): string {
   const value = String(formData.get(field) ?? '');
-  return DATE.test(value) ? value : new Date().toISOString().slice(0, 10);
+  return DATE.test(value) ? value : todayInputValue();
 }
 
 function readArea(formData: FormData): TaskArea {

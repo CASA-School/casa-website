@@ -46,7 +46,7 @@ export default async function FlagsPage({
     <>
       <PageHeader
         backHref="/admin/people"
-        backLabel="People"
+        backLabel="Students"
         eyebrow="Needs a look"
         title={filter ? FLAG_LABELS[filter] : 'Everything flagged'}
         description="Records with a value that could not be matched, or that may belong to someone already on file."

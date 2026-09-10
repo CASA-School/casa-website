@@ -20,6 +20,7 @@ import {
   type PaymentMethod,
   type Payer,
 } from '@/lib/admin/bookings';
+import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { requireModule } from '@/lib/admin/guard';
 
 /**
@@ -274,4 +275,81 @@ export async function deleteBookingAction(formData: FormData): Promise<void> {
   revalidatePath('/admin', 'layout');
   if (!result.ok) fail(back, result.reason);
   redirect('/admin/bookings');
+}
+
+/**
+ * Creates a booking from the wizard's answers.
+ *
+ * The wizard sends a SELECTION, not a price list. Every rate-backed line —
+ * the enrolment fee, each book, an exam entry — is resolved again here from
+ * `rates`, so a crafted form cannot invent an amount. The two staff-agreed
+ * figures, tuition and accommodation, do come from the form because CASA has
+ * published no rate for them yet; both are clamped to a sane range.
+ */
+export async function createBookingFromWizardAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const personId = id(formData, 'personId');
+  const raw = String(formData.get('returnTo') ?? '');
+  const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
+
+  const kind = String(formData.get('kind') ?? 'course') === 'exam' ? 'exam' : 'course';
+  const dates = readDates(formData, safeBack);
+  const status = String(formData.get('status') ?? 'reserved');
+  if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
+  const payer = String(formData.get('payer') ?? 'self');
+  if (!PAYERS.has(payer)) throw new Error('Invalid payer');
+
+  const levelRaw = text(formData, 'levelCode', 8);
+  const materialIds = formData
+    .getAll('materialIds')
+    .map(String)
+    .filter((value) => UUID.test(value));
+
+  const selection: BookingSelection = {
+    kind,
+    courseInstanceId: optionalId(formData, 'courseInstanceId'),
+    courseTypeId: optionalId(formData, 'courseTypeId'),
+    examTypeId: kind === 'exam' ? optionalId(formData, 'examTypeId') : null,
+    examParts: String(formData.get('examParts') ?? '2') === '1' ? 1 : 2,
+    ...dates,
+    levelCode: levelRaw,
+    tuitionAmount: kind === 'course' ? money(formData, 'tuitionAmount') : null,
+    includeEnrolmentFee: formData.get('includeEnrolmentFee') === '1',
+    materialIds,
+    accommodationTypeCode: text(formData, 'accommodationTypeCode', 40),
+    roomTypeCode: text(formData, 'roomTypeCode', 40),
+    cateringCode: text(formData, 'cateringCode', 40),
+    accommodationFrom: text(formData, 'accommodationFrom', 10),
+    accommodationTo: text(formData, 'accommodationTo', 10),
+    accommodationAmount: money(formData, 'accommodationAmount'),
+  };
+
+  const lines = await priceSelection(selection);
+  if (lines.length === 0) fail(safeBack, 'Nothing to charge yet. Choose a course or an exam.');
+
+  const bookingId = await createBooking(
+    {
+      personId,
+      courseTypeId: selection.courseTypeId,
+      courseInstanceId: selection.courseInstanceId,
+      ...dates,
+      status: status as BookingStatus,
+      payer: payer as Payer,
+      payerName: text(formData, 'payerName', 120),
+      visaRequired: formData.get('visaRequired') === 'on',
+      notes: text(formData, 'notes', 2000),
+      charges: lines.map((line) => ({
+        kind: line.kind as ChargeKind,
+        description: line.description,
+        amount: line.amount,
+        chargeTypeCode: line.chargeTypeCode,
+        rateId: line.rateId,
+      })),
+      sourceRegistrationId: optionalId(formData, 'sourceRegistrationId'),
+    },
+    actor
+  );
+
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/bookings/${bookingId}`);
 }

@@ -1871,6 +1871,40 @@ country name ("Netherlands (the)") that the `countries` table and the public
 form both spell "Netherlands (Kingdom of the)", so every Dutch demo row was
 flagged unrecognised. The form and the table do agree — it was only the seed.
 
+## The booking wizard, and a timezone bug it exposed (2026-09-10)
+
+The owner's spec, verbatim in shape: "what does the student want — intensive
+course, so I choose intensive course then only intensive courses will be shown
+to me, the upcomings. So I choose one, the dates and the price will
+automatically be calculated... which level, say A2, so the selection will point
+me to the books for that level... we ask the students if they want a book, if
+yes the system automatically adds the books for a complete level and one book
+for a half level and calculates everything."
+
+Built as a five-step wizard in a wide dialog: What → Which → Level & books →
+Accommodation → Review, with a running total from the first step.
+`src/lib/admin/booking-offer.ts` is the catalogue plus the server's pricing;
+`booking-offer-types.ts` holds the shapes and the two pure helpers so the
+client component never reaches `db.ts`.
+
+**The price split that matters.** Rate-backed lines (enrolment fee 50, each
+book 23.99, exam entries) are **re-resolved on the server** from `rates`, and
+`booking_charges.rate_id` records which rate produced each line. Staff-agreed
+lines (tuition, accommodation) come from the form because CASA has published no
+rate for them yet — tuition falls back to `course_types.default_price`, so
+Intensive shows 520 and Evening 476. Verified end to end: a booking came out
+with 50 + 520 + 23.99 + 23.99, the two rate-backed book lines flagged as
+rate-backed and the tuition not.
+
+**A real bug it exposed.** A Postgres `date` arrives as a `Date` at LOCAL
+midnight, so `toISOString().slice(0, 10)` lands on the previous day for any
+positive UTC offset. Ten call sites had it: the accommodation dates prefilled
+27.09 for a cohort starting 28.09, and `BirthDate` rendered every stored birth
+date a day early — 1998-03-14 showed as "13 March 1998", while `DateText` on
+the same value showed the 14th, so the two disagreed on screen. Fixed with
+`src/lib/dates.ts` and a regression test. Nothing but looking at a rendered
+screen catches this class of thing.
+
 ## Verified Baseline
 
 The latest implementation pass (2026-09-10, migration 0012) cleared all six:
@@ -1878,7 +1912,7 @@ The latest implementation pass (2026-09-10, migration 0012) cleared all six:
 - `npm run lint`
 - `npm run typecheck`
 - `npm run build`
-- `npm run test` — 325 unit tests, 28 files
+- `npm run test` — 329 unit tests, 29 files
 - `npm run knip`
 - `E2E_PORT=3017 npm run test:e2e` — 36 specs, 23 public + 13 workspace
 

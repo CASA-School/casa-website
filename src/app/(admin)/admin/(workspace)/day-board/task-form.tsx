@@ -2,6 +2,7 @@ import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import { TASK_AREAS, type DayTask } from '@/lib/admin/day-board';
 import { AREA_LABELS } from './areas';
 import { createDayTaskAction, updateDayTaskAction } from './actions';
+import { toDateInputValue } from '@/lib/dates';
 
 /**
  * One form for writing a task and for editing it, shown in a dialog.
@@ -20,7 +21,7 @@ export function TaskForm({
   staff: readonly { id: string; name: string }[];
 }) {
   const editing = Boolean(task);
-  const onDate = task ? new Date(task.onDate).toISOString().slice(0, 10) : date;
+  const onDate = task ? toDateInputValue(task.onDate) : date;
 
   return (
     <form action={editing ? updateDayTaskAction : createDayTaskAction} className="space-y-3">

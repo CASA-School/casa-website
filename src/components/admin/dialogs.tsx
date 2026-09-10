@@ -25,7 +25,8 @@ import {
  * only visual, and a request that skips the dialog is refused.
  */
 
-const panel = 'max-w-lg rounded-2xl p-6 sm:rounded-2xl';
+const panel = (width: 'md' | 'lg') =>
+  `${width === 'lg' ? 'max-w-2xl' : 'max-w-lg'} rounded-2xl p-6 sm:rounded-2xl`;
 
 export function FormDialog({
   trigger,
@@ -34,6 +35,7 @@ export function FormDialog({
   children,
   triggerVariant = 'secondary',
   size = 'md',
+  width = 'md',
 }: {
   trigger: ReactNode;
   title: string;
@@ -41,6 +43,8 @@ export function FormDialog({
   children: ReactNode;
   triggerVariant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md';
+  /** `lg` for a multi-step form; the default suits a handful of fields. */
+  width?: 'md' | 'lg';
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -48,7 +52,7 @@ export function FormDialog({
       <Button type="button" variant={triggerVariant} size={size} onClick={() => setOpen(true)}>
         {trigger}
       </Button>
-      <DialogContent className={panel} closeLabel="Close">
+      <DialogContent className={panel(width)} closeLabel="Close">
         <DialogTitle className="text-lg">{title}</DialogTitle>
         {description ? (
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
@@ -94,7 +98,7 @@ export function ConfirmSubmit({
         {children}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={panel} showCloseButton={false}>
+        <DialogContent className={panel('md')} showCloseButton={false}>
           <DialogTitle className="text-lg">{title}</DialogTitle>
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
           <div className="mt-5 flex justify-end gap-2">

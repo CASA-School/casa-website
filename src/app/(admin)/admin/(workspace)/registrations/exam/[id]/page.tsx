@@ -9,6 +9,7 @@ import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { getExamRegistration, registrationTypeLabel } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
+import { toDateInputValue } from '@/lib/dates';
 
 const SALUTATIONS: Record<string, string> = {
   mr: 'Mr',
@@ -48,7 +49,7 @@ export default async function ExamRegistrationPage({
     ? await findDuplicateCandidates({
         email: registration.email,
         lastName: registration.lastName,
-        birthDate: registration.birthDate?.toISOString().slice(0, 10) ?? null,
+        birthDate: toDateInputValue(registration.birthDate) || null,
         excludePersonId: person.id,
       })
     : [];

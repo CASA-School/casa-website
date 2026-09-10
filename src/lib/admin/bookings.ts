@@ -354,8 +354,18 @@ export type NewBooking = {
   payerName: string | null;
   visaRequired: boolean;
   notes: string | null;
-  /** Opening cost lines. The form offers the catalogue price as the first. */
-  charges: { kind: ChargeKind; description: string; amount: number }[];
+  /**
+   * Opening cost lines. `rateId` records which published rate produced the
+   * amount, where one did — that provenance is what stops a rate being
+   * deleted after it has priced a booking.
+   */
+  charges: {
+    kind: ChargeKind;
+    description: string;
+    amount: number;
+    chargeTypeCode?: string | null;
+    rateId?: string | null;
+  }[];
   sourceRegistrationId?: string | null;
 };
 
@@ -420,8 +430,10 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
     );
     for (const c of input.charges) {
       await client.query(
-        `INSERT INTO booking_charges (booking_id, kind, description, amount, created_by) VALUES ($1, $2, $3, $4, $5)`,
-        [id, c.kind, c.description, c.amount, actor.id]
+        `INSERT INTO booking_charges
+           (booking_id, kind, description, amount, charge_type_code, rate_id, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [id, c.kind, c.description, c.amount, c.chargeTypeCode ?? null, c.rateId ?? null, actor.id]
       );
     }
     if (input.sourceRegistrationId) {
