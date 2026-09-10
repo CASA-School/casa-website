@@ -33,6 +33,10 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
     title: 'Study & Life in Germany',
     summary: 'Applications, language, funding and housing, in the order they actually happen.',
     lead: 'The route from deciding to study in Germany to your first month here, written for people organising it from abroad.',
+    photo: {
+      src: '/media/casa/study-materials-map.jpg',
+      alt: 'Study materials and a map laid out for planning a course',
+    },
     ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
   },
   quickFacts: [
@@ -188,6 +192,10 @@ export const livingInGermanyGuideEn: ResourceGuideData = {
     title: 'Living in Germany',
     summary: 'Registration, banking, insurance and housing, in the order the first month demands them.',
     lead: 'The practical month: what to do in which week after you land, and which tasks block the others until they are done.',
+    photo: {
+      src: '/media/casa/bremen-schnoor-houses.jpg',
+      alt: 'Gabled houses in the Schnoor quarter of Bremen',
+    },
     ctas: [{ label: 'See CASA accommodation', href: '/accommodation' }],
   },
   quickFacts: [
@@ -333,6 +341,10 @@ export const whyGermanyGuideEn: ResourceGuideData = {
     title: 'Why Germany',
     summary: 'What Germany offers a student in practice, and where German changes the outcome.',
     lead: 'A page for deciding rather than for persuading: what is genuinely good here, what takes effort, and how much of it depends on the language.',
+    photo: {
+      src: '/media/casa/group-course-walking-bremen.jpg',
+      alt: 'CASA learners walking through Bremen together',
+    },
     ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
   },
   quickFacts: [

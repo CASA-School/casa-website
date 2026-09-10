@@ -39,6 +39,8 @@ describe('the German guides mirror the English ones', () => {
       faq: guide.faq.length,
       officialLinks: guide.officialLinks.length,
       heroActions: guide.hero.ctas.map((cta) => cta.href),
+      // The same photograph in both languages; only the alt text is translated.
+      heroPhoto: guide.hero.photo.src,
     });
 
     expect(shape(de)).toEqual(shape(en));
@@ -53,6 +55,7 @@ describe('the German guides mirror the English ones', () => {
     expect(de.hero.lead).not.toBe(en.hero.lead);
     expect(de.stepsTitle).not.toBe(en.stepsTitle);
     expect(de.metaDescription).not.toBe(en.metaDescription);
+    expect(de.hero.photo.alt).not.toBe(en.hero.photo.alt);
     de.steps.forEach((step, index) => {
       expect(step.title, `${slug} step ${index + 1}`).not.toBe(en.steps[index].title);
     });

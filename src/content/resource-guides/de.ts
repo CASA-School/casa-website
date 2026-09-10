@@ -35,6 +35,10 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
     title: 'Studium & Leben in Deutschland',
     summary: 'Bewerbung, Sprache, Finanzierung und Wohnen, in der Reihenfolge, in der sie anstehen.',
     lead: 'Der Weg von der Entscheidung für ein Studium in Deutschland bis zum ersten Monat hier, geschrieben für alle, die das aus dem Ausland organisieren.',
+    photo: {
+      src: '/media/casa/study-materials-map.jpg',
+      alt: 'Lernmaterialien und eine Karte für die Kursplanung',
+    },
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },
   quickFacts: [
@@ -190,6 +194,10 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
     title: 'Leben in Deutschland',
     summary: 'Anmeldung, Konto, Versicherung und Wohnen, in der Reihenfolge, die der erste Monat verlangt.',
     lead: 'Der praktische Monat: was in welcher Woche nach der Ankunft zu tun ist, und welche Schritte die anderen blockieren, solange sie offen sind.',
+    photo: {
+      src: '/media/casa/bremen-schnoor-houses.jpg',
+      alt: 'Giebelhäuser im Bremer Schnoorviertel',
+    },
     ctas: [{ label: 'Unterkünfte ansehen', href: '/accommodation' }],
   },
   quickFacts: [
@@ -335,6 +343,10 @@ export const whyGermanyGuideDe: ResourceGuideData = {
     title: 'Warum Deutschland',
     summary: 'Was Deutschland Studierenden praktisch bietet, und wo Deutsch den Unterschied macht.',
     lead: 'Eine Seite zum Entscheiden, nicht zum Überzeugen: was hier wirklich gut ist, was Mühe kostet, und wie viel davon an der Sprache hängt.',
+    photo: {
+      src: '/media/casa/group-course-walking-bremen.jpg',
+      alt: 'CASA Lernende gehen gemeinsam durch Bremen',
+    },
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },
   quickFacts: [
