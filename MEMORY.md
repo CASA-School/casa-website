@@ -2078,3 +2078,22 @@ numbered placeholders instead, and the registry keeps the old paths as the deliv
 targets for the new pictures. The product owner expected them gone. The ~100 new shots
 in the untracked `editorial-2026/` pool are not wired to any slot yet.
 
+## 25. The resource guides rebuilt on the standard hero (2026-09-10)
+
+`ResourceGuidePage` had its own hero (framed photo card with caption, rotated-square
+ornament, tricolour rule, two blur blobs, two buttons) and seven card sections that
+restated each other: six facts, eight steps, six "deep dive" cards each ending in an
+"Action:" line, two decorative photo cards, an eight-item checklist that repeated the
+eight steps, FAQ, official links, plus per-guide colour presets. It is now the standard
+hero with one action and five plain hairline sections: facts (four, the ones the steps do
+not repeat), roadmap (the eight steps, "Action:" labels gone), four topics (the two that
+duplicated the Living and Why guides became cross-links; the CASA tie-in folded into the
+language topic with a text link to the placement test), questions, official sources (the
+non-official summary site dropped) and the other two guides. Removed from the content
+types for all three guides: `checklistItems`, `finalCTA` (never rendered), `imageSlots`,
+hero captions and the topic "Action:" lines. Glued hyphens in the prose fixed.
+
+The body copy is still English under the German URLs; the chrome follows the language
+and the German page says so in one line. Translating the Study & Life guide is the next
+copy step, after the trimmed English is approved.
+

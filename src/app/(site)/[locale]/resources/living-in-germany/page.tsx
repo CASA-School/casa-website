@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function LivingInGermanyResourcePage() {
-  return <ResourceGuidePage data={livingInGermanyGuide} />;
+export default async function LivingInGermanyResourcePage() {
+  const locale = await getContentLocale();
+  return <ResourceGuidePage data={livingInGermanyGuide} locale={locale} />;
 }
