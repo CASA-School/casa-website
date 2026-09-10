@@ -5,32 +5,53 @@ import { HeroBEditorial } from '@/components/heroes';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
+import type { ContentLocale } from '@/lib/content/types';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
-export const metadata: Metadata = createPublicMetadata({
-  title: 'Gemeinnützigkeit & Mission',
-  description:
-    'Wie CASA als gemeinnützige Sprachschule Kursgebühren in Bildung, Integration, Lehrkräfte und soziale Projekte reinvestiert.',
-  path: '/ueber-uns/gemeinnuetzigkeit',
-  keywords: [
-    'CASA gemeinnützig',
-    'CASA gGmbH',
-    'Non-profit language school Bremen',
-    'gemeinnützige Sprachschule Bremen',
-  ],
-});
+const PATH = '/ueber-uns/gemeinnuetzigkeit';
+const KEYWORDS = [
+  'CASA gemeinnützig',
+  'CASA gGmbH',
+  'Non-profit language school Bremen',
+  'gemeinnützige Sprachschule Bremen',
+];
 
-const pageSchema = {
+// Title and description follow the visitor's language like the rest of the page.
+// They were German for everyone, so an English visitor got a German tab title and
+// search preview on this one route.
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getContentLocale();
+
+  return createPublicMetadata(
+    locale === 'de'
+      ? {
+          title: 'Gemeinnützigkeit & Mission',
+          description:
+            'Wie CASA als gemeinnützige Sprachschule Kursgebühren in Bildung, Integration, Lehrkräfte und soziale Projekte reinvestiert.',
+          path: PATH,
+          keywords: KEYWORDS,
+        }
+      : {
+          title: 'Non-profit status & mission',
+          description:
+            'How CASA, a non-profit language school, reinvests course fees in education, integration, teachers and social projects.',
+          path: PATH,
+          keywords: KEYWORDS,
+        }
+  );
+}
+
+const pageSchema = (locale: ContentLocale) => ({
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
-  name: 'Gemeinnützigkeit & Mission',
-  url: toAbsoluteUrl('/ueber-uns/gemeinnuetzigkeit'),
+  name: locale === 'de' ? 'Gemeinnützigkeit & Mission' : 'Non-profit status & mission',
+  url: toAbsoluteUrl(PATH),
   about: {
     '@type': 'EducationalOrganization',
     name: 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH',
     legalName: 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH',
   },
-};
+});
 
 export default async function NonProfitStatusPage() {
   const locale = await getContentLocale();
@@ -211,7 +232,7 @@ export default async function NonProfitStatusPage() {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      <JsonLdScript id="nonprofit-status-schema" data={pageSchema} />
+      <JsonLdScript id="nonprofit-status-schema" data={pageSchema(locale)} />
       <HeroBEditorial
         eyebrow={copy.hero.eyebrow}
         title={copy.hero.title}
