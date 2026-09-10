@@ -848,60 +848,85 @@ h3 {
  * THE COLLAPSED SIDEBAR
  *
  * `SidebarToggle` writes `data-workspace-nav` on the root element and the
- * folding happens here, in CSS. The rail's links, groups and footer are
+ * folding happens here, in CSS. The rail's links and groups are
  * server-rendered and know nothing about it: they carry `data-nav-label` on
- * whatever is text, and these selectors hide it. That keeps a piece of chrome
+ * whatever is text, and these selectors handle it. That keeps a piece of chrome
  * out of a dozen components, and it means the state survives a navigation
  * without a client provider around the whole shell.
  *
- * Desktop only. On a phone the rail is already a horizontal strip of icons and
- * labels that scrolls, and collapsing a strip gains nothing.
+ * SMOOTHNESS IS THE POINT. The aside animates its width (see shell.tsx), and
+ * the labels FADE rather than vanish — `display: none` would snap the text
+ * away a frame before the rail starts to move, which is exactly the jolt a
+ * collapse must not have. Each link clips its own overflow, so a fading label
+ * is cropped by the shrinking rail instead of wrapping under its icon. Only the
+ * things that have no icon to fall back on — group headings and nested lists —
+ * are removed outright, and those go after the width has settled.
+ *
+ * Desktop only. On a phone the rail is already a horizontal strip.
  */
 @media (min-width: 64rem) {
   html[data-workspace-nav='collapsed'] .casa-workspace-panel {
     width: 4.25rem;
   }
 
-  /* Text goes, and with it the chevrons and the nested lists that only make
-     sense beside a label. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-label],
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-children],
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-group-label] {
-    display: none;
+  .casa-workspace-panel [data-nav-label] {
+    transition: opacity 120ms ease-out;
+  }
+  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-label] {
+    opacity: 0;
+    pointer-events: none;
   }
 
-  /* Every remaining row centres on its icon. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a,
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel button,
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-identity],
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel .mt-auto a {
+  /* No icon to stand in for these, so they are removed — but a beat after the
+     width finishes, not before it starts. */
+  .casa-workspace-panel [data-nav-children],
+  .casa-workspace-panel [data-nav-group-label] {
+    transition:
+      opacity 100ms ease-out,
+      max-height 200ms ease-out 100ms;
+    max-height: 40rem;
+    overflow: hidden;
+  }
+  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-children],
+  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-group-label] {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+  }
+
+  /* Every row centres on its icon. The label is still in the flow at zero
+     opacity, so it is pinned out of the way rather than left to push the icon
+     off-centre. */
+  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
   }
-
-  /* A badge cannot show a number at this width, so it becomes a marker: the
-     fact that something is waiting still reaches the eye. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a > span:last-child:not([data-nav-label]) {
+  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a > [data-nav-label] {
     position: absolute;
-    top: 0.3rem;
-    right: 0.55rem;
-    min-width: 0.45rem;
-    height: 0.45rem;
-    padding: 0;
-    font-size: 0;
-    line-height: 0;
+    left: 100%;
+    width: 0;
   }
 
-  /* The logo is hidden, so the rail should not keep its gap. */
+  /* The "you are here" marker keeps its place against the rail's left edge. */
+  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a > span:first-child {
+    left: -0.75rem;
+  }
+
+  /* The logo is hidden with the labels, so the rail should not keep its gap. */
   html[data-workspace-nav='collapsed'] .casa-workspace-panel > div {
     gap: 1rem;
   }
 
-  /* The group label is gone, so a hairline keeps the grouping legible. */
+  /* Group headings are gone, so a hairline keeps the grouping legible — and
+     the spacing between groups stays even, which is most of what "smooth"
+     means once the animation has finished. */
   html[data-workspace-nav='collapsed'] .casa-workspace-panel nav > div + div {
-    margin-top: 0.6rem;
-    padding-top: 0.6rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
     border-top: 1px solid var(--ws-panel-line);
   }
 }

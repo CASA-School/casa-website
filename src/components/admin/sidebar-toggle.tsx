@@ -7,12 +7,16 @@ import { cn } from '@/lib/utils';
 /**
  * Collapses the sidebar to icons.
  *
- * The state lives on `<html data-workspace-nav>` and the collapsing itself is
- * CSS in `globals.css`. That is deliberate: the rail's links and groups are
+ * The state lives on `<html data-workspace-nav>` and the folding itself is CSS
+ * in `globals.css`. That is deliberate: the rail's links and groups are
  * server-rendered, and threading a "collapsed" prop through every one of them
  * — or wrapping the whole shell in a context provider — would make a dozen
  * components care about a piece of chrome. A data attribute and descendant
  * selectors let them stay ignorant.
+ *
+ * It sits in the top bar rather than at the foot of the rail, which is where
+ * every dashboard people already use puts it, and which means it does not
+ * disappear along with the rail it controls.
  *
  * `src/app/(admin)/layout.tsx` sets the attribute before first paint from the
  * same localStorage key, so a colleague who works collapsed does not watch the
@@ -54,29 +58,28 @@ export function SidebarToggle() {
       type="button"
       onClick={toggle}
       aria-pressed={collapsed}
+      aria-label={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}
       title={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}
       className={cn(
-        'hidden w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold',
-        'text-ws-on-panel-muted transition-colors hover:bg-white/6 hover:text-ws-on-panel',
-        'outline-none focus-visible:ring-2 focus-visible:ring-[var(--ws-marker)]/70 lg:flex'
+        'hidden size-8 items-center justify-center rounded-lg text-[var(--casa-text-subtle)]',
+        'transition-colors hover:bg-ws-sunk hover:text-[var(--casa-ink)]',
+        'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 lg:flex'
       )}
     >
-      <span aria-hidden="true" className="shrink-0">
-        <svg
-          viewBox="0 0 16 16"
-          className={cn('h-4 w-4 transition-transform', collapsed ? 'rotate-180' : '')}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="2" y="2.5" width="12" height="11" rx="1.4" />
-          <path d="M6.25 2.5v11" />
-          <path d="m11.5 6.25-1.75 1.75 1.75 1.75" />
-        </svg>
-      </span>
-      <span data-nav-label>{collapsed ? 'Expand' : 'Collapse'}</span>
+      <svg
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="2" y="2.5" width="12" height="11" rx="1.4" />
+        <path d="M6.25 2.5v11" />
+        <path d={collapsed ? 'm9.75 6.25 1.75 1.75-1.75 1.75' : 'm11.5 6.25-1.75 1.75 1.75 1.75'} />
+      </svg>
     </button>
   );
 }

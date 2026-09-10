@@ -28,17 +28,17 @@ const isCurrent = (pathname: string, href: string) =>
 export function NavLink({
   href,
   icon,
-  badge,
+  title,
   children,
   items,
 }: {
   href: string;
   icon: ReactNode;
-  /** A count worth interrupting for. Rendered only when above zero. */
-  badge?: number;
+  /** Shown as the browser tooltip — the label, for when the rail is icons only. */
+  title?: string;
   children: ReactNode;
   /** Nested destinations under this one. */
-  items?: { href: string; label: string; badge?: number }[];
+  items?: { href: string; label: string }[];
 }) {
   const pathname = usePathname();
   const active = isCurrent(pathname, href);
@@ -48,11 +48,12 @@ export function NavLink({
     <div className="shrink-0">
       <Link
         href={href}
+        title={title}
         aria-current={
           active && !items?.some((i) => isCurrent(pathname, i.href)) ? 'page' : undefined
         }
         className={cn(
-          'group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm whitespace-nowrap transition-colors',
+          'group relative flex items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-2 text-sm whitespace-nowrap transition-colors',
           'outline-none focus-visible:ring-2 focus-visible:ring-[var(--ws-marker)]/70',
           active
             ? 'bg-white/10 font-semibold text-ws-on-panel'
@@ -80,7 +81,6 @@ export function NavLink({
         <span data-nav-label className="min-w-0 flex-1">
           {children}
         </span>
-        <Count value={badge} />
         {items && items.length > 0 ? (
           <span
             aria-hidden="true"
@@ -128,7 +128,6 @@ export function NavLink({
                   <span data-nav-label className="min-w-0 flex-1">
                     {item.label}
                   </span>
-                  <Count value={item.badge} />
                 </Link>
               </li>
             );
@@ -136,15 +135,6 @@ export function NavLink({
         </ul>
       ) : null}
     </div>
-  );
-}
-
-function Count({ value }: { value?: number }) {
-  if (!value || value <= 0) return null;
-  return (
-    <span className="flex h-[1.15rem] min-w-[1.15rem] items-center justify-center rounded-full bg-[var(--casa-accent-surface)] px-1.5 text-[0.65rem] font-bold text-white">
-      {value > 99 ? '99+' : value}
-    </span>
   );
 }
 

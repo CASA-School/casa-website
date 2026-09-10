@@ -1943,6 +1943,31 @@ served a stale CSS chunk** for a `globals.css` edit — the production build had
 the rules and the dev server did not, so `rm -rf .next/dev` and restart before
 concluding CSS does not work.
 
+## Top bar, counts gone, a collapse that moves (2026-09-10, later)
+
+The owner: "the collapse experience is not that smooth and professional at all"
+and "those numbers next to enquiry or registration, we don't need those" — a
+different notification system is coming, possibly with a sticky top-level bar.
+
+- **Sticky top bar** (`top-bar.tsx`): collapse toggle, today's date linking to
+  the day view, back-to-website, avatar + name + role + sign out. Identity left
+  the rail's foot, where it collided with the browser's bottom-left furniture
+  and disappeared when collapsed. The rail is navigation only, at every width.
+- **Counts removed** everywhere in the rail, and the layout no longer runs the
+  five backlog queries per request that fed them. No bell until there is a real
+  source — an empty panel teaches people to ignore it.
+- **The collapse animates.** Width 200ms ease-out on the aside, labels fade at
+  120ms instead of `display: none` (which snapped text away before the rail
+  moved), links clip their overflow, nested lists and group headings leave a
+  beat after the width settles, icons centre to the pixel, every link has a
+  tooltip title.
+
+Verification caveat worth remembering: **the in-app Browser pane, when hidden,
+produces no frames** — `requestAnimationFrame` never fires, timers throttle to
+1s, and CSS transitions queue without painting, so a 200ms animation cannot be
+sampled from it. I verified the declared transitions, the live CSS and both end
+states; the motion itself is only observable with the pane visible.
+
 ## Verified Baseline
 
 The latest implementation pass (2026-09-10, migration 0012) cleared all six:

@@ -1,11 +1,8 @@
 import { redirect } from 'next/navigation';
 
-import { WorkspaceShell, type NavBadges } from '@/components/admin/shell';
+import { WorkspaceShell } from '@/components/admin/shell';
 import { getStaffUser, signOut } from '@/lib/admin/auth';
-import { bookingCounts } from '@/lib/admin/bookings';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
-import { placementReviewBacklog } from '@/lib/admin/placement';
-import { unhandledCount } from '@/lib/admin/queues';
 import { DatabaseUnavailable } from '@/components/admin/database-unavailable';
 
 /**
@@ -41,25 +38,6 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     redirect('/admin/sign-in');
   }
 
-  const [enquiries, courseRegistrations, examRegistrations, applications, placement, bookings] =
-    await Promise.all([
-      unhandledCount('enquiry'),
-      unhandledCount('course_registration'),
-      unhandledCount('exam_registration'),
-      unhandledCount('career_application'),
-      placementReviewBacklog(),
-      bookingCounts(),
-    ]);
-
-  const badges: NavBadges = {
-    enquiries,
-    courseRegistrations,
-    examRegistrations,
-    applications,
-    placement,
-    reserved: bookings.reserved,
-  };
-
   async function handleSignOut() {
     'use server';
     await signOut();
@@ -67,7 +45,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   }
 
   return (
-    <WorkspaceShell user={user} badges={badges} signOutAction={handleSignOut}>
+    <WorkspaceShell user={user} signOutAction={handleSignOut}>
       {children}
     </WorkspaceShell>
   );

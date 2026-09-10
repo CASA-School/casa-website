@@ -373,22 +373,46 @@ uncontrolled — any form can use it by naming its required inputs. The server
 snapshot is open, so a render without JavaScript shows every field.
 `alwaysOpen` is for editing and for a final review step.
 
-## The sidebar collapses
+## The top bar, and a rail that is only navigation
 
-`SidebarToggle` writes `data-workspace-nav` on the root element and the folding
-is CSS in `globals.css`; `src/app/(admin)/layout.tsx` sets the attribute before
-first paint from the same localStorage key, so a colleague who works collapsed
-never watches the rail fold itself. The rail's links and groups know nothing
-about it — they carry `data-nav-label` on whatever is text and the selectors
-hide it, which keeps a piece of chrome out of a dozen components.
+A sticky 56px bar runs across the top of every screen (`top-bar.tsx`). It holds
+what is true everywhere and nothing about the page beneath: the control that
+folds the rail, today's date as a way back to the day view, the way back to the
+website, and who is signed in with their sign-out. Identity moved here from the
+foot of the sidebar because it was the only thing down there, it collided with
+the browser's own bottom-left furniture, and it vanished when the rail
+collapsed — so signing out required expanding the rail first. The rail is now
+navigation and nothing else, at every width.
 
-Collapsed the rail is 4.25rem of icons: labels, group headings and nested items
-go, a badge becomes a marker dot, and hairlines replace the group headings. The
-wordmark hides too — it is nearly six times as wide as it is tall, so at icon
-width it would be a sliver of the letter C, and CASA has no separate emblem to
-put there. Desktop only: on a phone the rail is already a scrolling strip.
+**There are no counts in the rail.** The numbers beside Enquiries, Registrations
+and Placement were queue backlogs, not notifications, and a permanent number
+next to a label reads as nagging. A notification system is planned; when it has
+a real source — something happened, to a record you own, since you last looked
+— it belongs in the top bar, to the left of the date. Until then there is no
+bell, because a bell that opens an empty panel teaches people to ignore it.
 
-`suppressHydrationWarning` on `<html>` is required and deliberate: the
+### Collapsing
+
+`SidebarToggle` (in the top bar) writes `data-workspace-nav` on the root element
+and the folding is CSS in `globals.css`; `src/app/(admin)/layout.tsx` applies
+the stored value before first paint, so a colleague who works collapsed never
+watches the rail fold itself. The rail's links and groups know nothing about
+it — they carry `data-nav-label` on whatever is text — which keeps a piece of
+chrome out of a dozen components.
+
+**Smoothness is the point.** The aside animates its width (200ms, ease-out) and
+labels *fade* (120ms) rather than vanish: `display: none` would snap the text
+away a frame before the rail moved, which is exactly the jolt a collapse must
+not have. Each link clips its own overflow, so a fading label is cropped by the
+shrinking rail instead of wrapping under its icon. Only things with no icon to
+fall back on — group headings, nested lists — are removed, and those go a beat
+*after* the width settles. Collapsed, the rail is 4.25rem of centred icons with
+hairlines where the group headings were, and every link carries its label as a
+tooltip. The wordmark hides too: nearly six times as wide as tall, at icon width
+it would be a sliver of the letter C, and CASA has no separate emblem.
+
+Desktop only: on a phone the rail is already a scrolling strip.
+`suppressHydrationWarning` on `<html>` is required and deliberate — the
 pre-paint script writes an attribute the server render does not have.
 
 ## Design standards

@@ -176,7 +176,11 @@ never give plumbing a badge in the rail.
 
 **Setup is not navigation.** Rooms, the type lists and the price list are
 defined once and left for a season; they live under Settings, not the main
-rail. A nav label and the page title it opens must say the same word. `docs/ADMIN_WORKSPACE.md` §Design standards has the
+rail. A nav label and the page title it opens must say the same word.
+
+**No counts in the rail, and no fake notifications.** Queue backlogs are not
+notifications. The sticky top bar holds identity, the date and the collapse
+control; a notification bell goes there only once a real source exists. `docs/ADMIN_WORKSPACE.md` §Design standards has the
 measurements and the defect each rule came from.
 
 **Workspace screens: labels, not explanations.** The staff workspace must stay
