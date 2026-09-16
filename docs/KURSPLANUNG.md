@@ -115,10 +115,10 @@ colleague's change.
 
 | PR | Content | Status |
 | --- | --- | --- |
-| 1 | module, focus-mode shell, migration 0014, domain + tests, landing page, import script, Manrope | open (#29) |
-| 2 | the board: week view, tray, pick-up mode, drag & drop, handle, menus, undo, copy week, save action | open (#30) |
-| 3 | teacher dialog (rules + absences), Kurse (pairs, group count, registrations), Lehrkräfte list | open (#31) |
-| 4 | Monat view (all weeks stacked), `Ersatz finden`, month selection and the next month from this one, stale-write check, e2e with a real session | open (#32) |
+| 1 | module, focus-mode shell, migration 0014, domain + tests, landing page, import script, Manrope | merged 2026-09-16 (#29) |
+| 2 | the board: week view, tray, pick-up mode, drag & drop, handle, menus, undo, copy week, save action | merged 2026-09-16 (#30) |
+| 3 | teacher dialog (rules + absences), Kurse (pairs, group count, registrations), Lehrkräfte list | merged 2026-09-16 (#31) |
+| 4 | Monat view (all weeks stacked), `Ersatz finden`, month selection and the next month from this one, stale-write check, e2e with a real session | merged 2026-09-16 (#32) |
 
 Then the FileMaker side, in the order `docs/FILEMAKER_BRIDGE.md` §7 sets: read the four layouts the
 analytics bridge already exports (`Course_API`, `SingleDateCourse_API`, `SingleDayStaff`, `StaffMember`)
