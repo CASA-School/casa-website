@@ -32,13 +32,19 @@ az account set --subscription "$SUBSCRIPTION"
 # ACR's tar packer walks .git even though it excludes it, and dies on the stale
 # fsmonitor unix socket some checkouts carry ("tarfile: unsupported type").
 # Staging a copy without .git is cheaper than touching a developer's .git, and it
-# also guarantees the build context matches .dockerignore exactly.
+# avoids staging local caches and tool state. ACR then applies .dockerignore
+# to the staged copy before building the image.
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 echo "==> staging build context in $STAGE"
 rsync -a --exclude '.git' --exclude 'node_modules' --exclude '.next' \
-      --exclude 'output' --exclude 'playwright-report' --exclude 'test-results' \
-      --exclude '.env.local' ./ "$STAGE"/
+      --exclude 'output' --exclude 'tmp' --exclude 'coverage' \
+      --exclude 'playwright-report' --exclude 'test-results' \
+      --exclude '.playwright-cli' --exclude '.claude' --exclude '.gstack' \
+      --exclude '.agentic' --exclude '.vercel' --exclude '.neon' \
+      --exclude '*.tsbuildinfo' --exclude '.DS_Store' \
+      --exclude 'public/media/casa/editorial-2026' \
+      --include '.env.example' --exclude '.env*' ./ "$STAGE"/
 
 echo "==> building $REPO:$TAG in $ACR (linux/amd64)"
 az acr build --registry "$ACR" --platform linux/amd64 \

@@ -10,6 +10,7 @@ tmp/
 coverage/
 playwright-report/
 test-results/
+.playwright-cli/
 *.local.pdf
 *.presentation.pdf
 
@@ -23,6 +24,10 @@ test-results/
 
 # Development-only coordination
 .agentic/
+.claude/
+.gstack/
+public/media/casa/editorial-2026/
+public/**/*.md
 
 # Protected internal material with no build-time or runtime use.
 #

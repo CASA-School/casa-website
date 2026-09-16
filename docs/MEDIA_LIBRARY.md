@@ -1,6 +1,6 @@
 # CASA Media Library
 
-Photographs for the public site live here and are served from `/media/casa/…`.
+Approved photographs live in `public/media/casa/` and are served from `/media/casa/…`.
 
 ## What is in this folder (since 2026-09-10)
 
@@ -9,12 +9,18 @@ Photographs for the public site live here and are served from `/media/casa/…`.
 | `group-course-bremen-musicians.jpg` | Slot 20, live. Editorial grade (the pool's W008). |
 | `group-course-walking-bremen.jpg` | Slot 23, live. Editorial grade (the pool's W012). |
 | `newsflash-editor-lisa-dao.jpg`, `newsflash-kicktipp-winners.jpg` | Article images of two NewsFlash posts. Rendered directly, not through the placeholder, and deliberately unnumbered. |
-| `editorial-2026/` (untracked, excluded from the Docker image) | The new pool: 99 camera shots and 13 re-edits, delivered 2026-08-27. The source for every remaining slot. Contact sheet: `output/review/new-photo-pool.jpg`. |
+
+The candidate pool is kept outside the project so unapproved photographs cannot be
+served or deployed accidentally. On the CASA laptop, the 103 files were moved intact
+on 2026-09-16 to `/Users/rahmanshafiee/Archive/CASA/website-cleanup-2026-09-16/editorial-2026/`.
+The contact sheet is in that archive's `project-output/review/new-photo-pool.jpg`.
+This pool remains the source for filling the remaining slots; it is not a deployment asset.
 
 The old library — 39 derivatives made in June 2026 from the OneDrive selection — was
 removed on 2026-09-10. The product owner chose the new pool over it; the files had only
 survived because the site switched to numbered placeholders on 2026-08-17 instead of
-deleting them. Their sources and enhancement parameters are in this file's git history.
+deleting them. Their sources and enhancement parameters are in the Git history of
+this document's former path, `public/media/casa/README.md`.
 
 ## How a photograph goes live
 

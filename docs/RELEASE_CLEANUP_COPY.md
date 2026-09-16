@@ -3,8 +3,8 @@
 ## Ownership and scope
 - Branch: `codex/deployment-cleanup-copy`, rebased onto `casa/main` at `a0c01b5` after the four course-planning changes landed. Original audit base: `d8316c8`.
 - Isolated worktree: `/Users/rahmanshafiee/.codex/worktrees/casa-release-copy/CASA`.
-- User authorized repository cleanup and native English/German copy improvement. No deployment requested.
-- Course-planning changes are included through the rebase. Do not edit other worktrees or the main checkout; preserve its untracked `public/media/casa/editorial-2026/` photo pool.
+- User authorized repository cleanup and native English/German copy improvement, then explicitly requested statistics removal, push/merge and retired branch/worktree cleanup. No production deployment requested.
+- Course-planning changes are included through the rebase. The candidate photo pool is preserved outside the project; see `docs/MEDIA_LIBRARY.md`.
 - Work context: CASA website; source of brand direction is the user's brief (international diversity, belonging, listening, personal advice, accommodation, exams, cultural trips and friendship).
 
 ## Completed scope
@@ -23,7 +23,7 @@
 - Live homepage and English version checked on 2026-09-16: https://casa-bremen.de/ and https://casa-bremen.de/en/ . Existing source comparison: `docs/CONTENT_PARITY_WITH_CASA_BREMEN_DE.md` (historical findings, not reliable current status).
 
 ## Verification
-Final checks on 2026-09-16 after both readability fixes:
+Final checks on 2026-09-16 after readability fixes, statistics removal and deployment-context cleanup:
 
 | Command | Result |
 | --- | --- |
@@ -41,6 +41,8 @@ Browser checks: English/German homepage at 1440px and 390px. Community text cont
 Additional browser audit: 18 core routes in both languages at both widths, **72 successful page checks**. Each returned HTTP 200, rendered one main heading and had no horizontal overflow or failed completed image loads. Coverage includes homepage, About/team, courses and intensive course, exams and B2, accommodation and both options, contact, FAQ, all three guides, careers, hosting and nonprofit. Local details: `output/playwright/route-audit.txt`.
 
 Logs are local, ignored artifacts in `tmp/{build,lint,typecheck,unit,knip,e2e}-final.log`. Earlier failures were resolved: lint caught only a temporary task script; e2e first required rebasing onto the planner changes, then updating the old homepage headline assertion. Final runs above are clean.
+
+The same gates were rerun after the final removal, with the same counts (`*-merge.log`). Browser checks confirm the statistics heading and rows are absent in EN/DE, while the community programme and testimonials still render. `bash -n infra/azure/deploy.sh` passed. The actual staging script passed with a local Azure CLI stub; no Azure call or deployment was made. A Docker BuildKit context export contained 446 files / 7,244,481 bytes, including app sources and approved images, and excluded caches, worktrees, reports, local configuration, raw placement source and unapproved photos. Logs and verification artifacts are preserved in the external cleanup archive when the temporary worktree is retired.
 
 ## Removed files (recover from base commit `d8316c8`)
 
@@ -138,16 +140,26 @@ These are website features/information, not new promises of separate university-
 - [uni-assist planning](https://www.uni-assist.de/en/how-to-apply/plan-your-application/), [federal banking guide](https://www.make-it-in-germany.com/en/living-in-germany/money-insurance/bank-account): application and banking requirements are not one universal sequence.
 
 ## Remaining launch decisions / boundaries
-- Photography remains an existing launch blocker: only slots 20 and 23 are ready; most slots intentionally show numbered placeholders. The untracked editorial pool is owned by the photo workstream. No unapproved image was published or deleted.
+- Photography remains an existing launch blocker: only slots 20 and 23 are ready; most slots intentionally show numbered placeholders. All 103 candidate images are preserved in the external archive for the photo workstream. No unapproved image was published or destroyed.
 - Confirm current staff roles, calendar, prices, nonprofit/legal wording and accommodation arrangements with their owners before deployment. This pass changes prose, not contractual policies or database rows.
 - `npm audit` reports 9 existing dependency vulnerabilities (3 high), with overlapping Dependabot branches already present. No lockfile changes in this branch; assess/merge those updates separately. Production-only audit (`npm audit --omit=dev`): 0 vulnerabilities.
 - Internal design-review routes are intentionally gated, not abandoned public pages; kept. Historical factual evidence and active operational docs are retained.
-- No push, merge, deployment or shared-database mutation performed.
+- Push and merge are authorized in the final follow-up. No production deployment or shared-database mutation is part of this task.
 
 ## Handoff
-Implementation and required checks are complete on this isolated branch. Commit `4f90fcd` contains the asset/code/document cleanup and bilingual editorial pass; the follow-up commit contains the homepage/navbar readability corrections, final copy refinements, smoke assertion and this verification record. Use `git log -2 --oneline` for both hashes.
+Implementation and required checks are complete. Commit `4f90fcd` contains the asset/code/document cleanup and bilingual editorial pass; `4413d06` contains the homepage/navbar readability corrections, final copy refinements and smoke assertion. The final follow-up removes the requested statistics block and tightens deployment exclusions.
 
-Next release work: review/integrate this branch, finish the existing photography workstream, confirm operational facts with their owners and assess the existing dependency update branches. No deployment or merge has been performed. The current local preview is `http://localhost:3028/` (DE) and `http://localhost:3028/en` (EN); restart with `npm run dev -- -p 3028` from this worktree if needed.
+After integration, continue in `/Users/rahmanshafiee/Downloads/CASA` on `main`; the task branch and its worktree are disposable. The laptop coordination handoff records the final merge and cleanup outcome. Next release work: finish the existing photography workstream, confirm operational facts with their owners and assess the seven open Dependabot PRs. Those dependency branches are active work and are retained.
+
+## Final folder and Git cleanup (user follow-up)
+- Removed the screenshot's statistics heading, all four figures/labels and their unused local data from both homepage languages. Kept the separate student testimonials.
+- Moved the media provenance guide from the publicly served folder to `docs/MEDIA_LIBRARY.md` and updated references.
+- Added missing Docker/Vercel exclusions and staging exclusions for temporary files, tool state, caches, nested worktrees and unapproved photos.
+- Recovery archive: `/Users/rahmanshafiee/Archive/CASA/website-cleanup-2026-09-16/`. Its manifest records original paths and SHA-256 hashes; moved files were checked against those hashes.
+- Moved the 103 unapproved photos, historical `output/` files and obsolete local Vercel/Neon metadata outside the project. Preserved the main checkout's current environment file and installed dependencies needed for continued work.
+- Retired worktrees `3388/CASA`, `4735/CASA` and `.claude/worktrees/kursplanung-month`. The old detached worktree's dependency edits were saved as a binary patch and complete edited files; the planner's distinct local environment file was preserved privately. Neither was silently discarded.
+- Retired local branches `archive/quantutech-main`, `claude/admin-workspace-2`, `claude/public-site-go-live` and `claude/kursplanung-month`. The first is archived history; the others are already integrated (including squash merges). Their complete history is in a verified external Git bundle. Removed the two corresponding stale remote branches that still existed.
+- The final task worktree and branch are removed after merging. Build/test caches and Finder metadata are disposable; historical review artifacts and photo candidates remain recoverable outside the deployment folder.
 
 ## User review correction — homepage readability
 - The new community band used `BandHeading` without a tone; its default is `dark`, so it painted white headings on the light canvas. Set `tone="light"` at that call site.

@@ -300,44 +300,6 @@ export default async function HomePage() {
       };
     });
 
-  const statsItems = locale === 'de'
-    ? [
-        {
-          value: '30.000+',
-          label: 'Begleitete Lernende',
-        },
-        {
-          value: '150+',
-          label: 'Herkunftsländer',
-        },
-        {
-          value: '7-80+',
-          label: 'Altersspanne',
-        },
-        {
-          value: '45.000+',
-          label: 'Kursbuchungen',
-        },
-      ]
-    : [
-        {
-          value: '30,000+',
-          label: 'Learners supported',
-        },
-        {
-          value: '150+',
-          label: 'Countries represented',
-        },
-        {
-          value: '7-80+',
-          label: 'Age range represented',
-        },
-        {
-          value: '45,000+',
-          label: 'Course bookings',
-        },
-      ];
-
   const featuredSource = stories[1] ?? stories[0];
   const featuredStoryId = featuredSource?.id;
   const nonFeaturedStories = stories.filter((story) => story.id !== featuredStoryId);
@@ -936,56 +898,7 @@ export default async function HomePage() {
 
       <section className="py-16 md:py-24" data-track-section="proof-and-outcomes">
         <Container>
-          <div className="mx-auto max-w-[85rem] space-y-12 md:space-y-14">
-          {/*
-            Centred stat band, ported from /design-system/layout-patterns
-            (pattern 6). Replaces StatsRow — a dark ink slab carrying three
-            vertical dividers, two decorative circles and a `max-w-[15rem]` label
-            cap that guaranteed ~131px of empty panel beside every label.
-
-            No panel, no dividers, no ornament. The gap is the separator and the
-            whitespace does the framing.
-
-            `statsItems` is unchanged: it already holds exactly the four
-            aggregates approved in CLAUDE.md hard rule 1 (2026-06-17 sync), in
-            both locales. The draft `40+ staff and teachers` claim is not in that
-            array and must not be added without verification.
-          */}
-          <div>
-            {/* No eyebrow and no lead here — the figures below are the content. */}
-            <BandHeading
-              tone="light"
-              title={locale === 'de' ? 'Was Lernende bei CASA schätzen' : 'What learners value at CASA'}
-            />
-
-            {/*
-              `tabular-nums` is load-bearing, not decoration: the figures share a
-              row, and proportional digits would set `30,000+` and `45,000+` at
-              different widths so the row would read as misaligned.
-
-              The label cap is centred under each number — uncapped, a long label
-              runs the full column and the figure stops looking like its subject.
-
-              2-up from the smallest width, 4-up only from lg. Four numbers
-              stacked one per row on a phone is ~400px of scrolling for what is
-              meant to be a single glanceable block; 2x2 reads as one unit.
-              Measured at 375: the column is 167px and the widest figure paints
-              ~120px at 33px, so it fits without shrinking the type.
-            */}
-            <ul className="mx-auto mt-10 grid max-w-[64rem] grid-cols-2 gap-x-6 gap-y-10 text-center sm:gap-x-8 md:mt-14 lg:grid-cols-4">
-              {statsItems.map((stat) => (
-                <li key={stat.label}>
-                  <p className="text-4xl font-bold tabular-nums text-[var(--casa-accent-text)] sm:text-5xl">
-                    {stat.value}
-                  </p>
-                  <p className="mx-auto mt-3 max-w-[12rem] text-sm leading-relaxed text-[var(--casa-ink)] md:text-base">
-                    {stat.label}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+          <div className="mx-auto max-w-[85rem]">
           <TestimonialGrid
             title={
               locale === 'de'

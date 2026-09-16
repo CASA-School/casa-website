@@ -28,14 +28,28 @@ coverage
 # Deliverables and docs. `output/` is already gitignored; both are dead weight in
 # a runtime image.
 output
+tmp
 docs
 *.md
 !README.md
+public/**/*.md
 
 .DS_Store
 .vscode
 .idea
 .claude
+.agentic
+.gstack
+.playwright-cli
+.vercel
+.neon
+*.tsbuildinfo
+**/.DS_Store
+*.local.pdf
+*.presentation.pdf
+
+# Raw placement-test editorial source; generated server modules are the runtime.
+scripts/placement/source-item-bank.md
 
 # Unapproved photo candidates awaiting a decision. Never part of the image.
 public/media/casa/editorial-2026

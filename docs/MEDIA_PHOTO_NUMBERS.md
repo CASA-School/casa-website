@@ -20,9 +20,8 @@ staff members after the code had removed them.
 
 ## Photo pool and delivery
 
-The main checkout has an untracked `public/media/casa/editorial-2026/` candidate
-pool. It is excluded from Docker uploads and was not changed by the cleanup branch.
-See [`public/media/casa/README.md`](../public/media/casa/README.md).
+The candidate pool is archived outside the project, with all 103 files preserved.
+See [MEDIA_LIBRARY.md](MEDIA_LIBRARY.md) for its location and delivery rules.
 
 For a confirmed photograph:
 
