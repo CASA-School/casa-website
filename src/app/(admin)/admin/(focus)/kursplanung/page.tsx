@@ -1,46 +1,36 @@
-import { EmptyState, PageHeader, StatBand } from '@/components/admin/ui';
-import { planMonthSummary, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
+import { EmptyState, PageHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
+import { loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
+import { Board } from './board';
+
 /**
- * Kursplanung — the landing screen of the board.
- *
- * This step ships the module, its tables and its rules; the board itself
- * follows in the next change. Until then the screen shows what the tables
- * hold for the planning month, so the import can be checked from here rather
- * than from a SQL prompt.
+ * Kursplanung — the board. docs/KURSPLANUNG.md explains the rules.
  *
  * `?month=2026-10` picks a month; the default is the latest month that has
- * course groups, and the current month when there is none.
+ * course groups, and the current month when there is none. Everything the
+ * board needs is loaded here in one round; the board keeps a local copy and
+ * saves whole shift-weeks through `saveWeekAction`.
  */
 export default async function KursplanungPage({
   searchParams,
 }: {
   searchParams: Promise<{ month?: string }>;
 }) {
-  const params = await searchParams;
+  const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
   const month = await resolvePlanMonth(params.month);
-  const summary = await planMonthSummary(month);
+  const plan = await loadPlan(month);
   const label = monthLabel(month);
 
   return (
     <>
       <PageHeader eyebrow="Management" title="Kursplanung" description={label} />
-
-      {summary.groups === 0 ? (
-        <EmptyState
-          title={`Kein Plan für ${label}`}
-          description="Für diesen Monat sind noch keine Kursgruppen angelegt."
-        />
+      {plan.groups.length === 0 ? (
+        <EmptyState title={`Kein Plan für ${label}`} description="Für diesen Monat sind noch keine Kursgruppen angelegt." />
       ) : (
-        <StatBand
-          items={[
-            { label: 'Kursgruppen', value: summary.groups, hint: `${summary.morning} Vormittag · ${summary.afternoon} Nachmittag` },
-            { label: 'Lehrkräfte', value: summary.teachers, hint: 'aktiv' },
-            { label: 'Geplante Kurstage', value: summary.assignments, hint: `von ${summary.courseDays} im Monat` },
-            { label: 'Offene Kurstage', value: summary.courseDays - summary.assignments, alert: true },
-          ]}
-        />
+        <Board plan={plan} month={month} canWrite={canAccess(user, 'kursplanung', 'edit')} />
       )}
     </>
   );

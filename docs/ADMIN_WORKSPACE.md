@@ -654,7 +654,8 @@ substitute and tentative marks the board draws yellow and with a `?`.
 `teacher_absences` is one teacher on one date with a reason. No audit table:
 mutations write `staff_activity` like everything else. The board and its
 rules live in `src/lib/admin/kursplanung/`; the module is management-only by
-default and is served in the shell's focus mode.
+default and is served in the shell's focus mode. Product rules, code map and
+the plan of record: `docs/KURSPLANUNG.md`.
 
 ### 0012 — the day board
 
