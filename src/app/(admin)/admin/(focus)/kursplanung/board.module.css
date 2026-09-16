@@ -108,6 +108,8 @@
 .tpHand { border-color: var(--pz-ink); box-shadow: 0 0 0 2px var(--pz-ink); }
 .tpName { font-weight: 800; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sh { font-size: 10px; font-weight: 800; color: var(--pz-mute); letter-spacing: 0.04em; background: #eef0f4; border-radius: 6px; padding: 1px 6px; }
+.more { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border-radius: 6px; color: var(--pz-faint); font-weight: 800; text-decoration: none; letter-spacing: 0.05em; }
+.more:hover { color: var(--pz-ink); background: #eef0f4; }
 .handlbl { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; background: var(--pz-ink); color: #fff; border-radius: 6px; padding: 1px 6px; }
 .bl { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
 .blocks { display: flex; gap: 3px; }

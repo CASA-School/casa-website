@@ -76,6 +76,7 @@ src/lib/admin/kursplanung/
   rules.ts    analysePlan → every violation, per tile and per week
   pairs.ts    assignmentsFromPairs → fill a month from the groups' pairs
   week.ts     validateWeekAssignments → what the server accepts for one shift-week
+  forms.ts    parseTeacherForm / parseGroupForm → what the dialogs may write (tested)
   repo.ts     reads (server-only) and replaceWeekAssignments
 src/app/(admin)/admin/(focus)/
   layout.tsx            the gate in focus mode (same requireStaff as the workspace)
@@ -83,6 +84,10 @@ src/app/(admin)/admin/(focus)/
   kursplanung/page.tsx     loads the month, renders the board
   kursplanung/actions.ts   saveWeekAction — the one write, whole shift-week at a time
   kursplanung/board.tsx    the board ('use client'), board.module.css its look
+  kursplanung/tabs.tsx     Puzzle · Kurse · Lehrkräfte, month travels along
+  kursplanung/kurse/       groups per shift with their pairs; add / remove (empty only) / fill from pairs
+  kursplanung/lehrkraefte/ the teaching staff; Details opens the dialog (?teacher=<id> opens it on arrival)
+  kursplanung/teacher-form.tsx, group-form.tsx   the forms inside FormDialog; parsed by lib/admin/kursplanung/forms.ts
 scripts/kursplanung/import-bridge.mjs   loads the tables from the analytics bridge's JSON
 ```
 
@@ -98,7 +103,7 @@ is therefore just "save the previous set". Last write wins per week; a version c
 | --- | --- | --- |
 | 1 | module, focus-mode shell, migration 0014, domain + tests, landing page, import script, Manrope | open (#29) |
 | 2 | the board: week view, tray, pick-up mode, drag & drop, handle, menus, undo, copy week, save action | open |
-| 3 | teacher dialog (rules + absences), Kurse (pairs, group count, registrations), Lehrkräfte list | next |
+| 3 | teacher dialog (rules + absences), Kurse (pairs, group count, registrations), Lehrkräfte list | open |
 | 4 | Monat view (all weeks stacked), `Ersatz finden`, e2e with a seeded account, multi-month | after |
 
 Then the FileMaker side, in the order `docs/FILEMAKER_BRIDGE.md` §7 sets: read the four layouts the
