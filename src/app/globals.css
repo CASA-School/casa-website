@@ -863,16 +863,20 @@ h3 {
  * are removed outright, and those go after the width has settled.
  *
  * Desktop only. On a phone the rail is already a horizontal strip.
+ *
+ * The same rules match `.casa-workspace-focus`, the shell's focus mode: there
+ * the rail is collapsed by the layout, not by the person, so the toggle is
+ * hidden and the stored preference is left alone.
  */
 @media (min-width: 64rem) {
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel {
     width: 4.25rem;
   }
 
   .casa-workspace-panel [data-nav-label] {
     transition: opacity 120ms ease-out;
   }
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-label] {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel [data-nav-label] {
     opacity: 0;
     pointer-events: none;
   }
@@ -887,8 +891,8 @@ h3 {
     max-height: 40rem;
     overflow: hidden;
   }
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-children],
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel [data-nav-group-label] {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel [data-nav-children],
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel [data-nav-group-label] {
     opacity: 0;
     max-height: 0;
     margin: 0;
@@ -900,31 +904,31 @@ h3 {
   /* Every row centres on its icon. The label is still in the flow at zero
      opacity, so it is pinned out of the way rather than left to push the icon
      off-centre. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav a {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
   }
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a > [data-nav-label] {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav a > [data-nav-label] {
     position: absolute;
     left: 100%;
     width: 0;
   }
 
   /* The "you are here" marker keeps its place against the rail's left edge. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav a > span:first-child {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav a > span:first-child {
     left: -0.75rem;
   }
 
   /* The logo is hidden with the labels, so the rail should not keep its gap. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel > div {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel > div {
     gap: 1rem;
   }
 
   /* Group headings are gone, so a hairline keeps the grouping legible — and
      the spacing between groups stays even, which is most of what "smooth"
      means once the animation has finished. */
-  html[data-workspace-nav='collapsed'] .casa-workspace-panel nav > div + div {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav > div + div {
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid var(--ws-panel-line);

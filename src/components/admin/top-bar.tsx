@@ -26,15 +26,18 @@ import type { StaffUser } from '@/lib/admin/auth';
 export function TopBar({
   user,
   signOutAction,
+  collapsible = true,
 }: {
   user: StaffUser;
   signOutAction: () => Promise<void>;
+  /** False in the shell's focus mode, where the rail is fixed at icon width. */
+  collapsible?: boolean;
 }) {
   const today = new Date();
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-ws-line bg-white/92 px-4 backdrop-blur-sm lg:px-6">
-      <SidebarToggle />
+      {collapsible ? <SidebarToggle /> : null}
 
       <Link
         href="/admin"

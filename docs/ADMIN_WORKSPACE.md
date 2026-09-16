@@ -153,6 +153,12 @@ Four checks, and each is load-bearing on its own.
 redirects to `/admin/sign-in` when there is none. Every workspace screen is a
 child of it, so a page cannot forget to check.
 
+Since 0014 there is a second entry with the same gate:
+`src/app/(admin)/admin/(focus)/layout.tsx`, which renders the shell in focus
+mode (icon rail, no 1180px measure) for the course-planning board. Both
+layouts call the one `requireStaff()` in `src/lib/admin/guard.ts`, so "signed
+in" is still defined once; what differs is the chrome, never the check.
+
 ### 2. Every server action checks again
 
 A server action is a public HTTP endpoint. Nothing about a POST to one goes
@@ -200,7 +206,8 @@ time leaks nothing and the form is not an account-enumeration oracle.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, planning, catalogue, activity, team, settings. For each
+applications, people, bookings, rooms, catalogue, kursplanung, activity, team,
+settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -213,7 +220,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms and Team |
+| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms, Kursplanung and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -633,6 +640,21 @@ Seeded: the 36 book prices, the four exam fees recovered from the script, the
 50 € enrolment fee. Course and accommodation prices are deliberately empty —
 CASA enters them once, per period (`docs/CATALOGUE_AND_PRICING.md` §5 lists
 the decisions).
+
+### 0014 — Kursplanung
+
+Who teaches which course on which day. `teachers` is the school's teaching
+staff — a different set from `staff_users`, who are the people signing in
+here — with the RULES that shape a person's piece on the board: shifts, days
+per week, possible weekdays, levels. `course_groups` is one row per parallel
+group of a level in a planning month, with the PAIR that normally holds it
+(first half of the week, second half) and `filemaker_course_id` for the bridge.
+`plan_assignments` is one teacher on one group on one date, with the
+substitute and tentative marks the board draws yellow and with a `?`.
+`teacher_absences` is one teacher on one date with a reason. No audit table:
+mutations write `staff_activity` like everything else. The board and its
+rules live in `src/lib/admin/kursplanung/`; the module is management-only by
+default and is served in the shell's focus mode.
 
 ### 0012 — the day board
 

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
+import { Manrope, Playfair_Display } from 'next/font/google';
 
 import '../globals.css';
 
@@ -12,14 +12,18 @@ import '../globals.css';
  * structured data: none of it belongs on an internal tool, and the footer alone
  * would put the school's full marketing sitemap under every table of records.
  *
- * TYPEFACES ARE THE SAME TWO AS THE PUBLIC SITE, USED DIFFERENTLY.
+ * TWO TYPEFACES, ONE OF THEM THE WORKSPACE'S OWN.
  *
- * Plus Jakarta Sans carries the interface and every numeral — it has real
- * tabular figures, which a workspace of dated, counted rows depends on
- * completely. Playfair Display is kept for page and card titles only, at 16px
- * and above, because it is what makes this read as CASA's own tool rather than
- * as a generic admin template; below about 20px its hairlines thin out, so it
- * never touches a label, a row or a number.
+ * Manrope carries the interface and every numeral (2026-09-16, the product
+ * owner's choice after the course-planning board was designed in it): a
+ * geometric sans with tabular figures, which a workspace of dated, counted
+ * rows depends on completely. The public site stays on Plus Jakarta Sans in
+ * its own root layout; the two products already differ in chrome and ground,
+ * and the typeface is part of what tells staff which one they are in. Playfair
+ * Display is kept for page and card titles only, at 16px and above, because it
+ * is what makes this read as CASA's own tool rather than as a generic admin
+ * template; below about 20px its hairlines thin out, so it never touches a
+ * label, a row or a number.
  *
  * ROUTING NOTE: the workspace answers on `admin.casa-bremen.de`, which
  * `src/middleware.ts` maps onto these `/admin` paths. On the public host these
@@ -27,10 +31,10 @@ import '../globals.css';
  * is not reachable at `casa-bremen.de/admin`.
  */
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 const playfairDisplay = Playfair_Display({
@@ -51,7 +55,7 @@ export default function WorkspaceRootLayout({ children }: { children: React.Reac
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} ${playfairDisplay.variable}`}
+      className={`${manrope.variable} ${playfairDisplay.variable}`}
       suppressHydrationWarning
     >
       <body className="casa-workspace bg-ws-canvas font-[family-name:var(--font-sans)] text-[var(--casa-ink)] antialiased">

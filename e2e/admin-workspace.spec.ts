@@ -31,6 +31,7 @@ const GUARDED_PATHS = [
   '/admin/activity',
   '/admin/team',
   '/admin/settings',
+  '/admin/kursplanung',
 ];
 
 /** Text that only ever appears once a request is authenticated. */
