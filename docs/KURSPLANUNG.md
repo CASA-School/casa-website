@@ -84,7 +84,7 @@ src/app/(admin)/admin/(focus)/
   kursplanung/page.tsx     loads the month, renders the board
   kursplanung/actions.ts   saveWeekAction — the one write, whole shift-week at a time
   kursplanung/board.tsx    the board ('use client'), board.module.css its look
-  kursplanung/tabs.tsx     Puzzle · Kurse · Lehrkräfte, month travels along
+  kursplanung/tabs.tsx     Puzzle · Kurse · Lehrkräfte, month travels along; month-picker.tsx chooses the month
   kursplanung/kurse/       groups per shift with their pairs; add / remove (empty only) / fill from pairs
   kursplanung/lehrkraefte/ the teaching staff; Details opens the dialog (?teacher=<id> opens it on arrival)
   kursplanung/teacher-form.tsx, group-form.tsx   the forms inside FormDialog; parsed by lib/admin/kursplanung/forms.ts
@@ -95,20 +95,40 @@ scripts/kursplanung/import-bridge.mjs   loads the tables from the analytics brid
 on the client with the same pure functions the server uses, then the whole assignment set of that
 shift-week is sent to `saveWeekAction`, which validates it (module `edit`, zod, groups of that
 month/shift, course days of that week, active teachers) and replaces the week in one transaction. Undo
-is therefore just "save the previous set". Last write wins per week; a version check is a later step.
+is therefore just "save the previous set". The client also sends the week as it last saw it (`base`); when the
+database no longer matches, the save is refused as stale and the board offers a reload instead of overwriting a
+colleague's change.
 
 ## Plan of record
 
 | PR | Content | Status |
 | --- | --- | --- |
 | 1 | module, focus-mode shell, migration 0014, domain + tests, landing page, import script, Manrope | open (#29) |
-| 2 | the board: week view, tray, pick-up mode, drag & drop, handle, menus, undo, copy week, save action | open |
-| 3 | teacher dialog (rules + absences), Kurse (pairs, group count, registrations), Lehrkräfte list | open |
-| 4 | Monat view (all weeks stacked), `Ersatz finden`, e2e with a seeded account, multi-month | after |
+| 2 | the board: week view, tray, pick-up mode, drag & drop, handle, menus, undo, copy week, save action | open (#30) |
+| 3 | teacher dialog (rules + absences), Kurse (pairs, group count, registrations), Lehrkräfte list | open (#31) |
+| 4 | Monat view (all weeks stacked), `Ersatz finden`, month selection and the next month from this one, stale-write check, e2e with a real session | open |
 
 Then the FileMaker side, in the order `docs/FILEMAKER_BRIDGE.md` §7 sets: read the four layouts the
 analytics bridge already exports (`Course_API`, `SingleDateCourse_API`, `SingleDayStaff`, `StaffMember`)
 into these tables; write back only after a `WebIntake` account exists.
+
+## Testing
+
+`e2e/kursplanung.spec.ts` runs only with `DATABASE_URL` and an owner account: it opens a session the way
+`scripts/admin/check-routes.mjs` does — a session row plus the cookie, no password — and drives the board and the
+two screens. Three tests: a placed piece survives a reload and is taken back through the piece menu; a save against a
+week a colleague changed meanwhile (a row inserted straight into the database after the page loaded) is refused, undone
+on the board, writes nothing, and goes through after `Neu laden`; Kurse renders and the teacher dialog opens from
+`?teacher=`. Open sockets carry `data-group`, `data-week`, `data-date` and `data-row`, pieces `data-group`, `data-week`
+and `data-row` — those are the test hooks, and the resize handle uses the same attributes. Every test removes what it
+wrote (anything in the touched groups newer than its start), so the plan is left as found. Run it with its own port:
+`E2E_PORT=3017 npx playwright test e2e/kursplanung.spec.ts`. `npm run admin:check` covers the three routes.
+
+The first run of that spec found a defect the unit tests could not: `staff_activity.entity_id` is a uuid column, and
+the week save logged `month|shift|weekStart` as the entity id — the transaction had already committed, the action then
+threw, and the board sat on "speichert …" while the database had the change. Activity rows for a shift-week or a month
+now carry `null` there and the identifiers in `detail`; a save that throws is treated on the board like a stale one
+(reverted locally, reload offered) because the database may hold it.
 
 ## Open questions for the planners
 

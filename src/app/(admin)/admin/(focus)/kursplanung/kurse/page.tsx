@@ -1,13 +1,13 @@
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
-import { Badge, Button, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { Badge, Button, Card, Cell, Field, PageHeader, Select, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
-import { loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
+import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { LEVELS, SHIFT_INFO, SHIFTS, type CourseGroup } from '@/lib/admin/kursplanung/types';
-import { monthLabel } from '@/lib/admin/kursplanung/weeks';
+import { monthLabel, nextMonth } from '@/lib/admin/kursplanung/weeks';
 
-import { addGroupAction, fillFromPairsAction, removeGroupAction } from '../actions';
+import { addGroupAction, createMonthAction, fillFromPairsAction, removeGroupAction } from '../actions';
 import { GroupForm } from '../group-form';
 import { KursplanungTabs } from '../tabs';
 
@@ -22,7 +22,7 @@ import { KursplanungTabs } from '../tabs';
 export default async function KursePage({ searchParams }: { searchParams: Promise<{ month?: string; ok?: string; error?: string; group?: string }> }) {
   const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
   const month = await resolvePlanMonth(params.month);
-  const plan = await loadPlan(month);
+  const [plan, months] = await Promise.all([loadPlan(month), listPlanMonths()]);
   const canWrite = canAccess(user, 'kursplanung', 'edit');
   const canRemove = canAccess(user, 'kursplanung', 'full');
   const returnTo = '/admin/kursplanung/kurse';
@@ -36,13 +36,21 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader eyebrow="Management" title="Kursplanung" description={monthLabel(month)} />
-      <KursplanungTabs active="kurse" month={month} notice={{ ok: params.ok, error: params.error }} />
+      <KursplanungTabs active="kurse" month={month} months={months} notice={{ ok: params.ok, error: params.error }} />
+
+      {canWrite && !months.includes(nextMonth(month)) ? (
+        <form action={createMonthAction} className="mb-5">
+          <input type="hidden" name="month" value={month} />
+          <input type="hidden" name="returnTo" value={returnTo} />
+          <Button type="submit" variant="secondary" size="sm">{monthLabel(nextMonth(month))} aus {monthLabel(month)} anlegen</Button>
+        </form>
+      ) : null}
 
       <div className="space-y-6">
         {SHIFTS.map((shift) => {
           const groups = plan.groups.filter((g) => g.shift === shift);
-          if (!groups.length) return null;
-          const phase = groups[0].phase;
+          const otherPhase = plan.groups.find((g) => g.shift !== shift)?.phase;
+          const phase: '1' | '2' = groups[0]?.phase ?? (otherPhase === '2' ? '1' : otherPhase === '1' ? '2' : '1');
           return (
             <Card
               key={shift}
@@ -50,16 +58,39 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
               description={`${phase === '1' ? 'Kursstart' : 'Fortsetzung'} · ${SHIFT_INFO[shift].time} · Paar: ${SHIFT_INFO[shift].halves.join(' / ')}`}
               actions={
                 canWrite ? (
-                  <form action={fillFromPairsAction}>
-                    <input type="hidden" name="month" value={month} />
-                    <input type="hidden" name="shift" value={shift} />
-                    <input type="hidden" name="returnTo" value={returnTo} />
-                    <Button type="submit" variant="secondary" size="sm">Alle Wochen aus Paaren belegen</Button>
-                  </form>
+                  <>
+                    <FormDialog trigger="Gruppe anlegen" size="sm" title={`Gruppe anlegen · ${SHIFT_INFO[shift].label}`} description={`${monthLabel(month)} · ${phase === '1' ? 'Kursstart' : 'Fortsetzung'} (.${phase})`}>
+                      <form action={addGroupAction} className="space-y-4">
+                        <input type="hidden" name="month" value={month} />
+                        <input type="hidden" name="shift" value={shift} />
+                        <input type="hidden" name="phase" value={phase} />
+                        <input type="hidden" name="returnTo" value={returnTo} />
+                        <Field label="Niveau" htmlFor={`lvl-${shift}`}>
+                          <Select id={`lvl-${shift}`} name="level" defaultValue="A1">
+                            {LEVELS.map((l) => (
+                              <option key={l} value={l}>{l}.{phase}</option>
+                            ))}
+                          </Select>
+                        </Field>
+                        <div className="flex justify-end"><Button type="submit">Anlegen</Button></div>
+                      </form>
+                    </FormDialog>
+                    {groups.length ? (
+                      <form action={fillFromPairsAction}>
+                        <input type="hidden" name="month" value={month} />
+                        <input type="hidden" name="shift" value={shift} />
+                        <input type="hidden" name="returnTo" value={returnTo} />
+                        <Button type="submit" variant="secondary" size="sm">Alle Wochen aus Paaren belegen</Button>
+                      </form>
+                    ) : null}
+                  </>
                 ) : null
               }
               bleed
             >
+              {groups.length === 0 ? (
+                <div className="px-5 py-6 text-sm text-[var(--casa-text-subtle)]">Noch keine Gruppen in diesem Monat.</div>
+              ) : (
               <Table head={['Kurs', { label: 'Anmeldungen', align: 'right' }, SHIFT_INFO[shift].halves[0], SHIFT_INFO[shift].halves[1], 'Geplant', '']}>
                 {LEVELS.flatMap((level) => {
                   const lg = groups.filter((g) => g.level === level);
@@ -121,6 +152,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                   ];
                 })}
               </Table>
+              )}
             </Card>
           );
         })}

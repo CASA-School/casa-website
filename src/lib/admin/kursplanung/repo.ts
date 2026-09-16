@@ -330,3 +330,48 @@ export async function insertMissingAssignments(assignments: readonly Assignment[
   });
   return added;
 }
+
+/* --------------------------------------------------------------- months */
+
+/** Every planning month that has course groups, `yyyy-mm`, oldest first. */
+export async function listPlanMonths(): Promise<string[]> {
+  const rows = await query<{ month: string }>(
+    `SELECT DISTINCT to_char(month, 'YYYY-MM') AS month FROM course_groups ORDER BY 1`
+  );
+  return rows.map((r) => r.month);
+}
+
+/**
+ * The next month from this one: every `.1` course continues as `.2` with its
+ * pair, its registrations and its room — the constancy rule the planners
+ * apply by hand. The other shift's new courses are not guessed; they are
+ * created on the Kurse screen once the registrations are known. Returns how
+ * many groups were created (none when the month already has them).
+ */
+export async function createContinuationMonth(from: string, to: string): Promise<number> {
+  const rows = await query<{ n: string }>(
+    `WITH ins AS (
+       INSERT INTO course_groups (month, shift, level, phase, group_index, registrations, teacher_first, teacher_second, room_id)
+       SELECT $2::date, shift, level, '2', group_index, registrations, teacher_first, teacher_second, room_id
+         FROM course_groups
+        WHERE month = $1::date AND phase = '1'
+       ON CONFLICT (month, shift, level, phase, group_index) DO NOTHING
+       RETURNING 1
+     )
+     SELECT count(*)::text AS n FROM ins`,
+    [`${from}-01`, `${to}-01`]
+  );
+  return Number(rows[0]?.n ?? 0);
+}
+
+/** The assignments of some groups on some dates, as they are right now — for the stale check. */
+export async function assignmentsNow(groupIds: readonly string[], days: readonly string[]): Promise<Assignment[]> {
+  if (!groupIds.length || !days.length) return [];
+  const rows = await query<{ group_id: string; on_date: string; teacher_id: string; is_substitute: boolean; is_tentative: boolean }>(
+    `SELECT group_id, to_char(on_date, 'YYYY-MM-DD') AS on_date, teacher_id, is_substitute, is_tentative
+       FROM plan_assignments
+      WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[])`,
+    [groupIds, days]
+  );
+  return rows.map((r) => ({ groupId: r.group_id, onDate: r.on_date, teacherId: r.teacher_id, isSubstitute: r.is_substitute, isTentative: r.is_tentative }));
+}

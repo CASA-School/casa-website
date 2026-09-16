@@ -2,7 +2,7 @@ import { FormDialog } from '@/components/admin/dialogs';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
+import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { SHIFT_INFO, type Shift } from '@/lib/admin/kursplanung/types';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
@@ -18,7 +18,7 @@ import { TeacherForm } from '../teacher-form';
 export default async function LehrkraeftePage({ searchParams }: { searchParams: Promise<{ month?: string; ok?: string; error?: string; teacher?: string }> }) {
   const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
   const month = await resolvePlanMonth(params.month);
-  const plan = await loadPlan(month);
+  const [plan, months] = await Promise.all([loadPlan(month), listPlanMonths()]);
   const canWrite = canAccess(user, 'kursplanung', 'edit');
   const returnTo = '/admin/kursplanung/lehrkraefte';
   const order = (s: readonly Shift[]) => (s.length > 1 ? 2 : s[0] === 'morning' ? 0 : 1);
@@ -28,7 +28,7 @@ export default async function LehrkraeftePage({ searchParams }: { searchParams: 
   return (
     <>
       <PageHeader eyebrow="Management" title="Kursplanung" description={monthLabel(month)} />
-      <KursplanungTabs active="lehrkraefte" month={month} notice={{ ok: params.ok, error: params.error }} />
+      <KursplanungTabs active="lehrkraefte" month={month} months={months} notice={{ ok: params.ok, error: params.error }} />
 
       <Card title="Lehrkräfte" description={`${teachers.length} aktiv · Tage pro Woche = Länge des Teils, Niveaus = wo es passt`} bleed>
         <Table head={['Name', 'Auf dem Brett', 'Schicht', { label: 'Tage / Woche', align: 'right' }, 'Wochentage', 'Niveaus', 'Abwesend', '']}>

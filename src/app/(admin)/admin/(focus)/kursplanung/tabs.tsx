@@ -1,7 +1,10 @@
 import Link from 'next/link';
 
 import { Badge } from '@/components/admin/ui';
+import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 import { cn } from '@/lib/utils';
+
+import { MonthPicker } from './month-picker';
 
 /**
  * Three tabs above the module: the board, the groups, the teachers.
@@ -13,12 +16,15 @@ import { cn } from '@/lib/utils';
 export function KursplanungTabs({
   active,
   month,
+  months,
   notice,
 }: {
   active: 'puzzle' | 'kurse' | 'lehrkraefte';
   month: string;
+  months: readonly string[];
   notice?: { ok?: string; error?: string };
 }) {
+  const labels = Object.fromEntries([...months, month].map((m) => [m, monthLabel(m)]));
   const q = `?month=${month}`;
   const tabs = [
     { key: 'puzzle' as const, label: 'Puzzle', href: `/admin/kursplanung${q}` },
@@ -46,6 +52,7 @@ export function KursplanungTabs({
           );
         })}
       </div>
+      <MonthPicker months={months} month={month} labels={labels} />
       {notice?.ok ? <Badge tone="positive">{notice.ok}</Badge> : null}
       {notice?.error ? <Badge tone="danger">{notice.error}</Badge> : null}
     </div>
