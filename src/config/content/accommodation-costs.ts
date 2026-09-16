@@ -1,93 +1,49 @@
 import { ACCOMMODATION_FEES } from '@/config/calculator/pricing';
 import type { ContentLocale } from '@/lib/content/types';
 
-/**
- * What CASA accommodation costs — stated once, for every accommodation surface.
- *
- * THE TWO OPTIONS COST THE SAME. docs/COURSE_FACTS_SOURCE_OF_TRUTH.md prices
- * them from one pair of pages — `/unterkunft/wohnen-in-einer-gastfamilie` and
- * `/unterkunft/die-casa-wg` — with one set of figures covering both. The pages
- * did not say so, and disagreed instead. Measured before this:
- *
- *   /accommodation          only 580 EUR
- *   /accommodation/flat     580, 145 and the 50 EUR placement fee
- *   /accommodation/host     580 and 145, no placement fee
- *
- * Worse, the same 145 EUR appeared as two different things: "plus 145 EUR for
- * each additional week" on the flat page and "holiday surcharge is planned at
- * 145 EUR per week" on the host page. The doc says it is BOTH — the
- * additional-week rate, and the Christmas/Easter closure surcharge. A reader
- * comparing the two options would reasonably have concluded they are priced
- * differently, and picked on that basis.
- *
- * So this is a single list rather than per-option highlights. If CASA ever does
- * price the two apart, that is the moment to split it — not before.
- *
- * `refundable` and `note` exist so the deposit reads as a deposit rather than as
- * a second 580 EUR charge, which is how it read when it was one bullet among
- * four in a highlights array.
- */
+/** Same published rates for both accommodation options. Amounts remain tied
+ * to the calculator; the refundable deposit is identified separately. */
 export type AccommodationCost = {
   label: { en: string; de: string };
   amount: string;
   note?: { en: string; de: string };
-  /**
-   * Money that comes back. Only the deposit.
-   *
-   * Set here rather than inferred from the note, because the strip that renders
-   * these sets a refundable amount in muted ink and the difference matters: the
-   * deposit is €580 and the first four weeks are also €580, so at one weight a
-   * reader sums the column to roughly €1,355 instead of the €775 they part with.
-   */
   refundable?: true;
 };
 
-/*
- * DERIVED, not restated.
- *
- * config/calculator/pricing.ts already held these figures as ACCOMMODATION_FEES
- * (base4Weeks, commissionFee, deposit, perAdditionalWeek), sourced from
- * Wohnen_2023.pdf and the FAQ, and the cost calculator has been quoting from
- * them all along. Writing them out again here would have been a second source
- * for one set of numbers — exactly the duplication this file exists to remove on
- * the accommodation pages. They agree today; deriving is what keeps them
- * agreeing.
- */
 const eur = (value: number) => `€${value}`;
 
 export const accommodationCosts: AccommodationCost[] = [
   {
-    label: { en: 'First 4 weeks', de: 'Erste 4 Wochen' },
+    label: { en: 'Rent for 4 weeks', de: 'Miete für 4 Wochen' },
     amount: eur(ACCOMMODATION_FEES.base4Weeks),
     note: {
-      en: 'The same for a host family and for a CASA shared flat.',
-      de: 'Für die Gastfamilie und für die CASA-WG identisch.',
+      en: 'Your room for the first four weeks.',
+      de: 'Ihr Zimmer für die ersten vier Wochen.',
     },
   },
   {
     label: { en: 'Each additional week', de: 'Jede weitere Woche' },
     amount: eur(ACCOMMODATION_FEES.perAdditionalWeek),
     note: {
-      // One figure, two occasions. Both are in the verified table.
-      en: 'Also the surcharge for the Christmas and Easter closure weeks.',
-      de: 'Gilt auch als Zuschlag für die Schließzeiten zu Weihnachten und Ostern.',
+      en: 'If you stay longer than four weeks.',
+      de: 'Wenn Sie länger als vier Wochen bleiben.',
     },
   },
   {
-    label: { en: 'Placement fee', de: 'Vermittlungsgebühr' },
+    label: { en: 'One-time placement fee', de: 'Einmalige Vermittlungsgebühr' },
     amount: eur(ACCOMMODATION_FEES.commissionFee),
     note: {
-      en: 'Charged once, for arranging the placement.',
-      de: 'Einmalig, für die Vermittlung.',
+      en: 'For arranging your accommodation.',
+      de: 'Für die Vermittlung Ihrer Unterkunft.',
     },
   },
   {
-    label: { en: 'Deposit', de: 'Deponat' },
+    label: { en: 'Refundable deposit', de: 'Rückerstattbare Kaution' },
     amount: eur(ACCOMMODATION_FEES.deposit),
     refundable: true,
     note: {
-      en: 'Refunded when the room and the keys come back as they were handed over.',
-      de: 'Wird zurückerstattet, wenn Zimmer und Schlüssel so übergeben werden wie erhalten.',
+      en: 'Returned after departure, provided the accommodation and keys are handed back in the condition in which you received them.',
+      de: 'Nach der Abreise erhalten Sie die Kaution zurück, sofern Unterkunft und Schlüssel im gleichen Zustand wie bei der Übernahme sind.',
     },
   },
 ];
@@ -97,7 +53,6 @@ export function localizeAccommodationCosts(locale: ContentLocale) {
     label: cost.label[locale],
     amount: cost.amount,
     note: cost.note?.[locale],
-    /* Shaped for FeeStrip, which reads `tone` rather than `refundable`. */
     tone: cost.refundable ? ('refundable' as const) : ('charge' as const),
   }));
 }
@@ -116,4 +71,12 @@ export function accommodationPriceSummary(locale: ContentLocale) {
   return locale === 'de'
     ? `${base} für 4 Wochen, danach ${week} pro Woche`
     : `${base} for 4 weeks, then ${week} a week`;
+}
+
+/** A separate condition, not an unexplained second meaning of the weekly rent. */
+export function accommodationHolidayNote(locale: ContentLocale) {
+  const amount = eur(ACCOMMODATION_FEES.perAdditionalWeek);
+  return locale === 'de'
+    ? `Aufenthalt über Weihnachten oder Ostern: Während der Schließzeiten fällt eine zusätzliche Unterkunftsgebühr von ${amount} pro Woche an.`
+    : `Staying over Christmas or Easter? An additional accommodation charge of ${amount} per week applies during the school closure.`;
 }
