@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: CareerDetailPageProps): Promi
   return createPublicMetadata({
     locale,
     // createPublicMetadata already appends "| CASA Bremen"
-    title: `${position.title} — Careers`,
+    title: `${position.title} — ${locale === 'de' ? 'Arbeiten bei CASA' : 'Careers'}`,
     description: position.shortDescription,
     path: `/careers/${slug}`,
     keywords: ['CASA careers', position.title, 'Language school jobs Bremen'],

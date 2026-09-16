@@ -1,56 +1,52 @@
 import type { ContentLocale, CulturalProgramItem } from '@/lib/content/types';
 
+// Destinations and meetups reflect CASA's brief. Dates vary with the programme;
+// do not turn examples into a promised weekly or monthly schedule.
 export const culturalProgramsByLocale: Record<ContentLocale, CulturalProgramItem[]> = {
   en: [
     {
       id: 'tandem',
       locale: 'en',
-      title: 'Tandem Language Partners',
-      summary:
-        'Students meet native or advanced speakers for guided conversation exchange and confidence building.',
-      cadence: 'Weekly',
+      title: 'Language exchange',
+      summary: 'Practise German in conversation and share your own language with a tandem partner. It is a chance to learn from each other and get to know someone in Bremen.',
+      cadence: 'Ask about current opportunities',
     },
     {
       id: 'weekend-excursions',
       locale: 'en',
-      title: 'Weekend Excursions',
-      summary:
-        'Organized trips to hand-picked destinations give learners the chance to practice German in real-world settings. Highlights include the Universum Science Center Bremen (technology, nature, humankind), the Klimahaus Bremerhaven 8° Ost (a journey along the 8th meridian), Weser harbour tours, and day trips to Groningen, Hamburg, and the island of Norderney.',
-      cadence: 'Twice monthly',
+      title: 'Bremen and beyond',
+      summary: 'Explore Bremen together and join trips to places such as Hamburg, Lübeck and other cities in the region. Discover somewhere new, enjoy a day out and use your German along the way.',
+      cadence: 'Dates depend on the current programme',
     },
     {
       id: 'community-events',
       locale: 'en',
-      title: 'Community Culture Events',
-      summary:
-        'Shared events, intercultural evenings, and practical orientation activities connect students across levels.',
-      cadence: 'Monthly',
+      title: 'Meet people, make friends',
+      summary: 'Our meetups bring students from different courses together. Spend time with people from around the world, share experiences and build friendships beyond your classroom.',
+      cadence: 'Ask for the current programme',
     },
   ],
   de: [
     {
       id: 'tandem',
       locale: 'de',
-      title: 'Tandem-Sprachpartnerschaften',
-      summary:
-        'Lernende treffen Muttersprachlerinnen, Muttersprachler oder Fortgeschrittene für begleitete Gesprächspraxis.',
-      cadence: 'Wöchentlich',
+      title: 'Im Sprachtandem lernen',
+      summary: 'Deutsch üben und die eigene Sprache weitergeben: Im Tandem lernen zwei Menschen voneinander. So entstehen Gespräche, neue Perspektiven und Kontakte in Bremen.',
+      cadence: 'Aktuelle Möglichkeiten auf Anfrage',
     },
     {
       id: 'weekend-excursions',
       locale: 'de',
-      title: 'Wochenend-Exkursionen',
-      summary:
-        'Gemeinsame Ausflüge zu ausgewählten Zielen verbinden Sprachanwendung mit Kultur und Orientierung. Auf dem Programm stehen u. a. das Universum Science Center Bremen (Technik, Natur, Mensch), das Klimahaus Bremerhaven 8° Ost (eine Reise entlang des achten Längengrads), Weser- und Hafenrundfahrten sowie Tagesausflüge nach Groningen, Hamburg und auf die Insel Norderney.',
-      cadence: 'Zweimal im Monat',
+      title: 'Bremen und die Region entdecken',
+      summary: 'Gemeinsam erkunden wir Bremen und unternehmen Ausflüge, zum Beispiel nach Hamburg, Lübeck und in andere Städte der Region. Dabei bleibt Zeit zum Entdecken, Deutschsprechen und Zusammensein.',
+      cadence: 'Termine je nach aktuellem Programm',
     },
     {
       id: 'community-events',
       locale: 'de',
-      title: 'Community- und Kulturveranstaltungen',
-      summary:
-        'Interkulturelle Abende und gemeinschaftliche Formate schaffen Begegnung über Kursgrenzen hinweg.',
-      cadence: 'Monatlich',
+      title: 'Neue Menschen kennenlernen',
+      summary: 'Bei unseren Treffen kommen Teilnehmende aus verschiedenen Kursen zusammen. Hier können Sie Erfahrungen austauschen, Freundschaften schließen und sich nach und nach in Bremen zu Hause fühlen.',
+      cadence: 'Aktuelles Programm auf Anfrage',
     },
   ],
 };

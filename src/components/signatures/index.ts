@@ -1,4 +1,3 @@
-export { HomeCommunityOutcomes } from './home-community-outcomes';
 export { CoursesFormatSelector } from './courses-format-selector';
 export { CourseLevelGoals } from './course-level-goals';
 export { AccommodationArrivalChecklist } from './accommodation-arrival-checklist';

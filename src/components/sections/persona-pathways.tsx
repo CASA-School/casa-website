@@ -43,7 +43,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           key: 'new-learners',
           icon: 'courses',
           title: 'Niveau finden',
-          description: 'Starten Sie bei A1 oder steigen Sie mit klarer Einstufung ins passende Niveau ein.',
+          description: 'Sie fangen neu an oder haben schon Deutsch gelernt? Gemeinsam finden wir Ihren Einstieg.',
           primaryAction: { href: '/placement-test' },
         },
         {
@@ -56,8 +56,8 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
         {
           key: 'exam-candidates',
           icon: 'exams',
-          title: 'Zertifikat vorbereiten',
-          description: 'Verbinden Sie Ihren Kursweg mit telc B2 oder C1 Hochschule Vorbereitung.',
+          title: 'Auf eine Prüfung vorbereiten',
+          description: 'Bereiten Sie sich gezielt auf telc Deutsch B2 oder telc Deutsch C1 Hochschule vor.',
           primaryAction: { href: '#exam-preparation' },
         },
         {
@@ -73,7 +73,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           key: 'new-learners',
           icon: 'courses',
           title: 'Find your level',
-          description: 'Start at A1 or continue from your current level with clear placement guidance.',
+          description: 'Starting from scratch or returning to German? Let us help you find the right level.',
           primaryAction: { href: '/placement-test' },
         },
         {
@@ -87,7 +87,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           key: 'exam-candidates',
           icon: 'exams',
           title: 'Prepare for a certificate',
-          description: 'Connect your course plan with telc B2 or C1 Hochschule preparation.',
+          description: 'Get ready for telc Deutsch B2 or telc Deutsch C1 Hochschule with focused practice.',
           primaryAction: { href: '#exam-preparation' },
         },
         {

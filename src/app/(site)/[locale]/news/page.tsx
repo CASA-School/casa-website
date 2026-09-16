@@ -29,9 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'News',
-    description:
-      'Read CASA Bremen stories, language-learning insights, and community updates for international students.',
+    title: locale === 'de' ? 'Neuigkeiten von CASA' : 'CASA news',
+    description: locale === 'de' ? 'Neuigkeiten, Veranstaltungen und Geschichten aus dem Alltag unserer internationalen Sprachschule in Bremen.' : 'News, events and stories from everyday life at our international language school in Bremen.',
     path: '/news',
     keywords: ['CASA news', 'language learning stories Bremen', 'German school journal'],
   });

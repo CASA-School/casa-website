@@ -49,9 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Placement Test',
-    description:
-      'Take CASA Bremen’s own German placement test and get a course recommendation from our teaching team. Free, about 15–30 minutes, no registration needed.',
+    title: locale === 'de' ? 'Deutsch-Einstufungstest' : 'German placement test',
+    description: locale === 'de' ? 'Finden Sie den passenden Deutschkurs mit dem kostenlosen CASA-Einstufungstest. Etwa 15–30 Minuten, ohne Anmeldung.' : 'Find the right German course with the free CASA placement test. Allow about 15–30 minutes; no registration needed.',
     path: '/placement-test',
     keywords: ['German placement test Bremen', 'CEFR level check', 'Einstufungstest Bremen', 'CASA admissions'],
   });

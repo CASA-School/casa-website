@@ -301,10 +301,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | --- | --- |
 | `MEMORY.md` | **Living project log.** Read first. Numbered work passes, current assumptions, next focus. Update it when making a significant architectural or UX shift. |
 | `README.md` | Scope, route list, integrations |
-| `PROJECT_BRIEF.md` | Product framing and core flows |
 | `ARCHITECTURE.md` | Stack, runtime modes, folder responsibilities, env vars |
 | `UI_SYSTEM.md` | Brand tokens, typography, radius, layout/motion conventions |
-| `IMPLEMENTATION_PLAN.md` | Launch workstreams and explicit out-of-scope |
 | `AGENTS.md` | Agent operating rules — see caveat below |
 | `docs/DEV_SETUP.md` | Environment and Neon setup |
 | `docs/ERD.md` | Mermaid data model |
@@ -330,7 +328,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md` | Token comparison with the CASA student app and what should converge |
 | `docs/EXPERIMENTAL_LANDING_PAGES.md` | Review-only routes and rollback steps |
 | `docs/TEAM_UPDATE_2026-06-23.md` | Team-facing status, demo flow, open decisions |
-| `CLEANUP_REPORT.md`, `docs/WEBAPP_REVIEW.md` | Historical Feb 2026 audits, largely superseded |
+| `docs/WEBAPP_REVIEW.md` | Historical Feb 2026 audit, largely superseded |
+| `docs/RELEASE_CLEANUP_COPY.md` | September cleanup, copy decisions and launch handoff |
 
 ### AGENTS.md caveat
 

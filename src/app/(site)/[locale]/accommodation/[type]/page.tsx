@@ -30,16 +30,20 @@ export async function generateMetadata({ params }: AccommodationDetailPageProps)
   if (!validTypes.includes(type as AccommodationTypeKey)) {
     return createPublicMetadata({
       locale,
-      title: 'Accommodation detail',
-      description: 'CASA accommodation detail',
+      title: locale === 'de' ? 'Unterkunft' : 'Accommodation',
+      description: locale === 'de' ? 'Unterkunft bei CASA in Bremen.' : 'Accommodation with CASA in Bremen.',
       path: `/accommodation/${type}`,
     });
   }
 
   return createPublicMetadata({
     locale,
-    title: type === 'flat' ? 'Shared Flats | CASA' : 'Host Families | CASA',
-    description: 'CASA accommodation detail including arrival checklist and support expectations.',
+    title: type === 'flat'
+      ? (locale === 'de' ? 'CASA-WGs' : 'CASA shared flats')
+      : (locale === 'de' ? 'Wohnen bei Bremer Gastgebern' : 'Stay with local hosts'),
+    description: locale === 'de'
+      ? 'Ihr Zimmer während des Intensivkurses: Informationen zu Wohnen, Kosten und Anreise sowie persönliche Unterstützung von CASA.'
+      : 'Your room during your intensive course: accommodation details, costs and arrival information, with personal support from CASA.',
     path: `/accommodation/${type}`,
   });
 }
@@ -158,7 +162,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 title={locale === 'de' ? 'Ankunfts- und Stadtteil-Checkliste' : 'Neighborhood + arrival checklist'}
                 description={
                   locale === 'de'
-                    ? 'Printbare Checkliste für Anreise, Orientierung und erste Woche.'
+                    ? 'Eine Checkliste zum Ausdrucken für Ihre Anreise und die erste Woche.'
                     : 'Printable checklist for arrival, orientation, and your first week.'
                 }
                 neighborhoodTitle={locale === 'de' ? 'Im Stadtteil' : 'In the neighbourhood'}
@@ -166,8 +170,8 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 printLabel={locale === 'de' ? 'Checkliste drucken' : 'Print checklist'}
                 neighborhoodNotes={[
                   locale === 'de' ? 'ÖPNV-Anbindung und Wege zur Schule prüfen' : 'Check public transport access to school',
-                  locale === 'de' ? 'Nächste Supermärkte und Apotheken lokalisieren' : 'Locate nearby groceries and pharmacies',
-                  locale === 'de' ? 'Ruhige Lernorte im Umfeld identifizieren' : 'Identify quiet places for study',
+                  locale === 'de' ? 'Supermärkte und Apotheken in der Nähe finden' : 'Locate nearby groceries and pharmacies',
+                  locale === 'de' ? 'Ruhige Orte zum Lernen in der Umgebung finden' : 'Identify quiet places for study',
                 ]}
                 arrivalChecklist={[
                   locale === 'de' ? 'Check-in Zeit bestätigen' : 'Confirm check-in time',
@@ -249,8 +253,8 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 </h2>
                 <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                   {locale === 'de'
-                    ? 'Bei der Ankunft und bei der Abreise füllen Gastgeber und Lernende dasselbe Formular gemeinsam aus. Deshalb ist die Rückzahlung der Kaution keine Ermessensfrage — beide Seiten haben denselben Zustand festgehalten.'
-                    : 'At arrival and again at departure, the host and the student fill in the same form together. That is why returning the deposit is not a matter of judgement — both sides recorded the same condition.'}
+                    ? 'Bei der Ankunft und bei der Abreise halten Gastgeber und Teilnehmende den Zustand des Zimmers gemeinsam fest. Das Übergabeformular hilft beiden Seiten, Fragen zu Zustand und Kaution nachvollziehbar zu klären.'
+                    : 'At arrival and departure, the host and student record the condition of the room together. The handover form gives both sides a shared record when discussing the room and deposit.'}
                 </p>
                 <ul className="mt-6 grid gap-3 sm:grid-cols-2">
                   {checkInSummary(locale).map((item) => (
@@ -289,44 +293,44 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 rows={[
                   {
                     label: locale === 'de' ? 'Alltagsrhythmus' : 'Daily rhythm',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Selbstorganisiert' : 'Self-organized') : locale === 'de' ? 'Familienbasiert' : 'Family-based',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Familienbasiert' : 'Family-based') : locale === 'de' ? 'Selbstorganisiert' : 'Self-organized',
+                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Selbstorganisiert' : 'Self-organized') : locale === 'de' ? 'Mit den Gastgebern abgestimmt' : 'Agreed with your hosts',
+                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Mit den Gastgebern abgestimmt' : 'Agreed with your hosts') : locale === 'de' ? 'Selbstorganisiert' : 'Self-organized',
                   },
                   {
                     label: locale === 'de' ? 'Sprachpraxis' : 'Language practice',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Peer-Umfeld' : 'Peer environment') : locale === 'de' ? 'Tägliche Gespräche' : 'Daily conversations',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Tägliche Gespräche' : 'Daily conversations') : locale === 'de' ? 'Peer-Umfeld' : 'Peer environment',
+                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Mit anderen Kursteilnehmenden' : 'With fellow students') : locale === 'de' ? 'Tägliche Gespräche' : 'Daily conversations',
+                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Tägliche Gespräche' : 'Daily conversations') : locale === 'de' ? 'Mit anderen Kursteilnehmenden' : 'With fellow students',
                   },
                   {
                     label: locale === 'de' ? 'Privatsphäre' : 'Privacy',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Hoch - eigenes Zimmer in WG' : 'Higher - own room in shared flat') : locale === 'de' ? 'Mittel - Familienalltag' : 'Moderate - shared family rhythm',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Mittel - Familienalltag' : 'Moderate - shared family rhythm') : locale === 'de' ? 'Hoch - eigenes Zimmer in WG' : 'Higher - own room in shared flat',
+                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Eigenes Zimmer in der WG' : 'Your own room in a shared flat') : locale === 'de' ? 'Eigenes Zimmer im Haushalt' : 'Your own room in a local home',
+                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Eigenes Zimmer im Haushalt' : 'Your own room in a local home') : locale === 'de' ? 'Eigenes Zimmer in der WG' : 'Your own room in a shared flat',
                   },
                   {
                     label: locale === 'de' ? 'Nebenkosten' : 'Utilities',
-                    left: locale === 'de' ? 'Meist inklusive' : 'Usually included',
-                    right: locale === 'de' ? 'In der Regel inklusive' : 'Typically included',
+                    left: locale === 'de' ? 'Vor der Buchung klären' : 'Confirm before booking',
+                    right: locale === 'de' ? 'Vor der Buchung klären' : 'Confirm before booking',
                   },
                   {
-                    label: locale === 'de' ? 'Unterstützungsmodell' : 'Support model',
+                    label: locale === 'de' ? 'Ansprechpersonen' : 'People to contact',
                     left: accommodationType === 'flat' ? (locale === 'de' ? 'CASA Team + Hausregeln' : 'CASA team + house policy') : locale === 'de' ? 'CASA Team + Gastgeberkontakt' : 'CASA team + host contact',
                     right: accommodationType === 'flat' ? (locale === 'de' ? 'CASA Team + Gastgeberkontakt' : 'CASA team + host contact') : locale === 'de' ? 'CASA Team + Hausregeln' : 'CASA team + house policy',
                   },
                   {
                     label: locale === 'de' ? 'Alltagsstruktur' : 'Daily structure',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Flexibel und eigenverantwortlich' : 'Flexible and self-directed') : locale === 'de' ? 'Strukturierter Familienrahmen' : 'Structured family framework',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Strukturierter Familienrahmen' : 'Structured family framework') : locale === 'de' ? 'Flexibel und eigenverantwortlich' : 'Flexible and self-directed',
+                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Flexibel und eigenverantwortlich' : 'Flexible and self-directed') : locale === 'de' ? 'Absprachen mit den Gastgebern' : 'Arrangements with your hosts',
+                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Absprachen mit den Gastgebern' : 'Arrangements with your hosts') : locale === 'de' ? 'Flexibel und eigenverantwortlich' : 'Flexible and self-directed',
                   },
                   {
                     label: locale === 'de' ? 'Geeignet für' : 'Best fit',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Selbstständige Lernende' : 'Independent learners') : locale === 'de' ? 'Lernende mit Wunsch nach Immersion' : 'Learners seeking immersion',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Lernende mit Wunsch nach Immersion' : 'Learners seeking immersion') : locale === 'de' ? 'Selbstständige Lernende' : 'Independent learners',
+                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Selbstständige Lernende' : 'Independent learners') : locale === 'de' ? 'Menschen, die den Alltag vor Ort kennenlernen möchten' : 'People who want to experience local daily life',
+                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Menschen, die den Alltag vor Ort kennenlernen möchten' : 'People who want to experience local daily life') : locale === 'de' ? 'Selbstständige Lernende' : 'Independent learners',
                   },
                 ]}
               />
 
               <ProcessSteps
-                eyebrow={locale === 'de' ? 'Anfrage' : 'Request CTA'}
+                eyebrow={locale === 'de' ? 'Anfrage' : 'Enquire'}
                 title={locale === 'de' ? 'Unterkunft jetzt anfragen' : 'Request this accommodation now'}
                 description={
                   locale === 'de'
@@ -347,7 +351,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                   {
                     step: locale === 'de' ? '3' : '3',
                     title: locale === 'de' ? 'Bestätigen' : 'Confirm',
-                    description: locale === 'de' ? 'Nach Zahlungsschritten Check-in Infos erhalten.' : 'Receive check-in details after required payment steps.',
+                    description: locale === 'de' ? 'Nach der Buchung Anreise und Schlüsselübergabe abstimmen.' : 'Arrange your arrival and key collection after booking.',
                   },
                 ]}
               />

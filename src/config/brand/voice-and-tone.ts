@@ -9,7 +9,19 @@ export const voicePrinciples = [
   },
   {
     title: 'People before process',
-    description: 'Frame steps around learner outcomes, confidence, and real-life progress.',
+    description: 'Start by listening. Describe help with real situations: learning, settling in, meeting people and planning what comes next.',
+  },
+  {
+    title: 'Belonging through diversity',
+    description: 'Welcome people from every background as participants in the community. Avoid implying that belonging depends on fluency, nationality or a particular career path.',
+  },
+  {
+    title: 'Natural in each language',
+    description: 'Write German in the established Sie form and English in natural British English. Preserve meaning and verified facts, not sentence structure. Prefer Beratung and Gemeinschaft to Support and Community in German prose.',
+  },
+  {
+    title: 'Care without overpromising',
+    description: 'Describe advice and support specifically. Do not promise admission, employment, a visa, accommodation availability, exam results or event frequency without confirmation. Keep verified student quotations intact.',
   },
 ] as const;
 

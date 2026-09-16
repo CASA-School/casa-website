@@ -16,8 +16,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Contact CASA',
-    description: 'Contact CASA for course advice, exam registration support, and accommodation questions.',
+    title: locale === 'de' ? 'Kontakt und Beratung' : 'Contact and advice',
+    description: locale === 'de'
+      ? 'Fragen zu Deutschkursen, Prüfungen, Unterkunft oder Ihren nächsten Schritten? Das CASA-Team in Bremen nimmt sich Zeit für Sie.'
+      : 'Questions about German courses, exams, accommodation or what comes next? Talk to the CASA team in Bremen for personal advice.',
     path: '/contact',
     keywords: ['Contact CASA', 'Admissions Bremen', 'Language school support'],
   });
@@ -128,8 +130,8 @@ function getInitialTopicKey(rawTopic: string | undefined, locale: 'en' | 'de') {
 
 const formCopyByLocale = {
   en: {
-    formTitle: 'Send your request',
-    formBody: 'Tell us your current level, target, preferred start date, and whether exam, visa, Bildungszeit/AZAV, or housing deadlines matter. We will answer with a clear next step.',
+    formTitle: 'Tell us how we can help',
+    formBody: 'Tell us about your plans and any questions you have. If you know your German level, preferred start date or an important deadline, include it. You do not need to have everything worked out.',
     submit: 'Send',
     submitting: 'Sending your request...',
     firstNameLabel: 'First name',
@@ -141,28 +143,28 @@ const formCopyByLocale = {
     topicLabel: 'Topic',
     topicPlaceholder: 'Select a topic',
     messageLabel: 'Message',
-    messagePlaceholder: 'Example: I am currently A2, need evening classes, want to start in August, and may need telc B2 or housing support.',
+    messagePlaceholder: 'For example: I have some German and would like to study in Bremen. Could you help me choose a course and find out about accommodation?',
     successTitle: 'Request received',
-    successBody: 'Thank you. CASA usually replies within one business day with a concrete recommendation.',
+    successBody: 'Thank you for getting in touch. Our team will read your message and reply to your questions.',
     sendAnother: 'Send another request',
     errorTitle: 'Submission issue',
     errorBody: 'Please try again or contact us directly if your request is time-sensitive.',
-    responseTitle: 'Response promise',
-    responseValue: 'Usually within 1 business day',
+    responseTitle: 'Speak to us directly',
+    responseValue: 'During office hours',
     responseBody: 'For urgent deadlines, call the office directly during opening hours.',
     callCta: 'Call the office',
     officeDetails: 'Office details',
     officeHours: 'Office hours',
     placementPromptTitle: 'Need level advice first?',
-    placementPromptBody: 'Take the placement test before registration.',
-    placementPromptCta: 'Start level check',
+    placementPromptBody: 'The placement test helps us recommend a suitable course.',
+    placementPromptCta: 'Start the placement test',
     registrationPromptTitle: 'Already decided?',
     registrationPromptBody: 'Go directly to course registration.',
-    registrationPromptCta: 'Reserve course spot',
+    registrationPromptCta: 'Register for a course',
   },
   de: {
     formTitle: 'Anfrage senden',
-    formBody: 'Nennen Sie bitte Ihr aktuelles Niveau, Ziel, Wunschstart und ob Prüfung, Visum, Bildungszeit/AZAV oder Unterkunft wichtig sind. Wir antworten mit einem klaren nächsten Schritt.',
+    formBody: 'Schreiben Sie uns, was Sie vorhaben und welche Fragen Sie beschäftigen. Wenn Sie Ihr Sprachniveau, einen Wunschstart oder eine wichtige Frist kennen, nennen Sie diese gern. Sie müssen noch nicht alles entschieden haben.',
     submit: 'Senden',
     submitting: 'Anfrage wird übermittelt...',
     firstNameLabel: 'Vorname',
@@ -174,21 +176,21 @@ const formCopyByLocale = {
     topicLabel: 'Thema',
     topicPlaceholder: 'Thema auswählen',
     messageLabel: 'Nachricht',
-    messagePlaceholder: 'Beispiel: Ich bin aktuell A2, suche Abendkurse, möchte im August starten und brauche eventuell telc B2 oder Unterkunft.',
+    messagePlaceholder: 'Zum Beispiel: Ich habe erste Deutschkenntnisse und möchte in Bremen studieren. Welcher Kurs passt zu mir und können Sie mir bei der Unterkunft helfen?',
     successTitle: 'Anfrage eingegangen',
-    successBody: 'Vielen Dank. CASA meldet sich in der Regel innerhalb eines Werktages mit einer konkreten Empfehlung.',
+    successBody: 'Vielen Dank für Ihre Nachricht. Unser Team liest Ihre Anfrage und meldet sich bei Ihnen.',
     sendAnother: 'Weitere Anfrage senden',
     errorTitle: 'Übermittlung nicht möglich',
     errorBody: 'Bitte erneut versuchen oder bei Zeitdruck direkt im Büro melden.',
-    responseTitle: 'Antwortzeit',
-    responseValue: 'Meist innerhalb eines Werktags',
+    responseTitle: 'Persönlich erreichbar',
+    responseValue: 'Während unserer Bürozeiten',
     responseBody: 'Bei dringenden Fristen rufen Sie das Büro bitte direkt an.',
     callCta: 'Büro anrufen',
     officeDetails: 'Kontaktdaten',
     officeHours: 'Öffnungszeiten',
     placementPromptTitle: 'Unsicher beim Niveau?',
     placementPromptBody: 'Starten Sie zuerst mit der Einstufung.',
-    placementPromptCta: 'Level-Check starten',
+    placementPromptCta: 'Einstufungstest starten',
     registrationPromptTitle: 'Schon entschieden?',
     registrationPromptBody: 'Direkt zur Kursanmeldung wechseln.',
     registrationPromptCta: 'Zur Kursanmeldung',
@@ -232,7 +234,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
         title={hero.headline}
         description={hero.subheadline}
         breadcrumbs={breadcrumbs}
-        cta={{ label: locale === 'de' ? 'CASA-Plan anfragen' : 'Get my CASA plan', href: '#contact-form', kind: 'primary' }}
+        cta={{ label: locale === 'de' ? 'Nachricht schreiben' : 'Write to us', href: '#contact-form', kind: 'primary' }}
         meta={hero.proofMetrics.slice(0, 1).map((item) => `${item.value} ${item.label}`)}
       />
 
@@ -266,7 +268,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
             <div className="min-w-0 xl:sticky xl:top-28 xl:self-start">
               <aside className="rounded-3xl border border-[color:var(--casa-sand)]/60 bg-[var(--casa-surface-wash)] p-6 sm:p-8 space-y-8 shadow-[var(--shadow-soft)]">
-                {/* Response promise */}
+                {/* Speak to us directly */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">

@@ -24,6 +24,7 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import { getCoursePath } from '@/lib/content/course-routes';
 import {
   getCourseFinderData,
+  getCulturalPrograms,
   getCourseNarrative,
   getExamCatalog,
   getSocialProof,
@@ -45,12 +46,12 @@ export async function generateMetadata(): Promise<Metadata> {
       ? {
           title: 'Deutsch lernen in Bremen',
           description:
-            'CASA verbindet Unterricht mit Menschen im Mittelpunkt, klaren Lernwegen und verlässlicher Prüfungsvorbereitung in Bremen.',
+            'Deutsch lernen und in Bremen ankommen: CASA bietet Kurse, telc-Prüfungen, persönliche Beratung und Unterkunft in einer internationalen Gemeinschaft.',
         }
       : {
           title: 'Learn German in Bremen',
           description:
-            'CASA combines human-centered teaching, clear learning pathways, and trusted exam preparation in Bremen.',
+            'Learn German and feel at home in Bremen. Discover CASA courses, telc exams, accommodation and personal advice in an international community.',
         }),
   });
 }
@@ -94,7 +95,7 @@ const homepageExamOrder = [
 const homepageCourseTitles: Partial<Record<string, Record<ContentLocale, string>>> = {
   'intensive-german': {
     en: 'Intensive German',
-    de: 'Intensiv Deutsch',
+    de: 'Deutsch intensiv',
   },
   'evening-german': {
     en: 'Evening Course',
@@ -109,8 +110,8 @@ const homepageCourseTitles: Partial<Record<string, Record<ContentLocale, string>
     de: 'Deutsch für Gruppen',
   },
   'medical-german': {
-    en: 'German for Medical',
-    de: 'Deutsch für Medizin',
+    en: 'German for medical professionals',
+    de: 'Deutsch für Mediziner',
   },
   'in-company': {
     en: 'In-company courses',
@@ -149,6 +150,7 @@ export default async function HomePage() {
     accommodationPageConfig.photos.thumbA ??
     pageConfig.photos.accommodation;
   const rhythm = getLayoutRhythm('home');
+  const culturalPrograms = getCulturalPrograms(locale);
 
   const [finderData, examCatalog, stories] = await Promise.all([
     getCourseFinderData(locale),
@@ -202,7 +204,7 @@ export default async function HomePage() {
           : 'Best for: international learners'),
       outcomes: course.narrative?.outcomes ?? [],
       href: getCoursePath(course.slug),
-      ctaLabel: locale === 'de' ? 'Kursplan erkunden' : 'Explore course plan',
+      ctaLabel: locale === 'de' ? 'Kurs ansehen' : 'Explore this course',
       meta: nextStart
         ? `${locale === 'de' ? 'Nächster Start' : 'Next start'}: ${formatDate(nextStart, locale)}`
         : undefined,
@@ -388,38 +390,20 @@ export default async function HomePage() {
     >
       <JsonLdScript id="website-schema" data={websiteSchema} />
 
-      {/*
-        The headline is CASA's own Leitbild, not marketing copy written for this
-        page. It is recorded at src/app/about/page.tsx:77 and
-        docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md calls it "the best line of copy
-        on the site", buried below a timeline, and says it "arguably belongs on
-        the homepage". This is that move.
-
-        The English is a rendering, not a translation of convenience: the German
-        is two imperatives in parallel, so the English keeps two clauses of
-        matching weight rather than flattening it into one sentence.
-
-        1983 is verifiable — the About page states the founding year and the
-        proof metrics carry "Since 1983". No other number appears here.
-
-        Photo: `courseDiscussion` ("learners listening and speaking during a
-        classroom discussion") — chosen because it depicts the headline rather
-        than decorating it. The previous `studentClass` was a table of people
-        working quietly, which illustrates study, not conversation.
-      */}
+      {/* Keep CASA's German Leitbild; English expresses the same welcome in its own voice. */}
       <HeroAPhotoLed
         eyebrow={
-          locale === 'de' ? 'CASA Leitbild · seit 1983' : 'The CASA idea · since 1983'
+          locale === 'de' ? 'Deutsch lernen in Bremen · seit 1983' : 'German courses in Bremen · since 1983'
         }
         title={
           locale === 'de'
-            ? 'Miteinander reden - aufeinander zugehen'
-            : 'Speak with each other. Move toward one another.'
+            ? 'Miteinander reden – aufeinander zugehen'
+            : 'Learn German. Feel at home.'
         }
         description={
           locale === 'de'
-            ? 'Seit 1983 unterrichten wir Deutsch in Bremen so, wie Sprache wirklich entsteht: im Gespräch, in kleinen Gruppen, mit Menschen, die Sie verstehen wollen.'
-            : 'Since 1983 we have taught German in Bremen the way language actually happens: in conversation, in small groups, with people who want to understand you.'
+            ? 'Bei CASA lernen Sie Deutsch und Menschen aus aller Welt kennen. Mit persönlicher Begleitung und einem offenen Miteinander helfen wir Ihnen, in Bremen anzukommen.'
+            : 'Learn German with people from around the world, with a team who take time to get to know you. At CASA, we help you find your feet in Bremen and feel part of a community.'
         }
         ctas={[
           {
@@ -458,12 +442,12 @@ export default async function HomePage() {
                 {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
               </p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de' ? 'Wo starten Sie?' : "Choose where you're starting from"}
+                {locale === 'de' ? 'Was haben Sie vor?' : "What brings you to CASA?"}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
-                  ? 'Vier häufige Ausgangspunkte. Wählen Sie den, der Ihrer Situation am nächsten kommt - der Rest ergibt sich im Gespräch.'
-                  : 'Four common starting points. Pick whichever is closest to your situation - the rest can be worked out together.'}
+                  ? 'Sie möchten studieren, beruflich weiterkommen oder sich im Alltag sicherer fühlen? Finden Sie einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.'
+                  : 'You may be planning to study, looking ahead to work or settling into everyday life. Start with what matters to you; we can work out the details together.'}
               </p>
               <span className="casa-tricolor-rule mt-7 block h-1 w-28 rounded-full md:w-36" aria-hidden />
             </div>
@@ -513,8 +497,8 @@ export default async function HomePage() {
               }
               description={
                 locale === 'de'
-                  ? 'Starten Sie mit den wichtigsten Formaten. Wenn Sie unsicher sind, hilft CASA beim passenden Niveau und Lerntempo.'
-                  : 'Start with the main formats. If you are unsure, CASA can help you choose the right level and pace.'
+                  ? 'Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu Ihren Vorkenntnissen und Ihrem Alltag passt.'
+                  : 'Study intensively, join an evening class or focus on a particular skill. We can help you find a course that suits your level and your everyday commitments.'
               }
             />
 
@@ -543,17 +527,17 @@ export default async function HomePage() {
           <div className="mx-auto max-w-[85rem]">
             <div className="max-w-[42rem]">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Ebenfalls verfügbar' : 'Also available'}
+                {locale === 'de' ? 'Deutsch für besondere Ziele' : 'German for specific goals'}
               </p>
               <h2 className="mt-4 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
                 {locale === 'de'
-                  ? 'Spezialisierte Formate und Programme'
-                  : 'Specialised formats and programmes'}
+                  ? 'Für Beruf und Weiterbildung'
+                  : 'For work and professional development'}
               </h2>
               <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                 {locale === 'de'
-                  ? 'Für bestimmte Berufe, Gruppen und Wege - wenn keines der vier Hauptformate passt.'
-                  : 'For particular professions, groups and routes - when none of the four main formats is the right fit.'}
+                  ? 'Deutsch für den medizinischen Alltag, für Ihr Team oder im Rahmen der Bildungszeit: Erzählen Sie uns, was Sie brauchen.'
+                  : 'German for medical practice, for your team or as part of educational leave. Tell us what you need and we will help you explore the options.'}
               </p>
             </div>
 
@@ -642,24 +626,24 @@ export default async function HomePage() {
               eyebrow={locale === 'de' ? 'Warum CASA' : 'Why CASA'}
               title={
                 locale === 'de'
-                  ? 'Kurs, Prüfung und Support in einem Plan'
-                  : 'The right course, exam path, and support in one plan'
+                  ? 'Wir hören zu. Und begleiten Sie.'
+                  : 'Your plans start with a conversation'
               }
               description={
                 locale === 'de'
-                  ? 'Sobald Ihr Ziel klar ist, hilft CASA, den passenden Kurs, Prüfungsvorbereitung und praktische Unterstützung zu verbinden.'
-                  : 'Once you know your goal, CASA helps you combine the right course, exam preparation, and practical support.'
+                  ? 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit Ihnen, was Ihnen jetzt weiterhilft – beim Deutschlernen und bei Ihren nächsten Schritten.'
+                  : 'Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.'
               }
               bullets={[
                 locale === 'de'
-                  ? 'Kursberatung nach Niveau, Zeitplan und Ziel'
-                  : 'Course advice based on your level, schedule, and goal',
+                  ? 'Persönliche Beratung zu Kurswahl, Sprachniveau und Prüfungen'
+                  : 'One-to-one advice on your course, language level and exams',
                 locale === 'de'
-                  ? 'telc Vorbereitung, wenn ein Zertifikat wichtig ist'
-                  : 'telc preparation when a certificate matters',
+                  ? 'Orientierung, wenn Sie studieren, Arbeit suchen oder in eine andere Stadt ziehen möchten'
+                  : 'Guidance as you explore university, look for work or plan a move to another city',
                 locale === 'de'
-                  ? 'Unterkunft und Ankommen, wenn Sie nach Bremen kommen'
-                  : 'Accommodation and arrival support if you are coming to Bremen',
+                  ? 'Unterstützung bei der Unterkunft und beim Ankommen in Bremen'
+                  : 'Help with accommodation and settling into life in Bremen',
               ]}
               photo={pageConfig.photos.story}
             />
@@ -717,13 +701,13 @@ export default async function HomePage() {
             eyebrow={locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
             title={
               locale === 'de'
-                ? 'Kursgebühren bleiben im Bildungsauftrag.'
-                : 'Course fees stay inside the education mission.'
+                ? 'Ihre Kursgebühren fördern Bildung.'
+                : 'Your course fees support education.'
             }
             description={
               locale === 'de'
                 ? 'CASA ist eine gemeinnützige GmbH. Einnahmen werden in Unterrichtsqualität, faire Vergütung, Lernräume und soziale Bildungsprojekte reinvestiert.'
-                : 'CASA is a non-profit gGmbH. Income is reinvested in teaching quality, fair pay, learning spaces, and social education projects.'
+                : 'CASA is a non-profit language school. Our income supports teaching, fair pay, learning spaces and projects that help people take part in society.'
             }
           />
 
@@ -746,8 +730,8 @@ export default async function HomePage() {
                 title: locale === 'de' ? 'Keine Gewinnausschüttung' : 'No profit distribution',
                 text:
                   locale === 'de'
-                    ? 'Überschüsse verlassen die Schule nicht.'
-                    : 'Surplus does not leave the school.',
+                    ? 'Überschüsse fließen in unsere gemeinnützige Arbeit.'
+                    : 'Any surplus supports our non-profit work.',
               },
               {
                 title: locale === 'de' ? 'Reinvestition in Bildung' : 'Reinvestment in education',
@@ -761,7 +745,7 @@ export default async function HomePage() {
                 text:
                   locale === 'de'
                     ? 'Soziale Bildungsarbeit in Bremen.'
-                    : 'Social education work across Bremen.',
+                    : 'Helping people build a life in Bremen through education.',
               },
             ].map((item) => (
               <li key={item.title} className="p-6 md:p-7">
@@ -801,13 +785,13 @@ export default async function HomePage() {
                 </p>
                 <h2 className="mt-3 text-3xl font-bold md:text-4xl">
                   {locale === 'de'
-                    ? 'Ergänzen Sie Ihren Kursweg mit Prüfungsvorbereitung'
-                    : 'Add exam preparation to your course plan'}
+                    ? 'Gut vorbereitet in Ihre telc-Prüfung'
+                    : 'Prepare for your telc exam with us'}
                 </h2>
                 <p className="mt-4 text-base leading-relaxed text-white/72 md:text-lg">
                   {locale === 'de'
-                    ? 'Nach der Kurswahl können Sie gezielt telc Deutsch B2 oder telc Deutsch C1 Hochschule vorbereiten - mit Prüfungstraining, Feedback und klarer Anmeldung.'
-                    : 'After choosing a course, you can prepare for telc Deutsch B2 or telc Deutsch C1 Hochschule with exam training, feedback, and clear registration.'}
+                    ? 'Sie brauchen telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen Ihnen bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an. Die Vorbereitung ist nicht im Intensivkurs enthalten.'
+                    : 'Need telc Deutsch B2 or telc Deutsch C1 Hochschule? We can help you choose your exam and prepare in a dedicated course. Exam preparation is booked separately from intensive German.'}
                 </p>
                 {/*
                   A band lead-in, not a conversion. The two cards below it are
@@ -884,8 +868,8 @@ export default async function HomePage() {
               </div>
               <p className="absolute inset-x-0 bottom-0 p-5 text-base font-bold text-white md:p-6">
                 {locale === 'de'
-                  ? 'Kursstart und Ankommen in Bremen werden zusammen geplant.'
-                  : 'Course start and arrival in Bremen are planned together.'}
+                  ? 'Ein eigenes Zimmer für Ihren Start in Bremen.'
+                  : 'A room of your own as you settle into Bremen.'}
               </p>
             </div>
 
@@ -895,21 +879,21 @@ export default async function HomePage() {
               </p>
               <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {locale === 'de'
-                  ? 'Unterkunft als Support rund um den Kurs.'
-                  : 'Accommodation as support around the course.'}
+                  ? 'Ein Zuhause für Ihre Zeit in Bremen'
+                  : 'A place to call home in Bremen'}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
-                  ? 'Wenn Sie für einen Kurs nach Bremen kommen, kann CASA bei WG, Gastfamilie und den nächsten Schritten helfen.'
-                  : 'If you are coming to Bremen for a course, CASA can support shared-flat or host-family options and the next practical steps.'}
+                  ? 'Für Ihren Intensivkurs vermitteln wir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu Ihnen passt und was verfügbar ist.'
+                  : 'For your intensive course, we can arrange a room in a CASA shared flat or with local hosts in and around Bremen. We will talk through your preferences and confirm what is available.'}
               </p>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {[
                   locale === 'de' ? 'CASA WG' : 'CASA shared flat',
                   locale === 'de' ? 'Gastfamilie' : 'Host family',
-                  locale === 'de' ? 'Klare Erwartungen' : 'Clear expectations',
-                  locale === 'de' ? 'Anfragebasierte Verfügbarkeit' : 'Request-based availability',
+                  locale === 'de' ? 'Persönliche Vermittlung' : 'Personal help finding a room',
+                  locale === 'de' ? 'Verfügbarkeit auf Anfrage' : 'Availability on request',
                 ].map((item) => (
                   <div
                     key={item}
@@ -930,6 +914,31 @@ export default async function HomePage() {
       </section>
 
       <BandSeam />
+
+      <section id="community" className="bg-[var(--casa-canvas)] py-16 md:py-24 scroll-mt-28" data-track-section="life-at-casa">
+        <Container>
+          <BandHeading
+            eyebrow={locale === 'de' ? 'Leben bei CASA' : 'Life at CASA'}
+            title={locale === 'de' ? 'Bremen entdecken. Menschen kennenlernen.' : 'Discover Bremen. Find your people.'}
+            description={locale === 'de'
+              ? 'Zum Ankommen gehört mehr als ein Sprachkurs. Gemeinsame Erlebnisse machen aus einer neuen Stadt einen vertrauten Ort.'
+              : 'Feeling at home takes more than a language course. Shared experiences help turn a new city into a familiar place.'}
+          />
+          <div className="mx-auto mt-10 grid max-w-[85rem] gap-8 md:grid-cols-3">
+            {culturalPrograms.map((program) => (
+              <article key={program.id}>
+                <h3 className="text-xl font-bold">{program.title}</h3>
+                <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{program.summary}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <TextCta href="/contact">
+              {locale === 'de' ? 'Nach dem aktuellen Programm fragen' : 'Ask what is coming up'}
+            </TextCta>
+          </div>
+        </Container>
+      </section>
 
       <section className="py-16 md:py-24" data-track-section="proof-and-outcomes">
         <Container>
@@ -986,8 +995,8 @@ export default async function HomePage() {
           <TestimonialGrid
             title={
               locale === 'de'
-                ? 'Echte Stimmen aus der CASA Community'
-                : 'Real stories from the CASA community'
+                ? 'Das sagen unsere Teilnehmenden'
+                : 'In our students’ words'
             }
             description={
               locale === 'de'

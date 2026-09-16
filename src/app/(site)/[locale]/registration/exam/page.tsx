@@ -11,9 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Exam Registration',
-    description:
-      'Register for CASA Bremen exam sessions with transparent deadlines, fees, and candidate details.',
+    title: locale === 'de' ? 'Prüfungsanmeldung' : 'Exam registration',
+    description: locale === 'de' ? 'Melden Sie sich zu Ihrer telc-Prüfung bei CASA in Bremen an. Wählen Sie Prüfung und Termin und tragen Sie Ihre Daten ein.' : 'Register for your telc exam at CASA in Bremen. Choose your exam and date, then enter your details.',
     path: '/registration/exam',
   });
 }

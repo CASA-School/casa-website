@@ -13,8 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Become a Host Family',
-    description: 'Open your home to international CASA students and support language learning through daily life in Bremen.',
+    title: locale === 'de' ? 'Gastgeber werden' : 'Become a host',
+    description: locale === 'de' ? 'Sie haben ein Zimmer frei? Heißen Sie internationale CASA-Teilnehmende in Bremen willkommen und lernen Sie Menschen aus aller Welt kennen.' : 'Have a room to spare? Welcome international CASA students into your home in Bremen and meet people from around the world.',
     path: '/accommodation/become-host',
     keywords: ['Host family Bremen', 'Become host family', 'Student accommodation'],
   });
@@ -96,7 +96,7 @@ export default async function BecomeHostFamilyPage() {
           storyEyebrow: 'Wie Hosting bei CASA funktioniert',
           storyTitle: 'Gastgebersein bedeutet mehr als ein Zimmer anzubieten',
           storyDescription:
-            'Wir suchen Haushalte, die Lernenden ein stabiles Umfeld für Sprache, Alltag und Orientierung geben. CASA begleitet Matching, Kommunikation und organisatorische Abstimmung.',
+            'Wir suchen offene Haushalte, in denen sich internationale Teilnehmende willkommen fühlen. CASA hilft bei der Vermittlung und den Absprachen und bleibt während des Aufenthalts an Ihrer Seite.',
           storyBullets: [
             'Möbliertes Einzelzimmer mit Bett, Schreibtisch und Stauraum',
             'Zugang zu Bad und alltagsnaher Wohnnutzung',
@@ -137,7 +137,7 @@ export default async function BecomeHostFamilyPage() {
           partnershipEyebrow: 'Die Zusammenarbeit',
           partnershipTitle: 'Wer was übernimmt',
           partnershipDescription:
-            'Gastgeben ist eine Aufteilung, keine Übergabe. Sie bringen das Zuhause und den Alltag; CASA bringt das Matching, die Vorbereitung und eine Ansprechperson, die während des ganzen Aufenthalts erreichbar bleibt.',
+            'Sie bieten ein Zuhause und Einblicke in den Alltag. CASA kümmert sich um die Vermittlung, bereitet den Aufenthalt mit Ihnen vor und bleibt für beide Seiten ansprechbar.',
           partnershipBullets: [
             'Sie sagen zu: ein verlässlicher Alltag, offener Umgang und der vereinbarte Zeitraum',
             'CASA wählt aus: passend nach Kursformat, Aufenthaltsdauer und Profil',
@@ -148,7 +148,7 @@ export default async function BecomeHostFamilyPage() {
           processEyebrow: 'Nächster Schritt',
           processTitle: 'In drei Schritten Gastgeberhaushalt werden',
           processDescription:
-            'Der Ablauf ist klar strukturiert, damit Sie schnell entscheiden können, ob Hosting zu Ihrem Haushalt passt.',
+            'Wir besprechen mit Ihnen, wie ein Aufenthalt aussehen könnte, damit Sie in Ruhe entscheiden können.',
           processSteps: [
             { step: '1', title: 'Interesse senden', description: 'Kurze Anfrage mit Haushaltsprofil und Verfügbarkeit.' },
             { step: '2', title: 'Profilabgleich', description: 'CASA stimmt Formate, Dauer und Rahmenbedingungen mit Ihnen ab.' },
@@ -195,7 +195,7 @@ export default async function BecomeHostFamilyPage() {
           storyEyebrow: 'How hosting works at CASA',
           storyTitle: 'Hosting is more than offering a room',
           storyDescription:
-            'We look for households that provide a stable environment for language growth, everyday orientation, and respectful exchange. CASA supports matching, communication, and practical coordination.',
+            'We are looking for welcoming households where international students can feel at ease. CASA helps with matching and practical arrangements and remains your contact during the stay.',
           storyBullets: [
             'Furnished single room with bed, desk, and storage',
             'Access to bathroom and shared household facilities',
@@ -236,7 +236,7 @@ export default async function BecomeHostFamilyPage() {
           partnershipEyebrow: 'The partnership',
           partnershipTitle: 'Who carries what',
           partnershipDescription:
-            'Hosting is a division of work, not a handover. You bring the home and the daily rhythm; CASA brings the matching, the preparation, and a contact who stays reachable for the whole stay.',
+            'You offer a home and a taste of everyday life in Bremen. CASA arranges the match, helps you prepare and remains a point of contact for you and your guest.',
           partnershipBullets: [
             'You commit to: a dependable daily rhythm, an open household, and the dates you agreed',
             'CASA chooses the match: by course format, length of stay, and student profile',
@@ -247,7 +247,7 @@ export default async function BecomeHostFamilyPage() {
           processEyebrow: 'Next step',
           processTitle: 'Become a host household in three steps',
           processDescription:
-            'The process is structured so you can quickly assess fit and confirm hosting with full clarity.',
+            'We will talk through what hosting could look like, so you have the information and time to decide.',
           processSteps: [
             { step: '1', title: 'Share interest', description: 'Send a short inquiry with household profile and availability.' },
             { step: '2', title: 'Profile alignment', description: 'CASA aligns format, duration, and practical expectations.' },
@@ -302,7 +302,7 @@ export default async function BecomeHostFamilyPage() {
         ]}
         notes={
           locale === 'de'
-            ? 'CASA wählt das Matching, informiert Sie vorab und bleibt für beide Seiten erreichbar.'
+            ? 'CASA vermittelt passende Gäste, informiert Sie vorab und bleibt für beide Seiten erreichbar.'
             : 'CASA chooses the match, briefs you first, and stays reachable for both sides.'
         }
         ctas={copy.heroCtas}
@@ -410,7 +410,7 @@ export default async function BecomeHostFamilyPage() {
                 label: locale === 'de' ? 'Aufwandsentschädigung' : 'Compensation',
                 left:
                   locale === 'de'
-                    ? 'Satz je Placement, schriftlich vor der Zusage'
+                    ? 'Vergütung je Aufenthalt, schriftlich vor der Zusage'
                     : 'A per-placement rate, in writing before you agree',
                 right:
                   locale === 'de'

@@ -11,8 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Terms & Conditions',
-    description: 'Core contractual terms for courses, exams, and related services at CASA.',
+    title: locale === 'de' ? 'Allgemeine Geschäftsbedingungen' : 'Terms and conditions',
+    description: locale === 'de' ? 'Die Geschäftsbedingungen für Kurse, Prüfungen und weitere Angebote von CASA.' : 'Terms and conditions for courses, exams and other CASA services.',
     path: '/terms',
   });
 }

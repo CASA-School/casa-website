@@ -13,9 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Careers',
-    description:
-      'Explore open roles at CASA and join a people-first international language school in Bremen.',
+    title: locale === 'de' ? 'Arbeiten bei CASA' : 'Work with us',
+    description: locale === 'de' ? 'Werden Sie Teil unseres internationalen Teams in Bremen. Entdecken Sie offene Stellen bei CASA.' : 'Join our international team in Bremen. Explore current opportunities at CASA language school.',
     path: '/careers',
     keywords: ['CASA careers', 'Language school jobs Bremen', 'DaF teacher jobs'],
   });
@@ -39,7 +38,7 @@ export default async function CareersPage() {
           eyebrow: 'Karriere',
           title: 'Arbeiten bei CASA in Bremen',
           description:
-            'Werden Sie Teil eines internationalen Teams, das Sprachlernen menschlich, strukturiert und wirksam gestaltet.',
+            'Arbeiten Sie mit Menschen, denen guter Unterricht, persönliche Begegnung und eine offene Gemeinschaft am Herzen liegen.',
           cta: 'Offene Stellen ansehen',
           openingLabel: 'Offene Stelle',
           team: 'Team',
@@ -63,7 +62,7 @@ export default async function CareersPage() {
           eyebrow: 'Careers',
           title: 'Join CASA in Bremen',
           description:
-            'Be part of an international team that makes language learning structured, personal, and genuinely effective.',
+            'Join a team who care about good teaching, personal connections and a welcoming community.',
           cta: 'See open roles',
           openingLabel: 'Open role',
           team: 'Team',
@@ -76,7 +75,7 @@ export default async function CareersPage() {
           apply: 'View role',
           noOpeningsTitle: 'No open positions right now',
           noOpeningsBody:
-            'You can still send an initiative application and we will contact you when a matching role opens.',
+            'You are welcome to send a speculative application and tell us how you would like to contribute.',
           noOpeningsCta: 'Send initiative application',
           footerTitle: 'Want to grow with the CASA community?',
           footerBody:

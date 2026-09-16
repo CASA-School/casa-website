@@ -11,9 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Privacy Policy',
-    description:
-      'How CASA collects, uses, and protects personal data in connection with website use and educational services.',
+    title: locale === 'de' ? 'Datenschutz' : 'Privacy policy',
+    description: locale === 'de' ? 'Informationen zum Umgang mit personenbezogenen Daten bei der Nutzung der CASA-Website und unserer Angebote.' : 'How CASA handles personal data when you use our website and services.',
     path: '/privacy',
   });
 }

@@ -15,8 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Team',
-    description: 'Meet the people behind CASA: teachers, coordination, and student support roles.',
+    title: locale === 'de' ? 'Unser Team' : 'Our team',
+    description: locale === 'de' ? 'Lernen Sie die Menschen kennen, die Sie bei CASA in Bremen unterrichten, beraten und begleiten.' : 'Meet the people who teach, advise and support you at CASA in Bremen.',
     path: '/team',
     keywords: ['CASA team', 'Language school teachers', 'Bremen student support'],
   });
@@ -46,11 +46,11 @@ export default async function TeamPage() {
       */}
       <HeroAPhotoLed
         eyebrow="Team"
-        title={locale === 'de' ? 'Menschen, die Lernwege möglich machen' : 'People who make learner journeys possible'}
+        title={locale === 'de' ? 'Wir sind für Sie da' : 'The people here for you'}
         description={
           locale === 'de'
-            ? 'Lehrkräfte, Koordination und Support arbeiten gemeinsam dafür, dass jede lernende Person Fortschritte macht.'
-            : 'Teachers, coordinators, and student support work as one team to help every learner move forward.'
+            ? 'Ob im Unterricht, bei der Kurswahl oder bei Fragen zum Aufenthalt: Unser Team begleitet Sie persönlich.'
+            : 'In the classroom, when choosing a course or as you settle into Bremen, our team are here to help.'
         }
         photo={pageConfig.photos.team}
         ctas={[{ label: locale === 'de' ? 'Beratung anfragen' : 'Talk to admissions', href: '/contact', kind: 'primary' }]}
@@ -64,8 +64,8 @@ export default async function TeamPage() {
             title={locale === 'de' ? 'Team nach Rollen filtern' : 'Filterable team directory'}
             description={
               locale === 'de'
-                ? 'Filtern Sie nach Rollen und sehen Sie, wie das Team den Lernprozess begleitet.'
-                : 'Filter by roles and explore how each team function supports learners.'
+                ? 'Lernen Sie unser Team kennen und finden Sie die passende Ansprechperson für Ihr Anliegen.'
+                : 'Get to know our team and find the right person to talk to.'
             }
             team={team}
             contactLabel={locale === 'de' ? 'Team kontaktieren' : 'Contact team'}
@@ -79,15 +79,15 @@ export default async function TeamPage() {
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Menschen zuerst' : 'People first'}
-            title={locale === 'de' ? 'Lehrqualität trifft menschliche Begleitung' : 'Teaching quality meets personal guidance'}
+            title={locale === 'de' ? 'Gemeinsam für Ihren guten Start' : 'Support that brings everything together'}
             description={
               locale === 'de'
-                ? 'Der Lernerfolg entsteht durch Teamarbeit zwischen Unterricht, Organisation und Support.'
-                : 'Learner progress is built through teamwork across teaching, operations, and support.'
+                ? 'Lehrkräfte und Verwaltung arbeiten eng zusammen, damit Sie sich auf das Lernen konzentrieren können und bei Fragen Unterstützung finden.'
+                : 'Our teachers and office team work closely together, so you can focus on learning and know who to turn to with questions.'
             }
             bullets={[
               locale === 'de' ? 'Klare Rollen und schnelle Kommunikation' : 'Clear roles and responsive communication',
-              locale === 'de' ? 'Verbindliche Begleitung im gesamten Lernweg' : 'Consistent support across the full journey',
+              locale === 'de' ? 'Persönliche Begleitung während Ihrer Zeit bei CASA' : 'Personal support throughout your time at CASA',
               locale === 'de' ? 'Fokus auf Fortschritt und Integration' : 'Focus on progress and integration',
             ]}
             photo={{

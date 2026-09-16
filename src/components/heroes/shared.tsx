@@ -121,44 +121,6 @@ export function HeroPhotoCard({
   );
 }
 
-type HeroProofStripProps = {
-  items: HeroProofItem[];
-  className?: string;
-  compact?: boolean;
-};
-
-export function HeroProofStrip({ items, className, compact = false }: HeroProofStripProps) {
-  if (items.length === 0) {
-    return null;
-  }
-
-  const colCount = Math.min(items.length, 4);
-  const layoutClass = {
-    1: 'grid-cols-1 max-w-xs',
-    2: 'grid-cols-2 max-w-lg',
-    3: 'grid-cols-3 max-w-2xl',
-    4: 'grid-cols-2 md:grid-cols-4 max-w-3xl',
-  }[colCount as 1 | 2 | 3 | 4] || 'grid-cols-2 md:grid-cols-4 max-w-3xl';
-
-  return (
-    <div
-      className={cn(
-        'grid gap-3 rounded-xl border border-[color:var(--casa-sand)] bg-white/90 p-3 shadow-[var(--shadow-soft)]',
-        layoutClass,
-        compact && 'p-2',
-        className
-      )}
-    >
-      {items.slice(0, 4).map((item) => (
-        <article key={`${item.value}-${item.label}`} className="rounded-xl bg-white px-3 py-2.5 shadow-[var(--shadow-soft)]">
-          <p className={cn('font-black text-[var(--casa-ink)]', compact ? 'text-lg' : 'text-xl')}>{item.value}</p>
-          <p className={cn('mt-1 font-semibold text-[var(--casa-muted)]', compact ? 'text-xs' : 'text-xs')}>{item.label}</p>
-        </article>
-      ))}
-    </div>
-  );
-}
-
 /**
  * THE HERO LEDE — eyebrow, headline, lead sentence, calls to action.
  *
