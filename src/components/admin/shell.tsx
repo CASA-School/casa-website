@@ -7,6 +7,7 @@ import { TopBar } from './top-bar';
 import { Logo } from '@/components/ui/logo';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
+import { cn } from '@/lib/utils';
 
 /**
  * The workspace frame.
@@ -27,19 +28,30 @@ import type { StaffRole, StaffUser } from '@/lib/admin/auth';
  * globals.css). On a phone it becomes a horizontal scroller at the top. Not a
  * hamburger: a drawer needs client JavaScript, a focus trap and an escape key,
  * and the whole nav is a dozen short labels that fit in a swipe.
+ *
+ * FOCUS MODE (`variant="focus"`) is the same shell at a different density,
+ * for the one module that is a board rather than a queue: the rail is fixed at
+ * icon width (the collapsed rules in globals.css also match
+ * `.casa-workspace-focus`), the top bar loses its toggle, and the main column
+ * drops the 1180px measure. Same gate, same tokens, same way back — what
+ * changes is only how much room the content gets.
  */
 
 export function WorkspaceShell({
   user,
   signOutAction,
+  variant = 'default',
   children,
 }: {
   user: StaffUser;
   signOutAction: () => Promise<void>;
+  variant?: 'default' | 'focus';
   children: ReactNode;
 }) {
+  const focus = variant === 'focus';
+
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
+    <div className={cn('flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
       <aside className="casa-workspace-panel w-full shrink-0 self-start border-b border-ws-panel-line bg-ws-panel text-ws-on-panel lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-r lg:border-b-0 lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
         <div className="flex h-full flex-col gap-7 overflow-x-hidden overflow-y-auto px-4 py-4 lg:py-6">
           {/*
@@ -169,11 +181,22 @@ export function WorkspaceShell({
             <NavGroup
               id="admin"
               label="Management"
-              hrefs={['/admin/applications', '/admin/activity', '/admin/team', '/admin/settings']}
+              hrefs={[
+                '/admin/applications',
+                '/admin/kursplanung',
+                '/admin/activity',
+                '/admin/team',
+                '/admin/settings',
+              ]}
             >
               {canAccess(user, 'applications') ? (
                 <NavLink href="/admin/applications" title="Applications" icon={Icon.applications}>
                   Applications
+                </NavLink>
+              ) : null}
+              {canAccess(user, 'kursplanung') ? (
+                <NavLink href="/admin/kursplanung" icon={Icon.kursplanung} title="Kursplanung">
+                  Kursplanung
                 </NavLink>
               ) : null}
               {canAccess(user, 'activity') ? (
@@ -207,12 +230,18 @@ export function WorkspaceShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar user={user} signOutAction={signOutAction} />
-        <main className="flex-1 bg-ws-canvas px-5 py-7 lg:px-10 lg:py-10">
+        <TopBar user={user} signOutAction={signOutAction} collapsible={!focus} />
+        <main
+          className={cn(
+            'flex-1 bg-ws-canvas',
+            focus ? 'px-4 py-5 lg:px-6 lg:py-6' : 'px-5 py-7 lg:px-10 lg:py-10'
+          )}
+        >
           {/* 1180px, not the public site's wider shells. A workspace table read
               edge to edge on a 27-inch monitor forces the eye across half a metre
-              to match a name to a date. */}
-          <div className="mx-auto max-w-[1180px]">{children}</div>
+              to match a name to a date. A board is the exception: its columns
+              are the measure, so focus mode lets it have the width. */}
+          <div className={focus ? 'min-w-0' : 'mx-auto max-w-[1180px]'}>{children}</div>
         </main>
       </div>
     </div>

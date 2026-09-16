@@ -21,6 +21,14 @@
     // and nobody needs a populated demo any more.
     "scripts/admin/seed-demo.mjs",
 
+    // Loads the course-planning tables from the JSON files the analytics
+    // bridge publishes (courses, weekly teacher assignments, staff absences,
+    // staff). Run by hand against a DATABASE_URL, never imported.
+    //
+    // Removal condition: delete when the workspace reads FileMaker directly
+    // (docs/FILEMAKER_BRIDGE.md §7, item 7) and this script is retired.
+    "scripts/kursplanung/import-bridge.mjs",
+
     // Reached only through the `server-only` alias in vitest.config.ts, which
     // knip does not follow. See the comment there: the real package throws from
     // its browser entry point, which every jsdom suite that transitively

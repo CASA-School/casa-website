@@ -103,6 +103,15 @@ export const Icon = {
     </svg>
   ),
   /** A calendar — dated cohorts and sittings. */
+  /** Three sockets and a plus — the planning board. */
+  kursplanung: (
+    <svg {...box}>
+      <rect x="2" y="2" width="5" height="5" rx="1.2" />
+      <rect x="9" y="2" width="5" height="5" rx="1.2" />
+      <rect x="2" y="9" width="5" height="5" rx="1.2" />
+      <path d="M11.5 9.5v4M9.5 11.5h4" />
+    </svg>
+  ),
   calendar: (
     <svg {...box}>
       <rect x="2" y="3.5" width="12" height="10" rx="1.3" />

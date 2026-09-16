@@ -47,6 +47,7 @@ production build.
 - `/admin/catalogue`, `/admin/catalogue/exams` — live demand against the published catalogue
 - `/admin/activity` — who changed what
 - `/admin/team` (owner/admin only), `/admin/settings`
+- `/admin/kursplanung` (management only) — the course-planning board, served in the shell's focus mode
 
 ### Supported routes
 German is served at the root under the old site's paths (`/sprachkurse/deutsch-intensiv`),
