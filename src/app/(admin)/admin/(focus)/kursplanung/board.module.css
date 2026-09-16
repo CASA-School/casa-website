@@ -1,26 +1,10 @@
 /*
  * The board's look. Level tints on columns and placed pieces; yellow only for a
  * substitute; red only for a conflict. Local tokens, so the board reads the same
- * on any ground; the typeface is the workspace's (Manrope) by inheritance.
+ * on any ground (the --pz-* tokens sit on .casa-workspace in globals.css); the
+ * typeface is the workspace's (Manrope) by inheritance.
  */
 .root {
-  --pz-card: #ffffff;
-  --pz-line: #e4e7ec;
-  --pz-line2: #eef0f4;
-  --pz-ink: #111827;
-  --pz-ink2: #374151;
-  --pz-mute: #6b7280;
-  --pz-faint: #a0a7b3;
-  --pz-yellow: #ffe14d;
-  --pz-yellow-ink: #4a3b00;
-  --pz-red: #dc2626;
-  --pz-red-soft: #fee2e2;
-  --pz-green: #16a34a;
-  --pz-green-soft: #dcfce7;
-  --pz-orange: #ea8a0a;
-  --pz-r: 14px;
-  --pz-sh: 0 1px 2px rgba(17, 24, 39, 0.04), 0 8px 24px -12px rgba(17, 24, 39, 0.12);
-  --pz-sh2: 0 12px 40px -12px rgba(17, 24, 39, 0.25), 0 2px 6px rgba(17, 24, 39, 0.06);
   color: var(--pz-ink);
   font-size: 14px;
   line-height: 1.45;
@@ -46,12 +30,6 @@
 .pillBad { background: var(--pz-red-soft); color: #991b1b; }
 .pillSub { background: #fff3b0; color: var(--pz-yellow-ink); }
 .pillOk { background: var(--pz-green-soft); color: #166534; }
-.ghost { border: 1px solid var(--pz-line); background: #fff; height: 36px; padding: 0 13px; border-radius: 10px; font-weight: 700; color: var(--pz-ink2); display: inline-flex; align-items: center; gap: 7px; }
-.ghost:hover { border-color: #c5cad3; background: #fafbfc; }
-.ghost:disabled { opacity: 0.45; cursor: default; }
-.actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-.status { font-size: 12px; color: var(--pz-faint); font-weight: 600; }
-.statusBad { color: var(--pz-red); }
 
 /* layout */
 .wrap { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 14px; align-items: start; }
@@ -106,7 +84,6 @@
 .compact .pieceCap { font-size: 10px; }
 .compact .tag { font-size: 9px; padding: 0 5px; }
 .compact .socket { font-size: 11px; border-radius: 8px; }
-.reload { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--pz-red); background: var(--pz-red-soft); color: #991b1b; font-weight: 700; font-size: 12.5px; }
 
 /* hand mode */
 .handbar { display: flex; align-items: center; gap: 14px; padding: 10px 16px; margin-bottom: 12px; background: var(--pz-ink); color: #fff; border-radius: 12px; font-weight: 600; flex-wrap: wrap; line-height: 1.4; }
@@ -152,7 +129,7 @@
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
 
 /* menus */
-.menu { position: fixed; z-index: 90; width: 320px; background: #fff; border: 1px solid var(--pz-line); border-radius: 14px; box-shadow: var(--pz-sh2); overflow: hidden; }
+.menu { position: fixed; z-index: 90; width: 320px; max-height: calc(100vh - 16px); overflow: auto; background: #fff; border: 1px solid var(--pz-line); border-radius: 14px; box-shadow: var(--pz-sh2); overflow: hidden; }
 .mh { padding: 12px 14px 8px; border-bottom: 1px solid var(--pz-line2); }
 .mh b { font-weight: 800; font-size: 14px; }
 .mh .s { font-size: 12px; color: var(--pz-mute); font-weight: 600; }
@@ -167,13 +144,8 @@
 .miSub::before { content: ''; width: 10px; height: 10px; border-radius: 3px; background: var(--pz-yellow); flex: none; }
 .miDis { color: var(--pz-faint); cursor: default; }
 .miDis:hover { background: none; }
-.state { padding: 8px 14px 10px; font-size: 12px; color: var(--pz-mute); font-weight: 600; border-bottom: 1px solid var(--pz-line2); }
 .rows { padding: 6px; }
-.mr { display: flex; flex-direction: column; gap: 1px; width: 100%; border: 0; background: none; border-radius: 10px; padding: 9px 10px; text-align: left; }
+.mr { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; border-radius: 10px; padding: 10px 12px; text-align: left; font-weight: 700; font-size: 13.5px; color: var(--pz-ink); }
 .mr:hover { background: #f2f4f7; }
-.mr b { font-weight: 800; font-size: 13.5px; }
-.mr span { font-size: 12px; color: var(--pz-mute); font-weight: 600; }
-.mrOn { background: #fff6bf; }
-.mrOn b { color: var(--pz-yellow-ink); }
-.mrDel b { color: var(--pz-red); }
-.tip { padding: 9px 14px 11px; font-size: 11.5px; color: var(--pz-faint); font-weight: 600; border-top: 1px solid var(--pz-line2); }
+.mrOn { background: #fff6bf; color: var(--pz-yellow-ink); }
+.mrDel { color: var(--pz-red); }

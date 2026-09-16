@@ -2,16 +2,18 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition, type ReactNode } from 'react';
 
+import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
 import { absenceOn, assignmentKey, courseDays, fit, remainingDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
-import { SHIFT_INFO, SHIFTS, type Assignment, type CourseGroup, type Level, type Shift, type Teacher } from '@/lib/admin/kursplanung/types';
+import { SHIFT_INFO, SHIFTS, type Assignment, type CourseGroup, type Shift, type Teacher } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
 import { weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
 import { saveWeekAction, type SaveWeekResult } from './actions';
 import styles from './board.module.css';
+import ui from './ui.module.css';
 
 /**
  * The board. Read docs/KURSPLANUNG.md first.
@@ -24,16 +26,6 @@ import styles from './board.module.css';
  * change comes back as stale and is undone here. Undo replays the previous set.
  */
 
-const LEVEL_COLOURS: Record<Level, [string, string]> = {
-  A1: ['#d9e8ff', '#1d4f9e'],
-  A2: ['#d2f1e6', '#0e6a50'],
-  B1: ['#dff0cc', '#3b6a10'],
-  'B1+': ['#e4e0fa', '#4b3a98'],
-  B2: ['#fadce3', '#9b2447'],
-  C1: ['#e1e7ee', '#2e4358'],
-  C1H: ['#edd8ee', '#742e7e'],
-};
-
 const DAY_LABEL: Record<string, string> = { Mo: 'Montag', Di: 'Dienstag', Mi: 'Mittwoch', Do: 'Donnerstag', Fr: 'Freitag' };
 
 type Drag = { teacherId: string; from: 'tray' } | { teacherId: string; from: 'board'; groupId: string; dates: string[]; weekStart: string };
@@ -43,12 +35,24 @@ type Menu =
 type Preview = { keys: Set<string>; cls: string } | null;
 type Touched = { shift: Shift; weekStart: string };
 
-const lvStyle = (level: Level) => ({ '--lt': LEVEL_COLOURS[level][0], '--li': LEVEL_COLOURS[level][1] }) as React.CSSProperties;
 const groupLabel = (g: CourseGroup, of: number) => `${g.level}.${g.phase}${of > 1 ? ` · Gruppe ${g.groupIndex}` : ''}`;
 const shortDay = (date: string) => weekdayOf(date) ?? '';
 const sig = (a: Assignment) => `${a.groupId}|${a.onDate}|${a.teacherId}|${a.isSubstitute}|${a.isTentative}`;
 
-export function Board({ plan, month, canWrite }: { plan: PlanContext; month: string; canWrite: boolean }) {
+export function Board({
+  plan,
+  month,
+  canWrite,
+  header,
+  notice,
+}: {
+  plan: PlanContext;
+  month: string;
+  canWrite: boolean;
+  /** The module's title, month and tabs — the board lays its own buttons beside them. */
+  header: ReactNode;
+  notice?: { ok?: string; error?: string };
+}) {
   const router = useRouter();
   const [assignments, setAssignments] = useState<Assignment[]>(() => [...plan.assignments]);
   const [shift, setShift] = useState<Shift>(() => (plan.groups.some((g) => g.shift === 'morning') ? 'morning' : 'afternoon'));
@@ -68,6 +72,7 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
   const [, startTransition] = useTransition();
   const dragRef = useRef<Drag | null>(null);
   const resizeRef = useRef<{ groupId: string; dates: string[]; row: number | null } | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   /** The plan as the server last confirmed it — what a save is conditional on. */
   const baseRef = useRef<Assignment[]>([...plan.assignments]);
 
@@ -324,6 +329,31 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
     return () => document.removeEventListener('keydown', key);
   });
 
+  // A menu opens at the pointer and is then pulled back inside the viewport,
+  // measured — a menu that hangs off the bottom of the window is unreadable.
+  // Scrolling the page closes it: it is anchored to a piece, and the piece moves.
+  useLayoutEffect(() => {
+    const el = menuRef.current;
+    if (!menu || !el) return;
+    const r = el.getBoundingClientRect();
+    el.style.left = `${Math.max(8, Math.min(menu.x, window.innerWidth - r.width - 8))}px`;
+    el.style.top = `${Math.max(8, Math.min(menu.y + 6, window.innerHeight - r.height - 8))}px`;
+  }, [menu]);
+
+  useEffect(() => {
+    if (!menu) return;
+    const close = (e: Event) => {
+      if (e.target instanceof Node && menuRef.current?.contains(e.target)) return;
+      setMenu(null);
+    };
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [menu]);
+
   /* ----------------------------------------------------------------- data */
 
   const statsFor = (wks: readonly PlanningWeek[]) => {
@@ -402,7 +432,7 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
       </button>
     );
     return (
-      <div className={styles.menu} style={{ left: Math.min(m.x, window.innerWidth - 332), top: Math.min(m.y, window.innerHeight - 420) }} onClick={(e) => e.stopPropagation()}>
+      <div ref={menuRef} className={styles.menu} style={{ left: m.x, top: m.y + 6 }} onClick={(e) => e.stopPropagation()}>
         <div className={styles.mh}><b>{groupLabel(g, groupsOfLevel(g))}</b><div className="s">{DAY_LABEL[shortDay(m.date)]} · KW {wk.kw} · legt ab hier so viele Tage wie frei</div></div>
         <input type="search" placeholder="Lehrkraft suchen" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus aria-label="Lehrkraft suchen" />
         <div className={styles.list}>
@@ -424,28 +454,24 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
     const range = `${shortDay(m.dates[0])}${m.dates.length > 1 ? `–${shortDay(m.dates[m.dates.length - 1])}` : ''}`;
     const free = courseDays(g, wk).filter((d) => !assignments.some((x) => x.groupId === g.id && x.onDate === d) && fit(ctx, a.teacherId, g, d).ok);
     const absent = m.dates.filter((d) => absenceOn(ctx, a.teacherId, d) || (t && !t.weekdays.includes(weekdayOf(d)!)));
-    const pair = g.teacherFirst === a.teacherId || g.teacherSecond === a.teacherId;
-    const state = [pair ? (g.phase === '1' ? 'vorgeschlagene Lehrkraft' : 'Stammlehrkraft dieser Gruppe') : '', a.isSubstitute ? 'als Vertretung markiert (gelb)' : 'regulär geplant', a.isTentative ? 'noch unbestätigt (?)' : ''].filter(Boolean).join(' · ');
-    const row = (title: string, desc: string, onClick: () => void, cls?: string) => (
-      <button key={title} type="button" className={`${styles.mr} ${cls ?? ''}`} onClick={onClick}><b>{title}</b><span>{desc}</span></button>
+    const row = (title: string, onClick: () => void, cls?: string) => (
+      <button key={title} type="button" className={`${styles.mr} ${cls ?? ''}`} onClick={onClick}>{title}</button>
     );
     return (
-      <div className={styles.menu} style={{ left: Math.min(m.x, window.innerWidth - 332), top: Math.min(m.y, window.innerHeight - 420) }} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.mh}><b>{t?.fullName}</b><div className="s">{groupLabel(g, groupsOfLevel(g))} · {range} · KW {wk.kw}</div></div>
-        <div className={styles.state}>{state}</div>
+      <div ref={menuRef} className={styles.menu} style={{ left: m.x, top: m.y + 6 }} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.mh}><b>{t?.fullName}</b><div className="s">{groupLabel(g, groupsOfLevel(g))} · {range} · KW {wk.kw}{a.isSubstitute ? ' · Vertretung' : ''}{a.isTentative ? ' · unbestätigt' : ''}</div></div>
         <div className={styles.rows}>
-          {absent.length ? row(`Ersatz finden für ${absent.map(shortDay).join(', ')}`, `Gibt diese Tage frei und öffnet dort die Auswahl – die übrigen Tage bleiben bei ${t?.shortName}.`, () => { const rest = without(assignments, g.id, absent); commit(rest); setMenu({ kind: 'socket', groupId: g.id, date: absent[0], x: m.x, y: m.y }); }, styles.mrOn) : null}
+          {absent.length ? row(`Ersatz finden für ${absent.map(shortDay).join(', ')}`, () => { commit(without(assignments, g.id, absent)); setMenu({ kind: 'socket', groupId: g.id, date: absent[0], x: m.x, y: m.y }); }, styles.mrOn) : null}
           {a.isSubstitute
-            ? row('Vertretung aufheben', 'Teil wird wieder regulär und bekommt die Niveaufarbe.', () => toggleFlag(g.id, m.dates, 'isSubstitute'), styles.mrOn)
-            : row('Als Vertretung markieren', `Teil wird gelb: ${t?.shortName} springt hier nur ein.`, () => toggleFlag(g.id, m.dates, 'isSubstitute'))}
+            ? row('Vertretung aufheben', () => toggleFlag(g.id, m.dates, 'isSubstitute'), styles.mrOn)
+            : row('Als Vertretung markieren', () => toggleFlag(g.id, m.dates, 'isSubstitute'))}
           {a.isTentative
-            ? row('Bestätigen', 'Das „?“ verschwindet – die Zusage steht.', () => toggleFlag(g.id, m.dates, 'isTentative'))
-            : row('Als unbestätigt markieren', 'Name mit „?“, bis die Zusage da ist.', () => toggleFlag(g.id, m.dates, 'isTentative'))}
-          {free.length ? row(`Auf ${free.map(shortDay).join(', ')} ausdehnen`, `Legt ${t?.shortName} zusätzlich auf die freien Tage dieser Gruppe.`, () => extendRun(g, a, wk)) : null}
-          {row('Lehrkraft-Details', 'Schicht, Tage pro Woche, Wochentage, Niveaus, Abwesenheiten.', () => router.push(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${a.teacherId}`))}
-          {row(`Aus KW ${wk.kw} entfernen`, `${range} wird wieder frei; ${t?.shortName} bekommt die Tage im Teile-Bereich zurück.`, () => removeDates(g.id, m.dates), styles.mrDel)}
+            ? row('Bestätigen', () => toggleFlag(g.id, m.dates, 'isTentative'))
+            : row('Als unbestätigt markieren', () => toggleFlag(g.id, m.dates, 'isTentative'))}
+          {free.length ? row(`Auf ${free.map(shortDay).join(', ')} ausdehnen`, () => extendRun(g, a, wk)) : null}
+          {row('Lehrkraft-Details', () => router.push(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${a.teacherId}`))}
+          {row(`Aus KW ${wk.kw} entfernen`, () => removeDates(g.id, m.dates), styles.mrDel)}
         </div>
-        <div className={styles.tip}>Ziehen verschiebt das Teil in eine andere Gruppe · Griff unten ändert die Tage · in eine andere Woche ziehen kopiert.</div>
       </div>
     );
   };
@@ -573,7 +599,15 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
   };
 
   return (
-    <div className={`${styles.root} ${hand ? styles.hand : ''}`} onClick={() => { if (menu) setMenu(null); else if (hand) setHand(null); }}>
+    <div className={`${styles.root} ${ui.module} ${hand ? styles.hand : ''}`} onClick={() => { if (menu) setMenu(null); else if (hand) setHand(null); }}>
+      <div className={ui.top}>
+        {header}
+        <span className={ui.spacer} />
+        {canWrite ? <><button type="button" className={ui.ghost} disabled={!undo.length} onClick={(e) => { e.stopPropagation(); doUndo(); }}>↶ Rückgängig</button><button type="button" className={ui.ghost} onClick={(e) => { e.stopPropagation(); copyWeek(); }}>Woche übernehmen →</button></> : null}
+        {stale ? <button type="button" className={ui.reload} onClick={(e) => { e.stopPropagation(); router.refresh(); }}>Neu laden</button> : null}
+        <span className={`${ui.status} ${status.bad ? ui.statusBad : ''}`}>{status.text}</span>
+        {notice?.error ? <span className={`${ui.status} ${ui.statusBad}`}>{notice.error}</span> : notice?.ok ? <span className={`${ui.status} ${ui.statusOk}`}>{notice.ok}</span> : null}
+      </div>
       <div className={styles.bar}>
         <div className={styles.seg}>{SHIFTS.map((s) => <button key={s} type="button" aria-pressed={s === shift} onClick={(e) => { e.stopPropagation(); setShift(s); setHand(null); }}>{SHIFT_INFO[s].label}</button>)}</div>
         <div className={`${styles.seg} ${styles.segSoft}`}>
@@ -595,11 +629,6 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
           {st.hard ? <span className={`${styles.pill} ${styles.pillBad}`}>{st.hard} Konflikt{st.hard > 1 ? 'e' : ''}</span> : null}
           {st.subs ? <span className={`${styles.pill} ${styles.pillSub}`}>{st.subs} Vertretung{st.subs > 1 ? 'en' : ''}</span> : null}
           {st.warn ? <span className={styles.pill}>{st.warn} Hinweis{st.warn > 1 ? 'e' : ''}</span> : null}
-        </div>
-        <div className={styles.actions}>
-          {canWrite ? <><button type="button" className={styles.ghost} disabled={!undo.length} onClick={(e) => { e.stopPropagation(); doUndo(); }}>↶ Rückgängig</button><button type="button" className={styles.ghost} onClick={(e) => { e.stopPropagation(); copyWeek(); }}>Woche übernehmen →</button></> : null}
-          {stale ? <button type="button" className={styles.reload} onClick={(e) => { e.stopPropagation(); router.refresh(); }}>Neu laden</button> : null}
-          <span className={`${styles.status} ${status.bad ? styles.statusBad : ''}`}>{status.text}</span>
         </div>
       </div>
 

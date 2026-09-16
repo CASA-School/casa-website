@@ -145,7 +145,7 @@ test.describe('kursplanung', () => {
   test('Kurse and Lehrkräfte render, and the teacher dialog opens from the URL', async ({ page }) => {
     await page.goto(`/admin/kursplanung/kurse?month=${month}`);
     await expect(page.getByRole('heading', { name: 'Kursplanung' })).toBeVisible();
-    await expect(page.getByText('Alle Wochen aus Paaren belegen').first()).toBeVisible();
+    await expect(page.getByText('Alle Gruppen aus ihren Paaren belegen').first()).toBeVisible();
 
     const { rows } = await client.query<{ id: string; full_name: string }>(
       `SELECT id, full_name FROM teachers WHERE is_active ORDER BY short_name LIMIT 1`
