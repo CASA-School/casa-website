@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { query, queryFirst } from '../db';
+import { query, queryFirst, withTransaction } from '../db';
 import type { PlanContext } from './fit';
 import {
   isAbsenceReason,
@@ -202,4 +202,33 @@ export async function planMonthSummary(month: string): Promise<PlanMonthSummary>
     assignments: plan.assignments.length,
     courseDays,
   };
+}
+
+/**
+ * Replaces one shift-week's assignments in a single transaction: the board's
+ * only write. `groupIds` are the month's groups of that shift, `days` the
+ * week's course days — both resolved by the action, which has already
+ * validated the payload against them.
+ */
+export async function replaceWeekAssignments(
+  groupIds: readonly string[],
+  days: readonly string[],
+  assignments: readonly Assignment[],
+  changedBy: string
+): Promise<void> {
+  if (groupIds.length === 0 || days.length === 0) return;
+  await withTransaction(async (client) => {
+    await client.query(
+      `DELETE FROM plan_assignments
+        WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[])`,
+      [groupIds, days]
+    );
+    for (const a of assignments) {
+      await client.query(
+        `INSERT INTO plan_assignments (group_id, on_date, teacher_id, is_substitute, is_tentative, changed_by)
+         VALUES ($1, $2::date, $3, $4, $5, $6)`,
+        [a.groupId, a.onDate, a.teacherId, a.isSubstitute, a.isTentative, changedBy]
+      );
+    }
+  });
 }

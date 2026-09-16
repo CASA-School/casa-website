@@ -15,6 +15,8 @@ careers, news, and contact. Routes live under `src/app/(site)`.
 internal tool for CASA's administrative staff: everything the public site
 receives lands in a queue with a status and an owner. Routes live under
 `src/app/(admin)`. **Read `docs/ADMIN_WORKSPACE.md` before touching it.**
+The course-planning board at `/admin/kursplanung` (management only, focus-mode
+shell) has its own rules and history: **read `docs/KURSPLANUNG.md` before touching it.**
 
 The workspace is NOT the old portal. The previous role-based student/teacher
 portal was removed and is not coming back — do not reintroduce learner-facing
