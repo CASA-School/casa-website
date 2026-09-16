@@ -11,8 +11,11 @@ import { fromFormData, parseGroupForm, parseTeacherForm } from '@/lib/admin/kurs
 import { assignmentsFromPairs } from '@/lib/admin/kursplanung/pairs';
 import {
   addGroup,
+  assignmentsNow,
+  createContinuationMonth,
   insertMissingAssignments,
   listGroups,
+  listPlanMonths,
   listTeachers,
   loadPlan,
   removeGroupIfEmpty,
@@ -32,34 +35,43 @@ import { monthStart, nextMonth, planningWeeks } from '@/lib/admin/kursplanung/we
  * week, undo — is computed on the client with the same pure functions the
  * server has, and then the whole assignment set of that shift-week is sent
  * here. One shape to validate, one transaction, and undo is just "send the
- * previous set". Last write wins per week; a version check is a later step.
+ * previous set". A `base` — the week as the client last saw it — makes the
+ * write conditional: if the week in the database no longer matches it, someone
+ * else has been here and the save is refused as stale rather than silently
+ * overwriting their work.
  *
  * `edit` is enough: laying and lifting pieces is the module's daily work.
  * There is nothing irreversible here — the previous week is one undo away and
  * the activity trail keeps the count.
+ *
+ * `staff_activity.entity_id` is a uuid column; a shift-week has no row of its
+ * own, so the identifying month, shift and week go into `detail` instead.
  */
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const MONTH = /^\d{4}-\d{2}$/;
 
+const AssignmentSchema = z.object({
+  groupId: z.string().uuid(),
+  onDate: z.string().regex(DATE),
+  teacherId: z.string().uuid(),
+  isSubstitute: z.boolean(),
+  isTentative: z.boolean(),
+});
+
 const Payload = z.object({
   month: z.string().regex(MONTH),
   shift: z.enum(SHIFTS),
   weekStart: z.string().regex(DATE),
-  assignments: z
-    .array(
-      z.object({
-        groupId: z.string().uuid(),
-        onDate: z.string().regex(DATE),
-        teacherId: z.string().uuid(),
-        isSubstitute: z.boolean(),
-        isTentative: z.boolean(),
-      })
-    )
-    .max(200),
+  assignments: z.array(AssignmentSchema).max(200),
+  /** The week as the client last loaded or saved it; the write is refused when the database differs. */
+  base: z.array(AssignmentSchema).max(200).optional(),
 });
 
-export type SaveWeekResult = { ok: true } | { ok: false; error: string };
+export type SaveWeekResult = { ok: true } | { ok: false; error: string; stale?: boolean };
+
+const fingerprint = (list: readonly { groupId: string; onDate: string; teacherId: string; isSubstitute: boolean; isTentative: boolean }[]) =>
+  list.map((a) => `${a.groupId}|${a.onDate}|${a.teacherId}|${a.isSubstitute ? 1 : 0}|${a.isTentative ? 1 : 0}`).sort().join('\n');
 
 export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   const user = await requireModule('kursplanung', 'edit');
@@ -77,6 +89,13 @@ export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   const shiftGroups = groups.filter((g) => g.shift === payload.shift);
   const days = courseDays({ shift: payload.shift }, week);
 
+  if (payload.base) {
+    const now = await assignmentsNow(shiftGroups.map((g) => g.id), days);
+    if (fingerprint(now) !== fingerprint(payload.base)) {
+      return { ok: false, stale: true, error: 'Diese Woche wurde inzwischen von jemand anderem geändert.' };
+    }
+  }
+
   await replaceWeekAssignments(
     shiftGroups.map((g) => g.id),
     days,
@@ -87,7 +106,7 @@ export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   await logActivity({
     actor: user,
     entity: 'kursplanung',
-    entityId: `${payload.month}|${payload.shift}|${payload.weekStart}`,
+    entityId: null,
     action: 'week.saved',
     detail: {
       month: payload.month,
@@ -183,7 +202,22 @@ export async function fillFromPairsAction(formData: FormData): Promise<void> {
   const plan = await loadPlan(month);
   const targets = plan.groups.filter((g) => g.shift === shift && (!groupId || g.id === groupId));
   const added = await insertMissingAssignments(assignmentsFromPairs(plan, targets), user.id);
-  await logActivity({ actor: user, entity: 'kursplanung', entityId: `${month}|${shift}`, action: 'pairs.filled', detail: { groups: targets.length, added } });
+  await logActivity({ actor: user, entity: 'kursplanung', entityId: null, action: 'pairs.filled', detail: { month, shift, groups: targets.length, added } });
   revalidateAll();
   back(formData, `${added} Kurstage aus den Paaren belegt.`, 'ok');
+}
+
+/** The next month from this one: `.1` courses continue as `.2` with their pairs; the new starts are added on Kurse. */
+export async function createMonthAction(formData: FormData): Promise<void> {
+  const user = await requireModule('kursplanung', 'edit');
+  const from = String(formData.get('month') ?? '');
+  if (!MONTH.test(from)) back(formData, 'Ungültige Anfrage.', 'error');
+  const to = nextMonth(from);
+  if ((await listPlanMonths()).includes(to)) {
+    redirect(`/admin/kursplanung/kurse?month=${to}`);
+  }
+  const created = await createContinuationMonth(from, to);
+  await logActivity({ actor: user, entity: 'kursplanung', entityId: null, action: 'month.created', detail: { from, to, groups: created } });
+  revalidateAll();
+  redirect(`/admin/kursplanung/kurse?month=${to}&ok=${encodeURIComponent(`${created} Fortsetzungsgruppen angelegt.`)}`);
 }

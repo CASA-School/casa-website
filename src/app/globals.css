@@ -1995,3 +1995,41 @@ h3 {
     transform: none !important;
   }
 }
+
+/*
+ * Focus mode — the course-planning module (docs/KURSPLANUNG.md).
+ *
+ * The board keeps the typography it was approved with: Manrope for headings
+ * too. The workspace's display face belongs to the queues; a board and its two
+ * lists are controls, not prose. Scoped to the focus shell, so nothing else in
+ * the workspace and nothing on the public site changes. The dialog is portalled
+ * to the body and sets its own title face (FormDialog `titleClassName`).
+ */
+.casa-workspace-focus :is(h1, h2, h3) {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  letter-spacing: normal;
+}
+
+/*
+ * The module's own tokens — on the body, because the teacher dialog is
+ * portalled there and must read the same as the board. Unused elsewhere.
+ */
+.casa-workspace {
+  --pz-card: #ffffff;
+  --pz-line: #e4e7ec;
+  --pz-line2: #eef0f4;
+  --pz-ink: #111827;
+  --pz-ink2: #374151;
+  --pz-mute: #6b7280;
+  --pz-faint: #a0a7b3;
+  --pz-yellow: #ffe14d;
+  --pz-yellow-ink: #4a3b00;
+  --pz-red: #dc2626;
+  --pz-red-soft: #fee2e2;
+  --pz-green: #16a34a;
+  --pz-green-soft: #dcfce7;
+  --pz-orange: #ea8a0a;
+  --pz-r: 14px;
+  --pz-sh: 0 1px 2px rgba(17, 24, 39, 0.04), 0 8px 24px -12px rgba(17, 24, 39, 0.12);
+  --pz-sh2: 0 12px 40px -12px rgba(17, 24, 39, 0.25), 0 2px 6px rgba(17, 24, 39, 0.06);
+}

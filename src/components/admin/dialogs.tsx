@@ -37,6 +37,7 @@ export function FormDialog({
   size = 'md',
   width = 'md',
   defaultOpen = false,
+  titleClassName,
 }: {
   trigger: ReactNode;
   title: string;
@@ -48,6 +49,8 @@ export function FormDialog({
   width?: 'md' | 'lg';
   /** Open on first render — for a screen that names the record in its URL. */
   defaultOpen?: boolean;
+  /** For a module with its own type — the dialog is portalled out of the module's scope. */
+  titleClassName?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -56,7 +59,7 @@ export function FormDialog({
         {trigger}
       </Button>
       <DialogContent className={panel(width)} closeLabel="Close">
-        <DialogTitle className="text-lg">{title}</DialogTitle>
+        <DialogTitle className={titleClassName ? `text-lg ${titleClassName}` : 'text-lg'}>{title}</DialogTitle>
         {description ? (
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
         ) : (
