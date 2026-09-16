@@ -5,11 +5,9 @@ test('home renders Hero A and no top announcement bar', async ({ page }) => {
 
   await expect(page.locator('section[data-hero-archetype="A"]')).toBeVisible();
 
-  // The h1 is CASA's Leitbild — "Miteinander reden - aufeinander zugehen" —
-  // rendered in English under /en; the German root is covered below. Matching a
-  // fragment rather than the full sentence, so a copy tweak does not fail the
-  // test while a MISSING h1 still does.
-  await expect(page.getByRole('heading', { level: 1, name: /move toward one another/i })).toBeVisible();
+  // The English headline carries the same welcome as the German Leitbild,
+  // using natural English rather than a literal translation.
+  await expect(page.getByRole('heading', { level: 1, name: /learn german.*feel at home/i })).toBeVisible();
   await expect(page.getByText('Summer intensive courses are now open')).toHaveCount(0);
 });
 

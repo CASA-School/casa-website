@@ -16,8 +16,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'About CASA',
-    description: 'CASA in Bremen: people-first language education, long-term community impact, and trusted standards.',
+    title: locale === 'de' ? 'Über CASA' : 'About CASA',
+    description: locale === 'de'
+      ? 'CASA ist eine gemeinnützige Sprachschule in Bremen. Lernen Sie unser Team, unser Leitbild und das internationale Miteinander kennen.'
+      : 'Meet CASA, a non-profit language school in Bremen where people from around the world learn German, make connections and feel at home.',
     path: '/about',
     keywords: ['About CASA', 'CASA Bremen mission', 'Language school community'],
   });
@@ -40,68 +42,68 @@ export default async function AboutPage() {
   const leitbild = locale === 'de'
     ? {
         eyebrow: 'CASA Leitbild',
-        title: 'Miteinander reden - aufeinander zugehen',
+        title: 'Miteinander reden – aufeinander zugehen',
         intro:
-          'CASA wurde 1983 von einer Gruppe junger Pädagoginnen und Pädagogen gegründet. Als gemeinnützige Sprachschule verbinden wir Professionalität mit Leidenschaft und schaffen einen Ort der Begegnung für Menschen unterschiedlichster Herkunft.',
+          'Seit 1983 kommen bei CASA Menschen aus aller Welt zusammen. Gegründet von einer Gruppe junger Pädagoginnen und Pädagogen, ist unsere gemeinnützige Sprachschule bis heute ein Ort, an dem Lernen und Begegnung zusammengehören.',
         qualityTitle: 'Unsere Qualitätsstandards',
         qualityBullets: [
-          'Kontinuität und Aktualität unseres Angebots',
+          'Kurse, die sich an den Bedürfnissen unserer Teilnehmenden orientieren',
           'Hohe fachliche, pädagogische und soziale Kompetenz unserer Mitarbeitenden',
           'Zeitgemäße räumliche und technische Ausstattung',
           'Erwachsenengerechte Lehr- und Lernmaterialien',
-          'Regelmäßige selbstkritische Hinterfragung unserer Arbeit',
+          'Regelmäßige Rückmeldungen und gemeinsame Weiterentwicklung unseres Unterrichts',
         ],
         aimsTitle: 'Unsere Ziele',
         aimsText:
-          'Wir spezialisieren uns auf Deutsch als Fremdsprache. Sprachkenntnisse und Ausdrucksfähigkeit sind Schlüssel für Integration, Beruf und Studium.',
-        approachTitle: 'Begegnungspädagogik',
+          'Wir möchten, dass Sie sich auf Deutsch ausdrücken, andere verstehen und Ihren Alltag selbstständig gestalten können. Ob Studium, Beruf oder ein neuer Lebensmittelpunkt: Wir besprechen mit Ihnen, welche sprachlichen Schritte zu Ihren Plänen passen.',
+        approachTitle: 'Lernen durch Begegnung',
         approachText:
-          'CASA versteht sich als Brückenbauer zwischen Menschen. Wir schaffen in unserem Unterricht und in unseren Programmen Raum für Begegnung, Austausch und persönliche Entwicklung.',
+          'Deutsch wird lebendig, wenn Menschen miteinander sprechen. Deshalb schaffen wir auch außerhalb des Unterrichts Gelegenheiten, sich kennenzulernen, Erfahrungen zu teilen und Freundschaften zu schließen.',
         encounterBullets: [
           'Unterbringung in deutschen Gastfamilien',
           'Organisation von Tandempartnerschaften',
-          'Kultur- und Freizeitprogramme in Bremen',
+          'Kulturprogramm in Bremen und Ausflüge in die Region',
           'Partnerübungen und Austausch im Unterricht',
         ],
       }
     : {
         eyebrow: 'CASA mission',
-        title: 'Talking with each other – reaching out to one another',
+        title: 'Bringing people together through language',
         intro:
-          'CASA was founded in 1983 by a group of young educators. As a non-profit language school, we combine professionalism with passion and create a house of encounter for people from diverse cultural backgrounds.',
+          'A group of young educators founded CASA in 1983. Today, our non-profit school welcomes people from around the world. Different languages, experiences and perspectives enrich the life we share here.',
         qualityTitle: 'Our quality standards',
         qualityBullets: [
-          'Continuity and relevance of our course portfolio',
-          'Strong pedagogical and social competence across our team',
-          'Reliable facilities and learning infrastructure',
-          'Adult-focused teaching and learning materials',
-          'Regular self-review and quality feedback loops',
+          'Courses that respond to the needs of our students',
+          'A team with teaching expertise and an understanding of people',
+          'Well-equipped spaces for learning together',
+          'Materials suited to adult learners',
+          'Listening to feedback and continually improving our teaching',
         ],
         aimsTitle: 'Our aims',
         aimsText:
-          'We specialize in German as a foreign language. Communication skills are key for integration, work readiness, and university pathways in Germany.',
-        approachTitle: 'Encounter-based pedagogy',
+          'We want you to feel able to express yourself, understand others and take part in everyday life. Whether you are considering university, looking for work or moving to a new city, we help you think through the language skills and next steps you need.',
+        approachTitle: 'Learning through connection',
         approachText:
-          'CASA sees itself as a bridge builder between people. We intentionally design language learning spaces where exchange, confidence, and personal growth can happen.',
+          'Language comes to life when you use it with other people. In class and beyond, we make room for conversations, shared experiences and friendships that help a new place feel familiar.',
         encounterBullets: [
           'Hosting learners with German families',
           'Organizing tandem partnerships',
-          'Running cultural and leisure programs',
+          'Cultural activities in Bremen and trips further afield',
           'Creating space for partner work in class',
         ],
       };
 
   const tandemGuide = locale === 'de'
     ? {
-        eyebrow: 'Tandem Programm',
-        title: 'Sprachpraxis durch echte Begegnung',
+        eyebrow: 'Sprachtandem',
+        title: 'Zwei Sprachen, ein gemeinsames Gespräch',
         intro:
-          'CASA fördert sprachlichen und kulturellen Austausch über den Unterricht hinaus. Ein Sprachtandem hilft dabei, die Sprache regelmäßig in echten Gesprächen anzuwenden.',
+          'Im Sprachtandem lernen zwei Menschen voneinander: Sie üben Deutsch und unterstützen Ihr Gegenüber beim Lernen Ihrer Sprache. Dabei geht es auch um das Kennenlernen und den Austausch im Alltag.',
         stepsTitle: 'So funktioniert es',
         steps: [
-          'Sie füllen das Tandem-Formular aus und nennen Ihre Wunschsprache.',
+          'Sagen Sie uns, welche Sprache Sie sprechen und welche Sie üben möchten.',
           'Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner.',
-          'Wir koordinieren ein erstes Treffen bei CASA und begleiten den Start.',
+          'Sobald sich jemand Passendes findet, helfen wir Ihnen, miteinander in Kontakt zu kommen.',
         ],
         benefitsTitle: 'Warum es wirkt',
         benefits: [
@@ -115,14 +117,14 @@ export default async function AboutPage() {
       }
     : {
         eyebrow: 'Tandem program',
-        title: 'Language practice through real exchange',
+        title: 'Share your language, discover another',
         intro:
-          'CASA supports language and cultural exchange beyond the classroom. Tandem practice helps learners apply language in real conversations with confidence.',
+          'A tandem brings two people together to practise each other’s languages. You can use your German, share your own language and get to know someone in Bremen.',
         stepsTitle: 'How it works',
         steps: [
-          'You submit the tandem form and select your target language.',
-          'We match you with a suitable tandem partner.',
-          'We coordinate a first meeting at CASA and support your kickoff.',
+          'Tell us which language you speak and which you would like to practise.',
+          'We look for a suitable language partner.',
+          'When we find a match, we help you get in touch.',
         ],
         benefitsTitle: 'Why it helps',
         benefits: [
@@ -160,11 +162,11 @@ export default async function AboutPage() {
       */}
       <HeroAPhotoLed
         eyebrow={locale === 'de' ? 'Unsere Schule' : 'Our School'}
-        title={locale === 'de' ? 'Ein Haus der Begegnung in Bremen' : 'A house of encounter in Bremen'}
+        title={locale === 'de' ? 'Ein Ort zum Lernen und Ankommen' : 'A school where you belong'}
         description={
           locale === 'de'
-            ? 'CASA ist ein Ort, an dem Sprache, Menschen und Zukunftsperspektiven zusammenfinden.'
-            : 'CASA is where language learning, human connection, and future opportunities meet.'
+            ? 'Bei CASA begegnen sich Menschen aus aller Welt. Wir sind stolz auf diese Vielfalt und auf ein familiäres Miteinander, in dem Sie mit Ihren Fragen und Plänen willkommen sind.'
+            : 'People from around the world make CASA what it is. We are proud of that diversity and of the close, welcoming community we build together.'
         }
         photo={pageConfig.photos.hero}
         ctas={pageConfig.ctas.slice(0, 1)}
@@ -176,11 +178,11 @@ export default async function AboutPage() {
         <Container>
           <ProofBand
             locale={locale}
-            title={locale === 'de' ? 'Nachweise und Partner' : 'Proof and partners'}
+            title={locale === 'de' ? 'Qualität und Partnerschaften' : 'Quality and partnerships'}
             credibilityLine={
               locale === 'de'
-                ? 'Langjährige Bildungsarbeit, Partnerschaften und gelebte Community.'
-                : 'Long-term educational impact, trusted partners, and community credibility.'
+                ? 'Unsere Bildungsarbeit wird durch langjährige Erfahrung und verlässliche Partnerschaften getragen.'
+                : 'Long-standing experience and trusted partnerships support our work.'
             }
           />
         </Container>
@@ -202,24 +204,16 @@ export default async function AboutPage() {
                 title: locale === 'de' ? 'Gründung in Bremen' : 'Founded in Bremen',
                 description:
                   locale === 'de'
-                    ? 'Start als menschenorientierte Sprachschule.'
-                    : 'Started as a people-first language school model.',
-              },
-              {
-                label: '1990s',
-                title: locale === 'de' ? 'Internationale Expansion' : 'International expansion',
-                description:
-                  locale === 'de'
-                    ? 'Mehr Lernende aus unterschiedlichen Herkunftsländern.'
-                    : 'More learners from increasingly diverse backgrounds.',
+                    ? 'Eine Gruppe junger Pädagoginnen und Pädagogen gründet CASA.'
+                    : 'A group of young educators establishes CASA in Bremen.',
               },
               {
                 label: locale === 'de' ? 'Heute' : 'Today',
-                title: locale === 'de' ? 'Community mit Wirkung' : 'Community with impact',
+                title: locale === 'de' ? 'Lernen und Leben verbinden' : 'Learning and life together',
                 description:
                   locale === 'de'
-                    ? 'Sprache, Integration und Prüfungswege aus einer Hand.'
-                    : 'Language growth, integration, and exam pathways in one ecosystem.',
+                    ? 'Deutschkurse, Prüfungen, Unterkunft und persönliche Beratung begleiten Menschen auf ihrem Weg.'
+                    : 'German courses, exams, accommodation and personal advice support people as they build their lives here.',
               },
             ]}
           />
@@ -230,21 +224,21 @@ export default async function AboutPage() {
       <section id="mission" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white scroll-mt-28">
         <Container>
           <EditorialSplit
-            eyebrow={locale === 'de' ? 'Menschliche Bildung' : 'Human education'}
-            title={locale === 'de' ? 'Menschen stehen im Zentrum unseres Lernmodells' : 'People are at the center of our learning model'}
+            eyebrow={locale === 'de' ? 'Persönlich begleitet' : 'Here for you'}
+            title={locale === 'de' ? 'Zeit für Ihre Fragen und Ihre Ziele' : 'We take time to get to know you'}
             description={
               locale === 'de'
-                ? 'Unsere Arbeit verbindet akademische Struktur mit echter menschlicher Begleitung.'
-                : 'Our work combines academic structure with genuine human support.'
+                ? 'Wir hören zu, bevor wir etwas empfehlen. Im persönlichen Gespräch geht es um Ihre Vorkenntnisse, Ihren Alltag und das, was Sie erreichen möchten.'
+                : 'We listen before we recommend. A one-to-one conversation helps us understand your experience, your everyday commitments and what you hope to achieve.'
             }
             bullets={[
               locale === 'de' ? 'Kleine Lerngruppen für mehr Sprechzeit' : 'Small groups for more speaking time',
               locale === 'de' ? 'Lehrkräfte mit persönlichem Feedback' : 'Teachers who provide personal feedback',
-              locale === 'de' ? 'Community-Programme für Alltag in Bremen' : 'Community programs for real life in Bremen',
+              locale === 'de' ? 'Gemeinsame Aktivitäten, bei denen Sie neue Menschen kennenlernen' : 'Shared activities that help you meet people and settle in',
             ]}
             photo={{
               ...pageConfig.photos.mission,
-              caption: 'Teacher giving feedback during speaking exercise - Personal feedback in small groups.',
+              caption: pageConfig.photos.mission.caption,
             }}
           />
         </Container>
@@ -346,11 +340,11 @@ export default async function AboutPage() {
         <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
           <Container>
             <HumanStoryBlock
-              eyebrow={locale === 'de' ? 'Community-Stimme' : 'Community story'}
+              eyebrow={locale === 'de' ? 'Erfahrungen bei CASA' : 'Life at CASA'}
               title={
                 locale === 'de'
-                  ? 'Was Menschen bei CASA spüren'
-                  : 'What people feel at CASA'
+                  ? 'Was CASA für unsere Teilnehmenden bedeutet'
+                  : 'What CASA means to our students'
               }
               quote={communityStory.quote}
               person={communityStory.personDisplay}
@@ -361,8 +355,8 @@ export default async function AboutPage() {
               }}
               supportingText={
                 locale === 'de'
-                  ? 'Die Kombination aus Unterricht, Gemeinschaft und Orientierung macht den Unterschied.'
-                  : 'The mix of teaching, community, and personal orientation makes the difference.'
+                  ? 'Gemeinsam lernen, sich gegenseitig unterstützen und in Bremen Anschluss finden: Das gehört für uns zusammen.'
+                  : 'Learning together, supporting one another and finding a sense of belonging are all part of life at CASA.'
               }
               mediaSide="right"
             />

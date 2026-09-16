@@ -47,7 +47,7 @@ const deNavText: Record<string, string> = {
   'Special Courses': 'Spezialkurse',
   'Focused modules for targeted language goals.': 'Fokussierte Module für konkrete Sprachziele.',
   'Professional & Specialized': 'Beruflich & spezialisiert',
-  'German for Medical': 'Deutsch für Medizin',
+  'German for medical professionals': 'Deutsch für Mediziner',
   'Medical German for clinical communication needs.': 'Medizinisches Deutsch für klinische Kommunikation.',
   'German for Groups': 'Deutsch für Gruppen',
   'Tailor-made German plus culture programme for visiting groups.': 'Maßgeschneidertes Deutsch plus Kulturprogramm für Gruppen.',
@@ -141,7 +141,7 @@ export const navConfig = {
           title: 'Professional & Specialized',
           items: [
             {
-              label: 'German for Medical',
+              label: 'German for medical professionals',
               href: '/courses/german-for-medical',
               icon: 'medical',
               description: navDescription('Medical German for clinical communication needs.'),
@@ -165,7 +165,7 @@ export const navConfig = {
              * "For Companies" rather than the course's own name, which is
              * "Firmenunterricht" in both locales: it is the label a visitor has
              * been clicking, and this section already names its rows by audience
-             * ("German for Medical").
+             * ("German for medical professionals").
              */
             {
               label: 'For Companies',

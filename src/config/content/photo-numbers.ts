@@ -45,11 +45,12 @@
  * THE OLD LIBRARY IS GONE (2026-09-10). Every `ready: false` path below is a
  * delivery target with no file behind it — as slot 37 always was. The June
  * derivatives that sat at these paths were removed once the product owner chose
- * the new pool (`public/media/casa/editorial-2026/`) over them; only slots 20
+ * the new pool (now archived outside the project; see `docs/MEDIA_LIBRARY.md`)
+ * over them; only slots 20
  * and 23 keep a file, in the pool's editorial grade.
  *
  * NOT IN THIS LIST, on purpose:
- *   - Logos and accreditation marks (`proof-band.tsx`, `partner-strip.tsx`).
+ *   - Logos and accreditation marks (`proof-band.tsx`).
  *     Those are claims, not decoration, and were never placeholdered.
  *   - The two NewsFlash photographs. They are real, verified images that
  *     already bypass the placeholder wrapper via `next/image` directly.

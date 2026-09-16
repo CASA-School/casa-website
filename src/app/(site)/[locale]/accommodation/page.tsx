@@ -17,8 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Accommodation',
-    description: 'Choose between shared flats and host families with clear trust standards and support from CASA.',
+    title: locale === 'de' ? 'Unterkunft in Bremen' : 'Accommodation in Bremen',
+    description: locale === 'de'
+      ? 'Ein Zimmer für Ihren Intensivkurs: Entdecken Sie CASA-WGs und private Gastgeber in Bremen, mit persönlicher Vermittlung und klaren Kosten.'
+      : 'Find a room for your intensive German course: explore CASA shared flats and local hosts in Bremen, with personal advice and clear costs.',
     path: '/accommodation',
     keywords: ['Accommodation Bremen', 'Host families', 'Shared flats'],
   });
@@ -70,11 +72,11 @@ export default async function AccommodationPage() {
       <HeroAPhotoLed
         breadcrumbs={breadcrumbs}
         eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
-        title={locale === 'de' ? 'Wohnen in Bremen mit Klarheit und Vertrauen' : 'Live in Bremen with clarity and trust'}
+        title={locale === 'de' ? 'Ein Zuhause für Ihre Zeit in Bremen' : 'A place to call home in Bremen'}
         description={
           locale === 'de'
-            ? 'Shared flats oder Host families: beide Wege werden durch CASA begleitet und transparent erklärt.'
-            : 'Shared flats or host families: both pathways are supported by CASA with transparent expectations.'
+            ? 'In einer CASA-WG oder bei Bremer Gastgebern: Wir helfen Ihnen, eine Unterkunft für Ihren Intensivkurs zu finden und sich vor Ort einzuleben.'
+            : 'A CASA shared flat or a room with local hosts: we help you find somewhere to live during your intensive German course and settle into Bremen.'
         }
         photo={pageConfig.photos.thumbC}
         ctas={pageConfig.ctas.slice(0, 1)}
@@ -200,7 +202,7 @@ export default async function AccommodationPage() {
           <Container>
             <HumanStoryBlock
               eyebrow={locale === 'de' ? 'Wohn-Erfahrung' : 'Housing story'}
-              title={locale === 'de' ? 'Ankommen, wohl fühlen, besser lernen' : 'Settle well, learn better'}
+              title={locale === 'de' ? 'Ankommen und sich wohlfühlen' : 'Settle well, learn better'}
               quote={leadStory.quote}
               person={leadStory.personDisplay}
               context={leadStory.country}
@@ -210,8 +212,8 @@ export default async function AccommodationPage() {
               }}
               supportingText={
                 locale === 'de'
-                  ? 'Die passende Wohnsituation schafft Stabilität für den Kursstart und den Alltag in Bremen.'
-                  : 'The right housing setup creates stability for your classes and daily life in Bremen.'
+                  ? 'Ein eigenes Zimmer und Menschen in Ihrer Nähe machen den Start leichter. Bei Fragen zu Ihrer Unterkunft sind wir für Sie da.'
+                  : 'A room of your own and people nearby can make the first weeks easier. If you have questions about your accommodation, we are here to help.'
               }
             />
           </Container>
@@ -257,8 +259,8 @@ export default async function AccommodationPage() {
             title={locale === 'de' ? 'Unterkunftsanfrage in drei Schritten' : 'Request accommodation in three steps'}
             description={
               locale === 'de'
-                ? 'Schnell, transparent und mit klarer Rückmeldung.'
-                : 'Fast, transparent, and backed by clear support communication.'
+                ? 'Teilen Sie uns Ihre Wünsche mit. Wir prüfen die Möglichkeiten und besprechen alles Weitere mit Ihnen.'
+                : 'Tell us what you are looking for. We will check the options and talk through the arrangements with you.'
             }
             steps={[
               {

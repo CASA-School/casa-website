@@ -12,8 +12,8 @@ import type { AccommodationNarrative, ContentLocale } from '@/lib/content/types'
  *
  * They are not. Cost is now stated once, for both, in
  * config/content/accommodation-costs.ts. These highlights carry the thing that
- * actually differs: a shared flat gives you your own rhythm, a host family gives
- * you German at the dinner table.
+ * actually differs: a shared flat offers life with fellow learners; a local host offers
+ * everyday conversation. Meals must be agreed, never assumed.
  *
  * HEADLINES ARE SHORT ON PURPOSE. `headline` and `summary` are the h1 and the
  * lead sentence of the hero on /accommodation/flat and /accommodation/host.
@@ -29,11 +29,11 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       id: 'flat',
       locale: 'en',
       headline: 'Shared flats',
-      summary: 'Your own room and your own rhythm, alongside other international learners.',
+      summary: 'Your own room, a shared kitchen and people to come home to after class.',
       highlights: [
         'Private room with furnished essentials',
         'Shared kitchen and bathroom',
-        'You keep your own routine — no household mealtimes to plan around',
+        'Plan your own day and cook when it suits you',
         'Housemates are usually other international learners',
       ],
     },
@@ -41,11 +41,11 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       id: 'host',
       locale: 'en',
       headline: 'Host families',
-      summary: 'German at the dinner table, in a Bremen household that already hosts learners.',
+      summary: 'Get to know everyday life in Bremen with local hosts and a room of your own.',
       highlights: [
-        'German spoken at home every day, not only in class',
-        'A household that already hosts international learners',
-        'Meals and daily rhythm shared with the family',
+        'Opportunities to speak German in everyday conversation at home',
+        'A furnished room in a local household',
+        'Kitchen access for preparing your own meals; agree any other arrangements with your hosts',
         'Availability and cancellation timing are confirmed before booking',
       ],
     },
@@ -55,23 +55,23 @@ export const accommodationNarrativesByLocale: Record<ContentLocale, Accommodatio
       id: 'flat',
       locale: 'de',
       headline: 'CASA WGs',
-      summary: 'Eigenes Zimmer, eigener Tagesrhythmus — zusammen mit anderen internationalen Lernenden.',
+      summary: 'Ein eigenes Zimmer und ein gemeinsamer Alltag mit anderen Menschen, die in Bremen Deutsch lernen.',
       highlights: [
         'Möblierte Einzelzimmer',
         'Gemeinsame Küche und Badnutzung',
-        'Eigener Tagesrhythmus, keine gemeinsamen Essenszeiten',
-        'Mitbewohnende sind meist andere internationale Lernende',
+        'Den Tag selbst gestalten und kochen, wann es für Sie passt',
+        'Sie wohnen in der Regel mit anderen internationalen Kursteilnehmenden zusammen',
       ],
     },
     {
       id: 'host',
       locale: 'de',
       headline: 'Gastfamilien',
-      summary: 'Deutsch am Küchentisch, in einem Bremer Haushalt mit Gastgeber-Erfahrung.',
+      summary: 'Ein eigenes Zimmer bei Bremer Gastgebern und die Gelegenheit, den Alltag vor Ort kennenzulernen.',
       highlights: [
-        'Deutsch wird zu Hause täglich gesprochen, nicht nur im Unterricht',
-        'Ein Haushalt, der schon internationale Lernende aufnimmt',
-        'Mahlzeiten und Tagesablauf werden mit der Familie geteilt',
+        'Gelegenheiten, Deutsch auch zu Hause im Gespräch anzuwenden',
+        'Ein möbliertes Einzelzimmer in einem privaten Haushalt',
+        'Eine Küche zur Selbstverpflegung; weitere Absprachen treffen Sie mit Ihren Gastgebern',
         'Verfügbarkeit und Stornofrist werden vor Buchung bestätigt',
       ],
     },

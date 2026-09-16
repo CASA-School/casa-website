@@ -51,7 +51,7 @@ export const footerConfig: FooterConfig = {
         { label: 'Intensive courses', href: '/courses/intensive-german' },
         { label: 'Evening courses', href: '/courses/evening-course' },
         { label: 'Special courses', href: '/courses/special-courses' },
-        { label: 'German for Medical', href: '/courses/german-for-medical' },
+        { label: 'German for medical professionals', href: '/courses/german-for-medical' },
         { label: 'German for Groups', href: '/courses/german-for-groups' },
         { label: 'Bildungszeit', href: '/courses/bildungszeit' },
         { label: 'Firmenunterricht', href: '/courses/firmenunterricht' },

@@ -1,6 +1,10 @@
 # CASA Project Memory
 
-Last updated: 2026-06-29
+Current handoff: `docs/RELEASE_CLEANUP_COPY.md` (2026-09-16).
+
+The entries below are historical work notes, not a current launch checklist. Prefer README, the current handoff and runtime code when an older entry conflicts.
+
+Historical summary last updated: 2026-06-29
 
 ## Current Phase
 

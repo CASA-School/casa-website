@@ -14,11 +14,11 @@ The team presentation should frame the project as close to a launch-ready public
 
 ## Evidence From The Repo
 
-- Active product scope is documented in `README.md`, `PROJECT_BRIEF.md`, `ARCHITECTURE.md`, and `MEMORY.md`.
+- Active product scope is documented in `README.md`, `ARCHITECTURE.md`, and `MEMORY.md`.
 - Supported routes are implemented under `src/app/**`, including `/`, `/courses`, `/exams`, `/accommodation`, `/registration/course`, `/registration/exam`, `/contact`, `/faq`, `/news`, `/careers`, `/search`, `/placement-test`, and legal pages.
 - Public content and route helpers live in `src/lib/content/**` and `src/config/content/**`.
 - Public API handlers live in `src/app/api/**` and validate submissions through `zod`.
-- Public media provenance is documented in `public/media/casa/README.md`.
+- Public media provenance is documented in `docs/MEDIA_LIBRARY.md`.
 - The current project memory records recent verified gates: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test`, and `npm run test:e2e`.
 
 ## What Changed Recently

@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Search',
-    description: 'Search across CASA courses, exams, FAQ, and news from one place.',
+    title: locale === 'de' ? 'Suche' : 'Search',
+    description: locale === 'de' ? 'Finden Sie Deutschkurse, Prüfungen, Antworten und Neuigkeiten auf der CASA-Website.' : 'Find German courses, exams, answers and news on the CASA website.',
     path: '/search',
     keywords: ['CASA search', 'courses exams faq news'],
   });

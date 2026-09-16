@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'FAQ',
-    description: 'Topic-based FAQ for courses, exams, accommodation, registration, and visa guidance.',
+    title: locale === 'de' ? 'Häufige Fragen' : 'Frequently asked questions',
+    description: locale === 'de' ? 'Antworten zu Deutschkursen, Prüfungen, Anmeldung und Unterkunft bei CASA in Bremen.' : 'Answers about German courses, exams, registration and accommodation at CASA in Bremen.',
     path: '/faq',
     keywords: ['CASA FAQ', 'Course FAQ', 'Exam FAQ', 'Accommodation FAQ'],
   });
@@ -135,11 +135,11 @@ export default async function FaqPage() {
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Persönliche Beratung' : 'Human support'}
-            title={locale === 'de' ? 'Wenn Ihre Frage speziell ist, helfen wir persönlich.' : 'If your case is specific, we can guide you directly.'}
+            title={locale === 'de' ? 'Ihre Frage ist noch offen?' : 'Still have a question?'}
             description={
               locale === 'de'
-                ? 'Nicht jede Entscheidung passt in eine Standardantwort. Das CASA-Team unterstützt individuell.'
-                : 'Not every decision fits a generic answer. The CASA team helps with tailored guidance.'
+                ? 'Manches lässt sich am besten im Gespräch klären. Erzählen Sie uns, was Sie beschäftigt – wir nehmen uns Zeit für Sie.'
+                : 'Some questions are easier to talk through. Tell us what is on your mind and our team will take time to help.'
             }
             bullets={[
               locale === 'de' ? 'Schnelle Rückmeldung für dringende Fragen' : 'Fast responses for urgent questions',
@@ -164,8 +164,8 @@ export default async function FaqPage() {
             title={locale === 'de' ? 'Von Frage zu Entscheidung' : 'From question to decision'}
             description={
               locale === 'de'
-                ? 'Drei Schritte für klare nächste Aktionen.'
-                : 'Three steps to move from confusion to action.'
+                ? 'So finden Sie die passende Information oder persönliche Unterstützung.'
+                : 'Find the information you need or get in touch for personal help.'
             }
             steps={[
               {

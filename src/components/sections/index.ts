@@ -1,10 +1,4 @@
-export { ProofStrip, toProofStripItems, type ProofStripItem } from './proof-strip';
-export { PartnerStrip } from './partner-strip';
-export { PhotoStorySplit, type StoryPhoto, type StoryCta } from './photo-story-split';
-export { StatsRow, type StatItem } from './stats-row';
 export { TestimonialGrid, type TestimonialCard } from './testimonial-grid';
-export { CommunityBand } from './community-band';
-export { FAQTopics, type FaqTopicItem } from './faq-topics';
 export { StickyInfoCard, type StickyInfoItem } from './sticky-info-card';
 export {
   QuickChooserPanel,
@@ -17,11 +11,8 @@ export { ProofBand, type ProofStat } from './proof-band';
 export { GuidedPicker, type GuidedPickerItem } from './guided-picker';
 export { ProcessSteps, type ProcessStep } from './process-steps';
 export { ComparisonModule } from './comparison-module';
-export { CommunityStories, type CommunityStory } from './community-stories';
 export { HumanStoryBlock } from './human-story-block';
 export { DeadlineBadge } from './deadline-badge';
-export { LiveReviewModule, type LiveReviewItem } from './live-review-module';
-export { TeachingStaffCard } from './teaching-staff-card';
 export { DecisionRail } from './decision-rail';
 export { NextStepsTimeline } from './next-steps-timeline';
 export { UnifiedSearchPanel, type UnifiedSearchScope } from './unified-search-panel';

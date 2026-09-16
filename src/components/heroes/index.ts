@@ -1,6 +1,4 @@
 export { HeroHomePhoto } from './hero-home-photo';
-export { HeroIndexChooser } from './hero-index-chooser';
-export { HeroDetailUtility } from './hero-detail-utility';
 export { HeroMinimalUtility } from './hero-minimal-utility';
 export { HeroAPhotoLed } from './hero-a-photo-led';
 export { HeroCUtilityRail } from './hero-c-utility-rail';

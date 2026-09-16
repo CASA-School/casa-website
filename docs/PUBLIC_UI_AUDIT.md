@@ -4,7 +4,7 @@
 - Audit date: 2026-02-10
 - Scope: public-facing App Router pages under `src/app/**`, excluding `src/app/api/**`
 - Required docs reviewed:
-  - `PROJECT_BRIEF.md`
+  - `README.md`
   - `UI_SYSTEM.md`
   - `ARCHITECTURE.md`
   - `AGENTS.md`

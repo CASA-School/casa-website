@@ -11,8 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Imprint',
-    description: 'Provider information and legal disclosure for CASA Internationale Sprachschule.',
+    title: locale === 'de' ? 'Impressum' : 'Legal notice',
+    description: locale === 'de' ? 'Anbieterkennzeichnung und Kontaktdaten der CASA Internationale Sprachschule Bremen.' : 'Provider information and contact details for CASA Internationale Sprachschule Bremen.',
     path: '/imprint',
   });
 }

@@ -64,9 +64,9 @@ export default async function NonProfitStatusPage() {
         ],
         hero: {
           eyebrow: 'Gemeinnützigkeit & Mission',
-          title: 'Eine Sprachschule im öffentlichen Interesse',
+          title: 'Sprache verbindet. Bildung eröffnet Wege.',
           description:
-            'CASA ist als gemeinnützige GmbH organisiert. Unser Auftrag ist Bildung, Völkerverständigung und soziale Integration in Bremen - nicht Gewinnausschüttung.',
+            'Als gemeinnützige Sprachschule setzen wir uns für Bildung, Verständigung und Teilhabe ein. Unsere Einnahmen fließen zurück in diese Arbeit.',
           ctas: [{ label: 'Wirkung ansehen', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
         introTitle: 'Warum CASA eine gGmbH ist',
@@ -111,7 +111,7 @@ export default async function NonProfitStatusPage() {
         ],
         projectTitle: 'Wie Gemeinnützigkeit praktisch sichtbar wird',
         projectText:
-          'Die folgenden Arbeitsfelder zeigen, dass CASA nicht nur Kurse verkauft, sondern Bildungswege, Begegnung und Teilhabe in Bremen unterstützt.',
+          'In diesen Bereichen unterstützen wir Menschen beim Lernen, beim Kennenlernen anderer und beim Aufbau eines Lebens in Bremen.',
         projects: [
           {
             title: 'Here Ahead',
@@ -147,14 +147,14 @@ export default async function NonProfitStatusPage() {
         ],
         hero: {
           eyebrow: 'Non-profit status & mission',
-          title: 'A language school serving the public interest',
+          title: 'Language brings people together',
           description:
-            'CASA is organized as a non-profit gGmbH. Our purpose is education, intercultural understanding, and social integration in Bremen - not profit distribution.',
+            'As a non-profit language school, we help people learn, understand one another and take part in life in Bremen. Our income goes back into that work.',
           ctas: [{ label: 'See the impact', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
         introTitle: 'Why CASA is a gGmbH',
         introText:
-          'As a non-profit language school, CASA provides German education with public benefit. Language skills open access to everyday life, training, university, and work. That is why we combine classes with advising, encounter, and practical orientation in Bremen.',
+          'Learning German can open up opportunities in everyday life, education and work. At CASA, teaching goes hand in hand with personal advice and chances to meet people and find your place in Bremen.',
         principles: [
           {
             title: 'No profit distribution',
@@ -162,7 +162,7 @@ export default async function NonProfitStatusPage() {
           },
           {
             title: 'Education and integration',
-            text: 'Our focus is language development, encounter, academic and work pathways, and helping people settle into Bremen society.',
+            text: 'We help people develop their German, meet others and take their next steps in education, work and life in Bremen.',
           },
           {
             title: 'Transparent use of funds',
@@ -176,7 +176,7 @@ export default async function NonProfitStatusPage() {
           'Qualified teachers and pedagogical support',
           'Small, speaking-focused groups with reliable course structure',
           'Facilities, advising, and safe learning rooms in Bremen',
-          'Social education projects, tandem formats, and reduced access where possible',
+          'Educational projects, language exchange and reduced fees where possible',
         ],
         legalTitle: 'Legal status and references',
         legalRows: [
@@ -194,13 +194,13 @@ export default async function NonProfitStatusPage() {
         ],
         projectTitle: 'Where non-profit work becomes practical',
         projectText:
-          'These fields show that CASA is not only selling courses. The school supports education pathways, encounter, and participation in Bremen.',
+          'These are some of the ways we help people learn, make connections and build a life in Bremen.',
         projects: [
           {
             title: 'Here Ahead',
             label: 'University preparation',
             icon: GraduationCap,
-            text: 'Linguistic and methodical preparation for international university applicants and refugees preparing for degree studies in Bremen.',
+            text: 'Language and study-skills preparation for international applicants and refugees planning to study in Bremen.',
           },
           {
             title: 'Garantiefonds Hochschule',

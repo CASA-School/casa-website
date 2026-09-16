@@ -27,9 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'German Courses',
-    description:
-      'Explore CASA course formats with human-centered guidance, clear comparisons, and practical next steps.',
+    title: locale === 'de' ? 'Deutschkurse in Bremen' : 'German courses in Bremen',
+    description: locale === 'de' ? 'Intensivkurse, Abendkurse und weitere Deutschkurse bei CASA. Finden Sie das passende Angebot für Ihren Alltag und Ihre Ziele.' : 'Explore intensive, evening and specialist German courses at CASA. Find a course that fits your everyday life and your goals.',
     path: '/courses',
     keywords: ['CASA courses', 'German course Bremen', 'Course formats A1 C1'],
   });
@@ -386,8 +385,8 @@ export default async function CoursesPage({
       */}
       <HeroAPhotoLed
         eyebrow={hero.eyebrow}
-        title={locale === 'de' ? 'Kursformate für Ihre Ziele' : 'Course formats for your goals'}
-        description={locale === 'de' ? 'Entdecken Sie CASA-Kursformate mit menschlicher Orientierung, klaren Vergleichen und praktischen nächsten Schritten.' : 'Explore CASA course formats with human-centered guidance, clear comparisons, and practical next steps.'}
+        title={locale === 'de' ? 'Finden Sie Ihren Deutschkurs' : 'Find your German course'}
+        description={locale === 'de' ? 'Ob Sie neu anfangen, neben der Arbeit lernen oder sich auf ein bestimmtes Ziel vorbereiten: Wir helfen Ihnen, den passenden Deutschkurs zu finden.' : 'Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.'}
         photo={pageConfig.photos.thumbA}
         ctas={pageConfig.ctas.slice(0, 1)}
         breadcrumbs={breadcrumbs}
@@ -491,8 +490,8 @@ export default async function CoursesPage({
             title={locale === 'de' ? 'Vier Dinge, die Sie vorher wissen sollten' : 'Four things worth knowing first'}
             description={
               locale === 'de'
-                ? 'Erst die Fragen, die für alle Formate gelten — dann der Vergleich der Formate selbst.'
-                : 'First the questions that apply to every format, then the formats themselves compared.'
+                ? 'Hier finden Sie Antworten zu Einstufung, Lerntempo und Vorbereitung auf eine Prüfung.'
+                : 'Start with the essentials: placement, pace and preparing for an exam.'
             }
           />
 
@@ -502,8 +501,8 @@ export default async function CoursesPage({
                 title: locale === 'de' ? 'Ihr Niveau steht am Anfang' : 'Your level comes first',
                 body:
                   locale === 'de'
-                    ? 'Jeder Kurs setzt eine Einstufung voraus. Der Einstufungstest ist kostenlos und dauert wenige Minuten — er entscheidet, in welcher Gruppe Sie starten.'
-                    : 'Every format starts from a placement. The test is free and takes a few minutes, and it decides which group you join.',
+                    ? 'Wenn Sie bereits Deutsch sprechen, hilft uns die Einstufung bei der Kurswahl. Der kostenlose Test dauert etwa 15–30 Minuten. Ihr Ergebnis besprechen wir mit Blick auf Ihre Ziele.'
+                    : 'If you already know some German, placement helps us recommend a course. The free test takes about 15–30 minutes. We consider your result alongside your goals.',
                 linkHref: '/placement-test',
                 linkLabel: locale === 'de' ? 'Zum Einstufungstest' : 'Take the placement test',
               },
@@ -518,8 +517,8 @@ export default async function CoursesPage({
                 title: locale === 'de' ? 'Prüfungsvorbereitung ist ein eigener Kurs' : 'Exam preparation is a separate course',
                 body:
                   locale === 'de'
-                    ? 'Die Vorbereitung auf telc gehört ausdrücklich nicht zum Intensivprogramm. Wer ein Zertifikat braucht, bucht sie zusätzlich.'
-                    : 'Preparing for a telc certificate is explicitly not part of the intensive programme. If you need the certificate, book it alongside.',
+                    ? 'Die Vorbereitung auf telc-Prüfungen ist nicht im Intensivkurs enthalten. Wenn Sie ein Zertifikat brauchen, können Sie einen zusätzlichen Vorbereitungskurs buchen.'
+                    : 'Preparation for telc exams is separate from the intensive course. If you need a certificate, you can book an additional preparation course.',
                 linkHref: '/exams',
                 linkLabel: locale === 'de' ? 'Prüfungen ansehen' : 'See exams',
               },

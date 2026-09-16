@@ -320,8 +320,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
       className={cn(
         'sticky top-0 z-[900] h-20 border-b transition-[background-color,border-color,box-shadow] duration-200',
         scrolled || activeDropdown
-          ? 'border-[color:var(--casa-sand)]/80 bg-white/90 shadow-[var(--shadow-soft)] backdrop-blur supports-[backdrop-filter]:bg-white/80'
-          : 'border-transparent bg-white/65 backdrop-blur supports-[backdrop-filter]:bg-white/55'
+          ? 'border-[color:var(--casa-sand)]/80 bg-white shadow-[var(--shadow-soft)]'
+          : 'border-transparent bg-white'
       )}
     >
       {/*

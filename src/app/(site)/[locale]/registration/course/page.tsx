@@ -11,9 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: 'Course Registration',
-    description:
-      'Complete your CASA Bremen course registration with program selection, schedule options, and admissions review.',
+    title: locale === 'de' ? 'Kursanmeldung' : 'Course registration',
+    description: locale === 'de' ? 'Melden Sie sich zu einem Deutschkurs bei CASA in Bremen an. Wählen Sie Ihren Kurs und teilen Sie uns Ihre Wünsche mit.' : 'Register for a German course at CASA in Bremen. Choose your course and tell us about your plans.',
     path: '/registration/course',
   });
 }

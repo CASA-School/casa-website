@@ -1,40 +1,22 @@
 import type { ResourceGuideData, ResourceGuideSlug } from './types';
 
 /*
- * The three guides in German — a translation, written 2026-09-10.
- *
- * Until now these routes were English-only by construction: the content module
- * was named `resourcesGuides.en.ts` and there was no German one, so a German
- * visitor read English prose under a German URL.
- *
- * Written rather than machine-translated, in `Sie` form like the rest of the
- * site, and it stays a translation: the same guides, the same steps in the same
- * order, the same claims. A test locks that structure to the English set so the
- * two cannot drift apart silently.
- *
- * German terms stay German, and here that is the point — Anmeldung,
- * Wohnungsgeberbestätigung, Semesterbeitrag and Haftpflichtversicherung are
- * what the form and the letter will say.
- *
- * The Studierendenwerke link keeps its /en/ path in both languages on purpose: the
- * German path could only be guessed, and that site answers 403 to any automated
- * request, so a guess could not be checked. Swap it for the German page once
- * someone has opened it in a browser.
- *
- * NEEDS A NATIVE REVIEW before launch, like every other German page. It is on
- * the copy list with the Gemeinnützigkeit text.
+ * German editorial copy, reviewed alongside English on 2026-09-16.
+ * Sie form; natural German phrasing, shared facts and structure.
+ * Keep official German terms readers meet on forms. See the release copy
+ * handoff for sources and remaining operational confirmations.
  */
 
 export const studyInGermanyGuideDe: ResourceGuideData = {
   slug: 'study-in-germany',
   path: '/resources/study-in-germany',
-  metaTitle: 'Studium & Leben in Deutschland: die Schritte in der richtigen Reihenfolge',
+  metaTitle: 'Studium und Leben in Deutschland: Ihre nächsten Schritte',
   metaDescription:
     'Was ein Studium in Deutschland verlangt, von der Wahl des Studiengangs bis zum ersten Monat vor Ort: Zulassung, Sprachniveau, Bewerbung, Finanzierung und Wohnen.',
   hero: {
     title: 'Studium & Leben in Deutschland',
-    summary: 'Bewerbung, Sprache, Finanzierung und Wohnen, in der Reihenfolge, in der sie anstehen.',
-    lead: 'Der Weg von der Entscheidung für ein Studium in Deutschland bis zum ersten Monat hier, geschrieben für alle, die das aus dem Ausland organisieren.',
+    summary: 'Orientierung bei Studienwahl, Bewerbung und den ersten Schritten in Deutschland.',
+    lead: 'Sie möchten in Deutschland studieren? Hier finden Sie Orientierung für Ihre Planung – von der Studienwahl über den Sprachkurs bis zum Ankommen vor Ort.',
     photo: {
       src: '/media/casa/study-materials-map.jpg',
       alt: 'Lernmaterialien und eine Karte für die Kursplanung',
@@ -42,36 +24,36 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },
   quickFacts: [
-    'Staatliche Hochschulen erheben in der Regel einen Semesterbeitrag statt Studiengebühren. Ihr Budget bestimmen also die Lebenshaltungskosten.',
-    'Fast jeder Studiengang verlangt einen Sprachnachweis: Deutsch für deutschsprachige Studiengänge, Englisch für die übrigen.',
+    'Viele staatliche Studiengänge sind gebührenfrei, es gibt aber Ausnahmen. Prüfen Sie Studiengebühren und Semesterbeitrag für Ihr Wunschstudium getrennt.',
+    'Welcher Sprachnachweis verlangt wird, hängt vom Studiengang und der Unterrichtssprache ab. Maßgeblich sind die Angaben Ihrer Hochschule.',
     'Für das Studienvisum brauchen Sie meist einen Finanzierungsnachweis und eine Krankenversicherung, bevor Sie einreisen.',
-    'Der erste Monat hier besteht überwiegend aus Formalitäten: Anmeldung des Wohnsitzes, Bankkonto, Versicherung, Einschreibung.',
+    'Planen Sie neben dem Kennenlernen Ihrer neuen Stadt auch Zeit für Anmeldung, Bankkonto, Versicherung und Einschreibung ein.',
   ],
   stepsTitle: 'Die Schritte in der richtigen Reihenfolge',
   steps: [
     {
       title: 'Die Art des Studiums wählen',
-      text: 'Eine Universität ist forschungsorientiert, eine Hochschule für angewandte Wissenschaften praxisorientiert, und eine Ausbildung ist bezahlte Berufsausbildung in einem Betrieb. Diese Wahl bestimmt sowohl das verlangte Sprachniveau als auch Ihren Zeitplan.',
+      text: 'Universitäten und Hochschulen für angewandte Wissenschaften setzen unterschiedliche Schwerpunkte bei Forschung und Praxis. Eine Ausbildung ist ein weiterer Weg in den Beruf; betriebliche Ausbildungen werden in der Regel vergütet.',
       action: 'Notieren Sie ein Ziel: Fach, Stadt und das Semester, in dem Sie beginnen möchten.',
     },
     {
-      title: 'Die Zulassungsvoraussetzungen selbst lesen',
+      title: 'Zulassungsvoraussetzungen prüfen',
       text: 'Jeder Studiengang legt sie eigenständig fest: Schulzeugnisse, Noten, ein Sprachzertifikat, teils eine Eignungsprüfung. Zwei Studiengänge derselben Hochschule können Unterschiedliches verlangen.',
       action: 'Wählen Sie drei bis fünf Studiengänge aus und listen Sie auf, was jeder einzelne verlangt.',
     },
     {
-      title: 'Deutsch- oder englischsprachig entscheiden',
-      text: 'Ein deutschsprachiger Studiengang verlangt ein hohes Sprachniveau, meist C1 mit anerkanntem Zertifikat. Ein englischsprachiger Studiengang verlangt Englisch, und Sie leben trotzdem auf Deutsch.',
-      action: 'Legen Sie ein Zielniveau fest: B1 für den Alltag, C1 für ein deutschsprachiges Studium.',
+      title: 'Die Unterrichtssprache berücksichtigen',
+      text: 'Für ein deutschsprachiges Studium benötigen Sie in der Regel fortgeschrittene Deutschkenntnisse und einen anerkannten Nachweis. Englischsprachige Studiengänge haben eigene Anforderungen. Im Alltag hilft Ihnen Deutsch in beiden Fällen.',
+      action: 'Prüfen Sie, welches Zertifikat mit welchem Ergebnis verlangt wird, und planen Sie von Ihrem aktuellen Niveau aus.',
     },
     {
-      title: 'Den Sprachplan vom Startdatum aus rückwärts planen',
-      text: 'Ein Niveau braucht Monate, nicht Wochen. Wenn Sie vom gewünschten Semester zurückrechnen, sehen Sie, ob ein Intensivkurs oder ein Abendkurs in Ihre Zeit passt.',
-      action: 'Machen Sie zuerst einen Einstufungstest. Das eigene Niveau zu schätzen ist der häufigste Planungsfehler.',
+      title: 'Zeit für das Sprachenlernen einplanen',
+      text: 'Wie viel Zeit Sie brauchen, hängt von Ihren Vorkenntnissen und Ihrem Lernpensum ab. Rechnen Sie vom gewünschten Studienbeginn zurück und berücksichtigen Sie auch Prüfungstermine und Wartezeiten auf Ergebnisse.',
+      action: 'Ein Einstufungstest hilft Ihnen, Ihren Lernweg realistisch zu planen.',
     },
     {
       title: 'Unterlagen früh vollständig zusammenstellen',
-      text: 'Beglaubigte Kopien und amtliche Übersetzungen brauchen Zeit, und die Hochschulen akzeptieren Unterschiedliches. Eine fehlende Übersetzung ist der häufigste Grund, warum eine Bewerbung liegen bleibt.',
+      text: 'Prüfen Sie, welche Unterlagen Ihre Hochschule verlangt und ob Beglaubigungen oder Übersetzungen nötig sind. Wenn Sie früh beginnen, bleibt Zeit, offene Fragen vor der Bewerbungsfrist zu klären.',
       action: 'Führen Sie einen Ordner: Originale, beglaubigte Kopien, Übersetzungen, Lebenslauf, Pass.',
     },
     {
@@ -82,29 +64,29 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
     {
       title: 'Finanzierung nachweisen und Versicherung abschließen',
       text: 'Für das Studienvisum ist meist nachzuweisen, dass Sie Ihr erstes Jahr finanzieren können, üblicherweise über ein Sperrkonto, dazu eine in Deutschland gültige Krankenversicherung. Was als Nachweis gilt, hängt von Ihrer Staatsangehörigkeit ab.',
-      action: 'Arbeiten Sie mit der aktuellen Liste Ihrer deutschen Botschaft, nicht mit Forenbeiträgen.',
+      action: 'Nutzen Sie die aktuelle Checkliste der deutschen Botschaft oder des Konsulats, das für Ihren Antrag zuständig ist.',
     },
     {
       title: 'Ankommen, anmelden, einschreiben',
-      text: 'Die ersten Wochen sind Verwaltung in fester Reihenfolge: Wohnsitz anmelden, Konto eröffnen, Versicherung bestätigen, einschreiben, dann den Aufenthaltstitel beantragen.',
-      action: 'Der Ratgeber „Leben in Deutschland“ geht diesen Monat Woche für Woche durch.',
+      text: 'Prüfen Sie die Fristen für Wohnsitzanmeldung, Einschreibung und einen gegebenenfalls benötigten Aufenthaltstitel. Manche Schritte lassen sich parallel erledigen. Ihre Hochschule und die zuständigen Stellen helfen bei der Planung.',
+      action: 'Im Ratgeber „Leben in Deutschland“ finden Sie Hinweise für die praktische Vorbereitung Ihrer Ankunft.',
     },
   ],
   sections: [
     {
       title: 'Welche Studienform zu Ihnen passt',
-      intro: 'Die drei Wege führen an unterschiedliche Orte, und die Zulassungsvoraussetzungen folgen daraus, nicht umgekehrt.',
+      intro: 'Überlegen Sie, welches Fach Sie interessiert, wie Sie gern lernen und in welchem Bereich Sie später arbeiten möchten.',
       bullets: [
-        'Eine Universität ist akademisch und forschungsorientiert und der übliche Weg weiter zum Master und zur Promotion.',
-        'Eine Hochschule für angewandte Wissenschaften lehrt dieselben Fächer praxisnah, ist enger mit Unternehmen verbunden und verlangt oft ein Pflichtpraktikum.',
-        'Eine Ausbildung bezahlt Sie, während Sie im Betrieb lernen, und führt in einen Beruf statt in die Wissenschaft. Aus dem Ausland wird dieser Weg am häufigsten übersehen.',
+        'Universitäten legen meist einen besonderen Schwerpunkt auf wissenschaftliches Arbeiten und Forschung.',
+        'Hochschulen für angewandte Wissenschaften verbinden das Studium häufig mit Praxisprojekten und Praktika.',
+        'Eine betriebliche Ausbildung verbindet Arbeiten und Lernen. Informieren Sie sich über Voraussetzungen, Vergütung und Abschluss des jeweiligen Angebots.',
       ],
     },
     {
       title: 'Bewerbung und Fristen',
-      intro: 'Eine versäumte Frist kostet in der Regel ein ganzes Semester. Der Kalender gehört daher zur Bewerbung und ist keine Randnotiz.',
+      intro: 'Tragen Sie Bewerbungszeiträume und Fristen für Unterlagen in einen Kalender ein. So können Sie die Vorbereitung gut aufteilen.',
       bullets: [
-        'Prüfen Sie pro Studiengang, ob Sie direkt oder über uni-assist bewerben. An einer Hochschule kann es beides geben.',
+        'Prüfen Sie für jeden Studiengang, ob Sie sich direkt oder über uni-assist bewerben. An einer Hochschule kann beides vorkommen.',
         'Fristen für das Wintersemester liegen meist im Sommer, für das Sommersemester im Winter. Bestätigen Sie jede Frist an der Quelle.',
         'Rechnen Sie Wochen für die Prüfung ein, und erneut Wochen für alles, was unvollständig zurückkommt.',
         'Bewahren Sie jedes Dokument digital und auf Papier auf. Beides wird zu unterschiedlichen Zeitpunkten verlangt.',
@@ -114,21 +96,21 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
       title: 'Sprache: wie viel und wie schnell',
       intro: 'Ihr Sprachniveau entscheidet, welche Studiengänge offenstehen und wie viel Alltag Sie ohne Hilfe bewältigen.',
       bullets: [
-        'Deutschsprachige Studiengänge verlangen in der Regel C1, nachgewiesen durch ein anerkanntes Zertifikat, nicht durch Selbsteinschätzung.',
-        'Auch bei einem englischsprachigen Studium mieten Sie eine Wohnung, sitzen in Ämtern und arbeiten auf Deutsch.',
-        'Regelmäßiger Unterricht bringt mehr als kurze Schübe, außer wenn Sie eine Frist haben. Dann ist Intensiv die ehrliche Antwort.',
-        'CASA stuft Sie nach Niveau ein und bietet Intensiv- und Abendkurse von A1 bis C1, mit telc Prüfungsvorbereitung, wenn Sie ein Zertifikat brauchen.',
+        'Ihre Hochschule legt fest, welche Deutschzertifikate und Ergebnisse sie für die Zulassung anerkennt.',
+        'Auch bei einem englischsprachigen Studium hilft Deutsch bei der Wohnungssuche, bei Terminen und beim Kennenlernen anderer Menschen.',
+        'Wählen Sie ein Lernpensum, das zu Ihrem Alltag passt. Ein Intensivkurs bietet mehr Unterrichtszeit; ein Abendkurs lässt sich gut mit anderen Verpflichtungen verbinden.',
+        'Bei CASA besprechen wir Ihr Niveau und Ihre Pläne persönlich. Gemeinsam finden wir einen passenden Deutschkurs und bei Bedarf eine zusätzliche telc-Vorbereitung.',
       ],
       link: { label: 'Mit dem Einstufungstest beginnen', href: '/placement-test' },
     },
     {
       title: 'Finanzierung, Wohnen und der erste Monat',
-      intro: 'Ein Studienplan trägt nur, wenn der Ankunftsplan trägt. Kaution, erste Miete und Versicherung fallen in dieselben Wochen.',
+      intro: 'Planen Sie neben dem Studium auch Ihre Ankunft: Unterkunft, Versicherung und erste Anschaffungen können zeitlich zusammenfallen.',
       bullets: [
         'Planen Sie den Semesterbeitrag ein, auch wenn keine Studiengebühren anfallen. Häufig ist ein Semesterticket enthalten.',
-        'Die Miete ist der größte Unterschied zwischen deutschen Städten, und die Kaution beträgt meist mehrere Monatsmieten, fällig vor dem Einzug.',
-        'Anmeldung, Bankkonto und Krankenversicherung hängen voneinander ab. Die Reihenfolge ist deshalb wichtig.',
-        'Planen Sie für den ersten Monat einen Puffer statt einer genauen Summe. Er kostet immer mehr als die Monate danach.',
+        'Vergleichen Sie die Mieten vor Ort und prüfen Sie im Mietvertrag Kaution, Zahlungstermine und mögliche Zusatzkosten.',
+        'Fragen Sie Hochschule, Bank und Versicherung, welche Unterlagen jeweils wann benötigt werden. So lassen sich die Schritte aufeinander abstimmen.',
+        'Ein finanzieller Puffer hilft bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.',
       ],
       link: { label: 'Zum Ratgeber „Leben in Deutschland“', href: '/resources/living-in-germany' },
     },
@@ -137,12 +119,12 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
     {
       question: 'Brauche ich Deutsch, bevor ich komme?',
       answer:
-        'Formal nur für ein deutschsprachiges Studium. Wohnungssuche, Ämter und Nebenjobs laufen aber auf Deutsch, und mit etwa B1 anzukommen macht die ersten Monate deutlich leichter.',
+        'Das hängt von den Zulassungsvoraussetzungen Ihres Studiengangs ab. Auch für ein englischsprachiges Studium sind erste Deutschkenntnisse hilfreich: bei Gesprächen im Alltag, Terminen und neuen Kontakten.',
     },
     {
       question: 'Ist ein Studium in Deutschland kostenlos?',
       answer:
-        'Staatliche Hochschulen erheben meist einen Semesterbeitrag statt Studiengebühren, und darin ist häufig ein Semesterticket enthalten. Private Hochschulen verlangen Gebühren. Erfragen Sie die Summe bei der Hochschule selbst.',
+        'Viele staatliche Studiengänge sind gebührenfrei. Je nach Hochschule, Studiengang und persönlichem Status gibt es Ausnahmen. Der Semesterbeitrag ist eine eigene Kostenposition. Erfragen Sie die aktuellen Gesamtkosten bei Ihrer Hochschule.',
     },
     {
       question: 'Was ist uni-assist?',
@@ -187,13 +169,13 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
 export const livingInGermanyGuideDe: ResourceGuideData = {
   slug: 'living-in-germany',
   path: '/resources/living-in-germany',
-  metaTitle: 'Leben in Deutschland: Ihre ersten dreißig Tage',
+  metaTitle: 'Leben in Deutschland: ankommen und sich einleben',
   metaDescription:
     'Wohnsitz anmelden, Konto eröffnen, Krankenversicherung, ein Zimmer finden und die Gewohnheiten, die den ersten Monat in Deutschland leichter machen.',
   hero: {
     title: 'Leben in Deutschland',
-    summary: 'Anmeldung, Konto, Versicherung und Wohnen, in der Reihenfolge, die der erste Monat verlangt.',
-    lead: 'Der praktische Monat: was in welcher Woche nach der Ankunft zu tun ist, und welche Schritte die anderen blockieren, solange sie offen sind.',
+    summary: 'Praktische Hinweise zu Unterkunft, Terminen und Ihrem neuen Alltag.',
+    lead: 'Ein neues Zuhause bringt Fragen und Möglichkeiten mit sich. Dieser Ratgeber hilft Ihnen, das Wichtigste vorzubereiten und Zeit für die Menschen und Orte um Sie herum zu finden.',
     photo: {
       src: '/media/casa/bremen-schnoor-houses.jpg',
       alt: 'Giebelhäuser im Bremer Schnoorviertel',
@@ -201,12 +183,12 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
     ctas: [{ label: 'Unterkünfte ansehen', href: '/accommodation' }],
   },
   quickFacts: [
-    'Die Anmeldung des Wohnsitzes schaltet fast alles Weitere frei: Bank, Versicherung, Aufenthaltstitel.',
+    'Nach einem Umzug gehört die Anmeldung des Wohnsitzes zu den wichtigen ersten Aufgaben. Informieren Sie sich über die örtlichen Voraussetzungen und freien Termine.',
     'Eine Krankenversicherung ist Voraussetzung für Einschreibung und Aufenthaltstitel, keine Option.',
-    'Zimmer in Studienstädten sind schnell weg, und Organisation hilft mehr als früh dran zu sein.',
+    'Beginnen Sie früh mit der Wohnungssuche und halten Sie die Unterlagen für Anfragen und Besichtigungen bereit.',
     'Die meisten Ämter arbeiten mit Terminen, und Termine sind oft Wochen im Voraus vergeben.',
   ],
-  stepsTitle: 'Ihre ersten dreißig Tage, Woche für Woche',
+  stepsTitle: 'Ihre ersten Wochen planen',
   steps: [
     {
       title: 'Vor dem Abflug',
@@ -214,61 +196,61 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
       action: 'Buchen Sie alle Amtstermine, die schon aus dem Ausland buchbar sind.',
     },
     {
-      title: 'Tag eins bis drei: erreichbar werden',
-      text: 'Eine deutsche Mobilnummer und eine feste Adresse machen jeden weiteren Schritt möglich. Für die Formulare genügt eine Messenger-App nicht.',
-      action: 'Kaufen Sie eine SIM-Karte und notieren Sie Ihre Adresse genau so, wie sie am Briefkasten steht.',
+      title: 'Gut erreichbar sein',
+      text: 'Eine funktionierende Telefonnummer, E-Mail-Adresse und Postanschrift erleichtern vieles. Hochschulen, Banken und Behörden verschicken wichtige Mitteilungen auch per Brief.',
+      action: 'Achten Sie darauf, dass Ihr Name am Briefkasten steht und Sie Anrufe und Nachrichten empfangen können.',
     },
     {
-      title: 'Woche eins: Wohnsitz anmelden',
-      text: 'Bei der Anmeldung im Bürgeramt erhalten Sie eine Meldebescheinigung. Bank, Versicherung und Ausländerbehörde verlangen sie alle.',
+      title: 'Den Wohnsitz anmelden',
+      text: 'Beim zuständigen Bürgeramt erfahren Sie, wie Sie Ihren Wohnsitz anmelden und welche Unterlagen Sie benötigen. Bewahren Sie die Meldebescheinigung für weitere Termine auf.',
       action: 'Bringen Sie Pass, Wohnungsgeberbestätigung und das ausgefüllte Formular mit.',
     },
     {
-      title: 'Woche eins bis zwei: Konto eröffnen',
-      text: 'Miete, Versicherung und Handyvertrag werden per Lastschrift von einem deutschen Konto abgebucht. Dieser Schritt macht also die übrigen möglich.',
+      title: 'Bankgeschäfte für den Alltag regeln',
+      text: 'Klären Sie, wie Sie Miete und laufende Rechnungen bezahlen können. Wenn Sie ein neues Konto benötigen, vergleichen Sie Gebühren, Leistungen und erforderliche Unterlagen.',
       action: 'Entscheiden Sie vorab, ob Sie eine Filiale vor Ort oder ein reines App-Konto möchten.',
     },
     {
-      title: 'Woche zwei bis vier: Versicherung und Aufenthaltstitel',
+      title: 'Versicherung und Aufenthalt klären',
       text: 'Prüfen Sie, ob Ihr Krankenversicherungsschutz für Ihren Status ausreicht, und beantragen Sie dann den Aufenthaltstitel, falls Ihre Staatsangehörigkeit einen verlangt.',
       action: 'Behalten Sie jede Bestätigung. Jede davon wird später noch einmal verlangt.',
     },
     {
       title: 'Von der Übergangs- in die Dauerwohnung',
-      text: 'Ein Zwischenzimmer verschafft Ihnen die Zeit, richtige Wohnungen zu besichtigen. WGs und Vermietende entscheiden schnell, die Unterlagen müssen also vor der Besichtigung fertig sein.',
+      text: 'Wenn Sie zunächst vorübergehend wohnen, planen Sie Zeit für die Suche nach einer dauerhaften Unterkunft ein. Eine kurze Vorstellung und die jeweils benötigten Unterlagen helfen bei der Anfrage.',
       action: 'Schreiben Sie eine kurze Selbstvorstellung und legen Sie Ihre Unterlagen in eine Datei.',
     },
     {
-      title: 'Dann die Routine aufbauen',
-      text: 'Die Sprache wird vom Fach zum Alltag: Einkauf, Termine, Nachbarschaft, Kurs.',
-      action: 'Nehmen Sie sich pro Woche eine Sache vor, die Sie auf Deutsch erledigen statt auf Englisch.',
+      title: 'Den neuen Alltag gestalten',
+      text: 'Ein Gespräch mit den Nachbarn, ein gemeinsames Essen oder eine regelmäßige Aktivität können helfen, sich einzuleben. Auch kleine Gelegenheiten zum Deutschsprechen zählen.',
+      action: 'Überlegen Sie, in welcher Alltagssituation Sie diese Woche Deutsch ausprobieren möchten.',
     },
   ],
   sections: [
     {
-      title: 'Wo Studierende tatsächlich wohnen',
-      intro: 'Vier Modelle, und sie unterscheiden sich in Kosten, Selbstständigkeit und darin, wie viel Hilfe Sie bekommen, wenn etwas schiefgeht.',
+      title: 'Eine passende Unterkunft finden',
+      intro: 'Denken Sie an Ihr Budget, den Weg zum Kurs und daran, wie viel Alltag Sie mit anderen teilen möchten.',
       bullets: [
-        'Ein Wohnheim ist meist die günstigste und die begehrteste Variante. Bewerben Sie sich, sobald Sie eine Zulassung haben, nicht erst nach der Ankunft.',
-        'Die WG ist hier die normale Wohnform, und über das Zimmer entscheiden die Menschen, die schon darin wohnen.',
+        'Ein Studierendenwohnheim kann eine günstige Möglichkeit sein. Prüfen Sie die Voraussetzungen und bewerben Sie sich früh, da Wartelisten lang sein können.',
+        'In einer Wohngemeinschaft, kurz WG, haben Sie ein eigenes Zimmer und teilen Räume wie die Küche mit anderen.',
         'Eine eigene Wohnung bringt Selbstständigkeit und verlangt Kaution, Einkommensnachweis und Geduld mit dem Markt.',
-        'Eine Gastfamilie gibt Ihnen einen Haushalt und die Sprache jeden Tag. Genau deshalb vermittelt CASA sie an Kursteilnehmende.',
+        'Für Teilnehmende an Intensivkursen vermittelt CASA je nach Verfügbarkeit Zimmer bei privaten Gastgebern oder in WGs.',
       ],
       link: { label: 'Unterkünfte von CASA ansehen', href: '/accommodation' },
     },
     {
       title: 'Der erste Monat, realistisch gerechnet',
-      intro: 'Der erste Monat ist kein normaler Monat, und ihn als solchen zu planen ist der übliche Fehler.',
+      intro: 'In den ersten Wochen kommen zu den laufenden Ausgaben oft einmalige Kosten hinzu. Etwas Spielraum im Budget erleichtert den Start.',
       bullets: [
-        'Die Miete ist der Posten, der die Städte unterscheidet. Die übrigen Kosten sind bundesweit ähnlich.',
-        'Die Kaution beträgt üblicherweise mehrere Monatsmieten, fällig vor dem Einzug und zurückgezahlt, wenn Sie die Wohnung in Ordnung übergeben.',
-        'Rechnen Sie die Einmalkosten dazu, die niemand einplant: Bettwäsche und Küchengrundausstattung, ein Ticket, die Wege zu den Ämtern.',
-        'Planen Sie einen Puffer statt einer genauen Summe. Etwas kommt immer später oder teurer als gedacht.',
+        'Vergleichen Sie die Mieten in den Stadtteilen, die für Sie infrage kommen, und berücksichtigen Sie Fahrtkosten.',
+        'Prüfen Sie Kaution und Zahlungsvereinbarungen im Mietvertrag, einschließlich der Bedingungen für die Rückzahlung.',
+        'Denken Sie an erste Anschaffungen wie Bettwäsche, Küchengrundausstattung und Fahrkarten.',
+        'Eine Reserve hilft bei unerwarteten Ausgaben oder einem längeren Aufenthalt in einer vorübergehenden Unterkunft.',
       ],
     },
     {
-      title: 'Die Unterlagen, von denen alles andere abhängt',
-      intro: 'Zwei oder drei Papiere entscheiden, wie schnell der Rest des Monats läuft. Besorgen Sie sie früh und behalten Sie Kopien.',
+      title: 'Wichtige Unterlagen griffbereit halten',
+      intro: 'Ein Ordner mit wichtigen Dokumenten und digitalen Kopien erleichtert Termine und Anträge.',
       bullets: [
         'Die Krankenversicherung ist für die Einschreibung und für den Aufenthaltstitel erforderlich.',
         'Eine Reiseversicherung wird für einen längeren Aufenthalt meist nicht anerkannt, auch wenn die Laufzeit passt.',
@@ -278,12 +260,12 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
     },
     {
       title: 'Arbeiten neben dem Studium',
-      intro: 'Neben dem Studium zu arbeiten ist normal, und die Regeln hängen an Ihrem Aufenthaltstitel, nicht an Ihrem Kurs.',
+      intro: 'Ein Nebenjob kann sich mit dem Studium verbinden lassen. Prüfen Sie vorab, welche Regeln für Ihre Staatsangehörigkeit und Ihren Aufenthaltsstatus gelten.',
       bullets: [
         'Wie viel Sie arbeiten dürfen, richtet sich nach Aufenthaltstitel und Staatsangehörigkeit. Die Auflagen stehen auf dem Titel selbst.',
-        'Verbindliche Auskunft geben das International Office Ihrer Hochschule und die Ausländerbehörde.',
-        'Ein Job auf Deutsch wird genauso bezahlt wie einer auf Englisch und bringt Ihnen deutlich mehr.',
-        'Schützen Sie den Studienrhythmus. Ein wiederholtes Semester kostet mehr, als zusätzliche Schichten einbringen.',
+        'Das International Office Ihrer Hochschule hilft bei der Orientierung. Die Ausländerbehörde kann die Bedingungen Ihres Aufenthaltstitels bestätigen.',
+        'Deutschkenntnisse können Ihnen weitere Möglichkeiten im Austausch mit Kolleginnen, Kollegen und Kunden eröffnen.',
+        'Planen Sie bei der Wahl Ihrer Arbeitszeiten auch Unterricht, selbstständiges Lernen und Erholung ein.',
       ],
     },
   ],
@@ -336,13 +318,13 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
 export const whyGermanyGuideDe: ResourceGuideData = {
   slug: 'why-germany',
   path: '/resources/why-germany',
-  metaTitle: 'Warum Deutschland, und warum Deutsch',
+  metaTitle: 'Warum in Deutschland studieren und Deutsch lernen?',
   metaDescription:
     'Was Deutschland Studierenden praktisch bietet: was es kostet, welche Abschlüsse anerkannt sind, wie Studium und Arbeit zusammenpassen und wo Deutsch den Unterschied macht.',
   hero: {
     title: 'Warum Deutschland',
     summary: 'Was Deutschland Studierenden praktisch bietet, und wo Deutsch den Unterschied macht.',
-    lead: 'Eine Seite zum Entscheiden, nicht zum Überzeugen: was hier wirklich gut ist, was Mühe kostet, und wie viel davon an der Sprache hängt.',
+    lead: 'Entdecken Sie, was ein Studium und ein Leben in Deutschland für Sie bedeuten könnten – von der Wahl des Bildungswegs bis zu neuen Freundschaften und einem Zuhause in einer anderen Stadt.',
     photo: {
       src: '/media/casa/group-course-walking-bremen.jpg',
       alt: 'CASA Lernende gehen gemeinsam durch Bremen',
@@ -350,62 +332,62 @@ export const whyGermanyGuideDe: ResourceGuideData = {
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },
   quickFacts: [
-    'Das staatliche Hochschulstudium ist vergleichsweise günstig. Sie planen also für das Leben hier, nicht für das Studium.',
-    'Deutsche Abschlüsse sind international breit anerkannt, auch die beruflichen Wege außerhalb der Hochschule.',
+    'Viele staatliche Studiengänge sind gebührenfrei. Prüfen Sie dennoch mögliche Ausnahmen und planen Sie Semesterbeiträge und Lebenshaltungskosten ein.',
+    'Vergleichen Sie Studium und Ausbildung und informieren Sie sich, wo Ihr angestrebter Abschluss anerkannt wird.',
     'Studium und Arbeit lassen sich verbinden, im Rahmen der Auflagen auf Ihrem Aufenthaltstitel.',
-    'Fast jeder Vorteil auf dieser Seite wird größer, sobald Sie Deutsch sprechen.',
+    'Deutsch eröffnet Ihnen mehr Möglichkeiten im Alltag: im Gespräch mit den Nachbarn genauso wie im Beruf.',
   ],
   stepsTitle: 'Ein Weg zur Entscheidung',
   steps: [
     {
-      title: 'Welches Ergebnis wollen Sie?',
-      text: 'Einen Abschluss, einen Beruf, ein Sprachniveau oder einen Umzug. Jedes davon bedeutet einen anderen Weg durch das System und eine andere Menge Deutsch.',
+      title: 'Was möchten Sie erreichen?',
+      text: 'Vielleicht möchten Sie studieren, beruflich weiterkommen, Ihr Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Ihre Wünsche sind ein guter Ausgangspunkt, um Möglichkeiten zu erkunden.',
     },
     {
       title: 'Welche Stadt können Sie sich leisten?',
-      text: 'Die Miete unterscheidet sich zwischen deutschen Städten stärker als alles andere, und eine kleinere Stadt verschafft meist Zeit und Ruhe.',
+      text: 'Vergleichen Sie Mieten, Fahrtkosten und alltägliche Ausgaben ebenso wie die Bildungsangebote und Möglichkeiten vor Ort.',
     },
     {
       title: 'Welcher Weg passt zu Ihrem Lernen?',
-      text: 'Akademisch, angewandt oder bezahlte Ausbildung. Die angewandten und beruflichen Wege werden aus dem Ausland am stärksten unterschätzt.',
+      text: 'Wissenschaftliches Studium, praxisorientierter Studiengang oder Ausbildung: Jeder Weg bietet andere Möglichkeiten, Ihre Fähigkeiten zu entwickeln.',
     },
     {
-      title: 'Wie viel Deutsch brauchen Sie ehrlich?',
-      text: 'Etwa B1, um bequem zu leben, C1 für ein deutschsprachiges Studium, und für die meisten Arbeitsplätze etwas dazwischen.',
+      title: 'Welche Deutschkenntnisse brauchen Sie?',
+      text: 'Prüfen Sie die Anforderungen Ihres Studiengangs oder Berufs. Denken Sie auch an den Alltag: Welche Gespräche möchten Sie führen und was möchten Sie selbstständig erledigen können?',
     },
     {
       title: 'Wann wollen Sie beginnen, und was heißt das für heute?',
-      text: 'Rechnen Sie zurück: Einschreibung, Visum, Zulassung, Bewerbung, Sprachniveau. Die Sprache ist der längste Posten auf dieser Liste und beginnt deshalb zuerst.',
+      text: 'Rechnen Sie vom gewünschten Beginn zurück und planen Sie Zeit für Sprache, Bewerbungen, Prüfungen und gegebenenfalls das Visum ein.',
     },
   ],
   sections: [
     {
       title: 'Was es wirklich kostet',
-      intro: 'Deutschland ist günstig, wo alle hinschauen, bei den Gebühren, und durchschnittlich, wo kaum jemand hinschaut, bei der Miete.',
+      intro: 'Vergleichen Sie das gesamte Budget: Gebühren, Miete, Versicherung, Fahrtkosten und alltägliche Ausgaben.',
       bullets: [
-        'Staatliche Hochschulen erheben einen Semesterbeitrag statt Studiengebühren, und häufig ist ein Semesterticket enthalten.',
+        'Prüfen Sie Studiengebühren und Semesterbeitrag getrennt. Auch staatliche Studiengänge können unter bestimmten Voraussetzungen Gebühren verlangen.',
         'Die Miete bestimmt Ihr Monatsbudget, und entschieden wird sie von der Stadt, nicht von der Hochschule.',
-        'Für das Studienvisum ist meist eine Jahresfinanzierung im Voraus nachzuweisen. Das ist eher eine Planungsfrage als eine Frage des Vermögens.',
+        'Wenn Sie ein Studienvisum benötigen, informieren Sie sich vor dem Antrag über die aktuellen Finanzierungsvorgaben und anerkannten Nachweise.',
       ],
     },
     {
-      title: 'Anerkennung, und die übersehenen Wege',
-      intro: 'Der Abschluss ist international anerkannt, und die Wege, die nicht an einer Universität beginnen, sind es ebenso.',
+      title: 'Verschiedene Abschlüsse kennenlernen',
+      intro: 'Welcher Abschluss zu Ihnen passt, hängt von Ihren Zielen ab und davon, wo Sie später arbeiten möchten.',
       bullets: [
-        'Abschlüsse von Universitäten und von Hochschulen für angewandte Wissenschaften gelten auf dem Arbeitsmarkt vergleichbar viel.',
-        'Eine Ausbildung bezahlt Sie während der Lehre und führt direkt in einen Beruf.',
-        'telc und vergleichbare Zertifikate sind der anerkannte Nachweis eines Sprachniveaus. Deshalb gehört die Prüfungsvorbereitung in den Kursplan und nicht dahinter.',
+        'Vergleichen Sie die Studieninhalte und Praxisanteile von Universitäten und Hochschulen für angewandte Wissenschaften.',
+        'Eine betriebliche Ausbildung verbindet Lernen mit vergüteter Arbeit und führt zu einem Berufsabschluss.',
+        'Prüfen Sie vor der Buchung einer Sprachprüfung, welches Zertifikat und Ergebnis Ihre Hochschule oder Ihr Arbeitgeber anerkennt.',
       ],
       link: { label: 'Prüfungswege ansehen', href: '/exams' },
     },
     {
       title: 'Wo Deutsch den Unterschied macht',
-      intro: 'Das ist der Teil, der sich aus dem Ausland am schwersten erkennen lässt. Hier ist die Sprache kein Fach, das Sie lernen, sondern der Zugang, den Sie haben.',
+      intro: 'Deutsch hilft Ihnen, mitzureden, Fragen zu stellen und Menschen kennenzulernen. Schon kleine Gespräche können viel bewirken.',
       bullets: [
-        'Wohnen: Besichtigung, Vertrag und Nachbarschaft laufen auf Deutsch, auch in Städten voller internationaler Studierender.',
-        'Ämter: Anmeldung, Versicherung und Ausländerbehörde setzen voraus, dass Sie dem Gespräch folgen können.',
-        'Arbeit: Ein Nebenjob auf Deutsch wird genauso bezahlt wie einer auf Englisch und bringt Ihnen deutlich mehr.',
-        'Menschen: Es ist der Unterschied, ob Sie drei Jahre Gast sind oder hier leben.',
+        'Beim Wohnen hilft Deutsch im Gespräch mit Mitbewohnenden, beim Verstehen von Briefen und beim Kennenlernen der Nachbarschaft.',
+        'Bei Terminen und offiziellen Schreiben können Deutschkenntnisse helfen, Einzelheiten zu verstehen und gezielt nachzufragen.',
+        'Im Beruf erleichtert Deutsch den Austausch mit Kolleginnen, Kollegen und Kunden und erweitert die Auswahl möglicher Tätigkeiten.',
+        'Über gemeinsame Interessen, Aktivitäten vor Ort und alltägliche Gespräche können Kontakte und Freundschaften entstehen.',
       ],
       link: { label: 'Kurs passend zu Ihrem Zeitplan finden', href: '/courses' },
     },
@@ -419,7 +401,7 @@ export const whyGermanyGuideDe: ResourceGuideData = {
     {
       question: 'Ist das Studium teuer?',
       answer:
-        'Die Gebühren an staatlichen Hochschulen sind im internationalen Vergleich niedrig. Die Lebenshaltungskosten sind europäischer Durchschnitt und werden vor allem von der Miete bestimmt.',
+        'Die Kosten unterscheiden sich je nach Studiengang und Stadt. Prüfen Sie Studiengebühren, Semesterbeitrag und Lebenshaltungskosten gemeinsam, einschließlich Miete und Versicherung.',
     },
     {
       question: 'Muss ich die Finanzierung nachweisen?',
@@ -429,12 +411,12 @@ export const whyGermanyGuideDe: ResourceGuideData = {
     {
       question: 'Warum mit Deutsch anfangen, bevor ich komme?',
       answer:
-        'Weil alle Formalitäten in Ihren ersten Monat fallen, und das ist genau der Monat, in dem Sie am wenigsten Deutsch haben.',
+        'Schon erste Deutschkenntnisse können bei Gesprächen und Terminen helfen. Beginnen Sie, wenn es für Sie möglich ist, und lernen Sie nach der Ankunft weiter.',
     },
     {
       question: 'Warum Bremen?',
       answer:
-        'Eine Hafen- und Arbeitsstadt, keine Touristenstadt: nach deutschen Maßstäben bezahlbare Mieten, eine echte studentische Szene, und es ist genug los. CASA unterrichtet hier seit 1983 Deutsch.',
+        'Bremen bietet Stadtleben, Orte zum Entdecken an der Weser und Begegnungen mit Menschen aus aller Welt. Bei CASA verbinden Sie Deutschlernen mit gemeinsamen Aktivitäten und persönlicher Unterstützung beim Ankommen.',
     },
   ],
   officialLinks: [

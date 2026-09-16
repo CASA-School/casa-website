@@ -9,7 +9,7 @@ import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
 import type { ContentLocale } from '@/lib/content/types';
 
 const deFooterText: Record<string, string> = {
-  'Consistent Help': 'Verlässliche Hilfe',
+  'Here to help': 'Wir beraten Sie gern',
   'Ready to start German in Bremen?': 'Bereit für Deutsch in Bremen?',
   'Find my course': 'Kurs finden',
   'Talk to an advisor': 'Beratung anfragen',
@@ -29,7 +29,7 @@ const deFooterText: Record<string, string> = {
   'Intensive courses': 'Intensivkurse',
   'Evening courses': 'Abendkurse',
   'Special courses': 'Spezialkurse',
-  'German for Medical': 'Deutsch für Medizin',
+  'German for medical professionals': 'Deutsch für Mediziner',
   'German for Groups': 'Deutsch für Gruppen',
   Bildungszeit: 'Bildungszeit',
   Firmenunterricht: 'Firmenunterricht',
@@ -119,7 +119,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
           <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]/90">
-                {footerText('Consistent Help', locale)}
+                {footerText('Here to help', locale)}
               </p>
               <h3 className="mt-1 text-xl font-bold text-white">
                 {footerText('Ready to start German in Bremen?', locale)}
