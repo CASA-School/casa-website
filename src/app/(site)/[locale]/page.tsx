@@ -366,14 +366,7 @@ export default async function HomePage() {
         person: featuredSource.personDisplay,
         role: featuredSource.country,
       }
-    : {
-        quote:
-          locale === 'de'
-            ? 'CASA hat mir geholfen, im Alltag sicherer Deutsch zu sprechen.'
-            : 'CASA helped me speak German with more confidence in real life.',
-        person: locale === 'de' ? 'CASA Lernende' : 'CASA learner',
-        role: locale === 'de' ? 'Bremen' : 'Bremen',
-      };
+    : undefined;
 
   const websiteSchema = {
     '@context': 'https://schema.org',
@@ -918,6 +911,7 @@ export default async function HomePage() {
       <section id="community" className="bg-[var(--casa-canvas)] py-16 md:py-24 scroll-mt-28" data-track-section="life-at-casa">
         <Container>
           <BandHeading
+            tone="light"
             eyebrow={locale === 'de' ? 'Leben bei CASA' : 'Life at CASA'}
             title={locale === 'de' ? 'Bremen entdecken. Menschen kennenlernen.' : 'Discover Bremen. Find your people.'}
             description={locale === 'de'

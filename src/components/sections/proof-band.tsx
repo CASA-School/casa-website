@@ -25,10 +25,10 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
   const proofMetrics = getProofMetrics(locale);
 
   // Default to standard homepage copy if not explicitly overridden
-  const defaultTitle = locale === 'de' ? 'Nachweise und Anerkennung' : 'Proof and credibility';
+  const defaultTitle = locale === 'de' ? 'Qualität und Partnerschaften' : 'Quality and partnerships';
   const defaultCredibilityLine = locale === 'de'
-    ? 'Anerkennung, langjährige Schulgeschichte und verlässliche Sprachpartner.'
-    : 'Accreditations, long-standing school history, and trusted language partners.';
+    ? 'Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für Sie.'
+    : 'Our experience and partnerships support the work we do for our students.';
 
   const displayTitle = title ?? defaultTitle;
   const displayCredibilityLine = credibilityLine ?? defaultCredibilityLine;

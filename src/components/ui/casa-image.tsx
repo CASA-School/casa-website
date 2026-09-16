@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
  * required by the prop type and still travels with the call site, so it returns
  * intact when the photographs do.
  *
- * NOT used for logos. `proof-band.tsx` and `partner-strip.tsx` render
+ * NOT used for logos. `proof-band.tsx` renders
  * accreditation and partner marks, which are information rather than decoration
  * — replacing those with colour would delete a claim, not defer it.
  *
