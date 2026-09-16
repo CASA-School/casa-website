@@ -139,7 +139,7 @@ export default async function BecomeHostFamilyPage() {
           partnershipDescription:
             'Sie bieten ein Zuhause und Einblicke in den Alltag. CASA kümmert sich um die Vermittlung, bereitet den Aufenthalt mit Ihnen vor und bleibt für beide Seiten ansprechbar.',
           partnershipBullets: [
-            'Sie sagen zu: ein verlässlicher Alltag, offener Umgang und der vereinbarte Zeitraum',
+            'Sie stellen für den vereinbarten Zeitraum ein möbliertes Zimmer mit Zugang zu Küche und Bad bereit',
             'CASA wählt aus: passend nach Kursformat, Aufenthaltsdauer und Profil',
             'CASA informiert vorab: Profil, Zeitraum und besondere Hinweise, bevor jemand ankommt',
             'CASA bleibt erreichbar: eine Ansprechperson für beide Seiten, nicht nur am Anfang',
@@ -238,7 +238,7 @@ export default async function BecomeHostFamilyPage() {
           partnershipDescription:
             'You offer a home and a taste of everyday life in Bremen. CASA arranges the match, helps you prepare and remains a point of contact for you and your guest.',
           partnershipBullets: [
-            'You commit to: a dependable daily rhythm, an open household, and the dates you agreed',
+            'You provide a furnished room with kitchen and bathroom access for the agreed dates',
             'CASA chooses the match: by course format, length of stay, and student profile',
             'CASA briefs you first: the profile, the dates, and anything particular, before anyone arrives',
             'CASA stays reachable: one contact for both sides, not only at the start',
@@ -360,6 +360,7 @@ export default async function BecomeHostFamilyPage() {
             eyebrow={copy.comparisonEyebrow}
             title={copy.comparisonTitle}
             description={copy.comparisonDescription}
+            rowHeading={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
             leftTitle={copy.intensiveTitle}
             rightTitle={copy.groupTitle}
             rows={[
@@ -375,7 +376,7 @@ export default async function BecomeHostFamilyPage() {
               },
               {
                 label: locale === 'de' ? 'Verpflegung' : 'Meals',
-                left: locale === 'de' ? 'Nach vereinbartem Hostingmodell' : 'Based on agreed hosting model',
+                left: locale === 'de' ? 'Selbstverpflegung mit Küchenbenutzung' : 'Self-catering with kitchen access',
                 /*
                   Was "Often coordinated with half-board" / "Häufig mit
                   Halbpension organisiert". The verified fact is narrower —
@@ -388,7 +389,7 @@ export default async function BecomeHostFamilyPage() {
               },
               {
                 label: locale === 'de' ? 'Tagesstruktur' : 'Daily rhythm',
-                left: locale === 'de' ? 'Alltagsnahe Sprachpraxis im Haushalt' : 'Everyday language immersion in household life',
+                left: locale === 'de' ? 'Der Intensivkurs findet bei CASA statt' : 'Intensive classes take place at CASA',
                 right: locale === 'de' ? 'Klar strukturierter Ablauf mit Programmzeiten' : 'Structured schedule around program timetable',
               },
               {

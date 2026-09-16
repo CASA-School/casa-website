@@ -10,6 +10,7 @@ type ComparisonModuleProps = {
   eyebrow: string;
   title: string;
   description: string;
+  rowHeading?: string;
   leftTitle: string;
   rightTitle: string;
   rows: TableRow[];
@@ -32,6 +33,7 @@ export function ComparisonModule({
   eyebrow,
   title,
   description,
+  rowHeading = 'Focus',
   leftTitle,
   rightTitle,
   rows,
@@ -80,13 +82,32 @@ export function ComparisonModule({
         </p>
       </div>
 
-      {/* The table itself stays wide, but not edge-to-edge on the inverted field. */}
-      <div className={cn('mt-8 overflow-x-auto', isDark && 'mx-auto max-w-[76rem]')}>
+      {/* On phones each criterion spans both columns, leaving room for the
+          two answers. Repeat the option names for assistive technology. */}
+      <div className="mt-8 md:hidden">
+        <div aria-hidden className={cn('grid grid-cols-2 gap-5 border-b pb-3 text-sm font-semibold', rule, strong)}>
+          <span>{leftTitle}</span>
+          <span>{rightTitle}</span>
+        </div>
+        <dl>
+          {rows.map((row) => (
+            <div key={row.label} className={cn('border-b py-4', rule)}>
+              <dt className={cn('text-sm font-semibold', strong)}>{row.label}</dt>
+              <dd className={cn('mt-2 grid grid-cols-2 gap-5 text-sm leading-relaxed', muted)}>
+                <span><span className="sr-only">{leftTitle}: </span>{row.left}</span>
+                <span><span className="sr-only">{rightTitle}: </span>{row.right}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className={cn('mt-8 hidden overflow-x-auto md:block', isDark && 'mx-auto max-w-[76rem]')}>
         <table className="w-full min-w-full border-collapse text-left text-base md:min-w-[520px]">
           <thead>
             <tr>
               <th className={cn('border-b px-2 py-2 text-xs font-semibold uppercase tracking-eyebrow', rule, muted)}>
-                Focus
+                {rowHeading}
               </th>
               <th className={cn('border-b px-2 py-2 text-xs font-semibold uppercase tracking-eyebrow', rule, muted)}>
                 {leftTitle}

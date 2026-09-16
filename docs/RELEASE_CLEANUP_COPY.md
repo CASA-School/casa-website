@@ -165,3 +165,32 @@ After integration, continue in `/Users/rahmanshafiee/Downloads/CASA` on `main`; 
 - The new community band used `BandHeading` without a tone; its default is `dark`, so it painted white headings on the light canvas. Set `tone="light"` at that call site.
 - The navbar deliberately used 55–90% white and backdrop blur, letting underlying page content compete with its labels. Both resting and scrolled/open states now use opaque white; existing scroll border/shadow behaviour remains.
 - Browser validation measured foreground/background contrast and the scrolled header's opacity in both languages at desktop and mobile sizes; results are recorded above.
+
+
+## 2026-09-16 follow-up: accommodation facts and shared pricing
+
+Branch: `codex/accommodation-copy-pricing`. Local implementation complete; this follow-up is not merged or deployed.
+
+**Evidence:** The accommodation comparison promised daily conversations and a coordinated household routine. Those services are not promised by CASA's current [host accommodation page](https://casa-bremen.de/unterkunft/wohnen-in-einer-gastfamilie). It specifies an own furnished room, usually shared kitchen and bathroom, self-catering and intensive-course eligibility. The [shared-flat page](https://casa-bremen.de/unterkunft/die-casa-wg) additionally specifies adult participants. Both pages were checked on 2026-09-16.
+
+**Root cause:** Aspirational descriptions of family life had become service claims in the comparison, host recruitment copy and German assistant knowledge. Pricing used amount-first rows and mixed the additional-week rate with the holiday surcharge; the deposit was not named refundable in its label.
+
+**Changes:**
+- EN/DE accommodation narratives and comparisons now use the published facilities and eligibility. Removed promised daily conversations, structured family routines and speculative utilities rows. Corrected the related intensive-stay descriptions on the host recruitment page and the German assistant passage. Group-package meal arrangements remain separate.
+- Shared `FeeStrip` now leads with labels, aligns amounts, uses a restrained warm surface and gives refundable deposits a separate tint plus an explicit label. No prices, charges or refund conditions were removed or changed. The holiday surcharge has its own visible explanation.
+- Course sections use the same pricing presentation with calmer headings and retain all conditions. Zero-price, single-price and multiple-price formats remain supported.
+- Accommodation comparisons now show two readable answer columns on mobile, with the criterion above each pair. This fixes the clipping observed at 390px. Desktop retains the table; option names remain available to screen readers.
+
+**Files:**
+- `src/app/(site)/[locale]/accommodation/[type]/page.tsx`
+- `src/app/(site)/[locale]/accommodation/become-host/page.tsx`
+- `src/components/courses/course-practical-details.tsx`
+- `src/components/sections/fee-strip.tsx`
+- `src/components/sections/comparison-module.tsx`
+- `src/config/content/accommodation-costs.ts`
+- `src/config/content/accommodation-narratives.ts`
+- `src/lib/assistant/tools/search-public-kb.ts`
+
+**Verification:** `npm run build`, `npm run lint`, `npm run typecheck`, `npm run test` (384 tests) and `E2E_PORT=3000 npm run test:e2e -- --workers=2` (40 passed, 3 skipped) passed. The 3 skipped planner tests require a separately supplied DATABASE_URL and seeded owner/course groups; no planner code changed. The e2e run used this checkout's existing preview. Earlier attempts encountered a missing matching Chromium and a system-Chrome teardown hang; installing the matching Playwright Chromium resolved the runner issue, and the unmodified project configuration passed. No new test spec or dependency-manifest change was needed.
+
+Visual checks covered German host pricing, English flat comparison, intensive-course pricing with its long price range, Bildungszeit's two durations, and evening-course pricing at desktop/390px as applicable. Final German phone checks found no page overflow or clipped terms/values. Screenshots and logs are outside the deployment tree at `/Users/rahmanshafiee/Archive/CASA/website-cleanup-2026-09-16/verification/accommodation-pricing/`.

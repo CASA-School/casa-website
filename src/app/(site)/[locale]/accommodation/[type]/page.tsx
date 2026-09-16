@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { HeroCUtilityRail } from '@/components/heroes';
 import { ComparisonModule, DecisionRail, EditorialSplit, ProcessSteps } from '@/components/sections';
 import { AccommodationArrivalChecklist } from '@/components/signatures';
-import { localizeAccommodationCosts } from '@/config/content/accommodation-costs';
+import { accommodationHolidayNote, localizeAccommodationCosts } from '@/config/content/accommodation-costs';
 import { checkInSummary } from '@/config/content/accommodation-checkin-form';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -149,7 +149,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
           caption:
             accommodationType === 'flat'
               ? 'Shared flat kitchen / common area - Independent living with other students.'
-              : 'Host family dinner conversation - Daily immersion and cultural exchange.',
+              : (locale === 'de' ? 'Wohnen in einem privaten Bremer Haushalt.' : 'Accommodation in a private Bremen household.'),
         }}
         themeClassName="hero-theme-accommodation"
       />
@@ -192,47 +192,23 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                   caption:
                     accommodationType === 'flat'
                       ? 'Shared flat kitchen / common area - Independent living with other students.'
-                      : 'Host family dinner conversation - Daily immersion and cultural exchange.',
+                      : (locale === 'de' ? 'Wohnen in einem privaten Bremer Haushalt.' : 'Accommodation in a private Bremen household.'),
                 }}
               />
 
-              {/*
-                The cost, stated in full, identically on both option pages.
-
-                It used to be two of the four `highlights` bullets — and the two
-                options told different stories about the same figures: the flat
-                listed the 4-week price, the additional-week rate, the placement
-                fee and the deposit; the host family listed only a "holiday
-                surcharge" of the same 145. Same price, two accounts of it.
-                Everything here comes from config/content/accommodation-costs.ts.
-              */}
               <section>
                 <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
-                  {locale === 'de' ? 'Was die Unterkunft kostet' : 'What the accommodation costs'}
+                  {locale === 'de' ? 'Ihre Unterkunftskosten im Überblick' : 'Your accommodation costs at a glance'}
                 </h2>
                 <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                   {locale === 'de'
-                    ? 'Für die Gastfamilie und für die CASA-WG gelten dieselben Sätze. Die Wahl ist eine Frage des Alltags, nicht des Preises.'
-                    : 'A host family and a CASA shared flat cost the same. Choosing between them is a question of daily life, not of price.'}
+                    ? 'Ob CASA-WG oder privater Haushalt: Für beide Wohnmöglichkeiten gelten dieselben Preise.'
+                    : 'The same rates apply to a CASA shared flat and a room with local hosts.'}
                 </p>
-                {/*
-                  THE SHARED FIGURE STRIP, not a table written here.
-
-                  This was a `<dl>` in this file: label left, amount right-aligned
-                  at `text-base` against a hairline. The seven course formats
-                  publish the same shape from a different config and had the same
-                  markup until CoursePracticalDetails was rebuilt — at which point
-                  these two option pages were the last surface still showing the
-                  small right-aligned amount. Both read `FeeStrip` now, so the two
-                  cannot drift apart again.
-
-                  Four costs, so the strip lays them out 2x2. Everything still
-                  comes from config/content/accommodation-costs.ts.
-                */}
-                <FeeStrip
-                  figures={localizeAccommodationCosts(locale)}
-                  className="mt-7"
-                />
+                <FeeStrip figures={localizeAccommodationCosts(locale)} className="mt-6" />
+                <p className="mt-4 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">
+                  {accommodationHolidayNote(locale)}
+                </p>
               </section>
 
               {/*
@@ -273,58 +249,39 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
               </section>
 
               <ComparisonModule
-                eyebrow={locale === 'de' ? 'Vergleich' : 'Comparison'}
-                title={locale === 'de' ? 'Ist diese Option die richtige für Sie?' : 'Is this option right for you?'}
-                description={
-                  locale === 'de'
-                    ? 'Vergleich nach Alltag, Struktur und Sprachpraxis.'
-                    : 'Compare by daily routine, structure, and language exposure.'
-                }
-                leftTitle={optionTitle}
-                rightTitle={
-                  accommodationType === 'flat'
-                    ? locale === 'de'
-                      ? 'Gastfamilien'
-                      : 'Host Families'
-                    : locale === 'de'
-                      ? 'WGs'
-                      : 'Shared Flats'
-                }
+                eyebrow={locale === 'de' ? 'Wohnen bei CASA' : 'Living with CASA'}
+                title={locale === 'de' ? 'WG oder privater Haushalt?' : 'Shared flat or local household?'}
+                description={locale === 'de'
+                  ? 'Das bieten die beiden Wohnmöglichkeiten für Ihren Intensivkurs.'
+                  : 'What each accommodation option offers during your intensive course.'}
+                rowHeading={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
+                leftTitle={locale === 'de' ? 'CASA-WG' : 'CASA shared flat'}
+                rightTitle={locale === 'de' ? 'Privater Haushalt' : 'Local household'}
                 rows={[
                   {
-                    label: locale === 'de' ? 'Alltagsrhythmus' : 'Daily rhythm',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Selbstorganisiert' : 'Self-organized') : locale === 'de' ? 'Mit den Gastgebern abgestimmt' : 'Agreed with your hosts',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Mit den Gastgebern abgestimmt' : 'Agreed with your hosts') : locale === 'de' ? 'Selbstorganisiert' : 'Self-organized',
+                    label: locale === 'de' ? 'Zusammenleben' : 'Who you live with',
+                    left: locale === 'de' ? 'Mit anderen internationalen Kursteilnehmenden' : 'Other international course participants',
+                    right: locale === 'de' ? 'Bei Privatpersonen in Bremen' : 'Local hosts in Bremen',
                   },
                   {
-                    label: locale === 'de' ? 'Sprachpraxis' : 'Language practice',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Mit anderen Kursteilnehmenden' : 'With fellow students') : locale === 'de' ? 'Tägliche Gespräche' : 'Daily conversations',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Tägliche Gespräche' : 'Daily conversations') : locale === 'de' ? 'Mit anderen Kursteilnehmenden' : 'With fellow students',
+                    label: locale === 'de' ? 'Ihr Zimmer' : 'Your room',
+                    left: locale === 'de' ? 'Eigenes möbliertes Zimmer' : 'Your own furnished room',
+                    right: locale === 'de' ? 'Eigenes möbliertes Zimmer' : 'Your own furnished room',
                   },
                   {
-                    label: locale === 'de' ? 'Privatsphäre' : 'Privacy',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Eigenes Zimmer in der WG' : 'Your own room in a shared flat') : locale === 'de' ? 'Eigenes Zimmer im Haushalt' : 'Your own room in a local home',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Eigenes Zimmer im Haushalt' : 'Your own room in a local home') : locale === 'de' ? 'Eigenes Zimmer in der WG' : 'Your own room in a shared flat',
+                    label: locale === 'de' ? 'Küche und Bad' : 'Kitchen and bathroom',
+                    left: locale === 'de' ? 'Gemeinsame Nutzung in der WG' : 'Shared with your flatmates',
+                    right: locale === 'de' ? 'In der Regel gemeinsam mit den Gastgebern genutzt' : 'Usually shared with your hosts',
                   },
                   {
-                    label: locale === 'de' ? 'Nebenkosten' : 'Utilities',
-                    left: locale === 'de' ? 'Vor der Buchung klären' : 'Confirm before booking',
-                    right: locale === 'de' ? 'Vor der Buchung klären' : 'Confirm before booking',
+                    label: locale === 'de' ? 'Verpflegung' : 'Meals',
+                    left: locale === 'de' ? 'Selbstverpflegung' : 'Self-catering',
+                    right: locale === 'de' ? 'Selbstverpflegung' : 'Self-catering',
                   },
                   {
-                    label: locale === 'de' ? 'Ansprechpersonen' : 'People to contact',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'CASA Team + Hausregeln' : 'CASA team + house policy') : locale === 'de' ? 'CASA Team + Gastgeberkontakt' : 'CASA team + host contact',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'CASA Team + Gastgeberkontakt' : 'CASA team + host contact') : locale === 'de' ? 'CASA Team + Hausregeln' : 'CASA team + house policy',
-                  },
-                  {
-                    label: locale === 'de' ? 'Alltagsstruktur' : 'Daily structure',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Flexibel und eigenverantwortlich' : 'Flexible and self-directed') : locale === 'de' ? 'Absprachen mit den Gastgebern' : 'Arrangements with your hosts',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Absprachen mit den Gastgebern' : 'Arrangements with your hosts') : locale === 'de' ? 'Flexibel und eigenverantwortlich' : 'Flexible and self-directed',
-                  },
-                  {
-                    label: locale === 'de' ? 'Geeignet für' : 'Best fit',
-                    left: accommodationType === 'flat' ? (locale === 'de' ? 'Selbstständige Lernende' : 'Independent learners') : locale === 'de' ? 'Menschen, die den Alltag vor Ort kennenlernen möchten' : 'People who want to experience local daily life',
-                    right: accommodationType === 'flat' ? (locale === 'de' ? 'Menschen, die den Alltag vor Ort kennenlernen möchten' : 'People who want to experience local daily life') : locale === 'de' ? 'Selbstständige Lernende' : 'Independent learners',
+                    label: locale === 'de' ? 'Für wen?' : 'Who can book?',
+                    left: locale === 'de' ? 'Volljährige Teilnehmende unserer Intensivkurse' : 'Intensive-course participants aged 18 or over',
+                    right: locale === 'de' ? 'Teilnehmende unserer Intensivkurse' : 'Participants on our intensive courses',
                   },
                 ]}
               />
