@@ -1,15 +1,29 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { logActivity } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
-import { listGroups, listTeachers, replaceWeekAssignments } from '@/lib/admin/kursplanung/repo';
-import { SHIFTS } from '@/lib/admin/kursplanung/types';
+import { fromFormData, parseGroupForm, parseTeacherForm } from '@/lib/admin/kursplanung/forms';
+import { assignmentsFromPairs } from '@/lib/admin/kursplanung/pairs';
+import {
+  addGroup,
+  insertMissingAssignments,
+  listGroups,
+  listTeachers,
+  loadPlan,
+  removeGroupIfEmpty,
+  replaceTeacherAbsences,
+  replaceWeekAssignments,
+  updateGroup,
+  updateTeacherRules,
+} from '@/lib/admin/kursplanung/repo';
+import { SHIFTS, isLevel, isShift } from '@/lib/admin/kursplanung/types';
 import { validateWeekAssignments } from '@/lib/admin/kursplanung/week';
-import { planningWeeks } from '@/lib/admin/kursplanung/weeks';
+import { monthStart, nextMonth, planningWeeks } from '@/lib/admin/kursplanung/weeks';
 
 /**
  * The board's one write.
@@ -86,4 +100,90 @@ export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
 
   revalidatePath('/admin/kursplanung');
   return { ok: true };
+}
+
+/* ------------------------------------------------------------------------
+ * Rules, absences, groups — the forms of the Kurse and Lehrkräfte screens.
+ * FormData in, redirect back out, like every other workspace form. Each one
+ * re-checks the module: a server action is a public endpoint.
+ * --------------------------------------------------------------------- */
+
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function back(formData: FormData, message: string, kind: 'error' | 'ok'): never {
+  const raw = String(formData.get('returnTo') ?? '/admin/kursplanung');
+  const path = raw.startsWith('/admin/kursplanung') ? raw.split('?')[0] : '/admin/kursplanung';
+  const month = String(formData.get('month') ?? '');
+  const params = new URLSearchParams();
+  if (MONTH.test(month)) params.set('month', month);
+  params.set(kind, message);
+  redirect(`${path}?${params}`);
+}
+
+const revalidateAll = () => ['/admin/kursplanung', '/admin/kursplanung/kurse', '/admin/kursplanung/lehrkraefte'].forEach((p) => revalidatePath(p));
+
+export async function saveTeacherAction(formData: FormData): Promise<void> {
+  const user = await requireModule('kursplanung', 'edit');
+  const teacherId = String(formData.get('teacherId') ?? '');
+  const month = String(formData.get('month') ?? '');
+  if (!UUID.test(teacherId) || !MONTH.test(month)) back(formData, 'Ungültige Anfrage.', 'error');
+
+  const weeks = planningWeeks(month);
+  const parsed = parseTeacherForm(fromFormData(formData), teacherId, weeks);
+  if (!parsed.ok) back(formData, parsed.error, 'error');
+
+  await updateTeacherRules(teacherId, parsed.rules);
+  await replaceTeacherAbsences(teacherId, monthStart(month), monthStart(nextMonth(month)), parsed.absences, user.id);
+  await logActivity({ actor: user, entity: 'kursplanung.teacher', entityId: teacherId, action: 'rules.saved', detail: { month, absences: parsed.absences.length, daysPerWeek: parsed.rules.daysPerWeek } });
+  revalidateAll();
+  back(formData, `${parsed.rules.shortName} gespeichert.`, 'ok');
+}
+
+export async function saveGroupAction(formData: FormData): Promise<void> {
+  const user = await requireModule('kursplanung', 'edit');
+  const groupId = String(formData.get('groupId') ?? '');
+  if (!UUID.test(groupId)) back(formData, 'Ungültige Anfrage.', 'error');
+  const parsed = parseGroupForm(fromFormData(formData));
+  if (!parsed.ok) back(formData, parsed.error, 'error');
+
+  await updateGroup(groupId, parsed);
+  await logActivity({ actor: user, entity: 'kursplanung.group', entityId: groupId, action: 'group.saved', detail: { registrations: parsed.registrations } });
+  revalidateAll();
+  back(formData, 'Gruppe gespeichert.', 'ok');
+}
+
+export async function addGroupAction(formData: FormData): Promise<void> {
+  const user = await requireModule('kursplanung', 'edit');
+  const month = String(formData.get('month') ?? ''), shift = String(formData.get('shift') ?? ''), level = String(formData.get('level') ?? ''), phase = String(formData.get('phase') ?? '');
+  if (!MONTH.test(month) || !isShift(shift) || !isLevel(level) || !(phase === '1' || phase === '2')) back(formData, 'Ungültige Anfrage.', 'error');
+  await addGroup(month, shift, level, phase);
+  await logActivity({ actor: user, entity: 'kursplanung.group', entityId: null, action: 'group.added', detail: { month, shift, level, phase } });
+  revalidateAll();
+  back(formData, `${level}.${phase}: weitere Gruppe angelegt.`, 'ok');
+}
+
+export async function removeGroupAction(formData: FormData): Promise<void> {
+  const user = await requireModule('kursplanung', 'full');
+  if (String(formData.get('confirmed') ?? '') !== '1') back(formData, 'Bitte bestätigen.', 'error');
+  const groupId = String(formData.get('groupId') ?? '');
+  if (!UUID.test(groupId)) back(formData, 'Ungültige Anfrage.', 'error');
+  const removed = await removeGroupIfEmpty(groupId);
+  if (!removed) back(formData, 'Die Gruppe ist im Plan belegt – erst leeren.', 'error');
+  await logActivity({ actor: user, entity: 'kursplanung.group', entityId: groupId, action: 'group.removed' });
+  revalidateAll();
+  back(formData, 'Gruppe entfernt.', 'ok');
+}
+
+/** Lays every group's pair on its halves for all weeks of the month where the cell is free and the teacher fits. */
+export async function fillFromPairsAction(formData: FormData): Promise<void> {
+  const user = await requireModule('kursplanung', 'edit');
+  const month = String(formData.get('month') ?? ''), shift = String(formData.get('shift') ?? ''), groupId = String(formData.get('groupId') ?? '');
+  if (!MONTH.test(month) || !isShift(shift)) back(formData, 'Ungültige Anfrage.', 'error');
+  const plan = await loadPlan(month);
+  const targets = plan.groups.filter((g) => g.shift === shift && (!groupId || g.id === groupId));
+  const added = await insertMissingAssignments(assignmentsFromPairs(plan, targets), user.id);
+  await logActivity({ actor: user, entity: 'kursplanung', entityId: `${month}|${shift}`, action: 'pairs.filled', detail: { groups: targets.length, added } });
+  revalidateAll();
+  back(formData, `${added} Kurstage aus den Paaren belegt.`, 'ok');
 }

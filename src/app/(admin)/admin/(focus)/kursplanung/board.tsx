@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { assignmentKey, courseDays, fit, remainingDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
@@ -61,6 +63,7 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
   const [help, setHelp] = useState(false);
   const [query, setQuery] = useState('');
   const [, startTransition] = useTransition();
+  const router = useRouter();
   const dragRef = useRef<Drag | null>(null);
   const resizeRef = useRef<{ groupId: string; dates: string[]; row: number | null } | null>(null);
 
@@ -410,6 +413,7 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
             ? row('Bestätigen', 'Das „?“ verschwindet – die Zusage steht.', () => toggleFlag(g.id, m.dates, 'isTentative'))
             : row('Als unbestätigt markieren', 'Name mit „?“, bis die Zusage da ist.', () => toggleFlag(g.id, m.dates, 'isTentative'))}
           {free.length ? row(`Auf ${free.map(shortDay).join(', ')} ausdehnen`, `Legt ${t?.shortName} zusätzlich auf die freien Tage dieser Gruppe.`, () => extendRun(g, a)) : null}
+          {row('Lehrkraft-Details', 'Schicht, Tage pro Woche, Wochentage, Niveaus, Abwesenheiten.', () => router.push(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${a.teacherId}`))}
           {row(`Aus KW ${week.kw} entfernen`, `${range} wird wieder frei; ${t?.shortName} bekommt die Tage im Teile-Bereich zurück.`, () => removeRun(g.id, m.dates), styles.mrDel)}
         </div>
         <div className={styles.tip}>Ziehen verschiebt das Teil in eine andere Gruppe · Griff unten ändert die Tage · in eine andere Woche ziehen kopiert.</div>
@@ -419,22 +423,29 @@ export function Board({ plan, month, canWrite }: { plan: PlanContext; month: str
 
   const trayPiece = (x: { t: Teacher; rest: number; used: number; max: number; awayAll: boolean; ab?: unknown }, off: boolean) => {
     const flex = x.t.shifts.length > 1, hon = x.t.contract === 'freelance', inHand = hand === x.t.id;
-    const Tag = off ? 'div' : 'button';
+    const pick = () => setHand(inHand ? null : x.t.id);
     return (
-      <Tag
+      <div
         key={x.t.id}
-        {...(off ? {} : { type: 'button' as const, 'aria-pressed': inHand, onClick: () => setHand(inHand ? null : x.t.id), draggable: true, onDragStart: (e: React.DragEvent) => { dragRef.current = { teacherId: x.t.id, from: 'tray' }; e.dataTransfer.effectAllowed = 'move'; markFor(x.t.id); }, onDragEnd: () => { dragRef.current = null; setPreview(null); if (!hand) setMarks(new Map()); } })}
+        role={off ? undefined : 'button'}
+        tabIndex={off ? undefined : 0}
+        aria-pressed={off ? undefined : inHand}
+        onClick={off ? undefined : pick}
+        onKeyDown={off ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }}
+        draggable={!off}
+        onDragStart={off ? undefined : (e) => { dragRef.current = { teacherId: x.t.id, from: 'tray' }; e.dataTransfer.effectAllowed = 'move'; markFor(x.t.id); }}
+        onDragEnd={off ? undefined : () => { dragRef.current = null; setPreview(null); if (!hand) setMarks(new Map()); }}
         className={`${styles.tp} ${off ? styles.tpOff : ''} ${inHand ? styles.tpHand : ''}`}
         title={`${x.t.fullName}${off ? '' : ' – anklicken oder ziehen'}`}
       >
         <span className={styles.tpName}>{x.t.shortName}</span>
-        <span>{inHand ? <span className={styles.handlbl}>in der Hand</span> : null} {flex ? <span className={styles.sh}>V+N</span> : null} {hon ? <span className={styles.sh}>HON</span> : null}</span>
+        <span>{inHand ? <span className={styles.handlbl}>in der Hand</span> : null} {flex ? <span className={styles.sh}>V+N</span> : null} {hon ? <span className={styles.sh}>HON</span> : null} <Link href={`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${x.t.id}`} className={styles.more} title="Details: Schicht, Tage, Niveaus, Abwesenheiten" aria-label={`Details zu ${x.t.shortName}`} onClick={(e) => e.stopPropagation()} draggable={false}>···</Link></span>
         <span className={styles.bl}>
           <span className={styles.blocks} aria-hidden="true">{Array.from({ length: x.max }, (_, i) => <i key={i} className={i < x.max - x.rest ? 'u' : ''} />)}</span>
           <span className={styles.cnt}>{x.awayAll ? 'abwesend' : x.rest > 0 ? `${x.rest} von ${x.max} Tagen frei` : `alle ${x.max} Tage verplant`}</span>
         </span>
         <span className={styles.lvs}>{x.t.levels.map((L) => <i key={L} className={styles.lvChip} style={lvStyle(L)}>{L}</i>)}</span>
-      </Tag>
+      </div>
     );
   };
 

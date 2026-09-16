@@ -232,3 +232,101 @@ export async function replaceWeekAssignments(
     }
   });
 }
+
+/* ------------------------------------------------------------- teachers */
+
+export type { TeacherRules } from './repo-types';
+import type { TeacherRules } from './repo-types';
+
+export async function updateTeacherRules(id: string, rules: TeacherRules): Promise<void> {
+  await query(
+    `UPDATE teachers
+        SET short_name = $2, contract = $3, shifts = $4, days_per_week = $5, weekdays = $6, levels = $7,
+            note = $8, updated_at = timezone('utc', now())
+      WHERE id = $1`,
+    [id, rules.shortName, rules.contract, [...rules.shifts], rules.daysPerWeek, [...rules.weekdays], [...rules.levels], rules.note]
+  );
+}
+
+/**
+ * Replaces a teacher's absences inside a date range: the teacher dialog edits
+ * a whole month at once, so the month's rows are rewritten in one transaction.
+ * Rows carrying a `filemaker_ref` are kept — those came from FileMaker and are
+ * the bridge's to change.
+ */
+export async function replaceTeacherAbsences(
+  teacherId: string,
+  from: string,
+  to: string,
+  absences: readonly Absence[],
+  createdBy: string
+): Promise<void> {
+  await withTransaction(async (client) => {
+    await client.query(
+      `DELETE FROM teacher_absences
+        WHERE teacher_id = $1 AND on_date >= $2::date AND on_date < $3::date AND filemaker_ref IS NULL`,
+      [teacherId, from, to]
+    );
+    for (const a of absences) {
+      await client.query(
+        `INSERT INTO teacher_absences (teacher_id, on_date, reason, created_by)
+         VALUES ($1, $2::date, $3, $4)
+         ON CONFLICT (teacher_id, on_date) DO UPDATE SET reason = EXCLUDED.reason`,
+        [teacherId, a.onDate, a.reason, createdBy]
+      );
+    }
+  });
+}
+
+/* --------------------------------------------------------------- groups */
+
+export async function updateGroup(
+  id: string,
+  patch: { registrations: number; teacherFirst: string | null; teacherSecond: string | null; filemakerCourseId: string | null }
+): Promise<void> {
+  await query(
+    `UPDATE course_groups
+        SET registrations = $2, teacher_first = $3, teacher_second = $4, filemaker_course_id = $5,
+            updated_at = timezone('utc', now())
+      WHERE id = $1`,
+    [id, patch.registrations, patch.teacherFirst, patch.teacherSecond, patch.filemakerCourseId]
+  );
+}
+
+/** A further parallel group of a level: next index, same registrations split later by the planners. */
+export async function addGroup(month: string, shift: string, level: string, phase: '1' | '2'): Promise<void> {
+  await query(
+    `INSERT INTO course_groups (month, shift, level, phase, group_index)
+     SELECT $1::date, $2, $3, $4, coalesce(max(group_index), 0) + 1
+       FROM course_groups WHERE month = $1::date AND shift = $2 AND level = $3 AND phase = $4`,
+    [`${month}-01`, shift, level, phase]
+  );
+}
+
+/** Removes a group only when nothing is planned in it. Returns false otherwise. */
+export async function removeGroupIfEmpty(id: string): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `DELETE FROM course_groups g
+      WHERE g.id = $1 AND NOT EXISTS (SELECT 1 FROM plan_assignments a WHERE a.group_id = g.id)
+      RETURNING id`,
+    [id]
+  );
+  return rows.length > 0;
+}
+
+/** Adds assignments that do not exist yet; existing cells are left alone. Returns how many were added. */
+export async function insertMissingAssignments(assignments: readonly Assignment[], changedBy: string): Promise<number> {
+  let added = 0;
+  await withTransaction(async (client) => {
+    for (const a of assignments) {
+      const r = await client.query(
+        `INSERT INTO plan_assignments (group_id, on_date, teacher_id, is_substitute, is_tentative, changed_by)
+         VALUES ($1, $2::date, $3, $4, $5, $6)
+         ON CONFLICT (group_id, on_date) DO NOTHING`,
+        [a.groupId, a.onDate, a.teacherId, a.isSubstitute, a.isTentative, changedBy]
+      );
+      added += r.rowCount ?? 0;
+    }
+  });
+  return added;
+}

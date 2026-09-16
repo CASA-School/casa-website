@@ -36,6 +36,7 @@ export function FormDialog({
   triggerVariant = 'secondary',
   size = 'md',
   width = 'md',
+  defaultOpen = false,
 }: {
   trigger: ReactNode;
   title: string;
@@ -45,8 +46,10 @@ export function FormDialog({
   size?: 'sm' | 'md';
   /** `lg` for a multi-step form; the default suits a handful of fields. */
   width?: 'md' | 'lg';
+  /** Open on first render — for a screen that names the record in its URL. */
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button type="button" variant={triggerVariant} size={size} onClick={() => setOpen(true)}>

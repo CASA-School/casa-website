@@ -195,7 +195,15 @@ export function WorkspaceShell({
                 </NavLink>
               ) : null}
               {canAccess(user, 'kursplanung') ? (
-                <NavLink href="/admin/kursplanung" icon={Icon.kursplanung} title="Kursplanung">
+                <NavLink
+                  href="/admin/kursplanung"
+                  icon={Icon.kursplanung}
+                  title="Kursplanung"
+                  items={[
+                    { href: '/admin/kursplanung/kurse', label: 'Kurse' },
+                    { href: '/admin/kursplanung/lehrkraefte', label: 'Lehrkräfte' },
+                  ]}
+                >
                   Kursplanung
                 </NavLink>
               ) : null}

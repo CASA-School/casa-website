@@ -5,6 +5,7 @@ import { loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
 import { Board } from './board';
+import { KursplanungTabs } from './tabs';
 
 /**
  * Kursplanung — the board. docs/KURSPLANUNG.md explains the rules.
@@ -17,7 +18,7 @@ import { Board } from './board';
 export default async function KursplanungPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; ok?: string; error?: string }>;
 }) {
   const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
   const month = await resolvePlanMonth(params.month);
@@ -27,6 +28,7 @@ export default async function KursplanungPage({
   return (
     <>
       <PageHeader eyebrow="Management" title="Kursplanung" description={label} />
+      <KursplanungTabs active="puzzle" month={month} notice={{ ok: params.ok, error: params.error }} />
       {plan.groups.length === 0 ? (
         <EmptyState title={`Kein Plan für ${label}`} description="Für diesen Monat sind noch keine Kursgruppen angelegt." />
       ) : (
