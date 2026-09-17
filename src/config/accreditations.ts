@@ -23,10 +23,10 @@ export const accreditationLogos: Accreditation[] = [
     id: 'tandem-quality',
     name: 'TANDEM Quality',
     imageSrc: '/accreditations/tandem-quality.jpg',
-    imageWidth: 69,
-    imageHeight: 100,
+    imageWidth: 200,
+    imageHeight: 290,
     displayHeight: 50,
-    href: 'https://www.tandem-schools.com/en/about-us/quality-management',
+    href: 'https://tandem-schools.com/en/qualitaet',
   },
   {
     id: 'telc',
