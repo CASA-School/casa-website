@@ -2,6 +2,9 @@
 
 Branch: `codex/groups-appointments-test-mail`, based on main `e588d07`.
 
+**Current user instruction: keep fixing locally; do not merge or deploy until everything is done.**
+Microsoft activation is deferred; the earlier permission question was not approved.
+
 ## User decisions
 
 - Make the Town Musicians package names more prominent, without a decorative redesign.
@@ -124,3 +127,26 @@ Verification logs, screenshots and the local concurrency check are archived outs
 `/Users/rahmanshafiee/Archive/CASA/group-appointments-2026-09-17/`.
 German 320px and English 390px checks showed no horizontal dialog overflow; focus returned to
 the booking button after Escape (after the Radix close animation completed).
+
+## Contact form follow-up — local only
+
+Evidence: the form combined a decorative badge/gradient, prompt chips, uppercase labels,
+long introductory copy and a three-stage receipt timeline. Its pale form and sidebar had little
+visual separation. Group/company topics expanded every optional briefing field immediately.
+
+Changes: plain white form against the canvas, dark contact panel with readable white text,
+clearer input borders, sentence-case labels, shorter EN/DE copy and message placeholder, solid
+submit button, optional briefing disclosure, privacy link and concise receipt. Removed the
+unsupported one-business-day response claim. Browser autofill is enabled; validation focuses
+and describes invalid fields and presents basic errors in German on the German page.
+
+Files:
+- `src/components/forms/contact-inquiry-form.tsx`
+- `src/app/(site)/[locale]/contact/page.tsx`
+
+Verification: build, lint and typecheck pass; 399 unit tests and 40 e2e pass. The same three
+existing planner tests skip because DATABASE_URL is not configured in the test process.
+Browser checks cover desktop EN, DE at 390px/320px, collapsed/expanded optional briefing,
+validation focus, preserved draft after a simulated 503, and the concise receipt after a simulated
+successful submission. No actual email or submission was sent. Evidence is in the `contact-form`
+subfolder of the external verification archive above. No push, merge or deployment.
