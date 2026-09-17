@@ -150,3 +150,18 @@ Browser checks cover desktop EN, DE at 390px/320px, collapsed/expanded optional 
 validation focus, preserved draft after a simulated 503, and the concise receipt after a simulated
 successful submission. No actual email or submission was sent. Evidence is in the `contact-form`
 subfolder of the external verification archive above. No push, merge or deployment.
+
+### Contact-page simplification, follow-up
+
+Removed the large hero, trust badge and redundant jump button. Kept a compact H1 and
+breadcrumbs, with the form immediately underneath. The contact panel is top-aligned on the
+right from 768px, spans to the site's right gutter on wide screens and stacks below on phones.
+Topics are now six categories in EN/DE: courses, exams, accommodation, groups, company courses
+and other questions. Existing specialist topic aliases map into the relevant category; group
+and company briefing behavior remains intact.
+
+Updated the existing smoke assertions to check direct access to the form instead of requiring
+a marketing hero. Build/lint/typecheck, 399 unit tests and 40 e2e passed; the same three
+planner DB cases skipped (test process has no DATABASE_URL). Browser checks confirmed alignment
+at 768/900/1440px, phone stacking at 390px, six options in both languages and representative
+legacy topic mappings. No push, merge, deployment or email activation.

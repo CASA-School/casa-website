@@ -2,12 +2,11 @@ import type { Metadata } from 'next';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
 import { ContactInquiryForm } from '@/components/forms/contact-inquiry-form';
-import { HeroEMinimal } from '@/components/heroes';
+import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import { footerConfig } from '@/config/footer';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,63 +39,39 @@ type ContactPageProps = {
 const topicCatalog: TopicConfig[] = [
   {
     key: 'course-advice',
-    labels: { en: 'Course advice', de: 'Kursberatung' },
-    aliases: ['course-advice', 'course', 'courses', 'kurs', 'kursberatung'],
-  },
-  {
-    key: 'registration-support',
-    labels: { en: 'Registration support', de: 'Anmeldung' },
-    aliases: ['registration', 'register', 'anmeldung'],
-  },
-  {
-    key: 'placement-test',
-    labels: { en: 'Placement test', de: 'Einstufung' },
-    aliases: ['placement', 'placement-test', 'placement-online', 'placement-in-person', 'einstufung'],
+    labels: { en: 'Courses', de: 'Kurse' },
+    aliases: ['course-advice', 'course', 'courses', 'kurs', 'kurse', 'kursberatung',
+      'registration-support', 'registration', 'register', 'anmeldung',
+      'placement', 'placement-test', 'placement-online', 'placement-in-person', 'einstufung',
+      'bildungszeit-azav', 'bildungszeit', 'azav', 'educational-leave', 'funding',
+      'medical', 'medical-german', 'medizin', 'deutsch-für-medizin', 'fsp'],
   },
   {
     key: 'exam-registration',
-    labels: { en: 'Exam registration', de: 'Prüfungsanmeldung' },
-    aliases: ['exam', 'exam-registration', 'prüfung', 'prüfungsanmeldung'],
-  },
-  {
-    key: 'bildungszeit-azav',
-    labels: { en: 'Bildungszeit / AZAV', de: 'Bildungszeit / AZAV' },
-    aliases: ['bildungszeit', 'azav', 'educational-leave', 'funding'],
-  },
-  {
-    key: 'medical-german',
-    labels: { en: 'Medical German', de: 'Deutsch für Medizin' },
-    aliases: ['medical', 'medical-german', 'medizin', 'deutsch-für-medizin', 'fsp'],
-  },
-  {
-    key: 'company-courses',
-    labels: { en: 'Company courses', de: 'Firmenunterricht' },
-    aliases: ['company', 'company-courses', 'corporate', 'business', 'firmenunterricht', 'firma'],
-  },
-  {
-    key: 'group-booking',
-    labels: { en: 'Group booking', de: 'Gruppenanfrage' },
-    aliases: ['group', 'group-booking', 'groups', 'gruppe', 'gruppen', 'gruppenanfrage', 'schulklasse'],
+    labels: { en: 'Exams', de: 'Prüfungen' },
+    aliases: ['exam', 'exams', 'exam-registration', 'prüfung', 'prüfungen', 'prüfungsanmeldung'],
   },
   {
     key: 'accommodation-support',
-    labels: { en: 'Accommodation support', de: 'Unterkunft' },
-    aliases: ['accommodation', 'housing', 'unterkunft'],
+    labels: { en: 'Accommodation', de: 'Unterkunft' },
+    aliases: ['accommodation-support', 'accommodation', 'housing', 'unterkunft',
+      'host-family', 'host', 'become-host', 'gastfamilie', 'gastfamilie-werden'],
   },
   {
-    key: 'host-family',
-    labels: { en: 'Host family application', de: 'Gastfamilie werden' },
-    aliases: ['host-family', 'host', 'become-host', 'gastfamilie', 'gastfamilie-werden'],
+    key: 'group-booking',
+    labels: { en: 'Groups', de: 'Gruppen' },
+    aliases: ['group', 'group-booking', 'groups', 'gruppe', 'gruppen', 'gruppenanfrage', 'schulklasse'],
   },
   {
-    key: 'agency-partnership',
-    labels: { en: 'Agency partnership', de: 'Agenturpartnerschaft' },
-    aliases: ['agency', 'agency-partnership', 'agentur', 'agenturpartnerschaft'],
+    key: 'company-courses',
+    labels: { en: 'Company courses', de: 'Firmenkurse' },
+    aliases: ['company', 'company-courses', 'corporate', 'business', 'firmenunterricht', 'firmenkurse', 'firma'],
   },
   {
-    key: 'careers',
-    labels: { en: 'Career opportunities', de: 'Karriere' },
-    aliases: ['career', 'careers', 'job', 'jobs', 'karriere'],
+    key: 'other',
+    labels: { en: 'Other questions', de: 'Sonstige Fragen' },
+    aliases: ['other', 'agency', 'agency-partnership', 'agentur', 'agenturpartnerschaft',
+      'career', 'careers', 'job', 'jobs', 'karriere'],
   },
 ];
 
@@ -121,7 +96,8 @@ function getInitialTopicKey(rawTopic: string | undefined, locale: 'en' | 'de') {
 
   const match = topicCatalog.find((item) => {
     const localizedLabel = locale === 'de' ? item.labels.de : item.labels.en;
-    return item.aliases.includes(normalized) || normalizeTopicValue(localizedLabel) === normalized;
+    return item.aliases.some(alias => normalizeTopicValue(alias) === normalized)
+      || normalizeTopicValue(localizedLabel) === normalized;
   });
 
   return match?.key ?? '';
@@ -176,7 +152,6 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   const locale = await getContentLocale();
   const resolvedSearchParams = await Promise.resolve(searchParams).then((value) => value ?? {});
   const rhythm = getLayoutRhythm('legal');
-  const hero = getPageHero('contact', locale);
 
   const copy = formCopyByLocale[locale];
   const topics = topicCatalog.map((topic) => ({
@@ -204,24 +179,19 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactSchema) }} />
 
-      <HeroEMinimal
-        eyebrow={hero.eyebrow}
-        title={hero.headline}
-        description={hero.subheadline}
-        breadcrumbs={breadcrumbs}
-        cta={{ label: locale === 'de' ? 'Nachricht schreiben' : 'Write to us', href: '#contact-form', kind: 'primary' }}
-        meta={hero.proofMetrics.slice(0, 1).map((item) => `${item.value} ${item.label}`)}
-      />
-
-      <section className="bg-[var(--casa-canvas)] py-12 md:py-16">
+      <section className="pb-12 pt-6 md:pb-16 md:pt-8">
         <Container>
+          <Breadcrumbs items={breadcrumbs} />
+          <h1 className="mb-6 mt-4 text-3xl font-bold md:text-4xl">
+            {locale === 'de' ? 'Kontakt' : 'Contact'}
+          </h1>
           <div
             id="contact-form"
-            className="grid max-w-[88rem] scroll-mt-28 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]"
+            className="grid scroll-mt-28 items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.65fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-8"
           >
             <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 
-            <div className="min-w-0 xl:sticky xl:top-28 xl:self-start">
+            <div className="min-w-0 md:sticky md:top-28 md:self-start">
               <aside className="rounded-3xl bg-[var(--casa-ink-deep)] p-6 text-white sm:p-8">
                 <h2 className="text-2xl font-bold text-white">
                   {locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk?'}
