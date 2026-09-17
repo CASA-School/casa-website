@@ -274,7 +274,7 @@ export default async function NonProfitStatusPage() {
               </ul>
             </div>
 
-            <section className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)] md:p-8">
+            <section className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-6 md:p-8">
               <h2 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.legalTitle}</h2>
               {/*
                 `minmax(9rem, …)` on the label column because a fractional one
@@ -306,12 +306,7 @@ export default async function NonProfitStatusPage() {
                 {copy.impactTitle}
               </h2>
             </div>
-            {/*
-              One warm panel, divided — the same figure as the homepage's
-              non-profit band, so the two surfaces that carry this story look
-              related. Four separate tinted boxes read as four unrelated chips.
-            */}
-            <ul className="divide-y divide-[color:var(--casa-sand)]/70 overflow-hidden rounded-xl bg-[var(--casa-warm-soft)]/35">
+            <ul className="divide-y divide-[color:var(--casa-sand)]/70 overflow-hidden rounded-xl bg-[var(--casa-bg)]">
               {copy.impactItems.map((item) => (
                 <li
                   key={item}

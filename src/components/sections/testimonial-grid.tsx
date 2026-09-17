@@ -44,7 +44,7 @@ type TestimonialGridProps = {
 
 function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: ContentLocale }) {
   return (
-    <article className="group overflow-hidden rounded-xl bg-white shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]/70 ">
+    <article className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-soft)]">
       {card.photoSrc ? (
         <figure>
           <div className="casa-media-overlay relative h-52 md:h-56">
@@ -63,20 +63,23 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
           </div>
         </figure>
       ) : null}
-      <blockquote className="space-y-3 p-6">
+      <blockquote className="flex flex-1 flex-col p-6 md:p-7">
         {/*
           A quotation mark glyph rather than a photograph. Without an image the
           tile needs something to open on, and the mark is honest about what the
           card is: someone's words, not their portrait.
         */}
-        <span aria-hidden className="block text-3xl leading-none text-[var(--casa-accent-text)]">
+        <span aria-hidden className="mb-4 block h-7 font-display text-4xl leading-none text-[var(--casa-accent-text)]">
           &ldquo;
         </span>
         <p className="text-base leading-relaxed text-[var(--casa-ink)]">
           {card.quote}
         </p>
-        <footer className="text-xs font-semibold text-[var(--casa-muted)]">
-          {card.person} · {card.country}
+        <footer className="mt-auto pt-6">
+          <div className="border-t border-[color:var(--casa-sand)] pt-4">
+            <p className="text-sm font-semibold text-[var(--casa-ink)]">{card.person}</p>
+            <p className="mt-1 min-h-10 text-xs leading-5 text-[var(--casa-muted)]">{card.country}</p>
+          </div>
         </footer>
       </blockquote>
     </article>
@@ -177,7 +180,7 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
       </div>
       <div
         ref={track}
-        className="relative mt-5 flex snap-x snap-mandatory items-start gap-4 overflow-x-auto overscroll-x-contain px-1 pb-5 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative mt-5 flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto overscroll-x-contain px-1 pb-5 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onPointerDown={() => setPaused(true)}
         onScroll={() => {
           const element = track.current;
@@ -186,7 +189,7 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
         }}
       >
         {stories.map((card, index) => (
-          <div key={card.id} role="group" aria-roledescription={de ? 'Stimme' : 'slide'} aria-label={`${index + 1} / ${stories.length}`} className="min-w-0 shrink-0 basis-full snap-start md:basis-[calc((100%-1rem)/2)] xl:basis-[calc((100%-2rem)/3)]">
+          <div key={card.id} role="group" aria-roledescription={de ? 'Stimme' : 'slide'} aria-label={`${index + 1} / ${stories.length}`} className="flex min-w-0 shrink-0 basis-full snap-start md:basis-[calc((100%-1rem)/2)] xl:basis-[calc((100%-2rem)/3)]">
             <TestimonialTile card={card} locale={locale} />
           </div>
         ))}

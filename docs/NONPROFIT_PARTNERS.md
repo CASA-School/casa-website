@@ -27,3 +27,7 @@ All four school links return HTTP 200. Logo files are hosted locally, unchanged;
 ## Implementation and verification
 
 `src/components/sections/nonprofit-partnerships.tsx` replaces the non-profit page's generic project cards with bilingual project explanations, linked logos and a separate network section. Community/language-exchange information remains. Desktop, tablet and phone layouts checked; no overflow. All seven new logo assets decode in the browser. Build/lint/typecheck/unit/e2e checked; evidence archived at `~/Archive/CASA/nonprofit-partners-2026-09-17/`. This refinement is local only on `codex/refine-pathway-cards`; no push, merge or deployment.
+
+### Layout refinement after user review
+
+Replaced the three tall project cards with separated editorial rows: aligned logo plates, readable descriptions and a dedicated desktop link column; stacked presentation on phones. Network tiles use neutral surfaces and consistent logo/name areas. Removed the remaining warm impact-panel fill and heavy legal-panel shadow for a calmer page. Checked DE/EN and 390/768/1440px; no overflow. Full build/lint/typecheck/unit/e2e checks pass (399 unit, 40 e2e, 3 existing database skips).
