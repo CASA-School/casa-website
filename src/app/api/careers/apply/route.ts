@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { notifyForm } from '@/lib/notifications/forms.server';
 
 import { normalizeContentLocale } from '@/lib/content/locale';
 import { isDatabaseConfigured } from '@/lib/db/env';
@@ -6,7 +7,6 @@ import { withDatabaseTransaction } from '@/lib/db/server';
 import { careerApplicationSchema } from '@/lib/validation/career-applications';
 
 const MAX_CV_FILE_SIZE_BYTES = 8 * 1024 * 1024;
-const REQUEST_TIMEOUT_MS = 8000;
 
 const acceptedCvMimeTypes = new Set([
   'application/pdf',
@@ -222,56 +222,17 @@ export async function POST(request: Request) {
     );
   }
 
-  if (webHookUrl) {
-    try {
-      const response = await fetch(webHookUrl, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          requestId,
-          submittedAt,
-          locale: data.locale,
-          positionId: data.positionId || null,
-          positionSlug: data.positionSlug,
-          positionTitle: data.positionTitle,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone || null,
-          linkedinUrl: data.linkedinUrl || null,
-          coverLetter: data.coverLetter,
-          cvFileName: cvFile.name,
-          cvFileSize: cvFile.size,
-          cvMimeType: cvFile.type || null,
-          cvStoragePath: null,
-          cvStorageMode: 'database',
-          userAgent: request.headers.get('user-agent') || 'unknown',
-        }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Webhook rejected career application with status ${response.status}`);
-      }
-    } catch (error) {
-      console.error('[careers-apply-api] webhook failed', error);
-      return NextResponse.json(
-        {
-          status: 'error',
-          message: failureMessage(locale),
-          supportPath: '/contact?topic=careers',
-        },
-        { status: 502 }
-      );
-    }
-  }
+  const delivery = await notifyForm('careers', {
+    requestId, submittedAt, ...data,
+    cvFileName: cvFile.name, cvFileSize: cvFile.size,
+    cvStorageMode: 'database',
+  }, webHookUrl);
 
   return NextResponse.json({
     status: 'accepted',
     requestId,
     mode: 'database',
+    notified: delivery.delivered,
     message: successMessage(locale),
   });
 }

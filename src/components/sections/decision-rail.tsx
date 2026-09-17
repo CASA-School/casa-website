@@ -1,3 +1,4 @@
+import { AppointmentDialog } from '@/components/gruppen/appointment-dialog';
 import type { ContentLocale } from '@/lib/content/types';
 
 import { PersonMonogram } from '@/components/ui/person-monogram';
@@ -27,7 +28,7 @@ type DecisionRailProps = {
    * site. `email` is a published inbox — CASA prints names and roles but only
    * one individual mailbox, so the role address is the honest route.
    */
-  contact?: { name: string; role: string; booking: boolean } | null;
+  contact?: { name: string; role: string; booking: boolean; appointment?: 'groups' } | null;
 };
 
 export function DecisionRail({
@@ -116,23 +117,8 @@ export function DecisionRail({
                 <p className="mt-0.5 break-words text-xs leading-snug text-[var(--casa-muted)]">{contact.role}</p>
               </div>
             </div>
-            {/*
-              BOOK A CALL — rendered only where the person offers one, and
-              INERT until CASA has a scheduling destination.
-
-              `disabled` rather than a link to `#` or to /contact. A control that
-              looks live and does nothing on click is worse than a visibly
-              unavailable one, and pointing it at the contact form would make it
-              a second, differently-labelled route to a page the nav already
-              reaches — the duplicate-CTA problem this card was cleaned up to
-              remove. Give it an `href` and it becomes a real button; nothing
-              else here changes.
-
-              This replaced the printed mailto address. See the `email` note in
-              config/content/contacts.ts: the addresses are still recorded, just
-              not set as the last line of a card meant to hold a few facts.
-            */}
-            {contact.booking ? (
+            {/* Ina's group appointments are active. Other contacts await their own schedule. */}
+            {contact.appointment === 'groups' ? <AppointmentDialog locale={locale} /> : contact.booking ? (
               <button
                 type="button"
                 /*

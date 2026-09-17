@@ -196,7 +196,7 @@ async function raiseIntakeFlags(
   }
 }
 
-export async function storeEnquiry(input: {
+export type EnquiryInput = {
   requestId: string;
   locale: 'en' | 'de';
   firstName: string;
@@ -208,48 +208,53 @@ export async function storeEnquiry(input: {
   source: string;
   organiserBrief: Record<string, unknown> | null;
   userAgent: string | null;
-}): Promise<boolean> {
+};
+
+/** Used by appointment intake so reservation, person and enquiry commit together. */
+export async function storeEnquiryInTransaction(client: PoolClient, input: EnquiryInput): Promise<void> {
+  const now = new Date();
+  const person = await createPerson(client, {
+    firstName: input.firstName,
+    lastName: input.lastName,
+    email: input.email,
+    createdAt: now,
+  });
+  const { rows } = await client.query<{ id: string }>(
+    `INSERT INTO enquiries
+       (request_id, kind, locale, first_name, last_name, email, topic, topic_key,
+        message, source, organiser_brief, user_agent, person_id, submitted_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+     ON CONFLICT (request_id) DO NOTHING
+     RETURNING id`,
+    [
+      input.requestId,
+      classifyEnquiry(input.topicKey),
+      input.locale,
+      input.firstName,
+      input.lastName,
+      input.email,
+      input.topic,
+      input.topicKey,
+      input.message,
+      input.source,
+      input.organiserBrief ? JSON.stringify(input.organiserBrief) : null,
+      input.userAgent,
+      person.personId,
+      now,
+    ]
+  );
+  // A retried request_id inserts nothing; the person created above must not
+  // outlive it. Roll the whole thing back by throwing a sentinel.
+  if (rows.length === 0) throw new Duplicate();
+  await raiseIntakeFlags(execOn(client), 'enquiry', rows[0].id, {
+    candidates: person.candidates,
+  });
+}
+
+export async function storeEnquiry(input: EnquiryInput): Promise<boolean> {
   if (!isWorkspaceDatabaseConfigured()) return false;
   try {
-    await withTransaction(async (client) => {
-      const now = new Date();
-      const person = await createPerson(client, {
-        firstName: input.firstName,
-        lastName: input.lastName,
-        email: input.email,
-        createdAt: now,
-      });
-      const { rows } = await client.query<{ id: string }>(
-        `INSERT INTO enquiries
-           (request_id, kind, locale, first_name, last_name, email, topic, topic_key,
-            message, source, organiser_brief, user_agent, person_id, submitted_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-         ON CONFLICT (request_id) DO NOTHING
-         RETURNING id`,
-        [
-          input.requestId,
-          classifyEnquiry(input.topicKey),
-          input.locale,
-          input.firstName,
-          input.lastName,
-          input.email,
-          input.topic,
-          input.topicKey,
-          input.message,
-          input.source,
-          input.organiserBrief ? JSON.stringify(input.organiserBrief) : null,
-          input.userAgent,
-          person.personId,
-          now,
-        ]
-      );
-      // A retried request_id inserts nothing; the person created above must not
-      // outlive it. Roll the whole thing back by throwing a sentinel.
-      if (rows.length === 0) throw new Duplicate();
-      await raiseIntakeFlags(execOn(client), 'enquiry', rows[0].id, {
-        candidates: person.candidates,
-      });
-    });
+    await withTransaction(client => storeEnquiryInTransaction(client, input));
     return true;
   } catch (error) {
     if (error instanceof Duplicate) return true;

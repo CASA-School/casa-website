@@ -124,12 +124,12 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
                     type="button"
                     className="group flex h-full w-full flex-col text-left rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300 motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-modal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
                   >
-                <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+                <h3 className="text-3xl font-bold leading-tight text-[var(--casa-accent-text)] sm:text-4xl">
                   {item.animal[locale]}
-                </span>
-                <h3 className="mt-4 text-xl font-bold leading-snug text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">
-                  {item.descriptor[locale]}
                 </h3>
+                <p className="mt-2 text-lg font-semibold leading-snug text-[var(--casa-ink)]">
+                  {item.descriptor[locale]}
+                </p>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">
                   {item.tagline[locale]}
                 </p>
