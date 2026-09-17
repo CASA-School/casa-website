@@ -1,6 +1,6 @@
 # Published legal wording baseline — 17 September 2026
 
-User instruction: copy the current CASA legal wording first; discuss changes with the legal team later. These changes are local only. Do not push, merge, or deploy without a new instruction.
+User instruction: copy the current CASA legal wording first; discuss changes with the legal team later. The user subsequently authorized push, merge and deployment on 2026-09-17. Deploy to the existing Azure website; public-domain cutover and Microsoft/database activation remain separate work.
 
 ## Sources
 

@@ -2,7 +2,7 @@
 
 Branch: `codex/groups-appointments-test-mail`, based on main `e588d07`.
 
-**Current user instruction: keep fixing locally; do not merge or deploy until everything is done.**
+**2026-09-17 release authorization: user has now requested push, merge and deployment of this version to the existing Azure website.**
 Microsoft activation is deferred; the earlier permission question was not approved.
 
 ## User decisions
