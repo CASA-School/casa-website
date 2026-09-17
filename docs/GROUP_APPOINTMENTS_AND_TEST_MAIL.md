@@ -119,3 +119,8 @@ Sources: [Microsoft Graph sendMail](https://learn.microsoft.com/en-us/graph/api/
   stubbed submission only for the browser receipt test. Actual persistence tested separately above.
 - Microsoft transport requests were mocked in unit tests. Actual inbox delivery remains blocked by
   the unconfigured sender connection; do not describe the mocked result as email delivery.
+
+Verification logs, screenshots and the local concurrency check are archived outside deployment at
+`/Users/rahmanshafiee/Archive/CASA/group-appointments-2026-09-17/`.
+German 320px and English 390px checks showed no horizontal dialog overflow; focus returned to
+the booking button after Escape (after the Radix close animation completed).
