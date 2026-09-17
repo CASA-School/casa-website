@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { CheckCircle2, GraduationCap, Handshake, MessageCircle, Users } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
+import { NonprofitPartnerships } from '@/components/sections/nonprofit-partnerships';
 import { HeroAPhotoLed } from '@/components/heroes';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
@@ -109,35 +110,6 @@ export default async function NonProfitStatusPage() {
           'Kooperationen mit Programmen für akademische und soziale Integration',
           'Tandem, Begegnung und praktische Orientierung über den Unterricht hinaus',
         ],
-        projectTitle: 'Wie Gemeinnützigkeit praktisch sichtbar wird',
-        projectText:
-          'In diesen Bereichen unterstützen wir Menschen beim Lernen, beim Kennenlernen anderer und beim Aufbau eines Lebens in Bremen.',
-        projects: [
-          {
-            title: 'Here Ahead',
-            label: 'Studienvorbereitung',
-            icon: GraduationCap,
-            text: 'Sprachliche und methodische Vorbereitung für internationale Studienbewerberinnen, Studienbewerber und Geflüchtete auf ein Fachstudium in Bremen.',
-          },
-          {
-            title: 'Garantiefonds Hochschule',
-            label: 'Geförderte Bildungswege',
-            icon: Handshake,
-            text: 'Anerkannte Sprachkurse für junge Zugewanderte, die ein Hochschulstudium in Deutschland aufnehmen oder fortsetzen möchten.',
-          },
-          {
-            title: 'Tandem & Begegnung',
-            label: 'Community',
-            icon: MessageCircle,
-            text: 'Kostenfreie Sprachpraxis, kultureller Austausch und persönliche Verbindung zwischen Deutschlernenden und Menschen in Bremen.',
-          },
-          {
-            title: 'Ankommen in Bremen',
-            label: 'Integration',
-            icon: Users,
-            text: 'Orientierung im Alltag, Kulturprogramme und unterstützende Lernräume verbinden Unterricht mit echter gesellschaftlicher Teilhabe.',
-          },
-        ],
       }
     : {
         breadcrumbs: [
@@ -191,35 +163,6 @@ export default async function NonProfitStatusPage() {
           'Preparation for telc certificates and academic language goals',
           'Cooperation with programs for academic and social integration',
           'Tandem, encounter, and practical orientation beyond the classroom',
-        ],
-        projectTitle: 'Where non-profit work becomes practical',
-        projectText:
-          'These are some of the ways we help people learn, make connections and build a life in Bremen.',
-        projects: [
-          {
-            title: 'Here Ahead',
-            label: 'University preparation',
-            icon: GraduationCap,
-            text: 'Language and study-skills preparation for international applicants and refugees planning to study in Bremen.',
-          },
-          {
-            title: 'Garantiefonds Hochschule',
-            label: 'Funded education pathways',
-            icon: Handshake,
-            text: 'Recognized language courses for young migrants who want to begin or continue university studies in Germany.',
-          },
-          {
-            title: 'Tandem & encounter',
-            label: 'Community',
-            icon: MessageCircle,
-            text: 'Free speaking practice, cultural exchange, and personal connection between German learners and people in Bremen.',
-          },
-          {
-            title: 'Settling in Bremen',
-            label: 'Integration',
-            icon: Users,
-            text: 'Daily-life orientation, cultural programming, and supportive learning spaces connect class with real social participation.',
-          },
         ],
       };
 
@@ -382,45 +325,7 @@ export default async function NonProfitStatusPage() {
         </Container>
       </section>
 
-      <section id="integrationsprojekte" className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 py-16 md:py-20">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Wirkung im Alltag' : 'Everyday impact'}
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
-                {copy.projectTitle}
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                {copy.projectText}
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {copy.projects.map((project) => {
-                const Icon = project.icon;
-
-                return (
-                  <article
-                    key={project.title}
-                    className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-card)]"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <Icon className="h-6 w-6 text-[var(--casa-accent-text)]" aria-hidden />
-                      <span className="rounded-full bg-[var(--casa-warm-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-                        {project.label}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 text-xl font-bold text-[var(--casa-ink)]">{project.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{project.text}</p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </Container>
-      </section>
+      <NonprofitPartnerships locale={locale} />
 
       {/*
         No closing CTA band here, deliberately (2026-08-20).
