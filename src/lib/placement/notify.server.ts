@@ -1,29 +1,10 @@
-/**
- * Hands a finished attempt to CASA staff.
- *
- * WHY A WEBHOOK AND NOT A REVIEW QUEUE
- *
- * The upstream package assumes a staff review UI with placement-reviewer roles.
- * `CLAUDE.md` is explicit that this repo must not reintroduce auth, roles, or
- * dashboard surfaces — the portal was removed on purpose. So the division is:
- * the website owns the learner-facing test, the engine, and persistence; the
- * CASA dashboard workspace owns review. This is the seam, and it matches the
- * fan-out idiom the site already uses for contact, careers, and both
- * registration forms.
- *
- * Fire and forget, deliberately. A learner's result must never depend on a
- * downstream system being up: the attempt is already stored and the result page
- * already renders from the database. A failed notification is logged and the
- * attempt is still recoverable by token.
- *
- * SERVER ONLY.
- */
+/** Notify staff after a placement result has been stored; delivery never blocks the result page. */
 
+import { notifyForm } from '@/lib/notifications/forms.server';
 import { getPlacementResultWebhookUrl } from '@/lib/db/env';
 import type { PlacementDecision } from './finalise';
 import type { StoredAttempt } from './repository.server';
 
-const REQUEST_TIMEOUT_MS = 8000;
 
 /**
  * What the dashboard receives.
@@ -95,31 +76,10 @@ export function buildPlacementResultEvent(
   };
 }
 
-/** Sends the event if a webhook is configured. Never throws. */
+/** Delivery never determines whether the learner can see their saved result. */
 export async function notifyPlacementResult(
   attempt: StoredAttempt,
   decision: PlacementDecision
 ): Promise<void> {
-  const webhookUrl = getPlacementResultWebhookUrl();
-  if (!webhookUrl) return;
-
-  try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(buildPlacementResultEvent(attempt, decision)),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Webhook rejected the placement result with status ${response.status}`);
-    }
-  } catch (error) {
-    // Logged, not surfaced. The attempt is stored and the learner has their
-    // result; staff can still find it by token.
-    console.error('[placement] result notification failed', {
-      token: attempt.token,
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
+  await notifyForm('placement', { ...buildPlacementResultEvent(attempt, decision) }, getPlacementResultWebhookUrl());
 }

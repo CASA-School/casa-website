@@ -138,7 +138,7 @@ test('mobile nav language menu opens independently from the close control', asyn
 
 test('hero archetypes map correctly across key public routes', async ({ page }) => {
   /*
-   * TWO TIERS, AND EVERY ROUTE IS IN ONE OF THEM.
+   * Main marketing-page hero tiers.
    *
    * A — the photo-led hero — is every INDEX a visitor reaches from the nav: /,
    * /courses, /exams, /accommodation, /about. /courses/german-for-groups is the
@@ -151,7 +151,8 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
    * pages agree with each other.
    *
    * /team and /ueber-uns/gemeinnuetzigkeit joined A on 2026-09-10, which retired
-   * B. E stays on the utility and legal pages on purpose: a legal page has no
+   * B. Contact uses a compact heading so its form is immediately accessible.
+   * E stays on the other utility and legal pages: a legal page has no
    * photograph to lead with. Listed so a future pass changes this table on
    * purpose, not by accident.
    */
@@ -170,7 +171,6 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
     { route: '/en/accommodation/flat', archetype: 'C' },
     { route: '/en/accommodation/host', archetype: 'C' },
     { route: '/en/accommodation/become-host', archetype: 'C' },
-    { route: '/en/contact', archetype: 'E' },
     { route: '/en/imprint', archetype: 'E' },
   ];
 
@@ -212,7 +212,13 @@ test('legal and utility pages include breadcrumbs and professional shells', asyn
   for (const route of routes) {
     await page.goto(route);
     await expect(page.locator('nav[aria-label="Breadcrumb"]').first()).toBeVisible();
-    await expect(page.locator('section[data-hero-archetype="E"]').first()).toBeVisible();
+    if (route === '/contact') {
+      const formTop = await page.locator('#contact-form').evaluate(element => element.getBoundingClientRect().top);
+      expect(formTop).toBeLessThan(300);
+      await expect(page.locator('main a[href="#contact-form"]')).toHaveCount(0);
+    } else {
+      await expect(page.locator('section[data-hero-archetype="E"]').first()).toBeVisible();
+    }
   }
 });
 

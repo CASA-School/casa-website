@@ -1,10 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { notifyForm } from '@/lib/notifications/forms.server';
 
 import { storeCourseRegistration } from '@/lib/admin/intake';
 
 import { courseRegistrationSubmissionSchema } from '@/lib/validation/registration-submissions';
 
-const REQUEST_TIMEOUT_MS = 8000;
 
 function successMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
@@ -82,54 +82,18 @@ export async function POST(request: NextRequest) {
     locale: payload.locale,
   });
 
-  if (webhookUrl) {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          requestId,
-          submittedAt,
-          ...payload,
-          source: 'registration-course',
-          userAgent: request.headers.get('user-agent') || 'unknown',
-        }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Webhook rejected course registration with status ${response.status}`);
-      }
-    } catch (error) {
-      console.error('[course-registration-api] submission failed', error);
-      return NextResponse.json(
-        {
-          status: 'error',
-          message: failureMessage(payload.locale),
-          supportPath: '/contact?topic=Course advice',
-        },
-        { status: 502 }
-      );
-    }
-  } else {
-    console.info('[course-registration-api] accepted request (preview mode)', {
-      requestId,
-      submittedAt,
-      courseTypeId: payload.courseTypeId,
-      courseInstanceId: payload.courseInstanceId,
-      email: payload.email,
-    });
+  const delivery = await notifyForm('course', {
+    requestId, submittedAt, ...payload, source: 'registration-course',
+  }, webhookUrl);
+  if (!stored && !delivery.delivered) {
+    return NextResponse.json({ status: 'error', message: failureMessage(payload.locale), supportPath: '/contact' }, { status: 503 });
   }
-
-  // Simulate automated confirmation email sending
-  console.info(`[email-service] Simulating automated registration confirmation email sent to: ${payload.email}`);
 
   return NextResponse.json({
     status: 'accepted',
     requestId,
-    mode: webhookUrl ? 'webhook' : 'preview',
+    mode: delivery.delivered ? delivery.channel : 'database',
+    notified: delivery.delivered,
     stored,
     message: successMessage(payload.locale),
   });

@@ -163,7 +163,7 @@ export const OFFICE_CONTACT = {
 } as const;
 
 /** What a card is given: no address, and whether to offer a call. */
-export type ResolvedContact = { name: string; role: string; booking: boolean };
+export type ResolvedContact = { name: string; role: string; booking: boolean; appointment?: 'groups' };
 
 /** Resolves a key to the name on the verified roster plus this surface's role. */
 export function getCasaContact(key: CasaContactKey, locale: ContentLocale): ResolvedContact {
@@ -173,5 +173,6 @@ export function getCasaContact(key: CasaContactKey, locale: ContentLocale): Reso
     name: teamContactById(entry.teamId)?.name ?? OFFICE_CONTACT.name,
     role: entry.role[locale],
     booking: (entry as CasaContact).booking === true,
+    ...(key === 'groups' ? { appointment: 'groups' as const } : {}),
   };
 }

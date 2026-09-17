@@ -3,8 +3,8 @@ export const isDatabaseConfigured = () =>
 
 /**
  * Optional fan-out for group and company briefs. Unset by default: contact
- * submissions then fall back to CONTACT_WEBHOOK_URL, and to preview logging if
- * that is unset too, so fallback mode keeps working.
+ * submissions can use CONTACT_WEBHOOK_URL in live mode. Test mode uses the
+ * shared Microsoft mail boundary and bypasses legacy webhook recipients.
  */
 export const getGroupInquiryWebhookUrl = () => {
   const url = process.env.GROUP_INQUIRY_WEBHOOK_URL;

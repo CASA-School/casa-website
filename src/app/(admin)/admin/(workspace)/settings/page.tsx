@@ -5,6 +5,7 @@ import { Icon } from '@/components/admin/icons';
 import { roleLabel } from '@/components/admin/shell';
 import { Badge, Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { getStaffUser } from '@/lib/admin/auth';
+import { formDeliveryConfig } from '@/lib/notifications/forms.server';
 import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/config/placement/policy';
 
 /**
@@ -22,6 +23,7 @@ import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/confi
  */
 export default async function SettingsPage() {
   const user = await getStaffUser();
+  const delivery = formDeliveryConfig('contact');
 
   if (!user) {
     redirect('/admin/sign-in');
@@ -88,9 +90,20 @@ export default async function SettingsPage() {
           </p>
         </Card>
 
+        <Card title="Website email">
+          <DetailList items={[
+            { label: 'Delivery mode', value: delivery.test ? 'Testing — all forms go to admin@casa-bremen.de' : 'Live — recipients are configured per form' },
+            { label: 'Microsoft 365', value: hasEnv('FORM_MAIL_FROM') && hasEnv('IDENTITY_ENDPOINT') && hasEnv('IDENTITY_HEADER') ? 'Configured — verify mailbox permission and actual delivery' : 'Sender connection not configured' },
+          ]} />
+          <p className="mt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
+            In test mode, legacy webhooks and applicant confirmation emails are disabled.
+            Saved requests remain in the workspace if a notification fails. Check these queues regularly.
+          </p>
+        </Card>
+
         <Card
           title="Integrations"
-          description="Webhooks the public site fires alongside storing a record here. All of them are optional."
+          description="Optional legacy webhooks, used only in live mode when Microsoft email is not configured and a form recipient is set."
         >
           <ul className="divide-y divide-ws-line-soft">
             {integrations.map((integration) => (
@@ -105,7 +118,7 @@ export default async function SettingsPage() {
                   </span>
                 </span>
                 <Badge tone={integration.configured ? 'positive' : 'quiet'}>
-                  {integration.configured ? 'Connected' : 'Not connected'}
+                  {integration.configured ? (delivery.test ? 'Bypassed for testing' : 'Configured') : 'Not configured'}
                 </Badge>
               </li>
             ))}

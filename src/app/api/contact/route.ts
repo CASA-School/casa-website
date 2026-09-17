@@ -1,10 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { notifyForm } from '@/lib/notifications/forms.server';
 
 import { storeEnquiry } from '@/lib/admin/intake';
 import { getGroupInquiryWebhookUrl } from '@/lib/db/env';
 import { contactInquirySchema, organiserBriefFields } from '@/lib/validation/contact';
 
-const REQUEST_TIMEOUT_MS = 8000;
 
 function successMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
@@ -107,61 +107,21 @@ export async function POST(request: NextRequest) {
     userAgent: request.headers.get('user-agent') || null,
   });
 
-  if (webhookUrl) {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          requestId,
-          submittedAt,
-          locale,
-          firstName: payload.firstName,
-          lastName: payload.lastName || null,
-          email: payload.email,
-          topic: payload.topic,
-          topicKey: payload.topicKey || null,
-          message: payload.message,
-          source: payload.source,
-          organiserBrief,
-          userAgent: request.headers.get('user-agent') || 'unknown',
-        }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Webhook rejected contact request with status ${response.status}`);
-      }
-    } catch (error) {
-      console.error('[contact-api] webhook submission failed', error);
-      return NextResponse.json(
-        {
-          status: 'error',
-          message: failureMessage(locale),
-          supportPath: '/contact',
-        },
-        { status: 502 }
-      );
-    }
-  } else {
-    // Keep functional behavior in preview mode while waiting for production integration.
-    console.info('[contact-api] accepted request (preview mode)', {
-      requestId,
-      submittedAt,
-      topic: payload.topic,
-      topicKey: payload.topicKey || null,
-      email: payload.email,
-      source: payload.source,
-      organiserBrief,
-    });
+  const delivery = await notifyForm(organiserBrief ? 'groups' : 'contact', {
+    requestId, submittedAt, locale, firstName: payload.firstName,
+    lastName: payload.lastName || null, email: payload.email,
+    topic: payload.topic, topicKey: payload.topicKey || null,
+    message: payload.message, source: payload.source, organiserBrief,
+  }, webhookUrl);
+  if (!stored && !delivery.delivered) {
+    return NextResponse.json({ status: 'error', message: failureMessage(locale), supportPath: '/contact' }, { status: 503 });
   }
 
   return NextResponse.json({
     status: 'accepted',
     requestId,
-    mode: webhookUrl ? 'webhook' : 'preview',
+    mode: delivery.delivered ? delivery.channel : 'database',
+    notified: delivery.delivered,
     stored,
     message: successMessage(locale),
   });

@@ -1,26 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, Loader2, MessageCircle, Send } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-/*
- * From its own module, NOT the `@/components/sections` barrel.
- *
- * This is a client component, and the barrel re-exports `proof-band`, which
- * imports the content repository, which imports the database client. Pulling
- * the barrel therefore asked the bundler to put a Postgres driver in the
- * browser bundle. It survived while the driver was Neon's HTTP client, which
- * happens to resolve in a browser target; it broke the build the moment the
- * driver became `pg`, whose `util/types` require has no browser equivalent.
- *
- * A barrel that mixes server and client modules cannot be imported from a
- * client component at all. Import the leaf.
- */
-import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
+import { Link } from '@/i18n/navigation';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
@@ -102,8 +89,8 @@ const initialFields = {
 
 const fieldGroupClassName = 'space-y-1.5';
 const inputClassName =
-  'h-11 data-[size=default]:h-11 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const labelTextClassName = 'block text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]';
+  'h-12 data-[size=default]:h-12 rounded-lg border border-[color:var(--casa-muted)] bg-white px-3.5 text-base md:text-base text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-colors focus-visible:border-[var(--casa-accent-text)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/25 focus-visible:ring-offset-0';
+const labelTextClassName = 'block text-sm font-semibold text-[var(--casa-ink)]';
 
 type OrganiserChoiceField = keyof typeof ORGANISER_CHOICES;
 
@@ -418,21 +405,6 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
 }
 
 export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: ContactInquiryFormProps) {
-  const promptIdeas =
-    locale === 'de'
-      ? [
-          'Ich suche einen Intensivkurs und brauche ein Startdatum.',
-          'Ich bin unsicher zwischen Abendkurs und Intensivkurs.',
-          'Ich möchte mich für eine telc-Prüfung anmelden.',
-          'Ich benötige Hilfe bei Unterkunft in Bremen.',
-        ]
-      : [
-          'I need an intensive course and the next available start date.',
-          'I am deciding between evening and intensive format.',
-          'I want to register for a telc exam and need deadlines.',
-          'I need accommodation support in Bremen.',
-        ];
-
   const topicOptions = useMemo(() => topics.filter((option) => option.key && option.label), [topics]);
   const preferredTopic = useMemo(() => {
     if (!topicOptions.length) {
@@ -454,6 +426,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof typeof initialFields, string>>>({});
+  const [briefOpen, setBriefOpen] = useState(false);
   const messageLength = fields.message.trim().length;
 
   const activeTopicKey = fields.topic || preferredTopic;
@@ -470,24 +443,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     }));
   };
 
-  const addPromptIdea = (value: string) => {
-    setFields((current) => {
-      const nextMessage = current.message.trim()
-        ? `${current.message.trim()}\n\n${value}`
-        : value;
-
-      return {
-        ...current,
-        message: nextMessage,
-      };
-    });
-  };
-
   const resetForm = () => {
     setFields({
       ...initialFields,
       topic: preferredTopic,
     });
+    setBriefOpen(false);
     setStatus('idle');
     setFeedbackMessage('');
     setFieldErrors({});
@@ -496,6 +457,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (status === 'submitting') return;
+    const form = event.currentTarget;
     setStatus('submitting');
     setFeedbackMessage('');
     setRequestId(null);
@@ -527,12 +490,23 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       for (const issue of parsed.error.issues) {
         const key = issue.path[0] as keyof typeof initialFields | undefined;
         if (key && !nextErrors[key]) {
-          nextErrors[key] = issue.message;
+          nextErrors[key] = locale === 'de'
+            ? ({
+                firstName: 'Bitte geben Sie Ihren Vornamen an (mindestens 2 Zeichen).',
+                email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+                message: 'Bitte schreiben Sie eine kurze Nachricht (12–3000 Zeichen).',
+                topic: 'Bitte wählen Sie ein Thema aus.',
+              } as Partial<Record<keyof typeof initialFields, string>>)[key] ?? 'Bitte prüfen Sie diese Angabe.'
+            : issue.message;
         }
       }
 
       setFieldErrors(nextErrors);
-      setFeedbackMessage(parsed.error.issues[0]?.message || copy.errorBody);
+      setFeedbackMessage(Object.values(nextErrors)[0] || copy.errorBody);
+      requestAnimationFrame(() => {
+        const firstInvalid = Object.keys(nextErrors)[0];
+        form.querySelector<HTMLElement>(`[id="${firstInvalid}"]`)?.focus();
+      });
       setStatus('error');
       trackCasaEvent('form_error', {
         form: 'contact_inquiry',
@@ -592,20 +566,16 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     <section
       id="contact-form-panel"
       data-track-section="contact-form"
-      className="relative overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-6 shadow-[var(--shadow-card)] sm:p-10"
+      className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-5 sm:p-8 lg:p-10"
     >
 
-      <div className="mb-8 border-b border-[color:var(--casa-sand)]/70 pb-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-          <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-          {locale === 'de' ? 'CASA-Beratung' : 'CASA admissions'}
-        </div>
-        <h2 className="mt-4 text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
-        <p className="mt-2 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">{copy.formBody}</p>
+      <div className="mb-7">
+        <h2 className="text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
+        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{copy.formBody}</p>
       </div>
 
       {status === 'success' ? (
-        <div className="space-y-4 rounded-3xl border border-[color:var(--casa-success-surface)]/30 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--casa-success-surface)_8%,white)_0%,var(--casa-bg)_100%)] p-6 shadow-[0_20px_45px_-36px_rgba(16,185,129,0.7)]" role="status" aria-live="polite">
+        <div className="space-y-5 border-t border-[color:var(--casa-sand)] pt-6" role="status" aria-live="polite">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--casa-success-surface)] text-white">
               <CheckCircle2 className="h-5 w-5" aria-hidden />
@@ -615,28 +585,11 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               <p className="mt-1 text-sm text-[var(--casa-success-text)]">{feedbackMessage || copy.successBody}</p>
               {requestId ? (
                 <p className="mt-2 text-xs font-medium text-[var(--casa-success-text)]">
-                  Request ID: <span className="font-mono">{requestId}</span>
+                  {locale === 'de' ? 'Ihre Referenz' : 'Your reference'}: <span className="break-all font-mono">{requestId}</span>
                 </p>
               ) : null}
             </div>
           </div>
-          <NextStepsTimeline
-            title={locale === 'de' ? 'Was als Nächstes passiert' : 'What happens next'}
-            steps={
-              locale === 'de'
-                ? [
-                    { title: 'Teamprüfung', description: 'Wir prüfen Ihre Anfrage und priorisieren nach Thema.' },
-                    { title: 'Rückmeldung', description: 'Sie erhalten eine Antwort meist innerhalb eines Werktags.' },
-                    { title: 'Nächster Schritt', description: 'Wir senden eine klare Empfehlung zu Kurs, Prüfung oder Unterkunft.' },
-                  ]
-                : [
-                    { title: 'Team review', description: 'Our team reviews your request and prioritizes by topic.' },
-                    { title: 'Reply', description: 'You usually receive a response within one business day.' },
-                    { title: 'Next action', description: 'We send a clear recommendation for course, exam, or accommodation.' },
-                  ]
-            }
-            className="border-[color:var(--casa-success-surface)]/30"
-          />
           <Button type="button" variant="outline" className="border-[color:var(--casa-success-surface)]/40 bg-white" onClick={resetForm}>
             {copy.sendAnother}
           </Button>
@@ -644,7 +597,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       ) : (
         <form
           id="contact-form-submit"
-          className="grid gap-6 sm:grid-cols-2"
+          className="grid gap-x-5 gap-y-6 sm:grid-cols-2"
           onSubmit={submit}
           noValidate
           data-casa-track-form="contact_inquiry"
@@ -656,10 +609,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             <Input
               required
               id="firstName"
+              autoComplete="given-name"
               className={inputClassName}
               value={fields.firstName}
               placeholder={copy.firstNamePlaceholder}
               aria-invalid={Boolean(fieldErrors.firstName)}
+              aria-describedby={fieldErrors.firstName ? 'firstName-error' : undefined}
               onChange={(event) =>
                 setFields((current) => ({
                   ...current,
@@ -667,7 +622,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.firstName ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.firstName}</p> : null}
+            {fieldErrors.firstName ? <p id="firstName-error" className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.firstName}</p> : null}
           </div>
 
           <div className={fieldGroupClassName}>
@@ -676,10 +631,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             </label>
             <Input
               id="lastName"
+              autoComplete="family-name"
               className={inputClassName}
               value={fields.lastName}
               placeholder={copy.lastNamePlaceholder}
               aria-invalid={Boolean(fieldErrors.lastName)}
+              aria-describedby={fieldErrors.lastName ? 'lastName-error' : undefined}
               onChange={(event) =>
                 setFields((current) => ({
                   ...current,
@@ -687,7 +644,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.lastName ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.lastName}</p> : null}
+            {fieldErrors.lastName ? <p id="lastName-error" className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.lastName}</p> : null}
           </div>
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
@@ -697,12 +654,14 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             <Input
               required
               id="email"
+              autoComplete="email"
               type="email"
               inputMode="email"
               className={inputClassName}
               value={fields.email}
               placeholder={copy.emailPlaceholder}
               aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
               onChange={(event) =>
                 setFields((current) => ({
                   ...current,
@@ -710,7 +669,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.email ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.email}</p> : null}
+            {fieldErrors.email ? <p id="email-error" className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.email}</p> : null}
           </div>
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
@@ -758,8 +717,17 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
           </p>
 
           {showBrief ? (
-            <fieldset className="sm:col-span-2 rounded-xl border border-[color:var(--casa-sand)] bg-white/70 p-5 sm:p-6">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+            <details
+              className="sm:col-span-2 border-y border-[color:var(--casa-sand)] py-4"
+              open={briefOpen || organiserBriefFields(activeTopicKey).some(name => Boolean(fieldErrors[name]))}
+              onToggle={event => setBriefOpen(event.currentTarget.open)}
+            >
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--casa-ink)] focus-visible:outline-2 focus-visible:outline-[var(--casa-blue)]">
+                {locale === 'de' ? 'Weitere Angaben ergänzen (optional)' : 'Add a few details (optional)'}
+              </summary>
+              <fieldset className="mt-5">
+
+              <legend className="sr-only">
                 {briefLegend}
               </legend>
               <p className="mt-1 text-xs leading-relaxed text-[var(--casa-muted)]">{briefCopy.intro}</p>
@@ -903,7 +871,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                   </>
                 )}
               </div>
-            </fieldset>
+              </fieldset>
+            </details>
           ) : null}
 
           <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
@@ -911,27 +880,11 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               {copy.messageLabel} <span className="text-[var(--casa-coral-text)]">*</span>
             </label>
             
-            {/* suggestions */}
-            <div className="flex flex-wrap items-center gap-1.5 py-1">
-              <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                {locale === 'de' ? 'Schnellstart:' : 'Prompts:'}
-              </span>
-              {promptIdeas.map((idea) => (
-                <button
-                  key={idea}
-                  type="button"
-                  onClick={() => addPromptIdea(idea)}
-                  className="rounded-full border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] hover:bg-[var(--casa-warm-soft)]/35 hover:border-[var(--casa-blue)]/20 px-2.5 py-1 text-xs font-semibold text-[var(--casa-muted)] transition-colors cursor-pointer"
-                >
-                  + {idea.split(' ').slice(0, 3).join(' ')}...
-                </button>
-              ))}
-            </div>
-
             <Textarea
               required
               id="message"
               rows={5}
+              maxLength={3000}
               className={cn(
                 inputClassName,
                 'min-h-[140px] py-3 resize-y'
@@ -939,6 +892,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               value={fields.message}
               placeholder={copy.messagePlaceholder}
               aria-invalid={Boolean(fieldErrors.message)}
+              aria-describedby={fieldErrors.message ? 'message-error' : undefined}
               onChange={(event) =>
                 setFields((current) => ({
                   ...current,
@@ -947,12 +901,10 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               }
             />
             <div className="flex justify-between items-center mt-1">
-              {fieldErrors.message ? <p className="text-xs text-[var(--casa-danger-text)]">{fieldErrors.message}</p> : <div />}
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                {locale === 'de'
-                  ? `${messageLength}/3000 Zeichen`
-                  : `${messageLength}/3000 characters`}
-              </p>
+              {fieldErrors.message ? <p id="message-error" className="text-xs text-[var(--casa-danger-text)]">{fieldErrors.message}</p> : <div />}
+              {messageLength >= 2700 && <p className="text-xs text-[var(--casa-muted)]">
+                {messageLength}/3000
+              </p>}
             </div>
           </div>
 
@@ -971,12 +923,16 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             aria-hidden="true"
           />
 
-          <div className="sm:col-span-2 pt-2">
+          <div className="sm:col-span-2 flex flex-col gap-4 border-t border-[color:var(--casa-sand)] pt-6">
+            <p className="text-xs leading-relaxed text-[var(--casa-muted)]">
+              {locale === 'de' ? '* Pflichtfelder. Wie wir Ihre Daten verarbeiten, erfahren Sie in unseren ' : '* Required fields. Read how we handle your information in our '}
+              <Link href="/privacy" className="underline underline-offset-4">{locale === 'de' ? 'Datenschutzhinweisen' : 'privacy notice'}</Link>.
+            </p>
             <Button
               type="submit"
-              variant="prism"
+              variant="default"
               disabled={status === 'submitting'}
-              className="h-11 w-full rounded-lg px-6 font-semibold text-white sm:w-auto shadow-[var(--shadow-card)] shadow-[var(--casa-ink-deep)]/10"
+              className="h-12 w-full rounded-lg bg-[var(--casa-ink-deep)] px-7 font-semibold text-white sm:w-auto sm:self-start"
               data-casa-track="true"
               data-casa-label={copy.submit}
             >

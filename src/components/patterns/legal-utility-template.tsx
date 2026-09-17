@@ -1,73 +1,29 @@
-import type { ReactNode } from 'react';
-
 import { HeroEMinimal } from '@/components/heroes';
-import { LegalAnchorLayout, type LegalAnchorSection } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
-import type { HeroSpec } from '@/lib/content/types';
-import { type BreadcrumbItem } from '@/components/patterns/breadcrumbs';
-
-type LegalSection = {
-  title: string;
-  body: string[];
-};
+import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
+import publishedLegal from '@/lib/content/published-legal.json';
 
 type LegalUtilityTemplateProps = {
-  hero: HeroSpec;
+  document: keyof typeof publishedLegal;
+  locale: 'de' | 'en';
   breadcrumbs: BreadcrumbItem[];
-  sections: LegalSection[];
-  notice?: string;
-  afterContent?: ReactNode;
 };
 
-function toAnchorSections(sections: LegalSection[]): LegalAnchorSection[] {
-  return sections.map((section) => ({
-    id: section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    title: section.title,
-    paragraphs: section.body,
-  }));
-}
-
-export function LegalUtilityTemplate({ hero, breadcrumbs, sections, notice, afterContent }: LegalUtilityTemplateProps) {
-  const primaryAction = hero.ctas.find((cta) => cta.kind === 'primary') ?? hero.ctas[0];
-  const anchorSections = toAnchorSections(sections);
+export function LegalUtilityTemplate({ document, locale, breadcrumbs }: LegalUtilityTemplateProps) {
+  const content = publishedLegal[document][locale];
 
   return (
     <main className="bg-[var(--casa-bg)] text-[var(--casa-ink)] print:bg-white">
-      <HeroEMinimal
-        eyebrow={hero.eyebrow}
-        title={hero.headline}
-        description={hero.subheadline}
-        breadcrumbs={breadcrumbs}
-        cta={primaryAction}
-        meta={hero.proofMetrics.slice(0, 2).map((item) => `${item.value} ${item.label}`)}
-      />
-
+      <HeroEMinimal eyebrow="" description="" title={content.title} breadcrumbs={breadcrumbs} />
       <section className="py-10 md:py-12 print:py-4">
-        <Container className="space-y-6">
-          <figure className="overflow-hidden rounded-3xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 print:hidden">
-            <div
-              role="img"
-              aria-label="CASA Bremen exterior sign at the school entrance"
-              className="h-64 bg-cover bg-center md:h-80"
-              style={{
-                backgroundImage: "url('/media/casa/school-entrance-sign.jpg')",
-              }}
-            />
-          </figure>
-
-          <LegalAnchorLayout
-            title="Print-friendly legal layout"
-            intro="Section anchors and typographic rhythm are structured for screen reading and printing."
-            sections={anchorSections}
+        <Container>
+          {/* Only the checked-in, allowlisted HTML snapshot is rendered here.
+              Never pass form data, CMS HTML, or a runtime fetch to this sink. */}
+          <article
+            data-published-legal={document}
+            className="mx-auto max-w-4xl space-y-5 break-words rounded-2xl bg-white p-6 text-base leading-relaxed shadow-[var(--shadow-soft)] md:p-10 print:p-0 print:shadow-none [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_p]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-3 [&_a]:text-[var(--casa-accent-text)] [&_a]:underline [&_a]:underline-offset-4"
+            dangerouslySetInnerHTML={{ __html: content.html }}
           />
-
-          {notice ? (
-            <div className="rounded-xl border border-[var(--casa-amber)]/45 bg-[var(--casa-warm-soft)]/60 p-5 text-sm leading-relaxed text-[var(--casa-ink)] print:border-[color:var(--casa-sand)] print:bg-white">
-              {notice}
-            </div>
-          ) : null}
-
-          {afterContent}
         </Container>
       </section>
     </main>
