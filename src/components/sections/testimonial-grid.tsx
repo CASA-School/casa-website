@@ -1,7 +1,7 @@
 'use client';
 
 import { CasaImage as Image } from '@/components/ui/casa-image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -42,44 +42,9 @@ type TestimonialGridProps = {
   locale?: ContentLocale;
 };
 
-function FeaturedQuoteTile({
-  quote,
-  person,
-  role,
-  locale,
-}: {
-  quote: string;
-  person: string;
-  role: string;
-  locale: ContentLocale;
-}) {
-  return (
-    <article className="h-full rounded-xl bg-[color:var(--casa-warm-soft)] p-6 shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)] md:p-8">
-      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-        {locale === 'de' ? 'Ausgewählte Stimme' : 'Featured story'}
-      </p>
-      <span className="casa-tricolor-rule mt-3 block h-1 w-20 rounded-full" aria-hidden />
-      {/*
-        `text-lg md:text-xl` is a step up from the grid tiles on purpose — this is
-        the featured voice. It used to be unbounded, so a 290-character quote set
-        at 20px filled eleven lines and made the tile twice the height of the two
-        cards beside it. Quotes are trimmed to ~170 characters in the content layer
-        now; the clamp is the backstop for the day someone adds a longer one.
-      */}
-      <blockquote className="mt-4 line-clamp-6 text-lg leading-relaxed text-[var(--casa-ink)] md:text-xl">
-        &quot;{quote}&quot;
-      </blockquote>
-      <div className="mt-6 space-y-1">
-        <p className="text-sm font-semibold text-[var(--casa-ink)]">{person}</p>
-        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{role}</p>
-      </div>
-    </article>
-  );
-}
-
 function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: ContentLocale }) {
   return (
-    <article className="group h-full overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 transition-transform hover:-translate-y-0.5">
+    <article className="group overflow-hidden rounded-xl bg-white shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]/70 ">
       {card.photoSrc ? (
         <figure>
           <div className="casa-media-overlay relative h-52 md:h-56">
@@ -107,13 +72,7 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
         <span aria-hidden className="block text-3xl leading-none text-[var(--casa-accent-text)]">
           &ldquo;
         </span>
-        {/*
-          No min-height. It existed to stop tiles of wildly different lengths from
-          collapsing at different heights; with excerpts in a 100-170 character
-          band the grid's own stretch alignment handles that, and the min-height
-          only added dead space under the short ones. The clamp stays as a backstop.
-        */}
-        <p className={cn('text-[0.95rem] leading-relaxed text-[var(--casa-ink)] md:text-base', card.photoSrc ? 'line-clamp-5' : 'line-clamp-6')}>
+        <p className="text-base leading-relaxed text-[var(--casa-ink)]">
           {card.quote}
         </p>
         <footer className="text-xs font-semibold text-[var(--casa-muted)]">
@@ -125,122 +84,112 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
 }
 
 export function TestimonialGrid({ title, description, cards, featuredQuote, className, locale = 'en' }: TestimonialGridProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [page, setPage] = useState(0);
-  /*
-   * Fill the row.
-   *
-   * This was a flat `isMobile ? 1 : 2`, which is right when a featured tile takes
-   * the third column and wrong when there isn't one: a course page with three
-   * cards and three columns still rendered two and hid the third behind a pager,
-   * next to an empty column. Nobody clicks to page two of a testimonial carousel
-   * to see a card that would have fitted on screen.
-   */
-  const pageSize = isMobile ? 1 : featuredQuote ? 2 : 3;
-  const pageCount = Math.max(1, Math.ceil(cards.length / pageSize));
-  const clampedPage = Math.min(page, pageCount - 1);
+  const headingId = useId();
+  const track = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [perView, setPerView] = useState(1);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(true);
+  const [inView, setInView] = useState(false);
+  const [tabVisible, setTabVisible] = useState(true);
+  const stories = useMemo(() => {
+    if (!featuredQuote || cards.some(card => card.person === featuredQuote.person && card.quote === featuredQuote.quote)) return cards;
+    return [...cards, { id: 'featured-voice', person: featuredQuote.person, country: featuredQuote.role, quote: featuredQuote.quote }];
+  }, [cards, featuredQuote]);
+  const last = Math.max(0, stories.length - perView);
+  const current = Math.min(active, last);
+  const de = locale === 'de';
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
-    const applyViewport = () => setIsMobile(mediaQuery.matches);
-    applyViewport();
-    mediaQuery.addEventListener('change', applyViewport);
-
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updateMotion = () => setReducedMotion(motion.matches);
+    const updateVisibility = () => setTabVisible(!document.hidden);
+    const element = track.current;
+    if (!element) return;
+    const updateSize = () => {
+      const first = element.firstElementChild as HTMLElement | null;
+      if (first) setPerView(Math.max(1, Math.round(element.clientWidth / first.getBoundingClientRect().width)));
+    };
+    const resize = new ResizeObserver(updateSize);
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.5 });
+    resize.observe(element);
+    observer.observe(element);
+    updateMotion();
+    updateVisibility();
+    updateSize();
+    motion.addEventListener('change', updateMotion);
+    document.addEventListener('visibilitychange', updateVisibility);
     return () => {
-      mediaQuery.removeEventListener('change', applyViewport);
+      resize.disconnect();
+      observer.disconnect();
+      motion.removeEventListener('change', updateMotion);
+      document.removeEventListener('visibilitychange', updateVisibility);
     };
   }, []);
 
-  const visibleCards = useMemo(() => {
-    const start = clampedPage * pageSize;
-    return cards.slice(start, start + pageSize);
-  }, [cards, clampedPage, pageSize]);
+  function goTo(index: number) {
+    const element = track.current;
+    const child = element?.children[index] as HTMLElement | undefined;
+    if (element && child) element.scrollTo({ left: child.offsetLeft, behavior: reducedMotion ? 'instant' : 'smooth' });
+  }
 
-  const canGoPrevious = clampedPage > 0;
-  const canGoNext = clampedPage < pageCount - 1;
+  useEffect(() => {
+    if (!last || paused || hovered || focused || reducedMotion || !inView || !tabVisible) return;
+    const timer = window.setInterval(() => {
+      const element = track.current;
+      const child = element?.children[current >= last ? 0 : current + 1] as HTMLElement | undefined;
+      if (element && child) element.scrollTo({ left: child.offsetLeft, behavior: 'smooth' });
+    }, 9000);
+    return () => window.clearInterval(timer);
+  }, [current, last, paused, hovered, focused, reducedMotion, inView, tabVisible]);
+
+  const controlClass = 'inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-bg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--casa-blue)]';
 
   return (
-    /*
-      No shell. This was a white card with a hairline and a shadow whose only
-      contents were three more white cards with hairlines and shadows — the
-      clearest instance of the card-in-card nesting measured across the course
-      pages, and it renders on the homepage too. The cards are the cards.
-    */
-    <section data-reveal="true" className={cn(className)}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <section
+      data-reveal="true"
+      aria-labelledby={headingId}
+      aria-roledescription={de ? 'Karussell' : 'carousel'}
+      className={cn(className)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}
+    >
+      <div className="flex flex-wrap items-end justify-between gap-5">
         <div>
-          {/*
-            "STORIES" in capitals above a heading that already reads "How
-            learners describe this course" is the label describing the CMS field
-            rather than telling the reader anything (copy review §A6). The
-            accent rule stays — it is the one mark that opens the section.
-          */}
           <span className="casa-tricolor-rule block h-1 w-24 rounded-full" aria-hidden />
-          <h2 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+          <h2 id={headingId} className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
           <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
         </div>
-
-        {pageCount > 1 ? (
+        {last > 0 && (
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => canGoPrevious && setPage((current) => current - 1)}
-              disabled={!canGoPrevious}
-              aria-label={locale === 'de' ? 'Vorherige Stimmen' : 'Previous stories'}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--casa-sand)] text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)] disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="text-xs font-semibold text-[var(--casa-muted)]">
-              {clampedPage + 1} / {pageCount}
-            </span>
-            <button
-              type="button"
-              onClick={() => canGoNext && setPage((current) => current + 1)}
-              disabled={!canGoNext}
-              aria-label={locale === 'de' ? 'Nächste Stimmen' : 'Next stories'}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--casa-sand)] text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)] disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="mt-6">
-        {isMobile ? (
-          <div className="space-y-4">
-            {visibleCards.map((card) => (
-              <TestimonialTile key={card.id} card={card} locale={locale} />
-            ))}
-            {featuredQuote ? (
-              <FeaturedQuoteTile
-                quote={featuredQuote.quote}
-                person={featuredQuote.person}
-                role={featuredQuote.role}
-                locale={locale}
-              />
-            ) : null}
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {visibleCards.map((card) => (
-              <TestimonialTile key={card.id} card={card} locale={locale} />
-            ))}
-            {featuredQuote ? (
-              <FeaturedQuoteTile
-                quote={featuredQuote.quote}
-                person={featuredQuote.person}
-                role={featuredQuote.role}
-                locale={locale}
-              />
-            ) : null}
+            {!reducedMotion && <button type="button" className={cn(controlClass, 'w-auto px-3 text-xs font-semibold')} onClick={() => setPaused(value => !value)} aria-label={paused ? (de ? 'Automatischen Wechsel starten' : 'Start automatic rotation') : (de ? 'Automatischen Wechsel pausieren' : 'Pause automatic rotation')}>
+              {paused ? (de ? 'Abspielen' : 'Play') : 'Pause'}
+            </button>}
+            <button type="button" className={controlClass} aria-label={de ? 'Vorherige Stimmen' : 'Previous stories'} onClick={() => { setPaused(true); goTo(current <= 0 ? last : current - 1); }}><ChevronLeft className="h-4 w-4" /></button>
+            <span className="min-w-10 text-center text-xs font-semibold tabular-nums text-[var(--casa-muted)]">{current + 1} / {last + 1}</span>
+            <button type="button" className={controlClass} aria-label={de ? 'Nächste Stimmen' : 'Next stories'} onClick={() => { setPaused(true); goTo(current >= last ? 0 : current + 1); }}><ChevronRight className="h-4 w-4" /></button>
           </div>
         )}
+      </div>
+      <div
+        ref={track}
+        className="relative mt-5 flex snap-x snap-mandatory items-start gap-4 overflow-x-auto overscroll-x-contain px-1 pb-5 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onPointerDown={() => setPaused(true)}
+        onScroll={() => {
+          const element = track.current;
+          const first = element?.firstElementChild as HTMLElement | undefined;
+          if (element && first) setActive(Math.round(element.scrollLeft / (first.getBoundingClientRect().width + 16)));
+        }}
+      >
+        {stories.map((card, index) => (
+          <div key={card.id} role="group" aria-roledescription={de ? 'Stimme' : 'slide'} aria-label={`${index + 1} / ${stories.length}`} className="min-w-0 shrink-0 basis-full snap-start md:basis-[calc((100%-1rem)/2)] xl:basis-[calc((100%-2rem)/3)]">
+            <TestimonialTile card={card} locale={locale} />
+          </div>
+        ))}
       </div>
     </section>
   );
