@@ -188,6 +188,11 @@ export const photoSlots: PhotoSlot[] = [
   // ---- Append new photographs below this line, next number, never resort --
   { n: 44, src: '/media/casa/casa-building-golden.webp', subject: 'CASA building in golden evening light. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
   { n: 45, src: '/media/casa/casa-building-daylight.webp', subject: 'CASA building in clear daylight. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
+  { n: 46, src: '/media/casa/reel-learning-together-wide.webp', subject: 'Three learners enjoying a classroom exercise. User-requested AI expansion and lighting edit of collection frame 085 for the local hero reel, 2026-09-21.', ready: true },
+  { n: 47, src: '/media/casa/reel-language-practice-wide.webp', subject: 'Two learners working with a coursebook. User-requested AI expansion and lighting edit of collection frame 021 for the local hero reel, 2026-09-21.', ready: true },
+  { n: 48, src: '/media/casa/reel-garden-gathering-wide.webp', subject: 'A cheerful gathering in the leafy courtyard. User-requested AI expansion and lighting edit of collection frame 095 for the local hero reel, 2026-09-21.', ready: true },
+  { n: 49, src: '/media/casa/reel-building-golden-wide.webp', subject: 'Full CASA facade in golden evening light. AI panorama expanded from the supplied portrait image, explicitly requested for local preview on 2026-09-21; peripheral surroundings are generated.', ready: true },
+  { n: 50, src: '/media/casa/reel-walking-bremen-wide.webp', subject: 'Students walking together. User-requested AI expansion and lighting edit of the original slot 23 photograph for the local hero reel, 2026-09-21.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

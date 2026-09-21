@@ -482,6 +482,24 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     aspectRatio: '4 / 3',
     objectPosition: '50% 27%',
   },
+  reelLearning: {
+    src: '/media/casa/reel-learning-together-wide.webp',
+    alt: { de: 'Drei Lernende lachen gemeinsam bei einer Aufgabe im Deutschkurs', en: 'Three learners sharing a laugh while working on a German exercise' },
+    caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
+    objectPosition: '50% 50%',
+  },
+  reelPractice: {
+    src: '/media/casa/reel-language-practice-wide.webp',
+    alt: { de: 'Zwei Lernende arbeiten gemeinsam mit ihrem Deutschbuch', en: 'Two learners working together with their German coursebook' },
+    caption: { de: 'Miteinander weiterkommen', en: 'Making progress together' },
+    objectPosition: '50% 50%',
+  },
+  reelCommunity: {
+    src: '/media/casa/reel-garden-gathering-wide.webp',
+    alt: { de: 'Eine fröhliche Runde im grünen CASA-Innenhof', en: 'A cheerful gathering in CASA’s leafy courtyard' },
+    caption: { de: 'Menschen, die CASA ausmachen', en: 'The people who make CASA' },
+    objectPosition: '50% 50%',
+  },
 };
 
 export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
@@ -503,8 +521,22 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Talk to an advisor', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
-      // User-selected building image, 2026-09-21. Keep the entire facade in view.
-      hero: photoLibrary.buildingGolden,
+      // User-requested imagegen expansion; keep the complete facade in the reel.
+      hero: {
+        ...photoLibrary.buildingGolden,
+        src: '/media/casa/reel-building-golden-wide.webp',
+        aspectRatio: '12 / 5',
+        objectPosition: '50% 50%',
+      },
+      reelLearning: photoLibrary.reelLearning,
+      reelPractice: photoLibrary.reelPractice,
+      reelCommunity: photoLibrary.reelCommunity,
+      reelBremen: {
+        ...photoLibrary.groupCourseWalking,
+        src: '/media/casa/reel-walking-bremen-wide.webp',
+        caption: { de: 'Bremen gemeinsam entdecken', en: 'Discovering Bremen together' },
+        objectPosition: '50% 50%',
+      },
       story: photoLibrary.groupCourseLunch,
       /*
         The four flagship course rows, matched to what each format actually is

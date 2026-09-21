@@ -1,4 +1,10 @@
 import type { BreadcrumbItem } from '@/components/patterns/breadcrumbs';
+import type { ContentLocale } from '@/lib/content/types';
+import { Link } from '@/i18n/navigation';
+import { Button } from '@/components/ui/button';
+import { Container } from '@/components/ui/container';
+import { HeroPhotoReel } from './hero-photo-reel';
+import reelStyles from './hero-photo-reel.module.css';
 
 import { HeroBleedPhoto, HeroLede, HeroSurface, type HeroAction, type HeroFact, type HeroPhoto, type HeroProofItem } from './shared';
 
@@ -8,6 +14,8 @@ type HeroHomePhotoProps = {
   description: string;
   ctas: HeroAction[];
   photo: HeroPhoto;
+  reelPhotos?: HeroPhoto[];
+  locale?: ContentLocale;
   facts?: HeroFact[];
   proofItems?: HeroProofItem[];
   themeClassName?: string;
@@ -48,10 +56,32 @@ export function HeroHomePhoto({
   description,
   ctas,
   photo,
+  reelPhotos,
+  locale = 'en',
   facts,
   themeClassName = 'hero-theme-plain',
   breadcrumbs,
 }: HeroHomePhotoProps) {
+  if (reelPhotos?.length) {
+    const primaryCta = ctas[0];
+    return (
+      <section data-hero-archetype="A" className="pt-3 sm:pt-4" data-reveal-disabled="true">
+        <Container>
+          <HeroPhotoReel photos={reelPhotos} locale={locale}>
+            <div className={reelStyles.lede}>
+              <h1>{title}</h1>
+              {primaryCta && (
+                <Button asChild data-casa-track="true" data-casa-label={primaryCta.label}>
+                  <Link href={primaryCta.href}>{primaryCta.label}</Link>
+                </Button>
+              )}
+            </div>
+          </HeroPhotoReel>
+        </Container>
+      </section>
+    );
+  }
+
   return (
     <HeroSurface
       themeClassName={themeClassName}

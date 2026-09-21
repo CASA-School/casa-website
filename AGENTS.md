@@ -30,6 +30,7 @@ Project-specific operating rules for coding agents in this repository.
 - Keep icon usage aligned with `lucide-react` and `src/config/icon-map.ts`.
 - Preserve established spacing/radius/typography conventions (`Container`, radius tokens, heading styles).
 - Respect reduced-motion behavior and existing focus-visible patterns.
+- Art-direct photographs for phone, tablet and desktop. Preserve complete subjects and important building/signage details; do not force every source into the same crop. Check each scene at multiple widths and during motion, with text kept clear of faces. User preference confirmed 2026-09-21; see `docs/MEDIA_LIBRARY.md`.
 
 ## 5) Data and API Rules
 - Keep API response envelope shape: `{ data, error }`.
