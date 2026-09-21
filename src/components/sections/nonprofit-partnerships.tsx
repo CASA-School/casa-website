@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { NonprofitProjectTabs } from './nonprofit-project-tabs';
 import { Container } from '@/components/ui/container';
 import type { ContentLocale } from '@/lib/content/types';
 
@@ -9,7 +10,6 @@ const schools = [
   { name: 'Escuela Montalbán', city: 'Granada', logo: 'granada.png', href: 'https://www.escuela-montalban.com/' },
 ];
 const gfhUrl = 'https://www.bildungsberatung-gfh.de/wde/beratung-und-foerderung/foerderung-nach-gfh.php';
-const obsUrl = 'https://www.obs-ev.de/akademische-qualifizierung/garantiefonds-hochschule-2022/wie-kann-ich-mich-anmelden';
 const linkClass = 'rounded-sm text-[var(--casa-accent-text)] underline decoration-[var(--casa-blue)]/30 underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]';
 
 export function NonprofitPartnerships({ locale }: { locale: ContentLocale }) {
@@ -40,51 +40,35 @@ export function NonprofitPartnerships({ locale }: { locale: ContentLocale }) {
 
   return (
     <>
-      <section id="integrationsprojekte" className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/50 py-14 md:py-20">
-        <Container>
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{de ? 'Bildung verbindet' : 'Education brings us together'}</p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">{de ? 'Gemeinsam Perspektiven eröffnen' : 'Opening doors together'}</h2>
-            <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{de ? 'Mit unseren Kooperationspartnern begleiten wir Menschen auf ihrem Weg ins Studium. Sprachunterricht, Vorbereitung und Beratung greifen dabei ineinander.' : 'Together with our partners, we help people take their next step towards university, bringing language learning, preparation and advice together.'}</p>
+      <section id="integrationsprojekte" className="scroll-mt-28 bg-white py-16 md:py-24">
+        <Container className="grid gap-9 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
+          <div className="max-w-xl">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{de ? 'Unser gesellschaftlicher Auftrag' : 'Our public-benefit mission'}</p>
+            <h2 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">{de ? 'Gemeinnützig. Für Bildung und Teilhabe.' : 'A non-profit school. A shared purpose.'}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-[var(--casa-ink)]">{de ? 'Als gemeinnützige Sprachschule verbinden wir Deutschunterricht mit Beratung und Begegnung. Sprachkenntnisse eröffnen Wege in den Alltag, in Ausbildung, Studium und Beruf.' : 'As a non-profit language school, we bring teaching, personal advice and opportunities to meet others together. German opens doors in everyday life, education and work.'}</p>
+            <p className="mt-4 leading-relaxed text-[var(--casa-muted)]">{de ? 'Wir begleiten internationale Lernende und Menschen, die in Bremen neu anfangen. Unsere Bildungskooperationen unterstützen den Weg ins Studium; kostenfreie Sprachtandems, Ausflüge und Begegnungen schaffen Verbindungen im Alltag.' : 'We support international learners and people making a new start in Bremen. Our education partnerships help them prepare for university; free language exchanges, outings and meetups build connections beyond the classroom.'}</p>
+            <div className="mt-7 flex items-center gap-4 border-t border-[color:var(--casa-sand)] pt-5">
+              <span className="h-8 w-1 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
+              <p className="text-sm font-semibold text-[var(--casa-ink)]">{de ? 'Gemeinsam mit HERE AHEAD, :prime und GF-H.' : 'Working with HERE AHEAD, :prime and GF-H.'}</p>
+            </div>
           </div>
-          <div className="mt-9 divide-y divide-[color:var(--casa-sand)] border-y border-[color:var(--casa-sand)]">
-            {projects.map(project => (
-              <article key={project.name} className="grid items-center gap-5 py-7 md:grid-cols-[11rem_minmax(0,1fr)] md:gap-x-9 md:py-9 xl:grid-cols-[13rem_minmax(0,1fr)_11rem] xl:gap-x-12">
-                <a href={project.href} target="_blank" rel="noopener noreferrer" aria-label={project.name} className={`flex h-28 w-full max-w-52 items-center justify-center rounded-lg px-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)] ${project.logo === 'gfh.svg' ? 'bg-[var(--casa-ink-deep)]' : 'bg-white'}`}>
-                  <Image src={`/partners/${project.logo}`} alt={project.name} width={280} height={100} className="h-16 w-full object-contain" />
-                </a>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{project.label}</p>
-                  <h3 className="mt-2 text-2xl font-bold">{project.name}</h3>
-                  <p className="mt-3 max-w-2xl text-base leading-relaxed text-[var(--casa-muted)]">{project.text}</p>
-                </div>
-                <div className="space-y-3 text-sm md:col-start-2 xl:col-start-auto">
-                  <p className="font-semibold"><a href={project.href} target="_blank" rel="noopener noreferrer" className={linkClass}>{de ? 'Mehr erfahren' : 'Find out more'}<span className="sr-only">: {project.name}</span> ↗</a></p>
-                  {project.logo === 'gfh.svg' && <p><a href={obsUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>Otto Benecke Stiftung e.V. ↗</a></p>}
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="mt-9 grid gap-7 md:grid-cols-2 md:gap-12">
-            <div><h3 className="text-xl font-bold">{de ? 'Tandem & Begegnung' : 'Language exchange & connection'}</h3><p className="mt-2 leading-relaxed text-[var(--casa-muted)]">{de ? 'Kostenfreie Sprachpraxis und kultureller Austausch bringen Deutschlernende und Menschen aus Bremen zusammen.' : 'Free language practice and cultural exchange bring German learners and people from Bremen together.'}</p></div>
-            <div><h3 className="text-xl font-bold">{de ? 'In Bremen ankommen' : 'Finding your feet in Bremen'}</h3><p className="mt-2 leading-relaxed text-[var(--casa-muted)]">{de ? 'Ausflüge, Begegnungen und Orientierung im Alltag helfen, neue Freundschaften zu schließen und sich zu Hause zu fühlen.' : 'Outings, meetups and practical guidance help students make friends and feel at home.'}</p></div>
-          </div>
+          <NonprofitProjectTabs projects={projects} locale={locale} />
         </Container>
       </section>
-      <section className="bg-white py-14 md:py-20">
+      <section className="bg-[var(--casa-bg)] py-14 md:py-20">
         <Container>
-          <div className="grid items-center gap-8 md:grid-cols-[1fr_auto]">
-            <div className="max-w-3xl">
+          <div className="grid items-center gap-6 md:grid-cols-[auto_1fr]">
+            <div className="max-w-3xl md:col-start-2 md:row-start-1">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">TANDEM International</p>
-              <h2 className="mt-3 text-3xl font-bold md:text-4xl">{de ? 'Verbunden über Bremen hinaus' : 'Connections beyond Bremen'}</h2>
-              <p className="mt-4 leading-relaxed text-[var(--casa-muted)] md:text-lg">{de ? 'CASA ist Teil des TANDEM-Netzwerks. Mit Sprachschulen in Deutschland und Spanien teilen wir die Freude an Sprachen und interkultureller Begegnung. Lernen Sie eine Auswahl der Schulen aus unserem Netzwerk kennen.' : 'CASA is part of the TANDEM network. We share a love of languages and intercultural exchange with schools in Germany and Spain. Meet a selection of schools from our network.'}</p>
+              <h2 className="mt-2 text-2xl font-bold md:text-3xl">{de ? 'Verbunden über Bremen hinaus' : 'Connections beyond Bremen'}</h2>
+              <p className="mt-3 leading-relaxed text-[var(--casa-muted)]">{de ? 'CASA ist Teil des TANDEM-Netzwerks. Mit Sprachschulen in Deutschland und Spanien teilen wir die Freude an Sprachen und interkultureller Begegnung. Lernen Sie eine Auswahl der Schulen aus unserem Netzwerk kennen.' : 'CASA is part of the TANDEM network. We share a love of languages and intercultural exchange with schools in Germany and Spain. Meet a selection of schools from our network.'}</p>
             </div>
-            <a href="https://tandem-schools.com/en/" target="_blank" rel="noopener noreferrer" aria-label="TANDEM International" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"><Image src="/accreditations/tandem-international-bremen.png" alt="TANDEM Language Schools" width={280} height={141} className="h-auto w-52" /></a>
+            <a href="https://tandem-schools.com/en/" target="_blank" rel="noopener noreferrer" aria-label="TANDEM International" className="md:col-start-1 md:row-start-1 md:mr-8 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"><Image src="/accreditations/tandem-international-bremen.png" alt="TANDEM Language Schools" width={280} height={141} className="h-auto w-52" /></a>
           </div>
-          <ul className="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label={de ? 'Schulen im TANDEM-Netzwerk' : 'Schools in the TANDEM network'}>
-            {schools.map(school => <li key={school.name}><a href={school.href} target="_blank" rel="noopener noreferrer" className="group flex h-full flex-col rounded-xl bg-[var(--casa-bg)] p-4 transition-colors hover:bg-[var(--casa-blue)]/5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)] md:p-6">
-              <Image src={`/partners/${school.logo}`} alt={school.name} width={240} height={100} className="h-24 w-full rounded-lg bg-white p-3 object-contain" sizes="(min-width: 1024px) 240px, 40vw" />
-              <p className="mt-5 min-h-10 text-sm font-semibold text-[var(--casa-ink)]">{school.name} ↗</p><p className="mt-1 text-xs text-[var(--casa-muted)]">{!de && school.city === 'München' ? 'Munich' : school.city} · {['Madrid', 'Granada'].includes(school.city) ? (de ? 'Spanien' : 'Spain') : (de ? 'Deutschland' : 'Germany')}</p>
+          <ul className="mt-7 grid grid-cols-2 gap-x-5 gap-y-6 border-y border-[color:var(--casa-sand)] py-6 lg:grid-cols-4" aria-label={de ? 'Schulen im TANDEM-Netzwerk' : 'Schools in the TANDEM network'}>
+            {schools.map(school => <li key={school.name}><a href={school.href} target="_blank" rel="noopener noreferrer" className="group flex h-full flex-col rounded-lg px-2 transition-colors hover:bg-[var(--casa-bg)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)] md:px-4">
+              <Image src={`/partners/${school.logo}`} alt={school.name} width={240} height={100} className="h-16 w-full object-contain" sizes="(min-width: 1024px) 240px, 40vw" />
+              <p className="mt-4 text-sm font-semibold text-[var(--casa-ink)]">{school.name} ↗</p><p className="mt-1 text-xs text-[var(--casa-muted)]">{!de && school.city === 'München' ? 'Munich' : school.city} · {['Madrid', 'Granada'].includes(school.city) ? (de ? 'Spanien' : 'Spain') : (de ? 'Deutschland' : 'Germany')}</p>
             </a></li>)}
           </ul>
           <p className="mt-6 text-sm font-semibold"><a href="https://tandem-schools.com/en/" target="_blank" rel="noopener noreferrer" className={linkClass}>{de ? 'Das gesamte TANDEM-Netzwerk entdecken' : 'Explore the full TANDEM network'} ↗</a></p>

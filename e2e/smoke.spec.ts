@@ -264,3 +264,29 @@ test('German is the language of the root, English lives under /en, and each page
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/en\/courses\/intensive-german$/);
   await expect(page.locator('link[rel="alternate"][hreflang="de"]')).toHaveAttribute('href', /\/sprachkurse\/deutsch-intensiv$/);
 });
+
+test('nonprofit mission stays visible while project tabs work with keyboard navigation', async ({ page }) => {
+  for (const locale of ['de', 'en']) {
+    await page.goto(`${locale === 'de' ? '' : '/en'}/ueber-uns/gemeinnuetzigkeit`);
+    await expect(page.locator('#nonprofit-transparency-title')).toBeVisible();
+    await expect(page.locator('#nonprofit-legal-title')).toBeVisible();
+    await expect(page.getByText('Amtsgericht Bremen HRB 32761 HB', { exact: true })).toBeVisible();
+    await expect(page.getByText(locale === 'de'
+      ? 'Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.'
+      : 'Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.'
+    )).toBeVisible();
+    const tabs = page.getByRole('tab');
+    await expect(tabs).toHaveCount(3);
+    await tabs.first().focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tabpanel')).toHaveCount(1);
+    await expect(page.getByRole('tabpanel').getByRole('link', { name: ':prime Bremen', exact: true })).toHaveAttribute('href', 'https://www.primebremen.de/');
+    await tabs.nth(2).click();
+    await expect(page.getByRole('tabpanel')).toHaveCount(1);
+    await expect(page.getByRole('tabpanel').getByRole('link', { name: /Otto Benecke Stiftung/ })).toBeVisible();
+    for (const panel of await page.locator('[role=tabpanel][data-state=inactive]').all()) {
+      await expect(panel).toHaveCSS('opacity', '0');
+    }
+  }
+});

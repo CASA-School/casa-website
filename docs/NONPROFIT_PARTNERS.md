@@ -31,3 +31,17 @@ All four school links return HTTP 200. Logo files are hosted locally, unchanged;
 ### Layout refinement after user review
 
 Replaced the three tall project cards with separated editorial rows: aligned logo plates, readable descriptions and a dedicated desktop link column; stacked presentation on phones. Network tiles use neutral surfaces and consistent logo/name areas. Removed the remaining warm impact-panel fill and heavy legal-panel shadow for a calmer page. Checked DE/EN and 390/768/1440px; no overflow. Full build/lint/typecheck/unit/e2e checks pass (399 unit, 40 e2e, 3 existing database skips).
+
+### Current composition — mission remains visible
+
+Supersedes the editorial-row layout above. The user found the repeated page bands too long, then found the first consolidated version too compressed. The final layout has a spacious mission introduction beside three project tabs, a horizontal TANDEM directory, and a fully visible funding/legal section. CASA's purpose, beneficiaries, non-distribution of profits, use of course fees and existing legal/registration details remain readable without opening any controls, in DE and EN. Only the partnership descriptions use tabs; their original logo links and source-based wording remain. The existing numbered hero photo slot is unchanged and still awaits an approved photograph.
+
+The new `nonprofit-project-tabs.tsx` uses the existing Radix dependency, keyboard navigation and reduced-motion-aware fades. All panels share the largest natural height; inactive panels are inert, hidden from assistive technology and explicitly transparent so the site's reveal effect cannot expose their text. The smoke test covers this interaction and visibility of core nonprofit information in both languages.
+
+Verification: build, full lint, typecheck and 399 unit tests pass; 41 e2e tests pass, with 3 existing planner tests skipped because the test process has no database connection. Browser checks cover DE/EN at 320, 390, 768 and 1440px, all project tabs, stable panel heights and no horizontal overflow. Evidence: `/Users/rahmanshafiee/Archive/CASA/nonprofit-recomposition-2026-09-17/`. Local only on `codex/refine-pathway-cards`; not pushed, merged or deployed.
+
+Google's [website policy](https://support.google.com/nonprofits/answer/1657899?hl=en), checked on 2026-09-17, asks for a prominent mission, substantial activity information and clear financial information. Preserving these details supports website clarity; this work does not establish Google for Nonprofits or Ad Grants eligibility, nor independently verify CASA's underlying legal/tax records.
+
+### Completion check — 21 September 2026
+
+The previous turn ended with the implementation saved but not committed; the local preview had subsequently stopped. Rechecked the saved version, restarted the preview on port 3000 and completed the local handoff. Fresh `npm run build`, `npm run lint`, `npm run typecheck`, `npm run test` and `E2E_PORT=3000 npm run test:e2e -- --workers=2` pass (399 unit, 41 e2e, 3 existing planner skips because the test process does not receive `DATABASE_URL`). The first fresh e2e run had one unrelated sign-in failure because Docker/local PostgreSQL was stopped; starting the existing Docker runtime restored the existing `casa-postgres` container, and the full rerun passed without code changes. No database recreation or migration. Desktop and responsive DE/EN checks reconfirmed visible nonprofit information and no overflow. The branch remains local; no push, merge or deployment.
