@@ -19,6 +19,8 @@ export type HeroPhoto = {
   src: string;
   alt: string;
   caption?: string;
+  aspectRatio?: string;
+  objectPosition?: string;
 };
 
 export type HeroQuickLink = {
@@ -254,11 +256,13 @@ export function HeroBleedPhoto({
   return (
     <div
       className={cn(
-        'relative h-[19rem] overflow-hidden rounded-[var(--casa-radius-feature)] sm:h-[24rem] lg:h-[33rem]',
+        'relative overflow-hidden rounded-[var(--casa-radius-feature)]',
+        photo.aspectRatio ? 'w-full' : 'h-[19rem] sm:h-[24rem] lg:h-[33rem]',
         className
       )}
+      style={{ aspectRatio: photo.aspectRatio }}
     >
-      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" priority />
+      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" style={{ objectPosition: photo.objectPosition }} preload />
     </div>
   );
 }
