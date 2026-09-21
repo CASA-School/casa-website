@@ -1,6 +1,6 @@
 # Website photography: current handoff
 
-Updated 2026-09-16. The authoritative numbered shot list is
+Updated 2026-09-21. The authoritative numbered shot list is
 [`src/config/content/photo-numbers.ts`](../src/config/content/photo-numbers.ts).
 It contains the subject brief, delivery path and `ready` flag for every slot.
 The previous table here drifted from that registry and still named fabricated
@@ -10,6 +10,15 @@ staff members after the code had removed them.
 
 - Slots **20** (`group-course-bremen-musicians.jpg`) and **23**
   (`group-course-walking-bremen.jpg`) are ready and render real photographs.
+- Slots **44** (`casa-building-golden.webp`) and **45**
+  (`casa-building-daylight.webp`) render the user-supplied processed building
+  images from the first homepage/About preview. The About hero still uses 45;
+  the homepage now uses panoramic variant 49. Approved for local preview
+  on 2026-09-21; provenance and review status are in [MEDIA_LIBRARY.md](MEDIA_LIBRARY.md).
+- Slots **46–50** are the five user-requested AI-expanded and relit hero photos:
+  classroom learning, language practice, courtyard, golden building and Bremen walk.
+  Reel order: **49, 46, 50, 47, 48**. Only the homepage uses these derivatives;
+  the original walking image in slot 23 remains on its other pages.
 - Other slots remain numbered placeholders. Their absent image files are expected;
   do not delete their config references as broken or unused assets.
 - Slots **31–36 and 38–43** are reserved for twelve verified staff portraits.

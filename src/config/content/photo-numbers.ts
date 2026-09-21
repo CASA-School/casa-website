@@ -106,7 +106,7 @@ export const photoSlots: PhotoSlot[] = [
   { n: 9, src: '/media/casa/classroom-pair-study.jpg', subject: 'Two learners working as a pair, heads together over one task.', ready: false },
   { n: 10, src: '/media/casa/classroom-map-vocabulary.jpg', subject: 'Vocabulary work against a map — language tied to place.', ready: false },
   { n: 11, src: '/media/casa/learners-writing-class.jpg', subject: 'Learners writing by hand in class, close on the work.', ready: false },
-  { n: 12, src: '/media/casa/group-classroom-teacher-activity.jpg', subject: 'Teacher running an activity with the group. This is the widest-travelling photograph on the site, including the homepage hero — it needs to read at full-bleed hero size and in a small card.', ready: false },
+  { n: 12, src: '/media/casa/group-classroom-teacher-activity.jpg', subject: 'Teacher running an activity with the group. Reused across course pages and the About community story; needs to work as a large image and in a small card.', ready: false },
   { n: 13, src: '/media/casa/individual-tutoring.jpg', subject: 'One-to-one tutoring, teacher and single learner side by side.', ready: false },
   { n: 14, src: '/media/casa/whiteboard-german-coaching.jpg', subject: 'Coaching at the whiteboard, German visibly on the board.', ready: false },
   { n: 15, src: '/media/casa/business-german-group.jpg', subject: 'Professional adults in a workplace-German setting — business dress, meeting-room feel.', ready: false },
@@ -186,6 +186,13 @@ export const photoSlots: PhotoSlot[] = [
   { n: 43, src: '/media/casa/team/team-portrait-12.jpg', subject: 'Staff portrait 12 of 12. Match the framing of 31.', ready: false },
 
   // ---- Append new photographs below this line, next number, never resort --
+  { n: 44, src: '/media/casa/casa-building-golden.webp', subject: 'CASA building in golden evening light. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
+  { n: 45, src: '/media/casa/casa-building-daylight.webp', subject: 'CASA building in clear daylight. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
+  { n: 46, src: '/media/casa/reel-learning-together-wide.webp', subject: 'Three learners enjoying a classroom exercise. User-requested AI expansion and lighting edit of collection frame 085 for the local hero reel, 2026-09-21.', ready: true },
+  { n: 47, src: '/media/casa/reel-language-practice-wide.webp', subject: 'Two learners working with a coursebook. User-requested AI expansion and lighting edit of collection frame 021 for the local hero reel, 2026-09-21.', ready: true },
+  { n: 48, src: '/media/casa/reel-garden-gathering-wide.webp', subject: 'A cheerful gathering in the leafy courtyard. User-requested AI expansion and lighting edit of collection frame 095 for the local hero reel, 2026-09-21.', ready: true },
+  { n: 49, src: '/media/casa/reel-building-golden-wide.webp', subject: 'Full CASA facade in golden evening light. AI panorama expanded from the supplied portrait image, explicitly requested for local preview on 2026-09-21; peripheral surroundings are generated.', ready: true },
+  { n: 50, src: '/media/casa/reel-walking-bremen-wide.webp', subject: 'Students walking together. User-requested AI expansion and lighting edit of the original slot 23 photograph for the local hero reel, 2026-09-21.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

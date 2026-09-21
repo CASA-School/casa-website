@@ -33,6 +33,8 @@ export type PhotoPlaceholderConfig = {
   src: string;
   alt: LocalizedText;
   caption: LocalizedText;
+  aspectRatio?: string;
+  objectPosition?: string;
 };
 
 export type PublicPageConfig = {
@@ -52,6 +54,8 @@ export type LocalizedPhotoPlaceholder = {
   src: string;
   alt: string;
   caption: string;
+  aspectRatio?: string;
+  objectPosition?: string;
 };
 
 export type LocalizedPublicPageConfig = {
@@ -458,6 +462,44 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
       de: 'Ein neutrales CASA Standortbild für praktische und rechtliche Seiten.',
     },
   },
+  buildingGolden: {
+    src: '/media/casa/casa-building-golden.webp',
+    alt: {
+      en: 'The CASA school building in Bremen in warm evening light',
+      de: 'Das CASA-Schulgebäude in Bremen im warmen Abendlicht',
+    },
+    caption: { en: 'Welcome to CASA in Bremen.', de: 'Willkommen bei CASA in Bremen.' },
+    aspectRatio: '4 / 3',
+    objectPosition: '50% 27%',
+  },
+  buildingDaylight: {
+    src: '/media/casa/casa-building-daylight.webp',
+    alt: {
+      en: 'The CASA school building with its entrance and language school signs',
+      de: 'Das CASA-Schulgebäude mit Eingang und Sprachschul-Schriftzügen',
+    },
+    caption: { en: 'Our school in Bremen.', de: 'Unsere Schule in Bremen.' },
+    aspectRatio: '4 / 3',
+    objectPosition: '50% 27%',
+  },
+  reelLearning: {
+    src: '/media/casa/reel-learning-together-wide.webp',
+    alt: { de: 'Drei Lernende lachen gemeinsam bei einer Aufgabe im Deutschkurs', en: 'Three learners sharing a laugh while working on a German exercise' },
+    caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
+    objectPosition: '50% 50%',
+  },
+  reelPractice: {
+    src: '/media/casa/reel-language-practice-wide.webp',
+    alt: { de: 'Zwei Lernende arbeiten gemeinsam mit ihrem Deutschbuch', en: 'Two learners working together with their German coursebook' },
+    caption: { de: 'Miteinander weiterkommen', en: 'Making progress together' },
+    objectPosition: '50% 50%',
+  },
+  reelCommunity: {
+    src: '/media/casa/reel-garden-gathering-wide.webp',
+    alt: { de: 'Eine fröhliche Runde im grünen CASA-Innenhof', en: 'A cheerful gathering in CASA’s leafy courtyard' },
+    caption: { de: 'Menschen, die CASA ausmachen', en: 'The people who make CASA' },
+    objectPosition: '50% 50%',
+  },
 };
 
 export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
@@ -479,13 +521,22 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Talk to an advisor', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
-      /*
-        The homepage headline is CASA's Leitbild — "Miteinander reden -
-        aufeinander zugehen". This image shows learners listening and speaking,
-        so it depicts the line rather than decorating it. `studentClass` (people
-        working quietly at a table) illustrated study, not conversation.
-      */
-      hero: photoLibrary.groupClassroomTeacherActivity,
+      // User-requested imagegen expansion; keep the complete facade in the reel.
+      hero: {
+        ...photoLibrary.buildingGolden,
+        src: '/media/casa/reel-building-golden-wide.webp',
+        aspectRatio: '12 / 5',
+        objectPosition: '50% 50%',
+      },
+      reelLearning: photoLibrary.reelLearning,
+      reelPractice: photoLibrary.reelPractice,
+      reelCommunity: photoLibrary.reelCommunity,
+      reelBremen: {
+        ...photoLibrary.groupCourseWalking,
+        src: '/media/casa/reel-walking-bremen-wide.webp',
+        caption: { de: 'Bremen gemeinsam entdecken', en: 'Discovering Bremen together' },
+        objectPosition: '50% 50%',
+      },
       story: photoLibrary.groupCourseLunch,
       /*
         The four flagship course rows, matched to what each format actually is
@@ -515,23 +566,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Find my course path', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
     ],
     photos: {
-      /*
-        TWO CONSTRAINTS, and they rule out most of the library.
-
-        Not `groupClassroomTeacherActivity`: that is the homepage's hero photo,
-        and /about now renders the homepage's hero composition. The same picture
-        in the same layout makes the page a homepage clone rather than a sibling.
-
-        Not a course's identity photograph either — `campusDiscussion` is
-        bildungszeit's face, `courseClassroomWide` is Intensive's, and so on
-        through `course-detail.photos` below. Putting one format's photograph on
-        a page about the school is the mistake the `story`/`guidance` note on
-        /courses already warns about.
-
-        `schoolEntrance` satisfies both and depicts the headline rather than
-        decorating it: "A house of encounter in Bremen" is the house.
-      */
-      hero: photoLibrary.schoolEntrance,
+      // Daylight companion to the warmer homepage image, supplied by the user.
+      hero: photoLibrary.buildingDaylight,
       mission: photoLibrary.groupCourseBremenMusicians,
       /* The community-story block's photo, which used to borrow `hero`. */
       story: photoLibrary.groupClassroomTeacherActivity,
@@ -729,6 +765,8 @@ export function getPublicPageConfig(route: PublicRouteKey, locale: ContentLocale
         src: photo.src,
         alt: localize(photo.alt, locale),
         caption: localize(photo.caption, locale),
+        aspectRatio: photo.aspectRatio,
+        objectPosition: photo.objectPosition,
       },
     ])
   );

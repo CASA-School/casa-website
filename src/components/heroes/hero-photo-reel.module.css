@@ -1,0 +1,63 @@
+.reel { min-width: 0; }
+.reel:focus-visible { outline: 2px solid var(--casa-blue); outline-offset: 4px; }
+.frame {
+  position: relative;
+  aspect-ratio: 12 / 5;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--casa-radius-feature);
+  background: var(--casa-ink-deep);
+  touch-action: pan-y;
+}
+.viewport { position: absolute; inset: 0; overflow: hidden; border-radius: var(--casa-radius-feature); }
+.viewport::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 0% 100%, rgba(10, 20, 31, .78), rgba(10, 20, 31, .18) 52%, transparent 72%);
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1400ms cubic-bezier(.4, 0, .2, 1);
+  pointer-events: none;
+}
+.image { position: absolute; inset: 0; will-change: transform; }
+.overlay { position: absolute; inset: 0; z-index: 4; display: flex; align-items: flex-end; padding: clamp(28px, 4.5vw, 76px); pointer-events: none; }
+.lede { width: min(62%, 700px); }
+.lede h1 { color: white; font-size: clamp(2.75rem, 4.3vw, 4.5rem); font-weight: 700; line-height: 1.08; text-wrap: balance; text-shadow: 0 2px 20px rgb(0 0 0 / 18%); animation: lede-in 900ms cubic-bezier(.16, 1, .3, 1) both; }
+.lede a[data-slot='button'] { pointer-events: auto; min-height: 48px; margin-top: 28px; padding-inline: 26px; background: white; color: var(--casa-ink-deep); border: 0; box-shadow: none; animation: lede-in 900ms 130ms cubic-bezier(.16, 1, .3, 1) both; }
+.lede a[data-slot='button']:hover { background: #e7f3f9; }
+.lede a[data-slot='button']:focus-visible { outline: 2px solid white; outline-offset: 4px; }
+.timeline { display: flex; justify-content: center; gap: 8px; max-width: 256px; margin-inline: auto; }
+.timeline button { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; cursor: pointer; transition: flex 600ms cubic-bezier(.16, 1, .3, 1); }
+.timeline button[aria-current] { flex: 1.8; }
+.timeline button:focus-visible { outline: 2px solid var(--casa-blue); outline-offset: 2px; }
+.track { position: relative; display: block; width: 100%; height: 3px; overflow: hidden; background: color-mix(in srgb, var(--casa-ink) 24%, transparent); border-radius: 2px; }
+.fill { position: absolute; inset: 0; background: var(--casa-accent-text); transform-origin: left; }
+.timeline button[aria-current] .track { background: color-mix(in srgb, var(--casa-blue) 40%, white); }
+.timeline button:disabled { opacity: .3; cursor: default; }
+@keyframes lede-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1023px) {
+  .reel { display: flex; flex-direction: column; }
+  .frame { display: contents; }
+  .viewport { position: relative; aspect-ratio: 2 / 1; order: 0; isolation: isolate; touch-action: pan-y; }
+  .viewport::after { display: none; }
+  .timeline { order: 1; width: min(100%, 256px); margin-bottom: 8px; }
+  .overlay { position: relative; order: 2; padding: 8px 4px 16px; }
+  .lede { width: min(100%, 620px); }
+  .lede h1 { color: var(--casa-ink); font-size: clamp(2rem, 5vw, 2.75rem); text-shadow: none; }
+  .lede a[data-slot='button'] { margin-top: 24px; background: var(--casa-ink-deep); color: white; }
+  .lede a[data-slot='button']:hover { background: var(--casa-ink-deep-hover); }
+  .lede a[data-slot='button']:focus-visible { outline-color: var(--casa-blue); }
+}
+@media (max-width: 359px) {
+  .lede h1 { font-size: 1.85rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide, .timeline button { transition: none; }
+  .lede h1, .lede a[data-slot='button'] { animation: none; }
+  .image { will-change: auto; }
+}

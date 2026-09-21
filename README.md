@@ -126,6 +126,7 @@ Current homepage metrics use rounded aggregate values from the 2026-06-17 dashbo
 
 ## Current Status Docs
 
+- [Recent website changes](docs/RECENT_CHANGES.md) — latest design, image and nonprofit-page handoff; responsive image rules and verification.
 - [Deployment cleanup and bilingual copy](docs/RELEASE_CLEANUP_COPY.md) — September 2026 review, additions compared with the old site, remaining launch decisions and verification.
 
 - [Team update - 2026-06-23](/Users/rahmanshafiee/Downloads/CASA/docs/TEAM_UPDATE_2026-06-23.md)
