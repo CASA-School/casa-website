@@ -49,6 +49,23 @@ English slug under a German segment (`/sprachkurse/intensive-german` →
   for the staff workspace runs first and is unchanged.
 - `src/app/(site)/[locale]/layout.tsx` — validates the segment, `setRequestLocale`, sets
   `lang` and `dir` on `<html>`, hands the language to the shell as a prop.
+- `src/app/(site)/[locale]/not-found.tsx`, `[...rest]/page.tsx`, `error.tsx` — the site's own
+  404 and error pages, inside the layout and in the page's language. The catch-all only
+  calls `notFound()`, so a path no route claims 404s with the site chrome rather than as
+  Next's bare page; it has no URL-map entry and the route-tree test exempts it by name.
+  The proxy rewrites `/admin` on the public host to `/de/admin/…`, so it gets this same
+  German 404, and so does an unknown language (`/fr/x` is prefixed like any German path).
+  Only a path the proxy leaves without a language (`/api/nope`, a missing file under
+  `/media`) reaches the layout as `[locale]=api` and is rejected there: it 404s with Next's
+  plain body under the site's head. Workspace misses have their own catch-all,
+  `(admin)/admin/(workspace)/[...rest]`.
+
+  The 404 body is client-rendered. With two root layouts and a dynamic root segment, Next
+  cannot compose a 404 into the layout on the server, so the server HTML is an empty error
+  shell that carries only the 404 status, `noindex` and the localised title; the heading,
+  chrome and links appear once JS runs. That is enough for crawlers, and the layout sets no
+  canonical, hreflang or Open Graph tags for a 404 to inherit. `e2e/smoke.spec.ts` asserts
+  the raw response and the hydrated page separately.
 - `src/i18n/navigation.tsx` — `Link`, `useRouter`, `usePathname` for the site. They take
   internal paths and localise them from the current URL, so they need no provider and work
   in every tree. `usePathname` returns the internal path, so `pathname === '/courses'` keeps

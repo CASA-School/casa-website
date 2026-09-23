@@ -22,11 +22,21 @@ Deploy with `./infra/azure/deploy.sh` — it builds in ACR (no local Docker) and
 rolls a new revision pinned to the image digest.
 
 **It runs with no `DATABASE_URL`, on purpose.** Public content falls back to the
-in-repo fixtures, which is a supported runtime mode, so the whole site is
-testable now without waiting for the driver port below. The one thing that mode
-disables is career application submission, because the CV upload needs database
-storage. Everything else — every public route, image optimisation via `sharp`,
-the forms up to the point of persistence — is live and verified.
+in-repo fixtures, which is a supported runtime mode, so every public page and
+image optimisation via `sharp` can be tested without waiting for the database.
+
+**No lead form works on it (corrected 2026-09-23).** Without a database nothing
+is stored, so a submission reaches CASA only through `notifyForm`
+(`src/lib/notifications/forms.server.ts`), and the revision has no mail sender
+either: its only settings are `NODE_ENV` and `NEXT_TELEMETRY_DISABLED`. Contact,
+course and exam registration therefore answer 503 (nothing stored, nothing
+delivered); group appointments and career applications answer 503 whenever
+there is no database. Webhooks are no fallback — test mode, the default when
+`FORM_DELIVERY_MODE` is unset, never calls them. Before the public domain points
+here: a database with every migration applied, `DATABASE_URL` as a secret, the
+Microsoft Graph sender (`FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID`), and one
+synthetic submission per form checked in `/admin` and in the inbox — the
+checklist in `docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md`.
 
 ### The Vercel URL cannot be reused
 
@@ -104,6 +114,7 @@ Add one resource group, reuse the shared platform group:
 | Database | Azure Database for PostgreSQL Flexible Server | Replaces Neon |
 | Secrets | Container App secrets | Where the app already keeps its mailbox password |
 | Domain | `casa-bremen.de` → CNAME + Azure TXT verification | Same mechanism the app uses for its subdomain |
+| Domain | `www.casa-bremen.de` bound as well | The apex is the canonical host (`src/lib/seo.ts`), as on the old site; `src/proxy.ts` 308s `www` to it, which only runs if `www` reaches the app |
 
 ### Scale-to-zero is worth it here
 
@@ -153,7 +164,10 @@ the one that matters is the careers upload.
 - Dockerfile on `node:22-alpine`, multi-stage, non-root.
 - `sharp` must be in the image — on Vercel, `next/image` optimisation is provided by the
   platform. In a container it runs in-process, and without `sharp` it silently degrades.
-- Health endpoint for the Container App probe.
+- Health endpoint for the Container App probe. `GET /api/health` exists (no database
+  call, public hosts only), but no probe uses it yet: `infra/azure/deploy.sh` still needs
+  startup, readiness and liveness HTTP probes on it, the startup one allowing for a cold
+  start from zero replicas.
 
 ### 3. Pipeline
 
