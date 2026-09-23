@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,15 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
+import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
-import type { CourseRegistrationOption, RegistrationCourseCatalog } from '@/lib/content/types';
+import type { RegistrationCourseCatalog } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
-import { courseRegistrationFormSchema, requiresLevelField } from '@/lib/validation/registration-submissions';
+import { createCourseRegistrationFormSchema, requiresLevelField } from '@/lib/validation/registration-submissions';
 
-const registrationSchema = courseRegistrationFormSchema;
-
-type FormData = z.input<typeof registrationSchema>;
-type FormSubmissionData = z.output<typeof registrationSchema>;
+type RegistrationSchema = ReturnType<typeof createCourseRegistrationFormSchema>;
+type FormData = z.input<RegistrationSchema>;
+type FormSubmissionData = z.output<RegistrationSchema>;
 
 type CourseWizardProps = {
   catalog: RegistrationCourseCatalog;
@@ -45,20 +45,23 @@ const requiredMarkClassName = 'mr-1 text-[var(--casa-coral-text)]';
 const fieldGroupClassName = 'space-y-1.5';
 const reviewTileClassName = 'rounded-lg border border-[color:var(--casa-sand)] bg-white p-4';
 
-function AvailabilityTag({ option }: { option: CourseRegistrationOption }) {
-  const classes =
-    option.availabilityState === 'full'
-      ? 'border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 text-[var(--casa-danger-text)]'
-      : option.availabilityState === 'limited'
-        ? 'border-[color:var(--casa-gold-deep)]/30 bg-[var(--casa-gold-deep)]/8 text-[var(--casa-warning-text)]'
-        : 'border-[color:var(--casa-success-surface)]/30 bg-[var(--casa-success-surface)]/8 text-[var(--casa-success-text)]';
+const PERSONAL_FIELDS: Array<keyof FormData> = [
+  'salutation',
+  'firstName',
+  'lastName',
+  'email',
+  'phone',
+  'nationality',
+  'birthDate',
+];
 
-  return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-eyebrow', classes)}>
-      {option.availabilityLabel}
-    </span>
-  );
-}
+/** Element ids that differ from the field name, so a failed step can focus its first invalid field. */
+const FIELD_ELEMENT_IDS: Partial<Record<keyof FormData, string>> = {
+  courseTypeId: 'course-type',
+  courseInstanceId: 'course-option',
+  accommodationRequired: 'accommodation',
+  accommodationType: 'accommodation-type',
+};
 
 export function CourseWizard({ catalog }: CourseWizardProps) {
   const isDe = catalog.locale === 'de';
@@ -67,6 +70,14 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  // Messages follow the page, so a German form never shows an English error.
+  const registrationSchema = useMemo(() => createCourseRegistrationFormSchema(catalog.locale), [catalog.locale]);
+  // Set by a step change, so focus moves to the new step's heading but not on first render.
+  const stepChanged = useRef(false);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  // Counts failed attempts at the current step; each one focuses the field named here once its error has rendered.
+  const [stepFailures, setStepFailures] = useState(0);
+  const invalidFieldId = useRef<string | null>(null);
 
   const form = useForm<FormData, undefined, FormSubmissionData>({
     resolver: zodResolver(registrationSchema),
@@ -88,12 +99,14 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
       allergies: '',
       notes: '',
       acceptTerms: false,
+      website: '',
     },
     mode: 'onChange',
   });
 
   const handleCloseSuccess = () => {
     setSuccess(false);
+    stepChanged.current = true;
     setStep(1);
     form.reset({
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
@@ -113,6 +126,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
       allergies: '',
       notes: '',
       acceptTerms: false,
+      website: '',
     });
   };
 
@@ -123,6 +137,12 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     trigger,
     formState: { errors, isValid },
   } = form;
+
+  /** Ties a field to its error message, whose id is `<name>-error`. */
+  const errorProps = (name: keyof FormData) => ({
+    'aria-invalid': Boolean(errors[name]),
+    'aria-describedby': errors[name] ? `${name}-error` : undefined,
+  });
 
   const selectedCourseTypeId = watch('courseTypeId');
   const selectedCourseInstanceId = watch('courseInstanceId');
@@ -160,6 +180,15 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     { title: t('Details', 'Details'), description: t('Student profile', 'Teilnehmerprofil') },
     { title: t('Review', 'Prüfen'), description: t('Final check', 'Letzte Kontrolle') },
   ];
+  const fieldsByStep: Array<Array<keyof FormData>> = [
+    ['courseTypeId', 'courseInstanceId'],
+    accommodationRequired
+      ? [...PERSONAL_FIELDS, 'accommodationRequired', 'accommodationType']
+      : [...PERSONAL_FIELDS, 'accommodationRequired'],
+    [],
+  ];
+  const stepFields = fieldsByStep[step - 1] ?? [];
+  const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
 
   useEffect(() => {
     if (!selectedCourseTypeId) {
@@ -178,6 +207,18 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
       setValue('courseInstanceId', options[0].id, { shouldValidate: true, shouldDirty: true });
     }
   }, [catalog.optionsByCourseTypeId, selectedCourseInstanceId, selectedCourseTypeId, setValue]);
+
+  useEffect(() => {
+    if (!stepChanged.current) return;
+    stepChanged.current = false;
+    stepHeadingRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (!invalidFieldId.current) return;
+    document.getElementById(invalidFieldId.current)?.focus();
+    invalidFieldId.current = null;
+  }, [stepFailures]);
 
   // Reset level when course type changes to avoid stale value
   useEffect(() => {
@@ -205,9 +246,9 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         }),
       });
 
-      const result = (await response.json()) as CourseRegistrationApiResult;
-      if (!response.ok || result.status !== 'accepted') {
-        throw new Error(result.message || 'Registration failed. Please try again.');
+      const result = (await response.json().catch(() => null)) as CourseRegistrationApiResult | null;
+      if (!response.ok || result?.status !== 'accepted') {
+        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
       }
 
       setSuccess(true);
@@ -218,7 +259,11 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         locale: catalog.locale,
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unexpected registration error';
+      // A network failure's own message ("Failed to fetch") is the browser's, not ours.
+      const message =
+        error instanceof Error && !(error instanceof TypeError)
+          ? error.message
+          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
       setSubmissionError(message);
       trackCasaEvent('form_error', {
         form: 'course_registration',
@@ -233,31 +278,20 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
   };
 
   const nextStep = async () => {
-    const personalFields: Array<keyof FormData> = [
-      'salutation',
-      'firstName',
-      'lastName',
-      'email',
-      'phone',
-      'nationality',
-      'birthDate',
-    ];
-
-    const fieldsByStep: Array<Array<keyof FormData>> = [
-      ['courseTypeId', 'courseInstanceId'],
-      accommodationRequired
-        ? [...personalFields, 'accommodationRequired', 'accommodationType']
-        : [...personalFields, 'accommodationRequired'],
-      [],
-    ];
-
-    const fields = fieldsByStep[step - 1] ?? [];
-    const valid = fields.length === 0 ? true : await trigger(fields, { shouldFocus: true });
+    // Not `shouldFocus`: it reaches only fields with a registered ref, and the
+    // selects, the country field and the date picker have none.
+    const valid = stepFields.length === 0 ? true : await trigger(stepFields);
 
     if (valid) {
+      stepChanged.current = true;
+      setStepFailures(0);
       setStep((current) => Math.min(current + 1, stepItems.length));
       return;
     }
+
+    const firstInvalid = stepFields.find((name) => form.getFieldState(name).invalid);
+    invalidFieldId.current = firstInvalid ? (FIELD_ELEMENT_IDS[firstInvalid] ?? firstInvalid) : null;
+    setStepFailures((count) => count + 1);
 
     trackCasaEvent('form_error', {
       form: 'course_registration',
@@ -269,7 +303,11 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     });
   };
 
-  const prevStep = () => setStep((current) => Math.max(current - 1, 1));
+  const prevStep = () => {
+    stepChanged.current = true;
+    setStepFailures(0);
+    setStep((current) => Math.max(current - 1, 1));
+  };
 
 
 
@@ -356,7 +394,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                     {t('Course path', 'Kursweg')}
                   </p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
+                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
                     {t('Choose your course', 'Kurs auswählen')}
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
@@ -379,7 +417,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   onValueChange={(value) => setValue('courseTypeId', value, { shouldDirty: true, shouldValidate: true })}
                   defaultValue={watch('courseTypeId')}
                 >
-                  <SelectTrigger id="course-type" className={selectTriggerClassName}>
+                  <SelectTrigger id="course-type" aria-required {...errorProps('courseTypeId')} className={selectTriggerClassName}>
                     <SelectValue placeholder={t('Select a course...', 'Kurs auswählen...')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -390,7 +428,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.courseTypeId && <p className="text-sm text-[var(--casa-danger-text)]">{errors.courseTypeId.message}</p>}
+                {errors.courseTypeId && <p id="courseTypeId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.courseTypeId.message}</p>}
               </div>
 
               <div className={fieldGroupClassName}>
@@ -402,7 +440,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   onValueChange={(value) => setValue('courseInstanceId', value, { shouldDirty: true, shouldValidate: true })}
                   value={selectedCourseInstanceId}
                 >
-                  <SelectTrigger id="course-option" className={selectTriggerClassName}>
+                  <SelectTrigger id="course-option" aria-required {...errorProps('courseInstanceId')} className={selectTriggerClassName}>
                     <SelectValue placeholder={catalog.locale === 'de' ? 'Starttermin auswählen...' : 'Select a start date...'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -418,7 +456,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     {catalog.locale === 'de' ? 'Noch keine Termine für diesen Kurstyp verfügbar.' : 'No scheduled options for this course type yet. Please choose another course type.'}
                   </p>
                 ) : null}
-                {errors.courseInstanceId && <p className="text-sm text-[var(--casa-danger-text)]">{errors.courseInstanceId.message}</p>}
+                {errors.courseInstanceId && <p id="courseInstanceId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.courseInstanceId.message}</p>}
               </div>
             </div>
 
@@ -467,7 +505,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   >
                     {t('Take the placement test', 'Einstufungstest machen')}
                   </Link>
-                  {t(' — it takes about 15 minutes.', ' — das dauert etwa 15 Minuten.')}
+                  {t(' — it takes about 15–30 minutes.', ' — das dauert etwa 15–30 Minuten.')}
                 </p>
               </div>
             )}
@@ -481,7 +519,6 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     </p>
                     <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedCourseType?.name}</h3>
                   </div>
-                  <AvailabilityTag option={selectedOption} />
                 </div>
                 <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
                   <div>
@@ -513,7 +550,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-coral-text)]">
                     {t('Student profile', 'Teilnehmerprofil')}
                   </p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
+                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
                     {t('Personal details', 'Persönliche Angaben')}
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
@@ -535,7 +572,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 onValueChange={(value) => setValue('salutation', value as 'mr' | 'ms' | 'mx' | 'neutral', { shouldDirty: true, shouldValidate: true })}
                 value={watch('salutation')}
               >
-                <SelectTrigger id="salutation" className={selectTriggerClassName}>
+                <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={selectTriggerClassName}>
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -545,7 +582,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Neutral / Other'}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.salutation && <p className="text-sm text-[var(--casa-danger-text)]">{errors.salutation.message}</p>}
+              {errors.salutation && <p id="salutation-error" className="text-sm text-[var(--casa-danger-text)]">{errors.salutation.message}</p>}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -554,16 +591,16 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <span className={requiredMarkClassName}>*</span>
                   {t('First Name', 'Vorname')}
                 </Label>
-                <Input id="firstName" autoComplete="given-name" className={fieldClassName} {...register('firstName')} />
-                {errors.firstName && <p className="text-sm text-[var(--casa-danger-text)]">{errors.firstName.message}</p>}
+                <Input id="firstName" autoComplete="given-name" aria-required {...errorProps('firstName')} className={fieldClassName} {...register('firstName')} />
+                {errors.firstName && <p id="firstName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.firstName.message}</p>}
               </div>
               <div className={fieldGroupClassName}>
                 <Label htmlFor="lastName" className={labelClassName}>
                   <span className={requiredMarkClassName}>*</span>
                   {t('Last Name', 'Nachname')}
                 </Label>
-                <Input id="lastName" autoComplete="family-name" className={fieldClassName} {...register('lastName')} />
-                {errors.lastName && <p className="text-sm text-[var(--casa-danger-text)]">{errors.lastName.message}</p>}
+                <Input id="lastName" autoComplete="family-name" aria-required {...errorProps('lastName')} className={fieldClassName} {...register('lastName')} />
+                {errors.lastName && <p id="lastName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.lastName.message}</p>}
               </div>
             </div>
 
@@ -577,18 +614,20 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  aria-required
+                  {...errorProps('email')}
                   className={fieldClassName}
                   {...register('email')}
                 />
-                {errors.email && <p className="text-sm text-[var(--casa-danger-text)]">{errors.email.message}</p>}
+                {errors.email && <p id="email-error" className="text-sm text-[var(--casa-danger-text)]">{errors.email.message}</p>}
               </div>
               <div className={fieldGroupClassName}>
                 <Label htmlFor="phone" className={labelClassName}>
                   <span className={requiredMarkClassName}>*</span>
                   {t('Phone Number', 'Telefonnummer')}
                 </Label>
-                <Input id="phone" autoComplete="tel" className={fieldClassName} {...register('phone')} />
-                {errors.phone && <p className="text-sm text-[var(--casa-danger-text)]">{errors.phone.message}</p>}
+                <Input id="phone" autoComplete="tel" aria-required {...errorProps('phone')} className={fieldClassName} {...register('phone')} />
+                {errors.phone && <p id="phone-error" className="text-sm text-[var(--casa-danger-text)]">{errors.phone.message}</p>}
               </div>
             </div>
 
@@ -616,8 +655,9 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   emptyLabel={t('No results found.', 'Keine Ergebnisse gefunden.')}
                   className={fieldClassName}
                   required
+                  aria-describedby={errors.nationality ? 'nationality-error' : undefined}
                 />
-                {errors.nationality && <p className="text-sm text-[var(--casa-danger-text)]">{errors.nationality.message}</p>}
+                {errors.nationality && <p id="nationality-error" className="text-sm text-[var(--casa-danger-text)]">{errors.nationality.message}</p>}
               </div>
               <div className={fieldGroupClassName}>
                 <Label htmlFor="birthDate" className={labelClassName}>
@@ -630,6 +670,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   render={({ field }) => (
                     <DatePicker
                       id="birthDate"
+                      aria-describedby={errors.birthDate ? 'birthDate-error' : undefined}
                       value={field.value}
                       onChange={field.onChange}
                       placeholder={catalog.locale === 'de' ? 'TT.MM.JJJJ' : 'dd.mm.yyyy'}
@@ -639,7 +680,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     />
                   )}
                 />
-                {errors.birthDate && <p className="text-sm text-[var(--casa-danger-text)]">{errors.birthDate.message}</p>}
+                {errors.birthDate && <p id="birthDate-error" className="text-sm text-[var(--casa-danger-text)]">{errors.birthDate.message}</p>}
               </div>
             </div>
 
@@ -686,7 +727,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     }
                     defaultValue={watch('accommodationType')}
                   >
-                    <SelectTrigger id="accommodation-type" className={selectTriggerClassName}>
+                    <SelectTrigger id="accommodation-type" aria-required {...errorProps('accommodationType')} className={selectTriggerClassName}>
                       <SelectValue placeholder={t('Select type...', 'Wohnform auswählen...')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -694,7 +735,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                       <SelectItem value="host">{t('Host Family', 'Gastfamilie')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.accommodationType && <p className="text-sm text-[var(--casa-danger-text)]">{errors.accommodationType.message}</p>}
+                  {errors.accommodationType && <p id="accommodationType-error" className="text-sm text-[var(--casa-danger-text)]">{errors.accommodationType.message}</p>}
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -708,13 +749,15 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
 
                 <div className={fieldGroupClassName}>
                   <Label htmlFor="allergies" className={labelClassName}>{t('Allergies', 'Allergien')}</Label>
-                  <Input id="allergies" className={fieldClassName} {...register('allergies')} placeholder={t('e.g. cats, nuts', 'z. B. Katzen, Nüsse')} />
+                  {/* maxLength mirrors the schema: no step validates these two, so a longer value would only disable Absenden. */}
+                  <Input id="allergies" maxLength={500} className={fieldClassName} {...register('allergies')} placeholder={t('e.g. cats, nuts', 'z. B. Katzen, Nüsse')} />
                 </div>
 
                 <div className={fieldGroupClassName}>
                   <Label htmlFor="notes" className={labelClassName}>{t('Additional Notes', 'Weitere Hinweise')}</Label>
                   <Textarea
                     id="notes"
+                    maxLength={2000}
                     className="min-h-28 rounded-lg border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 py-3 text-sm text-[var(--casa-ink)] shadow-none placeholder:text-[var(--casa-muted)] focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
                     {...register('notes')}
                     placeholder={t('Any preferences we should know about?', 'Gibt es Wünsche, die wir kennen sollten?')}
@@ -736,7 +779,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                     {t('Final check', 'Letzte Kontrolle')}
                   </p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
+                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
                     {t('Review and submit', 'Prüfen und absenden')}
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
@@ -802,6 +845,8 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="accept-terms"
+                    aria-required
+                    {...errorProps('acceptTerms')}
                     checked={watch('acceptTerms')}
                     onCheckedChange={(checked) =>
                       setValue('acceptTerms', Boolean(checked), { shouldDirty: true, shouldValidate: true })
@@ -836,18 +881,42 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     )}
                   </Label>
                 </div>
-                {errors.acceptTerms ? <p className="text-sm text-[var(--casa-danger-text)]">{errors.acceptTerms.message}</p> : null}
+                {errors.acceptTerms ? <p id="acceptTerms-error" className="text-sm text-[var(--casa-danger-text)]">{errors.acceptTerms.message}</p> : null}
               </div>
             </div>
           </div>
         )}
 
+        {showStepAlert && (
+          // Keyed by attempt, so a repeated failed Weiter is announced again.
+          <div key={stepFailures} className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+            <p>{t('Please check the highlighted fields.', 'Bitte prüfen Sie die markierten Angaben.')}</p>
+          </div>
+        )}
+
         {submissionError && (
           <div className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
-            {submissionError}
+            <p>{submissionError}</p>
+            <p className="mt-1">
+              {t('Reach us directly:', 'So erreichen Sie uns direkt:')}{' '}
+              <a href={footerConfig.contact.emails[0].href} className="font-semibold underline underline-offset-4">
+                {footerConfig.contact.emails[0].label}
+              </a>
+              {' · '}
+              <a href={`tel:${footerConfig.contact.phone}`} className="font-semibold underline underline-offset-4">
+                {footerConfig.contact.phone}
+              </a>
+              {' · '}
+              <Link href="/contact" className="font-semibold underline underline-offset-4">
+                {t('Contact page', 'Kontaktseite')}
+              </Link>
+            </p>
           </div>
         )}
         </div>
+
+        {/* Honeypot, as on the contact form: invisible to people, filled by bots. */}
+        <input type="text" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" {...register('website')} />
 
         <div className="mt-4 flex shrink-0 justify-between border-t border-[color:var(--casa-sand)] pt-4">
           {step > 1 ? (

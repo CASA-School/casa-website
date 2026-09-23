@@ -11,6 +11,7 @@ interface DatePickerProps {
   hasError?: boolean;
   locale?: 'en' | 'de';
   align?: 'top' | 'bottom';
+  'aria-describedby'?: string;
 }
 
 const MONTHS_EN = [
@@ -31,7 +32,8 @@ export function DatePicker({
   className,
   hasError,
   locale = 'en',
-  align = 'bottom'
+  align = 'bottom',
+  'aria-describedby': ariaDescribedBy
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -139,6 +141,7 @@ export function DatePicker({
         id={id}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-describedby={ariaDescribedBy}
         className={cn(
           "flex h-11 w-full items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 text-left text-sm text-[var(--casa-ink)] transition-all",
           "focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--casa-blue)]/10",

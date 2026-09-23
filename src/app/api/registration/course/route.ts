@@ -2,8 +2,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { notifyForm } from '@/lib/notifications/forms.server';
 
 import { storeCourseRegistration } from '@/lib/admin/intake';
+import { rateLimit } from '@/lib/api/rate-limit';
+import { getCourseRegistrationCatalog } from '@/lib/content/repository';
 
-import { courseRegistrationSubmissionSchema } from '@/lib/validation/registration-submissions';
+import {
+  createCourseRegistrationSubmissionSchema,
+  submissionLocale,
+} from '@/lib/validation/registration-submissions';
 
 
 function successMessage(locale: 'en' | 'de') {
@@ -22,7 +27,18 @@ function failureMessage(locale: 'en' | 'de') {
   return 'Your course request could not be submitted right now. Please try again or contact the CASA team directly.';
 }
 
+function unavailableMessage(locale: 'en' | 'de') {
+  if (locale === 'de') {
+    return 'Dieser Starttermin ist nicht mehr buchbar. Bitte wählen Sie einen anderen Termin.';
+  }
+
+  return 'This start date can no longer be booked. Please choose another date.';
+}
+
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 'registration-course', { limit: 20, windowMs: 10 * 60 * 1000 });
+  if (limited) return limited;
+
   let body: unknown;
 
   try {
@@ -37,7 +53,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const parsed = courseRegistrationSubmissionSchema.safeParse(body);
+  const parsed = createCourseRegistrationSubmissionSchema(submissionLocale(body)).safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       {
@@ -48,8 +64,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const payload = parsed.data;
+  const { website, ...payload } = parsed.data;
   const requestId = crypto.randomUUID();
+
+  // Honeypot field for automated submissions.
+  if (website) {
+    return NextResponse.json({
+      status: 'accepted',
+      requestId,
+      mode: 'filtered',
+      message: successMessage(payload.locale),
+    });
+  }
+
+  /*
+   * The option must be one the public form offers right now. The catalogue
+   * decides what a learner can still book; without this check anyone could
+   * POST a past or unknown term straight at the route. The labels come from
+   * the same lookup, so the stored record names the course even when its ids
+   * are fixtures with no row behind them.
+   */
+  const catalog = await getCourseRegistrationCatalog(payload.locale);
+  const courseType = catalog.courseTypes.find((item) => item.id === payload.courseTypeId);
+  const option = catalog.optionsByCourseTypeId[payload.courseTypeId]?.find(
+    (item) => item.id === payload.courseInstanceId
+  );
+  if (!courseType || !option) {
+    return NextResponse.json({ status: 'error', message: unavailableMessage(payload.locale) }, { status: 400 });
+  }
+  const courseTypeLabel = courseType.name;
+  const courseInstanceLabel = `${option.dateRangeLabel} | ${option.scheduleLabel} | ${option.locationLabel}`;
+
   const submittedAt = new Date().toISOString();
   const webhookUrl = process.env.COURSE_REGISTRATION_WEBHOOK_URL;
 
@@ -63,8 +108,8 @@ export async function POST(request: NextRequest) {
     requestId,
     courseTypeId: payload.courseTypeId,
     courseInstanceId: payload.courseInstanceId,
-    courseTypeLabel: payload.courseTypeLabel,
-    courseInstanceLabel: payload.courseInstanceLabel,
+    courseTypeLabel,
+    courseInstanceLabel,
     salutation: payload.salutation,
     firstName: payload.firstName,
     lastName: payload.lastName,
@@ -83,8 +128,8 @@ export async function POST(request: NextRequest) {
   });
 
   const delivery = await notifyForm('course', {
-    requestId, submittedAt, ...payload, source: 'registration-course',
-  }, webhookUrl);
+    requestId, submittedAt, ...payload, courseTypeLabel, courseInstanceLabel, source: 'registration-course',
+  }, webhookUrl, { stored });
   if (!stored && !delivery.delivered) {
     return NextResponse.json({ status: 'error', message: failureMessage(payload.locale), supportPath: '/contact' }, { status: 503 });
   }

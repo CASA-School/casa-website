@@ -2,8 +2,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { notifyForm } from '@/lib/notifications/forms.server';
 
 import { storeExamRegistration } from '@/lib/admin/intake';
+import { rateLimit } from '@/lib/api/rate-limit';
+import { getExamRegistrationCatalog } from '@/lib/content/repository';
 
-import { examRegistrationSubmissionSchema } from '@/lib/validation/registration-submissions';
+import {
+  createExamRegistrationSubmissionSchema,
+  submissionLocale,
+} from '@/lib/validation/registration-submissions';
 
 
 function successMessage(locale: 'en' | 'de') {
@@ -22,7 +27,18 @@ function failureMessage(locale: 'en' | 'de') {
   return 'Your exam request could not be submitted right now. Please try again or contact the CASA team directly.';
 }
 
+function unavailableMessage(locale: 'en' | 'de') {
+  if (locale === 'de') {
+    return 'Für diesen Prüfungstermin ist keine Anmeldung mehr möglich. Bitte wählen Sie einen anderen Termin.';
+  }
+
+  return 'Registration for this exam session is no longer possible. Please choose another session.';
+}
+
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 'registration-exam', { limit: 20, windowMs: 10 * 60 * 1000 });
+  if (limited) return limited;
+
   let body: unknown;
 
   try {
@@ -37,7 +53,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const parsed = examRegistrationSubmissionSchema.safeParse(body);
+  const parsed = createExamRegistrationSubmissionSchema(submissionLocale(body)).safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       {
@@ -48,8 +64,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const payload = parsed.data;
+  const { website, ...payload } = parsed.data;
   const requestId = crypto.randomUUID();
+
+  // Honeypot field for automated submissions.
+  if (website) {
+    return NextResponse.json({
+      status: 'accepted',
+      requestId,
+      mode: 'filtered',
+      message: successMessage(payload.locale),
+    });
+  }
+
+  /*
+   * The session must be one the public form offers right now: the catalogue
+   * drops sessions past their deadline, and this is what stops a direct POST
+   * registering for one anyway. The labels come from the same lookup, so the
+   * stored record names the sitting even when its ids are fixtures. Not the
+   * deadline status ("Frist endet bald"): it is true today and stale tomorrow.
+   */
+  const catalog = await getExamRegistrationCatalog(payload.locale);
+  const examType = catalog.examTypes.find((item) => item.id === payload.examTypeId);
+  const option = catalog.optionsByExamTypeId[payload.examTypeId]?.find(
+    (item) => item.id === payload.examSessionId
+  );
+  if (!examType || !option) {
+    return NextResponse.json({ status: 'error', message: unavailableMessage(payload.locale) }, { status: 400 });
+  }
+  const examTypeLabel = examType.name;
+  const examSessionLabel = `${option.startsAtLabel} | ${option.locationLabel}`;
+
   const submittedAt = new Date().toISOString();
   const webhookUrl = process.env.EXAM_REGISTRATION_WEBHOOK_URL;
 
@@ -61,8 +106,8 @@ export async function POST(request: NextRequest) {
     requestId,
     examTypeId: payload.examTypeId,
     examSessionId: payload.examSessionId,
-    examTypeLabel: payload.examTypeLabel,
-    examSessionLabel: payload.examSessionLabel,
+    examTypeLabel,
+    examSessionLabel,
     registrationType: payload.registrationType,
     salutation: payload.salutation,
     firstName: payload.firstName,
@@ -76,8 +121,8 @@ export async function POST(request: NextRequest) {
   });
 
   const delivery = await notifyForm('exam', {
-    requestId, submittedAt, ...payload, source: 'registration-exam',
-  }, webhookUrl);
+    requestId, submittedAt, ...payload, examTypeLabel, examSessionLabel, source: 'registration-exam',
+  }, webhookUrl, { stored });
   if (!stored && !delivery.delivered) {
     return NextResponse.json({ status: 'error', message: failureMessage(payload.locale), supportPath: '/contact' }, { status: 503 });
   }
