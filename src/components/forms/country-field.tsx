@@ -19,6 +19,7 @@ type CountryFieldProps = {
   className?: string;
   disabled?: boolean;
   required?: boolean;
+  'aria-describedby'?: string;
 };
 
 export function CountryField({
@@ -30,6 +31,7 @@ export function CountryField({
   emptyLabel = 'No results found.',
   className,
   disabled,
+  'aria-describedby': ariaDescribedBy,
 }: CountryFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -82,6 +84,7 @@ export function CountryField({
         type="button"
         disabled={disabled}
         onClick={toggleOpen}
+        aria-describedby={ariaDescribedBy}
         className={cn(
           'flex h-11 w-full items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 text-left text-sm text-[var(--casa-ink)] transition-all',
           'focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--casa-blue)]/10',

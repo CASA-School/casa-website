@@ -309,17 +309,23 @@ export async function storeCourseRegistration(input: {
             declared_level_raw, declared_level_code, visa_required,
             accommodation_required, accommodation_type, smoker, allergies, notes,
             locale, person_id, submitted_at)
-         VALUES ($1, $2, $3, $4, $5, $6::salutation, $7, $8, $9, $10,
+         VALUES ($1,
+                 (SELECT id FROM course_types WHERE id = $2::uuid),
+                 (SELECT id FROM course_instances WHERE id = $3::uuid),
+                 $4, $5, $6::salutation, $7, $8, $9, $10,
                  $11, $12, $13, $14::date, $15, $16, $17, $18, $19::accommodation_type, $20, $21, $22,
                  $23, $24, $25)
          ON CONFLICT (request_id) DO NOTHING
          RETURNING id`,
         [
           input.requestId,
-          // The wizard sends whatever the catalogue gave it; from fixtures that is
-          // not a uuid and the FK would reject the whole row. A non-uuid is stored
-          // as null and the labels carry the meaning. Losing the join is
-          // survivable; losing the registration is not.
+          // The wizard sends whatever the catalogue gave it, and with no rows of
+          // its own the catalogue serves fixtures: uuid-shaped ids with no row
+          // behind them, which the FK would reject along with the whole
+          // registration. So an id is stored only when its row exists (the
+          // sub-selects above), a non-uuid never, and the labels carry the
+          // meaning either way. Losing the join is survivable; losing the
+          // registration is not.
           asUuid(input.courseTypeId),
           asUuid(input.courseInstanceId),
           input.courseTypeLabel || null,
@@ -401,12 +407,18 @@ export async function storeExamRegistration(input: {
             registration_type, salutation, first_name, last_name, email, phone,
             nationality_raw, nationality_code, birth_date_raw, birth_date,
             official_name_confirmed, locale, person_id, submitted_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7::salutation, $8, $9, $10, $11,
+         VALUES ($1,
+                 (SELECT id FROM exam_types WHERE id = $2::uuid),
+                 (SELECT id FROM exam_sessions WHERE id = $3::uuid),
+                 $4, $5, $6, $7::salutation, $8, $9, $10, $11,
                  $12, $13, $14, $15::date, $16, $17, $18, $19)
          ON CONFLICT (request_id) DO NOTHING
          RETURNING id`,
         [
           input.requestId,
+          // As for courses above. Nothing seeds exam_sessions, so in database
+          // mode the form still offers fixture sessions; each one is stored
+          // with a null FK and its label, never refused.
           asUuid(input.examTypeId),
           asUuid(input.examSessionId),
           input.examTypeLabel || null,

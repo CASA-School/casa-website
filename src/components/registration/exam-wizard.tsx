@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,13 +15,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
+import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
-import type { ExamRegistrationOption, RegistrationExamCatalog } from '@/lib/content/types';
+import type { RegistrationExamCatalog } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
-import { examRegistrationFormSchema } from '@/lib/validation/registration-submissions';
+import { createExamRegistrationFormSchema } from '@/lib/validation/registration-submissions';
 
-const registrationSchema = examRegistrationFormSchema;
-type FormData = z.infer<typeof registrationSchema>;
+type RegistrationSchema = ReturnType<typeof createExamRegistrationFormSchema>;
+type FormData = z.input<RegistrationSchema>;
+type FormSubmissionData = z.output<RegistrationSchema>;
 
 type ExamWizardProps = {
   catalog: RegistrationExamCatalog;
@@ -41,20 +43,19 @@ const requiredMarkClassName = 'mr-1 text-[var(--casa-coral-text)]';
 const fieldGroupClassName = 'space-y-1.5';
 const reviewTileClassName = 'rounded-lg border border-[color:var(--casa-sand)] bg-white p-4';
 
-function AvailabilityTag({ option }: { option: ExamRegistrationOption }) {
-  const classes =
-    option.availabilityState === 'full'
-      ? 'border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 text-[var(--casa-danger-text)]'
-      : option.availabilityState === 'limited'
-        ? 'border-[color:var(--casa-gold-deep)]/30 bg-[var(--casa-gold-deep)]/8 text-[var(--casa-warning-text)]'
-        : 'border-[color:var(--casa-success-surface)]/30 bg-[var(--casa-success-surface)]/8 text-[var(--casa-success-text)]';
+/** In the order the fields appear, so the first invalid one is the first on screen. */
+const FIELDS_BY_STEP: Array<Array<keyof FormData>> = [
+  ['examTypeId', 'registrationType', 'examSessionId'],
+  ['salutation', 'firstName', 'lastName', 'email', 'phone', 'nationality', 'birthDate'],
+  [],
+];
 
-  return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-eyebrow', classes)}>
-      {option.availabilityLabel}
-    </span>
-  );
-}
+/** Element ids that differ from the field name, so a failed step can focus its first invalid field. */
+const FIELD_ELEMENT_IDS: Partial<Record<keyof FormData, string>> = {
+  examTypeId: 'exam-type',
+  examSessionId: 'exam-session',
+  registrationType: 'registration-type',
+};
 
 export function ExamWizard({ catalog }: ExamWizardProps) {
   const isDe = catalog.locale === 'de';
@@ -63,8 +64,16 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  // Messages follow the page, so a German form never shows an English error.
+  const registrationSchema = useMemo(() => createExamRegistrationFormSchema(catalog.locale), [catalog.locale]);
+  // Set by a step change, so focus moves to the new step's heading but not on first render.
+  const stepChanged = useRef(false);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  // Counts failed attempts at the current step; each one focuses the field named here once its error has rendered.
+  const [stepFailures, setStepFailures] = useState(0);
+  const invalidFieldId = useRef<string | null>(null);
 
-  const form = useForm<FormData>({
+  const form = useForm<FormData, undefined, FormSubmissionData>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
@@ -80,12 +89,14 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
       officialNameConfirmed: false,
       examPolicyAccepted: false,
       acceptTerms: false,
+      website: '',
     },
     mode: 'onChange',
   });
 
   const handleCloseSuccess = () => {
     setSuccess(false);
+    stepChanged.current = true;
     setStep(1);
     form.reset({
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
@@ -101,6 +112,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
       officialNameConfirmed: false,
       examPolicyAccepted: false,
       acceptTerms: false,
+      website: '',
     });
   };
 
@@ -111,6 +123,12 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     trigger,
     formState: { errors, isValid },
   } = form;
+
+  /** Ties a field to its error message, whose id is `<name>-error`. */
+  const errorProps = (name: keyof FormData) => ({
+    'aria-invalid': Boolean(errors[name]),
+    'aria-describedby': errors[name] ? `${name}-error` : undefined,
+  });
 
   const selectedExamTypeId = watch('examTypeId');
   const selectedExamSessionId = watch('examSessionId');
@@ -135,6 +153,8 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     { title: t('Personal', 'Daten'), description: t('Candidate profile', 'Kandidatenprofil') },
     { title: t('Review', 'Prüfen'), description: t('Final check', 'Letzte Kontrolle') },
   ];
+  const stepFields = FIELDS_BY_STEP[step - 1] ?? [];
+  const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
   const registrationTypeLabel =
     {
       full: t('Full Exam', 'Vollprüfung'),
@@ -160,7 +180,19 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     }
   }, [catalog.optionsByExamTypeId, selectedExamSessionId, selectedExamTypeId, setValue]);
 
-  const onSubmit = async (data: FormData) => {
+  useEffect(() => {
+    if (!stepChanged.current) return;
+    stepChanged.current = false;
+    stepHeadingRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (!invalidFieldId.current) return;
+    document.getElementById(invalidFieldId.current)?.focus();
+    invalidFieldId.current = null;
+  }, [stepFailures]);
+
+  const onSubmit = async (data: FormSubmissionData) => {
     setSubmitting(true);
     setSubmissionError(null);
 
@@ -174,15 +206,15 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
           ...data,
           examTypeLabel: selectedExamType?.name ?? '',
           examSessionLabel: selectedOption
-            ? `${selectedOption.startsAtLabel} | ${selectedOption.locationLabel} | ${selectedOption.deadlineLabel}`
+            ? `${selectedOption.startsAtLabel} | ${selectedOption.locationLabel}`
             : '',
           locale: catalog.locale,
         }),
       });
 
-      const result = (await response.json()) as ExamRegistrationApiResult;
-      if (!response.ok || result.status !== 'accepted') {
-        throw new Error(result.message || 'Registration failed. Please try again.');
+      const result = (await response.json().catch(() => null)) as ExamRegistrationApiResult | null;
+      if (!response.ok || result?.status !== 'accepted') {
+        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
       }
 
       setSuccess(true);
@@ -193,7 +225,11 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
         locale: catalog.locale,
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unexpected registration error';
+      // A network failure's own message ("Failed to fetch") is the browser's, not ours.
+      const message =
+        error instanceof Error && !(error instanceof TypeError)
+          ? error.message
+          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
       setSubmissionError(message);
       trackCasaEvent('form_error', {
         form: 'exam_registration',
@@ -208,29 +244,20 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
   };
 
   const nextStep = async () => {
-    const personalFields: Array<keyof FormData> = [
-      'salutation',
-      'firstName',
-      'lastName',
-      'email',
-      'phone',
-      'nationality',
-      'birthDate',
-    ];
-
-    const fieldsByStep: Array<Array<keyof FormData>> = [
-      ['examTypeId', 'examSessionId', 'registrationType'],
-      personalFields,
-      [],
-    ];
-
-    const fields = fieldsByStep[step - 1] ?? [];
-    const valid = fields.length === 0 ? true : await trigger(fields, { shouldFocus: true });
+    // Not `shouldFocus`: it reaches only fields with a registered ref, and the
+    // selects, the country field and the date picker have none.
+    const valid = stepFields.length === 0 ? true : await trigger(stepFields);
 
     if (valid) {
+      stepChanged.current = true;
+      setStepFailures(0);
       setStep((current) => Math.min(current + 1, stepItems.length));
       return;
     }
+
+    const firstInvalid = stepFields.find((name) => form.getFieldState(name).invalid);
+    invalidFieldId.current = firstInvalid ? (FIELD_ELEMENT_IDS[firstInvalid] ?? firstInvalid) : null;
+    setStepFailures((count) => count + 1);
 
     trackCasaEvent('form_error', {
       form: 'exam_registration',
@@ -242,7 +269,11 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     });
   };
 
-  const prevStep = () => setStep((current) => Math.max(current - 1, 1));
+  const prevStep = () => {
+    stepChanged.current = true;
+    setStepFailures(0);
+    setStep((current) => Math.max(current - 1, 1));
+  };
 
 
 
@@ -328,7 +359,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 </span>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-coral-text)]">{t('Exam path', 'Prüfungsweg')}</p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Choose your exam', 'Prüfung auswählen')}</h2>
+                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Choose your exam', 'Prüfung auswählen')}</h2>
                   <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
                     {t(
                       'Select exam type first, then choose the session that matches your preparation timeline.',
@@ -349,7 +380,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   onValueChange={(value) => setValue('examTypeId', value, { shouldDirty: true, shouldValidate: true })}
                   defaultValue={watch('examTypeId')}
                 >
-                  <SelectTrigger id="exam-type" className={selectTriggerClassName}>
+                  <SelectTrigger id="exam-type" aria-required {...errorProps('examTypeId')} className={selectTriggerClassName}>
                     <SelectValue placeholder={t('Select an exam...', 'Prüfung auswählen...')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -360,7 +391,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.examTypeId && <p className="text-sm text-[var(--casa-danger-text)]">{errors.examTypeId.message}</p>}
+                {errors.examTypeId && <p id="examTypeId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.examTypeId.message}</p>}
               </div>
 
               <div className={fieldGroupClassName}>
@@ -374,7 +405,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   }
                   defaultValue={watch('registrationType')}
                 >
-                  <SelectTrigger id="registration-type" className={selectTriggerClassName}>
+                  <SelectTrigger id="registration-type" aria-required {...errorProps('registrationType')} className={selectTriggerClassName}>
                     <SelectValue placeholder={t('Select type...', 'Anmeldeart auswählen...')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -383,7 +414,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     <SelectItem value="oral">{t('Oral Only', 'Nur mündlich')}</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.registrationType && <p className="text-sm text-[var(--casa-danger-text)]">{errors.registrationType.message}</p>}
+                {errors.registrationType && <p id="registrationType-error" className="text-sm text-[var(--casa-danger-text)]">{errors.registrationType.message}</p>}
               </div>
             </div>
 
@@ -397,7 +428,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 onValueChange={(value) => setValue('examSessionId', value, { shouldDirty: true, shouldValidate: true })}
                 value={selectedExamSessionId}
               >
-                <SelectTrigger id="exam-session" className={selectTriggerClassName}>
+                <SelectTrigger id="exam-session" aria-required {...errorProps('examSessionId')} className={selectTriggerClassName}>
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Termin auswählen...' : 'Select a session...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -413,7 +444,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   {catalog.locale === 'de' ? 'Noch keine Termine für diesen Prüfungstyp verfügbar.' : 'No sessions published for this exam type yet. Please choose another exam type.'}
                 </p>
               ) : null}
-              {errors.examSessionId && <p className="text-sm text-[var(--casa-danger-text)]">{errors.examSessionId.message}</p>}
+              {errors.examSessionId && <p id="examSessionId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.examSessionId.message}</p>}
             </div>
 
             {selectedOption ? (
@@ -423,7 +454,6 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{t('Selected session', 'Ausgewählter Termin')}</p>
                     <h3 className="mt-1 text-base font-bold text-[var(--casa-ink)]">{selectedExamType?.name}</h3>
                   </div>
-                  <AvailabilityTag option={selectedOption} />
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
                   <div>
@@ -453,7 +483,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 </span>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{t('Candidate profile', 'Kandidatenprofil')}</p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Personal information', 'Persönliche Angaben')}</h2>
+                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Personal information', 'Persönliche Angaben')}</h2>
                   <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
                     {t('Candidate details must match your official identification.', 'Ihre Angaben müssen exakt zu Ihrem amtlichen Ausweis passen.')}
                   </p>
@@ -470,7 +500,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 onValueChange={(value) => setValue('salutation', value as 'mr' | 'ms' | 'mx' | 'neutral', { shouldDirty: true, shouldValidate: true })}
                 value={watch('salutation')}
               >
-                <SelectTrigger id="salutation" className={selectTriggerClassName}>
+                <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={selectTriggerClassName}>
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -480,7 +510,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Neutral / Other'}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.salutation && <p className="text-sm text-[var(--casa-danger-text)]">{errors.salutation.message}</p>}
+              {errors.salutation && <p id="salutation-error" className="text-sm text-[var(--casa-danger-text)]">{errors.salutation.message}</p>}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -489,16 +519,16 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   <span className={requiredMarkClassName}>*</span>
                   {t('First Name', 'Vorname')}
                 </Label>
-                <Input id="firstName" autoComplete="given-name" className={fieldClassName} {...register('firstName')} />
-                {errors.firstName && <p className="text-sm text-[var(--casa-danger-text)]">{errors.firstName.message}</p>}
+                <Input id="firstName" autoComplete="given-name" aria-required {...errorProps('firstName')} className={fieldClassName} {...register('firstName')} />
+                {errors.firstName && <p id="firstName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.firstName.message}</p>}
               </div>
               <div className={fieldGroupClassName}>
                 <Label htmlFor="lastName" className={labelClassName}>
                   <span className={requiredMarkClassName}>*</span>
                   {t('Last Name', 'Nachname')}
                 </Label>
-                <Input id="lastName" autoComplete="family-name" className={fieldClassName} {...register('lastName')} />
-                {errors.lastName && <p className="text-sm text-[var(--casa-danger-text)]">{errors.lastName.message}</p>}
+                <Input id="lastName" autoComplete="family-name" aria-required {...errorProps('lastName')} className={fieldClassName} {...register('lastName')} />
+                {errors.lastName && <p id="lastName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.lastName.message}</p>}
               </div>
             </div>
 
@@ -512,18 +542,20 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  aria-required
+                  {...errorProps('email')}
                   className={fieldClassName}
                   {...register('email')}
                 />
-                {errors.email && <p className="text-sm text-[var(--casa-danger-text)]">{errors.email.message}</p>}
+                {errors.email && <p id="email-error" className="text-sm text-[var(--casa-danger-text)]">{errors.email.message}</p>}
               </div>
               <div className={fieldGroupClassName}>
                 <Label htmlFor="phone" className={labelClassName}>
                   <span className={requiredMarkClassName}>*</span>
                   {t('Phone Number', 'Telefonnummer')}
                 </Label>
-                <Input id="phone" autoComplete="tel" className={fieldClassName} {...register('phone')} />
-                {errors.phone && <p className="text-sm text-[var(--casa-danger-text)]">{errors.phone.message}</p>}
+                <Input id="phone" autoComplete="tel" aria-required {...errorProps('phone')} className={fieldClassName} {...register('phone')} />
+                {errors.phone && <p id="phone-error" className="text-sm text-[var(--casa-danger-text)]">{errors.phone.message}</p>}
               </div>
             </div>
 
@@ -546,8 +578,9 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   emptyLabel={t('No results found.', 'Keine Ergebnisse gefunden.')}
                   className={fieldClassName}
                   required
+                  aria-describedby={errors.nationality ? 'nationality-error' : undefined}
                 />
-                {errors.nationality && <p className="text-sm text-[var(--casa-danger-text)]">{errors.nationality.message}</p>}
+                {errors.nationality && <p id="nationality-error" className="text-sm text-[var(--casa-danger-text)]">{errors.nationality.message}</p>}
               </div>
               <div className={fieldGroupClassName}>
                 <Label htmlFor="birthDate" className={labelClassName}>
@@ -560,6 +593,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   render={({ field }) => (
                     <DatePicker
                       id="birthDate"
+                      aria-describedby={errors.birthDate ? 'birthDate-error' : undefined}
                       value={field.value}
                       onChange={field.onChange}
                       placeholder={catalog.locale === 'de' ? 'TT.MM.JJJJ' : 'dd.mm.yyyy'}
@@ -569,7 +603,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     />
                   )}
                 />
-                {errors.birthDate && <p className="text-sm text-[var(--casa-danger-text)]">{errors.birthDate.message}</p>}
+                {errors.birthDate && <p id="birthDate-error" className="text-sm text-[var(--casa-danger-text)]">{errors.birthDate.message}</p>}
               </div>
             </div>
           </div>
@@ -584,7 +618,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 </span>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{t('Final check', 'Letzte Kontrolle')}</p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Review and submit', 'Prüfen und absenden')}</h2>
+                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Review and submit', 'Prüfen und absenden')}</h2>
                   <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{t('Double-check your exam selection and candidate details.', 'Bitte prüfen Sie Prüfungsauswahl und Kandidatenangaben.')}</p>
                 </div>
               </div>
@@ -630,6 +664,8 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="official-name-confirmed"
+                    aria-required
+                    {...errorProps('officialNameConfirmed')}
                     checked={watch('officialNameConfirmed')}
                     onCheckedChange={(checked) =>
                       setValue('officialNameConfirmed', Boolean(checked), { shouldDirty: true, shouldValidate: true })
@@ -640,11 +676,13 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     {t('My name and birth date match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
                   </Label>
                 </div>
-                {errors.officialNameConfirmed ? <p className="text-sm text-[var(--casa-danger-text)]">{errors.officialNameConfirmed.message}</p> : null}
+                {errors.officialNameConfirmed ? <p id="officialNameConfirmed-error" className="text-sm text-[var(--casa-danger-text)]">{errors.officialNameConfirmed.message}</p> : null}
 
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="exam-policy-accepted"
+                    aria-required
+                    {...errorProps('examPolicyAccepted')}
                     checked={watch('examPolicyAccepted')}
                     onCheckedChange={(checked) =>
                       setValue('examPolicyAccepted', Boolean(checked), { shouldDirty: true, shouldValidate: true })
@@ -655,11 +693,13 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich verstehe, dass die Prüfungsbestätigung von Dokumenten- und Zahlungsprüfung abhängt.')}
                   </Label>
                 </div>
-                {errors.examPolicyAccepted ? <p className="text-sm text-[var(--casa-danger-text)]">{errors.examPolicyAccepted.message}</p> : null}
+                {errors.examPolicyAccepted ? <p id="examPolicyAccepted-error" className="text-sm text-[var(--casa-danger-text)]">{errors.examPolicyAccepted.message}</p> : null}
 
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="accept-terms"
+                    aria-required
+                    {...errorProps('acceptTerms')}
                     checked={watch('acceptTerms')}
                     onCheckedChange={(checked) =>
                       setValue('acceptTerms', Boolean(checked), { shouldDirty: true, shouldValidate: true })
@@ -694,18 +734,42 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     )}
                   </Label>
                 </div>
-                {errors.acceptTerms ? <p className="text-sm text-[var(--casa-danger-text)]">{errors.acceptTerms.message}</p> : null}
+                {errors.acceptTerms ? <p id="acceptTerms-error" className="text-sm text-[var(--casa-danger-text)]">{errors.acceptTerms.message}</p> : null}
               </div>
             </div>
           </div>
         )}
 
+        {showStepAlert && (
+          // Keyed by attempt, so a repeated failed Weiter is announced again.
+          <div key={stepFailures} className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+            <p>{t('Please check the highlighted fields.', 'Bitte prüfen Sie die markierten Angaben.')}</p>
+          </div>
+        )}
+
         {submissionError && (
           <div className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
-            {submissionError}
+            <p>{submissionError}</p>
+            <p className="mt-1">
+              {t('Reach us directly:', 'So erreichen Sie uns direkt:')}{' '}
+              <a href={footerConfig.contact.emails[0].href} className="font-semibold underline underline-offset-4">
+                {footerConfig.contact.emails[0].label}
+              </a>
+              {' · '}
+              <a href={`tel:${footerConfig.contact.phone}`} className="font-semibold underline underline-offset-4">
+                {footerConfig.contact.phone}
+              </a>
+              {' · '}
+              <Link href="/contact" className="font-semibold underline underline-offset-4">
+                {t('Contact page', 'Kontaktseite')}
+              </Link>
+            </p>
           </div>
         )}
         </div>
+
+        {/* Honeypot, as on the contact form: invisible to people, filled by bots. */}
+        <input type="text" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" {...register('website')} />
 
         <div className="mt-4 flex shrink-0 justify-between border-t border-[color:var(--casa-sand)] pt-4">
           {step > 1 ? (

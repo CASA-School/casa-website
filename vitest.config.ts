@@ -21,6 +21,10 @@ export default defineConfig({
        * Components and has no client boundary to protect.
        */
       'server-only': path.resolve(__dirname, './src/test/server-only-stub.ts'),
+      // Mirrors the `paths` entry in tsconfig.json: `lucide-react` is not a
+      // dependency, it resolves to the icon adapter. Vitest does not read
+      // tsconfig paths, so a suite rendering an icon failed on import.
+      'lucide-react': path.resolve(__dirname, './src/lib/icons/streamline-lucide-adapter'),
     },
   },
   test: {
