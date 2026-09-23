@@ -53,15 +53,21 @@ were written against it.
 - Public content reads come from Postgres tables.
 - Contact enquiries and course/exam registrations persist to the workspace queues.
 - Career applications persist including uploaded CV files.
-- Public submissions also fan out through configured webhooks.
+- Every submission also goes through `notifyForm`
+  (`src/lib/notifications/forms.server.ts`): Microsoft Graph mail when
+  `FORM_MAIL_FROM` and the managed identity are set, otherwise — in
+  `FORM_DELIVERY_MODE=live` only — the form's webhook. Test mode, the default,
+  mails `admin@casa-bremen.de` and never calls a webhook.
 
 ### Fallback
 - Enabled when `DATABASE_URL` is unset.
 - Public content falls back to in-repo content fixtures.
-- Career listings fall back to the in-memory dataset in `src/lib/mock/store.ts`;
-  career application submission is disabled, because CV upload needs storage.
-- Enquiries and registrations still fan out to their webhooks and report
-  `stored: false`.
+- Career listings fall back to the in-memory dataset in `src/lib/mock/store.ts`.
+- No submission is stored, so `notifyForm` is the only way a lead reaches CASA.
+  Contact and course/exam registration answer 503 when nothing was stored and
+  nothing delivered, and `stored: false` when the notification went out. Group
+  appointments and career applications answer 503 whenever there is no
+  database. With neither a database nor mail configured, every lead form fails.
 - The placement test runs end to end from an in-process store and tells the
   learner plainly that progress is not saved.
 
@@ -118,10 +124,15 @@ staff conclude nothing had come in.
   - `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST`
   - `CASA_ENABLE_INTERNAL_SURFACES`
 - Public submission integrations:
+  - `FORM_DELIVERY_MODE`, `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID`,
+    `FORM_RECIPIENT_<FORM>` — lead notification mail (see Runtime Modes)
   - `CONTACT_WEBHOOK_URL`, `GROUP_INQUIRY_WEBHOOK_URL`
   - `CAREERS_APPLICATION_WEBHOOK_URL`
   - `COURSE_REGISTRATION_WEBHOOK_URL`, `EXAM_REGISTRATION_WEBHOOK_URL`
   - `PLACEMENT_RESULT_WEBHOOK_URL`
+- SEO:
+  - `NEXT_PUBLIC_SITE_URL` — canonical origin, default `https://casa-bremen.de`;
+    inlined at build time
 - Optional public UX flags:
   - `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS`
 - Validation approach:

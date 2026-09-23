@@ -85,11 +85,20 @@ workspace queues; career applications persist including the uploaded CV file
 (`career_application_files`).
 
 **Fallback** (`DATABASE_URL` unset): public content falls back to in-repo fixtures;
-careers use the in-memory dataset in `src/lib/mock/store.ts`; career application
-submission is disabled because CV upload requires database storage. The placement
-test still runs end to end from an in-process store, and tells the learner plainly
-that progress is not being saved. Enquiries and registrations still fan out to
-their webhooks; each route reports `stored: false`.
+careers use the in-memory dataset in `src/lib/mock/store.ts`. The placement test
+still runs end to end from an in-process store, and tells the learner plainly that
+progress is not being saved. **No lead is stored**, so a submission reaches CASA
+only if `notifyForm` (`src/lib/notifications/forms.server.ts`) delivers it:
+Microsoft Graph mail when `FORM_MAIL_FROM` and the managed identity
+(`IDENTITY_ENDPOINT`, `IDENTITY_HEADER`) are present, otherwise the form's legacy
+webhook — but only with `FORM_DELIVERY_MODE=live`. Test mode is the default,
+sends to `admin@casa-bremen.de` and never calls a webhook; live mode needs a
+`FORM_RECIPIENT_<FORM>` per form or it sends nothing. Contact and course/exam
+registration then answer **503** when nothing was stored and nothing delivered,
+and succeed with `stored: false` when the notification went out. Group appointments and career
+applications answer 503 whenever there is no database, mail or not. With neither
+a database nor mail — the Azure revision as deployed — every lead form fails;
+`docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md` has the launch checklist.
 
 Keep both modes working for the PUBLIC SITE. Do not break fallback parity when
 changing data flows.
@@ -111,9 +120,14 @@ conclude nothing had come in.
 | `COURSE_REGISTRATION_WEBHOOK_URL` | Course registration fan-out |
 | `EXAM_REGISTRATION_WEBHOOK_URL` | Exam registration fan-out |
 | `PLACEMENT_RESULT_WEBHOOK_URL` | Placement result hand-off to the CASA dashboard |
+| `FORM_DELIVERY_MODE` | `live` sends to the real recipients; anything else is test mode (all mail to `admin@casa-bremen.de`, no webhooks) |
+| `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID` | Sender mailbox and managed identity for lead notification mail via Microsoft Graph |
+| `FORM_RECIPIENT_<FORM>` | Per-form recipient in live mode (`CONTACT`, `GROUPS`, `COURSE`, `EXAM`, `CAREERS`, `PLACEMENT`, `APPOINTMENT`) |
+| `NEXT_PUBLIC_SITE_URL` | Origin for canonical, hreflang, sitemap and JSON-LD URLs; default `https://casa-bremen.de`. Inlined at build time, so it only takes effect when passed into the image build (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`) |
 | `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS` | Optional flag for unverified public claims |
 
-All webhooks are optional, and each fires *alongside* storing the record in the
+All webhooks are optional, and in live mode a webhook is used only when no
+notification mail is configured; it fires *alongside* storing the record in the
 workspace rather than instead of it. Presence checks live in `src/lib/db/env.ts`;
 there is no central typed env schema yet. `/admin/settings` reports which are
 connected without ever printing a value.
@@ -138,7 +152,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0013_booking_accommodation.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0016_staff_sign_in_failures.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -313,9 +327,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
-| `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or free-text column.** Measured defects in CASA's FileMaker and the rule each one gives the new schema; 0007 is its first application |
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
-| `docs/FILEMAKER_BRIDGE.md` | The strangler plan: three phases from write-through to retirement, server-safe scripts, the decisions still open |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
@@ -369,6 +381,8 @@ is still valid.
   accounts today, so a dedicated `WebIntake` account with its own privilege set is a
   precondition, not a nicety; FileMaker is LAN-only, so the push must run on-prem.
   Blocked on the decisions in that document's §7.
+- **Migration 0016 must be applied before deploying this build.** The staff sign-in
+  throttle fails closed without `staff_sign_in_failures`: nobody can sign in.
 - **No retention policy.** Enquiries, registrations, placement attempts and stored
   CVs are all personal data, none of it deleted on a schedule. A period needs a
   named privacy owner at CASA.
@@ -419,8 +433,9 @@ is still valid.
 - No canonical production deployment doc yet (domain, rollback owner). The custom domain
   for the website is still unassigned: `lernen.casa-bremen.de` points at the *student app*,
   and `www.casa-bremen.de` still resolves to the old site at 195.34.167.82. The Container
-  App now needs **two** hostnames, because the staff workspace answers on
-  `admin.casa-bremen.de` off the same revision.
+  App needs **three** hostnames off the same revision: the apex `casa-bremen.de`, which is
+  the canonical host (`src/lib/seo.ts`, as on the old site); `www.casa-bremen.de`, which
+  `src/proxy.ts` 308s to the apex; and `admin.casa-bremen.de` for the staff workspace.
 
 ## Artifacts
 

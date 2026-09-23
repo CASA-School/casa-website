@@ -2160,6 +2160,37 @@ English one or contains a transliterated umlaut. Ten new assertions, 350 tests g
 answers 403 to any automated request, so a guess could not be verified. Swap it once
 someone has opened the German page in a browser.
 
+## 27. Pre-deployment small fixes (2026-09-23)
+
+A verified pre-deployment audit (2026-09-22, eight dimensions, every finding re-checked;
+local report `output/review/predeploy-audit-2026-09-22.md`) produced this pass. What
+changed in how the code works, for whoever picks it up next:
+
+- **Bookability is one rule.** `src/lib/content/bookability.ts` decides, from Bremen's
+  calendar day at request time, which terms and exam sittings can still be booked:
+  evening terms until they end (CASA publishes joining a running course), Bildungszeit
+  on any Monday, everything else — Intensive included, an ASSUMPTION to confirm with
+  CASA — only up to its first day; sittings up to and including the deadline day. Every
+  public surface and both registration routes ask it; nothing takes `instances[0]`.
+- **No invented availability.** The hash-based "Nur wenige Plätze" / "Warteliste"
+  labels are gone. Do not reintroduce a seat count without real bookings.
+- **Canonical host is the apex** `https://casa-bremen.de` (as on the old site);
+  `www` 308s to it in `src/proxy.ts`. Hosts outside the production allowlist get
+  `X-Robots-Tag: noindex`. Security headers live in `next.config.ts`.
+- **Staff sign-in is throttled** through `staff_sign_in_failures` (migration 0016):
+  10 failures per typed address and 30 per client per 15 minutes, race-free, plus two
+  concurrent scrypt checks per replica. It fails closed, so 0016 must be applied before
+  deploying. Public POST routes have an in-memory per-replica rate limit
+  (`src/lib/api/rate-limit.ts`).
+- **404s** render inside the locale layout (`[locale]/not-found.tsx` + `[...rest]`),
+  but the body is client-rendered; the server HTML carries the status, noindex and
+  title. The layout sets no canonical, hreflang or OG of its own.
+- `TZ=Europe/Berlin` in the image; `/api/health` exists but no probe uses it yet.
+
+Still open from the audit, by owner: the legacy redirect map for the old site's URLs,
+the privacy notice and other legal texts, photographs, a database and mail on Azure,
+and the cutover runbook.
+
 ## 28. The homepage reel is real photographs again (2026-09-23)
 
 The 21 September reel was five `image_gen` edits. Measured against their sources: the
@@ -2179,4 +2210,3 @@ photograph exists. The old courtyard frame 095 could not be used honestly: its g
 spans the width at mid-height, so the desktop heading always lands on faces.
 
 Selection record, rejections and the consent check are in docs/MEDIA_LIBRARY.md.
-
