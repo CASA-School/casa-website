@@ -40,7 +40,17 @@ export async function logActivity({
   );
 }
 
-export async function recentActivity(limit = 12): Promise<ActivityEntry[]> {
+/**
+ * The latest entries across the whole workspace.
+ *
+ * Entries about job applications — a status change, a note, a CV download —
+ * only when asked for, because each links to the application's record. The
+ * caller passes `canAccess(user, 'applications')`.
+ */
+export async function recentActivity(
+  limit = 12,
+  { includeApplications = false }: { includeApplications?: boolean } = {}
+): Promise<ActivityEntry[]> {
   const rows = await query<{
     id: string;
     staff_name: string | null;
@@ -52,9 +62,10 @@ export async function recentActivity(limit = 12): Promise<ActivityEntry[]> {
   }>(
     `SELECT id, staff_name, entity, entity_id, action, detail, created_at
        FROM staff_activity
+      WHERE $2::boolean OR entity <> 'career_application'
       ORDER BY created_at DESC
       LIMIT $1`,
-    [limit]
+    [limit, includeApplications]
   );
 
   return rows.map((row) => ({

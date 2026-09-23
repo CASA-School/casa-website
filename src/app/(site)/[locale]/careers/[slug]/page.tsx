@@ -3,12 +3,14 @@ import { Link } from '@/i18n/navigation';
 import { ArrowLeft, ArrowRight, Briefcase, Clock, MapPin } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
-import { CareerApplicationForm } from '@/components/forms/career-application-form';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCareerPositionBySlug } from '@/lib/content/repository';
+import { isDatabaseConfigured } from '@/lib/db/env';
 import { createPublicMetadata } from '@/lib/seo';
+
+import { ApplySection } from './apply-section';
 
 type CareerDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -49,13 +51,9 @@ export async function generateMetadata({ params }: CareerDetailPageProps): Promi
   const { slug } = await params;
   const position = await getCareerPositionBySlug(slug, locale);
 
+  // A missing role 404s from here, so no canonical is emitted for it.
   if (!position) {
-    return createPublicMetadata({
-      locale,
-      title: 'Career role',
-      description: 'Career opportunity at CASA Bremen.',
-      path: `/careers/${slug}`,
-    });
+    notFound();
   }
 
   return createPublicMetadata({
@@ -285,11 +283,10 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
               </article>
 
               <div id="apply-form" className="scroll-mt-8">
-                <CareerApplicationForm
+                <ApplySection
                   locale={locale}
-                  positionId={position.id}
-                  positionSlug={position.slug}
-                  positionTitle={position.title}
+                  position={position}
+                  acceptsUploads={isDatabaseConfigured()}
                 />
               </div>
             </div>

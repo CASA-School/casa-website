@@ -1,11 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
+
+import { resetRateLimits } from '@/lib/api/rate-limit';
 
 const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn() }));
 vi.mock('@/lib/admin/intake', () => ({ storeEnquiry: mocks.store }));
 vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify }));
 import { POST } from './route';
 
+beforeEach(() => resetRateLimits());
 afterEach(() => vi.clearAllMocks());
 const request = () => new Request('http://localhost/api/contact', {
   method: 'POST', body: JSON.stringify({
@@ -24,5 +27,16 @@ describe('contact delivery acknowledgement', () => {
     const response = await POST(request());
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ stored: true, notified: false, mode: 'database' });
+  });
+  it('tells the notification whether the enquiry was stored', async () => {
+    mocks.store.mockResolvedValue(false); mocks.notify.mockResolvedValue({ delivered: true, channel: 'email' });
+    await POST(request());
+    expect(mocks.notify.mock.calls[0][3]).toEqual({ stored: false });
+  });
+  it('refuses the eleventh enquiry from one client in ten minutes, before storing it', async () => {
+    mocks.store.mockResolvedValue(true); mocks.notify.mockResolvedValue({ delivered: true, channel: 'email' });
+    for (let i = 0; i < 10; i += 1) expect((await POST(request())).status).toBe(200);
+    expect((await POST(request())).status).toBe(429);
+    expect(mocks.store).toHaveBeenCalledTimes(10);
   });
 });

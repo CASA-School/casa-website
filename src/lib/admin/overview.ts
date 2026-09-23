@@ -248,8 +248,18 @@ export type RecentInbound = {
   href: string;
 };
 
-/** The latest arrivals across all four queues, newest first. */
-export async function getRecentInbound(limit = 8): Promise<RecentInbound[]> {
+/**
+ * The latest arrivals across all four queues, newest first.
+ *
+ * Job applications only when asked for: the list carries each applicant's
+ * name and the link to their record, which is Applications-module data, and
+ * the Activity screen that shows it is open to colleagues who do not hold that
+ * module. The caller passes `canAccess(user, 'applications')`.
+ */
+export async function getRecentInbound(
+  limit = 8,
+  { includeApplications = false }: { includeApplications?: boolean } = {}
+): Promise<RecentInbound[]> {
   const rows = await query<{
     id: string;
     kind: RecentInbound['kind'];
@@ -290,10 +300,11 @@ export async function getRecentInbound(limit = 8): Promise<RecentInbound[]> {
               a.status,
               a.created_at
          FROM career_applications a
+        WHERE $2::boolean
      ) inbound
      ORDER BY at DESC
      LIMIT $1`,
-    [limit]
+    [limit, includeApplications]
   );
 
   const hrefFor: Record<RecentInbound['kind'], string> = {

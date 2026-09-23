@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { notifyForm } from '@/lib/notifications/forms.server';
 
+import { acceptedCvKind, cvMimeType } from '@/lib/admin/cv-file';
+import { rateLimit } from '@/lib/api/rate-limit';
 import { normalizeContentLocale } from '@/lib/content/locale';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { withDatabaseTransaction } from '@/lib/db/server';
@@ -8,11 +10,8 @@ import { careerApplicationSchema } from '@/lib/validation/career-applications';
 
 const MAX_CV_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 
-const acceptedCvMimeTypes = new Set([
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]);
+/** Longer than any real file name, short enough to keep out of the header on download. */
+const MAX_CV_FILE_NAME_LENGTH = 255;
 
 function successMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
@@ -51,6 +50,10 @@ function extractLocale(value: FormDataEntryValue | null): 'en' | 'de' {
 }
 
 export async function POST(request: Request) {
+  // The lowest budget of any form: every accepted request stores up to 8 MB.
+  const limited = rateLimit(request, 'careers-apply', { limit: 5, windowMs: 10 * 60_000 });
+  if (limited) return limited;
+
   let formData: FormData;
 
   try {
@@ -66,6 +69,19 @@ export async function POST(request: Request) {
   }
 
   const locale = extractLocale(formData.get('locale'));
+
+  // Honeypot, as on the contact form: a filled `website` field is a bot. It is
+  // told the application arrived, and nothing is stored or sent.
+  const website = formData.get('website');
+  if (typeof website === 'string' && website.trim().length > 0) {
+    return NextResponse.json({
+      status: 'accepted',
+      requestId: crypto.randomUUID(),
+      mode: 'filtered',
+      message: successMessage(locale),
+    });
+  }
+
   const cvFile = formData.get('cvFile');
 
   if (!(cvFile instanceof File) || cvFile.size <= 0) {
@@ -78,7 +94,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (cvFile.size > MAX_CV_FILE_SIZE_BYTES) {
+  if (cvFile.size > MAX_CV_FILE_SIZE_BYTES || cvFile.name.length > MAX_CV_FILE_NAME_LENGTH) {
     return NextResponse.json(
       {
         status: 'error',
@@ -88,7 +104,16 @@ export async function POST(request: Request) {
     );
   }
 
-  if (cvFile.type && !acceptedCvMimeTypes.has(cvFile.type)) {
+  /*
+   * The declared type is the browser's guess, or a script's claim. The file is
+   * a CV only when its extension and its leading bytes agree on PDF, DOC or
+   * DOCX — an executable renamed `Lebenslauf.pdf` is refused here rather than
+   * stored and downloaded by a colleague.
+   */
+  const cvBytes = Buffer.from(await cvFile.arrayBuffer());
+  const cvKind = acceptedCvKind({ name: cvFile.name, type: cvFile.type, bytes: cvBytes });
+
+  if (!cvKind) {
     return NextResponse.json(
       {
         status: 'error',
@@ -146,8 +171,6 @@ export async function POST(request: Request) {
       throw new Error('Database is not available');
     }
 
-    const cvBytes = Buffer.from(await cvFile.arrayBuffer());
-
     /*
      * One transaction, two inserts.
      *
@@ -194,7 +217,8 @@ export async function POST(request: Request) {
           data.coverLetter,
           cvFile.name,
           cvFile.size,
-          cvFile.type || null,
+          // What the bytes are, not what the browser declared.
+          cvMimeType(cvKind),
         ]
       );
 
@@ -207,7 +231,7 @@ export async function POST(request: Request) {
            file_bytes
          )
          VALUES ($1::uuid, $2, $3, $4, $5)`,
-        [requestId, cvFile.name, cvFile.size, cvFile.type || null, cvBytes]
+        [requestId, cvFile.name, cvFile.size, cvMimeType(cvKind), cvBytes]
       );
     });
   } catch (error) {
@@ -226,7 +250,7 @@ export async function POST(request: Request) {
     requestId, submittedAt, ...data,
     cvFileName: cvFile.name, cvFileSize: cvFile.size,
     cvStorageMode: 'database',
-  }, webHookUrl);
+  }, webHookUrl, { stored: true });
 
   return NextResponse.json({
     status: 'accepted',

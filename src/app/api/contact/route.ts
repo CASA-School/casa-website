@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { notifyForm } from '@/lib/notifications/forms.server';
 
 import { storeEnquiry } from '@/lib/admin/intake';
+import { rateLimit } from '@/lib/api/rate-limit';
 import { getGroupInquiryWebhookUrl } from '@/lib/db/env';
 import { contactInquirySchema, organiserBriefFields } from '@/lib/validation/contact';
 
@@ -23,6 +24,9 @@ function failureMessage(locale: 'en' | 'de') {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 'contact', { limit: 10, windowMs: 10 * 60_000 });
+  if (limited) return limited;
+
   let body: unknown;
 
   try {
@@ -112,7 +116,7 @@ export async function POST(request: NextRequest) {
     lastName: payload.lastName || null, email: payload.email,
     topic: payload.topic, topicKey: payload.topicKey || null,
     message: payload.message, source: payload.source, organiserBrief,
-  }, webhookUrl);
+  }, webhookUrl, { stored });
   if (!stored && !delivery.delivered) {
     return NextResponse.json({ status: 'error', message: failureMessage(locale), supportPath: '/contact' }, { status: 503 });
   }

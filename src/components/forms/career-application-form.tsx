@@ -79,6 +79,8 @@ export function CareerApplicationForm({
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
   const [cvFile, setCvFile] = useState<File | null>(null);
+  // Honeypot: hidden from people, filled in by bots; the route drops it.
+  const [website, setWebsite] = useState('');
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -146,6 +148,7 @@ export function CareerApplicationForm({
     formData.append('linkedinUrl', linkedinUrl);
     formData.append('coverLetter', coverLetter);
     formData.append('cvFile', cvFile as File);
+    formData.append('website', website);
 
     try {
       const response = await fetch('/api/careers/apply', {
@@ -243,6 +246,17 @@ export function CareerApplicationForm({
             className="rounded-xl"
           />
         </label>
+
+        <input
+          type="text"
+          name="website"
+          className="hidden"
+          value={website}
+          tabIndex={-1}
+          autoComplete="off"
+          onChange={(event) => setWebsite(event.target.value)}
+          aria-hidden="true"
+        />
 
         <Button
           type="submit"
