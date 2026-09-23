@@ -27,13 +27,9 @@ export async function generateMetadata({ params }: AccommodationDetailPageProps)
   const locale = await getContentLocale();
   const { type } = await params;
 
+  // An unknown type 404s from here, so no canonical is emitted for it.
   if (!validTypes.includes(type as AccommodationTypeKey)) {
-    return createPublicMetadata({
-      locale,
-      title: locale === 'de' ? 'Unterkunft' : 'Accommodation',
-      description: locale === 'de' ? 'Unterkunft bei CASA in Bremen.' : 'Accommodation with CASA in Bremen.',
-      path: `/accommodation/${type}`,
-    });
+    notFound();
   }
 
   return createPublicMetadata({

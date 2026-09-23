@@ -27,13 +27,9 @@ export async function generateMetadata({ params }: NewsDetailPageProps): Promise
   const { slug } = await params;
   const post = await getNewsPost(slug, locale);
 
+  // A missing article 404s from here, so no canonical is emitted for it.
   if (!post) {
-    return createPublicMetadata({
-      locale,
-      title: 'Article',
-      description: 'CASA Bremen article',
-      path: `/news/${slug}`,
-    });
+    notFound();
   }
   return createPublicMetadata({
     locale,

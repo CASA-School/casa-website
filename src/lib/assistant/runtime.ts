@@ -490,19 +490,26 @@ function safetyRefusal(locale: AssistantRuntimeLocale): Pick<AssistantResponsePa
   };
 }
 
+/*
+ * No duration or weekly minimum in the chat, and no course called
+ * visa-suitable: that is not verified per course
+ * (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, "The visa eligibility problem"), and
+ * the embassy, not CASA, sets the requirement. CASA's own wording lives in the
+ * FAQ, so the answer points there and to the advice team.
+ */
 function visaResponse(locale: AssistantRuntimeLocale): Pick<AssistantResponsePayload, 'message' | 'cta' | 'intent' | 'planSteps' | 'quickLinks'> {
   if (locale === 'de') {
     return {
       intent: 'visa',
       message:
-        'Wichtiger Punkt. Laut CASA-Hinweisen braucht der Sprachvisumspfad meist mindestens 3 Monate Kursdauer und mindestens 20 Lektionen pro Woche.\n\nDas ist keine verbindliche Rechtsberatung. Bitte lassen Sie Ihren konkreten Fall zusätzlich vom CASA-Team und der zuständigen Botschaft prüfen.',
+        'Wichtiger Punkt. Welche Kursdauer und wie viele Unterrichtseinheiten pro Woche ein Sprachvisum voraussetzt, legt die zuständige deutsche Auslandsvertretung fest. Was CASA dazu sagt, steht in unseren FAQ; unser Beratungsteam sagt Ihnen, welcher Kurs zu Ihrem Fall passt.\n\nDas ist keine verbindliche Rechtsberatung. Bitte lassen Sie Ihren konkreten Fall zusätzlich vom CASA-Team und der zuständigen Botschaft prüfen.',
       cta: { label: 'Visa-Beratung anfragen', href: '/contact?topic=Course advice' },
       quickLinks: [
-        { label: 'Intensivkurse', href: '/courses/intensive-german' },
+        { label: 'FAQ', href: '/faq' },
         { label: 'Kontakt', href: '/contact?topic=Course advice' },
       ],
       planSteps: plan(locale, [], [
-        'Passenden Intensivkurs auswählen',
+        'Mit dem CASA-Team klären, welcher Kurs passt',
         'Anmeldung und Kursbestätigung sichern',
         'Dokumente mit Botschaft und CASA abstimmen',
       ]),
@@ -512,14 +519,14 @@ function visaResponse(locale: AssistantRuntimeLocale): Pick<AssistantResponsePay
   return {
     intent: 'visa',
     message:
-      'Important point. CASA visa guidance usually means at least 3 months of study and at least 20 lessons per week.\n\nThis is not legal certainty. Please confirm your exact case with the CASA team and your responsible embassy.',
+      'Important point. How long a course must run and how many lessons a week a language visa requires is set by the German embassy or consulate handling your application. CASA’s own guidance is in our FAQ, and our advice team can tell you which course fits your case.\n\nThis is not legal certainty. Please confirm your exact case with the CASA team and your responsible embassy.',
     cta: { label: 'Request visa guidance', href: '/contact?topic=Course advice' },
     quickLinks: [
-      { label: 'Intensive Courses', href: '/courses/intensive-german' },
+      { label: 'FAQ', href: '/faq' },
       { label: 'Contact Office', href: '/contact?topic=Course advice' },
     ],
     planSteps: plan(locale, [
-      'Pick a suitable intensive course',
+      'Ask the CASA team which course fits your case',
       'Secure registration and course confirmation',
       'Validate your case with embassy and CASA office',
     ], []),

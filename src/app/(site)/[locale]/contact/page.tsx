@@ -3,6 +3,7 @@ import { Mail, MapPin, Phone } from 'lucide-react';
 
 import { ContactInquiryForm } from '@/components/forms/contact-inquiry-form';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
+import { serializeJsonLd } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
 import { footerConfig } from '@/config/footer';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -177,7 +178,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(contactSchema) }} />
 
       <section className="pb-12 pt-6 md:pb-16 md:pt-8">
         <Container>

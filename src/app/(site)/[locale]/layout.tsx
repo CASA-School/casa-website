@@ -71,6 +71,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     }),
     // Override the composed title for the root — avoid "CASA Bremen | CASA Bremen"
     title: 'CASA Bremen — Internationale Sprachschule',
+    // No canonical or hreflang at layout level. Every page sets its own; the only
+    // thing that inherits these is a 404, which cannot set metadata of its own and
+    // would otherwise name the homepage as its canonical.
+    alternates: null,
+    // No Open Graph or Twitter card either, for the same reason: every page that
+    // is shared sets its own. What inherits these — a 404 after hydration, the
+    // noindex placement runner and result — would otherwise carry the
+    // homepage's og:url and a "CASA Bremen | CASA Bremen" og:title.
+    openGraph: null,
+    twitter: null,
     other: {
       'theme-color': '#009fe3',
     },
