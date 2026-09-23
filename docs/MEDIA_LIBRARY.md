@@ -11,11 +11,13 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `newsflash-editor-lisa-dao.jpg`, `newsflash-kicktipp-winners.jpg` | Article images of two NewsFlash posts. Rendered directly, not through the placeholder, and deliberately unnumbered. |
 | `casa-building-golden.webp` | Slot 44, homepage hero. User-supplied processed building image, local preview approved 2026-09-21. |
 | `casa-building-daylight.webp` | Slot 45, About hero. User-supplied processed building image, local preview approved 2026-09-21. |
-| `reel-learning-together-wide.webp` | Slot 46, hero reel; AI framing/lighting edit of pool frame 085. |
-| `reel-language-practice-wide.webp` | Slot 47, hero reel; AI framing/lighting edit of pool frame 021. |
-| `reel-garden-gathering-wide.webp` | Slot 48, hero reel; AI framing/lighting edit of pool frame 095. |
-| `reel-building-golden-wide.webp` | Slot 49, first hero scene; AI expansion of supplied golden building image. |
-| `reel-walking-bremen-wide.webp` | Slot 50, hero reel; AI framing/lighting edit of the original slot 23 image. |
+| `reel-classroom-lesson.webp` | Slot 51, first reel scene. Real crop of pool frame 093, light correction only. |
+| `reel-team-courtyard.webp` | Slot 53, reel. Real crop of pool frame 098, light correction only. |
+| `reel-partner-practice.webp` | Slot 52, reel. Real crop of pool frame 075, light correction only. |
+| `reel-walking-bremen-wide.webp` | Slot 50, reel. Real crop of pool frame W012 (the slot 23 photograph), light correction only. |
+
+Slots 46–49 were the AI-edited reel images of 21 September; their files were deleted on
+2026-09-23 and their numbers are retired, not reused.
 
 The candidate pool is kept outside the project so unapproved photographs cannot be
 served or deployed accidentally. On the CASA laptop, the 103 files were moved intact
@@ -69,8 +71,9 @@ phone captures confirm that the building, entrance and signs remain visible.
 ## Rules
 
 - Source-faithful edits only: crop, resize, light exposure and colour correction.
-- Exception explicitly requested on 2026-09-21: the homepage reel uses AI-expanded
-  and relit versions, documented below. These must not be described as unaltered photos.
+  No generative editing of any kind — no expansion, relighting, retouching or
+  "improvement" by an image model. A frame that needs more room than the photograph
+  has gets a different photograph. (The 21 September exception is withdrawn; see below.)
 - Art-direct images for each screen size, not just their container: preserve subjects,
   faces, architecture and important signs; check the full motion cycle. Use separate
   framing or text placement where needed. Verify phone, tablet, laptop and large screens.
@@ -79,50 +82,55 @@ phone captures confirm that the building, entrance and signs remain visible.
 - Group and younger-student photos are used generically. CASA confirms consent for the
   identifiable people in a picture before its slot goes live.
 
-## Homepage reel — 21 September 2026
+## Homepage reel — rebuilt from real photographs, 23 September 2026
 
-The user asked for a five-scene reel, then a wider GLS-inspired homepage hero with
-only the existing heading and course CTA, tighter navbar spacing and no visible
-Pause/Abspielen button. After rejecting cropped/dark images, the user explicitly
-requested imagegen framing and lighting improvements. Built-in `image_gen` made
-five separate edits; originals remain intact. Output: 1942×809 WebP assets,
-quality 85, about 1.30 MB total. Generated surroundings are inferred, not verified
-depictions of every neighboring building or classroom detail. Review is local only.
+The 21 September reel used five `image_gen` edits. Compared with their sources they
+had invented the building's surroundings and misspelled its window sign
+("CASA SPRACHSHULE"), redrawn every person from under half the photograph's
+resolution (faces, hair and positions changed) and shipped at 1942×809, below the
+hero's display size. All five are gone. The building left the reel: every image of
+it we have is AI-altered, so it returns only with a real, high-resolution photograph.
 
+**How a reel image is made.** `scripts/media/build_reel.py` holds one recipe per
+slide: the camera original in the pool, a full-width 2:1 crop, and global light and
+colour correction (white balance gains, a tone curve on lightness, a chroma factor).
+It writes the WebP at the crop's own resolution, never upscaled, without EXIF.
+Phones show the whole 2:1 image; desktop's 12:5 frame shows a band of it, and the
+slide's `objectPosition` in `public-page-config.ts` is that band, as the script prints
+it. So a slide is only trimmed top and bottom, never at the sides.
+
+**How to prove one is unedited.** `python3 scripts/media/build_reel.py --verify`
+re-renders every slide from its original and compares it with the committed file in
+96px tiles; any tile below 33 dB fails. An honest re-encode scores at least 36 dB in
+its worst tile, while a single redrawn or blurred 200px patch drops its tile to about
+28 dB even though the whole-image score stays near 40. Run it on the machine that holds
+the pool; CI does not have the originals.
+
+**Choosing a photograph.** The pool was scanned against the reel's frames (every face
+inside the desktop band and the phone image, nothing important under the desktop
+heading in the lower left), then judged for story, composition and consent risk.
 Scene order and source:
 
-1. Golden building: supplied `ChatGPT Image Sep 21, 2026, 01_23_32 PM (2).png`.
-2. Classroom: archive `085_IMG_0293.JPG`.
-3. Bremen walk: existing `group-course-walking-bremen.jpg` (slot 23).
-4. Language practice: archive `021_IMG_0140.JPG`.
-5. Courtyard: archive `095_IMG_0322.JPG`.
+1. Lesson: pool `093_IMG_0314.JPG` — the teacher's own board handwriting.
+2. The CASA team in the courtyard: pool `098_IMG_0340.JPG`. The earlier courtyard
+   frame 095 cannot work honestly: its group spans the full width with faces at
+   mid-height, so any band puts faces under the heading.
+3. Partner interview: pool `075_IMG_0279.JPG`.
+4. Bremen walk: pool `W012_group-course-walking-bremen_editorial.jpg`.
 
-The desktop image frame matches the panoramic 12:5 assets; below 1024px it uses
-a subject-safe 2:1 frame and puts the heading/CTA below the image, with no dark
-photo overlay. Desktop uses a localized lower-left scrim. The image fills its
-frame without distorting proportions. Maximum camera zoom is 2%; excessive zoom
-was rejected because it cut off heads and building details.
+Rejected for this frame, with the reason, so nobody re-litigates them: 091 (camera
+roll about 5.5°, levelling would be a rotation), 073 (possible minors; also the trio
+of the old AI slide), 068 (a publisher's textbook page is legible), 090 and 092
+(learners look tired, or faces under the heading), 046 (a party table, and a teacher
+who also appears in the team photo).
 
-The client reel uses a 6.5-second interval and a 1.4-second overlapping dissolve.
-It pauses on hover, keyboard entry, offscreen or a hidden tab. Choosing an image
-stops autoplay; arrow keys/swipe navigate; Space on the reel toggles playback.
-Reduced motion disables autoplay, zoom and fades. Unloaded choices are disabled;
-autoplay holds the current image until the next is loaded. Inactive photos are
-hidden from assistive technology. Only the first image is preloaded. No new dependency.
+Consent for the identifiable people in slides 1–3 (the teacher and the learner at the
+board in 093, both learners in 075, the team in 098) was confirmed by the product owner
+on 2026-09-23. A replacement photograph needs the same confirmation before it is
+committed: this repository is public. Check each slide at 1024, 1280, 1440 and 1920px and
+on a phone after any change: the heading is up to 62% of the frame wide at 1024px and
+wraps to three lines at 1920px.
 
-Implementation: `src/components/heroes/hero-photo-reel.tsx`, its CSS module,
-`hero-home-photo.tsx`, homepage props, page configuration and photo registry.
-About and all other page heroes retain their existing composition.
-
-Verification: build, lint, typecheck, 399 unit tests and 43 e2e tests pass; 3 existing
-planner tests skip without the test runner's DATABASE_URL. New e2e coverage checks
-autoplay, manual selection/keyboard pause, reduced motion, all five images and
-stable mobile height. Browser checks include 320/375/390/414/768/1024/1366/1440/1920/2560px;
-no hero overflow or height jumps. Both languages checked. Local server: port 3000.
-
-Exact prompts, source/output mapping, screenshots and logs:
-`/Users/rahmanshafiee/Archive/CASA/hero-reel-2026-09-21/`.
-`image-edit-prompts.md` contains all five final prompts and `image-edit-manifest.json`
-records generated originals under `.codex/generated_images`. Only selected optimized
-derivatives are in the project. Superseded review captures/derivatives stay in the archive.
-No push, merge or deployment; branch `codex/refine-pathway-cards`.
+The reel component itself is unchanged: 6.5-second interval, 1.4-second dissolve,
+pause on hover, focus, hidden tab and offscreen, reduced motion honoured, only the
+first image preloaded. Implementation: `src/components/heroes/hero-photo-reel.tsx`.

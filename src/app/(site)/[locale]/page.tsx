@@ -368,7 +368,7 @@ export default async function HomePage() {
           },
         ]}
         photo={pageConfig.photos.hero}
-        reelPhotos={[pageConfig.photos.hero, pageConfig.photos.reelLearning, pageConfig.photos.reelBremen, pageConfig.photos.reelPractice, pageConfig.photos.reelCommunity]}
+        reelPhotos={[pageConfig.photos.hero, pageConfig.photos.reelCommunity, pageConfig.photos.reelPartnerPractice, pageConfig.photos.reelBremen]}
         locale={locale}
       />
 

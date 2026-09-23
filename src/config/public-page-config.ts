@@ -482,23 +482,36 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     aspectRatio: '4 / 3',
     objectPosition: '50% 27%',
   },
-  reelLearning: {
-    src: '/media/casa/reel-learning-together-wide.webp',
-    alt: { de: 'Drei Lernende lachen gemeinsam bei einer Aufgabe im Deutschkurs', en: 'Three learners sharing a laugh while working on a German exercise' },
+  /*
+   * THE HOMEPAGE REEL. Real photographs only: each file is a full-width 2:1
+   * crop of a camera original with global light and colour correction, built
+   * and checked by scripts/media/build_reel.py. Phones show the whole image;
+   * the desktop 12:5 frame shows a band of it, and `objectPosition` is that
+   * band, as the script prints it. Change a crop there, not here.
+   */
+  reelLesson: {
+    src: '/media/casa/reel-classroom-lesson.webp',
+    alt: {
+      de: 'Eine Lehrerin hält lachend ein Arbeitsblatt hoch, an der Tafel stehen die Wechselpräpositionen',
+      en: 'A teacher laughs as she holds up a worksheet, with German two-way prepositions on the board',
+    },
     caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
-    objectPosition: '50% 50%',
+    objectPosition: '50% 26%',
   },
-  reelPractice: {
-    src: '/media/casa/reel-language-practice-wide.webp',
-    alt: { de: 'Zwei Lernende arbeiten gemeinsam mit ihrem Deutschbuch', en: 'Two learners working together with their German coursebook' },
-    caption: { de: 'Miteinander weiterkommen', en: 'Making progress together' },
-    objectPosition: '50% 50%',
+  reelPartnerPractice: {
+    src: '/media/casa/reel-partner-practice.webp',
+    alt: {
+      de: 'Zwei Lernende führen mit einem Arbeitsblatt ein Partnerinterview',
+      en: 'Two learners doing a partner interview from a worksheet',
+    },
+    caption: { de: 'Miteinander sprechen', en: 'Talking together' },
+    objectPosition: '50% 64%',
   },
   reelCommunity: {
-    src: '/media/casa/reel-garden-gathering-wide.webp',
-    alt: { de: 'Eine fröhliche Runde im grünen CASA-Innenhof', en: 'A cheerful gathering in CASA’s leafy courtyard' },
+    src: '/media/casa/reel-team-courtyard.webp',
+    alt: { de: 'Das CASA-Team lächelnd im grünen Innenhof', en: 'The CASA team smiling in the leafy courtyard' },
     caption: { de: 'Menschen, die CASA ausmachen', en: 'The people who make CASA' },
-    objectPosition: '50% 50%',
+    objectPosition: '50% 47%',
   },
 };
 
@@ -521,21 +534,17 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Talk to an advisor', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
-      // User-requested imagegen expansion; keep the complete facade in the reel.
-      hero: {
-        ...photoLibrary.buildingGolden,
-        src: '/media/casa/reel-building-golden-wide.webp',
-        aspectRatio: '12 / 5',
-        objectPosition: '50% 50%',
-      },
-      reelLearning: photoLibrary.reelLearning,
-      reelPractice: photoLibrary.reelPractice,
+      // The reel opens on a lesson. The building left it on 2026-09-23: every
+      // image of it we have is AI-altered, and the panorama misspelled the
+      // window sign. It returns only with a real, high-resolution photograph.
+      hero: { ...photoLibrary.reelLesson, aspectRatio: '12 / 5' },
       reelCommunity: photoLibrary.reelCommunity,
+      reelPartnerPractice: photoLibrary.reelPartnerPractice,
       reelBremen: {
         ...photoLibrary.groupCourseWalking,
         src: '/media/casa/reel-walking-bremen-wide.webp',
         caption: { de: 'Bremen gemeinsam entdecken', en: 'Discovering Bremen together' },
-        objectPosition: '50% 50%',
+        objectPosition: '50% 31%',
       },
       story: photoLibrary.groupCourseLunch,
       /*

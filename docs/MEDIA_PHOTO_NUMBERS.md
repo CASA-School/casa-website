@@ -11,14 +11,12 @@ staff members after the code had removed them.
 - Slots **20** (`group-course-bremen-musicians.jpg`) and **23**
   (`group-course-walking-bremen.jpg`) are ready and render real photographs.
 - Slots **44** (`casa-building-golden.webp`) and **45**
-  (`casa-building-daylight.webp`) render the user-supplied processed building
-  images from the first homepage/About preview. The About hero still uses 45;
-  the homepage now uses panoramic variant 49. Approved for local preview
-  on 2026-09-21; provenance and review status are in [MEDIA_LIBRARY.md](MEDIA_LIBRARY.md).
-- Slots **46–50** are the five user-requested AI-expanded and relit hero photos:
-  classroom learning, language practice, courtyard, golden building and Bremen walk.
-  Reel order: **49, 46, 50, 47, 48**. Only the homepage uses these derivatives;
-  the original walking image in slot 23 remains on its other pages.
+  (`casa-building-daylight.webp`) are user-supplied, AI-processed building
+  images. The About hero still uses 45. Neither is in the homepage reel any more.
+- The homepage reel is **51, 53, 52, 50**: a lesson, the team in the courtyard, a
+  partner interview and the Bremen walk — real crops with light correction only,
+  built by `scripts/media/build_reel.py`. Slots **46–49** are retired (the AI-edited
+  reel of 21 September); their files are deleted and the numbers are not reused.
 - Other slots remain numbered placeholders. Their absent image files are expected;
   do not delete their config references as broken or unused assets.
 - Slots **31–36 and 38–43** are reserved for twelve verified staff portraits.
