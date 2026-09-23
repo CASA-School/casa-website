@@ -155,7 +155,9 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
       data-reveal="true"
       aria-labelledby={headingId}
       aria-roledescription={de ? 'Karussell' : 'carousel'}
-      className={cn(className)}
+      // `min-w-0`: the track below is every slide laid end to end, so as a grid or
+      // flex item this section would otherwise widen its column past the screen.
+      className={cn('min-w-0', className)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)}

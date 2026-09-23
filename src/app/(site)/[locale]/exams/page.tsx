@@ -45,14 +45,6 @@ function examDetailHref(code: string, anchorId: string) {
   return `/exams/${anchorId}`;
 }
 
-function deadlineClosed(deadline?: string | null) {
-  if (!deadline) {
-    return false;
-  }
-
-  return new Date(deadline).getTime() < Date.now();
-}
-
 export default async function ExamsPage() {
   const locale = await getContentLocale();
   const rhythm = getLayoutRhythm('exams-index');
@@ -66,8 +58,9 @@ export default async function ExamsPage() {
   const leadStory = candidateStory;
 
   const examItems = catalog.items.slice(0, 4).map((item) => {
+    // getExamCatalog holds only sittings still open for registration, so
+    // there is no closed-deadline state to label here.
     const nextSession = item.sessions[0];
-    const hasClosedDeadline = deadlineClosed(nextSession?.registration_deadline);
 
     return {
       id: item.examType.id,
@@ -77,13 +70,7 @@ export default async function ExamsPage() {
         (locale === 'de' ? 'Anerkannte Prüfungsroute mit klaren Fristen.' : 'Recognized exam pathway with clear deadlines.'),
       bestFor: item.examType.level || (locale === 'de' ? 'Geeignet für CEFR-Fortschritt' : 'Best for: CEFR progression'),
       href: examDetailHref(item.examType.code, item.anchorId),
-      ctaLabel: hasClosedDeadline
-        ? locale === 'de'
-          ? 'Warteliste'
-          : 'Join waitlist'
-        : locale === 'de'
-          ? 'Zur Prüfungsanmeldung'
-          : 'Reserve exam seat',
+      ctaLabel: locale === 'de' ? 'Zur Prüfungsanmeldung' : 'Reserve exam seat',
       meta: examFeeSummary(item.examType.code, locale),
       deadlineIso: nextSession?.registration_deadline ?? null,
       media: {

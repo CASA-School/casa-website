@@ -57,6 +57,8 @@ function formatDateRange(start: string, end: string, locale: ContentLocale) {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    // A date-only string parses as UTC midnight: west of UTC it printed the day before.
+    timeZone: 'Europe/Berlin',
   });
   return `${fmt.format(new Date(start))} – ${fmt.format(new Date(end))}`;
 }

@@ -9,6 +9,7 @@ import type { CourseTermGroup } from '@/components/courses/course-term-table';
 import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
 import { HeroAPhotoLed, HeroCUtilityRail } from '@/components/heroes';
 import { DecisionRail, EditorialSplit, HumanStoryBlock, ProcessSteps, TestimonialGrid } from '@/components/sections';
+import { serializeJsonLd } from '@/components/seo/json-ld';
 import { CourseLevelGoals } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -24,6 +25,7 @@ import { getCourseContactKey, getCourseLevelGoals, getCoursePhotoKey, getCourseP
 import { getCasaContact } from '@/config/content/contacts';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
+import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
@@ -32,6 +34,7 @@ function formatDate(value: string, locale: 'en' | 'de') {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: 'Europe/Berlin',
   }).format(new Date(value));
 }
 
@@ -40,13 +43,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const detail = await getCourseDetail(slug, locale);
 
+  // A missing course 404s from here, so no canonical or hreflang is emitted for
+  // a URL that does not exist.
   if (!detail) {
-    return createPublicMetadata({
-      locale,
-      title: 'Course detail',
-      description: 'CASA course detail',
-      path: `/courses/${getCanonicalCourseRouteSlug(slug)}`,
-    });
+    notFound();
   }
 
   return createPublicMetadata({
@@ -89,12 +89,34 @@ export default async function CourseDetailPage({
     notFound();
   }
 
+  /*
+   * Only a term a learner can still join is ever selected — not `instances[0]`,
+   * which was a term that had begun weeks earlier, rendered as "Nächster Start".
+   * The rule is per format (an evening term can be joined while it runs); see
+   * lib/content/bookability. `today` is the request's day in Bremen.
+   */
+  const today = bremenToday();
+  const bookableInstances = detail.instances.filter((courseInstance) =>
+    isCourseTermBookable(courseInstance, detail.course.slug, today)
+  );
   const requestedInstanceId = typeof instance === 'string' ? instance : '';
   const selectedInstance =
-    detail.instances.find((courseInstance) => courseInstance.id === requestedInstanceId) ?? detail.instances[0];
-  const selectedStartOptions = detail.instances.map((courseInstance) => ({
+    bookableInstances.find((courseInstance) => courseInstance.id === requestedInstanceId) ?? bookableInstances[0];
+  // An evening term under way has no start ahead of it: it is joined.
+  const startLabel = (courseInstance: (typeof detail.instances)[number]) => {
+    const nextStart = nextCourseStartDate(courseInstance, detail.course.slug, today);
+    if (nextStart) {
+      return formatDate(nextStart, locale);
+    }
+    const since = formatDate(courseInstance.start_date, locale);
+    return locale === 'de' ? `Laufender Kurs seit ${since}` : `Course running since ${since}`;
+  };
+  const selectedIsUnderWay = Boolean(
+    selectedInstance && !nextCourseStartDate(selectedInstance, detail.course.slug, today)
+  );
+  const selectedStartOptions = bookableInstances.map((courseInstance) => ({
     value: courseInstance.id,
-    label: formatDate(courseInstance.start_date, locale),
+    label: startLabel(courseInstance),
     href: `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`,
   }));
   const coursePhotoKey = getCoursePhotoKey(detail.course.slug);
@@ -126,8 +148,7 @@ export default async function CourseDetailPage({
     }[locale];
 
     const groups = new Map<string, CourseTermGroup>();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const bookableIds = new Set(bookableInstances.map((courseInstance) => courseInstance.id));
 
     for (const courseInstance of detail.instances) {
       const schedule = courseInstance.schedule as { days?: string[]; time?: string } | null;
@@ -154,7 +175,12 @@ export default async function CourseDetailPage({
         rangeLabel: `${formatDate(courseInstance.start_date, locale)} – ${formatDate(courseInstance.end_date, locale)}`,
         href: `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`,
         isSelected: courseInstance.id === selectedInstance?.id,
-        isPast: new Date(courseInstance.end_date) < today,
+        // A term that has begun and cannot be joined is not a link either.
+        state: bookableIds.has(courseInstance.id)
+          ? 'bookable'
+          : courseInstance.end_date < today
+            ? 'finished'
+            : 'under-way',
       });
     }
 
@@ -222,9 +248,15 @@ export default async function CourseDetailPage({
 
   const factRows: Partial<Record<CourseFactKey, FactRow>> = {
     'next-start': {
-      label: locale === 'de' ? 'Nächster Start' : 'Next start date',
+      label: selectedIsUnderWay
+        ? locale === 'de'
+          ? 'Einstieg'
+          : 'Joining'
+        : locale === 'de'
+          ? 'Nächster Start'
+          : 'Next start date',
       value: selectedInstance
-        ? formatDate(selectedInstance.start_date, locale)
+        ? startLabel(selectedInstance)
         : locale === 'de'
           ? 'Wird bekannt gegeben'
           : 'To be announced',
@@ -436,11 +468,11 @@ export default async function CourseDetailPage({
          * Placement first, registration second.
          *
          * These ran the other way round — "Complete registration", then "Confirm
-         * placement" — which contradicts the site's own rule, stated plainly on
-         * /courses: "Every format starts from a placement. The test is free and
-         * it decides which group you join." You cannot pick a group before you
-         * know your level, so the old order asked the reader to commit and then
-         * find out what they had committed to.
+         * placement" — which contradicts the site's own rule that every format
+         * starts from a placement. You cannot pick a course before you know your
+         * level, so the old order asked the reader to commit and then find out
+         * what they had committed to. The result is a course recommendation a
+         * teacher confirms, never a decision the test makes (CLAUDE.md rule 6).
          */
         [
           {
@@ -448,8 +480,8 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Einstufung machen' : 'Take the placement test',
             description:
               locale === 'de'
-                ? 'Kostenlos und in wenigen Minuten — sie entscheidet über die Gruppe.'
-                : 'Free, a few minutes, and it decides which group you join.',
+                ? 'Kostenlos, etwa 15–30 Minuten — Ihre Kursempfehlung, die eine Lehrkraft mit Ihnen bestätigt.'
+                : 'Free, about 15–30 minutes: a course recommendation a teacher confirms with you.',
           },
           {
             step: '2',
@@ -517,7 +549,7 @@ export default async function CourseDetailPage({
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(courseSchema) }} />
 
       {/*
         CASA Gruppen takes the HOMEPAGE hero, not the course-detail one.
@@ -609,8 +641,13 @@ export default async function CourseDetailPage({
               three different questions. The page's bands elsewhere sit 128–192px
               apart (py-16 to py-24 each side); 64/96px is the same scale applied
               inside a column that shares the frame with a sticky rail.
+
+              `min-w-0`: below xl this is the grid's only, implicit, column, and a
+              grid item's min-width defaults to its content. The testimonial
+              carousel's track is three full-width slides long, so the column
+              grew to ~554px and every phone scrolled sideways.
             */}
-            <div className="space-y-16 md:space-y-24">
+            <div className="min-w-0 space-y-16 md:space-y-24">
               {archetype.sections.map((sectionKey) => {
                 switch (sectionKey) {
                 case 'module-catalogue':
@@ -797,7 +834,11 @@ export default async function CourseDetailPage({
                                 {course.narrative?.promise || (locale === 'de' ? 'Strukturierter Deutschkurs mit klaren nächsten Schritten.' : 'Structured German course with clear next steps.')}
                               </p>
                               <p className="mt-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                                {course.level_min || 'A1'} - {course.level_max || 'C1'} · {course.lessons_per_week} {locale === 'de' ? 'Lektionen/Woche' : 'lessons/week'}
+                                {course.level_min || 'A1'} - {course.level_max || 'C1'}
+                                {/* 0 is the "no published weekly load" sentinel, not a figure. */}
+                                {course.lessons_per_week > 0
+                                  ? ` · ${course.lessons_per_week} ${locale === 'de' ? 'Lektionen/Woche' : 'lessons/week'}`
+                                  : null}
                               </p>
                             </div>
                           </Link>
@@ -822,7 +863,12 @@ export default async function CourseDetailPage({
                 prose, without the avatar or the address. One statement of who
                 answers, not two.
               */
-              deadlineIso={selectedInstance?.start_date}
+              /*
+                No `deadlineIso`. It was the term's start date, which is not a
+                deadline CASA publishes, and on a term already under way it read
+                "Anmeldung geschlossen" on every course page. Without one the
+                badge says what is true: registration is rolling.
+              */
               // Gated on the CTA policy, not the slug, so Firmenunterricht is
               // covered too: neither page has anything to register for.
               showDeadline={archetype.cta !== 'request-quote'}

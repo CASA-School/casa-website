@@ -61,6 +61,7 @@ function formatDate(value: string, locale: 'en' | 'de') {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: 'Europe/Berlin',
   }).format(new Date(value));
 }
 

@@ -47,6 +47,7 @@ function formatDate(value: string, locale: 'en' | 'de') {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: 'Europe/Berlin',
   }).format(new Date(value));
 }
 
@@ -118,10 +119,17 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
     (locale === 'de' ? 'Internationale Lernende mit klaren Zielen.' : 'International learners with clear goals.');
 
   const baseSchedule = formatScheduleTags(scheduleTags, locale);
+  // 0 is the "CASA publishes no weekly load" sentinel (German for Medical,
+  // Firmenunterricht), and printed as "0 Lektionen/Woche" it read as no lessons.
+  // Same wording as the course page's facts rail.
   const baseIntensity =
-    locale === 'de'
-      ? `${course.lessons_per_week} Lektionen/Woche`
-      : `${course.lessons_per_week} lessons/week`;
+    course.lessons_per_week > 0
+      ? locale === 'de'
+        ? `${course.lessons_per_week} Lektionen/Woche`
+        : `${course.lessons_per_week} lessons/week`
+      : locale === 'de'
+        ? 'Nach Absprache'
+        : 'By arrangement';
   const baseOutcomes = course.narrative?.outcomes?.slice(0, 5) ?? fallbackOutcomes;
 
   if (normalizedSlug.includes('intensive')) {

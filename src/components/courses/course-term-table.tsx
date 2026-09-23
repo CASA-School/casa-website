@@ -8,7 +8,8 @@ export type CourseTermGroup = {
     rangeLabel: string;
     href: string;
     isSelected: boolean;
-    isPast: boolean;
+    /** `under-way`: begun, and this format cannot be joined late. */
+    state: 'bookable' | 'under-way' | 'finished';
   }[];
 };
 
@@ -28,7 +29,9 @@ export type CourseTermGroup = {
  *
  * Past terms are kept, dimmed and non-interactive. Removing them would leave a
  * reader unsure whether the table is short because CASA runs few courses or
- * because the year is half gone.
+ * because the year is half gone. A term that has begun and cannot be joined is
+ * dimmed the same way: it used to stay a link, to a term the page would not
+ * offer.
  */
 export function CourseTermTable({
   groups,
@@ -45,7 +48,8 @@ export function CourseTermTable({
 
   const copy = {
     title: locale === 'de' ? 'Kurstermine' : 'Course dates',
-    past: locale === 'de' ? 'beendet' : 'finished',
+    finished: locale === 'de' ? 'beendet' : 'finished',
+    'under-way': locale === 'de' ? 'läuft bereits' : 'under way',
   };
 
   /*
@@ -72,10 +76,10 @@ export function CourseTermTable({
                   key={term.id}
                   className="border-b border-[color:var(--casa-sand)]/60 last:border-b-0"
                 >
-                  {term.isPast ? (
+                  {term.state !== 'bookable' ? (
                     <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3.5 text-base tabular-nums text-[var(--casa-muted)]">
-                      <span className="line-through decoration-1">{term.rangeLabel}</span>
-                      <span className="text-xs uppercase tracking-eyebrow">{copy.past}</span>
+                      <span className={term.state === 'finished' ? 'line-through decoration-1' : undefined}>{term.rangeLabel}</span>
+                      <span className="text-xs uppercase tracking-eyebrow">{copy[term.state]}</span>
                     </span>
                   ) : (
                     <Link
