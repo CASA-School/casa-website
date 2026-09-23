@@ -127,8 +127,9 @@ export async function searchPublicContent({
     getNewsList(locale),
   ]);
 
-  const dateFormatter = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-US', {
+  const dateFormatter = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
     dateStyle: 'medium',
+    timeZone: 'Europe/Berlin',
   });
   const includeScope = (candidate: PublicSearchScope) => scope === 'all' || scope === candidate;
 

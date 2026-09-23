@@ -35,6 +35,8 @@ function formatDateRange(start: string, end: string, locale: ContentLocale) {
   const fmt = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
     day: 'numeric',
     month: 'short',
+    // A date-only string parses as UTC midnight: west of UTC it printed the day before.
+    timeZone: 'Europe/Berlin',
   });
   return `${fmt.format(new Date(start))} – ${fmt.format(new Date(end))}`;
 }

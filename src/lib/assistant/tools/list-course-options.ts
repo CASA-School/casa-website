@@ -1,6 +1,8 @@
 import type { AssistantCard, AssistantCourseFilters, AssistantRuntimeLocale } from '@/lib/assistant/types';
+import { coursePriceLabel, formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { getCoursePath } from '@/lib/content/course-routes';
 import { getCourseFinderData } from '@/lib/content/repository';
+import type { CourseTypeRow } from '@/lib/content/types';
 
 const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1'] as const;
 
@@ -51,36 +53,61 @@ function goalMatches(goal: NonNullable<AssistantCourseFilters['goal']>, slug: st
   return true;
 }
 
-function dateLabel(value: string | null, locale: AssistantRuntimeLocale) {
-  if (!value) {
-    return locale === 'de' ? 'Wird angekündigt' : 'To be announced';
-  }
-
+function dateLabel(value: string, locale: AssistantRuntimeLocale) {
   return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: 'Europe/Berlin',
   }).format(new Date(value));
 }
 
-function label(locale: AssistantRuntimeLocale, key: 'nextStart' | 'lessons' | 'price') {
-  if (locale === 'de') {
-    if (key === 'nextStart') {
-      return 'Nächster Start';
-    }
-    if (key === 'lessons') {
-      return 'Lektionen/Woche';
-    }
-    return 'Preis ab';
+// "Einstieg" / "Joining" for a term under way, as the course page labels it.
+const labels = {
+  de: { nextStart: 'Nächster Start', joining: 'Einstieg', lessons: 'Lektionen/Woche' },
+  en: { nextStart: 'Next start', joining: 'Joining', lessons: 'Lessons/week' },
+} as const;
+
+function label(locale: AssistantRuntimeLocale, key: keyof (typeof labels)['de']) {
+  return labels[locale][key];
+}
+
+/**
+ * The facts a card states, and only the ones CASA publishes.
+ *
+ * A zero is how the course data says "not published" (German for Medical has
+ * no public load, dates or fee; Firmenunterricht is by arrangement), so a zero
+ * weekly load or list price is left off rather than shown as a number. A quoted
+ * product says "on request" instead of a price, through the same formatter the
+ * course pages use — this read "Preis ab 0 EUR" for German for Groups.
+ *
+ * An evening term under way has no start ahead of it but can be joined today,
+ * so it says so; it read "Nächster Start: Wird angekündigt". With neither a term
+ * to join nor a start ahead, the card states no date at all.
+ */
+function courseMeta(
+  course: Pick<CourseTypeRow, 'lessons_per_week' | 'default_price' | 'currency' | 'pricing_mode'>,
+  nextStart: string | null,
+  joinableNow: boolean,
+  locale: AssistantRuntimeLocale
+): AssistantCard['meta'] {
+  const meta: AssistantCard['meta'] = [];
+
+  if (joinableNow) {
+    meta.push({ label: label(locale, 'joining'), value: locale === 'de' ? 'Jederzeit möglich' : 'Any time' });
+  } else if (nextStart) {
+    meta.push({ label: label(locale, 'nextStart'), value: dateLabel(nextStart, locale) });
   }
 
-  if (key === 'nextStart') {
-    return 'Next start';
+  if (Number(course.lessons_per_week) > 0) {
+    meta.push({ label: label(locale, 'lessons'), value: String(course.lessons_per_week) });
   }
-  if (key === 'lessons') {
-    return 'Lessons/week';
+
+  if (isQuoteOnly(course) || Number(course.default_price) > 0) {
+    meta.push({ label: coursePriceLabel(course, locale), value: formatCoursePrice(course, locale) });
   }
-  return 'Price from';
+
+  return meta;
 }
 
 export async function listCourseOptions(
@@ -149,20 +176,12 @@ export async function listCourseOptions(
           : 'Practical outcomes with a clear learning structure.'),
       href: getCoursePath(course.slug),
       badges: [course.level_min ?? 'A1', course.level_max ?? 'C1'],
-      meta: [
-        {
-          label: label(locale, 'nextStart'),
-          value: dateLabel(finder.nextStartByCourseId[course.id] ?? null, locale),
-        },
-        {
-          label: label(locale, 'lessons'),
-          value: String(course.lessons_per_week),
-        },
-        {
-          label: label(locale, 'price'),
-          value: `${course.default_price} ${course.currency}`,
-        },
-      ],
+      meta: courseMeta(
+        course,
+        finder.nextStartByCourseId[course.id] ?? null,
+        finder.joinableNowByCourseId[course.id] ?? false,
+        locale
+      ),
     }));
   }
 
@@ -177,19 +196,6 @@ export async function listCourseOptions(
         : 'Practical outcomes with a clear learning structure.'),
     href: getCoursePath(item.course.slug),
     badges: [item.course.level_min ?? 'A1', item.course.level_max ?? 'C1'],
-    meta: [
-      {
-        label: label(locale, 'nextStart'),
-        value: dateLabel(item.nextStart, locale),
-      },
-      {
-        label: label(locale, 'lessons'),
-        value: String(item.course.lessons_per_week),
-      },
-      {
-        label: label(locale, 'price'),
-        value: `${item.course.default_price} ${item.course.currency}`,
-      },
-    ],
+    meta: courseMeta(item.course, item.nextStart, finder.joinableNowByCourseId[item.course.id] ?? false, locale),
   }));
 }

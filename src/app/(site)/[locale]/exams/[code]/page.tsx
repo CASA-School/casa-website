@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { HeroCUtilityRail } from '@/components/heroes';
 import { DecisionRail, EditorialSplit, ProcessSteps, TestimonialGrid } from '@/components/sections';
+import { serializeJsonLd } from '@/components/seo/json-ld';
 import { ExamDayTimelineSignature } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -23,6 +24,7 @@ function formatDate(value: string, locale: 'en' | 'de') {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: 'Europe/Berlin',
   }).format(new Date(value));
 }
 
@@ -61,8 +63,9 @@ export async function generateMetadata({ params }: ExamDetailPageProps): Promise
   const { code } = await params;
   const detail = await getExamDetail(code, locale);
 
+  // A missing exam 404s from here, so no canonical is emitted for it.
   if (!detail) {
-    return createPublicMetadata({ locale, title: 'Exam detail', description: 'CASA exam detail', path: `/exams/${code}` });
+    notFound();
   }
 
   return createPublicMetadata({
@@ -115,7 +118,11 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
   const infoItems = [
     {
       label: nextDateLabel,
-      value: selectedSession ? formatDate(selectedSession.starts_at, locale) : 'TBD',
+      value: selectedSession
+        ? formatDate(selectedSession.starts_at, locale)
+        : locale === 'de'
+          ? 'Wird bekannt gegeben'
+          : 'To be announced',
       selector:
         selectedSessionOptions.length > 1 && selectedSession
           ? {
@@ -191,7 +198,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(examSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(examSchema) }} />
 
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Prüfungsdetail' : 'Exam detail'}
@@ -226,7 +233,8 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
       <section className="py-16 md:py-20">
         <Container className="space-y-12 md:space-y-14">
           <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-            <div className="space-y-12 md:space-y-14">
+            {/* `min-w-0`, as on /courses/[slug]: the testimonial carousel must not widen the column. */}
+            <div className="min-w-0 space-y-12 md:space-y-14">
               <ExamDayTimelineSignature
                 title={locale === 'de' ? 'Ablauf und Unterlagen für den Prüfungstag' : 'Exam day timeline + what to bring'}
                 description={
@@ -312,6 +320,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                 reader anything about the exam.
               */
               deadlineIso={selectedSession?.registration_deadline}
+              // Only for a real sitting: with none on offer the badge's
+              // no-deadline state read "Laufende Anmeldung" beside "Wird bekannt gegeben".
+              showDeadline={Boolean(selectedSession)}
               /*
                 Tanja Langenickel, per CASA's 2026-09-08 allocation. This card
                 had no contact row at all — it ended on the `notes` line removed

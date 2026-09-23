@@ -226,7 +226,7 @@ export default async function NewsPage() {
 
       <section className="py-12 md:py-16">
         <Container>
-          <div className="mx-auto grid max-w-[85rem] gap-5 lg:grid-cols-3">
+          <div className="mx-auto grid max-w-[85rem] grid-cols-1 gap-5 lg:grid-cols-3">
             {/*
               SCHLAGZEILEN — the tall tinted column that opens the printed sheet.
 
@@ -292,7 +292,7 @@ export default async function NewsPage() {
               own and carries a level tag instead of a byline.
             */}
             <article className="rounded-xl bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:col-span-2">
-              <h2 className="text-2xl font-bold uppercase tracking-tight text-[var(--casa-ink)] sm:text-3xl">
+              <h2 className="break-words hyphens-auto text-2xl font-bold uppercase tracking-tight text-[var(--casa-ink)] sm:text-3xl">
                 {localizedText(newsFlashIssue.feature.title, locale)}
               </h2>
               <CefrBandBadge bands={newsFlashIssue.feature.levels} className="mt-3" />

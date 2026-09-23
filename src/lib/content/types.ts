@@ -294,7 +294,6 @@ export type ExamSessionRow = {
   updated_at: string;
 };
 
-export type RegistrationAvailabilityState = 'open' | 'limited' | 'full';
 export type RegistrationDeadlineStatus = 'open' | 'closing-soon' | 'closed' | 'not-applicable';
 
 export type CourseRegistrationOption = {
@@ -308,9 +307,6 @@ export type CourseRegistrationOption = {
   fee: number;
   currency: string;
   capacity: number;
-  seatsLeft: number;
-  availabilityState: RegistrationAvailabilityState;
-  availabilityLabel: string;
   deadlineStatus: RegistrationDeadlineStatus;
   deadlineLabel: string;
   status: string;
@@ -333,9 +329,6 @@ export type ExamRegistrationOption = {
   fee: number;
   currency: string;
   capacity: number;
-  seatsLeft: number;
-  availabilityState: RegistrationAvailabilityState;
-  availabilityLabel: string;
   deadlineStatus: RegistrationDeadlineStatus;
   deadlineLabel: string;
   locationLabel: string;
@@ -381,6 +374,8 @@ export type ExamCatalogModel = {
 export type CourseFinderData = {
   courses: CourseWithNarrative[];
   nextStartByCourseId: Record<string, string | null>;
+  /** A bookable term is under way and may be joined today (evening German). */
+  joinableNowByCourseId: Record<string, boolean>;
   scheduleTagsByCourseId: Record<string, string[]>;
   visaEligibleByCourseId: Record<string, boolean | null>;
 };

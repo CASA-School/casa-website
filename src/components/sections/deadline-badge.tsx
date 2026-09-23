@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 
+import { bremenToday } from '@/lib/content/bookability';
 import type { ContentLocale } from '@/lib/content/types';
 
 type DeadlineBadgeProps = {
@@ -8,10 +9,15 @@ type DeadlineBadgeProps = {
   className?: string;
 };
 
+/**
+ * Whole calendar days from today in Bremen to the deadline day, which counts as
+ * open. Measured against the clock instead, the deadline day read as "1 Tag"
+ * just after midnight and a passed deadline as "heute" until 02:00.
+ */
 function daysUntil(deadlineIso: string) {
-  const now = new Date();
-  const deadline = new Date(deadlineIso);
-  return Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const deadline = Date.parse(`${deadlineIso.slice(0, 10)}T00:00:00Z`);
+  const today = Date.parse(`${bremenToday()}T00:00:00Z`);
+  return Math.round((deadline - today) / (1000 * 60 * 60 * 24));
 }
 
 export function DeadlineBadge({ deadlineIso, locale, className }: DeadlineBadgeProps) {

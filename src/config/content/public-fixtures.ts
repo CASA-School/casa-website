@@ -276,15 +276,21 @@ function buildCourseInstances(): CourseInstanceRow[] {
   ];
 }
 
+/**
+ * Exam days at the hours CASA publishes (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md):
+ * telc B2 about 09:00-17:00, telc C1 Hochschule about 08:30-17:00, in Bremen
+ * time. Stored as UTC instants, so summer dates are two hours behind the wall
+ * clock and winter dates (from 25 October) one. These were 14:00-18:00.
+ */
 function buildExamSessions(): ExamSessionRow[] {
   return [
-    examSession('000000010001', 'telc_b2', '2026-08-21T12:00:00.000Z', '2026-08-21T16:00:00.000Z', '2026-07-20'),
-    examSession('000000010002', 'telc_b2', '2026-10-16T12:00:00.000Z', '2026-10-16T16:00:00.000Z', '2026-09-15'),
-    examSession('000000010003', 'telc_b2', '2026-11-13T13:00:00.000Z', '2026-11-13T17:00:00.000Z', '2026-10-12'),
-    examSession('000000020001', 'telc_c1_hochschule', '2026-09-04T12:00:00.000Z', '2026-09-04T16:00:00.000Z', '2026-08-03'),
-    examSession('000000020002', 'telc_c1_hochschule', '2026-10-02T12:00:00.000Z', '2026-10-02T16:00:00.000Z', '2026-09-01'),
-    examSession('000000020003', 'telc_c1_hochschule', '2026-10-30T13:00:00.000Z', '2026-10-30T17:00:00.000Z', '2026-09-29'),
-    examSession('000000020004', 'telc_c1_hochschule', '2026-11-27T13:00:00.000Z', '2026-11-27T17:00:00.000Z', '2026-10-26'),
+    examSession('000000010001', 'telc_b2', '2026-08-21T07:00:00.000Z', '2026-08-21T15:00:00.000Z', '2026-07-20'),
+    examSession('000000010002', 'telc_b2', '2026-10-16T07:00:00.000Z', '2026-10-16T15:00:00.000Z', '2026-09-15'),
+    examSession('000000010003', 'telc_b2', '2026-11-13T08:00:00.000Z', '2026-11-13T16:00:00.000Z', '2026-10-12'),
+    examSession('000000020001', 'telc_c1_hochschule', '2026-09-04T06:30:00.000Z', '2026-09-04T15:00:00.000Z', '2026-08-03'),
+    examSession('000000020002', 'telc_c1_hochschule', '2026-10-02T06:30:00.000Z', '2026-10-02T15:00:00.000Z', '2026-09-01'),
+    examSession('000000020003', 'telc_c1_hochschule', '2026-10-30T07:30:00.000Z', '2026-10-30T16:00:00.000Z', '2026-09-29'),
+    examSession('000000020004', 'telc_c1_hochschule', '2026-11-27T07:30:00.000Z', '2026-11-27T16:00:00.000Z', '2026-10-26'),
   ];
 }
 

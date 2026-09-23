@@ -111,8 +111,8 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
             step: '1',
             title: de ? 'Niveau einstufen' : 'Get placed',
             description: de
-              ? 'Der Einstufungstest ist kostenlos und entscheidet, in welcher Gruppe Sie starten.'
-              : 'The placement test is free and decides which group you join.',
+              ? 'Der Einstufungstest ist kostenlos und ergibt eine Kursempfehlung, die eine Lehrkraft mit Ihnen bestätigt.'
+              : 'The placement test is free and gives a course recommendation a teacher confirms with you.',
           },
           {
             step: '2',

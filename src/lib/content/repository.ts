@@ -10,6 +10,14 @@ import { placementNarrativesByLocale } from '@/config/content/placement-narrativ
 import { culturalProgramsByLocale } from '@/config/content/cultural-programs';
 import { teamSpotlightsByLocale } from '@/config/content/team-spotlights';
 import { listMockRows } from '@/lib/mock/store';
+import { toDateInputValue } from '@/lib/dates';
+import {
+  bremenToday,
+  isCourseTermBookable,
+  isExamSittingBookable,
+  lastCourseEntryDate,
+  nextCourseStartDate,
+} from '@/lib/content/bookability';
 import { getCourseContentSlug } from '@/lib/content/course-routes';
 import { sortByPublicCourseOrder } from '@/config/courses/course-order';
 import {
@@ -156,6 +164,15 @@ const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, str
     en: 'Firmenunterricht',
     de: 'Firmenunterricht',
   },
+  // The German titles casa-bremen.de ranks with; the fixture and seed names are English.
+  'special-courses': {
+    en: 'Special Courses',
+    de: 'Deutsch Spezialkurse',
+  },
+  bildungszeit: {
+    en: 'Bildungszeit German',
+    de: 'Bildungszeit Deutsch',
+  },
 };
 
 function filterPublicCourseTypes(courses: CourseTypeRow[]) {
@@ -222,12 +239,17 @@ function localeTag(locale: ContentLocale) {
   return locale === 'de' ? 'de-DE' : 'en-GB';
 }
 
+// Bremen time, explicitly: the container runs in UTC, which rendered a 09:00
+// exam start as 08:00 in winter and 07:00 in summer.
+const CASA_TIME_ZONE = 'Europe/Berlin';
+
 function formatDateLabel(value: string | Date, locale: ContentLocale) {
   const date = value instanceof Date ? value : new Date(value);
   return new Intl.DateTimeFormat(localeTag(locale), {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
+    timeZone: CASA_TIME_ZONE,
   }).format(date);
 }
 
@@ -244,15 +266,28 @@ function formatDateTimeLabel(startsAt: string, endsAt: string, locale: ContentLo
   const timeFormatter = new Intl.DateTimeFormat(localeTag(locale), {
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: CASA_TIME_ZONE,
   });
 
   return `${dateLabel}, ${timeFormatter.format(starts)} - ${timeFormatter.format(ends)}`;
 }
 
-function normalizeScheduleDays(days: string[]) {
+// The schedule column stores English abbreviations; German pages printed them as-is.
+const germanWeekdays: Record<string, string> = {
+  Mon: 'Mo',
+  Tue: 'Di',
+  Wed: 'Mi',
+  Thu: 'Do',
+  Fri: 'Fr',
+  Sat: 'Sa',
+  Sun: 'So',
+};
+
+function normalizeScheduleDays(days: string[], locale: ContentLocale) {
   return days
     .map((day) => day.trim())
     .filter(Boolean)
+    .map((day) => (locale === 'de' ? germanWeekdays[day] ?? day : day))
     .join(', ');
 }
 
@@ -266,7 +301,7 @@ function formatScheduleLabel(schedule: unknown, locale: ContentLocale) {
   const days = Array.isArray(rawDays) ? rawDays.filter((item): item is string => typeof item === 'string') : [];
   const time = typeof rawTime === 'string' ? rawTime : '';
 
-  const daysLabel = days.length > 0 ? normalizeScheduleDays(days) : locale === 'de' ? 'Tage tbd' : 'Days tbd';
+  const daysLabel = days.length > 0 ? normalizeScheduleDays(days, locale) : locale === 'de' ? 'Tage tbd' : 'Days tbd';
   if (!time) {
     return daysLabel;
   }
@@ -274,6 +309,7 @@ function formatScheduleLabel(schedule: unknown, locale: ContentLocale) {
   return `${daysLabel} • ${time}`;
 }
 
+/** Both arguments are `YYYY-MM-DD`; see normalizeCourseInstanceRow for why. */
 function toDateOnly(value: string) {
   return new Date(`${value}T00:00:00Z`);
 }
@@ -283,65 +319,16 @@ function daysBetween(from: Date, to: Date) {
   return Math.floor((to.getTime() - from.getTime()) / msPerDay);
 }
 
-function stableHash(input: string) {
-  let hash = 0;
-  for (let index = 0; index < input.length; index += 1) {
-    hash = (hash << 5) - hash + input.charCodeAt(index);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
+/*
+  No seat availability. `seatsLeft` and its "Nur wenige Plätze" / "Warteliste"
+  labels were derived from a hash of the term id, never from bookings — invented
+  scarcity on a nonprofit's registration form (UWG §5). Nothing may show a count
+  or a scarcity label until one is computed from real bookings against capacity.
+*/
 
-function estimateSeatsLeft(capacity: number, seed: string) {
-  if (capacity <= 0) {
-    return 0;
-  }
-
-  const ratio = stableHash(seed) % 100;
-  if (ratio > 92) {
-    return 0;
-  }
-  if (ratio > 68) {
-    return Math.max(1, Math.round(capacity * 0.2));
-  }
-
-  return Math.max(2, Math.round(capacity * 0.55));
-}
-
-function getAvailabilityState(seatsLeft: number) {
-  if (seatsLeft <= 0) {
-    return 'full' as const;
-  }
-  if (seatsLeft <= 3) {
-    return 'limited' as const;
-  }
-  return 'open' as const;
-}
-
-function availabilityLabel(state: 'open' | 'limited' | 'full', locale: ContentLocale) {
-  if (locale === 'de') {
-    if (state === 'full') {
-      return 'Warteliste';
-    }
-    if (state === 'limited') {
-      return 'Nur wenige Plätze';
-    }
-    return 'Plätze frei';
-  }
-
-  if (state === 'full') {
-    return 'Waitlist';
-  }
-  if (state === 'limited') {
-    return 'Limited seats';
-  }
-  return 'Open seats';
-}
-
-function courseDeadlineStatus(startDate: string) {
-  const now = new Date();
-  const startsAt = toDateOnly(startDate);
-  const days = daysBetween(now, startsAt);
+/** `lastEntryDate` is the last day a learner can join, per lib/content/bookability. */
+function courseDeadlineStatus(lastEntryDate: string, today: string) {
+  const days = daysBetween(toDateOnly(today), toDateOnly(lastEntryDate));
 
   if (days < 0) {
     return 'closed' as const;
@@ -352,14 +339,13 @@ function courseDeadlineStatus(startDate: string) {
   return 'open' as const;
 }
 
-function examDeadlineStatus(deadline: string | null) {
+function examDeadlineStatus(deadline: string | null, today: string) {
   if (!deadline) {
     return 'not-applicable' as const;
   }
 
-  const now = new Date();
-  const dueDate = toDateOnly(deadline);
-  const days = daysBetween(now, dueDate);
+  // Calendar days in Bremen, so the deadline day itself still reads as open.
+  const days = daysBetween(toDateOnly(today), toDateOnly(deadline));
 
   if (days < 0) {
     return 'closed' as const;
@@ -423,7 +409,8 @@ function getAvailableLevels(levelMin: string | null, levelMax: string | null): s
 }
 
 /**
- * Coerces a Postgres `date` to the ISO `YYYY-MM-DD` string the row types claim.
+ * Coerces Postgres dates to the strings the row types claim, once, at the query
+ * boundary.
  *
  * `CourseInstanceRow.start_date` is typed `string`, and it is one in fallback
  * mode -- but the Postgres driver hydrates a `date` column into a JS `Date`,
@@ -434,42 +421,56 @@ function getAvailableLevels(levelMin: string | null, levelMax: string | null): s
  * on a one-element array. Seeding CASA's real eight-term intensive table made
  * `a.startDate.localeCompare(...)` throw and took the homepage down with a 500.
  *
+ * A `date` arrives at LOCAL midnight, so it goes through `toDateInputValue`,
+ * never `toISOString()`: with TZ=Europe/Berlin the latter moves every date back a
+ * day. The same gap made `registration_deadline` an Invalid Date downstream, and
+ * every past exam deadline read as open. A `timestamptz` is a real instant, so
+ * `toISOString()` is right for it.
+ *
  * Same class of mode gap as the numeric(10,2) price strings documented in
  * lib/content/course-pricing.ts. Normalise at the boundary so the declared type
  * is true for both runtime modes.
  */
-function toIsoDateString(value: string | Date): string {
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
-  }
+function normalizeCourseInstanceRow(row: CourseInstanceRow): CourseInstanceRow {
+  return {
+    ...row,
+    start_date: toDateInputValue(row.start_date),
+    end_date: toDateInputValue(row.end_date),
+  };
+}
 
-  // Already a date-only string, or a timestamp we only want the date part of.
-  return String(value).slice(0, 10);
+function toTimestampString(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : String(value);
+}
+
+function normalizeExamSessionRow(row: ExamSessionRow): ExamSessionRow {
+  return {
+    ...row,
+    starts_at: toTimestampString(row.starts_at),
+    ends_at: toTimestampString(row.ends_at),
+    registration_deadline: toDateInputValue(row.registration_deadline) || null,
+  };
 }
 
 function buildCourseRegistrationOption(
   instance: CourseInstanceRow,
   courseType: CourseTypeRow,
-  locale: ContentLocale
+  locale: ContentLocale,
+  today: string
 ): CourseRegistrationOption {
-  const seatsLeft = estimateSeatsLeft(instance.capacity, `${courseType.id}-${instance.id}`);
-  const availabilityState = getAvailabilityState(seatsLeft);
-  const status = courseDeadlineStatus(instance.start_date);
+  const status = courseDeadlineStatus(lastCourseEntryDate(instance, courseType.slug), today);
 
   return {
     id: instance.id,
     courseTypeId: courseType.id,
     dateRangeLabel: formatDateRangeLabel(instance.start_date, instance.end_date, locale),
-    startDate: toIsoDateString(instance.start_date),
-    endDate: toIsoDateString(instance.end_date),
+    startDate: instance.start_date,
+    endDate: instance.end_date,
     scheduleLabel: formatScheduleLabel(instance.schedule, locale),
     locationLabel: instance.location || (locale === 'de' ? 'CASA Bremen Campus' : 'CASA Bremen Campus'),
     fee: courseType.default_price,
     currency: courseType.currency,
     capacity: instance.capacity,
-    seatsLeft,
-    availabilityState,
-    availabilityLabel: availabilityLabel(availabilityState, locale),
     deadlineStatus: status,
     deadlineLabel: deadlineLabel(status, locale),
     status: instance.status,
@@ -482,11 +483,10 @@ function buildCourseRegistrationOption(
 function buildExamRegistrationOption(
   session: ExamSessionRow,
   examType: ExamTypeRow,
-  locale: ContentLocale
+  locale: ContentLocale,
+  today: string
 ): ExamRegistrationOption {
-  const seatsLeft = estimateSeatsLeft(session.capacity, `${examType.id}-${session.id}`);
-  const availabilityState = getAvailabilityState(seatsLeft);
-  const status = examDeadlineStatus(session.registration_deadline);
+  const status = examDeadlineStatus(session.registration_deadline, today);
 
   return {
     id: session.id,
@@ -499,9 +499,6 @@ function buildExamRegistrationOption(
     fee: session.fee_override ?? examType.default_fee,
     currency: examType.currency,
     capacity: session.capacity,
-    seatsLeft,
-    availabilityState,
-    availabilityLabel: availabilityLabel(availabilityState, locale),
     deadlineStatus: status,
     deadlineLabel: deadlineLabel(status, locale),
     locationLabel: locale === 'de' ? 'CASA Bremen Prüfungszentrum' : 'CASA Bremen Exam Center',
@@ -673,7 +670,8 @@ function scheduleTagsFromOptions(options: CourseRegistrationOption[]) {
 
   for (const option of options) {
     const label = option.scheduleLabel.toLowerCase();
-    if (label.includes('mon') || label.includes('tue') || label.includes('wed') || label.includes('thu') || label.includes('fri')) {
+    // English or German abbreviations: the label follows the page's locale.
+    if (/\b(mon|tue|wed|thu|fri|mo|di|mi|do|fr)\b/.test(label)) {
       tags.add('weekdays');
     }
     if (label.includes('18:') || label.includes('19:') || label.includes('evening')) {
@@ -697,12 +695,25 @@ export async function getCourseFinderData(locale: ContentLocale): Promise<Course
   ]);
 
   const nextStartByCourseId: Record<string, string | null> = {};
+  const joinableNowByCourseId: Record<string, boolean> = {};
   const scheduleTagsByCourseId: Record<string, string[]> = {};
   const visaEligibleByCourseId: Record<string, boolean | null> = {};
+  const today = bremenToday();
 
   for (const course of courses) {
     const options = catalog.optionsByCourseTypeId[course.id] ?? [];
-    nextStartByCourseId[course.id] = options[0]?.startDate ?? null;
+    const terms = options.map((option) => ({ start_date: option.startDate, end_date: option.endDate, status: option.status }));
+    // Not options[0]: that can be an evening term already under way, which is
+    // joinable but did not "start" on a date still ahead. That case is
+    // `joinableNow`, so a null start never has to stand for it.
+    nextStartByCourseId[course.id] =
+      terms
+        .map((term) => nextCourseStartDate(term, course.slug, today))
+        .filter((date): date is string => date !== null)
+        .sort()[0] ?? null;
+    joinableNowByCourseId[course.id] = terms.some(
+      (term) => isCourseTermBookable(term, course.slug, today) && nextCourseStartDate(term, course.slug, today) === null
+    );
     const scheduleTags = scheduleTagsFromOptions(options);
     scheduleTagsByCourseId[course.id] = scheduleTags;
     visaEligibleByCourseId[course.id] = resolveVisaEligibility(course);
@@ -711,6 +722,7 @@ export async function getCourseFinderData(locale: ContentLocale): Promise<Course
   return {
     courses,
     nextStartByCourseId,
+    joinableNowByCourseId,
     scheduleTagsByCourseId,
     visaEligibleByCourseId,
   };
@@ -774,14 +786,17 @@ export async function getCourseDetail(slug: string, locale: ContentLocale): Prom
               updated_at
             FROM course_instances
             WHERE course_type_id = $1
-              AND start_date >= CURRENT_DATE
+              -- Terms under way too: an evening term can be joined until its
+              -- last day. lib/content/bookability decides which can be booked.
+              AND end_date >= CURRENT_DATE
+              AND status = 'scheduled'
             ORDER BY start_date ASC
           `,
           [row.id]
         );
 
         if (instanceRows.length > 0) {
-          instances = instanceRows;
+          instances = instanceRows.map(normalizeCourseInstanceRow);
         }
       }
     } catch (error) {
@@ -802,8 +817,10 @@ export async function getCourseDetail(slug: string, locale: ContentLocale): Prom
   course = applyPublicCourseDisplayName(course, locale);
 
   if (instances.length === 0) {
+    // Finished terms stay in: the term table shows them dimmed, and the page
+    // selects only a term isCourseTermBookable() still offers.
     instances = fallbackCourseInstances
-      .filter((item) => item.course_type_id === course.id)
+      .filter((item) => item.course_type_id === course.id && item.status === 'scheduled')
       .sort((a, b) => a.start_date.localeCompare(b.start_date));
   }
 
@@ -827,6 +844,24 @@ export async function getCourseRegistrationCatalog(
   let instances: CourseInstanceRow[] = [];
   let selectedOptionId = defaultInstanceId;
   let selectedCourseTypeId: string | undefined;
+  const today = bremenToday();
+
+  /*
+    ONLY TERMS A LEARNER CAN STILL BOOK, soonest first — so the form's default is
+    never a term that has begun. Which terms that is depends on the format
+    (an evening term can be joined while it runs); lib/content/bookability has the
+    rule. Applied to the database rows and to the fixtures alike, before either
+    is chosen, so a database whose every term has begun falls back exactly as an
+    empty one did. The registration routes check a submitted id against this
+    same catalog.
+  */
+  const bookableTerms = (rows: CourseInstanceRow[], types: CourseTypeRow[]) => {
+    const slugByTypeId = new Map(types.map((type) => [type.id, type.slug]));
+    return rows.filter((row) => {
+      const slug = slugByTypeId.get(row.course_type_id);
+      return slug !== undefined && isCourseTermBookable(row, slug, today);
+    });
+  };
 
   if (db) {
     try {
@@ -879,15 +914,16 @@ export async function getCourseRegistrationCatalog(
               updated_at
             FROM course_instances
             WHERE course_type_id = ANY($1::uuid[])
-              AND start_date >= CURRENT_DATE
+              AND end_date >= CURRENT_DATE
               AND status = 'scheduled'
             ORDER BY start_date ASC
           `,
           [typeIds]
         );
 
-        if (instanceRows.length > 0) {
-          instances = instanceRows;
+        const bookableRows = bookableTerms(instanceRows.map(normalizeCourseInstanceRow), courseTypes);
+        if (bookableRows.length > 0) {
+          instances = bookableRows;
         }
       }
 
@@ -938,8 +974,7 @@ export async function getCourseRegistrationCatalog(
   }
 
   if (instances.length === 0) {
-    instances = [...fallbackCourseInstances]
-      .filter((item) => item.status === 'scheduled')
+    instances = bookableTerms(fallbackCourseInstances, fallbackCourseTypes)
       .sort((a, b) => a.start_date.localeCompare(b.start_date));
   }
 
@@ -949,8 +984,8 @@ export async function getCourseRegistrationCatalog(
   if (instances.length === 0) {
     const fallbackPublicCourseTypes = filterPublicCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
     const fallbackPublicCourseTypeIds = new Set(fallbackPublicCourseTypes.map((courseType) => courseType.id));
-    const fallbackPublicInstances = [...fallbackCourseInstances]
-      .filter((item) => item.status === 'scheduled' && fallbackPublicCourseTypeIds.has(item.course_type_id))
+    const fallbackPublicInstances = bookableTerms(fallbackCourseInstances, fallbackCourseTypes)
+      .filter((item) => fallbackPublicCourseTypeIds.has(item.course_type_id))
       .sort((a, b) => a.start_date.localeCompare(b.start_date));
 
     if (fallbackPublicCourseTypes.length > 0 && fallbackPublicInstances.length > 0) {
@@ -973,7 +1008,7 @@ export async function getCourseRegistrationCatalog(
   courseTypes.forEach((courseType) => {
     const options = instances
       .filter((instance) => instance.course_type_id === courseType.id)
-      .map((instance) => buildCourseRegistrationOption(instance, courseType, locale))
+      .map((instance) => buildCourseRegistrationOption(instance, courseType, locale, today))
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
 
     optionsByCourseTypeId[courseType.id] = options;
@@ -1009,6 +1044,11 @@ export async function getExamRegistrationCatalog(
   let sessions: ExamSessionRow[] = [];
   let selectedOptionId = defaultSessionId;
   let selectedExamTypeId: string | undefined;
+  const now = new Date();
+  const today = bremenToday(now);
+  // Same rule as the course catalog above: only sittings still open for
+  // registration, from the database and the fixtures alike.
+  const bookableSittings = (rows: ExamSessionRow[]) => rows.filter((row) => isExamSittingBookable(row, now));
 
   if (db) {
     try {
@@ -1055,8 +1095,9 @@ export async function getExamRegistrationCatalog(
         examTypes = examTypeRows;
       }
 
-      if (sessionRows.length > 0) {
-        sessions = sessionRows;
+      const bookableRows = bookableSittings(sessionRows.map(normalizeExamSessionRow));
+      if (bookableRows.length > 0) {
+        sessions = bookableRows;
       }
 
       if (defaultSessionId) {
@@ -1102,8 +1143,7 @@ export async function getExamRegistrationCatalog(
   }
 
   if (sessions.length === 0) {
-    sessions = [...fallbackExamSessions]
-      .filter((session) => session.status === 'scheduled')
+    sessions = bookableSittings(fallbackExamSessions)
       .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   }
 
@@ -1112,8 +1152,7 @@ export async function getExamRegistrationCatalog(
   if (sessions.length === 0) {
     const fallbackPublicExamTypes = filterPublicExamTypes([...fallbackExamTypes].sort((a, b) => a.name.localeCompare(b.name)));
     const fallbackPublicSessions = filterSessionsByType(
-      [...fallbackExamSessions]
-        .filter((session) => session.status === 'scheduled')
+      bookableSittings(fallbackExamSessions)
         .sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
       fallbackPublicExamTypes
     );
@@ -1143,8 +1182,7 @@ export async function getExamRegistrationCatalog(
   examTypes.forEach((examType) => {
     const options = sessions
       .filter((session) => session.exam_type_id === examType.id)
-      .map((session) => buildExamRegistrationOption(session, examType, locale))
-      .filter((option) => option.deadlineStatus !== 'closed')
+      .map((session) => buildExamRegistrationOption(session, examType, locale, today))
       .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
     optionsByExamTypeId[examType.id] = options;
@@ -1236,8 +1274,9 @@ export async function getExamCatalog(locale: ContentLocale): Promise<ExamCatalog
         examTypes = typeRows;
       }
 
-      if (sessionRows.length > 0) {
-        sessions = sessionRows;
+      const bookableRows = sessionRows.map(normalizeExamSessionRow).filter((row) => isExamSittingBookable(row));
+      if (bookableRows.length > 0) {
+        sessions = bookableRows;
       }
     } catch (error) {
       logDatabaseFallback('getExamCatalog (exam_types, exam_sessions)', error);
@@ -1255,8 +1294,23 @@ export async function getExamCatalog(locale: ContentLocale): Promise<ExamCatalog
     examTypes = filterPublicExamTypes([...fallbackExamTypes]);
   }
 
+  /*
+    Only sittings a candidate can still register for, by the same rule
+    (isExamSittingBookable) the registration form applies. Every page reads
+    `sessions[0]` as "Nächste Prüfung" and takes its deadline badge from it, so a
+    sitting whose deadline has passed would have headed the page as "Anmeldung
+    geschlossen".
+
+    The pages list the sittings the form offers only in fallback mode and when
+    the database has sittings. With database exam types and no sittings, the
+    fixture sittings match none of those type ids and the pages show none, while
+    getExamRegistrationCatalog swaps in the fixture exam types as well and still
+    offers them. That swap is not copied here, because it would replace the
+    database's exam names and fees on the public pages; the fix is seeding
+    exam_sessions.
+  */
   if (sessions.length === 0) {
-    sessions = [...fallbackExamSessions];
+    sessions = fallbackExamSessions.filter((row) => isExamSittingBookable(row));
   }
 
   sessions = filterSessionsByType(sessions, examTypes);

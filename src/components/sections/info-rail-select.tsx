@@ -46,10 +46,15 @@ export function InfoRailSelect({ label, selectedValue, options }: InfoRailSelect
         control sits in a column of values ("A1 – C1", "from €520") that are
         17px/600, and at the primitive's 14px it read as a smaller, secondary
         fact instead of the date it is.
+
+        It wraps instead of the primitive's single 44px line: a label such as
+        "Laufender Kurs seit 24. August 2026" is wider than the rail on a phone,
+        and a nowrap trigger widened the rail, and with it the page, past the
+        screen.
       */}
       <SelectTrigger
         aria-label={label}
-        className="w-full bg-[var(--casa-surface-wash)] text-left text-base font-semibold text-[var(--casa-ink)]"
+        className="w-full min-h-11 whitespace-normal bg-[var(--casa-surface-wash)] text-left text-base font-semibold text-[var(--casa-ink)] data-[size=default]:h-auto"
       >
         <SelectValue />
       </SelectTrigger>
