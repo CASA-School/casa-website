@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-test('homepage reel starts with CASA, advances, and stops automatic rotation after choosing a photo', async ({ page }) => {
+test('homepage reel starts with a lesson, advances, and stops automatic rotation after choosing a photo', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   const reel = page.getByRole('region', { name: 'Einblicke in CASA' });
-  await expect(reel.getByRole('img')).toHaveAttribute('alt', 'Das CASA-Schulgebäude in Bremen im warmen Abendlicht');
+  await expect(reel.getByRole('img')).toHaveAttribute('alt', 'Eine Lehrerin hält lachend ein Arbeitsblatt hoch, an der Tafel stehen die Wechselpräpositionen');
   await expect(reel.getByRole('button', { name: /^Bild 2:/ })).toHaveAttribute('aria-current', 'true', { timeout: 12_000 });
   await expect(reel.getByRole('button', { name: /Bildfolge pausieren|Bildfolge abspielen/ })).toHaveCount(0);
   // Let the dissolve finish before selecting a different scene.
@@ -35,7 +35,7 @@ test('mobile reduced-motion reel stays still and supports every image through ke
   await expect(first).toHaveAttribute('aria-current', 'true');
   const before = await reel.boundingBox();
   await first.focus();
-  for (const number of [2, 3, 4, 5, 1]) {
+  for (const number of [2, 3, 4, 1]) {
     await page.keyboard.press('ArrowRight');
     await expect(reel.getByRole('button', { name: new RegExp(`^Photo ${number}:`) })).toHaveAttribute('aria-current', 'true');
     await expect(reel.getByRole('img')).toHaveCount(1);

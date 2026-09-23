@@ -20,15 +20,17 @@ handoff, `~/.agentic/ACTIVE_HANDOFF.md`, after integration completes.
   partner schools. Funding, non-distribution and legal details remain visible in DE/EN.
   See [NONPROFIT_PARTNERS.md](NONPROFIT_PARTNERS.md). No Google NGO eligibility claim.
 - About hero: user-supplied daylight building image; its layout remains unchanged.
-- Homepage hero: five-photo reel starting with the golden CASA building, followed by
-  classroom learning, Bremen walk, language practice and the courtyard. The homepage
+- Homepage hero: a four-photo reel of real photographs (updated 2026-09-23) — a lesson,
+  the CASA team in the courtyard, a partner interview and the Bremen walk. The homepage
   alone has the wider image-led layout, 12–16px navbar gap, heading and single course
   button. No eyebrow, supporting paragraph or visible Pause/Abspielen control.
-- Five AI-edited panoramic images: wider framing and brighter natural lighting,
-  explicitly requested by the user. Desktop uses 12:5; smaller screens use a 2:1
-  frame with the heading and CTA below, without an image-darkening overlay.
+- The five AI-edited images of 21 September were withdrawn on 2026-09-23: they had
+  invented the building's surroundings, misspelled its sign and redrawn every face.
+  Each reel image is now a 2:1 crop with light correction only, built and verified by
+  `scripts/media/build_reel.py`; see [MEDIA_LIBRARY.md](MEDIA_LIBRARY.md). Desktop shows
+  a 12:5 band of it; smaller screens show it whole with the heading and CTA below.
   Gentle 2% zoom, 1.4s dissolves, progress indicators, swipe/keyboard navigation,
-  loading safeguards and reduced-motion behavior. Original images are preserved.
+  loading safeguards and reduced-motion behavior are unchanged.
 
 ## Decisions to preserve
 
@@ -37,9 +39,8 @@ handoff, `~/.agentic/ACTIVE_HANDOFF.md`, after integration completes.
   stretching a photograph or darkening the whole image.
 - Keep homepage copy minimal; keep nonprofit mission/funding information visible.
 - Avoid yellow/cream card backgrounds and repetitive, compressed page layouts.
-- These imagegen derivatives include inferred surroundings; do not describe them
-  as untouched documentary photographs. Sources, prompts and exact asset paths:
-  [MEDIA_LIBRARY.md](MEDIA_LIBRARY.md) and [MEDIA_PHOTO_NUMBERS.md](MEDIA_PHOTO_NUMBERS.md).
+- No generative image editing. A frame that needs more room than a photograph has gets a
+  different photograph; `build_reel.py --verify` fails any reel image that is not its recipe.
 - Local originals, intermediate designs and review evidence stay outside the deploy
   tree in `/Users/rahmanshafiee/Archive/CASA/hero-reel-2026-09-21/`.
 

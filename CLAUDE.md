@@ -267,7 +267,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    (`public/media/casa/team/`). They must be replaced with verified real staff
    portraits before launch. Do not present them as real staff.
 4. **Photo edits stay source-faithful** — crop, resize, light exposure/color
-   correction only.
+   correction only. No generative editing (expansion, relighting, retouching by an
+   image model). The homepage reel is built and checked by `scripts/media/build_reel.py`.
 5. **Accommodation photos are contextual, not availability claims.**
 6. **Placement test content and results.** All 163 placement items are
    `PILOT_UNREVIEWED` and need two qualified DaF reviewers before live use. Never

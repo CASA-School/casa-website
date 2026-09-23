@@ -188,11 +188,14 @@ export const photoSlots: PhotoSlot[] = [
   // ---- Append new photographs below this line, next number, never resort --
   { n: 44, src: '/media/casa/casa-building-golden.webp', subject: 'CASA building in golden evening light. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
   { n: 45, src: '/media/casa/casa-building-daylight.webp', subject: 'CASA building in clear daylight. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
-  { n: 46, src: '/media/casa/reel-learning-together-wide.webp', subject: 'Three learners enjoying a classroom exercise. User-requested AI expansion and lighting edit of collection frame 085 for the local hero reel, 2026-09-21.', ready: true },
-  { n: 47, src: '/media/casa/reel-language-practice-wide.webp', subject: 'Two learners working with a coursebook. User-requested AI expansion and lighting edit of collection frame 021 for the local hero reel, 2026-09-21.', ready: true },
-  { n: 48, src: '/media/casa/reel-garden-gathering-wide.webp', subject: 'A cheerful gathering in the leafy courtyard. User-requested AI expansion and lighting edit of collection frame 095 for the local hero reel, 2026-09-21.', ready: true },
-  { n: 49, src: '/media/casa/reel-building-golden-wide.webp', subject: 'Full CASA facade in golden evening light. AI panorama expanded from the supplied portrait image, explicitly requested for local preview on 2026-09-21; peripheral surroundings are generated.', ready: true },
-  { n: 50, src: '/media/casa/reel-walking-bremen-wide.webp', subject: 'Students walking together. User-requested AI expansion and lighting edit of the original slot 23 photograph for the local hero reel, 2026-09-21.', ready: true },
+  { n: 46, src: '/media/casa/reel-learning-together-wide.webp', subject: 'Retired 2026-09-23. Was an AI-redrawn panorama of collection frame 085 (faces and surroundings regenerated); the file is deleted and the number is not reused.', ready: false },
+  { n: 47, src: '/media/casa/reel-language-practice-wide.webp', subject: 'Retired 2026-09-23. Was an AI-redrawn panorama of collection frame 021; the file is deleted and the number is not reused.', ready: false },
+  { n: 48, src: '/media/casa/reel-garden-gathering-wide.webp', subject: 'Retired 2026-09-23. Was an AI-redrawn panorama of collection frame 095 (people moved and redrawn); the file is deleted and the number is not reused. The team photograph in 53 took its place.', ready: false },
+  { n: 49, src: '/media/casa/reel-building-golden-wide.webp', subject: 'Retired 2026-09-23. Was an AI panorama of the facade that invented neighbouring houses and misspelled the window sign; the file is deleted and the number is not reused. A real building photograph gets a new number.', ready: false },
+  { n: 50, src: '/media/casa/reel-walking-bremen-wide.webp', subject: 'Students walking together in Bremen. The slot 23 photograph (collection W012), cropped 2:1 with light correction only (scripts/media/build_reel.py), 2026-09-23.', ready: true },
+  { n: 51, src: '/media/casa/reel-classroom-lesson.webp', subject: 'A lesson in progress: the teacher laughing with a worksheet, a learner at the board, German grammar in the teacher\'s handwriting. Collection frame 093, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
+  { n: 52, src: '/media/casa/reel-partner-practice.webp', subject: 'Two learners doing a partner interview from a worksheet, talking and smiling. Collection frame 075, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
+  { n: 53, src: '/media/casa/reel-team-courtyard.webp', subject: 'The CASA team standing together in the leafy courtyard, most smiling at the camera. Collection frame 098, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

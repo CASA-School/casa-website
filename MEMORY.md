@@ -2160,3 +2160,23 @@ English one or contains a transliterated umlaut. Ten new assertions, 350 tests g
 answers 403 to any automated request, so a guess could not be verified. Swap it once
 someone has opened the German page in a browser.
 
+## 28. The homepage reel is real photographs again (2026-09-23)
+
+The 21 September reel was five `image_gen` edits. Measured against their sources: the
+building panorama invented neighbouring houses, trees and a sunset and misspelled the
+window sign ("CASA SPRACHSHULE"); every people photograph survived at only 42–52% of
+its width because the model redrew the whole frame, so faces and hair changed (one
+colleague's long hair became shoulder-length) and the 1942×809 files were stretched
+across a 1680px hero. All five were deleted; slots 46–49 are retired.
+
+The reel is now four real photographs from the pool (093 lesson, 098 team, 075
+partner interview, W012 walk), each a full-width 2:1 crop with global light and colour
+correction from `scripts/media/build_reel.py`. Phones show the whole image; the
+desktop 12:5 frame shows a band chosen by `objectPosition`. `--verify` re-renders each
+slide and fails any 96px tile under 33 dB, which catches a single redrawn patch that a
+whole-image score misses. The building stays out until a real, high-resolution
+photograph exists. The old courtyard frame 095 could not be used honestly: its group
+spans the width at mid-height, so the desktop heading always lands on faces.
+
+Selection record, rejections and the consent check are in docs/MEDIA_LIBRARY.md.
+
