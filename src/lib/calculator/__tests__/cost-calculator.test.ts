@@ -1,5 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
+import { EXAM_FEES } from '@/config/calculator/pricing';
 import {
   calculateCasaCostPathway,
   type CasaCalculatorInput,
@@ -14,7 +18,7 @@ import {
  *     against casa-bremen.de/en/language-courses/intensive-german-courses,
  *     see pricing.ts
  *   - Special course (default):     192 €  (SPECIAL_COURSE_DEFAULT_PRICE)
- *   - Exam: telcB2 prep=260, full=190, partial=160  (Level Development Plan 2026)
+ *   - Exam: telcB2 prep=260, full=190, partial=160; telcC1 prep=520, full=210, partial=185
  *   - Accommodation: 580/4wk base, 145/extra-wk, 50 commission, 580 deposit, 145 holiday/wk
  *
  * Intensive tuition is billed per real level, not per pair of steps: a level
@@ -201,5 +205,54 @@ describe('calculateCasaCostPathway', () => {
     expect(result.validationError).toBe('Target level must be higher than current level.');
     expect(result.breakdown.totalMin).toBe(0);
     expect(result.breakdown.totalMax).toBe(0);
+  });
+
+  it('adds the telc C1 Hochschule preparation course at 520 €', () => {
+    const result = calculateCasaCostPathway(
+      makeInput({
+        currentLevel: 'B2.2',
+        targetLevel: 'C1.1',
+        includeBooks: false,
+        includeEnrollmentFee: false,
+        examTarget: 'telcC1',
+        includeExamPrep: true,
+        examType: 'full',
+      })
+    );
+
+    expect(result.breakdown.examPrep).toBe(520);
+    expect(result.breakdown.examFee).toBe(210);
+  });
+});
+
+/**
+ * The calculator is the one place on the site that totals a learner's cost, so
+ * its exam fees are read from the facts document rather than retyped here. A
+ * change to either side fails this until the other matches.
+ */
+describe('exam fees against docs/COURSE_FACTS_SOURCE_OF_TRUTH.md', () => {
+  const facts = readFileSync(
+    join(__dirname, '..', '..', '..', '..', 'docs', 'COURSE_FACTS_SOURCE_OF_TRUTH.md'),
+    'utf8'
+  );
+
+  function euros(pattern: RegExp): number[] {
+    const match = pattern.exec(facts);
+    expect(match, `no row matching ${pattern} in the facts document`).not.toBeNull();
+    return match!.slice(1).map(Number);
+  }
+
+  it('matches the telc B2 exam and preparation course', () => {
+    const [full, partial] = euros(/\| telc B2 exam \| \*\*€(\d+)\*\* full \/ \*\*€(\d+)\*\* partial/);
+    const [prep] = euros(/\| telc B2 preparation course \| \*\*€(\d+)\*\*/);
+
+    expect(EXAM_FEES.telcB2).toEqual({ prep, examFull: full, examPartial: partial });
+  });
+
+  it('matches the telc C1 Hochschule exam and preparation course', () => {
+    const [full, partial] = euros(/\| telc C1 Hochschule exam \| \*\*€(\d+)\*\* full \/ \*\*€(\d+)\*\* partial/);
+    const [prep] = euros(/\| telc C1 Hochschule preparation course \| \*\*€(\d+)\*\*/);
+
+    expect(EXAM_FEES.telcC1).toEqual({ prep, examFull: full, examPartial: partial });
   });
 });

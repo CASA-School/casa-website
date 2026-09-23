@@ -132,7 +132,8 @@ export const BOOK_PRICE_UPPER = 26.99;
 export const ENROLLMENT_FEE = 50;
 
 // ---------------------------------------------------------------------------
-// Exam fees (source: Level Development Plan 2026 + Telc 2025 sheet)
+// Exam fees (source: Level Development Plan 2026 + Telc 2025 sheet; checked
+// against docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, which a test pins them to)
 // ---------------------------------------------------------------------------
 
 export const EXAM_FEES = {
@@ -142,7 +143,8 @@ export const EXAM_FEES = {
     examPartial: 160,
   },
   telcC1: {
-    prep: 500,
+    // The four-week block, as the live C1 Hochschule page and the FAQ list it.
+    prep: 520,
     examFull: 210,
     examPartial: 185,
   },

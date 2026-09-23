@@ -143,6 +143,11 @@ test('the landing page offers one way in and no level self-diagnosis', async ({ 
   // pick a level in order to discover their level.
   await expect(page.getByText(/klett placement tests/i)).toHaveCount(0);
   await expect(page.locator('a[href*="einstufungstests.klett-sprachen.de"]')).toHaveCount(0);
+
+  // Every item is PILOT_UNREVIEWED and the cut scores are hypotheses; the page
+  // must not claim otherwise (CLAUDE.md hard rule 6).
+  await expect(page.getByText(/not yet been independently reviewed/i)).toBeVisible();
+  await expect(page.getByText(/reviewed by our teaching/i)).toHaveCount(0);
 });
 
 test('a true beginner is placed without sitting a single item', async ({ page }) => {
@@ -154,6 +159,12 @@ test('a true beginner is placed without sitting a single item', async ({ page })
   // Never a certificate, never pass/fail — v1 policy, not a copy preference.
   await expect(page.getByText(/not a certificate/i)).toBeVisible();
   await expect(page.getByText(/\byou (passed|failed)\b/i)).toHaveCount(0);
+
+  // The pilot status is stated as it is, and the page promises a lasting link
+  // only when the result was stored: exactly one of the two lines renders.
+  await expect(page.getByText(/not yet calibrated/i)).toBeVisible();
+  await expect(page.getByText(/calibrated against how learners actually progress in their first weeks/i)).toHaveCount(0);
+  await expect(page.getByText(/keep this page’s private link|this result has not been saved/i)).toHaveCount(1);
 });
 
 test('the test runs one item at a time and names the phase, not a total', async ({ page }) => {

@@ -114,7 +114,6 @@ export const NON_LOCALIZED_PREFIXES: readonly string[] = [
   '/api',
   '/admin',
   '/_next',
-  '/_casa-not-found',
   '/media',
   '/images',
   '/accreditations',

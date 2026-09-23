@@ -4,7 +4,14 @@ import { toPublicPath } from '@/i18n/pathnames';
 import { defaultLocale, localeTags, locales } from '@/i18n/routing';
 import type { ContentLocale } from '@/lib/content/types';
 
-const DEFAULT_SITE_URL = 'https://www.casa-bremen.de';
+/*
+ * The apex, not www: the old site 301s www to https://casa-bremen.de/ and every
+ * page it has had indexed carries an apex canonical, so keeping it makes the
+ * migration a same-URL move rather than a host change. src/proxy.ts sends www
+ * to the apex. NEXT_PUBLIC_SITE_URL is inlined at build time, so overriding it
+ * means passing it into the image build, not setting it on the running app.
+ */
+const DEFAULT_SITE_URL = 'https://casa-bremen.de';
 const DEFAULT_OG_IMAGE = '/images/og-default.png';
 
 function stripTrailingSlash(value: string) {

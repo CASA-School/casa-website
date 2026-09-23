@@ -113,7 +113,7 @@ export default async function PlacementTestPage() {
           prepBody: 'Mit ein paar Angaben erhalten Sie schneller eine passgenaue Empfehlung.',
           pilotTitle: 'Unser eigenes Instrument, in der Pilotphase',
           pilotBody:
-            'CASA hat diesen Test selbst entwickelt: eigene Aufgaben, an unserem Lehrplan ausgerichtet, geprüft von unserem Unterrichtsteam. Während der Pilotphase bestätigt immer eine Lehrkraft das Ergebnis — die Empfehlung ist der Ausgangspunkt für dieses Gespräch, nicht das letzte Wort.',
+            'CASA hat diesen Test selbst entwickelt: eigene Aufgaben, an unserem Lehrplan ausgerichtet. In der Pilotphase sind die Aufgaben noch nicht unabhängig fachlich geprüft und die Empfehlungen noch nicht an echten Lernverläufen kalibriert. Deshalb bestätigt immer eine Lehrkraft das Ergebnis — die Empfehlung ist der Ausgangspunkt für dieses Gespräch, nicht das letzte Wort.',
         }
       : {
           heroTitle: 'Find your level without guessing at it',
@@ -162,7 +162,7 @@ export default async function PlacementTestPage() {
           prepBody: 'A few details help us give you a sharper recommendation.',
           pilotTitle: 'Our own instrument, in its pilot phase',
           pilotBody:
-            'CASA built this test in house: our own questions, written against our curriculum and reviewed by our teaching team. During the pilot a teacher always confirms the outcome — the recommendation is the starting point for that conversation, not the last word.',
+            'CASA built this test in house: our own questions, written against our curriculum. During the pilot the questions have not yet been independently reviewed, and the recommendations are not yet calibrated against how learners actually progress. That is why a teacher always confirms the outcome — the recommendation is the starting point for that conversation, not the last word.',
         };
 
   return (

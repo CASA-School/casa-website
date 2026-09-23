@@ -30,8 +30,8 @@ import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { BAND_COPY, SKILL_LABELS, SKILL_NOT_MEASURED, reviewNotice } from '@/config/placement/result-copy';
 import { LISTENING_AUDIO_AVAILABLE } from '@/config/placement/policy';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { loadAttempt } from '@/lib/placement/attempt.server';
 import { levelLabelOfBand, presentationBand } from '@/lib/placement/finalise';
+import { getAttemptByTokenWithPersistence } from '@/lib/placement/repository.server';
 
 export const metadata: Metadata = {
   title: 'Your placement result | CASA Bremen',
@@ -46,10 +46,15 @@ export default async function PlacementResultPage({
   const { token } = await params;
   const locale = await getContentLocale();
 
-  const attempt = await loadAttempt(token);
-  if (!attempt || !attempt.decision) notFound();
+  // `persisted` reports where THIS read found the attempt, not whether a
+  // database is configured. Only a stored result has a link that keeps
+  // working; one held in this process's memory is gone on the next restart,
+  // scale-down or replica, so the page must not tell the learner to rely on it.
+  const record = await getAttemptByTokenWithPersistence(token);
+  if (!record || !record.attempt.decision) notFound();
 
-  const decision = attempt.decision;
+  const { persisted } = record;
+  const decision = record.attempt.decision;
   // `presentationBand` owns the "may this be shown as settled?" rule, so the
   // page cannot accidentally present an unconfirmed C1 as a seat.
   const { band, provisional } = presentationBand(decision);
@@ -183,12 +188,19 @@ export default async function PlacementResultPage({
             </div>
 
             {/* The token is the only way back to this page. Given to the
-                learner explicitly rather than left in the address bar. */}
+                learner explicitly rather than left in the address bar — and
+                only when the result is stored, because otherwise the link
+                dies with the process that holds it. */}
             <p className="mt-5 rounded-lg border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 py-3 text-xs leading-relaxed text-[var(--casa-muted)]">
-              {t(
-                'Keep this page’s private link and show it when you register. The test does not ask for your name, so the link is how CASA connects you to this result.',
-                'Speichern Sie den privaten Link dieser Seite und zeigen Sie ihn bei der Anmeldung. Der Test fragt nicht nach Ihrem Namen; über den Link kann CASA Ihr Ergebnis zuordnen.'
-              )}
+              {persisted
+                ? t(
+                    'Keep this page’s private link and show it when you register. The test does not ask for your name, so the link is how CASA connects you to this result.',
+                    'Speichern Sie den privaten Link dieser Seite und zeigen Sie ihn bei der Anmeldung. Der Test fragt nicht nach Ihrem Namen; über den Link kann CASA Ihr Ergebnis zuordnen.'
+                  )
+                : t(
+                    'This result has not been saved, so the link to this page will not keep working. Please note your recommended starting point and mention it when you register.',
+                    'Dieses Ergebnis wurde nicht gespeichert, daher funktioniert der Link zu dieser Seite nicht dauerhaft. Bitte notieren Sie sich Ihren empfohlenen Einstieg und nennen Sie ihn bei der Anmeldung.'
+                  )}
             </p>
           </section>
 
@@ -292,8 +304,8 @@ export default async function PlacementResultPage({
 
           <p className="px-1 text-xs leading-relaxed text-[var(--casa-muted)]">
             {t(
-              'CASA’s placement test is our own instrument, currently in its pilot phase. Its questions are reviewed by our teaching staff and its recommendations are calibrated against how learners actually progress in their first weeks.',
-              'Der CASA-Einstufungstest ist unser eigenes Instrument und befindet sich derzeit in der Pilotphase. Die Aufgaben werden von unserem Unterrichtsteam geprüft, die Empfehlungen anhand des tatsächlichen Lernfortschritts in den ersten Wochen kalibriert.'
+              'CASA’s placement test is our own instrument, currently in its pilot phase. Its questions have not yet been independently reviewed and its recommendations are not yet calibrated against how learners actually progress, which is why a teacher confirms every placement.',
+              'Der CASA-Einstufungstest ist unser eigenes Instrument und befindet sich derzeit in der Pilotphase. Die Aufgaben sind noch nicht unabhängig fachlich geprüft und die Empfehlungen noch nicht am tatsächlichen Lernfortschritt kalibriert. Deshalb bestätigt eine Lehrkraft jede Einstufung.'
             )}
           </p>
         </div>

@@ -14,13 +14,17 @@ import { cn } from '@/lib/utils';
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
 
-  return createPublicMetadata({
-    locale,
-    title: locale === 'de' ? 'Suche' : 'Search',
-    description: locale === 'de' ? 'Finden Sie Deutschkurse, Prüfungen, Antworten und Neuigkeiten auf der CASA-Website.' : 'Find German courses, exams, answers and news on the CASA website.',
-    path: '/search',
-    keywords: ['CASA search', 'courses exams faq news'],
-  });
+  return {
+    ...createPublicMetadata({
+      locale,
+      title: locale === 'de' ? 'Suche' : 'Search',
+      description: locale === 'de' ? 'Finden Sie Deutschkurse, Prüfungen, Antworten und Neuigkeiten auf der CASA-Website.' : 'Find German courses, exams, answers and news on the CASA website.',
+      path: '/search',
+      keywords: ['CASA search', 'courses exams faq news'],
+    }),
+    // A results page per query is not a page to rank; its links still are.
+    robots: { index: false, follow: true },
+  };
 }
 
 type SearchPageProps = {

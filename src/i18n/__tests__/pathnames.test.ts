@@ -5,6 +5,9 @@ import { describe, expect, it } from 'vitest';
 
 import { localizeHref, routes, toInternalPath, toPublicPath } from '../pathnames';
 
+/** `src/app/(site)/[locale]/[...rest]/page.tsx`, which only calls notFound(). */
+const UNMATCHED_PATH_CATCH_ALL = '/[...rest]';
+
 describe('the URL map', () => {
   it('round-trips every static route in both languages', () => {
     for (const route of routes.filter((entry) => !entry.internal.includes('['))) {
@@ -114,7 +117,19 @@ describe('the route tree', () => {
           .split(path.sep)
           .filter((segment) => segment && segment !== '[locale]' && !segment.startsWith('('))
           .join('/');
+      // The not-found catch-all is not a page anyone visits: it only turns an
+      // unmatched path into the site's own 404. Exempt by name, so a real
+      // catch-all route added later still needs an entry.
+      if (route === UNMATCHED_PATH_CATCH_ALL) continue;
       expect(known.has(route === '/' ? '/' : route), `${route} has no entry in src/i18n/pathnames.ts`).toBe(true);
     }
+  });
+
+  it('keeps the not-found catch-all out of the URL map', () => {
+    expect(routes.some((route) => route.internal.includes('[...'))).toBe(false);
+    // An unmatched path passes through the map untouched, so the proxy neither
+    // redirects nor rewrites it and next-intl hands it to the catch-all.
+    expect(toPublicPath('/no-such-page', 'de')).toBe('/no-such-page');
+    expect(toInternalPath('/en/no-such-page')).toEqual({ locale: 'en', internalPath: '/no-such-page', explicitDefaultPrefix: false });
   });
 });

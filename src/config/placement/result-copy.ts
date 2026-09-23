@@ -181,11 +181,11 @@ export function reviewNotice(
     return locale === 'de'
       ? {
           title: 'Wir schauen uns Ihr Ergebnis noch persönlich an',
-          body: 'Der Test wurde nicht vollständig abgeschlossen, deshalb prüft eine Lehrkraft Ihre Antworten, bevor wir eine Empfehlung bestätigen. Sie können den Test auch erneut starten.',
+          body: 'Der Test wurde nicht vollständig abgeschlossen, deshalb sieht sich eine Lehrkraft Ihr Ergebnis an, bevor wir eine Empfehlung bestätigen. Sie können den Test auch erneut starten.',
         }
       : {
           title: 'A teacher will look at your result',
-          body: 'The test was not completed in full, so a teacher will read your answers before we confirm a recommendation. You are also welcome to take it again.',
+          body: 'The test was not completed in full, so a teacher will look at your result before we confirm a recommendation. You are also welcome to take it again.',
         };
   }
 

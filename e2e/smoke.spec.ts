@@ -265,6 +265,38 @@ test('German is the language of the root, English lives under /en, and each page
   await expect(page.locator('link[rel="alternate"][hreflang="de"]')).toHaveAttribute('href', /\/sprachkurse\/deutsch-intensiv$/);
 });
 
+test('an unknown address is a 404 in the site’s own frame and language', async ({ page, request }) => {
+  const misses = [
+    // No route at all, at the German root and under /en.
+    { path: '/diese-seite-gibt-es-nicht', lang: 'de', heading: 'Seite nicht gefunden', contact: 'Kontakt aufnehmen' },
+    { path: '/en/no-such-page/at-all', lang: 'en', heading: 'Page not found', contact: 'Contact us' },
+    // A real route with an unknown slug.
+    { path: '/sprachkurse/gibt-es-nicht', lang: 'de', heading: 'Seite nicht gefunden', contact: 'Kontakt aufnehmen' },
+  ];
+
+  for (const miss of misses) {
+    // The server HTML before any JS: the 404 body is client-rendered, so this
+    // head is all a crawler that does not run scripts gets.
+    const raw = await request.get(miss.path);
+    expect(raw.status(), miss.path).toBe(404);
+    const html = await raw.text();
+    expect(html, miss.path).toMatch(/<meta name="robots" content="noindex[^"]*"/);
+    expect(html, miss.path).toContain(`<title>${miss.heading} | CASA Bremen</title>`);
+    expect(html, miss.path).not.toMatch(/<link rel="canonical"/);
+
+    const response = await page.goto(miss.path);
+    expect(response?.status(), miss.path).toBe(404);
+    await expect(page.locator('html')).toHaveAttribute('lang', miss.lang);
+    await expect(page.getByRole('heading', { level: 1, name: miss.heading })).toBeVisible();
+    await expect(page.locator('main').getByRole('link', { name: miss.contact })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute('content', /noindex/);
+    // The layout's canonical and og:url would point a missing URL at the homepage.
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+    await expect(page.locator('meta[property="og:url"]')).toHaveCount(0);
+  }
+});
+
 test('nonprofit mission stays visible while project tabs work with keyboard navigation', async ({ page }) => {
   for (const locale of ['de', 'en']) {
     await page.goto(`${locale === 'de' ? '' : '/en'}/ueber-uns/gemeinnuetzigkeit`);

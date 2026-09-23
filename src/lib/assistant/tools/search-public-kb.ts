@@ -261,28 +261,36 @@ function faqRouteHint(question: string, answer: string, category: string) {
   return '/courses';
 }
 
+/*
+ * Figures in the passages below are the ones in docs/COURSE_FACTS_SOURCE_OF_TRUTH.md
+ * and nothing else. Where CASA publishes no figure (German for Medical) or a
+ * figure dates quickly (start dates, exam sessions), the passage points to the
+ * page that carries the current value or to the advice team instead of
+ * restating it. Whether a course suits a visa is not stated per course: that is
+ * unverified, and the embassy sets the requirement.
+ */
 function buildPolicyPassages(): KbPassage[] {
   return [
     {
       id: 'policy-visa-en',
       locale: 'en',
       title: 'Visa policy guidance',
-      url: '/courses/intensive-german',
+      url: '/faq',
       topic: 'visa',
-      keywords: ['visa', 'course', 'intensive', '20 lessons', '3 months', 'residence permit', 'confirmation'],
+      keywords: ['visa', 'course', 'intensive', 'residence permit', 'confirmation', 'embassy'],
       content:
-        'Language visa guidance: minimum duration is usually 3 months with at least 20 lessons per week. The CASA Intensive German course (20 lessons/week, Mon–Fri) meets this requirement. After completing registration and payment, CASA can issue confirmation documents for visa applications. This is not legal advice — confirm your case with the CASA office and your embassy.',
+        'Language visa guidance: the German embassy or consulate handling your application sets how long a course must run and how many lessons a week it needs. CASA’s own guidance is in the FAQ, and the CASA advice team can tell you which course fits your case. After registration and payment for at least the first course, CASA sends the visa letter by email. This is not legal advice — confirm your case with the CASA office and your embassy.',
     },
     {
       id: 'policy-visa-de',
       locale: 'de',
       title: 'Visum und Sprachkurs',
-      url: '/courses/intensive-german',
+      url: '/faq',
       topic: 'visa',
       // ASCII spellings stay so learners typing without umlauts still match.
-      keywords: ['visum', 'kurs', 'intensiv', '20 lektionen', '3 monate', 'aufenthalt', 'kursbestaetigung', 'kursbestätigung'],
+      keywords: ['visum', 'kurs', 'intensiv', 'aufenthalt', 'botschaft', 'kursbestaetigung', 'kursbestätigung'],
       content:
-        'Sprachvisumhinweis: Mindestens 3 Monate und mindestens 20 Lektionen pro Woche sind in der Regel erforderlich. Der CASA Intensivkurs (20 Lektionen/Woche, Mo–Fr) erfüllt diese Anforderung. Nach Abschluss der Anmeldung und Zahlung kann CASA Kursbestätigungen für Visumverfahren ausstellen. Kein Rechtsrat — bitte Einzelfall mit CASA und Botschaft klären.',
+        'Sprachvisumhinweis: Welche Kursdauer und wie viele Unterrichtseinheiten pro Woche nötig sind, legt die zuständige deutsche Auslandsvertretung fest. Was CASA dazu sagt, steht in den FAQ; das CASA-Beratungsteam sagt Ihnen, welcher Kurs zu Ihrem Fall passt. Sobald die Gebühr für mindestens den ersten Kurs eingegangen ist, sendet CASA den Visumsbrief per E-Mail. Kein Rechtsrat — bitte Einzelfall mit CASA und Botschaft klären.',
     },
     {
       id: 'policy-exams-en',
@@ -407,7 +415,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'b2', 'exam', '190', 'fee', 'date', 'august', 'october', 'november', 'preparation', 'certificate'],
       content:
-        'CASA offers telc Deutsch B2 for EUR 190. Preparation course available at EUR 520 (B1–C1 level, 10 lessons/week). 2026 exam sessions: 21 Aug (deadline 20 Jul), 16 Oct (deadline 15 Sep), 13 Nov (deadline 12 Oct). Preparation includes strategy drills, timed mock sections, and individual error correction. Ideal for work, training, and daily life in Germany.',
+        'CASA offers telc Deutsch B2: EUR 190 for the full exam, EUR 160 for a single written or oral part. The exam runs approx. 09:00–17:00 at the school. The preparation course costs EUR 260 (two evenings a week, Mon/Wed 18:30–20:00). Current exam dates and registration deadlines are on the exam page. Preparation includes strategy drills, timed mock sections, and individual error correction. Ideal for work, training, and daily life in Germany.',
     },
     {
       id: 'exam-telc-b2-de',
@@ -417,7 +425,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'b2', 'prüfung', '190', 'gebühr', 'termin', 'august', 'oktober', 'november', 'vorbereitung', 'zertifikat'],
       content:
-        'CASA bietet telc Deutsch B2 für 190 EUR. Vorbereitungskurs verfügbar für 520 EUR (Niveau B1–C1, 10 Lektionen/Woche). Prüfungstermine 2026: 21. Aug. (Frist 20. Jul.), 16. Okt. (Frist 15. Sep.), 13. Nov. (Frist 12. Okt.). Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
+        'CASA bietet telc Deutsch B2 an: 190 EUR für die gesamte Prüfung, 160 EUR für einen schriftlichen oder mündlichen Teil. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet in der Schule statt. Der Vorbereitungskurs kostet 260 EUR (zwei Abende pro Woche, Mo/Mi 18:30–20:00). Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
     },
     {
       id: 'exam-telc-c1-en',
@@ -427,7 +435,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'c1', 'hochschule', 'university', '210', 'fee', 'date', 'september', 'october', 'november', 'preparation', 'academic'],
       content:
-        'CASA offers telc Deutsch C1 Hochschule for EUR 210. Preparation course included in Exam Preparation program (EUR 520, B1–C1). 2026 sessions: 4 Sep (deadline 3 Aug), 2 Oct (deadline 1 Sep), 30 Oct (deadline 29 Sep), 27 Nov (deadline 26 Oct). Focused on academic language, argumentation, lecture comprehension, and formal writing. Required for many German university admissions.',
+        'CASA offers telc Deutsch C1 Hochschule: EUR 210 for the full exam, EUR 185 for a single part. It always takes place on a Friday, approx. 08:30–17:00. The preparation course is a four-week block at EUR 520, plus EUR 50 on a first registration at CASA. Current exam dates and registration deadlines are on the exam page. Focused on academic language, argumentation, lecture comprehension, and formal writing. Required for many German university admissions.',
     },
     {
       id: 'exam-telc-c1-de',
@@ -437,7 +445,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'c1', 'hochschule', 'universität', '210', 'gebühr', 'termin', 'september', 'oktober', 'november', 'vorbereitung', 'akademisch'],
       content:
-        'CASA bietet telc Deutsch C1 Hochschule für 210 EUR. Vorbereitungskurs im Prüfungsvorbereitungsprogramm (520 EUR, B1–C1). Termine 2026: 4. Sep. (Frist 3. Aug.), 2. Okt. (Frist 1. Sep.), 30. Okt. (Frist 29. Sep.), 27. Nov. (Frist 26. Okt.). Fokus auf Akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
+        'CASA bietet telc Deutsch C1 Hochschule an: 210 EUR für die gesamte Prüfung, 185 EUR für einen Teil. Sie findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein vierwöchiger Block für 520 EUR, bei der ersten Anmeldung bei CASA zuzüglich 50 EUR. Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Fokus auf akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
     },
     {
       id: 'exam-testdaf-en',
@@ -472,7 +480,7 @@ function buildPlacementPassages(): KbPassage[] {
       topic: 'placement',
       keywords: ['placement', 'level', 'test', 'a1', 'a2', 'b1', 'b2', 'c1', 'cefr', 'beginner', 'intermediate', 'advanced', 'which level'],
       content:
-        'CASA uses CEFR levels (A1–C1) to place learners correctly. A1 = absolute beginner; A2 = elementary; B1 = intermediate; B2 = upper-intermediate; C1 = advanced. Take the placement test before registration if you have any prior German knowledge. Absolute beginners (zero German) can register directly at A1. The placement test is online at /placement-test and free to use.',
+        'CASA uses CEFR levels (A1–C1) to place learners. A1 = absolute beginner; A2 = elementary; B1 = intermediate; B2 = upper-intermediate; C1 = advanced. Take the placement test before registration if you have any prior German knowledge. Absolute beginners (zero German) can register directly at A1. The placement test is online at /placement-test and free to use. It is in its pilot phase: the result is a course recommendation that a teacher confirms, not a certificate.',
     },
     {
       id: 'placement-de',
@@ -482,7 +490,7 @@ function buildPlacementPassages(): KbPassage[] {
       topic: 'placement',
       keywords: ['einstufung', 'einstufungstest', 'niveau', 'a1', 'a2', 'b1', 'b2', 'c1', 'cefr', 'anfänger', 'mittelstufe', 'fortgeschritten', 'welches niveau'],
       content:
-        'CASA arbeitet mit CEFR-Niveaus (A1–C1) für eine präzise Einstufung. A1 = absolute Anfänger; A2 = Grundkenntnisse; B1 = Mittelstufe; B2 = Oberstufe; C1 = Fortgeschrittene. Wer bereits Deutschkenntnisse hat, sollte vor der Anmeldung den Einstufungstest absolvieren. Absolute Anfänger (keine Vorkenntnisse) können direkt im A1-Kurs starten. Der Test ist kostenlos unter /placement-test verfügbar.',
+        'CASA arbeitet mit CEFR-Niveaus (A1–C1) für die Einstufung. A1 = absolute Anfänger; A2 = Grundkenntnisse; B1 = Mittelstufe; B2 = Oberstufe; C1 = Fortgeschrittene. Wer bereits Deutschkenntnisse hat, sollte vor der Anmeldung den Einstufungstest absolvieren. Absolute Anfänger (keine Vorkenntnisse) können direkt im A1-Kurs starten. Der Test ist kostenlos unter /placement-test verfügbar. Er befindet sich in der Pilotphase: Das Ergebnis ist eine Kursempfehlung, die eine Lehrkraft bestätigt, kein Zertifikat.',
     },
   ];
 }
@@ -495,9 +503,9 @@ function buildCourseDetailPassages(): KbPassage[] {
       title: 'Intensive German course – schedule and prices',
       url: '/courses/intensive-german',
       topic: 'courses',
-      keywords: ['intensive', 'german', 'course', '940', '520', 'price', 'morning', 'full time', '20 lessons', 'visa', 'monday friday'],
+      keywords: ['intensive', 'german', 'course', '940', '520', 'price', 'morning', 'full time', '20 lessons', 'monday friday'],
       content:
-        'Intensive German: A1–C1, 20 lessons/week, Mon–Fri. Morning sessions 09:00–12:30; afternoon sessions 13:00–17:30. Price: EUR 520 for 4 weeks, EUR 940 for 8 weeks. Plus EUR 50 one-time enrollment fee and book costs. Next starts in 2026: 29 Jun, 31 Aug, 26 Oct (morning); 3 Aug, 28 Sep, 23 Nov (afternoon). Meets visa requirements (20+ lessons/week, 3+ months). Beginners welcome.',
+        'Intensive German: A1–C1, 20 lessons/week of 45 minutes. Mornings Mon–Fri 09:00–12:30, or afternoons Mon–Thu 13:00–17:30. Price: EUR 520 for 4 weeks, EUR 940 for 8 weeks, EUR 117.50 for each additional week. Plus a one-time EUR 50 enrolment fee and EUR 23.99–26.99 for the book. Current start dates are on the course page. Beginners welcome.',
     },
     {
       id: 'course-intensive-de',
@@ -505,9 +513,9 @@ function buildCourseDetailPassages(): KbPassage[] {
       title: 'Intensivkurs Deutsch – Stundenplan und Preise',
       url: '/courses/intensive-german',
       topic: 'courses',
-      keywords: ['intensiv', 'deutsch', 'kurs', '940', '520', 'preis', 'morgens', 'vollzeit', '20 lektionen', 'visum', 'montag freitag'],
+      keywords: ['intensiv', 'deutsch', 'kurs', '940', '520', 'preis', 'morgens', 'vollzeit', '20 lektionen', 'montag freitag'],
       content:
-        'Intensivkurs Deutsch: A1–C1, 20 Lektionen/Woche, Mo–Fr. Morgens 09:00–12:30; nachmittags 13:00–17:30. Preis: 520 EUR für 4 Wochen, 940 EUR für 8 Wochen. Zusätzlich einmalig 50 EUR Anmeldegebühr und Lernmaterialkosten. Nächste Starts 2026: 29. Jun, 31. Aug, 26. Okt (morgens); 3. Aug, 28. Sep, 23. Nov (nachmittags). Visumstauglich (20+ Lektionen/Woche, 3+ Monate). Anfänger willkommen.',
+        'Intensivkurs Deutsch: A1–C1, 20 Unterrichtseinheiten à 45 Minuten pro Woche. Vormittags Mo–Fr 09:00–12:30 oder nachmittags Mo–Do 13:00–17:30. Preis: 520 EUR für 4 Wochen, 940 EUR für 8 Wochen, 117,50 EUR für jede weitere Woche. Zusätzlich einmalig 50 EUR Anmeldegebühr und 23,99–26,99 EUR für das Lehrbuch. Aktuelle Starttermine stehen auf der Kursseite. Anfänger willkommen.',
     },
     {
       id: 'course-evening-en',
@@ -517,7 +525,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['evening', 'abend', 'course', '476', 'price', 'after work', 'part time', 'monday wednesday', 'tuesday thursday'],
       content:
-        'Evening German: A1–C1, 4 lessons/week. Mon/Wed or Tue/Thu, 18:30–20:00. EUR 476 per trimester plus the course book. Ideal for learners studying alongside work or other commitments. Next starts: 24 Aug (Mon/Wed) and 25 Aug (Tue/Thu) 2026.',
+        'Evening German: A1–C1, 4 lessons/week. Mon/Wed or Tue/Thu, 18:30–20:00. EUR 476 per trimester plus the course book. Ideal for learners studying alongside work or other commitments. Current terms and start dates are on the course page.',
     },
     {
       id: 'course-evening-de',
@@ -527,47 +535,47 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['abend', 'abendkurs', 'kurs', '476', 'preis', 'nach der arbeit', 'teilzeit', 'montag mittwoch', 'dienstag donnerstag'],
       content:
-        'Abendkurs Deutsch: A1–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 EUR pro Trimester zzgl. Lehrwerk. Ideal für Lernende neben Arbeit oder Studium. Nächste Starts: 24. Aug. (Mo/Mi) und 25. Aug. (Di/Do) 2026.',
+        'Abendkurs Deutsch: A1–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 EUR pro Trimester zzgl. Lehrwerk. Ideal für Lernende neben Arbeit oder Studium. Aktuelle Trimester und Starttermine stehen auf der Kursseite.',
     },
     {
       id: 'course-medical-en',
       locale: 'en',
       title: 'Medical German course at CASA',
-      url: '/courses/medical-german',
+      url: '/courses/german-for-medical',
       topic: 'courses',
-      keywords: ['medical', 'doctor', 'healthcare', 'b2', 'c1', '400', 'professional', 'friday'],
+      keywords: ['medical', 'doctor', 'healthcare', 'b2', 'c1', 'fachsprachprüfung', 'fsp', 'professional'],
       content:
-        'German for Medical Professionals: B2–C1, 4 lessons/week, Fri 13:00–16:30. EUR 400. Designed for doctors, nurses, and healthcare workers. Small groups (max 12). Starts: 26 Jun 2026.',
+        'German for Medical Professionals: for doctors before and after the Fachsprachprüfung, entering at CEFR level B2 or C1. The fee, weekly hours and dates are available from the CASA advice team.',
     },
     {
       id: 'course-medical-de',
       locale: 'de',
       title: 'Medizinisches Deutsch bei CASA',
-      url: '/courses/medical-german',
+      url: '/courses/german-for-medical',
       topic: 'courses',
-      keywords: ['medizin', 'arzt', 'gesundheit', 'b2', 'c1', '400', 'professionell', 'freitag'],
+      keywords: ['medizin', 'arzt', 'gesundheit', 'b2', 'c1', 'fachsprachprüfung', 'fsp', 'professionell'],
       content:
-        'Medizinisches Deutsch: B2–C1, 4 Lektionen/Woche, Fr 13:00–16:30. 400 EUR. Für Ärztinnen/Ärzte, Pflegepersonal und Gesundheitsberufe. Kleine Gruppen (max. 12). Start: 26. Jun. 2026.',
+        'Deutsch für Mediziner: für Ärztinnen und Ärzte vor und nach der Fachsprachprüfung, Einstieg auf Niveau B2 oder C1. Gebühr, Wochenstunden und Termine erfahren Sie beim CASA-Beratungsteam.',
     },
     {
       id: 'course-bildungszeit-en',
       locale: 'en',
-      title: 'Bildungszeit German – AZAV-certified intensive block',
+      title: 'Bildungszeit German – superintensive block',
       url: '/courses/bildungszeit',
       topic: 'courses',
-      keywords: ['bildungszeit', 'azav', 'funding', 'entitlement', 'employer', '640', 'intensive', 'block'],
+      keywords: ['bildungszeit', 'educational leave', 'entitlement', 'employer', '280', 'intensive', 'block'],
       content:
-        'Bildungszeit German: A2–C1, 40 lessons/week intensive block, EUR 640. Uses your Bildungszeit entitlement (5 days/year in most German states). CASA is AZAV-certified. Confirm eligibility with CASA and your employer before registering.',
+        'Bildungszeit German: from B1, superintensive — a morning and an afternoon intensive course in parallel, 30–40 hours a week, which is what educational-leave recognition requires. EUR 280 for 1 week, EUR 520 for 2 weeks, plus books (EUR 46–54 for two) and EUR 50 on a first registration. Join any Monday. Under the Bremisches Bildungszeitgesetz, employees working in Bremen have ten days over two years. Confirm eligibility with CASA and your employer before registering.',
     },
     {
       id: 'course-bildungszeit-de',
       locale: 'de',
-      title: 'Bildungszeit Deutsch – AZAV-zertifizierter Intensivblock',
+      title: 'Bildungszeit Deutsch – superintensiver Block',
       url: '/courses/bildungszeit',
       topic: 'courses',
-      keywords: ['bildungszeit', 'azav', 'förderung', 'arbeitgeber', '640', 'intensiv', 'block', 'freistellung'],
+      keywords: ['bildungszeit', 'bildungsurlaub', 'arbeitgeber', '280', 'intensiv', 'block', 'freistellung'],
       content:
-        'Bildungszeit Deutsch: A2–C1, 40 Lektionen/Woche Intensivblock, 640 EUR. Nutzt Ihren Bildungszeitanspruch (5 Tage/Jahr in den meisten Bundesländern). CASA ist AZAV-zertifiziert. Berechtigung bitte vor der Anmeldung mit CASA und Arbeitgeber klären.',
+        'Bildungszeit Deutsch: ab B1, superintensiv — ein Intensivkurs am Vormittag und einer am Nachmittag parallel, 30–40 Stunden pro Woche, wie es die Anerkennung als Bildungszeit verlangt. 280 EUR für 1 Woche, 520 EUR für 2 Wochen, zuzüglich Lehrbücher (46–54 EUR für zwei) und 50 EUR bei der ersten Anmeldung. Einstieg an jedem Montag. Nach dem Bremischen Bildungszeitgesetz haben Beschäftigte in Bremen Anspruch auf zehn Tage in zwei Jahren. Berechtigung bitte vor der Anmeldung mit CASA und Arbeitgeber klären.',
     },
   ];
 }
