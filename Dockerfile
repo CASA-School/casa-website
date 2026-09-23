@@ -31,16 +31,24 @@ COPY . .
 # database — and a build that silently baked in database content would make the
 # two runtime modes diverge.
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Inlined into the bundle by `npm run build`, so an override is a build arg
+# (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`). Unset, it is empty and
+# src/lib/seo.ts falls back to https://casa-bremen.de.
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npm run build
 
 # --------------------------------------------------------------------- runtime
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 
+# TZ: server-rendered dates and times are Bremen's, not the container's UTC.
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    TZ=Europe/Berlin
 
 # Non-root. Container Apps does not require it, but a public web container that
 # can write to its own image is a needless step for an attacker to skip.

@@ -11,7 +11,9 @@ import {
   Table,
   TableRow,
 } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import { activityHref, describeActivity, recentActivity } from '@/lib/admin/activity';
+import { requireModule } from '@/lib/admin/guard';
 import { getInboundByDay, getOverviewCounts, getRecentInbound } from '@/lib/admin/overview';
 import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 
@@ -31,11 +33,19 @@ import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues
  * screen — what arrived most recently, and the fortnight's volume. Today is for
  * the day in front of you; this screen is the record of what has already
  * happened, and those two belong with the trail rather than above it.
+ *
+ * Activity is open to every colleague; job applications are not. Applicants'
+ * names, and every link into an application, appear here only for someone who
+ * holds the Applications module. The volume chart and counts stay whole: a
+ * number is not a person.
  */
 export default async function ActivityPage() {
+  const user = await requireModule('activity');
+  const includeApplications = canAccess(user, 'applications');
+
   const [entries, recent, inbound, counts] = await Promise.all([
-    recentActivity(200),
-    getRecentInbound(8),
+    recentActivity(200, { includeApplications }),
+    getRecentInbound(8, { includeApplications }),
     getInboundByDay(14),
     getOverviewCounts(),
   ]);

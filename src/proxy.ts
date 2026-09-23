@@ -6,6 +6,7 @@ import { defaultLocale, locales } from '@/i18n/routing';
 
 /**
  * Host routing for the staff workspace, then language routing for the site.
+ * Before either, `www.casa-bremen.de` is sent to the apex (CANONICAL_ORIGIN).
  *
  * The workspace answers on `admin.casa-bremen.de`; the marketing site answers
  * on `casa-bremen.de`. They are one Next application and one container — one
@@ -53,6 +54,15 @@ import { defaultLocale, locales } from '@/i18n/routing';
 /** Subdomains that serve the workspace. */
 const ADMIN_HOSTS = ['admin.casa-bremen.de', 'admin.localhost'];
 
+/**
+ * The one public origin. The apex, because it is what casa-bremen.de has
+ * always been indexed under: the old site 301s www to it, and every canonical
+ * tag it ever served names it. `www` stays bound so old links and typed URLs
+ * arrive, and is sent on permanently.
+ */
+const CANONICAL_ORIGIN = 'https://casa-bremen.de';
+const WWW_HOST = 'www.casa-bremen.de';
+
 /** Prefix on the admin host that would otherwise be served twice. */
 const WORKSPACE_PREFIX = '/admin';
 
@@ -99,6 +109,14 @@ export function proxy(request: NextRequest) {
   const host = request.headers.get('host') ?? '';
   const { pathname, search } = request.nextUrl;
 
+  // Path and query kept, so every old www link lands on the same page. A 308,
+  // like the language redirects below: a form POST keeps its method and body.
+  // Files the matcher skips (/robots.txt, public/) are still served on www;
+  // they carry no canonical signal of their own.
+  if (host.split(':')[0].toLowerCase() === WWW_HOST) {
+    return NextResponse.redirect(new URL(`${pathname}${search}`, CANONICAL_ORIGIN), 308);
+  }
+
   if (isAdminHost(host)) {
     // Already inside the tree — `/admin/...` on the admin host would rewrite to
     // `/admin/admin/...`, so it is served as-is. It stays reachable rather than
@@ -117,11 +135,17 @@ export function proxy(request: NextRequest) {
     (pathname === WORKSPACE_PREFIX || pathname.startsWith(`${WORKSPACE_PREFIX}/`)) &&
     !allowWorkspaceOnPublicHost()
   ) {
-    // `rewrite` to a path with no route, so Next renders its own 404 — which is
-    // indistinguishable from the routes not existing. A 403 would confirm that
-    // something is there.
+    // `rewrite` to the same path under `/de`, where no route claims it, so the
+    // site's `[...rest]` renders the same German 404 as for any other unknown
+    // path. A 403 would confirm that something is there. The target is what
+    // an unknown German path is rewritten to anyway (`x-middleware-rewrite:
+    // /de/<path>`), so the header does not mark it either; a fixed target did.
+    // Not under `/de` and the locale layout would reject it and give Next's
+    // bare English page, which would stand out. One residual difference: an
+    // unknown dotted path elsewhere (`/kurse/x.y`) skips this proxy and
+    // carries no rewrite header at all, while `/admin/x.y` does.
     const url = request.nextUrl.clone();
-    url.pathname = '/_casa-not-found';
+    url.pathname = `/${defaultLocale}${pathname}`;
     url.search = search;
     return NextResponse.rewrite(url, { status: 404 });
   }
@@ -159,6 +183,14 @@ export const config = {
    * `public/`. The negative lookahead is cheaper than matching and returning
    * early inside the middleware, which would run this function on every chunk
    * and every image on the marketing site.
+   *
+   * `/admin/:path*` is listed on its own because the file exclusion would
+   * otherwise skip any workspace path whose last segment has a dot in it —
+   * `/admin/enquiries/x.y` reached the workspace on the public host, past
+   * rule 2 above. Every /admin request must come through here.
    */
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|media|.*\\.[\\w]+$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|media|.*\\.[\\w]+$).*)',
+    '/admin/:path*',
+  ],
 };

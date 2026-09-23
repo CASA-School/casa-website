@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { rateLimit } from '@/lib/api/rate-limit';
 import { apiError, apiSuccess } from '@/lib/api/response';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { appointmentDays, appointmentInstant, APPOINTMENT_TIMES, isAppointmentDate } from '@/lib/appointments/schedule';
@@ -33,6 +34,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Tighter than the other forms: each accepted request holds one of Ina's slots.
+  const limited = rateLimit(request, 'appointments', { limit: 6, windowMs: 10 * 60_000 });
+  if (limited) return limited;
   let body: unknown;
   try { body = await request.json(); } catch { return apiError('INVALID', 'Invalid request.', 400); }
   const parsed = schema.safeParse(body);
@@ -64,6 +68,6 @@ export async function POST(request: Request) {
     requestId, firstName: input.firstName, lastName: input.lastName, email: input.email,
     startsAt: startsAt.toISOString(), localDate: input.date, localTime: input.time,
     timeZone: 'Europe/Berlin', durationMinutes: 30, message: input.message,
-  });
+  }, null, { stored: true });
   return apiSuccess({ requestId, status: 'requested', notified: delivery.delivered }, 201);
 }

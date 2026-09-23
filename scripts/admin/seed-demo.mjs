@@ -16,13 +16,45 @@
  * explicitly — the same shape intake produces. One nationality is left as a
  * demonym on purpose ('Turkish'), so the `nationality_unmatched` flag path is
  * visible in the demo.
+ *
+ * LOCAL DATABASES ONLY. The go-live runbook runs db:migrate and db:seed from a
+ * shell pointed at the production server, and one mistyped command in that
+ * shell would put fake learners into real queues. So this refuses to run with
+ * NODE_ENV=production, or against any host but localhost, 127.0.0.1, ::1 or
+ * the compose service `postgres`, unless `--i-know-this-is-not-local` is
+ * passed — for a deliberate demo on a staging server.
  */
 import { randomUUID } from 'node:crypto';
 
-import { connect } from '../db/client.mjs';
+import { connect, requireConnectionString } from '../db/client.mjs';
 
 const TAG = 'demo-seed';
 const clear = process.argv.includes('--clear');
+const OVERRIDE = '--i-know-this-is-not-local';
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]', 'postgres']);
+
+function targetHost(connectionString) {
+  try {
+    return new URL(connectionString).hostname.toLowerCase();
+  } catch {
+    // Unparseable, or a key=value connection string: not provably local.
+    return null;
+  }
+}
+
+const host = targetHost(requireConnectionString());
+const local = host !== null && LOCAL_HOSTS.has(host) && process.env.NODE_ENV !== 'production';
+
+if (!local && !process.argv.includes(OVERRIDE)) {
+  console.error(
+    `\nRefusing to seed demo records into ${host ?? 'an unrecognised host'}` +
+      `${process.env.NODE_ENV === 'production' ? ' with NODE_ENV=production' : ''}.` +
+      `\nThis script is for a local database. Pass ${OVERRIDE} if this really is a demo server.\n`
+  );
+  process.exit(1);
+}
+
+console.log(`\nDemo seed target: ${host ?? 'unrecognised host'}${clear ? ' (clearing)' : ''}`);
 
 const client = await connect();
 

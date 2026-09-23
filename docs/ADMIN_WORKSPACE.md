@@ -89,6 +89,14 @@ row it writes is tagged `source = 'demo-seed'` and every person it creates
 exam candidate is deliberately seeded with a demonym ("Turkish") so the
 `nationality_unmatched` flag path is visible.
 
+It refuses to run with `NODE_ENV=production`, or when `DATABASE_URL` points
+anywhere but `localhost`, `127.0.0.1`, `::1` or the compose service `postgres`,
+and prints the target host before it writes. The go-live runbook runs
+`db:migrate` and `db:seed` from a shell aimed at the production server; this
+keeps a mistyped command in that shell from filling real queues with fake
+people. For a deliberate demo on a staging server, pass
+`--i-know-this-is-not-local`.
+
 ### Everything from scratch
 
 ```bash
@@ -129,7 +137,23 @@ navigation, no footer, no locale provider, no structured data.
    on `admin.casa-bremen.de/enquiries` and never shows `/admin`.
 2. On the public host, `/admin/*` **404s in production**. This is the important
    one: without it, `casa-bremen.de/admin/sign-in` is a login form on the domain
-   every prospective learner visits.
+   every prospective learner visits. It rewrites to `/de/admin/…`, the site's
+   German 404, which is where any unknown German path is rewritten too, so the
+   `x-middleware-rewrite` header does not single it out. Until 2026-09-23 the
+   target was a fixed `/de/_casa-not-found`, a marker no real missing page had.
+
+The proxy's matcher skips paths that look like files, for speed on the public
+site, so `/admin/:path*` is a second matcher entry: until 2026-09-23
+`/admin/enquiries/x.y` skipped the proxy and reached the workspace on the
+public host. `host-routing.test.ts` calls `proxy()` for that path.
+
+Before either rule, `www.casa-bremen.de` is sent to `https://casa-bremen.de`
+with a 308, path and query kept; the apex is the canonical host.
+
+`next.config.ts` adds `X-Robots-Tag: noindex, nofollow` to every response on
+any host other than `casa-bremen.de` and `www.casa-bremen.de` — so the admin
+host, the Container Apps FQDN and any staging name are never indexed,
+including `/robots.txt` and files the proxy does not see.
 
 Local development is exempt from rule 2, because there is no `admin.localhost`
 by default and requiring one would mean editing `/etc/hosts` to open the
@@ -151,7 +175,11 @@ Four checks, and each is load-bearing on its own.
 
 `src/app/(admin)/admin/(workspace)/layout.tsx` resolves the session and
 redirects to `/admin/sign-in` when there is none. Every workspace screen is a
-child of it, so a page cannot forget to check.
+child of it, so a page cannot forget to check. So is a path no screen claims:
+`(workspace)/[...rest]` only calls `notFound()`, so signed out it redirects to
+sign-in like any screen, and signed in it gets `(workspace)/not-found.tsx`
+inside the shell. Without it the public site's `[locale]/[...rest]` took
+`admin` for a language and answered with the site's head.
 
 Since 0014 there is a second entry with the same gate:
 `src/app/(admin)/admin/(focus)/layout.tsx`, which renders the shell in focus
@@ -163,26 +191,116 @@ in" is still defined once; what differs is the chrome, never the check.
 
 A server action is a public HTTP endpoint. Nothing about a POST to one goes
 through the layout that rendered the form, so the gate does not protect it.
-Every exported action in `actions.ts`, `team/actions.ts` and
-`planning/actions.ts` starts with `requireModule(<module>)` from
-`src/lib/admin/guard.ts`, and `src/lib/admin/__tests__/host-routing.test.ts` asserts
-that they all do.
+Every exported action in every `'use server'` file under `src/app/(admin)`
+(`actions.ts`, `team/actions.ts`, `kursplanung/actions.ts` and the rest)
+resolves the actor through `requireModule(<module>, <level>)` from
+`src/lib/admin/guard.ts` before it awaits anything else, and asks for `full`
+when it deletes, removes, voids or cancels. The one exception is
+`deleteDayTaskAction`: the day board is the team's shared surface and a task
+on it is deleted at `edit` (day-board/actions.ts). `src/lib/admin/__tests__/host-routing.test.ts`
+finds the action files itself and asserts all of this, so a new file cannot be
+forgotten.
 
 ### 3. The CV download route checks for itself
 
 `applications/[id]/cv/route.ts` is a route handler, not a page, so it is not a
-child of the layout either. It authenticates, logs the access, and serves the
-bytes as `application/octet-stream` with `Content-Disposition: attachment` and
-`X-Content-Type-Options: nosniff` — never the uploader's own MIME type, because
-an SVG or an HTML file masquerading as a CV would otherwise be stored XSS
-against every signed-in colleague.
+child of the layout either — nor of `applications/layout.tsx`. It checks the
+session AND the Applications module itself (a colleague without the module gets
+a 404, the same answer as for an id that does not exist), logs the access, and
+serves the bytes as `application/octet-stream` with `Content-Disposition:
+attachment` and `X-Content-Type-Options: nosniff` — never the uploader's own
+MIME type, because an SVG or an HTML file masquerading as a CV would otherwise
+be stored XSS against every signed-in colleague.
+
+The download name is not the uploaded name either: the extension is the one
+the file's bytes justify, and anything but letters, digits, spaces and `._-`
+is replaced (`src/lib/admin/cv-file.ts`). The upload itself is refused unless
+the declared type, the extension and the leading bytes all agree on PDF
+(`%PDF-`), DOC (`D0 CF 11 E0 A1 B1 1A E1`) or DOCX (`PK 03 04`).
+
+Activity is open to every colleague and applications are not, so the Activity
+screen lists applicants, and trail entries about applications, only for
+someone who holds the Applications module.
 
 ### 4. Sessions are server-side
 
 `staff_sessions` holds the SHA-256 of a 32-byte random token, never the token.
 A signed self-contained cookie cannot be revoked before it expires — signing
 out would be cosmetic, and a laptop left on a train would stay logged in.
-Twelve-hour expiry, refreshed on use at most once every five minutes.
+A session ends **twelve hours after sign-in**, the cookie's own lifetime, and
+use does not extend it. Until 2026-09-23 `expires_at` slid forward on every
+request, so a copied token replayed at least twice a day never expired;
+`last_used_at` is still written, at most once every five minutes.
+
+### Sign-in throttling
+
+`signIn` writes the attempt to `staff_sign_in_failures` (0016) and then counts
+the recent rows, **before** it looks up the account or runs scrypt, and refuses
+with the ordinary sign-in error when either limit is exceeded:
+
+| Keyed on | Limit |
+| --- | --- |
+| The address typed, trimmed and lower-cased | 10 failures in 15 minutes |
+| The client address (the last `X-Forwarded-For` hop, which the Container Apps ingress appends) | 30 failures in 15 minutes |
+
+**Written first, counted after, as two statements.** The first version counted
+first and wrote the failure after the ~100 ms scrypt, so every attempt sent
+while an earlier one was being checked read the same count: in the 2026-09-23
+review, 100 parallel wrong passwords for one address all got through. Now each
+attempt's row is committed before it counts, so no more than the limit get past
+however many arrive at once. Repeated bursts of 30 parallel wrong passwords for
+one address against a local server never left more than 10 rows. Under
+contention it errs towards refusing.
+
+A refused attempt deletes the row it wrote, so it leaves nothing behind, costs
+an insert, a count and a delete instead of a 64 MiB scrypt, and says nothing
+about whether the account exists. A failed attempt's row stays: the address
+typed, the client address and the time — never anything typed as the password.
+A successful sign-in deletes that address's failures, and every successful
+sign-in deletes failures older than a day. The per-client limit is the higher
+one because the whole office signs in from one address.
+
+**Two password checks at a time per replica** (`SIGN_IN_MAX_CONCURRENT_VERIFICATIONS`).
+Each check is a 64 MiB scrypt on one of libuv's four threadpool workers, on the
+replica that also serves the public site, and the limits above do not bound a
+burst spread over many addresses typed. An attempt that finds both slots taken
+is refused at once with the ordinary error, and its row deleted, rather than
+queued.
+
+The trade-offs, accepted:
+
+- Someone who knows a colleague's address can keep it locked by failing ten
+  times every fifteen minutes. The lock lifts by itself fifteen minutes after
+  the attempts stop, and nothing in the workspace lifts it sooner. Two-factor
+  sign-in, not a higher limit, is the answer to that.
+- During a flood, a colleague with the right password can be refused because
+  both slots are taken. Trying again works once the flood stops.
+- The per-client limit counts whatever address is typed, so thirty failures
+  from one public address refuse every sign-in from it for fifteen minutes,
+  correct passwords included. Nobody on the internet can do that to CASA's
+  address — the client address is the hop the ingress appends — but anyone
+  behind it can. **ASSUMPTION: CASA's learner Wi-Fi reaches the internet
+  through the same public address as the office** (`src/lib/api/rate-limit.ts`
+  assumes a class shares one), so one learner device could lock the whole
+  office out. Check the egress addresses before go-live; if they are shared,
+  split them, or count the per-client limit only against addresses typed that
+  match no account.
+
+The check **fails closed**: if the row cannot be written or the table cannot
+be read, nobody can sign in and the server log says `sign-in throttle check
+failed`. Apply 0016 before deploying a build that contains it.
+
+### Response headers
+
+`next.config.ts` sends, on every response of both products:
+`X-Frame-Options: DENY` and `Content-Security-Policy: frame-ancestors 'none'`
+(the confirmation dialogs cannot be clickjacked from a frame), HSTS for a year
+without `includeSubDomains` (other casa-bremen.de subdomains are not this
+deployment's to bind), `X-Content-Type-Options: nosniff`,
+`Referrer-Policy: strict-origin-when-cross-origin` and a `Permissions-Policy`
+denying camera, microphone, geolocation and payment. `X-Powered-By` is off.
+No script-src policy yet: that needs a nonce strategy for Next's inline
+scripts.
 
 ### Passwords
 
@@ -586,6 +704,9 @@ Tables from 0006:
 | `placement_reviews` | One row per attempt: a teacher's decision |
 | `staff_notes` | Polymorphic by `(entity, entity_id)`, constrained to five entity names |
 | `staff_activity` | Who changed what. `staff_name` denormalised so the trail survives a deleted account |
+
+Since 0016, `staff_sign_in_failures`: one row per failed sign-in, for the
+throttle (§Sign-in throttling). No password; short-lived.
 
 Plus two columns on `career_applications`: `assigned_to`, and a check
 constraint that admits both the public route's `'submitted'` and the

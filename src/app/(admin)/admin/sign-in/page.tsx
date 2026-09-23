@@ -8,6 +8,7 @@ import { Button, Field, Input } from '@/components/admin/ui';
 import { Logo } from '@/components/ui/logo';
 import { getStaffUser, pruneExpiredSessions, signIn, writeSessionCookie } from '@/lib/admin/auth';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
+import { clientAddress } from '@/lib/api/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,8 +26,9 @@ export const metadata: Metadata = {
  * possible.
  *
  * The error is deliberately one message for every failure — unknown address,
- * wrong password, deactivated account (see `signIn`). Telling someone which of
- * the three it was turns this page into a way to find out who works at CASA.
+ * wrong password, deactivated account, too many failed attempts (see
+ * `signIn`). Telling someone which it was turns this page into a way to find
+ * out who works at CASA.
  */
 export default async function SignInPage({
   searchParams,
@@ -56,7 +58,12 @@ export default async function SignInPage({
     }
 
     const requestHeaders = await headers();
-    const result = await signIn(email, password, requestHeaders.get('user-agent'));
+    const result = await signIn(
+      email,
+      password,
+      requestHeaders.get('user-agent'),
+      clientAddress(requestHeaders)
+    );
 
     if (!result) {
       redirect('/admin/sign-in?error=1');

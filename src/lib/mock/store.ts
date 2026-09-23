@@ -7,7 +7,19 @@ type MockRow = {
 
 type TableName = 'career_positions';
 
-const initialNow = new Date().toISOString();
+/*
+ * A fixed date, the day these fixtures entered the repository, not the start
+ * of the server process: a timestamp taken at boot re-dated every listing on
+ * each restart and told applicants a role had opened that morning.
+ */
+const FIXTURE_DATE = '2026-08-12T00:00:00.000Z';
+
+/*
+ * The address casa-bremen.de publishes for job applications, and the one the
+ * database seed uses (db/seeds/0001_public_baseline.sql), so both runtime
+ * modes send an applicant to the same inbox.
+ */
+const APPLY_EMAIL = 'bewerbungen@casa-bremen.de';
 
 const tables: Record<TableName, MockRow[]> = {
   career_positions: [
@@ -26,13 +38,13 @@ const tables: Record<TableName, MockRow[]> = {
       requirements:
         'DaF/DaZ qualification or equivalent\nClassroom teaching experience\nStrong communication skills in German and English',
       apply_url: null,
-      apply_email: 'info@casa-bremen.de',
+      apply_email: APPLY_EMAIL,
       is_published: true,
       is_featured: true,
-      posted_at: initialNow,
+      posted_at: FIXTURE_DATE,
       closes_at: null,
-      created_at: initialNow,
-      updated_at: initialNow,
+      created_at: FIXTURE_DATE,
+      updated_at: FIXTURE_DATE,
     },
     {
       id: '79b868c5-c66b-4288-9be6-000000000042',
@@ -49,13 +61,13 @@ const tables: Record<TableName, MockRow[]> = {
       requirements:
         'Experience in educational coordination\nStrong organizational communication\nGerman language school context preferred',
       apply_url: null,
-      apply_email: 'info@casa-bremen.de',
+      apply_email: APPLY_EMAIL,
       is_published: true,
       is_featured: false,
-      posted_at: initialNow,
+      posted_at: FIXTURE_DATE,
       closes_at: null,
-      created_at: initialNow,
-      updated_at: initialNow,
+      created_at: FIXTURE_DATE,
+      updated_at: FIXTURE_DATE,
     },
     {
       id: '79b868c5-c66b-4288-9be6-000000000043',
@@ -72,13 +84,13 @@ const tables: Record<TableName, MockRow[]> = {
       requirements:
         'DaF/DaZ-Qualifikation oder vergleichbar\nUnterrichtserfahrung\nSehr gute Kommunikationsfähigkeit',
       apply_url: null,
-      apply_email: 'info@casa-bremen.de',
+      apply_email: APPLY_EMAIL,
       is_published: true,
       is_featured: true,
-      posted_at: initialNow,
+      posted_at: FIXTURE_DATE,
       closes_at: null,
-      created_at: initialNow,
-      updated_at: initialNow,
+      created_at: FIXTURE_DATE,
+      updated_at: FIXTURE_DATE,
     },
   ],
 };

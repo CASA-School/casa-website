@@ -3,18 +3,32 @@ import { performance } from 'node:perf_hooks';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 
+import { rateLimit } from '@/lib/api/rate-limit';
 import { runAssistantTurn } from '@/lib/assistant/runtime';
 import type { AssistantUserContext } from '@/lib/assistant/types';
 
+/** The runtime reads only this much of the conversation. */
+const MAX_MESSAGES = 20;
+
+/*
+ * Bounded, because the runtime normalises every user message on each turn and
+ * an unbounded body kept the shared event loop busy for seconds. The widget
+ * sends the whole conversation, so a long one is cut to its latest messages
+ * rather than refused; a single message over 1,000 characters is refused.
+ */
 const assistantRequestSchema = z.object({
-  messages: z
-    .array(
-      z.object({
-        role: z.enum(['user', 'assistant']),
-        content: z.string().min(1),
-      })
-    )
-    .min(1),
+  messages: z.preprocess(
+    (value) => (Array.isArray(value) ? value.slice(-MAX_MESSAGES) : value),
+    z
+      .array(
+        z.object({
+          role: z.enum(['user', 'assistant']),
+          content: z.string().min(1).max(1000),
+        })
+      )
+      .min(1)
+      .max(MAX_MESSAGES)
+  ),
   locale: z.enum(['en', 'de', 'es', 'fr', 'zh']).nullable().optional(),
   userContext: z
     .object({
@@ -25,6 +39,9 @@ const assistantRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 'assistant', { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   let payload: unknown;
 
   try {

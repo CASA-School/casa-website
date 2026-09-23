@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { resetRateLimits } from '@/lib/api/rate-limit';
+
 const mocks = vi.hoisted(() => ({ reserve: vi.fn(), taken: vi.fn(), notify: vi.fn() }));
 vi.mock('@/lib/appointments/repository.server', () => ({ reserveAppointment: mocks.reserve, takenAppointments: mocks.taken }));
 vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify }));
@@ -11,6 +13,7 @@ const request = (overrides = {}) => new Request('http://localhost/api/appointmen
 });
 
 beforeEach(() => {
+  resetRateLimits();
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-09-17T08:00Z'));
   vi.stubEnv('DATABASE_URL', 'postgres://test');
   vi.stubEnv('GROUP_APPOINTMENT_BLOCKED_DATES', '');
@@ -43,5 +46,11 @@ describe('appointment requests', () => {
     expect(response.status).toBe(201);
     expect(mocks.reserve.mock.calls[0][0].toISOString()).toBe('2026-09-21T08:30:00.000Z');
     expect(await response.json()).toMatchObject({ data: { status: 'requested', notified: false }, error: null });
+    expect(mocks.notify.mock.calls[0][3]).toEqual({ stored: true });
+  });
+  it('refuses a seventh request from one client in ten minutes, before reserving a slot', async () => {
+    for (let i = 0; i < 6; i += 1) expect((await POST(request())).status).toBe(201);
+    expect((await POST(request())).status).toBe(429);
+    expect(mocks.reserve).toHaveBeenCalledTimes(6);
   });
 });

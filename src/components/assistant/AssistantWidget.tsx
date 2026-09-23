@@ -697,6 +697,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
               }
             }}
             rows={2}
+            maxLength={1000}
             placeholder={copy.placeholder}
             className="min-h-[44px] flex-1 resize-y rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 py-2 text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
           />
