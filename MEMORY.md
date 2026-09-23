@@ -2210,3 +2210,21 @@ photograph exists. The old courtyard frame 095 could not be used honestly: its g
 spans the width at mid-height, so the desktop heading always lands on faces.
 
 Selection record, rejections and the consent check are in docs/MEDIA_LIBRARY.md.
+
+## 29. The old site's URLs redirect to their pages (2026-09-23)
+
+Before this pass every old English URL (`/en/language-courses/…`, `/en/tests-examinations/…`,
+`/en/registration/…`) and a handful of German ones (`/anmeldung/geschaeftsbedingungen`,
+`/sprachkurse/niveaustufen`, `/ueber-uns/tandem`, `/gallerie`, the section roots) would have
+404ed at cutover. The old URLs were inventoried from a crawl of the live TYPO3 site, the
+Internet Archive's history (2,375 URLs across five site generations since 2000) and search
+results, then mapped and checked twice.
+
+`src/i18n/legacy-redirects.ts` holds 511 redirects, loaded as `redirects()` in `next.config.ts`
+so they reach `.php` and `.pdf` paths the proxy never sees. Old news articles match on their
+`tx_news_pi1[news]` parameter. URLs dead for years with only a generic equivalent stay 404 on
+purpose. The unit test proves every target is a canonical existing page and that no old path
+hides a real one in any letter case; the e2e spec follows all 511. The judgement calls CASA
+should confirm (gallery, tandem, language levels, the old culture programme) are in
+docs/LEGACY_REDIRECTS.md.
+

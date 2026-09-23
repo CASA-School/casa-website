@@ -324,6 +324,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PUBLIC_UI_AUDIT.md` | Route inventory + responsive findings (375/768/1280) |
 | `docs/PUBLIC_UI_BACKLOG.md` | Sequenced PR-A / PR-B / PR-C plan |
 | `docs/I18N_ROUTING.md` | **Read before adding a route or a language.** German at the root, English under `/en`, the URL map, the rules, how to add a language |
+| `docs/LEGACY_REDIRECTS.md` | The old casa-bremen.de URLs and where each one redirects (`src/i18n/legacy-redirects.ts`): inventory, rules, judgement calls for CASA |
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |

@@ -1,6 +1,8 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
 
+import { legacyRedirectRules } from './src/i18n/legacy-redirects';
+
 /**
  * Sent on every response: pages, route handlers, `_next/static` and `public/`.
  *
@@ -55,6 +57,12 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
     ];
+  },
+  // The old casa-bremen.de's URLs → their pages here (src/i18n/legacy-redirects.ts).
+  // Here rather than in the proxy: Next applies these to every path, and many old
+  // URLs end in .php or .pdf, which the proxy matcher skips.
+  async redirects() {
+    return legacyRedirectRules();
   },
   // Next 16.3 blocks cross-origin requests to dev-server resources by default.
   // Playwright drives the dev server over 127.0.0.1:3001, which the dev server
