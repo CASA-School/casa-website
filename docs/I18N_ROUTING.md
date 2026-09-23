@@ -120,5 +120,7 @@ English internal paths are served under the new prefix.
   i18n step and the largest.
 - News and career slugs pass through untranslated, so a German article has a German slug
   only if its content row does.
-- Redirects from the old site's English paths (`/en/language-courses/…`) are not mapped yet.
-  The German paths need none.
+- The old site's URLs that this map does not keep — its whole English tree
+  (`/en/language-courses/…`), a few German pages and four older site generations — are
+  permanently redirected by `src/i18n/legacy-redirects.ts`, loaded in `next.config.ts`.
+  [LEGACY_REDIRECTS.md](LEGACY_REDIRECTS.md) has the inventory, the rules and the judgement calls.
