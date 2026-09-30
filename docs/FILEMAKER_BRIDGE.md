@@ -429,7 +429,7 @@ reference-table ID must come from a live read of the vocabulary (§7).
 | `current_level` (self-declared) | `PreBooking._ID_LevelStepReference` (1–13) and `_ID_Level` | our `B1+` → 7; store in `Comment` as "self-declared" too |
 | `visa_required` | `PreBooking._ID_VisaRequired` | `Decision_Yes_No`: 1 = ja, 2 = nein *(live)* |
 | `accommodation_required`, `accommodation_type` | `PreBooking._ID_AccommodationTypeReference` (`flat`/`host` → ask) | room/catering refs left blank |
-| `allergies`, `notes`, `smoker` | `PreBooking.Comment` | prefixed lines; no dedicated fields exist |
+| `allergies`, `notes` | `PreBooking.Comment` | prefixed lines; no dedicated fields exist |
 | `locale`, `source` | `SourceReference` **1 = Internet \| Homepage already exists**; a `Source` row is attached to the Booking at conversion — phase 2 passes source 1 to the conversion script. Phase 1: `Comment` line `Quelle: Website (en)` | |
 | `submitted_at` | `PreBooking.DateOfCreation` is auto-enter — leave; put the ISO timestamp in `Comment` | |
 | *(returned)* `__ID_Contact`, `__ID_PreBooking`, `__ID_Person` | → `external_ref` | structured, §5 |

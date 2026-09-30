@@ -26,8 +26,8 @@ const validCourseFormInput = {
   visaRequired: false,
   accommodationRequired: false,
   accommodationType: undefined,
-  smoker: false,
   allergies: '',
+  allergyConsent: false,
   notes: '',
   acceptTerms: true,
 };
@@ -54,6 +54,34 @@ describe('course registration schemas', () => {
 
     expect(parsed.success).toBe(false);
     expect(parsed.error?.issues.some((issue) => issue.path[0] === 'accommodationType')).toBe(true);
+  });
+
+  it('accepts allergies only with their own consent', () => {
+    const withAccommodation = { ...validCourseFormInput, accommodationRequired: true, accommodationType: 'host' };
+
+    const refused = courseRegistrationFormSchema.safeParse({ ...withAccommodation, allergies: 'cats' });
+    expect(refused.success).toBe(false);
+    expect(refused.error?.issues.map((issue) => issue.path[0])).toEqual(['allergyConsent']);
+
+    expect(courseRegistrationFormSchema.safeParse({ ...withAccommodation, allergies: 'cats', allergyConsent: true }).success).toBe(true);
+    expect(courseRegistrationFormSchema.safeParse({ ...withAccommodation, allergies: '   ' }).success).toBe(true);
+  });
+
+  it('asks for the allergy consent on the details step, before the terms are accepted', () => {
+    const parsed = courseRegistrationFormSchema.safeParse({
+      ...validCourseFormInput,
+      accommodationRequired: true,
+      accommodationType: 'flat',
+      allergies: 'nuts',
+      acceptTerms: false,
+    });
+
+    expect(parsed.error?.issues.some((issue) => issue.path[0] === 'allergyConsent')).toBe(true);
+  });
+
+  it('no longer takes a smoker answer', () => {
+    const parsed = courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, smoker: true });
+    expect(parsed.success && 'smoker' in parsed.data).toBe(false);
   });
 
   it('requires a valid salutation in the schema', () => {

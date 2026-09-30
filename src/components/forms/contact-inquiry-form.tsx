@@ -925,8 +925,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
           <div className="sm:col-span-2 flex flex-col gap-4 border-t border-[color:var(--casa-sand)] pt-6">
             <p className="text-xs leading-relaxed text-[var(--casa-muted)]">
-              {locale === 'de' ? '* Pflichtfelder. Wie wir Ihre Daten verarbeiten, erfahren Sie in unseren ' : '* Required fields. Read how we handle your information in our '}
-              <Link href="/privacy" className="underline underline-offset-4">{locale === 'de' ? 'Datenschutzhinweisen' : 'privacy notice'}</Link>.
+              {locale === 'de' ? '* Pflichtfelder. Wie wir Ihre Daten verarbeiten, erfahren Sie in unserer ' : '* Required fields. Read how we handle your information in our '}
+              <Link href="/privacy" className="underline underline-offset-4">{locale === 'de' ? 'Datenschutzerklärung' : 'privacy policy'}</Link>.
             </p>
             <Button
               type="submit"

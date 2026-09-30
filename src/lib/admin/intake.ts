@@ -47,9 +47,10 @@ function classifyEnquiry(topicKey: string | null | undefined): 'general' | 'grou
 }
 
 function report(scope: string, error: unknown): false {
+  // Name and SQLSTATE only: a pg message can quote the form values it rejected.
   console.error(`[workspace-intake] ${scope} was not stored`, {
     name: error instanceof Error ? error.name : 'UnknownError',
-    message: error instanceof Error ? error.message : String(error),
+    code: (error as { code?: unknown } | null)?.code,
   });
   return false;
 }
@@ -281,7 +282,6 @@ export async function storeCourseRegistration(input: {
   visaRequired: boolean;
   accommodationRequired: boolean;
   accommodationType: string | undefined;
-  smoker: boolean;
   allergies: string;
   notes: string;
   locale: 'en' | 'de';
@@ -307,14 +307,14 @@ export async function storeCourseRegistration(input: {
             course_instance_label, salutation, first_name, last_name, email, phone,
             nationality_raw, nationality_code, birth_date_raw, birth_date,
             declared_level_raw, declared_level_code, visa_required,
-            accommodation_required, accommodation_type, smoker, allergies, notes,
+            accommodation_required, accommodation_type, allergies, notes,
             locale, person_id, submitted_at)
          VALUES ($1,
                  (SELECT id FROM course_types WHERE id = $2::uuid),
                  (SELECT id FROM course_instances WHERE id = $3::uuid),
                  $4, $5, $6::salutation, $7, $8, $9, $10,
-                 $11, $12, $13, $14::date, $15, $16, $17, $18, $19::accommodation_type, $20, $21, $22,
-                 $23, $24, $25)
+                 $11, $12, $13, $14::date, $15, $16, $17, $18, $19::accommodation_type, $20, $21,
+                 $22, $23, $24)
          ON CONFLICT (request_id) DO NOTHING
          RETURNING id`,
         [
@@ -344,7 +344,6 @@ export async function storeCourseRegistration(input: {
           input.visaRequired,
           input.accommodationRequired,
           input.accommodationType ?? null,
-          input.smoker,
           input.allergies || null,
           input.notes || null,
           input.locale,

@@ -95,8 +95,8 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
       visaRequired: false,
       accommodationRequired: false,
       accommodationType: undefined,
-      smoker: false,
       allergies: '',
+      allergyConsent: false,
       notes: '',
       acceptTerms: false,
       website: '',
@@ -122,8 +122,8 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
       visaRequired: false,
       accommodationRequired: false,
       accommodationType: undefined,
-      smoker: false,
       allergies: '',
+      allergyConsent: false,
       notes: '',
       acceptTerms: false,
       website: '',
@@ -148,6 +148,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
   const selectedCourseInstanceId = watch('courseInstanceId');
   const currentLevel = watch('currentLevel');
   const accommodationRequired = watch('accommodationRequired');
+  const hasAllergies = Boolean(watch('allergies')?.trim());
 
   const selectedCourseType = useMemo(
     () => catalog.courseTypes.find((courseType) => courseType.id === selectedCourseTypeId) || null,
@@ -183,7 +184,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
   const fieldsByStep: Array<Array<keyof FormData>> = [
     ['courseTypeId', 'courseInstanceId'],
     accommodationRequired
-      ? [...PERSONAL_FIELDS, 'accommodationRequired', 'accommodationType']
+      ? [...PERSONAL_FIELDS, 'accommodationRequired', 'accommodationType', 'allergies', 'allergyConsent']
       : [...PERSONAL_FIELDS, 'accommodationRequired'],
     [],
   ];
@@ -651,6 +652,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   id="nationality"
                   value={watch('nationality')}
                   onChange={(value) => setValue('nationality', value, { shouldDirty: true, shouldValidate: true })}
+                  placeholder={t('Select nationality', 'Nationalität auswählen')}
                   searchPlaceholder={t('Search...', 'Suchen...')}
                   emptyLabel={t('No results found.', 'Keine Ergebnisse gefunden.')}
                   className={fieldClassName}
@@ -738,20 +740,34 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   {errors.accommodationType && <p id="accommodationType-error" className="text-sm text-[var(--casa-danger-text)]">{errors.accommodationType.message}</p>}
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="smoker"
-                    checked={watch('smoker')}
-                    onCheckedChange={(checked) => setValue('smoker', Boolean(checked), { shouldDirty: true })}
-                  />
-                  <Label htmlFor="smoker">{t('I am a smoker', 'Ich rauche')}</Label>
-                </div>
-
                 <div className={fieldGroupClassName}>
                   <Label htmlFor="allergies" className={labelClassName}>{t('Allergies', 'Allergien')}</Label>
                   {/* maxLength mirrors the schema: no step validates these two, so a longer value would only disable Absenden. */}
                   <Input id="allergies" maxLength={500} className={fieldClassName} {...register('allergies')} placeholder={t('e.g. cats, nuts', 'z. B. Katzen, Nüsse')} />
                 </div>
+
+                {hasAllergies && (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id="allergy-consent"
+                        aria-required
+                        {...errorProps('allergyConsent')}
+                        checked={watch('allergyConsent')}
+                        onCheckedChange={(checked) =>
+                          setValue('allergyConsent', Boolean(checked), { shouldDirty: true, shouldValidate: true })
+                        }
+                      />
+                      <Label htmlFor="allergy-consent" className="cursor-pointer text-sm leading-relaxed">
+                        {t(
+                          'I consent to CASA processing my allergy information and passing it to my host family or shared flat, so that suitable accommodation can be found. I can withdraw this consent at any time.',
+                          'Ich willige ein, dass CASA meine Angaben zu Allergien verarbeitet und an meine Gastfamilie oder Wohngemeinschaft weitergibt, damit eine passende Unterkunft gefunden wird. Diese Einwilligung kann ich jederzeit widerrufen.'
+                        )}
+                      </Label>
+                    </div>
+                    {errors.allergyConsent && <p id="allergyConsent-error" className="text-sm text-[var(--casa-danger-text)]">{errors.allergyConsent.message}</p>}
+                  </div>
+                )}
 
                 <div className={fieldGroupClassName}>
                   <Label htmlFor="notes" className={labelClassName}>{t('Additional Notes', 'Weitere Hinweise')}</Label>
@@ -833,7 +849,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 <p className="font-semibold text-[var(--casa-ink)]">{t('Legal and next steps', 'Rechtliches und nächste Schritte')}</p>
                 <ul className="mt-2 space-y-1.5">
                   <li>
-                    - {t('By submitting, you agree to CASA terms and privacy policy.', 'Mit dem Absenden akzeptieren Sie die CASA AGB und Datenschutzerklärung.')}
+                    - {t('By submitting, you accept the CASA terms and conditions; the privacy policy explains how we handle your data.', 'Mit dem Absenden akzeptieren Sie die AGB von CASA; wie wir Ihre Daten verarbeiten, erklärt die Datenschutzerklärung.')}
                   </li>
                   <li>
                     - {t('Admissions confirmation is sent after seat and profile checks.', 'Die Bestätigung erfolgt nach Anmelde- und Kursprüfung.')}
@@ -860,11 +876,11 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                         <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Allgemeinen Geschäftsbedingungen
                         </Link>{' '}
-                        und die{' '}
+                        und habe die{' '}
                         <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Datenschutzerklärung
-                        </Link>
-                        .
+                        </Link>{' '}
+                        zur Kenntnis genommen.
                       </>
                     ) : (
                       <>
@@ -872,7 +888,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                         <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Terms and Conditions
                         </Link>{' '}
-                        and the{' '}
+                        and have read the{' '}
                         <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Privacy Policy
                         </Link>
