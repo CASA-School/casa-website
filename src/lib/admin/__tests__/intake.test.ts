@@ -80,7 +80,6 @@ describe('registration intake foreign keys', () => {
       visaRequired: false,
       accommodationRequired: false,
       accommodationType: undefined,
-      smoker: false,
       allergies: '',
       notes: '',
     });

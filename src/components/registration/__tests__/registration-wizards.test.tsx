@@ -170,4 +170,22 @@ describe('course registration wizard, accommodation', () => {
     expect(container.querySelector<HTMLInputElement>('#allergies')?.maxLength).toBe(500);
     expect(container.querySelector<HTMLTextAreaElement>('#notes')?.maxLength).toBe(2000);
   });
+  it('asks for a separate consent only once allergies are entered, and no longer asks about smoking', async () => {
+    await act(async () => root.render(<CourseWizard catalog={courseCatalog} />));
+    await click(button('Weiter'));
+    await click(container.querySelector<HTMLButtonElement>('#accommodation')!);
+
+    expect(container.querySelector('#smoker')).toBeNull();
+    expect(container.querySelector('#allergy-consent')).toBeNull();
+
+    const allergies = container.querySelector<HTMLInputElement>('#allergies')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(allergies, 'Katzen');
+      allergies.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    const consent = container.querySelector('#allergy-consent');
+    expect(consent?.getAttribute('aria-checked')).toBe('false');
+    expect(container.querySelector('label[for="allergy-consent"]')?.textContent).toContain('Ich willige ein');
+  });
 });

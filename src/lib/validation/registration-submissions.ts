@@ -61,6 +61,7 @@ const REGISTRATION_MESSAGES = {
     nationality: 'Nationality is required.',
     birthDate: 'Date of birth is required.',
     accommodationType: 'Please select an accommodation type.',
+    allergyConsent: 'Please give your consent, or leave the allergies field empty.',
     officialName: 'Please confirm your official name matches your identification.',
     examPolicy: 'Please accept exam registration terms before submitting.',
     acceptTerms: 'You must accept the terms and conditions to proceed.',
@@ -81,6 +82,7 @@ const REGISTRATION_MESSAGES = {
     nationality: 'Bitte geben Sie Ihre Nationalität an.',
     birthDate: 'Bitte geben Sie Ihr Geburtsdatum an.',
     accommodationType: 'Bitte wählen Sie eine Wohnform aus.',
+    allergyConsent: 'Bitte willigen Sie ein oder lassen Sie das Feld zu Allergien leer.',
     officialName: 'Bitte bestätigen Sie, dass Ihr Name mit Ihrem amtlichen Ausweis übereinstimmt.',
     examPolicy: 'Bitte bestätigen Sie die Bedingungen der Prüfungsanmeldung.',
     acceptTerms: 'Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen, um fortzufahren.',
@@ -130,6 +132,8 @@ const courseRegistrationValidation =
     data: {
       accommodationRequired: boolean;
       accommodationType?: 'flat' | 'host';
+      allergies: string;
+      allergyConsent: boolean;
     },
     ctx: z.RefinementCtx
   ) => {
@@ -138,6 +142,16 @@ const courseRegistrationValidation =
         code: z.ZodIssueCode.custom,
         message: m.accommodationType,
         path: ['accommodationType'],
+      });
+    }
+    // Allergies are health data (Art. 9 GDPR) and go to the host family, so
+    // they need their own explicit consent, not the terms box. Enforced here as
+    // well as in the wizard: a stored allergy always had consent at submission.
+    if (data.accommodationRequired && data.allergies && !data.allergyConsent) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: m.allergyConsent,
+        path: ['allergyConsent'],
       });
     }
   };
@@ -163,8 +177,8 @@ const courseRegistrationFormFieldsSchema = (m: RegistrationMessages) =>
       visaRequired: z.boolean({ message: m.invalid }),
       accommodationRequired: z.boolean({ message: m.invalid }),
       accommodationType: z.enum(['flat', 'host'], { message: m.accommodationType }).optional(),
-      smoker: z.boolean({ message: m.invalid }).optional().default(false),
       allergies: optionalText(m, 500),
+      allergyConsent: z.boolean({ message: m.invalid }).optional().default(false),
       notes: optionalText(m, 2000),
       acceptTerms: confirmed(m.acceptTerms),
       website: honeypot,

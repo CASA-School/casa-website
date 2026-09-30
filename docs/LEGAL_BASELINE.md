@@ -1,5 +1,8 @@
 # Published legal wording baseline — 17 September 2026
 
+> **Privacy replaced on 2026-09-30.** The privacy policy is now the new website's own text; see
+> `docs/PRIVACY_POLICY.md`. Terms and imprint below are still the verbatim baseline.
+
 User instruction: copy the current CASA legal wording first; discuss changes with the legal team later. The user subsequently authorized push, merge and deployment on 2026-09-17. Deploy to the existing Azure website; public-domain cutover and Microsoft/database activation remain separate work.
 
 ## Sources

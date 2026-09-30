@@ -58,7 +58,6 @@ export type CourseRegistrationDetail = {
   visaRequired: boolean;
   accommodationRequired: boolean;
   accommodationType: string | null;
-  smoker: boolean;
   allergies: string | null;
   notes: string | null;
   locale: string;
@@ -323,7 +322,6 @@ export async function getCourseRegistration(id: string): Promise<CourseRegistrat
     visa_required: boolean;
     accommodation_required: boolean;
     accommodation_type: string | null;
-    smoker: boolean;
     allergies: string | null;
     notes: string | null;
     locale: string;
@@ -355,7 +353,6 @@ export async function getCourseRegistration(id: string): Promise<CourseRegistrat
             r.visa_required,
             r.accommodation_required,
             r.accommodation_type::text AS accommodation_type,
-            r.smoker,
             r.allergies,
             r.notes,
             r.locale,
@@ -398,7 +395,6 @@ export async function getCourseRegistration(id: string): Promise<CourseRegistrat
     visaRequired: found.visa_required,
     accommodationRequired: found.accommodation_required,
     accommodationType: found.accommodation_type,
-    smoker: found.smoker,
     allergies: found.allergies,
     notes: found.notes,
     locale: found.locale,

@@ -64,7 +64,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { website, ...payload } = parsed.data;
+  const { website, ...fields } = parsed.data;
+  // Allergies belong to an accommodation request, which the schema has already
+  // tied to consent; unticking accommodation must not leave them behind.
+  const payload = { ...fields, allergies: fields.accommodationRequired ? fields.allergies : '' };
   const requestId = crypto.randomUUID();
 
   // Honeypot field for automated submissions.
@@ -121,7 +124,6 @@ export async function POST(request: NextRequest) {
     visaRequired: payload.visaRequired,
     accommodationRequired: payload.accommodationRequired,
     accommodationType: payload.accommodationType,
-    smoker: payload.smoker,
     allergies: payload.allergies,
     notes: payload.notes,
     locale: payload.locale,

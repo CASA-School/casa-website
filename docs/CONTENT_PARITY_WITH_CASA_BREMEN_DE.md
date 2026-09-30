@@ -310,7 +310,7 @@ Our page has the six Klett tests including B1+. The process rules are missing:
 
 ### `/anmeldung/anmeldeformular` → `/registration/course`
 Our wizard covers salutation, course, start, level, contact, visa, accommodation +
-type, smoker, allergies, notes and terms. Missing:
+type, allergies (with their own consent), notes and terms. Missing:
 - **Course end date** (the German form asks for start *and* end).
 - "Einstufungstest bei CASA gemacht: ja / nein".
 - Level list including **"nicht bekannt"** and the split **B1+1 / B1+2**.

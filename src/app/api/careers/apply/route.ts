@@ -235,7 +235,11 @@ export async function POST(request: Request) {
       );
     });
   } catch (error) {
-    console.error('[careers-apply-api] submission failed', error);
+    // Name and SQLSTATE only: a pg message can quote the values it rejected.
+    console.error('[careers-apply-api] submission failed', {
+      name: error instanceof Error ? error.name : 'UnknownError',
+      code: (error as { code?: unknown } | null)?.code,
+    });
     return NextResponse.json(
       {
         status: 'error',
@@ -246,10 +250,14 @@ export async function POST(request: Request) {
     );
   }
 
+  /*
+   * The alert names the position and nothing about the applicant. Applications
+   * are for management only, through the workspace's Applications module, and
+   * the alert goes to a shared mailbox (info@ in the first phase), so its body
+   * must not become a second, wider copy of the application.
+   */
   const delivery = await notifyForm('careers', {
-    requestId, submittedAt, ...data,
-    cvFileName: cvFile.name, cvFileSize: cvFile.size,
-    cvStorageMode: 'database',
+    requestId, submittedAt, positionTitle: data.positionTitle, locale,
   }, webHookUrl, { stored: true });
 
   return NextResponse.json({

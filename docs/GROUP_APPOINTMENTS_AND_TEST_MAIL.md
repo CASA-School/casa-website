@@ -14,6 +14,21 @@ Microsoft activation is deferred; the earlier permission question was not approv
   Preserve applicants' entered addresses in their records. Do not send to them during testing.
 - CASA uses Microsoft 365. Change recipients before public-domain launch.
 
+### Recipients after testing — Rahman, 2026-09-30
+
+| Form | `FORM_RECIPIENT_*` | Mailbox |
+| --- | --- | --- |
+| Contact | `CONTACT` | `info@casa-bremen.de` |
+| Group and company enquiries | `GROUPS` | `info@casa-bremen.de` |
+| Course registration (incl. accommodation) | `COURSE` | `online@casa-bremen.de` |
+| Exam registration | `EXAM` | `online@casa-bremen.de` |
+| Placement test result | `PLACEMENT` | `online@casa-bremen.de` |
+| Appointment request | `APPOINTMENT` | the contact person who holds the consultations — for group consultations, **Ina Eismann's mailbox** (address still to come). She confirms each appointment herself by email |
+| Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position and a reference only; the application itself is read in the workspace by management |
+
+`bewerbungen@` is being retired. The privacy policy (§17) states this routing, so a change here
+is a change there (`docs/PRIVACY_POLICY.md`).
+
 ## Evidence, cause and implementation
 
 The decision-rail booking buttons were inert. There was no calendar service or email sender

@@ -574,6 +574,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   id="nationality"
                   value={watch('nationality')}
                   onChange={(value) => setValue('nationality', value, { shouldDirty: true, shouldValidate: true })}
+                  placeholder={t('Select nationality', 'Nationalität auswählen')}
                   searchPlaceholder={t('Search...', 'Suchen...')}
                   emptyLabel={t('No results found.', 'Keine Ergebnisse gefunden.')}
                   className={fieldClassName}
@@ -713,11 +714,11 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                         <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Allgemeinen Geschäftsbedingungen
                         </Link>{' '}
-                        und die{' '}
+                        und habe die{' '}
                         <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Datenschutzerklärung
-                        </Link>
-                        .
+                        </Link>{' '}
+                        zur Kenntnis genommen.
                       </>
                     ) : (
                       <>
@@ -725,7 +726,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                         <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Terms and Conditions
                         </Link>{' '}
-                        and the{' '}
+                        and have read the{' '}
                         <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
                           Privacy Policy
                         </Link>

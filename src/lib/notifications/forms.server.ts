@@ -93,6 +93,7 @@ const HIDDEN_FIELDS = new Set([
   'positionId',
   'topicKey',
   'acceptTerms',
+  'allergyConsent',
   'examPolicyAccepted',
   'website',
 ]);

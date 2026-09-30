@@ -330,11 +330,11 @@ try {
           course_instance_label, salutation, first_name, last_name, email, phone,
           nationality_raw, nationality_code, birth_date_raw, birth_date,
           declared_level_raw, declared_level_code, visa_required,
-          accommodation_required, accommodation_type, smoker, notes, locale,
+          accommodation_required, accommodation_type, notes, locale,
           status, source, person_id, submitted_at, created_at)
        VALUES ($1, $2, $3, $4, $5, $6::salutation, $7, $8, $9, $10,
                $11, $12, $13, $14::date, $15, (SELECT code FROM levels WHERE code = $15), $16,
-               $17, $18::accommodation_type, false, $19, 'en', $20::work_status, $21, $22, $23, $23)`,
+               $17, $18::accommodation_type, $19, 'en', $20::work_status, $21, $22, $23, $23)`,
       [
         randomUUID(),
         instance?.course_type_id ?? null,

@@ -152,7 +152,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0016_staff_sign_in_failures.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0017_drop_course_registration_smoker.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -325,6 +325,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PUBLIC_UI_BACKLOG.md` | Sequenced PR-A / PR-B / PR-C plan |
 | `docs/I18N_ROUTING.md` | **Read before adding a route or a language.** German at the root, English under `/en`, the URL map, the rules, how to add a language |
 | `docs/LEGACY_REDIRECTS.md` | The old casa-bremen.de URLs and where each one redirects (`src/i18n/legacy-redirects.ts`): inventory, rules, judgement calls for CASA |
+| `docs/PRIVACY_POLICY.md` | **Read before changing a form, a recipient or a retention period.** The website's own privacy text, the facts it states, what must exist at launch for it to be true, and the open questions |
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |

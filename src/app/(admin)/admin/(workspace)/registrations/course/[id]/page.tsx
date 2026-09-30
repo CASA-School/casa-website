@@ -244,10 +244,6 @@ export default async function CourseRegistrationPage({
                       'Not needed'
                     ),
                   },
-                  {
-                    label: 'Smoker',
-                    value: registration.smoker ? 'Yes' : 'No',
-                  },
                   { label: 'Allergies', value: registration.allergies },
                   {
                     label: 'Their notes',
