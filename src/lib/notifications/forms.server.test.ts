@@ -50,51 +50,75 @@ describe('public form notifications', () => {
     expect(body.message.bccRecipients).toBeUndefined();
     expect(body.message.body.content).toContain('applicant@example.com');
   });
-  it('sets Reply-To to the submitter and writes a labelled body instead of JSON', async () => {
+  it('sets Reply-To to the submitter and sends a labelled HTML body instead of JSON', async () => {
     const body = await sentMessage('course', {
       requestId: 'ref-1', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com',
       courseTypeId: '40000000-0000-4000-8000-000000010003', courseTypeLabel: 'Intensive German',
-      visaRequired: false, allergies: '', notes: 'Line one\nLine two',
-      organiserBrief: { groupSize: 12, meals: null },
+      visaRequired: false, accommodationRequired: false, allergies: 'cats', notes: 'Line one\nLine two',
     });
     expect(body.message.replyTo).toEqual([{ emailAddress: { address: 'ada@example.com', name: 'Ada Lovelace' } }]);
     expect(body.message.toRecipients).toEqual([{ emailAddress: { address: TEST_FORM_RECIPIENT } }]);
+    expect(body.message.body.contentType).toBe('HTML');
+    expect(body.message.subject).toBe('[TEST] Kursanmeldung: Ada Lovelace – Intensive German');
     const content: string = body.message.body.content;
-    expect(content).toContain('Course registration from the website.');
-    expect(content).toContain('Reference: ref-1');
-    expect(content).toContain('Email: ada@example.com');
-    expect(content).toContain('Course: Intensive German');
-    expect(content).toContain('Visa required: No');
-    expect(content).toContain('Notes:\nLine one\nLine two');
-    expect(content).toContain('Organiser brief:\n  Group size: 12');
-    expect(content).not.toContain('{');
+    expect(content).toContain('Neue Kursanmeldung');
+    expect(content).toContain('Referenz ref-1');
+    expect(content).toContain('href="mailto:ada@example.com"');
+    expect(content).toContain('Intensive German');
+    expect(content).toContain('Nicht benötigt');
+    expect(content).toContain('Line one<br>Line two');
     expect(content).not.toContain('40000000-0000-4000-8000-000000010003');
-    expect(content).not.toContain('Allergies');
-    expect(content).not.toContain('Meals');
+    // Allergies belong to an accommodation request only.
+    expect(content).not.toContain('Allergien');
   });
-  it('prints the readings of machine tokens, not the tokens', async () => {
+  it('prints the readings of machine tokens in the form\'s language, not the tokens', async () => {
     const group = (await sentMessage('groups', {
-      requestId: 'r', locale: 'de',
+      requestId: 'r', locale: 'de', topic: 'Gruppenreise',
       organiserBrief: { meals: 'half-board-plus-canteen', ageBand: '14-17', invoicingParty: 'public-funder', groupSize: 12 },
     })).message.body.content as string;
-    expect(group).toContain('Language: German');
-    expect(group).toContain('  Meals: Half board plus school canteen');
-    expect(group).toContain('  Age band: 14–17');
-    expect(group).toContain('  Who is invoiced: A public funder');
-    expect(group).toContain('  Group size: 12');
+    expect(group).toContain('Sprache: Deutsch');
+    expect(group).toContain('Halbpension plus Mittagessen in der Kantine');
+    expect(group).toContain('Öffentlicher Träger oder Förderprogramm');
+    expect(group).toContain('Anzahl der Teilnehmenden');
     expect(group).not.toMatch(/half-board|public-funder/);
 
     const course = (await sentMessage('course', {
-      requestId: 'r', salutation: 'ms', accommodationType: 'host', locale: 'en',
+      requestId: 'r', salutation: 'ms', accommodationRequired: true, accommodationType: 'host', locale: 'en',
     })).message.body.content as string;
-    expect(course).toContain('Salutation: Ms');
-    expect(course).toContain('Accommodation type: Host family');
+    expect(course).toContain('New course registration');
+    expect(course).toContain('>Ms<');
+    expect(course).toContain('Host family');
     expect(course).toContain('Language: English');
 
     const exam = (await sentMessage('exam', { requestId: 'r', salutation: 'neutral', registrationType: 'written' }))
       .message.body.content as string;
-    expect(exam).toContain('Salutation: No salutation');
-    expect(exam).toContain('Exam part: Written part only');
+    expect(exam).toContain('Keine Anrede');
+    expect(exam).toContain('Nur schriftlich');
+  });
+  it('escapes everything the sender typed', async () => {
+    const content = (await sentMessage('contact', {
+      requestId: 'r', firstName: '<b>Eve</b>', topic: 'Kurse', message: '<script>alert(1)</script>',
+    })).message.body.content as string;
+    expect(content).not.toContain('<script>');
+    expect(content).not.toContain('<b>Eve</b>');
+    expect(content).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+  it('names only the position for a job application, and no token in a placement subject', async () => {
+    const careers = await sentMessage('careers', { requestId: 'r', positionTitle: 'Lehrkraft DaF', locale: 'de' });
+    expect(careers.message.subject).toBe('[TEST] Bewerbung: Lehrkraft DaF');
+    expect(careers.message.body.content).toContain('„Bewerbungen“');
+    const placement = await sentMessage('placement', { token: 'secret-token', band: 'B1.1', confidence: 'medium', locale: 'de' });
+    expect(placement.message.subject).toBe('[TEST] Einstufungstest: Empfehlung B1.1');
+    expect(placement.message.subject).not.toContain('secret-token');
+  });
+  it('writes an appointment as its weekday, date and Bremen time', async () => {
+    const appointment = await sentMessage('appointment', {
+      requestId: 'r', firstName: 'Ina', lastName: 'Gast', email: 'gast@example.com',
+      localDate: '2026-10-08', localTime: '10:30', durationMinutes: 30, locale: 'de',
+    });
+    expect(appointment.message.subject).toBe('[TEST] Terminanfrage: Ina Gast – Donnerstag, 8. Oktober 2026, 10:30 Uhr');
+    expect(appointment.message.body.content).toContain('10:30 Uhr (Bremer Zeit)');
+    expect(appointment.message.body.content).toContain('30 Minuten');
   });
   it('sets no Reply-To when the submission carries no usable address', async () => {
     expect((await sentMessage('placement', { token: 'tok-1', band: 'B1' })).message.replyTo).toBeUndefined();
@@ -104,12 +128,13 @@ describe('public form notifications', () => {
     const stored = await sentMessage('contact', { requestId: 'r' }, { stored: true });
     const notStored = await sentMessage('contact', { requestId: 'r' }, { stored: false });
     const unknown = await sentMessage('contact', { requestId: 'r' });
-    expect(stored.message.body.content).toContain('also stored in the staff workspace');
-    expect(notStored.message.body.content).toContain('This email is the only record of it.');
-    for (const content of [stored.message.body.content, notStored.message.body.content]) {
-      expect(content.startsWith('TEST DELIVERY')).toBe(true);
+    expect(stored.message.body.content).toContain('Auch im Arbeitsbereich gespeichert.');
+    expect(notStored.message.body.content).toContain('Diese E-Mail ist der einzige Eintrag.');
+    for (const message of [stored.message, notStored.message]) {
+      expect(message.subject.startsWith('[TEST] ')).toBe(true);
+      expect(message.body.content).toContain('Test: Alle Formular-E-Mails gehen derzeit an admin@casa-bremen.de.');
     }
-    expect(unknown.message.body.content).not.toContain('workspace');
+    expect(unknown.message.body.content).not.toContain('Arbeitsbereich');
   });
   it('requires an explicit valid recipient in live mode', async () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'live');

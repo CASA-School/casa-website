@@ -87,8 +87,6 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
 
 **Website follow-ups**
 
-- The placement token is in the notification subject line; anyone reading `online@` can open
-  the result with it (email redesign).
 - Allergies in the workspace and the notification mail are visible to everyone with course
   registrations; a permission of their own would narrow §12.
 - User agent is stored for enquiries and appointments with no use in the code; drop it and the

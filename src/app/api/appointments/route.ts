@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     return apiError('UNAVAILABLE', 'Your request could not be saved. Please try again.', 503);
   }
   const delivery = await notifyForm('appointment', {
-    requestId, firstName: input.firstName, lastName: input.lastName, email: input.email,
+    requestId, submittedAt: new Date().toISOString(), locale: input.locale, firstName: input.firstName, lastName: input.lastName, email: input.email,
     startsAt: startsAt.toISOString(), localDate: input.date, localTime: input.time,
     timeZone: 'Europe/Berlin', durationMinutes: 30, message: input.message,
   }, null, { stored: true });

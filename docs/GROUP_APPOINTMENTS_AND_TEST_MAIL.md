@@ -14,6 +14,28 @@ Microsoft activation is deferred; the earlier permission question was not approv
   Preserve applicants' entered addresses in their records. Do not send to them during testing.
 - CASA uses Microsoft 365. Change recipients before public-domain launch.
 
+### What the notification email looks like — 2026-10-01
+
+Built by `buildFormMail` in `src/lib/notifications/form-mail.ts`; `notifyForm` only delivers it.
+
+- **Language of the form.** A German form writes a German email, an English form an English one.
+  The group-enquiry fields use the contact form's own wording (`src/config/forms/organiser-brief-copy.ts`),
+  so staff read the words the sender chose.
+- **Subject says what and who:** `Kursanmeldung: Maria Rossi – Intensivkurs Deutsch`,
+  `Terminanfrage: Jonas Becker – Donnerstag, 8. Oktober 2026, 10:30 Uhr`, `Bewerbung: <Stelle>`,
+  `Einstufungstest: Empfehlung B1.1`. `[TEST] ` in front while testing. No access key or token
+  in a subject.
+- **Body:** a title and one summary line, then labelled sections (course, person, visa and
+  accommodation; exam; appointment; group details; placement result, skills, points to check,
+  opening questions). Empty fields are left out. The footer has the reference, the time received
+  in Bremen time, the language, and whether the workspace also stored the record.
+- **Reply** goes to the sender (Reply-To), and the email says so. The appointment email asks the
+  contact person to confirm by replying.
+- HTML in tables with inline styles, because desktop Outlook ignores most CSS. Everything the
+  sender typed is escaped.
+
+Previews of all seven emails in both languages: `output/review/form-emails/` (gitignored).
+
 ### Recipients after testing — Rahman, 2026-09-30
 
 | Form | `FORM_RECIPIENT_*` | Mailbox |
@@ -58,7 +80,8 @@ registration routes also logged simulated confirmation emails.
   Graph's 202 response means accepted for sending, not verified inbox delivery.
 - Failed notifications do not discard stored enquiries. Contact/course/exam requests now return
   503 if **neither storage nor delivery succeeded**. No applicant confirmation mail is sent.
-  Career CVs stay in the database; their notification includes metadata, not the attachment.
+  A job-application alert names only the position and a reference; the application and CV are
+  read in the workspace.
 - `/admin/settings` shows test/live mode and whether the Microsoft connection is configured.
 
 ## Verified connection state — not delivery-ready
