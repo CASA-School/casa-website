@@ -3,7 +3,6 @@ export { CourseLevelGoals } from './course-level-goals';
 export { AccommodationArrivalChecklist } from './accommodation-arrival-checklist';
 export { ExamsReadinessCheck } from './exams-readiness-check';
 export { ExamDayTimelineSignature } from './exam-day-timeline-signature';
-export { AboutMilestones } from './about-milestones';
 export { TeamDirectory } from './team-directory';
 export { FaqTopicNavigator } from './faq-topic-navigator';
 export { LegalAnchorLayout, type LegalAnchorSection } from './legal-anchor-layout';

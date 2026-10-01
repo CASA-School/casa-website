@@ -11,7 +11,8 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `newsflash-editor-lisa-dao.jpg`, `newsflash-kicktipp-winners.jpg` | Article images of two NewsFlash posts. Rendered directly, not through the placeholder, and deliberately unnumbered. |
 | `hero-classroom-lesson.webp` | Slot 54, homepage hero since 2026-10-01. A 5:4 crop of pool frame 093 (the slot 51 lesson), light correction only. |
 | `casa-building-golden.webp` | Slot 44. User-supplied, AI-processed building image; no longer used on the homepage. |
-| `casa-building-daylight.webp` | Slot 45, About hero. User-supplied processed building image, local preview approved 2026-09-21. |
+| `about-team-courtyard.webp` | Slot 55, About hero since 2026-10-01. Pool frame 098 (the slot 53 team) as its whole 3:2 frame, light correction only. |
+| `casa-building-daylight.webp` | Slot 45. User-supplied processed building image; the About hero until 2026-10-01, now unused. |
 | `reel-classroom-lesson.webp` | Slot 51. Real 2:1 crop of pool frame 093, light correction only. Made for the retired reel; available. |
 | `reel-team-courtyard.webp` | Slot 53. Real 2:1 crop of pool frame 098, light correction only. Made for the retired reel; available. |
 | `reel-partner-practice.webp` | Slot 52. Real 2:1 crop of pool frame 075, light correction only. Made for the retired reel; available. |
@@ -19,6 +20,16 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 
 Slots 46–49 were the AI-edited reel images of 21 September; their files were deleted on
 2026-09-23 and their numbers are retired, not reused.
+
+**A building photograph held back (2026-10-01).** The product owner supplied a
+1536×1024 photograph of the CASA facade, archived outside the project at
+`/Users/rahmanshafiee/Archive/CASA/supplied-2026-10-01/casa-building-facade-supplied-1536x1024.webp`.
+It has no camera metadata and is not the slot 44 or 45 image. Before it gets a
+number, confirm it is an unedited camera photograph (hard rule 4) — the earlier
+supplied building images turned out to be AI-processed. Candidate places once it
+is cleared: the contact page beside the address and directions, and a "find us"
+moment on the About page. Both are a building's natural job: showing people where
+to go, not what CASA is.
 
 The candidate pool is kept outside the project so unapproved photographs cannot be
 served or deployed accidentally. On the CASA laptop, the 103 files were moved intact

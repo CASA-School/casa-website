@@ -2255,3 +2255,18 @@ placeholder, so it now holds a real photograph: slot 54, a 5:4 full-resolution c
 frame 093, built and verified by `scripts/media/build_reel.py` like the reel crops. The reel
 component, its CSS and its e2e spec are deleted; the four reel crops stay in the library.
 
+
+## 32. The About page in the homepage's own design (2026-10-01)
+
+Rahman asked for `/ueber-uns/casa-leitbild` to match the rest of the site. Its hero now shows the
+CASA team in the courtyard (slot 55: frame 098 as its whole 3:2 frame, light correction only,
+consent confirmed 2026-09-23) in place of the AI-processed building image (slot 45). The page
+below it was rebuilt from the homepage's patterns: a figures band with the approved aggregates
+and the founding year, the Leitbild as a heading rail beside its text, the quality standards as
+the page's one ink-deep band with the accreditation marks (`AccreditationLogoList`, extracted
+from `ProofBand`), "Lernen durch Begegnung" as a photo split, the tandem steps as one divided
+panel, and Laura's words as a pull quote. Removed: the duplicated ProofBand slab, the two-entry
+milestone timeline (`AboutMilestones`, which had no other user), the "Persönlich begleitet" band
+that repeated the homepage, and the story photo, which was still a numbered placeholder. The
+anchors `#mission`, `#leitbild`, `#partners` and `#tandem` are kept. A supplied facade photograph
+is archived outside the repo until its origin is confirmed (`docs/MEDIA_LIBRARY.md`).

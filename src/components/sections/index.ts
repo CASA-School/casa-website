@@ -7,7 +7,7 @@ export {
   type QuickChooserThumbnail,
 } from './quick-chooser-panel';
 export { EditorialSplit, type EditorialSplitPhoto } from './editorial-split';
-export { ProofBand, type ProofStat } from './proof-band';
+export { AccreditationLogoList, ProofBand, type ProofStat } from './proof-band';
 export { GuidedPicker, type GuidedPickerItem } from './guided-picker';
 export { ProcessSteps, type ProcessStep } from './process-steps';
 export { ComparisonModule } from './comparison-module';

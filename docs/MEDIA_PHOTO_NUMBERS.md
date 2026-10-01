@@ -12,7 +12,10 @@ staff members after the code had removed them.
   (`group-course-walking-bremen.jpg`) are ready and render real photographs.
 - Slots **44** (`casa-building-golden.webp`) and **45**
   (`casa-building-daylight.webp`) are user-supplied, AI-processed building
-  images. The About hero still uses 45. Neither is in the homepage reel any more.
+  images. Neither is used on a page any more: the About hero moved to 55 on
+  2026-10-01.
+- The About hero is **55** (since 2026-10-01): the CASA team in the courtyard, the
+  whole 3:2 frame of 098 with light correction only.
 - The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light
   correction only, built by `scripts/media/build_reel.py`. **51, 53, 52, 50** were the
   full-width reel, retired the same day; they remain real, available crops. Slots **46–49** are retired (the AI-edited
