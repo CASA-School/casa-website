@@ -33,7 +33,9 @@ import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
  * genuinely informative field here, and it is what makes the directory useful:
  * a reader with a telc question can see who handles telc exams.
  *
- * VERIFIED 2026-08-18 against casa-bremen.de/ueber-uns/casa-team.
+ * VERIFIED 2026-08-18 against casa-bremen.de/ueber-uns/casa-team. Job titles
+ * updated 2026-10-01 to CASA's confirmed staff list (the go-live brief): the
+ * former titles described responsibilities, which stay in `areas`.
  * Staff change. Re-check this list before launch and at each term.
  */
 
@@ -69,6 +71,8 @@ const TEAM: TeamMemberSource[] = [
     group: 'leadership',
   },
   {
+    // TODO(Rahman): not on the confirmed staff list of 2026-10-01; confirm she
+    // and the title stay.
     id: 'mariella-baier',
     name: 'Mariella Baier',
     title: { en: 'Head of Evening Courses', de: 'Abendkursleitung' },
@@ -77,7 +81,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'tanja-langenickel',
     name: 'Tanja Langenickel',
-    title: { en: 'Courses & partnerships', de: 'Kurse & Kooperationen' },
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
       en: 'Intensive courses, partnerships, in-company training',
@@ -87,8 +91,8 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'natalia-sostres',
     name: 'Natàlia Sostres',
-    title: { en: 'Courses & telc exams', de: 'Kurse & telc Prüfungen' },
-    group: 'courses',
+    title: { en: 'Head of Office', de: 'Büroleitung' },
+    group: 'office',
     areas: {
       en: 'Intensive courses, telc examinations',
       de: 'Intensivkurse, telc Prüfungen',
@@ -97,7 +101,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'mareike-thomeczek',
     name: 'Mareike Thomeczek',
-    title: { en: 'Courses & accommodation', de: 'Kurse & Unterkunft' },
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
       en: 'Intensive courses, CASA accommodation, agencies',
@@ -107,7 +111,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'alissa-trouillet',
     name: 'Alissa Trouillet',
-    title: { en: 'Courses & quality management', de: 'Kurse & Qualitätsmanagement' },
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
       en: 'Intensive courses, evening and special courses, medical and nursing courses, quality management',
@@ -117,8 +121,8 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'meike-grosse-hundrup',
     name: 'Meike Große Hundrup',
-    title: { en: 'Administration & advice', de: 'Verwaltung/Beratung' },
-    group: 'office',
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
+    group: 'courses',
   },
   {
     id: 'manuela-meerhoff',
@@ -129,13 +133,21 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'ina-eismann',
     name: 'Ina Eismann',
-    title: { en: 'Accounts & group programmes', de: 'Buchhaltung & Gruppenprogramme' },
+    title: { en: 'Accounts', de: 'Buchhaltung' },
     group: 'office',
     areas: {
       en: 'Accounts, and the contact for group course quotes',
       de: 'Buchhaltung und Ansprechpartnerin für Gruppenangebote',
     },
   },
+  {
+    id: 'ilka-ahrens',
+    name: 'Ilka Ahrens',
+    title: { en: 'Resource management', de: 'Ressourcenmanagement' },
+    group: 'office',
+  },
+  // TODO(Rahman): the two volunteers are not on the confirmed staff list of
+  // 2026-10-01 (it lists the administration only); confirm they are still here.
   {
     id: 'lara-nobmann',
     name: 'Lara Nobmann',
