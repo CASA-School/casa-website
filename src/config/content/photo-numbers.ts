@@ -189,8 +189,8 @@ export const photoSlots: PhotoSlot[] = [
   { n: 43, src: '/media/casa/team/team-portrait-12.jpg', subject: 'Staff portrait 12 of 12. Match the framing of 31.', ready: false },
 
   // ---- Append new photographs below this line, next number, never resort --
-  { n: 44, src: '/media/casa/casa-building-golden.webp', subject: 'CASA building in golden evening light. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
-  { n: 45, src: '/media/casa/casa-building-daylight.webp', subject: 'CASA building in clear daylight. User-supplied processed image approved for local website preview on 2026-09-21.', ready: true },
+  { n: 44, src: '/media/casa/casa-building-golden.webp', subject: 'AI-PROCESSED, DO NOT USE (go-live brief 2026-10-01): the golden version misspells the window sign and changes the windows. Was: CASA building in golden evening light. User-supplied processed image approved for local website preview on 2026-09-21.', ready: false },
+  { n: 45, src: '/media/casa/casa-building-daylight.webp', subject: 'AI-PROCESSED, DO NOT USE (go-live brief 2026-10-01): the golden version misspells the window sign and changes the windows. Was: CASA building in clear daylight. User-supplied processed image approved for local website preview on 2026-09-21.', ready: false },
   { n: 46, src: '/media/casa/reel-learning-together-wide.webp', subject: 'Retired 2026-09-23. Was an AI-redrawn panorama of collection frame 085 (faces and surroundings regenerated); the file is deleted and the number is not reused.', ready: false },
   { n: 47, src: '/media/casa/reel-language-practice-wide.webp', subject: 'Retired 2026-09-23. Was an AI-redrawn panorama of collection frame 021; the file is deleted and the number is not reused.', ready: false },
   { n: 48, src: '/media/casa/reel-garden-gathering-wide.webp', subject: 'Retired 2026-09-23. Was an AI-redrawn panorama of collection frame 095 (people moved and redrawn); the file is deleted and the number is not reused. The team photograph in 53 took its place.', ready: false },

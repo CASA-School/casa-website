@@ -15,9 +15,9 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `course-special-pair-reading.webp` | Slot 8, Spezialkurse. Pool frame 077, 4:3, light correction only. |
 | `home-conversation-pair.webp` | Slot 56, the homepage's "Wir hören zu". Pool frame 076, 3:2, light correction only. |
 | `casa-wg-room.webp` | Slot 57, the homepage's accommodation block. Pool file 008, a room in a CASA-WG, 4:3, light correction only. |
-| `casa-building-golden.webp` | Slot 44. User-supplied, AI-processed building image; no longer used on the homepage. |
+| `casa-building-golden.webp` | Slot 44. AI-processed (misspelled window sign, changed windows): `ready: false` since 2026-10-01 so it cannot render. Do not use. |
 | `about-team-courtyard.webp` | Slot 55, About hero since 2026-10-01. Pool frame 098 (the slot 53 team) as its whole 3:2 frame, light correction only. |
-| `casa-building-daylight.webp` | Slot 45. User-supplied processed building image; the About hero until 2026-10-01, now unused. |
+| `casa-building-daylight.webp` | Slot 45. AI-processed: `ready: false` since 2026-10-01 so it cannot render. Do not use. |
 | `reel-classroom-lesson.webp` | Slot 51. Real 2:1 crop of pool frame 093, light correction only. Made for the retired reel; available. |
 | `reel-team-courtyard.webp` | Slot 53. Real 2:1 crop of pool frame 098, light correction only. Made for the retired reel; available. |
 | `reel-partner-practice.webp` | Slot 52. Real 2:1 crop of pool frame 075, light correction only. Made for the retired reel; available. |
@@ -172,6 +172,13 @@ crop keeps its faces in the middle ~52% of the height and ~75% of the width.
 Consent for the identifiable people in 060, 088, 077 and 076, including that the
 learners in 077 and 088 are adults, was confirmed by the product owner on
 2026-10-01, as was that 008 is a CASA-WG room.
+
+**Reuse across pages, 2026-10-01 (go-live brief).** The lesson (54) is also the
+/sprachkurse hero, the WG room (57) the /unterkunft hero, the team (55) the team
+page's hero, and the Bremen Town Musicians group (20) the "Unterricht für Gruppen"
+course photo. **After go-live:** regrade slots 20 and 23 (old-library re-edits
+W008 and W012) from their originals to the homepage set's house look; both sit a
+little cooler and pinker than the new photographs.
 
 **The reel was retired on 2026-10-01.** The product owner did not like the full-width
 slider: the headline on top of the photographs and the softness of the wide crops at
