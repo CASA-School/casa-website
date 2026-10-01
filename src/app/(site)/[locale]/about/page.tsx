@@ -203,7 +203,7 @@ export default async function AboutPage() {
             {stats.map((stat) => (
               <div key={stat.value} className="flex flex-col-reverse justify-end lg:px-8 lg:first:pl-0 lg:last:pr-0">
                 <dt className="mt-2 max-w-[16rem] text-sm leading-snug text-[var(--casa-muted)] md:text-base">{stat.label}</dt>
-                <dd className="font-display text-4xl leading-none tracking-tight text-[var(--casa-ink)] lining-nums md:text-5xl">{stat.value}</dd>
+                <dd className="text-4xl font-black leading-none tracking-tight text-[var(--casa-ink)] md:text-5xl">{stat.value}</dd>
               </div>
             ))}
           </dl>
@@ -315,8 +315,8 @@ export default async function AboutPage() {
             <ol className="grid divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] md:grid-cols-3 md:divide-x md:divide-y-0">
               {tandemGuide.steps.map((step, index) => (
                 <li key={step} className="p-6 md:p-7">
-                  <span className="font-display text-3xl leading-none text-[var(--casa-accent-text)] lining-nums" aria-hidden>
-                    {index + 1}
+                  <span className="text-xs font-semibold tracking-eyebrow text-[var(--casa-accent-text)]" aria-hidden>
+                    {String(index + 1).padStart(2, '0')}
                   </span>
                   <p className="mt-4 text-base leading-relaxed text-[var(--casa-ink)]">{step}</p>
                 </li>
@@ -349,7 +349,7 @@ export default async function AboutPage() {
           <Container>
             <figure className="mx-auto max-w-[50rem] text-center">
               <span aria-hidden className="block font-display text-6xl leading-none text-[var(--casa-accent-text)]">“</span>
-              <blockquote className="mt-2 text-balance font-display text-2xl leading-snug text-[var(--casa-ink)] md:text-3xl">
+              <blockquote className="mt-2 text-balance text-xl font-medium leading-relaxed text-[var(--casa-ink)] md:text-2xl">
                 {communityStory.quote}
               </blockquote>
               <figcaption className="mt-7 text-sm text-[var(--casa-muted)]">
