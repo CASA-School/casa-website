@@ -2228,3 +2228,20 @@ hides a real one in any letter case; the e2e spec follows all 511. The judgement
 should confirm (gallery, tandem, language levels, the old culture programme) are in
 docs/LEGACY_REDIRECTS.md.
 
+## 30. Back to the Klett placement tests; our own test in development (2026-10-01)
+
+Rahman: CASA's own level test is not finished, so the site uses the Klett tests for now while
+the own test keeps being built. The public page `/placement-test` (`/anmeldung/einstufungstest`)
+is the Klett page again, written from the old casa-bremen.de page in the new site's „Sie": start
+with A1, alone and without aids, name and email in Klett's form, result to online@, no test for
+complete beginners, in-person placement without an appointment. The address, its 67 legacy
+redirects and twenty internal links stay as they were.
+
+The own test is closed in production by one switch, `CASA_ENABLE_PLACEMENT_TEST`
+(`src/lib/placement/availability.ts`): open in development and e2e, closed otherwise. The runner
+redirects to the Klett page, a result is a 404, and each of the six API handlers refuses first.
+Copy that described the own test (15–30 minutes, a teacher confirms) was rewritten on the course
+pages, the course index, the registration hint and in the assistant. The privacy policy lost its
+section on the own test and gained one on the Klett links; the removed text is kept in
+docs/PRIVACY_POLICY.md for when the test returns.
+

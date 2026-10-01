@@ -209,7 +209,7 @@ export default async function CourseDetailPage({
       }
     : beginnerTrack
       ? {
-          label: locale === 'de' ? 'Einstufung zuerst buchen' : 'Book placement first',
+          label: locale === 'de' ? 'Niveau zuerst prüfen' : 'Check your level first',
           href: '/placement-test',
           kind: 'primary' as const,
         }
@@ -471,8 +471,8 @@ export default async function CourseDetailPage({
          * placement" — which contradicts the site's own rule that every format
          * starts from a placement. You cannot pick a course before you know your
          * level, so the old order asked the reader to commit and then find out
-         * what they had committed to. The result is a course recommendation a
-         * teacher confirms, never a decision the test makes (CLAUDE.md rule 6).
+         * what they had committed to. Placement is the Klett online test or an
+         * in-person placement (/placement-test); complete beginners skip it.
          */
         [
           {
@@ -480,8 +480,8 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Einstufung machen' : 'Take the placement test',
             description:
               locale === 'de'
-                ? 'Kostenlos, etwa 15–30 Minuten — Ihre Kursempfehlung, die eine Lehrkraft mit Ihnen bestätigt.'
-                : 'Free, about 15–30 minutes: a course recommendation a teacher confirms with you.',
+                ? 'Ein kostenloser Online-Test oder persönlich bei uns. Ganz ohne Vorkenntnisse beginnen Sie direkt bei A1.'
+                : 'A free online test, or in person at the school. With no German at all, you start straight at A1.',
           },
           {
             step: '2',

@@ -85,9 +85,9 @@ workspace queues; career applications persist including the uploaded CV file
 (`career_application_files`).
 
 **Fallback** (`DATABASE_URL` unset): public content falls back to in-repo fixtures;
-careers use the in-memory dataset in `src/lib/mock/store.ts`. The placement test
-still runs end to end from an in-process store, and tells the learner plainly that
-progress is not being saved. **No lead is stored**, so a submission reaches CASA
+careers use the in-memory dataset in `src/lib/mock/store.ts`. CASA's own placement
+test (open in development, closed in production — see below) still runs end to end
+from an in-process store, and tells the learner plainly that progress is not being saved. **No lead is stored**, so a submission reaches CASA
 only if `notifyForm` (`src/lib/notifications/forms.server.ts`) delivers it:
 Microsoft Graph mail when `FORM_MAIL_FROM` and the managed identity
 (`IDENTITY_ENDPOINT`, `IDENTITY_HEADER`) are present, otherwise the form's legacy
@@ -125,6 +125,7 @@ conclude nothing had come in.
 | `FORM_DELIVERY_MODE` | `live` sends to the real recipients; anything else is test mode (all mail to `admin@casa-bremen.de`, no webhooks) |
 | `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID` | Sender mailbox and managed identity for lead notification mail via Microsoft Graph |
 | `FORM_RECIPIENT_<FORM>` | Per-form recipient in live mode (`CONTACT`, `GROUPS`, `COURSE`, `EXAM`, `CAREERS`, `PLACEMENT`, `APPOINTMENT`) |
+| `CASA_ENABLE_PLACEMENT_TEST` | Opens CASA's own placement test (runner, result page, `/api/placement/*`). Unset: open in development, closed in production. The public `/placement-test` page always shows the Klett tests |
 | `FORM_REPLY_TO_CAREERS` | Management mailbox that receives replies to an application's confirmation; live, no application confirmation is sent without it |
 | `NEXT_PUBLIC_SITE_URL` | Origin for canonical, hreflang, sitemap and JSON-LD URLs; default `https://casa-bremen.de`. Inlined at build time, so it only takes effect when passed into the image build (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`) |
 | `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS` | Optional flag for unverified public claims |
@@ -411,6 +412,15 @@ is still valid.
   longer knows any course slug. A page's facts rail and section order come from its archetype;
   `scheduled-cohort` is the default, so an unregistered course keeps legacy behaviour.
   `professional-track` and `module-catalogue` exist but still need content (work board U5, U6).
+- **CASA's own placement test is in development and closed on the public site
+  (decided 2026-10-01).** The public page `/placement-test` (`/anmeldung/einstufungstest`)
+  links to the six Klett online tests again, as the old casa-bremen.de did. The runner,
+  the result page and all six `/api/placement/*` handlers check `placementTestEnabled()`
+  (`src/lib/placement/availability.ts`); `src/lib/placement/__tests__/availability.test.ts`
+  fails if a guard is removed. Open it on a deployment with
+  `az containerapp update ... --set-env-vars CASA_ENABLE_PLACEMENT_TEST=true`, close it with
+  `--remove-env-vars CASA_ENABLE_PLACEMENT_TEST` (env vars survive `deploy.sh`). When it
+  returns, restore the privacy section held back in `docs/PRIVACY_POLICY.md`.
 - Placement test is on `shadow` release mode with listening withheld: no audio
   exists for the 33 scored listening scripts, so the pilot measures language use
   and reading only. `LISTENING_AUDIO_AVAILABLE` in `src/config/placement/policy.ts`

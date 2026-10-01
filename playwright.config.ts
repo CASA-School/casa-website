@@ -33,6 +33,9 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 120_000,
     env: {
+      // The suite drives CASA's own placement test, which is closed on a
+      // production build; say so explicitly rather than rely on the dev default.
+      CASA_ENABLE_PLACEMENT_TEST: 'true',
       NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-key',
     },

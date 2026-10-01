@@ -22,6 +22,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import { Link } from '@/i18n/navigation';
 import { ArrowRight, Check, ClipboardCheck, MessageCircle, UserRound } from 'lucide-react';
 
@@ -31,6 +32,7 @@ import { BAND_COPY, SKILL_LABELS, SKILL_NOT_MEASURED, reviewNotice } from '@/con
 import { LISTENING_AUDIO_AVAILABLE } from '@/config/placement/policy';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { levelLabelOfBand, presentationBand } from '@/lib/placement/finalise';
+import { placementTestEnabled } from '@/lib/placement/availability';
 import { getAttemptByTokenWithPersistence } from '@/lib/placement/repository.server';
 
 export const metadata: Metadata = {
@@ -43,6 +45,10 @@ export default async function PlacementResultPage({
 }: {
   params: Promise<{ token: string }>;
 }) {
+  // Closed, a result is the same 404 as an unknown token, so it reveals nothing.
+  await connection();
+  if (!placementTestEnabled()) notFound();
+
   const { token } = await params;
   const locale = await getContentLocale();
 

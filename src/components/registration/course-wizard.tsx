@@ -496,21 +496,22 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 </Select>
                 {/*
                   This field asks the learner to self-report a level, so it has
-                  to hand them the way to find out. It used to say "link in the
-                  navigation", which made the reader hunt for the one thing the
-                  sentence was about — and at the time that link led to six
-                  external Klett tests that required knowing your level to pick
-                  one. Now it is a direct link to CASA's own test.
+                  to hand them the way to find out: the placement page with the
+                  Klett online tests (CASA's own test is in development, see
+                  src/lib/placement/availability.ts). A new tab, because the
+                  wizard keeps no draft and the learner would lose their choices.
                 */}
                 <p className="text-xs text-[var(--casa-muted)] leading-relaxed">
                   {t('Not sure which level you are?', 'Unsicher, welches Niveau Sie haben?')}{' '}
                   <Link
-                    href="/placement-test/test"
+                    href="/placement-test"
+                    target="_blank"
+                    rel="noopener"
                     className="casa-cta-link font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 decoration-[color:var(--casa-sand)] transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current"
                   >
-                    {t('Take the placement test', 'Einstufungstest machen')}
+                    {t('Take a free placement test', 'Kostenlosen Einstufungstest machen')}
                   </Link>
-                  {t(' — it takes about 15–30 minutes.', ' — das dauert etwa 15–30 Minuten.')}
+                  {t(' — opens in a new tab, so your details here stay.', ' – öffnet sich in einem neuen Tab, Ihre Angaben hier bleiben erhalten.')}
                 </p>
               </div>
             )}

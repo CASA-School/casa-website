@@ -1,6 +1,14 @@
 # CASA Einstufungstest — implementation log
 
-**Status:** built and verified · reviewed 2026-08-25 · release mode `shadow` · **not deployed**
+**Status:** built and verified · reviewed 2026-08-25 · release mode `shadow` · **in development, closed on the public site**
+
+> **2026-10-01 — CASA decided the test is not finished.** The public `/placement-test` page
+> links to the Klett online tests again. This test stays in the codebase and keeps being
+> developed: it is open in local development and the e2e suite, and closed in production by
+> `placementTestEnabled()` (`src/lib/placement/availability.ts`, `CASA_ENABLE_PLACEMENT_TEST`).
+> The runner redirects to the Klett page, a result URL is a 404, and every `/api/placement/*`
+> handler answers 404. The privacy-policy section for this test is held back in
+> `docs/PRIVACY_POLICY.md` and must be restored before it opens.
 **Goal:** replace the external Klett placement links with CASA's own adaptive
 placement test, and keep the result honest (a recommendation, not a certificate).
 

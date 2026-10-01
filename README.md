@@ -72,7 +72,7 @@ English under `/en`; the list uses the internal English paths. See `docs/I18N_RO
 - `/news/[slug]`
 - `/search`
 - `/placement-test`
-- `/placement-test/test` (the test itself; `noindex`)
+- `/placement-test/test` (CASA's own test; `noindex`, closed in production)
 - `/placement-test/result/[token]` (a result; `noindex`, token-gated)
 - `/imprint`
 - `/privacy`
@@ -102,8 +102,9 @@ are stored in Postgres before any webhook fan-out happens. The staff workspace
 requires it outright — it has no fixture fallback, deliberately, because an
 empty queue and an unreachable database look identical.
 
-The placement test is CASA's own instrument — it replaced the external Klett
-placement links in August 2026. It runs without `DATABASE_URL` (from an
+The public placement page links to the Klett online tests. CASA's own adaptive
+test is in development and closed in production (`CASA_ENABLE_PLACEMENT_TEST`,
+`src/lib/placement/availability.ts`). Where it is open, it runs without `DATABASE_URL` (from an
 in-process store, with the learner told that progress is not durable), but needs it
 for durable attempts, cross-device resume, and the writing task. See
 `docs/PLACEMENT_TEST_IMPLEMENTATION.md`.

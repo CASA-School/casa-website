@@ -509,8 +509,8 @@ export default async function CoursesPage({
                 title: locale === 'de' ? 'Ihr Niveau steht am Anfang' : 'Your level comes first',
                 body:
                   locale === 'de'
-                    ? 'Wenn Sie bereits Deutsch sprechen, hilft uns die Einstufung bei der Kurswahl. Der kostenlose Test dauert etwa 15–30 Minuten. Ihr Ergebnis besprechen wir mit Blick auf Ihre Ziele.'
-                    : 'If you already know some German, placement helps us recommend a course. The free test takes about 15–30 minutes. We consider your result alongside your goals.',
+                    ? 'Wenn Sie bereits Deutsch sprechen, hilft uns die Einstufung bei der Kurswahl. Machen Sie einen kostenlosen Online-Test und schicken Sie uns Ihr Ergebnis, oder kommen Sie persönlich vorbei.'
+                    : 'If you already know some German, placement helps us recommend a course. Take a free online test and send us your result, or come in person.',
                 linkHref: '/placement-test',
                 linkLabel: locale === 'de' ? 'Zum Einstufungstest' : 'Take the placement test',
               },

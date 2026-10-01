@@ -133,21 +133,23 @@ async function answerCurrentItem(page: Page) {
   await next.click();
 }
 
-test('the landing page offers one way in and no level self-diagnosis', async ({ page }) => {
+test('the public placement page offers the Klett tests and never our own test', async ({ page }) => {
+  // CASA's own test is in development (src/lib/placement/availability.ts). The
+  // public page is the Klett page again, as on the old casa-bremen.de, in every
+  // environment — even here, where the own test is switched on.
   await page.goto('/en/placement-test');
 
-  await expect(page.getByRole('link', { name: /start the (placement )?test/i }).first()).toBeVisible();
-  await expect(page.getByText(/about 15–30 minutes/i).first()).toBeVisible();
+  const klett = page.locator('a[href^="https://einstufungstests.klett-sprachen.de/eks/"]');
+  await expect(klett).toHaveCount(6);
+  for (const link of await klett.all()) {
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', /noreferrer/);
+  }
+  await expect(page.getByText(/always start with the A1 test/i)).toBeVisible();
+  await expect(page.locator('a[href="mailto:online@casa-bremen.de"]')).toBeVisible();
 
-  // The retired Klett link panel must not come back: it asked the learner to
-  // pick a level in order to discover their level.
-  await expect(page.getByText(/klett placement tests/i)).toHaveCount(0);
-  await expect(page.locator('a[href*="einstufungstests.klett-sprachen.de"]')).toHaveCount(0);
-
-  // Every item is PILOT_UNREVIEWED and the cut scores are hypotheses; the page
-  // must not claim otherwise (CLAUDE.md hard rule 6).
-  await expect(page.getByText(/not yet been independently reviewed/i)).toBeVisible();
-  await expect(page.getByText(/reviewed by our teaching/i)).toHaveCount(0);
+  await expect(page.locator('a[href*="/placement-test/test"]')).toHaveCount(0);
+  await expect(page.getByText(/15–30 minutes|pilot/i)).toHaveCount(0);
 });
 
 test('a true beginner is placed without sitting a single item', async ({ page }) => {
@@ -321,13 +323,12 @@ test('an unknown result token is a 404, not a blank page', async ({ page }) => {
   expect(response?.status()).toBe(404);
 });
 
-test('registration links straight to the test instead of naming the navigation', async ({ page }) => {
+test('registration points to the placement page in a new tab, not to our own test', async ({ page }) => {
   await page.goto('/en/registration/course');
 
-  // The level field is conditional on the selected course type, so this only
-  // asserts the link when the field is on screen.
-  const hint = page.getByRole('link', { name: /take the placement test/i });
-  if (await hint.count()) {
-    await expect(hint).toHaveAttribute('href', '/en/placement-test/test');
-  }
+  // The default course is intensive German, which asks for a level, so the hint is on screen.
+  const hint = page.getByRole('link', { name: /take a free placement test/i });
+  await expect(hint).toBeVisible();
+  await expect(hint).toHaveAttribute('href', '/en/placement-test');
+  await expect(hint).toHaveAttribute('target', '_blank');
 });
