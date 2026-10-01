@@ -2270,3 +2270,17 @@ milestone timeline (`AboutMilestones`, which had no other user), the "Persönlic
 that repeated the homepage, and the story photo, which was still a numbered placeholder. The
 anchors `#mission`, `#leitbild`, `#partners` and `#tandem` are kept. A supplied facade photograph
 is archived outside the repo until its origin is confirmed (`docs/MEDIA_LIBRARY.md`).
+
+## 33. The homepage's photographs are real (2026-10-01)
+
+Rahman asked for the photos to be edited carefully, starting with the homepage. A selection pass
+(course rows; guidance and accommodation; a house look measured on the live photos; a photo
+editor's final call) chose frames 060, 088 and 077 for the Deutsch intensiv, Abendkurs and
+Spezialkurse rows, 076 for "Wir hören zu" and 008, a CASA-WG room, for the accommodation block.
+All are `box` recipes in `scripts/media/build_reel.py`, graded to the hero's look and verified
+against their originals. Two re-pointed sections got new slots rather than borrowing ones that
+render elsewhere: 56 (slot 17 is the contact page's advising photo) and 57 (slot 26 appears on
+the become-a-host page). The hero's focal point now changes by breakpoint
+(`objectPositionClassName`), so both faces and the board stay in from 320 to 1920px. The medical
+row stays placeholder 37 until there is a real photo of that course. Consent for every person
+shown was confirmed by Rahman on 2026-10-01.

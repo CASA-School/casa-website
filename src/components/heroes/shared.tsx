@@ -21,6 +21,7 @@ export type HeroPhoto = {
   caption?: string;
   aspectRatio?: string;
   objectPosition?: string;
+  objectPositionClassName?: string;
 };
 
 export type HeroQuickLink = {
@@ -262,7 +263,7 @@ export function HeroBleedPhoto({
       )}
       style={{ aspectRatio: photo.aspectRatio }}
     >
-      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" style={{ objectPosition: photo.objectPosition }} preload />
+      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className={cn('object-cover', photo.objectPositionClassName)} style={photo.objectPosition ? { objectPosition: photo.objectPosition } : undefined} preload />
     </div>
   );
 }

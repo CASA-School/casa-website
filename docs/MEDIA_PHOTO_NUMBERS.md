@@ -14,6 +14,9 @@ staff members after the code had removed them.
   (`casa-building-daylight.webp`) are user-supplied, AI-processed building
   images. Neither is used on a page any more: the About hero moved to 55 on
   2026-10-01.
+- The homepage's course rows are **4, 5, 8** (real photographs since 2026-10-01; **37**,
+  the medical row, is still a placeholder), "Wir hören zu" is **56** and the
+  accommodation block is **57** (a CASA-WG room). See MEDIA_LIBRARY.md for the set.
 - The About hero is **55** (since 2026-10-01): the CASA team in the courtyard, the
   whole 3:2 frame of 098 with light correction only.
 - The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light

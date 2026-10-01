@@ -98,11 +98,11 @@ export const photoSlots: PhotoSlot[] = [
   },
 
   // ---- Teaching and classroom ---------------------------------------------
-  { n: 4, src: '/media/casa/course-classroom-wide.jpg', subject: 'Wide classroom in session, whole room visible.', ready: false },
-  { n: 5, src: '/media/casa/course-classroom-circle.jpg', subject: 'Class seated in a circle — discussion format, no front of room.', ready: false },
+  { n: 4, src: '/media/casa/course-intensive-class.webp', subject: 'Deutsch intensiv. Five learners along the table by the window, following the lesson. Collection frame 060, 4:3 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
+  { n: 5, src: '/media/casa/course-evening-table.webp', subject: 'Abendkurs. Three learners laughing over a shared exercise at the course table. Collection frame 088, 4:3 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
   { n: 6, src: '/media/casa/course-discussion-row.jpg', subject: 'A row of learners in discussion, shot along the row.', ready: false },
   { n: 7, src: '/media/casa/course-seminar-wide.jpg', subject: 'Seminar-style room, wide, adult learners at tables.', ready: false },
-  { n: 8, src: '/media/casa/course-whiteboard-practice.jpg', subject: 'A learner at the whiteboard working through something, teacher nearby.', ready: false },
+  { n: 8, src: '/media/casa/course-special-pair-reading.webp', subject: 'Spezialkurse. Two learners reading a text together by the window. Collection frame 077, 4:3 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
   { n: 9, src: '/media/casa/classroom-pair-study.jpg', subject: 'Two learners working as a pair, heads together over one task.', ready: false },
   { n: 10, src: '/media/casa/classroom-map-vocabulary.jpg', subject: 'Vocabulary work against a map — language tied to place.', ready: false },
   { n: 11, src: '/media/casa/learners-writing-class.jpg', subject: 'Learners writing by hand in class, close on the work.', ready: false },
@@ -198,6 +198,8 @@ export const photoSlots: PhotoSlot[] = [
   { n: 53, src: '/media/casa/reel-team-courtyard.webp', subject: 'The CASA team standing together in the leafy courtyard, most smiling at the camera. Collection frame 098, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
   { n: 54, src: '/media/casa/hero-classroom-lesson.webp', subject: 'The slot 51 lesson as a 5:4 crop of the full frame (collection 093, 2110x1688), light correction only (scripts/media/build_reel.py), for the half-width homepage hero, 2026-10-01.', ready: true },
   { n: 55, src: '/media/casa/about-team-courtyard.webp', subject: 'The slot 53 team photograph as the whole 3:2 frame (collection 098, 2560x1706), light correction only (scripts/media/build_reel.py), for the About hero, 2026-10-01.', ready: true },
+  { n: 56, src: '/media/casa/home-conversation-pair.webp', subject: 'The homepage\'s "Wir hören zu": two learners over a worksheet, one explaining, one listening. Collection frame 076, 3:2 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
+  { n: 57, src: '/media/casa/casa-wg-room.webp', subject: 'A single room in a CASA shared flat: bed, armchair, desk, the navy wall. Collection file 008, 4:3 crop with light correction only (scripts/media/build_reel.py), for the homepage accommodation block, 2026-10-01. Not a host-family room.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

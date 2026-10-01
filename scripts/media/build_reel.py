@@ -21,6 +21,10 @@ chosen by the slide's `objectPosition` in public-page-config.ts, which this
 script prints. So a slide is only ever trimmed top and bottom, never at the
 sides, and nobody standing at the edge of a group disappears on a phone.
 
+THE HOMEPAGE SET (2026-10-01). The course rows, "Wir hören zu" and the
+accommodation block are `box` recipes too, graded to one house look; see the
+note above their entries and docs/MEDIA_LIBRARY.md.
+
 THE HERO (since 2026-10-01). The full-width reel was retired from the homepage;
 the editorial hero, text left and photograph right, came back. Its photograph is
 a `box` recipe: a plain crop of the original at the frame's own proportions,
@@ -47,6 +51,61 @@ OUT = REPO / 'public/media/casa'
 # tone: target lightness (0-100) for the crop's 5th, 50th and 95th percentile.
 # chroma: saturation factor around neutral. wb: per-channel gains (R, G, B).
 SLIDES = [
+    # THE HOMEPAGE SET (2026-10-01). One house look across the page, measured
+    # against the slot 54 hero: reference whites at a* 0..+3 and b* +3.5..+6.5,
+    # skin hue 47-60 degrees, indoor median L* 54-60. Course photos are also
+    # each course page's hero and a small square card, both centre-cropped, so
+    # every face sits in the middle ~52% of the height and ~75% of the width.
+    {
+        # Slot 4, Deutsch intensiv: five learners along the table by the window.
+        # x 566 clears a learner the 1.16:1 crop would otherwise slice.
+        'out': 'course-intensive-class.webp',
+        'source': POOL / '060_IMG_0253.JPG',
+        'box': (566, 130, 1920, 1440),
+        'tone': (5, 59, 91),
+        'chroma': 1.03,
+        'wb': (0.965, 1.0, 1.04),
+    },
+    {
+        # Slot 5, Abendkurs: three learners laughing over a shared exercise.
+        # The right edge stops before a publisher's book cover and the teacher.
+        'out': 'course-evening-table.webp',
+        'source': POOL / '088_IMG_0303.JPG',
+        'box': (40, 30, 1960, 1470),
+        'tone': (5, 59, 91),
+        'chroma': 1.05,
+        'wb': (0.99, 1.0, 1.02),
+    },
+    {
+        # Slot 8, Spezialkurse: two learners reading a text together by the window.
+        'out': 'course-special-pair-reading.webp',
+        'source': POOL / '077_IMG_0284.JPG',
+        'box': (320, 0, 1960, 1470),
+        'tone': (5, 58, 91),
+        'chroma': 1.06,
+        'wb': (1.0, 1.0, 0.975),
+    },
+    {
+        # Slot 56, the homepage's "Wir hören zu": one explains, one listens.
+        # A white wall fills much of the frame, so the median sits higher than
+        # the classroom frames' to keep the wall white, not grey.
+        'out': 'home-conversation-pair.webp',
+        'source': POOL / '076_IMG_0283.JPG',
+        'box': (160, 42, 2400, 1600),
+        'tone': (6, 70, 92),
+        'chroma': 1.06,
+        'wb': (1.01, 1.0, 0.975),
+    },
+    {
+        # Slot 57, a single room in a CASA shared flat, for the homepage's
+        # accommodation block. Its lower third stays calm for the white caption.
+        'out': 'casa-wg-room.webp',
+        'source': POOL / '008_6.jpg',
+        'box': (200, 0, 2276, 1707),
+        'tone': (6, 56, 90),
+        'chroma': 1.04,
+        'wb': (0.94, 1.0, 0.97),
+    },
     {
         # Slot 55. The About hero: the CASA team in the courtyard (slot 53's
         # frame 098) as the whole 3:2 frame. The group fills the width, so any

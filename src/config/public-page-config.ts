@@ -35,6 +35,8 @@ export type PhotoPlaceholderConfig = {
   caption: LocalizedText;
   aspectRatio?: string;
   objectPosition?: string;
+  /** Tailwind object-position classes, for a focal point that changes by breakpoint. */
+  objectPositionClassName?: string;
 };
 
 export type PublicPageConfig = {
@@ -56,6 +58,7 @@ export type LocalizedPhotoPlaceholder = {
   caption: string;
   aspectRatio?: string;
   objectPosition?: string;
+  objectPositionClassName?: string;
 };
 
 export type LocalizedPublicPageConfig = {
@@ -78,10 +81,10 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   teacherGuiding: {
-    src: '/media/casa/course-whiteboard-practice.jpg',
+    src: '/media/casa/course-special-pair-reading.webp',
     alt: {
-      en: 'CASA learner writing German vocabulary on a classroom whiteboard',
-      de: 'CASA Lernender schreibt deutschen Wortschatz an ein Whiteboard',
+      en: 'Two learners reading a text together by the classroom window',
+      de: 'Zwei Teilnehmerinnen lesen am Fenster gemeinsam einen Text',
     },
     caption: {
       en: 'Whiteboard practice keeps language concrete, visible, and usable.',
@@ -155,10 +158,10 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   courseClassroomWide: {
-    src: '/media/casa/course-classroom-wide.jpg',
+    src: '/media/casa/course-intensive-class.webp',
     alt: {
-      en: 'wide CASA classroom with learners following a German lesson',
-      de: 'Weiter CASA Kursraum mit Lernenden im Deutschunterricht',
+      en: 'Learners at a long table by the window, following a German lesson',
+      de: 'Teilnehmerinnen an einem langen Tisch am Fenster folgen dem Deutschunterricht',
     },
     caption: {
       en: 'Course formats stay easier to understand when the learning room is visible.',
@@ -177,10 +180,10 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   courseClassroomCircle: {
-    src: '/media/casa/course-classroom-circle.jpg',
+    src: '/media/casa/course-evening-table.webp',
     alt: {
-      en: 'CASA learners practicing German in a wide classroom circle',
-      de: 'CASA Lernende üben Deutsch in einer weiten Kursrunde',
+      en: 'Three learners laughing over a shared exercise at the course table',
+      de: 'Drei Teilnehmende lachen bei einer gemeinsamen Übung am Kurstisch',
     },
     caption: {
       en: 'Room to listen, speak, and repeat keeps course rhythm active.',
@@ -375,7 +378,7 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   studentClassroomFocus: {
-    src: '/media/casa/course-classroom-wide.jpg',
+    src: '/media/casa/course-intensive-class.webp',
     alt: {
       en: 'CASA learners focused during a group German course',
       de: 'CASA Lernende konzentrieren sich in einem Gruppenkurs',
@@ -495,6 +498,12 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
       en: 'A teacher laughs as she holds up a worksheet, with German two-way prepositions on the board',
     },
     caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
+    /*
+     * Both faces, the worksheet and the board heading stay in at every width
+     * from 320 to 1920px. The 24rem tablet box (768-1023px) is a band up to
+     * 2.5:1, so it looks lower in the frame than the others.
+     */
+    objectPositionClassName: 'object-[34%_0%] md:max-lg:object-[34%_39%]',
   },
   /*
    * THE ABOUT HERO. The CASA team in the school courtyard: camera original 098
@@ -510,6 +519,33 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
     caption: { de: 'Das CASA-Team', en: 'The CASA team' },
     aspectRatio: '3 / 2',
+  },
+  /*
+   * THE HOMEPAGE'S "WIR HÖREN ZU" (slot 56): two learners, one explaining, one
+   * listening. Its own slot, not slot 17: that one is the advising photograph
+   * of the contact and registration heroes, and these two are not staff.
+   */
+  conversationPair: {
+    src: '/media/casa/home-conversation-pair.webp',
+    alt: {
+      de: 'Zwei Teilnehmende im Gespräch über ein Arbeitsblatt: Einer erklärt, der andere hört zu',
+      en: 'Two learners in conversation over a worksheet, one explaining while the other listens',
+    },
+    caption: { de: 'Im Gespräch', en: 'In conversation' },
+  },
+  /*
+   * A ROOM IN A CASA SHARED FLAT (slot 57), for the homepage's "Ein eigenes
+   * Zimmer". Its own slot, not slot 26: /accommodation/become-host shows slot
+   * 26's file to people offering a room in their own home, and a WG room must
+   * not stand in for a host family's (hard rule 5).
+   */
+  wgRoom: {
+    src: '/media/casa/casa-wg-room.webp',
+    alt: {
+      de: 'Ein Einzelzimmer in einer CASA-WG mit Bett, Sessel und Schreibtisch',
+      en: 'A single room in a CASA shared flat with a bed, an armchair and a desk',
+    },
+    caption: { de: 'Ein eigenes Zimmer', en: 'A room of your own' },
   },
 };
 
@@ -536,7 +572,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // as before the full-width reel. A lesson, because that is the school.
       // The building stays out: every image of it we have is AI-altered.
       hero: photoLibrary.heroLesson,
-      story: photoLibrary.groupCourseLunch,
+      story: photoLibrary.conversationPair,
       /*
         The four flagship course rows, matched to what each format actually is
         rather than to whatever was next in the library:
@@ -550,7 +586,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       courseD: photoLibrary.groupCourseWalking,
       courseE: photoLibrary.mentorSupport,
       courseF: photoLibrary.teamCollaboration,
-      accommodation: photoLibrary.hostFamilyDinner,
+      accommodation: photoLibrary.wgRoom,
       testimonial: photoLibrary.studentPortrait,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
       testimonialB: photoLibrary.studentTestimonialPortrait2,
@@ -766,6 +802,7 @@ export function getPublicPageConfig(route: PublicRouteKey, locale: ContentLocale
         caption: localize(photo.caption, locale),
         aspectRatio: photo.aspectRatio,
         objectPosition: photo.objectPosition,
+        objectPositionClassName: photo.objectPositionClassName,
       },
     ])
   );
