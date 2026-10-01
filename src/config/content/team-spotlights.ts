@@ -155,8 +155,8 @@ const TEAM: TeamMemberSource[] = [
     group: 'volunteer',
   },
   {
-    id: 'maryam-trawall',
-    name: 'Maryam Trawall',
+    id: 'maryam-trawally',
+    name: 'Maryam Trawally',
     title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
     group: 'volunteer',
   },
