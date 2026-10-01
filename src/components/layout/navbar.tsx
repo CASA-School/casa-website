@@ -50,6 +50,13 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [scrolled, setScrolled] = useState(false);
+  /*
+   * The compact header (2026-10-02): once the page scrolls, the whole bar
+   * shrinks from 80px to 64px and the logo from 48px to 40px. Two thresholds,
+   * not one: shrinking a sticky header shortens the page by 16px, and with a
+   * single threshold that shift alone would flip it straight back.
+   */
+  const [compact, setCompact] = useState(false);
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -232,13 +239,20 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 8);
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      setCompact((wasCompact) => (wasCompact ? y > 24 : y > 96));
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // The search popover is positioned below the header and reads its height here.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--casa-header-height', compact ? '4rem' : '5rem');
+  }, [compact]);
 
   useEffect(() => {
     clearCloseTimer();
@@ -318,7 +332,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
     <header
       ref={navRef}
       className={cn(
-        'sticky top-0 z-[900] h-20 bg-white transition-[box-shadow] duration-200',
+        'sticky top-0 z-[900] bg-white transition-[height,box-shadow] duration-300 ease-out motion-reduce:transition-none',
+        compact ? 'h-16' : 'h-20',
         scrolled || activeDropdown ? 'shadow-[var(--shadow-soft)]' : undefined
       )}
     >
@@ -366,7 +381,10 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
         className="flex h-full items-center justify-between gap-3 xl:grid xl:grid-cols-[1fr_auto_1fr]"
       >
         <Link href="/" aria-label="Go to CASA homepage" className="flex shrink-0 items-center focus-visible:outline-none">
-          <Logo className="h-10 w-auto" preload />
+          <Logo
+            className={cn('w-auto transition-[height] duration-300 ease-out motion-reduce:transition-none', compact ? 'h-10' : 'h-12')}
+            preload
+          />
         </Link>
 
         {/*
@@ -635,7 +653,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                   <Globe className="h-5 w-5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="mt-[calc(1.25rem+6px)] min-w-[140px] rounded-xl border-[color:var(--casa-sand)] p-2 shadow-[var(--shadow-modal)]">
+              <DropdownMenuContent align="end" className={cn(compact ? 'mt-[calc(0.75rem+6px)]' : 'mt-[calc(1.25rem+6px)]', 'min-w-[140px] rounded-xl border-[color:var(--casa-sand)] p-2 shadow-[var(--shadow-modal)]')}>
                 <DropdownMenuItem
                   data-testid="locale-option-en"
                   className={cn(
