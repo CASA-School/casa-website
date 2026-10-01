@@ -196,6 +196,7 @@ export const photoSlots: PhotoSlot[] = [
   { n: 51, src: '/media/casa/reel-classroom-lesson.webp', subject: 'A lesson in progress: the teacher laughing with a worksheet, a learner at the board, German grammar in the teacher\'s handwriting. Collection frame 093, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
   { n: 52, src: '/media/casa/reel-partner-practice.webp', subject: 'Two learners doing a partner interview from a worksheet, talking and smiling. Collection frame 075, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
   { n: 53, src: '/media/casa/reel-team-courtyard.webp', subject: 'The CASA team standing together in the leafy courtyard, most smiling at the camera. Collection frame 098, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
+  { n: 54, src: '/media/casa/hero-classroom-lesson.webp', subject: 'The slot 51 lesson as a 5:4 crop of the full frame (collection 093, 2110x1688), light correction only (scripts/media/build_reel.py), for the half-width homepage hero, 2026-10-01.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

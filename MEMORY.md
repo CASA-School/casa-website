@@ -2245,3 +2245,13 @@ pages, the course index, the registration hint and in the assistant. The privacy
 section on the own test and gained one on the Klett links; the removed text is kept in
 docs/PRIVACY_POLICY.md for when the test returns.
 
+## 31. The homepage hero is editorial again; the reel is gone (2026-10-01)
+
+Rahman did not like the full-width photo slider from PR #36: the headline set on top of the
+photographs and the soft look of wide crops at full viewport width. The homepage is back on the
+editorial hero it had before (`HeroHomePhoto`: eyebrow, headline, one sentence, one button on the
+left, one photograph on the right). Before #36 that photograph slot was still a numbered
+placeholder, so it now holds a real photograph: slot 54, a 5:4 full-resolution crop of the lesson
+frame 093, built and verified by `scripts/media/build_reel.py` like the reel crops. The reel
+component, its CSS and its e2e spec are deleted; the four reel crops stay in the library.
+

@@ -483,35 +483,18 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     objectPosition: '50% 27%',
   },
   /*
-   * THE HOMEPAGE REEL. Real photographs only: each file is a full-width 2:1
-   * crop of a camera original with global light and colour correction, built
-   * and checked by scripts/media/build_reel.py. Phones show the whole image;
-   * the desktop 12:5 frame shows a band of it, and `objectPosition` is that
-   * band, as the script prints it. Change a crop there, not here.
+   * THE HOMEPAGE HERO. A real photograph: a 5:4 crop of camera original 093
+   * with global light and colour correction only, built and checked by
+   * scripts/media/build_reel.py (slot 54). It replaced the full-width reel on
+   * 2026-10-01; the reel's four crops (slots 50–53) stay in the registry.
    */
-  reelLesson: {
-    src: '/media/casa/reel-classroom-lesson.webp',
+  heroLesson: {
+    src: '/media/casa/hero-classroom-lesson.webp',
     alt: {
       de: 'Eine Lehrerin hält lachend ein Arbeitsblatt hoch, an der Tafel stehen die Wechselpräpositionen',
       en: 'A teacher laughs as she holds up a worksheet, with German two-way prepositions on the board',
     },
     caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
-    objectPosition: '50% 26%',
-  },
-  reelPartnerPractice: {
-    src: '/media/casa/reel-partner-practice.webp',
-    alt: {
-      de: 'Zwei Lernende führen mit einem Arbeitsblatt ein Partnerinterview',
-      en: 'Two learners doing a partner interview from a worksheet',
-    },
-    caption: { de: 'Miteinander sprechen', en: 'Talking together' },
-    objectPosition: '50% 64%',
-  },
-  reelCommunity: {
-    src: '/media/casa/reel-team-courtyard.webp',
-    alt: { de: 'Das CASA-Team lächelnd im grünen Innenhof', en: 'The CASA team smiling in the leafy courtyard' },
-    caption: { de: 'Menschen, die CASA ausmachen', en: 'The people who make CASA' },
-    objectPosition: '50% 47%',
   },
 };
 
@@ -534,18 +517,10 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Talk to an advisor', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
-      // The reel opens on a lesson. The building left it on 2026-09-23: every
-      // image of it we have is AI-altered, and the panorama misspelled the
-      // window sign. It returns only with a real, high-resolution photograph.
-      hero: { ...photoLibrary.reelLesson, aspectRatio: '12 / 5' },
-      reelCommunity: photoLibrary.reelCommunity,
-      reelPartnerPractice: photoLibrary.reelPartnerPractice,
-      reelBremen: {
-        ...photoLibrary.groupCourseWalking,
-        src: '/media/casa/reel-walking-bremen-wide.webp',
-        caption: { de: 'Bremen gemeinsam entdecken', en: 'Discovering Bremen together' },
-        objectPosition: '50% 31%',
-      },
+      // The editorial hero again (2026-10-01): text left, one photograph right,
+      // as before the full-width reel. A lesson, because that is the school.
+      // The building stays out: every image of it we have is AI-altered.
+      hero: photoLibrary.heroLesson,
       story: photoLibrary.groupCourseLunch,
       /*
         The four flagship course rows, matched to what each format actually is
