@@ -12,6 +12,7 @@ Microsoft activation is deferred; the earlier permission question was not approv
   each appointment lasts 30 minutes, in Europe/Berlin time.
 - All website form notification recipients are **admin@casa-bremen.de during testing**.
   Preserve applicants' entered addresses in their records. Do not send to them during testing.
+  (Still true in test mode: a confirmation meant for the sender goes to admin@ instead.)
 - CASA uses Microsoft 365. Change recipients before public-domain launch.
 
 ### What the notification email looks like — 2026-10-01
@@ -47,6 +48,43 @@ Built by `buildFormMail` in `src/lib/notifications/form-mail.ts`; `notifyForm` o
 Previews of all seven emails in both languages, desktop and phone: `output/review/form-emails/`
 (gitignored).
 
+### Confirmation to the sender — 2026-10-01
+
+Rahman: „we have to send a confirmation, a nice one, it shows we care and we are working on it."
+Contact, group and company enquiries, course and exam registrations, appointment requests and job
+applications now send the person a branded confirmation in the form's language
+(`confirmToSender` in `forms.server.ts`, copy in `src/lib/notifications/confirmation-copy.ts`).
+
+- **Who receives it.** In test mode `admin@`, with a yellow line naming the address it would have
+  reached. In live mode the sender. Sent only once the route has accepted the submission.
+- **Replies** go to the team mailbox for that form (`FORM_RECIPIENT_<KIND>`), so the sender mailbox
+  stays the one address Exchange lets the website use. No new Exchange permission needed.
+  Applications are the exception: their alert goes to the shared info@, so an applicant's reply
+  goes to `FORM_REPLY_TO_CAREERS`, a management mailbox. **Live, a form with no reply mailbox
+  sends no confirmation** (set `FORM_RECIPIENT_*` and `FORM_REPLY_TO_CAREERS` before go-live).
+- **Launch gate:** do not switch to live mode before `casa-bremen.de` serves this build; the
+  footer and privacy link name that domain.
+- **What it prints.** The greeting name (checked: letters only, no links, digits or mixed scripts)
+  and only what the server produced or checked: catalogue labels (course, dates, classes, location,
+  accommodation type, exam, exam date, exam part), the validated appointment slot, the published
+  position title (looked up by slug, not taken from the request), the reference. Never the
+  message, notes, topic, allergies or any other free text. A name with a link, digits or an
+  address in it gets the neutral greeting.
+- **Abuse limits.** At most three confirmations per inbox in 24 hours (`+tags`, Gmail dots and
+  googlemail.com count as one inbox; per replica, in memory, deleted after 24 hours), and at most
+  30 an hour and 200 a day per replica overall, on top of the per-client rate limits. A failed send
+  gives its slot back. Over a limit the submission still succeeds; only the receipt is skipped.
+- **No copy kept.** Confirmations are sent with `saveToSentItems: false`; the staff alert keeps
+  its Sent Items copy as before.
+- **Wording.** A receipt, never an acceptance: a course or exam registration becomes binding only
+  with CASA's own confirmation, and an appointment only once the contact person confirms it.
+  There is no fixed time promise: the copy says „so bald wie möglich" / "as soon as we can" (the
+  on-screen messages say „zeitnah"). Written by three independent drafts,
+  judged and checked for truth, German and English (2026-10-01).
+- **On screen** the form adds „Eine Eingangsbestätigung ist per E-Mail zu Ihnen unterwegs." only when
+  the confirmation really went to the sender (never in test mode).
+- Privacy policy §14, §16, §17 and §20 describe it.
+
 ### Recipients after testing — Rahman, 2026-09-30
 
 | Form | `FORM_RECIPIENT_*` | Mailbox |
@@ -78,7 +116,8 @@ registration routes also logged simulated confirmation emails.
   all personal details are omitted.
 - Appointments appear in the existing group enquiries queue (`source=group-appointment`).
   The message contains the local time, duration and visitor's note. They are **requests awaiting
-  Ina's confirmation**, not Outlook events. No video link or automatic confirmation is invented.
+  Ina's confirmation**, not Outlook events. No video link is invented; since 2026-10-01 the request itself is acknowledged automatically,
+  and the appointment is still confirmed only by Ina's personal email.
 - ASSUMPTION: dates run from tomorrow through six weeks ahead. `GROUP_APPOINTMENT_BLOCKED_DATES`
   accepts comma-separated local dates for holidays/closures. Confirm these with Ina before launch.
 - To cancel during the pilot, staff records the cancellation in the enquiry; an operator removes
@@ -90,7 +129,8 @@ registration routes also logged simulated confirmation emails.
 - Microsoft email uses the Azure Container App managed identity, with no new password or package.
   Graph's 202 response means accepted for sending, not verified inbox delivery.
 - Failed notifications do not discard stored enquiries. Contact/course/exam requests now return
-  503 if **neither storage nor delivery succeeded**. No applicant confirmation mail is sent.
+  503 if **neither storage nor delivery succeeded**. Since 2026-10-01 the sender also gets a
+  confirmation, see below.
   A job-application alert names only the position and a reference; the application and CV are
   read in the workspace.
 - `/admin/settings` shows test/live mode and whether the Microsoft connection is configured.

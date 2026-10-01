@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from '@/i18n/navigation';
 import { trackCasaEvent } from '@/lib/analytics/client';
+import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 import {
@@ -60,6 +61,7 @@ type ContactApiResult = {
   status: 'accepted' | 'error';
   message: string;
   requestId?: string;
+  confirmationSent?: boolean;
 };
 
 const initialFields = {
@@ -216,6 +218,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     topic: preferredTopic,
   }));
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof typeof initialFields, string>>>({});
@@ -329,6 +332,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
       setFeedbackMessage(result.message || copy.successBody);
       setRequestId(result.requestId || null);
+      setConfirmationSent(result.confirmationSent === true);
       setStatus('success');
       setFields({
         ...initialFields,
@@ -376,6 +380,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             <div>
               <p className="text-base font-bold text-[var(--casa-success-text)]">{copy.successTitle}</p>
               <p className="mt-1 text-sm text-[var(--casa-success-text)]">{feedbackMessage || copy.successBody}</p>
+              {confirmationSent ? <p className="mt-1 text-sm text-[var(--casa-success-text)]">{confirmationNotice(locale)}</p> : null}
               {requestId ? (
                 <p className="mt-2 text-xs font-medium text-[var(--casa-success-text)]">
                   {locale === 'de' ? 'Ihre Referenz' : 'Your reference'}: <span className="break-all font-mono">{requestId}</span>

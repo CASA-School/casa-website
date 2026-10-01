@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resetRateLimits } from '@/lib/api/rate-limit';
 
-const mocks = vi.hoisted(() => ({ reserve: vi.fn(), taken: vi.fn(), notify: vi.fn() }));
+const mocks = vi.hoisted(() => ({ reserve: vi.fn(), taken: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })) }));
 vi.mock('@/lib/appointments/repository.server', () => ({ reserveAppointment: mocks.reserve, takenAppointments: mocks.taken }));
-vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify }));
+vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify, confirmToSender: mocks.confirm }));
 import { GET, POST } from './route';
 
 const payload = { date: '2026-09-21', time: '10:30', locale: 'de', firstName: 'Test', email: 'admin@casa-bremen.de', privacy: true };

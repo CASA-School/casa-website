@@ -301,7 +301,7 @@ function formatScheduleLabel(schedule: unknown, locale: ContentLocale) {
   const days = Array.isArray(rawDays) ? rawDays.filter((item): item is string => typeof item === 'string') : [];
   const time = typeof rawTime === 'string' ? rawTime : '';
 
-  const daysLabel = days.length > 0 ? normalizeScheduleDays(days, locale) : locale === 'de' ? 'Tage tbd' : 'Days tbd';
+  const daysLabel = days.length > 0 ? normalizeScheduleDays(days, locale) : locale === 'de' ? 'Tage werden noch festgelegt' : 'Days to be confirmed';
   if (!time) {
     return daysLabel;
   }
@@ -501,7 +501,7 @@ function buildExamRegistrationOption(
     capacity: session.capacity,
     deadlineStatus: status,
     deadlineLabel: deadlineLabel(status, locale),
-    locationLabel: locale === 'de' ? 'CASA Bremen Prüfungszentrum' : 'CASA Bremen Exam Center',
+    locationLabel: locale === 'de' ? 'CASA Bremen Prüfungszentrum' : 'CASA Bremen Exam Centre',
     status: session.status,
   };
 }

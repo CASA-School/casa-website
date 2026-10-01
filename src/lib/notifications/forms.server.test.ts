@@ -1,5 +1,7 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { formDeliveryConfig, notifyForm, TEST_FORM_RECIPIENT, type FormKind } from './forms.server';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  confirmToSender, formDeliveryConfig, notifyForm, resetConfirmationLimits, TEST_FORM_RECIPIENT, type FormKind,
+} from './forms.server';
 
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
@@ -187,5 +189,166 @@ describe('public form notifications', () => {
       .toEqual({ delivered: false, channel: 'failed' });
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(JSON.stringify(log.mock.calls)).not.toContain('private');
+  });
+});
+
+describe('confirmation to the sender', () => {
+  /** Sends one confirmation through a stubbed Graph and returns the posted message, or null if nothing was sent. */
+  async function confirmation(kind: Parameters<typeof confirmToSender>[0], payload: Record<string, unknown>, mode: 'test' | 'live' = 'test') {
+    vi.stubEnv('FORM_DELIVERY_MODE', mode);
+    vi.stubEnv('FORM_MAIL_FROM', 'website@example.com');
+    vi.stubEnv('IDENTITY_ENDPOINT', 'http://identity.local/token');
+    vi.stubEnv('IDENTITY_HEADER', 'test-header');
+    vi.stubEnv('FORM_RECIPIENT_COURSE', 'online@example.com');
+    vi.stubEnv('FORM_RECIPIENT_CONTACT', 'info@example.com');
+    const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' })))
+      .mockResolvedValueOnce(new Response(null, { status: 202 }));
+    vi.stubGlobal('fetch', fetch);
+    const result = await confirmToSender(kind, payload);
+    return { result, message: fetch.mock.calls[1] ? JSON.parse(fetch.mock.calls[1][1].body).message : null };
+  }
+
+  const course = {
+    requestId: 'ref-42', locale: 'de', salutation: 'ms', firstName: 'Maria', lastName: 'Rossi', email: 'maria@example.com',
+    courseTypeLabel: 'Intensivkurs Deutsch', courseInstanceLabel: '12.01.2027 – 05.02.2027 | Mo–Fr, 9:00–12:15 | CASA Am Dobben',
+    visaRequired: true, accommodationRequired: true, accommodationType: 'host',
+    allergies: 'PRIVATE-ALLERGY', notes: 'PRIVATE-NOTE',
+  };
+
+  beforeEach(() => resetConfirmationLimits());
+
+  it('goes to the test inbox in test mode and names the address it would have reached', async () => {
+    const { result, message } = await confirmation('course', course);
+    expect(result).toEqual({ sent: true, reachedSender: false });
+    expect(message.toRecipients).toEqual([{ emailAddress: { address: TEST_FORM_RECIPIENT } }]);
+    expect(message.subject.startsWith('[TEST] ')).toBe(true);
+    expect(message.body.content).toContain('maria@example.com');
+  });
+
+  it('goes to the sender in live mode, with replies to the team mailbox for that form', async () => {
+    const { result, message } = await confirmation('course', course, 'live');
+    expect(result).toEqual({ sent: true, reachedSender: true });
+    expect(message.toRecipients).toEqual([{ emailAddress: { address: 'maria@example.com' } }]);
+    expect(message.replyTo).toEqual([{ emailAddress: { address: 'online@example.com', name: 'CASA Internationale Sprachschule' } }]);
+    expect(message.subject.startsWith('[TEST]')).toBe(false);
+    expect(message.attachments[0]).toEqual(expect.objectContaining({ contentId: 'casa-logo', isInline: true }));
+  });
+
+  it('prints the catalogue choices and the reference, never what the sender typed', async () => {
+    const { message } = await confirmation('course', course);
+    const content: string = message.body.content;
+    expect(content).toContain('Intensivkurs Deutsch');
+    expect(content).toContain('ref-42');
+    expect(content).not.toContain('PRIVATE-ALLERGY');
+    expect(content).not.toContain('PRIVATE-NOTE');
+    const contact = (await confirmation('contact', {
+      requestId: 'r', locale: 'de', firstName: 'Ada', email: 'ada@example.com', topic: 'PRIVATE-TOPIC', message: 'PRIVATE-MESSAGE',
+    })).message.body.content as string;
+    expect(contact).not.toContain('PRIVATE-TOPIC');
+    expect(contact).not.toContain('PRIVATE-MESSAGE');
+  });
+
+  it('greets neutrally when the "name" carries a link or digits', async () => {
+    const { message } = await confirmation('contact', {
+      requestId: 'r', locale: 'de', firstName: 'Visit www.spam.example', email: 'victim@example.com', message: 'x',
+    });
+    expect(message.body.content).not.toContain('spam.example');
+  });
+
+  it('sends at most three confirmations to one address a day', async () => {
+    const results = [];
+    for (let i = 0; i < 4; i += 1) results.push((await confirmation('course', course, 'live')).result.sent);
+    expect(results).toEqual([true, true, true, false]);
+  });
+
+  it('sends nothing without a usable address or without the Microsoft connection', async () => {
+    expect((await confirmation('course', { ...course, email: 'not-an-address' })).result.sent).toBe(false);
+    vi.stubEnv('FORM_MAIL_FROM', '');
+    const fetch = vi.fn(); vi.stubGlobal('fetch', fetch);
+    expect((await confirmToSender('course', course)).sent).toBe(false);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing live when the form has no mailbox to receive replies', async () => {
+    vi.stubEnv('FORM_RECIPIENT_EXAM', '');
+    const exam = { requestId: 'r', locale: 'de', firstName: 'Ada', email: 'ada@example.com', examTypeLabel: 'telc Deutsch B1' };
+    expect((await confirmation('exam', exam, 'live')).result.sent).toBe(false);
+  });
+
+  it('sends an application receipt live only with a management reply mailbox, never info@', async () => {
+    const application = { requestId: 'r', locale: 'de', firstName: 'Ada', lastName: 'Byron', email: 'ada@example.com', positionTitle: 'Lehrkraft DaF' };
+    vi.stubEnv('FORM_RECIPIENT_CAREERS', 'info@example.com');
+    expect((await confirmation('careers', application, 'live')).result.sent).toBe(false);
+    vi.stubEnv('FORM_REPLY_TO_CAREERS', 'leitung@example.com');
+    const { message } = await confirmation('careers', application, 'live');
+    expect(message.replyTo).toEqual([{ emailAddress: { address: 'leitung@example.com', name: 'CASA Internationale Sprachschule' } }]);
+    expect(message.body.content).toContain('Lehrkraft DaF');
+  });
+
+  it('greets formally by salutation, never reveals the visa need, and drops an unscheduled row', async () => {
+    const formal = (await confirmation('course', course)).message.body.content as string;
+    expect(formal).toContain('Guten Tag Frau Rossi,');
+    expect(formal).not.toContain('Visum');
+    const unscheduled = (await confirmation('course', {
+      ...course, courseInstanceLabel: '12.01.2027 - 05.02.2027 | Tage werden noch festgelegt | CASA Am Dobben',
+    })).message.body.content as string;
+    expect(unscheduled).not.toContain('noch festgelegt');
+    expect(unscheduled).toContain('12.01.2027 – 05.02.2027');
+    const scheduled = (await confirmation('course', {
+      ...course, courseInstanceLabel: '12.01.2027 - 05.02.2027 | Mo, Di • 09:00-12:15 | CASA Am Dobben',
+    })).message.body.content as string;
+    expect(scheduled).toContain('09:00–12:15');
+  });
+
+  it('counts one inbox once, whatever its spelling', async () => {
+    const sent = [];
+    for (const email of ['victim+1@gmail.com', 'v.ictim@gmail.com', 'VICTIM@googlemail.com', 'victim+x@gmail.com']) {
+      sent.push((await confirmation('course', { ...course, email }, 'live')).result.sent);
+    }
+    expect(sent).toEqual([true, true, true, false]);
+  });
+
+  it('caps confirmations overall, so a flood cannot get the sender mailbox blocked', async () => {
+    const sent = [];
+    for (let i = 0; i < 31; i += 1) sent.push((await confirmation('course', { ...course, email: `person${i}@example.com` }, 'live')).result.sent);
+    expect(sent.filter(Boolean)).toHaveLength(30);
+    expect(sent[30]).toBe(false);
+  });
+
+  it('keeps no Sent Items copy of a confirmation, and gives a failed send its slot back', async () => {
+    expect((await confirmation('course', course, 'live')).message).toBeTruthy();
+    vi.stubEnv('FORM_DELIVERY_MODE', 'live');
+    const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 't' })))
+      .mockResolvedValueOnce(new Response(null, { status: 202 }));
+    vi.stubGlobal('fetch', fetch);
+    await confirmToSender('course', course);
+    expect(JSON.parse(fetch.mock.calls[1][1].body).saveToSentItems).toBe(false);
+
+    resetConfirmationLimits();
+    const failing = vi.fn().mockResolvedValue(new Response(JSON.stringify({ access_token: 't' }), { status: 500 }));
+    vi.stubGlobal('fetch', failing);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    for (let i = 0; i < 3; i += 1) expect((await confirmToSender('course', course)).sent).toBe(false);
+    expect((await confirmation('course', course, 'live')).result.sent).toBe(true);
+  });
+
+  it('refuses lookalike links and numeral strings in the name, and links CASA\'s own number', async () => {
+    for (const firstName of ['wwwꓸcasa-erstattungꓸde', '零一七六二三四五六七八']) {
+      const content = (await confirmation('contact', { requestId: 'r', locale: 'de', firstName, email: 'v@example.com', message: 'x' }))
+        .message.body.content as string;
+      expect(content).toContain('Guten Tag,');
+      expect(content).not.toContain(firstName);
+    }
+    const contact = (await confirmation('contact', { requestId: 'r', locale: 'de', firstName: 'Ada', email: 'ada@example.com' }))
+      .message.body.content as string;
+    expect(contact).toContain('href="tel:+4942146041430"');
+  });
+
+  it('writes in the language of the form', async () => {
+    const de = (await confirmation('course', course)).message;
+    const en = (await confirmation('course', { ...course, locale: 'en' })).message;
+    expect(de.body.content).toContain('lang="de"');
+    expect(en.body.content).toContain('lang="en"');
+    expect(de.subject).not.toBe(en.subject);
   });
 });

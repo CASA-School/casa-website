@@ -17,6 +17,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
+import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationExamCatalog } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 import { createExamRegistrationFormSchema } from '@/lib/validation/registration-submissions';
@@ -33,6 +34,7 @@ type ExamRegistrationApiResult = {
   status: 'accepted' | 'error';
   message: string;
   requestId?: string;
+  confirmationSent?: boolean;
 };
 const fieldClassName =
   'h-11 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-base sm:text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
@@ -63,6 +65,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   // Messages follow the page, so a German form never shows an English error.
   const registrationSchema = useMemo(() => createExamRegistrationFormSchema(catalog.locale), [catalog.locale]);
@@ -217,6 +220,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
         throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
       }
 
+      setConfirmationSent(result?.confirmationSent === true);
       setSuccess(true);
       trackCasaEvent('form_success', {
         form: 'exam_registration',
@@ -838,6 +842,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 ? 'Ihre Prüfungsanmeldung wird nun geprüft. Das CASA-Team meldet sich zeitnah per E-Mail bei Ihnen.'
                 : 'Your candidate registration is received. CASA will contact you by email with confirmation and the next required steps.'}
             </p>
+            {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
 
             <div className="w-full max-w-lg text-left mt-6">
               <NextStepsTimeline

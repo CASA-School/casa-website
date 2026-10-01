@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { notifyForm } from '@/lib/notifications/forms.server';
+import { confirmToSender, notifyForm } from '@/lib/notifications/forms.server';
+import { getCareerPositionBySlug } from '@/lib/content/repository';
 
 import { acceptedCvKind, cvMimeType } from '@/lib/admin/cv-file';
 import { rateLimit } from '@/lib/api/rate-limit';
@@ -256,15 +257,25 @@ export async function POST(request: Request) {
    * the alert goes to a shared mailbox (info@ in the first phase), so its body
    * must not become a second, wider copy of the application.
    */
-  const delivery = await notifyForm('careers', {
-    requestId, submittedAt, positionTitle: data.positionTitle, locale,
-  }, webHookUrl, { stored: true });
+  // The title as CASA published it, not as the request named it: both emails
+  // print it, and the confirmation goes to whatever address was typed.
+  const position = data.positionSlug ? await getCareerPositionBySlug(data.positionSlug, locale).catch(() => null) : null;
+  const positionTitle = position?.title ?? null;
+  const [delivery, confirmation] = await Promise.all([
+    notifyForm('careers', {
+      requestId, submittedAt, positionTitle: positionTitle ?? data.positionTitle, locale,
+    }, webHookUrl, { stored: true }),
+    confirmToSender('careers', {
+      requestId, submittedAt, locale, positionTitle, email: data.email, firstName: data.firstName, lastName: data.lastName,
+    }),
+  ]);
 
   return NextResponse.json({
     status: 'accepted',
     requestId,
     mode: 'database',
     notified: delivery.delivered,
+    confirmationSent: confirmation.reachedSender,
     message: successMessage(locale),
   });
 }
