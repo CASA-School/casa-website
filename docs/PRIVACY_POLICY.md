@@ -2,7 +2,7 @@
 
 `/privacy` (`/datenschutz`) no longer shows the old site's policy word for word. Since
 2026-09-30 it is CASA's own text, in German and English, written against what the code
-actually does. The general sections (introduction, §1 definitions, §21 rights, §25 legal
+actually does. The general sections (introduction, §1 definitions, §20 rights, §24 legal
 requirements) are carried over from the old policy; the rest is new. Provenance of the old
 text stays in `basedOn` in `src/lib/content/published-legal.json`. `docs/LEGAL_BASELINE.md`
 still describes the terms and the imprint, which are unchanged.
@@ -17,19 +17,24 @@ has an honest policy rather than an outdated one, not because a lawyer has signe
 ## Sections
 
 1 Definitions · 2 Controller (as in the imprint) · 3 Hosting · 4 Abuse protection ·
-5 Cookies · 6 Fonts and external content · 7 Social and map links · 8 Contact and group
-enquiries · 9 Internal handling · 10 Course registration · 11 Accommodation · 12 Allergies ·
-13 Exams · 14 Job applications · 15 Placement test · 16 Group appointments · 17 Email
-notifications · 18 Assistant and search · 19 Recipients · 20 Storage periods · 21 Rights ·
-22 Complaint · 23 Legal basis · 24 Legitimate interests · 25 Legal requirements ·
-26 Automated decisions. Every `h2` has an `id` (`#health-data`, `#storage-periods`, …),
+5 Cookies · 6 Fonts and external content · 7 Social, map and placement-test links (Klett) ·
+8 Contact and group enquiries · 9 Internal handling · 10 Course registration ·
+11 Accommodation · 12 Allergies · 13 Exams · 14 Job applications · 15 Group appointments ·
+16 Email notifications · 17 Assistant and search · 18 Recipients · 19 Storage periods ·
+20 Rights · 21 Complaint · 22 Legal basis · 23 Legitimate interests · 24 Legal requirements ·
+25 Automated decisions (none).
+
+Since 2026-10-01 there is no section on CASA's own placement test: the test is in
+development and closed on the public site (`src/lib/placement/availability.ts`), and the
+public page links to the Klett tests instead (§7). The removed text is kept at the end of
+this file, under „Held back". Every `h2` has an `id` (`#health-data`, `#storage-periods`, …),
 the same in both languages.
 
 ## Facts the text states (settled, 2026-09-30)
 
 - Microsoft nonprofit subscription for the gGmbH; processor Microsoft Ireland Operations Limited.
 - Mailboxes: contact and group enquiries → `info@`; course, exam and accommodation
-  registrations and placement results → `online@`; appointment requests → the responsible
+  registrations → `online@` (learners email their Klett result there themselves); appointment requests → the responsible
   contact person's mailbox (group consultations: Ina Eismann), who confirms by email;
   job-application alerts → `info@`, naming only the position and a reference.
 - Job applications themselves: management only, in the workspace's Applications module.
@@ -43,7 +48,7 @@ the same in both languages.
 - No data sold, no marketing email.
 - Since 2026-10-01 the sender gets a confirmation (receipt): their name, the reference and their
   catalogue choices, never their free text; no copy kept; at most three per inbox in 24 hours per
-  server process (§14, §16, §17, §20).
+  server process (§14, §15, §16, §19).
 - Logs: Log Analytics `log-casa-prod`, Germany West Central, 30 days (verified 2026-09-30);
   no Application Insights on `ca-casa-website`.
 
@@ -51,11 +56,11 @@ the same in both languages.
 
 The text describes the site as it will run on `casa-bremen.de`, not the current test revision.
 
-- **Database**: Azure Database for PostgreSQL in **Belgium Central**, backups ≤ 35 days (§3, §19, §20).
+- **Database**: Azure Database for PostgreSQL in **Belgium Central**, backups ≤ 35 days (§3, §18, §19).
   None is provisioned yet. The subscription blocks PostgreSQL in Germany West Central (checked
   2026-09-30, as `docs/AZURE_DEPLOYMENT_PLAN.md` says); the website and the logs stay there.
 - **Mail**: Graph mail from a CASA mailbox, `FORM_DELIVERY_MODE=live`, and every
-  `FORM_RECIPIENT_*` set to the routing in §17. During testing all mail goes to `admin@`.
+  `FORM_RECIPIENT_*` set to the routing in §16. During testing all mail goes to `admin@`.
 - **Staff host**: `admin.casa-bremen.de` live and `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset (§5).
 
 ## Open questions
@@ -69,7 +74,7 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
    so nobody outside management sees applicant data. Confirm that is what you want.
 4. Where the careers page's email fallback should point once `bewerbungen@` is retired
    (`src/lib/mock/store.ts`, and `apply_email` per position in the database).
-5. Deletion: nothing is deleted on a schedule, in the code or in the mailboxes. §20 promises
+5. Deletion: nothing is deleted on a schedule, in the code or in the mailboxes. §19 promises
    periods. Needs scheduled deletion in the workspace and Microsoft 365 retention rules on
    `info@`, `online@`, the contact person's mailbox and the sender's Sent Items.
 6. Host families: by which channel they receive the learner's details, and whether they sign
@@ -88,7 +93,7 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
 9. Legal bases throughout, the allergy consent (Art. 9(2)(a) GDPR), and whether submission
    under a server-enforced consent is enough proof or a stored timestamp is needed.
 10. No cookie banner: the § 25 TDDDG reasoning in §5.
-11. Placement test and Art. 22 GDPR (§15, §26): a teacher decides, the system recommends.
+11. Placement test and Art. 22 GDPR: only when CASA's own test returns (see „Held back").
 12. Data protection officer: none is named. Check § 38 BDSG (20+ people constantly
     processing personal data, counting teachers who use the workspace or the mailboxes).
 13. Whether the DGD generator licence needs the credit kept for the carried-over sections.
@@ -112,4 +117,28 @@ The HTML in `src/lib/content/published-legal.json` (`privacy.de`, `privacy.en`) 
 Change both languages, and `revisedAt` with the "Stand" / "Last updated" line at the end.
 Keep to the tags already used (`h2` with an `id`, `h3`, `p`, `ul`, `li`, `a`, `br`, `strong`):
 the template renders this HTML as it is. A change to a form, a recipient or a
-retention period is a change to this policy: check §10–§20 in the same PR.
+retention period is a change to this policy: check §10–§19 in the same PR.
+
+## Held back: CASA's own placement test (removed 2026-10-01)
+
+Taken out because the own test is closed on the public site. Put it back, after section 14
+(„Bewerbungen"), when `CASA_ENABLE_PLACEMENT_TEST` is switched on in production, and restore
+with it: the test in §4 (abuse protection), the access key in §5 (cookies), placement results
+in §9 (internal handling) and §16 (notifications to online@), the retention line in §19, the
+legitimate interest „Verbesserung unseres Einstufungstests" in §23, and the Art. 22 text in
+§25. `git show 4f9c179:src/lib/content/published-legal.json` has the full earlier version.
+The § numbers above are today's. Restoring the section renumbers today's §15–§25 to §16–§26 in
+both languages (the number in each `h2`), and the § references in this file and in
+docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md move with them.
+
+German, as it was published:
+
+```html
+<h2 id="placement-test">15. Online-Einstufungstest</h2><p>Mit unserem Online-Einstufungstest können Sie Ihr Deutschniveau einschätzen lassen. Sie benötigen dafür kein Konto. Ihren Namen oder Ihre E-Mail-Adresse müssen Sie für den Test nicht angeben. Ihre IP-Adresse speichern wir zusammen mit dem Test nicht.</p><p>Wir verarbeiten Ihre Antworten auf drei Einstiegsfragen (bisheriges Deutschlernen, Ihr Lernziel und wann Sie zuletzt regelmäßig Deutsch verwendet haben), Ihre Antworten auf die Testaufgaben einschließlich der Reihenfolge, in der Ihnen die Antwortmöglichkeiten angezeigt wurden, einen freiwilligen Schreibtext sowie Sprache, Zeitpunkte und Stand des Tests. Wenn Sie in der freiwilligen Schreibaufgabe Angaben zu Ihrer Person machen, speichern wir diese mit Ihrem Text. Aus Ihren Antworten berechnet unser System eine Empfehlung für ein Kursniveau.</p><p>Jeder Test erhält einen zufällig erzeugten Zugangsschlüssel. Er ist Teil der Adresse, unter der Sie den Test fortsetzen und Ihr Ergebnis aufrufen können. Wer diese Adresse kennt, kann das Ergebnis einsehen; bewahren Sie den Link daher sorgfältig auf. Er funktioniert, bis der Test gelöscht wird. Nach Abschluss des Tests werden unsere Mitarbeiterinnen und Mitarbeiter per E-Mail benachrichtigt und prüfen die Empfehlung in unserem internen Arbeitsbereich. Die Benachrichtigung enthält weder Ihren Namen noch Kontaktdaten, wohl aber Ihre Antworten auf die Einstiegsfragen, die berechnete Empfehlung und den Zugangsschlüssel zu Ihrem Ergebnis.</p><p>Das Ergebnis ist eine Kursempfehlung, kein Zertifikat, und es gibt kein Bestehen oder Nichtbestehen. Über Ihre Einstufung entscheidet eine Lehrkraft; eine ausschließlich auf automatisierter Verarbeitung beruhende Entscheidung im Sinne von Art. 22 DS-GVO findet nicht statt. Hat eine Lehrkraft die Empfehlung bestätigt, können unsere Mitarbeiterinnen und Mitarbeiter das Ergebnis Ihrem Eintrag in unserer Personenkartei zuordnen, etwa wenn Sie uns bei der Anmeldung Ihren Ergebnislink zeigen.</p><p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DS-GVO, da der Test auf Ihren Wunsch der Auswahl eines passenden Kurses dient. Außerdem werten wir die Antworten ohne Bezug zu einzelnen Personen aus, um die Testaufgaben zu verbessern. Rechtsgrundlage hierfür ist Art. 6 Abs. 1 lit. f DS-GVO; unser berechtigtes Interesse liegt in einem verlässlichen Einstufungstest.</p>
+```
+
+English:
+
+```html
+<h2 id="placement-test">15. Online placement test</h2><p>Our online placement test lets you have your level of German assessed. You do not need an account for it, and you do not have to give your name or email address to take the test. We do not store your IP address with the test.</p><p>We process your answers to three introductory questions (your previous German learning, your learning goal and when you last used German regularly), your answers to the test items including the order in which the answer options were shown to you, an optional writing sample, and the language, times and progress of the test. If you include details about yourself in the optional writing task, they are stored with your text. From your answers our system calculates a recommended course level.</p><p>Each test is given a randomly generated access key. It forms part of the address at which you can continue the test and view your result. Anyone who knows this address can see the result, so please keep the link safe. It works until the test is deleted. When you finish the test, our staff are notified by email and review the recommendation in our internal workspace. The notification contains neither your name nor contact details, but it does contain your answers to the introductory questions, the calculated recommendation and the access key to your result.</p><p>The result is a course recommendation, not a certificate, and there is no pass or fail. Your placement is decided by a teacher; there is no decision based solely on automated processing within the meaning of Art. 22 GDPR. Once a teacher has confirmed the recommendation, our staff can attach the result to your entry in our register of persons, for example if you show us your result link when you register.</p><p>The legal basis is Art. 6(1)(b) GDPR, as the test serves, at your request, to choose a suitable course. We also analyse the answers without reference to individuals in order to improve the test items. The legal basis for this is Art. 6(1)(f) GDPR; our legitimate interest lies in a reliable placement test.</p>
+```

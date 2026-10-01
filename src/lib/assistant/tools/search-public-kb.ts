@@ -480,7 +480,7 @@ function buildPlacementPassages(): KbPassage[] {
       topic: 'placement',
       keywords: ['placement', 'level', 'test', 'a1', 'a2', 'b1', 'b2', 'c1', 'cefr', 'beginner', 'intermediate', 'advanced', 'which level'],
       content:
-        'CASA uses CEFR levels (A1–C1) to place learners. A1 = absolute beginner; A2 = elementary; B1 = intermediate; B2 = upper-intermediate; C1 = advanced. Take the placement test before registration if you have any prior German knowledge. Absolute beginners (zero German) can register directly at A1. The placement test is online at /placement-test and free to use. It is in its pilot phase: the result is a course recommendation that a teacher confirms, not a certificate.',
+        'CASA uses CEFR levels (A1–C1) to place learners. A1 = absolute beginner; A2 = elementary; B1 = intermediate; B2 = upper-intermediate; C1 = advanced. If you know some German, take a free online placement test before registering: the tests are on the test portal of the publisher Klett (Netzwerk neu for A1–B1, Kontext for B1+–C1), linked from /placement-test. Always start with the A1 test, do it alone without a dictionary, enter your name and email in the test form, and send your result to online@casa-bremen.de. Absolute beginners (zero German) can register directly at A1. You can also come to the school for a personal placement during office hours, with no appointment; allow at least an hour.',
     },
     {
       id: 'placement-de',
@@ -490,7 +490,7 @@ function buildPlacementPassages(): KbPassage[] {
       topic: 'placement',
       keywords: ['einstufung', 'einstufungstest', 'niveau', 'a1', 'a2', 'b1', 'b2', 'c1', 'cefr', 'anfänger', 'mittelstufe', 'fortgeschritten', 'welches niveau'],
       content:
-        'CASA arbeitet mit CEFR-Niveaus (A1–C1) für die Einstufung. A1 = absolute Anfänger; A2 = Grundkenntnisse; B1 = Mittelstufe; B2 = Oberstufe; C1 = Fortgeschrittene. Wer bereits Deutschkenntnisse hat, sollte vor der Anmeldung den Einstufungstest absolvieren. Absolute Anfänger (keine Vorkenntnisse) können direkt im A1-Kurs starten. Der Test ist kostenlos unter /placement-test verfügbar. Er befindet sich in der Pilotphase: Das Ergebnis ist eine Kursempfehlung, die eine Lehrkraft bestätigt, kein Zertifikat.',
+        'CASA arbeitet mit CEFR-Niveaus (A1–C1) für die Einstufung. A1 = absolute Anfänger; A2 = Grundkenntnisse; B1 = Mittelstufe; B2 = Oberstufe; C1 = Fortgeschrittene. Wer bereits Deutschkenntnisse hat, macht vor der Anmeldung einen kostenlosen Online-Einstufungstest: Die Tests liegen auf dem Testportal des Klett Verlags (Netzwerk neu für A1–B1, Kontext für B1+–C1) und sind unter /placement-test verlinkt. Beginnen Sie immer mit dem A1-Test, machen Sie ihn allein und ohne Wörterbuch, tragen Sie im Testformular Namen und E-Mail-Adresse ein und senden Sie das Ergebnis an online@casa-bremen.de. Absolute Anfänger (keine Vorkenntnisse) können direkt im A1-Kurs starten. Eine persönliche Einstufung in der Schule ist während der Bürozeiten ohne Termin möglich; bitte planen Sie mindestens eine Stunde ein.',
     },
   ];
 }

@@ -13,6 +13,7 @@ import type { NextRequest } from 'next/server';
 
 import { rateLimit } from '@/lib/api/rate-limit';
 import { apiError, apiSuccess } from '@/lib/api/response';
+import { placementTestEnabled } from '@/lib/placement/availability';
 import { isDirectBeginner } from '@/config/placement/intake';
 import {
   computeProgress,
@@ -22,6 +23,8 @@ import {
 import { startAttemptSchema } from '@/lib/validation/placement';
 
 export async function POST(request: NextRequest) {
+  // CASA's own test is closed on this deployment (src/lib/placement/availability.ts).
+  if (!placementTestEnabled()) return apiError('not_found', 'Not found.', 404);
   // Only starting an attempt is limited: answering is bounded by the attempt
   // itself. Generous, because a whole class may start from one school network.
   const limited = rateLimit(request, 'placement-attempt', { limit: 60, windowMs: 10 * 60_000 });

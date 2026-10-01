@@ -12,6 +12,7 @@
 import type { NextRequest } from 'next/server';
 
 import { apiError, apiSuccess } from '@/lib/api/response';
+import { placementTestEnabled } from '@/lib/placement/availability';
 import {
   computeProgress,
   loadAttempt,
@@ -21,6 +22,8 @@ import {
 import { saveResponseSchema } from '@/lib/validation/placement';
 
 export async function POST(request: NextRequest) {
+  // CASA's own test is closed on this deployment (src/lib/placement/availability.ts).
+  if (!placementTestEnabled()) return apiError('not_found', 'Not found.', 404);
   let body: unknown;
 
   try {

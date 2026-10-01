@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
 
 import { resetRateLimits } from '@/lib/api/rate-limit';
@@ -20,6 +20,7 @@ const request = (forwardedFor: string) =>
   }) as NextRequest;
 
 beforeEach(() => resetRateLimits());
+afterEach(() => vi.unstubAllEnvs());
 
 describe('starting a placement attempt', () => {
   it('allows sixty starts from one address in ten minutes, a class on one network', async () => {
@@ -30,6 +31,18 @@ describe('starting a placement attempt', () => {
 
     expect((await POST(request('203.0.113.9'))).status).toBe(429);
     expect((await POST(request('203.0.113.10'))).status).toBe(400);
+    expect(mocks.start).not.toHaveBeenCalled();
+  });
+});
+
+describe('while CASA\'s own test is closed', () => {
+  it('answers 404 and starts nothing, before any rate limiting', async () => {
+    vi.stubEnv('CASA_ENABLE_PLACEMENT_TEST', 'false');
+    for (let i = 0; i < 3; i += 1) {
+      const response = await POST(request('203.0.113.20'));
+      expect(response.status).toBe(404);
+      expect(await response.json()).toMatchObject({ data: null, error: { code: 'not_found' } });
+    }
     expect(mocks.start).not.toHaveBeenCalled();
   });
 });

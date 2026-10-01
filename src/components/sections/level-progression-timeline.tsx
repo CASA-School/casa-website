@@ -86,7 +86,7 @@ const LEVELS: Level[] = [
     // and it is where the textbook switches from Netzwerk neu to Kontext
     // (pricing.ts:98). The descriptor is deliberately factual rather than
     // invented: the CEFR defines no B1+, so it is described by what changes at
-    // it. Kept verbatim from the retired Klett link panel it replaced.
+    // it.
     id: 'b1plus',
     label: 'B1+',
     weeks: WEEKS_FOR_BRIDGE_STAFF_CONFIRMED,

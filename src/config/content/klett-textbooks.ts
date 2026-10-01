@@ -5,11 +5,10 @@
  * from B1+ — which matches the book-price tiers in
  * `src/config/calculator/pricing.ts:95-99`.
  *
- * NOTE (2026-08-23): CASA no longer links to Klett's *placement tests*. Those
- * six external links were replaced by CASA's own adaptive Einstufungstest
- * (docs/PLACEMENT_TEST_IMPLEMENTATION.md). The textbooks below are unaffected:
- * CASA remains a Klett curriculum school. Only the placement instrument moved
- * in house.
+ * NOTE (2026-10-01): the public placement page links to Klett's six online
+ * placement tests again (src/components/sections/klett-level-tests.tsx), as the
+ * old casa-bremen.de did; CASA's own Einstufungstest is in development behind
+ * `placementTestEnabled()`. The textbooks below are unaffected either way.
  *
  * Titles, ISBNs and product URLs below were read directly out of the
  * klett-sprachen.de product-page markup on 2026-08-12 and independently

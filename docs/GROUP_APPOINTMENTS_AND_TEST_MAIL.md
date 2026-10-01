@@ -83,7 +83,7 @@ applications now send the person a branded confirmation in the form's language
   judged and checked for truth, German and English (2026-10-01).
 - **On screen** the form adds „Eine Eingangsbestätigung ist per E-Mail zu Ihnen unterwegs." only when
   the confirmation really went to the sender (never in test mode).
-- Privacy policy §14, §16, §17 and §20 describe it.
+- Privacy policy §14, §15, §16 and §19 describe it.
 
 ### Recipients after testing — Rahman, 2026-09-30
 
@@ -93,11 +93,11 @@ applications now send the person a branded confirmation in the form's language
 | Group and company enquiries | `GROUPS` | `info@casa-bremen.de` |
 | Course registration (incl. accommodation) | `COURSE` | `online@casa-bremen.de` |
 | Exam registration | `EXAM` | `online@casa-bremen.de` |
-| Placement test result | `PLACEMENT` | `online@casa-bremen.de` |
+| Placement test result | `PLACEMENT` | `online@casa-bremen.de`, once CASA's own test opens; until then learners email their Klett result there themselves |
 | Appointment request | `APPOINTMENT` | the contact person who holds the consultations — for group consultations, **Ina Eismann's mailbox** (address still to come). She confirms each appointment herself by email |
 | Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position and a reference only; the application itself is read in the workspace by management |
 
-`bewerbungen@` is being retired. The privacy policy (§17) states this routing, so a change here
+`bewerbungen@` is being retired. The privacy policy (§16) states this routing, so a change here
 is a change there (`docs/PRIVACY_POLICY.md`).
 
 ## Evidence, cause and implementation

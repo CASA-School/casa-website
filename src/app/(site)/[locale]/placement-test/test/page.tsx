@@ -17,9 +17,12 @@
  */
 
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 
 import { PlacementRunner } from '@/components/placement/placement-runner';
+import { redirectLocalized } from '@/i18n/redirect';
 import { getContentLocale } from '@/lib/content/locale.server';
+import { placementTestEnabled } from '@/lib/placement/availability';
 
 export const metadata: Metadata = {
   title: 'Placement test | CASA Bremen',
@@ -31,6 +34,12 @@ export default async function PlacementTestRunnerPage({
 }: {
   searchParams: Promise<{ attempt?: string }>;
 }) {
+  // Per request, never prerendered: the switch is read at runtime. Closed, the
+  // runner sends people to the Klett tests rather than a chrome-less 404
+  // (SiteShell drops the navbar and footer on this exact path).
+  await connection();
+  if (!placementTestEnabled()) await redirectLocalized('/placement-test');
+
   const locale = await getContentLocale();
   const { attempt } = await searchParams;
 
