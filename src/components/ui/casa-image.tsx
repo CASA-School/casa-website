@@ -1,6 +1,10 @@
 import NextImage, { type ImageProps } from 'next/image';
 
-import { photoSlotFor } from '@/config/content/photo-numbers';
+import type { LucideIcon } from 'lucide-react';
+
+import type { Meaning } from '@/config/brand/meaning';
+import { photoMeaningFor, photoSlotFor } from '@/config/content/photo-numbers';
+import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 
 /**
@@ -14,15 +18,8 @@ import { cn } from '@/lib/utils';
  * `className`, so aspect ratios, object-fit wrappers and rounded corners all
  * behave exactly as they did.
  *
- * Colour rather than grey: a grey box reads as a broken image, a coloured field
- * reads as a decision not yet made. The palette is CASA's own, mixed toward
- * white so the fields sit calmly on the white page and still register on the
- * ink-deep bands.
- *
- * The colour is derived from `src`, not from call order. That means the same
- * photograph is always the same colour everywhere it appears — a course keeps
- * its identity across the homepage, the course index and its detail page — and
- * two different photographs next to each other reliably differ.
+ * A missing photograph renders as a calm panel in the colour of what it is
+ * about (see STAND_IN below), never as a grey box that reads as a broken image.
  *
  * ACCESSIBILITY: these are `aria-hidden`. The alt text describes a photograph
  * that is not being shown, and announcing "CASA learners in a classroom" for a
@@ -34,11 +31,10 @@ import { cn } from '@/lib/utils';
  * accreditation and partner marks, which are information rather than decoration
  * — replacing those with colour would delete a claim, not defer it.
  *
- * NUMBERS. Each field shows the photograph's number from
- * `src/config/content/photo-numbers.ts`, which is how a replacement is
- * identified: read "24" off the page, name the file `24.jpg`. The number is
- * per PHOTOGRAPH, not per slot, so the same number appears in every place that
- * photograph is used and one delivered file fills all of them.
+ * NUMBERS. Each panel carries its photograph's number in `data-casa-placeholder`
+ * (from `src/config/content/photo-numbers.ts`); docs/MEDIA_PHOTO_NUMBERS.md lists
+ * the numbers by page. The number is per PHOTOGRAPH, not per slot, so one
+ * delivered file fills every place that photograph is used.
  *
  * Master switch below turns placeholders off site-wide. Per-photograph, set
  * `ready: true` on its registry entry instead — that slot renders the real
@@ -47,25 +43,21 @@ import { cn } from '@/lib/utils';
  */
 const PLACEHOLDERS_ENABLED = true;
 
-const FIELDS = [
-  'linear-gradient(135deg, color-mix(in srgb, var(--casa-blue) 34%, #fff) 0%, color-mix(in srgb, var(--casa-blue) 72%, #fff) 100%)',
-  'linear-gradient(135deg, color-mix(in srgb, var(--casa-sun) 46%, #fff) 0%, color-mix(in srgb, var(--casa-amber) 74%, #fff) 100%)',
-  'linear-gradient(135deg, color-mix(in srgb, var(--casa-coral) 34%, #fff) 0%, color-mix(in srgb, var(--casa-red) 52%, #fff) 100%)',
-  'linear-gradient(135deg, color-mix(in srgb, var(--casa-warm-soft) 90%, #fff) 0%, color-mix(in srgb, var(--casa-amber) 56%, #fff) 100%)',
-  'linear-gradient(135deg, color-mix(in srgb, var(--casa-blue) 22%, #fff) 0%, color-mix(in srgb, var(--casa-ink-deep) 46%, #fff) 100%)',
-  'linear-gradient(135deg, color-mix(in srgb, var(--casa-coral) 24%, #fff) 0%, color-mix(in srgb, var(--casa-sun) 58%, #fff) 100%)',
-];
-
-/** Stable, order-independent index so a given photo always gets a given field. */
-function fieldFor(src: ImageProps['src']) {
-  const key = typeof src === 'string' ? src : JSON.stringify(src);
-  let hash = 0;
-  for (let i = 0; i < key.length; i += 1) {
-    hash = (hash * 31 + key.charCodeAt(i)) % 100000;
-  }
-
-  return FIELDS[hash % FIELDS.length];
-}
+/*
+ * THE STAND-IN, SINCE 2026-10-01. Until then a missing photograph showed as a
+ * colour gradient with its number on it, which made the gaps visible while the
+ * photographs were being chosen. Before go-live the site shows only real
+ * photographs, so a missing one is now a calm panel in the colour of what the
+ * photograph is about, with that meaning's icon in a white circle. The number
+ * stays in the markup (`data-casa-placeholder`) and in the registry, which is
+ * where a replacement is identified now; docs/MEDIA_PHOTO_NUMBERS.md lists them.
+ */
+const STAND_IN: Record<Meaning, { tint: string; icon: string; Icon: LucideIcon }> = {
+  orientation: { tint: 'bg-[var(--casa-blue-tint)]', icon: 'text-[var(--casa-accent-text)]', Icon: iconMap.mission },
+  courses: { tint: 'bg-[var(--casa-red-tint)]', icon: 'text-[var(--casa-red-text)]', Icon: iconMap.courses },
+  exams: { tint: 'bg-[var(--casa-ink-tint)]', icon: 'text-[var(--casa-ink)]', Icon: iconMap.exams },
+  arrival: { tint: 'bg-[var(--casa-sun-tint)]', icon: 'text-[var(--casa-sun-text)]', Icon: iconMap.accommodation },
+};
 
 export function CasaImage({ src, alt, fill, width, height, className, style, ...rest }: ImageProps) {
   const slot = typeof src === 'string' ? photoSlotFor(src) : undefined;
@@ -88,11 +80,12 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
   /*
    * The halo copy in `media-frame.tsx` is the same photograph rendered a second
    * time, blurred, behind the frame — it passes `alt=""` to avoid being
-   * announced twice. Numbering it would stack a second, blurred copy of the
-   * same number behind the real one. An empty alt is the site's existing signal
-   * for "decorative duplicate", so it is the signal used here.
+   * announced twice. It gets the tint without the icon, so the icon is not
+   * stacked twice. An empty alt is the site's signal for "decorative duplicate".
    */
-  const showNumber = alt !== '';
+  const showIcon = alt !== '';
+  const standIn = STAND_IN[photoMeaningFor(slot?.n)];
+  const { Icon } = standIn;
 
   return (
     <div
@@ -102,28 +95,20 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
       className={cn(
         // `fill` callers position against a relative parent, exactly as next/image does.
         fill ? 'absolute inset-0 h-full w-full' : undefined,
-        // Lets the number scale with the field rather than the viewport, so it
-        // stays readable in a 74px avatar and does not become a billboard in a
-        // full-bleed hero. `cqw` below resolves against this.
-        showNumber ? 'grid place-items-center overflow-hidden [container-type:inline-size]' : undefined,
+        standIn.tint,
+        // The circle scales with the panel, not the viewport (`cqw`), so it
+        // stays in proportion in a small card and in a full-width hero.
+        showIcon ? 'grid place-items-center overflow-hidden [container-type:inline-size]' : undefined,
         className
       )}
       style={{
-        backgroundImage: fieldFor(src),
         ...(fill ? null : { width, height }),
         ...style,
       }}
     >
-      {showNumber ? (
-        <span
-          className={cn(
-            'pointer-events-none select-none rounded-[0.25em] bg-[var(--casa-ink-deep)]/85 px-[0.45em] py-[0.12em]',
-            'font-bold tabular-nums leading-none text-white',
-            // Padding and radius are in `em`, so the whole chip scales with this.
-            'text-[clamp(0.625rem,8cqw,2.25rem)]'
-          )}
-        >
-          {slot ? slot.n : '??'}
+      {showIcon ? (
+        <span className="pointer-events-none flex aspect-square w-[clamp(2.75rem,16cqw,5.5rem)] items-center justify-center rounded-full bg-white shadow-[var(--shadow-soft)]">
+          <Icon className={cn('h-1/2 w-1/2', standIn.icon)} strokeWidth={1.6} />
         </span>
       ) : null}
     </div>

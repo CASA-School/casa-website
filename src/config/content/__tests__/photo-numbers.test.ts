@@ -101,3 +101,17 @@ describe('photo number registry', () => {
     expect(thin, `numbers with no usable subject brief: ${thin.join(', ')}`).toEqual([]);
   });
 });
+
+describe('photo stand-in meaning', () => {
+  it('gives course, accommodation and exam slots their colour', async () => {
+    const { photoMeaningFor } = await import('../photo-numbers');
+
+    expect(photoMeaningFor(4)).toBe('courses');
+    expect(photoMeaningFor(21)).toBe('courses');
+    expect(photoMeaningFor(37)).toBe('courses');
+    expect(photoMeaningFor(18)).toBe('exams');
+    expect(photoMeaningFor(26)).toBe('arrival');
+    expect(photoMeaningFor(17)).toBe('orientation');
+    expect(photoMeaningFor(undefined)).toBe('orientation');
+  });
+});
