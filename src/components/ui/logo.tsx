@@ -8,8 +8,10 @@ import { cn } from '@/lib/utils';
  * THE COLOUR LOGO IS THE CURRENT WORDMARK FILE (2026-10-01): public/brand/casa-logo.png,
  * a 1155x325 downscale of the "casa-logo-neu" artwork CASA's new flyers use. The
  * inline SVG below is an older drawing of the same lock-up (its subtitle is cut
- * heavier), so Rahman chose the flyer file for the site. The SVG stays for the
- * workspace's white and `mark` versions, which need its paths.
+ * heavier), so Rahman chose the flyer file for the site. `onDark` is the same
+ * artwork with white lettering and the colours kept, for the dark footer
+ * (Rahman, 2026-10-02); scripts/media/build_logo.py builds both files. The SVG
+ * stays for the workspace's white and `mark` versions, which need its paths.
  *
  * The mark is symmetrical and it matters: a red sail on water, the CASA
  * wordmark, then a sun setting over water. Taking half of it leaves a stray
@@ -18,7 +20,7 @@ import { cn } from '@/lib/utils';
  */
 type LogoProps = {
   className?: string;
-  variant?: 'default' | 'white';
+  variant?: 'default' | 'onDark' | 'white';
   /** Only for the header copy, which is above the fold. */
   preload?: boolean;
   /**
@@ -55,10 +57,10 @@ export function Logo({
   crop = 'full',
   preload = false,
 }: LogoProps) {
-  if (variant === 'default' && crop === 'full') {
+  if ((variant === 'default' || variant === 'onDark') && crop === 'full') {
     return (
       <Image
-        src="/brand/casa-logo.png"
+        src={variant === 'onDark' ? '/brand/casa-logo-on-dark.png' : '/brand/casa-logo.png'}
         alt="CASA Internationale Sprachschule"
         width={1155}
         height={325}
