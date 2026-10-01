@@ -48,6 +48,18 @@ OUT = REPO / 'public/media/casa'
 # chroma: saturation factor around neutral. wb: per-channel gains (R, G, B).
 SLIDES = [
     {
+        # Slot 55. The About hero: the CASA team in the courtyard (slot 53's
+        # frame 098) as the whole 3:2 frame. The group fills the width, so any
+        # narrower crop would cut someone at the edge; the hero shows it at its
+        # own proportions instead (`aspectRatio: '3 / 2'`).
+        'out': 'about-team-courtyard.webp',
+        'source': POOL / '098_IMG_0340.JPG',
+        'box': (0, 0, 2560, 1706),
+        'tone': (8, 40, 88),
+        'chroma': 1.12,
+        'wb': (1.0, 1.0, 1.0),
+    },
+    {
         # Slot 54. The homepage hero: the slot 51 lesson as a 5:4 crop of the
         # full frame (2110x1688 of 2560x1688), for the half-width hero image.
         # The teacher, the board, the learner at the board and the class in

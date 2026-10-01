@@ -496,6 +496,21 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
     caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
   },
+  /*
+   * THE ABOUT HERO. The CASA team in the school courtyard: camera original 098
+   * as its whole 3:2 frame, light and colour correction only (slot 55,
+   * scripts/media/build_reel.py). The group spans the full width, so the hero
+   * shows the frame at its own proportions rather than cropping someone off.
+   */
+  heroTeam: {
+    src: '/media/casa/about-team-courtyard.webp',
+    alt: {
+      de: 'Das CASA-Team steht gemeinsam im begrünten Innenhof der Schule und lächelt in die Kamera',
+      en: 'The CASA team standing together in the school\'s leafy courtyard, smiling at the camera',
+    },
+    caption: { de: 'Das CASA-Team', en: 'The CASA team' },
+    aspectRatio: '3 / 2',
+  },
 };
 
 export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
@@ -544,14 +559,14 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
   },
   about: {
     heroType: 'home-photo',
-    sections: ['proof-mini', 'mission-story', 'timeline', 'team-grid', 'testimonials'],
+    sections: ['figures', 'mission-story', 'quality-standards', 'partners', 'learning-through-connection', 'tandem', 'testimonial'],
     ctas: [
       { label: { en: 'Talk to admissions', de: 'Beratung anfragen' }, href: '/contact', kind: 'primary' },
       { label: { en: 'Find my course path', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
     ],
     photos: {
-      // Daylight companion to the warmer homepage image, supplied by the user.
-      hero: photoLibrary.buildingDaylight,
+      // The people who run the school, not the building: slot 55.
+      hero: photoLibrary.heroTeam,
       mission: photoLibrary.groupCourseBremenMusicians,
       /* The community-story block's photo, which used to borrow `hero`. */
       story: photoLibrary.groupClassroomTeacherActivity,

@@ -85,21 +85,31 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
         ))}
       </ul>
 
-      <ul className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4" aria-label={locale === 'de' ? 'Qualität und Partnerschaften' : 'Accreditations and partners'}>
-        {accreditationLogos.slice(0, 5).map((logo) => (
-          <li key={logo.id}>
-            <Link
-              href={logo.href || '#'}
-              target={logo.href ? '_blank' : undefined}
-              rel={logo.href ? 'noreferrer' : undefined}
-              className="flex h-20 w-full items-center justify-center rounded-xl bg-white px-3 transition-transform duration-300 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-amber)] sm:h-24 xl:h-28 xl:px-5"
-              aria-label={logo.name}
-            >
-              <Image src={logo.imageSrc} alt={logo.name} width={logo.imageWidth} height={logo.imageHeight} sizes="(min-width: 1280px) 220px, (min-width: 1024px) 170px, (min-width: 640px) 200px, 160px" className="h-14 w-full object-contain sm:h-16 xl:h-20" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <AccreditationLogoList locale={locale} className="mt-7" />
     </section>
+  );
+}
+
+/**
+ * The five accreditation and partner marks as white tiles. They sit on ink in
+ * ProofBand and in the About page's quality band, so the row lives here once.
+ */
+export function AccreditationLogoList({ locale, className }: { locale: ContentLocale; className?: string }) {
+  return (
+    <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4', className)} aria-label={locale === 'de' ? 'Qualität und Partnerschaften' : 'Accreditations and partners'}>
+      {accreditationLogos.slice(0, 5).map((logo) => (
+        <li key={logo.id}>
+          <Link
+            href={logo.href || '#'}
+            target={logo.href ? '_blank' : undefined}
+            rel={logo.href ? 'noreferrer' : undefined}
+            className="flex h-20 w-full items-center justify-center rounded-xl bg-white px-3 transition-transform duration-300 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-amber)] sm:h-24 xl:h-28 xl:px-5"
+            aria-label={logo.name}
+          >
+            <Image src={logo.imageSrc} alt={logo.name} width={logo.imageWidth} height={logo.imageHeight} sizes="(min-width: 1280px) 220px, (min-width: 1024px) 170px, (min-width: 640px) 200px, 160px" className="h-14 w-full object-contain sm:h-16 xl:h-20" />
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
