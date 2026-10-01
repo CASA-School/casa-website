@@ -318,12 +318,12 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
     <header
       ref={navRef}
       className={cn(
-        'sticky top-0 z-[900] h-20 border-b transition-[background-color,border-color,box-shadow] duration-200',
-        scrolled || activeDropdown
-          ? 'border-[color:var(--casa-sand)]/80 bg-white shadow-[var(--shadow-soft)]'
-          : 'border-transparent bg-white'
+        'sticky top-0 z-[900] h-20 bg-white transition-[box-shadow] duration-200',
+        scrolled || activeDropdown ? 'shadow-[var(--shadow-soft)]' : undefined
       )}
     >
+      {/* The logo stripe is the header's bottom edge (globals.css, .casa-logo-stripe). */}
+      <div aria-hidden="true" className="casa-logo-stripe pointer-events-none absolute inset-x-0 bottom-0 h-[3px]" />
       {/*
         The actual Container, not a copy of its classes.
 
