@@ -16,7 +16,9 @@ staff members after the code had removed them.
   2026-10-01.
 - The homepage's course rows are **4, 5, 8** (real photographs since 2026-10-01; **37**,
   the medical row, is still a placeholder), "Wir hören zu" is **56** and the
-  accommodation block is **57** (a CASA-WG room). See MEDIA_LIBRARY.md for the set.
+  accommodation block is **57** (a CASA-WG room). Since 2026-10-02 the course pages
+  have their own hero crops (**58, 60, 61, 63, 65**) and second photos (**59, 62, 64**,
+  plus 10 and 56). See MEDIA_LIBRARY.md for the set and the modern grade.
 - The About hero is **55** (since 2026-10-01): the CASA team in the courtyard, the
   whole 3:2 frame of 098 with light correction only.
 - The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light

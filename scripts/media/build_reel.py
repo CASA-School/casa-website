@@ -51,60 +51,130 @@ OUT = REPO / 'public/media/casa'
 # tone: target lightness (0-100) for the crop's 5th, 50th and 95th percentile.
 # chroma: saturation factor around neutral. wb: per-channel gains (R, G, B).
 SLIDES = [
-    # THE HOMEPAGE SET (2026-10-01). One house look across the page, measured
-    # against the slot 54 hero: reference whites at a* 0..+3 and b* +3.5..+6.5,
-    # skin hue 47-60 degrees, indoor median L* 54-60. Course photos are also
-    # each course page's hero and a small square card, both centre-cropped, so
-    # every face sits in the middle ~52% of the height and ~75% of the width.
+    # THE PHOTOGRAPH SET, MODERN GRADE (2026-10-02). Rahman asked for brighter,
+    # more modern light and wider, livelier pictures. One grade for all of
+    # them: white balance from a known neutral in each frame (a whiteboard, a
+    # white wall, paper) or the photo editor's earlier skin-checked gains, the
+    # midtones lifted to L* 61-64 and the highlights to 93-94 without clipping,
+    # saturation near natural (1.02-1.06). Course photos are also each course
+    # page's hero, so every course has its own 2.4:1 crop composed for that
+    # band ("-hero") as well as the 4:3 identity crop.
     {
-        # Slot 4, Deutsch intensiv: five learners along the table by the window.
-        # x 566 clears a learner the 1.16:1 crop would otherwise slice.
+        # Slot 4, Intensivkurse: five learners along the table by the window.
         'out': 'course-intensive-class.webp',
         'source': POOL / '060_IMG_0253.JPG',
         'box': (566, 130, 1920, 1440),
-        'tone': (5, 59, 91),
-        'chroma': 1.03,
-        'wb': (0.965, 1.0, 1.04),
+        'tone': (5, 63, 93), 'chroma': 1.02, 'wb': (0.955, 1.0, 1.055),
     },
     {
-        # Slot 5, Abendkurs: three learners laughing over a shared exercise.
+        # Slot 58, its course-page hero: the same class as a 2.4:1 band.
+        'out': 'course-intensive-hero.webp',
+        'source': POOL / '060_IMG_0253.JPG',
+        'box': (260, 435, 2230, 929),
+        'tone': (5, 63, 93), 'chroma': 1.02, 'wb': (0.955, 1.0, 1.055),
+    },
+    {
+        # Slot 59, the course page's second photo: the same class, the teacher presenting.
+        'out': 'course-intensive-story.webp',
+        'source': POOL / '061_IMG_0254.JPG',
+        'box': (1070, 280, 1400, 933),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.965, 1.0, 1.045),
+    },
+    {
+        # Slot 5, Abendkurse: three learners laughing over a shared exercise.
         # The right edge stops before a publisher's book cover and the teacher.
         'out': 'course-evening-table.webp',
         'source': POOL / '088_IMG_0303.JPG',
         'box': (40, 30, 1960, 1470),
-        'tone': (5, 59, 91),
-        'chroma': 1.05,
-        'wb': (0.99, 1.0, 1.02),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.03),
     },
     {
-        # Slot 8, Spezialkurse: two learners reading a text together by the window.
-        'out': 'course-special-pair-reading.webp',
-        'source': POOL / '077_IMG_0284.JPG',
-        'box': (320, 0, 1960, 1470),
-        'tone': (5, 58, 91),
-        'chroma': 1.06,
-        'wb': (1.0, 1.0, 0.975),
+        # Slot 60, its course-page hero.
+        'out': 'course-evening-hero.webp',
+        'source': POOL / '088_IMG_0303.JPG',
+        'box': (40, 300, 1960, 817),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.03),
     },
     {
-        # Slot 56, the homepage's "Wir hören zu": one explains, one listens.
-        # A white wall fills much of the frame, so the median sits higher than
-        # the classroom frames' to keep the wall white, not grey.
-        'out': 'home-conversation-pair.webp',
-        'source': POOL / '076_IMG_0283.JPG',
-        'box': (160, 42, 2400, 1600),
-        'tone': (6, 70, 92),
-        'chroma': 1.06,
-        'wb': (1.01, 1.0, 0.975),
+        # Slot 8, Spezialkurse: the teacher speaking at the smart board, her
+        # class working in front of her (Rahman's pick, 2026-10-02). The left
+        # edge leaves out the wall clock rather than cut it in half.
+        'out': 'course-special-smartboard.webp',
+        'source': POOL / '067_IMG_0266.JPG',
+        'box': (490, 138, 2070, 1552),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.0, 1.0, 0.995),
     },
     {
-        # Slot 57, a single room in a CASA shared flat, for the homepage's
-        # accommodation block. Its lower third stays calm for the white caption.
+        # Slot 61, its course-page hero.
+        'out': 'course-special-hero.webp',
+        'source': POOL / '067_IMG_0266.JPG',
+        'box': (0, 560, 2560, 1067),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.0, 1.0, 0.995),
+    },
+    {
+        # Slot 62, Bildungszeit: a learner smiling up from his exercise while
+        # the teacher writes the grammar on the board.
+        'out': 'course-bildungszeit-class.webp',
+        'source': POOL / '094_IMG_0315.JPG',
+        'box': (170, 0, 2227, 1670),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.03),
+    },
+    {
+        # Slot 63, its course-page hero.
+        'out': 'course-bildungszeit-hero.webp',
+        'source': POOL / '094_IMG_0315.JPG',
+        'box': (0, 100, 2560, 1067),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.03),
+    },
+    {
+        # Slot 64, Firmenunterricht: a CASA classroom, the logo on the screen.
+        # No people in it.
+        'out': 'course-company-classroom.webp',
+        'source': POOL / '053_IMG_0211.JPG',
+        'box': (150, 0, 2251, 1688),
+        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.969, 1.0, 1.027),
+    },
+    {
+        # Slot 65, its course-page hero.
+        'out': 'course-company-hero.webp',
+        'source': POOL / '053_IMG_0211.JPG',
+        'box': (0, 330, 2560, 1067),
+        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.969, 1.0, 1.027),
+    },
+    {
+        # Slot 56, the homepage's "Wir hören zu": the teacher with smiling learners.
+        'out': 'home-class-welcome.webp',
+        'source': POOL / '087_IMG_0302.JPG',
+        'box': (60, 170, 1620, 1080),
+        'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.034),
+    },
+    {
+        # Slot 57, a single room in a CASA shared flat, for the accommodation block.
         'out': 'casa-wg-room.webp',
         'source': POOL / '008_6.jpg',
         'box': (200, 0, 2276, 1707),
-        'tone': (6, 56, 90),
-        'chroma': 1.04,
-        'wb': (0.94, 1.0, 0.97),
+        'tone': (6, 60, 92), 'chroma': 1.03, 'wb': (0.94, 1.0, 0.975),
+    },
+    {
+        # Slot 10, vocabulary on a Bremen map (hands only), Spezialkurse's second photo.
+        'out': 'classroom-map-vocabulary.jpg',
+        'source': POOL / 'W006_classroom-map-vocabulary_editorial.jpg',
+        'box': (0, 0, 2400, 1600),
+        'tone': (6, 60, 93), 'chroma': 1.03, 'wb': (1.0, 1.0, 1.0),
+    },
+    {
+        # Slot 20, a group at the Bremen Town Musicians, regraded from its pool file.
+        'out': 'group-course-bremen-musicians.jpg',
+        'source': POOL / 'W008_group-course-bremen-musicians_editorial.jpg',
+        'box': (0, 0, 2400, 1600),
+        'tone': (6, 50, 92), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.0),
+    },
+    {
+        # Slot 23, a group walking through Bremen, regraded from its pool file.
+        'out': 'group-course-walking-bremen.jpg',
+        'source': POOL / 'W012_group-course-walking-bremen_editorial.jpg',
+        'box': (0, 0, 2400, 1600),
+        'tone': (4, 46, 90), 'chroma': 1.05, 'wb': (0.975, 1.0, 1.0),
     },
     {
         # Slot 55. The About hero: the CASA team in the courtyard (slot 53's
@@ -114,9 +184,9 @@ SLIDES = [
         'out': 'about-team-courtyard.webp',
         'source': POOL / '098_IMG_0340.JPG',
         'box': (0, 0, 2560, 1706),
-        'tone': (8, 40, 88),
-        'chroma': 1.12,
-        'wb': (1.0, 1.0, 1.0),
+        'tone': (7, 47, 92),
+        'chroma': 1.06,
+        'wb': (1.0, 1.0, 0.985),
     },
     {
         # Slot 54. The homepage hero: the slot 51 lesson as a 5:4 crop of the
@@ -126,9 +196,9 @@ SLIDES = [
         'out': 'hero-classroom-lesson.webp',
         'source': POOL / '093_IMG_0314.JPG',
         'box': (129, 0, 2110, 1688),
-        'tone': (7, 56, 91),
-        'chroma': 1.06,
-        'wb': (0.975, 0.99, 1.035),
+        'tone': (6, 61, 93),
+        'chroma': 1.03,
+        'wb': (0.97, 0.995, 1.04),
     },
     {
         # Slot 51. A lesson on Wechselpräpositionen; the board is the teacher's own handwriting.
@@ -174,6 +244,8 @@ SLIDES = [
 ]
 
 WEBP_QUALITY = 90
+# The three older photographs keep their .jpg paths, which pages reference by name.
+JPEG_QUALITY = 90
 
 
 def load(path):
@@ -277,7 +349,10 @@ def main():
             print(f"{'ok  ' if ok else 'FAIL'}     {slide['out']}: worst tile {score:.1f} dB at {x},{y}")
         else:
             # No EXIF is written: camera files can carry GPS coordinates.
-            Image.fromarray(image).save(target, 'WEBP', quality=WEBP_QUALITY, method=6)
+            if target.suffix == '.jpg':
+                Image.fromarray(image).save(target, 'JPEG', quality=JPEG_QUALITY, optimize=True)
+            else:
+                Image.fromarray(image).save(target, 'WEBP', quality=WEBP_QUALITY, method=6)
             position = '' if 'box' in slide else f"; objectPosition '50% {object_position_y(slide, image):.0f}%'"
             print(f"wrote    {slide['out']}: {image.shape[1]}x{image.shape[0]} from {slide['source'].name}{position}")
     sys.exit(1 if failed else 0)

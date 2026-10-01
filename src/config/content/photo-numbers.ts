@@ -105,9 +105,9 @@ export const photoSlots: PhotoSlot[] = [
   { n: 5, src: '/media/casa/course-evening-table.webp', subject: 'Abendkurs. Three learners laughing over a shared exercise at the course table. Collection frame 088, 4:3 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
   { n: 6, src: '/media/casa/course-discussion-row.jpg', subject: 'A row of learners in discussion, shot along the row.', ready: false },
   { n: 7, src: '/media/casa/course-seminar-wide.jpg', subject: 'Seminar-style room, wide, adult learners at tables.', ready: false },
-  { n: 8, src: '/media/casa/course-special-pair-reading.webp', subject: 'Spezialkurse. Two learners reading a text together by the window. Collection frame 077, 4:3 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
+  { n: 8, src: '/media/casa/course-special-smartboard.webp', subject: 'Spezialkurse. The teacher speaking at the smart board, her class working in front of her. Collection frame 067, 4:3 crop, modern grade (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 9, src: '/media/casa/classroom-pair-study.jpg', subject: 'Two learners working as a pair, heads together over one task.', ready: false },
-  { n: 10, src: '/media/casa/classroom-map-vocabulary.jpg', subject: 'Vocabulary work against a map — language tied to place.', ready: false },
+  { n: 10, src: '/media/casa/classroom-map-vocabulary.jpg', subject: 'Vocabulary work against a map: hands writing on a Bremen map, no faces. Pool file W006, full frame, modern grade (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 11, src: '/media/casa/learners-writing-class.jpg', subject: 'Learners writing by hand in class, close on the work.', ready: false },
   { n: 12, src: '/media/casa/group-classroom-teacher-activity.jpg', subject: 'Teacher running an activity with the group. Reused across course pages and the About community story; needs to work as a large image and in a small card.', ready: false },
   { n: 13, src: '/media/casa/individual-tutoring.jpg', subject: 'One-to-one tutoring, teacher and single learner side by side.', ready: false },
@@ -119,10 +119,10 @@ export const photoSlots: PhotoSlot[] = [
   { n: 19, src: '/media/casa/study-materials-map.jpg', subject: 'Study materials laid out with a map.', ready: false },
 
   // ---- Groups, excursions, Bremen -----------------------------------------
-  { n: 20, src: '/media/casa/group-course-bremen-musicians.jpg', subject: 'Group at the Bremen Town Musicians statue.', ready: true },
+  { n: 20, src: '/media/casa/group-course-bremen-musicians.jpg', subject: 'Group at the Bremen Town Musicians statue. Pool file W008, regraded to the modern set (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 21, src: '/media/casa/group-course-lunch-table.jpg', subject: 'Group eating together, social rather than instructional.', ready: false },
   { n: 22, src: '/media/casa/group-course-phone-task.jpg', subject: 'Learners on a phone-based task out in the city.', ready: false },
-  { n: 23, src: '/media/casa/group-course-walking-bremen.jpg', subject: 'Group walking through Bremen together, city legible behind them.', ready: true },
+  { n: 23, src: '/media/casa/group-course-walking-bremen.jpg', subject: 'Group walking through Bremen together, city legible behind them. Pool file W012, regraded to the modern set (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 24, src: '/media/casa/student-group-activity-outdoor.jpg', subject: 'Outdoor group activity, daylight, clearly not a classroom.', ready: false },
   { n: 25, src: '/media/casa/bremen-schnoor-houses.jpg', subject: 'The Schnoor quarter houses — Bremen as a place to live, no people needed.', ready: false },
 
@@ -201,8 +201,16 @@ export const photoSlots: PhotoSlot[] = [
   { n: 53, src: '/media/casa/reel-team-courtyard.webp', subject: 'The CASA team standing together in the leafy courtyard, most smiling at the camera. Collection frame 098, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
   { n: 54, src: '/media/casa/hero-classroom-lesson.webp', subject: 'The slot 51 lesson as a 5:4 crop of the full frame (collection 093, 2110x1688), light correction only (scripts/media/build_reel.py), for the half-width homepage hero, 2026-10-01.', ready: true },
   { n: 55, src: '/media/casa/about-team-courtyard.webp', subject: 'The slot 53 team photograph as the whole 3:2 frame (collection 098, 2560x1706), light correction only (scripts/media/build_reel.py), for the About hero, 2026-10-01.', ready: true },
-  { n: 56, src: '/media/casa/home-conversation-pair.webp', subject: 'The homepage\'s "Wir hören zu": two learners over a worksheet, one explaining, one listening. Collection frame 076, 3:2 crop with light correction only (scripts/media/build_reel.py), 2026-10-01.', ready: true },
+  { n: 56, src: '/media/casa/home-class-welcome.webp', subject: 'The homepage\'s "Wir hören zu": the teacher with smiling learners at the course table. Collection frame 087, 3:2 crop, modern grade (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 57, src: '/media/casa/casa-wg-room.webp', subject: 'A single room in a CASA shared flat: bed, armchair, desk, the navy wall. Collection file 008, 4:3 crop with light correction only (scripts/media/build_reel.py), for the homepage accommodation block, 2026-10-01. Not a host-family room.', ready: true },
+  { n: 58, src: '/media/casa/course-intensive-hero.webp', subject: 'Intensivkurse course-page hero: frame 060 as a 2.4:1 band composed for the hero, modern grade, 2026-10-02.', ready: true },
+  { n: 59, src: '/media/casa/course-intensive-story.webp', subject: 'Intensivkurse second photo: the same class (frame 061), the teacher presenting at the screen, modern grade, 2026-10-02.', ready: true },
+  { n: 60, src: '/media/casa/course-evening-hero.webp', subject: 'Abendkurse course-page hero: frame 088 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
+  { n: 61, src: '/media/casa/course-special-hero.webp', subject: 'Spezialkurse course-page hero: frame 067 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
+  { n: 62, src: '/media/casa/course-bildungszeit-class.webp', subject: 'Bildungszeit: a learner smiling up from his exercise while the teacher writes grammar on the board. Frame 094, 4:3 crop, modern grade, 2026-10-02.', ready: true },
+  { n: 63, src: '/media/casa/course-bildungszeit-hero.webp', subject: 'Bildungszeit course-page hero: frame 094 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
+  { n: 64, src: '/media/casa/course-company-classroom.webp', subject: 'Firmenunterricht: a bright CASA classroom with the logo on the screen, no people. Frame 053, 4:3 crop, modern grade, 2026-10-02.', ready: true },
+  { n: 65, src: '/media/casa/course-company-hero.webp', subject: 'Firmenunterricht course-page hero: frame 053 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));
