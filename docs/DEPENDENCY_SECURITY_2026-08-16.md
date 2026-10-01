@@ -187,3 +187,12 @@ is production-scope only": clearing them means moving eslint and knip majors,
 which risks the toolchain to fix code that never ships.
 
 Verified on 16.3.4: lint, typecheck, build, knip, 329 unit tests, 36 e2e.
+
+## 2026-10-01 — Next.js 16.3.8 (GHSA-vcvr-r3jv-pc5j)
+
+The CI audit gate failed on a new **critical** advisory: remote code execution in
+`next/og`'s `ImageResponse`, affecting `next` 16.2.0–16.3.5. The site never imports `next/og`
+or `ImageResponse` (no generated OG images; `og:image` is a static file), so the vulnerable path
+was not reachable on the deployed revision. `next` and `eslint-config-next` were bumped to
+16.3.8, still pinned exactly; nothing else in the lockfile moved, and the production audit
+reports 0 vulnerabilities.
