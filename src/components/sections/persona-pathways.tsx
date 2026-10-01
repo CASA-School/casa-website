@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { ArrowRight } from 'lucide-react';
 
+import { meaningClasses, type Meaning } from '@/config/brand/meaning';
 import { iconMap, type IconKey } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import type { ContentLocale } from '@/lib/content/types';
@@ -100,23 +101,17 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
       ];
 }
 
-const personaAccentClasses: Record<PersonaKey, { bar: string; icon: string }> = {
-  'new-learners': {
-    bar: 'bg-[var(--casa-blue)]',
-    icon: 'text-[var(--casa-accent-text)]',
-  },
-  'working-professionals': {
-    bar: 'bg-[var(--casa-sun)]',
-    icon: 'text-[var(--casa-ink)]',
-  },
-  'exam-candidates': {
-    bar: 'bg-[var(--casa-red)]',
-    icon: 'text-[var(--casa-red)]',
-  },
-  'housing-onboarding': {
-    bar: 'bg-[var(--casa-ink-deep)]',
-    icon: 'text-[var(--casa-ink-deep)]',
-  },
+/*
+ * Each pathway takes the colour of what it leads to (src/config/brand/meaning.ts):
+ * finding a level is orientation, working around a job is a course, a
+ * certificate is an exam, arriving is accommodation. The colours used to be
+ * assigned in turn, which made the exam card red and the arrival card ink.
+ */
+const personaMeaning: Record<PersonaKey, Meaning> = {
+  'new-learners': 'orientation',
+  'working-professionals': 'courses',
+  'exam-candidates': 'exams',
+  'housing-onboarding': 'arrival',
 };
 
 function withPersonaContext(href: string, persona: PersonaKey) {
@@ -157,25 +152,25 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
         {pathways.map((pathway) => {
           const Icon = iconMap[pathway.icon];
           const primaryHref = withPersonaContext(pathway.primaryAction.href, pathway.key);
-          const accentClassName = personaAccentClasses[pathway.key];
+          const meaning = meaningClasses[personaMeaning[pathway.key]];
 
           return (
             <article
               key={pathway.title}
-              className="group relative flex min-h-[18.5rem] flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition duration-300 hover:bg-[var(--casa-blue)]/5 hover:ring-[color:var(--casa-blue)]/35 hover:shadow-[var(--shadow-card)] motion-safe:hover:-translate-y-1 md:p-7"
+              className={cn(
+                'group relative flex min-h-[18.5rem] flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition duration-300 hover:shadow-[var(--shadow-card)] motion-safe:hover:-translate-y-1 md:p-7',
+                meaning.hover
+              )}
               data-casa-persona={pathway.key}
             >
               <span
-                className={cn('absolute inset-x-0 top-0 h-1', accentClassName.bar)}
+                className={cn('absolute inset-x-0 top-0 h-1', meaning.bar)}
                 aria-hidden
               />
 
               <div>
                 <div
-                  className={cn(
-                    'inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--casa-bg)] ring-1 ring-[color:var(--casa-sand)]',
-                    accentClassName.icon
-                  )}
+                  className={cn('inline-flex h-12 w-12 items-center justify-center rounded-full', meaning.circle)}
                 >
                   <Icon className="h-6 w-6" />
                 </div>
@@ -210,7 +205,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
                     href={primaryHref}
                     aria-label={`${actionLabel}: ${pathway.title}`}
                     data-casa-track="true"
-                    className="casa-cta-link group/cta inline-flex items-center gap-2.5 text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors after:absolute after:inset-0 after:content-[''] hover:text-[var(--casa-accent-text-hover)] hover:underline"
+                    className={cn("casa-cta-link group/cta inline-flex items-center gap-2.5 text-sm font-semibold underline-offset-4 transition-colors after:absolute after:inset-0 after:content-[''] hover:underline", meaning.link)}
                   >
                     <span>{actionLabel}</span>
                     <ArrowRight
@@ -223,7 +218,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
                     href={primaryHref}
                     aria-label={`${actionLabel}: ${pathway.title}`}
                     data-casa-track="true"
-                    className="casa-cta-link group/cta inline-flex items-center gap-2.5 text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors after:absolute after:inset-0 after:content-[''] hover:text-[var(--casa-accent-text-hover)] hover:underline"
+                    className={cn("casa-cta-link group/cta inline-flex items-center gap-2.5 text-sm font-semibold underline-offset-4 transition-colors after:absolute after:inset-0 after:content-[''] hover:underline", meaning.link)}
                   >
                     <span>{actionLabel}</span>
                     <ArrowRight
