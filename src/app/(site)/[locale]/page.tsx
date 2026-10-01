@@ -33,6 +33,7 @@ import type { ContentLocale, CourseNarrative, CourseTypeRow } from '@/lib/conten
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { publicCourseOrder } from '@/config/courses/course-order';
 import { meaningClasses } from '@/config/brand/meaning';
+import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import { BandHeading } from '@/components/sections/band-heading';
 
@@ -151,6 +152,23 @@ export default async function HomePage() {
   const accommodationPhoto = pageConfig.photos.accommodation;
   const rhythm = getLayoutRhythm('home');
   const culturalPrograms = getCulturalPrograms(locale);
+  const programById = (id: string) => culturalPrograms.find((program) => program.id === id);
+  const tandemProgram = programById('tandem');
+  const TandemIcon = iconMap.tandem;
+  const lifeTiles = [
+    {
+      id: 'weekend-excursions',
+      photo: pageConfig.photos.lifeRegion,
+      title: programById('weekend-excursions')?.title ?? '',
+      line: locale === 'de' ? 'Ausflüge, Stadtspaziergänge, Kulturprogramm' : 'Trips, city walks and cultural events',
+    },
+    {
+      id: 'community-events',
+      photo: pageConfig.photos.lifePeople,
+      title: programById('community-events')?.title ?? '',
+      line: locale === 'de' ? 'Teilnehmende aus vielen Kursen' : 'Learners from many courses',
+    },
+  ];
 
   const [finderData, examCatalog, stories] = await Promise.all([
     getCourseFinderData(locale),
@@ -883,13 +901,44 @@ export default async function HomePage() {
               ? 'Zum Ankommen gehört mehr als ein Sprachkurs. Gemeinsame Erlebnisse machen aus einer neuen Stadt einen vertrauten Ort.'
               : 'Feeling at home takes more than a language course. Shared experiences help turn a new city into a familiar place.'}
           />
-          <div className="mx-auto mt-10 grid max-w-[85rem] gap-8 md:grid-cols-3">
-            {culturalPrograms.map((program) => (
-              <article key={program.id}>
-                <h3 className="text-xl font-bold">{program.title}</h3>
-                <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{program.summary}</p>
-              </article>
+          {/*
+            Two real photographs with their caption on a dark gradient, and the
+            tandem as a light-blue card (blue = exchange, src/config/brand/meaning.ts).
+            It was three columns of text; the texts are the same programmes.
+          */}
+          <div className="mx-auto mt-10 grid max-w-[85rem] gap-5 md:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
+            {lifeTiles.map((tile) => (
+              <figure
+                key={tile.id}
+                className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] shadow-[var(--shadow-card)] lg:aspect-auto lg:h-[23rem]"
+              >
+                <Image
+                  src={tile.photo.src}
+                  alt={tile.photo.alt}
+                  fill
+                  sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw"
+                  className="object-cover"
+                />
+                <figcaption className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.78)_100%)] px-5 pb-5 pt-16 text-white md:px-6">
+                  <span className="block text-lg font-bold leading-snug">{tile.title}</span>
+                  <span className="mt-1 block text-sm text-white/90">{tile.line}</span>
+                </figcaption>
+              </figure>
             ))}
+            {tandemProgram ? (
+              <article className="flex flex-col justify-between rounded-xl bg-[var(--casa-blue-tint)] p-6 md:col-span-2 md:p-7 lg:col-span-1 lg:h-[23rem]">
+                <div>
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-[var(--casa-accent-text)]" aria-hidden>
+                    <TandemIcon className="h-6 w-6" />
+                  </span>
+                  <h3 className="mt-5 text-xl font-bold text-[var(--casa-ink)]">{tandemProgram.title}</h3>
+                  <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemProgram.summary}</p>
+                </div>
+                <TextCta href="/contact" className="mt-6 self-start">
+                  {locale === 'de' ? 'Tandem anfragen' : 'Ask about a tandem'}
+                </TextCta>
+              </article>
+            ) : null}
           </div>
           <div className="mt-8 text-center">
             <TextCta href="/contact">
