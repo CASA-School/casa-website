@@ -2,6 +2,7 @@ import 'server-only';
 
 import { z } from 'zod';
 
+import { LOGO_CONTENT_ID, LOGO_PNG_BASE64 } from './casa-logo';
 import { buildFormMail, type FormKind } from './form-mail';
 
 export type { FormKind };
@@ -74,6 +75,16 @@ export async function notifyForm(
           message: {
             subject: mail.subject,
             body: { contentType: 'HTML', content: mail.html },
+            // The logo travels with the mail and is referenced as cid:, so no
+            // client blocks it as a remote image.
+            attachments: [{
+              '@odata.type': '#microsoft.graph.fileAttachment',
+              name: 'casa-logo.png',
+              contentType: 'image/png',
+              contentId: LOGO_CONTENT_ID,
+              isInline: true,
+              contentBytes: LOGO_PNG_BASE64,
+            }],
             toRecipients: [{ emailAddress: { address: recipient } }],
             ...(replyTo ? { replyTo } : {}),
           },

@@ -18,23 +18,34 @@ Microsoft activation is deferred; the earlier permission question was not approv
 
 Built by `buildFormMail` in `src/lib/notifications/form-mail.ts`; `notifyForm` only delivers it.
 
-- **Language of the form.** A German form writes a German email, an English form an English one.
-  The group-enquiry fields use the contact form's own wording (`src/config/forms/organiser-brief-copy.ts`),
-  so staff read the words the sender chose.
-- **Subject says what and who:** `Kursanmeldung: Maria Rossi – Intensivkurs Deutsch`,
+- **Language of the form.** A German form writes a German email, an English form an English one,
+  including the reply it prepares. The group-enquiry fields use the contact form's own wording
+  (`src/config/forms/organiser-brief-copy.ts`), so staff read the words the sender chose.
+- **Brand.** The CASA logo, rendered from the master SVG in `src/components/ui/logo.tsx` to a PNG
+  (`src/lib/notifications/casa-logo.ts`) and sent as an inline attachment (`cid:casa-logo`), so
+  Outlook never blocks it as a remote image. One accent, CASA blue; the red, blue and sun triad
+  stays in the logo, as on the website. Headline in a serif (Georgia, standing in for the site's
+  display face), body in Arial.
+- **Structure.** The form and the time received; a headline; one sentence saying who wants what
+  („Maria Rossi hat sich für den Kurs „Intensivkurs Deutsch“ angemeldet.“); highlights such as
+  „Visum benötigt“ or „Gastfamilie gewünscht“; one button; then labelled sections with empty
+  fields left out. Footer: reference, language, whether the workspace also stored it, and the
+  CASA address.
+- **The button.** „Maria antworten“ opens a reply to the sender, greeting them by salutation
+  („Sehr geehrte Frau Rossi,“). For an appointment it is „Termin bestätigen“: a confirmation in the
+  guest's language with the date, time and duration filled in and one bracketed line, how the
+  conversation takes place, for the contact person to complete before sending. Job applications
+  and placement results have no button; they point to the workspace.
+- **Subjects** say what and who: `Kursanmeldung: Maria Rossi – Intensivkurs Deutsch`,
   `Terminanfrage: Jonas Becker – Donnerstag, 8. Oktober 2026, 10:30 Uhr`, `Bewerbung: <Stelle>`,
-  `Einstufungstest: Empfehlung B1.1`. `[TEST] ` in front while testing. No access key or token
-  in a subject.
-- **Body:** a title and one summary line, then labelled sections (course, person, visa and
-  accommodation; exam; appointment; group details; placement result, skills, points to check,
-  opening questions). Empty fields are left out. The footer has the reference, the time received
-  in Bremen time, the language, and whether the workspace also stored the record.
-- **Reply** goes to the sender (Reply-To), and the email says so. The appointment email asks the
-  contact person to confirm by replying.
-- HTML in tables with inline styles, because desktop Outlook ignores most CSS. Everything the
-  sender typed is escaped.
+  `Einstufungstest: Empfehlung B1.1`. `[TEST] ` in front, and a yellow line in the body, while
+  testing. No access key or token in any subject.
+- **Responsive.** Up to 640px wide; below 620px the rows stack (label above value), the margins
+  narrow and the card runs edge to edge. A ghost table holds the width in desktop Outlook.
+  Light mode only (`color-scheme: light only`). Everything the sender typed is escaped.
 
-Previews of all seven emails in both languages: `output/review/form-emails/` (gitignored).
+Previews of all seven emails in both languages, desktop and phone: `output/review/form-emails/`
+(gitignored).
 
 ### Recipients after testing — Rahman, 2026-09-30
 

@@ -132,9 +132,40 @@ describe('public form notifications', () => {
     expect(notStored.message.body.content).toContain('Diese E-Mail ist der einzige Eintrag.');
     for (const message of [stored.message, notStored.message]) {
       expect(message.subject.startsWith('[TEST] ')).toBe(true);
-      expect(message.body.content).toContain('Test: Alle Formular-E-Mails gehen derzeit an admin@casa-bremen.de.');
+      expect(message.body.content).toContain('Testbetrieb: Alle Formular-E-Mails gehen derzeit an admin@casa-bremen.de.');
     }
     expect(unknown.message.body.content).not.toContain('Arbeitsbereich');
+  });
+  it('carries the CASA logo inline, so no client blocks it as remote content', async () => {
+    const body = await sentMessage('contact', { requestId: 'r', firstName: 'Ada', email: 'ada@example.com', topic: 'Kurse' });
+    expect(body.message.attachments).toEqual([expect.objectContaining({
+      '@odata.type': '#microsoft.graph.fileAttachment', contentType: 'image/png', contentId: 'casa-logo', isInline: true,
+    })]);
+    expect(body.message.attachments[0].contentBytes.startsWith('iVBORw0KGgo')).toBe(true);
+    expect(body.message.body.content).toContain('src="cid:casa-logo"');
+    expect(body.message.body.content).toContain('@media only screen and (max-width: 620px)');
+  });
+  it('prepares a reply in the sender\'s language, greeting them by salutation', async () => {
+    const de = (await sentMessage('course', {
+      requestId: 'r', salutation: 'ms', firstName: 'Maria', lastName: 'Rossi', email: 'maria@example.com', courseTypeLabel: 'Intensivkurs', locale: 'de',
+    })).message.body.content as string;
+    expect(de).toContain('Maria antworten');
+    expect(de).toContain(`subject=${encodeURIComponent('Ihre Kursanmeldung bei CASA')}`);
+    expect(de).toContain(encodeURIComponent('Sehr geehrte Frau Rossi,'));
+    const en = (await sentMessage('contact', { requestId: 'r', firstName: 'Sam', email: 'sam@example.com', locale: 'en' }))
+      .message.body.content as string;
+    expect(en).toContain('Reply to Sam');
+    expect(en).toContain(encodeURIComponent('Dear Sam,'));
+  });
+  it('offers the contact person a ready confirmation for an appointment', async () => {
+    const content = (await sentMessage('appointment', {
+      requestId: 'r', firstName: 'Jonas', lastName: 'Becker', email: 'jonas@example.com',
+      localDate: '2026-10-08', localTime: '10:30', durationMinutes: 30, locale: 'de',
+    })).message.body.content as string;
+    expect(content).toContain('Termin bestätigen');
+    expect(content).toContain('mailto:jonas@example.com?subject=');
+    expect(content).toContain(encodeURIComponent('am Donnerstag, 8. Oktober 2026, um 10:30 Uhr (Bremer Zeit)'));
+    expect(content).toContain('Diese Uhrzeit ist ab sofort für andere Anfragen reserviert.');
   });
   it('requires an explicit valid recipient in live mode', async () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'live');
