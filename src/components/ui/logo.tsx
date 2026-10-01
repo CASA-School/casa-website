@@ -1,7 +1,15 @@
+import Image from 'next/image';
+
 import { cn } from '@/lib/utils';
 
 /**
  * The CASA logo. One copy of the master artwork, for the whole application.
+ *
+ * THE COLOUR LOGO IS THE CURRENT WORDMARK FILE (2026-10-01): public/brand/casa-logo.png,
+ * a 1155x325 downscale of the "casa-logo-neu" artwork CASA's new flyers use. The
+ * inline SVG below is an older drawing of the same lock-up (its subtitle is cut
+ * heavier), so Rahman chose the flyer file for the site. The SVG stays for the
+ * workspace's white and `mark` versions, which need its paths.
  *
  * The mark is symmetrical and it matters: a red sail on water, the CASA
  * wordmark, then a sun setting over water. Taking half of it leaves a stray
@@ -11,6 +19,8 @@ import { cn } from '@/lib/utils';
 type LogoProps = {
   className?: string;
   variant?: 'default' | 'white';
+  /** Only for the header copy, which is above the fold. */
+  preload?: boolean;
   /**
    * How much of the lock-up to show.
    *
@@ -43,7 +53,22 @@ export function Logo({
   className = 'h-8 w-auto',
   variant = 'default',
   crop = 'full',
+  preload = false,
 }: LogoProps) {
+  if (variant === 'default' && crop === 'full') {
+    return (
+      <Image
+        src="/brand/casa-logo.png"
+        alt="CASA Internationale Sprachschule"
+        width={1155}
+        height={325}
+        sizes="180px"
+        className={className}
+        preload={preload}
+      />
+    );
+  }
+
   return (
     <svg
       className={cn(

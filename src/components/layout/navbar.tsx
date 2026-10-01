@@ -366,7 +366,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
         className="flex h-full items-center justify-between gap-3 xl:grid xl:grid-cols-[1fr_auto_1fr]"
       >
         <Link href="/" aria-label="Go to CASA homepage" className="flex shrink-0 items-center focus-visible:outline-none">
-          <Logo className="h-10 w-auto" />
+          <Logo className="h-10 w-auto" preload />
         </Link>
 
         {/*
