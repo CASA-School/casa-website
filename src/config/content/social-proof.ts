@@ -32,6 +32,10 @@ import type { ContentLocale, SocialProofItem } from '@/lib/content/types';
  *    kept rather than "translated", because a testimonial is someone's own words.
  *    Only light typo repair (CASA's page has "Fatameh", spacing slips, a missing
  *    space after a full stop) — never rephrasing.
+ *    Since 2026-10-01 (the go-live brief) German pages show a faithful German
+ *    translation of an English quote, always labelled "aus dem Englischen
+ *    übersetzt" in the attribution so it never passes as the learner's own
+ *    words. The verbatim original stays in `quote` and on English pages.
  *
  * VERIFIED 2026-08-18 against the seven casa-bremen.de/sprachkurse/* pages.
  */
@@ -74,6 +78,11 @@ type TestimonialSource = {
   excerpt: string;
   /** What the learner says about themselves, used in place of a country. */
   context: { en: string; de: string };
+  /**
+   * German pages' translation of an English quote. Same excerpt rule as above:
+   * the excerpt is a contiguous substring of the translated quote.
+   */
+  translation?: { de: { quote: string; excerpt: string } };
 };
 
 const TESTIMONIALS: TestimonialSource[] = [
@@ -90,6 +99,14 @@ const TESTIMONIALS: TestimonialSource[] = [
       en: 'Afternoon intensive course, about a year',
       de: 'Intensivkurs am Nachmittag, etwa ein Jahr',
     },
+    translation: {
+      de: {
+        quote:
+          'Es war eine so schöne Zeit. Ich habe Sprachkurse mein ganzes Leben lang gehasst und bin ohne große Hoffnung zu CASA gekommen! Ich habe etwa ein Jahr lang den Nachmittagsunterricht besucht, und es war großartig! Obwohl ich nach der Arbeit kam, war der Kursraum voller Energie und Spaß. Mein Deutsch hat sich so deutlich verbessert, dass ich bei Treffen auf der Arbeit angefangen habe, Deutsch zu sprechen. Die Mitarbeitenden sind sehr freundlich und entgegenkommend, und man wird respektvoll behandelt.',
+        excerpt:
+          'Ich habe Sprachkurse mein ganzes Leben lang gehasst und bin ohne große Hoffnung zu CASA gekommen! Ich habe etwa ein Jahr lang den Nachmittagsunterricht besucht, und es war großartig!',
+      },
+    },
   },
   {
     id: 'fatameh-evening',
@@ -104,6 +121,14 @@ const TESTIMONIALS: TestimonialSource[] = [
     context: {
       en: 'Evening courses A2 to B2, and the telc B2 exam',
       de: 'Abendkurse A2 bis B2 und die telc B2 Prüfung',
+    },
+    translation: {
+      de: {
+        quote:
+          'Ich habe regelmäßig Abendkurse in Deutsch besucht (A2 bis B2) und auch meine telc B2 Prüfung bei CASA abgelegt. Es war großartig! Meine Lehrkräfte, darunter Claudia, waren alle sehr nett, professionell und motiviert. Auch die Kommunikation mit der Verwaltung war immer nett, hilfsbereit und angenehm. Ich kann es auf jeden Fall empfehlen!',
+        excerpt:
+          'Ich habe regelmäßig Abendkurse in Deutsch besucht (A2 bis B2) und auch meine telc B2 Prüfung bei CASA abgelegt. Es war großartig!',
+      },
     },
   },
   {
@@ -132,6 +157,14 @@ const TESTIMONIALS: TestimonialSource[] = [
     context: {
       en: 'Intensive course, B1 level',
       de: 'Intensivkurs, Niveau B1',
+    },
+    translation: {
+      de: {
+        quote:
+          'Ich lerne bei CASA im Intensivkurs und bin gerade auf Niveau B1. Ich mache hier großartige Erfahrungen: Die Lehrkräfte sind toll, und die Atmosphäre an der Schule ebenso. Die Schule wird ihrem Namen gerecht, ich fühle mich hier wirklich willkommen und zu Hause. Außerdem bin ich sehr zufrieden mit meiner sprachlichen Entwicklung in so kurzer Zeit.',
+        excerpt:
+          'Die Schule wird ihrem Namen gerecht, ich fühle mich hier wirklich willkommen und zu Hause. Außerdem bin ich sehr zufrieden mit meiner sprachlichen Entwicklung in so kurzer Zeit.',
+      },
     },
   },
   {
@@ -179,18 +212,21 @@ const TESTIMONIALS: TestimonialSource[] = [
 ];
 
 function toSocialProof(source: TestimonialSource, locale: ContentLocale): SocialProofItem {
+  // A German page shows the labelled translation of an English quote (rule 3).
+  const translated = locale === 'de' && source.writtenIn !== 'de' ? source.translation?.de : undefined;
+
   return {
     id: `${source.id}-${locale}`,
     locale,
     // `quote` is what renders, so it carries the excerpt. The verbatim text stays
     // on `quoteFull` — auditable, and the guard test compares the two.
-    quote: source.excerpt,
-    quoteFull: source.quote,
+    quote: translated?.excerpt ?? source.excerpt,
+    quoteFull: translated?.quote ?? source.quote,
     personDisplay: source.person,
     // The old field was `country`, filled with invented nationalities. CASA
     // publishes what the learner studied, not where they are from, and that is
     // the more useful line beside a course testimonial anyway.
-    country: source.context[locale],
+    country: translated ? `${source.context[locale]} · aus dem Englischen übersetzt` : source.context[locale],
     courseSlug: source.courseSlug,
     examCode: source.examCode,
     sourcePlatform: 'website',

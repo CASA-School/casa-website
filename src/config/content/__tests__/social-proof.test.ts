@@ -71,3 +71,18 @@ describe('learner testimonials', () => {
     expect(groups[0]?.courseSlug).toBe('german-for-groups');
   });
 });
+
+describe('German pages and English testimonials', () => {
+  it('shows a labelled German translation, never an unlabelled English quote', async () => {
+    const { socialProofByLocale } = await import('../social-proof');
+
+    for (const item of socialProofByLocale.de) {
+      const english = /\b(the|and|was|I am|my)\b/.test(item.quote);
+      expect(english, `${item.id} renders English on a German page`).toBe(false);
+    }
+
+    const laura = socialProofByLocale.de.find((item) => item.id === 'laura-medical-de');
+    expect(laura?.country).toContain('aus dem Englischen übersetzt');
+    expect(socialProofByLocale.en.find((item) => item.id === 'laura-medical-en')?.quote).toContain('makes justice to its name');
+  });
+});
