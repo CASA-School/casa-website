@@ -40,7 +40,7 @@ function navDescription(value: string) {
 const deNavText: Record<string, string> = {
   Courses: 'Kurse',
   'Intensive & Part-time': 'Intensiv & berufsbegleitend',
-  'Intensive German': 'Intensiv Deutsch',
+  'Intensive German': 'Deutsch intensiv',
   'Fast-track German with frequent weekly classes.': 'Schneller Deutschfortschritt mit hoher Unterrichtsdichte.',
   'Evening Course': 'Abendkurs',
   'After-work classes for steady weekly progress.': 'Deutsch nach der Arbeit mit stabilem Lernrhythmus.',

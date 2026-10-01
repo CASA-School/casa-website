@@ -47,8 +47,8 @@ const pageSchema = (locale: ContentLocale) => ({
   url: toAbsoluteUrl(PATH),
   about: {
     '@type': 'EducationalOrganization',
-    name: 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH',
-    legalName: 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH',
+    name: 'CASA – Internationale Sprachschule gGmbH',
+    legalName: 'CASA – Internationale Sprachschule gGmbH',
   },
 });
 
@@ -79,7 +79,7 @@ export default async function NonProfitStatusPage() {
         ],
         legalTitle: 'Rechtsform und Nachweise',
         legalRows: [
-          ['Rechtsform', 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH'],
+          ['Rechtsform', 'CASA – Internationale Sprachschule gGmbH'],
           ['Register', 'Amtsgericht Bremen HRB 32761 HB'],
           ['Anerkennung', 'Staatlich anerkannter Träger der freien Jugendhilfe'],
           ['Steuerliche Einordnung', 'Anerkennung wegen Förderung der Volks- und Berufsbildung'],
@@ -108,7 +108,7 @@ export default async function NonProfitStatusPage() {
         ],
         legalTitle: 'Legal status and references',
         legalRows: [
-          ['Legal form', 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH'],
+          ['Legal form', 'CASA – Internationale Sprachschule gGmbH'],
           ['Register', 'Amtsgericht Bremen HRB 32761 HB'],
           ['Recognition', 'State-recognized independent youth welfare provider'],
           ['Tax classification', 'Recognized for promotion of public and vocational education'],

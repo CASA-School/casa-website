@@ -54,7 +54,7 @@ const COPY = {
     stored: 'Auch im Arbeitsbereich gespeichert.',
     notStored: 'Nicht im Arbeitsbereich gespeichert. Diese E-Mail ist der einzige Eintrag.',
     generated: (source: string) => `Automatisch erstellt ${source} auf casa-bremen.de.`,
-    address: 'CASA – Internationale Sprachschule gemeinnützige GmbH · Am Dobben 14–16 · 28203 Bremen',
+    address: 'CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen',
     logoAlt: 'CASA Internationale Sprachschule',
     name: 'Name',
     salutation: 'Anrede',
@@ -221,7 +221,7 @@ const COPY = {
     stored: 'Also stored in the staff workspace.',
     notStored: 'Not stored in the staff workspace. This email is the only record.',
     generated: (source: string) => `Generated automatically ${source} on casa-bremen.de.`,
-    address: 'CASA – Internationale Sprachschule gemeinnützige GmbH · Am Dobben 14–16 · 28203 Bremen, Germany',
+    address: 'CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany',
     logoAlt: 'CASA Internationale Sprachschule',
     name: 'Name',
     salutation: 'Salutation',
@@ -935,7 +935,7 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     // "Guten Tag Frau Rossi," where the form asked for a salutation.
     // The joined name has to pass the same check as each part, or the first name alone is used.
     name: formal ? `${formal} ${last}` : (first && last ? greetableName(`${first} ${last}`) : null) ?? first,
-    phone: locale === 'de' ? '+49 421 460 414 3-0' : '+49 421 460 414 30',
+    phone: '+49 421 460 414 30',
     siteUrl: site,
     siteHost: site.replace(/^https?:\/\//, ''),
     course: kind === 'course' ? text(p.courseTypeLabel) : null,

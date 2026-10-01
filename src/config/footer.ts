@@ -70,7 +70,7 @@ export const footerConfig: FooterConfig = {
     },
   ],
   contact: {
-    phone: '+49 421 460 414 3-0',
+    phone: '+49 421 460 414 30',
     address: 'Am Dobben 14-16, 28203 Bremen, Germany',
     mapsHref: 'https://goo.gl/maps/sqJEsWgSezYa7JM5A',
     emails: [
