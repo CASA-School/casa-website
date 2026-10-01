@@ -46,7 +46,16 @@ export type CoursePracticalFacts = {
   conditions: { en: string; de: string }[];
 };
 
-const EUR = (value: string) => ({ en: value, de: value });
+/*
+ * German pages write prices the German way: "117,50 €", "23,99 – 26,99 €"
+ * (go-live brief 2026-10-01). Amounts are authored once, in the English form.
+ */
+function germanEuro(value: string) {
+  const amounts = [...value.matchAll(/€\s?(\d+(?:\.\d+)?)/g)].map((match) => match[1].replace('.', ','));
+  return amounts.length ? `${amounts.join(' – ')}\u00a0€` : value;
+}
+
+const EUR = (value: string) => ({ en: value, de: germanEuro(value) });
 
 export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
   'intensive-german': {

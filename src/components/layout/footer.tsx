@@ -302,7 +302,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
       <div className="border-t border-white/10">
         <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-[var(--casa-text-subtle)]">
-            &copy; {new Date().getFullYear()} CASA - Internationale Sprachschule gemeinnützige GmbH.{' '}
+            &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
             {footerText('All rights reserved.', locale)}
           </p>
 

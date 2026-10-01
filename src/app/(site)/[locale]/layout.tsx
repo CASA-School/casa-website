@@ -91,7 +91,7 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'EducationalOrganization',
   name: 'CASA Internationale Sprachschule Bremen',
-  legalName: 'CASA - Internationale Sprachschule Bremen gemeinnützige GmbH',
+  legalName: 'CASA – Internationale Sprachschule gGmbH',
   description:
     'Non-profit German language school in Bremen for German courses, telc exam preparation, learner support, and integration projects.',
   url: toAbsoluteUrl('/'),

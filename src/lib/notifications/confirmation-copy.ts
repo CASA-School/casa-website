@@ -545,7 +545,7 @@ export const CONFIRMATION_COPY = {
       "replyNote": "Möchten Sie noch etwas ergänzen oder haben Sie eine Frage? Antworten Sie einfach auf diese E-Mail – Ihre Antwort geht direkt an unser Team.",
       "signoff": "Herzliche Grüße aus Bremen",
       "team": "Ihr CASA-Team",
-      "footer": "Gemeinnützige Sprachschule in Bremen. Seit 1983.\nCASA – Internationale Sprachschule gemeinnützige GmbH · Am Dobben 14–16 · 28203 Bremen\nTelefon +49 421 460 414 3-0 · {siteHost}\nÖffnungszeiten: Montag bis Donnerstag 08:30–19:00 Uhr, Freitag 08:30–13:00 Uhr\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick\nSie erhalten diese E-Mail, weil auf {siteHost} ein Formular mit Ihrer E-Mail-Adresse abgeschickt wurde. Falls nicht Sie es waren, antworten Sie bitte kurz auf diese E-Mail – dann löschen wir die Angaben. Wie wir mit Ihren Daten umgehen, lesen Sie unter {siteUrl}/datenschutz."
+      "footer": "Gemeinnützige Sprachschule in Bremen. Seit 1983.\nCASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen\nTelefon +49 421 460 414 3-0 · {siteHost}\nÖffnungszeiten: Montag bis Donnerstag 08:30–19:00 Uhr, Freitag 08:30–13:00 Uhr\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick\nSie erhalten diese E-Mail, weil auf {siteHost} ein Formular mit Ihrer E-Mail-Adresse abgeschickt wurde. Falls nicht Sie es waren, antworten Sie bitte kurz auf diese E-Mail – dann löschen wir die Angaben. Wie wir mit Ihren Daten umgehen, lesen Sie unter {siteUrl}/datenschutz."
     },
     "en": {
       "greetingNamed": "Dear {name},",
@@ -553,7 +553,7 @@ export const CONFIRMATION_COPY = {
       "replyNote": "Anything to add, or a question in the meantime? Simply reply to this email — your reply goes straight to our team.",
       "signoff": "Best wishes from Bremen",
       "team": "The CASA team",
-      "footer": "Non-profit language school in Bremen. Since 1983.\nCASA – Internationale Sprachschule gemeinnützige GmbH (non-profit company) · Am Dobben 14–16 · 28203 Bremen, Germany\nPhone +49 421 460 414 30 · {siteHost}/en\nOffice hours: Monday to Thursday 08:30–19:00, Friday 08:30–13:00 (Bremen time)\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick\nYou’re receiving this email because this address was entered in a form on {siteHost}. If that wasn’t you, just reply and let us know — we’ll delete the details. How we handle your data: {siteUrl}/en/privacy"
+      "footer": "Non-profit language school in Bremen. Since 1983.\nCASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany\nPhone +49 421 460 414 30 · {siteHost}/en\nOffice hours: Monday to Thursday 08:30–19:00, Friday 08:30–13:00 (Bremen time)\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick\nYou’re receiving this email because this address was entered in a form on {siteHost}. If that wasn’t you, just reply and let us know — we’ll delete the details. How we handle your data: {siteUrl}/en/privacy"
     }
   }
 } as const;

@@ -345,7 +345,7 @@ function buildSchoolPassages(): KbPassage[] {
       topic: 'school',
       keywords: ['nonprofit', 'non-profit', 'gGmbH', 'public benefit', 'mission', 'reinvestment', 'gemeinnuetzig'],
       content:
-        'CASA is organized as CASA - Internationale Sprachschule Bremen gemeinnützige GmbH. Course fees are reinvested in teaching quality, fair pay, facilities, social education projects, tandem formats, and integration support. The non-profit mission centers education, intercultural understanding, and social integration in Bremen.',
+        'CASA is organized as CASA – Internationale Sprachschule gGmbH. Course fees are reinvested in teaching quality, fair pay, facilities, social education projects, tandem formats, and integration support. The non-profit mission centers education, intercultural understanding, and social integration in Bremen.',
     },
     {
       id: 'school-nonprofit-de',
@@ -355,7 +355,7 @@ function buildSchoolPassages(): KbPassage[] {
       topic: 'school',
       keywords: ['gemeinnützig', 'gemeinnuetzig', 'gGmbH', 'gemeinwohl', 'mission', 'reinvestition', 'mittelverwendung'],
       content:
-        'CASA ist als CASA - Internationale Sprachschule Bremen gemeinnützige GmbH organisiert. Kursgebühren werden in Unterrichtsqualität, faire Vergütung, Räume, soziale Bildungsprojekte, Tandemformate und Integrationsunterstützung reinvestiert. Die gemeinnützige Mission fokussiert Bildung, Völkerverständigung und soziale Integration in Bremen.',
+        'CASA ist als CASA – Internationale Sprachschule gGmbH organisiert. Kursgebühren werden in Unterrichtsqualität, faire Vergütung, Räume, soziale Bildungsprojekte, Tandemformate und Integrationsunterstützung reinvestiert. Die gemeinnützige Mission fokussiert Bildung, Völkerverständigung und soziale Integration in Bremen.',
     },
     {
       id: 'school-integration-projects-en',

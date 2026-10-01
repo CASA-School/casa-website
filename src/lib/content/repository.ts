@@ -144,9 +144,12 @@ const publicExamCodes = new Set([
 ]);
 
 const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, string>>> = {
+  // One name per course, the homepage's (go-live brief 2026-10-01). TODO(Rahman):
+  // confirm the spelling; "Intensiv Deutsch" and "Deutsch für Medizin" were the
+  // variants on this list and in the nav.
   'intensive-german': {
     en: 'Intensive German',
-    de: 'Intensiv Deutsch',
+    de: 'Deutsch intensiv',
   },
   'evening-german': {
     en: 'Evening Course',
@@ -158,7 +161,7 @@ const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, str
   },
   'medical-german': {
     en: 'German for Medical',
-    de: 'Deutsch für Medizin',
+    de: 'Deutsch für Mediziner',
   },
   'in-company': {
     en: 'Firmenunterricht',
