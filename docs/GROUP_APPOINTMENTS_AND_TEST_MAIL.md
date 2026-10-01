@@ -84,7 +84,24 @@ registration routes also logged simulated confirmation emails.
   read in the workspace.
 - `/admin/settings` shows test/live mode and whether the Microsoft connection is configured.
 
-## Verified connection state — not delivery-ready
+## Connected and delivering to admin@ — 2026-10-01
+
+- **Exchange:** Rahman signed in (device code, as r.shafiee@casa-bremen.de) and the commands below
+  ran once. Service principal `CASA website`, management scope `CASA website test sender`
+  (`PrimarySmtpAddress -eq 'admin@casa-bremen.de'`), role assignment `CASA website test Mail.Send`.
+  `Test-ServicePrincipalAuthorization`: admin@ in scope; **info@ and online@ not in scope**.
+  No Entra/Graph Mail.Send was granted.
+- **Azure:** `FORM_DELIVERY_MODE=test`, `FORM_MAIL_FROM=admin@casa-bremen.de`,
+  `FORM_MAIL_IDENTITY_CLIENT_ID` set on `ca-casa-website` (revision 0000022; kept by every
+  `deploy.sh` run, which only swaps the image).
+- **Received in admin@'s inbox** from revision 0000023: contact (German), course registration
+  (German), exam registration (English), placement result (English). Outlook on the web renders
+  the HTML as designed. Group appointments and job applications need the database; their emails
+  were checked as rendered previews only.
+- The sender shows as „admin“. For live mode a dedicated sender mailbox (for example
+  `website@`) would read better in staff inboxes; it needs its own scope, as above.
+
+## Connection state before 2026-10-01 — not delivery-ready
 
 Read-only Azure checks on 2026-09-17:
 
@@ -137,7 +154,8 @@ Sources: [Microsoft Graph sendMail](https://learn.microsoft.com/en-us/graph/api/
 ## Before public-domain launch
 
 1. Connect the production database and apply migrations, including `0015_group_appointments`.
-2. Complete the Microsoft connection above and verify actual receipt at admin@ for every form.
+2. ~~Complete the Microsoft connection and verify receipt at admin@~~ done 2026-10-01 for contact,
+   course, exam and placement; appointments and applications once the database exists.
 3. Confirm Ina's closure dates and who handles confirmation/cancellation. If she wants automatic
    Outlook invitations and busy-time sync, connect her calendar before changing the request wording.
 4. Obtain permanent recipients and set every FORM_RECIPIENT_* variable listed in `.env.example`.
