@@ -96,28 +96,29 @@ const homepageExamOrder = [
 ] as const;
 
 const homepageCourseTitles: Partial<Record<string, Record<ContentLocale, string>>> = {
+  // The flyers' names (Rahman, 2026-10-01), the same as lib/content/repository.ts.
   'intensive-german': {
-    en: 'Intensive German',
-    de: 'Deutsch intensiv',
+    en: 'Intensive courses',
+    de: 'Intensivkurse',
   },
   'evening-german': {
-    en: 'Evening Course',
-    de: 'Abendkurs',
+    en: 'Evening courses',
+    de: 'Abendkurse',
   },
   'special-courses': {
-    en: 'Special Courses',
+    en: 'Special courses',
     de: 'Spezialkurse',
   },
   'german-for-groups': {
-    en: 'German for Groups',
-    de: 'Deutsch für Gruppen',
+    en: 'Classes for groups',
+    de: 'Unterricht für Gruppen',
   },
   'medical-german': {
-    en: 'German for medical professionals',
-    de: 'Deutsch für Mediziner',
+    en: 'German for nursing and medicine',
+    de: 'Deutsch für Pflege und Medizin',
   },
   'in-company': {
-    en: 'In-company courses',
+    en: 'In-company teaching',
     de: 'Firmenunterricht',
   },
 };

@@ -534,8 +534,8 @@ export default async function CoursesPage({
                 title: locale === 'de' ? 'Zwei Formate ohne Listenpreis' : 'Two formats are quoted individually',
                 body:
                   locale === 'de'
-                    ? 'Deutsch für Gruppen und Firmenunterricht werden nach Bedarf zusammengestellt und individuell angeboten — beim Gruppenkurs inklusive Unterkunft, Kulturprogramm und Nahverkehrsticket.'
-                    : 'German for Groups and Firmenunterricht are built to a brief and quoted individually — the group programme including accommodation, a culture programme and a transit pass.',
+                    ? 'Unterricht für Gruppen und Firmenunterricht werden nach Bedarf zusammengestellt und individuell angeboten — beim Gruppenkurs inklusive Unterkunft, Kulturprogramm und Nahverkehrsticket.'
+                    : 'Classes for groups and in-company teaching are built to a brief and quoted individually — the group programme including accommodation, a culture programme and a transit pass.',
                 linkHref: '/contact',
                 linkLabel: locale === 'de' ? 'Angebot anfragen' : 'Request a quote',
               },

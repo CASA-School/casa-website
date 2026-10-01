@@ -215,12 +215,12 @@ describe('course archetypes', () => {
     }
   });
 
-  it('holds CASA\'s 2026-09-08 allocation, so a reassignment has to be deliberate', () => {
+  it('holds CASA\'s allocation (2026-09-08, medical course 2026-10-01), so a reassignment has to be deliberate', () => {
     const expected: Record<string, string> = {
       'intensive-german': 'Natàlia Sostres',
       'evening-german': 'Alissa Trouillet',
       'special-courses': 'Alissa Trouillet',
-      'medical-german': 'Meike Große Hundrup',
+      'medical-german': 'Mareike Thomeczek',
       bildungszeit: 'Meike Große Hundrup',
       // Also Meike, but through the `company` key, which carries the call.
       'in-company': 'Meike Große Hundrup',

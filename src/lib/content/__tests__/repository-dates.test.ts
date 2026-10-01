@@ -152,8 +152,11 @@ describe('course detail', () => {
     expect(detail?.instances.map((instance) => instance.start_date)).toContain('2026-08-03');
   });
 
-  it('uses the German course names CASA publishes', async () => {
-    expect((await getCourseDetail('special-courses', 'de'))?.course.name).toBe('Deutsch Spezialkurse');
+  it('uses the course names on CASA\'s flyers (Rahman, 2026-10-01)', async () => {
+    expect((await getCourseDetail('intensive-german', 'de'))?.course.name).toBe('Intensivkurse');
+    expect((await getCourseDetail('medical-german', 'de'))?.course.name).toBe('Deutsch für Pflege und Medizin');
+    expect((await getCourseDetail('german-for-groups', 'en'))?.course.name).toBe('Classes for groups');
+    expect((await getCourseDetail('special-courses', 'de'))?.course.name).toBe('Spezialkurse');
     expect((await getCourseDetail('bildungszeit', 'de'))?.course.name).toBe('Bildungszeit Deutsch');
     expect((await getCourseDetail('bildungszeit', 'en'))?.course.name).toBe('Bildungszeit German');
   });

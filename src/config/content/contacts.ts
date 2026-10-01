@@ -91,7 +91,7 @@ const CONTACTS = {
      of keying contacts by surface rather than by person. */
   intensive: {
     teamId: 'natalia-sostres',
-    role: { en: 'Intensive courses', de: 'Intensivkurse' },
+    role: { en: 'Head of Office', de: 'Büroleitung' },
     email: 'info@casa-bremen.de',
     source: 'casa-bremen.de team page areas; assigned by CASA 2026-09-08',
   },
@@ -99,12 +99,21 @@ const CONTACTS = {
   /* Her published areas already include evening and special courses. */
   eveningAndSpecial: {
     teamId: 'alissa-trouillet',
-    role: { en: 'Evening & special courses', de: 'Abend- & Spezialkurse' },
+    role: { en: 'Course administration', de: 'Kursverwaltung' },
     email: 'info@casa-bremen.de',
     source: 'casa-bremen.de team page areas; confirmed by CASA 2026-09-08',
   },
 
-  /* Bildungszeit and the medical course. The team page prints no `areas` for her
+  /* The nursing and medical course: Mareike Thomeczek, Rahman's assignment of
+     2026-10-01 (it was Meike Große Hundrup, shared with Bildungszeit). */
+  medical: {
+    teamId: 'mareike-thomeczek',
+    role: { en: 'Course administration', de: 'Kursverwaltung' },
+    email: 'info@casa-bremen.de',
+    source: 'assigned by Rahman 2026-10-01',
+  },
+
+  /* Bildungszeit (and, until 2026-10-01, the medical course). The team page prints no `areas` for her
      at all, and puts the medical/nursing courses with Alissa Trouillet — so both
      of these are CASA's instruction rather than anything published.
 

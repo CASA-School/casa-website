@@ -144,34 +144,33 @@ const publicExamCodes = new Set([
 ]);
 
 const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, string>>> = {
-  // One name per course, the homepage's (go-live brief 2026-10-01). TODO(Rahman):
-  // confirm the spelling; "Intensiv Deutsch" and "Deutsch für Medizin" were the
-  // variants on this list and in the nav.
+  // The names on CASA's new flyers, decided by Rahman 2026-10-01: one name per
+  // course in every heading, card, menu and title. URLs and slugs are unchanged.
   'intensive-german': {
-    en: 'Intensive German',
-    de: 'Deutsch intensiv',
+    en: 'Intensive courses',
+    de: 'Intensivkurse',
   },
   'evening-german': {
-    en: 'Evening Course',
-    de: 'Abendkurs',
+    en: 'Evening courses',
+    de: 'Abendkurse',
   },
   'german-for-groups': {
-    en: 'German for Groups',
-    de: 'Deutsch für Gruppen',
+    en: 'Classes for groups',
+    de: 'Unterricht für Gruppen',
   },
   'medical-german': {
-    en: 'German for Medical',
-    de: 'Deutsch für Mediziner',
+    en: 'German for nursing and medicine',
+    de: 'Deutsch für Pflege und Medizin',
   },
   'in-company': {
-    en: 'Firmenunterricht',
+    en: 'In-company teaching',
     de: 'Firmenunterricht',
   },
-  // The German titles casa-bremen.de ranks with; the fixture and seed names are English.
   'special-courses': {
-    en: 'Special Courses',
-    de: 'Deutsch Spezialkurse',
+    en: 'Special courses',
+    de: 'Spezialkurse',
   },
+  // Not on the flyers; it stays as it was.
   bildungszeit: {
     en: 'Bildungszeit German',
     de: 'Bildungszeit Deutsch',

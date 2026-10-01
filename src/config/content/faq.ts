@@ -55,8 +55,8 @@ const FAQ: FaqSource[] = [
       de: 'Welche Art von Kursen bietet CASA an?',
     },
     answer: {
-      en: 'Intensive courses, evening courses, special courses and in-company training, plus German for groups, German for medical professionals and Bildungszeit. We do not offer Integrationskurse or occupation-specific language courses (berufsbezogene Sprachkurse).',
-      de: 'Intensivkurse, Abendkurse, Spezialkurse und Firmenunterricht, außerdem Deutsch für Gruppen, Deutsch für Mediziner und Bildungszeit. Wir bieten leider keine Integrationskurse oder berufsbezogene Sprachkurse an.',
+      en: 'Intensive courses, evening courses, special courses and in-company training, plus classes for groups, German for nursing and medicine and Bildungszeit. We do not offer Integrationskurse or occupation-specific language courses (berufsbezogene Sprachkurse).',
+      de: 'Intensivkurse, Abendkurse, Spezialkurse und Firmenunterricht, außerdem Unterricht für Gruppen, Deutsch für Pflege und Medizin und Bildungszeit. Wir bieten leider keine Integrationskurse oder berufsbezogene Sprachkurse an.',
     },
     source: 'faq',
   },
