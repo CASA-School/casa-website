@@ -573,6 +573,9 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // The building stays out: every image of it we have is AI-altered.
       hero: photoLibrary.heroLesson,
       story: photoLibrary.conversationPair,
+      // "Leben bei CASA" (slots 20 and 23, both real photographs).
+      lifeRegion: photoLibrary.groupCourseBremenMusicians,
+      lifePeople: photoLibrary.groupCourseWalking,
       /*
         The four flagship course rows, matched to what each format actually is
         rather than to whatever was next in the library:
