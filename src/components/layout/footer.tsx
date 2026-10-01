@@ -88,25 +88,11 @@ export function Footer({ contentLocale: locale }: FooterProps) {
   return (
     <footer className="bg-[var(--casa-ink-deep)] text-white">
       {/*
-        The line over the footer.
-
-        Was `border-t border-white/10` — a 1px rule in white-at-10% painted over
-        the footer's own #111827, which computes to roughly #292f3d. Against the
-        light page above it, that is invisible: the only thing marking the
-        boundary was the raw light-to-dark tone switch.
-
-        A 3px accent band instead, so the footer starts on a deliberate line
-        rather than just going dark. Single accent, not the brand triad —
-        globals.css retired the red/yellow/blue sweep for the reason recorded on
-        `.casa-tricolor-rule`, and a multi-colour bar here would walk it straight
-        back in. Blue fading toward the edge keeps it a mark rather than a stripe.
-
-        The first attempt put a blue-to-sun midpoint in the gradient, which is
-        why it does not: sRGB interpolation between #009FE3 and the sun yellow
-        passes through green (measured: srgb 0.45 0.72 0.49). Reusing
-        `.casa-tricolor-rule` avoids inventing a second rule for the same job.
+        The line over the footer: the logo stripe in thirds (globals.css,
+        .casa-logo-stripe), the same as the header's bottom edge. It replaced a
+        single blue accent on 2026-10-01, with the go-live brief.
       */}
-      <div aria-hidden="true" className="casa-tricolor-rule h-[3px] w-full" />
+      <div aria-hidden="true" className="casa-logo-stripe h-[3px] w-full" />
 
       {/*
         Closing CTA. One button, one text link — it used to be two buttons of
@@ -171,7 +157,10 @@ export function Footer({ contentLocale: locale }: FooterProps) {
             aria-label="Go to CASA homepage"
             className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
           >
-            <Logo className="h-10 w-auto" variant="white" />
+            {/* The logo in its own colours, on a small white plate. */}
+            <span className="inline-flex rounded-lg bg-white px-3 py-2">
+              <Logo className="h-9 w-auto" />
+            </span>
           </Link>
           <p className="mt-3 text-sm font-medium text-[var(--casa-text-subtle)]">
             {footerText('Non-profit language school in Bremen. Since 1983.', locale)}
@@ -225,7 +214,9 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 aria-label="Go to CASA homepage"
                 className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
-                <Logo className="h-10 w-auto" variant="white" />
+                <span className="inline-flex rounded-lg bg-white px-3 py-2">
+                  <Logo className="h-9 w-auto" />
+                </span>
               </Link>
             </div>
             <p className="text-sm font-medium text-[var(--casa-text-subtle)]">

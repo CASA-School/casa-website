@@ -1131,6 +1131,27 @@ h3 {
   z-index: 2;
 }
 
+/*
+ * THE LOGO STRIPE (2026-10-01): red, blue and yellow in hard-stop thirds, as on
+ * CASA's flyer, roll-up and business card. Used at exactly two edges, the
+ * bottom of the header and the top of the footer. This reverses, for those two
+ * edges only, the 2026-08-16 decision to keep the full triad for the logo
+ * (see .casa-tricolor-rule below); Rahman approved it with the go-live brief.
+ * Hard stops, never a gradient between the colours: sRGB interpolation from
+ * the blue to the yellow passes through green.
+ */
+.casa-logo-stripe {
+  background-image: linear-gradient(
+    90deg,
+    var(--casa-red) 0%,
+    var(--casa-red) 33.333%,
+    var(--casa-blue) 33.333%,
+    var(--casa-blue) 66.666%,
+    var(--casa-sun) 66.666%,
+    var(--casa-sun) 100%
+  );
+}
+
 .casa-tricolor-rule {
   /*
    * Was a red -> yellow -> blue sweep, on 25 surfaces, alongside two hard-stop
