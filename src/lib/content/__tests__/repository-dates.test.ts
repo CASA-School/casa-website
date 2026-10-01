@@ -157,7 +157,7 @@ describe('course detail', () => {
     expect((await getCourseDetail('medical-german', 'de'))?.course.name).toBe('Deutsch für Pflege und Medizin');
     expect((await getCourseDetail('german-for-groups', 'en'))?.course.name).toBe('Classes for groups');
     expect((await getCourseDetail('special-courses', 'de'))?.course.name).toBe('Spezialkurse');
-    expect((await getCourseDetail('bildungszeit', 'de'))?.course.name).toBe('Bildungszeit Deutsch');
+    expect((await getCourseDetail('bildungszeit', 'de'))?.course.name).toBe('Bildungszeit');
     expect((await getCourseDetail('bildungszeit', 'en'))?.course.name).toBe('Bildungszeit German');
   });
 });

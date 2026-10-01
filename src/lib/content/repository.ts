@@ -170,10 +170,9 @@ const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, str
     en: 'Special courses',
     de: 'Spezialkurse',
   },
-  // Not on the flyers; it stays as it was.
   bildungszeit: {
     en: 'Bildungszeit German',
-    de: 'Bildungszeit Deutsch',
+    de: 'Bildungszeit',
   },
 };
 
