@@ -1,10 +1,13 @@
+import type { Meaning } from '@/config/brand/meaning';
+
 /**
  * THE PHOTO NUMBER REGISTRY.
  *
- * While the site runs on colour placeholders, every photograph slot shows a
- * number. That number is how a replacement photograph is identified: you see
- * "24" on the page, you name the new file `24.jpg`, and it lands in the one
- * place the site expects it.
+ * Every photograph slot has a number. That number is how a replacement
+ * photograph is identified: a slot without a photograph renders a calm stand-in
+ * panel carrying `data-casa-placeholder="24"`, you name the new file `24.jpg`,
+ * and it lands in the one place the site expects it. (Until 2026-10-01 the
+ * number was printed on a gradient on the page itself.)
  *
  * ---------------------------------------------------------------------------
  * TWO RULES. BOTH MATTER.
@@ -203,6 +206,21 @@ export const photoSlots: PhotoSlot[] = [
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));
+
+/**
+ * What a slot is ABOUT, by the brand's colour meanings (src/config/brand/meaning.ts).
+ * A slot with no photograph yet renders a calm panel in this colour with its icon
+ * (src/components/ui/casa-image.tsx) instead of a gradient with a number.
+ */
+export function photoMeaningFor(n: number | undefined): Meaning {
+  if (n === undefined) return 'orientation';
+  if (n === 18) return 'exams';
+  if (n === 17) return 'orientation';
+  // 21 sits with the excursions but is the groups course's photograph.
+  if ((n >= 4 && n <= 19) || n === 21 || n === 37) return 'courses';
+  if (n >= 26 && n <= 30) return 'arrival';
+  return 'orientation';
+}
 
 /** The slot for a photograph path, or undefined if it has no number yet. */
 export function photoSlotFor(src: string): PhotoSlot | undefined {

@@ -8,6 +8,7 @@ import { Instagram, Linkedin, Mail, X } from 'lucide-react';
 
 import type { TeamSpotlight } from '@/lib/content/types';
 import { PersonMonogram } from '@/components/ui/person-monogram';
+import { cn } from '@/lib/utils';
 
 
 type TeamDirectoryProps = {
@@ -153,8 +154,12 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
           {visibleMembers.map((member) => (
             <li key={member.id}>
               <article className="h-full overflow-hidden rounded-3xl bg-[var(--casa-bg)] shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
-                <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden">
-                  {member.photo ? (
+                {/*
+                  A portrait fills a 4:5 frame; without one the card opens with a
+                  small round monogram instead of a tall field of initials.
+                */}
+                {member.photo ? (
+                  <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden">
                     <Image
                       src={member.photo.src}
                       alt={member.photo.alt}
@@ -162,13 +167,12 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                       sizes="(min-width: 1280px) 24vw, (min-width: 640px) 44vw, 92vw"
                       className="object-cover"
                     />
-                  ) : (
-                    <PersonMonogram size="lg" name={member.name} />
-                  )}
-                </div>
+                  </div>
+                ) : null}
 
                 <div className="space-y-3 p-5">
                   <div>
+                    {member.photo ? null : <PersonMonogram size="md" name={member.name} className="mb-4" />}
                     <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{member.role}</p>
                     <h3 className="mt-2 text-lg font-bold text-[var(--casa-ink)]">{member.name}</h3>
                     <p className="text-sm font-semibold text-[var(--casa-muted)]">{member.title}</p>
@@ -276,9 +280,14 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
               className="w-full max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-[var(--shadow-modal)] sm:my-6 sm:rounded-3xl"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain sm:max-h-[calc(100dvh-3rem)] md:grid md:grid-cols-[0.9fr_1.1fr]">
-                <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden md:aspect-auto md:h-auto md:min-h-full">
-                  {activeMember.photo ? (
+              <div
+                className={cn(
+                  'max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain sm:max-h-[calc(100dvh-3rem)]',
+                  activeMember.photo && 'md:grid md:grid-cols-[0.9fr_1.1fr]'
+                )}
+              >
+                {activeMember.photo ? (
+                  <div className="casa-media-overlay relative aspect-[4/5] overflow-hidden md:aspect-auto md:h-auto md:min-h-full">
                     <Image
                       src={activeMember.photo.src}
                       alt={activeMember.photo.alt}
@@ -286,13 +295,12 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                       sizes="(min-width: 1024px) 36vw, 92vw"
                       className="object-cover"
                     />
-                  ) : (
-                    <PersonMonogram size="lg" name={activeMember.name} />
-                  )}
-                </div>
+                  </div>
+                ) : null}
                 <div className="p-5 sm:p-6 md:p-7">
                   <div className="flex items-start justify-between gap-4">
                     <div>
+                      {activeMember.photo ? null : <PersonMonogram size="md" name={activeMember.name} className="mb-4" />}
                       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{activeMember.role}</p>
                       <h3 className="mt-2 text-xl font-bold text-[var(--casa-ink)] sm:text-2xl">{activeMember.name}</h3>
                       <p className="text-sm font-semibold text-[var(--casa-muted)]">{activeMember.title}</p>

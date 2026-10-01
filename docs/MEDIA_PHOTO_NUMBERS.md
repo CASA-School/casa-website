@@ -23,7 +23,10 @@ staff members after the code had removed them.
   correction only, built by `scripts/media/build_reel.py`. **51, 53, 52, 50** were the
   full-width reel, retired the same day; they remain real, available crops. Slots **46–49** are retired (the AI-edited
   reel of 21 September); their files are deleted and the numbers are not reused.
-- Other slots remain numbered placeholders. Their absent image files are expected;
+- Since 2026-10-01 a slot without a photograph no longer shows its number on the page: it renders a calm
+  panel in the colour of what it is about (red courses, yellow accommodation, ink exams, blue everything
+  else) with that meaning's icon. The number is in the markup as `data-casa-placeholder` and in this list.
+- Other slots remain placeholders. Their absent image files are expected;
   do not delete their config references as broken or unused assets.
 - Slots **31–36 and 38–43** are reserved for twelve verified staff portraits.
   No synthetic portrait should be presented as a real colleague.
