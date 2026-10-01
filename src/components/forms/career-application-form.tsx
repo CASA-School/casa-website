@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import type { ContentLocale } from '@/lib/content/types';
+import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 
 type CareerApplicationFormProps = {
   locale: ContentLocale;
@@ -20,6 +21,7 @@ type ApiResponse = {
   status: 'accepted' | 'error';
   message: string;
   requestId?: string;
+  confirmationSent?: boolean;
 };
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -85,6 +87,7 @@ export function CareerApplicationForm({
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
+  const [confirmationSent, setConfirmationSent] = useState(false);
 
   const validateCv = (file: File | null) => {
     if (!file) {
@@ -164,6 +167,7 @@ export function CareerApplicationForm({
       setStatus('success');
       setMessage(result.message || copy.success);
       setRequestId(result.requestId || null);
+      setConfirmationSent(result.confirmationSent === true);
       resetForm();
       trackCasaEvent('form_success', {
         form: 'career_application',
@@ -287,6 +291,7 @@ export function CareerApplicationForm({
               {copy.requestId}: <span className="font-mono">{requestId}</span>
             </p>
           ) : null}
+          {confirmationSent ? <p className="mt-1 text-xs text-[var(--casa-success-text)]">{confirmationNotice(locale)}</p> : null}
         </div>
       ) : null}
 

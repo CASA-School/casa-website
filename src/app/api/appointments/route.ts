@@ -5,7 +5,7 @@ import { apiError, apiSuccess } from '@/lib/api/response';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { appointmentDays, appointmentInstant, APPOINTMENT_TIMES, isAppointmentDate } from '@/lib/appointments/schedule';
 import { reserveAppointment, takenAppointments } from '@/lib/appointments/repository.server';
-import { notifyForm } from '@/lib/notifications/forms.server';
+import { confirmToSender, notifyForm } from '@/lib/notifications/forms.server';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,10 +64,17 @@ export async function POST(request: Request) {
     console.error('[appointments] reservation failed', { requestId });
     return apiError('UNAVAILABLE', 'Your request could not be saved. Please try again.', 503);
   }
-  const delivery = await notifyForm('appointment', {
+  const notification = {
     requestId, submittedAt: new Date().toISOString(), locale: input.locale, firstName: input.firstName, lastName: input.lastName, email: input.email,
     startsAt: startsAt.toISOString(), localDate: input.date, localTime: input.time,
     timeZone: 'Europe/Berlin', durationMinutes: 30, message: input.message,
-  }, null, { stored: true });
-  return apiSuccess({ requestId, status: 'requested', notified: delivery.delivered }, 201);
+  };
+  const [delivery, confirmation] = await Promise.all([
+    notifyForm('appointment', notification, null, { stored: true }),
+    confirmToSender('appointment', notification),
+  ]);
+  return apiSuccess(
+    { requestId, status: 'requested', notified: delivery.delivered, confirmationSent: confirmation.reachedSender },
+    201,
+  );
 }

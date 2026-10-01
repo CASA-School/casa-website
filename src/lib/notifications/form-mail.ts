@@ -1,8 +1,10 @@
 import { organiserCopy } from '@/config/forms/organiser-brief-copy';
 import { INTAKE_QUESTIONS } from '@/config/placement/intake';
+import { getSiteUrl } from '@/lib/seo';
 import { isCompanyTopic, ORGANISER_CHOICES } from '@/lib/validation/contact';
 
 import { LOGO_CONTENT_ID, LOGO_HEIGHT, LOGO_WIDTH } from './casa-logo';
+import { CONFIRMATION_COPY } from './confirmation-copy';
 
 /**
  * The notification email CASA staff receive for each public form.
@@ -24,7 +26,7 @@ export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'p
 type Locale = 'de' | 'en';
 type Payload = Record<string, unknown>;
 
-type Row = { label: string; value: string | null; href?: string; detail?: string; block?: boolean; item?: boolean };
+type Row = { label: string; value: string | null; href?: string; detail?: string; block?: boolean; item?: boolean; mono?: boolean };
 type Section = { title: string | null; rows: Row[] };
 type Action = { label: string; href: string; hint: string | null };
 type Mail = {
@@ -738,7 +740,9 @@ function rowHtml(row: Row) {
   }
   const shown = row.href
     ? `<a href="${escape(row.href)}" style="color:${LINK};text-decoration:underline;">${escape(value)}</a>`
-    : multiline(value);
+    : row.mono
+      ? `<span style="font-family:Menlo,Consolas,'Courier New',monospace;font-size:13px;word-break:break-all;">${escape(value)}</span>`
+      : multiline(value);
   const detail = row.detail ? `<div style="${SANS}padding-top:3px;font-size:13px;line-height:19px;color:${MUTED};">${escape(row.detail)}</div>` : '';
   return `<tr class="row"><td class="label" valign="top" width="200" style="${SANS}width:200px;padding:7px 16px 7px 0;font-size:14px;line-height:21px;color:${MUTED};">${escape(row.label)}</td>`
     + `<td class="value" valign="top" style="${SANS}padding:7px 0;font-size:15px;line-height:22px;color:${INK};">${shown}${detail}</td></tr>`;
@@ -772,6 +776,39 @@ function actionHtml(action: Action | null) {
     + `</td></tr>`;
 }
 
+/** The branded frame both emails share: canvas, card, test line, logo, content rows, footer. */
+function renderShell(input: {
+  locale: Locale;
+  subject: string;
+  preheader: string;
+  testLine: string | null;
+  logoAlt: string;
+  rows: string;
+  footer: string;
+}) {
+  // Keeps the inbox preview to the preheader instead of the next lines of the body.
+  const preheaderPad = '&#847;&zwnj;&nbsp;'.repeat(40);
+  return `<!doctype html><html lang="${input.locale}" xmlns="http://www.w3.org/1999/xhtml"><head>`
+    + `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`
+    + `<meta name="x-apple-disable-message-reformatting"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no">`
+    + `<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">`
+    + `<title>${escape(input.subject)}</title><style>${STYLE}</style></head>`
+    + `<body style="margin:0;padding:0;background:${CANVAS};">`
+    + `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${escape(input.preheader)}${preheaderPad}</div>`
+    + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${CANVAS}" style="background:${CANVAS};"><tr><td class="shell" align="center" style="padding:32px 16px;">`
+    + `<!--[if mso]><table role="presentation" width="640" cellpadding="0" cellspacing="0"><tr><td><![endif]-->`
+    + `<table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:640px;background:#ffffff;border:1px solid ${RULE};border-top:4px solid ${ACCENT};border-radius:10px;">`
+    + (input.testLine
+      ? `<tr><td class="px" style="${SANS}padding:10px 40px;font-size:13px;line-height:19px;color:#7a5a00;background:#fff3da;">${escape(input.testLine)}</td></tr>`
+      : '')
+    + `<tr><td class="px" style="padding:30px 40px 0;"><img src="cid:${LOGO_CONTENT_ID}" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" alt="${escape(input.logoAlt)}" style="display:block;width:${LOGO_WIDTH}px;height:${LOGO_HEIGHT}px;"></td></tr>`
+    + input.rows
+    + `</table>`
+    + `<!--[if mso]></td></tr></table><![endif]-->`
+    + `<div style="${SANS}max-width:640px;margin:0 auto;padding:18px 8px 0;font-size:12px;line-height:19px;color:${MUTED};text-align:center;">${input.footer}</div>`
+    + `</td></tr></table></body></html>`;
+}
+
 export function buildFormMail(kind: FormKind, payload: Payload, options: FormMailOptions) {
   const locale: Locale = payload.locale === 'en' ? 'en' : 'de';
   const c = COPY[locale];
@@ -785,24 +822,8 @@ export function buildFormMail(kind: FormKind, payload: Payload, options: FormMai
     options.stored === true ? escape(c.stored)
     : options.stored === false ? `<strong style="color:#d20612;">${escape(c.notStored)}</strong>`
     : '';
-  // Keeps the inbox preview to the lead sentence instead of the next lines of the body.
-  const preheaderPad = '&#847;&zwnj;&nbsp;'.repeat(40);
 
-  const html = `<!doctype html><html lang="${locale}" xmlns="http://www.w3.org/1999/xhtml"><head>`
-    + `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`
-    + `<meta name="x-apple-disable-message-reformatting"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no">`
-    + `<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">`
-    + `<title>${escape(mail.subject)}</title><style>${STYLE}</style></head>`
-    + `<body style="margin:0;padding:0;background:${CANVAS};">`
-    + `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${escape(mail.lead)}${preheaderPad}</div>`
-    + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${CANVAS}" style="background:${CANVAS};"><tr><td class="shell" align="center" style="padding:32px 16px;">`
-    + `<!--[if mso]><table role="presentation" width="640" cellpadding="0" cellspacing="0"><tr><td><![endif]-->`
-    + `<table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:640px;background:#ffffff;border:1px solid ${RULE};border-top:4px solid ${ACCENT};border-radius:10px;">`
-    + (options.test
-      ? `<tr><td class="px" style="${SANS}padding:10px 40px;font-size:13px;line-height:19px;color:#7a5a00;background:#fff3da;">${escape(c.test(options.testRecipient))}</td></tr>`
-      : '')
-    + `<tr><td class="px" style="padding:30px 40px 0;"><img src="cid:${LOGO_CONTENT_ID}" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" alt="${escape(c.logoAlt)}" style="display:block;width:${LOGO_WIDTH}px;height:${LOGO_HEIGHT}px;"></td></tr>`
-    + `<tr><td class="px" style="padding:30px 40px 24px;">`
+  const rows = `<tr><td class="px" style="padding:30px 40px 24px;">`
     + `<div style="${SANS}font-size:13px;line-height:19px;font-weight:bold;color:${LINK};">${escape(kicker)}</div>`
     + `<h1 class="title" style="${SERIF}margin:8px 0 0;font-size:28px;line-height:36px;font-weight:normal;color:${INK};">${escape(mail.title)}</h1>`
     + `<p style="${SANS}margin:12px 0 0;font-size:16px;line-height:25px;color:${BODY};">${escape(mail.lead)}</p>`
@@ -814,12 +835,216 @@ export function buildFormMail(kind: FormKind, payload: Payload, options: FormMai
       : '')
     + mail.sections.map(sectionHtml).join('')
     + `<tr><td class="px" style="padding:0 40px 30px;"><div style="${SANS}border-top:1px solid ${RULE};padding-top:18px;font-size:13px;line-height:21px;color:${MUTED};">`
-    + `${escape(meta)}${storage ? `<br>${storage}` : ''}</div></td></tr>`
-    + `</table>`
-    + `<!--[if mso]></td></tr></table><![endif]-->`
-    + `<div style="${SANS}max-width:640px;margin:0 auto;padding:18px 8px 0;font-size:12px;line-height:19px;color:${MUTED};text-align:center;">`
-    + `${escape(c.generated(SOURCES[kind](c, payload)))}<br>${escape(c.address)}</div>`
-    + `</td></tr></table></body></html>`;
+    + `${escape(meta)}${storage ? `<br>${storage}` : ''}</div></td></tr>`;
+
+  const html = renderShell({
+    locale,
+    subject: mail.subject,
+    preheader: mail.lead,
+    testLine: options.test ? c.test(options.testRecipient) : null,
+    logoAlt: c.logoAlt,
+    rows,
+    footer: `${escape(c.generated(SOURCES[kind](c, payload)))}<br>${escape(c.address)}`,
+  });
 
   return { subject: `${options.test ? '[TEST] ' : ''}${mail.subject}`, html };
+}
+
+/* ------------------------------------------------------------------------ */
+/* The confirmation the sender receives                                     */
+/* ------------------------------------------------------------------------ */
+
+type ConfirmationKind = Exclude<FormKind, 'placement'>;
+
+export type ConfirmationOptions = { test: boolean; intendedRecipient: string; testRecipient: string; replyInvited: boolean };
+
+/** The contact person the appointment dialog already names in public. */
+const APPOINTMENT_HOST = 'Ina Eismann';
+
+/** The exam part as the confirmation spells it out for a candidate. */
+const CONFIRMATION_EXAM_PARTS: Record<Locale, Record<string, string>> = {
+  de: { full: 'Gesamte Prüfung (schriftlich und mündlich)', written: 'Nur schriftlich', oral: 'Nur mündlich' },
+  en: { full: 'Full exam (written and oral)', written: 'Written exam only', oral: 'Oral exam only' },
+};
+
+/** „Do., 8. Okt.“ / "Thu 8 Oct", for a subject line. */
+function formatShortDay(value: unknown, locale: Locale) {
+  const match = text(value)?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12));
+  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+    timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short',
+  }).format(date).replace(',', locale === 'de' ? ',' : '');
+}
+
+/**
+ * A name fit to greet someone with. The confirmation goes to whatever address
+ * was typed, so a "name" carrying a link, an address or digits is not printed:
+ * the mail falls back to the neutral greeting instead of relaying it.
+ */
+function greetableName(value: unknown) {
+  const raw = text(value)?.replace(/\s+/g, ' ');
+  if (!raw || raw.length > 40) return null;
+  const tokens = raw.split(' ');
+  // Words of letters, joined by an apostrophe or hyphen, or a one-letter
+  // initial with its full stop: "Anne-Marie", "O’Neill", "J.". Nothing else.
+  const word = /^(?:[\p{L}\p{M}]+(?:['’-][\p{L}\p{M}]+)*|\p{L}\.)$/u;
+  // Latin mixed with another script is how lookalike dots and colons get in:
+  // "wwwꓸexampleꓸde". Names in one script (佐々木, Łukasz, Nguyễn) pass.
+  const mixesScripts = (token: string) => /\p{sc=Latin}/u.test(token) && !/^[\p{sc=Latin}\p{M}'’.-]+$/u.test(token);
+  if (/[〇零一二三四五六七八九十百千万]{4,}/u.test(raw)) return null;
+  return tokens.length <= 3 && tokens.every((token) => word.test(token) && !mixesScripts(token)) ? raw : null;
+}
+
+/** The catalogue writes ranges with a hyphen-minus; a range takes an en dash. Times first. */
+const rangeDash = (value: string) =>
+  value.replace(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/g, '$1–$2').replace(/\s+-\s+/g, ' – ');
+
+/** Fills `{placeholders}`; null when any of them has no value, so the caller drops the line. */
+function fill(template: string, values: Record<string, string | null>) {
+  let missing = false;
+  const result = template.replace(/\{(\w+)\}/g, (_, key: string) => {
+    const value = values[key];
+    if (!value) missing = true;
+    return value ?? '';
+  });
+  return missing ? null : result;
+}
+
+/**
+ * Only values the server produced or checked: catalogue labels, the validated
+ * appointment slot, the reference, enum readings. Never the sender's free text.
+ */
+function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale): Record<string, string | null> {
+  const c = COPY[locale];
+  const first = greetableName(p.firstName);
+  const last = greetableName(p.lastName);
+  const course = text(p.courseInstanceLabel)?.split(' | ').map((part) => part.trim()) ?? [];
+  const session = text(p.examSessionLabel)?.split(' | ').map((part) => part.trim()) ?? [];
+  const brief = (p.organiserBrief ?? {}) as Record<string, unknown>;
+  const size = typeof brief.groupSize === 'number' && Number.isInteger(brief.groupSize) ? String(brief.groupSize) : null;
+  const stay = p.accommodationRequired === true ? (c.accommodationTypes[String(p.accommodationType)] ?? null) : null;
+  const site = getSiteUrl();
+  const formal = (kind === 'course' || kind === 'exam') && last
+    ? ({ de: { ms: 'Frau', mr: 'Herr' }, en: { ms: 'Ms', mr: 'Mr' } } as const)[locale][String(p.salutation) as 'ms' | 'mr']
+    : undefined;
+  return {
+    reference: text(p.requestId),
+    firstName: first,
+    lastName: last,
+    // "Guten Tag Frau Rossi," where the form asked for a salutation.
+    // The joined name has to pass the same check as each part, or the first name alone is used.
+    name: formal ? `${formal} ${last}` : (first && last ? greetableName(`${first} ${last}`) : null) ?? first,
+    phone: locale === 'de' ? '+49 421 460 414 3-0' : '+49 421 460 414 30',
+    siteUrl: site,
+    siteHost: site.replace(/^https?:\/\//, ''),
+    course: kind === 'course' ? text(p.courseTypeLabel) : null,
+    dates: course.length === 3 ? rangeDash(course[0]) : null,
+    // A term without stored days reads "Days to be confirmed": leave the row out rather than print it.
+    schedule: course.length === 3 && !/to be confirmed|noch festgelegt|wird bestätigt/i.test(course[1]) ? rangeDash(course[1]) : null,
+    location: course.length === 3 ? course[2] : session.length === 2 ? session[1] : null,
+    accommodation: stay,
+    exam: kind === 'exam' ? text(p.examTypeLabel) : null,
+    examDate: session.length === 2 ? rangeDash(session[0]) : null,
+    examPart: kind === 'exam' ? (CONFIRMATION_EXAM_PARTS[locale][String(p.registrationType)] ?? null) : null,
+    day: kind === 'appointment' ? formatDay(p.localDate, locale, true) : null,
+    dayShort: kind === 'appointment' ? formatShortDay(p.localDate, locale) : null,
+    time: kind === 'appointment' ? text(p.localTime) : null,
+    duration: kind === 'appointment' && typeof p.durationMinutes === 'number' ? String(p.durationMinutes) : null,
+    contactPerson: kind === 'appointment' ? APPOINTMENT_HOST : null,
+    position: kind === 'careers' ? text(p.positionTitle) : null,
+    groupSize: size,
+  };
+}
+
+/** CASA's own addresses and phone number in the copy as links; a full stop after a URL stays text. */
+function linkify(html: string) {
+  return html
+    .replace(/https?:\/\/[^\s<]+?(?=[.,;:!?)]?(?:\s|<|$))/g, (url) =>
+      `<a href="${url}" style="color:${LINK};text-decoration:underline;">${url.replace(/^https?:\/\//, '')}</a>`)
+    .replace(/\+49 421 460 414 3-?0/g, (shown) =>
+      `<a href="tel:+4942146041430" style="color:${LINK};text-decoration:underline;white-space:nowrap;">${shown}</a>`);
+}
+
+function paragraph(value: string, style = '') {
+  return `<p style="${SANS}margin:0 0 14px;font-size:16px;line-height:25px;color:${BODY};${style}">${linkify(multiline(value))}</p>`;
+}
+
+export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, options: ConfirmationOptions) {
+  const locale: Locale = payload.locale === 'en' ? 'en' : 'de';
+  const variant = kind === 'groups' && isCompanyTopic(text(payload.topicKey)) ? 'company' : '';
+  const entry =
+    CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind && candidate.variant === variant)
+    ?? CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind)!;
+  const copy = entry[locale];
+  const shared = CONFIRMATION_COPY.shared[locale];
+  const values = confirmationValues(kind, payload, locale);
+  const line = (template: string, fallback: string | null = null) => fill(template, values) ?? fallback;
+
+  // Without its date, the appointment subject keeps its first half: „Ihre Terminanfrage bei CASA“.
+  const subject = line(copy.subject) ?? copy.subject.split(':')[0].trim();
+  const greeting = line(shared.greetingNamed, shared.greetingNeutral)!;
+  const rows = copy.summaryRows
+    .map((row) => ({ label: row.label as string, value: line(row.value), mono: row.value === '{reference}' }))
+    .filter((row): row is { label: string; value: string; mono: boolean } => Boolean(row.value));
+  const steps = copy.nextSteps.map((step) => line(step.text)).filter((step): step is string => Boolean(step));
+  const paragraphs = (value: string | null) =>
+    value ? value.split(/\n\s*\n/).map((part) => paragraph(part.trim())).join('') : '';
+
+  // The tint sits on a table cell: desktop Outlook drops a padded, tinted div.
+  const summary = rows.length
+    ? `<tr><td class="px" style="padding:0 40px 24px;">`
+      + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;">`
+      + `<tr><td bgcolor="${TINT}" style="background:${TINT};border-radius:10px;padding:18px 20px;">`
+      + `<div style="${SANS}margin:0 0 6px;font-size:15px;line-height:22px;font-weight:bold;color:${INK};">${escape(copy.summaryTitle)}</div>`
+      + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">`
+      + rows.map((row) => rowHtml(row)).join('')
+      + `</table></td></tr></table></td></tr>`
+    : '';
+  const next = steps.length
+    ? `<tr><td class="px" style="padding:0 40px 10px;">`
+      + `<div style="${SANS}padding:0 0 8px;font-size:15px;line-height:22px;font-weight:bold;color:${INK};">${escape(copy.nextStepsTitle)}</div>`
+      + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">`
+      + steps.map((step, index) =>
+          `<tr><td valign="top" width="30" style="${SANS}width:30px;padding:4px 0;font-size:15px;line-height:23px;font-weight:bold;color:${ACCENT};">${index + 1}.</td>`
+          + `<td valign="top" style="${SANS}padding:4px 0;font-size:15px;line-height:23px;color:${INK};">${linkify(multiline(step))}</td></tr>`).join('')
+      + `</table></td></tr>`
+    : '';
+
+  const body = `<tr><td class="px" style="padding:30px 40px 8px;">`
+    + `<h1 class="title" style="${SERIF}margin:0 0 18px;font-size:28px;line-height:36px;font-weight:normal;color:${INK};">${escape(line(copy.heading) ?? copy.heading)}</h1>`
+    + paragraph(greeting)
+    + paragraphs(line(copy.intro))
+    + `</td></tr>`
+    + summary
+    + next
+    + `<tr><td class="px" style="padding:10px 40px 30px;">`
+    + paragraphs(line(copy.closing))
+    // Exam and appointment receipts already ask for a reply where it matters (a typo, a time that does not suit).
+    + (options.replyInvited && !('replyNote' in entry && entry.replyNote === false) ? paragraph(shared.replyNote) : '')
+    + paragraph(shared.signoff, 'margin:22px 0 0;')
+    + paragraph(shared.team, 'margin:0;font-weight:bold;color:' + INK + ';')
+    + `</td></tr>`;
+
+  const testLine = options.test
+    ? (locale === 'de'
+      ? `Testbetrieb: Diese Bestätigung ginge an ${options.intendedRecipient}. Sie wurde stattdessen an ${options.testRecipient} gesendet.`
+      : `Test mode: this confirmation would go to ${options.intendedRecipient}. It was sent to ${options.testRecipient} instead.`)
+    : null;
+
+  const html = renderShell({
+    locale,
+    subject,
+    preheader: line(copy.preheader) ?? copy.preheader,
+    testLine,
+    logoAlt: COPY[locale].logoAlt,
+    rows: body,
+    footer: linkify(escape(line(shared.footer) ?? shared.footer).replace(/\n/g, '<br>')),
+  });
+
+  return {
+    subject: `${options.test ? '[TEST] ' : ''}${subject}`,
+    html,
+    replyName: locale === 'de' ? 'CASA Internationale Sprachschule' : 'CASA International Language School',
+  };
 }

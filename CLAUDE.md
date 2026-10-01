@@ -99,6 +99,8 @@ and succeed with `stored: false` when the notification went out. Group appointme
 applications answer 503 whenever there is no database, mail or not. With neither
 a database nor mail — the Azure revision as deployed — every lead form fails;
 `docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md` has the launch checklist.
+The sender also gets a confirmation email (`confirmToSender`): to `admin@` in test mode, to
+the sender in live mode, and only when that form has a mailbox to receive replies.
 
 Keep both modes working for the PUBLIC SITE. Do not break fallback parity when
 changing data flows.
@@ -123,6 +125,7 @@ conclude nothing had come in.
 | `FORM_DELIVERY_MODE` | `live` sends to the real recipients; anything else is test mode (all mail to `admin@casa-bremen.de`, no webhooks) |
 | `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID` | Sender mailbox and managed identity for lead notification mail via Microsoft Graph |
 | `FORM_RECIPIENT_<FORM>` | Per-form recipient in live mode (`CONTACT`, `GROUPS`, `COURSE`, `EXAM`, `CAREERS`, `PLACEMENT`, `APPOINTMENT`) |
+| `FORM_REPLY_TO_CAREERS` | Management mailbox that receives replies to an application's confirmation; live, no application confirmation is sent without it |
 | `NEXT_PUBLIC_SITE_URL` | Origin for canonical, hreflang, sitemap and JSON-LD URLs; default `https://casa-bremen.de`. Inlined at build time, so it only takes effect when passed into the image build (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`) |
 | `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS` | Optional flag for unverified public claims |
 

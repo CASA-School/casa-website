@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
+import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationCourseCatalog } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 import { createCourseRegistrationFormSchema, requiresLevelField } from '@/lib/validation/registration-submissions';
@@ -34,6 +35,7 @@ type CourseRegistrationApiResult = {
   status: 'accepted' | 'error';
   message: string;
   requestId?: string;
+  confirmationSent?: boolean;
 };
 
 const fieldClassName =
@@ -69,6 +71,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   // Messages follow the page, so a German form never shows an English error.
   const registrationSchema = useMemo(() => createCourseRegistrationFormSchema(catalog.locale), [catalog.locale]);
@@ -252,6 +255,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
       }
 
+      setConfirmationSent(result?.confirmationSent === true);
       setSuccess(true);
       trackCasaEvent('form_success', {
         form: 'course_registration',
@@ -1000,6 +1004,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 ? 'Ihre Kursanmeldung wird nun geprüft. Das CASA-Team meldet sich zeitnah per E-Mail bei Ihnen.'
                 : 'Your enrollment request is now in review. CASA admissions will contact you by email with availability and next steps.'}
             </p>
+            {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
 
             <div className="w-full max-w-lg text-left mt-6">
               <NextStepsTimeline

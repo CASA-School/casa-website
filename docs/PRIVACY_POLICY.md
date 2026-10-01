@@ -41,6 +41,9 @@ the same in both languages.
 - Visas: CASA issues the learner a confirmation; no data goes to authorities.
 - Bookings move into the in-house school administration system (FileMaker).
 - No data sold, no marketing email.
+- Since 2026-10-01 the sender gets a confirmation (receipt): their name, the reference and their
+  catalogue choices, never their free text; no copy kept; at most three per inbox in 24 hours per
+  server process (§14, §16, §17, §20).
 - Logs: Log Analytics `log-casa-prod`, Germany West Central, 30 days (verified 2026-09-30);
   no Application Insights on `ca-casa-website`.
 
@@ -74,16 +77,22 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
 7. Longer storage of applications "for future vacancies" (§14) needs a consent box that does
    not exist yet — build one or drop the sentence.
 
+8. AGB 2.2 promises „eine Kopie der Anmeldung per E-Mail". The new receipt deliberately shows only
+   the name, the catalogue choices and the reference, so a mistyped address reveals little. Either
+   amend 2.2 („erhält eine Eingangsbestätigung per E-Mail; sie ist noch keine Annahme") or decide
+   to send the full copy. Also whether the receipt should carry the Widerrufsbelehrung on a
+   durable medium.
+
 **For a lawyer**
 
-8. Legal bases throughout, the allergy consent (Art. 9(2)(a) GDPR), and whether submission
+9. Legal bases throughout, the allergy consent (Art. 9(2)(a) GDPR), and whether submission
    under a server-enforced consent is enough proof or a stored timestamp is needed.
-9. No cookie banner: the § 25 TDDDG reasoning in §5.
-10. Placement test and Art. 22 GDPR (§15, §26): a teacher decides, the system recommends.
-11. Data protection officer: none is named. Check § 38 BDSG (20+ people constantly
+10. No cookie banner: the § 25 TDDDG reasoning in §5.
+11. Placement test and Art. 22 GDPR (§15, §26): a teacher decides, the system recommends.
+12. Data protection officer: none is named. Check § 38 BDSG (20+ people constantly
     processing personal data, counting teachers who use the workspace or the mailboxes).
-12. Whether the DGD generator licence needs the credit kept for the carried-over sections.
-13. Facebook and Instagram pages: a separate notice for possible joint controllership with Meta.
+13. Whether the DGD generator licence needs the credit kept for the carried-over sections.
+14. Facebook and Instagram pages: a separate notice for possible joint controllership with Meta.
 
 **Website follow-ups**
 

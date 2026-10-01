@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Clock, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -75,6 +76,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [reference, setReference] = useState('');
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const stepHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -127,6 +129,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
       }
       if (!response.ok) throw new Error('failed');
       const body = await response.json();
+      setConfirmationSent(body.data.confirmationSent === true);
       setReference(body.data.requestId);
     } catch { setError(t.error); }
     finally { setSending(false); }
@@ -137,6 +140,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
       <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Ina Eismann · CASA Bremen</p>
       <DialogTitle ref={reference ? stepHeading : undefined} tabIndex={reference ? -1 : undefined} className="pr-7 text-2xl sm:text-3xl">{reference ? t.success : t.title}</DialogTitle>
       <DialogDescription className="mt-3 max-w-xl text-sm">{reference ? t.thanks : t.intro}</DialogDescription>
+      {reference && confirmationSent ? <p className="mt-2 max-w-xl text-sm font-medium text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
       <p className="mt-4 flex items-center gap-2 text-sm text-[var(--casa-ink)]"><Clock aria-hidden className="size-4" />{t.schedule}</p>
     </header>
     <div className="p-5 sm:p-8">

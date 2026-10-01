@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 import { resetRateLimits } from '@/lib/api/rate-limit';
 
-const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn() }));
+const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })) }));
 vi.mock('@/lib/admin/intake', () => ({ storeEnquiry: mocks.store }));
-vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify }));
+vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify, confirmToSender: mocks.confirm }));
 import { POST } from './route';
 
 beforeEach(() => resetRateLimits());

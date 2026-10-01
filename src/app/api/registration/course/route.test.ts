@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 import { resetRateLimits } from '@/lib/api/rate-limit';
 
-const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn(), catalog: vi.fn() }));
+const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })), catalog: vi.fn() }));
 vi.mock('@/lib/admin/intake', () => ({ storeCourseRegistration: mocks.store }));
-vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify }));
+vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify, confirmToSender: mocks.confirm }));
 vi.mock('@/lib/content/repository', () => ({ getCourseRegistrationCatalog: mocks.catalog }));
 import { POST } from './route';
 
@@ -71,6 +71,25 @@ describe('course registration route', () => {
     expect(options).toEqual({ stored: false });
   });
 
+  it('confirms an accepted registration to the sender, and says so', async () => {
+    mocks.catalog.mockResolvedValue(catalog);
+    mocks.store.mockResolvedValue(true);
+    mocks.notify.mockResolvedValue({ delivered: true, channel: 'email' });
+    const response = await POST(request(valid));
+    expect(await response.json()).toMatchObject({ status: 'accepted', confirmationSent: true });
+    const [kind, payload] = mocks.confirm.mock.calls[0];
+    expect(kind).toBe('course');
+    expect(payload).toMatchObject({ courseTypeLabel: 'Intensiv Deutsch', email: 'ada@example.com' });
+  });
+
+  it('sends no confirmation when nothing was stored and nothing delivered', async () => {
+    mocks.catalog.mockResolvedValue(catalog);
+    mocks.store.mockResolvedValue(false);
+    mocks.notify.mockResolvedValue({ delivered: false, channel: 'failed' });
+    expect((await POST(request(valid))).status).toBe(503);
+    expect(mocks.confirm).not.toHaveBeenCalled();
+  });
+
   it('gives a filled honeypot a quiet success and stores nothing', async () => {
     for (const website of ['https://spam.example', 'x'.repeat(250)]) {
       const response = await POST(request({ ...valid, website }));
@@ -80,6 +99,7 @@ describe('course registration route', () => {
     expect(mocks.catalog).not.toHaveBeenCalled();
     expect(mocks.store).not.toHaveBeenCalled();
     expect(mocks.notify).not.toHaveBeenCalled();
+    expect(mocks.confirm).not.toHaveBeenCalled();
   });
 
   it('refuses an oversized id before it reaches storage', async () => {

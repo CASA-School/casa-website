@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { notifyForm } from '@/lib/notifications/forms.server';
+import { confirmToSender, notifyForm } from '@/lib/notifications/forms.server';
 
 import { storeExamRegistration } from '@/lib/admin/intake';
 import { rateLimit } from '@/lib/api/rate-limit';
@@ -120,18 +120,24 @@ export async function POST(request: NextRequest) {
     locale: payload.locale,
   });
 
-  const delivery = await notifyForm('exam', {
-    requestId, submittedAt, ...payload, examTypeLabel, examSessionLabel, source: 'registration-exam',
-  }, webhookUrl, { stored });
+  const notification = { requestId, submittedAt, ...payload, examTypeLabel, examSessionLabel, source: 'registration-exam' };
+  // Stored, the registration is accepted whatever the alert does, so the receipt
+  // goes out alongside it. Not stored, it waits: no receipt for a 503.
+  const [delivery, early] = stored
+    ? await Promise.all([notifyForm('exam', notification, webhookUrl, { stored }), confirmToSender('exam', notification)])
+    : [await notifyForm('exam', notification, webhookUrl, { stored }), null];
   if (!stored && !delivery.delivered) {
     return NextResponse.json({ status: 'error', message: failureMessage(payload.locale), supportPath: '/contact' }, { status: 503 });
   }
+
+  const confirmation = early ?? await confirmToSender('exam', notification);
 
   return NextResponse.json({
     status: 'accepted',
     requestId,
     mode: delivery.delivered ? delivery.channel : 'database',
     notified: delivery.delivered,
+    confirmationSent: confirmation.reachedSender,
     stored,
     message: successMessage(payload.locale),
   });

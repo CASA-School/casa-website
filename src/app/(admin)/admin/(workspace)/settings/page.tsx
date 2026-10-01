@@ -96,7 +96,7 @@ export default async function SettingsPage() {
             { label: 'Microsoft 365', value: hasEnv('FORM_MAIL_FROM') && hasEnv('IDENTITY_ENDPOINT') && hasEnv('IDENTITY_HEADER') ? 'Configured — verify mailbox permission and actual delivery' : 'Sender connection not configured' },
           ]} />
           <p className="mt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-            In test mode, legacy webhooks and applicant confirmation emails are disabled.
+            In test mode, legacy webhooks are off, and confirmations meant for the sender go to admin@casa-bremen.de instead.
             Saved requests remain in the workspace if a notification fails. Check these queues regularly.
           </p>
         </Card>
