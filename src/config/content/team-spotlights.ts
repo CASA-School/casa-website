@@ -146,20 +146,10 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Resource management', de: 'Ressourcenmanagement' },
     group: 'office',
   },
-  // TODO(Rahman): the two volunteers are not on the confirmed staff list of
-  // 2026-10-01 (it lists the administration only); confirm they are still here.
-  {
-    id: 'lara-nobmann',
-    name: 'Lara Nobmann',
-    title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
-    group: 'volunteer',
-  },
-  {
-    id: 'ilona-sher',
-    name: 'Ilona Sher',
-    title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
-    group: 'volunteer',
-  },
+  // The Bundesfreiwilligendienst volunteers: Lara Nobmann and Ilona Sher have
+  // left (Rahman, 2026-10-01). TODO(Rahman): the current volunteers are Lisa
+  // and Maryam; add them here once their surnames are confirmed, with the
+  // `volunteer` group. Until then there are no volunteer cards.
 ];
 
 function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotlight {
