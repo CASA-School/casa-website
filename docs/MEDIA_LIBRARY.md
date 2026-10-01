@@ -12,8 +12,10 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `hero-classroom-lesson.webp` | Slot 54, homepage hero since 2026-10-01. A 5:4 crop of pool frame 093 (the slot 51 lesson), light correction only. Its focal point moves by breakpoint (`objectPositionClassName` on `heroLesson`). |
 | `course-intensive-class.webp` | Slot 4, Deutsch intensiv (homepage row, /courses card, course page). Pool frame 060, 4:3, light correction only. |
 | `course-evening-table.webp` | Slot 5, Abendkurs. Pool frame 088, 4:3, light correction only. |
-| `course-special-pair-reading.webp` | Slot 8, Spezialkurse. Pool frame 077, 4:3, light correction only. |
-| `home-conversation-pair.webp` | Slot 56, the homepage's "Wir hören zu". Pool frame 076, 3:2, light correction only. |
+| `course-special-smartboard.webp` | Slot 8, Spezialkurse (since 2026-10-02). Pool frame 067: the teacher at the smart board with her class, 4:3, modern grade. |
+| `home-class-welcome.webp` | Slot 56, the homepage's "Wir hören zu" and Abendkurse's second photo (since 2026-10-02). Pool frame 087, 3:2, modern grade. |
+| `course-*-hero.webp` | Slots 58, 60, 61, 63, 65: each course page's 2.4:1 hero crop (Intensivkurse, Abendkurse, Spezialkurse, Bildungszeit, Firmenunterricht), shown from `lg` up. |
+| `course-intensive-story.webp`, `course-bildungszeit-class.webp`, `course-company-classroom.webp` | Slots 59, 62, 64: Intensivkurse's second photo (061), Bildungszeit (094) and Firmenunterricht (053, no people). |
 | `casa-wg-room.webp` | Slot 57, the homepage's accommodation block. Pool file 008, a room in a CASA-WG, 4:3, light correction only. |
 | `casa-building-golden.webp` | Slot 44. AI-processed (misspelled window sign, changed windows): `ready: false` since 2026-10-01 so it cannot render. Do not use. |
 | `about-team-courtyard.webp` | Slot 55, About hero since 2026-10-01. Pool frame 098 (the slot 53 team) as its whole 3:2 frame, light correction only. |
@@ -179,6 +181,22 @@ page's hero, and the Bremen Town Musicians group (20) the "Unterricht für Grupp
 course photo. **After go-live:** regrade slots 20 and 23 (old-library re-edits
 W008 and W012) from their originals to the homepage set's house look; both sit a
 little cooler and pinker than the new photographs.
+
+**The modern grade and the course pages, 2026-10-02.** Rahman asked for brighter,
+more modern light, wider and livelier pictures, and better crops. Every photograph
+in the set was rebuilt from its original with one grade: white balance from a known
+neutral in the frame (a whiteboard, a white wall) or the earlier skin-checked gains,
+midtones lifted to L* 61-64, highlights to 93-94 without clipping, saturation near
+natural. The two close two-person shots went: 077 (Spezialkurse) became 067, the
+teacher at the smart board (Rahman's pick, after 059 was rejected as a poor angle),
+and 076 ("Wir hören zu") became 087, the teacher with smiling learners. Course pages
+no longer show the same photo twice: each has a second photo (`<course>Story`) and
+a 2.4:1 hero crop (`<course>Hero`) that the hero uses from `lg` up, where its box is
+a 2.2-2.6:1 band; below `lg` it shows the 4:3 crop. Slots 10, 20 and 23 were
+regraded in place (JPEG, same paths). 067's board shows a page of a publisher's
+digital textbook, readable only at large retina sizes. Deutsch für Pflege und
+Medizin still has no photograph. Consent for the people in 061, 067, 087 and 094,
+all adults, was confirmed by the product owner on 2026-10-02.
 
 **The reel was retired on 2026-10-01.** The product owner did not like the full-width
 slider: the headline on top of the photographs and the softness of the wide crops at

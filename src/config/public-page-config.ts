@@ -81,14 +81,14 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   teacherGuiding: {
-    src: '/media/casa/course-special-pair-reading.webp',
+    src: '/media/casa/course-special-smartboard.webp',
     alt: {
-      en: 'Two learners reading a text together by the classroom window',
-      de: 'Zwei Teilnehmerinnen lesen am Fenster gemeinsam einen Text',
+      en: 'The teacher speaks at the smart board while her class works on an exercise',
+      de: 'Die Lehrerin spricht am digitalen Whiteboard, ihre Klasse arbeitet an einer Übung',
     },
     caption: {
-      en: 'Whiteboard practice keeps language concrete, visible, and usable.',
-      de: 'Whiteboard-Praxis macht Sprache konkret, sichtbar und anwendbar.',
+      en: 'Focused practice: grammar, writing and speaking.',
+      de: 'Gezielt üben: Grammatik, Schreiben, Sprechen.',
     },
   },
   groupConversation: {
@@ -521,17 +521,62 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     aspectRatio: '3 / 2',
   },
   /*
-   * THE HOMEPAGE'S "WIR HÖREN ZU" (slot 56): two learners, one explaining, one
-   * listening. Its own slot, not slot 17: that one is the advising photograph
-   * of the contact and registration heroes, and these two are not staff.
+   * THE HOMEPAGE'S "WIR HÖREN ZU" (slot 56): the teacher with smiling learners.
+   * Its own slot, not slot 17: that one is the advising photograph of the
+   * contact and registration heroes.
    */
-  conversationPair: {
-    src: '/media/casa/home-conversation-pair.webp',
+  classWelcome: {
+    src: '/media/casa/home-class-welcome.webp',
     alt: {
-      de: 'Zwei Teilnehmende im Gespräch über ein Arbeitsblatt: Einer erklärt, der andere hört zu',
-      en: 'Two learners in conversation over a worksheet, one explaining while the other listens',
+      de: 'Eine Lehrerin und lächelnde Teilnehmende im Unterricht',
+      en: 'A teacher with smiling learners in class',
     },
-    caption: { de: 'Im Gespräch', en: 'In conversation' },
+    caption: { de: 'Persönlich begleitet', en: 'Personal support' },
+  },
+  /*
+   * COURSE-PAGE PHOTOGRAPHS (2026-10-02). Each course's hero is a 2.4:1 crop
+   * composed for the hero band (`<course>Hero`); its second photo (`<course>Story`)
+   * is a different picture, so no course page shows the same photo twice.
+   */
+  intensiveHero: {
+    src: '/media/casa/course-intensive-hero.webp',
+    alt: { de: 'Teilnehmerinnen am langen Tisch am Fenster im Deutschunterricht', en: 'Learners at the long table by the window in a German lesson' },
+    caption: { de: 'Intensivkurse', en: 'Intensive courses' },
+  },
+  intensiveStory: {
+    src: '/media/casa/course-intensive-story.webp',
+    alt: { de: 'Die Lehrerin erklärt am Bildschirm, die Teilnehmerinnen hören zu', en: 'The teacher explains at the screen while the learners listen' },
+    caption: { de: 'Im Kurs', en: 'In class' },
+  },
+  eveningHero: {
+    src: '/media/casa/course-evening-hero.webp',
+    alt: { de: 'Drei Teilnehmende lachen bei einer gemeinsamen Übung', en: 'Three learners laughing over a shared exercise' },
+    caption: { de: 'Abendkurse', en: 'Evening courses' },
+  },
+  specialHero: {
+    src: '/media/casa/course-special-hero.webp',
+    alt: { de: 'Die Lehrerin am digitalen Whiteboard, vor ihr die Klasse', en: 'The teacher at the smart board, her class in front of her' },
+    caption: { de: 'Spezialkurse', en: 'Special courses' },
+  },
+  bildungszeitClass: {
+    src: '/media/casa/course-bildungszeit-class.webp',
+    alt: { de: 'Ein Teilnehmer lächelt von seiner Übung auf, die Lehrerin schreibt Grammatik an die Tafel', en: 'A learner smiles up from his exercise while the teacher writes grammar on the board' },
+    caption: { de: 'Bildungszeit', en: 'Bildungszeit' },
+  },
+  bildungszeitHero: {
+    src: '/media/casa/course-bildungszeit-hero.webp',
+    alt: { de: 'Teilnehmende schreiben, die Lehrerin schreibt Grammatik an die Tafel', en: 'Learners writing while the teacher writes grammar on the board' },
+    caption: { de: 'Bildungszeit', en: 'Bildungszeit' },
+  },
+  companyClassroom: {
+    src: '/media/casa/course-company-classroom.webp',
+    alt: { de: 'Ein heller CASA-Kursraum, das Logo auf dem Bildschirm', en: 'A bright CASA classroom, the logo on the screen' },
+    caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
+  },
+  companyHero: {
+    src: '/media/casa/course-company-hero.webp',
+    alt: { de: 'Ein heller CASA-Kursraum mit Tischen und Stühlen', en: 'A bright CASA classroom with tables and chairs' },
+    caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
   },
   /*
    * A ROOM IN A CASA SHARED FLAT (slot 57), for the homepage's "Ein eigenes
@@ -572,7 +617,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // as before the full-width reel. A lesson, because that is the school.
       // The building stays out: every image of it we have is AI-altered.
       hero: photoLibrary.heroLesson,
-      story: photoLibrary.conversationPair,
+      story: photoLibrary.classWelcome,
       // "Leben bei CASA" (slots 20 and 23, both real photographs).
       lifeRegion: photoLibrary.groupCourseBremenMusicians,
       lifePeople: photoLibrary.groupCourseWalking,
@@ -682,14 +727,24 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     photos: {
       supportCard: photoLibrary.consultationDesk,
       intensive: photoLibrary.courseClassroomWide,
+      intensiveHero: photoLibrary.intensiveHero,
+      intensiveStory: photoLibrary.intensiveStory,
       evening: photoLibrary.courseClassroomCircle,
+      eveningHero: photoLibrary.eveningHero,
+      eveningStory: photoLibrary.classWelcome,
       special: photoLibrary.teacherGuiding,
+      specialHero: photoLibrary.specialHero,
+      specialStory: photoLibrary.classroomMapVocabulary,
       // A group course at the Bremen Town Musicians (slot 20), a real photograph.
       groups: photoLibrary.groupCourseBremenMusicians,
       groupsStory: photoLibrary.groupCoursePhoneTask,
       medical: photoLibrary.medicalConsultation,
-      company: photoLibrary.teamCollaboration,
-      bildungszeit: photoLibrary.campusDiscussion,
+      company: photoLibrary.companyClassroom,
+      companyHero: photoLibrary.companyHero,
+      companyStory: photoLibrary.teacherGuiding,
+      bildungszeit: photoLibrary.bildungszeitClass,
+      bildungszeitHero: photoLibrary.bildungszeitHero,
+      bildungszeitStory: photoLibrary.companyClassroom,
       academic: photoLibrary.classroomMapVocabulary,
       business: photoLibrary.whiteboardPractice,
       testimonialA: photoLibrary.studentTestimonialPortrait1,

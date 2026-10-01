@@ -13,6 +13,8 @@ type HeroCUtilityRailProps = {
   notes?: string;
   ctas: HeroAction[];
   photo: HeroPhoto;
+  /** A crop composed for the wide band the photo becomes from `lg` up. */
+  photoWide?: HeroPhoto;
   proofItems?: HeroProofItem[];
   themeClassName?: string;
 };
@@ -46,6 +48,7 @@ export function HeroCUtilityRail({
   notes,
   ctas,
   photo,
+  photoWide,
   themeClassName = 'hero-theme-default',
 }: HeroCUtilityRailProps) {
   return (
@@ -87,7 +90,20 @@ export function HeroCUtilityRail({
             Only at `lg`. On a phone the columns are stacked and the photograph
             is not competing with anything, so it keeps its full height.
           */}
-          <HeroPhotoCard photo={photo} className="mt-8 lg:h-80" priority />
+          {photoWide ? (
+            <>
+              {/*
+                Art direction (2026-10-02). Below `lg` the box is about 1.2-1.8:1,
+                which the 4:3 crop fills; from `lg` it is a 2.2-2.6:1 band, which
+                a centre slice of the 4:3 left looking zoomed in, so that band
+                gets a crop composed for it.
+              */}
+              <HeroPhotoCard photo={photo} className="mt-8 lg:hidden" />
+              <HeroPhotoCard photo={photoWide} className="mt-8 hidden lg:block lg:h-80" priority />
+            </>
+          ) : (
+            <HeroPhotoCard photo={photo} className="mt-8 lg:h-80" priority />
+          )}
         </div>
 
         <div className="lg:pt-2">

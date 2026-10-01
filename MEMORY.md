@@ -2284,3 +2284,14 @@ the become-a-host page). The hero's focal point now changes by breakpoint
 (`objectPositionClassName`), so both faces and the board stay in from 320 to 1920px. The medical
 row stays placeholder 37 until there is a real photo of that course. Consent for every person
 shown was confirmed by Rahman on 2026-10-01.
+
+## 34. Modern grade, livelier photos, course pages without repeats (2026-10-02)
+
+Rahman asked for better photo choices, less zoomed-in crops and more modern light. Every photo
+in the homepage/course set is rebuilt from its original with one brighter, cleaner grade
+(`scripts/media/build_reel.py`). The two tight two-person shots went: Spezialkurse is now 067
+(the teacher at the smart board, Rahman's pick after rejecting 059) and "Wir hören zu" is 087 (the
+teacher with smiling learners). Course pages now have a second, different photo and a 2.4:1
+hero crop shown from `lg` up (`HeroCUtilityRail` `photoWide`); phones keep the 4:3. Bildungszeit
+(094) and Firmenunterricht (053, an empty CASA classroom) have photos for the first time; Pflege
+und Medizin still has none. Consent for 061, 067, 087 and 094 confirmed 2026-10-02.

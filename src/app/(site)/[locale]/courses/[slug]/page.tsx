@@ -122,6 +122,8 @@ export default async function CourseDetailPage({
   const coursePhotoKey = getCoursePhotoKey(detail.course.slug);
   const coursePhoto = pageConfig.photos[coursePhotoKey] ?? pageConfig.photos.supportCard;
   const courseStoryPhoto = pageConfig.photos[`${coursePhotoKey}Story`] ?? coursePhoto;
+  // From `lg` the hero is a 2.2-2.6:1 band; a crop composed for it beats a slice of the 4:3.
+  const courseHeroPhoto = pageConfig.photos[`${coursePhotoKey}Hero`] ?? coursePhoto;
   const courseLevelGoals = getCourseLevelGoals(detail.course.slug, locale);
   const archetype = getCourseArchetype(getCourseProfile(detail.course.slug)?.archetype);
   // Only meaningful on `package-inquiry`, where two very different products
@@ -623,6 +625,7 @@ export default async function CourseDetailPage({
           ...coursePhoto,
           caption: coursePhoto.caption,
         }}
+        photoWide={courseHeroPhoto === coursePhoto ? undefined : { ...courseHeroPhoto, caption: courseHeroPhoto.caption }}
         themeClassName="hero-theme-courses"
       />
       )}
