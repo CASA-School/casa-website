@@ -625,7 +625,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     photos: {
       hero: photoLibrary.studentClass,
       mission: photoLibrary.campusDiscussion,
-      team: photoLibrary.studentPortrait,
+      // The team page's hero: the CASA team in the courtyard (slot 55, 3:2).
+      team: photoLibrary.heroTeam,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
       testimonialB: photoLibrary.studentTestimonialPortrait2,
       testimonialC: photoLibrary.studentTestimonialPortrait3,
@@ -652,7 +653,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
         `groupConversation` is a whole class with the teacher at the board and
         belongs to no format in `course-detail.photos`.
       */
-      thumbA: photoLibrary.groupConversation,
+      // The hero (thumbA): the homepage's lesson (slot 54), no format's photograph.
+      thumbA: photoLibrary.heroLesson,
       thumbB: photoLibrary.courseClassroomWide,
       thumbC: photoLibrary.teacherGuiding,
       thumbD: photoLibrary.groupCourseLunch,
@@ -682,7 +684,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       intensive: photoLibrary.courseClassroomWide,
       evening: photoLibrary.courseClassroomCircle,
       special: photoLibrary.teacherGuiding,
-      groups: photoLibrary.groupCourseLunch,
+      // A group course at the Bremen Town Musicians (slot 20), a real photograph.
+      groups: photoLibrary.groupCourseBremenMusicians,
       groupsStory: photoLibrary.groupCoursePhoneTask,
       medical: photoLibrary.medicalConsultation,
       company: photoLibrary.teamCollaboration,
@@ -733,7 +736,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     photos: {
       thumbA: photoLibrary.sharedFlat,
       thumbB: photoLibrary.hostFamilyDinner,
-      thumbC: photoLibrary.sharedFlatKitchen,
+      // The hero (thumbC): a room in a CASA shared flat (slot 57), never a host family's.
+      thumbC: photoLibrary.wgRoom,
       story: photoLibrary.hostFamilyDinner,
     },
   },
