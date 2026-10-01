@@ -145,11 +145,9 @@ function examDetailHref(code: string) {
 export default async function HomePage() {
   const locale = await getContentLocale();
   const pageConfig = getPublicPageConfig('home', locale);
-  const accommodationPageConfig = getPublicPageConfig('accommodation', locale);
-  const accommodationPhoto =
-    accommodationPageConfig.photos.story ??
-    accommodationPageConfig.photos.thumbA ??
-    pageConfig.photos.accommodation;
+  // A CASA-WG room for "Ein eigenes Zimmer" (slot 57), not the accommodation
+  // page's host-family photograph that this used to borrow.
+  const accommodationPhoto = pageConfig.photos.accommodation;
   const rhythm = getLayoutRhythm('home');
   const culturalPrograms = getCulturalPrograms(locale);
 

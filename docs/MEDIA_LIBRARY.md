@@ -9,7 +9,12 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `group-course-bremen-musicians.jpg` | Slot 20, live. Editorial grade (the pool's W008). |
 | `group-course-walking-bremen.jpg` | Slot 23, live. Editorial grade (the pool's W012). |
 | `newsflash-editor-lisa-dao.jpg`, `newsflash-kicktipp-winners.jpg` | Article images of two NewsFlash posts. Rendered directly, not through the placeholder, and deliberately unnumbered. |
-| `hero-classroom-lesson.webp` | Slot 54, homepage hero since 2026-10-01. A 5:4 crop of pool frame 093 (the slot 51 lesson), light correction only. |
+| `hero-classroom-lesson.webp` | Slot 54, homepage hero since 2026-10-01. A 5:4 crop of pool frame 093 (the slot 51 lesson), light correction only. Its focal point moves by breakpoint (`objectPositionClassName` on `heroLesson`). |
+| `course-intensive-class.webp` | Slot 4, Deutsch intensiv (homepage row, /courses card, course page). Pool frame 060, 4:3, light correction only. |
+| `course-evening-table.webp` | Slot 5, Abendkurs. Pool frame 088, 4:3, light correction only. |
+| `course-special-pair-reading.webp` | Slot 8, Spezialkurse. Pool frame 077, 4:3, light correction only. |
+| `home-conversation-pair.webp` | Slot 56, the homepage's "Wir hören zu". Pool frame 076, 3:2, light correction only. |
+| `casa-wg-room.webp` | Slot 57, the homepage's accommodation block. Pool file 008, a room in a CASA-WG, 4:3, light correction only. |
 | `casa-building-golden.webp` | Slot 44. User-supplied, AI-processed building image; no longer used on the homepage. |
 | `about-team-courtyard.webp` | Slot 55, About hero since 2026-10-01. Pool frame 098 (the slot 53 team) as its whole 3:2 frame, light correction only. |
 | `casa-building-daylight.webp` | Slot 45. User-supplied processed building image; the About hero until 2026-10-01, now unused. |
@@ -142,6 +147,31 @@ on 2026-09-23. A replacement photograph needs the same confirmation before it is
 committed: this repository is public. Check each slide at 1024, 1280, 1440 and 1920px and
 on a phone after any change: the heading is up to 62% of the frame wide at 1024px and
 wraps to three lines at 1920px.
+
+**The homepage set, 2026-10-01.** The four course rows, "Wir hören zu" and the
+accommodation block got real photographs, chosen from the whole pool by a selection
+pass with a photo editor's final call, and all built by `scripts/media/build_reel.py`
+as `box` recipes with one house look measured against the slot 54 hero: reference
+whites at a* 0..+3 and b* +3.5..+6.5, skin hue 47–60°, indoor median L* 54–60 (a
+white-wall frame like 076 sits higher so the wall stays white). Course photos are
+also each course page's hero and a small square card, both centre-cropped, so every
+crop keeps its faces in the middle ~52% of the height and ~75% of the width.
+
+- Slot 4 (060): five learners at the long table by the window. Slot 5 (088): three
+  learners laughing over a shared exercise; the box stops before a publisher's book
+  cover. Slot 8 (077): two learners reading a text together.
+- "Wir hören zu" uses a new slot 56 (076), not slot 17: slot 17 is the advising
+  photograph of the contact and registration heroes, and these two are learners.
+- The accommodation block uses a new slot 57 (008, a CASA-WG room), not slot 26 or
+  27: /accommodation/become-host shows slot 26's file to people offering a room in
+  their own home, and 27 is the host-family page's hero (hard rule 5).
+- Slot 37 (Deutsch für Mediziner) stays a numbered placeholder: nothing in the pool
+  shows the medical course, and the one good stand-in (075) shows the same two men
+  as slot 56. It needs a short consented photo of the medical course.
+
+Consent for the identifiable people in 060, 088, 077 and 076, including that the
+learners in 077 and 088 are adults, was confirmed by the product owner on
+2026-10-01, as was that 008 is a CASA-WG room.
 
 **The reel was retired on 2026-10-01.** The product owner did not like the full-width
 slider: the headline on top of the photographs and the softness of the wide crops at
