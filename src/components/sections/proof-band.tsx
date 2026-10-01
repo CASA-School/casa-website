@@ -96,9 +96,14 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
  */
 export function AccreditationLogoList({ locale, className }: { locale: ContentLocale; className?: string }) {
   return (
-    <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4', className)} aria-label={locale === 'de' ? 'Qualität und Partnerschaften' : 'Accreditations and partners'}>
+    /*
+      Flex, centred, not a grid: five tiles in a 2- or 3-column grid left the
+      last one alone at the left edge beside an empty cell on phones and
+      tablets. Centred, the short last row reads as intended.
+    */
+    <ul className={cn('flex flex-wrap justify-center gap-3 lg:gap-4', className)} aria-label={locale === 'de' ? 'Qualität und Partnerschaften' : 'Accreditations and partners'}>
       {accreditationLogos.slice(0, 5).map((logo) => (
-        <li key={logo.id}>
+        <li key={logo.id} className="basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-4rem)/5)]">
           <Link
             href={logo.href || '#'}
             target={logo.href ? '_blank' : undefined}
