@@ -157,10 +157,8 @@ export function Footer({ contentLocale: locale }: FooterProps) {
             aria-label="Go to CASA homepage"
             className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
           >
-            {/* The logo in its own colours, on a small white plate. */}
-            <span className="inline-flex rounded-lg bg-white px-3 py-2">
-              <Logo className="h-9 w-auto" />
-            </span>
+            {/* The logo's colours with white lettering, straight on the dark footer. */}
+            <Logo className="h-10 w-auto" variant="onDark" />
           </Link>
           <p className="mt-3 text-sm font-medium text-[var(--casa-text-subtle)]">
             {footerText('Non-profit language school in Bremen. Since 1983.', locale)}
@@ -214,9 +212,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 aria-label="Go to CASA homepage"
                 className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
-                <span className="inline-flex rounded-lg bg-white px-3 py-2">
-                  <Logo className="h-9 w-auto" />
-                </span>
+                <Logo className="h-10 w-auto" variant="onDark" />
               </Link>
             </div>
             <p className="text-sm font-medium text-[var(--casa-text-subtle)]">
