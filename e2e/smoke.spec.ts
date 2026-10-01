@@ -81,7 +81,8 @@ test('desktop navbar dropdown is dynamic and courses panel stays inside project 
     await expect(coursesPanel).toBeVisible({ timeout: 1_500 });
   }).toPass({ timeout: 15_000 });
 
-  await expect(coursesPanel.getByText('Intensive German')).toBeVisible();
+  // The flyers' course name (Rahman, 2026-10-01).
+  await expect(coursesPanel.getByText('Intensive courses')).toBeVisible();
 
   // The nav row is the site frame itself. Selected by its data attribute rather
   // than by a utility class: width and centring live in the [data-casa-site-frame]

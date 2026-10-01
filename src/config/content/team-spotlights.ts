@@ -71,11 +71,11 @@ const TEAM: TeamMemberSource[] = [
     group: 'leadership',
   },
   {
-    // TODO(Rahman): not on the confirmed staff list of 2026-10-01; confirm she
-    // and the title stay.
+    // A teacher and the Studienleitung for the evening courses (Rahman,
+    // 2026-10-01). On the team page only; she is not a course contact.
     id: 'mariella-baier',
     name: 'Mariella Baier',
-    title: { en: 'Head of Evening Courses', de: 'Abendkursleitung' },
+    title: { en: 'Director of Studies, evening courses', de: 'Studienleitung Abendkurse' },
     group: 'leadership',
   },
   {

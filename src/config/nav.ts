@@ -40,20 +40,20 @@ function navDescription(value: string) {
 const deNavText: Record<string, string> = {
   Courses: 'Kurse',
   'Intensive & Part-time': 'Intensiv & berufsbegleitend',
-  'Intensive German': 'Deutsch intensiv',
+  'Intensive courses': 'Intensivkurse',
   'Fast-track German with frequent weekly classes.': 'Schneller Deutschfortschritt mit hoher Unterrichtsdichte.',
-  'Evening Course': 'Abendkurs',
+  'Evening courses': 'Abendkurse',
   'After-work classes for steady weekly progress.': 'Deutsch nach der Arbeit mit stabilem Lernrhythmus.',
-  'Special Courses': 'Spezialkurse',
+  'Special courses': 'Spezialkurse',
   'Focused modules for targeted language goals.': 'Fokussierte Module für konkrete Sprachziele.',
   'Professional & Specialized': 'Beruflich & spezialisiert',
-  'German for medical professionals': 'Deutsch für Mediziner',
+  'German for nursing and medicine': 'Deutsch für Pflege und Medizin',
   'Medical German for clinical communication needs.': 'Medizinisches Deutsch für klinische Kommunikation.',
-  'German for Groups': 'Deutsch für Gruppen',
+  'Classes for groups': 'Unterricht für Gruppen',
   'Tailor-made German plus culture programme for visiting groups.': 'Maßgeschneidertes Deutsch plus Kulturprogramm für Gruppen.',
   'Educational Leave': 'Bildungszeit',
   'Intensive learning blocks during approved leave.': 'Intensive Lernblöcke für genehmigte Bildungszeit.',
-  Firmenunterricht: 'Firmenunterricht',
+  'In-company teaching': 'Firmenunterricht',
   'Custom German training for teams and workplaces.': 'Maßgeschneidertes Deutschtraining für Teams.',
   'For Companies': 'Für Firmen',
   'For Groups': 'Für Gruppen',
@@ -118,19 +118,19 @@ export const navConfig = {
           title: 'Intensive & Part-time',
           items: [
             {
-              label: 'Intensive German',
+              label: 'Intensive courses',
               href: '/courses/intensive-german',
               icon: 'intensive',
               description: navDescription('Fast-track German with frequent weekly classes.'),
             },
             {
-              label: 'Evening Course',
+              label: 'Evening courses',
               href: '/courses/evening-course',
               icon: 'evening',
               description: navDescription('After-work classes for steady weekly progress.'),
             },
             {
-              label: 'Special Courses',
+              label: 'Special courses',
               href: '/courses/special-courses',
               icon: 'special',
               description: navDescription('Focused modules for targeted language goals.'),
@@ -141,7 +141,7 @@ export const navConfig = {
           title: 'Professional & Specialized',
           items: [
             {
-              label: 'German for medical professionals',
+              label: 'German for nursing and medicine',
               href: '/courses/german-for-medical',
               icon: 'medical',
               description: navDescription('Medical German for clinical communication needs.'),
@@ -168,7 +168,7 @@ export const navConfig = {
              * ("German for medical professionals").
              */
             {
-              label: 'For Companies',
+              label: 'In-company teaching',
               href: '/courses/firmenunterricht',
               icon: 'inCompany',
               description: navDescription('Custom German training for teams and workplaces.'),

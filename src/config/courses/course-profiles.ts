@@ -69,7 +69,7 @@ export const courseProfiles: Record<string, CourseProfile> = {
   'evening-german': { archetype: 'scheduled-cohort', photoKey: 'evening', contactKey: 'eveningAndSpecial' },
   bildungszeit: { archetype: 'scheduled-cohort', photoKey: 'bildungszeit', contactKey: 'professional' },
   'special-courses': { archetype: 'module-catalogue', photoKey: 'special', contactKey: 'eveningAndSpecial' },
-  'medical-german': { archetype: 'professional-track', photoKey: 'medical', contactKey: 'professional' },
+  'medical-german': { archetype: 'professional-track', photoKey: 'medical', contactKey: 'medical' },
   'german-for-groups': {
     archetype: 'package-inquiry',
     quoteAudience: 'group',
