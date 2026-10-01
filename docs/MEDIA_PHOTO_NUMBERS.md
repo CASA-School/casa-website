@@ -13,9 +13,9 @@ staff members after the code had removed them.
 - Slots **44** (`casa-building-golden.webp`) and **45**
   (`casa-building-daylight.webp`) are user-supplied, AI-processed building
   images. The About hero still uses 45. Neither is in the homepage reel any more.
-- The homepage reel is **51, 53, 52, 50**: a lesson, the team in the courtyard, a
-  partner interview and the Bremen walk — real crops with light correction only,
-  built by `scripts/media/build_reel.py`. Slots **46–49** are retired (the AI-edited
+- The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light
+  correction only, built by `scripts/media/build_reel.py`. **51, 53, 52, 50** were the
+  full-width reel, retired the same day; they remain real, available crops. Slots **46–49** are retired (the AI-edited
   reel of 21 September); their files are deleted and the numbers are not reused.
 - Other slots remain numbered placeholders. Their absent image files are expected;
   do not delete their config references as broken or unused assets.

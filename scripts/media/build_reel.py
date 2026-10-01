@@ -1,4 +1,4 @@
-"""Build the homepage reel photographs from the original camera files.
+"""Build the homepage hero photograph and the reel photographs from the original camera files.
 
 Every slide is a CROP of a real photograph plus global light and colour
 correction: white balance, a tone curve on lightness, and a chroma factor.
@@ -21,6 +21,12 @@ chosen by the slide's `objectPosition` in public-page-config.ts, which this
 script prints. So a slide is only ever trimmed top and bottom, never at the
 sides, and nobody standing at the edge of a group disappears on a phone.
 
+THE HERO (since 2026-10-01). The full-width reel was retired from the homepage;
+the editorial hero, text left and photograph right, came back. Its photograph is
+a `box` recipe: a plain crop of the original at the frame's own proportions,
+corrected the same way, with no 2:1 band or desktop offset. The four reel images
+stay in the library as photographs that may be used again.
+
 Output never exceeds the source's own pixels: the crop is taken at full
 resolution and written at that size, so there is no upscaling.
 """
@@ -41,6 +47,18 @@ OUT = REPO / 'public/media/casa'
 # tone: target lightness (0-100) for the crop's 5th, 50th and 95th percentile.
 # chroma: saturation factor around neutral. wb: per-channel gains (R, G, B).
 SLIDES = [
+    {
+        # Slot 54. The homepage hero: the slot 51 lesson as a 5:4 crop of the
+        # full frame (2110x1688 of 2560x1688), for the half-width hero image.
+        # The teacher, the board, the learner at the board and the class in
+        # front all stay in; only empty wall at each side goes.
+        'out': 'hero-classroom-lesson.webp',
+        'source': POOL / '093_IMG_0314.JPG',
+        'box': (129, 0, 2110, 1688),
+        'tone': (7, 56, 91),
+        'chroma': 1.06,
+        'wb': (0.975, 0.99, 1.035),
+    },
     {
         # Slot 51. A lesson on Wechselpräpositionen; the board is the teacher's own handwriting.
         'out': 'reel-classroom-lesson.webp',
@@ -109,6 +127,11 @@ def tone_lut(L, targets):
 def render(slide):
     rgb = load(slide['source']).astype(np.float32) / 255.0
     h, w = rgb.shape[:2]
+    if 'box' in slide:
+        x0, y0, bw, bh = slide['box']
+        if x0 < 0 or y0 < 0 or x0 + bw > w or y0 + bh > h:
+            raise SystemExit(f"{slide['out']}: box {slide['box']} does not fit {w}x{h}")
+        return correct(rgb[y0:y0 + bh, x0:x0 + bw], slide)
     y0 = slide['crop_y']
     ch = w // 2
     band = round(w * 5 / 12)
@@ -116,7 +139,11 @@ def render(slide):
         raise SystemExit(f"{slide['out']}: 2:1 crop at y {y0} ({w}x{ch}) does not fit {w}x{h}")
     if not 0 <= slide['desktop_y'] <= ch - band:
         raise SystemExit(f"{slide['out']}: desktop band at {slide['desktop_y']} leaves the 2:1 crop")
-    crop = rgb[y0:y0 + ch]
+    return correct(rgb[y0:y0 + ch], slide)
+
+
+def correct(crop, slide):
+    """Global light and colour only: white balance, a tone curve on lightness, chroma."""
     crop = np.clip(crop * np.asarray(slide['wb'], np.float32), 0, 1)
     lab = cv2.cvtColor(crop, cv2.COLOR_RGB2LAB)  # float input: L 0..100, a/b around 0
     grid, curve = tone_lut(lab[..., 0], slide['tone'])
@@ -180,8 +207,8 @@ def main():
         else:
             # No EXIF is written: camera files can carry GPS coordinates.
             Image.fromarray(image).save(target, 'WEBP', quality=WEBP_QUALITY, method=6)
-            print(f"wrote    {slide['out']}: {image.shape[1]}x{image.shape[0]} from {slide['source'].name}; "
-                  f"objectPosition '50% {object_position_y(slide, image):.0f}%'")
+            position = '' if 'box' in slide else f"; objectPosition '50% {object_position_y(slide, image):.0f}%'"
+            print(f"wrote    {slide['out']}: {image.shape[1]}x{image.shape[0]} from {slide['source'].name}{position}")
     sys.exit(1 if failed else 0)
 
 

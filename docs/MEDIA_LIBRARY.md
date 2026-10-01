@@ -9,12 +9,13 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `group-course-bremen-musicians.jpg` | Slot 20, live. Editorial grade (the pool's W008). |
 | `group-course-walking-bremen.jpg` | Slot 23, live. Editorial grade (the pool's W012). |
 | `newsflash-editor-lisa-dao.jpg`, `newsflash-kicktipp-winners.jpg` | Article images of two NewsFlash posts. Rendered directly, not through the placeholder, and deliberately unnumbered. |
-| `casa-building-golden.webp` | Slot 44, homepage hero. User-supplied processed building image, local preview approved 2026-09-21. |
+| `hero-classroom-lesson.webp` | Slot 54, homepage hero since 2026-10-01. A 5:4 crop of pool frame 093 (the slot 51 lesson), light correction only. |
+| `casa-building-golden.webp` | Slot 44. User-supplied, AI-processed building image; no longer used on the homepage. |
 | `casa-building-daylight.webp` | Slot 45, About hero. User-supplied processed building image, local preview approved 2026-09-21. |
-| `reel-classroom-lesson.webp` | Slot 51, first reel scene. Real crop of pool frame 093, light correction only. |
-| `reel-team-courtyard.webp` | Slot 53, reel. Real crop of pool frame 098, light correction only. |
-| `reel-partner-practice.webp` | Slot 52, reel. Real crop of pool frame 075, light correction only. |
-| `reel-walking-bremen-wide.webp` | Slot 50, reel. Real crop of pool frame W012 (the slot 23 photograph), light correction only. |
+| `reel-classroom-lesson.webp` | Slot 51. Real 2:1 crop of pool frame 093, light correction only. Made for the retired reel; available. |
+| `reel-team-courtyard.webp` | Slot 53. Real 2:1 crop of pool frame 098, light correction only. Made for the retired reel; available. |
+| `reel-partner-practice.webp` | Slot 52. Real 2:1 crop of pool frame 075, light correction only. Made for the retired reel; available. |
+| `reel-walking-bremen-wide.webp` | Slot 50. Real 2:1 crop of pool frame W012 (the slot 23 photograph), light correction only. Made for the retired reel; available. |
 
 Slots 46–49 were the AI-edited reel images of 21 September; their files were deleted on
 2026-09-23 and their numbers are retired, not reused.
@@ -131,6 +132,10 @@ committed: this repository is public. Check each slide at 1024, 1280, 1440 and 1
 on a phone after any change: the heading is up to 62% of the frame wide at 1024px and
 wraps to three lines at 1920px.
 
-The reel component itself is unchanged: 6.5-second interval, 1.4-second dissolve,
-pause on hover, focus, hidden tab and offscreen, reduced motion honoured, only the
-first image preloaded. Implementation: `src/components/heroes/hero-photo-reel.tsx`.
+**The reel was retired on 2026-10-01.** The product owner did not like the full-width
+slider: the headline on top of the photographs and the softness of the wide crops at
+full viewport width. The homepage went back to the editorial hero (text left, one
+photograph right, `HeroHomePhoto`), and its photograph is slot 54, a 5:4 crop of the
+same lesson frame 093 at full resolution (2110×1688), built and verified by the same
+script as a `box` recipe. The reel component and its e2e spec are deleted; git history
+has them (`git show 1577898`). The four reel crops above stay in the library.

@@ -369,8 +369,6 @@ export default async function HomePage() {
           },
         ]}
         photo={pageConfig.photos.hero}
-        reelPhotos={[pageConfig.photos.hero, pageConfig.photos.reelCommunity, pageConfig.photos.reelPartnerPractice, pageConfig.photos.reelBremen]}
-        locale={locale}
       />
 
       <section className="py-14 md:py-20" data-track-section="trust-and-search">
