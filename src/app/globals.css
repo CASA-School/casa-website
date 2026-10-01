@@ -299,6 +299,22 @@
   --casa-amber: #f2b441;
   --casa-amber-strong: #df9f24;
   --casa-coral: #d66b4d;
+  /*
+   * THE LOGO COLOURS CARRY A MEANING (2026-10-01), as on CASA's flyer, roll-up
+   * and business card: blue = orientation, exchange, tandem; red = language
+   * courses; ink = exams; yellow = accommodation and arrival. The raw colours
+   * are for bars; the tints fill an icon's circle; text and icons use the
+   * -text values (white: blue 5.56, red 5.56, yellow 4.92; on their own tint
+   * 4.93, 4.74, 4.51). src/config/brand/meaning.ts maps a meaning to classes.
+   */
+  --casa-blue-tint: #e3f4fc;
+  --casa-red-tint: #fde8e9;
+  --casa-sun-tint: #fff6c7;
+  --casa-ink-tint: #f1e6d6;
+  --casa-red-text: #d20612;
+  --casa-red-text-hover: #b80510;
+  --casa-sun-text: #8a6d00;
+  --casa-sun-text-hover: #6e5700;
   --casa-warm-soft: #fff3da;
   --casa-ink-deep: #111827;
   --casa-ink-deep-hover: #1f2b3c;

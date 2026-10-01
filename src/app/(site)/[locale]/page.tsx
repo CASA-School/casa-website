@@ -32,6 +32,7 @@ import {
 import type { ContentLocale, CourseNarrative, CourseTypeRow } from '@/lib/content/types';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { publicCourseOrder } from '@/config/courses/course-order';
+import { meaningClasses } from '@/config/brand/meaning';
 import { cn } from '@/lib/utils';
 import { BandHeading } from '@/components/sections/band-heading';
 
@@ -534,21 +535,23 @@ export default async function HomePage() {
                           --casa-canvas tint. The page is pure white now, so that
                           step is almost invisible and the cards lose their edge.
                         */
-                        'group flex h-full flex-col rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300',
+                        // Red top edge: a course card (src/config/brand/meaning.ts).
+                        'group relative flex h-full flex-col overflow-hidden rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300',
                         'motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-modal)]',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2'
                       )}
                     >
+                      <span className={cn('absolute inset-x-0 top-0 h-1', meaningClasses.courses.bar)} aria-hidden />
                       <span className="text-xs font-semibold uppercase tracking-eyebrow tabular-nums text-[var(--casa-muted)]">
                         {String(index + 1).padStart(2, '0')}
                       </span>
-                      <span className="mt-4 block text-xl font-bold text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">
+                      <span className="mt-4 block text-xl font-bold text-[var(--casa-ink)] group-hover:text-[var(--casa-red-text)]">
                         {option.title}
                       </span>
                       <span className="mt-3 block text-sm leading-relaxed text-[var(--casa-muted)]">
                         {option.description}
                       </span>
-                      <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold text-[var(--casa-ink)]">
+                      <span className={cn('mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold', meaningClasses.courses.link)}>
                         {locale === 'de' ? 'Ansehen' : 'View'}
                         <ArrowRight
                           className="h-4 w-4 transition-transform duration-300 motion-safe:group-hover:translate-x-1"
@@ -853,13 +856,14 @@ export default async function HomePage() {
                     key={item}
                     className="flex items-center gap-3 rounded-lg bg-white px-4 py-3 text-sm font-bold text-[var(--casa-ink)] ring-1 ring-[color:var(--casa-sand)]"
                   >
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--casa-sun-text)]" aria-hidden />
                     {item}
                   </div>
                 ))}
               </div>
 
-              <TextCta href="/accommodation" className="mt-8">
+              {/* Yellow: accommodation and arrival (src/config/brand/meaning.ts). */}
+              <TextCta href="/accommodation" className={cn('mt-8', meaningClasses.arrival.link)}>
                 {locale === 'de' ? 'Unterkunft erkunden' : 'Explore accommodation'}
               </TextCta>
             </div>
