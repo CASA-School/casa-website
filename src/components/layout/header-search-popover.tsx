@@ -279,7 +279,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
            * exactly the widths 2xl is meant to cover. Below the ceiling it now
            * falls back to the lg gutter instead.
            */
-          className="fixed left-4 right-4 top-[calc(5rem+10px)] z-[950] overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:left-auto sm:right-8 sm:w-[28rem] lg:right-10 2xl:right-[max(2.5rem,calc((100vw-var(--casa-container-max))/2+2.5rem))]"
+          className="fixed left-4 right-4 top-[calc(var(--casa-header-height,5rem)+10px)] z-[950] overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:left-auto sm:right-8 sm:w-[28rem] lg:right-10 2xl:right-[max(2.5rem,calc((100vw-var(--casa-container-max))/2+2.5rem))]"
         >
           <form
             className="border-b border-[color:var(--casa-sand)] p-3"
