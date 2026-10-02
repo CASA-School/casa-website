@@ -58,7 +58,11 @@ export type ResourceGuideData = {
      * src/config/content/photo-numbers.ts, so it renders as its numbered
      * placeholder until a real photograph is delivered for that slot.
      */
-    photo: { src: string; alt: string };
+    /**
+     * `aspectRatio` shows the whole frame instead of the hero's fixed box, for
+     * a group that spans the width (crop pass, 2026-10-02).
+     */
+    photo: { src: string; alt: string; aspectRatio?: string };
     /** The first entry is the hero's one action. */
     ctas: ResourceGuideCta[];
   };

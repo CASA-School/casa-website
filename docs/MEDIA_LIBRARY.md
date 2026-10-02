@@ -246,3 +246,32 @@ in host-family frame 11, a photo collage in frame 12, the mirror in bathroom fra
 - Consent for the identifiable people in 012, 023, 024, 031, 032, 034, 011, 043 and
   W009 (a visiting school group, likely minors) rests on Rahman's approval of the brief;
   confirm with CASA before go-live, as for earlier slots.
+
+**The crop pass, 2026-10-02 (Rahman: "no head may be cut").** Every photo box on
+every public page (DE and EN) was crawled at 390, 640, 768, 820, 1000, 1024, 1200,
+1280, 1440 and 1920px (`scripts/media/crop_audit.mjs`) and checked against the
+heads in each photograph (`scripts/media/fit_positions.py`, which holds every
+head's box). Rule: a frame edge may leave a person out, but never runs through a
+head, and the top edge keeps a little room above the hair. Three kinds of fix:
+
+- **Boxes with a shape instead of a fixed height.** The detail heroes
+  (HeroCUtilityRail) show the 4:3 photo in a 4:3 box on phones and the 2.4:1 crop
+  in a 12:5 box at md and from xl; only the lg column (about 1.5:1) trims.
+  EditorialSplit, HumanStoryBlock and the photo-led hero below lg keep an aspect
+  ratio, so a 3:2 photo is no longer a 2.4:1 band at tablet width or a square in
+  the course pages' narrow column. The related-course cards got a 16:9 band on
+  phones and a wider cell from sm.
+- **A position per photo and breakpoint.** `position` on a registry entry holds
+  Tailwind object-position classes; CasaImage applies them unless the call site
+  positions the image itself. Recompute them with the two scripts after any
+  layout change.
+- **Better source crops or photographs.** The exam set (012, 023, 024, 031, 032,
+  034) was shot so tight that the camera frame itself cuts crowns, so the exam
+  pages and the Studieren hero now use 066, 079, 065, 074, 078 and 026, all with
+  room above the heads; slot 80 is retired for slot 82. The wide crops of 067
+  (Spezialkurse), 094 (Bildungszeit) and the 087 "Wir hören zu" crop start higher.
+  The homepage's "community events" tile is portrait from lg up, which the wide
+  walking group (slot 23) could not fill without cutting heads; it is now slot 83,
+  a portrait crop of 050 from the slot 79 breakfast. 011 (FAQ) and W009 (groups)
+  keep their photos with little room above the hair, so their position keeps the
+  top of the photo.

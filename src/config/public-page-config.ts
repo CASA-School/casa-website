@@ -358,8 +358,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   studentSuccess: {
     src: '/media/casa/learners-writing-class.jpg',
     alt: {
-      en: 'Two learners writing in class, one of them laughing',
-      de: 'Zwei Teilnehmerinnen schreiben im Unterricht, eine lacht dabei',
+      en: 'Four learners writing along the course table',
+      de: 'Vier Teilnehmende schreiben am langen Kurstisch',
     },
     caption: {
       en: 'Consistent progress builds confidence for study and work.',
@@ -498,12 +498,7 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
       en: 'A teacher laughs as she holds up a worksheet, with German two-way prepositions on the board',
     },
     caption: { de: 'Gemeinsam lernen', en: 'Learning together' },
-    /*
-     * Both faces, the worksheet and the board heading stay in at every width
-     * from 320 to 1920px. The 24rem tablet box (768-1023px) is a band up to
-     * 2.5:1, so it looks lower in the frame than the others.
-     */
-    objectPositionClassName: 'object-[34%_0%] md:max-lg:object-[34%_39%]',
+    // Its position per breakpoint is the registry's (slot 54, photo-numbers.ts).
   },
   /*
    * THE ABOUT HERO. The CASA team in the school courtyard: camera original 098
@@ -605,27 +600,27 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   },
   examB2Class: {
     src: '/media/casa/exam-b2-class.webp',
-    alt: { de: 'Drei Teilnehmerinnen schreiben konzentriert am Kurstisch', en: 'Three learners writing at the course table' },
+    alt: { de: 'Zwei Teilnehmer gehen gemeinsam ihre Blätter durch', en: 'Two learners going through their papers together' },
     caption: { de: 'Vorbereitung im Kurs', en: 'Preparing in class' },
   },
   examC1: {
     src: '/media/casa/exam-c1-writing.webp',
-    alt: { de: 'Zwei Teilnehmerinnen arbeiten konzentriert an ihren Texten', en: 'Two learners concentrating on their texts' },
+    alt: { de: 'Drei Teilnehmer am langen Kurstisch folgen dem Unterricht', en: 'Three learners at the long course table following the lesson' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Hero: {
     src: '/media/casa/exam-c1-hero.webp',
-    alt: { de: 'Zwei Teilnehmerinnen arbeiten konzentriert an ihren Texten', en: 'Two learners concentrating on their texts' },
+    alt: { de: 'Fünf Teilnehmer in einer Reihe am Kurstisch', en: 'Five learners in a row at the course table' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Class: {
     src: '/media/casa/exam-c1-speaking.webp',
-    alt: { de: 'Ein Teilnehmer spricht lächelnd über den Tisch hinweg', en: 'A learner speaking across the table, smiling' },
+    alt: { de: 'Zwei Teilnehmer besprechen einen Text', en: 'Two learners discussing a text' },
     caption: { de: 'Sprechen üben', en: 'Speaking practice' },
   },
   examStory: {
     src: '/media/casa/exam-story-writing.webp',
-    alt: { de: 'Ein Stift in der Hand, dahinter schreibt die Klasse', en: 'A pen in hand, the class writing behind it' },
+    alt: { de: 'Zwei Teilnehmerinnen lesen ihre Prüfungstexte', en: 'Two learners reading their exam texts' },
     caption: { de: 'Mit Ruhe vorbereiten', en: 'Calm preparation' },
   },
   /*
@@ -680,6 +675,15 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Ein Einzelzimmer in einer CASA-WG mit Bett und großen Fenstern', en: 'A single room in a CASA shared flat with a bed and large windows' },
     caption: { de: 'Die CASA-WG', en: 'The CASA shared flat' },
   },
+  /* The homepage's "community events" tile (slot 83): portrait from lg up. */
+  communityBreakfast: {
+    src: '/media/casa/home-community-breakfast.webp',
+    alt: {
+      de: 'Ein Teilnehmer klatscht lachend beim gemeinsamen Frühstück',
+      en: 'A learner clapping and laughing at the shared breakfast',
+    },
+    caption: { de: 'Gemeinsam bei CASA', en: 'Together at CASA' },
+  },
   wgKitchen: {
     src: '/media/casa/shared-flat-kitchen-table.jpg',
     alt: { de: 'Die Gemeinschaftsküche einer CASA-WG mit Esstisch', en: 'The shared kitchen of a CASA flat with its table' },
@@ -711,9 +715,10 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // The building stays out: every image of it we have is AI-altered.
       hero: photoLibrary.heroLesson,
       story: photoLibrary.classWelcome,
-      // "Leben bei CASA" (slots 20 and 23, both real photographs).
+      // "Leben bei CASA" (slots 20 and 83, both real photographs).
       lifeRegion: photoLibrary.groupCourseBremenMusicians,
-      lifePeople: photoLibrary.groupCourseWalking,
+      // Portrait from lg up, so a portrait photograph (crop pass 2026-10-02).
+      lifePeople: photoLibrary.communityBreakfast,
       /*
         The four flagship course rows, matched to what each format actually is
         rather than to whatever was next in the library:
