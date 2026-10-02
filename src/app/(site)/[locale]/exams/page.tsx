@@ -29,12 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
+// German pages write "190 €", English "€190" (brief 2026-10-02), as the course pages do.
 function examFeeSummary(code: string, locale: 'en' | 'de') {
   if (code === 'telc_b2') {
-    return locale === 'de' ? 'Vollprüfung 190 EUR, Vorbereitung 260 EUR' : 'Full exam EUR 190, prep EUR 260';
+    return locale === 'de' ? 'Vollprüfung 190\u00a0€, Vorbereitung 260\u00a0€' : 'Full exam €190, prep €260';
   }
   if (code === 'telc_c1_hochschule') {
-    return locale === 'de' ? 'Vollprüfung 210 EUR, Vorbereitung 520 EUR' : 'Full exam EUR 210, prep EUR 520';
+    return locale === 'de' ? 'Vollprüfung 210\u00a0€, Vorbereitung 520\u00a0€' : 'Full exam €210, prep €520';
   }
   return locale === 'de' ? 'Gebühr wird bestätigt' : 'Fee confirmed by office';
 }

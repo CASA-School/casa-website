@@ -43,12 +43,15 @@ function formatDate(value: string, locale: 'en' | 'de') {
  * number. Amounts unchanged, still per docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
  */
 function getExamFeeDetails(code: string, locale: 'en' | 'de') {
+  // "190 €" on German pages, "€190" on English ones (brief 2026-10-02).
+  const euro = (amount: number) => (locale === 'de' ? `${amount}\u00a0€` : `€${amount}`);
+
   if (code === 'telc_b2') {
-    return { full: 'EUR 190', partial: 'EUR 160', prep: 'EUR 260' };
+    return { full: euro(190), partial: euro(160), prep: euro(260) };
   }
 
   if (code === 'telc_c1_hochschule') {
-    return { full: 'EUR 210', partial: 'EUR 185', prep: 'EUR 520' };
+    return { full: euro(210), partial: euro(185), prep: euro(520) };
   }
 
   return {

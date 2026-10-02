@@ -71,7 +71,7 @@ export const footerConfig: FooterConfig = {
   ],
   contact: {
     phone: '+49 421 460 414 30',
-    address: 'Am Dobben 14-16, 28203 Bremen, Germany',
+    address: 'Am Dobben 14–16, 28203 Bremen, Germany',
     mapsHref: 'https://goo.gl/maps/sqJEsWgSezYa7JM5A',
     emails: [
       { label: 'info@casa-bremen.de', href: 'mailto:info@casa-bremen.de' },
