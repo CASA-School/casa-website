@@ -10,10 +10,25 @@ import { ArrowLeft, ArrowRight, CheckCircle2, FileCheck2, HelpCircle, Loader2, S
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CountryField } from '@/components/forms/country-field';
+import {
+  formAlertClassName,
+  formControlClassName,
+  formErrorClassName,
+  formFieldGroupClassName,
+  formHintClassName,
+  formLabelClassName,
+  formMetaLabelClassName,
+  formPrimaryButtonClassName,
+  formSecondaryButtonClassName,
+  formTileClassName,
+  FormStepHeader,
+  RequiredMark,
+} from '@/components/forms/form-styles';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
@@ -36,16 +51,6 @@ type ExamRegistrationApiResult = {
   requestId?: string;
   confirmationSent?: boolean;
 };
-const fieldClassName =
-  'h-11 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-base sm:text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const selectTriggerClassName =
-  'h-11 data-[size=default]:h-11 w-full rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-base sm:text-sm text-[var(--casa-ink)] data-[placeholder]:text-[var(--casa-muted)] shadow-none text-left flex items-center justify-between transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const labelClassName = 'block text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]';
-const requiredMarkClassName = 'mr-1 text-[var(--casa-coral-text)]';
-const fieldGroupClassName = 'space-y-1.5';
-const reviewTileClassName = 'rounded-lg border border-[color:var(--casa-sand)] bg-white p-4';
-
-/** In the order the fields appear, so the first invalid one is the first on screen. */
 const FIELDS_BY_STEP: Array<Array<keyof FormData>> = [
   ['examTypeId', 'registrationType', 'examSessionId'],
   ['salutation', 'firstName', 'lastName', 'email', 'phone', 'nationality', 'birthDate'],
@@ -160,9 +165,9 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
   const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
   const registrationTypeLabel =
     {
-      full: t('Full Exam', 'Vollprüfung'),
-      written: t('Written Only', 'Nur schriftlich'),
-      oral: t('Oral Only', 'Nur mündlich'),
+      full: t('Full exam', 'Vollprüfung'),
+      written: t('Written only', 'Nur schriftlich'),
+      oral: t('Oral only', 'Nur mündlich'),
     }[selectedRegistrationType] ?? selectedRegistrationType;
 
   useEffect(() => {
@@ -283,108 +288,42 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
   return (
     <div className="flex flex-col" data-track-section="registration-exam">
-      <div className="shrink-0 pb-6 border-b border-[color:var(--casa-sand)]/70 space-y-6">
-        {/* On-Page Registration Tabs Switcher */}
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-lg bg-[var(--casa-surface-subtle)]/80 p-1 shadow-inner">
-            <Link
-              href="/registration/course"
-              className={cn(
-                "rounded-lg px-5 py-2.5 text-xs font-bold transition-all duration-200 text-[var(--casa-ink)] hover:text-[var(--casa-ink)]"
-              )}
-            >
-              {catalog.locale === 'de' ? 'Kursanmeldung' : 'Course Registration'}
-            </Link>
-            <Link
-              href="/registration/exam"
-              className={cn(
-                "rounded-lg px-5 py-2.5 text-xs font-bold transition-all duration-200",
-                "bg-white text-[var(--casa-ink)] shadow-[var(--shadow-soft)]"
-              )}
-            >
-              {catalog.locale === 'de' ? 'Prüfungsanmeldung' : 'Exam Registration'}
-            </Link>
-          </div>
-        </div>
-
-        {/* Steps Timeline */}
-        <div className="relative flex items-center justify-between px-6 sm:px-12">
-          {/* Background line */}
-          <div className="absolute left-6 right-6 sm:left-12 sm:right-12 top-[18px] h-0.5 bg-[var(--casa-surface-subtle)]" aria-hidden="true" />
-          {/* Active indicator line */}
-          <div
-            className="absolute left-6 sm:left-12 top-[18px] h-0.5 bg-[var(--casa-blue)] transition-all duration-300"
-            style={{ width: `calc(${((step - 1) / (stepItems.length - 1)) * 100}% - ${step === 3 ? '0px' : '0px'})` }}
-            aria-hidden="true"
-          />
-
-          {stepItems.map((item, index) => {
-            const current = index + 1;
-            const complete = current < step;
-            const active = current === step;
-
-            return (
-              <div key={item.title} className="relative z-10 flex flex-col items-center">
-                <div
-                  className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300',
-                    complete
-                      ? 'border-[var(--casa-blue)] bg-[var(--casa-accent-surface)] text-white shadow-[var(--shadow-card)] shadow-[var(--casa-blue)]/10'
-                      : active
-                        ? 'border-[var(--casa-blue)] bg-white text-[var(--casa-accent-text)] shadow-[0_0_0_4px_rgba(0,159,227,0.12)]'
-                        : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-muted)]'
-                  )}
-                >
-                  {complete ? <CheckCircle2 className="h-4.5 w-4.5" aria-hidden /> : current}
-                </div>
-                <span className={cn('mt-2 text-xs font-bold uppercase tracking-eyebrow transition-colors duration-300', active || complete ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
-                  {item.title}
-                </span>
-                <span className="mt-0.5 hidden text-xs text-[var(--casa-muted)] sm:block">{item.description}</span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="shrink-0 space-y-7 border-b border-[color:var(--casa-sand)] pb-7">
+        <RegistrationTabs current="exam" locale={catalog.locale} />
+        <RegistrationStepper steps={stepItems} step={step} locale={catalog.locale} />
       </div>
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-6"
+        className="mt-7"
         noValidate
         data-casa-track-form="exam_registration"
       >
         <div className="space-y-6">
         {step === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-coral)]/10 text-[var(--casa-coral)]">
-                  <FileCheck2 className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-coral-text)]">{t('Exam path', 'Prüfungsweg')}</p>
-                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Choose your exam', 'Prüfung auswählen')}</h2>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
-                    {t(
-                      'Select exam type first, then choose the session that matches your preparation timeline.',
-                      'Wählen Sie zuerst den Prüfungstyp und dann den Termin, der zu Ihrer Vorbereitung passt.'
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <FormStepHeader
+              icon={FileCheck2}
+              meaning="exams"
+              headingRef={stepHeadingRef}
+              title={t('Choose your exam', 'Prüfung auswählen')}
+              description={t(
+                'Choose the exam first, then the date that fits your preparation.',
+                'Wählen Sie zuerst die Prüfung und dann den Termin, der zu Ihrer Vorbereitung passt.'
+              )}
+            />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="exam-type" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Exam Type', 'Prüfungstyp')}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="exam-type" className={formLabelClassName}>
+                  {t('Exam type', 'Prüfungstyp')}
+                  <RequiredMark />
                 </Label>
                 <Select
                   onValueChange={(value) => setValue('examTypeId', value, { shouldDirty: true, shouldValidate: true })}
                   defaultValue={watch('examTypeId')}
                 >
-                  <SelectTrigger id="exam-type" aria-required {...errorProps('examTypeId')} className={selectTriggerClassName}>
+                  <SelectTrigger id="exam-type" aria-required {...errorProps('examTypeId')} className={formControlClassName}>
                     <SelectValue placeholder={t('Select an exam...', 'Prüfung auswählen...')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -395,13 +334,13 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.examTypeId && <p id="examTypeId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.examTypeId.message}</p>}
+                {errors.examTypeId && <p id="examTypeId-error" className={formErrorClassName}>{errors.examTypeId.message}</p>}
               </div>
 
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="registration-type" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Registration Type', 'Anmeldeart')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="registration-type" className={formLabelClassName}>
+                  {t('Registration type', 'Anmeldeart')}
+                  <RequiredMark />
                 </Label>
                 <Select
                   onValueChange={(value: 'full' | 'written' | 'oral') =>
@@ -409,30 +348,30 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   }
                   defaultValue={watch('registrationType')}
                 >
-                  <SelectTrigger id="registration-type" aria-required {...errorProps('registrationType')} className={selectTriggerClassName}>
+                  <SelectTrigger id="registration-type" aria-required {...errorProps('registrationType')} className={formControlClassName}>
                     <SelectValue placeholder={t('Select type...', 'Anmeldeart auswählen...')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="full">{t('Full Exam', 'Vollprüfung')}</SelectItem>
-                    <SelectItem value="written">{t('Written Only', 'Nur schriftlich')}</SelectItem>
-                    <SelectItem value="oral">{t('Oral Only', 'Nur mündlich')}</SelectItem>
+                    <SelectItem value="full">{t('Full exam', 'Vollprüfung')}</SelectItem>
+                    <SelectItem value="written">{t('Written only', 'Nur schriftlich')}</SelectItem>
+                    <SelectItem value="oral">{t('Oral only', 'Nur mündlich')}</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.registrationType && <p id="registrationType-error" className="text-sm text-[var(--casa-danger-text)]">{errors.registrationType.message}</p>}
+                {errors.registrationType && <p id="registrationType-error" className={formErrorClassName}>{errors.registrationType.message}</p>}
               </div>
             </div>
 
 
-            <div className={fieldGroupClassName}>
-              <Label htmlFor="exam-session" className={labelClassName}>
-                <span className={requiredMarkClassName}>*</span>
-                {catalog.locale === 'de' ? 'Prüfungstermin' : 'Exam Session'}
+            <div className={formFieldGroupClassName}>
+              <Label htmlFor="exam-session" className={formLabelClassName}>
+                {catalog.locale === 'de' ? 'Prüfungstermin' : 'Exam session'}
+                <RequiredMark />
               </Label>
               <Select
                 onValueChange={(value) => setValue('examSessionId', value, { shouldDirty: true, shouldValidate: true })}
                 value={selectedExamSessionId}
               >
-                <SelectTrigger id="exam-session" aria-required {...errorProps('examSessionId')} className={selectTriggerClassName}>
+                <SelectTrigger id="exam-session" aria-required {...errorProps('examSessionId')} className={formControlClassName}>
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Termin auswählen...' : 'Select a session...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -444,33 +383,30 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 </SelectContent>
               </Select>
               {selectedOptions.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 py-2 text-sm text-[var(--casa-muted)]">
+                <p className={formHintClassName}>
                   {catalog.locale === 'de' ? 'Noch keine Termine für diesen Prüfungstyp verfügbar.' : 'No sessions published for this exam type yet. Please choose another exam type.'}
                 </p>
               ) : null}
-              {errors.examSessionId && <p id="examSessionId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.examSessionId.message}</p>}
+              {errors.examSessionId && <p id="examSessionId-error" className={formErrorClassName}>{errors.examSessionId.message}</p>}
             </div>
 
             {selectedOption ? (
-              <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-5 shadow-[var(--shadow-card)]">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--casa-sand)]/70 pb-3">
+              <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
+                <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-ink-deep)]" />
+                <p className={formMetaLabelClassName}>{t('Selected session', 'Ausgewählter Termin')}</p>
+                <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedExamType?.name}</h3>
+                <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-[color:var(--casa-sand)] pt-4 text-sm sm:grid-cols-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{t('Selected session', 'Ausgewählter Termin')}</p>
-                    <h3 className="mt-1 text-base font-bold text-[var(--casa-ink)]">{selectedExamType?.name}</h3>
-                  </div>
-                </div>
-                <dl className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Date', 'Datum')}</dt>
-                    <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.startsAtLabel}</dd>
+                    <dt className={formMetaLabelClassName}>{t('Date', 'Datum')}</dt>
+                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.startsAtLabel}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Location', 'Ort')}</dt>
-                    <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.locationLabel}</dd>
+                    <dt className={formMetaLabelClassName}>{t('Location', 'Ort')}</dt>
+                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.locationLabel}</dd>
                   </div>
                   <div className="col-span-2 sm:col-span-1">
-                    <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Deadline', 'Frist')}</dt>
-                    <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.deadlineLabel}</dd>
+                    <dt className={formMetaLabelClassName}>{t('Deadline', 'Frist')}</dt>
+                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.deadlineLabel}</dd>
                   </div>
                 </dl>
               </div>
@@ -479,32 +415,25 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
         )}
 
         {step === 2 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-                  <UserRound className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{t('Candidate profile', 'Kandidatenprofil')}</p>
-                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Personal information', 'Persönliche Angaben')}</h2>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
-                    {t('Candidate details must match your official identification.', 'Ihre Angaben müssen exakt zu Ihrem amtlichen Ausweis passen.')}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+            <FormStepHeader
+              icon={UserRound}
+              meaning="orientation"
+              headingRef={stepHeadingRef}
+              title={t('Personal information', 'Persönliche Angaben')}
+              description={t('Your details must match your official ID exactly.', 'Ihre Angaben müssen exakt zu Ihrem amtlichen Ausweis passen.')}
+            />
 
-            <div className={fieldGroupClassName}>
-              <Label htmlFor="salutation" className={labelClassName}>
-                <span className={requiredMarkClassName}>*</span>
+            <div className={formFieldGroupClassName}>
+              <Label htmlFor="salutation" className={formLabelClassName}>
                 {catalog.locale === 'de' ? 'Anrede' : 'Salutation'}
+                <RequiredMark />
               </Label>
               <Select
                 onValueChange={(value) => setValue('salutation', value as 'mr' | 'ms' | 'mx' | 'neutral', { shouldDirty: true, shouldValidate: true })}
                 value={watch('salutation')}
               >
-                <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={selectTriggerClassName}>
+                <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={formControlClassName}>
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -514,33 +443,33 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Neutral / Other'}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.salutation && <p id="salutation-error" className="text-sm text-[var(--casa-danger-text)]">{errors.salutation.message}</p>}
+              {errors.salutation && <p id="salutation-error" className={formErrorClassName}>{errors.salutation.message}</p>}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="firstName" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('First Name', 'Vorname')}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="firstName" className={formLabelClassName}>
+                  {t('First name', 'Vorname')}
+                  <RequiredMark />
                 </Label>
-                <Input id="firstName" autoComplete="given-name" aria-required {...errorProps('firstName')} className={fieldClassName} {...register('firstName')} />
-                {errors.firstName && <p id="firstName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.firstName.message}</p>}
+                <Input id="firstName" autoComplete="given-name" aria-required {...errorProps('firstName')} className={formControlClassName} {...register('firstName')} />
+                {errors.firstName && <p id="firstName-error" className={formErrorClassName}>{errors.firstName.message}</p>}
               </div>
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="lastName" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Last Name', 'Nachname')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="lastName" className={formLabelClassName}>
+                  {t('Last name', 'Nachname')}
+                  <RequiredMark />
                 </Label>
-                <Input id="lastName" autoComplete="family-name" aria-required {...errorProps('lastName')} className={fieldClassName} {...register('lastName')} />
-                {errors.lastName && <p id="lastName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.lastName.message}</p>}
+                <Input id="lastName" autoComplete="family-name" aria-required {...errorProps('lastName')} className={formControlClassName} {...register('lastName')} />
+                {errors.lastName && <p id="lastName-error" className={formErrorClassName}>{errors.lastName.message}</p>}
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="email" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="email" className={formLabelClassName}>
                   {t('Email', 'E-Mail')}
+                  <RequiredMark />
                 </Label>
                 <Input
                   id="email"
@@ -548,31 +477,31 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   autoComplete="email"
                   aria-required
                   {...errorProps('email')}
-                  className={fieldClassName}
+                  className={formControlClassName}
                   {...register('email')}
                 />
-                {errors.email && <p id="email-error" className="text-sm text-[var(--casa-danger-text)]">{errors.email.message}</p>}
+                {errors.email && <p id="email-error" className={formErrorClassName}>{errors.email.message}</p>}
               </div>
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="phone" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Phone Number', 'Telefonnummer')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="phone" className={formLabelClassName}>
+                  {t('Phone number', 'Telefonnummer')}
+                  <RequiredMark />
                 </Label>
-                <Input id="phone" autoComplete="tel" aria-required {...errorProps('phone')} className={fieldClassName} {...register('phone')} />
-                {errors.phone && <p id="phone-error" className="text-sm text-[var(--casa-danger-text)]">{errors.phone.message}</p>}
+                <Input id="phone" autoComplete="tel" aria-required {...errorProps('phone')} className={formControlClassName} {...register('phone')} />
+                {errors.phone && <p id="phone-error" className={formErrorClassName}>{errors.phone.message}</p>}
               </div>
             </div>
 
-            <div className="flex gap-3 rounded-lg border border-[color:var(--casa-blue)]/30 bg-[var(--casa-blue)]/8 px-4 py-3 text-xs font-semibold leading-relaxed text-[var(--casa-ink)]">
-              <HelpCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-              <p>{t('This is a public launch form. CASA will confirm exam details and deadlines by email after review.', 'Dies ist ein öffentliches Startformular. CASA bestätigt Prüfungsdetails und Fristen nach Prüfung per E-Mail.')}</p>
-            </div>
+            <p className={cn(formHintClassName, 'flex gap-2.5')}>
+              <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
+              {t('CASA reviews your registration and confirms the exam details and deadlines by email.', 'CASA prüft Ihre Anmeldung und bestätigt Prüfungsdetails und Fristen per E-Mail.')}
+            </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="nationality" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="nationality" className={formLabelClassName}>
                   {t('Nationality', 'Nationalität')}
+                  <RequiredMark />
                 </Label>
                 <CountryField
                   id="nationality"
@@ -581,16 +510,17 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   placeholder={t('Select nationality', 'Nationalität auswählen')}
                   searchPlaceholder={t('Search...', 'Suchen...')}
                   emptyLabel={t('No results found.', 'Keine Ergebnisse gefunden.')}
-                  className={fieldClassName}
+                  className={formControlClassName}
                   required
                   aria-describedby={errors.nationality ? 'nationality-error' : undefined}
+                  invalid={Boolean(errors.nationality)}
                 />
-                {errors.nationality && <p id="nationality-error" className="text-sm text-[var(--casa-danger-text)]">{errors.nationality.message}</p>}
+                {errors.nationality && <p id="nationality-error" className={formErrorClassName}>{errors.nationality.message}</p>}
               </div>
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="birthDate" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Date of Birth', 'Geburtsdatum')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="birthDate" className={formLabelClassName}>
+                  {t('Date of birth', 'Geburtsdatum')}
+                  <RequiredMark />
                 </Label>
                 <Controller
                   name="birthDate"
@@ -608,65 +538,60 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     />
                   )}
                 />
-                {errors.birthDate && <p id="birthDate-error" className="text-sm text-[var(--casa-danger-text)]">{errors.birthDate.message}</p>}
+                {errors.birthDate && <p id="birthDate-error" className={formErrorClassName}>{errors.birthDate.message}</p>}
               </div>
             </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-ink-deep)] text-white">
-                  <ShieldCheck className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{t('Final check', 'Letzte Kontrolle')}</p>
-                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">{t('Review and submit', 'Prüfen und absenden')}</h2>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{t('Double-check your exam selection and candidate details.', 'Bitte prüfen Sie Prüfungsauswahl und Kandidatenangaben.')}</p>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+            <FormStepHeader
+              icon={ShieldCheck}
+              meaning="orientation"
+              headingRef={stepHeadingRef}
+              title={t('Review and submit', 'Prüfen und absenden')}
+              description={t('Please check your exam choice and your details.', 'Bitte prüfen Sie Ihre Prüfungsauswahl und Ihre Angaben.')}
+            />
 
-            <div className="space-y-4 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-5 text-sm">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Exam', 'Prüfung')}</p>
+            <div className="space-y-4 text-sm">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Exam', 'Prüfung')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedExamType?.name || '-'}</p>
-                  <p className="text-xs text-[var(--casa-ink)]">{t('Mode', 'Art')}: {registrationTypeLabel}</p>
+                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{t('Mode', 'Art')}: {registrationTypeLabel}</p>
                 </div>
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Session', 'Termin')}</p>
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Session', 'Termin')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption?.startsAtLabel || '-'}</p>
-                  <p className="text-xs text-[var(--casa-ink)]">{selectedOption?.locationLabel || '-'}</p>
+                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{selectedOption?.locationLabel || '-'}</p>
                 </div>
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Candidate', 'Kandidat:in')}</p>
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Candidate', 'Kandidat:in')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
                     {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr. ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms. ') : 'Mx. ')) : ''}
                     {watch('firstName')} {watch('lastName')}
                   </p>
-                  <p className="text-xs text-[var(--casa-ink)]">{watch('email')}</p>
+                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{watch('email')}</p>
                 </div>
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Deadline', 'Frist')}</p>
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Deadline', 'Frist')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
                     {selectedOption?.deadlineLabel || '-'}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-4 text-xs leading-relaxed text-[var(--casa-muted)]">
+              <div className={formTileClassName}>
                 <p className="font-semibold text-[var(--casa-ink)]">{t('Legal and next steps', 'Rechtliches und nächste Schritte')}</p>
-                <ul className="mt-2 space-y-1.5">
-                  <li>- {t('By submitting, you agree to CASA terms and exam registration conditions.', 'Mit dem Absenden akzeptieren Sie die CASA AGB und Prüfungsbedingungen.')}</li>
-                  <li>- {t('Session access is confirmed after payment and candidate-data checks.', 'Der Termin wird nach Zahlungs- und Kandidatendatenprüfung bestätigt.')}</li>
+                <ul className="mt-2 list-disc space-y-1 pl-5 leading-relaxed text-[var(--casa-muted)]">
+                  <li>{t('By submitting, you agree to CASA terms and exam registration conditions.', 'Mit dem Absenden akzeptieren Sie die CASA AGB und Prüfungsbedingungen.')}</li>
+                  <li>{t('Session access is confirmed after payment and candidate-data checks.', 'Der Termin wird nach Zahlungs- und Kandidatendatenprüfung bestätigt.')}</li>
                 </ul>
               </div>
 
-              <div className="space-y-3 rounded-lg border border-[color:var(--casa-sand)] bg-white p-4">
-                <div className="flex items-start gap-2">
+              <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
+                <div className="flex items-start gap-3">
                   <Checkbox
                     id="official-name-confirmed"
                     aria-required
@@ -676,14 +601,14 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                       setValue('officialNameConfirmed', Boolean(checked), { shouldDirty: true, shouldValidate: true })
                     }
                   />
-                  <Label htmlFor="official-name-confirmed" className="cursor-pointer text-sm font-medium text-[var(--casa-ink)]">
-                    <span className={requiredMarkClassName}>*</span>
+                  <Label htmlFor="official-name-confirmed" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
                     {t('My name and birth date match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
+                    <RequiredMark />
                   </Label>
                 </div>
-                {errors.officialNameConfirmed ? <p id="officialNameConfirmed-error" className="text-sm text-[var(--casa-danger-text)]">{errors.officialNameConfirmed.message}</p> : null}
+                {errors.officialNameConfirmed ? <p id="officialNameConfirmed-error" className={formErrorClassName}>{errors.officialNameConfirmed.message}</p> : null}
 
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-3">
                   <Checkbox
                     id="exam-policy-accepted"
                     aria-required
@@ -693,14 +618,14 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                       setValue('examPolicyAccepted', Boolean(checked), { shouldDirty: true, shouldValidate: true })
                     }
                   />
-                  <Label htmlFor="exam-policy-accepted" className="cursor-pointer text-sm font-medium text-[var(--casa-ink)]">
-                    <span className={requiredMarkClassName}>*</span>
+                  <Label htmlFor="exam-policy-accepted" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
                     {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich verstehe, dass die Prüfungsbestätigung von Dokumenten- und Zahlungsprüfung abhängt.')}
+                    <RequiredMark />
                   </Label>
                 </div>
-                {errors.examPolicyAccepted ? <p id="examPolicyAccepted-error" className="text-sm text-[var(--casa-danger-text)]">{errors.examPolicyAccepted.message}</p> : null}
+                {errors.examPolicyAccepted ? <p id="examPolicyAccepted-error" className={formErrorClassName}>{errors.examPolicyAccepted.message}</p> : null}
 
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-3">
                   <Checkbox
                     id="accept-terms"
                     aria-required
@@ -710,36 +635,37 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                       setValue('acceptTerms', Boolean(checked), { shouldDirty: true, shouldValidate: true })
                     }
                   />
-                  <Label htmlFor="accept-terms" className="cursor-pointer text-sm font-medium text-[var(--casa-ink)]">
-                    <span className={requiredMarkClassName}>*</span>
+                  <Label htmlFor="accept-terms" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
                     {catalog.locale === 'de' ? (
                       <>
                         Ich akzeptiere die{' '}
-                        <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/terms" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Allgemeinen Geschäftsbedingungen
                         </Link>{' '}
                         und habe die{' '}
-                        <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/privacy" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Datenschutzerklärung
                         </Link>{' '}
                         zur Kenntnis genommen.
+                        <RequiredMark />
                       </>
                     ) : (
                       <>
                         I accept the{' '}
-                        <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/terms" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Terms and Conditions
                         </Link>{' '}
                         and have read the{' '}
-                        <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/privacy" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Privacy Policy
                         </Link>
                         .
+                        <RequiredMark />
                       </>
                     )}
                   </Label>
                 </div>
-                {errors.acceptTerms ? <p id="acceptTerms-error" className="text-sm text-[var(--casa-danger-text)]">{errors.acceptTerms.message}</p> : null}
+                {errors.acceptTerms ? <p id="acceptTerms-error" className={formErrorClassName}>{errors.acceptTerms.message}</p> : null}
               </div>
             </div>
           </div>
@@ -747,13 +673,13 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
         {showStepAlert && (
           // Keyed by attempt, so a repeated failed Weiter is announced again.
-          <div key={stepFailures} className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+          <div key={stepFailures} className={formAlertClassName} role="alert" aria-live="assertive">
             <p>{t('Please check the highlighted fields.', 'Bitte prüfen Sie die markierten Angaben.')}</p>
           </div>
         )}
 
         {submissionError && (
-          <div className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+          <div className={formAlertClassName} role="alert" aria-live="assertive">
             <p>{submissionError}</p>
             <p className="mt-1">
               {t('Reach us directly:', 'So erreichen Sie uns direkt:')}{' '}
@@ -761,7 +687,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 {footerConfig.contact.emails[0].label}
               </a>
               {' · '}
-              <a href={`tel:${footerConfig.contact.phone}`} className="font-semibold underline underline-offset-4">
+              <a href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`} className="font-semibold underline underline-offset-4">
                 {footerConfig.contact.phone}
               </a>
               {' · '}
@@ -776,9 +702,9 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
         {/* Honeypot, as on the contact form: invisible to people, filled by bots. */}
         <input type="text" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" {...register('website')} />
 
-        <div className="mt-4 flex shrink-0 justify-between border-t border-[color:var(--casa-sand)] pt-4">
+        <div className="mt-8 flex shrink-0 items-center justify-between gap-3 border-t border-[color:var(--casa-sand)] pt-6">
           {step > 1 ? (
-            <Button type="button" variant="outline" onClick={prevStep} disabled={submitting} className="h-11 rounded-lg border-[color:var(--casa-sand)] bg-white px-4">
+            <Button type="button" variant="outline" onClick={prevStep} disabled={submitting} className={formSecondaryButtonClassName}>
               <ArrowLeft className="mr-2 size-4" />
               {t('Back', 'Zurück')}
             </Button>
@@ -790,7 +716,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             <Button
               type="button"
               onClick={nextStep}
-              className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 text-white hover:bg-[var(--casa-ink-deep-hover)]"
+              className={formPrimaryButtonClassName}
               data-casa-track="true"
               data-casa-label="Continue exam registration"
             >
@@ -801,7 +727,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             <Button
               type="submit"
               disabled={submitting || !isValid}
-              className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 text-white hover:bg-[var(--casa-ink-deep-hover)]"
+              className={formPrimaryButtonClassName}
               data-casa-track="true"
               data-casa-label="Submit exam registration"
             >
@@ -866,7 +792,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             <div className="mt-8 w-full max-w-xs">
               <Link
                 href="/"
-                className="flex w-full h-11 items-center justify-center rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)] font-bold text-sm transition-colors"
+                className={cn(formPrimaryButtonClassName, 'flex w-full items-center justify-center')}
               >
                 {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to Home'}
               </Link>

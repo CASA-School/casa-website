@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, Compass, FileCheck2, GraduationCap, type LucideIcon } from 'lucide-react';
 
+import { ContactHelpPanel } from '@/components/forms/contact-help-panel';
 import { ContactInquiryForm } from '@/components/forms/contact-inquiry-form';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { serializeJsonLd } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
-import { footerConfig } from '@/config/footer';
+import { meaningClasses, type Meaning } from '@/config/brand/meaning';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
+import { Link } from '@/i18n/navigation';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { cn } from '@/lib/utils';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -116,8 +119,7 @@ const formCopyByLocale = {
     lastNamePlaceholder: 'Mueller',
     emailLabel: 'Email',
     emailPlaceholder: 'you@example.com',
-    topicLabel: 'Topic',
-    topicPlaceholder: 'Select a topic',
+    topicLabel: 'What is it about?',
     messageLabel: 'Message',
     messagePlaceholder: 'What would you like to know?',
     successTitle: 'Request received',
@@ -137,8 +139,7 @@ const formCopyByLocale = {
     lastNamePlaceholder: 'Müller',
     emailLabel: 'E-Mail',
     emailPlaceholder: 'you@example.com',
-    topicLabel: 'Thema',
-    topicPlaceholder: 'Thema auswählen',
+    topicLabel: 'Worum geht es?',
     messageLabel: 'Nachricht',
     messagePlaceholder: 'Was möchten Sie gerne wissen?',
     successTitle: 'Anfrage eingegangen',
@@ -148,6 +149,35 @@ const formCopyByLocale = {
     errorBody: 'Bitte erneut versuchen oder bei Zeitdruck direkt im Büro melden.',
   },
 } as const;
+
+/**
+ * What a visitor can do without writing at all. Each row in the logo colour of
+ * its subject: red courses, ink exams, blue orientation (the placement page
+ * with the Klett online tests).
+ */
+const selfServiceLinks: { href: string; icon: LucideIcon; meaning: Meaning; label: { de: string; en: string }; detail: { de: string; en: string } }[] = [
+  {
+    href: '/registration/course',
+    icon: GraduationCap,
+    meaning: 'courses',
+    label: { de: 'Kursanmeldung', en: 'Course registration' },
+    detail: { de: 'Kurs und Starttermin wählen', en: 'Choose a course and start date' },
+  },
+  {
+    href: '/registration/exam',
+    icon: FileCheck2,
+    meaning: 'exams',
+    label: { de: 'Prüfungsanmeldung', en: 'Exam registration' },
+    detail: { de: 'Prüfung und Termin wählen', en: 'Choose an exam and date' },
+  },
+  {
+    href: '/placement-test',
+    icon: Compass,
+    meaning: 'orientation',
+    label: { de: 'Einstufungstest', en: 'Placement test' },
+    detail: { de: 'Ihr Niveau online herausfinden', en: 'Find your level online' },
+  },
+];
 
 export default async function ContactPage({ searchParams }: ContactPageProps) {
   const locale = await getContentLocale();
@@ -180,47 +210,68 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(contactSchema) }} />
 
-      <section className="pb-12 pt-6 md:pb-16 md:pt-8">
+      <section className="pb-14 pt-6 md:pb-20 md:pt-8">
         <Container>
           <Breadcrumbs items={breadcrumbs} />
-          <h1 className="mb-6 mt-4 text-3xl font-bold md:text-4xl">
-            {locale === 'de' ? 'Kontakt' : 'Contact'}
-          </h1>
+          <header className="mt-4 max-w-2xl">
+            <h1 className="text-3xl font-bold md:text-4xl">
+              {locale === 'de' ? 'Kontakt' : 'Contact'}
+            </h1>
+            <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+              {locale === 'de'
+                ? 'Schreiben Sie uns, rufen Sie an oder kommen Sie vorbei.'
+                : 'Write to us, give us a call or drop by.'}
+            </p>
+          </header>
           <div
             id="contact-form"
-            className="grid scroll-mt-28 items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.65fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-8"
+            className="mt-6 grid scroll-mt-28 items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.65fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:gap-8"
           >
             <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 
-            <div className="min-w-0 md:sticky md:top-28 md:self-start">
-              <aside className="rounded-3xl bg-[var(--casa-ink-deep)] p-6 text-white sm:p-8">
-                <h2 className="text-2xl font-bold text-white">
-                  {locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk?'}
+            <div className="min-w-0 space-y-5 md:sticky md:top-28 md:self-start">
+              <ContactHelpPanel
+                locale={locale}
+                title={locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk?'}
+                body={locale === 'de'
+                  ? 'Rufen Sie uns während der Öffnungszeiten an oder schreiben Sie uns eine E-Mail. Wir nehmen uns Zeit für Ihre Fragen.'
+                  : 'Call us during office hours or send us an email. We’re happy to talk through your questions.'}
+              />
+
+              <nav
+                aria-labelledby="contact-self-service"
+                className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-7"
+              >
+                <h2 id="contact-self-service" className="text-lg font-bold text-[var(--casa-ink)]">
+                  {locale === 'de' ? 'Direkt online' : 'Do it online'}
                 </h2>
-                <p className="mt-3 text-sm leading-relaxed text-white/80">
-                  {locale === 'de'
-                    ? 'Rufen Sie uns während unserer Bürozeiten an oder schreiben Sie uns eine E-Mail. Wir nehmen uns Zeit für Ihre Fragen.'
-                    : 'Call us during office hours or send us an email. We’re happy to talk through your questions.'}
-                </p>
-                <ul className="mt-7 space-y-6 border-t border-white/20 pt-7 text-sm">
-                  <li className="flex gap-3">
-                    <Phone className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
-                    <a href={`tel:${footerConfig.contact.phone}`} className="font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
-                      {footerConfig.contact.phone}
-                    </a>
-                  </li>
-                  <li className="flex min-w-0 gap-3">
-                    <Mail className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
-                    <a href={footerConfig.contact.emails[0]?.href || 'mailto:info@casa-bremen.de'} className="min-w-0 break-words font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
-                      {footerConfig.contact.emails[0]?.label || 'info@casa-bremen.de'}
-                    </a>
-                  </li>
-                  <li className="flex gap-3">
-                    <MapPin className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
-                    <span className="leading-relaxed text-white/85">{footerConfig.contact.address}</span>
-                  </li>
+                <ul className="mt-3 divide-y divide-[color:var(--casa-sand)]">
+                  {selfServiceLinks.map((item) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className="group flex items-center gap-3 rounded-lg py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
+                        >
+                          <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-full', meaningClasses[item.meaning].circle)}>
+                            <Icon className="size-5" aria-hidden />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-[var(--casa-ink)]">{item.label[locale]}</span>
+                            <span className="block text-sm text-[var(--casa-muted)]">{item.detail[locale]}</span>
+                          </span>
+                          <ArrowRight
+                            className="size-4 shrink-0 text-[var(--casa-muted)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--casa-ink)] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                            aria-hidden
+                          />
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
-              </aside>
+              </nav>
             </div>
           </div>
         </Container>

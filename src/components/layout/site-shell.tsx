@@ -5,7 +5,7 @@ import { usePathname } from '@/i18n/navigation';
 
 import { AssistantLauncher } from '@/components/assistant';
 import { InteractionTracker } from '@/components/analytics/interaction-tracker';
-import { Footer } from '@/components/layout/footer';
+import { Footer, LegalFooter } from '@/components/layout/footer';
 import { Navbar } from '@/components/layout/navbar';
 import { ScrollEffects } from '@/components/ui/scroll-effects';
 import type { ContentLocale } from '@/lib/content/types';
@@ -57,6 +57,7 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
         {children}
       </div>
       {!hideSiteChrome && <Footer contentLocale={contentLocale} />}
+      {isRegistrationPage && <LegalFooter contentLocale={contentLocale} />}
       {!isFocusedTestSurface && <AssistantLauncher />}
     </>
   );

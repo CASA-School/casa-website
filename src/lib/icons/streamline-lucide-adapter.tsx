@@ -32,9 +32,6 @@ const ICON_DATA: Record<string, StreamlineIconData> = {
   "arrow-down-2": {
     "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m4 6.5l3 3l3-3m-3-6v9m-3.5 4h7\"/>"
   },
-  "arrow-round-left": {
-    "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.75.5L2.25 3l2.5 2.5\"/><path d=\"M1.75 8.25A5.25 5.25 0 1 0 7 3H2.25\"/></g>"
-  },
   "arrow-round-right": {
     "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9.25.5l2.5 2.5l-2.5 2.5\"/><path d=\"M12.25 8.25A5.25 5.25 0 1 1 7 3h4.75\"/></g>"
   },
@@ -51,6 +48,9 @@ const ICON_DATA: Record<string, StreamlineIconData> = {
    * Geometry matches "arrow-up-1" (the one straight arrow the set already had),
    * rotated: same 14x14 box, same stroke treatment, same 3.5px head.
    */
+  "arrow-left-1": {
+    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.5 7H.5M4 3.5L.5 7L4 10.5\"/>"
+  },
   "arrow-right-1": {
     "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M.5 7h13M10 3.5L13.5 7L10 10.5\"/>"
   },
@@ -399,7 +399,8 @@ const ICON_NAME_BY_EXPORT = {
   AlertCircle: "interface-alert-warning-circle-warning-alert-frame-exclamation-caution-circle",
   AlertTriangle: "warning-triangle",
   ArrowDown: "arrow-down-2",
-  ArrowLeft: "arrow-round-left",
+  // The mirror of arrow-right-1. Was arrow-round-left, an undo glyph: "Zurück" read as "revert".
+  ArrowLeft: "arrow-left-1",
   ArrowRight: "arrow-right-1",
   ArrowUp: "arrow-up-1",
   ArrowUpDown: "arrow-curvy-up-down-1",

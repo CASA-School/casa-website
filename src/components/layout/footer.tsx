@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { Link } from '@/i18n/navigation';
 import { Logo } from '@/components/ui/logo';
 import { footerConfig } from '@/config/footer';
@@ -17,6 +19,7 @@ const deFooterText: Record<string, string> = {
   'Office Hours': 'Öffnungszeiten',
   'Monday - Thursday: 08:30 - 19:00': 'Montag - Donnerstag: 08:30 - 19:00',
   'Friday: 08:30 - 13:00': 'Freitag: 08:30 - 13:00',
+  'Am Dobben 14-16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
   School: 'Schule',
   'Our School': 'Unsere Schule',
   'Non-profit status': 'Gemeinnützigkeit',
@@ -173,13 +176,13 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                 rel="noreferrer"
                 className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
-                {footerConfig.contact.address}
+                {footerText(footerConfig.contact.address, locale)}
               </a>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="h-4 w-4 shrink-0 text-[var(--casa-amber)]" />
               <a
-                href={`tel:${footerConfig.contact.phone}`}
+                href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
                 className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
                 {footerConfig.contact.phone}
@@ -228,13 +231,13 @@ export function Footer({ contentLocale: locale }: FooterProps) {
                   rel="noreferrer"
                   className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
-                  {footerConfig.contact.address}
+                  {footerText(footerConfig.contact.address, locale)}
                 </a>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
                 <a
-                  href={`tel:${footerConfig.contact.phone}`}
+                  href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
                   className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
                   {footerConfig.contact.phone}
@@ -296,28 +299,50 @@ export function Footer({ contentLocale: locale }: FooterProps) {
         things that belong in a colophon: the legal entity and the legal links.
       */}
       <div className="border-t border-white/10">
-        <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[var(--casa-text-subtle)]">
-            &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
-            {footerText('All rights reserved.', locale)}
-          </p>
-
-          <div className="flex items-center gap-6">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium">
-              {footerConfig.legalLinks.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
-                >
-                  {footerText(item.label, locale)}
-                </Link>
-              ))}
-            </div>
-            <div className="hidden md:block">{social}</div>
-          </div>
-        </Container>
+        <LegalBar locale={locale} social={<div className="hidden md:block">{social}</div>} />
       </div>
+    </footer>
+  );
+}
+
+/** The legal entity and the legal links: the last row of every footer. */
+function LegalBar({ locale, social }: { locale: ContentLocale; social?: ReactNode }) {
+  return (
+    <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-xs text-[var(--casa-text-subtle)]">
+        &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
+        {footerText('All rights reserved.', locale)}
+      </p>
+
+      <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium">
+          {footerConfig.legalLinks.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+            >
+              {footerText(item.label, locale)}
+            </Link>
+          ))}
+        </div>
+        {social}
+      </div>
+    </Container>
+  );
+}
+
+/**
+ * The colophon alone, for the registration pages. They drop the site footer to
+ * keep the learner in the form, and with it went the only links to the
+ * Impressum and the privacy policy, which have to stay one click away on every
+ * page (§ 5 DDG). The logo stripe closes the page as on every other.
+ */
+export function LegalFooter({ contentLocale: locale }: FooterProps) {
+  return (
+    <footer data-footer="legal" className="bg-[var(--casa-ink-deep)] text-white">
+      <div aria-hidden="true" className="casa-logo-stripe h-[3px] w-full" />
+      <LegalBar locale={locale} />
     </footer>
   );
 }

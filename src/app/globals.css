@@ -386,6 +386,10 @@
   /* Was #64748b (4.76:1 on white but 4.32:1 on --casa-warm-soft and 3.86:1 on
      --casa-sand). Darkened so body text clears AA on every light surface. */
   --casa-muted: #5b697e;
+  /* A form field's outline (src/components/forms/form-styles.ts): 3.27:1 on
+     white and 3.11:1 on --casa-canvas, so it clears WCAG 1.4.11 where --casa-sand
+     (1.23:1) did not, without the hard box --casa-muted (5.58:1) drew. */
+  --casa-field-border: #848fa1;
   --casa-blue-strong: #008ecb;
 
   /*
