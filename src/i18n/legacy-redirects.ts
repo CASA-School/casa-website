@@ -21,6 +21,8 @@
  * - URLs dead for years with no specific counterpart are NOT here, on purpose: they 404.
  *   A mass of redirects to a generic page reads to search engines as soft 404s anyway.
  *
+ * The last block is different in kind: this site's own retired sample articles.
+ *
  * No path aliases in this file: next.config.ts imports it before the app is compiled.
  */
 
@@ -538,6 +540,34 @@ export const LEGACY_REDIRECTS: readonly LegacyRedirect[] = [
   ['/ueber-uns', '/ueber-uns/casa-leitbild'],
   ['/ueber-uns/stellenanschreibung', '/karriere'],
   ['/ueber-uns/tandem', '/ueber-uns/casa-leitbild#tandem'],
+
+  // This site's own twelve sample articles, removed 2026-10-02 (they were layout
+  // copy, not CASA's news). They were live on the Azure preview, so their URLs go
+  // to the news page rather than 404.
+  ['/aktuelles/intensive-course-starter-guide', '/aktuelles'],
+  ['/aktuelles/telc-c1-six-week-roadmap', '/aktuelles'],
+  ['/aktuelles/bremen-first-month-language-habits', '/aktuelles'],
+  ['/aktuelles/why-placement-tests-protect-progress', '/aktuelles'],
+  ['/aktuelles/inside-the-tandem-program', '/aktuelles'],
+  ['/aktuelles/weekend-excursions-language-impact', '/aktuelles'],
+  ['/aktuelles/medical-german-fsp-focus', '/aktuelles'],
+  ['/aktuelles/study-routine-before-exam-season', '/aktuelles'],
+  ['/aktuelles/from-a2-to-b1-confidence', '/aktuelles'],
+  ['/aktuelles/new-student-onboarding-checklist', '/aktuelles'],
+  ['/aktuelles/what-makes-a-great-language-class', '/aktuelles'],
+  ['/aktuelles/bremen-study-and-life-balance', '/aktuelles'],
+  ['/en/news/intensive-course-starter-guide', '/en/news'],
+  ['/en/news/telc-c1-six-week-roadmap', '/en/news'],
+  ['/en/news/bremen-first-month-language-habits', '/en/news'],
+  ['/en/news/why-placement-tests-protect-progress', '/en/news'],
+  ['/en/news/inside-the-tandem-program', '/en/news'],
+  ['/en/news/weekend-excursions-language-impact', '/en/news'],
+  ['/en/news/medical-german-fsp-focus', '/en/news'],
+  ['/en/news/study-routine-before-exam-season', '/en/news'],
+  ['/en/news/from-a2-to-b1-confidence', '/en/news'],
+  ['/en/news/new-student-onboarding-checklist', '/en/news'],
+  ['/en/news/what-makes-a-great-language-class', '/en/news'],
+  ['/en/news/bremen-study-and-life-balance', '/en/news'],
 ];
 
 /** The workspace host serves /admin only; an old public URL means nothing there. */

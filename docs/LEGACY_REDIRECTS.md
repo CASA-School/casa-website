@@ -93,3 +93,17 @@ a page that exists" test fails and that entry goes.
 
 The per-URL inventory, every mapping with its reason and both review passes are kept locally in
 `output/review/legacy-redirects/` (not in Git).
+
+## This site's retired sample articles (2026-10-02)
+
+The twelve sample articles that filled the news fallback (`/aktuelles/<slug>`,
+`/en/news/<slug>`: intensive-course-starter-guide, telc-c1-six-week-roadmap,
+bremen-first-month-language-habits, why-placement-tests-protect-progress,
+inside-the-tandem-program, weekend-excursions-language-impact,
+medical-german-fsp-focus, study-routine-before-exam-season, from-a2-to-b1-confidence,
+new-student-onboarding-checklist, what-makes-a-great-language-class,
+bremen-study-and-life-balance) were deleted on Rahman's brief. They were live on the
+Azure preview, so the last block of the map sends each to `/aktuelles` or `/en/news`
+(24 more redirects, covered by the same unit and e2e tests). A real post published
+later under one of these slugs would be hidden by its redirect: pick another slug or
+remove the line.
