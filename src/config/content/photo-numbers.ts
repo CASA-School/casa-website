@@ -108,30 +108,30 @@ export const photoSlots: PhotoSlot[] = [
   { n: 8, src: '/media/casa/course-special-smartboard.webp', subject: 'Spezialkurse. The teacher speaking at the smart board, her class working in front of her. Collection frame 067, 4:3 crop, modern grade (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 9, src: '/media/casa/classroom-pair-study.jpg', subject: 'Two learners working as a pair, heads together over one task.', ready: false },
   { n: 10, src: '/media/casa/classroom-map-vocabulary.jpg', subject: 'Vocabulary work against a map: hands writing on a Bremen map, no faces. Pool file W006, full frame, modern grade (scripts/media/build_reel.py), 2026-10-02.', ready: true },
-  { n: 11, src: '/media/casa/learners-writing-class.jpg', subject: 'Learners writing by hand in class, close on the work.', ready: false },
+  { n: 11, src: '/media/casa/learners-writing-class.jpg', subject: 'Learners writing by hand in class, close on the work. Pool frame 012 (IMG_0031): two learners writing, one laughing. 5:4 crop, modern grade, white balance half-corrected (cream wall, tungsten), scripts/media/build_reel.py, 2026-10-02. The exams page\'s hero.', ready: true },
   { n: 12, src: '/media/casa/group-classroom-teacher-activity.jpg', subject: 'Teacher running an activity with the group. Reused across course pages and the About community story; needs to work as a large image and in a small card.', ready: false },
-  { n: 13, src: '/media/casa/individual-tutoring.jpg', subject: 'One-to-one tutoring, teacher and single learner side by side.', ready: false },
+  { n: 13, src: '/media/casa/individual-tutoring.jpg', subject: 'One-to-one support at a desk: one person explaining a worksheet to another. Pool frame 011 (IMG_0021), full 3:2 frame, modern grade, scripts/media/build_reel.py, 2026-10-02. FAQ "Ihre Frage ist noch offen?" and the contact page.', ready: true },
   { n: 14, src: '/media/casa/whiteboard-german-coaching.jpg', subject: 'Coaching at the whiteboard, German visibly on the board.', ready: false },
   { n: 15, src: '/media/casa/business-german-group.jpg', subject: 'Professional adults in a workplace-German setting — business dress, meeting-room feel.', ready: false },
   { n: 16, src: '/media/casa/junior-classroom-listening.jpg', subject: 'Younger learners listening — the junior/teen cohort.', ready: false },
   { n: 17, src: '/media/casa/advising-session-classroom.jpg', subject: 'An advising conversation across a desk — two people, one clearly helping the other.', ready: false },
-  { n: 18, src: '/media/casa/exam-preparation-writing.jpg', subject: 'Exam-condition writing — quiet, focused, papers out.', ready: false },
+  { n: 18, src: '/media/casa/exam-preparation-writing.jpg', subject: 'Exam-condition writing: a hand writing the telc Deutsch B2 "Schriftlicher Ausdruck (Brief)" sheet. Pool file W007 (older editorial edit, checked at 100-200%: real handwriting and print, no artefacts). 4:3 crop that leaves out the answer sheet\'s date-of-birth boxes and a brochure face, modern grade, scripts/media/build_reel.py, 2026-10-02.', ready: true },
   { n: 19, src: '/media/casa/study-materials-map.jpg', subject: 'Study materials laid out with a map.', ready: false },
 
   // ---- Groups, excursions, Bremen -----------------------------------------
   { n: 20, src: '/media/casa/group-course-bremen-musicians.jpg', subject: 'Group at the Bremen Town Musicians statue. Pool file W008, regraded to the modern set (scripts/media/build_reel.py), 2026-10-02.', ready: true },
-  { n: 21, src: '/media/casa/group-course-lunch-table.jpg', subject: 'Group eating together, social rather than instructional.', ready: false },
+  { n: 21, src: '/media/casa/group-course-lunch-table.jpg', subject: 'Group eating together, social rather than instructional: a visiting school group at lunch in the courtyard. Pool file W009 (older editorial edit, checked at 100-200%), full frame; its purple cast and lifted blacks corrected globally, scripts/media/build_reel.py, 2026-10-02.', ready: true },
   { n: 22, src: '/media/casa/group-course-phone-task.jpg', subject: 'Learners on a phone-based task out in the city.', ready: false },
   { n: 23, src: '/media/casa/group-course-walking-bremen.jpg', subject: 'Group walking through Bremen together, city legible behind them. Pool file W012, regraded to the modern set (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 24, src: '/media/casa/student-group-activity-outdoor.jpg', subject: 'Outdoor group activity, daylight, clearly not a classroom.', ready: false },
-  { n: 25, src: '/media/casa/bremen-schnoor-houses.jpg', subject: 'The Schnoor quarter houses — Bremen as a place to live, no people needed.', ready: false },
+  { n: 25, src: '/media/casa/bremen-schnoor-houses.jpg', subject: 'The Schnoor quarter houses, no people. Pool file W003 (older editorial edit, checked at 100-200%), 5:4 crop, saturation reduced (chroma 0.85), scripts/media/build_reel.py, 2026-10-02.', ready: true },
 
   // ---- Accommodation -------------------------------------------------------
-  { n: 26, src: '/media/casa/student-room-balcony.jpg', subject: 'Student room with a balcony, tidy and lit.', ready: false },
-  { n: 27, src: '/media/casa/host-family-room.jpg', subject: 'A host family living room — domestic, lived-in.', ready: false },
-  { n: 28, src: '/media/casa/shared-flat-kitchen-table.jpg', subject: 'Shared-flat kitchen table, signs of shared use.', ready: false },
+  { n: 26, src: '/media/casa/student-room-balcony.jpg', subject: 'Student room with a balcony: a room in a CASA-WG with balcony doors, bed and desk. Pool file 003, 4:3 crop, modern grade, scripts/media/build_reel.py, 2026-10-02. A CASA-WG room, never a host family\'s.', ready: true },
+  { n: 27, src: '/media/casa/host-family-room.jpg', subject: 'A host family\'s home: the dining table with the open kitchen beyond. Host-family photo 08 (iPhone IMG_7598, Neanderstrasse, resized derivative from the CASA photo package; consent CASA 2026-09-15, cleared for the website by Rahman 2026-10-02). 4:3 crop leaving out a wall display and a bag, white balance from the wall, scripts/media/build_reel.py, 2026-10-02.', ready: true },
+  { n: 28, src: '/media/casa/shared-flat-kitchen-table.jpg', subject: 'Shared-flat kitchen table: the kitchen of a CASA-WG. Pool file W013 (older editorial edit, checked at 100-200%); the crop leaves out the wide-angle stretch at both edges, modern grade, scripts/media/build_reel.py, 2026-10-02.', ready: true },
   { n: 29, src: '/media/casa/student-shared-kitchen.jpg', subject: 'A shared kitchen in use.', ready: false },
-  { n: 30, src: '/media/casa/student-room-alternative-1.jpg', subject: 'A second, different student room — read alongside 26, so vary the layout.', ready: false },
+  { n: 30, src: '/media/casa/student-room-alternative-1.jpg', subject: 'A second, different student room: a single room in a CASA-WG, bed, desk and tulips. Pool file 004, 4:3 crop, modern grade, scripts/media/build_reel.py, 2026-10-02.', ready: true },
 
   /*
    * ---- Team portraits ----------------------------------------------------
@@ -211,6 +211,22 @@ export const photoSlots: PhotoSlot[] = [
   { n: 63, src: '/media/casa/course-bildungszeit-hero.webp', subject: 'Bildungszeit course-page hero: frame 094 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
   { n: 64, src: '/media/casa/course-company-classroom.webp', subject: 'Firmenunterricht: a bright CASA classroom with the logo on the screen, no people. Frame 053, 4:3 crop, modern grade, 2026-10-02.', ready: true },
   { n: 65, src: '/media/casa/course-company-hero.webp', subject: 'Firmenunterricht course-page hero: frame 053 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
+  { n: 66, src: '/media/casa/exam-b2-hero.webp', subject: 'telc B2 page hero from lg up: the W007 writing hand as a 2.4:1 band (1370px wide, the most the frame has), modern grade, 2026-10-02.', ready: true },
+  { n: 67, src: '/media/casa/exam-b2-class.webp', subject: 'telc B2 page second photo: three learners writing at the course table. Pool frame 023 (IMG_0147), full frame, modern grade, white balance half-corrected, 2026-10-02.', ready: true },
+  { n: 68, src: '/media/casa/exam-c1-writing.webp', subject: 'telc C1 Hochschule card and that page\'s hero on phones: two learners concentrating over their texts. Pool frame 032 (IMG_0473), 4:3 crop, modern grade, 2026-10-02.', ready: true },
+  { n: 69, src: '/media/casa/exam-c1-hero.webp', subject: 'telc C1 Hochschule page hero from lg up: frame 032 as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
+  { n: 70, src: '/media/casa/exam-c1-speaking.webp', subject: 'telc C1 Hochschule page second photo: a learner speaking across the table, smiling. Pool frame 031 (IMG_0472), full frame, modern grade, 2026-10-02.', ready: true },
+  { n: 71, src: '/media/casa/exam-story-writing.webp', subject: 'The exams page\'s candidate story: a pen in focus, the class writing behind it. Pool frame 024 (IMG_0156), full frame, modern grade, white balance half-corrected, 2026-10-02.', ready: true },
+  { n: 72, src: '/media/casa/host-family-living-hero.webp', subject: 'Host-family page hero from lg up: host-family photo 08 (the slot 27 room) as a 2.4:1 band, 2026-10-02.', ready: true },
+  { n: 73, src: '/media/casa/host-family-kitchen.webp', subject: 'A host family\'s kitchen. Host-family photo 09 (iPhone IMG_7599, resized derivative; consent CASA 2026-09-15, website use cleared 2026-10-02), 3:2 crop leaving out a coat, white balance from the wall, 2026-10-02.', ready: true },
+  { n: 74, src: '/media/casa/host-family-kitchen-detail.webp', subject: 'A host family\'s kitchen from the other side, the sewing-machine table between the windows. Host-family photo 12 (iPhone 15 original IMG_7601), 3:2 crop that leaves out a wall of family photographs, scaled to 2560px, 2026-10-02.', ready: true },
+  { n: 75, src: '/media/casa/host-family-kitchen-hero.webp', subject: 'Become-a-host hero from lg up: host-family photo 12 as a 2.4:1 band, scaled to 2560px, 2026-10-02.', ready: true },
+  { n: 76, src: '/media/casa/host-family-guest-bathroom.webp', subject: 'A host family\'s guest bathroom. Host-family photo 10 (iPhone IMG_7602, resized derivative), 3:2 crop below the mirror, 2026-10-02.', ready: true },
+  { n: 77, src: '/media/casa/host-family-dining-table.webp', subject: 'A host family\'s dining table. Host-family photo 11 (iPhone 15 original IMG_7596); the crop starts below the windowsills (framed photographs of the family\'s children) and stays left of a pinboard of letters, 2026-10-02.', ready: true },
+  { n: 78, src: '/media/casa/casa-wg-room-hero.webp', subject: 'CASA-WG page hero from lg up: pool file 004 (the slot 30 room) as a 2.4:1 band, modern grade, 2026-10-02.', ready: true },
+  { n: 79, src: '/media/casa/community-shared-meal.webp', subject: 'Learners and volunteers sharing a breakfast table in a CASA classroom, one playing the guitar. Pool frame 043 (IMG_0178), the whole 3:2 frame, modern grade, 2026-10-02.', ready: true },
+  { n: 80, src: '/media/casa/study-learners-dictionary.webp', subject: 'Two learners working with CASA\'s own dictionary ("Eigentum von CASA"). Pool frame 034 (IMG_0506), 5:4 crop, modern grade, 2026-10-02.', ready: true },
+  { n: 81, src: '/media/casa/host-family-guest-room.jpg', subject: 'A guest room in a host family: bed, desk, wardrobe, a lamp. THIS PHOTOGRAPH DOES NOT EXIST YET; the host-family photo set (2026-09-15) has living room, kitchen and bathrooms but no guest room, and a CASA-WG room must not stand in for it (hard rule 5).', ready: false },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));
@@ -226,7 +242,7 @@ export function photoMeaningFor(n: number | undefined): Meaning {
   if (n === 17) return 'orientation';
   // 21 sits with the excursions but is the groups course's photograph.
   if ((n >= 4 && n <= 19) || n === 21 || n === 37) return 'courses';
-  if (n >= 26 && n <= 30) return 'arrival';
+  if ((n >= 26 && n <= 30) || n === 81) return 'arrival';
   return 'orientation';
 }
 

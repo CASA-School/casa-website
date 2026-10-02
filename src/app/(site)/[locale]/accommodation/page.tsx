@@ -207,8 +207,8 @@ export default async function AccommodationPage() {
               person={leadStory.personDisplay}
               context={leadStory.country}
               photo={{
-                src: pageConfig.photos.thumbB.src,
-                alt: pageConfig.photos.thumbB.alt,
+                src: pageConfig.photos.story.src,
+                alt: pageConfig.photos.story.alt,
               }}
               supportingText={
                 locale === 'de'

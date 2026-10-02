@@ -1,6 +1,6 @@
 # Website photography: current handoff
 
-Updated 2026-09-21. The authoritative numbered shot list is
+Updated 2026-10-02. The authoritative numbered shot list is
 [`src/config/content/photo-numbers.ts`](../src/config/content/photo-numbers.ts).
 It contains the subject brief, delivery path and `ready` flag for every slot.
 The previous table here drifted from that registry and still named fabricated
@@ -28,6 +28,9 @@ staff members after the code had removed them.
 - Since 2026-10-01 a slot without a photograph no longer shows its number on the page: it renders a calm
   panel in the colour of what it is about (red courses, yellow accommodation, ink exams, blue everything
   else) with that meaning's icon. The number is in the markup as `data-casa-placeholder` and in this list.
+- Since 2026-10-02 slots **11, 13, 18, 21, 25-28, 30** and the new **66-80** are real
+  photographs (exams, accommodation, nonprofit, groups, Ratgeber, FAQ); **81** is an
+  awaited host-family guest room. See MEDIA_LIBRARY.md, "The placeholder pass".
 - Other slots remain placeholders. Their absent image files are expected;
   do not delete their config references as broken or unused assets.
 - Slots **31–36 and 38–43** are reserved for twelve verified staff portraits.
