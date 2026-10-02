@@ -36,7 +36,7 @@ staff members after the code had removed them.
 - Slots **31–36 and 38–43** are reserved for twelve verified staff portraits.
   No synthetic portrait should be presented as a real colleague.
 - Slot **37** awaits a suitable medical German photograph.
-- The two NewsFlash article photographs are real, intentionally unnumbered assets.
+- NewsFlash photographs are real, intentionally unnumbered assets (the October 2026 issue has none).
 - Accreditation marks and the social-sharing image are separate assets, not photo slots.
 
 ## Photo pool and delivery

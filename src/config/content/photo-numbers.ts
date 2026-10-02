@@ -55,8 +55,8 @@ import type { Meaning } from '@/config/brand/meaning';
  * NOT IN THIS LIST, on purpose:
  *   - Logos and accreditation marks (`proof-band.tsx`).
  *     Those are claims, not decoration, and were never placeholdered.
- *   - The two NewsFlash photographs. They are real, verified images that
- *     already bypass the placeholder wrapper via `next/image` directly.
+ *   - NewsFlash photographs. Real, verified images rendered through
+ *     `next/image` directly (none in the October 2026 issue).
  *   - Klett textbook covers (`klett-textbooks.ts`). Licensing is unresolved,
  *     so `coverSrc` is unset and no slot renders at all today.
  *

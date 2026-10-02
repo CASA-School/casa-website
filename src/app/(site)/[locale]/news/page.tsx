@@ -261,9 +261,11 @@ export default async function NewsPage() {
                             <HeadlineIcon className="h-4 w-4" aria-hidden />
                           </span>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-                              {localizedText(item.title, locale)}
-                            </p>
+                            {item.title ? (
+                              <p className="text-sm font-bold uppercase tracking-eyebrow text-[var(--casa-ink)]">
+                                {localizedText(item.title, locale)}
+                              </p>
+                            ) : null}
                             {item.levels ? <CefrBandBadge bands={item.levels} className="mt-2" /> : null}
                           </div>
                         </div>
@@ -315,6 +317,7 @@ export default async function NewsPage() {
                 ))}
               </div>
 
+              {newsFlashIssue.feature.photo || newsFlashIssue.feature.aside ? (
               <div className="mt-5 grid items-stretch gap-5 sm:grid-cols-[0.62fr_0.38fr]">
                 {newsFlashIssue.feature.photo ? (
                   <div className="casa-media-overlay relative aspect-[16/9] overflow-hidden rounded-xl">
@@ -339,6 +342,7 @@ export default async function NewsPage() {
                   </aside>
                 ) : null}
               </div>
+              ) : null}
 
             </article>
 
@@ -379,6 +383,7 @@ export default async function NewsPage() {
               that IS the content. A colour block here would defeat the point of
               the block.
             */}
+            {newsFlashIssue.editor ? (
             <aside className="flex items-start gap-4 rounded-xl bg-white p-7 shadow-[var(--shadow-card)]">
               <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-[var(--casa-sun)]">
                 <NextImage
@@ -402,6 +407,7 @@ export default async function NewsPage() {
                 </p>
               </div>
             </aside>
+            ) : null}
 
             {/*
               Notices. `kind` drives the panel, so the editor picks a rubric and
@@ -412,21 +418,30 @@ export default async function NewsPage() {
               const rubric = RUBRIC_STYLE[notice.kind];
 
               return (
-                <aside key={notice.id} className={cn('rounded-xl p-7', rubric.panel)}>
+                <aside key={notice.id} className={cn('rounded-xl p-7', rubric.panel, notice.wide && 'lg:col-span-2')}>
                   <div className="flex items-start gap-3">
                     <span className={cn('inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', rubric.medallion)}>
                       <RubricIcon className="h-4 w-4" aria-hidden />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                        {localizedText(notice.title, locale)}
-                      </p>
+                      {notice.title ? (
+                        <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+                          {localizedText(notice.title, locale)}
+                        </p>
+                      ) : null}
                       {notice.levels ? <CefrBandBadge bands={notice.levels} className="mt-2" /> : null}
                     </div>
                   </div>
                   <p className="mt-4 text-[15px] leading-relaxed text-[var(--casa-muted)]">
                     {localizedText(notice.body, locale)}
                   </p>
+                  {notice.list ? (
+                    <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-[var(--casa-muted)] marker:text-[var(--casa-accent-text)]">
+                      {notice.list.map((entry) => (
+                        <li key={entry.de}>{localizedText(entry, locale)}</li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </aside>
               );
             })}
