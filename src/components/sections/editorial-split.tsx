@@ -115,7 +115,10 @@ export function EditorialSplit({
           of this photograph behind itself instead, so the surface picks up the
           image's own colours. See the `.casa-media` block in globals.css.
         */}
-        <figure className="h-64 md:h-[360px]">
+        {/* A shape, not a height (crop pass, 2026-10-02): the fixed 360px made a
+            3:2 photo a 2.4:1 band at tablet width and a square in the course
+            pages' narrow column, and both cut heads. */}
+        <figure className="aspect-[3/2] md:aspect-[16/9] lg:aspect-[3/2]">
           <MediaFrame
             src={photo.src}
             alt={photo.alt}

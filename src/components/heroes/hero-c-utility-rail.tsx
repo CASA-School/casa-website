@@ -93,13 +93,28 @@ export function HeroCUtilityRail({
           {photoWide ? (
             <>
               {/*
-                Art direction (2026-10-02). Below `lg` the box is about 1.2-1.8:1,
-                which the 4:3 crop fills; from `lg` it is a 2.2-2.6:1 band, which
-                a centre slice of the 4:3 left looking zoomed in, so that band
-                gets a crop composed for it.
+                Art direction, revised in the crop pass (2026-10-02). A fixed-height
+                box cut heads: at 820px the full-width 384px box made a 4:3 photo
+                a 1.9:1 band, and at 1024px the narrow column made the 2.4:1 crop
+                a 1.5:1 slice. Now each photo is shown in a box of its OWN shape
+                wherever the layout allows, so nothing is cropped there:
+                  phone          4:3 photo in a 4:3 box
+                  md (stacked)   2.4:1 photo in a 12:5 box
+                  lg             4:3 photo in the 320px box (about 1.5:1, the
+                                 one place it is trimmed; the registry's focus
+                                 position keeps the heads in)
+                  xl and up      2.4:1 photo in a 12:5 box
               */}
-              <HeroPhotoCard photo={photo} className="mt-8 lg:hidden" />
-              <HeroPhotoCard photo={photoWide} className="mt-8 hidden lg:block lg:h-80" priority />
+              <HeroPhotoCard
+                photo={photo}
+                className="mt-8 aspect-[4/3] h-auto md:hidden md:h-auto lg:block lg:aspect-auto lg:h-80 xl:hidden"
+                priority
+              />
+              <HeroPhotoCard
+                photo={photoWide}
+                className="mt-8 hidden aspect-[12/5] h-auto md:block md:h-auto lg:hidden xl:block"
+                priority
+              />
             </>
           ) : (
             <HeroPhotoCard photo={photo} className="mt-8 lg:h-80" priority />

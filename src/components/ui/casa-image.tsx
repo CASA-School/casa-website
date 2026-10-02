@@ -63,6 +63,9 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
   const slot = typeof src === 'string' ? photoSlotFor(src) : undefined;
 
   if (!PLACEHOLDERS_ENABLED || slot?.ready) {
+    // The registry's focus position (heads kept in frame), unless the call site
+    // already positions the image itself.
+    const positioned = /(^|\s|:)object-(center|top|bottom|left|right|\[)/.test(className ?? '') || Boolean(style?.objectPosition);
     return (
       <NextImage
         src={src}
@@ -70,7 +73,7 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
         fill={fill}
         width={width}
         height={height}
-        className={className}
+        className={positioned || !slot?.position ? className : `${className ?? ''} ${slot.position}`.trim()}
         style={style}
         {...rest}
       />
