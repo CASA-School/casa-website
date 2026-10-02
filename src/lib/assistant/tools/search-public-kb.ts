@@ -310,7 +310,7 @@ function buildPolicyPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['prüfung', 'telc', 'b2', 'c1', 'zertifikat', 'hochschule', 'vorbereitung'],
       content:
-        'CASA bietet aktuell telc Deutsch B2 (190 EUR) und telc Deutsch C1 Hochschule (210 EUR) inklusive Vorbereitungskursen und Anmeldung. TestDaF wird derzeit nicht angeboten, könnte aber künftig zurückkehren — bitte CASA kontaktieren.',
+        'CASA bietet aktuell telc Deutsch B2 (190 €) und telc Deutsch C1 Hochschule (210 €) inklusive Vorbereitungskursen und Anmeldung. TestDaF wird derzeit nicht angeboten, könnte aber künftig zurückkehren — bitte CASA kontaktieren.',
     },
   ];
 }
@@ -425,7 +425,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'b2', 'prüfung', '190', 'gebühr', 'termin', 'august', 'oktober', 'november', 'vorbereitung', 'zertifikat'],
       content:
-        'CASA bietet telc Deutsch B2 an: 190 EUR für die gesamte Prüfung, 160 EUR für einen schriftlichen oder mündlichen Teil. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet in der Schule statt. Der Vorbereitungskurs kostet 260 EUR (zwei Abende pro Woche, Mo/Mi 18:30–20:00). Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
+        'CASA bietet telc Deutsch B2 an: 190 € für die gesamte Prüfung, 160 € für einen schriftlichen oder mündlichen Teil. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet in der Schule statt. Der Vorbereitungskurs kostet 260 EUR (zwei Abende pro Woche, Mo/Mi 18:30–20:00). Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
     },
     {
       id: 'exam-telc-c1-en',
@@ -445,7 +445,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'c1', 'hochschule', 'universität', '210', 'gebühr', 'termin', 'september', 'oktober', 'november', 'vorbereitung', 'akademisch'],
       content:
-        'CASA bietet telc Deutsch C1 Hochschule an: 210 EUR für die gesamte Prüfung, 185 EUR für einen Teil. Sie findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein vierwöchiger Block für 520 EUR, bei der ersten Anmeldung bei CASA zuzüglich 50 EUR. Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Fokus auf akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
+        'CASA bietet telc Deutsch C1 Hochschule an: 210 € für die gesamte Prüfung, 185 € für einen Teil. Sie findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein vierwöchiger Block für 520 EUR, bei der ersten Anmeldung bei CASA zuzüglich 50 EUR. Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Fokus auf akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
     },
     {
       id: 'exam-testdaf-en',

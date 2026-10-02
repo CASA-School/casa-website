@@ -163,9 +163,9 @@ const calculatorCopy = {
       refundableDeposit: 'Rückerstattbare Kaution',
     },
     priceHints: {
-      intensive: 'Intensiv: €520 / 4 Wochen, €940 / ganzes Niveau',
-      evening: 'Abendkurs: €476 / Trimester',
-      accommodation: 'Wohnen: €580 / 4 Wochen, danach €145 / Woche',
+      intensive: 'Intensiv: 520\u00a0€ / 4 Wochen, 940\u00a0€ / ganzes Niveau',
+      evening: 'Abendkurs: 476\u00a0€ / Trimester',
+      accommodation: 'Wohnen: 580\u00a0€ / 4 Wochen, danach 145\u00a0€ / Woche',
     },
     validationError: 'Das Zielniveau muss höher sein als das aktuelle Niveau.',
     weeks: 'Wochen',

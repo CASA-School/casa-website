@@ -45,6 +45,8 @@ const deFooterText: Record<string, string> = {
   'Privacy Policy': 'Datenschutz',
   'Terms & Conditions': 'AGB',
   'All rights reserved.': 'Alle Rechte vorbehalten.',
+  // German pages: no country, and the en dash of a number range (brief 2026-10-02).
+  'Am Dobben 14–16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
 };
 
 function footerText(value: string, locale: ContentLocale) {
