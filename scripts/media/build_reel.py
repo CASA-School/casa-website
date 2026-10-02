@@ -112,7 +112,8 @@ SLIDES = [
         # Slot 61, its course-page hero.
         'out': 'course-special-hero.webp',
         'source': POOL / '067_IMG_0266.JPG',
-        'box': (0, 560, 2560, 1067),
+        # y 470, not 560 (crop pass 2026-10-02): room above the teacher's head.
+        'box': (0, 470, 2560, 1067),
         'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.0, 1.0, 0.995),
     },
     {
@@ -127,7 +128,8 @@ SLIDES = [
         # Slot 63, its course-page hero.
         'out': 'course-bildungszeit-hero.webp',
         'source': POOL / '094_IMG_0315.JPG',
-        'box': (0, 100, 2560, 1067),
+        # y 0, not 100 (crop pass 2026-10-02): room above the teacher's head.
+        'box': (0, 0, 2560, 1067),
         'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.03),
     },
     {
@@ -149,7 +151,8 @@ SLIDES = [
         # Slot 56, the homepage's "Wir hören zu": the teacher with smiling learners.
         'out': 'home-class-welcome.webp',
         'source': POOL / '087_IMG_0302.JPG',
-        'box': (60, 170, 1620, 1080),
+        # y 60, not 170 (crop pass 2026-10-02): room above the teacher's head.
+        'box': (60, 60, 1620, 1080),
         'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.034),
     },
     {
@@ -271,47 +274,54 @@ SLIDES = [
         'tone': (6, 62, 93), 'chroma': 1.0, 'wb': (0.985, 1.0, 1.01),
     },
     {
-        # Slot 67, the telc B2 page's second photo: three learners writing.
+        # Slot 67, the telc B2 page's second photo: two learners going through
+        # their papers. Replaced 023 (its original frame cuts two heads).
         'out': 'exam-b2-class.webp',
-        'source': POOL / '023_IMG_0147.JPG',
+        'source': POOL / '079_IMG_0286.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.97, 1.0, 1.12),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.01, 1.0, 0.99),
     },
     {
-        # Slot 11, the exams hero: two learners writing, one laughing. 5:4 for
-        # the photo-led hero; both faces inside the middle of the frame.
+        # Slot 11, the exams hero (since the crop pass of 2026-10-02): four
+        # learners writing along the table, room above every head. 5:4. Replaced
+        # 012, whose original frame cuts one learner's crown.
         'out': 'learners-writing-class.jpg',
-        'source': POOL / '012_IMG_0031.JPG',
-        'box': (400, 0, 2134, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.975, 1.0, 1.11),
+        'source': POOL / '066_IMG_0265.JPG',
+        'box': (0, 0, 2134, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.02, 1.0, 0.985),
     },
     {
-        # Slot 68, the telc C1 Hochschule card and that page's hero on phones.
+        # Slot 68, the telc C1 Hochschule card and that page's hero on phones:
+        # three learners at the long table, heads with room above. 4:3. Replaced
+        # 032 (its original frame cuts a learner's crown).
         'out': 'exam-c1-writing.webp',
-        'source': POOL / '032_IMG_0473.JPG',
-        'box': (262, 0, 2276, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.02, 1.0, 1.0),
+        'source': POOL / '065_IMG_0264.JPG',
+        'box': (820, 230, 1740, 1305),
+        'tone': (5, 61, 93), 'chroma': 1.03, 'wb': (1.02, 1.0, 0.97),
     },
     {
-        # Slot 69, the telc C1 Hochschule page's hero from lg up.
+        # Slot 69, the telc C1 Hochschule hero band: the whole row of five
+        # learners, about 200px above the tallest head. 2.4:1.
         'out': 'exam-c1-hero.webp',
-        'source': POOL / '032_IMG_0473.JPG',
-        'box': (0, 200, 2560, 1067),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.02, 1.0, 1.0),
+        'source': POOL / '065_IMG_0264.JPG',
+        'box': (0, 250, 2560, 1067),
+        'tone': (5, 61, 93), 'chroma': 1.03, 'wb': (1.02, 1.0, 0.97),
     },
     {
-        # Slot 70, the telc C1 Hochschule page's second photo: a learner speaking.
+        # Slot 70, the telc C1 Hochschule page's second photo: two learners
+        # discussing a text. Replaced 031 (hair touching the frame top).
         'out': 'exam-c1-speaking.webp',
-        'source': POOL / '031_IMG_0472.JPG',
+        'source': POOL / '074_IMG_0278.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.02, 1.0, 1.0),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.015, 1.0, 0.975),
     },
     {
-        # Slot 71, the exams page's candidate story: a pen in focus, a class writing behind.
+        # Slot 71, the exams page's candidate story: two learners reading
+        # their exam texts. Replaced 024 (blurred heads cut by the frame top).
         'out': 'exam-story-writing.webp',
-        'source': POOL / '024_IMG_0156.JPG',
+        'source': POOL / '078_IMG_0285.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 60, 93), 'chroma': 1.0, 'wb': (0.965, 1.0, 1.13),
+        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.975),
     },
     {
         # Slot 13, "Ihre Frage ist noch offen?" (FAQ) and the contact page: one
@@ -330,12 +340,13 @@ SLIDES = [
         'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.96),
     },
     {
-        # Slot 81, the "Studieren in Deutschland" guide's hero: two learners
-        # working with CASA's own dictionary. 5:4.
-        'out': 'study-learners-dictionary.webp',
-        'source': POOL / '034_IMG_0506.JPG',
-        'box': (330, 0, 2134, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.03, 1.0, 1.0),
+        # Slot 82, the "Studieren in Deutschland" hero: two learners listening
+        # attentively. The whole 5:4 frame. Replaced 034 (slot 80, retired):
+        # its original frame cuts a learner's crown.
+        'out': 'study-learners-attentive.webp',
+        'source': POOL / '026_IMG_0185.JPG',
+        'box': (0, 0, 2560, 2056),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.975, 1.0, 1.12),
     },
     {
         # Slot 25, the "Leben in Deutschland" guide's hero: the Schnoor. The
@@ -437,6 +448,16 @@ SLIDES = [
         'source': HOST / '11-host-family-home-living-dining-wide.jpg',
         'box': (330, 2660, 1700, 1275),
         'tone': (5, 58, 92), 'chroma': 1.0, 'wb': (0.93, 1.0, 1.12),
+    },
+    {
+        # Slot 83, the homepage's "community events" tile: a learner clapping at
+        # the shared breakfast (the slot 79 morning). A portrait frame, because
+        # that tile is portrait from lg; the wide walking group it replaced
+        # (slot 23) could not fit it without cutting heads (crop pass 2026-10-02).
+        'out': 'home-community-breakfast.webp',
+        'source': POOL / '050_IMG_0194.JPG',
+        'box': (0, 150, 1680, 2240),
+        'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.96),
     },
 ]
 

@@ -34,8 +34,8 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
     summary: 'A guide to choosing a course of study, preparing your application and settling in.',
     lead: 'Planning to study in Germany brings plenty of questions. Start with your goals, then work through the language, application and practical arrangements at your own pace.',
     photo: {
-      src: '/media/casa/study-learners-dictionary.webp',
-      alt: 'Two learners working on their tasks with the CASA dictionary',
+      src: '/media/casa/study-learners-attentive.webp',
+      alt: 'Two learners listening attentively',
     },
     ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
   },
@@ -344,6 +344,8 @@ export const whyGermanyGuideEn: ResourceGuideData = {
     photo: {
       src: '/media/casa/group-course-walking-bremen.jpg',
       alt: 'CASA learners walking through Bremen together',
+      // The group spans the whole width: shown as its full 3:2 frame, no head cut.
+      aspectRatio: '3 / 2',
     },
     ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
   },

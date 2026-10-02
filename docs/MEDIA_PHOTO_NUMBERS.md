@@ -31,6 +31,9 @@ staff members after the code had removed them.
 - Since 2026-10-02 slots **11, 13, 18, 21, 25-28, 30** and the new **66-80** are real
   photographs (exams, accommodation, nonprofit, groups, Ratgeber, FAQ); **81** is an
   awaited host-family guest room. See MEDIA_LIBRARY.md, "The placeholder pass".
+- Crop pass 2026-10-02: slots 11, 67-71 re-sourced (frames with room above the heads),
+  **80** retired for **82**, **83** added (homepage community tile). Ready slots may carry
+  a `position` (object-position per breakpoint), computed by `scripts/media/fit_positions.py`.
 - Other slots remain placeholders. Their absent image files are expected;
   do not delete their config references as broken or unused assets.
 - Slots **31–36 and 38–43** are reserved for twelve verified staff portraits.
