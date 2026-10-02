@@ -2,7 +2,7 @@ import { getDb, logDatabaseFallback } from '@/lib/db/server';
 import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import { heroSpecsByLocale } from '@/config/content/heroes';
 import { proofMetricsByLocale } from '@/config/content/proof-metrics';
-import { socialProofById, socialProofByLocale, socialProofForCourse, socialProofForExam } from '@/config/content/social-proof';
+import { socialProofById, socialProofByLocale, socialProofForCourse } from '@/config/content/social-proof';
 import { courseNarrativesByLocale } from '@/config/content/course-narratives';
 import { examNarrativesByLocale } from '@/config/content/exam-narratives';
 import { accommodationNarrativesByLocale } from '@/config/content/accommodation-narratives';
@@ -551,11 +551,6 @@ export function getSocialProofForCourse(slug: string, locale: ContentLocale): So
 /** One named voice, for pages with room for exactly one. */
 export function getSocialProofById(id: string, locale: ContentLocale): SocialProofItem | null {
   return socialProofById(id, locale);
-}
-
-/** Empty when no CASA learner has published anything about this exam. */
-export function getSocialProofForExam(code: string, locale: ContentLocale): SocialProofItem[] {
-  return socialProofForExam(code, locale);
 }
 
 export function getCourseNarrative(slug: string, locale: ContentLocale): CourseNarrative | null {
