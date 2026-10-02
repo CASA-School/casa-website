@@ -2300,11 +2300,14 @@ und Medizin still has none. Consent for 061, 067, 087 and 094 confirmed 2026-10-
 
 Rahman found the contact form "very basic" and the registration forms different from it. Both
 had drifted into their own field styles: hard `--casa-muted` boxes on the contact form, `--casa-sand`
-outlines (1.23:1, below WCAG 1.4.11) under uppercase eyebrow labels in the wizards. Every public
-form now takes fields, labels, tiles, step headers and buttons from
-`src/components/forms/form-styles.tsx`, with a new `--casa-field-border` (3.27:1). The contact topic
-is six chips in the meaning colours instead of a dropdown. Both registration pages sit in the
-contact page's frame (`RegistrationPageShell`): breadcrumbs, title, the form card, and the office
-panel beside it (`ContactHelpPanel`: phone, email, address with directions, opening hours). They
-had no link to the Impressum or the privacy policy, because the site shell drops its footer there;
-`LegalFooter` now closes them (§ 5 DDG). `ArrowLeft` is a straight arrow; it was an undo glyph.
+outlines under uppercase eyebrow labels in the wizards. Every public form now takes fields, labels,
+tiles, step headers and buttons from `src/components/forms/form-styles.tsx`. A field at rest is a
+soft well (`--casa-field-fill`, a hairline `--casa-field-edge`, an inset shadow); active it turns
+white with the CASA blue edge, a halo and a slight lift (Rahman's direction, replacing a 3:1 grey
+outline). The contact topic is six chips in the meaning colours instead of a dropdown. Both
+registration pages sit in the contact page's frame (`RegistrationPageShell`): breadcrumbs, title,
+the form card, and the office panel beside it (`ContactHelpPanel`: phone, email, address with
+directions, opening hours). They are ordinary pages now: they started as a closed checkout with no
+navbar and no footer, got the navbar back but never the footer, and so had no link to the Impressum
+or the privacy policy. They keep the site footer minus its closing band ("Kurs finden" under a
+half-filled form only leads away). `ArrowLeft` is a straight arrow; it was an undo glyph.

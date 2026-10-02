@@ -525,7 +525,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                       'has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
                       checked
                         ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/45 shadow-[inset_0_0_0_1px_var(--casa-accent-text)]'
-                        : 'border-[color:var(--casa-sand)] shadow-[var(--shadow-soft)] hover:border-[color:var(--casa-field-border)]'
+                        : 'border-[color:var(--casa-sand)] shadow-[var(--shadow-soft)] hover:border-[color:var(--casa-field-edge-hover)]'
                     )}
                   >
                     <input

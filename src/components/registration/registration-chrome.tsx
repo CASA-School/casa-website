@@ -78,7 +78,7 @@ export function RegistrationStepper({ steps, step, locale }: RegistrationStepper
                     ? 'bg-[var(--casa-accent-surface)] text-white'
                     : active
                       ? 'border-2 border-[var(--casa-blue)] text-[var(--casa-accent-text)]'
-                      : 'border border-[color:var(--casa-field-border)] text-[var(--casa-muted)]'
+                      : 'border border-[color:var(--casa-field-edge-hover)] text-[var(--casa-muted)]'
                 )}
               >
                 {complete ? <Check className="size-3.5" aria-hidden /> : number}

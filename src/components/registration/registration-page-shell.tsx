@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 
 import { ContactHelpPanel } from '@/components/forms/contact-help-panel';
 import { formCardClassName } from '@/components/forms/form-styles';
-import { Navbar } from '@/components/layout/navbar';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import type { ContentLocale } from '@/lib/content/types';
@@ -21,9 +20,7 @@ type RegistrationPageShellProps = {
 
 /**
  * The frame of both registration pages, built like the contact page: title and
- * one line, the form on its white card, the office beside it. The site shell
- * drops its own navbar and footer here (site-shell.tsx), so the page renders
- * the navbar itself and the shell adds the legal footer.
+ * one line, the form on its white card, the office beside it.
  */
 export function RegistrationPageShell({ locale, title, intro, formId, helpTitle, helpBody, children }: RegistrationPageShellProps) {
   const breadcrumbs = [
@@ -32,9 +29,7 @@ export function RegistrationPageShell({ locale, title, intro, formId, helpTitle,
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      <Navbar contentLocale={locale} />
-
+    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <section className="pb-14 pt-6 md:pb-20 md:pt-8">
         <Container>
           <Breadcrumbs items={breadcrumbs} />

@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { getData } from 'country-list';
-import { formControlClassName } from '@/components/forms/form-styles';
+import { formControlClassName, formControlOpenClassName } from '@/components/forms/form-styles';
 import { cn } from '@/lib/utils';
 
 const countryNames = getData()
@@ -93,7 +93,7 @@ export function CountryField({
         className={cn(
           formControlClassName,
           'flex items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
-          isOpen && 'border-[var(--casa-accent-text)] ring-4 ring-[var(--casa-blue)]/15',
+          isOpen && formControlOpenClassName,
           className
         )}
       >

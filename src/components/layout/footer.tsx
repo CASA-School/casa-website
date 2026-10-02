@@ -1,7 +1,5 @@
 'use client';
 
-import type { ReactNode } from 'react';
-
 import { Link } from '@/i18n/navigation';
 import { Logo } from '@/components/ui/logo';
 import { footerConfig } from '@/config/footer';
@@ -60,9 +58,14 @@ function footerText(value: string, locale: ContentLocale) {
 type FooterProps = {
   /** Resolved on the server — see the note in Navbar about hydration. */
   contentLocale: ContentLocale;
+  /**
+   * The "Bereit für Deutsch in Bremen?" band. Off on the registration pages:
+   * under a half-filled form, "Kurs finden" only leads away from it.
+   */
+  closingCta?: boolean;
 };
 
-export function Footer({ contentLocale: locale }: FooterProps) {
+export function Footer({ contentLocale: locale, closingCta = true }: FooterProps) {
   const socialIconMap = {
     facebook: Facebook,
     instagram: Instagram,
@@ -103,6 +106,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
         between them at the very bottom of the page. Registering is the action;
         talking to an advisor is a question, and it now reads as one.
       */}
+      {closingCta ? (
       <div className="border-b border-white/10 bg-[var(--casa-ink-panel)]">
         <Container className="py-8">
           <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
@@ -137,6 +141,7 @@ export function Footer({ contentLocale: locale }: FooterProps) {
           </div>
         </Container>
       </div>
+      ) : null}
 
       <Container className="py-10 md:py-14 lg:py-16">
         {/* ---------------------------------------------------------------- */}
@@ -299,50 +304,28 @@ export function Footer({ contentLocale: locale }: FooterProps) {
         things that belong in a colophon: the legal entity and the legal links.
       */}
       <div className="border-t border-white/10">
-        <LegalBar locale={locale} social={<div className="hidden md:block">{social}</div>} />
+        <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[var(--casa-text-subtle)]">
+            &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
+            {footerText('All rights reserved.', locale)}
+          </p>
+
+          <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium">
+              {footerConfig.legalLinks.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
+                >
+                  {footerText(item.label, locale)}
+                </Link>
+              ))}
+            </div>
+            <div className="hidden md:block">{social}</div>
+          </div>
+        </Container>
       </div>
-    </footer>
-  );
-}
-
-/** The legal entity and the legal links: the last row of every footer. */
-function LegalBar({ locale, social }: { locale: ContentLocale; social?: ReactNode }) {
-  return (
-    <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-xs text-[var(--casa-text-subtle)]">
-        &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
-        {footerText('All rights reserved.', locale)}
-      </p>
-
-      <div className="flex items-center gap-6">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium">
-          {footerConfig.legalLinks.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
-            >
-              {footerText(item.label, locale)}
-            </Link>
-          ))}
-        </div>
-        {social}
-      </div>
-    </Container>
-  );
-}
-
-/**
- * The colophon alone, for the registration pages. They drop the site footer to
- * keep the learner in the form, and with it went the only links to the
- * Impressum and the privacy policy, which have to stay one click away on every
- * page (§ 5 DDG). The logo stripe closes the page as on every other.
- */
-export function LegalFooter({ contentLocale: locale }: FooterProps) {
-  return (
-    <footer data-footer="legal" className="bg-[var(--casa-ink-deep)] text-white">
-      <div aria-hidden="true" className="casa-logo-stripe h-[3px] w-full" />
-      <LegalBar locale={locale} />
     </footer>
   );
 }
