@@ -20,22 +20,34 @@ export const formFieldGroupClassName = 'space-y-2';
 export const formLabelClassName = 'block text-sm font-semibold leading-snug text-[var(--casa-ink)]';
 
 /**
- * Input, select trigger and date button. 48px, white, an outline that clears
- * 3:1 and darkens on hover, and the site's blue focus ring. `aria-invalid` (or
- * `data-invalid` on a button) turns it red, so an invalid field needs no
- * className of its own.
+ * Input, select trigger and date button. At rest a soft well: the cool
+ * --casa-field-fill, a hairline edge and a shadow inside the top edge. Active
+ * (focused, or a select or picker open) it turns white with the CASA blue edge,
+ * a halo and a slight lift, so the field being filled in is unmistakable.
+ * `aria-invalid` (or `data-invalid` on a button) draws the edge red, so an
+ * invalid field needs no className of its own.
+ *
+ * Every class is written out in full: Tailwind finds classes by scanning the
+ * source, so a variant assembled in code would never reach the stylesheet.
  */
 export const formControlClassName = cn(
-  'h-12 data-[size=default]:h-12 w-full rounded-xl border border-[color:var(--casa-field-border)] bg-white px-4',
+  'h-12 data-[size=default]:h-12 w-full rounded-xl border border-[color:var(--casa-field-edge)] bg-[var(--casa-field-fill)] px-4',
   'text-left text-base md:text-base text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] data-[placeholder]:text-[var(--casa-muted)]',
-  'shadow-none transition-[border-color,box-shadow] duration-150 hover:border-[color:var(--casa-muted)]',
+  'shadow-[inset_0_1px_2px_rgba(15,23,42,0.06)] outline-none transition-[background-color,border-color,box-shadow] duration-200 ease-out',
+  'hover:border-[color:var(--casa-field-edge-hover)] hover:bg-[var(--casa-field-fill-hover)]',
   // A select's value: one line with an ellipsis. The trigger's own `flex` on it defeated line-clamp.
   '*:data-[slot=select-value]:block *:data-[slot=select-value]:min-w-0 *:data-[slot=select-value]:truncate',
-  'focus-visible:border-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/15 focus-visible:ring-offset-0',
-  'aria-invalid:border-[var(--casa-danger-text)] aria-invalid:ring-[var(--casa-danger-text)]/15',
+  'focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--casa-blue)]/15 focus:ring-offset-0 focus:shadow-[0_10px_24px_-14px_rgba(0,111,159,0.45)]',
+  'focus-visible:border-[var(--casa-blue)] focus-visible:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/15 focus-visible:ring-offset-0 focus-visible:shadow-[0_10px_24px_-14px_rgba(0,111,159,0.45)]',
+  'data-[state=open]:border-[var(--casa-blue)] data-[state=open]:bg-white data-[state=open]:ring-4 data-[state=open]:ring-[var(--casa-blue)]/15 data-[state=open]:shadow-[0_10px_24px_-14px_rgba(0,111,159,0.45)]',
+  'aria-invalid:border-[var(--casa-danger-text)] aria-invalid:focus:border-[var(--casa-danger-text)] aria-invalid:focus:ring-[var(--casa-danger-text)]/15',
   // A plain <button> trigger (date, country) may not carry aria-invalid, so it says so with data-invalid.
   'data-[invalid=true]:border-[var(--casa-danger-text)]',
 );
+
+/** The active look, for a picker that opens a panel of its own instead of a Radix select. */
+export const formControlOpenClassName =
+  'border-[var(--casa-blue)] bg-white ring-4 ring-[var(--casa-blue)]/15 shadow-[0_10px_24px_-14px_rgba(0,111,159,0.45)]';
 
 export const formTextareaClassName = cn(formControlClassName, 'h-auto min-h-36 py-3 leading-relaxed resize-y');
 
@@ -50,15 +62,19 @@ export const formMetaLabelClassName = 'text-xs font-medium text-[var(--casa-mute
 export const formCardClassName =
   'min-w-0 rounded-3xl border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-8 lg:p-10';
 
-/** A checkbox row, an optional block or a review value inside the form card. */
-export const formTileClassName = 'rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-4';
+/**
+ * A checkbox row, an optional block or a review value inside the form card:
+ * raised where the fields are recessed, as the topic chips are.
+ */
+export const formTileClassName =
+  'rounded-xl border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]';
 
 /** The one primary action of a form: send, continue, submit. */
 export const formPrimaryButtonClassName = 'casa-button-prism h-12 rounded-xl px-6 text-base text-white';
 
 /** Back and "send another": the primary's size and type, outlined. */
 export const formSecondaryButtonClassName =
-  'h-12 rounded-xl border-[color:var(--casa-field-border)] bg-white px-5 text-[length:var(--casa-button-font-size)] font-bold text-[var(--casa-ink)] hover:border-[color:var(--casa-muted)] hover:bg-white';
+  'h-12 rounded-xl border-[color:var(--casa-field-edge-hover)] bg-white px-5 text-[length:var(--casa-button-font-size)] font-bold text-[var(--casa-ink)] shadow-[var(--shadow-soft)] hover:border-[color:var(--casa-muted)] hover:bg-white';
 
 export const formAlertClassName =
   'rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]';

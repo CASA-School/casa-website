@@ -233,13 +233,14 @@ test('registration pages render main navbar without register CTA button', async 
     await expect(page.locator('header:has(nav[aria-label="Main navigation"])')).toBeVisible();
     // The Register Now CTA button should not be present
     await expect(page.locator('a:has-text("Register Now"), a:has-text("Jetzt anmelden"), a:has-text("Register for Exam"), a:has-text("Zur Prüfung anmelden")')).toHaveCount(0);
-    // The site footer stays off, but the legal footer closes the page: the
-    // Impressum and the privacy policy stay one click away (§ 5 DDG).
-    await expect(page.locator('footer')).toHaveCount(1);
-    const legalFooter = page.locator('footer[data-footer="legal"]');
-    await expect(legalFooter).toBeVisible();
-    await expect(legalFooter.getByRole('link', { name: /^(Impressum|Imprint)$/ })).toBeVisible();
-    await expect(legalFooter.getByRole('link', { name: /^(Datenschutz|Privacy Policy)$/ })).toBeVisible();
+    // The site footer closes the page as everywhere, so the Impressum and the
+    // privacy policy stay one click away (§ 5 DDG). Its closing band does not:
+    // under a half-filled form, "Kurs finden" only leads away from it.
+    const footer = page.locator('footer');
+    await expect(footer).toHaveCount(1);
+    await expect(footer.getByRole('link', { name: /^(Impressum|Imprint)$/ })).toBeVisible();
+    await expect(footer.getByRole('link', { name: /^(Datenschutz|Privacy Policy)$/ })).toBeVisible();
+    await expect(footer.getByRole('link', { name: /^(Kurs finden|Find my course)$/ })).toHaveCount(0);
   }
 });
 

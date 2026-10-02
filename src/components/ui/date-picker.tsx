@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formControlClassName } from '@/components/forms/form-styles';
+import { formControlClassName, formControlOpenClassName } from '@/components/forms/form-styles';
 import { cn } from '@/lib/utils';
 
 interface DatePickerProps {
@@ -144,7 +144,7 @@ export function DatePicker({
         onClick={() => setIsOpen(!isOpen)}
         aria-describedby={ariaDescribedBy}
         data-invalid={hasError || undefined}
-        className={cn(formControlClassName, "flex items-center justify-between", className)}
+        className={cn(formControlClassName, "flex items-center justify-between", isOpen && formControlOpenClassName, className)}
       >
         <span className={cn(!value && "text-[var(--casa-muted)]")}>
           {value ? formatDateLabel(value) : placeholder}

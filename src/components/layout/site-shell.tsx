@@ -5,7 +5,7 @@ import { usePathname } from '@/i18n/navigation';
 
 import { AssistantLauncher } from '@/components/assistant';
 import { InteractionTracker } from '@/components/analytics/interaction-tracker';
-import { Footer, LegalFooter } from '@/components/layout/footer';
+import { Footer } from '@/components/layout/footer';
 import { Navbar } from '@/components/layout/navbar';
 import { ScrollEffects } from '@/components/ui/scroll-effects';
 import type { ContentLocale } from '@/lib/content/types';
@@ -18,13 +18,20 @@ type SiteShellProps = {
 
 export function SiteShell({ children, contentLocale }: SiteShellProps) {
   const pathname = usePathname();
+  /*
+   * The registration pages are ordinary pages (2026-10-02). They began as a
+   * closed checkout with neither navbar nor footer; the navbar came back inside
+   * the pages, the footer did not, and with it went the only links to the
+   * Impressum and the privacy policy. Now they keep the whole frame, minus the
+   * footer's closing band, which under a half-filled form only leads away.
+   */
   const isRegistrationPage = pathname?.startsWith('/registration');
 
   /**
    * The running placement test is an app surface, not a page.
    *
-   * It drops MORE chrome than the registration wizard does, and for reasons that
-   * are specific to it rather than stylistic:
+   * It drops the site chrome, for reasons that are specific to it rather than
+   * stylistic:
    *
    *  - **No footer.** On a 375x667 phone the site footer measured 721px against a
    *    1725px page — 42% of a surface whose entire job is one question at a time.
@@ -40,7 +47,7 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
    * result should be able to get to courses and registration from it.
    */
   const isFocusedTestSurface = pathname === '/placement-test/test';
-  const hideSiteChrome = isRegistrationPage || isFocusedTestSurface;
+  const hideSiteChrome = isFocusedTestSurface;
 
   return (
     <>
@@ -56,8 +63,7 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
       <div id="site-content" className="flex-1 flex flex-col">
         {children}
       </div>
-      {!hideSiteChrome && <Footer contentLocale={contentLocale} />}
-      {isRegistrationPage && <LegalFooter contentLocale={contentLocale} />}
+      {!hideSiteChrome && <Footer contentLocale={contentLocale} closingCta={!isRegistrationPage} />}
       {!isFocusedTestSurface && <AssistantLauncher />}
     </>
   );
