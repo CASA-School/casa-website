@@ -5,6 +5,7 @@ import { ComparisonModule, EditorialSplit, ProcessSteps } from '@/components/sec
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
+import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata } from '@/lib/seo';
 
@@ -20,56 +21,18 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const hostFamilyPhotos = {
-  dinner: {
-    src: '/media/casa/shared-flat-kitchen-table.jpg',
-    alt: {
-      en: 'shared kitchen and dining table prepared for student routines',
-      de: 'Gemeinsame Küche mit Esstisch für studentische Alltagsroutinen',
-    },
-    caption: {
-      en: 'Daily routines create practical moments for language and trust.',
-      de: 'Alltagsroutinen schaffen praktische Momente für Sprache und Vertrauen.',
-    },
-  },
-  arrival: {
-    src: '/media/casa/student-room-balcony.jpg',
-    alt: {
-      en: 'bright student room with bed, desk, and balcony doors',
-      de: 'Helles Studierendenzimmer mit Bett, Schreibtisch und Balkontüren',
-    },
-    caption: {
-      en: 'Welcoming students starts with a clear, practical place to arrive.',
-      de: 'Gastfreundschaft beginnt mit einem klaren, praktischen Ankommensort.',
-    },
-  },
-  partnership: {
-    src: '/media/casa/host-family-room.jpg',
-    alt: {
-      en: 'host family room prepared for an arriving student',
-      de: 'Gastfamilienzimmer, vorbereitet für eine ankommende Lernende',
-    },
-    caption: {
-      en: 'CASA stays the contact for both sides for the whole stay.',
-      de: 'CASA bleibt für beide Seiten während des gesamten Aufenthalts Ansprechpartner.',
-    },
-  },
-  home: {
-    src: '/media/casa/student-room-alternative-1.jpg',
-    alt: {
-      en: 'bright furnished student room prepared for a stable stay in Bremen',
-      de: 'Helles möbliertes Studierendenzimmer für einen stabilen Aufenthalt in Bremen',
-    },
-    caption: {
-      en: 'A stable living rhythm supports the learning that happens at CASA.',
-      de: 'Ein stabiler Wohnalltag unterstützt das Lernen bei CASA.',
-    },
-  },
-} as const;
+/*
+ * Only a host family's own rooms on this page (2026-10-02): it is read by people
+ * offering a room in their home, so a CASA-WG photo would describe the wrong
+ * thing (CLAUDE.md hard rule 5). The photographs live in public-page-config
+ * under `becomeHost*`; the guest-room row stays an icon panel (slot 81) until a
+ * host family's guest room is photographed.
+ */
 
 export default async function BecomeHostFamilyPage() {
   const locale = await getContentLocale();
   const rhythm = getLayoutRhythm('accommodation-detail');
+  const { photos } = getPublicPageConfig('accommodation-detail', locale);
 
   const copy =
     locale === 'de'
@@ -306,10 +269,8 @@ export default async function BecomeHostFamilyPage() {
             : 'CASA chooses the match, briefs you first, and stays reachable for both sides.'
         }
         ctas={copy.heroCtas}
-        photo={{
-          src: hostFamilyPhotos.dinner.src,
-          alt: locale === 'de' ? hostFamilyPhotos.dinner.alt.de : hostFamilyPhotos.dinner.alt.en,
-        }}
+        photo={photos.becomeHost}
+        photoWide={photos.becomeHostHero}
         themeClassName="hero-theme-accommodation"
       />
 
@@ -327,11 +288,7 @@ export default async function BecomeHostFamilyPage() {
             title={copy.storyTitle}
             description={copy.storyDescription}
             bullets={copy.storyBullets}
-            photo={{
-              src: hostFamilyPhotos.arrival.src,
-              alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
-              caption: locale === 'de' ? hostFamilyPhotos.arrival.caption.de : hostFamilyPhotos.arrival.caption.en,
-            }}
+            photo={photos.becomeHostStory}
             /*
               No `ctas` here. This passed `heroCtas` verbatim, so the identical
               "Apply as host family" / "View accommodation" pair rendered in the
@@ -461,10 +418,7 @@ export default async function BecomeHostFamilyPage() {
                 description: copy.roomDescription,
                 outcomes: copy.roomItems,
                 meta: copy.roomEyebrow,
-                media: {
-                  src: hostFamilyPhotos.arrival.src,
-                  alt: locale === 'de' ? hostFamilyPhotos.arrival.alt.de : hostFamilyPhotos.arrival.alt.en,
-                },
+                media: { src: photos.becomeHostRoom.src, alt: photos.becomeHostRoom.alt },
               },
               {
                 id: 'host-agreement',
@@ -472,10 +426,7 @@ export default async function BecomeHostFamilyPage() {
                 description: copy.agreementDescription,
                 outcomes: copy.agreementBullets,
                 meta: copy.agreementEyebrow,
-                media: {
-                  src: hostFamilyPhotos.home.src,
-                  alt: locale === 'de' ? hostFamilyPhotos.home.alt.de : hostFamilyPhotos.home.alt.en,
-                },
+                media: { src: photos.becomeHostAgreement.src, alt: photos.becomeHostAgreement.alt },
               },
               {
                 id: 'host-partnership',
@@ -483,13 +434,7 @@ export default async function BecomeHostFamilyPage() {
                 description: copy.partnershipDescription,
                 outcomes: copy.partnershipBullets,
                 meta: copy.partnershipEyebrow,
-                media: {
-                  src: hostFamilyPhotos.partnership.src,
-                  alt:
-                    locale === 'de'
-                      ? hostFamilyPhotos.partnership.alt.de
-                      : hostFamilyPhotos.partnership.alt.en,
-                },
+                media: { src: photos.becomeHostPartnership.src, alt: photos.becomeHostPartnership.alt },
               },
             ]}
           />

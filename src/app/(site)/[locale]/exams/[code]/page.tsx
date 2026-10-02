@@ -97,6 +97,13 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
 
   const socialProof = getSocialProofForExam(detail.examType.code, locale);
 
+  // Each exam has its own photographs (2026-10-02): a 4:3 crop for phones, a
+  // 2.4:1 crop for the hero band from lg up, and a different second photo.
+  const examPhotoKey = detail.examType.code === 'telc_c1_hochschule' ? 'c1' : detail.examType.code === 'telc_b2' ? 'b2' : null;
+  const examPhoto = (examPhotoKey && pageConfig.photos[examPhotoKey]) || pageConfig.photos.supportCard;
+  const examHeroPhoto = examPhotoKey ? pageConfig.photos[`${examPhotoKey}Hero`] : undefined;
+  const examStoryPhoto = (examPhotoKey && pageConfig.photos[`${examPhotoKey}Story`]) || pageConfig.photos.supportCard;
+
   const requestedSessionId = typeof session === 'string' ? session : '';
   const selectedSession =
     detail.sessions.find((examSession) => examSession.id === requestedSessionId) ?? detail.sessions[0];
@@ -223,10 +230,8 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
         ctas={pageConfig.ctas.map((cta, index) =>
           index === 0 ? { ...cta, href: examRegistrationHref } : cta
         )}
-        photo={{
-          ...pageConfig.photos.supportCard,
-          caption: 'Exam preparation table scene - Structured exam practice and strategy.',
-        }}
+        photo={examPhoto}
+        photoWide={examHeroPhoto}
         themeClassName="hero-theme-exams"
       />
 
@@ -268,10 +273,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                   locale === 'de' ? 'Fokus auf typische Aufgabenformate' : 'Practice focused on exam task types',
                   locale === 'de' ? 'Klare Checkliste für den Prüfungstag' : 'Clear checklist for exam-day readiness',
                 ]}
-                photo={{
-                  ...pageConfig.photos.supportCard,
-                  caption: 'Teacher giving feedback during speaking exercise - Personal feedback in small groups.',
-                }}
+                photo={examStoryPhoto}
               />
 
               <ProcessSteps

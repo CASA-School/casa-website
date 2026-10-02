@@ -110,8 +110,13 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
     { label: locale === 'de' ? 'Verfügbarkeit' : 'Availability', value: locale === 'de' ? 'Auf Anfrage' : 'On request' },
   ];
 
-  const detailHeroPhoto =
-    accommodationType === 'flat' ? pageConfig.photos.supportCard : pageConfig.photos.story;
+  // Each type has its own photographs (2026-10-02): a 4:3 crop for phones, a
+  // 2.4:1 crop for the hero band from lg up, and a different second photo.
+  // A CASA-WG photo never stands in for a host family's (CLAUDE.md hard rule 5).
+  const photoKey = accommodationType === 'flat' ? 'flat' : 'host';
+  const detailHeroPhoto = pageConfig.photos[photoKey];
+  const detailHeroPhotoWide = pageConfig.photos[`${photoKey}Hero`];
+  const detailStoryPhoto = pageConfig.photos[`${photoKey}Story`];
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
@@ -140,13 +145,8 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
             : 'Availability is confirmed after your request.'
         }
         ctas={pageConfig.ctas}
-        photo={{
-          ...detailHeroPhoto,
-          caption:
-            accommodationType === 'flat'
-              ? 'Shared flat kitchen / common area - Independent living with other students.'
-              : (locale === 'de' ? 'Wohnen in einem privaten Bremer Haushalt.' : 'Accommodation in a private Bremen household.'),
-        }}
+        photo={detailHeroPhoto}
+        photoWide={detailHeroPhotoWide}
         themeClassName="hero-theme-accommodation"
       />
 
@@ -183,13 +183,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 title={optionTitle}
                 description={detail.summary}
                 bullets={detail.highlights}
-                photo={{
-                  ...pageConfig.photos.story,
-                  caption:
-                    accommodationType === 'flat'
-                      ? 'Shared flat kitchen / common area - Independent living with other students.'
-                      : (locale === 'de' ? 'Wohnen in einem privaten Bremer Haushalt.' : 'Accommodation in a private Bremen household.'),
-                }}
+                photo={detailStoryPhoto}
               />
 
               <section>

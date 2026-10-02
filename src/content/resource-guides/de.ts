@@ -18,8 +18,8 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
     summary: 'Orientierung bei Studienwahl, Bewerbung und den ersten Schritten in Deutschland.',
     lead: 'Sie möchten in Deutschland studieren? Hier finden Sie Orientierung für Ihre Planung – von der Studienwahl über den Sprachkurs bis zum Ankommen vor Ort.',
     photo: {
-      src: '/media/casa/study-materials-map.jpg',
-      alt: 'Lernmaterialien und eine Karte für die Kursplanung',
+      src: '/media/casa/study-learners-dictionary.webp',
+      alt: 'Zwei Teilnehmerinnen arbeiten mit dem CASA-Wörterbuch an ihren Aufgaben',
     },
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },

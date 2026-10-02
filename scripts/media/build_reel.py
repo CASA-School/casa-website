@@ -44,6 +44,10 @@ from PIL import Image, ImageOps
 
 REPO = Path(__file__).resolve().parents[2]
 POOL = Path.home() / 'Archive/CASA/website-cleanup-2026-09-16/editorial-2026'
+# Host-family photographs (iPhone originals and resized iPhone derivatives) from
+# the CASA photo package, cleared for the website by Rahman on 2026-10-02.
+HOST = (Path.home() / 'Tasks/10-active/work/CASA - Various Tasks/casa-external-agency-photo-package-2026-09-15'
+        / 'output/casa-photo-package-external-agency-review-2026-09-15/consent-confirmed-by-casa-2026-09-15')
 OUT = REPO / 'public/media/casa'
 
 # crop_y: top of the full-width 2:1 box in the original's pixels.
@@ -241,10 +245,205 @@ SLIDES = [
         'chroma': 1.08,
         'wb': (1.0, 1.0, 1.0),
     },
+    # THE PLACEHOLDER PASS (2026-10-02, brief "Fotos fuer die Platzhalter").
+    # Same modern grade as above. Every frame was checked at 100-200%: no
+    # distorted faces or hands, no misspelled text. Private details are left
+    # out by the crop, never retouched: the candidate's date of birth on the
+    # telc answer sheet in W007, the children's photographs on the windowsills
+    # and the pinboard of letters in host-family frame 11, the photo collage
+    # on the kitchen wall in frame 12, the mirror in the guest bathroom (10).
+    # The classroom 012/023/024/011 walls are cream and the light is tungsten,
+    # so their white balance is only half-corrected towards neutral.
+    {
+        # Slot 18, the telc B2 card and the B2 page's hero on phones: a hand
+        # writing the "Schriftlicher Ausdruck (Brief)" sheet. The box stops left
+        # of the answer sheet's date-of-birth boxes and right of a brochure face.
+        'out': 'exam-preparation-writing.jpg',
+        'source': POOL / 'W007_exam-preparation-writing_editorial.jpg',
+        'box': (360, 180, 1340, 1005),
+        'tone': (6, 62, 93), 'chroma': 1.0, 'wb': (0.985, 1.0, 1.01),
+    },
+    {
+        # Slot 66, the telc B2 page's hero from lg up: the writing hand as a 2.4:1 band.
+        'out': 'exam-b2-hero.webp',
+        'source': POOL / 'W007_exam-preparation-writing_editorial.jpg',
+        'box': (330, 330, 1370, 571),
+        'tone': (6, 62, 93), 'chroma': 1.0, 'wb': (0.985, 1.0, 1.01),
+    },
+    {
+        # Slot 67, the telc B2 page's second photo: three learners writing.
+        'out': 'exam-b2-class.webp',
+        'source': POOL / '023_IMG_0147.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.97, 1.0, 1.12),
+    },
+    {
+        # Slot 11, the exams hero: two learners writing, one laughing. 5:4 for
+        # the photo-led hero; both faces inside the middle of the frame.
+        'out': 'learners-writing-class.jpg',
+        'source': POOL / '012_IMG_0031.JPG',
+        'box': (400, 0, 2134, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.975, 1.0, 1.11),
+    },
+    {
+        # Slot 68, the telc C1 Hochschule card and that page's hero on phones.
+        'out': 'exam-c1-writing.webp',
+        'source': POOL / '032_IMG_0473.JPG',
+        'box': (262, 0, 2276, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.02, 1.0, 1.0),
+    },
+    {
+        # Slot 69, the telc C1 Hochschule page's hero from lg up.
+        'out': 'exam-c1-hero.webp',
+        'source': POOL / '032_IMG_0473.JPG',
+        'box': (0, 200, 2560, 1067),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.02, 1.0, 1.0),
+    },
+    {
+        # Slot 70, the telc C1 Hochschule page's second photo: a learner speaking.
+        'out': 'exam-c1-speaking.webp',
+        'source': POOL / '031_IMG_0472.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.02, 1.0, 1.0),
+    },
+    {
+        # Slot 71, the exams page's candidate story: a pen in focus, a class writing behind.
+        'out': 'exam-story-writing.webp',
+        'source': POOL / '024_IMG_0156.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': (5, 60, 93), 'chroma': 1.0, 'wb': (0.965, 1.0, 1.13),
+    },
+    {
+        # Slot 13, "Ihre Frage ist noch offen?" (FAQ) and the contact page: one
+        # person explaining a worksheet to another across the desk.
+        'out': 'individual-tutoring.jpg',
+        'source': POOL / '011_IMG_0021.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.98, 1.0, 1.10),
+    },
+    {
+        # Slot 80, the nonprofit page's hero: learners and volunteers sharing
+        # breakfast, one playing the guitar. Whole frame (the hero shows it 3:2).
+        'out': 'community-shared-meal.webp',
+        'source': POOL / '043_IMG_0178.JPG',
+        'box': (0, 0, 2560, 1685),
+        'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.96),
+    },
+    {
+        # Slot 81, the "Studieren in Deutschland" guide's hero: two learners
+        # working with CASA's own dictionary. 5:4.
+        'out': 'study-learners-dictionary.webp',
+        'source': POOL / '034_IMG_0506.JPG',
+        'box': (330, 0, 2134, 1707),
+        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (1.03, 1.0, 1.0),
+    },
+    {
+        # Slot 25, the "Leben in Deutschland" guide's hero: the Schnoor. The
+        # editorial file is strongly saturated; the chroma comes down. 5:4.
+        'out': 'bremen-schnoor-houses.jpg',
+        'source': POOL / 'W003_bremen-schnoor-houses_editorial.jpg',
+        'box': (200, 0, 1992, 1594),
+        'tone': (5, 55, 94), 'chroma': 0.85, 'wb': (1.0, 1.0, 1.0), 'jpeg_quality': 92, 'jpeg_subsampling': 0,
+    },
+    {
+        # Slot 21, Unterricht fuer Gruppen's second photo: a group lunch in the
+        # courtyard. The editorial file has a purple cast and lifted blacks.
+        'out': 'group-course-lunch-table.jpg',
+        'source': POOL / 'W009_group-course-lunch-table_editorial.jpg',
+        'box': (0, 0, 2400, 1600),
+        'tone': (4, 52, 92), 'chroma': 1.05, 'wb': (0.92, 1.0, 0.93),
+    },
+    {
+        # Slot 26, the "CASA WGs" card: a CASA-WG room with balcony doors.
+        'out': 'student-room-balcony.jpg',
+        'source': POOL / '003_3.jpg',
+        'box': (100, 0, 2276, 1707),
+        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.95, 1.0, 1.03),
+    },
+    {
+        # Slot 30, the CASA-WG page's hero on phones: a single room, desk and tulips.
+        'out': 'student-room-alternative-1.jpg',
+        'source': POOL / '004_4.jpg',
+        'box': (140, 0, 2276, 1707),
+        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.0),
+    },
+    {
+        # Slot 79, the CASA-WG page's hero from lg up.
+        'out': 'casa-wg-room-hero.webp',
+        'source': POOL / '004_4.jpg',
+        'box': (0, 300, 2560, 1067),
+        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.0),
+    },
+    {
+        # Slot 28, the CASA-WG page's second photo: the shared kitchen. The
+        # box leaves out the wide-angle stretch at both edges of the editorial file.
+        'out': 'shared-flat-kitchen-table.jpg',
+        'source': POOL / 'W013_shared-flat-kitchen-table_editorial.jpg',
+        'box': (300, 150, 2000, 1333),
+        'tone': (6, 62, 93), 'chroma': 1.0, 'wb': (0.965, 1.0, 0.99),
+    },
+    {
+        # Slot 27, the host-family card and the host-family page's hero on
+        # phones: a host family's dining table, the open kitchen beyond. The
+        # box leaves out a wall display and a bag at the left edge.
+        'out': 'host-family-room.jpg',
+        'source': HOST / '08-host-family-home-living-area.jpg',
+        'box': (180, 1400, 2420, 1815),
+        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.92, 1.0, 1.07), 'jpeg_quality': 95,
+    },
+    {
+        # Slot 72, the host-family page's hero from lg up: the same room as a 2.4:1 band.
+        'out': 'host-family-living-hero.webp',
+        'source': HOST / '08-host-family-home-living-area.jpg',
+        'box': (180, 1650, 2420, 1008),
+        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.92, 1.0, 1.07),
+    },
+    {
+        # Slot 73, a host family's kitchen. The box leaves out a coat on the right.
+        'out': 'host-family-kitchen.webp',
+        'source': HOST / '09-host-family-home-kitchen.jpg',
+        'box': (0, 1100, 2250, 1500),
+        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.92, 1.0, 1.12),
+    },
+    {
+        # Slot 74, the become-a-host hero on phones: the kitchen from the other
+        # side, the sewing-machine table between the windows. The box leaves
+        # out a wall of family photographs on the left.
+        'out': 'host-family-kitchen-detail.webp',
+        'source': HOST / '12-host-family-home-kitchen-detail.jpg',
+        'box': (1400, 300, 4312, 2875),
+        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.94, 1.0, 1.12), 'max_width': 2560,
+    },
+    {
+        # Slot 75, the become-a-host hero from lg up: the same kitchen as a 2.4:1 band.
+        'out': 'host-family-kitchen-hero.webp',
+        'source': HOST / '12-host-family-home-kitchen-detail.jpg',
+        'box': (1400, 900, 4312, 1797),
+        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.94, 1.0, 1.12), 'max_width': 2560,
+    },
+    {
+        # Slot 76, the guest bathroom. The box stops below the mirror.
+        'out': 'host-family-guest-bathroom.webp',
+        'source': HOST / '10-host-family-home-guest-bathroom.jpg',
+        'box': (0, 1350, 2600, 1733),
+        'tone': (5, 62, 93), 'chroma': 1.0, 'wb': (0.99, 1.0, 1.01),
+    },
+    {
+        # Slot 77, the host family's dining table. Frame 11 is the wide living
+        # room, but its windowsills carry framed photographs of the family's
+        # children and its right wall a pinboard of letters; this box starts
+        # below the sills and stays left of the pinboard.
+        'out': 'host-family-dining-table.webp',
+        'source': HOST / '11-host-family-home-living-dining-wide.jpg',
+        'box': (330, 2660, 1700, 1275),
+        'tone': (5, 58, 92), 'chroma': 1.0, 'wb': (0.93, 1.0, 1.12),
+    },
 ]
 
 WEBP_QUALITY = 90
-# The three older photographs keep their .jpg paths, which pages reference by name.
+# Photographs at .jpg paths (which pages reference by name) are written as JPEG; a
+# recipe with fine texture sets 'jpeg_quality' (and, for saturated red/green detail like
+# the Schnoor roses, 'jpeg_subsampling': 0, full-resolution colour) so --verify holds.
 JPEG_QUALITY = 90
 
 
@@ -274,7 +473,13 @@ def render(slide):
         x0, y0, bw, bh = slide['box']
         if x0 < 0 or y0 < 0 or x0 + bw > w or y0 + bh > h:
             raise SystemExit(f"{slide['out']}: box {slide['box']} does not fit {w}x{h}")
-        return correct(rgb[y0:y0 + bh, x0:x0 + bw], slide)
+        out = correct(rgb[y0:y0 + bh, x0:x0 + bw], slide)
+        # 'max_width' only ever scales DOWN (the 5712px iPhone originals).
+        limit = slide.get('max_width')
+        if limit and out.shape[1] > limit:
+            size = (limit, round(out.shape[0] * limit / out.shape[1]))
+            out = cv2.resize(out, size, interpolation=cv2.INTER_AREA)
+        return out
     y0 = slide['crop_y']
     ch = w // 2
     band = round(w * 5 / 12)
@@ -328,9 +533,12 @@ def worst_tile_psnr(a, b):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--verify', action='store_true')
+    parser.add_argument('--only', nargs='+', metavar='OUT', help='build or verify only these output files')
     args = parser.parse_args()
     failed = False
     for slide in SLIDES:
+        if args.only and slide['out'] not in args.only:
+            continue
         image = render(slide)
         target = OUT / slide['out']
         if args.verify:
@@ -350,7 +558,8 @@ def main():
         else:
             # No EXIF is written: camera files can carry GPS coordinates.
             if target.suffix == '.jpg':
-                Image.fromarray(image).save(target, 'JPEG', quality=JPEG_QUALITY, optimize=True)
+                Image.fromarray(image).save(target, 'JPEG', quality=slide.get('jpeg_quality', JPEG_QUALITY), optimize=True,
+                                            subsampling=slide.get('jpeg_subsampling', -1))
             else:
                 Image.fromarray(image).save(target, 'WEBP', quality=WEBP_QUALITY, method=6)
             position = '' if 'box' in slide else f"; objectPosition '50% {object_position_y(slide, image):.0f}%'"

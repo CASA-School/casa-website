@@ -122,12 +122,15 @@ export default async function NonProfitStatusPage() {
         eyebrow={copy.hero.eyebrow}
         title={copy.hero.title}
         description={copy.hero.description}
+        /* Slot 79: learners and volunteers at a shared breakfast. The people sit
+           along both edges of the frame, so the hero shows it whole (3:2). */
         photo={{
-          src: '/media/casa/classroom-community-table.jpg',
+          src: '/media/casa/community-shared-meal.webp',
           alt:
             locale === 'de'
-              ? 'CASA Lernende arbeiten gemeinsam an einem Tisch im Unterricht'
-              : 'CASA learners working together at a classroom table',
+              ? 'Teilnehmende und Freiwillige frühstücken gemeinsam in einem CASA-Kursraum, einer spielt Gitarre'
+              : 'Learners and volunteers sharing breakfast in a CASA classroom, one playing the guitar',
+          aspectRatio: '3 / 2',
         }}
         ctas={copy.hero.ctas}
         breadcrumbs={copy.breadcrumbs}

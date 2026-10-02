@@ -178,8 +178,8 @@ export default async function ExamsPage() {
               person={leadStory.personDisplay}
               context={leadStory.country}
               photo={{
-                src: pageConfig.photos.thumbA.src,
-                alt: pageConfig.photos.thumbA.alt,
+                src: pageConfig.photos.story.src,
+                alt: pageConfig.photos.story.alt,
               }}
               supportingText={
                 locale === 'de'

@@ -116,8 +116,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   groupCourseLunch: {
     src: '/media/casa/group-course-lunch-table.jpg',
     alt: {
-      en: 'CASA group-course students sharing lunch during a Bremen stay',
-      de: 'CASA Teilnehmende eines Gruppenkurses essen gemeinsam während ihres Aufenthalts in Bremen',
+      en: 'A visiting school group at lunch together in the courtyard',
+      de: 'Eine Schülergruppe beim gemeinsamen Mittagessen im Innenhof',
     },
     caption: {
       en: 'Group courses work best when classroom progress and shared daily moments belong together.',
@@ -248,8 +248,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   hostFamilyDinner: {
     src: '/media/casa/host-family-room.jpg',
     alt: {
-      en: 'private room in a CASA host-family accommodation context',
-      de: 'Privates Zimmer im CASA Gastfamilien-Kontext',
+      en: 'The dining table in a host family\'s home, with the open kitchen beyond',
+      de: 'Der Esstisch in der Wohnung einer Gastfamilie, dahinter die offene Küche',
     },
     caption: {
       en: 'Accommodation support is about feeling settled enough to learn.',
@@ -259,8 +259,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   sharedFlat: {
     src: '/media/casa/student-room-balcony.jpg',
     alt: {
-      en: 'bright student room with a bed, desk, and balcony doors',
-      de: 'Helles Studierendenzimmer mit Bett, Schreibtisch und Balkontüren',
+      en: 'A bright room in a CASA shared flat with a bed, a desk and balcony doors',
+      de: 'Ein helles Zimmer in einer CASA-WG mit Bett, Schreibtisch und Balkontür',
     },
     caption: {
       en: 'Student housing works best when study, rest, and daily life have space.',
@@ -325,8 +325,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   examPrepTable: {
     src: '/media/casa/exam-preparation-writing.jpg',
     alt: {
-      en: 'hands writing German exam preparation notes beside telc B2 materials',
-      de: 'Hände schreiben Notizen zur Prüfungsvorbereitung neben telc B2 Material',
+      en: 'A hand writing the letter task on a telc Deutsch B2 answer sheet',
+      de: 'Eine Hand schreibt die Briefaufgabe auf einem Antwortbogen der telc-Prüfung Deutsch B2',
     },
     caption: {
       en: 'Structured preparation brings clarity before exam day.',
@@ -336,8 +336,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   consultationDesk: {
     src: '/media/casa/individual-tutoring.jpg',
     alt: {
-      en: 'one-to-one German learning support in a CASA classroom setting',
-      de: 'Individuelle Deutschlern-Begleitung in einer CASA Kursumgebung',
+      en: 'One person explains a worksheet to another across the desk',
+      de: 'Eine Person erklärt einer anderen am Tisch ein Arbeitsblatt',
     },
     caption: {
       en: 'Clear guidance makes next steps easy to understand.',
@@ -358,8 +358,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   studentSuccess: {
     src: '/media/casa/learners-writing-class.jpg',
     alt: {
-      en: 'CASA learners concentrating on written German practice',
-      de: 'CASA Lernende konzentrieren sich auf schriftliche Deutschübungen',
+      en: 'Two learners writing in class, one of them laughing',
+      de: 'Zwei Teilnehmerinnen schreiben im Unterricht, eine lacht dabei',
     },
     caption: {
       en: 'Consistent progress builds confidence for study and work.',
@@ -592,6 +592,99 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
     caption: { de: 'Ein eigenes Zimmer', en: 'A room of your own' },
   },
+  /*
+   * EXAM PAGES (2026-10-02). The index leads with learners writing (slot 11),
+   * the B2 card is the telc answer sheet (18), the C1 card two learners over
+   * their texts (68). Each exam page has a 2.4:1 hero crop for lg up and a
+   * different second photo, as the course pages do.
+   */
+  examB2Hero: {
+    src: '/media/casa/exam-b2-hero.webp',
+    alt: { de: 'Eine Hand schreibt die Briefaufgabe der telc-Prüfung Deutsch B2', en: 'A hand writing the letter task of the telc Deutsch B2 exam' },
+    caption: { de: 'telc Deutsch B2', en: 'telc Deutsch B2' },
+  },
+  examB2Class: {
+    src: '/media/casa/exam-b2-class.webp',
+    alt: { de: 'Drei Teilnehmerinnen schreiben konzentriert am Kurstisch', en: 'Three learners writing at the course table' },
+    caption: { de: 'Vorbereitung im Kurs', en: 'Preparing in class' },
+  },
+  examC1: {
+    src: '/media/casa/exam-c1-writing.webp',
+    alt: { de: 'Zwei Teilnehmerinnen arbeiten konzentriert an ihren Texten', en: 'Two learners concentrating on their texts' },
+    caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
+  },
+  examC1Hero: {
+    src: '/media/casa/exam-c1-hero.webp',
+    alt: { de: 'Zwei Teilnehmerinnen arbeiten konzentriert an ihren Texten', en: 'Two learners concentrating on their texts' },
+    caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
+  },
+  examC1Class: {
+    src: '/media/casa/exam-c1-speaking.webp',
+    alt: { de: 'Ein Teilnehmer spricht lächelnd über den Tisch hinweg', en: 'A learner speaking across the table, smiling' },
+    caption: { de: 'Sprechen üben', en: 'Speaking practice' },
+  },
+  examStory: {
+    src: '/media/casa/exam-story-writing.webp',
+    alt: { de: 'Ein Stift in der Hand, dahinter schreibt die Klasse', en: 'A pen in hand, the class writing behind it' },
+    caption: { de: 'Mit Ruhe vorbereiten', en: 'Calm preparation' },
+  },
+  /*
+   * ACCOMMODATION (2026-10-02). Host-family photographs come from one real
+   * Bremen household (consent CASA 2026-09-15, website use cleared by Rahman
+   * 2026-10-02); CASA-WG photographs from the pool. A WG photo never stands
+   * in for a host family's, or the other way round (CLAUDE.md hard rule 5).
+   */
+  hostFamilyLivingHero: {
+    src: '/media/casa/host-family-living-hero.webp',
+    alt: { de: 'Der Esstisch in der Wohnung einer Gastfamilie, dahinter die offene Küche', en: 'The dining table in a host family\'s home, with the open kitchen beyond' },
+    caption: { de: 'Wohnen in einer Gastfamilie', en: 'Living with a host family' },
+  },
+  hostFamilyKitchen: {
+    src: '/media/casa/host-family-kitchen.webp',
+    alt: { de: 'Die Küche einer Gastfamilie', en: 'A host family\'s kitchen' },
+    caption: { de: 'Küche zum Mitbenutzen', en: 'A kitchen to share' },
+  },
+  hostFamilyKitchenDetail: {
+    src: '/media/casa/host-family-kitchen-detail.webp',
+    alt: { de: 'Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'A host family\'s bright kitchen with two windows' },
+    caption: { de: 'Gastgeber werden', en: 'Become a host' },
+  },
+  hostFamilyKitchenHero: {
+    src: '/media/casa/host-family-kitchen-hero.webp',
+    alt: { de: 'Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'A host family\'s bright kitchen with two windows' },
+    caption: { de: 'Gastgeber werden', en: 'Become a host' },
+  },
+  hostFamilyBathroom: {
+    src: '/media/casa/host-family-guest-bathroom.webp',
+    alt: { de: 'Das Gästebad einer Gastfamilie', en: 'A host family\'s guest bathroom' },
+    caption: { de: 'Bad zum Mitbenutzen', en: 'A bathroom to share' },
+  },
+  hostFamilyTable: {
+    src: '/media/casa/host-family-dining-table.webp',
+    alt: { de: 'Der Esstisch einer Gastfamilie', en: 'A host family\'s dining table' },
+    caption: { de: 'Am Tisch der Gastfamilie', en: 'At the host family\'s table' },
+  },
+  /* Awaited (slot 81): no host family's guest room has been photographed yet. */
+  hostFamilyGuestRoom: {
+    src: '/media/casa/host-family-guest-room.jpg',
+    alt: { de: 'Ein Gästezimmer in einer Gastfamilie', en: 'A guest room in a host family' },
+    caption: { de: 'Das Zimmer', en: 'The room' },
+  },
+  wgRoomSingle: {
+    src: '/media/casa/student-room-alternative-1.jpg',
+    alt: { de: 'Ein Einzelzimmer in einer CASA-WG mit Bett, Schreibtisch und Tulpen', en: 'A single room in a CASA shared flat with a bed, a desk and tulips' },
+    caption: { de: 'Die CASA-WG', en: 'The CASA shared flat' },
+  },
+  wgRoomHero: {
+    src: '/media/casa/casa-wg-room-hero.webp',
+    alt: { de: 'Ein Einzelzimmer in einer CASA-WG mit Bett und großen Fenstern', en: 'A single room in a CASA shared flat with a bed and large windows' },
+    caption: { de: 'Die CASA-WG', en: 'The CASA shared flat' },
+  },
+  wgKitchen: {
+    src: '/media/casa/shared-flat-kitchen-table.jpg',
+    alt: { de: 'Die Gemeinschaftsküche einer CASA-WG mit Esstisch', en: 'The shared kitchen of a CASA flat with its table' },
+    caption: { de: 'Gemeinsame Küche', en: 'Shared kitchen' },
+  },
 };
 
 export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
@@ -737,7 +830,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       specialStory: photoLibrary.classroomMapVocabulary,
       // A group course at the Bremen Town Musicians (slot 20), a real photograph.
       groups: photoLibrary.groupCourseBremenMusicians,
-      groupsStory: photoLibrary.groupCoursePhoneTask,
+      // A group lunch in the courtyard (slot 21, pool W009).
+      groupsStory: photoLibrary.groupCourseLunch,
       medical: photoLibrary.medicalConsultation,
       company: photoLibrary.companyClassroom,
       companyHero: photoLibrary.companyHero,
@@ -762,9 +856,12 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Reserve exam seat', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
     ],
     photos: {
+      // telc B2 card (slot 18), telc C1 Hochschule card (68), the hero (11).
       thumbA: photoLibrary.examPrepTable,
-      thumbB: photoLibrary.studyMaterials,
+      thumbB: photoLibrary.examC1,
       thumbC: photoLibrary.studentSuccess,
+      // The candidate story: its own photo, so the B2 card's is not shown twice.
+      story: photoLibrary.examStory,
     },
   },
   'exam-detail': {
@@ -776,6 +873,14 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     ],
     photos: {
       supportCard: photoLibrary.examPrepTable,
+      // Per exam, as on the course pages: the 4:3 crop (phones), a 2.4:1 hero
+      // crop (lg up) and a different second photo.
+      b2: photoLibrary.examPrepTable,
+      b2Hero: photoLibrary.examB2Hero,
+      b2Story: photoLibrary.examB2Class,
+      c1: photoLibrary.examC1,
+      c1Hero: photoLibrary.examC1Hero,
+      c1Story: photoLibrary.examC1Class,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
       testimonialB: photoLibrary.studentTestimonialPortrait2,
       testimonialC: photoLibrary.studentTestimonialPortrait3,
@@ -793,7 +898,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       thumbB: photoLibrary.hostFamilyDinner,
       // The hero (thumbC): a room in a CASA shared flat (slot 57), never a host family's.
       thumbC: photoLibrary.wgRoom,
-      story: photoLibrary.hostFamilyDinner,
+      // "Ankommen und sich wohlfühlen": the host family's table, not the card's photo again.
+      story: photoLibrary.hostFamilyTable,
     },
   },
   'accommodation-detail': {
@@ -804,8 +910,20 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Talk to admissions', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
-      supportCard: photoLibrary.sharedFlatKitchen,
-      story: photoLibrary.hostFamilyDinner,
+      // Per type: the 4:3 crop (phones), a 2.4:1 hero crop (lg up), a second photo.
+      flat: photoLibrary.wgRoomSingle,
+      flatHero: photoLibrary.wgRoomHero,
+      flatStory: photoLibrary.wgKitchen,
+      host: photoLibrary.hostFamilyDinner,
+      hostHero: photoLibrary.hostFamilyLivingHero,
+      hostStory: photoLibrary.hostFamilyKitchen,
+      // /accommodation/become-host
+      becomeHost: photoLibrary.hostFamilyKitchenDetail,
+      becomeHostHero: photoLibrary.hostFamilyKitchenHero,
+      becomeHostStory: photoLibrary.hostFamilyDinner,
+      becomeHostRoom: photoLibrary.hostFamilyGuestRoom,
+      becomeHostAgreement: photoLibrary.hostFamilyBathroom,
+      becomeHostPartnership: photoLibrary.hostFamilyKitchen,
     },
   },
   imprint: {

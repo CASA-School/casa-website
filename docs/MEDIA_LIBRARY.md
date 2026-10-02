@@ -24,6 +24,13 @@ Approved photographs live in `public/media/casa/` and are served from `/media/ca
 | `reel-team-courtyard.webp` | Slot 53. Real 2:1 crop of pool frame 098, light correction only. Made for the retired reel; available. |
 | `reel-partner-practice.webp` | Slot 52. Real 2:1 crop of pool frame 075, light correction only. Made for the retired reel; available. |
 | `reel-walking-bremen-wide.webp` | Slot 50. Real 2:1 crop of pool frame W012 (the slot 23 photograph), light correction only. Made for the retired reel; available. |
+| `exam-preparation-writing.jpg`, `exam-b2-hero.webp`, `exam-b2-class.webp` | Slots 18, 66, 67: the telc B2 card and page (W007 4:3 and 2.4:1, 023). Since 2026-10-02. |
+| `learners-writing-class.jpg`, `exam-c1-*.webp`, `exam-story-writing.webp` | Slots 11, 68-71: the exams hero (012, 5:4), the telc C1 Hochschule card and page (032 4:3 and 2.4:1, 031), the exams page's candidate story (024). |
+| `individual-tutoring.jpg` | Slot 13 (011): FAQ "Ihre Frage ist noch offen?" and the contact page. |
+| `community-shared-meal.webp`, `study-learners-dictionary.webp`, `bremen-schnoor-houses.jpg` | Slots 79, 80, 25: the nonprofit page's hero (043, whole 3:2 frame), the two Ratgeber heroes (034 5:4, W003 5:4). |
+| `group-course-lunch-table.jpg` | Slot 21 (W009): Unterricht für Gruppen's second photo and the /courses card. |
+| `student-room-balcony.jpg`, `student-room-alternative-1.jpg`, `casa-wg-room-hero.webp`, `shared-flat-kitchen-table.jpg` | Slots 26, 30, 78, 28: CASA-WG rooms (003, 004) and kitchen (W013). |
+| `host-family-*.{jpg,webp}` | Slots 27, 72-77: one real Bremen host family's home (photo package frames 08-12). Slot 81 (`host-family-guest-room.jpg`) is awaited. |
 
 Slots 46–49 were the AI-edited reel images of 21 September; their files were deleted on
 2026-09-23 and their numbers are retired, not reused.
@@ -205,3 +212,33 @@ photograph right, `HeroHomePhoto`), and its photograph is slot 54, a 5:4 crop of
 same lesson frame 093 at full resolution (2110×1688), built and verified by the same
 script as a `box` recipe. The reel component and its e2e spec are deleted; git history
 has them (`git show 1577898`). The four reel crops above stay in the library.
+
+**The placeholder pass, 2026-10-02 (brief "Fotos für die Platzhalter").** Exams,
+accommodation, the nonprofit page, the groups course, both Ratgeber heroes and the
+FAQ got real photographs, all built by `scripts/media/build_reel.py` with the modern
+grade above (`--verify` passes for every recipe). Every source was checked at
+100-200%: no distorted faces or hands, no misspelled signs, and the older `W0xx`
+editorial files used here (W003, W007, W009, W013) show no generative edits. Private
+details are cropped out, never retouched: the date-of-birth boxes on W007's telc answer
+sheet, the framed photographs of children on the windowsills and a pinboard of letters
+in host-family frame 11, a photo collage in frame 12, the mirror in bathroom frame 10.
+
+- Host-family photos: `casa-external-agency-photo-package-2026-09-15/.../consent-confirmed-by-casa-2026-09-15/`
+  (CASA consent 2026-09-15, website use cleared by Rahman 2026-10-02). 11, 12 and 13
+  are iPhone 15 originals; 08, 09 and 10 are 2600px derivatives of iPhone files from
+  the same household (the originals are in the CASA Mediathek). Evening tungsten light,
+  white balance taken from the walls.
+- Not used, with the reason: 11 and 17 as wide room photos (the children's photographs
+  sit along every windowsill, so only the dining-table crop of 11 is used); 13 (a bare
+  shower); 009 (soft focus throughout); W011 (Unterricht für Gruppen has only one free
+  photo spot, given to W009); 089 (a learner who may be a minor). The brief's 008 hero
+  for the CASA-WG page went to 004 instead, because 008 is already the /unterkunft hero.
+- The exams index hero is 012, not W007: the B2 card already shows W007, and the
+  photo-led hero's fade dissolves a close-up of paper.
+- Each exam and accommodation detail page now has its own 4:3 photo, a 2.4:1 hero crop
+  for `lg` up (`photoWide`) and a different second photo, as the course pages do.
+- /unterkunft/gastfamilie-werden shows only a host family's rooms (no WG photo). Its
+  "Das Zimmer" row stays an icon panel (slot 81) until a guest room is photographed.
+- Consent for the identifiable people in 012, 023, 024, 031, 032, 034, 011, 043 and
+  W009 (a visiting school group, likely minors) rests on Rahman's approval of the brief;
+  confirm with CASA before go-live, as for earlier slots.
