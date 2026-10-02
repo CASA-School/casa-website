@@ -310,7 +310,7 @@ function buildPolicyPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['prüfung', 'telc', 'b2', 'c1', 'zertifikat', 'hochschule', 'vorbereitung'],
       content:
-        'CASA bietet aktuell telc Deutsch B2 (190 €) und telc Deutsch C1 Hochschule (210 €) inklusive Vorbereitungskursen und Anmeldung. TestDaF wird derzeit nicht angeboten, könnte aber künftig zurückkehren — bitte CASA kontaktieren.',
+        'CASA bietet aktuell telc Deutsch B2 (190 €) und telc Deutsch C1 Hochschule (210 €) inklusive Vorbereitungskursen und Anmeldung. TestDaF wird derzeit nicht angeboten, könnte aber künftig zurückkehren — bitte CASA kontaktieren.',
     },
   ];
 }
@@ -400,7 +400,7 @@ function buildAccommodationDetailPassages(): KbPassage[] {
       topic: 'accommodation',
       keywords: ['unterkunft', 'wg', 'gastfamilie', 'preis', '580', 'kaution', 'zimmer', 'wohnen', 'einzimmerwohnung'],
       content:
-        'CASA vermittelt Unterkünfte ausschließlich an Teilnehmende der Intensivkurse; CASA-WGs stehen nur Volljährigen zur Verfügung. WG: eigenes möbliertes Zimmer, gemeinsame Küche und Bad, WLAN und Bettwäsche; Handtücher bitte mitbringen. Bei Privatpersonen in Bremen: eigenes möbliertes Zimmer, Küche und Bad werden in der Regel gemeinsam genutzt, Selbstverpflegung. Mahlzeiten und tägliche Gespräche sind keine zugesicherten Leistungen. Beide Optionen kosten 580 EUR für 4 Wochen, danach 145 EUR pro weitere Woche. Hinzu kommen einmalig 50 EUR Vermittlungsgebühr und 580 EUR rückerstattbare Kaution. Die Rückzahlung erfolgt nach Abreise, sofern Unterkunft und Schlüssel im gleichen Zustand wie bei der Übernahme sind. Während der Schließzeiten zu Weihnachten und Ostern fallen zusätzlich 145 EUR pro Woche an. WG-Zimmer sind begrenzt; ist keines frei, vermittelt CASA ein Zimmer bei privaten Gastgebern.',
+        'CASA vermittelt Unterkünfte ausschließlich an Teilnehmende der Intensivkurse; CASA-WGs stehen nur Volljährigen zur Verfügung. WG: eigenes möbliertes Zimmer, gemeinsame Küche und Bad, WLAN und Bettwäsche; Handtücher bitte mitbringen. Bei Privatpersonen in Bremen: eigenes möbliertes Zimmer, Küche und Bad werden in der Regel gemeinsam genutzt, Selbstverpflegung. Mahlzeiten und tägliche Gespräche sind keine zugesicherten Leistungen. Beide Optionen kosten 580 € für 4 Wochen, danach 145 € pro weitere Woche. Hinzu kommen einmalig 50 € Vermittlungsgebühr und 580 € rückerstattbare Kaution. Die Rückzahlung erfolgt nach Abreise, sofern Unterkunft und Schlüssel im gleichen Zustand wie bei der Übernahme sind. Während der Schließzeiten zu Weihnachten und Ostern fallen zusätzlich 145 € pro Woche an. WG-Zimmer sind begrenzt; ist keines frei, vermittelt CASA ein Zimmer bei privaten Gastgebern.',
     },
   ];
 }
@@ -425,7 +425,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'b2', 'prüfung', '190', 'gebühr', 'termin', 'august', 'oktober', 'november', 'vorbereitung', 'zertifikat'],
       content:
-        'CASA bietet telc Deutsch B2 an: 190 € für die gesamte Prüfung, 160 € für einen schriftlichen oder mündlichen Teil. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet in der Schule statt. Der Vorbereitungskurs kostet 260 EUR (zwei Abende pro Woche, Mo/Mi 18:30–20:00). Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
+        'CASA bietet telc Deutsch B2 an: 190 € für die gesamte Prüfung, 160 € für einen schriftlichen oder mündlichen Teil. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet in der Schule statt. Der Vorbereitungskurs kostet 260 € (zwei Abende pro Woche, Mo/Mi 18:30–20:00). Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
     },
     {
       id: 'exam-telc-c1-en',
@@ -445,7 +445,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'c1', 'hochschule', 'universität', '210', 'gebühr', 'termin', 'september', 'oktober', 'november', 'vorbereitung', 'akademisch'],
       content:
-        'CASA bietet telc Deutsch C1 Hochschule an: 210 € für die gesamte Prüfung, 185 € für einen Teil. Sie findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein vierwöchiger Block für 520 EUR, bei der ersten Anmeldung bei CASA zuzüglich 50 EUR. Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Fokus auf akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
+        'CASA bietet telc Deutsch C1 Hochschule an: 210 € für die gesamte Prüfung, 185 € für einen Teil. Sie findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein vierwöchiger Block für 520 €, bei der ersten Anmeldung bei CASA zuzüglich 50 €. Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Fokus auf akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
     },
     {
       id: 'exam-testdaf-en',
@@ -515,7 +515,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['intensiv', 'deutsch', 'kurs', '940', '520', 'preis', 'morgens', 'vollzeit', '20 lektionen', 'montag freitag'],
       content:
-        'Intensivkurs Deutsch: A1–C1, 20 Unterrichtseinheiten à 45 Minuten pro Woche. Vormittags Mo–Fr 09:00–12:30 oder nachmittags Mo–Do 13:00–17:30. Preis: 520 EUR für 4 Wochen, 940 EUR für 8 Wochen, 117,50 EUR für jede weitere Woche. Zusätzlich einmalig 50 EUR Anmeldegebühr und 23,99–26,99 EUR für das Lehrbuch. Aktuelle Starttermine stehen auf der Kursseite. Anfänger willkommen.',
+        'Intensivkurs Deutsch: A1–C1, 20 Unterrichtseinheiten à 45 Minuten pro Woche. Vormittags Mo–Fr 09:00–12:30 oder nachmittags Mo–Do 13:00–17:30. Preis: 520 € für 4 Wochen, 940 € für 8 Wochen, 117,50 € für jede weitere Woche. Zusätzlich einmalig 50 € Anmeldegebühr und 23,99–26,99 € für das Lehrbuch. Aktuelle Starttermine stehen auf der Kursseite. Anfänger willkommen.',
     },
     {
       id: 'course-evening-en',
@@ -535,7 +535,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['abend', 'abendkurs', 'kurs', '476', 'preis', 'nach der arbeit', 'teilzeit', 'montag mittwoch', 'dienstag donnerstag'],
       content:
-        'Abendkurs Deutsch: A1–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 EUR pro Trimester zzgl. Lehrwerk. Ideal für Lernende neben Arbeit oder Studium. Aktuelle Trimester und Starttermine stehen auf der Kursseite.',
+        'Abendkurs Deutsch: A1–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 € pro Trimester zzgl. Lehrwerk. Ideal für Lernende neben Arbeit oder Studium. Aktuelle Trimester und Starttermine stehen auf der Kursseite.',
     },
     {
       id: 'course-medical-en',
@@ -575,7 +575,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['bildungszeit', 'bildungsurlaub', 'arbeitgeber', '280', 'intensiv', 'block', 'freistellung'],
       content:
-        'Bildungszeit Deutsch: ab B1, superintensiv — ein Intensivkurs am Vormittag und einer am Nachmittag parallel, 30–40 Stunden pro Woche, wie es die Anerkennung als Bildungszeit verlangt. 280 EUR für 1 Woche, 520 EUR für 2 Wochen, zuzüglich Lehrbücher (46–54 EUR für zwei) und 50 EUR bei der ersten Anmeldung. Einstieg an jedem Montag. Nach dem Bremischen Bildungszeitgesetz haben Beschäftigte in Bremen Anspruch auf zehn Tage in zwei Jahren. Berechtigung bitte vor der Anmeldung mit CASA und Arbeitgeber klären.',
+        'Bildungszeit Deutsch: ab B1, superintensiv — ein Intensivkurs am Vormittag und einer am Nachmittag parallel, 30–40 Stunden pro Woche, wie es die Anerkennung als Bildungszeit verlangt. 280 € für 1 Woche, 520 € für 2 Wochen, zuzüglich Lehrbücher (46–54 € für zwei) und 50 € bei der ersten Anmeldung. Einstieg an jedem Montag. Nach dem Bremischen Bildungszeitgesetz haben Beschäftigte in Bremen Anspruch auf zehn Tage in zwei Jahren. Berechtigung bitte vor der Anmeldung mit CASA und Arbeitgeber klären.',
     },
   ];
 }
