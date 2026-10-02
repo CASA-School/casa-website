@@ -258,7 +258,13 @@ export function HeroBleedPhoto({
     <div
       className={cn(
         'relative overflow-hidden rounded-[var(--casa-radius-feature)]',
-        photo.aspectRatio ? 'w-full' : 'h-[19rem] sm:h-[24rem] lg:h-[33rem]',
+        /*
+          Crop pass (2026-10-02): from `sm` to `lg` the photo is full width, and a
+          fixed 24rem made it a 2.4:1 band at 1000px that cut heads. It keeps a
+          shape there instead (16:9, then 2:1), and the registry position
+          (photo-numbers.ts) places it.
+        */
+        photo.aspectRatio ? 'w-full' : 'h-[19rem] sm:h-auto sm:aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-[33rem]',
         className
       )}
       style={{ aspectRatio: photo.aspectRatio }}

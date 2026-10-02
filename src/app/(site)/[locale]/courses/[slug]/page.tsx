@@ -820,14 +820,17 @@ export default async function CourseDetailPage({
                           <Link
                             key={course.id}
                             href={getCoursePath(course.slug)}
-                            className="group grid overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35 sm:grid-cols-[8.5rem_minmax(0,1fr)]"
+                            className="group grid overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/75 transition-all hover:-translate-y-0.5 hover:ring-[var(--casa-blue)]/35 sm:grid-cols-[11.5rem_minmax(0,1fr)] md:grid-cols-1"
                           >
-                            <div className="casa-media-overlay relative min-h-36 sm:min-h-full">
+                            {/* A 16:9 band on top, except at sm where one card fills the row and a
+                                ~4:3 cell sits beside the text (crop pass, 2026-10-02): the
+                                8.5rem column made a square that cut heads. */}
+                            <div className="casa-media-overlay relative aspect-[16/9] sm:aspect-auto sm:min-h-full md:aspect-[16/9] md:min-h-0">
                               <Image
                                 src={relatedPhoto.src}
                                 alt={relatedPhoto.alt}
                                 fill
-                                sizes="(min-width: 768px) 9rem, 92vw"
+                                sizes="(min-width: 768px) 40vw, (min-width: 640px) 12rem, 92vw"
                                 className="object-cover"
                               />
                             </div>

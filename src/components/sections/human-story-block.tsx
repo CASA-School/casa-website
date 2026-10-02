@@ -53,7 +53,8 @@ export function HumanStoryBlock({
           of this photograph behind itself instead, so the surface picks up the
           image's own colours. See the `.casa-media` block in globals.css.
         */}
-        <figure className="h-72 md:h-80">
+        {/* A shape, not a height (crop pass, 2026-10-02), as in EditorialSplit. */}
+        <figure className="aspect-[4/3] md:aspect-[16/9] lg:aspect-[3/2]">
           <MediaFrame
             src={photo.src}
             alt={photo.alt}
