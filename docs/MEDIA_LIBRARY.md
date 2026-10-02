@@ -2,13 +2,17 @@
 
 Approved photographs live in `public/media/casa/` and are served from `/media/casa/…`.
 
+The two August 2026 NewsFlash photographs (`newsflash-editor-lisa-dao.jpg`,
+`newsflash-kicktipp-winners.jpg`) were removed with that issue on 2026-10-02; the
+October issue has no photographs. Recover them from commit `bbd7abb` if an archive of
+older issues is built.
+
 ## What is in this folder (since 2026-09-10)
 
 | File | Status |
 | --- | --- |
 | `group-course-bremen-musicians.jpg` | Slot 20, live. Editorial grade (the pool's W008). |
 | `group-course-walking-bremen.jpg` | Slot 23, live. Editorial grade (the pool's W012). |
-| `newsflash-editor-lisa-dao.jpg`, `newsflash-kicktipp-winners.jpg` | Article images of two NewsFlash posts. Rendered directly, not through the placeholder, and deliberately unnumbered. |
 | `hero-classroom-lesson.webp` | Slot 54, homepage hero since 2026-10-01. A 5:4 crop of pool frame 093 (the slot 51 lesson), light correction only. Its focal point moves by breakpoint (`objectPositionClassName` on `heroLesson`). |
 | `course-intensive-class.webp` | Slot 4, Deutsch intensiv (homepage row, /courses card, course page). Pool frame 060, 4:3, light correction only. |
 | `course-evening-table.webp` | Slot 5, Abendkurs. Pool frame 088, 4:3, light correction only. |

@@ -14,15 +14,9 @@ const PUBLIC_ROOT = join(REPO_ROOT, 'public');
  * else found in the source tree must carry a number, so adding a photograph
  * without registering it fails here rather than shipping as a "??" field.
  */
-const INTENTIONALLY_UNNUMBERED = new Map([
-  [
-    '/media/casa/newsflash-editor-lisa-dao.jpg',
-    'Real, verified photograph — renders through next/image directly, never the placeholder wrapper.',
-  ],
-  [
-    '/media/casa/newsflash-kicktipp-winners.jpg',
-    'Real, verified photograph — renders through next/image directly, never the placeholder wrapper.',
-  ],
+const INTENTIONALLY_UNNUMBERED = new Map<string, string>([
+  // Empty since 2026-10-02: the two August NewsFlash photographs (the editor
+  // credit and the Kicktipp winners) left with the August issue.
 ]);
 
 function walk(dir: string): string[] {

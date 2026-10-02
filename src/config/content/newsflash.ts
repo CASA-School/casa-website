@@ -6,7 +6,7 @@ import type { ContentLocale } from '@/lib/content/types';
  * THIS IS THE FILE THE NEWSFLASH EDITOR CHANGES EACH MONTH. Nothing else needs
  * touching to publish an issue: edit the values below, and /news updates.
  *
- * The shape deliberately mirrors the printed NewsFlash (August 2026) so the
+ * The shape deliberately mirrors the printed NewsFlash (since August 2026) so the
  * person writing it recognises what they are filling in — masthead month, quote
  * of the month, word of the month, and a set of short notices. Longer articles
  * are NOT here: those stay in the news posts the repository already serves, so
@@ -41,8 +41,13 @@ export type NewsFlashNotice = {
    *   person   portrait rubric — "Neues Gesicht bei CASA"
    */
   kind: 'notice' | 'tip' | 'wish' | 'person';
-  title: Localized;
+  /** Omit only inside `headlines`, where the panel's own title heads the item. */
+  title?: Localized;
   body: Localized;
+  /** Items listed under the body (podcasts, dates). Names, so not localised. */
+  list?: Localized[];
+  /** Spans two columns from lg up, to close a row the issue would leave short. */
+  wide?: boolean;
   /** Omit when an item is not level-specific. */
   levels?: CefrBand[];
   icon: NewsFlashIcon;
@@ -122,68 +127,70 @@ export type NewsFlashIssue = {
     items: NewsFlashNotice[];
   };
   notices: NewsFlashNotice[];
-  editor: NewsFlashEditor;
+  /** Omit when the printed issue carries no editor credit (October 2026 does not). */
+  editor?: NewsFlashEditor;
 };
 
+/*
+ * OCTOBER 2026, from the printed "News Flash Oktober 26" (brief 2026-10-02).
+ * German copied word for word, with "auf deutsch" corrected to "auf Deutsch".
+ * The August issue (the World Cup feature, the Kicktipp photo, the editor
+ * credit) is no longer shown; it is in git history (commit bbd7abb).
+ */
 export const newsFlashIssue: NewsFlashIssue = {
   issue: {
-    en: 'August 2026',
-    de: 'August 2026',
+    en: 'October 2026',
+    de: 'Oktober 2026',
   },
 
   quote: {
     text: {
-      de: 'Habe Mut, dich deines eigenen Verstandes zu bedienen.',
-      en: 'Have the courage to use your own understanding.',
+      de: 'Jedem Anfang wohnt ein Zauber inne.',
+      en: 'A magic dwells in every beginning.',
     },
-    attribution: 'Immanuel Kant',
+    attribution: 'Hermann Hesse',
   },
 
   wordOfTheMonth: {
-    word: 'Ohrwurm',
+    word: 'Schnapsidee',
     definition: {
-      de: 'Lied oder Melodie, die man nicht mehr aus dem Kopf bekommt.',
-      en: 'A song or melody you cannot get out of your head.',
+      de: 'verrückter, unüberlegter oder unsinniger Einfall',
+      en: 'a crazy, rash or nonsensical idea',
     },
   },
 
   ticker: [
-    { de: '21.08. · telc B2 Prüfung bei CASA', en: '21.08. · telc B2 exam at CASA' },
-    { de: '22.08. · CSD Bremen, 12 Uhr Altenwall', en: '22.08. · Bremen CSD, 12:00 Altenwall' },
-    { de: 'Büro im August · Mo-Do 9-17, Fr 9-13', en: 'Office in August · Mon-Thu 9-17, Fri 9-13' },
-    { de: 'Sprachcafé · Termin folgt', en: 'Language café · date to follow' },
+    { de: '02.10.–04.10. · Tag der Deutschen Einheit in der Innenstadt', en: '02.10.–04.10. · German Unity Day in the city centre' },
+    { de: '16.10. · telc B2-Prüfung bei CASA', en: '16.10. · telc B2 exam at CASA' },
+    { de: '16.10.–01.11. · Freimarkt auf der Bürgerweide', en: '16.10.–01.11. · Freimarkt fair on the Bürgerweide' },
+    { de: '24.10. · Freimarktsumzug, 10 Uhr', en: '24.10. · Freimarkt parade, 10:00' },
+    { de: '30.10. · telc C1-HS-Prüfung bei CASA', en: '30.10. · telc C1 Hochschule exam at CASA' },
   ],
 
+  /*
+   * The printed October sheet has no long feature; its largest text block is the
+   * Stammtisch invitation, so that takes the feature's place. No photograph.
+   */
   feature: {
     title: {
-      de: 'Die Fussball-Weltmeisterschaft',
-      en: 'The football World Cup',
+      de: 'Stammtisch im Lagerhaus',
+      en: 'Stammtisch at the Lagerhaus',
     },
-    levels: ['C'],
+    levels: ['A', 'B', 'C'],
     body: [
       {
-        de: 'Vom 11.06.2026 bis zum 19.07.2026 fand die Fussball-Weltmeisterschaft in Kanada, Mexiko und den USA statt. 48 Mannschaften spielten um den Titel. Am Ende spielte Spanien gegen Argentinien im Finale. Die Spanier gewannen mit 1:0 und sind zum zweiten Mal Weltmeister geworden.',
-        en: 'From 11.06.2026 to 19.07.2026 the football World Cup took place in Canada, Mexico and the USA. 48 teams played for the title. Spain met Argentina in the final, won 1:0, and became world champions for the second time.',
+        de: 'Das CASA-Team lädt euch zu einem monatlichen Treffen abends im Lagerhaus (Schildstraße 12–19, 28203 Bremen) ein. Dort möchten wir mit euch zusammen auf Deutsch ins Gespräch kommen und miteinander Zeit verbringen.',
+        en: 'The CASA team invites you to a monthly evening get-together at the Lagerhaus (Schildstraße 12–19, 28203 Bremen). We want to talk with you in German and spend time together.',
       },
       {
-        de: 'Habt ihr auch die Weltmeisterschaft verfolgt? Welches Team habt ihr unterstützt? ;)',
-        en: 'Did you follow the World Cup too? Which team were you supporting? ;)',
+        de: 'Die Termine werden bald kommen.',
+        en: 'The dates will follow soon.',
+      },
+      {
+        de: 'Alle sind herzlich eingeladen!',
+        en: 'Everyone is warmly invited!',
       },
     ],
-    aside: {
-      icon: 'star',
-      text: {
-        de: 'Hier bei CASA gab es ein Kicktipp-Spiel und es wurden drei Preise verliehen. Herzlichen Glückwunsch!',
-        en: 'Here at CASA we ran a Kicktipp sweepstake and awarded three prizes. Congratulations!',
-      },
-    },
-    photo: {
-      src: '/media/casa/newsflash-kicktipp-winners.jpg',
-      alt: {
-        de: 'Drei CASA Lernende mit ihren Kicktipp-Urkunden und Preisen',
-        en: 'Three CASA learners with their Kicktipp certificates and prizes',
-      },
-    },
   },
 
   headlines: {
@@ -196,79 +203,60 @@ export const newsFlashIssue: NewsFlashIssue = {
     title: { de: 'Schlagzeilen', en: 'Schlagzeilen' },
     items: [
       {
-        id: 'sprachcafe',
-        icon: 'chat',
+        id: 'gruppe-viborg',
+        icon: 'sparkles',
         kind: 'notice',
-        levels: ['B', 'C'],
-        title: { de: 'Das Sprachcafé', en: 'The language café' },
+        levels: ['C'],
         body: {
-          de: 'Demnächst findet wieder das Sprachcafé statt. Achtet bitte auf weitere Informationen und Aushänge und gebt die Information auch gerne an eure Mitschüler:innen weiter.',
-          en: 'The language café is running again soon. Watch for further information and notices, and do pass it on to your classmates.',
+          de: 'Im September durften wir wieder eine weitere Gruppe aus dem Ausland begrüßen. Die Schülergruppe kam aus Viborg in Dänemark. Gemeinsam mit unseren Freiwilligendienstlerinnen haben sie nach dem Unterricht am Vormittag Bremen auf verschiedene Arten erkundet. Sie haben unter anderem das Universum und den Bunker Valentin in Bremen Farge besucht.',
+          en: 'In September we welcomed another group from abroad: a school group from Viborg in Denmark. After their morning lessons they explored Bremen in many ways together with our volunteers, visiting the Universum science centre and the Valentin submarine bunker in Bremen-Farge, among other places.',
         },
       },
     ],
   },
 
-  editor: {
-    name: 'Lisa Dao',
-    role: {
-      de: 'Freiwilligendienst · Redaktion NewsFlash',
-      en: 'Volunteer · NewsFlash editor',
-    },
-    blurb: {
-      de: 'Lisa unterstützt das CASA-Team im Büro, kümmert sich um die Cafeteria und schreibt jeden Monat diesen NewsFlash. Ihr habt einen Termin, einen Tipp oder eine Idee für die nächste Ausgabe? Sagt ihr einfach Bescheid.',
-      en: 'Lisa supports the CASA team in the office, looks after the cafeteria, and writes this NewsFlash every month. Got a date, a tip or an idea for the next issue? Just let her know.',
-    },
-    photo: {
-      src: '/media/casa/newsflash-editor-lisa-dao.jpg',
-      alt: {
-        de: 'Lisa Dao, Redakteurin des CASA NewsFlash',
-        en: 'Lisa Dao, editor of the CASA NewsFlash',
-      },
-    },
-  },
-
   notices: [
-    {
-      id: 'oeffnungszeiten',
-      icon: 'clock',
-      kind: 'notice',
-      title: { de: 'Geänderte Öffnungszeiten', en: 'Changed opening hours' },
-      body: {
-        de: 'Bitte beachtet die geänderten Öffnungszeiten im August. Bis zum 21.08.2026 hat das Büro von Montag bis Donnerstag von 9-17 Uhr geöffnet und am Freitag von 9-13 Uhr.',
-        en: 'Please note the changed opening hours in August. Until 21.08.2026 the office is open Monday to Thursday 9-17 and Friday 9-13.',
-      },
-    },
-    {
-      id: 'neues-gesicht',
-      icon: 'person',
-      kind: 'person',
-      levels: ['A', 'B', 'C'],
-      title: { de: 'Neues Gesicht bei CASA!', en: 'A new face at CASA!' },
-      body: {
-        de: 'Seit Anfang August ist die neue Freiwilligendienstlerin da. Sie unterstützt das CASA-Team im Büro, kümmert sich um die Cafeteria und schreibt diesen NewsFlash.',
-        en: 'Since the beginning of August our new volunteer has joined us. She supports the CASA team in the office, looks after the cafeteria, and writes this NewsFlash.',
-      },
-    },
     {
       id: 'daumen-telc',
       icon: 'star',
       kind: 'wish',
-      title: { de: 'Wir drücken die Daumen für...', en: 'Fingers crossed for...' },
+      title: { de: 'Wir drücken allen …', en: 'Fingers crossed for …' },
       body: {
-        de: '...alle, die am 21.08.2026 ihre telc B2-Prüfung bei uns schreiben!',
-        en: '...everyone sitting their telc B2 exam with us on 21.08.2026!',
+        de: '…, die bei uns am 16.10.2026 ihre telc B2-Prüfung oder am 30.10.2026 ihre telc C1-HS-Prüfung schreiben, … die Daumen!',
+        en: '… everyone sitting their telc B2 exam with us on 16.10.2026 or their telc C1 Hochschule exam on 30.10.2026!',
       },
     },
     {
-      id: 'tipp-csd',
+      id: 'podcasts',
+      icon: 'chat',
+      kind: 'notice',
+      levels: ['A', 'B', 'C'],
+      title: { de: 'Podcast zum Deutschlernen', en: 'Podcasts for learning German' },
+      body: {
+        de: 'Sprachen kann man einfacher lernen, wenn man sie hört. Hier sind einige Podcasts, die ihr auf dem Weg zu CASA und/oder in eurer Freizeit hören könnt:',
+        en: 'Languages are easier to learn when you hear them. Here are some podcasts to listen to on your way to CASA or in your free time:',
+      },
+      list: [
+        { de: 'Easy German: Learn German with native speakers', en: 'Easy German: Learn German with native speakers' },
+        { de: 'Tagesschau in einfacher Sprache', en: 'Tagesschau in einfacher Sprache' },
+        { de: 'Slow German Podcast for Beginners', en: 'Slow German Podcast for Beginners' },
+      ],
+    },
+    {
+      id: 'veranstaltungen',
       icon: 'calendar',
       kind: 'tip',
-      title: { de: 'Tipp aus dem Büro', en: 'Tip from the office' },
+      wide: true,
+      title: { de: 'Veranstaltungen im Oktober', en: 'Events in October' },
       body: {
-        de: 'Am 22. August findet der CSD (Christopher Street Day) Bremen statt. Schaut doch mal vorbei! Beginn ist um 12 Uhr am Altenwall.',
-        en: 'Bremen CSD (Christopher Street Day) takes place on 22 August. Do come along — it starts at 12:00 at the Altenwall.',
+        de: 'Tipps aus dem Büro:',
+        en: 'Tips from the office:',
       },
+      list: [
+        { de: '02.10.–04.10.: Große Veranstaltung zum Tag der Deutschen Einheit in der Innenstadt Bremens', en: '02.10.–04.10.: Big German Unity Day celebration in Bremen city centre' },
+        { de: '16.10.–01.11.: Freimarkt auf der Bürgerweide', en: '16.10.–01.11.: Freimarkt fair on the Bürgerweide' },
+        { de: '24.10.: Freimarktsumzug, 10 Uhr', en: '24.10.: Freimarkt parade, 10:00' },
+      ],
     },
   ],
 };
