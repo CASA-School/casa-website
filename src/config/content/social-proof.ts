@@ -46,14 +46,7 @@ type TestimonialSource = {
   person: string;
   /** The course page it appears on. Omit for a school-wide quote. */
   courseSlug?: string;
-  /**
-   * The exam this learner actually sat, if any.
-   *
-   * Only Fatameh mentions an exam, so the telc C1 Hochschule page has no
-   * testimonial and renders none — rather than borrowing an unrelated learner's
-   * words under the heading "Stories from exam preparation", which is what a
-   * shared pool produced.
-   */
+  /** The exam this learner actually sat, if any. */
   examCode?: string;
   /** The language the learner actually wrote in. */
   writtenIn: ContentLocale;
@@ -271,19 +264,4 @@ export function socialProofById(id: string, locale: ContentLocale): SocialProofI
   const all = socialProofByLocale[locale] ?? socialProofByLocale.en;
 
   return all.find((item) => item.id === `${id}-${locale}`) ?? all[0] ?? null;
-}
-
-/**
- * Testimonials from learners who actually sat this exam.
- *
- * Returns an empty array rather than falling back to the pool, and the exam page
- * omits its stories section when it is empty. CASA publishes one exam
- * testimonial; inventing relevance for the other exam by showing a grammar-course
- * learner under "Stories from exam preparation" is the kind of small dishonesty
- * that a shared pool makes invisible.
- */
-export function socialProofForExam(code: string, locale: ContentLocale): SocialProofItem[] {
-  const all = socialProofByLocale[locale] ?? socialProofByLocale.en;
-
-  return all.filter((item) => item.examCode === code);
 }

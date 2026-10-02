@@ -3,14 +3,14 @@ import { Link } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
 
 import { HeroCUtilityRail } from '@/components/heroes';
-import { DecisionRail, EditorialSplit, ProcessSteps, TestimonialGrid } from '@/components/sections';
+import { DecisionRail, EditorialSplit, ProcessSteps } from '@/components/sections';
 import { serializeJsonLd } from '@/components/seo/json-ld';
 import { ExamDayTimelineSignature } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getExamDetail, getSocialProofForExam } from '@/lib/content/repository';
+import { getExamDetail } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
 
@@ -88,17 +88,11 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
   const rhythm = getLayoutRhythm('exam-detail');
   const pageConfig = getPublicPageConfig('exam-detail', locale);
 
-  // Resolved from the exam itself rather than the route param: the same exam is
-  // reachable as /exams/b2 and /exams/telc_b2, and only the row carries the
-  // canonical code that testimonials are keyed on. The lookup is synchronous
-  // config, so doing it after the fetch costs nothing.
   const detail = await getExamDetail(code, locale);
 
   if (!detail) {
     notFound();
   }
-
-  const socialProof = getSocialProofForExam(detail.examType.code, locale);
 
   // Each exam has its own photographs (2026-10-02): a 4:3 crop for phones, a
   // 2.4:1 crop for the hero band from lg up, and a different second photo.
@@ -179,25 +173,6 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     ? `/registration/exam?sessionId=${encodeURIComponent(selectedSession.id)}`
     : '/registration/exam';
 
-  /*
-   * Only learners who actually sat THIS exam.
-   *
-   * This used to draw from the shared pool, so both exam pages showed the same
-   * two quotes under "Stories from exam preparation" — one about a grammar module
-   * and one about an intensive course, neither about an exam. CASA publishes
-   * exactly one exam testimonial (Fatameh, telc B2), so the C1 Hochschule page
-   * renders no stories section at all, which is the honest answer.
-   *
-   * No portraits: these are real named learners and the only portrait files on
-   * hand are synthetic. See components/sections/testimonial-grid.
-   */
-  const testimonialCards = socialProof.map((story) => ({
-    id: story.id,
-    person: story.personDisplay,
-    country: story.country,
-    quote: story.quote,
-  }));
-
   const examSchema = {
     '@context': 'https://schema.org',
     '@type': 'EducationalOccupationalCredential',
@@ -241,7 +216,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
       <section className="py-16 md:py-20">
         <Container className="space-y-12 md:space-y-14">
           <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-            {/* `min-w-0`, as on /courses/[slug]: the testimonial carousel must not widen the column. */}
+            {/* `min-w-0`, as on /courses/[slug]: no child may widen the column. */}
             <div className="min-w-0 space-y-12 md:space-y-14">
               <ExamDayTimelineSignature
                 title={locale === 'de' ? 'Ablauf und Unterlagen für den Prüfungstag' : 'Exam day timeline + what to bring'}
@@ -293,19 +268,6 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                   { step: locale === 'de' ? '3' : '3', title: locale === 'de' ? 'Absenden' : 'Submit', description: locale === 'de' ? 'Anmeldung finalisieren.' : 'Complete registration.' },
                 ]}
               />
-
-              {testimonialCards.length > 0 ? (
-                <TestimonialGrid
-                  title={locale === 'de' ? 'Erfahrungen mit dieser Prüfung' : 'Stories from candidates who sat it'}
-                  description={
-                    locale === 'de'
-                      ? 'Von Lernenden, die diese Prüfung bei CASA abgelegt haben.'
-                      : 'From learners who took this exam at CASA.'
-                  }
-                  cards={testimonialCards}
-                  locale={locale}
-                />
-              ) : null}
 
               <Link
                 href="/exams"
