@@ -1,11 +1,39 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, Loader2, Send } from 'lucide-react';
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  ChevronDown,
+  FileCheck2,
+  GraduationCap,
+  Home,
+  Loader2,
+  MessageCircle,
+  Send,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 
+import {
+  formAlertClassName,
+  formCardClassName,
+  formControlClassName,
+  formErrorClassName,
+  formFieldGroupClassName,
+  formHintClassName,
+  formLabelClassName,
+  formPrimaryButtonClassName,
+  formSecondaryButtonClassName,
+  formTextareaClassName,
+  FormStepHeader,
+  RequiredMark,
+} from '@/components/forms/form-styles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { meaningClasses, type Meaning } from '@/config/brand/meaning';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from '@/i18n/navigation';
 import { trackCasaEvent } from '@/lib/analytics/client';
@@ -34,7 +62,6 @@ type ContactInquiryFormCopy = {
   emailLabel: string;
   emailPlaceholder: string;
   topicLabel: string;
-  topicPlaceholder: string;
   messageLabel: string;
   messagePlaceholder: string;
   successTitle: string;
@@ -90,10 +117,20 @@ const initialFields = {
   schedulePreference: '',
 };
 
-const fieldGroupClassName = 'space-y-1.5';
-const inputClassName =
-  'h-12 data-[size=default]:h-12 rounded-lg border border-[color:var(--casa-muted)] bg-white px-3.5 text-base md:text-base text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-colors focus-visible:border-[var(--casa-accent-text)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/25 focus-visible:ring-offset-0';
-const labelTextClassName = 'block text-sm font-semibold text-[var(--casa-ink)]';
+/**
+ * Each topic's icon in its logo colour (src/config/brand/meaning.ts): red for
+ * the course formats, ink for exams, yellow for accommodation, blue for the
+ * rest. A key the page adds later falls back to the blue speech bubble.
+ */
+const topicLook: Record<string, { icon: LucideIcon; meaning: Meaning }> = {
+  'course-advice': { icon: GraduationCap, meaning: 'courses' },
+  'exam-registration': { icon: FileCheck2, meaning: 'exams' },
+  'accommodation-support': { icon: Home, meaning: 'arrival' },
+  'group-booking': { icon: Users, meaning: 'courses' },
+  'company-courses': { icon: Building2, meaning: 'courses' },
+  other: { icon: MessageCircle, meaning: 'orientation' },
+};
+const fallbackTopicLook = { icon: MessageCircle, meaning: 'orientation' } as const;
 
 /**
  * Option list for one choice field. `OrganiserCopy` already forces every allowed
@@ -124,13 +161,13 @@ function BriefTextField({ id, label, value, placeholder, error, max, onChange }:
   const numeric = typeof max === 'number';
 
   return (
-    <div className={fieldGroupClassName}>
-      <label htmlFor={id} className={labelTextClassName}>
+    <div className={formFieldGroupClassName}>
+      <label htmlFor={id} className={formLabelClassName}>
         {label}
       </label>
       <Input
         id={id}
-        className={inputClassName}
+        className={formControlClassName}
         value={value}
         placeholder={placeholder}
         type={numeric ? 'number' : 'text'}
@@ -142,7 +179,7 @@ function BriefTextField({ id, label, value, placeholder, error, max, onChange }:
         onChange={(event) => onChange(event.target.value)}
       />
       {error ? (
-        <p id={errorId} className="text-xs text-[var(--casa-danger-text)] mt-1">
+        <p id={errorId} className={formErrorClassName}>
           {error}
         </p>
       ) : null}
@@ -164,8 +201,8 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
   const errorId = `${id}-error`;
 
   return (
-    <div className={fieldGroupClassName}>
-      <label htmlFor={id} className={labelTextClassName}>
+    <div className={formFieldGroupClassName}>
+      <label htmlFor={id} className={formLabelClassName}>
         {label}
       </label>
       <Select value={value || undefined} onValueChange={onChange}>
@@ -174,11 +211,7 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
           aria-label={label}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
-          className={cn(
-            inputClassName,
-            'w-full flex items-center justify-between text-left',
-            error && 'border-[color:var(--casa-danger-surface)]/45 focus-visible:ring-[var(--casa-danger-surface)]/25'
-          )}
+          className={formControlClassName}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -191,7 +224,7 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
         </SelectContent>
       </Select>
       {error ? (
-        <p id={errorId} className="text-xs text-[var(--casa-danger-text)] mt-1">
+        <p id={errorId} className={formErrorClassName}>
           {error}
         </p>
       ) : null}
@@ -363,32 +396,30 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     <section
       id="contact-form-panel"
       data-track-section="contact-form"
-      className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-5 sm:p-8 lg:p-10"
+      className={formCardClassName}
     >
-
-      <div className="mb-7">
-        <h2 className="text-2xl font-bold text-[var(--casa-ink)] md:text-3xl">{copy.formTitle}</h2>
-        <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{copy.formBody}</p>
+      <div className="mb-8">
+        <FormStepHeader icon={MessageCircle} meaning="orientation" title={copy.formTitle} description={copy.formBody} />
       </div>
 
       {status === 'success' ? (
-        <div className="space-y-5 border-t border-[color:var(--casa-sand)] pt-6" role="status" aria-live="polite">
-          <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--casa-success-surface)] text-white">
-              <CheckCircle2 className="h-5 w-5" aria-hidden />
+        <div className="rounded-2xl border border-[color:var(--casa-success-surface)]/25 bg-[var(--casa-success-surface)]/[0.06] p-5 sm:p-6" role="status" aria-live="polite">
+          <div className="flex items-start gap-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--casa-success-surface)] text-white">
+              <CheckCircle2 className="size-5" aria-hidden />
             </span>
-            <div>
-              <p className="text-base font-bold text-[var(--casa-success-text)]">{copy.successTitle}</p>
-              <p className="mt-1 text-sm text-[var(--casa-success-text)]">{feedbackMessage || copy.successBody}</p>
-              {confirmationSent ? <p className="mt-1 text-sm text-[var(--casa-success-text)]">{confirmationNotice(locale)}</p> : null}
+            <div className="min-w-0">
+              <p className="text-lg font-bold text-[var(--casa-success-text)]">{copy.successTitle}</p>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{feedbackMessage || copy.successBody}</p>
+              {confirmationSent ? <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
               {requestId ? (
-                <p className="mt-2 text-xs font-medium text-[var(--casa-success-text)]">
+                <p className="mt-3 text-xs font-medium text-[var(--casa-muted)]">
                   {locale === 'de' ? 'Ihre Referenz' : 'Your reference'}: <span className="break-all font-mono">{requestId}</span>
                 </p>
               ) : null}
             </div>
           </div>
-          <Button type="button" variant="outline" className="border-[color:var(--casa-success-surface)]/40 bg-white" onClick={resetForm}>
+          <Button type="button" variant="outline" className={cn(formSecondaryButtonClassName, 'mt-5')} onClick={resetForm}>
             {copy.sendAnother}
           </Button>
         </div>
@@ -400,15 +431,15 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
           noValidate
           data-casa-track-form="contact_inquiry"
         >
-          <div className={fieldGroupClassName}>
-            <label htmlFor="firstName" className={labelTextClassName}>
-              {copy.firstNameLabel} <span className="text-[var(--casa-coral-text)]">*</span>
+          <div className={formFieldGroupClassName}>
+            <label htmlFor="firstName" className={formLabelClassName}>
+              {copy.firstNameLabel}<RequiredMark />
             </label>
             <Input
               required
               id="firstName"
               autoComplete="given-name"
-              className={inputClassName}
+              className={formControlClassName}
               value={fields.firstName}
               placeholder={copy.firstNamePlaceholder}
               aria-invalid={Boolean(fieldErrors.firstName)}
@@ -420,17 +451,17 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.firstName ? <p id="firstName-error" className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.firstName}</p> : null}
+            {fieldErrors.firstName ? <p id="firstName-error" className={formErrorClassName}>{fieldErrors.firstName}</p> : null}
           </div>
 
-          <div className={fieldGroupClassName}>
-            <label htmlFor="lastName" className={labelTextClassName}>
+          <div className={formFieldGroupClassName}>
+            <label htmlFor="lastName" className={formLabelClassName}>
               {copy.lastNameLabel}
             </label>
             <Input
               id="lastName"
               autoComplete="family-name"
-              className={inputClassName}
+              className={formControlClassName}
               value={fields.lastName}
               placeholder={copy.lastNamePlaceholder}
               aria-invalid={Boolean(fieldErrors.lastName)}
@@ -442,12 +473,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.lastName ? <p id="lastName-error" className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.lastName}</p> : null}
+            {fieldErrors.lastName ? <p id="lastName-error" className={formErrorClassName}>{fieldErrors.lastName}</p> : null}
           </div>
 
-          <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
-            <label htmlFor="email" className={labelTextClassName}>
-              {copy.emailLabel} <span className="text-[var(--casa-coral-text)]">*</span>
+          <div className={cn(formFieldGroupClassName, 'sm:col-span-2')}>
+            <label htmlFor="email" className={formLabelClassName}>
+              {copy.emailLabel}<RequiredMark />
             </label>
             <Input
               required
@@ -455,7 +486,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               autoComplete="email"
               type="email"
               inputMode="email"
-              className={inputClassName}
+              className={formControlClassName}
               value={fields.email}
               placeholder={copy.emailPlaceholder}
               aria-invalid={Boolean(fieldErrors.email)}
@@ -467,44 +498,61 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            {fieldErrors.email ? <p id="email-error" className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.email}</p> : null}
+            {fieldErrors.email ? <p id="email-error" className={formErrorClassName}>{fieldErrors.email}</p> : null}
           </div>
 
-          <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
-            <label htmlFor="topic" className={labelTextClassName}>
-              {copy.topicLabel} <span className="text-[var(--casa-coral-text)]">*</span>
-            </label>
-            <Select
-              value={fields.topic || undefined}
-              onValueChange={(value) =>
-                setFields((current) => ({
-                  ...current,
-                  topic: value,
-                }))
-              }
-            >
-              <SelectTrigger
-                id="topic"
-                aria-label={copy.topicLabel}
-                disabled={topicOptions.length === 0}
-                className={cn(
-                  inputClassName,
-                  'w-full flex items-center justify-between text-left',
-                  fieldErrors.topic && 'border-[color:var(--casa-danger-surface)]/45 focus-visible:ring-[var(--casa-danger-surface)]/25'
-                )}
-              >
-                <SelectValue placeholder={copy.topicPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {topicOptions.map((option) => (
-                  <SelectItem key={option.key} value={option.key}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {fieldErrors.topic ? <p className="text-xs text-[var(--casa-danger-text)] mt-1">{fieldErrors.topic}</p> : null}
-          </div>
+          {/*
+            The topic as six chips, not a dropdown: the choice is the first thing
+            the form asks, and a closed select hid the six answers behind a click.
+            Native radios, so arrow keys move between them and the browser
+            announces "1 of 6".
+          */}
+          <fieldset id="topic" tabIndex={-1} className={cn(formFieldGroupClassName, 'min-w-0 sm:col-span-2')}>
+            <legend className={cn(formLabelClassName, 'mb-2')}>
+              {copy.topicLabel}<RequiredMark />
+            </legend>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              {topicOptions.map((option) => {
+                const look = topicLook[option.key] ?? fallbackTopicLook;
+                const TopicIcon = look.icon;
+                const checked = activeTopicKey === option.key;
+
+                return (
+                  <label
+                    key={option.key}
+                    className={cn(
+                      'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 py-2.5 text-sm font-semibold leading-snug text-[var(--casa-ink)] transition-[border-color,background-color,box-shadow] duration-150',
+                      'has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
+                      checked
+                        ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/45 shadow-[inset_0_0_0_1px_var(--casa-accent-text)]'
+                        : 'border-[color:var(--casa-sand)] shadow-[var(--shadow-soft)] hover:border-[color:var(--casa-field-border)]'
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="topic"
+                      value={option.key}
+                      checked={checked}
+                      disabled={status === 'submitting'}
+                      onChange={() =>
+                        setFields((current) => ({
+                          ...current,
+                          topic: option.key,
+                        }))
+                      }
+                      className="sr-only"
+                    />
+                    <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses[look.meaning].circle)}>
+                      <TopicIcon className="size-[1.125rem]" aria-hidden />
+                    </span>
+                    <span className="min-w-0">{option.label}</span>
+                    {checked ? <CheckCircle2 className="ml-auto size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden /> : null}
+                  </label>
+                );
+              })}
+            </div>
+            {fieldErrors.topic ? <p className={formErrorClassName}>{fieldErrors.topic}</p> : null}
+          </fieldset>
 
           {/*
             Organiser brief. The live region is always mounted so that swapping
@@ -516,19 +564,20 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
           {showBrief ? (
             <details
-              className="sm:col-span-2 border-y border-[color:var(--casa-sand)] py-4"
+              className="group sm:col-span-2 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] open:bg-white"
               open={briefOpen || organiserBriefFields(activeTopicKey).some(name => Boolean(fieldErrors[name]))}
               onToggle={event => setBriefOpen(event.currentTarget.open)}
             >
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--casa-ink)] focus-visible:outline-2 focus-visible:outline-[var(--casa-blue)]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-[var(--casa-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--casa-blue)] [&::-webkit-details-marker]:hidden">
                 {locale === 'de' ? 'Weitere Angaben ergänzen (optional)' : 'Add a few details (optional)'}
+                <ChevronDown className="size-4 shrink-0 text-[var(--casa-accent-text)] transition-transform duration-200 group-open:rotate-180" aria-hidden />
               </summary>
-              <fieldset className="mt-5">
+              <fieldset className="border-t border-[color:var(--casa-sand)] px-4 pb-5 pt-4">
 
               <legend className="sr-only">
                 {briefLegend}
               </legend>
-              <p className="mt-1 text-xs leading-relaxed text-[var(--casa-muted)]">{briefCopy.intro}</p>
+              <p className={formHintClassName}>{briefCopy.intro}</p>
 
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <BriefTextField
@@ -673,9 +722,9 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             </details>
           ) : null}
 
-          <div className={cn(fieldGroupClassName, 'sm:col-span-2')}>
-            <label htmlFor="message" className={labelTextClassName}>
-              {copy.messageLabel} <span className="text-[var(--casa-coral-text)]">*</span>
+          <div className={cn(formFieldGroupClassName, 'sm:col-span-2')}>
+            <label htmlFor="message" className={formLabelClassName}>
+              {copy.messageLabel}<RequiredMark />
             </label>
             
             <Textarea
@@ -683,10 +732,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               id="message"
               rows={5}
               maxLength={3000}
-              className={cn(
-                inputClassName,
-                'min-h-[140px] py-3 resize-y'
-              )}
+              className={formTextareaClassName}
               value={fields.message}
               placeholder={copy.messagePlaceholder}
               aria-invalid={Boolean(fieldErrors.message)}
@@ -698,8 +744,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 }))
               }
             />
-            <div className="flex justify-between items-center mt-1">
-              {fieldErrors.message ? <p id="message-error" className="text-xs text-[var(--casa-danger-text)]">{fieldErrors.message}</p> : <div />}
+            <div className="flex items-center justify-between">
+              {fieldErrors.message ? <p id="message-error" className={formErrorClassName}>{fieldErrors.message}</p> : <div />}
               {messageLength >= 2700 && <p className="text-xs text-[var(--casa-muted)]">
                 {messageLength}/3000
               </p>}
@@ -721,16 +767,15 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             aria-hidden="true"
           />
 
-          <div className="sm:col-span-2 flex flex-col gap-4 border-t border-[color:var(--casa-sand)] pt-6">
-            <p className="text-xs leading-relaxed text-[var(--casa-muted)]">
+          <div className="flex flex-col gap-5 border-t border-[color:var(--casa-sand)] pt-6 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-md text-xs leading-relaxed text-[var(--casa-muted)]">
               {locale === 'de' ? '* Pflichtfelder. Wie wir Ihre Daten verarbeiten, erfahren Sie in unserer ' : '* Required fields. Read how we handle your information in our '}
-              <Link href="/privacy" className="underline underline-offset-4">{locale === 'de' ? 'Datenschutzerklärung' : 'privacy policy'}</Link>.
+              <Link href="/privacy" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">{locale === 'de' ? 'Datenschutzerklärung' : 'privacy policy'}</Link>.
             </p>
             <Button
               type="submit"
-              variant="default"
               disabled={status === 'submitting'}
-              className="h-12 w-full rounded-lg bg-[var(--casa-ink-deep)] px-7 font-semibold text-white sm:w-auto sm:self-start"
+              className={cn(formPrimaryButtonClassName, 'w-full shrink-0 sm:w-auto')}
               data-casa-track="true"
               data-casa-label={copy.submit}
             >
@@ -751,7 +796,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       )}
 
       {status === 'error' ? (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+        <div className={cn(formAlertClassName, 'mt-5 flex items-start gap-2')} role="alert" aria-live="assertive">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-semibold">{copy.errorTitle}</p>

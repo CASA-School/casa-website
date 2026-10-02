@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { getData } from 'country-list';
+import { formControlClassName } from '@/components/forms/form-styles';
 import { cn } from '@/lib/utils';
 
 const countryNames = getData()
@@ -20,6 +21,8 @@ type CountryFieldProps = {
   disabled?: boolean;
   required?: boolean;
   'aria-describedby'?: string;
+  /** Draws the field in its error state; a button may not carry aria-invalid. */
+  invalid?: boolean;
 };
 
 export function CountryField({
@@ -32,6 +35,7 @@ export function CountryField({
   className,
   disabled,
   'aria-describedby': ariaDescribedBy,
+  invalid,
 }: CountryFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -85,11 +89,11 @@ export function CountryField({
         disabled={disabled}
         onClick={toggleOpen}
         aria-describedby={ariaDescribedBy}
+        data-invalid={invalid || undefined}
         className={cn(
-          'flex h-11 w-full items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 text-left text-sm text-[var(--casa-ink)] transition-all',
-          'focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--casa-blue)]/10',
-          'disabled:cursor-not-allowed disabled:opacity-50',
-          isOpen && 'border-[var(--casa-blue)] bg-white ring-2 ring-[var(--casa-blue)]/10',
+          formControlClassName,
+          'flex items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
+          isOpen && 'border-[var(--casa-accent-text)] ring-4 ring-[var(--casa-blue)]/15',
           className
         )}
       >
@@ -98,7 +102,7 @@ export function CountryField({
         </span>
         <ChevronDown
           className={cn(
-            'h-4 w-4 text-[var(--casa-text-subtle)] transition-transform duration-200',
+            'h-4 w-4 text-[var(--casa-accent-text)] transition-transform duration-200',
             isOpen && 'rotate-180'
           )}
         />

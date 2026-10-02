@@ -2295,3 +2295,16 @@ teacher with smiling learners). Course pages now have a second, different photo 
 hero crop shown from `lg` up (`HeroCUtilityRail` `photoWide`); phones keep the 4:3. Bildungszeit
 (094) and Firmenunterricht (053, an empty CASA classroom) have photos for the first time; Pflege
 und Medizin still has none. Consent for 061, 067, 087 and 094 confirmed 2026-10-02.
+
+## 35. One form design for contact and registration (2026-10-02)
+
+Rahman found the contact form "very basic" and the registration forms different from it. Both
+had drifted into their own field styles: hard `--casa-muted` boxes on the contact form, `--casa-sand`
+outlines (1.23:1, below WCAG 1.4.11) under uppercase eyebrow labels in the wizards. Every public
+form now takes fields, labels, tiles, step headers and buttons from
+`src/components/forms/form-styles.tsx`, with a new `--casa-field-border` (3.27:1). The contact topic
+is six chips in the meaning colours instead of a dropdown. Both registration pages sit in the
+contact page's frame (`RegistrationPageShell`): breadcrumbs, title, the form card, and the office
+panel beside it (`ContactHelpPanel`: phone, email, address with directions, opening hours). They
+had no link to the Impressum or the privacy policy, because the site shell drops its footer there;
+`LegalFooter` now closes them (§ 5 DDG). `ArrowLeft` is a straight arrow; it was an undo glyph.

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formControlClassName } from '@/components/forms/form-styles';
 import { cn } from '@/lib/utils';
 
 interface DatePickerProps {
@@ -142,17 +143,13 @@ export function DatePicker({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-describedby={ariaDescribedBy}
-        className={cn(
-          "flex h-11 w-full items-center justify-between rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 text-left text-sm text-[var(--casa-ink)] transition-all",
-          "focus:border-[var(--casa-blue)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--casa-blue)]/10",
-          hasError ? "border-[color:var(--casa-danger-surface)]/45 focus:border-[color:var(--casa-danger-surface)] focus:ring-[var(--casa-danger-surface)]/10" : "",
-          className
-        )}
+        data-invalid={hasError || undefined}
+        className={cn(formControlClassName, "flex items-center justify-between", className)}
       >
         <span className={cn(!value && "text-[var(--casa-muted)]")}>
           {value ? formatDateLabel(value) : placeholder}
         </span>
-        <Calendar className="h-4.5 w-4.5 text-[var(--casa-text-subtle)]" />
+        <Calendar className="h-4.5 w-4.5 text-[var(--casa-accent-text)]" aria-hidden />
       </button>
 
       {isOpen && (

@@ -10,12 +10,29 @@ import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, HelpCircle, Home, L
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CountryField } from '@/components/forms/country-field';
+import {
+  formAlertClassName,
+  formControlClassName,
+  formErrorClassName,
+  formFieldGroupClassName,
+  formHintClassName,
+  formLabelClassName,
+  formMetaLabelClassName,
+  formPrimaryButtonClassName,
+  formSecondaryButtonClassName,
+  formTextareaClassName,
+  formTileClassName,
+  FormStepHeader,
+  RequiredMark,
+} from '@/components/forms/form-styles';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
+import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
+import { meaningClasses } from '@/config/brand/meaning';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
@@ -37,15 +54,6 @@ type CourseRegistrationApiResult = {
   requestId?: string;
   confirmationSent?: boolean;
 };
-
-const fieldClassName =
-  'h-11 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-base sm:text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] shadow-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const selectTriggerClassName =
-  'h-11 data-[size=default]:h-11 w-full rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3.5 text-base sm:text-sm text-[var(--casa-ink)] data-[placeholder]:text-[var(--casa-muted)] shadow-none text-left flex items-center justify-between transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
-const labelClassName = 'block text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]';
-const requiredMarkClassName = 'mr-1 text-[var(--casa-coral-text)]';
-const fieldGroupClassName = 'space-y-1.5';
-const reviewTileClassName = 'rounded-lg border border-[color:var(--casa-sand)] bg-white p-4';
 
 const PERSONAL_FIELDS: Array<keyof FormData> = [
   'salutation',
@@ -318,111 +326,42 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
 
   return (
     <div className="flex flex-col" data-track-section="registration-course">
-      <div className="shrink-0 pb-6 border-b border-[color:var(--casa-sand)]/70 space-y-6">
-        {/* On-Page Registration Tabs Switcher */}
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-lg bg-[var(--casa-surface-subtle)]/80 p-1 shadow-inner">
-            <Link
-              href="/registration/course"
-              className={cn(
-                "rounded-lg px-5 py-2.5 text-xs font-bold transition-all duration-200",
-                "bg-white text-[var(--casa-ink)] shadow-[var(--shadow-soft)]"
-              )}
-            >
-              {catalog.locale === 'de' ? 'Kursanmeldung' : 'Course Registration'}
-            </Link>
-            <Link
-              href="/registration/exam"
-              className={cn(
-                "rounded-lg px-5 py-2.5 text-xs font-bold transition-all duration-200 text-[var(--casa-ink)] hover:text-[var(--casa-ink)]"
-              )}
-            >
-              {catalog.locale === 'de' ? 'Prüfungsanmeldung' : 'Exam Registration'}
-            </Link>
-          </div>
-        </div>
-
-        <div className="relative flex items-center justify-between px-6 sm:px-12">
-          {/* Background line */}
-          <div className="absolute left-6 right-6 sm:left-12 sm:right-12 top-[18px] h-0.5 bg-[var(--casa-surface-subtle)]" aria-hidden="true" />
-          {/* Active indicator line */}
-          <div
-            className="absolute left-6 sm:left-12 top-[18px] h-0.5 bg-[var(--casa-blue)] transition-all duration-300"
-            style={{ width: `calc(${((step - 1) / (stepItems.length - 1)) * 100}% - ${step === 3 ? '0px' : '0px'})` }}
-            aria-hidden="true"
-          />
-
-          {stepItems.map((item, index) => {
-            const current = index + 1;
-            const complete = current < step;
-            const active = current === step;
-
-            return (
-              <div key={item.title} className="relative z-10 flex flex-col items-center">
-                <div
-                  className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300',
-                    complete
-                      ? 'border-[var(--casa-blue)] bg-[var(--casa-accent-surface)] text-white shadow-[var(--shadow-card)] shadow-[var(--casa-blue)]/10'
-                      : active
-                        ? 'border-[var(--casa-blue)] bg-white text-[var(--casa-accent-text)] shadow-[0_0_0_4px_rgba(0,159,227,0.12)]'
-                        : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-muted)]'
-                  )}
-                >
-                  {complete ? <CheckCircle2 className="h-4.5 w-4.5" aria-hidden /> : current}
-                </div>
-                <span className={cn('mt-2 text-xs font-bold uppercase tracking-eyebrow transition-colors duration-300', active || complete ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
-                  {item.title}
-                </span>
-                <span className="mt-0.5 hidden text-xs text-[var(--casa-muted)] sm:block">{item.description}</span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="shrink-0 space-y-7 border-b border-[color:var(--casa-sand)] pb-7">
+        <RegistrationTabs current="course" locale={catalog.locale} />
+        <RegistrationStepper steps={stepItems} step={step} locale={catalog.locale} />
       </div>
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-6"
+        className="mt-7"
         noValidate
         data-casa-track-form="course_registration"
       >
         <div className="space-y-6">
         {step === 1 && (
-          <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-                  <GraduationCap className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                    {t('Course path', 'Kursweg')}
-                  </p>
-                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
-                    {t('Choose your course', 'Kurs auswählen')}
-                  </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
-                    {t(
-                      'Select one course and one start option. You can review everything before submit.',
-                      'Wählen Sie einen Kurs und einen Starttermin. Vor dem Absenden können Sie alles prüfen.'
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+            <FormStepHeader
+              icon={GraduationCap}
+              meaning="courses"
+              headingRef={stepHeadingRef}
+              title={t('Choose your course', 'Kurs auswählen')}
+              description={t(
+                'Select one course and one start date. You can review everything before you submit.',
+                'Wählen Sie einen Kurs und einen Starttermin. Vor dem Absenden können Sie alles prüfen.'
+              )}
+            />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="course-type" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Course Type', 'Kurstyp')}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="course-type" className={formLabelClassName}>
+                  {t('Course type', 'Kurstyp')}
+                  <RequiredMark />
                 </Label>
                 <Select
                   onValueChange={(value) => setValue('courseTypeId', value, { shouldDirty: true, shouldValidate: true })}
                   defaultValue={watch('courseTypeId')}
                 >
-                  <SelectTrigger id="course-type" aria-required {...errorProps('courseTypeId')} className={selectTriggerClassName}>
+                  <SelectTrigger id="course-type" aria-required {...errorProps('courseTypeId')} className={formControlClassName}>
                     <SelectValue placeholder={t('Select a course...', 'Kurs auswählen...')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -433,19 +372,19 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.courseTypeId && <p id="courseTypeId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.courseTypeId.message}</p>}
+                {errors.courseTypeId && <p id="courseTypeId-error" className={formErrorClassName}>{errors.courseTypeId.message}</p>}
               </div>
 
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="course-option" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {catalog.locale === 'de' ? 'Startdatum' : 'Start Date'}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="course-option" className={formLabelClassName}>
+                  {catalog.locale === 'de' ? 'Startdatum' : 'Start date'}
+                  <RequiredMark />
                 </Label>
                 <Select
                   onValueChange={(value) => setValue('courseInstanceId', value, { shouldDirty: true, shouldValidate: true })}
                   value={selectedCourseInstanceId}
                 >
-                  <SelectTrigger id="course-option" aria-required {...errorProps('courseInstanceId')} className={selectTriggerClassName}>
+                  <SelectTrigger id="course-option" aria-required {...errorProps('courseInstanceId')} className={formControlClassName}>
                     <SelectValue placeholder={catalog.locale === 'de' ? 'Starttermin auswählen...' : 'Select a start date...'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -457,20 +396,20 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   </SelectContent>
                 </Select>
                 {selectedOptions.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 py-2 text-sm text-[var(--casa-muted)]">
+                  <p className={formHintClassName}>
                     {catalog.locale === 'de' ? 'Noch keine Termine für diesen Kurstyp verfügbar.' : 'No scheduled options for this course type yet. Please choose another course type.'}
                   </p>
                 ) : null}
-                {errors.courseInstanceId && <p id="courseInstanceId-error" className="text-sm text-[var(--casa-danger-text)]">{errors.courseInstanceId.message}</p>}
+                {errors.courseInstanceId && <p id="courseInstanceId-error" className={formErrorClassName}>{errors.courseInstanceId.message}</p>}
               </div>
             </div>
 
             {/* Conditional level / niveau field */}
             {showLevelField && levelOptions.length > 0 && (
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="current-level" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="current-level" className={formLabelClassName}>
                   {t('Your current level (Niveau)', 'Ihr aktuelles Niveau')}
+                  <RequiredMark />
                 </Label>
                 <Select
                   onValueChange={(value) =>
@@ -478,7 +417,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   }
                   value={watch('currentLevel') || ''}
                 >
-                  <SelectTrigger id="current-level" className={selectTriggerClassName}>
+                  <SelectTrigger id="current-level" className={formControlClassName}>
                     <SelectValue
                       placeholder={t(
                         'Select your current level…',
@@ -501,7 +440,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   src/lib/placement/availability.ts). A new tab, because the
                   wizard keeps no draft and the learner would lose their choices.
                 */}
-                <p className="text-xs text-[var(--casa-muted)] leading-relaxed">
+                <p className={formHintClassName}>
                   {t('Not sure which level you are?', 'Unsicher, welches Niveau Sie haben?')}{' '}
                   <Link
                     href="/placement-test"
@@ -517,27 +456,18 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
             )}
 
             {selectedOption ? (
-              <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-5 shadow-[var(--shadow-card)]">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--casa-sand)]/70 pb-3">
+              <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
+                <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-red)]" />
+                <p className={formMetaLabelClassName}>{t('Selected session', 'Ausgewählter Termin')}</p>
+                <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedCourseType?.name}</h3>
+                <dl className="mt-4 grid gap-4 border-t border-[color:var(--casa-sand)] pt-4 text-sm sm:grid-cols-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                      {t('Selected session', 'Ausgewählter Termin')}
-                    </p>
-                    <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedCourseType?.name}</h3>
-                  </div>
-                </div>
-                <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-                      {t('Dates', 'Daten')}
-                    </dt>
-                    <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.dateRangeLabel}</dd>
+                    <dt className={formMetaLabelClassName}>{t('Dates', 'Daten')}</dt>
+                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.dateRangeLabel}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-                      {t('Schedule', 'Zeitplan')}
-                    </dt>
-                    <dd className="mt-1 font-bold text-[var(--casa-ink)]">{selectedOption.scheduleLabel}</dd>
+                    <dt className={formMetaLabelClassName}>{t('Schedule', 'Zeitplan')}</dt>
+                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.scheduleLabel}</dd>
                   </div>
                 </dl>
               </div>
@@ -546,39 +476,28 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         )}
 
         {step === 2 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-coral)]/10 text-[var(--casa-coral)]">
-                  <UserRound className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-coral-text)]">
-                    {t('Student profile', 'Teilnehmerprofil')}
-                  </p>
-                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
-                    {t('Personal details', 'Persönliche Angaben')}
-                  </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
-                    {t(
-                      'Share your details so we can prepare enrollment and optional accommodation support.',
-                      'Teilen Sie Ihre Angaben, damit wir Anmeldung und optionale Unterkunftsunterstützung vorbereiten können.'
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+            <FormStepHeader
+              icon={UserRound}
+              meaning="orientation"
+              headingRef={stepHeadingRef}
+              title={t('Personal details', 'Persönliche Angaben')}
+              description={t(
+                'Your details let us prepare the registration and, if you wish, help with accommodation.',
+                'Mit Ihren Angaben bereiten wir die Anmeldung vor und helfen auf Wunsch bei der Unterkunft.'
+              )}
+            />
 
-            <div className={fieldGroupClassName}>
-              <Label htmlFor="salutation" className={labelClassName}>
-                <span className={requiredMarkClassName}>*</span>
+            <div className={formFieldGroupClassName}>
+              <Label htmlFor="salutation" className={formLabelClassName}>
                 {catalog.locale === 'de' ? 'Anrede' : 'Salutation'}
+                <RequiredMark />
               </Label>
               <Select
                 onValueChange={(value) => setValue('salutation', value as 'mr' | 'ms' | 'mx' | 'neutral', { shouldDirty: true, shouldValidate: true })}
                 value={watch('salutation')}
               >
-                <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={selectTriggerClassName}>
+                <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={formControlClassName}>
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -588,33 +507,33 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Neutral / Other'}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.salutation && <p id="salutation-error" className="text-sm text-[var(--casa-danger-text)]">{errors.salutation.message}</p>}
+              {errors.salutation && <p id="salutation-error" className={formErrorClassName}>{errors.salutation.message}</p>}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="firstName" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('First Name', 'Vorname')}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="firstName" className={formLabelClassName}>
+                  {t('First name', 'Vorname')}
+                  <RequiredMark />
                 </Label>
-                <Input id="firstName" autoComplete="given-name" aria-required {...errorProps('firstName')} className={fieldClassName} {...register('firstName')} />
-                {errors.firstName && <p id="firstName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.firstName.message}</p>}
+                <Input id="firstName" autoComplete="given-name" aria-required {...errorProps('firstName')} className={formControlClassName} {...register('firstName')} />
+                {errors.firstName && <p id="firstName-error" className={formErrorClassName}>{errors.firstName.message}</p>}
               </div>
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="lastName" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Last Name', 'Nachname')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="lastName" className={formLabelClassName}>
+                  {t('Last name', 'Nachname')}
+                  <RequiredMark />
                 </Label>
-                <Input id="lastName" autoComplete="family-name" aria-required {...errorProps('lastName')} className={fieldClassName} {...register('lastName')} />
-                {errors.lastName && <p id="lastName-error" className="text-sm text-[var(--casa-danger-text)]">{errors.lastName.message}</p>}
+                <Input id="lastName" autoComplete="family-name" aria-required {...errorProps('lastName')} className={formControlClassName} {...register('lastName')} />
+                {errors.lastName && <p id="lastName-error" className={formErrorClassName}>{errors.lastName.message}</p>}
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="email" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="email" className={formLabelClassName}>
                   {t('Email', 'E-Mail')}
+                  <RequiredMark />
                 </Label>
                 <Input
                   id="email"
@@ -622,36 +541,34 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   autoComplete="email"
                   aria-required
                   {...errorProps('email')}
-                  className={fieldClassName}
+                  className={formControlClassName}
                   {...register('email')}
                 />
-                {errors.email && <p id="email-error" className="text-sm text-[var(--casa-danger-text)]">{errors.email.message}</p>}
+                {errors.email && <p id="email-error" className={formErrorClassName}>{errors.email.message}</p>}
               </div>
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="phone" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Phone Number', 'Telefonnummer')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="phone" className={formLabelClassName}>
+                  {t('Phone number', 'Telefonnummer')}
+                  <RequiredMark />
                 </Label>
-                <Input id="phone" autoComplete="tel" aria-required {...errorProps('phone')} className={fieldClassName} {...register('phone')} />
-                {errors.phone && <p id="phone-error" className="text-sm text-[var(--casa-danger-text)]">{errors.phone.message}</p>}
+                <Input id="phone" autoComplete="tel" aria-required {...errorProps('phone')} className={formControlClassName} {...register('phone')} />
+                {errors.phone && <p id="phone-error" className={formErrorClassName}>{errors.phone.message}</p>}
               </div>
             </div>
 
-            <div className="flex gap-3 rounded-lg border border-[color:var(--casa-blue)]/30 bg-[var(--casa-blue)]/8 px-4 py-3 text-xs font-semibold leading-relaxed text-[var(--casa-ink)]">
-              <HelpCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-              <p>
-                {t(
-                  'This is a public launch form. CASA will follow up by email after reviewing your request.',
-                  'Dies ist ein öffentliches Startformular. CASA meldet sich nach Prüfung Ihrer Anfrage per E-Mail.'
-                )}
-              </p>
-            </div>
+            <p className={cn(formHintClassName, 'flex gap-2.5')}>
+              <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
+              {t(
+                'CASA reviews your registration and replies by email.',
+                'CASA prüft Ihre Anmeldung und meldet sich per E-Mail bei Ihnen.'
+              )}
+            </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="nationality" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="nationality" className={formLabelClassName}>
                   {t('Nationality', 'Nationalität')}
+                  <RequiredMark />
                 </Label>
                 <CountryField
                   id="nationality"
@@ -660,16 +577,17 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                   placeholder={t('Select nationality', 'Nationalität auswählen')}
                   searchPlaceholder={t('Search...', 'Suchen...')}
                   emptyLabel={t('No results found.', 'Keine Ergebnisse gefunden.')}
-                  className={fieldClassName}
+                  className={formControlClassName}
                   required
                   aria-describedby={errors.nationality ? 'nationality-error' : undefined}
+                  invalid={Boolean(errors.nationality)}
                 />
-                {errors.nationality && <p id="nationality-error" className="text-sm text-[var(--casa-danger-text)]">{errors.nationality.message}</p>}
+                {errors.nationality && <p id="nationality-error" className={formErrorClassName}>{errors.nationality.message}</p>}
               </div>
-              <div className={fieldGroupClassName}>
-                <Label htmlFor="birthDate" className={labelClassName}>
-                  <span className={requiredMarkClassName}>*</span>
-                  {t('Date of Birth', 'Geburtsdatum')}
+              <div className={formFieldGroupClassName}>
+                <Label htmlFor="birthDate" className={formLabelClassName}>
+                  {t('Date of birth', 'Geburtsdatum')}
+                  <RequiredMark />
                 </Label>
                 <Controller
                   name="birthDate"
@@ -687,46 +605,47 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     />
                   )}
                 />
-                {errors.birthDate && <p id="birthDate-error" className="text-sm text-[var(--casa-danger-text)]">{errors.birthDate.message}</p>}
+                {errors.birthDate && <p id="birthDate-error" className={formErrorClassName}>{errors.birthDate.message}</p>}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 rounded-lg border border-[color:var(--casa-sand)] bg-white p-4 shadow-[var(--shadow-soft)]">
+            <div className={cn(formTileClassName, 'flex items-center gap-3')}>
               <Checkbox
                 id="visa"
                 checked={watch('visaRequired')}
                 onCheckedChange={(checked) => setValue('visaRequired', Boolean(checked), { shouldDirty: true })}
               />
-              <Label htmlFor="visa" className="cursor-pointer">
+              <Label htmlFor="visa" className="cursor-pointer text-sm font-medium text-[var(--casa-ink)]">
                 {t('I need a visa for Germany', 'Ich brauche ein Visum für Deutschland')}
               </Label>
             </div>
 
-            <div className="space-y-3 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4">
-              <div className="flex items-center gap-2">
-                <Home className="h-4 w-4 text-[var(--casa-gold-deep)]" aria-hidden />
-                <p className="text-sm font-bold text-[var(--casa-ink)]">
-                  {t('Accommodation support (optional)', 'Unterkunftsunterstützung (optional)')}
+            <div className={cn(formTileClassName, 'space-y-3')}>
+              <div className="flex items-center gap-3">
+                <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses.arrival.circle)}>
+                  <Home className="size-4" aria-hidden />
+                </span>
+                <p className="text-sm font-semibold text-[var(--casa-ink)]">
+                  {t('Accommodation (optional)', 'Unterkunft (optional)')}
                 </p>
               </div>
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-3">
                 <Checkbox
                   id="accommodation"
                   checked={accommodationRequired}
                   onCheckedChange={(checked) => setValue('accommodationRequired', Boolean(checked), { shouldDirty: true })}
                 />
-                <Label htmlFor="accommodation" className="cursor-pointer text-sm">
+                <Label htmlFor="accommodation" className="cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
                   {t('I want CASA to support my accommodation search', 'Ich möchte Unterstützung bei der Unterkunftssuche')}
                 </Label>
               </div>
-            </div>
 
-            {accommodationRequired && (
-              <div className="space-y-4 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-4">
-                <div className={fieldGroupClassName}>
-                  <Label htmlFor="accommodation-type" className={labelClassName}>
-                    <span className={requiredMarkClassName}>*</span>
-                    {t('Type Preference', 'Wohnform')}
+              {accommodationRequired && (
+              <div className="space-y-5 border-t border-[color:var(--casa-sand)] pt-5">
+                <div className={formFieldGroupClassName}>
+                  <Label htmlFor="accommodation-type" className={formLabelClassName}>
+                    {t('Type of accommodation', 'Wohnform')}
+                    <RequiredMark />
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -734,26 +653,26 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                     }
                     defaultValue={watch('accommodationType')}
                   >
-                    <SelectTrigger id="accommodation-type" aria-required {...errorProps('accommodationType')} className={selectTriggerClassName}>
+                    <SelectTrigger id="accommodation-type" aria-required {...errorProps('accommodationType')} className={formControlClassName}>
                       <SelectValue placeholder={t('Select type...', 'Wohnform auswählen...')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="flat">{t('Shared Flat (WG)', 'WG')}</SelectItem>
-                      <SelectItem value="host">{t('Host Family', 'Gastfamilie')}</SelectItem>
+                      <SelectItem value="flat">{t('Shared flat (WG)', 'WG')}</SelectItem>
+                      <SelectItem value="host">{t('Host family', 'Gastfamilie')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.accommodationType && <p id="accommodationType-error" className="text-sm text-[var(--casa-danger-text)]">{errors.accommodationType.message}</p>}
+                  {errors.accommodationType && <p id="accommodationType-error" className={formErrorClassName}>{errors.accommodationType.message}</p>}
                 </div>
 
-                <div className={fieldGroupClassName}>
-                  <Label htmlFor="allergies" className={labelClassName}>{t('Allergies', 'Allergien')}</Label>
+                <div className={formFieldGroupClassName}>
+                  <Label htmlFor="allergies" className={formLabelClassName}>{t('Allergies', 'Allergien')}</Label>
                   {/* maxLength mirrors the schema: no step validates these two, so a longer value would only disable Absenden. */}
-                  <Input id="allergies" maxLength={500} className={fieldClassName} {...register('allergies')} placeholder={t('e.g. cats, nuts', 'z. B. Katzen, Nüsse')} />
+                  <Input id="allergies" maxLength={500} className={formControlClassName} {...register('allergies')} placeholder={t('e.g. cats, nuts', 'z. B. Katzen, Nüsse')} />
                 </div>
 
                 {hasAllergies && (
                   <div className="space-y-2">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-3">
                       <Checkbox
                         id="allergy-consent"
                         aria-required
@@ -763,107 +682,97 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                           setValue('allergyConsent', Boolean(checked), { shouldDirty: true, shouldValidate: true })
                         }
                       />
-                      <Label htmlFor="allergy-consent" className="cursor-pointer text-sm leading-relaxed">
+                      <Label htmlFor="allergy-consent" className="cursor-pointer text-sm font-normal leading-relaxed text-[var(--casa-ink)]">
                         {t(
                           'I consent to CASA processing my allergy information and passing it to my host family or shared flat, so that suitable accommodation can be found. I can withdraw this consent at any time.',
                           'Ich willige ein, dass CASA meine Angaben zu Allergien verarbeitet und an meine Gastfamilie oder Wohngemeinschaft weitergibt, damit eine passende Unterkunft gefunden wird. Diese Einwilligung kann ich jederzeit widerrufen.'
                         )}
                       </Label>
                     </div>
-                    {errors.allergyConsent && <p id="allergyConsent-error" className="text-sm text-[var(--casa-danger-text)]">{errors.allergyConsent.message}</p>}
+                    {errors.allergyConsent && <p id="allergyConsent-error" className={formErrorClassName}>{errors.allergyConsent.message}</p>}
                   </div>
                 )}
 
-                <div className={fieldGroupClassName}>
-                  <Label htmlFor="notes" className={labelClassName}>{t('Additional Notes', 'Weitere Hinweise')}</Label>
+                <div className={formFieldGroupClassName}>
+                  <Label htmlFor="notes" className={formLabelClassName}>{t('Additional notes', 'Weitere Hinweise')}</Label>
                   <Textarea
                     id="notes"
                     maxLength={2000}
-                    className="min-h-28 rounded-lg border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-4 py-3 text-sm text-[var(--casa-ink)] shadow-none placeholder:text-[var(--casa-muted)] focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                    className={formTextareaClassName}
                     {...register('notes')}
                     placeholder={t('Any preferences we should know about?', 'Gibt es Wünsche, die wir kennen sollten?')}
                   />
                 </div>
               </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <div className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-ink-deep)] text-white">
-                  <ShieldCheck className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                    {t('Final check', 'Letzte Kontrolle')}
-                  </p>
-                  <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 text-xl font-bold tracking-tight text-[var(--casa-ink)]">
-                    {t('Review and submit', 'Prüfen und absenden')}
-                  </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">
-                    {t(
-                      'Please confirm all details before sending your enrollment request.',
-                      'Bitte prüfen Sie alle Angaben, bevor Sie Ihre Anfrage absenden.'
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+            <FormStepHeader
+              icon={ShieldCheck}
+              meaning="orientation"
+              headingRef={stepHeadingRef}
+              title={t('Review and submit', 'Prüfen und absenden')}
+              description={t(
+                'Please check all details before you send your registration.',
+                'Bitte prüfen Sie alle Angaben, bevor Sie Ihre Anmeldung absenden.'
+              )}
+            />
 
-            <div className="space-y-4 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] p-5 text-sm">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Course', 'Kurs')}</p>
+            <div className="space-y-4 text-sm">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Course', 'Kurs')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedCourseType?.name || '-'}</p>
-                  <p className="text-xs text-[var(--casa-ink)]">{selectedOption?.dateRangeLabel || '-'}</p>
+                  <p className="mt-0.5 text-[var(--casa-muted)]">{selectedOption?.dateRangeLabel || '-'}</p>
                 </div>
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Schedule', 'Zeitplan')}</p>
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Schedule', 'Zeitplan')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption?.scheduleLabel || '-'}</p>
                 </div>
                 {showLevelField && currentLevel && (
-                  <div className={reviewTileClassName}>
-                    <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-                      {t('Current Level', 'Aktuelles Niveau')}
+                  <div className={formTileClassName}>
+                    <p className={formMetaLabelClassName}>
+                      {t('Current level', 'Aktuelles Niveau')}
                     </p>
                     <p className="mt-1 font-semibold text-[var(--casa-ink)]">{currentLevel}</p>
                   </div>
                 )}
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Student', 'Teilnehmer')}</p>
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Student', 'Teilnehmer')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
                     {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr. ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms. ') : 'Mx. ')) : ''}
                     {watch('firstName')} {watch('lastName')}
                   </p>
-                  <p className="text-xs text-[var(--casa-ink)]">{watch('email')}</p>
+                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{watch('email')}</p>
                 </div>
-                <div className={reviewTileClassName}>
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{t('Accommodation', 'Unterkunft')}</p>
+                <div className={formTileClassName}>
+                  <p className={formMetaLabelClassName}>{t('Accommodation', 'Unterkunft')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
                     {accommodationRequired
-                      ? (watch('accommodationType') === 'flat' ? t('Shared Flat (WG)', 'WG') : t('Host Family', 'Gastfamilie'))
+                      ? (watch('accommodationType') === 'flat' ? t('Shared flat (WG)', 'WG') : t('Host family', 'Gastfamilie'))
                       : t('Not requested', 'Nicht angefragt')}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[color:var(--casa-sand)] bg-white p-4 text-xs leading-relaxed text-[var(--casa-muted)]">
+              <div className={formTileClassName}>
                 <p className="font-semibold text-[var(--casa-ink)]">{t('Legal and next steps', 'Rechtliches und nächste Schritte')}</p>
-                <ul className="mt-2 space-y-1.5">
+                <ul className="mt-2 list-disc space-y-1 pl-5 leading-relaxed text-[var(--casa-muted)]">
                   <li>
-                    - {t('By submitting, you accept the CASA terms and conditions; the privacy policy explains how we handle your data.', 'Mit dem Absenden akzeptieren Sie die AGB von CASA; wie wir Ihre Daten verarbeiten, erklärt die Datenschutzerklärung.')}
+                    {t('By submitting, you accept the CASA terms and conditions; the privacy policy explains how we handle your data.', 'Mit dem Absenden akzeptieren Sie die AGB von CASA; wie wir Ihre Daten verarbeiten, erklärt die Datenschutzerklärung.')}
                   </li>
                   <li>
-                    - {t('Admissions confirmation is sent after seat and profile checks.', 'Die Bestätigung erfolgt nach Anmelde- und Kursprüfung.')}
+                    {t('Admissions confirmation is sent after seat and profile checks.', 'Die Bestätigung erfolgt nach Anmelde- und Kursprüfung.')}
                   </li>
                 </ul>
               </div>
 
-              <div className="space-y-3 rounded-lg border border-[color:var(--casa-sand)] bg-white p-4">
-                <div className="flex items-start gap-2">
+              <div className={cn(formTileClassName, 'space-y-3 bg-white')}>
+                <div className="flex items-start gap-3">
                   <Checkbox
                     id="accept-terms"
                     aria-required
@@ -873,36 +782,37 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                       setValue('acceptTerms', Boolean(checked), { shouldDirty: true, shouldValidate: true })
                     }
                   />
-                  <Label htmlFor="accept-terms" className="cursor-pointer text-sm font-medium text-[var(--casa-ink)]">
-                    <span className={requiredMarkClassName}>*</span>
+                  <Label htmlFor="accept-terms" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
                     {catalog.locale === 'de' ? (
                       <>
                         Ich akzeptiere die{' '}
-                        <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/terms" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Allgemeinen Geschäftsbedingungen
                         </Link>{' '}
                         und habe die{' '}
-                        <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/privacy" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Datenschutzerklärung
                         </Link>{' '}
                         zur Kenntnis genommen.
+                        <RequiredMark />
                       </>
                     ) : (
                       <>
                         I accept the{' '}
-                        <Link href="/terms" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/terms" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Terms and Conditions
                         </Link>{' '}
                         and have read the{' '}
-                        <Link href="/privacy" target="_blank" className="text-[var(--casa-accent-text)] hover:underline font-bold">
+                        <Link href="/privacy" target="_blank" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">
                           Privacy Policy
                         </Link>
                         .
+                        <RequiredMark />
                       </>
                     )}
                   </Label>
                 </div>
-                {errors.acceptTerms ? <p id="acceptTerms-error" className="text-sm text-[var(--casa-danger-text)]">{errors.acceptTerms.message}</p> : null}
+                {errors.acceptTerms ? <p id="acceptTerms-error" className={formErrorClassName}>{errors.acceptTerms.message}</p> : null}
               </div>
             </div>
           </div>
@@ -910,13 +820,13 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
 
         {showStepAlert && (
           // Keyed by attempt, so a repeated failed Weiter is announced again.
-          <div key={stepFailures} className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+          <div key={stepFailures} className={formAlertClassName} role="alert" aria-live="assertive">
             <p>{t('Please check the highlighted fields.', 'Bitte prüfen Sie die markierten Angaben.')}</p>
           </div>
         )}
 
         {submissionError && (
-          <div className="rounded-xl border border-[color:var(--casa-danger-surface)]/30 bg-[var(--casa-danger-surface)]/5 px-4 py-3 text-sm text-[var(--casa-danger-text)]" role="alert" aria-live="assertive">
+          <div className={formAlertClassName} role="alert" aria-live="assertive">
             <p>{submissionError}</p>
             <p className="mt-1">
               {t('Reach us directly:', 'So erreichen Sie uns direkt:')}{' '}
@@ -924,7 +834,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 {footerConfig.contact.emails[0].label}
               </a>
               {' · '}
-              <a href={`tel:${footerConfig.contact.phone}`} className="font-semibold underline underline-offset-4">
+              <a href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`} className="font-semibold underline underline-offset-4">
                 {footerConfig.contact.phone}
               </a>
               {' · '}
@@ -939,9 +849,9 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         {/* Honeypot, as on the contact form: invisible to people, filled by bots. */}
         <input type="text" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" {...register('website')} />
 
-        <div className="mt-4 flex shrink-0 justify-between border-t border-[color:var(--casa-sand)] pt-4">
+        <div className="mt-8 flex shrink-0 items-center justify-between gap-3 border-t border-[color:var(--casa-sand)] pt-6">
           {step > 1 ? (
-            <Button type="button" variant="outline" onClick={prevStep} disabled={submitting} className="h-11 rounded-lg border-[color:var(--casa-sand)] bg-white px-4">
+            <Button type="button" variant="outline" onClick={prevStep} disabled={submitting} className={formSecondaryButtonClassName}>
               <ArrowLeft className="mr-2 size-4" />
               {t('Back', 'Zurück')}
             </Button>
@@ -953,7 +863,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
             <Button
               type="button"
               onClick={nextStep}
-              className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 text-white hover:bg-[var(--casa-ink-deep-hover)]"
+              className={formPrimaryButtonClassName}
               data-casa-track="true"
               data-casa-label="Continue course registration"
             >
@@ -964,7 +874,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
             <Button
               type="submit"
               disabled={submitting || !isValid}
-              className="h-11 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-5 text-white hover:bg-[var(--casa-ink-deep-hover)]"
+              className={formPrimaryButtonClassName}
               data-casa-track="true"
               data-casa-label="Submit course registration"
             >
@@ -1029,7 +939,7 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
             <div className="mt-8 w-full max-w-xs">
               <Link
                 href="/"
-                className="flex w-full h-11 items-center justify-center rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)] font-bold text-sm transition-colors"
+                className={cn(formPrimaryButtonClassName, 'flex w-full items-center justify-center')}
               >
                 {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to Home'}
               </Link>

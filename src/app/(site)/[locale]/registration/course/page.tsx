@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
-import { Navbar } from '@/components/layout/navbar';
 import { CourseWizard } from '@/components/registration/course-wizard';
+import { RegistrationPageShell } from '@/components/registration/registration-page-shell';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCourseRegistrationCatalog } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
@@ -27,34 +27,20 @@ export default async function CourseRegistrationPage({
   const requestedInstanceId = typeof courseId === 'string' ? courseId : undefined;
   const registrationData = await getCourseRegistrationCatalog(locale, requestedInstanceId);
 
-  /*
-    The page canvas. Was --casa-sand/30, which composites to #f6f8fa — 2.2 RGB
-    units from --casa-canvas, i.e. the same ground spelled a fifth way.
-  */
   return (
-    <main className="min-h-screen bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      {/* Main navigation header */}
-      <Navbar contentLocale={locale} />
-
-      <div className="mx-auto max-w-4xl px-4 py-8 md:py-16">
-        <header className="mb-6 md:mb-8">
-          <h1 className="text-3xl font-black tracking-tight text-[var(--casa-ink)] md:text-4xl">
-            {locale === 'de' ? 'Kursanmeldung' : 'Course registration'}
-          </h1>
-          <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-ink)]">
-            {locale === 'de'
-              ? 'Wählen Sie Kurs und Starttermin, ergänzen Sie Ihre Angaben und prüfen Sie alles vor dem Absenden.'
-              : 'Choose your course and start date, add your details, and review everything before you submit.'}
-          </p>
-        </header>
-
-        <div
-          id="course-registration-form"
-          className="relative min-w-0 scroll-mt-28 overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] p-6 shadow-[var(--shadow-card)] sm:p-10"
-        >
-          <CourseWizard catalog={registrationData} />
-        </div>
-      </div>
-    </main>
+    <RegistrationPageShell
+      locale={locale}
+      title={locale === 'de' ? 'Kursanmeldung' : 'Course registration'}
+      intro={locale === 'de'
+        ? 'Wählen Sie Kurs und Starttermin, ergänzen Sie Ihre Angaben und prüfen Sie alles vor dem Absenden.'
+        : 'Choose your course and start date, add your details, and review everything before you submit.'}
+      formId="course-registration-form"
+      helpTitle={locale === 'de' ? 'Fragen zur Anmeldung?' : 'Questions about registering?'}
+      helpBody={locale === 'de'
+        ? 'Nicht sicher, welcher Kurs passt oder wann er beginnt? Rufen Sie an oder schreiben Sie uns, wir helfen gern bei der Anmeldung.'
+        : 'Not sure which course fits or when it starts? Call or write to us, we are happy to help you register.'}
+    >
+      <CourseWizard catalog={registrationData} />
+    </RegistrationPageShell>
   );
 }
