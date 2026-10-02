@@ -112,17 +112,12 @@ export default async function NewsPage() {
      harder to read than a named constant, and the icon never changes per render. */
   const FeatureAsideIcon = RUBRIC_ICON[newsFlashIssue.feature.aside?.icon ?? 'star'];
 
-  if (!featured) {
-    return (
-      <main className="bg-white text-[var(--casa-ink)]">
-        <Container className="py-20">
-          <h1 className="text-3xl font-black">News</h1>
-          <p className="mt-3 text-base text-[var(--casa-muted)]">No articles are available yet.</p>
-        </Container>
-      </main>
-    );
-  }
-
+  /*
+   * The issue renders with or without a news post. Until 2026-10-02 the page
+   * showed "No articles are available yet" instead of the NewsFlash when the
+   * repository had no post, which was harmless only while twelve sample articles
+   * filled the fallback. They are gone, so the lead article is optional now.
+   */
   const copy =
     locale === 'de'
       ? {
@@ -166,7 +161,7 @@ export default async function NewsPage() {
 
   return (
     <main className="bg-white text-[var(--casa-ink)]">
-      <JsonLdScript id="news-list-schema" data={newsListSchema} />
+      {posts.length > 0 ? <JsonLdScript id="news-list-schema" data={newsListSchema} /> : null}
       {/*
         NEWSFLASH masthead, ported from the printed edition (August 2026).
 
@@ -442,6 +437,7 @@ export default async function NewsPage() {
               search indexing; only the notices around it come from the issue
               config.
             */}
+            {featured ? (
             <article id="featured" className="rounded-xl bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {copy.featured}
@@ -469,6 +465,7 @@ export default async function NewsPage() {
                 </Button>
               </div>
             </article>
+            ) : null}
 
           </div>
         </Container>

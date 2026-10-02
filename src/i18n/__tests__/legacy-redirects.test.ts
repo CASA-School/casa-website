@@ -62,7 +62,11 @@ describe('legacy redirects', () => {
     const keys = LEGACY_REDIRECTS.map(([from]) => from.toLowerCase());
     expect(keys.length - new Set(keys).size).toBe(0);
 
-    const sources = new Set(LEGACY_REDIRECTS.map(([from]) => split(from).path.toLowerCase()));
+    // Only a query-less source redirects the bare path: /aktuelles itself is the
+    // news page, redirected only when an old TYPO3 article parameter is present.
+    const sources = new Set(
+      LEGACY_REDIRECTS.filter(([from]) => !split(from).query).map(([from]) => split(from).path.toLowerCase())
+    );
     const chained = LEGACY_REDIRECTS.filter(([, to]) => sources.has(to.split('#')[0].toLowerCase()));
     expect(chained).toEqual([]);
   });
