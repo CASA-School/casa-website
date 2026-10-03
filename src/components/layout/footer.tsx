@@ -22,6 +22,7 @@ const deFooterText: Record<string, string> = {
   'Our School': 'Unsere Schule',
   'Non-profit status': 'Gemeinnützigkeit',
   Team: 'Team',
+  'Cooperation partners': 'Kooperationspartner',
   'Tandem program': 'Tandemprogramm',
   'Partners & agencies': 'Partner & Agenturen',
   News: 'News',

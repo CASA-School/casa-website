@@ -69,7 +69,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'No. Our courses are for self-paying participants, and course fees cannot be covered by the BAMF or the Jobcenter. CASA does cooperate with Here Ahead and Bildungsberatung Garantiefonds Hochschule, which fund study-preparation language courses — it is worth checking whether you qualify for one of those.',
-      de: 'Nein. Unsere Sprachkurse richten sich ausschließlich an Selbstzahler; die Kursgebühren können nicht vom BAMF oder Jobcenter übernommen werden. CASA kooperiert allerdings mit Here Ahead und der Bildungsberatung Garantiefonds Hochschule, die studienvorbereitende Sprachkurse fördern — bitte prüfe, ob du für eine dieser Förderungen infrage kommst.',
+      de: 'Nein. Unsere Sprachkurse richten sich ausschließlich an Selbstzahler; die Kursgebühren können nicht vom BAMF oder Jobcenter übernommen werden. CASA kooperiert allerdings mit Here Ahead und der Bildungsberatung Garantiefonds Hochschule, die studienvorbereitende Sprachkurse fördern — bitte prüfen Sie, ob Sie für eine dieser Förderungen infrage kommen.',
     },
     source: 'faq + the funding cooperations on the German homepage',
   },
