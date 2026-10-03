@@ -43,6 +43,7 @@ export const footerConfig: FooterConfig = {
         { label: 'Our School', href: '/about#mission' },
         { label: 'Non-profit status', href: '/ueber-uns/gemeinnuetzigkeit' },
         { label: 'Team', href: '/team' },
+        { label: 'Cooperation partners', href: '/partners' },
       ],
     },
     {

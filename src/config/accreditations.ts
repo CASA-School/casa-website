@@ -20,13 +20,15 @@ export const accreditationLogos: Accreditation[] = [
     href: 'https://www.tandem-schools.com/en',
   },
   {
-    id: 'tandem-quality',
-    name: 'TANDEM Quality',
-    imageSrc: '/accreditations/tandem-quality.jpg',
-    imageWidth: 200,
-    imageHeight: 290,
-    displayHeight: 50,
-    href: 'https://tandem-schools.com/en/qualitaet',
+    // Took the TANDEM Quality seal's place (CASA, 2026-10-03). File: g.a.s.t.'s
+    // own TestDaF logo from gast.de, downloaded 2026-10-03.
+    id: 'testdaf',
+    name: 'TestDaF',
+    imageSrc: '/accreditations/testdaf.svg',
+    imageWidth: 471,
+    imageHeight: 118,
+    displayHeight: 44,
+    href: 'https://www.testdaf.de/',
   },
   {
     id: 'telc',
@@ -38,11 +40,14 @@ export const accreditationLogos: Accreditation[] = [
     href: 'https://www.telc.net/en',
   },
   {
+    // CASA's certification mark from its certifier HZA, as the old
+    // casa-bremen.de showed it (downloaded 2026-10-03). It replaced a badge we
+    // had drawn ourselves. HZA publishes no logo of its own to link to.
     id: 'azav',
-    name: 'AZAV',
-    imageSrc: '/accreditations/azav.svg',
-    imageWidth: 300,
-    imageHeight: 160,
+    name: 'Zertifiziert nach SGB III und AZAV durch HZA',
+    imageSrc: '/accreditations/azav-hza.jpg',
+    imageWidth: 1051,
+    imageHeight: 476,
     displayHeight: 44,
   },
   {

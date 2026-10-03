@@ -77,6 +77,25 @@ function formatDate(value: string, locale: 'en' | 'de') {
 const additionalProgramOrder = ['bildungszeit'] as const;
 
 /**
+ * The course formats listed under "Für Beruf und Weiterbildung", in this order
+ * and before Bildungszeit, instead of as full rows (CASA, 2026-10-03): Pflege
+ * und Medizin belongs beside Firmenunterricht, and Unterricht für Gruppen took
+ * its full row.
+ */
+const professionalCourseOrder = ['medical-german', 'in-company'] as const;
+
+/**
+ * The list under "Für Beruf und Weiterbildung" shows one short line per format;
+ * the course overview and the course page keep the full text.
+ */
+const homepageListSummaries: Partial<Record<string, Record<ContentLocale, string>>> = {
+  'medical-german': {
+    de: 'Deutsch für den Klinik- und Pflegealltag, mit Vorbereitung auf die Fachsprachprüfung.',
+    en: 'German for work in hospitals and care, with preparation for the medical language exam.',
+  },
+};
+
+/**
  * Derived from the published order, not restated.
  *
  * This used to be its own literal list here, which is how the homepage came to
@@ -167,7 +186,7 @@ export default async function HomePage() {
       id: 'community-events',
       photo: pageConfig.photos.lifePeople,
       title: programById('community-events')?.title ?? '',
-      line: locale === 'de' ? 'Teilnehmende aus vielen Kursen' : 'Learners from many courses',
+      line: locale === 'de' ? 'Internationalen Teilnehmenden mit Vielfalt und Offenheit begegnen' : 'An international community, open and diverse',
     },
   ];
 
@@ -216,11 +235,12 @@ export default async function HomePage() {
         (locale === 'de'
           ? 'Praxisnahe Lernziele mit klarer Struktur.'
           : 'Practical language outcomes with clear structure.'),
-      bestFor:
-        course.narrative?.audience ||
-        (locale === 'de'
-          ? 'Geeignet für internationale Lernende'
-          : 'Best for: international learners'),
+      bestFor: course.narrative?.audienceInPromise
+        ? ''
+        : course.narrative?.audience ||
+          (locale === 'de'
+            ? 'Geeignet für internationale Lernende'
+            : 'Best for: international learners'),
       outcomes: course.narrative?.outcomes ?? [],
       href: getCoursePath(course.slug),
       ctaLabel: locale === 'de' ? 'Kurs ansehen' : 'Explore this course',
@@ -235,12 +255,16 @@ export default async function HomePage() {
   });
 
   /*
-   * The first four formats carry the band as full alternating rows; the rest
-   * get a hairline row beneath. `homepageCourseOrder` is already priority
-   * order, so this reads the existing intent rather than inventing a ranking.
+   * The formats for learners carry the band as full alternating rows, in the
+   * published order; the formats for work and further training go to the list
+   * beneath, in `professionalCourseOrder`.
    */
-  const flagshipCourses = guidedCourses.slice(0, 4);
-  const secondaryCourses = guidedCourses.slice(4);
+  const isProfessional = (courseId: string) =>
+    professionalCourseOrder.some((slug) => courseId === `course-${slug}`);
+  const flagshipCourses = guidedCourses.filter((course) => !isProfessional(course.id));
+  const secondaryCourses = professionalCourseOrder
+    .map((slug) => guidedCourses.find((course) => course.id === `course-${slug}`))
+    .filter((course): course is NonNullable<typeof course> => course !== undefined);
 
   const additionalPrograms = additionalProgramOrder
     .map((slug) => {
@@ -280,7 +304,7 @@ export default async function HomePage() {
       key: course.id,
       anchorId: course.id as string | undefined,
       title: course.title,
-      description: course.description,
+      description: homepageListSummaries[course.id.replace(/^course-/, '')]?.[locale] ?? course.description,
       href: course.href,
     })),
     ...additionalPrograms.map((program) => ({
@@ -376,8 +400,8 @@ export default async function HomePage() {
         }
         description={
           locale === 'de'
-            ? 'Bei CASA lernen Sie Deutsch und Menschen aus aller Welt kennen. Mit persönlicher Begleitung und einem offenen Miteinander helfen wir Ihnen, in Bremen anzukommen.'
-            : 'Learn German with people from around the world, with a team who take time to get to know you. At CASA, we help you find your feet in Bremen and feel part of a community.'
+            ? 'Bei CASA können Sie nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen Ihnen, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.'
+            : 'At CASA you don’t just learn German, you meet people from all over the world. We help you settle into Bremen, with personal support and a welcoming community.'
         }
         ctas={[
           {
@@ -416,7 +440,7 @@ export default async function HomePage() {
                 {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
               </p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de' ? 'Was haben Sie vor?' : "What brings you to CASA?"}
+                {locale === 'de' ? 'Was sind Ihre Lernziele?' : 'What are your learning goals?'}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
@@ -612,11 +636,11 @@ export default async function HomePage() {
               }
               bullets={[
                 locale === 'de'
-                  ? 'Persönliche Beratung zu Kurswahl, Sprachniveau und Prüfungen'
-                  : 'One-to-one advice on your course, language level and exams',
+                  ? 'Persönliche Beratung bezüglich Kurswahl, Sprachniveau und Prüfungen'
+                  : 'One-to-one advice on choosing a course, your language level and exams',
                 locale === 'de'
-                  ? 'Orientierung, wenn Sie studieren, Arbeit suchen oder in eine andere Stadt ziehen möchten'
-                  : 'Guidance as you explore university, look for work or plan a move to another city',
+                  ? 'Orientierung, wenn Sie studieren, Arbeit suchen oder eine Ausbildung machen möchten'
+                  : 'Guidance if you’re planning to study, looking for work or hoping to start vocational training',
                 locale === 'de'
                   ? 'Unterstützung bei der Unterkunft und beim Ankommen in Bremen'
                   : 'Help with accommodation and settling into life in Bremen',
@@ -766,8 +790,8 @@ export default async function HomePage() {
                 </h2>
                 <p className="mt-4 text-base leading-relaxed text-white/72 md:text-lg">
                   {locale === 'de'
-                    ? 'Sie brauchen telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen Ihnen bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an. Die Vorbereitung ist nicht im Intensivkurs enthalten.'
-                    : 'Need telc Deutsch B2 or telc Deutsch C1 Hochschule? We can help you choose your exam and prepare in a dedicated course. Exam preparation is booked separately from intensive German.'}
+                    ? 'Sie brauchen ein Zertifikat telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen Ihnen bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an.'
+                    : 'Need a telc Deutsch B2 or telc Deutsch C1 Hochschule certificate? We’ll help you choose the right exam, and we run our own preparation courses.'}
                 </p>
                 {/*
                   A band lead-in, not a conversion. The two cards below it are
@@ -860,13 +884,13 @@ export default async function HomePage() {
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
-                  ? 'Für Ihren Intensivkurs vermitteln wir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu Ihnen passt und was verfügbar ist.'
-                  : 'For your intensive course, we can arrange a room in a CASA shared flat or with local hosts in and around Bremen. We will talk through your preferences and confirm what is available.'}
+                  ? 'Für die Zeit Ihres Intensivkurses bei uns vermitteln wir Ihnen Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu Ihnen passt und verfügbar ist.'
+                  : 'While you’re on an intensive course with us, we can find you a room in a CASA flat share or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.'}
               </p>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {[
-                  locale === 'de' ? 'CASA WG' : 'CASA shared flat',
+                  locale === 'de' ? 'CASA-WG' : 'CASA flat share',
                   locale === 'de' ? 'Gastfamilie' : 'Host family',
                   locale === 'de' ? 'Persönliche Vermittlung' : 'Personal help finding a room',
                   locale === 'de' ? 'Verfügbarkeit auf Anfrage' : 'Availability on request',
