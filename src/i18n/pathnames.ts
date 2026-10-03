@@ -63,6 +63,7 @@ export const routes: readonly RouteDefinition[] = [
   { internal: '/about', de: '/ueber-uns/casa-leitbild' },
   { internal: '/ueber-uns/gemeinnuetzigkeit', de: '/ueber-uns/gemeinnuetzigkeit' },
   { internal: '/team', de: '/ueber-uns/casa-team' },
+  { internal: '/partners', de: '/ueber-uns/kooperationspartner' },
 
   { internal: '/courses', de: '/sprachkurse' },
   { internal: '/courses/[slug]', de: '/sprachkurse/[slug]', params: { slug: COURSE_SLUGS_DE } },
