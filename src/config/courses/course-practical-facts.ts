@@ -89,7 +89,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     conditions: [
       {
         en: '20 lessons a week of 45 minutes each. A complete CEFR level takes 8 to 9 weeks, so a year at CASA takes you from A1 to C1.',
-        de: '20 Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen — in einem Jahr durchläufst du A1 bis C1.',
+        de: '20 Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen — in einem Jahr durchlaufen Sie A1 bis C1.',
       },
       {
         en: 'Mornings Monday to Friday, 09:00–12:30, or afternoons Monday to Thursday, 13:00–17:30. The afternoon course runs four days, not five.',

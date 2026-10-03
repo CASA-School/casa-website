@@ -5,7 +5,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'intensive-german',
       locale: 'en',
-      audience: 'For learners who want to make German a central part of their week, for study, work or everyday life.',
+      audience: 'For anyone who wants to immerse themselves in German, for their studies, their job and everyday life.',
       promise: 'Build your German step by step, with regular practice and a group to learn alongside.',
       outcomes: ['Progress through the language levels', 'Improved speaking confidence', 'A steady learning routine'],
       teachingStyle: ['Communicative tasks', 'Small-group correction', 'Weekly progress checkpoints'],
@@ -21,9 +21,9 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'special-courses',
       locale: 'en',
-      audience: 'For learners who want more practice in a particular area of German.',
+      audience: 'For anyone who wants to work on specific language skills.',
       promise: 'Work on grammar, writing or speaking in a course with a clear focus.',
-      outcomes: ['More confidence in your chosen skill', 'Practice you can use in class and daily life', 'A focus on the areas you want to improve'],
+      outcomes: ['More confidence in your chosen skill', 'Practice geared to your own goals and to everyday life', 'A focus on the areas you want to improve'],
       teachingStyle: ['Workshop format', 'Time for practice and individual feedback', 'Learning by doing'],
     },
     {
@@ -33,7 +33,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       promise: 'Practise patient consultations, medical reports and conversations with colleagues as you prepare for clinical work and the Fachsprachprüfung.',
       outcomes: [
         'Confident patient history-taking (Anamnese)',
-        'Clear physical examination language',
+        'Speaking appropriately to patients and colleagues, and writing professional documentation',
         'Structured case presentations (Fallvorstellungen)',
         'Precise medical report writing (Arztbriefe)',
         'Preparation for the medical language exam (FSP)',
@@ -48,17 +48,21 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'bildungszeit',
       locale: 'en',
-      audience: 'Employees using educational leave for intensive German training.',
-      promise: 'Use your educational leave to focus on German. We can advise you on the course and the documents you need.',
-      outcomes: ['Focused time for learning', 'Practical speaking gains', 'Advice on how to continue learning'],
+      audience: 'Employees on educational leave (Bildungszeit) with clear learning goals.',
+      promise: 'Use your educational leave to focus on German or English. We’ll advise you on the right course and the paperwork you need.',
+      outcomes: ['Focused time for learning', 'More language practice', 'Advice on how to continue learning'],
       teachingStyle: ['Compact intensive blocks', 'Applied communication tasks', 'Goal-based lesson plans'],
     },
     {
       slug: 'in-company',
       locale: 'en',
       audience: 'Teams that need German for internal and client communication.',
-      promise: 'Company-specific language training linked directly to work tasks.',
-      outcomes: ['More confidence in meetings', 'Clearer emails', 'Better understanding within your team'],
+      promise: 'Job-focused language training, built around real work. Courses tailored to your company and your team’s day-to-day needs.',
+      outcomes: [
+        'A curriculum built around your company, for confident communication at work',
+        'A clearer understanding of instructions and assignments',
+        'More confidence when communicating in your team',
+      ],
       teachingStyle: ['Needs analysis', 'Industry vocabulary tracks', 'Location and format agreed with your company'],
     },
     {
@@ -73,11 +77,12 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'german-for-groups',
       locale: 'en',
       audience: 'School classes, universities, and organisations bringing a group to Bremen.',
-      promise: 'A German programme built around your group, combined with a Bremen culture programme and host-family accommodation.',
+      audienceInPromise: true,
+      promise: 'Learn German and experience Bremen together: we plan the lessons, the culture programme and the accommodation around your group. The programme is for school classes, universities and organisations coming to Bremen as a group, and every participant receives a certificate of attendance.',
       outcomes: [
         'Lesson content shaped around your group and its goals',
         'German practised outside the classroom every day',
-        'A participation certificate for every learner',
+        'Experiencing local culture with Bremen host families',
       ],
       teachingStyle: [
         '20 hours of lessons per week',
@@ -90,7 +95,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'intensive-german',
       locale: 'de',
-      audience: 'Für alle, die sich intensiv mit Deutsch beschäftigen möchten – für Studium, Beruf oder Alltag.',
+      audience: 'Für alle, die sich intensiv mit Deutsch beschäftigen möchten – für das Studium, den Beruf und den Alltag.',
       promise: 'Schritt für Schritt sicherer auf Deutsch: mit regelmäßiger Übung und einer Gruppe, die gemeinsam lernt.',
       outcomes: ['Fortschritte auf Ihrem Sprachniveau', 'Mehr Sprechsicherheit', 'Verlässlicher Lernrhythmus'],
       teachingStyle: ['Kommunikative Aufgaben', 'Korrektur in Kleingruppen', 'Wöchentliche Lernchecks'],
@@ -106,9 +111,9 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'special-courses',
       locale: 'de',
-      audience: 'Für alle, die gezielt an einem Bereich ihres Deutschs arbeiten möchten.',
+      audience: 'Für alle, die gezielt an speziellen Sprachfertigkeiten arbeiten möchten.',
       promise: 'Grammatik vertiefen, besser schreiben oder freier sprechen: Wählen Sie Ihren Schwerpunkt.',
-      outcomes: ['Mehr Sicherheit im gewählten Bereich', 'Übung für Unterricht und Alltag', 'Individuelle Schwerpunkte'],
+      outcomes: ['Mehr Sicherheit im gewählten Bereich', 'Übungen für die individuellen Lernziele und den Alltag', 'Individuelle Schwerpunkte'],
       teachingStyle: ['Workshop-Format', 'Intensives Feedback', 'Lernen durch Anwenden'],
     },
     {
@@ -118,7 +123,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       promise: 'Üben Sie Patientengespräche, Arztbriefe und den Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.',
       outcomes: [
         'Sichere Anamnesegespräche auf Deutsch',
-        'Klare Sprache bei der körperlichen Untersuchung',
+        'Adressatengerechte mündliche Kommunikation und berufsspezifische schriftliche Dokumentation',
         'Strukturierte Fallvorstellungen im Team',
         'Präzises Verfassen von Arztbriefen',
         'Gezielte Vorbereitung auf die Fachsprachprüfung (FSP)',
@@ -134,16 +139,20 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'bildungszeit',
       locale: 'de',
       audience: 'Berufstätige in der Bildungszeit mit klaren Lernzielen.',
-      promise: 'Nutzen Sie Ihre Bildungszeit, um sich auf Deutsch zu konzentrieren. Wir beraten Sie zum Kurs und den benötigten Unterlagen.',
-      outcomes: ['Konzentrierte Zeit zum Lernen', 'Mehr Sprechpraxis', 'Beratung zum Weiterlernen'],
+      promise: 'Nutzen Sie Ihre Bildungszeit, um sich auf Deutsch und Englisch zu konzentrieren. Wir beraten Sie zum Kurs und den benötigten Unterlagen.',
+      outcomes: ['Konzentrierte Zeit zum Lernen', 'Mehr Sprachpraxis', 'Beratung zum Weiterlernen'],
       teachingStyle: ['Kompakte Intensivblöcke', 'Alltagsnahe Kommunikation', 'Zielorientierte Planung'],
     },
     {
       slug: 'in-company',
       locale: 'de',
       audience: 'Teams, die Deutsch direkt im Arbeitsalltag brauchen.',
-      promise: 'Firmenbezogenes Sprachtraining mit direktem Praxisbezug.',
-      outcomes: ['Sicherere Meetings', 'Bessere E-Mail-Kommunikation', 'Bessere Verständigung im Team'],
+      promise: 'Fachbezogenes Sprachtraining mit direktem Praxisbezug. Passgenaue und bedarfsgerechte Angebote für den Arbeitsalltag in Ihrer Firma.',
+      outcomes: [
+        'Speziell auf Ihre Firma zugeschnittenes Curriculum für sichere Kommunikation in der beruflichen Praxis',
+        'Besseres Verständnis bei Arbeitsanweisungen und -aufträgen',
+        'Sicheres Auftreten in der Teamkommunikation',
+      ],
       teachingStyle: ['Bedarfsanalyse', 'Branchenvokabular', 'Ort und Unterrichtsform nach Vereinbarung'],
     },
     {
@@ -158,11 +167,12 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'german-for-groups',
       locale: 'de',
       audience: 'Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen.',
-      promise: 'Deutsch lernen und Bremen gemeinsam erleben: Wir planen Unterricht, Kulturprogramm und Unterkunft passend zu Ihrer Gruppe.',
+      audienceInPromise: true,
+      promise: 'Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu Ihrer Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten. Alle Teilnehmenden erhalten eine Teilnahmebescheinigung.',
       outcomes: [
         'Unterrichtsinhalte passend zu Ihrer Gruppe und ihren Zielen',
         'Täglich Deutsch auch außerhalb des Unterrichts',
-        'Teilnahmebescheinigung für alle Teilnehmenden',
+        'Kultur vor Ort in Bremer Gastfamilien kennenlernen',
       ],
       teachingStyle: [
         '20 Unterrichtsstunden pro Woche',

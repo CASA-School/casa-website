@@ -331,7 +331,9 @@ export default async function CoursesPage({
       description:
         course.narrative?.promise ||
         (locale === 'de' ? 'Klarer Sprachaufbau mit betreuten Lernschritten.' : 'Structured language growth with supported steps.'),
-      bestFor: course.narrative?.audience || (locale === 'de' ? 'Geeignet für internationale Lernende' : 'Best for: international learners'),
+      bestFor: course.narrative?.audienceInPromise
+        ? ''
+        : course.narrative?.audience || (locale === 'de' ? 'Geeignet für internationale Lernende' : 'Best for: international learners'),
       outcomes: course.narrative?.outcomes ?? [],
       href: getCoursePath(course.slug),
       ctaLabel: locale === 'de' ? 'Kursplan ansehen' : 'View course plan',
