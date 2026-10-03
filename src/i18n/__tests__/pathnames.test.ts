@@ -56,7 +56,7 @@ describe('the URL map', () => {
   });
 
   it('leaves route handlers, the workspace, assets and files alone', () => {
-    for (const untouched of ['/api/contact', '/admin/sign-in', '/accreditations/azav.svg', '/images/og-default.png', '/sitemap.xml', '/robots.txt', '/icon.png']) {
+    for (const untouched of ['/api/contact', '/admin/sign-in', '/accreditations/azav-hza.jpg', '/images/og-default.png', '/sitemap.xml', '/robots.txt', '/icon.png']) {
       expect(toPublicPath(untouched, 'en')).toBe(untouched);
       expect(toPublicPath(untouched, 'de')).toBe(untouched);
       expect(toInternalPath(untouched).internalPath).toBe(untouched);

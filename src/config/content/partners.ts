@@ -97,12 +97,14 @@ export const garantiefonds: Partner = {
  * Neither organisation's site nor any public source describes the
  * cooperation, so their text says only what the organisation does
  * (vskultur.de and hoodtraining.de, imprints checked 2026-10-03). Add what
- * CASA does with them once CASA has described it.
+ * CASA does with them once CASA has described it. Their logos are the files
+ * on their own sites, downloaded 2026-10-03.
  */
 export const visionskultur: Partner = {
   id: 'visionskultur',
   name: 'Visionskultur · Creative HUB',
   href: 'https://vskultur.de/',
+  logo: { src: '/partners/visionskultur.svg', width: 312, height: 40, onDark: true },
   label: { de: 'Kreativität und Gründung', en: 'Creativity and new ventures' },
   text: {
     de: 'Visionskultur ist eine gemeinnützige Organisation in Bremen, die Menschen bei Gründungen sowie bei kreativen und kulturellen Projekten unterstützt. Im Creative HUB bietet sie dafür Arbeits- und Werkstatträume, Coaching und ein Netzwerk.',
@@ -114,6 +116,7 @@ export const hoodTraining: Partner = {
   id: 'hood-training',
   name: 'Hood Training',
   href: 'https://hoodtraining.de/',
+  logo: { src: '/partners/hood-training.png', width: 3291, height: 1836 },
   label: { de: 'Sport und Jugendarbeit', en: 'Sport and youth work' },
   text: {
     de: 'Hood Training ist eine gemeinnützige Organisation der Kinder- und Jugendhilfe in Bremen. Mit Sport- und Bewegungsangeboten in den Stadtteilen erreicht sie Kinder und Jugendliche und verbindet das mit sozialer Arbeit und Bildungsangeboten.',
