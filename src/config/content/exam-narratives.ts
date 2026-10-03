@@ -16,7 +16,7 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       locale: 'en',
       headline: 'telc C1 Hochschule for university admission',
       summary:
-        'Practise the German you need in an academic setting, from understanding complex texts to presenting and discussing an argument.',
+        'Practise the German you need for university: understanding demanding texts, building an argument and making your case in speech and in writing.',
       outcomes: ['More confidence with academic German', 'Practice understanding academic speech', 'Higher confidence under exam pressure'],
       prepHighlights: ['Academic reading and writing tasks', 'Exam-format simulations', 'Personal feedback on what to work on next'],
     },
@@ -36,7 +36,7 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       locale: 'de',
       headline: 'telc C1 Hochschule für die Zulassung an Hochschulen',
       summary:
-        'Üben Sie Deutsch für das Studium: anspruchsvolle Texte verstehen, Argumente aufbauen und eigene Standpunkte im Gespräch vertreten.',
+        'Üben Sie Deutsch für das Studium: anspruchsvolle Texte verstehen, Argumente aufbauen und eigene Standpunkte mündlich und schriftlich vertreten.',
       outcomes: ['Mehr akademische Sprachsicherheit', 'Besseres Vorlesungsverstehen', 'Souveräner Umgang mit Prüfungsdruck'],
       prepHighlights: ['Hochschulnahe Aufgaben', 'Prüfungssimulationen', 'Persönliches Feedback zum Weiterlernen'],
     },

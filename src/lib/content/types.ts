@@ -159,6 +159,11 @@ export type CourseNarrative = {
   slug: string;
   locale: ContentLocale;
   audience: string;
+  /**
+   * The promise already says who the course is for, so a course card does not
+   * repeat `audience` as its second line. The course's own page still uses it.
+   */
+  audienceInPromise?: boolean;
   promise: string;
   outcomes: string[];
   teachingStyle: string[];
