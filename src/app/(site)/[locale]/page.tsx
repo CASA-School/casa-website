@@ -77,6 +77,25 @@ function formatDate(value: string, locale: 'en' | 'de') {
 const additionalProgramOrder = ['bildungszeit'] as const;
 
 /**
+ * The course formats listed under "Für Beruf und Weiterbildung", in this order
+ * and before Bildungszeit, instead of as full rows (CASA, 2026-10-03): Pflege
+ * und Medizin belongs beside Firmenunterricht, and Unterricht für Gruppen took
+ * its full row.
+ */
+const professionalCourseOrder = ['medical-german', 'in-company'] as const;
+
+/**
+ * The list under "Für Beruf und Weiterbildung" shows one short line per format;
+ * the course overview and the course page keep the full text.
+ */
+const homepageListSummaries: Partial<Record<string, Record<ContentLocale, string>>> = {
+  'medical-german': {
+    de: 'Deutsch für den Klinik- und Pflegealltag, mit Vorbereitung auf die Fachsprachprüfung.',
+    en: 'German for work in hospitals and care, with preparation for the medical language exam.',
+  },
+};
+
+/**
  * Derived from the published order, not restated.
  *
  * This used to be its own literal list here, which is how the homepage came to
@@ -236,12 +255,16 @@ export default async function HomePage() {
   });
 
   /*
-   * The first four formats carry the band as full alternating rows; the rest
-   * get a hairline row beneath. `homepageCourseOrder` is already priority
-   * order, so this reads the existing intent rather than inventing a ranking.
+   * The formats for learners carry the band as full alternating rows, in the
+   * published order; the formats for work and further training go to the list
+   * beneath, in `professionalCourseOrder`.
    */
-  const flagshipCourses = guidedCourses.slice(0, 4);
-  const secondaryCourses = guidedCourses.slice(4);
+  const isProfessional = (courseId: string) =>
+    professionalCourseOrder.some((slug) => courseId === `course-${slug}`);
+  const flagshipCourses = guidedCourses.filter((course) => !isProfessional(course.id));
+  const secondaryCourses = professionalCourseOrder
+    .map((slug) => guidedCourses.find((course) => course.id === `course-${slug}`))
+    .filter((course): course is NonNullable<typeof course> => course !== undefined);
 
   const additionalPrograms = additionalProgramOrder
     .map((slug) => {
@@ -281,7 +304,7 @@ export default async function HomePage() {
       key: course.id,
       anchorId: course.id as string | undefined,
       title: course.title,
-      description: course.description,
+      description: homepageListSummaries[course.id.replace(/^course-/, '')]?.[locale] ?? course.description,
       href: course.href,
     })),
     ...additionalPrograms.map((program) => ({

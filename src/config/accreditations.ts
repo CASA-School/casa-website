@@ -20,15 +20,6 @@ export const accreditationLogos: Accreditation[] = [
     href: 'https://www.tandem-schools.com/en',
   },
   {
-    id: 'tandem-quality',
-    name: 'TANDEM Quality',
-    imageSrc: '/accreditations/tandem-quality.jpg',
-    imageWidth: 200,
-    imageHeight: 290,
-    displayHeight: 50,
-    href: 'https://tandem-schools.com/en/qualitaet',
-  },
-  {
     id: 'telc',
     name: 'telc Language Tests',
     imageSrc: '/accreditations/telc.svg',
