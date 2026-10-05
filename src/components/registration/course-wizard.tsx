@@ -29,7 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
-import { courseDatesLine, CourseItemFields, ExamAddOn } from '@/components/registration/course-choices';
+import { courseDatesLine, CourseItemFields, ExamAddOn, pathStepDates } from '@/components/registration/course-choices';
 import type { CourseFormData, CourseFormSubmission } from '@/components/registration/course-form-types';
 import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
@@ -38,6 +38,7 @@ import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
+import { buildLevelPath } from '@/lib/registration/level-path';
 import { describeBookedLevel } from '@/lib/registration/levels';
 import { cn } from '@/lib/utils';
 import {
@@ -88,6 +89,7 @@ function courseRow(catalog: RegistrationCourseCatalog, typeId = '', instanceId =
     courseInstanceId: instanceId,
     level: '',
     levelRequired: requiresLevelField(slug) && (options[0]?.availableLevels.length ?? 0) > 0,
+    pathTo: '',
   };
 }
 
@@ -656,26 +658,50 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
             <div className="space-y-4 text-sm">
               <div className="grid gap-3 sm:grid-cols-2">
-                {courses.map((course, index) => {
-                  const type = catalog.courseTypes.find((candidate) => candidate.id === course.courseTypeId);
-                  const option = catalog.optionsByCourseTypeId[course.courseTypeId]?.find((candidate) => candidate.id === course.courseInstanceId);
-                  const level = type && option && course.level
-                    ? describeBookedLevel(type.slug, course.level, option.availableLevels, catalog.locale)
-                    : null;
-                  return (
-                    <div key={`${course.courseTypeId}-${index}`} className={formTileClassName}>
+                {(() => {
+                  // One tile per course, and per term of a learning path, numbered as staff will see them.
+                  const tiles = courses.flatMap((course) => {
+                    const type = catalog.courseTypes.find((candidate) => candidate.id === course.courseTypeId);
+                    const options = catalog.optionsByCourseTypeId[course.courseTypeId] ?? [];
+                    const option = options.find((candidate) => candidate.id === course.courseInstanceId);
+                    const level = type && option && course.level
+                      ? describeBookedLevel(type.slug, course.level, option.availableLevels, catalog.locale)
+                      : null;
+                    const path = type && option && course.level && course.pathTo
+                      ? buildLevelPath({
+                          slug: type.slug, value: course.level, option, options,
+                          availableLevels: option.availableLevels, pathTo: course.pathTo, locale: catalog.locale,
+                        })
+                      : [];
+                    if (path.length > 1) {
+                      return path.map((step) => ({
+                        name: type?.name ?? '-',
+                        level: step.label.split(' · ')[0],
+                        dates: pathStepDates(step, catalog.locale),
+                        schedule: step.option?.scheduleLabel ?? null,
+                      }));
+                    }
+                    return [{
+                      name: type?.name ?? '-',
+                      level: level ? level.label.split(' · ')[0] : null,
+                      dates: option ? courseDatesLine(type?.slug, option, level, catalog.locale) : null,
+                      schedule: option?.scheduleLabel ?? null,
+                    }];
+                  });
+                  return tiles.map((tile, index) => (
+                    <div key={`${tile.name}-${index}`} className={formTileClassName}>
                       <p className={formMetaLabelClassName}>
-                        {courses.length > 1 ? t(`Course ${index + 1}`, `Kurs ${index + 1}`) : t('Course', 'Kurs')}
+                        {tiles.length > 1 ? t(`Course ${index + 1}`, `Kurs ${index + 1}`) : t('Course', 'Kurs')}
                       </p>
                       <p className="mt-1 font-semibold text-[var(--casa-ink)]">
-                        {type?.name || '-'}
-                        {level ? <span className="font-normal text-[var(--casa-muted)]"> · {level.label.split(' · ')[0]}</span> : null}
+                        {tile.name}
+                        {tile.level ? <span className="font-normal text-[var(--casa-muted)]"> · {tile.level}</span> : null}
                       </p>
-                      {option ? <p className="mt-0.5 text-[var(--casa-muted)]">{courseDatesLine(type?.slug, option, level, catalog.locale)}</p> : null}
-                      {option ? <p className="mt-0.5 text-[var(--casa-muted)]">{option.scheduleLabel}</p> : null}
+                      {tile.dates ? <p className="mt-0.5 text-[var(--casa-muted)]">{tile.dates}</p> : null}
+                      {tile.schedule ? <p className="mt-0.5 text-[var(--casa-muted)]">{tile.schedule}</p> : null}
                     </div>
-                  );
-                })}
+                  ));
+                })()}
                 {examEnabled && examCatalog ? (() => {
                   const examType = examCatalog.examTypes.find((candidate) => candidate.id === exam?.examTypeId);
                   const session = examCatalog.optionsByExamTypeId[exam?.examTypeId ?? '']?.find((candidate) => candidate.id === exam?.examSessionId);

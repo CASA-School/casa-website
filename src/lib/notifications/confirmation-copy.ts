@@ -207,11 +207,7 @@ export const CONFIRMATION_COPY = {
           },
           {
             "label": "Weiterer Kurs",
-            "value": "{course2}"
-          },
-          {
-            "label": "Weiterer Kurs",
-            "value": "{course3}"
+            "value": "{moreCourses}"
           },
           {
             "label": "Prüfung",
@@ -273,11 +269,7 @@ export const CONFIRMATION_COPY = {
           },
           {
             "label": "Another course",
-            "value": "{course2}"
-          },
-          {
-            "label": "Another course",
-            "value": "{course3}"
+            "value": "{moreCourses}"
           },
           {
             "label": "Exam",

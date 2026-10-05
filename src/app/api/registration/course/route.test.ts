@@ -26,8 +26,11 @@ const catalog = {
       scheduleLabel: 'Mo-Fr 09:00-12:15', locationLabel: 'CASA Bremen', availableLevels: [],
     }],
     [INTENSIVE_ID]: [{
-      id: INTENSIVE_OPTION_ID, dateRangeLabel: '23. Nov. 2026 - 28. Jan. 2027',
-      scheduleLabel: 'Mo-Fr 09:00-12:30', locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2'],
+      id: INTENSIVE_OPTION_ID, dateRangeLabel: '23. Nov. 2026 - 28. Jan. 2027', startDate: '2026-11-23', endDate: '2027-01-28',
+      scheduleLabel: 'Mo-Fr 09:00-12:30', locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2'],
+    }, {
+      id: '20000000-0000-4000-8000-000000000003', dateRangeLabel: '01. Feb. 2027 - 01. Apr. 2027', startDate: '2027-02-01', endDate: '2027-04-01',
+      scheduleLabel: 'Mo-Do 13:00-17:30', locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2'],
     }],
   },
 };
@@ -192,6 +195,30 @@ describe('course registration route', () => {
     }));
     expect(response.status).toBe(400);
     expect((await response.json()).message).toBe('Dieser Prüfungstermin ist nicht mehr buchbar. Bitte wählen Sie einen anderen Termin.');
+    expect(mocks.store).not.toHaveBeenCalled();
+  });
+
+  it('stores a learning path as one row per level, in the terms it finds, with a dateless row where none is listed', async () => {
+    mocks.catalog.mockResolvedValue(catalog);
+    mocks.store.mockResolvedValue(true);
+    mocks.notify.mockResolvedValue({ delivered: true, channel: 'email' });
+    const response = await POST(request({ ...valid, courses: [{ courseTypeId: INTENSIVE_ID, courseInstanceId: INTENSIVE_OPTION_ID, level: 'A1.1', pathTo: 'B1' }] }));
+    expect(response.status).toBe(200);
+    const rows = mocks.store.mock.calls[0][0].courses;
+    expect(rows.map((row: { levelRaw: string }) => row.levelRaw)).toEqual([
+      'A1 komplett (A1.1 + A1.2) · 8 Wochen',
+      'A2 komplett (A2.1 + A2.2) · 8 Wochen',
+      'B1 komplett (B1.1 + B1.2) · 8 Wochen',
+    ]);
+    expect(rows[1].courseInstanceLabel).toBe('01. Feb. 2027 - 01. Apr. 2027 | Mo-Do 13:00-17:30 | CASA Bremen');
+    expect(rows[2]).toMatchObject({ courseInstanceId: '', courseInstanceLabel: 'Termin wird noch festgelegt', levelCode: 'B1.1' });
+    expect(new Set(rows.map((row: { requestId: string }) => row.requestId)).size).toBe(3);
+  });
+
+  it('refuses a path to a level the course cannot reach from the one chosen', async () => {
+    mocks.catalog.mockResolvedValue(catalog);
+    const response = await POST(request({ ...valid, courses: [{ courseTypeId: INTENSIVE_ID, courseInstanceId: INTENSIVE_OPTION_ID, level: 'B1', pathTo: 'A2' }] }));
+    expect(response.status).toBe(400);
     expect(mocks.store).not.toHaveBeenCalled();
   });
 });

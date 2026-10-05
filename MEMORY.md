@@ -2329,3 +2329,15 @@ home-made AZAV badge; Green Planet Energy left (on the old site it meant the web
 on its power, untrue on Azure). CASA asked for Universität Bremen in that slot, but its logo
 is for university staff only, so HERE AHEAD stands in until the university approves.
 
+## 37. The registration books levels, paths, several courses and an exam (2026-10-05)
+
+Rahman asked for a registration that books the way agencies do. Courses are cards (only formats
+with a bookable date; the rest are named with a way to ask). The intensive course is booked by the
+half level (4 weeks) or the whole level ("A1 komplett", 8 weeks: one term). "Danach weiterlernen?"
+builds a learning path from one click ("bis B2"): every next level in the first term after the
+previous one ends, shown as a timeline, dateless where the catalogue lists no term yet
+(`src/lib/registration/level-path.ts`, shared by the wizard and the route). Up to three courses and an
+exam ride in one registration; one person, one queue row per course term, one exam row
+(`storeRegistration`). Zod 4 runs cross-field rules only once every field is valid, so step 1 checks
+its conditional fields in the wizard itself.
+

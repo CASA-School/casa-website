@@ -201,7 +201,11 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
       [INTENSIVE_ID]: [{
         id: INTENSIVE_OPTION_ID, courseTypeId: INTENSIVE_ID, dateRangeLabel: '26. Okt. 2026 - 18. Dez. 2026',
         startDate: '2026-10-26', endDate: '2026-12-18', scheduleLabel: 'Mo-Fr 09:00-12:30',
-        locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2'],
+        locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2'],
+      }, {
+        id: '20000000-0000-4000-8000-000000000010', courseTypeId: INTENSIVE_ID, dateRangeLabel: '04. Jan. 2027 - 26. Feb. 2027',
+        startDate: '2027-01-04', endDate: '2027-02-26', scheduleLabel: 'Mo-Do 13:00-17:30',
+        locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2'],
       }],
     },
     unavailableCourseTypes: [{ slug: 'medical-german', name: 'Deutsch für Pflege und Medizin' }],
@@ -235,6 +239,12 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     expect(container.querySelectorAll('input[name="exam-type"]')).toHaveLength(1);
     await click(button('Weiter'));
     expect(container.querySelector('#exam-registration-type-error')?.textContent).toBe('Bitte wählen Sie eine Anmeldeart aus.');
+  });
+
+  it('offers no learning path before a level is chosen', async () => {
+    // Choosing one means the Radix select, which jsdom cannot open: e2e/registration.spec.ts walks that part.
+    await act(async () => root.render(<CourseWizard catalog={{ ...catalog, defaultCourseTypeId: INTENSIVE_ID, defaultOptionId: INTENSIVE_OPTION_ID }} />));
+    expect(container.querySelector('input[name="course-0-path"]')).toBeNull();
   });
 });
 

@@ -984,9 +984,10 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     siteHost: site.replace(/^https?:\/\//, ''),
     course: kind === 'course' ? text(p.courseTypeLabel) : null,
     courseLevel: kind === 'course' ? text(p.currentLevel) : null,
-    // A second and third course, and an exam booked with the courses, one line each.
-    course2: kind === 'course' ? courseLine(registrationParts(p).courses[1]) : null,
-    course3: kind === 'course' ? courseLine(registrationParts(p).courses[2]) : null,
+    // Every course after the first (further courses, the terms of a learning path), one line each.
+    moreCourses: kind === 'course'
+      ? registrationParts(p).courses.slice(1).map(courseLine).filter(Boolean).join('\n') || null
+      : null,
     addedExam: kind === 'course' ? examLine(registrationParts(p).exam, locale) : null,
     dates: course.length === 3 ? rangeDash(course[0]) : null,
     // A term without stored days reads "Days to be confirmed": leave the row out rather than print it.
@@ -1049,7 +1050,10 @@ export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, 
   const subject = line(copy.subject) ?? copy.subject.split(':')[0].trim();
   const greeting = line(shared.greetingNamed, shared.greetingNeutral)!;
   const rows = copy.summaryRows
-    .map((row) => ({ label: row.label as string, value: line(row.value), mono: row.value === '{reference}' }))
+    // `{moreCourses}` is one row per further course, under the same label.
+    .flatMap((row) => row.value === '{moreCourses}'
+      ? (values.moreCourses ?? '').split('\n').filter(Boolean).map((value) => ({ label: row.label as string, value, mono: false }))
+      : [{ label: row.label as string, value: line(row.value), mono: row.value === '{reference}' }])
     .filter((row): row is { label: string; value: string; mono: boolean } => Boolean(row.value));
   const steps = copy.nextSteps.map((step) => line(step.text)).filter((step): step is string => Boolean(step));
   const paragraphs = (value: string | null) =>

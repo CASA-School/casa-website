@@ -5,7 +5,8 @@ import { storeRegistration } from '@/lib/admin/intake';
 import { levelCodeFrom } from '@/lib/admin/normalize';
 import { rateLimit } from '@/lib/api/rate-limit';
 import { getCourseRegistrationCatalog, getExamRegistrationCatalog } from '@/lib/content/repository';
-import { describeBookedLevel, type BookedLevel } from '@/lib/registration/levels';
+import { buildLevelPath, continuationLevels } from '@/lib/registration/level-path';
+import { describeBookedLevel } from '@/lib/registration/levels';
 
 import {
   createCourseRegistrationSubmissionSchema,
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
    * wizard.
    */
   const catalog = await getCourseRegistrationCatalog(payload.locale);
-  const courses: Array<{ typeLabel: string; instanceLabel: string; typeId: string; instanceId: string; level: BookedLevel | null }> = [];
+  const courses: Array<{ typeLabel: string; instanceLabel: string; typeId: string; instanceId: string; level: { label: string; startCode: string } | null }> = [];
   for (const item of payload.courses) {
     const courseType = catalog.courseTypes.find((candidate) => candidate.id === item.courseTypeId);
     const option = catalog.optionsByCourseTypeId[item.courseTypeId]?.find((candidate) => candidate.id === item.courseInstanceId);
@@ -115,6 +116,36 @@ export async function POST(request: NextRequest) {
     const levelRequired = requiresLevelField(courseType.slug) && levels.length > 0;
     if ((item.level && !level) || (levelRequired && !level)) {
       return NextResponse.json({ status: 'error', message: levelMessage(payload.locale) }, { status: 400 });
+    }
+    if (item.pathTo && !continuationLevels(courseType.slug, item.level, levels).includes(item.pathTo)) {
+      return NextResponse.json({ status: 'error', message: levelMessage(payload.locale) }, { status: 400 });
+    }
+    // A path is one row per level, each in the term the path finds; the route
+    // rebuilds it from its own catalogue rather than taking the wizard's.
+    const steps = level && item.pathTo
+      ? buildLevelPath({
+          slug: courseType.slug,
+          value: item.level,
+          option,
+          options: catalog.optionsByCourseTypeId[courseType.id] ?? [],
+          availableLevels: levels,
+          pathTo: item.pathTo,
+          locale: payload.locale,
+        })
+      : [];
+    if (steps.length > 1) {
+      for (const step of steps) {
+        courses.push({
+          typeId: courseType.id,
+          instanceId: step.option?.id ?? '',
+          typeLabel: courseType.name,
+          instanceLabel: step.option
+            ? `${step.option.dateRangeLabel} | ${step.option.scheduleLabel} | ${step.option.locationLabel}`
+            : payload.locale === 'de' ? 'Termin wird noch festgelegt' : 'Date to be arranged',
+          level: { label: step.label, startCode: step.startCode },
+        });
+      }
+      continue;
     }
     courses.push({
       typeId: courseType.id,

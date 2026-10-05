@@ -604,10 +604,24 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
 | Public route | Table |
 | --- | --- |
 | `POST /api/contact` | `enquiries` |
-| `POST /api/registration/course` | `course_registrations` |
+| `POST /api/registration/course` | `course_registrations`, and `exam_registrations` for an exam booked with the courses |
 | `POST /api/registration/exam` | `exam_registrations` |
 | `POST /api/careers/apply` | `career_applications` + `career_application_files` (pre-existing) |
 | `/placement-test` | `placement_attempts` (pre-existing) |
+
+**One course registration, several rows (2026-10-05).** The public form takes
+up to three courses, a learning path (one intensive term per whole level, "A2
+bis B2") and an exam. `storeRegistration` in `src/lib/admin/intake.ts` writes
+them in one transaction: one person, a `course_registrations` row per course or
+path term, an `exam_registrations` row for the exam, each with its own
+`request_id`. The rows belong together through the `person_id` they share; the
+learner's reference is the first course's. The person's flags (duplicate
+candidate, unmatched nationality or birth date) go on the first course and on
+the exam only, so one person is not flagged three times in one queue.
+`declared_level_raw` holds what the learner chose ("A1 komplett (A1.1 + A1.2) ·
+8 Wochen"), `declared_level_code` the half level it starts at. A path term the
+catalogue lists no date for yet is stored without an instance and with the
+label "Termin wird noch festgelegt": CASA plans it with the learner.
 
 ---
 
