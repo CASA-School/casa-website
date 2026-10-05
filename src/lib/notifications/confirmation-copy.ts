@@ -190,6 +190,10 @@ export const CONFIRMATION_COPY = {
             "value": "{course}"
           },
           {
+            "label": "Niveau",
+            "value": "{courseLevel}"
+          },
+          {
             "label": "Zeitraum",
             "value": "{dates}"
           },
@@ -200,6 +204,18 @@ export const CONFIRMATION_COPY = {
           {
             "label": "Ort",
             "value": "{location}"
+          },
+          {
+            "label": "Weiterer Kurs",
+            "value": "{course2}"
+          },
+          {
+            "label": "Weiterer Kurs",
+            "value": "{course3}"
+          },
+          {
+            "label": "Prüfung",
+            "value": "{addedExam}"
           },
           {
             "label": "Unterkunft",
@@ -240,6 +256,10 @@ export const CONFIRMATION_COPY = {
             "value": "{course}"
           },
           {
+            "label": "Level",
+            "value": "{courseLevel}"
+          },
+          {
             "label": "Dates",
             "value": "{dates}"
           },
@@ -250,6 +270,18 @@ export const CONFIRMATION_COPY = {
           {
             "label": "Location",
             "value": "{location}"
+          },
+          {
+            "label": "Another course",
+            "value": "{course2}"
+          },
+          {
+            "label": "Another course",
+            "value": "{course3}"
+          },
+          {
+            "label": "Exam",
+            "value": "{addedExam}"
           },
           {
             "label": "Accommodation",

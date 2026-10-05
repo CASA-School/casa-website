@@ -109,7 +109,11 @@ const COPY = {
     schedule: 'Unterricht',
     location: 'Ort',
     courseOption: 'Termin',
-    declaredLevel: 'Selbst eingeschätztes Niveau',
+    declaredLevel: 'Gewünschtes Niveau',
+    courseNumbered: (n: number) => `Kurs ${n}`,
+    courseLeadMany: (name: string, courses: number, exam: boolean) =>
+      `${name} hat sich für ${courses === 1 ? 'einen Kurs' : `${courses} Kurse`}${exam ? ' und eine Prüfung' : ''} angemeldet.`,
+    chipExam: 'Mit Prüfung',
     visaAndStay: 'Visum und Unterkunft',
     visa: 'Visum',
     visaNeeded: 'Benötigt',
@@ -277,7 +281,11 @@ const COPY = {
     schedule: 'Classes',
     location: 'Location',
     courseOption: 'Dates',
-    declaredLevel: 'Self-assessed level',
+    declaredLevel: 'Requested level',
+    courseNumbered: (n: number) => `Course ${n}`,
+    courseLeadMany: (name: string, courses: number, exam: boolean) =>
+      `${name} has registered for ${courses === 1 ? 'a course' : `${courses} courses`}${exam ? ' and an exam' : ''}.`,
+    chipExam: 'With exam',
     visaAndStay: 'Visa and accommodation',
     visa: 'Visa',
     visaNeeded: 'Needed',
@@ -497,18 +505,51 @@ function contactMail(kind: 'contact' | 'groups', p: Payload, locale: Locale, c: 
   };
 }
 
+/** The courses and the exam a registration lists; empty for a sender that predates them. */
+function registrationParts(p: Payload) {
+  const courses = Array.isArray(p.courses)
+    ? (p.courses as unknown[]).filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+    : [];
+  const exam = p.exam && typeof p.exam === 'object' ? (p.exam as Record<string, unknown>) : null;
+  return { courses, exam };
+}
+
 function courseMail(p: Payload, locale: Locale, c: Copy): Mail {
   const name = fullName(p) ?? c.name;
   const course = text(p.courseTypeLabel);
   const accommodation = p.accommodationRequired === true;
   const stayType = String(p.accommodationType ?? '');
   const allergies = accommodation ? text(p.allergies) : null;
+  const { courses, exam } = registrationParts(p);
+  const examName = exam ? text(exam.examTypeLabel) : null;
+  const examPart = exam ? String(exam.registrationType ?? '') : '';
+  // One course reads as it always did; several, or one with an exam, number their sections.
+  const courseSections = courses.length > 1
+    ? courses.map((item, index) => ({
+        title: c.courseNumbered(index + 1),
+        rows: [
+          { label: c.course, value: text(item.courseTypeLabel) },
+          ...optionRows(item.courseInstanceLabel, [c.dates, c.schedule, c.location], c.courseOption),
+          { label: c.declaredLevel, value: text(item.level) },
+        ],
+      }))
+    : [{
+        title: c.course,
+        rows: [
+          { label: c.course, value: course },
+          ...optionRows(p.courseInstanceLabel, [c.dates, c.schedule, c.location], c.courseOption),
+          { label: c.declaredLevel, value: text(p.currentLevel) },
+        ],
+      }];
+  // "Kursanmeldung: Maria Rossi – Intensivkurse, Spezialkurse + telc Deutsch B2"; one course reads as before.
+  const courseNames = courses.length > 1 ? courses.map((item) => text(item.courseTypeLabel)).filter(Boolean).join(', ') : course;
   return {
-    subject: `${c.courseKind}: ${[fullName(p), course].filter(Boolean).join(' – ')}`,
+    subject: `${c.courseKind}: ${[fullName(p), courseNames].filter(Boolean).join(' – ')}${examName ? ` + ${examName}` : ''}`,
     kindLabel: c.courseKind,
     title: c.courseTitle,
-    lead: c.courseLead(name, course),
+    lead: courses.length > 1 || exam ? c.courseLeadMany(name, Math.max(courses.length, 1), Boolean(exam)) : c.courseLead(name, course),
     chips: [
+      ...(exam ? [c.chipExam] : []),
       ...(p.visaRequired === true ? [c.chipVisa] : []),
       ...(accommodation ? [c.chipStay[stayType] ?? c.chipStayAny] : []),
       ...(allergies ? [c.chipAllergies] : []),
@@ -516,14 +557,17 @@ function courseMail(p: Payload, locale: Locale, c: Copy): Mail {
     action: replyAction(p, c, c.courseReply),
     note: null,
     sections: [
-      {
-        title: c.course,
-        rows: [
-          { label: c.course, value: course },
-          ...optionRows(p.courseInstanceLabel, [c.dates, c.schedule, c.location], c.courseOption),
-          { label: c.declaredLevel, value: text(p.currentLevel) },
-        ],
-      },
+      ...courseSections,
+      ...(exam
+        ? [{
+            title: c.exam,
+            rows: [
+              { label: c.exam, value: examName },
+              ...optionRows(exam.examSessionLabel, [c.examSession, c.location], c.examSession),
+              { label: c.examPart, value: c.examParts[examPart] ?? text(exam.registrationType) },
+            ],
+          }]
+        : []),
       personSection(p, locale, c),
       {
         title: c.visaAndStay,
@@ -939,6 +983,11 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     siteUrl: site,
     siteHost: site.replace(/^https?:\/\//, ''),
     course: kind === 'course' ? text(p.courseTypeLabel) : null,
+    courseLevel: kind === 'course' ? text(p.currentLevel) : null,
+    // A second and third course, and an exam booked with the courses, one line each.
+    course2: kind === 'course' ? courseLine(registrationParts(p).courses[1]) : null,
+    course3: kind === 'course' ? courseLine(registrationParts(p).courses[2]) : null,
+    addedExam: kind === 'course' ? examLine(registrationParts(p).exam, locale) : null,
     dates: course.length === 3 ? rangeDash(course[0]) : null,
     // A term without stored days reads "Days to be confirmed": leave the row out rather than print it.
     schedule: course.length === 3 && !/to be confirmed|noch festgelegt|wird bestätigt/i.test(course[1]) ? rangeDash(course[1]) : null,
@@ -955,6 +1004,21 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     position: kind === 'careers' ? text(p.positionTitle) : null,
     groupSize: size,
   };
+}
+
+/** "Abendkurse · B1.2 · 2.11.2026 – 17.12.2026": one more course, in the confirmation summary. */
+function courseLine(item: Record<string, unknown> | undefined) {
+  if (!item) return null;
+  const dates = text(item.courseInstanceLabel)?.split(' | ')[0]?.trim();
+  return [text(item.courseTypeLabel), text(item.level), dates ? rangeDash(dates) : null].filter(Boolean).join(' · ') || null;
+}
+
+/** "telc Deutsch B2 · 13.11.2026 · Gesamte Prüfung": an exam booked with the courses. */
+function examLine(exam: Record<string, unknown> | null, locale: Locale) {
+  if (!exam) return null;
+  const date = text(exam.examSessionLabel)?.split(' | ')[0]?.trim();
+  const part = CONFIRMATION_EXAM_PARTS[locale][String(exam.registrationType)] ?? null;
+  return [text(exam.examTypeLabel), date ? rangeDash(date) : null, part].filter(Boolean).join(' · ') || null;
 }
 
 /** CASA's own addresses and phone number in the copy as links; a full stop after a URL stays text. */

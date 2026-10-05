@@ -265,12 +265,9 @@ export async function storeEnquiry(input: EnquiryInput): Promise<boolean> {
 
 class Duplicate extends Error {}
 
-export async function storeCourseRegistration(input: {
-  requestId: string;
-  courseTypeId: string;
-  courseInstanceId: string;
-  courseTypeLabel: string;
-  courseInstanceLabel: string;
+type CreatedPerson = Awaited<ReturnType<typeof createPerson>>;
+
+type RegistrantInput = {
   salutation: string;
   firstName: string;
   lastName: string;
@@ -278,174 +275,256 @@ export async function storeCourseRegistration(input: {
   phone: string;
   nationality: string;
   birthDate: string;
-  currentLevel: string;
+};
+
+const registrantPerson = (input: RegistrantInput, now: Date) => ({
+  salutation: input.salutation,
+  firstName: input.firstName,
+  lastName: input.lastName,
+  birthDate: input.birthDate,
+  nationalityRaw: input.nationality,
+  email: input.email,
+  phone: input.phone,
+  createdAt: now,
+});
+
+type CourseRowInput = {
+  requestId: string;
+  courseTypeId: string;
+  courseInstanceId: string;
+  courseTypeLabel: string;
+  courseInstanceLabel: string;
+  /** What the learner chose, e.g. "A1 komplett (A1.1 + A1.2) · 8 Wochen" or "B1.2". */
+  levelRaw: string;
+  /** The half level it starts at, the stored code; null when the raw value is not a CASA level. */
+  levelCode: string | null;
+};
+
+type StayInput = {
   visaRequired: boolean;
   accommodationRequired: boolean;
   accommodationType: string | undefined;
   allergies: string;
   notes: string;
-  locale: 'en' | 'de';
-}): Promise<boolean> {
-  if (!isWorkspaceDatabaseConfigured()) return false;
-  try {
-    await withTransaction(async (client) => {
-      const now = new Date();
-      const person = await createPerson(client, {
-        salutation: input.salutation,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        birthDate: input.birthDate,
-        nationalityRaw: input.nationality,
-        email: input.email,
-        phone: input.phone,
-        createdAt: now,
-      });
-      const levelCode = levelCodeFrom(input.currentLevel);
-      const { rows } = await client.query<{ id: string }>(
-        `INSERT INTO course_registrations
-           (request_id, course_type_id, course_instance_id, course_type_label,
-            course_instance_label, salutation, first_name, last_name, email, phone,
-            nationality_raw, nationality_code, birth_date_raw, birth_date,
-            declared_level_raw, declared_level_code, visa_required,
-            accommodation_required, accommodation_type, allergies, notes,
-            locale, person_id, submitted_at)
-         VALUES ($1,
-                 (SELECT id FROM course_types WHERE id = $2::uuid),
-                 (SELECT id FROM course_instances WHERE id = $3::uuid),
-                 $4, $5, $6::salutation, $7, $8, $9, $10,
-                 $11, $12, $13, $14::date, $15, $16, $17, $18, $19::accommodation_type, $20, $21,
-                 $22, $23, $24)
-         ON CONFLICT (request_id) DO NOTHING
-         RETURNING id`,
-        [
-          input.requestId,
-          // The wizard sends whatever the catalogue gave it, and with no rows of
-          // its own the catalogue serves fixtures: uuid-shaped ids with no row
-          // behind them, which the FK would reject along with the whole
-          // registration. So an id is stored only when its row exists (the
-          // sub-selects above), a non-uuid never, and the labels carry the
-          // meaning either way. Losing the join is survivable; losing the
-          // registration is not.
-          asUuid(input.courseTypeId),
-          asUuid(input.courseInstanceId),
-          input.courseTypeLabel || null,
-          input.courseInstanceLabel || null,
-          input.salutation,
-          input.firstName,
-          input.lastName,
-          input.email,
-          input.phone,
-          input.nationality,
-          person.nationalityCode,
-          input.birthDate,
-          person.birthDate,
-          input.currentLevel || null,
-          levelCode,
-          input.visaRequired,
-          input.accommodationRequired,
-          input.accommodationType ?? null,
-          input.allergies || null,
-          input.notes || null,
-          input.locale,
-          person.personId,
-          now,
-        ]
-      );
-      if (rows.length === 0) throw new Duplicate();
-      await raiseIntakeFlags(execOn(client), 'course_registration', rows[0].id, {
-        candidates: person.candidates,
-        nationalityRaw: input.nationality,
-        nationalityCode: person.nationalityCode,
-        birthDateRaw: input.birthDate,
-        birthDate: person.birthDate,
-        levelRaw: input.currentLevel,
-        levelCode,
-      });
-    });
-    return true;
-  } catch (error) {
-    if (error instanceof Duplicate) return true;
-    return report('course registration', error);
-  }
+};
+
+/** One course_registrations row for a person created in the same transaction. Null when the request id exists. */
+async function insertCourseRow(
+  client: PoolClient,
+  person: CreatedPerson,
+  registrant: RegistrantInput,
+  stay: StayInput,
+  course: CourseRowInput,
+  locale: 'en' | 'de',
+  now: Date
+): Promise<string | null> {
+  const { rows } = await client.query<{ id: string }>(
+    `INSERT INTO course_registrations
+       (request_id, course_type_id, course_instance_id, course_type_label,
+        course_instance_label, salutation, first_name, last_name, email, phone,
+        nationality_raw, nationality_code, birth_date_raw, birth_date,
+        declared_level_raw, declared_level_code, visa_required,
+        accommodation_required, accommodation_type, allergies, notes,
+        locale, person_id, submitted_at)
+     VALUES ($1,
+             (SELECT id FROM course_types WHERE id = $2::uuid),
+             (SELECT id FROM course_instances WHERE id = $3::uuid),
+             $4, $5, $6::salutation, $7, $8, $9, $10,
+             $11, $12, $13, $14::date, $15, $16, $17, $18, $19::accommodation_type, $20, $21,
+             $22, $23, $24)
+     ON CONFLICT (request_id) DO NOTHING
+     RETURNING id`,
+    [
+      course.requestId,
+      // The wizard sends whatever the catalogue gave it, and with no rows of
+      // its own the catalogue serves fixtures: uuid-shaped ids with no row
+      // behind them, which the FK would reject along with the whole
+      // registration. So an id is stored only when its row exists (the
+      // sub-selects above), a non-uuid never, and the labels carry the
+      // meaning either way. Losing the join is survivable; losing the
+      // registration is not.
+      asUuid(course.courseTypeId),
+      asUuid(course.courseInstanceId),
+      course.courseTypeLabel || null,
+      course.courseInstanceLabel || null,
+      registrant.salutation,
+      registrant.firstName,
+      registrant.lastName,
+      registrant.email,
+      registrant.phone,
+      registrant.nationality,
+      person.nationalityCode,
+      registrant.birthDate,
+      person.birthDate,
+      course.levelRaw || null,
+      course.levelCode,
+      stay.visaRequired,
+      stay.accommodationRequired,
+      stay.accommodationType ?? null,
+      stay.allergies || null,
+      stay.notes || null,
+      locale,
+      person.personId,
+      now,
+    ]
+  );
+  return rows[0]?.id ?? null;
 }
 
-export async function storeExamRegistration(input: {
+type ExamRowInput = {
   requestId: string;
   examTypeId: string;
   examSessionId: string;
   examTypeLabel: string;
   examSessionLabel: string;
   registrationType: string;
-  salutation: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  nationality: string;
-  birthDate: string;
   officialNameConfirmed: boolean;
+};
+
+/** One exam_registrations row for a person created in the same transaction. Null when the request id exists. */
+async function insertExamRow(
+  client: PoolClient,
+  person: CreatedPerson,
+  registrant: RegistrantInput,
+  exam: ExamRowInput,
+  locale: 'en' | 'de',
+  now: Date
+): Promise<string | null> {
+  const { rows } = await client.query<{ id: string }>(
+    `INSERT INTO exam_registrations
+       (request_id, exam_type_id, exam_session_id, exam_type_label, exam_session_label,
+        registration_type, salutation, first_name, last_name, email, phone,
+        nationality_raw, nationality_code, birth_date_raw, birth_date,
+        official_name_confirmed, locale, person_id, submitted_at)
+     VALUES ($1,
+             (SELECT id FROM exam_types WHERE id = $2::uuid),
+             (SELECT id FROM exam_sessions WHERE id = $3::uuid),
+             $4, $5, $6, $7::salutation, $8, $9, $10, $11,
+             $12, $13, $14, $15::date, $16, $17, $18, $19)
+     ON CONFLICT (request_id) DO NOTHING
+     RETURNING id`,
+    [
+      exam.requestId,
+      // As for courses above. Nothing seeds exam_sessions, so in database
+      // mode the form still offers fixture sessions; each one is stored
+      // with a null FK and its label, never refused.
+      asUuid(exam.examTypeId),
+      asUuid(exam.examSessionId),
+      exam.examTypeLabel || null,
+      exam.examSessionLabel || null,
+      exam.registrationType,
+      registrant.salutation,
+      registrant.firstName,
+      registrant.lastName,
+      registrant.email,
+      registrant.phone,
+      registrant.nationality,
+      person.nationalityCode,
+      registrant.birthDate,
+      person.birthDate,
+      exam.officialNameConfirmed,
+      locale,
+      person.personId,
+      now,
+    ]
+  );
+  return rows[0]?.id ?? null;
+}
+
+const personFacts = (person: CreatedPerson, registrant: RegistrantInput) => ({
+  candidates: person.candidates,
+  nationalityRaw: registrant.nationality,
+  nationalityCode: person.nationalityCode,
+  birthDateRaw: registrant.birthDate,
+  birthDate: person.birthDate,
+});
+
+export async function storeCourseRegistration(input: RegistrantInput & StayInput & {
+  requestId: string;
+  courseTypeId: string;
+  courseInstanceId: string;
+  courseTypeLabel: string;
+  courseInstanceLabel: string;
+  currentLevel: string;
   locale: 'en' | 'de';
+}): Promise<boolean> {
+  return storeRegistration({
+    registrant: input,
+    stay: input,
+    locale: input.locale,
+    courses: [{
+      requestId: input.requestId,
+      courseTypeId: input.courseTypeId,
+      courseInstanceId: input.courseInstanceId,
+      courseTypeLabel: input.courseTypeLabel,
+      courseInstanceLabel: input.courseInstanceLabel,
+      levelRaw: input.currentLevel,
+      levelCode: levelCodeFrom(input.currentLevel),
+    }],
+  });
+}
+
+/**
+ * One registration as the learner sent it (2026-10-05): one person, a row in
+ * the course queue per course, and a row in the exam queue for an exam booked
+ * with them, all in one transaction, each row with its own request id. The rows
+ * belong together through the person they share; the learner's reference is
+ * the first course's request id.
+ *
+ * The person's own flags (a possible duplicate, an unmatched nationality or
+ * birth date) go on the first course and on the exam, which another colleague
+ * may work; further courses carry only their level's flag, so one person is
+ * not flagged three times in one queue.
+ */
+export async function storeRegistration(input: {
+  registrant: RegistrantInput;
+  stay: StayInput;
+  locale: 'en' | 'de';
+  courses: CourseRowInput[];
+  exam?: ExamRowInput;
 }): Promise<boolean> {
   if (!isWorkspaceDatabaseConfigured()) return false;
   try {
     await withTransaction(async (client) => {
       const now = new Date();
-      const person = await createPerson(client, {
-        salutation: input.salutation,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        birthDate: input.birthDate,
-        nationalityRaw: input.nationality,
-        email: input.email,
-        phone: input.phone,
-        createdAt: now,
-      });
-      const { rows } = await client.query<{ id: string }>(
-        `INSERT INTO exam_registrations
-           (request_id, exam_type_id, exam_session_id, exam_type_label, exam_session_label,
-            registration_type, salutation, first_name, last_name, email, phone,
-            nationality_raw, nationality_code, birth_date_raw, birth_date,
-            official_name_confirmed, locale, person_id, submitted_at)
-         VALUES ($1,
-                 (SELECT id FROM exam_types WHERE id = $2::uuid),
-                 (SELECT id FROM exam_sessions WHERE id = $3::uuid),
-                 $4, $5, $6, $7::salutation, $8, $9, $10, $11,
-                 $12, $13, $14, $15::date, $16, $17, $18, $19)
-         ON CONFLICT (request_id) DO NOTHING
-         RETURNING id`,
-        [
-          input.requestId,
-          // As for courses above. Nothing seeds exam_sessions, so in database
-          // mode the form still offers fixture sessions; each one is stored
-          // with a null FK and its label, never refused.
-          asUuid(input.examTypeId),
-          asUuid(input.examSessionId),
-          input.examTypeLabel || null,
-          input.examSessionLabel || null,
-          input.registrationType,
-          input.salutation,
-          input.firstName,
-          input.lastName,
-          input.email,
-          input.phone,
-          input.nationality,
-          person.nationalityCode,
-          input.birthDate,
-          person.birthDate,
-          input.officialNameConfirmed,
-          input.locale,
-          person.personId,
-          now,
-        ]
-      );
-      if (rows.length === 0) throw new Duplicate();
-      await raiseIntakeFlags(execOn(client), 'exam_registration', rows[0].id, {
-        candidates: person.candidates,
-        nationalityRaw: input.nationality,
-        nationalityCode: person.nationalityCode,
-        birthDateRaw: input.birthDate,
-        birthDate: person.birthDate,
-      });
+      const person = await createPerson(client, registrantPerson(input.registrant, now));
+      const exec = execOn(client);
+
+      for (const [index, course] of input.courses.entries()) {
+        const id = await insertCourseRow(client, person, input.registrant, input.stay, course, input.locale, now);
+        if (!id) {
+          // The first row's request id is the submission's: already stored means a retry.
+          if (index === 0) throw new Duplicate();
+          continue;
+        }
+        await raiseIntakeFlags(exec, 'course_registration', id, {
+          ...(index === 0 ? personFacts(person, input.registrant) : { candidates: [] }),
+          levelRaw: course.levelRaw,
+          levelCode: course.levelCode,
+        });
+      }
+
+      if (input.exam) {
+        const id = await insertExamRow(client, person, input.registrant, input.exam, input.locale, now);
+        if (id) await raiseIntakeFlags(exec, 'exam_registration', id, personFacts(person, input.registrant));
+      }
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof Duplicate) return true;
+    return report('registration', error);
+  }
+}
+
+export async function storeExamRegistration(input: RegistrantInput & ExamRowInput & { locale: 'en' | 'de' }): Promise<boolean> {
+  if (!isWorkspaceDatabaseConfigured()) return false;
+  try {
+    await withTransaction(async (client) => {
+      const now = new Date();
+      const person = await createPerson(client, registrantPerson(input, now));
+      const id = await insertExamRow(client, person, input, input, input.locale, now);
+      if (!id) throw new Duplicate();
+      await raiseIntakeFlags(execOn(client), 'exam_registration', id, personFacts(person, input));
     });
     return true;
   } catch (error) {

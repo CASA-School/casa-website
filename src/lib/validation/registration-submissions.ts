@@ -65,6 +65,8 @@ const REGISTRATION_MESSAGES = {
     officialName: 'Please confirm your official name matches your identification.',
     examPolicy: 'Please accept exam registration terms before submitting.',
     acceptTerms: 'You must accept the terms and conditions to proceed.',
+    level: 'Please choose a level.',
+    sameCourseTwice: 'You have already chosen this date for this course.',
     tooLong: 'This entry is too long.',
     invalid: 'Please check this entry.',
   },
@@ -86,12 +88,19 @@ const REGISTRATION_MESSAGES = {
     officialName: 'Bitte bestätigen Sie, dass Ihr Name mit Ihrem amtlichen Ausweis übereinstimmt.',
     examPolicy: 'Bitte bestätigen Sie die Bedingungen der Prüfungsanmeldung.',
     acceptTerms: 'Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen, um fortzufahren.',
+    level: 'Bitte wählen Sie ein Niveau aus.',
+    sameCourseTwice: 'Diesen Termin haben Sie für diesen Kurs schon gewählt.',
     tooLong: 'Diese Angabe ist zu lang.',
     invalid: 'Bitte prüfen Sie diese Angabe.',
   },
 } as const satisfies Record<RegistrationLocale, Record<string, string>>;
 
 type RegistrationMessages = (typeof REGISTRATION_MESSAGES)[RegistrationLocale];
+
+/** The messages in one language, for checks the wizard makes itself (a step's conditional fields). */
+export function registrationMessages(locale: RegistrationLocale): RegistrationMessages {
+  return REGISTRATION_MESSAGES[locale];
+}
 
 /*
  * Bounds are input guards, not published limits. An id is a uuid (36) or a
@@ -126,10 +135,46 @@ const honeypot = z
   .unknown()
   .transform((value) => (value === undefined || value === null ? '' : String(value).trim().slice(0, 200)));
 
+/** Up to three courses in one registration (CASA, 2026-10-05). */
+export const MAX_REGISTRATION_COURSES = 3;
+
+/**
+ * One course of a registration. `levelRequired` is set by the wizard from the
+ * course type so the step can say "choose a level"; the route recomputes it
+ * from the catalogue and never trusts it.
+ */
+const courseItemSchema = (m: RegistrationMessages) =>
+  z.object(
+    {
+      courseTypeId: requiredId(m, m.course),
+      courseInstanceId: requiredId(m, m.courseOption),
+      /** A half level ('B1.2') or, for formats sold by the level, a whole level ('A1'): lib/registration/levels. */
+      level: optionalText(m, 20),
+      levelRequired: z.boolean().optional().default(false),
+    },
+    { message: m.invalid }
+  );
+
+/** An exam booked with the courses. Checked only when `examEnabled`. */
+const examAddOnSchema = (m: RegistrationMessages) =>
+  z.object(
+    {
+      examTypeId: optionalText(m, ID_MAX),
+      examSessionId: optionalText(m, ID_MAX),
+      registrationType: z.enum(['full', 'written', 'oral'], { message: m.registrationType }).optional(),
+    },
+    { message: m.invalid }
+  );
+
 const courseRegistrationValidation =
   (m: RegistrationMessages) =>
   (
     data: {
+      courses: Array<{ courseTypeId: string; courseInstanceId: string; level: string; levelRequired: boolean }>;
+      examEnabled: boolean;
+      exam?: { examTypeId: string; examSessionId: string; registrationType?: 'full' | 'written' | 'oral' };
+      officialNameConfirmed: boolean;
+      examPolicyAccepted: boolean;
       accommodationRequired: boolean;
       accommodationType?: 'flat' | 'host';
       allergies: string;
@@ -137,6 +182,35 @@ const courseRegistrationValidation =
     },
     ctx: z.RefinementCtx
   ) => {
+    const seen = new Set<string>();
+    data.courses.forEach((course, index) => {
+      if (course.levelRequired && !course.level) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.level, path: ['courses', index, 'level'] });
+      }
+      if (course.courseInstanceId) {
+        if (seen.has(course.courseInstanceId)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.sameCourseTwice, path: ['courses', index, 'courseInstanceId'] });
+        }
+        seen.add(course.courseInstanceId);
+      }
+    });
+    if (data.examEnabled) {
+      if (!data.exam?.examTypeId) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.exam, path: ['exam', 'examTypeId'] });
+      }
+      if (!data.exam?.examSessionId) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.examSession, path: ['exam', 'examSessionId'] });
+      }
+      if (!data.exam?.registrationType) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.registrationType, path: ['exam', 'registrationType'] });
+      }
+      if (!data.officialNameConfirmed) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.officialName, path: ['officialNameConfirmed'] });
+      }
+      if (!data.examPolicyAccepted) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: m.examPolicy, path: ['examPolicyAccepted'] });
+      }
+    }
     if (data.accommodationRequired && !data.accommodationType) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -160,14 +234,9 @@ const courseRegistrationFormFieldsSchema = (m: RegistrationMessages) =>
   z.object(
     {
       salutation: z.enum(['mr', 'ms', 'mx', 'neutral'], { message: m.salutation }),
-      courseTypeId: requiredId(m, m.course),
-      courseInstanceId: requiredId(m, m.courseOption),
-      /**
-       * Learner's current CEFR sub-level (e.g. 'B1.2').
-       * Optional at schema level — conditional requirement enforced in the wizard
-       * via requiresLevelField(). Stored and forwarded on submission.
-       */
-      currentLevel: optionalText(m, 20),
+      courses: z.array(courseItemSchema(m), { message: m.course }).min(1, m.course).max(MAX_REGISTRATION_COURSES, m.invalid),
+      examEnabled: z.boolean({ message: m.invalid }).optional().default(false),
+      exam: examAddOnSchema(m).optional(),
       firstName: requiredText(m, m.firstName, 2, 80),
       lastName: requiredText(m, m.lastName, 2, 80),
       email: z.string({ message: m.email }).trim().email(m.email).max(200, m.tooLong),
@@ -180,6 +249,8 @@ const courseRegistrationFormFieldsSchema = (m: RegistrationMessages) =>
       allergies: optionalText(m, 500),
       allergyConsent: z.boolean({ message: m.invalid }).optional().default(false),
       notes: optionalText(m, 2000),
+      officialNameConfirmed: z.boolean({ message: m.invalid }).optional().default(false),
+      examPolicyAccepted: z.boolean({ message: m.invalid }).optional().default(false),
       acceptTerms: confirmed(m.acceptTerms),
       website: honeypot,
     },
@@ -194,11 +265,7 @@ export function createCourseRegistrationFormSchema(locale: RegistrationLocale) {
 export function createCourseRegistrationSubmissionSchema(locale: RegistrationLocale) {
   const m = REGISTRATION_MESSAGES[locale];
   return courseRegistrationFormFieldsSchema(m)
-    .extend({
-      courseTypeLabel: optionalText(m, 160),
-      courseInstanceLabel: optionalText(m, 240),
-      locale: localeSchema,
-    })
+    .extend({ locale: localeSchema })
     .superRefine(courseRegistrationValidation(m));
 }
 

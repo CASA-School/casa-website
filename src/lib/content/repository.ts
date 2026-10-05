@@ -1010,11 +1010,26 @@ export async function getCourseRegistrationCatalog(
     optionsByCourseTypeId[courseType.id] = options;
   });
 
-  const fallbackCourseTypeId =
-    courseTypes.find((courseType) => (optionsByCourseTypeId[courseType.id] ?? []).length > 0)?.id ??
-    courseTypes[0]?.id;
+  /*
+   * Only formats with a date a learner can book appear in the form (CASA,
+   * 2026-10-05): a format with none, such as Pflege und Medizin between groups,
+   * is planned on request, and the form names it beneath the choices with a way
+   * to ask. The route checks a submitted course against this same catalogue.
+   */
+  const unavailableCourseTypes = courseTypes
+    .filter((courseType) => (optionsByCourseTypeId[courseType.id] ?? []).length === 0)
+    .map((courseType) => ({ slug: courseType.slug, name: courseType.name }));
+  courseTypes = courseTypes.filter((courseType) => (optionsByCourseTypeId[courseType.id] ?? []).length > 0);
+  for (const id of Object.keys(optionsByCourseTypeId)) {
+    if (optionsByCourseTypeId[id].length === 0) delete optionsByCourseTypeId[id];
+  }
 
-  const resolvedCourseTypeId = selectedCourseTypeId ?? fallbackCourseTypeId;
+  const fallbackCourseTypeId = courseTypes[0]?.id;
+
+  const resolvedCourseTypeId =
+    selectedCourseTypeId && courseTypes.some((courseType) => courseType.id === selectedCourseTypeId)
+      ? selectedCourseTypeId
+      : fallbackCourseTypeId;
   const resolvedOptionId =
     selectedOptionId && Object.values(optionsByCourseTypeId).flat().some((option) => option.id === selectedOptionId)
       ? selectedOptionId
@@ -1026,6 +1041,7 @@ export async function getCourseRegistrationCatalog(
     locale,
     courseTypes,
     optionsByCourseTypeId,
+    unavailableCourseTypes,
     defaultCourseTypeId: resolvedCourseTypeId,
     defaultOptionId: resolvedOptionId,
   };
