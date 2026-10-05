@@ -6,7 +6,6 @@ export type Accreditation = {
   imageHeight: number;
   displayHeight?: number;
   href?: string;
-  preface?: string;
 };
 
 export const accreditationLogos: Accreditation[] = [
@@ -51,13 +50,18 @@ export const accreditationLogos: Accreditation[] = [
     displayHeight: 44,
   },
   {
-    id: 'greenpeace-energy',
-    name: 'Green Planet Energy',
-    imageSrc: '/accreditations/greenpeace-energy.svg',
-    imageWidth: 335,
-    imageHeight: 233,
+    // Took Green Planet Energy's place (CASA, 2026-10-05). On the old site that
+    // logo meant the WEB SERVER ran on its power, which stopped being true when
+    // the site moved to Azure. CASA asked for Universität Bremen here, HERE
+    // AHEAD's university; its logo is for university staff only (corporate
+    // design portal, login), so it needs the university's approval first.
+    // Until then the slot shows HERE AHEAD itself.
+    id: 'here-ahead',
+    name: 'HERE AHEAD',
+    imageSrc: '/partners/here-ahead.svg',
+    imageWidth: 105,
+    imageHeight: 79,
     displayHeight: 50,
-    href: 'https://www.green-planet-energy.de/en',
-    preface: 'Hosted with green energy from',
+    href: 'https://www.aheadbremen.de/',
   },
 ];
