@@ -486,6 +486,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 </Label>
                 <CountryField
                   id="nationality"
+                  locale={catalog.locale}
                   value={watch('nationality')}
                   onChange={(value) => setValue('nationality', value, { shouldDirty: true, shouldValidate: true })}
                   placeholder={t('Select nationality', 'Nationalität auswählen')}

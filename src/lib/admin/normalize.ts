@@ -34,10 +34,12 @@ export function normalizePhone(value: string): string {
 /**
  * Name → ISO 3166-1 alpha-2, using the same list the public form draws from.
  *
- * The form's CountryField submits the English name exactly as `country-list`
- * spells it ("United Arab Emirates (the)"), so the exact lookup is the normal
- * path. The case-insensitive and German fallbacks exist for staff typing a
- * country by hand later. Anything else — a demonym, a typo, a region — is
+ * Since 2026-10-05 the form's CountryField sends the country as the page's
+ * language names it ("Deutschland" on the German form, "South Korea" on the
+ * English one), so the display-name lookups at the end are the normal path.
+ * The `country-list` spellings ("United Arab Emirates (the)"), which the form
+ * sent before, and a bare code still resolve, for older records and for staff
+ * typing a country by hand. Anything else — a demonym, a typo, a region — is
  * `null`, kept raw, and flagged `nationality_unmatched`.
  */
 export function countryCodeFromName(value: string | null | undefined): string | null {
@@ -56,18 +58,19 @@ export function countryCodeFromName(value: string | null | undefined): string | 
   const insensitive = getData().find((c) => c.name.toLowerCase() === lower);
   if (insensitive) return insensitive.code;
 
-  return germanNames().get(lower) ?? null;
+  return displayNames('de').get(lower) ?? displayNames('en').get(lower) ?? null;
 }
 
-let germanIndex: Map<string, string> | null = null;
+const displayIndexes = new Map<'de' | 'en', Map<string, string>>();
 
-function germanNames(): Map<string, string> {
-  if (germanIndex) return germanIndex;
-  const names = new Intl.DisplayNames(['de'], { type: 'region' });
-  germanIndex = new Map(
-    getData().map((c) => [String(names.of(c.code) ?? '').toLowerCase(), c.code] as const)
-  );
-  return germanIndex;
+/** Lower-cased region name → code, as Intl names regions in a language: what the form lists on that page. */
+function displayNames(locale: 'de' | 'en'): Map<string, string> {
+  const cached = displayIndexes.get(locale);
+  if (cached) return cached;
+  const names = new Intl.DisplayNames([locale], { type: 'region' });
+  const index = new Map(getData().map((c) => [String(names.of(c.code) ?? '').toLowerCase(), c.code] as const));
+  displayIndexes.set(locale, index);
+  return index;
 }
 
 const LEVELS = new Set<string>(CASA_LEVEL_SEQUENCE);
