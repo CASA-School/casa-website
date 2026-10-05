@@ -50,7 +50,7 @@ export const GARANTIEFONDS_URL = 'https://www.bildungsberatung-gfh.de/wde/beratu
 export const primeProgramme: PartnerProgramme = {
   name: ':prime Bremen',
   href: 'https://www.primebremen.de/',
-  logo: { src: '/partners/prime.svg', width: 240, height: 100 },
+  logo: { src: '/partners/prime.svg', width: 78, height: 25 },
   label: { de: 'Vorbereitung auf den Hochschulzugang', en: 'Preparing for university entry' },
   text: {
     de: ':prime ist ein Vorbereitungsprogramm von HERE AHEAD. Es verbindet sprachliche und fachliche Vorbereitung für Studieninteressierte, deren Schulabschluss zum Besuch eines Studienkollegs berechtigt.',
@@ -62,7 +62,7 @@ export const hereAhead: Partner = {
   id: 'here-ahead',
   name: 'HERE AHEAD',
   href: 'https://www.aheadbremen.de/',
-  logo: { src: '/partners/here-ahead.svg', width: 240, height: 100 },
+  logo: { src: '/partners/here-ahead.svg', width: 105, height: 79 },
   main: true,
   label: { de: 'Gemeinsam Richtung Studium', en: 'A shared path to university' },
   text: {
