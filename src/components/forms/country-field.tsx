@@ -4,14 +4,35 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { getData } from 'country-list';
 import { formControlClassName, formControlOpenClassName } from '@/components/forms/form-styles';
+import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
-const countryNames = getData()
-  .map((entry) => entry.name)
-  .sort((a, b) => a.localeCompare(b));
+/*
+ * Countries in the page's language (2026-10-05). The list printed
+ * `country-list`'s English ISO names on the German form too ("Germany",
+ * "Korea (the Republic of)"). Each code is now named as the platform names it
+ * in the page's language ("Deutschland", "Südkorea"; "South Korea" in
+ * English) and sorted the way that language sorts. The name chosen is what is
+ * sent; lib/admin/normalize.ts reads it back to its code in either language.
+ */
+const namesByLocale = new Map<ContentLocale, string[]>();
+
+function countryNames(locale: ContentLocale): string[] {
+  const cached = namesByLocale.get(locale);
+  if (cached) return cached;
+  const display = new Intl.DisplayNames([locale], { type: 'region' });
+  const names = [...new Set(getData().map((entry) => display.of(entry.code) ?? entry.name))].sort((a, b) => a.localeCompare(b, locale));
+  namesByLocale.set(locale, names);
+  return names;
+}
+
+/** For the search: no accents, one apostrophe, lower case, so "osterr" finds Österreich and "cote d'" Côte d’Ivoire. */
+const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’‘]/g, "'").toLowerCase();
 
 type CountryFieldProps = {
   id: string;
+  /** The page's language, which the countries are named in. */
+  locale: ContentLocale;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -27,6 +48,7 @@ type CountryFieldProps = {
 
 export function CountryField({
   id,
+  locale,
   value,
   onChange,
   placeholder = 'Select nationality',
@@ -43,10 +65,10 @@ export function CountryField({
   const searchRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => {
-    if (!query.trim()) return countryNames;
-    const lower = query.toLowerCase();
-    return countryNames.filter((c) => c.toLowerCase().includes(lower));
-  }, [query]);
+    const names = countryNames(locale);
+    const wanted = fold(query.trim());
+    return wanted ? names.filter((name) => fold(name).includes(wanted)) : names;
+  }, [locale, query]);
 
   // Focus search input when opened
   useEffect(() => {
@@ -92,17 +114,18 @@ export function CountryField({
         data-invalid={invalid || undefined}
         className={cn(
           formControlClassName,
-          'flex items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
+          'flex items-center justify-between gap-2 disabled:cursor-not-allowed disabled:opacity-50',
           isOpen && formControlOpenClassName,
           className
         )}
       >
-        <span className={cn(!value && 'text-[var(--casa-muted)]')}>
+        {/* One line: German names run long ("St. Vincent und die Grenadinen"). */}
+        <span className={cn('min-w-0 truncate', !value && 'text-[var(--casa-muted)]')}>
           {value || placeholder}
         </span>
         <ChevronDown
           className={cn(
-            'h-4 w-4 text-[var(--casa-accent-text)] transition-transform duration-200',
+            'h-4 w-4 shrink-0 text-[var(--casa-accent-text)] transition-transform duration-200',
             isOpen && 'rotate-180'
           )}
         />

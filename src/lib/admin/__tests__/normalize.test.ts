@@ -28,7 +28,14 @@ describe('normalizePhone', () => {
 });
 
 describe('countryCodeFromName', () => {
-  it('maps what the public form submits, byte for byte', () => {
+  it('maps what the public form submits: the country as the page language names it', () => {
+    expect(countryCodeFromName('Deutschland')).toBe('DE');
+    expect(countryCodeFromName('Südkorea')).toBe('KR');
+    expect(countryCodeFromName('Côte d’Ivoire')).toBe('CI');
+    expect(countryCodeFromName('South Korea')).toBe('KR');
+    expect(countryCodeFromName('Palestinian Territories')).toBe('PS');
+  });
+  it('still maps the country-list spellings the form sent before', () => {
     expect(countryCodeFromName('Germany')).toBe('DE');
     expect(countryCodeFromName('United Arab Emirates (the)')).toBe('AE');
   });

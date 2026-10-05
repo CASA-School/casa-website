@@ -2354,3 +2354,6 @@ starts on "Vollprüfung". Schedules have parts now (`src/lib/registration/term-f
 range, a dash in the time, the part of the day), so mails and the workspace read "Mo–Fr · 09:00–12:30"
 too. Step descriptions, stepper subtitles and the "Rechtliches" box that repeated the terms
 checkbox are gone. The shared pickers live in `src/components/registration/choice-controls.tsx`.
+The nationality list names countries in the page's language (`Intl.DisplayNames`: "Deutschland",
+"South Korea", never `country-list`'s "Korea (the Republic of)"), searches without accents, and
+sends the name shown; `countryCodeFromName` resolves German and English display names.
