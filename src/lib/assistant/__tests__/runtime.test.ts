@@ -155,8 +155,9 @@ describe('assistant knowledge search', () => {
 
     expect(nonprofit.passages.some((entry) => entry.url === '/ueber-uns/gemeinnuetzigkeit')).toBeTruthy();
     expect(nonprofit.routeSuggestions.some((entry) => entry.href === '/ueber-uns/gemeinnuetzigkeit')).toBeTruthy();
-    expect(integration.passages.some((entry) => entry.url === '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte')).toBeTruthy();
-    expect(integration.routeSuggestions.some((entry) => entry.href === '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte')).toBeTruthy();
+    // The partners have their own page since 2026-10-05; the mission page keeps to the gGmbH.
+    expect(integration.passages.some((entry) => entry.url === '/partners')).toBeTruthy();
+    expect(integration.routeSuggestions.some((entry) => entry.href === '/partners')).toBeTruthy();
   });
 
   /*

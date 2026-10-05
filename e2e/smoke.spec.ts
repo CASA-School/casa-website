@@ -304,7 +304,7 @@ test('an unknown address is a 404 in the site’s own frame and language', async
   }
 });
 
-test('nonprofit mission stays visible while project tabs work with keyboard navigation', async ({ page }) => {
+test('the non-profit page leads with the gGmbH and points to the partners', async ({ page }) => {
   for (const locale of ['de', 'en']) {
     await page.goto(`${locale === 'de' ? '' : '/en'}/ueber-uns/gemeinnuetzigkeit`);
     await expect(page.locator('#nonprofit-transparency-title')).toBeVisible();
@@ -314,18 +314,13 @@ test('nonprofit mission stays visible while project tabs work with keyboard navi
       ? 'Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.'
       : 'Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.'
     )).toBeVisible();
-    const tabs = page.getByRole('tab');
-    await expect(tabs).toHaveCount(3);
-    await tabs.first().focus();
-    await page.keyboard.press('ArrowRight');
-    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-    await expect(page.getByRole('tabpanel')).toHaveCount(1);
-    await expect(page.getByRole('tabpanel').getByRole('link', { name: ':prime Bremen', exact: true })).toHaveAttribute('href', 'https://www.primebremen.de/');
-    await tabs.nth(2).click();
-    await expect(page.getByRole('tabpanel')).toHaveCount(1);
-    await expect(page.getByRole('tabpanel').getByRole('link', { name: /Otto Benecke Stiftung/ })).toBeVisible();
-    for (const panel of await page.locator('[role=tabpanel][data-state=inactive]').all()) {
-      await expect(panel).toHaveCSS('opacity', '0');
-    }
+    // The partners have their own page since 2026-10-05: the mission section
+    // keeps their logos and one link there, and its anchor still resolves.
+    const mission = page.locator('#integrationsprojekte');
+    await expect(mission).toBeVisible();
+    await expect(mission.getByRole('list', { name: locale === 'de' ? 'Kooperationspartner' : 'Cooperation partners' }).getByRole('img')).toHaveCount(5);
+    await expect(mission.getByRole('link', { name: locale === 'de' ? 'Alle Kooperationspartner ansehen' : 'See all cooperation partners' }))
+      .toHaveAttribute('href', locale === 'de' ? '/ueber-uns/kooperationspartner' : '/en/partners');
+    await expect(page.getByRole('tab')).toHaveCount(0);
   }
 });
