@@ -151,6 +151,8 @@ const courseItemSchema = (m: RegistrationMessages) =>
       /** A half level ('B1.2') or, for formats sold by the level, a whole level ('A1'): lib/registration/levels. */
       level: optionalText(m, 20),
       levelRequired: z.boolean().optional().default(false),
+      /** Continue up to this whole level ('B2'), one term per level: lib/registration/level-path. '' for this level alone. */
+      pathTo: optionalText(m, 4),
     },
     { message: m.invalid }
   );
@@ -170,7 +172,7 @@ const courseRegistrationValidation =
   (m: RegistrationMessages) =>
   (
     data: {
-      courses: Array<{ courseTypeId: string; courseInstanceId: string; level: string; levelRequired: boolean }>;
+      courses: Array<{ courseTypeId: string; courseInstanceId: string; level: string; levelRequired: boolean; pathTo: string }>;
       examEnabled: boolean;
       exam?: { examTypeId: string; examSessionId: string; registrationType?: 'full' | 'written' | 'oral' };
       officialNameConfirmed: boolean;

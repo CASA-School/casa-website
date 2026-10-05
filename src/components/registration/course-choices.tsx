@@ -30,6 +30,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { meaningClasses, type Meaning } from '@/config/brand/meaning';
 import { Link } from '@/i18n/navigation';
 import type { ContentLocale, RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
+import { buildLevelPath, continuationLevels, pathWeeks, type PathStep } from '@/lib/registration/level-path';
 import { levelChoiceGroups } from '@/lib/registration/levels';
 import { cn } from '@/lib/utils';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
@@ -68,6 +69,14 @@ export function courseDatesLine(
   const start = `${locale === 'de' ? 'Beginn' : 'Starts'} ${formatStart(option.startDate, locale)}`;
   if (!level) return start;
   return `${start} · ${level.complete ? (locale === 'de' ? '8 Wochen' : '8 weeks') : (locale === 'de' ? '4 Wochen' : '4 weeks')}`;
+}
+
+/** A path step's dates: the term's range for a whole level, a start and four weeks for a block. */
+export function pathStepDates(step: PathStep, locale: ContentLocale) {
+  if (!step.option) return locale === 'de' ? 'Termin folgt – wir planen ihn mit Ihnen' : 'Date to follow – we plan it with you';
+  return step.complete
+    ? step.option.dateRangeLabel
+    : `${locale === 'de' ? 'Beginn' : 'Starts'} ${formatStart(step.option.startDate, locale)} · ${locale === 'de' ? '4 Wochen' : '4 weeks'}`;
 }
 
 /** "Pflege und Medizin, Unterricht für Gruppen und Firmenunterricht". */
@@ -128,6 +137,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
   const typeId = watch(`courses.${index}.courseTypeId`);
   const instanceId = watch(`courses.${index}.courseInstanceId`);
   const level = watch(`courses.${index}.level`);
+  const pathTo = watch(`courses.${index}.pathTo`) ?? '';
   const errors = formState.errors.courses?.[index];
 
   const courseType = catalog.courseTypes.find((candidate) => candidate.id === typeId) ?? null;
@@ -139,6 +149,11 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
   const termIsLevel = Boolean(courseType && TERMS_ARE_LEVELS.has(courseType.slug));
   const chosenLevel = levelGroups.flatMap((group) => group.choices.map((choice) => ({ ...choice, whole: choice.value === group.level })))
     .find((choice) => choice.value === level);
+  // The levels to continue to, and the path they make (lib/registration/level-path).
+  const continuation = termIsLevel && level ? continuationLevels(courseType?.slug, level, levels) : [];
+  const path = termIsLevel && level && option && pathTo
+    ? buildLevelPath({ slug: courseType?.slug, value: level, option, options, availableLevels: levels, pathTo, locale })
+    : [];
 
   const errorProps = (field: 'courseTypeId' | 'courseInstanceId' | 'level') => ({
     'aria-invalid': Boolean(errors?.[field]),
@@ -151,6 +166,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
     setValue(`courses.${index}.courseTypeId`, id, { shouldDirty: true });
     setValue(`courses.${index}.courseInstanceId`, nextOptions[0]?.id ?? '', { shouldDirty: true });
     setValue(`courses.${index}.level`, '', { shouldDirty: true });
+    setValue(`courses.${index}.pathTo`, '', { shouldDirty: true });
     setValue(`courses.${index}.levelRequired`, requiresLevelField(slug) && (nextOptions[0]?.availableLevels.length ?? 0) > 0);
     clearErrors(`courses.${index}`);
   };
@@ -235,6 +251,10 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
                 value={level || ''}
                 onValueChange={(value) => {
                   setValue(`courses.${index}.level`, value, { shouldDirty: true });
+                  // A path ends where it ended, if the new level can still reach it.
+                  if (pathTo && !continuationLevels(courseType?.slug, value, levels).includes(pathTo)) {
+                    setValue(`courses.${index}.pathTo`, '', { shouldDirty: true });
+                  }
                   clearErrors(`courses.${index}.level`);
                 }}
               >
@@ -281,7 +301,74 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
         </p>
       ) : null}
 
-      {courseType && option ? (
+      {continuation.length > 0 ? (
+        <fieldset className={cn(formFieldGroupClassName, 'min-w-0')}>
+          <legend className={cn(formLabelClassName, 'mb-2')}>{t('Continue afterwards?', 'Danach weiterlernen?')}</legend>
+          <div className="flex flex-wrap gap-2">
+            {[{ value: '', label: t(`Only ${level}`, `Nur ${level}`) }, ...continuation.map((target) => ({ value: target, label: t(`Up to ${target}`, `bis ${target}`) }))].map((choice) => {
+              const checked = choice.value === pathTo;
+              return (
+                <label
+                  key={choice.value || 'only'}
+                  className={cn(
+                    'cursor-pointer rounded-full border px-4 py-2 text-sm font-semibold transition-colors has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
+                    checked
+                      ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/60 text-[var(--casa-accent-text)]'
+                      : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] hover:border-[color:var(--casa-field-edge-hover)]'
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name={`course-${index}-path`}
+                    value={choice.value}
+                    checked={checked}
+                    onChange={() => setValue(`courses.${index}.pathTo`, choice.value, { shouldDirty: true })}
+                    className="sr-only"
+                  />
+                  {choice.label}
+                </label>
+              );
+            })}
+          </div>
+          <p className={formHintClassName}>
+            {t(
+              'Each further level takes 8 weeks and starts with the next course date.',
+              'Jedes weitere Niveau dauert 8 Wochen und beginnt mit dem nächsten Kurstermin.'
+            )}
+          </p>
+        </fieldset>
+      ) : null}
+
+      {courseType && path.length > 1 ? (
+        <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
+          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-red)]" />
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className={formMetaLabelClassName}>{t('Your learning path', 'Ihr Lernweg')} · {courseType.name}</p>
+            <p className="text-sm font-semibold text-[var(--casa-ink)]">
+              {t(`${path.length} levels · ${pathWeeks(path)} weeks`, `${path.length} Niveaus · ${pathWeeks(path)} Wochen`)}
+            </p>
+          </div>
+          <ol className="mt-4">
+            {path.map((step, stepIndex) => (
+              <li key={`${step.level}-${stepIndex}`} className="relative flex gap-4 pb-5 last:pb-0">
+                {stepIndex < path.length - 1 ? (
+                  <span aria-hidden="true" className="absolute bottom-0 left-[13px] top-7 w-px bg-[color:var(--casa-field-edge-hover)]" />
+                ) : null}
+                <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--casa-red-text)] ring-1 ring-[color:var(--casa-sand)]">
+                  {stepIndex + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-[var(--casa-ink)]">{step.label.split(' · ')[0]}</p>
+                  <p className="text-sm text-[var(--casa-muted)]">{pathStepDates(step, locale)}</p>
+                  {step.option ? <p className="text-sm text-[var(--casa-muted)]">{step.option.scheduleLabel}</p> : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+
+      {courseType && option && path.length <= 1 ? (
         <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
           <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-red)]" />
           <p className={formMetaLabelClassName}>{t('Your choice', 'Ihre Auswahl')}</p>
