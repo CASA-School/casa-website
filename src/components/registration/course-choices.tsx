@@ -1,9 +1,10 @@
 'use client';
 
+import { Fragment } from 'react';
 import {
   Briefcase,
   Calendar,
-  CheckCircle2,
+  CalendarDays,
   Clock,
   FileCheck2,
   GraduationCap,
@@ -20,22 +21,51 @@ import {
   formFieldGroupClassName,
   formHintClassName,
   formLabelClassName,
-  formMetaLabelClassName,
   formTileClassName,
   RequiredMark,
 } from '@/components/forms/form-styles';
+import {
+  ChoiceChip,
+  choiceLook,
+  DateTiles,
+  PillChoices,
+  REGISTRATION_TYPES,
+  registrationTypeLabels,
+  sittingFacts,
+  type DateTile,
+  type DateTileGroup,
+} from '@/components/registration/choice-controls';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { meaningClasses, type Meaning } from '@/config/brand/meaning';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from '@/i18n/navigation';
-import type { ContentLocale, RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
-import { buildLevelPath, continuationLevels, pathWeeks, type PathStep } from '@/lib/registration/level-path';
+import type {
+  ContentLocale,
+  CourseRegistrationOption,
+  RegistrationCourseCatalog,
+  RegistrationExamCatalog,
+  TermDaytime,
+  TermSchedule,
+} from '@/lib/content/types';
+import { buildLevelPath, continuationLevels, pathWeeks } from '@/lib/registration/level-path';
 import { levelChoiceGroups } from '@/lib/registration/levels';
+import { daytimeLabel, formatDay, scheduleLine, termRange, weeksLabel } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
 
 import type { CourseForm } from './course-form-types';
+
+/*
+ * THE COURSE STEP, CALMER (2026-10-05).
+ *
+ * The step printed each fact two or three times: every date in the start list
+ * carried its full day list and time, and a summary card under the fields
+ * repeated the start, the schedule and a "4 oder 8 Wochen" that the level had
+ * already settled. Now each fact appears once, where it is decided: the level
+ * first (it sets the length), a ladder for the levels after it, the start
+ * dates as tiles under the one schedule they share, and a single line with
+ * what the choices add up to, the end date and the weeks.
+ */
 
 const courseIcons: Record<string, LucideIcon> = {
   'intensive-german': Clock,
@@ -48,36 +78,8 @@ const courseIcons: Record<string, LucideIcon> = {
   'exam-preparation': FileCheck2,
 };
 
-/** Formats whose terms are a whole level: their dates read as a start and a length. */
+/** Formats whose terms are a whole level: their length comes from the level booked. */
 const TERMS_ARE_LEVELS = new Set(['intensive-german']);
-
-const formatStart = (iso: string, locale: ContentLocale) =>
-  new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Berlin' })
-    .format(new Date(`${iso}T12:00:00Z`));
-
-/**
- * A course's dates in one line: a start and a length for a format whose terms
- * are a whole level ("Beginn 26. Okt. 2026 · 8 Wochen"), else its date range.
- */
-export function courseDatesLine(
-  slug: string | undefined,
-  option: { startDate: string; dateRangeLabel: string },
-  level: { complete: boolean } | null,
-  locale: ContentLocale
-) {
-  if (!slug || !TERMS_ARE_LEVELS.has(slug)) return option.dateRangeLabel;
-  const start = `${locale === 'de' ? 'Beginn' : 'Starts'} ${formatStart(option.startDate, locale)}`;
-  if (!level) return start;
-  return `${start} · ${level.complete ? (locale === 'de' ? '8 Wochen' : '8 weeks') : (locale === 'de' ? '4 Wochen' : '4 weeks')}`;
-}
-
-/** A path step's dates: the term's range for a whole level, a start and four weeks for a block. */
-export function pathStepDates(step: PathStep, locale: ContentLocale) {
-  if (!step.option) return locale === 'de' ? 'Termin folgt – wir planen ihn mit Ihnen' : 'Date to follow – we plan it with you';
-  return step.complete
-    ? step.option.dateRangeLabel
-    : `${locale === 'de' ? 'Beginn' : 'Starts'} ${formatStart(step.option.startDate, locale)} · ${locale === 'de' ? '4 Wochen' : '4 weeks'}`;
-}
 
 /** "Pflege und Medizin, Unterricht für Gruppen und Firmenunterricht". */
 function joinNames(names: string[], locale: ContentLocale) {
@@ -85,41 +87,209 @@ function joinNames(names: string[], locale: ContentLocale) {
   return `${names.slice(0, -1).join(', ')} ${locale === 'de' ? 'und' : 'and'} ${names[names.length - 1]}`;
 }
 
-type ChoiceChipProps = {
+type LevelLadderProps = {
   name: string;
+  /** The level chosen, the ladder's first rung. */
+  start: string;
+  /** The whole levels after it. */
+  targets: string[];
   value: string;
-  checked: boolean;
-  icon: LucideIcon;
-  meaning: Meaning;
-  title: string;
-  meta?: string;
-  onSelect: () => void;
+  onChange: (value: string) => void;
+  locale: ContentLocale;
 };
 
-/** One choice as a chip, the contact form's "Worum geht es?": a native radio, so arrow keys move between them. */
-function ChoiceChip({ name, value, checked, icon: Icon, meaning, title, meta, onSelect }: ChoiceChipProps) {
+/** "Bis zu welchem Niveau?": the levels in a row, filled from the chosen one to the one picked. */
+function LevelLadder({ name, start, targets, value, onChange, locale }: LevelLadderProps) {
+  const de = locale === 'de';
+  const rungs = [{ value: '', label: start }, ...targets.map((target) => ({ value: target, label: target }))];
+  const reach = Math.max(0, rungs.findIndex((rung) => rung.value === value));
+
   return (
-    <label
-      className={cn(
-        'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 py-2.5 transition-[border-color,background-color,box-shadow] duration-150',
-        'has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
-        checked
-          ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/45 shadow-[inset_0_0_0_1px_var(--casa-accent-text)]'
-          : 'border-[color:var(--casa-sand)] shadow-[var(--shadow-soft)] hover:border-[color:var(--casa-field-edge-hover)]'
-      )}
-    >
-      <input type="radio" name={name} value={value} checked={checked} onChange={onSelect} className="sr-only" />
-      <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses[meaning].circle)}>
-        <Icon className="size-[1.125rem]" aria-hidden />
-      </span>
-      <span className="min-w-0 leading-snug">
-        <span className="block text-sm font-semibold text-[var(--casa-ink)]">{title}</span>
-        {meta ? <span className="block text-xs text-[var(--casa-muted)]">{meta}</span> : null}
-      </span>
-      {checked ? <CheckCircle2 className="ml-auto size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden /> : null}
-    </label>
+    <fieldset className={formFieldGroupClassName}>
+      <legend className={cn(formLabelClassName, 'mb-2')}>{de ? 'Bis zu welchem Niveau?' : 'Up to which level?'}</legend>
+      <div className="flex flex-wrap items-center gap-y-2">
+        {rungs.map((rung, index) => {
+          const inPath = index <= reach;
+          return (
+            <Fragment key={rung.value || 'start'}>
+              {index > 0 ? (
+                <span aria-hidden="true" className={cn('h-0.5 w-3 sm:w-5', inPath ? 'bg-[var(--casa-accent-surface)]' : 'bg-[color:var(--casa-sand)]')} />
+              ) : null}
+              <label
+                className={cn(
+                  'flex h-10 min-w-12 cursor-pointer items-center justify-center rounded-full border px-3.5 text-sm font-bold tabular-nums transition-colors duration-150',
+                  choiceLook.focus,
+                  inPath
+                    ? 'border-[var(--casa-accent-surface)] bg-[var(--casa-accent-surface)] text-white'
+                    : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] shadow-[var(--shadow-soft)] hover:border-[color:var(--casa-field-edge-hover)]'
+                )}
+              >
+                <input
+                  type="radio"
+                  name={name}
+                  value={rung.value}
+                  checked={index === reach}
+                  onChange={() => onChange(rung.value)}
+                  className="sr-only"
+                />
+                {index === 0 ? (
+                  <>
+                    <span className="sr-only">{de ? 'Nur ' : 'Only '}</span>
+                    {rung.label}
+                  </>
+                ) : (
+                  <>
+                    <span className="sr-only">{de ? 'bis ' : 'up to '}</span>
+                    {rung.label}
+                  </>
+                )}
+              </label>
+            </Fragment>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
+
+export type PlanRow = {
+  key: string;
+  /** "A2 komplett" alone, "A2" or "A2.2" on a path. */
+  level: string | null;
+  start: string | null;
+  end: string | null;
+  schedule: TermSchedule | null | undefined;
+  scheduleLabel: string | null;
+};
+
+export type CoursePlan = { rows: PlanRow[]; weeks: number | null; isPath: boolean };
+
+/**
+ * What a course choice adds up to: one row, or one per level of a learning
+ * path, each with its dates. Null until there is enough to say when it ends.
+ * The summary under the fields and the review step both read it.
+ */
+export function coursePlan(input: {
+  slug: string | undefined;
+  options: readonly CourseRegistrationOption[];
+  option: CourseRegistrationOption | null;
+  level: string;
+  pathTo: string;
+  locale: ContentLocale;
+}): CoursePlan | null {
+  const { slug, options, option, level, pathTo, locale } = input;
+  if (!option) return null;
+
+  if (slug && TERMS_ARE_LEVELS.has(slug)) {
+    if (!level) return null;
+    const steps = buildLevelPath({ slug, value: level, option, options, availableLevels: option.availableLevels, pathTo, locale });
+    if (steps.length === 0) return null;
+    const isPath = steps.length > 1;
+    return {
+      isPath,
+      weeks: pathWeeks(steps),
+      rows: steps.map((step, index) => ({
+        key: `${step.level}-${index}`,
+        level: isPath ? step.level : step.label.split(' · ')[0],
+        start: step.start,
+        end: step.end,
+        schedule: step.option?.schedule,
+        scheduleLabel: step.option?.scheduleLabel ?? null,
+      })),
+    };
+  }
+
+  return {
+    isPath: false,
+    weeks: null,
+    rows: [{ key: option.id, level: level || null, start: option.startDate, end: option.endDate, schedule: option.schedule, scheduleLabel: option.scheduleLabel }],
+  };
+}
+
+/** A plan row's dates, or that CASA plans them. */
+export function planRowDates(row: PlanRow, locale: ContentLocale) {
+  if (!row.start) return locale === 'de' ? 'Termin folgt – wir planen ihn mit Ihnen' : 'Date to follow – we plan it with you';
+  return row.end ? termRange(row.start, row.end, locale) : formatDay(row.start, locale);
+}
+
+/** A plan row's schedule on one line. */
+export const planRowSchedule = (row: PlanRow, locale: ContentLocale) =>
+  row.schedule ? scheduleLine(row.schedule, locale) : row.scheduleLabel;
+
+const sameSchedule = (a: TermSchedule | null | undefined, b: TermSchedule | null | undefined) =>
+  Boolean(a && b && a.days === b.days && a.time === b.time);
+
+/** The plan under the fields: the end date and the weeks, or a learning path as a short timeline. */
+function PlanSummary({ plan, locale }: { plan: CoursePlan; locale: ContentLocale }) {
+  const de = locale === 'de';
+  const [first] = plan.rows;
+  const last = plan.rows[plan.rows.length - 1];
+  const weeks = plan.weeks ? weeksLabel(plan.weeks, locale) : null;
+
+  if (!plan.isPath) {
+    return (
+      <p className="flex items-center gap-3 rounded-xl bg-[var(--casa-canvas)] px-4 py-3 text-sm" aria-live="polite">
+        <CalendarDays className="size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
+        <span className="font-semibold text-[var(--casa-ink)]">{planRowDates(first, locale)}</span>
+        {weeks ? <span className="ml-auto shrink-0 text-[var(--casa-muted)]">{weeks}</span> : null}
+      </p>
+    );
+  }
+
+  const span = first.start && last.end ? termRange(first.start, last.end, locale) : first.start ? `${de ? 'ab' : 'from'} ${formatDay(first.start, locale)}` : null;
+
+  return (
+    <div className="rounded-xl bg-[var(--casa-canvas)] px-4 py-4 sm:px-5" aria-live="polite">
+      <p className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
+        <span className="font-semibold text-[var(--casa-ink)]">{de ? 'Ihr Lernweg' : 'Your learning path'}</span>
+        <span className="text-[var(--casa-muted)]">{[span, weeks].filter(Boolean).join(' · ')}</span>
+      </p>
+      <ol className="mt-3 space-y-2">
+        {plan.rows.map((row) => {
+          const otherTime = row.start && !sameSchedule(row.schedule, first.schedule) && row.schedule?.daytime;
+          return (
+            <li key={row.key} className="flex items-center gap-3 text-sm">
+              <span className="flex h-7 min-w-11 shrink-0 items-center justify-center rounded-full bg-white px-2 text-xs font-bold tabular-nums text-[var(--casa-accent-text)] ring-1 ring-[color:var(--casa-sand)]">
+                {row.level}
+              </span>
+              <span className={row.start ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]'}>
+                {row.start ? planRowDates(row, locale) : de ? 'Termin folgt' : 'Date to follow'}
+              </span>
+              {otherTime ? <span className="text-[var(--casa-muted)]">· {daytimeLabel(otherTime as TermDaytime, locale)}</span> : null}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+const DAYTIME_ORDER: Record<TermDaytime, number> = { morning: 0, fullDay: 1, afternoon: 2, evening: 3 };
+
+/** A format's terms as tile groups, one per schedule, mornings first. */
+function termGroups(options: readonly CourseRegistrationOption[], locale: ContentLocale): DateTileGroup[] {
+  const groups = new Map<string, { schedule: TermSchedule | null | undefined; label: string; tiles: DateTile[] }>();
+
+  for (const option of options) {
+    const key = option.schedule ? `${option.schedule.days}|${option.schedule.time}` : option.scheduleLabel;
+    const group = groups.get(key) ?? { schedule: option.schedule, label: option.scheduleLabel, tiles: [] };
+    group.tiles.push({ id: option.id, date: option.startDate, note: option.underway ? (locale === 'de' ? 'läuft bereits' : 'under way') : undefined });
+    groups.set(key, group);
+  }
+
+  const rank = (schedule: TermSchedule | null | undefined) => (schedule?.daytime ? DAYTIME_ORDER[schedule.daytime] : 4);
+  return [...groups.entries()]
+    .sort(([, a], [, b]) => rank(a.schedule) - rank(b.schedule) || a.tiles[0].date.localeCompare(b.tiles[0].date))
+    .map(([key, group]) => ({
+      key,
+      title: group.schedule?.daytime ? daytimeLabel(group.schedule.daytime, locale) : undefined,
+      meta: group.schedule ? scheduleLine(group.schedule, locale) : group.label,
+      tiles: [...group.tiles].sort((a, b) => a.date.localeCompare(b.date)),
+    }));
+}
+
+const linkClassName =
+  'font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current';
 
 type CourseItemFieldsProps = {
   form: CourseForm;
@@ -127,7 +297,7 @@ type CourseItemFieldsProps = {
   index: number;
 };
 
-/** One course of the registration: which course, when it starts, and at which level. */
+/** One course of the registration: which course, at which level, and when it starts. */
 export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps) {
   const locale = catalog.locale;
   const de = locale === 'de';
@@ -136,7 +306,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
 
   const typeId = watch(`courses.${index}.courseTypeId`);
   const instanceId = watch(`courses.${index}.courseInstanceId`);
-  const level = watch(`courses.${index}.level`);
+  const level = watch(`courses.${index}.level`) ?? '';
   const pathTo = watch(`courses.${index}.pathTo`) ?? '';
   const errors = formState.errors.courses?.[index];
 
@@ -147,18 +317,9 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
   const showLevel = requiresLevelField(courseType?.slug) && levels.length > 0;
   const levelGroups = levelChoiceGroups(courseType?.slug, levels, locale);
   const termIsLevel = Boolean(courseType && TERMS_ARE_LEVELS.has(courseType.slug));
-  const chosenLevel = levelGroups.flatMap((group) => group.choices.map((choice) => ({ ...choice, whole: choice.value === group.level })))
-    .find((choice) => choice.value === level);
-  // The levels to continue to, and the path they make (lib/registration/level-path).
+  // The levels to continue to, and what the choices add up to (lib/registration/level-path).
   const continuation = termIsLevel && level ? continuationLevels(courseType?.slug, level, levels) : [];
-  const path = termIsLevel && level && option && pathTo
-    ? buildLevelPath({ slug: courseType?.slug, value: level, option, options, availableLevels: levels, pathTo, locale })
-    : [];
-
-  const errorProps = (field: 'courseTypeId' | 'courseInstanceId' | 'level') => ({
-    'aria-invalid': Boolean(errors?.[field]),
-    'aria-describedby': errors?.[field] ? `course-${index}-${field}-error` : undefined,
-  });
+  const plan = courseType ? coursePlan({ slug: courseType.slug, options, option, level, pathTo, locale }) : null;
 
   const chooseType = (id: string) => {
     const nextOptions = catalog.optionsByCourseTypeId[id] ?? [];
@@ -174,8 +335,8 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
   const unavailable = index === 0 ? (catalog.unavailableCourseTypes ?? []).map((item) => item.name) : [];
 
   return (
-    <div className="space-y-5">
-      <fieldset id={`course-${index}-type`} tabIndex={-1} className={cn(formFieldGroupClassName, 'min-w-0')}>
+    <div className="space-y-6">
+      <fieldset id={`course-${index}-type`} tabIndex={-1} className={cn(formFieldGroupClassName, 'outline-none')}>
         <legend className={cn(formLabelClassName, 'mb-2')}>
           {index === 0 ? t('Which course?', 'Welcher Kurs?') : t('Which other course?', 'Welcher weitere Kurs?')}
           <RequiredMark />
@@ -200,213 +361,106 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
         ) : null}
         {unavailable.length > 0 ? (
           <p className={cn(formHintClassName, 'pt-1')}>
-            {t(
-              `${joinNames(unavailable, locale)}: no dates to book online right now. `,
-              `${joinNames(unavailable, locale)}: derzeit keine Termine zum Online-Buchen. `
-            )}
-            <Link
-              href="/contact"
-              className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current"
-            >
-              {t('Ask us about it', 'Fragen Sie uns gern')}
+            {t(`On request: ${joinNames(unavailable, locale)}.`, `Auf Anfrage: ${joinNames(unavailable, locale)}.`)}{' '}
+            <Link href="/contact?topic=course-advice" className={linkClassName}>
+              {t('Ask us', 'Anfragen')}
             </Link>
           </p>
         ) : null}
       </fieldset>
 
-      {courseType ? (
-        <div className={cn('grid gap-5', showLevel && 'sm:grid-cols-2')}>
-          <div className={formFieldGroupClassName}>
-            <Label htmlFor={`course-${index}-option`} className={formLabelClassName}>
-              {termIsLevel ? t('Start', 'Beginn') : t('Dates', 'Termin')}
+      {courseType && showLevel ? (
+        <div className={formFieldGroupClassName}>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <Label htmlFor={`course-${index}-level`} className={formLabelClassName}>
+              {t('Level', 'Niveau')}
               <RequiredMark />
             </Label>
-            <Select
-              value={instanceId || ''}
-              onValueChange={(value) => setValue(`courses.${index}.courseInstanceId`, value, { shouldDirty: true, shouldValidate: true })}
-            >
-              <SelectTrigger id={`course-${index}-option`} aria-required {...errorProps('courseInstanceId')} className={formControlClassName}>
-                <SelectValue placeholder={t('Choose a date…', 'Termin auswählen…')} />
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {termIsLevel ? `${formatStart(item.startDate, locale)} · ${item.scheduleLabel}` : item.dateRangeLabel}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors?.courseInstanceId ? (
-              <p id={`course-${index}-courseInstanceId-error`} className={formErrorClassName}>{errors.courseInstanceId.message}</p>
-            ) : null}
+            {/*
+              The level is the learner's own call, so the field hands them the way
+              to find out: the placement page with the Klett online tests (CASA's
+              own test is in development, see src/lib/placement/availability.ts).
+              A new tab, because the wizard keeps no draft.
+            */}
+            <Link href="/placement-test" target="_blank" rel="noopener" className={cn(linkClassName, 'text-sm')}>
+              {t('Free placement test', 'Kostenloser Einstufungstest')}
+              <span aria-hidden="true">{' '}↗</span>
+              <span className="sr-only">{t(' (opens in a new tab)', ' (öffnet in einem neuen Tab)')}</span>
+            </Link>
           </div>
-
-          {showLevel ? (
-            <div className={formFieldGroupClassName}>
-              <Label htmlFor={`course-${index}-level`} className={formLabelClassName}>
-                {t('Level', 'Niveau')}
-                <RequiredMark />
-              </Label>
-              <Select
-                value={level || ''}
-                onValueChange={(value) => {
-                  setValue(`courses.${index}.level`, value, { shouldDirty: true });
-                  // A path ends where it ended, if the new level can still reach it.
-                  if (pathTo && !continuationLevels(courseType?.slug, value, levels).includes(pathTo)) {
-                    setValue(`courses.${index}.pathTo`, '', { shouldDirty: true });
-                  }
-                  clearErrors(`courses.${index}.level`);
-                }}
-              >
-                <SelectTrigger id={`course-${index}-level`} aria-required {...errorProps('level')} className={formControlClassName}>
-                  <SelectValue placeholder={t('Choose a level…', 'Niveau auswählen…')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {levelGroups.map((group) => (
-                    <SelectGroup key={group.level}>
-                      {levelGroups.length > 1 ? <SelectLabel>{group.level}</SelectLabel> : null}
-                      {group.choices.map((choice) => (
-                        <SelectItem key={choice.value} value={choice.value}>
-                          {choice.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors?.level ? <p id={`course-${index}-level-error`} className={formErrorClassName}>{errors.level.message}</p> : null}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {showLevel ? (
-        /*
-          The level is the learner's own call, so the field hands them the way
-          to find out: the placement page with the Klett online tests (CASA's
-          own test is in development, see src/lib/placement/availability.ts).
-          A new tab, because the wizard keeps no draft.
-        */
-        <p className={formHintClassName}>
-          {t('Not sure which level you are?', 'Unsicher, welches Niveau Sie haben?')}{' '}
-          <Link
-            href="/placement-test"
-            target="_blank"
-            rel="noopener"
-            className="casa-cta-link font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 decoration-[color:var(--casa-sand)] transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current"
+          <Select
+            value={level || ''}
+            onValueChange={(value) => {
+              setValue(`courses.${index}.level`, value, { shouldDirty: true });
+              // A path ends where it ended, if the new level can still reach it.
+              if (pathTo && !continuationLevels(courseType?.slug, value, levels).includes(pathTo)) {
+                setValue(`courses.${index}.pathTo`, '', { shouldDirty: true });
+              }
+              clearErrors(`courses.${index}.level`);
+            }}
           >
-            {t('Take a free placement test', 'Kostenlosen Einstufungstest machen')}
-          </Link>
-          {t(' — opens in a new tab, so your details here stay.', ' – öffnet sich in einem neuen Tab, Ihre Angaben hier bleiben erhalten.')}
-        </p>
+            <SelectTrigger
+              id={`course-${index}-level`}
+              aria-required
+              aria-invalid={Boolean(errors?.level)}
+              aria-describedby={errors?.level ? `course-${index}-level-error` : undefined}
+              className={formControlClassName}
+            >
+              <SelectValue placeholder={t('Choose a level…', 'Niveau auswählen…')} />
+            </SelectTrigger>
+            <SelectContent>
+              {levelGroups.map((group, groupIndex) => (
+                <Fragment key={group.level}>
+                  {groupIndex > 0 ? <SelectSeparator /> : null}
+                  <SelectGroup>
+                    {group.choices.map((choice) => {
+                      const [name, length] = choice.label.split(' · ');
+                      return (
+                        <SelectItem key={choice.value} value={choice.value}>
+                          <span>{name}</span>
+                          {length ? <span className="text-[var(--casa-muted)]"> · {length}</span> : null}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectGroup>
+                </Fragment>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors?.level ? <p id={`course-${index}-level-error`} className={formErrorClassName}>{errors.level.message}</p> : null}
+        </div>
       ) : null}
 
       {continuation.length > 0 ? (
-        <fieldset className={cn(formFieldGroupClassName, 'min-w-0')}>
-          <legend className={cn(formLabelClassName, 'mb-2')}>{t('Continue afterwards?', 'Danach weiterlernen?')}</legend>
-          <div className="flex flex-wrap gap-2">
-            {[{ value: '', label: t(`Only ${level}`, `Nur ${level}`) }, ...continuation.map((target) => ({ value: target, label: t(`Up to ${target}`, `bis ${target}`) }))].map((choice) => {
-              const checked = choice.value === pathTo;
-              return (
-                <label
-                  key={choice.value || 'only'}
-                  className={cn(
-                    'cursor-pointer rounded-full border px-4 py-2 text-sm font-semibold transition-colors has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
-                    checked
-                      ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/60 text-[var(--casa-accent-text)]'
-                      : 'border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)] hover:border-[color:var(--casa-field-edge-hover)]'
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name={`course-${index}-path`}
-                    value={choice.value}
-                    checked={checked}
-                    onChange={() => setValue(`courses.${index}.pathTo`, choice.value, { shouldDirty: true })}
-                    className="sr-only"
-                  />
-                  {choice.label}
-                </label>
-              );
-            })}
-          </div>
-          <p className={formHintClassName}>
-            {t(
-              'Each further level takes 8 weeks and starts with the next course date.',
-              'Jedes weitere Niveau dauert 8 Wochen und beginnt mit dem nächsten Kurstermin.'
-            )}
-          </p>
-        </fieldset>
+        <LevelLadder
+          name={`course-${index}-path`}
+          start={level}
+          targets={continuation}
+          value={pathTo}
+          onChange={(value) => setValue(`courses.${index}.pathTo`, value, { shouldDirty: true })}
+          locale={locale}
+        />
       ) : null}
 
-      {courseType && path.length > 1 ? (
-        <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
-          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-red)]" />
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className={formMetaLabelClassName}>{t('Your learning path', 'Ihr Lernweg')} · {courseType.name}</p>
-            <p className="text-sm font-semibold text-[var(--casa-ink)]">
-              {t(`${path.length} levels · ${pathWeeks(path)} weeks`, `${path.length} Niveaus · ${pathWeeks(path)} Wochen`)}
-            </p>
-          </div>
-          <ol className="mt-4">
-            {path.map((step, stepIndex) => (
-              <li key={`${step.level}-${stepIndex}`} className="relative flex gap-4 pb-5 last:pb-0">
-                {stepIndex < path.length - 1 ? (
-                  <span aria-hidden="true" className="absolute bottom-0 left-[13px] top-7 w-px bg-[color:var(--casa-field-edge-hover)]" />
-                ) : null}
-                <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-[var(--casa-red-text)] ring-1 ring-[color:var(--casa-sand)]">
-                  {stepIndex + 1}
-                </span>
-                <div className="min-w-0">
-                  <p className="font-semibold text-[var(--casa-ink)]">{step.label.split(' · ')[0]}</p>
-                  <p className="text-sm text-[var(--casa-muted)]">{pathStepDates(step, locale)}</p>
-                  {step.option ? <p className="text-sm text-[var(--casa-muted)]">{step.option.scheduleLabel}</p> : null}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
+      {courseType ? (
+        <DateTiles
+          id={`course-${index}-option`}
+          name={`course-${index}-option`}
+          legend={termIsLevel ? t('Start', 'Beginn') : t('Dates', 'Termin')}
+          groups={termGroups(options, locale)}
+          value={instanceId}
+          onChange={(value) => {
+            setValue(`courses.${index}.courseInstanceId`, value, { shouldDirty: true });
+            clearErrors(`courses.${index}.courseInstanceId`);
+          }}
+          locale={locale}
+          error={errors?.courseInstanceId?.message}
+          errorId={`course-${index}-courseInstanceId-error`}
+          emptyText={t('No dates to book online right now.', 'Derzeit keine Termine zum Online-Buchen.')}
+        />
       ) : null}
 
-      {courseType && option && path.length <= 1 ? (
-        <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
-          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-red)]" />
-          <p className={formMetaLabelClassName}>{t('Your choice', 'Ihre Auswahl')}</p>
-          <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">
-            {courseType.name}
-            {chosenLevel ? <span className="font-normal text-[var(--casa-muted)]"> · {chosenLevel.label.split(' · ')[0]}</span> : null}
-          </h3>
-          <dl className="mt-4 grid gap-4 border-t border-[color:var(--casa-sand)] pt-4 text-sm sm:grid-cols-2">
-            {termIsLevel ? (
-              <>
-                <div>
-                  <dt className={formMetaLabelClassName}>{t('Start', 'Beginn')}</dt>
-                  <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{formatStart(option.startDate, locale)}</dd>
-                </div>
-                <div>
-                  <dt className={formMetaLabelClassName}>{t('Length', 'Dauer')}</dt>
-                  <dd className="mt-1 font-semibold text-[var(--casa-ink)]">
-                    {chosenLevel
-                      ? chosenLevel.whole
-                        ? t('8 weeks (whole level)', '8 Wochen (komplettes Niveau)')
-                        : t('4 weeks (half level)', '4 Wochen (Teilniveau)')
-                      : t('4 or 8 weeks, by level', '4 oder 8 Wochen, je nach Niveau')}
-                  </dd>
-                </div>
-              </>
-            ) : (
-              <div>
-                <dt className={formMetaLabelClassName}>{t('Dates', 'Daten')}</dt>
-                <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{option.dateRangeLabel}</dd>
-              </div>
-            )}
-            <div className={termIsLevel ? 'sm:col-span-2' : undefined}>
-              <dt className={formMetaLabelClassName}>{t('Schedule', 'Zeitplan')}</dt>
-              <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{option.scheduleLabel}</dd>
-            </div>
-          </dl>
-        </div>
-      ) : null}
+      {plan ? <PlanSummary plan={plan} locale={locale} /> : null}
     </div>
   );
 }
@@ -415,8 +469,6 @@ type ExamAddOnProps = {
   form: CourseForm;
   examCatalog: RegistrationExamCatalog;
 };
-
-const REGISTRATION_TYPES = ['full', 'written', 'oral'] as const;
 
 /** An exam booked with the courses (2026-10-05): off until the learner asks for it. */
 export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
@@ -438,11 +490,7 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
 
   const sessions = examCatalog.optionsByExamTypeId[examTypeId] ?? [];
   const session = sessions.find((candidate) => candidate.id === sessionId) ?? null;
-  const typeLabels: Record<(typeof REGISTRATION_TYPES)[number], string> = {
-    full: t('Full exam', 'Vollprüfung'),
-    written: t('Written only', 'Nur schriftlich'),
-    oral: t('Oral only', 'Nur mündlich'),
-  };
+  const typeLabels = registrationTypeLabels(locale);
 
   const chooseExam = (id: string) => {
     setValue('exam.examTypeId', id, { shouldDirty: true });
@@ -455,6 +503,10 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
     if (checked && !examTypeId) {
       chooseExam(examTypes[0].id);
     }
+    // The full exam, as the exam form starts: a part on its own is the exception.
+    if (checked && !registrationType) {
+      setValue('exam.registrationType', 'full', { shouldDirty: true });
+    }
     if (!checked) {
       clearErrors(['exam', 'officialNameConfirmed', 'examPolicyAccepted']);
     }
@@ -465,19 +517,14 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
       <div className="flex items-start gap-3">
         <Checkbox id="exam-enabled" checked={enabled} onCheckedChange={(checked) => toggle(Boolean(checked))} className="mt-0.5" />
         <Label htmlFor="exam-enabled" className="block cursor-pointer leading-relaxed">
-          <span className="block text-sm font-semibold text-[var(--casa-ink)]">{t('Add an exam (optional)', 'Prüfung dazubuchen (optional)')}</span>
-          <span className="mt-0.5 block text-sm font-normal text-[var(--casa-muted)]">
-            {t(
-              `${joinNames(examTypes.map((type) => type.name), locale)} at CASA’s exam centre.`,
-              `${joinNames(examTypes.map((type) => type.name), locale)} im Prüfungszentrum von CASA.`
-            )}
-          </span>
+          <span className="block text-sm font-semibold text-[var(--casa-ink)]">{t('Add an exam', 'Prüfung dazubuchen')}</span>
+          <span className="mt-0.5 block text-sm font-normal text-[var(--casa-muted)]">{examTypes.map((type) => type.name).join(' · ')}</span>
         </Label>
       </div>
 
       {enabled ? (
-        <div className="mt-5 space-y-5 border-t border-[color:var(--casa-sand)] pt-5">
-          <fieldset id="exam-type" tabIndex={-1} className={cn(formFieldGroupClassName, 'min-w-0')}>
+        <div className="mt-5 space-y-6 border-t border-[color:var(--casa-sand)] pt-5">
+          <fieldset id="exam-type" tabIndex={-1} className={cn(formFieldGroupClassName, 'outline-none')}>
             <legend className={cn(formLabelClassName, 'mb-2')}>
               {t('Which exam?', 'Welche Prüfung?')}
               <RequiredMark />
@@ -499,93 +546,37 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
             {errors?.examTypeId ? <p id="exam-type-error" className={formErrorClassName}>{errors.examTypeId.message}</p> : null}
           </fieldset>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className={formFieldGroupClassName}>
-              <Label htmlFor="exam-session" className={formLabelClassName}>
-                {t('Exam date', 'Prüfungstermin')}
-                <RequiredMark />
-              </Label>
-              <Select
-                value={sessionId}
-                onValueChange={(value) => {
-                  setValue('exam.examSessionId', value, { shouldDirty: true });
-                  clearErrors('exam.examSessionId');
-                }}
-              >
-                <SelectTrigger
-                  id="exam-session"
-                  aria-required
-                  aria-invalid={Boolean(errors?.examSessionId)}
-                  aria-describedby={errors?.examSessionId ? 'exam-session-error' : undefined}
-                  className={formControlClassName}
-                >
-                  <SelectValue placeholder={t('Choose a date…', 'Termin auswählen…')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {sessions.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.startsAtLabel}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors?.examSessionId ? <p id="exam-session-error" className={formErrorClassName}>{errors.examSessionId.message}</p> : null}
-            </div>
-
-            <div className={formFieldGroupClassName}>
-              <Label htmlFor="exam-registration-type" className={formLabelClassName}>
-                {t('Type of entry', 'Anmeldeart')}
-                <RequiredMark />
-              </Label>
-              <Select
-                value={registrationType ?? ''}
-                onValueChange={(value) => {
-                  setValue('exam.registrationType', value as (typeof REGISTRATION_TYPES)[number], { shouldDirty: true });
-                  clearErrors('exam.registrationType');
-                }}
-              >
-                <SelectTrigger
-                  id="exam-registration-type"
-                  aria-required
-                  aria-invalid={Boolean(errors?.registrationType)}
-                  aria-describedby={errors?.registrationType ? 'exam-registration-type-error' : undefined}
-                  className={formControlClassName}
-                >
-                  <SelectValue placeholder={t('Choose…', 'Auswählen…')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {REGISTRATION_TYPES.map((value) => (
-                    <SelectItem key={value} value={value}>
-                      {typeLabels[value]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors?.registrationType ? (
-                <p id="exam-registration-type-error" className={formErrorClassName}>{errors.registrationType.message}</p>
-              ) : null}
-            </div>
+          <div className="space-y-2">
+            <DateTiles
+              id="exam-session"
+              name="exam-session"
+              legend={t('Exam date', 'Prüfungstermin')}
+              groups={sessions.length > 0 ? [{ key: examTypeId, tiles: sessions.map((item) => ({ id: item.id, date: item.startsAt })) }] : []}
+              value={sessionId}
+              onChange={(value) => {
+                setValue('exam.examSessionId', value, { shouldDirty: true });
+                clearErrors('exam.examSessionId');
+              }}
+              locale={locale}
+              error={errors?.examSessionId?.message}
+              errorId="exam-session-error"
+            />
+            {session ? <p className={formHintClassName}>{sittingFacts(session, locale)}</p> : null}
           </div>
 
-          {session ? (
-            <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
-              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-ink-deep)]" />
-              <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-                <div>
-                  <dt className={formMetaLabelClassName}>{t('Date', 'Datum')}</dt>
-                  <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{session.startsAtLabel}</dd>
-                </div>
-                <div>
-                  <dt className={formMetaLabelClassName}>{t('Location', 'Ort')}</dt>
-                  <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{session.locationLabel}</dd>
-                </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <dt className={formMetaLabelClassName}>{t('Deadline', 'Frist')}</dt>
-                  <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{session.deadlineLabel}</dd>
-                </div>
-              </dl>
-            </div>
-          ) : null}
+          <PillChoices
+            id="exam-registration-type"
+            name="exam-registration-type"
+            legend={t('Type of entry', 'Anmeldeart')}
+            options={REGISTRATION_TYPES.map((value) => ({ value, label: typeLabels[value] }))}
+            value={registrationType ?? ''}
+            onChange={(value) => {
+              setValue('exam.registrationType', value as (typeof REGISTRATION_TYPES)[number], { shouldDirty: true });
+              clearErrors('exam.registrationType');
+            }}
+            error={errors?.registrationType?.message}
+            errorId="exam-registration-type-error"
+          />
         </div>
       ) : null}
     </div>

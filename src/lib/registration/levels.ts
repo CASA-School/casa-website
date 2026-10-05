@@ -28,7 +28,7 @@ export type LevelChoiceGroup = {
 };
 
 export type BookedLevel = {
-  /** What staff and the learner read, e.g. "A1 komplett (A1.1 + A1.2) · 8 Wochen". */
+  /** What staff and the learner read, e.g. "A1 komplett · 8 Wochen". */
   label: string;
   /** The half level the learner starts at, the code the workspace stores. */
   startCode: string;
@@ -59,9 +59,8 @@ export function levelChoiceGroups(
     const whole = soldByLevel && halves.includes(first) && halves.includes(second)
       ? [{
           value: level,
-          label: locale === 'de'
-            ? `${level} komplett (${first} + ${second}) · ${weeks(8, locale)}`
-            : `${level} complete (${first} + ${second}) · ${weeks(8, locale)}`,
+          // "komplett" says both halves; the codes beside it only repeated the group.
+          label: `${level} ${locale === 'de' ? 'komplett' : 'complete'} · ${weeks(8, locale)}`,
         }]
       : [];
 

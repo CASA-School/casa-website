@@ -97,7 +97,8 @@ type FormStepHeaderProps = {
   /** The logo colour of what the step is about (src/config/brand/meaning.ts). */
   meaning: Meaning;
   title: string;
-  description: string;
+  /** One line under the title, only where it tells the reader something the fields do not. */
+  description?: string;
   /** A wizard moves focus here when the step changes. */
   headingRef?: Ref<HTMLHeadingElement>;
 };
@@ -105,7 +106,7 @@ type FormStepHeaderProps = {
 /** A step's or a form's own heading: the icon in its meaning colour, the title, one line. */
 export function FormStepHeader({ icon: Icon, meaning, title, description, headingRef }: FormStepHeaderProps) {
   return (
-    <div className="flex items-start gap-4">
+    <div className={cn('flex gap-4', description ? 'items-start' : 'items-center')}>
       <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-full', meaningClasses[meaning].circle)}>
         <Icon className="size-5" aria-hidden />
       </span>
@@ -113,7 +114,7 @@ export function FormStepHeader({ icon: Icon, meaning, title, description, headin
         <h2 ref={headingRef} tabIndex={-1} className="text-xl font-bold tracking-tight text-[var(--casa-ink)] md:text-2xl">
           {title}
         </h2>
-        <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)] md:text-base">{description}</p>
+        {description ? <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)] md:text-base">{description}</p> : null}
       </div>
     </div>
   );

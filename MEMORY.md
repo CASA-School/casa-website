@@ -2341,3 +2341,16 @@ exam ride in one registration; one person, one queue row per course term, one ex
 (`storeRegistration`). Zod 4 runs cross-field rules only once every field is valid, so step 1 checks
 its conditional fields in the wizard itself.
 
+
+## 38. The course step says each fact once (2026-10-05)
+
+Rahman found the course step crowded: every start date carried its day list and time, and an
+"Ihre Auswahl" card repeated the start, the schedule and "4 oder 8 Wochen". Now the level comes
+first (it sets the length), "Bis zu welchem Niveau?" is a ladder filled from the chosen level, and
+the start dates are tiles under the one schedule they share ("Vormittags · Mo–Fr · 09:00–12:30").
+Under them, one line: the end date and the weeks, or the learning path as a short timeline. The
+exam add-on and the exam form take the same tiles, and the type of entry is a row of pills that
+starts on "Vollprüfung". Schedules have parts now (`src/lib/registration/term-format.ts`: days as a
+range, a dash in the time, the part of the day), so mails and the workspace read "Mo–Fr · 09:00–12:30"
+too. Step descriptions, stepper subtitles and the "Rechtliches" box that repeated the terms
+checkbox are gone. The shared pickers live in `src/components/registration/choice-controls.tsx`.

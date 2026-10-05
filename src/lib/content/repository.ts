@@ -19,6 +19,7 @@ import {
   nextCourseStartDate,
 } from '@/lib/content/bookability';
 import { getCourseContentSlug } from '@/lib/content/course-routes';
+import { parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { sortByPublicCourseOrder } from '@/config/courses/course-order';
 import {
   fallbackCourseInstances,
@@ -273,41 +274,9 @@ function formatDateTimeLabel(startsAt: string, endsAt: string, locale: ContentLo
   return `${dateLabel}, ${timeFormatter.format(starts)} - ${timeFormatter.format(ends)}`;
 }
 
-// The schedule column stores English abbreviations; German pages printed them as-is.
-const germanWeekdays: Record<string, string> = {
-  Mon: 'Mo',
-  Tue: 'Di',
-  Wed: 'Mi',
-  Thu: 'Do',
-  Fri: 'Fr',
-  Sat: 'Sa',
-  Sun: 'So',
-};
-
-function normalizeScheduleDays(days: string[], locale: ContentLocale) {
-  return days
-    .map((day) => day.trim())
-    .filter(Boolean)
-    .map((day) => (locale === 'de' ? germanWeekdays[day] ?? day : day))
-    .join(', ');
-}
-
+// "Mo–Fr · 09:00–12:30", from the parts lib/registration/term-format reads off the schedule column.
 function formatScheduleLabel(schedule: unknown, locale: ContentLocale) {
-  if (!schedule || typeof schedule !== 'object' || Array.isArray(schedule)) {
-    return locale === 'de' ? 'Zeitplan wird bestätigt' : 'Schedule to be confirmed';
-  }
-
-  const rawDays = (schedule as { days?: unknown }).days;
-  const rawTime = (schedule as { time?: unknown }).time;
-  const days = Array.isArray(rawDays) ? rawDays.filter((item): item is string => typeof item === 'string') : [];
-  const time = typeof rawTime === 'string' ? rawTime : '';
-
-  const daysLabel = days.length > 0 ? normalizeScheduleDays(days, locale) : locale === 'de' ? 'Tage werden noch festgelegt' : 'Days to be confirmed';
-  if (!time) {
-    return daysLabel;
-  }
-
-  return `${daysLabel} • ${time}`;
+  return scheduleLine(parseSchedule(schedule, locale), locale);
 }
 
 /** Both arguments are `YYYY-MM-DD`; see normalizeCourseInstanceRow for why. */
@@ -468,6 +437,8 @@ function buildCourseRegistrationOption(
     startDate: instance.start_date,
     endDate: instance.end_date,
     scheduleLabel: formatScheduleLabel(instance.schedule, locale),
+    schedule: parseSchedule(instance.schedule, locale),
+    underway: instance.start_date < today,
     locationLabel: instance.location || (locale === 'de' ? 'CASA Bremen Campus' : 'CASA Bremen Campus'),
     fee: courseType.default_price,
     currency: courseType.currency,

@@ -200,11 +200,13 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
       ...courseCatalog.optionsByCourseTypeId,
       [INTENSIVE_ID]: [{
         id: INTENSIVE_OPTION_ID, courseTypeId: INTENSIVE_ID, dateRangeLabel: '26. Okt. 2026 - 18. Dez. 2026',
-        startDate: '2026-10-26', endDate: '2026-12-18', scheduleLabel: 'Mo-Fr 09:00-12:30',
+        startDate: '2026-10-26', endDate: '2026-12-18', scheduleLabel: 'Mo–Fr · 09:00–12:30',
+        schedule: { days: 'Mo–Fr', time: '09:00–12:30', daytime: 'morning' },
         locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2'],
       }, {
         id: '20000000-0000-4000-8000-000000000010', courseTypeId: INTENSIVE_ID, dateRangeLabel: '04. Jan. 2027 - 26. Feb. 2027',
-        startDate: '2027-01-04', endDate: '2027-02-26', scheduleLabel: 'Mo-Do 13:00-17:30',
+        startDate: '2027-01-04', endDate: '2027-02-26', scheduleLabel: 'Mo–Do · 13:00–17:30',
+        schedule: { days: 'Mo–Do', time: '13:00–17:30', daytime: 'afternoon' },
         locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2'],
       }],
     },
@@ -215,7 +217,7 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     await act(async () => root.render(<CourseWizard catalog={catalog} />));
     const radios = [...container.querySelectorAll<HTMLInputElement>('input[name="course-0-type"]')];
     expect(radios.map((radio) => radio.value)).toEqual([TYPE_ID, INTENSIVE_ID]);
-    expect(container.textContent).toContain('Deutsch für Pflege und Medizin: derzeit keine Termine zum Online-Buchen.');
+    expect(container.textContent).toContain('Auf Anfrage: Deutsch für Pflege und Medizin.');
 
     await click(button('Noch einen Kurs hinzufügen'));
     expect(container.querySelectorAll('input[name="course-1-type"]')).toHaveLength(2);
@@ -230,15 +232,32 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     expect(document.activeElement).toBe(container.querySelector('#course-0-level'));
   });
 
-  it('offers an exam only with an exam catalogue, and asks for it once added', async () => {
+  it('offers an exam only with an exam catalogue, and starts it as the full exam on its first date', async () => {
     await act(async () => root.render(<CourseWizard catalog={catalog} />));
     expect(container.querySelector('#exam-enabled')).toBeNull();
 
     await act(async () => root.render(<CourseWizard catalog={catalog} examCatalog={examCatalog} />));
     await click(container.querySelector<HTMLButtonElement>('#exam-enabled')!);
     expect(container.querySelectorAll('input[name="exam-type"]')).toHaveLength(1);
+    expect(container.querySelector<HTMLInputElement>('input[name="exam-session"]')?.checked).toBe(true);
+    expect(container.querySelector<HTMLInputElement>('input[name="exam-registration-type"][value="full"]')?.checked).toBe(true);
+
     await click(button('Weiter'));
-    expect(container.querySelector('#exam-registration-type-error')?.textContent).toBe('Bitte wählen Sie eine Anmeldeart aus.');
+    expect(container.querySelector('h2')?.textContent).toBe('Persönliche Angaben');
+  });
+
+  it('shows the start dates under the schedule they share, each schedule once', async () => {
+    await act(async () => root.render(<CourseWizard catalog={{ ...catalog, defaultCourseTypeId: INTENSIVE_ID, defaultOptionId: INTENSIVE_OPTION_ID }} />));
+    const groups = [...container.querySelectorAll('#course-0-option [role="group"]')];
+    expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual([
+      'Vormittags · Mo–Fr · 09:00–12:30',
+      'Nachmittags · Mo–Do · 13:00–17:30',
+    ]);
+    expect(container.querySelector<HTMLInputElement>('input[name="course-0-option"]:checked')?.value).toBe(INTENSIVE_OPTION_ID);
+    expect(groups[0].textContent).toContain('26. Oktober 2026');
+    // Said once, over its dates: no summary card repeats it.
+    expect(container.textContent?.split('Mo–Fr · 09:00–12:30')).toHaveLength(2);
+    expect(container.textContent).not.toContain('Ihre Auswahl');
   });
 
   it('offers no learning path before a level is chosen', async () => {

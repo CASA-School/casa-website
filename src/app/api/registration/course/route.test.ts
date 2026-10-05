@@ -158,7 +158,7 @@ describe('course registration route', () => {
 
     const stored = mocks.store.mock.calls[0][0];
     expect(stored.courses).toHaveLength(2);
-    expect(stored.courses[0]).toMatchObject({ requestId, levelRaw: 'A1 komplett (A1.1 + A1.2) · 8 Wochen', levelCode: 'A1.1' });
+    expect(stored.courses[0]).toMatchObject({ requestId, levelRaw: 'A1 komplett · 8 Wochen', levelCode: 'A1.1' });
     expect(stored.courses[1].requestId).not.toBe(requestId);
     expect(stored.exam).toMatchObject({ examTypeLabel: 'telc Deutsch B2', registrationType: 'full', officialNameConfirmed: true });
     expect(stored.registrant).toMatchObject({ email: 'ada@example.com' });
@@ -166,7 +166,7 @@ describe('course registration route', () => {
     const [, payload] = mocks.notify.mock.calls[0];
     expect(payload).toMatchObject({
       courseTypeLabel: 'Intensivkurse',
-      currentLevel: 'A1 komplett (A1.1 + A1.2) · 8 Wochen',
+      currentLevel: 'A1 komplett · 8 Wochen',
       courses: [{ courseTypeLabel: 'Intensivkurse' }, { courseTypeLabel: 'Intensiv Deutsch' }],
       exam: { examTypeLabel: 'telc Deutsch B2', registrationType: 'full' },
     });
@@ -206,9 +206,9 @@ describe('course registration route', () => {
     expect(response.status).toBe(200);
     const rows = mocks.store.mock.calls[0][0].courses;
     expect(rows.map((row: { levelRaw: string }) => row.levelRaw)).toEqual([
-      'A1 komplett (A1.1 + A1.2) · 8 Wochen',
-      'A2 komplett (A2.1 + A2.2) · 8 Wochen',
-      'B1 komplett (B1.1 + B1.2) · 8 Wochen',
+      'A1 komplett · 8 Wochen',
+      'A2 komplett · 8 Wochen',
+      'B1 komplett · 8 Wochen',
     ]);
     expect(rows[1].courseInstanceLabel).toBe('01. Feb. 2027 - 01. Apr. 2027 | Mo-Do 13:00-17:30 | CASA Bremen');
     expect(rows[2]).toMatchObject({ courseInstanceId: '', courseInstanceLabel: 'Termin wird noch festgelegt', levelCode: 'B1.1' });

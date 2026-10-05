@@ -106,7 +106,7 @@ describe('one registration, several rows (2026-10-05)', () => {
       stay: { visaRequired: false, accommodationRequired: false, accommodationType: undefined, allergies: '', notes: '' },
       locale: 'de',
       courses: [
-        { requestId: 'r-1', courseTypeId: FIXTURE_TYPE_ID, courseInstanceId: FIXTURE_SESSION_ID, courseTypeLabel: 'Intensivkurse', courseInstanceLabel: 'a | b | c', levelRaw: 'A1 komplett (A1.1 + A1.2) · 8 Wochen', levelCode: 'A1.1' },
+        { requestId: 'r-1', courseTypeId: FIXTURE_TYPE_ID, courseInstanceId: FIXTURE_SESSION_ID, courseTypeLabel: 'Intensivkurse', courseInstanceLabel: 'a | b | c', levelRaw: 'A1 komplett · 8 Wochen', levelCode: 'A1.1' },
         { requestId: 'r-2', courseTypeId: FIXTURE_TYPE_ID, courseInstanceId: FIXTURE_SESSION_ID, courseTypeLabel: 'Spezialkurse', courseInstanceLabel: 'a | b | c', levelRaw: 'B1.2', levelCode: 'B1.2' },
       ],
       exam: { requestId: 'r-3', examTypeId: FIXTURE_TYPE_ID, examSessionId: FIXTURE_SESSION_ID, examTypeLabel: 'telc Deutsch B2', examSessionLabel: 'x | y', registrationType: 'full', officialNameConfirmed: true },
@@ -116,7 +116,7 @@ describe('one registration, several rows (2026-10-05)', () => {
     expect(calls.filter((call) => /INSERT INTO people/.test(call.sql))).toHaveLength(1);
     const courseInserts = calls.filter((call) => /INSERT INTO course_registrations/.test(call.sql));
     expect(courseInserts.map((call) => call.params[0])).toEqual(['r-1', 'r-2']);
-    expect(courseInserts[0].params.slice(14, 16)).toEqual(['A1 komplett (A1.1 + A1.2) · 8 Wochen', 'A1.1']);
+    expect(courseInserts[0].params.slice(14, 16)).toEqual(['A1 komplett · 8 Wochen', 'A1.1']);
     expect(calls.filter((call) => /INSERT INTO exam_registrations/.test(call.sql)).map((call) => call.params[0])).toEqual(['r-3']);
 
     // The unmatched nationality: on the first course and on the exam, not on the second course.
