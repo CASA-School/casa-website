@@ -29,7 +29,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
-import { courseDatesLine, CourseItemFields, ExamAddOn, pathStepDates } from '@/components/registration/course-choices';
+import { registrationTypeLabels } from '@/components/registration/choice-controls';
+import { coursePlan, CourseItemFields, ExamAddOn, planRowDates, planRowSchedule } from '@/components/registration/course-choices';
 import type { CourseFormData, CourseFormSubmission } from '@/components/registration/course-form-types';
 import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
@@ -38,8 +39,7 @@ import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
-import { buildLevelPath } from '@/lib/registration/level-path';
-import { describeBookedLevel } from '@/lib/registration/levels';
+import { clockRange, formatDay } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import {
   createCourseRegistrationFormSchema,
@@ -197,11 +197,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
   const courses = watch('courses');
   const exam = watch('exam');
 
-  const stepItems = [
-    { title: t('Course', 'Kurs'), description: t('Goal and start', 'Ziel und Start') },
-    { title: t('Details', 'Details'), description: t('Student profile', 'Teilnehmerprofil') },
-    { title: t('Review', 'Prüfen'), description: t('Final check', 'Letzte Kontrolle') },
-  ];
+  const stepItems = [{ title: t('Course', 'Kurs') }, { title: t('Details', 'Details') }, { title: t('Review', 'Prüfen') }];
   const fieldsByStep: Array<Array<keyof FormData>> = [
     ['courses', 'examEnabled', 'exam'],
     accommodationRequired
@@ -365,10 +361,6 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
               meaning="courses"
               headingRef={stepHeadingRef}
               title={t('Choose your course', 'Kurs auswählen')}
-              description={t(
-                'Choose your course and when to start. You can add more courses and an exam.',
-                'Wählen Sie Ihren Kurs und den Beginn. Weitere Kurse und eine Prüfung können Sie dazubuchen.'
-              )}
             />
 
             {courseFields.map((field, index) => (
@@ -416,10 +408,6 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Personal details', 'Persönliche Angaben')}
-              description={t(
-                'Your details let us prepare the registration and, if you wish, help with accommodation.',
-                'Mit Ihren Angaben bereiten wir die Anmeldung vor und helfen auf Wunsch bei der Unterkunft.'
-              )}
             />
 
             <div className={formFieldGroupClassName}>
@@ -489,14 +477,6 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 {errors.phone && <p id="phone-error" className={formErrorClassName}>{errors.phone.message}</p>}
               </div>
             </div>
-
-            <p className={cn(formHintClassName, 'flex gap-2.5')}>
-              <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-              {t(
-                'CASA reviews your registration and replies by email.',
-                'CASA prüft Ihre Anmeldung und meldet sich per E-Mail bei Ihnen.'
-              )}
-            </p>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div className={formFieldGroupClassName}>
@@ -650,43 +630,26 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Review and submit', 'Prüfen und absenden')}
-              description={t(
-                'Please check all details before you send your registration.',
-                'Bitte prüfen Sie alle Angaben, bevor Sie Ihre Anmeldung absenden.'
-              )}
             />
 
             <div className="space-y-4 text-sm">
               <div className="grid gap-3 sm:grid-cols-2">
                 {(() => {
                   // One tile per course, and per term of a learning path, numbered as staff will see them.
-                  const tiles = courses.flatMap((course) => {
+                  const tiles = courses.flatMap((course): Array<{ name: string; level: string | null; dates: string | null; schedule: string | null }> => {
                     const type = catalog.courseTypes.find((candidate) => candidate.id === course.courseTypeId);
                     const options = catalog.optionsByCourseTypeId[course.courseTypeId] ?? [];
-                    const option = options.find((candidate) => candidate.id === course.courseInstanceId);
-                    const level = type && option && course.level
-                      ? describeBookedLevel(type.slug, course.level, option.availableLevels, catalog.locale)
-                      : null;
-                    const path = type && option && course.level && course.pathTo
-                      ? buildLevelPath({
-                          slug: type.slug, value: course.level, option, options,
-                          availableLevels: option.availableLevels, pathTo: course.pathTo, locale: catalog.locale,
-                        })
-                      : [];
-                    if (path.length > 1) {
-                      return path.map((step) => ({
-                        name: type?.name ?? '-',
-                        level: step.label.split(' · ')[0],
-                        dates: pathStepDates(step, catalog.locale),
-                        schedule: step.option?.scheduleLabel ?? null,
-                      }));
+                    const option = options.find((candidate) => candidate.id === course.courseInstanceId) ?? null;
+                    const plan = type ? coursePlan({ slug: type.slug, options, option, level: course.level ?? '', pathTo: course.pathTo ?? '', locale: catalog.locale }) : null;
+                    if (!plan) {
+                      return [{ name: type?.name ?? '-', level: null, dates: null, schedule: null }];
                     }
-                    return [{
+                    return plan.rows.map((row) => ({
                       name: type?.name ?? '-',
-                      level: level ? level.label.split(' · ')[0] : null,
-                      dates: option ? courseDatesLine(type?.slug, option, level, catalog.locale) : null,
-                      schedule: option?.scheduleLabel ?? null,
-                    }];
+                      level: row.level,
+                      dates: planRowDates(row, catalog.locale),
+                      schedule: row.start ? planRowSchedule(row, catalog.locale) : null,
+                    }));
                   });
                   return tiles.map((tile, index) => (
                     <div key={`${tile.name}-${index}`} className={formTileClassName}>
@@ -705,12 +668,12 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 {examEnabled && examCatalog ? (() => {
                   const examType = examCatalog.examTypes.find((candidate) => candidate.id === exam?.examTypeId);
                   const session = examCatalog.optionsByExamTypeId[exam?.examTypeId ?? '']?.find((candidate) => candidate.id === exam?.examSessionId);
-                  const types = { full: t('Full exam', 'Vollprüfung'), written: t('Written only', 'Nur schriftlich'), oral: t('Oral only', 'Nur mündlich') };
+                  const types = registrationTypeLabels(catalog.locale);
                   return (
                     <div className={formTileClassName}>
                       <p className={formMetaLabelClassName}>{t('Exam', 'Prüfung')}</p>
                       <p className="mt-1 font-semibold text-[var(--casa-ink)]">{examType?.name || '-'}</p>
-                      {session ? <p className="mt-0.5 text-[var(--casa-muted)]">{session.startsAtLabel}</p> : null}
+                      {session ? <p className="mt-0.5 text-[var(--casa-muted)]">{formatDay(session.startsAt, catalog.locale)} · {clockRange(session.startsAt, session.endsAt, catalog.locale)}</p> : null}
                       {exam?.registrationType ? <p className="mt-0.5 text-[var(--casa-muted)]">{types[exam.registrationType]}</p> : null}
                     </div>
                   );
@@ -733,17 +696,10 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 </div>
               </div>
 
-              <div className={formTileClassName}>
-                <p className="font-semibold text-[var(--casa-ink)]">{t('Legal and next steps', 'Rechtliches und nächste Schritte')}</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 leading-relaxed text-[var(--casa-muted)]">
-                  <li>
-                    {t('By submitting, you accept the CASA terms and conditions; the privacy policy explains how we handle your data.', 'Mit dem Absenden akzeptieren Sie die AGB von CASA; wie wir Ihre Daten verarbeiten, erklärt die Datenschutzerklärung.')}
-                  </li>
-                  <li>
-                    {t('Admissions confirmation is sent after seat and profile checks.', 'Die Bestätigung erfolgt nach Anmelde- und Kursprüfung.')}
-                  </li>
-                </ul>
-              </div>
+              <p className={cn(formHintClassName, 'flex gap-2.5')}>
+                <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
+                {t('We confirm your place by email once we have checked your registration.', 'Wir bestätigen Ihren Platz per E-Mail, sobald wir Ihre Anmeldung geprüft haben.')}
+              </p>
 
               <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
                 {examEnabled ? (

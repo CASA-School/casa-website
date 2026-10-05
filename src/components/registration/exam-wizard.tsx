@@ -28,12 +28,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { ChoiceChip, DateTiles, PillChoices, REGISTRATION_TYPES, registrationTypeLabels, sittingFacts } from '@/components/registration/choice-controls';
 import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationExamCatalog } from '@/lib/content/types';
+import { formatDay } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { createExamRegistrationFormSchema } from '@/lib/validation/registration-submissions';
 
@@ -156,19 +158,10 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     () => selectedOptions.find((option) => option.id === selectedExamSessionId) || null,
     [selectedOptions, selectedExamSessionId]
   );
-  const stepItems = [
-    { title: t('Exam', 'Prüfung'), description: t('Session and mode', 'Termin und Art') },
-    { title: t('Personal', 'Daten'), description: t('Candidate profile', 'Kandidatenprofil') },
-    { title: t('Review', 'Prüfen'), description: t('Final check', 'Letzte Kontrolle') },
-  ];
+  const stepItems = [{ title: t('Exam', 'Prüfung') }, { title: t('Personal', 'Daten') }, { title: t('Review', 'Prüfen') }];
   const stepFields = FIELDS_BY_STEP[step - 1] ?? [];
   const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
-  const registrationTypeLabel =
-    {
-      full: t('Full exam', 'Vollprüfung'),
-      written: t('Written only', 'Nur schriftlich'),
-      oral: t('Oral only', 'Nur mündlich'),
-    }[selectedRegistrationType] ?? selectedRegistrationType;
+  const registrationTypeLabel = registrationTypeLabels(catalog.locale)[selectedRegistrationType] ?? selectedRegistrationType;
 
   useEffect(() => {
     if (!selectedExamTypeId) {
@@ -307,110 +300,56 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               meaning="exams"
               headingRef={stepHeadingRef}
               title={t('Choose your exam', 'Prüfung auswählen')}
-              description={t(
-                'Choose the exam first, then the date that fits your preparation.',
-                'Wählen Sie zuerst die Prüfung und dann den Termin, der zu Ihrer Vorbereitung passt.'
-              )}
             />
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <div className={formFieldGroupClassName}>
-                <Label htmlFor="exam-type" className={formLabelClassName}>
-                  {t('Exam type', 'Prüfungstyp')}
-                  <RequiredMark />
-                </Label>
-                <Select
-                  onValueChange={(value) => setValue('examTypeId', value, { shouldDirty: true, shouldValidate: true })}
-                  defaultValue={watch('examTypeId')}
-                >
-                  <SelectTrigger id="exam-type" aria-required {...errorProps('examTypeId')} className={formControlClassName}>
-                    <SelectValue placeholder={t('Select an exam...', 'Prüfung auswählen...')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {catalog.examTypes.map((examType) => (
-                      <SelectItem key={examType.id} value={examType.id}>
-                        {examType.name} ({examType.level})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.examTypeId && <p id="examTypeId-error" className={formErrorClassName}>{errors.examTypeId.message}</p>}
-              </div>
-
-              <div className={formFieldGroupClassName}>
-                <Label htmlFor="registration-type" className={formLabelClassName}>
-                  {t('Registration type', 'Anmeldeart')}
-                  <RequiredMark />
-                </Label>
-                <Select
-                  onValueChange={(value: 'full' | 'written' | 'oral') =>
-                    setValue('registrationType', value, { shouldDirty: true, shouldValidate: true })
-                  }
-                  defaultValue={watch('registrationType')}
-                >
-                  <SelectTrigger id="registration-type" aria-required {...errorProps('registrationType')} className={formControlClassName}>
-                    <SelectValue placeholder={t('Select type...', 'Anmeldeart auswählen...')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="full">{t('Full exam', 'Vollprüfung')}</SelectItem>
-                    <SelectItem value="written">{t('Written only', 'Nur schriftlich')}</SelectItem>
-                    <SelectItem value="oral">{t('Oral only', 'Nur mündlich')}</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.registrationType && <p id="registrationType-error" className={formErrorClassName}>{errors.registrationType.message}</p>}
-              </div>
-            </div>
-
-
-            <div className={formFieldGroupClassName}>
-              <Label htmlFor="exam-session" className={formLabelClassName}>
-                {catalog.locale === 'de' ? 'Prüfungstermin' : 'Exam session'}
+            <fieldset id="exam-type" tabIndex={-1} className={cn(formFieldGroupClassName, 'outline-none')}>
+              <legend className={cn(formLabelClassName, 'mb-2')}>
+                {t('Which exam?', 'Welche Prüfung?')}
                 <RequiredMark />
-              </Label>
-              <Select
-                onValueChange={(value) => setValue('examSessionId', value, { shouldDirty: true, shouldValidate: true })}
+              </legend>
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {catalog.examTypes.map((examType) => (
+                  <ChoiceChip
+                    key={examType.id}
+                    name="exam-type"
+                    value={examType.id}
+                    checked={examType.id === selectedExamTypeId}
+                    icon={FileCheck2}
+                    meaning="exams"
+                    title={examType.name}
+                    onSelect={() => setValue('examTypeId', examType.id, { shouldDirty: true, shouldValidate: true })}
+                  />
+                ))}
+              </div>
+              {errors.examTypeId && <p id="examTypeId-error" className={formErrorClassName}>{errors.examTypeId.message}</p>}
+            </fieldset>
+
+            <div className="space-y-2">
+              <DateTiles
+                id="exam-session"
+                name="exam-session"
+                legend={t('Exam date', 'Prüfungstermin')}
+                groups={selectedOptions.length > 0 ? [{ key: selectedExamTypeId, tiles: selectedOptions.map((option) => ({ id: option.id, date: option.startsAt })) }] : []}
                 value={selectedExamSessionId}
-              >
-                <SelectTrigger id="exam-session" aria-required {...errorProps('examSessionId')} className={formControlClassName}>
-                  <SelectValue placeholder={catalog.locale === 'de' ? 'Termin auswählen...' : 'Select a session...'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedOptions.map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
-                      {option.startsAtLabel} | {option.locationLabel}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedOptions.length === 0 ? (
-                <p className={formHintClassName}>
-                  {catalog.locale === 'de' ? 'Noch keine Termine für diesen Prüfungstyp verfügbar.' : 'No sessions published for this exam type yet. Please choose another exam type.'}
-                </p>
-              ) : null}
-              {errors.examSessionId && <p id="examSessionId-error" className={formErrorClassName}>{errors.examSessionId.message}</p>}
+                onChange={(value) => setValue('examSessionId', value, { shouldDirty: true, shouldValidate: true })}
+                locale={catalog.locale}
+                error={errors.examSessionId?.message}
+                errorId="examSessionId-error"
+                emptyText={t('No dates for this exam yet.', 'Für diese Prüfung gibt es noch keine Termine.')}
+              />
+              {selectedOption ? <p className={formHintClassName}>{sittingFacts(selectedOption, catalog.locale)}</p> : null}
             </div>
 
-            {selectedOption ? (
-              <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
-                <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-ink-deep)]" />
-                <p className={formMetaLabelClassName}>{t('Selected session', 'Ausgewählter Termin')}</p>
-                <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedExamType?.name}</h3>
-                <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-[color:var(--casa-sand)] pt-4 text-sm sm:grid-cols-3">
-                  <div>
-                    <dt className={formMetaLabelClassName}>{t('Date', 'Datum')}</dt>
-                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.startsAtLabel}</dd>
-                  </div>
-                  <div>
-                    <dt className={formMetaLabelClassName}>{t('Location', 'Ort')}</dt>
-                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.locationLabel}</dd>
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <dt className={formMetaLabelClassName}>{t('Deadline', 'Frist')}</dt>
-                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.deadlineLabel}</dd>
-                  </div>
-                </dl>
-              </div>
-            ) : null}
+            <PillChoices
+              id="registration-type"
+              name="registration-type"
+              legend={t('Type of entry', 'Anmeldeart')}
+              options={REGISTRATION_TYPES.map((value) => ({ value, label: registrationTypeLabels(catalog.locale)[value] }))}
+              value={selectedRegistrationType ?? ''}
+              onChange={(value) => setValue('registrationType', value as (typeof REGISTRATION_TYPES)[number], { shouldDirty: true, shouldValidate: true })}
+              error={errors.registrationType?.message}
+              errorId="registrationType-error"
+            />
           </div>
         )}
 
@@ -492,11 +431,6 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               </div>
             </div>
 
-            <p className={cn(formHintClassName, 'flex gap-2.5')}>
-              <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-              {t('CASA reviews your registration and confirms the exam details and deadlines by email.', 'CASA prüft Ihre Anmeldung und bestätigt Prüfungsdetails und Fristen per E-Mail.')}
-            </p>
-
             <div className="grid gap-5 sm:grid-cols-2">
               <div className={formFieldGroupClassName}>
                 <Label htmlFor="nationality" className={formLabelClassName}>
@@ -551,7 +485,6 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Review and submit', 'Prüfen und absenden')}
-              description={t('Please check your exam choice and your details.', 'Bitte prüfen Sie Ihre Prüfungsauswahl und Ihre Angaben.')}
             />
 
             <div className="space-y-4 text-sm">
@@ -563,8 +496,8 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 </div>
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Session', 'Termin')}</p>
-                  <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption?.startsAtLabel || '-'}</p>
-                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{selectedOption?.locationLabel || '-'}</p>
+                  <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption ? formatDay(selectedOption.startsAt, catalog.locale) : '-'}</p>
+                  {selectedOption ? <p className="mt-0.5 break-words text-[var(--casa-muted)]">{sittingFacts(selectedOption, catalog.locale)}</p> : null}
                 </div>
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Candidate', 'Kandidat:in')}</p>
@@ -574,21 +507,12 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   </p>
                   <p className="mt-0.5 break-words text-[var(--casa-muted)]">{watch('email')}</p>
                 </div>
-                <div className={formTileClassName}>
-                  <p className={formMetaLabelClassName}>{t('Deadline', 'Frist')}</p>
-                  <p className="mt-1 font-semibold text-[var(--casa-ink)]">
-                    {selectedOption?.deadlineLabel || '-'}
-                  </p>
-                </div>
               </div>
 
-              <div className={formTileClassName}>
-                <p className="font-semibold text-[var(--casa-ink)]">{t('Legal and next steps', 'Rechtliches und nächste Schritte')}</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 leading-relaxed text-[var(--casa-muted)]">
-                  <li>{t('By submitting, you agree to CASA terms and exam registration conditions.', 'Mit dem Absenden akzeptieren Sie die CASA AGB und Prüfungsbedingungen.')}</li>
-                  <li>{t('Session access is confirmed after payment and candidate-data checks.', 'Der Termin wird nach Zahlungs- und Kandidatendatenprüfung bestätigt.')}</li>
-                </ul>
-              </div>
+              <p className={cn(formHintClassName, 'flex gap-2.5')}>
+                <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
+                {t('We confirm your exam place by email once payment and your details are checked.', 'Wir bestätigen Ihren Prüfungsplatz per E-Mail, sobald Zahlung und Angaben geprüft sind.')}
+              </p>
 
               <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
                 <div className="flex items-start gap-3">

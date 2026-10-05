@@ -46,7 +46,7 @@ export function RegistrationTabs({ current, locale }: RegistrationTabsProps) {
 }
 
 type RegistrationStepperProps = {
-  steps: readonly { title: string; description: string }[];
+  steps: readonly { title: string }[];
   /** 1-based. */
   step: number;
   locale: ContentLocale;
@@ -88,7 +88,6 @@ export function RegistrationStepper({ steps, step, locale }: RegistrationStepper
                   {item.title}
                   {complete ? <span className="sr-only">{locale === 'de' ? ' (erledigt)' : ' (done)'}</span> : null}
                 </p>
-                <p className="hidden truncate text-xs text-[var(--casa-muted)] sm:block">{item.description}</p>
               </div>
             </div>
           </li>

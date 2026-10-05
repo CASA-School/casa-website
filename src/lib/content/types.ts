@@ -301,6 +301,16 @@ export type ExamSessionRow = {
 
 export type RegistrationDeadlineStatus = 'open' | 'closing-soon' | 'closed' | 'not-applicable';
 
+/** The part of the day a term is taught in (lib/registration/term-format). */
+export type TermDaytime = 'morning' | 'afternoon' | 'evening' | 'fullDay';
+
+/** A term's schedule in parts: "Mo–Fr", "09:00–12:30", 'morning'. */
+export type TermSchedule = {
+  days: string;
+  time: string;
+  daytime: TermDaytime | null;
+};
+
 export type CourseRegistrationOption = {
   id: string;
   courseTypeId: string;
@@ -308,6 +318,10 @@ export type CourseRegistrationOption = {
   startDate: string;
   endDate: string;
   scheduleLabel: string;
+  /** The schedule in parts, so a picker can show it once over the terms that share it. */
+  schedule?: TermSchedule | null;
+  /** Begun and still open to join: an evening course any day, Bildungszeit on a Monday. */
+  underway?: boolean;
   locationLabel: string;
   fee: number;
   currency: string;

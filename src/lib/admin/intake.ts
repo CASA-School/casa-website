@@ -294,7 +294,7 @@ type CourseRowInput = {
   courseInstanceId: string;
   courseTypeLabel: string;
   courseInstanceLabel: string;
-  /** What the learner chose, e.g. "A1 komplett (A1.1 + A1.2) · 8 Wochen" or "B1.2". */
+  /** What the learner chose, e.g. "A1 komplett · 8 Wochen" or "B1.2". */
   levelRaw: string;
   /** The half level it starts at, the stored code; null when the raw value is not a CASA level. */
   levelCode: string | null;

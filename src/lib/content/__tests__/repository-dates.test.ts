@@ -118,13 +118,14 @@ describe('course registration catalog (fallback mode)', () => {
     expect(JSON.stringify(catalog)).not.toMatch(/Plätze|Warteliste|seats|Waitlist/);
   });
 
-  it('writes weekdays in the page language', async () => {
+  it('writes weekdays in the page language, as a range where they run in a row', async () => {
     const [de, en] = await Promise.all([getCourseRegistrationCatalog('de'), getCourseRegistrationCatalog('en')]);
     const afternoon = (catalog: typeof de) =>
-      catalog.optionsByCourseTypeId[INTENSIVE].find((option) => option.id.endsWith('010006'))?.scheduleLabel;
+      catalog.optionsByCourseTypeId[INTENSIVE].find((option) => option.id.endsWith('010006'));
 
-    expect(afternoon(de)).toBe('Mo, Di, Mi, Do • 13:00-17:30');
-    expect(afternoon(en)).toBe('Mon, Tue, Wed, Thu • 13:00-17:30');
+    expect(afternoon(de)?.scheduleLabel).toBe('Mo–Do · 13:00–17:30');
+    expect(afternoon(en)?.scheduleLabel).toBe('Mon–Thu · 13:00–17:30');
+    expect(afternoon(de)?.schedule).toEqual({ days: 'Mo–Do', time: '13:00–17:30', daytime: 'afternoon' });
   });
 });
 

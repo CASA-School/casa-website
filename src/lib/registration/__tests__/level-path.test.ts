@@ -23,7 +23,7 @@ describe('a learning path through the levels', () => {
   it('runs A2 to B2 as three whole levels, each in the first term after the last', () => {
     const steps = path('A2', 'B2');
     expect(steps.map((step) => [step.level, step.option?.id])).toEqual([['A2', 'oct'], ['B1', 'jan'], ['B2', 'mar']]);
-    expect(steps[1].label).toBe('B1 komplett (B1.1 + B1.2) · 8 Wochen');
+    expect(steps[1].label).toBe('B1 komplett · 8 Wochen');
     expect(steps.map((step) => step.startCode)).toEqual(['A2.1', 'B1.1', 'B2.1']);
     expect(pathWeeks(steps)).toBe(24);
   });
