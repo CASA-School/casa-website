@@ -2311,3 +2311,21 @@ directions, opening hours). They are ordinary pages now: they started as a close
 navbar and no footer, got the navbar back but never the footer, and so had no link to the Impressum
 or the privacy policy. They keep the site footer minus its closing band ("Kurs finden" under a
 half-filled form only leads away). `ArrowLeft` is a straight arrow; it was an undo glyph.
+
+## 36. CASA's content review, a partner page, the logo strip (2026-10-03 to 10-05)
+
+CASA (Rahman and the administration) reviewed the German homepage and course formats; every
+change is in, spelling and grammar corrected, the English rewritten to match rather than
+translated. "Für Beruf und Weiterbildung" now lists Pflege und Medizin, Firmenunterricht and
+Bildungszeit (`professionalCourseOrder` in the homepage), and Gruppen took the full row. A new
+page, `/ueber-uns/kooperationspartner` (`/partners`), lists the partners from
+`src/config/content/partners.ts`: HERE AHEAD as main partner, Garantiefonds Hochschule,
+Visionskultur, Hood Training, TANDEM International. For Visionskultur and Hood Training no
+source describes the cooperation, so their cards say only what each does until CASA adds a
+line. The Gemeinnützigkeit page now leads with the gGmbH and keeps one partner card.
+
+Logo strip: TestDaF replaced TANDEM Quality; CASA's HZA certification mark replaced our
+home-made AZAV badge; Green Planet Energy left (on the old site it meant the web server ran
+on its power, untrue on Azure). CASA asked for Universität Bremen in that slot, but its logo
+is for university staff only, so HERE AHEAD stands in until the university approves.
+

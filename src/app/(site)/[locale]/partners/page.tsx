@@ -3,8 +3,9 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
+import { PartnerLogoTile } from '@/components/sections/partner-logo-tile';
 import { Container } from '@/components/ui/container';
-import { partners, tandemSchools, type Partner, type PartnerProgramme } from '@/config/content/partners';
+import { partners, tandemSchools, type Partner } from '@/config/content/partners';
 import { Link } from '@/i18n/navigation';
 import { getContentLocale } from '@/lib/content/locale.server';
 import type { ContentLocale } from '@/lib/content/types';
@@ -43,36 +44,11 @@ function ExternalLink({ href, children, locale }: { href: string; children: Reac
   );
 }
 
-/** The partner's logo on its own tile, white or ink, so every mark sits on the ground it was drawn for. */
-function LogoTile({ partner, size = 'md' }: { partner: Pick<PartnerProgramme, 'name' | 'logo'>; size?: 'md' | 'lg' }) {
-  if (!partner.logo) {
-    return null;
-  }
-
-  return (
-    <div
-      className={cn(
-        'flex items-center rounded-xl px-5',
-        size === 'lg' ? 'h-24 w-60' : 'h-20 w-52',
-        partner.logo.onDark ? 'bg-[var(--casa-ink-deep)]' : 'bg-white ring-1 ring-[color:var(--casa-sand)]'
-      )}
-    >
-      <Image
-        src={partner.logo.src}
-        alt={partner.name}
-        width={partner.logo.width}
-        height={partner.logo.height}
-        className="max-h-[70%] w-full object-contain object-left"
-      />
-    </div>
-  );
-}
-
 function PartnerCard({ partner, locale }: { partner: Partner; locale: ContentLocale }) {
   return (
     <li className="relative flex flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8">
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-blue)]" />
-      <LogoTile partner={partner} />
+      <PartnerLogoTile partner={partner} />
       <p className={cn('text-sm font-semibold text-[var(--casa-accent-text)]', partner.logo && 'mt-6')}>{partner.label[locale]}</p>
       <h2 className="mt-1 text-2xl font-bold text-[var(--casa-ink)]">{partner.name}</h2>
       {partner.about ? <p className="mt-3 leading-relaxed text-[var(--casa-ink)]">{partner.about[locale]}</p> : null}
@@ -117,7 +93,7 @@ export default async function PartnersPage() {
               <span aria-hidden="true" className="casa-logo-stripe absolute inset-x-0 top-0 h-1" />
               <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-12">
                 <div className="min-w-0">
-                  <LogoTile partner={main} size="lg" />
+                  <PartnerLogoTile partner={main} size="lg" />
                   <p className="mt-6 text-sm font-semibold text-[var(--casa-accent-text)]">
                     {de ? 'Hauptpartner' : 'Main partner'} · {main.label[locale]}
                   </p>
@@ -135,7 +111,7 @@ export default async function PartnersPage() {
                   <ul className="space-y-4 lg:border-l lg:border-[color:var(--casa-sand)] lg:pl-12" aria-label={de ? 'Programme' : 'Programmes'}>
                     {main.programmes.map((programme) => (
                       <li key={programme.name} className="rounded-2xl bg-[var(--casa-canvas)] p-5">
-                        <LogoTile partner={programme} />
+                        <PartnerLogoTile partner={programme} />
                         <p className="mt-4 text-sm font-semibold text-[var(--casa-accent-text)]">{programme.label[locale]}</p>
                         <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{programme.name}</h3>
                         <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">{programme.text[locale]}</p>

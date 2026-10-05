@@ -18,6 +18,10 @@ Reference points to keep in view:
 
 - Added public mission route: `/ueber-uns/gemeinnuetzigkeit`
 - Folded integration-project proof points into the mission route under `#integrationsprojekte`.
+  **Changed 2026-10-05:** the partners have their own page, `/ueber-uns/kooperationspartner`
+  (`/partners`), under Unsere Schule. The mission route now leads with the gGmbH (what
+  happens to course fees, the legal facts), then the mission text with a short partner card
+  linking there. The `#integrationsprojekte` anchor stays on the mission section.
 - Added a homepage nonprofit callout before the main course-selection flow.
   **Rebuilt 2026-08-20.** It had ended up the flattest band on the page — no
   surface of its own, a hairline standing in for a boundary, and three claims
@@ -32,6 +36,9 @@ Reference points to keep in view:
 - Updated the footer legal line to show CASA as `CASA - Internationale Sprachschule gemeinnützige GmbH` without overloading the footer layout.
 - Updated site structured data with CASA's nonprofit legal name.
 - Updated CLARA/search knowledge so queries for nonprofit status, `gGmbH`, `Gemeinnützigkeit`, `Here Ahead`, `Garantiefonds Hochschule`, and integration projects route to the mission page.
+  Since 2026-10-05 partner queries (`Here Ahead`, `Garantiefonds Hochschule`, Visionskultur,
+  Hood Training, TANDEM, "Kooperationspartner") route to `/partners`; nonprofit queries still
+  route to the mission page.
 
 ## Production Verification Checklist
 
