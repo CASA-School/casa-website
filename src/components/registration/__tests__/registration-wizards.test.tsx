@@ -100,7 +100,7 @@ describe.each([
     () => <CourseWizard catalog={courseCatalog} />,
     'Persönliche Angaben',
     () => <CourseWizard catalog={courseCatalogWithoutDates} />,
-    '#course-option',
+    '#course-0-option',
   ],
   [
     'exam',
@@ -189,3 +189,52 @@ describe('course registration wizard, accommodation', () => {
     expect(container.querySelector('label[for="allergy-consent"]')?.textContent).toContain('Ich willige ein');
   });
 });
+
+describe('course registration wizard, several courses and an exam (2026-10-05)', () => {
+  const INTENSIVE_ID = '40000000-0000-4000-8000-000000000009';
+  const INTENSIVE_OPTION_ID = '20000000-0000-4000-8000-000000000009';
+  const catalog = {
+    ...courseCatalog,
+    courseTypes: [...courseCatalog.courseTypes, { id: INTENSIVE_ID, slug: 'intensive-german', name: 'Intensivkurse', lessons_per_week: 20 }],
+    optionsByCourseTypeId: {
+      ...courseCatalog.optionsByCourseTypeId,
+      [INTENSIVE_ID]: [{
+        id: INTENSIVE_OPTION_ID, courseTypeId: INTENSIVE_ID, dateRangeLabel: '26. Okt. 2026 - 18. Dez. 2026',
+        startDate: '2026-10-26', endDate: '2026-12-18', scheduleLabel: 'Mo-Fr 09:00-12:30',
+        locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2'],
+      }],
+    },
+    unavailableCourseTypes: [{ slug: 'medical-german', name: 'Deutsch für Pflege und Medizin' }],
+  } as unknown as RegistrationCourseCatalog;
+
+  it('offers the courses as choices, names the ones without dates, and adds a second course', async () => {
+    await act(async () => root.render(<CourseWizard catalog={catalog} />));
+    const radios = [...container.querySelectorAll<HTMLInputElement>('input[name="course-0-type"]')];
+    expect(radios.map((radio) => radio.value)).toEqual([TYPE_ID, INTENSIVE_ID]);
+    expect(container.textContent).toContain('Deutsch für Pflege und Medizin: derzeit keine Termine zum Online-Buchen.');
+
+    await click(button('Noch einen Kurs hinzufügen'));
+    expect(container.querySelectorAll('input[name="course-1-type"]')).toHaveLength(2);
+    expect(container.textContent).toContain('Kurs 2');
+  });
+
+  it('asks the intensive course for a level before step 2, and moves focus there', async () => {
+    await act(async () => root.render(<CourseWizard catalog={{ ...catalog, defaultCourseTypeId: INTENSIVE_ID, defaultOptionId: INTENSIVE_OPTION_ID }} />));
+    await click(button('Weiter'));
+    expect(container.querySelector('h2')?.textContent).toBe('Kurs auswählen');
+    expect(container.querySelector('#course-0-level-error')?.textContent).toBe('Bitte wählen Sie ein Niveau aus.');
+    expect(document.activeElement).toBe(container.querySelector('#course-0-level'));
+  });
+
+  it('offers an exam only with an exam catalogue, and asks for it once added', async () => {
+    await act(async () => root.render(<CourseWizard catalog={catalog} />));
+    expect(container.querySelector('#exam-enabled')).toBeNull();
+
+    await act(async () => root.render(<CourseWizard catalog={catalog} examCatalog={examCatalog} />));
+    await click(container.querySelector<HTMLButtonElement>('#exam-enabled')!);
+    expect(container.querySelectorAll('input[name="exam-type"]')).toHaveLength(1);
+    await click(button('Weiter'));
+    expect(container.querySelector('#exam-registration-type-error')?.textContent).toBe('Bitte wählen Sie eine Anmeldeart aus.');
+  });
+});
+

@@ -15,8 +15,7 @@ const examRegistrationSubmissionSchema = createExamRegistrationSubmissionSchema(
 
 const validCourseFormInput = {
   salutation: 'mr',
-  courseTypeId: 'course-1',
-  courseInstanceId: 'instance-1',
+  courses: [{ courseTypeId: 'course-1', courseInstanceId: 'instance-1', level: '', levelRequired: false }],
   firstName: 'Rahman',
   lastName: 'Shafiee',
   email: 'rahman@example.com',
@@ -215,15 +214,18 @@ describe('registration input bounds', () => {
   const huge = 'x'.repeat(2 * 1024 * 1024);
 
   it('refuses a multi-megabyte id or birth date in the course submission', () => {
-    for (const field of ['courseTypeId', 'courseInstanceId', 'birthDate'] as const) {
+    for (const field of ['courseTypeId', 'courseInstanceId'] as const) {
       const parsed = courseRegistrationSubmissionSchema.safeParse({
         ...validCourseFormInput,
-        [field]: huge,
+        courses: [{ ...validCourseFormInput.courses[0], [field]: huge }],
         locale: 'en',
       });
       expect(parsed.success, field).toBe(false);
-      expect(parsed.error?.issues[0]?.path[0]).toBe(field);
+      expect(parsed.error?.issues[0]?.path.join('.')).toBe(`courses.0.${field}`);
     }
+    const birth = courseRegistrationSubmissionSchema.safeParse({ ...validCourseFormInput, birthDate: huge, locale: 'en' });
+    expect(birth.success).toBe(false);
+    expect(birth.error?.issues[0]?.path[0]).toBe('birthDate');
   });
 
   it('refuses a multi-megabyte id or birth date in the exam submission', () => {
@@ -241,11 +243,43 @@ describe('registration input bounds', () => {
   it('still accepts a uuid id and an unparsed birth date intake will flag', () => {
     const parsed = courseRegistrationSubmissionSchema.safeParse({
       ...validCourseFormInput,
-      courseTypeId: '40000000-0000-4000-8000-000000010003',
-      courseInstanceId: '20000000-0000-4000-8000-000000000001',
+      courses: [{ courseTypeId: '40000000-0000-4000-8000-000000010003', courseInstanceId: '20000000-0000-4000-8000-000000000001', level: '' }],
       birthDate: '31.02.1990',
       locale: 'en',
     });
     expect(parsed.success).toBe(true);
   });
 });
+
+describe('a registration with several courses and an exam (2026-10-05)', () => {
+  const second = { courseTypeId: 'course-2', courseInstanceId: 'instance-2', level: 'B1.2', levelRequired: true };
+  const paths = (result: { success: boolean; error?: { issues: Array<{ path: PropertyKey[] }> } }) =>
+    result.success ? [] : result.error!.issues.map((issue) => issue.path.join('.'));
+
+  it('takes up to three courses, and not none', () => {
+    expect(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, courses: [validCourseFormInput.courses[0], second] }).success).toBe(true);
+    expect(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, courses: [] }).success).toBe(false);
+    const four = Array.from({ length: 4 }, (_, index) => ({ ...second, courseInstanceId: `instance-${index}` }));
+    expect(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, courses: four }).success).toBe(false);
+  });
+
+  it('asks for a level where the course needs one, and refuses the same date twice', () => {
+    expect(paths(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, courses: [{ ...second, level: '' }] }))).toEqual(['courses.0.level']);
+    expect(paths(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, courses: [second, second] }))).toEqual(['courses.1.courseInstanceId']);
+  });
+
+  it('needs the exam, its date, its part and both exam confirmations only when an exam is added', () => {
+    expect(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, examEnabled: false, exam: { examTypeId: '', examSessionId: '' } }).success).toBe(true);
+    expect(paths(courseRegistrationFormSchema.safeParse({ ...validCourseFormInput, examEnabled: true, exam: { examTypeId: '', examSessionId: '' } }))).toEqual([
+      'exam.examTypeId', 'exam.examSessionId', 'exam.registrationType', 'officialNameConfirmed', 'examPolicyAccepted',
+    ]);
+    expect(courseRegistrationFormSchema.safeParse({
+      ...validCourseFormInput,
+      examEnabled: true,
+      exam: { examTypeId: 'exam-1', examSessionId: 'session-1', registrationType: 'full' },
+      officialNameConfirmed: true,
+      examPolicyAccepted: true,
+    }).success).toBe(true);
+  });
+});
+

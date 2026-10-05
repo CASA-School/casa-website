@@ -14,7 +14,8 @@ import type { LucideIcon } from 'lucide-react';
 import { meaningClasses, type Meaning } from '@/config/brand/meaning';
 import { cn } from '@/lib/utils';
 
-export const formFieldGroupClassName = 'space-y-2';
+/** `min-w-0`: in a grid, a long select value would otherwise hold its column open past the card. */
+export const formFieldGroupClassName = 'min-w-0 space-y-2';
 
 /** A field title is a label, 14px sentence case, never an uppercase eyebrow. */
 export const formLabelClassName = 'block text-sm font-semibold leading-snug text-[var(--casa-ink)]';

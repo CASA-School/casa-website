@@ -342,8 +342,11 @@ export type ExamRegistrationOption = {
 
 export type RegistrationCourseCatalog = {
   locale: ContentLocale;
+  /** Only formats with at least one bookable date. */
   courseTypes: CourseTypeRow[];
   optionsByCourseTypeId: Record<string, CourseRegistrationOption[]>;
+  /** Public formats with no bookable date right now, named under the choices with a way to ask. */
+  unavailableCourseTypes?: Array<{ slug: string; name: string }>;
   defaultCourseTypeId?: string;
   defaultOptionId?: string;
 };

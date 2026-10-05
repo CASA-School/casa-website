@@ -18,7 +18,31 @@ async function sentMessage(kind: FormKind, payload: Record<string, unknown>, opt
   return JSON.parse(fetch.mock.calls[1][1].body);
 }
 
+const twoCoursesAndAnExam = {
+  requestId: 'r', locale: 'de', salutation: 'ms', firstName: 'Maria', lastName: 'Rossi', email: 'maria@example.com',
+  courseTypeLabel: 'Intensivkurse', courseInstanceLabel: '26.10.2026 – 18.12.2026 | Mo–Fr, 9:00–12:30 | CASA Am Dobben',
+  currentLevel: 'A1 komplett (A1.1 + A1.2) · 8 Wochen',
+  courses: [
+    { courseTypeLabel: 'Intensivkurse', courseInstanceLabel: '26.10.2026 – 18.12.2026 | Mo–Fr, 9:00–12:30 | CASA Am Dobben', level: 'A1 komplett (A1.1 + A1.2) · 8 Wochen' },
+    { courseTypeLabel: 'Spezialkurse', courseInstanceLabel: '02.11.2026 – 17.12.2026 | Mo, Mi, 18:00–19:30 | CASA Am Dobben', level: 'B1.2' },
+  ],
+  exam: { examTypeLabel: 'telc Deutsch B2', examSessionLabel: '13.11.2026, 09:00–17:00 | CASA Prüfungszentrum', registrationType: 'full' },
+};
+
 describe('public form notifications', () => {
+  it('numbers the courses of a registration with several, and adds the exam booked with them', async () => {
+    const mail = (await sentMessage('course', twoCoursesAndAnExam)).message;
+    const body = mail.body.content as string;
+    expect(body).toContain('Maria Rossi hat sich für 2 Kurse und eine Prüfung angemeldet.');
+    expect(body).toContain('Kurs 1');
+    expect(body).toContain('Kurs 2');
+    expect(body).toContain('Spezialkurse');
+    expect(body).toContain('telc Deutsch B2');
+    expect(body).toContain('Mit Prüfung');
+    expect(body).toContain('Gewünschtes Niveau');
+    expect(mail.subject).toContain('Kursanmeldung: Maria Rossi – Intensivkurse, Spezialkurse + telc Deutsch B2');
+  });
+
   it('defaults every form to the test inbox even if production recipients exist', () => {
     vi.stubEnv('FORM_DELIVERY_MODE', '');
     const kinds: FormKind[] = ['contact', 'groups', 'course', 'exam', 'careers', 'placement', 'appointment'];
@@ -253,6 +277,16 @@ describe('confirmation to the sender', () => {
       requestId: 'r', locale: 'de', firstName: 'Visit www.spam.example', email: 'victim@example.com', message: 'x',
     });
     expect(message.body.content).not.toContain('spam.example');
+  });
+
+  it('lists a further course and an exam booked with the first, and only when there are some', async () => {
+    const single = (await confirmation('course', course)).message.body.content as string;
+    expect(single).not.toContain('Weiterer Kurs');
+    const many = (await confirmation('course', { ...course, ...twoCoursesAndAnExam, requestId: 'ref-43' })).message.body.content as string;
+    expect(many).toContain('A1 komplett (A1.1 + A1.2) · 8 Wochen');
+    expect(many).toContain('Weiterer Kurs');
+    expect(many).toContain('Spezialkurse · B1.2 · 02.11.2026 – 17.12.2026');
+    expect(many).toContain('telc Deutsch B2 · 13.11.2026, 09:00–17:00');
   });
 
   it('sends at most three confirmations to one address a day', async () => {

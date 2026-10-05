@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useFieldArray, useForm, Controller, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, HelpCircle, Home, Loader2, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, HelpCircle, Home, Loader2, ShieldCheck, UserRound, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,22 +29,31 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
+import { courseDatesLine, CourseItemFields, ExamAddOn } from '@/components/registration/course-choices';
+import type { CourseFormData, CourseFormSubmission } from '@/components/registration/course-form-types';
 import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { meaningClasses } from '@/config/brand/meaning';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
-import type { RegistrationCourseCatalog } from '@/lib/content/types';
+import type { RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
+import { describeBookedLevel } from '@/lib/registration/levels';
 import { cn } from '@/lib/utils';
-import { createCourseRegistrationFormSchema, requiresLevelField } from '@/lib/validation/registration-submissions';
+import {
+  createCourseRegistrationFormSchema,
+  MAX_REGISTRATION_COURSES,
+  registrationMessages,
+  requiresLevelField,
+} from '@/lib/validation/registration-submissions';
 
-type RegistrationSchema = ReturnType<typeof createCourseRegistrationFormSchema>;
-type FormData = z.input<RegistrationSchema>;
-type FormSubmissionData = z.output<RegistrationSchema>;
+type FormData = CourseFormData;
+type FormSubmissionData = CourseFormSubmission;
 
 type CourseWizardProps = {
   catalog: RegistrationCourseCatalog;
+  /** For an exam booked with the courses; without one the form offers none. */
+  examCatalog?: RegistrationExamCatalog;
 };
 
 type CourseRegistrationApiResult = {
@@ -67,13 +75,34 @@ const PERSONAL_FIELDS: Array<keyof FormData> = [
 
 /** Element ids that differ from the field name, so a failed step can focus its first invalid field. */
 const FIELD_ELEMENT_IDS: Partial<Record<keyof FormData, string>> = {
-  courseTypeId: 'course-type',
-  courseInstanceId: 'course-option',
   accommodationRequired: 'accommodation',
   accommodationType: 'accommodation-type',
 };
 
-export function CourseWizard({ catalog }: CourseWizardProps) {
+/** A course row as the form starts it: the catalogue's default, or empty for a further course. */
+function courseRow(catalog: RegistrationCourseCatalog, typeId = '', instanceId = '') {
+  const slug = catalog.courseTypes.find((courseType) => courseType.id === typeId)?.slug;
+  const options = catalog.optionsByCourseTypeId[typeId] ?? [];
+  return {
+    courseTypeId: typeId,
+    courseInstanceId: instanceId,
+    level: '',
+    levelRequired: requiresLevelField(slug) && (options[0]?.availableLevels.length ?? 0) > 0,
+  };
+}
+
+/** The element a failed step focuses for a field path. */
+function elementIdFor(path: string): string {
+  const course = /^courses\.(\d+)\.(courseTypeId|courseInstanceId|level)$/.exec(path);
+  if (course) {
+    return `course-${course[1]}-${course[2] === 'courseTypeId' ? 'type' : course[2] === 'courseInstanceId' ? 'option' : 'level'}`;
+  }
+  return (
+    { 'exam.examTypeId': 'exam-type', 'exam.examSessionId': 'exam-session', 'exam.registrationType': 'exam-registration-type' } as Record<string, string>
+  )[path] ?? path;
+}
+
+export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
   const isDe = catalog.locale === 'de';
   const t = (en: string, de: string) => (isDe ? de : en);
   const [step, setStep] = useState(1);
@@ -94,9 +123,11 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
-      courseTypeId: catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '',
-      courseInstanceId: catalog.defaultOptionId || '',
-      currentLevel: '',
+      courses: [courseRow(catalog, catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '', catalog.defaultOptionId || '')],
+      examEnabled: false,
+      exam: { examTypeId: '', examSessionId: '', registrationType: undefined },
+      officialNameConfirmed: false,
+      examPolicyAccepted: false,
       firstName: '',
       lastName: '',
       email: '',
@@ -121,9 +152,11 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     setStep(1);
     form.reset({
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
-      courseTypeId: catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '',
-      courseInstanceId: catalog.defaultOptionId || '',
-      currentLevel: '',
+      courses: [courseRow(catalog, catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '', catalog.defaultOptionId || '')],
+      examEnabled: false,
+      exam: { examTypeId: '', examSessionId: '', registrationType: undefined },
+      officialNameConfirmed: false,
+      examPolicyAccepted: false,
       firstName: '',
       lastName: '',
       email: '',
@@ -155,70 +188,27 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     'aria-describedby': errors[name] ? `${name}-error` : undefined,
   });
 
-  const selectedCourseTypeId = watch('courseTypeId');
-  const selectedCourseInstanceId = watch('courseInstanceId');
-  const currentLevel = watch('currentLevel');
   const accommodationRequired = watch('accommodationRequired');
   const hasAllergies = Boolean(watch('allergies')?.trim());
+  const examEnabled = watch('examEnabled');
+  const { fields: courseFields, append: appendCourse, remove: removeCourse } = useFieldArray({ control: form.control, name: 'courses' });
+  const courses = watch('courses');
+  const exam = watch('exam');
 
-  const selectedCourseType = useMemo(
-    () => catalog.courseTypes.find((courseType) => courseType.id === selectedCourseTypeId) || null,
-    [catalog.courseTypes, selectedCourseTypeId]
-  );
-
-  const selectedOptions = useMemo(
-    () => catalog.optionsByCourseTypeId[selectedCourseTypeId] ?? [],
-    [catalog.optionsByCourseTypeId, selectedCourseTypeId]
-  );
-
-  const selectedOption = useMemo(
-    () => selectedOptions.find((option) => option.id === selectedCourseInstanceId) || null,
-    [selectedOptions, selectedCourseInstanceId]
-  );
-
-  /** Whether this course type needs a CEFR level selection */
-  const showLevelField = useMemo(
-    () => requiresLevelField(selectedCourseType?.slug),
-    [selectedCourseType]
-  );
-
-  /** The ordered level options for this course type (from the selected instance or the first option) */
-  const levelOptions = useMemo(() => {
-    const firstOption = selectedOptions[0];
-    return firstOption?.availableLevels ?? [];
-  }, [selectedOptions]);
   const stepItems = [
     { title: t('Course', 'Kurs'), description: t('Goal and start', 'Ziel und Start') },
     { title: t('Details', 'Details'), description: t('Student profile', 'Teilnehmerprofil') },
     { title: t('Review', 'Prüfen'), description: t('Final check', 'Letzte Kontrolle') },
   ];
   const fieldsByStep: Array<Array<keyof FormData>> = [
-    ['courseTypeId', 'courseInstanceId'],
+    ['courses', 'examEnabled', 'exam'],
     accommodationRequired
       ? [...PERSONAL_FIELDS, 'accommodationRequired', 'accommodationType', 'allergies', 'allergyConsent']
       : [...PERSONAL_FIELDS, 'accommodationRequired'],
     [],
   ];
   const stepFields = fieldsByStep[step - 1] ?? [];
-  const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
-
-  useEffect(() => {
-    if (!selectedCourseTypeId) {
-      return;
-    }
-
-    const options = catalog.optionsByCourseTypeId[selectedCourseTypeId] ?? [];
-    if (options.length === 0) {
-      if (selectedCourseInstanceId) {
-        setValue('courseInstanceId', '', { shouldValidate: true, shouldDirty: true });
-      }
-      return;
-    }
-
-    if (!options.some((option) => option.id === selectedCourseInstanceId)) {
-      setValue('courseInstanceId', options[0].id, { shouldValidate: true, shouldDirty: true });
-    }
-  }, [catalog.optionsByCourseTypeId, selectedCourseInstanceId, selectedCourseTypeId, setValue]);
+  const showStepAlert = stepFailures > 0 && (stepFields.some((name) => errors[name]) || (step === 1 && Boolean(errors.courses || errors.exam)));
 
   useEffect(() => {
     if (!stepChanged.current) return;
@@ -232,12 +222,6 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     invalidFieldId.current = null;
   }, [stepFailures]);
 
-  // Reset level when course type changes to avoid stale value
-  useEffect(() => {
-    setValue('currentLevel', '', { shouldDirty: true });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCourseTypeId]);
-
   const onSubmit = async (data: FormSubmissionData) => {
     setSubmitting(true);
     setSubmissionError(null);
@@ -248,14 +232,8 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify({
-          ...data,
-          courseTypeLabel: selectedCourseType?.name ?? '',
-          courseInstanceLabel: selectedOption
-            ? `${selectedOption.dateRangeLabel} | ${selectedOption.scheduleLabel} | ${selectedOption.locationLabel}`
-            : '',
-          locale: catalog.locale,
-        }),
+        // Ids and choices only: the route names every course and the exam from its own catalogues.
+        body: JSON.stringify({ ...data, locale: catalog.locale }),
       });
 
       const result = (await response.json().catch(() => null)) as CourseRegistrationApiResult | null;
@@ -290,20 +268,60 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
     }
   };
 
+  /*
+   * Step 1's conditional fields, checked here: zod runs the schema's own
+   * cross-field rules only once every field of the form is valid, and the
+   * personal details of step 2 are still empty at step 1.
+   */
+  const stepOneIssues = (): Array<{ path: FieldPath<FormData>; message: string }> => {
+    const m = registrationMessages(catalog.locale);
+    const issues: Array<{ path: FieldPath<FormData>; message: string }> = [];
+    courses.forEach((course, index) => {
+      if (course.levelRequired && !course.level) issues.push({ path: `courses.${index}.level`, message: m.level });
+    });
+    const chosen = courses.map((course) => course.courseInstanceId).filter(Boolean);
+    courses.forEach((course, index) => {
+      if (course.courseInstanceId && chosen.indexOf(course.courseInstanceId) !== index) {
+        issues.push({ path: `courses.${index}.courseInstanceId`, message: m.sameCourseTwice });
+      }
+    });
+    if (examEnabled) {
+      if (!exam?.examTypeId) issues.push({ path: 'exam.examTypeId', message: m.exam });
+      if (!exam?.examSessionId) issues.push({ path: 'exam.examSessionId', message: m.examSession });
+      if (!exam?.registrationType) issues.push({ path: 'exam.registrationType', message: m.registrationType });
+    }
+    return issues;
+  };
+
   const nextStep = async () => {
     // Not `shouldFocus`: it reaches only fields with a registered ref, and the
     // selects, the country field and the date picker have none.
     const valid = stepFields.length === 0 ? true : await trigger(stepFields);
+    const issues = step === 1 ? stepOneIssues() : [];
+    issues.forEach((issue) => form.setError(issue.path, { type: 'manual', message: issue.message }));
 
-    if (valid) {
+    if (valid && issues.length === 0) {
       stepChanged.current = true;
       setStepFailures(0);
       setStep((current) => Math.min(current + 1, stepItems.length));
       return;
     }
 
-    const firstInvalid = stepFields.find((name) => form.getFieldState(name).invalid);
-    invalidFieldId.current = firstInvalid ? (FIELD_ELEMENT_IDS[firstInvalid] ?? firstInvalid) : null;
+    if (step === 1) {
+      // The first course's fields, then the next course's, then the exam's: the order they appear in.
+      const errorPaths = [
+        ...courses.flatMap((_, index) => (['courseTypeId', 'courseInstanceId', 'level'] as const)
+          .filter((field) => form.getFieldState(`courses.${index}.${field}`).invalid || issues.some((issue) => issue.path === `courses.${index}.${field}`))
+          .map((field) => `courses.${index}.${field}`)),
+        ...(['examTypeId', 'examSessionId', 'registrationType'] as const)
+          .filter((field) => issues.some((issue) => issue.path === `exam.${field}`) || form.getFieldState(`exam.${field}`).invalid)
+          .map((field) => `exam.${field}`),
+      ];
+      invalidFieldId.current = errorPaths[0] ? elementIdFor(errorPaths[0]) : null;
+    } else {
+      const firstInvalid = stepFields.find((name) => form.getFieldState(name).invalid);
+      invalidFieldId.current = firstInvalid ? (FIELD_ELEMENT_IDS[firstInvalid] ?? firstInvalid) : null;
+    }
     setStepFailures((count) => count + 1);
 
     trackCasaEvent('form_error', {
@@ -346,132 +364,46 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
               headingRef={stepHeadingRef}
               title={t('Choose your course', 'Kurs auswählen')}
               description={t(
-                'Select one course and one start date. You can review everything before you submit.',
-                'Wählen Sie einen Kurs und einen Starttermin. Vor dem Absenden können Sie alles prüfen.'
+                'Choose your course and when to start. You can add more courses and an exam.',
+                'Wählen Sie Ihren Kurs und den Beginn. Weitere Kurse und eine Prüfung können Sie dazubuchen.'
               )}
             />
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <div className={formFieldGroupClassName}>
-                <Label htmlFor="course-type" className={formLabelClassName}>
-                  {t('Course type', 'Kurstyp')}
-                  <RequiredMark />
-                </Label>
-                <Select
-                  onValueChange={(value) => setValue('courseTypeId', value, { shouldDirty: true, shouldValidate: true })}
-                  defaultValue={watch('courseTypeId')}
-                >
-                  <SelectTrigger id="course-type" aria-required {...errorProps('courseTypeId')} className={formControlClassName}>
-                    <SelectValue placeholder={t('Select a course...', 'Kurs auswählen...')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {catalog.courseTypes.map((courseType) => (
-                      <SelectItem key={courseType.id} value={courseType.id}>
-                        {courseType.name} ({courseType.lessons_per_week} {t('lessons/week', 'Lektionen/Woche')})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.courseTypeId && <p id="courseTypeId-error" className={formErrorClassName}>{errors.courseTypeId.message}</p>}
-              </div>
-
-              <div className={formFieldGroupClassName}>
-                <Label htmlFor="course-option" className={formLabelClassName}>
-                  {catalog.locale === 'de' ? 'Startdatum' : 'Start date'}
-                  <RequiredMark />
-                </Label>
-                <Select
-                  onValueChange={(value) => setValue('courseInstanceId', value, { shouldDirty: true, shouldValidate: true })}
-                  value={selectedCourseInstanceId}
-                >
-                  <SelectTrigger id="course-option" aria-required {...errorProps('courseInstanceId')} className={formControlClassName}>
-                    <SelectValue placeholder={catalog.locale === 'de' ? 'Starttermin auswählen...' : 'Select a start date...'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedOptions.map((option) => (
-                      <SelectItem key={option.id} value={option.id}>
-                        {option.dateRangeLabel}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedOptions.length === 0 ? (
-                  <p className={formHintClassName}>
-                    {catalog.locale === 'de' ? 'Noch keine Termine für diesen Kurstyp verfügbar.' : 'No scheduled options for this course type yet. Please choose another course type.'}
-                  </p>
+            {courseFields.map((field, index) => (
+              <section
+                key={field.id}
+                aria-label={t(`Course ${index + 1}`, `Kurs ${index + 1}`)}
+                className={cn(index > 0 && 'rounded-2xl border border-[color:var(--casa-sand)] p-4 sm:p-5')}
+              >
+                {index > 0 ? (
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-[var(--casa-ink)]">{t(`Course ${index + 1}`, `Kurs ${index + 1}`)}</p>
+                    <button
+                      type="button"
+                      onClick={() => removeCourse(index)}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-danger-text)] focus-visible:outline-2 focus-visible:outline-[var(--casa-blue)]"
+                    >
+                      <X className="size-4" aria-hidden />
+                      {t('Remove', 'Entfernen')}
+                    </button>
+                  </div>
                 ) : null}
-                {errors.courseInstanceId && <p id="courseInstanceId-error" className={formErrorClassName}>{errors.courseInstanceId.message}</p>}
-              </div>
-            </div>
+                <CourseItemFields form={form} catalog={catalog} index={index} />
+              </section>
+            ))}
 
-            {/* Conditional level / niveau field */}
-            {showLevelField && levelOptions.length > 0 && (
-              <div className={formFieldGroupClassName}>
-                <Label htmlFor="current-level" className={formLabelClassName}>
-                  {t('Your current level (Niveau)', 'Ihr aktuelles Niveau')}
-                  <RequiredMark />
-                </Label>
-                <Select
-                  onValueChange={(value) =>
-                    setValue('currentLevel', value, { shouldDirty: true, shouldValidate: true })
-                  }
-                  value={watch('currentLevel') || ''}
-                >
-                  <SelectTrigger id="current-level" className={formControlClassName}>
-                    <SelectValue
-                      placeholder={t(
-                        'Select your current level…',
-                        'Aktuelles Niveau auswählen…'
-                      )}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {levelOptions.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {/*
-                  This field asks the learner to self-report a level, so it has
-                  to hand them the way to find out: the placement page with the
-                  Klett online tests (CASA's own test is in development, see
-                  src/lib/placement/availability.ts). A new tab, because the
-                  wizard keeps no draft and the learner would lose their choices.
-                */}
-                <p className={formHintClassName}>
-                  {t('Not sure which level you are?', 'Unsicher, welches Niveau Sie haben?')}{' '}
-                  <Link
-                    href="/placement-test"
-                    target="_blank"
-                    rel="noopener"
-                    className="casa-cta-link font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 decoration-[color:var(--casa-sand)] transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current"
-                  >
-                    {t('Take a free placement test', 'Kostenlosen Einstufungstest machen')}
-                  </Link>
-                  {t(' — opens in a new tab, so your details here stay.', ' – öffnet sich in einem neuen Tab, Ihre Angaben hier bleiben erhalten.')}
-                </p>
-              </div>
-            )}
-
-            {selectedOption ? (
-              <div className="relative overflow-hidden rounded-2xl border border-[color:var(--casa-sand)] bg-[var(--casa-canvas)] p-5 sm:p-6">
-                <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-red)]" />
-                <p className={formMetaLabelClassName}>{t('Selected session', 'Ausgewählter Termin')}</p>
-                <h3 className="mt-1 text-lg font-bold text-[var(--casa-ink)]">{selectedCourseType?.name}</h3>
-                <dl className="mt-4 grid gap-4 border-t border-[color:var(--casa-sand)] pt-4 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className={formMetaLabelClassName}>{t('Dates', 'Daten')}</dt>
-                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.dateRangeLabel}</dd>
-                  </div>
-                  <div>
-                    <dt className={formMetaLabelClassName}>{t('Schedule', 'Zeitplan')}</dt>
-                    <dd className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption.scheduleLabel}</dd>
-                  </div>
-                </dl>
-              </div>
+            {courseFields.length < MAX_REGISTRATION_COURSES ? (
+              <button
+                type="button"
+                onClick={() => appendCourse(courseRow(catalog))}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[color:var(--casa-field-edge-hover)] bg-white px-4 py-3.5 text-sm font-semibold text-[var(--casa-accent-text)] transition-colors hover:border-[var(--casa-accent-text)] hover:bg-[var(--casa-blue-tint)]/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--casa-blue)]"
+              >
+                <span aria-hidden="true" className="text-base leading-none">+</span>
+                {t('Add another course', 'Noch einen Kurs hinzufügen')}
+              </button>
             ) : null}
+
+            {examCatalog ? <ExamAddOn form={form} examCatalog={examCatalog} /> : null}
           </div>
         )}
 
@@ -724,23 +656,39 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
 
             <div className="space-y-4 text-sm">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className={formTileClassName}>
-                  <p className={formMetaLabelClassName}>{t('Course', 'Kurs')}</p>
-                  <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedCourseType?.name || '-'}</p>
-                  <p className="mt-0.5 text-[var(--casa-muted)]">{selectedOption?.dateRangeLabel || '-'}</p>
-                </div>
-                <div className={formTileClassName}>
-                  <p className={formMetaLabelClassName}>{t('Schedule', 'Zeitplan')}</p>
-                  <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption?.scheduleLabel || '-'}</p>
-                </div>
-                {showLevelField && currentLevel && (
-                  <div className={formTileClassName}>
-                    <p className={formMetaLabelClassName}>
-                      {t('Current level', 'Aktuelles Niveau')}
-                    </p>
-                    <p className="mt-1 font-semibold text-[var(--casa-ink)]">{currentLevel}</p>
-                  </div>
-                )}
+                {courses.map((course, index) => {
+                  const type = catalog.courseTypes.find((candidate) => candidate.id === course.courseTypeId);
+                  const option = catalog.optionsByCourseTypeId[course.courseTypeId]?.find((candidate) => candidate.id === course.courseInstanceId);
+                  const level = type && option && course.level
+                    ? describeBookedLevel(type.slug, course.level, option.availableLevels, catalog.locale)
+                    : null;
+                  return (
+                    <div key={`${course.courseTypeId}-${index}`} className={formTileClassName}>
+                      <p className={formMetaLabelClassName}>
+                        {courses.length > 1 ? t(`Course ${index + 1}`, `Kurs ${index + 1}`) : t('Course', 'Kurs')}
+                      </p>
+                      <p className="mt-1 font-semibold text-[var(--casa-ink)]">
+                        {type?.name || '-'}
+                        {level ? <span className="font-normal text-[var(--casa-muted)]"> · {level.label.split(' · ')[0]}</span> : null}
+                      </p>
+                      {option ? <p className="mt-0.5 text-[var(--casa-muted)]">{courseDatesLine(type?.slug, option, level, catalog.locale)}</p> : null}
+                      {option ? <p className="mt-0.5 text-[var(--casa-muted)]">{option.scheduleLabel}</p> : null}
+                    </div>
+                  );
+                })}
+                {examEnabled && examCatalog ? (() => {
+                  const examType = examCatalog.examTypes.find((candidate) => candidate.id === exam?.examTypeId);
+                  const session = examCatalog.optionsByExamTypeId[exam?.examTypeId ?? '']?.find((candidate) => candidate.id === exam?.examSessionId);
+                  const types = { full: t('Full exam', 'Vollprüfung'), written: t('Written only', 'Nur schriftlich'), oral: t('Oral only', 'Nur mündlich') };
+                  return (
+                    <div className={formTileClassName}>
+                      <p className={formMetaLabelClassName}>{t('Exam', 'Prüfung')}</p>
+                      <p className="mt-1 font-semibold text-[var(--casa-ink)]">{examType?.name || '-'}</p>
+                      {session ? <p className="mt-0.5 text-[var(--casa-muted)]">{session.startsAtLabel}</p> : null}
+                      {exam?.registrationType ? <p className="mt-0.5 text-[var(--casa-muted)]">{types[exam.registrationType]}</p> : null}
+                    </div>
+                  );
+                })() : null}
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Student', 'Teilnehmer')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
@@ -771,7 +719,43 @@ export function CourseWizard({ catalog }: CourseWizardProps) {
                 </ul>
               </div>
 
-              <div className={cn(formTileClassName, 'space-y-3 bg-white')}>
+              <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
+                {examEnabled ? (
+                  <>
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id="official-name-confirmed"
+                        aria-required
+                        {...errorProps('officialNameConfirmed')}
+                        checked={watch('officialNameConfirmed')}
+                        onCheckedChange={(checked) =>
+                          setValue('officialNameConfirmed', Boolean(checked), { shouldDirty: true, shouldValidate: true })
+                        }
+                      />
+                      <Label htmlFor="official-name-confirmed" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
+                        {t('My name and birth date match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
+                        <RequiredMark />
+                      </Label>
+                    </div>
+                    {errors.officialNameConfirmed ? <p id="officialNameConfirmed-error" className={formErrorClassName}>{errors.officialNameConfirmed.message}</p> : null}
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id="exam-policy-accepted"
+                        aria-required
+                        {...errorProps('examPolicyAccepted')}
+                        checked={watch('examPolicyAccepted')}
+                        onCheckedChange={(checked) =>
+                          setValue('examPolicyAccepted', Boolean(checked), { shouldDirty: true, shouldValidate: true })
+                        }
+                      />
+                      <Label htmlFor="exam-policy-accepted" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
+                        {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich verstehe, dass die Prüfungsbestätigung von Dokumenten- und Zahlungsprüfung abhängt.')}
+                        <RequiredMark />
+                      </Label>
+                    </div>
+                    {errors.examPolicyAccepted ? <p id="examPolicyAccepted-error" className={formErrorClassName}>{errors.examPolicyAccepted.message}</p> : null}
+                  </>
+                ) : null}
                 <div className="flex items-start gap-3">
                   <Checkbox
                     id="accept-terms"
