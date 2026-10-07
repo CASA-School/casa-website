@@ -187,7 +187,7 @@ test('exam and accommodation detail routes render signature modules', async ({ p
   await expect(page.getByTestId('exam-what-to-bring')).toBeVisible();
 
   await page.goto('/en/accommodation/flat');
-  await expect(page.getByRole('heading', { name: /neighborhood \+ arrival checklist/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /arrival and neighbourhood checklist/i })).toBeVisible();
 });
 
 test('legacy hash anchors still resolve on exams and accommodation indexes', async ({ page }) => {
@@ -231,8 +231,8 @@ test('registration pages render main navbar without register CTA button', async 
     // Main header/navbar should be visible. Scoped to the header that holds the
     // site nav — these pages also render a page-title <header> for their h1.
     await expect(page.locator('header:has(nav[aria-label="Main navigation"])')).toBeVisible();
-    // The Register Now CTA button should not be present
-    await expect(page.locator('a:has-text("Register Now"), a:has-text("Jetzt anmelden"), a:has-text("Register for Exam"), a:has-text("Zur Prüfung anmelden")')).toHaveCount(0);
+    // The header's register button should not be present on a registration page.
+    await expect(page.locator('a:has-text("Register for a course"), a:has-text("Zur Kursanmeldung"), a:has-text("Register for an exam"), a:has-text("Zur Prüfungsanmeldung")')).toHaveCount(0);
     // The site footer closes the page as everywhere, so the Impressum and the
     // privacy policy stay one click away (§ 5 DDG). Its closing band does not:
     // under a half-filled form, "Kurs finden" only leads away from it.

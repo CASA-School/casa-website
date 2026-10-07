@@ -327,7 +327,7 @@ test('registration points to the placement page in a new tab, not to our own tes
   await page.goto('/en/registration/course');
 
   // The default course is intensive German, which asks for a level, so the hint is on screen.
-  const hint = page.getByRole('link', { name: /take a free placement test/i });
+  const hint = page.getByRole('link', { name: /free placement test/i });
   await expect(hint).toBeVisible();
   await expect(hint).toHaveAttribute('href', '/en/placement-test');
   await expect(hint).toHaveAttribute('target', '_blank');
