@@ -16,6 +16,14 @@ import type { ContentLocale } from '@/lib/content/types';
 /** Formats CASA sells by the half level or the whole level. */
 const SOLD_BY_LEVEL = new Set(['intensive-german']);
 
+/*
+ * B1+ is one step between B1.2 and B2.1, taught with Kontext, but it runs a
+ * whole term: about two months, like a full level (Rahman, 2026-08-13; see
+ * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md). A half level runs four weeks.
+ */
+const FULL_TERM_STEPS = new Set(['B1+']);
+const weeksOf = (value: string, whole: boolean) => (whole || FULL_TERM_STEPS.has(value) ? 8 : 4);
+
 export type LevelChoice = {
   value: string;
   label: string;
@@ -32,8 +40,10 @@ export type BookedLevel = {
   label: string;
   /** The half level the learner starts at, the code the workspace stores. */
   startCode: string;
-  /** The whole level: both halves, eight weeks. */
+  /** The whole level: both halves. */
   complete: boolean;
+  /** Weeks of teaching: eight for a whole level or B1+, four for a half level. */
+  weeks: number;
 };
 
 const weeks = (count: number, locale: ContentLocale) => (locale === 'de' ? `${count} Wochen` : `${count} weeks`);
@@ -68,7 +78,7 @@ export function levelChoiceGroups(
       level,
       choices: [
         ...whole,
-        ...halves.map((half) => ({ value: half, label: soldByLevel ? `${half} · ${weeks(4, locale)}` : half })),
+        ...halves.map((half) => ({ value: half, label: soldByLevel ? `${half} · ${weeks(weeksOf(half, false), locale)}` : half })),
       ],
     };
   });
@@ -85,7 +95,7 @@ export function describeBookedLevel(
     const choice = group.choices.find((candidate) => candidate.value === value);
     if (choice) {
       const complete = choice.value === group.level;
-      return { label: choice.label, startCode: complete ? `${group.level}.1` : choice.value, complete };
+      return { label: choice.label, startCode: complete ? `${group.level}.1` : choice.value, complete, weeks: weeksOf(choice.value, complete) };
     }
   }
   return null;

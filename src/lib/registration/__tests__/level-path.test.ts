@@ -14,18 +14,27 @@ const terms = [
   term('jan', '2027-01-04', '2027-02-26'),
   term('feb', '2027-02-01', '2027-04-01'),
   term('mar', '2027-03-01', '2027-04-30'),
+  term('apr', '2027-04-05', '2027-05-27'),
+  term('may', '2027-05-03', '2027-06-25'),
 ];
 
 const path = (value: string, pathTo: string, start = terms[0]) =>
   buildLevelPath({ slug: 'intensive-german', value, option: start, options: terms, availableLevels: LEVELS, pathTo, locale: 'de' });
 
 describe('a learning path through the levels', () => {
-  it('runs A2 to B2 as three whole levels, each in the first term after the last', () => {
-    const steps = path('A2', 'B2');
-    expect(steps.map((step) => [step.level, step.option?.id])).toEqual([['A2', 'oct'], ['B1', 'jan'], ['B2', 'mar']]);
+  it('runs A2 to B1 as two whole levels, each in the first term after the last', () => {
+    const steps = path('A2', 'B1');
+    expect(steps.map((step) => [step.level, step.option?.id])).toEqual([['A2', 'oct'], ['B1', 'jan']]);
     expect(steps[1].label).toBe('B1 komplett · 8 Wochen');
-    expect(steps.map((step) => step.startCode)).toEqual(['A2.1', 'B1.1', 'B2.1']);
-    expect(pathWeeks(steps)).toBe(24);
+    expect(pathWeeks(steps)).toBe(16);
+  });
+
+  it('goes from B1 to B2 through B1+, which runs a whole term', () => {
+    const steps = path('A2', 'B2');
+    expect(steps.map((step) => [step.level, step.option?.id])).toEqual([['A2', 'oct'], ['B1', 'jan'], ['B1+', 'mar'], ['B2', 'may']]);
+    expect(steps.map((step) => step.startCode)).toEqual(['A2.1', 'B1.1', 'B1+', 'B2.1']);
+    expect(steps[2]).toMatchObject({ label: 'B1+ · 8 Wochen', weeks: 8, start: '2027-03-01', end: '2027-04-30' });
+    expect(pathWeeks(steps)).toBe(32);
   });
 
   it('finishes a level it starts at its first half, and runs a second half as its four weeks first', () => {
@@ -37,15 +46,18 @@ describe('a learning path through the levels', () => {
 
   it('leaves a step without a date when the catalogue lists no term for it yet', () => {
     const steps = path('A2', 'C1');
-    expect(steps.map((step) => step.level)).toEqual(['A2', 'B1', 'B2', 'C1']);
-    expect(steps[3].option).toBeNull();
-    expect(steps[3].start).toBeNull();
+    expect(steps.map((step) => step.level)).toEqual(['A2', 'B1', 'B1+', 'B2', 'C1']);
+    expect(steps[4].option).toBeNull();
+    expect(steps[4].start).toBeNull();
   });
 
   it('is the chosen level alone without a target, and offers only whole levels above it', () => {
     expect(path('A2', '')).toHaveLength(1);
-    expect(continuationLevels('intensive-german', 'A2', LEVELS)).toEqual(['B1', 'B2', 'C1']);
+    expect(continuationLevels('intensive-german', 'A2', LEVELS)).toEqual(['B1', 'B1+', 'B2', 'C1']);
+    expect(continuationLevels('intensive-german', 'B1.2', LEVELS)).toEqual(['B1+', 'B2', 'C1']);
     expect(continuationLevels('intensive-german', 'B1+', LEVELS)).toEqual(['B2', 'C1']);
+    // A format without B1+ climbs straight from B1 to B2.
+    expect(continuationLevels('intensive-german', 'A2', LEVELS.filter((level) => level !== 'B1+'))).toEqual(['B1', 'B2', 'C1']);
     expect(continuationLevels('evening-german', 'A2.1', LEVELS)).toEqual([]);
   });
 });
