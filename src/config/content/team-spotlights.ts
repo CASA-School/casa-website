@@ -57,7 +57,7 @@ type TeamMemberSource = {
   shortName: string;
   /**
    * A portrait in public/media/casa/team/, only with the person's consent.
-   * `position` is the CSS object-position that keeps the face in the 4:5 crop.
+   * `position` is the CSS object-position that keeps the face in the square crop.
    */
   photo?: { file: string; position?: string };
   /** The job title CASA prints. German is the source; EN is our translation. */
