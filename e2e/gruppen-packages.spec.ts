@@ -19,7 +19,7 @@ test('a package card opens a dialog named after the package', async ({ page }) =
   await expect(dialog).toBeVisible();
   // Radix derives the accessible name from DialogTitle, which renders the
   // localized descriptor. A synthesised English label would not survive DE.
-  await expect(dialog).toHaveAccessibleName(/2 Week Explorer/i);
+  await expect(dialog).toHaveAccessibleName(/2 weeks of exploring/i);
   await expect(dialog.getByText('Klimahaus Bremerhaven')).toBeVisible();
 });
 
