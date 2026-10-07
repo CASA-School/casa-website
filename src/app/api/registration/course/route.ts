@@ -20,7 +20,7 @@ function successMessage(locale: 'en' | 'de') {
     return 'Vielen Dank! Deine Kursanmeldung ist bei uns angekommen. Wir melden uns so bald wie möglich mit den nächsten Schritten bei dir.';
   }
 
-  return 'Thank you. Your course request has been received. The CASA team will contact you shortly with next steps.';
+  return 'Thank you! Your course registration has reached us. We’ll get back to you with the next steps as soon as we can.';
 }
 
 function failureMessage(locale: 'en' | 'de') {
@@ -28,7 +28,7 @@ function failureMessage(locale: 'en' | 'de') {
     return 'Deine Kursanmeldung konnte gerade nicht übermittelt werden. Bitte versuch es noch einmal oder wende dich direkt an das CASA-Team.';
   }
 
-  return 'Your course request could not be submitted right now. Please try again or contact the CASA team directly.';
+  return 'Your course registration could not be sent just now. Please try again or contact the CASA team directly.';
 }
 
 function unavailableMessage(locale: 'en' | 'de') {

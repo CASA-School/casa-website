@@ -5,7 +5,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'intensive-german',
       locale: 'en',
-      audience: 'For anyone who wants to immerse themselves in German, for their studies, their job and everyday life.',
+      audience: 'For anyone who wants to work intensively on their German, for their studies, their job and everyday life.',
       promise: 'Build your German step by step, with regular practice and a group to learn alongside.',
       outcomes: ['Progress through the language levels', 'Improved speaking confidence', 'A steady learning routine'],
       teachingStyle: ['Communicative tasks', 'Small-group correction', 'Weekly progress checkpoints'],
@@ -14,22 +14,22 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'evening-german',
       locale: 'en',
       audience: 'Working professionals and trainees balancing work with language learning.',
-      promise: 'Steady progress after work hours without losing structure.',
-      outcomes: ['Improved workplace communication', 'Vocabulary for daily life', 'Flexible long-term progression'],
+      promise: 'Learn German after work and use what you’ve learnt in everyday life straight away.',
+      outcomes: ['Improved workplace communication', 'Vocabulary for daily life', 'Progress over the long term'],
       teachingStyle: ['Real-life scenarios', 'Focused grammar blocks', 'Peer conversation practice'],
     },
     {
       slug: 'special-courses',
       locale: 'en',
       audience: 'For anyone who wants to work on specific language skills.',
-      promise: 'Work on grammar, writing or speaking in a course with a clear focus.',
+      promise: 'Deepen your knowledge of grammar, write better or speak more freely. You choose the focus.',
       outcomes: ['More confidence in your chosen skill', 'Practice geared to your own goals and to everyday life', 'A focus on the areas you want to improve'],
       teachingStyle: ['Workshop format', 'Time for practice and individual feedback', 'Learning by doing'],
     },
     {
       slug: 'medical-german',
       locale: 'en',
-      audience: 'Doctors and healthcare professionals preparing for clinical work and licensing in Germany.',
+      audience: 'For doctors and healthcare professionals preparing their German for work in Germany.',
       promise: 'Practise patient consultations, medical reports and conversations with colleagues as you prepare for clinical work and the Fachsprachprüfung.',
       outcomes: [
         'Confident patient history-taking (Anamnese)',
@@ -48,8 +48,8 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'bildungszeit',
       locale: 'en',
-      audience: 'Employees on educational leave (Bildungszeit) with clear learning goals.',
-      promise: 'Use your educational leave to focus on German or English. We’ll advise you on the right course and the paperwork you need.',
+      audience: 'Employees on Bildungszeit with clear learning goals.',
+      promise: 'Use your Bildungszeit, Bremen’s paid leave for further training, to focus on German and English. We’ll advise you on the right course and the paperwork you need.',
       outcomes: ['Focused time for learning', 'More language practice', 'Advice on how to continue learning'],
       teachingStyle: ['Compact intensive blocks', 'Applied communication tasks', 'Goal-based lesson plans'],
     },
@@ -76,7 +76,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
     {
       slug: 'german-for-groups',
       locale: 'en',
-      audience: 'School classes, universities, and organisations bringing a group to Bremen.',
+      audience: 'School classes, universities and organisations bringing a group to Bremen.',
       audienceInPromise: true,
       promise: 'Learn German and experience Bremen together: we plan the lessons, the culture programme and the accommodation around your group. The programme is for school classes, universities and organisations coming to Bremen as a group, and every participant receives a certificate of attendance.',
       outcomes: [
@@ -85,7 +85,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
         'Experiencing local culture with Bremen host families',
       ],
       teachingStyle: [
-        '20 hours of lessons per week',
+        '20 lessons a week',
         'Speaking-led sessions using content you choose',
         'Culture programme and excursions built into the week',
       ],

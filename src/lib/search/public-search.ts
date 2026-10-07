@@ -194,7 +194,7 @@ export async function searchPublicContent({
                 title: exam.examType.name,
                 snippet: buildSnippet([exam.narrative?.summary ?? '', exam.examType.name], queryTerms),
                 badges: [exam.examType.code],
-                meta: nextSession ? [`${locale === 'de' ? 'Nächster Termin' : 'Next session'}: ${nextSession}`] : [],
+                meta: nextSession ? [`${locale === 'de' ? 'Nächster Termin' : 'Next date'}: ${nextSession}`] : [],
               } satisfies PublicSearchResult,
               score,
               sortTitle: exam.examType.name,

@@ -8,15 +8,15 @@ import { createPublicMetadata } from '@/lib/seo';
 
 const pageCopy = {
   en: {
-    title: 'Cost & Pathway Calculator',
+    title: 'Course cost and duration calculator',
     description:
-      'Estimate duration and total cost to reach your target German level at CASA, including optional exams and accommodation.',
+      'Estimate how long your German course at CASA will take and what it will cost, with an exam and accommodation if you like.',
     breadcrumbHome: 'Home',
     breadcrumbCurrent: 'Calculator',
-    eyebrow: 'CASA Planning Tool',
-    heading: 'Calculate your course, exam, and housing estimate quickly',
+    eyebrow: 'Cost calculator',
+    heading: 'What will your course, exam and accommodation cost?',
     intro:
-      'Choose your current level, target level, and optional services. The estimate updates immediately and keeps refundable deposits separate.',
+      'Choose your current level, your target level and anything else you would like to book. The estimate updates straight away. We show the refundable deposit separately.',
   },
   de: {
     title: 'Kosten- und Kursweg-Rechner',

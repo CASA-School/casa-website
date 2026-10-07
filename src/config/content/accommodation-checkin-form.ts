@@ -129,7 +129,7 @@ export const accommodationCheckInForm = {
            */
           note: {
             de: 'Der Internetanschluss ist nur im Rahmen des rechtlich Zulässigen zu nutzen und illegale Downloads sind strengstens verboten. Aus gegebenem Anlass wird ausdrücklich darauf hingewiesen, dass WLAN kostenfrei zur Verfügung steht, jedoch bei Verstößen (kostenpflichtige Downloads etc.) die in Deutschland geltenden gesetzlichen Bestimmungen für kostenpflichtige [Satz im Originalformular unvollständig — Wortlaut bei CASA erfragen]',
-            en: 'The internet connection may be used only within what is legally permitted, and illegal downloads are strictly forbidden. WLAN is provided free of charge, but in the event of violations (paid downloads and similar) the statutory provisions applicable in Germany for paid [sentence incomplete in the original form — confirm the intended wording with CASA]',
+            en: 'The internet connection may be used only within what is legally permitted, and illegal downloads are strictly forbidden. Wi-Fi is provided free of charge, but in the event of violations (paid downloads and similar) the statutory provisions applicable in Germany for paid [sentence incomplete in the original form — confirm the intended wording with CASA]',
           },
         },
       ],
@@ -208,7 +208,7 @@ export const accommodationCheckInForm = {
             { de: 'nicht vollständig zurückgegeben', en: 'not returned in full' },
           ],
         },
-        { id: 'wlanAccess', label: { de: 'WLAN-Zugang erhalten', en: 'WLAN access provided' }, kind: 'yesNo' },
+        { id: 'wlanAccess', label: { de: 'WLAN-Zugang erhalten', en: 'Wi-Fi access provided' }, kind: 'yesNo' },
         {
           id: 'sharedUse',
           label: { de: 'Mitbenutzung erlaubt', en: 'Shared use permitted' },
@@ -217,7 +217,7 @@ export const accommodationCheckInForm = {
             { de: 'Küche', en: 'Kitchen' },
             { de: 'Bad', en: 'Bathroom' },
             { de: 'Waschmaschine', en: 'Washing machine' },
-            { de: 'WLAN', en: 'WLAN' },
+            { de: 'WLAN', en: 'Wi-Fi' },
             { de: 'Sonstiges', en: 'Other' },
           ],
         },
@@ -300,9 +300,9 @@ export function checkInSummary(locale: ContentLocale) {
         'Fotos vom Zimmer, wenn beide Seiten einverstanden sind',
       ]
     : [
-        'The condition of the room, the furniture and the walls, recorded together',
-        'How many keys and how much bed linen were handed over',
-        'What is shared: kitchen, bathroom, washing machine, WLAN',
-        'Photographs for the record, when both sides agree',
+        'The condition of the room, the furniture and the walls',
+        'How many keys and how much bed linen you receive',
+        'Whether you may use the kitchen, bathroom, washing machine and Wi-Fi',
+        'Photos of the room, if both sides agree',
       ];
 }

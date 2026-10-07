@@ -50,7 +50,7 @@ describe('assistant runtime', () => {
 
     expect(response.intent).toBe('contact');
     expect(response.cta.href).toBe('/contact');
-    expect(response.message.toLowerCase()).toContain('does not currently offer a live learner or staff dashboard');
+    expect(response.message.toLowerCase()).toContain('has no login area for learners or staff');
   });
 
   it('adds visa disclaimer guidance', async () => {
@@ -66,7 +66,7 @@ describe('assistant runtime', () => {
     });
 
     expect(response.intent).toBe('visa');
-    expect(response.message.toLowerCase()).toContain('not legal certainty');
+    expect(response.message.toLowerCase()).toContain('not binding legal advice');
     expect(response.cta.href).toContain('/contact');
   });
 
@@ -214,7 +214,7 @@ describe('assistant course cards', () => {
       for (const card of cards) {
         const labels = card.meta.map((entry) => entry.label);
         expect(labels, card.id).not.toContain(locale === 'de' ? 'Preis' : 'Price');
-        expect(labels, card.id).not.toContain(locale === 'de' ? 'UE pro Woche' : 'Lessons/week');
+        expect(labels, card.id).not.toContain(locale === 'de' ? 'UE pro Woche' : 'Lessons a week');
       }
     }
   });
@@ -225,6 +225,6 @@ describe('assistant course cards', () => {
 
     expect(medical).toBeDefined();
     expect(medical!.meta).toContainEqual({ label: 'Price', value: 'On request' });
-    expect(medical!.meta.some((entry) => entry.label === 'Lessons/week')).toBe(false);
+    expect(medical!.meta.some((entry) => entry.label === 'Lessons a week')).toBe(false);
   });
 });

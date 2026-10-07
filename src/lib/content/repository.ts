@@ -172,7 +172,8 @@ const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, str
     de: 'Spezialkurse',
   },
   bildungszeit: {
-    en: 'Bildungszeit German',
+    // A proper name in both languages: Bremen's paid leave for further training.
+    en: 'Bildungszeit',
     de: 'Bildungszeit',
   },
 };

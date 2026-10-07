@@ -65,7 +65,7 @@ const chrome = {
     faq: 'Questions people ask',
     sources: 'Official sources',
     related: 'The other guides',
-    disclaimer: 'Requirements change. Check the official source for your country before you act on any of this.',
+    disclaimer: 'Requirements change from time to time. Please check the official source for your country before you take any steps.',
   },
   de: {
     home: 'Start',

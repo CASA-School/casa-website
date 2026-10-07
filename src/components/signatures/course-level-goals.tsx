@@ -73,7 +73,7 @@ export function CourseLevelGoals({
   description,
   levels,
   practices,
-  practiceTitle = 'What you will practice',
+  practiceTitle = 'What you practise',
   locale = 'en',
 }: CourseLevelGoalsProps) {
   const netzwerkLevels = levels.filter((l) => l.textbook === 'netzwerk');
@@ -91,21 +91,21 @@ export function CourseLevelGoals({
   const groups = [
     {
       items: netzwerkLevels,
-      label: locale === 'de' ? 'Lehrwerk Netzwerk neu' : 'Netzwerk Textbook',
+      label: locale === 'de' ? 'Lehrwerk Netzwerk neu' : 'Netzwerk neu textbook',
       range: 'A1 – B1',
       blurb:
         locale === 'de'
           ? 'Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.'
-          : 'Daily vocabulary, grammar basics, and dialogues',
+          : 'With Netzwerk neu you learn everyday vocabulary and the basics of grammar, and you practise dialogues.',
     },
     {
       items: kontextLevels,
-      label: locale === 'de' ? 'Lehrwerk Kontext' : 'Kontext Textbook',
+      label: locale === 'de' ? 'Lehrwerk Kontext' : 'Kontext textbook',
       range: 'B1+ – C1',
       blurb:
         locale === 'de'
           ? 'Mit Kontext übst du komplexe Satzstrukturen, Fachsprache und Diskussionen.'
-          : 'Complex structures, professional terminology, and debate',
+          : 'With Kontext you practise complex sentence structures, specialist language and discussions.',
     },
   ].filter((group) => group.items.length > 0);
 

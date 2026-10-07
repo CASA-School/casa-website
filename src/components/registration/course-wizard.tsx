@@ -236,7 +236,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
       const result = (await response.json().catch(() => null)) as CourseRegistrationApiResult | null;
       if (!response.ok || result?.status !== 'accepted') {
-        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.'));
+        throw new Error(result?.message || t('Your registration could not be sent. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.'));
       }
 
       setConfirmationSent(result?.confirmationSent === true);
@@ -252,7 +252,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
       const message =
         error instanceof Error && !(error instanceof TypeError)
           ? error.message
-          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.');
+          : t('Your registration could not be sent. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.');
       setSubmissionError(message);
       trackCasaEvent('form_error', {
         form: 'course_registration',
@@ -423,10 +423,10 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mr">{catalog.locale === 'de' ? 'Herr' : 'Mr.'}</SelectItem>
-                  <SelectItem value="ms">{catalog.locale === 'de' ? 'Frau' : 'Ms.'}</SelectItem>
-                  <SelectItem value="mx">{catalog.locale === 'de' ? 'Mx.' : 'Mx.'}</SelectItem>
-                  <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Neutral / Other'}</SelectItem>
+                  <SelectItem value="mr">{catalog.locale === 'de' ? 'Herr' : 'Mr'}</SelectItem>
+                  <SelectItem value="ms">{catalog.locale === 'de' ? 'Frau' : 'Ms'}</SelectItem>
+                  <SelectItem value="mx">{catalog.locale === 'de' ? 'Mx.' : 'Mx'}</SelectItem>
+                  <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Prefer not to say'}</SelectItem>
                 </SelectContent>
               </Select>
               {errors.salutation && <p id="salutation-error" className={formErrorClassName}>{errors.salutation.message}</p>}
@@ -551,7 +551,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                   onCheckedChange={(checked) => setValue('accommodationRequired', Boolean(checked), { shouldDirty: true })}
                 />
                 <Label htmlFor="accommodation" className="cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                  {t('I want CASA to support my accommodation search', 'Ich möchte Unterstützung bei der Unterkunftssuche')}
+                  {t('I’d like help finding accommodation', 'Ich möchte Unterstützung bei der Unterkunftssuche')}
                 </Label>
               </div>
 
@@ -682,7 +682,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Student', 'Teilnehmer')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
-                    {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr. ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms. ') : 'Mx. ')) : ''}
+                    {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms ') : (catalog.locale === 'de' ? 'Mx. ' : 'Mx '))) : ''}
                     {watch('firstName')} {watch('lastName')}
                   </p>
                   <p className="mt-0.5 break-words text-[var(--casa-muted)]">{watch('email')}</p>
@@ -699,7 +699,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
               <p className={cn(formHintClassName, 'flex gap-2.5')}>
                 <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-                {t('We confirm your place by email once we have checked your registration.', 'Wir bestätigen dir deinen Platz per E-Mail, sobald wir deine Anmeldung geprüft haben.')}
+                {t('We’ll confirm your place by email once we have checked your registration.', 'Wir bestätigen dir deinen Platz per E-Mail, sobald wir deine Anmeldung geprüft haben.')}
               </p>
 
               <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
@@ -716,7 +716,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                         }
                       />
                       <Label htmlFor="official-name-confirmed" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                        {t('My name and birth date match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
+                        {t('My name and date of birth match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
                         <RequiredMark />
                       </Label>
                     </div>
@@ -732,7 +732,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                         }
                       />
                       <Label htmlFor="exam-policy-accepted" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                        {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich weiß, dass mein Prüfungsplatz erst bestätigt wird, wenn meine Dokumente und meine Zahlung geprüft sind.')}
+                        {t('I understand that my exam place is only confirmed once my documents and my payment have been checked.', 'Ich weiß, dass mein Prüfungsplatz erst bestätigt wird, wenn meine Dokumente und meine Zahlung geprüft sind.')}
                         <RequiredMark />
                       </Label>
                     </div>
@@ -865,7 +865,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
               type="button"
               onClick={handleCloseSuccess}
               className="absolute top-4 right-4 text-[var(--casa-text-subtle)] hover:text-[var(--casa-muted)] rounded-full p-2 hover:bg-[var(--casa-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
-              aria-label={t('Close success modal', 'Erfolgsmeldung schließen')}
+              aria-label={t('Close this message', 'Erfolgsmeldung schließen')}
             >
               <span className="text-xl font-bold">✕</span>
             </button>
@@ -875,12 +875,12 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
             </div>
 
             <h2 id="modal-title" className="text-2xl font-bold tracking-tight text-[var(--casa-ink)] mt-5">
-              {catalog.locale === 'de' ? 'Danke für deine Anmeldung' : 'Registration successful'}
+              {catalog.locale === 'de' ? 'Danke für deine Anmeldung' : 'Thank you for your registration'}
             </h2>
             <p className="max-w-md text-sm text-[var(--casa-muted)] mt-2">
               {catalog.locale === 'de'
                 ? 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.'
-                : 'Your enrollment request is now in review. CASA admissions will contact you by email with availability and next steps.'}
+                : 'We’ll look at your registration now and get back to you by email as soon as we can.'}
             </p>
             {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
 
@@ -895,9 +895,9 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                         { title: 'Wir schicken dir alles Weitere', description: 'Per E-Mail bekommst du die Unterlagen und Fristen, die du brauchst.' },
                       ]
                     : [
-                        { title: 'Admissions review', description: 'We validate profile, availability, and course fit.' },
-                        { title: 'Confirmation', description: 'You receive confirmation with payment and start details.' },
-                        { title: 'Next steps', description: 'We send the required documents and deadlines by email.' },
+                        { title: 'We check your registration', description: 'We look at your details and check that there is still a place free and that the course suits you.' },
+                        { title: 'You hear back from us', description: 'Our reply includes the details of payment and of the start of your course.' },
+                        { title: 'We send you everything else', description: 'You’ll receive the documents and deadlines you need by email.' },
                       ]
                 }
               />
@@ -908,7 +908,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 href="/"
                 className={cn(formPrimaryButtonClassName, 'flex w-full items-center justify-center')}
               >
-                {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to Home'}
+                {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to the home page'}
               </Link>
             </div>
           </div>

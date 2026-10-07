@@ -65,7 +65,7 @@ function dateLabel(value: string, locale: AssistantRuntimeLocale) {
 // "Einstieg" / "Joining" for a term under way, as the course page labels it.
 const labels = {
   de: { nextStart: 'Nächster Start', joining: 'Einstieg', lessons: 'UE pro Woche' },
-  en: { nextStart: 'Next start', joining: 'Joining', lessons: 'Lessons/week' },
+  en: { nextStart: 'Next start', joining: 'Joining', lessons: 'Lessons a week' },
 } as const;
 
 function label(locale: AssistantRuntimeLocale, key: keyof (typeof labels)['de']) {
@@ -173,7 +173,7 @@ export async function listCourseOptions(
         course.narrative?.promise ||
         (locale === 'de'
           ? 'Der Kurs hat einen klaren Aufbau und Lernziele aus der Praxis.'
-          : 'Practical outcomes with a clear learning structure.'),
+          : 'The course has a clear structure and practical learning goals.'),
       href: getCoursePath(course.slug),
       badges: [course.level_min ?? 'A1', course.level_max ?? 'C1'],
       meta: courseMeta(
@@ -193,7 +193,7 @@ export async function listCourseOptions(
       item.course.narrative?.promise ||
       (locale === 'de'
         ? 'Der Kurs hat einen klaren Aufbau und Lernziele aus der Praxis.'
-        : 'Practical outcomes with a clear learning structure.'),
+        : 'The course has a clear structure and practical learning goals.'),
     href: getCoursePath(item.course.slug),
     badges: [item.course.level_min ?? 'A1', item.course.level_max ?? 'C1'],
     meta: courseMeta(item.course, item.nextStart, finder.joinableNowByCourseId[item.course.id] ?? false, locale),

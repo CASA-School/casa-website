@@ -116,8 +116,8 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
         ? 'Strukturierter Lernweg mit klar definierten Kommunikationszielen.'
         : 'Structured learning path with clearly defined communication goals.',
     levels: [
-      { level: 'A1-B1', textbook: 'netzwerk' as const, focus: locale === 'de' ? 'Grundlagen aufbauen mit dem Lehrwerk Netzwerk neu' : 'Build core foundations using Netzwerk textbook' },
-      { level: 'B2-C1', textbook: 'kontext' as const, focus: locale === 'de' ? 'Ausdrucksweise verfeinern mit dem Lehrwerk Kontext' : 'Refine vocabulary and communication using the Kontext textbook' },
+      { level: 'A1-B1', textbook: 'netzwerk' as const, focus: locale === 'de' ? 'Grundlagen aufbauen mit dem Lehrwerk Netzwerk neu' : 'Build the foundations with the Netzwerk neu textbook' },
+      { level: 'B2-C1', textbook: 'kontext' as const, focus: locale === 'de' ? 'Ausdrucksweise verfeinern mit dem Lehrwerk Kontext' : 'Refine how you express yourself with the Kontext textbook' },
     ],
   };
 
@@ -125,13 +125,13 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
    * B1+ is one step of the intensive course, between B1 and B2, and the first
    * one taught with Kontext (Kontext B1+). It has a row on the two formats that
    * follow the intensive progression: the intensive course and Bildungszeit. Its
-   * German line is the old casa-bremen.de Niveaustufen text; the English line is
-   * the one the level timeline already uses.
+   * German line is the old casa-bremen.de Niveaustufen text, and the English
+   * line says the same.
    */
   const b1PlusFocus =
     locale === 'de'
       ? 'Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.'
-      : 'Bridge level before B2. This is where the course moves on to the Kontext textbook.';
+      : 'You build on the vocabulary, grammar and phrases from B1 and practise speaking and writing freely. From here on you learn with the Kontext textbook.';
 
   const goals: Record<string, { title: string; description: string; levels: LevelGoalItem[] }> = {
     'intensive-german': {
@@ -139,14 +139,14 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Für jede Niveaustufe haben wir ein passendes Lehrwerk ausgewählt. Von A1 bis B1 lernst du mit Netzwerk neu, von B1+ bis C1 mit Kontext.'
-          : 'Our classes follow the recognized Netzwerk and Kontext textbooks for structured progress.',
+          : 'We have chosen a suitable textbook for each level. From A1 to B1 you learn with Netzwerk neu, and from B1+ to C1 with Kontext.',
       levels: [
-        { level: 'A1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.' : 'Introduce yourself, ask simple questions, hold basic conversations' },
-        { level: 'A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.' : 'Share personal experiences, write simple messages' },
-        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.' : 'Express opinions, understand longer texts, give presentations' },
+        { level: 'A1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.' : 'You can introduce yourself, ask simple questions and hold everyday conversations.' },
+        { level: 'A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.' : 'You can talk about your experiences and write simple messages.' },
+        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.' : 'You can give your opinion, understand longer texts and give presentations.' },
         { level: 'B1+', textbook: 'kontext', focus: b1PlusFocus },
-        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.' : 'Understand complex arguments, participate in specialized discussions' },
-        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du sprichst fließend und spontan und kannst akademische Texte analysieren.' : 'Fluent, spontaneous speaking, analyze academic texts' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.' : 'You understand complex arguments and can take part in specialist discussions.' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du sprichst fließend und spontan und kannst akademische Texte analysieren.' : 'You speak fluently and spontaneously and can analyse academic texts.' },
       ],
     },
     'evening-german': {
@@ -154,13 +154,13 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Auch am Abend lernst du mit den Lehrwerken Netzwerk neu und Kontext, in jedem Trimester eine halbe Niveaustufe.'
-          : 'Continuous learning path in the evening using the proven Netzwerk and Kontext textbooks.',
+          : 'In the evenings, too, you learn with the Netzwerk neu and Kontext textbooks, completing half a level each trimester.',
       levels: [
-        { level: 'A1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.' : 'Understand simple sentences, build core vocabulary for daily life' },
-        { level: 'A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.' : 'Handle routine situations, write short descriptions' },
-        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.' : 'Understand main points on familiar topics, justify personal opinions' },
-        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.' : 'Understand complex texts, hold spontaneous conversations at work' },
-        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.' : 'Read demanding texts, use language flexibly in professional contexts' },
+        { level: 'A1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.' : 'You understand simple sentences and learn the basic vocabulary for everyday life.' },
+        { level: 'A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.' : 'You can manage in everyday situations and write short reports.' },
+        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.' : 'You understand the main points on familiar topics and can give reasons for your opinion.' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.' : 'You understand complex texts and can hold spontaneous conversations at work.' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.' : 'You read demanding texts and express yourself flexibly at work.' },
       ],
     },
     'german-for-groups': {
@@ -168,10 +168,10 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Gruppen kommen mit gemischten Niveaus. Wir stufen zu Beginn ein und richten Inhalte, Tempo und Schwerpunkte nach der Gruppe aus.'
-          : 'Groups arrive with mixed levels. We place learners at the start and shape content, pace, and focus around the group.',
+          : 'Groups arrive with mixed levels. We place learners at the start and shape the content, pace and focus around the group.',
       levels: [
-        { level: 'A1-A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Alltagssprache für Ausflüge, Gastfamilie und Orientierung in Bremen' : 'Everyday language for excursions, the host family, and getting around Bremen' },
-        { level: 'B1-B2', textbook: 'netzwerk', focus: locale === 'de' ? 'Freies Sprechen zu Themen, die die Gruppe selbst mitbringt' : 'Free speaking on topics the group brings with them' },
+        { level: 'A1-A2', textbook: 'netzwerk', focus: locale === 'de' ? 'Alltagssprache für Ausflüge, Gastfamilie und Orientierung in Bremen' : 'Everyday language for excursions, the host family and getting around Bremen' },
+        { level: 'B1-B2', textbook: 'netzwerk', focus: locale === 'de' ? 'Freies Sprechen zu Themen, die die Gruppe selbst mitbringt' : 'Speaking freely about topics the group brings along' },
         { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Vertiefung nach Absprache, etwa Projektarbeit oder Fachthemen' : 'Deeper work by arrangement, such as project work or subject-specific topics' },
       ],
     },
@@ -180,10 +180,10 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.'
-          : 'Medical German terminology at levels B2 and C1 focusing on hospital routines and professional communication.',
+          : 'You learn the specialist language of medicine at levels B2 and C1, with a focus on everyday hospital work and communication within the team.',
       levels: [
-        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du führst Anamnesegespräche, klärst Patientinnen und Patienten auf und dokumentierst.' : 'Conduct anamnesis interviews, patient explanations and documentation' },
-        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du führst Fachgespräche mit Kolleginnen und Kollegen, schreibst Arztbriefe und übst Visiten.' : 'Lead professional consultations with colleagues, write medical reports, simulate ward rounds' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du führst Anamnesegespräche, klärst Patientinnen und Patienten auf und dokumentierst.' : 'You take patient histories, explain treatment to patients and write up your documentation.' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du führst Fachgespräche mit Kolleginnen und Kollegen, schreibst Arztbriefe und übst Visiten.' : 'You hold professional discussions with colleagues, write medical reports and practise ward rounds.' },
       ],
     },
     /*
@@ -198,13 +198,13 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.'
-          : 'Two intensive courses a day compress the progress. Entry starts at B1.',
+          : 'With two intensive courses a day, you have twice as many lessons as in a single intensive course. You can join from B1.',
       levels: [
-        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.' : 'Justify opinions and hold longer conversations at work' },
+        { level: 'B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.' : 'You can give reasons for your opinions and hold longer conversations at work.' },
         // Bildungszeit is two intensive courses, so it follows their progression.
         { level: 'B1+', textbook: 'kontext', focus: b1PlusFocus },
-        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.' : 'Understand complex arguments and take part in specialist discussion' },
-        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.' : 'Speak spontaneously and flexibly, work through demanding texts' },
+        { level: 'B2', textbook: 'kontext', focus: locale === 'de' ? 'Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.' : 'You understand complex arguments and can take part in specialist discussions.' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.' : 'You speak spontaneously and flexibly and can work with demanding texts.' },
       ],
     },
     /*
@@ -217,11 +217,11 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Die Module gibt es auf verschiedenen Niveaus, von A2/B1 bis C1+.'
-          : 'Every module states its own level. The catalogue spans A2/B1 to C1+.',
+          : 'The modules are offered at different levels, from A2/B1 to C1+.',
       levels: [
-        { level: 'A2/B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du wiederholst und festigst die Grundlagen der Grammatik und lernst, einfache Alltagstexte zu schreiben.' : 'Lock down core grammar before it gets in the way of speaking' },
-        { level: 'B1/B2', textbook: 'kontext', focus: locale === 'de' ? 'Du trainierst gezielt Grammatik, Aussprache, Schreiben oder freies Sprechen.' : 'Targeted work on writing and pronunciation' },
-        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du trainierst den mündlichen und schriftlichen Ausdruck für telc Deutsch C1 Hochschule.' : 'Exam training for telc C1 Hochschule, spoken and written' },
+        { level: 'A2/B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Du wiederholst und festigst die Grundlagen der Grammatik und lernst, einfache Alltagstexte zu schreiben.' : 'You revise and consolidate the basics of grammar and learn to write simple everyday texts.' },
+        { level: 'B1/B2', textbook: 'kontext', focus: locale === 'de' ? 'Du trainierst gezielt Grammatik, Aussprache, Schreiben oder freies Sprechen.' : 'You focus on grammar, pronunciation, writing or speaking freely.' },
+        { level: 'C1', textbook: 'kontext', focus: locale === 'de' ? 'Du trainierst den mündlichen und schriftlichen Ausdruck für telc Deutsch C1 Hochschule.' : 'You practise spoken and written expression for telc Deutsch C1 Hochschule.' },
       ],
     },
     'in-company': {
@@ -229,10 +229,10 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         locale === 'de'
           ? 'Die Kursziele stimmen wir auf das Sprachniveau Ihres Teams ab.'
-          : 'Tailored course goals adapted to your team\'s specific language levels.',
+          : 'We match the course goals to your team\'s language level.',
       levels: [
-        { level: 'A1-B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Grundlegende Arbeitsplatzkommunikation, E-Mail-Korrespondenz und Telefonate' : 'Basic workplace communication, email correspondence, and phone calls' },
-        { level: 'B2-C1', textbook: 'kontext', focus: locale === 'de' ? 'Meetings moderieren, Verhandlungen führen, Präsentationen auf Deutsch' : 'Moderate meetings, lead negotiations, deliver presentations in German' },
+        { level: 'A1-B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Grundlegende Arbeitsplatzkommunikation, E-Mail-Korrespondenz und Telefonate' : 'Basic workplace communication, emails and phone calls' },
+        { level: 'B2-C1', textbook: 'kontext', focus: locale === 'de' ? 'Meetings moderieren, Verhandlungen führen, Präsentationen auf Deutsch' : 'Chairing meetings, leading negotiations and giving presentations in German' },
       ],
     },
   };

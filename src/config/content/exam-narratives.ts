@@ -5,20 +5,21 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
     {
       code: 'telc_b2',
       locale: 'en',
-      headline: 'telc Deutsch B2 for your next step',
+      headline: 'telc Deutsch B2 for work, training and everyday life',
       summary:
-        'Show what you can do in German. We help you understand the telc Deutsch B2 exam, prepare for its tasks and plan your registration.',
-      outcomes: ['Practice in reading and listening', 'Stronger writing structure', 'More confidence in speaking'],
-      prepHighlights: ['Strategies for each task', 'Practice with exam time limits', 'Individual error correction'],
+        'With telc Deutsch B2 you show what you can do in German. We explain how the exam works and help you prepare and register.',
+      outcomes: ['Better reading and listening comprehension', 'More confidence in writing', 'More fluent spoken communication'],
+      prepHighlights: ['Strategies for each type of task', 'Practice with the exam time limits', 'Individual analysis of your mistakes'],
     },
     {
       code: 'telc_c1_hochschule',
       locale: 'en',
-      headline: 'telc C1 Hochschule for university admission',
+      headline: 'telc Deutsch C1 Hochschule for university admission',
+      // Who the exam is for, after the old casa-bremen.de page, as in German.
       summary:
-        'Practise the German you need for university: understanding demanding texts, building an argument and making your case in speech and in writing.',
-      outcomes: ['More confidence with academic German', 'Practice understanding academic speech', 'Higher confidence under exam pressure'],
-      prepHighlights: ['Academic reading and writing tasks', 'Exam-format simulations', 'Personal feedback on what to work on next'],
+        'telc Deutsch C1 Hochschule tests your German at a very advanced level, as you need it for university. The exam is for you if you want to prove your German because you plan to study at a German-speaking university, are already a student or work in an academic profession.',
+      outcomes: ['More confidence with academic German', 'Better understanding of lectures', 'Staying calm under exam pressure'],
+      prepHighlights: ['University-style tasks', 'Mock exams', 'Personal feedback on what to work on next'],
     },
   ],
   de: [

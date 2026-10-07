@@ -37,7 +37,7 @@ export function ApplySection({ locale, position, acceptsUploads }: ApplySectionP
       : {
           title: 'Apply now',
           byEmail: 'Please email your application, with your CV and a cover letter, to',
-          byContact: 'Please write to us through the contact form and we will reply with the next steps.',
+          byContact: 'Please write to us using the contact form. We’ll then get back to you and talk through the next steps.',
           contactCta: 'Go to the contact form',
           subject: 'Application',
         };

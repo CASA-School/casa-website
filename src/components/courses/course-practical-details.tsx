@@ -27,7 +27,7 @@ export function CoursePracticalDetails({
   // (German for Medical) and organisers (groups, companies).
   const title = feeList.length
     ? (locale === 'de' ? 'Kursgebühren im Überblick' : 'Course fees at a glance')
-    : (locale === 'de' ? 'Der Kurs im Überblick' : 'Planning your course');
+    : (locale === 'de' ? 'Der Kurs im Überblick' : 'The course at a glance');
 
   return (
     <section>

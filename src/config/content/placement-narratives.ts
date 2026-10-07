@@ -12,9 +12,9 @@ export const placementNarrativesByLocale: Record<ContentLocale, PlacementNarrati
       'Join the best-fit course group',
     ],
     prepChecklist: [
-      'Bring previous certificates if available',
-      'Share your current language goals',
-      'Tell us your preferred start timeframe',
+      'Bring your certificates with you, if you already have some.',
+      'Think briefly about what you’d like to achieve with your German.',
+      'Tell us roughly when you’d like to start the course.',
     ],
   },
   de: {

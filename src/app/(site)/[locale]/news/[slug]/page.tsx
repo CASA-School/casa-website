@@ -77,10 +77,10 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           nextStepTitle: 'Your next step',
 
           nextStepBody:
-            'Ready to turn this into progress? We can recommend the right course and a realistic timeline.',
+            'If you’d like to take your German further, we’re happy to recommend a course that suits you and a realistic timescale.',
 
           findCourse: 'Find my course',
-          talkToAdmissions: 'Ask an advisor first',
+          talkToAdmissions: 'Get advice first',
 
           relatedTitle: 'More articles',
         };

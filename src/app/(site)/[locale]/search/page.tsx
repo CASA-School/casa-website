@@ -166,11 +166,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <HeroEMinimal
         eyebrow={locale === 'de' ? 'Suche' : 'Search'}
-        title={locale === 'de' ? 'Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles' : 'One search entry for courses, exams, FAQ, and news'}
+        title={locale === 'de' ? 'Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles' : 'One search box for courses, exams, FAQ and news'}
         description={
           locale === 'de'
             ? 'So findest du schnell, was du suchst, ohne dich durch viele Seiten zu klicken.'
-            : 'Find answers faster without jumping between pages.'
+            : 'Find what you’re looking for quickly, without clicking through lots of pages.'
         }
         breadcrumbs={[
           { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
@@ -178,7 +178,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         ]}
         cta={{ label: locale === 'de' ? 'Kontakt' : 'Contact', href: '/contact', kind: 'secondary' }}
         meta={[
-          locale === 'de' ? 'Zentrale Suche' : 'Unified search',
+          locale === 'de' ? 'Zentrale Suche' : 'Site-wide search',
           locale === 'de' ? 'Kurse + Prüfungen + FAQ + Aktuelles' : 'Courses + Exams + FAQ + News',
         ]}
       />
@@ -191,30 +191,30 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <p className="text-sm text-[var(--casa-muted)]">
               {locale === 'de'
                 ? `${totalResults} Treffer für „${q}“ in „${scopeLabel}“`
-                : `${totalResults} results for "${q}" in "${scopeLabel}"`}
+                : `${totalResults} ${totalResults === 1 ? 'result' : 'results'} for “${q}” in “${scopeLabel}”`}
             </p>
           ) : (
             <p className="text-sm text-[var(--casa-muted)]">
               {locale === 'de'
                 ? 'Gib einen Suchbegriff ein, dann siehst du hier die Ergebnisse.'
-                : 'Enter a search term to see results.'}
+                : 'Enter a search term and your results will appear here.'}
             </p>
           )}
 
           {shouldSearch && totalResults === 0 ? (
             <section className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-soft)]">
-              <h2 className="text-lg font-bold">{locale === 'de' ? 'Keine Treffer gefunden' : 'No matching results found'}</h2>
+              <h2 className="text-lg font-bold">{locale === 'de' ? 'Keine Treffer gefunden' : 'No results found'}</h2>
               <p className="mt-2 text-sm text-[var(--casa-muted)]">
                 {locale === 'de'
                   ? 'Versuch es mit einem allgemeineren Wort oder wähle einen anderen Suchbereich.'
-                  : 'Try a broader keyword or switch the search scope.'}
+                  : 'Try a more general word or choose a different area to search.'}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href="/courses" className="text-sm font-semibold text-[var(--casa-accent-text)] hover:underline">
-                  {locale === 'de' ? 'Alle Kurse ansehen' : 'Browse all courses'}
+                  {locale === 'de' ? 'Alle Kurse ansehen' : 'See all courses'}
                 </Link>
                 <Link href="/contact" className="text-sm font-semibold text-[var(--casa-accent-text)] hover:underline">
-                  {locale === 'de' ? 'Beratung anfragen' : 'Contact admissions'}
+                  {locale === 'de' ? 'Beratung anfragen' : 'Get advice'}
                 </Link>
               </div>
             </section>

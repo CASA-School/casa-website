@@ -51,8 +51,8 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
   const isRegistrationPage = pathname?.startsWith('/registration');
   const registerHref = isExamContext ? '/registration/exam' : '/registration/course';
   const registerText = isExamContext
-    ? (contentLocale === 'de' ? 'Zur Prüfungsanmeldung' : 'Register for Exam')
-    : (contentLocale === 'de' ? 'Zur Kursanmeldung' : 'Register Now');
+    ? (contentLocale === 'de' ? 'Zur Prüfungsanmeldung' : 'Register for an exam')
+    : (contentLocale === 'de' ? 'Zur Kursanmeldung' : 'Register for a course');
 
   const switchContentLocale = useCallback(
     (locale: ContentLocale) => {
@@ -88,7 +88,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
         <SheetDescription className="sr-only">
           {contentLocale === 'de'
             ? 'Hier findest du die wichtigsten Bereiche von CASA. Du kannst die Sprache wechseln oder direkt zur Anmeldung und zum Kontakt gehen.'
-            : 'Browse CASA sections, switch language, or jump directly to registration and admissions.'}
+            : 'Here you’ll find the main sections of the CASA website. You can switch the language or go straight to registration or to our contact page.'}
         </SheetDescription>
         <div className="flex h-full flex-col bg-white">
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[color:var(--casa-sand)]/70 bg-white/95 p-6 backdrop-blur">
@@ -264,7 +264,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                   href="/contact"
                   className="casa-cta-link inline-flex items-center justify-center gap-2 py-1 text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:underline"
                 >
-                  {contentLocale === 'de' ? 'Beratung anfragen' : 'Talk to Admissions'}
+                  {contentLocale === 'de' ? 'Beratung anfragen' : 'Get advice'}
                   <svg aria-hidden="true" viewBox="0 0 22 8" fill="none" className="h-2 w-[20px] shrink-0">
                     <path
                       d="M0 4h20M16.5 0.6L20.4 4l-3.9 3.4"

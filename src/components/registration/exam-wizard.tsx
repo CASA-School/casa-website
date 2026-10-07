@@ -158,7 +158,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     () => selectedOptions.find((option) => option.id === selectedExamSessionId) || null,
     [selectedOptions, selectedExamSessionId]
   );
-  const stepItems = [{ title: t('Exam', 'Prüfung') }, { title: t('Personal', 'Daten') }, { title: t('Review', 'Prüfen') }];
+  const stepItems = [{ title: t('Exam', 'Prüfung') }, { title: t('Details', 'Daten') }, { title: t('Review', 'Prüfen') }];
   const stepFields = FIELDS_BY_STEP[step - 1] ?? [];
   const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
   const registrationTypeLabel = registrationTypeLabels(catalog.locale)[selectedRegistrationType] ?? selectedRegistrationType;
@@ -215,7 +215,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
       const result = (await response.json().catch(() => null)) as ExamRegistrationApiResult | null;
       if (!response.ok || result?.status !== 'accepted') {
-        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.'));
+        throw new Error(result?.message || t('Your registration could not be sent. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.'));
       }
 
       setConfirmationSent(result?.confirmationSent === true);
@@ -231,7 +231,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
       const message =
         error instanceof Error && !(error instanceof TypeError)
           ? error.message
-          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.');
+          : t('Your registration could not be sent. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.');
       setSubmissionError(message);
       trackCasaEvent('form_error', {
         form: 'exam_registration',
@@ -335,7 +335,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 locale={catalog.locale}
                 error={errors.examSessionId?.message}
                 errorId="examSessionId-error"
-                emptyText={t('No dates for this exam yet.', 'Für diese Prüfung gibt es noch keine Termine.')}
+                emptyText={t('There are no dates for this exam yet.', 'Für diese Prüfung gibt es noch keine Termine.')}
               />
               {selectedOption ? <p className={formHintClassName}>{sittingFacts(selectedOption, catalog.locale)}</p> : null}
             </div>
@@ -359,7 +359,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               icon={UserRound}
               meaning="orientation"
               headingRef={stepHeadingRef}
-              title={t('Personal information', 'Persönliche Angaben')}
+              title={t('Personal details', 'Persönliche Angaben')}
               description={t('Your details must match your official ID exactly.', 'Deine Angaben müssen genau mit deinem amtlichen Ausweis übereinstimmen.')}
             />
 
@@ -376,10 +376,10 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                   <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mr">{catalog.locale === 'de' ? 'Herr' : 'Mr.'}</SelectItem>
-                  <SelectItem value="ms">{catalog.locale === 'de' ? 'Frau' : 'Ms.'}</SelectItem>
-                  <SelectItem value="mx">{catalog.locale === 'de' ? 'Mx.' : 'Mx.'}</SelectItem>
-                  <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Neutral / Other'}</SelectItem>
+                  <SelectItem value="mr">{catalog.locale === 'de' ? 'Herr' : 'Mr'}</SelectItem>
+                  <SelectItem value="ms">{catalog.locale === 'de' ? 'Frau' : 'Ms'}</SelectItem>
+                  <SelectItem value="mx">{catalog.locale === 'de' ? 'Mx.' : 'Mx'}</SelectItem>
+                  <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Prefer not to say'}</SelectItem>
                 </SelectContent>
               </Select>
               {errors.salutation && <p id="salutation-error" className={formErrorClassName}>{errors.salutation.message}</p>}
@@ -493,17 +493,17 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Exam', 'Prüfung')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedExamType?.name || '-'}</p>
-                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{t('Mode', 'Art')}: {registrationTypeLabel}</p>
+                  <p className="mt-0.5 break-words text-[var(--casa-muted)]">{t('Type', 'Art')}: {registrationTypeLabel}</p>
                 </div>
                 <div className={formTileClassName}>
-                  <p className={formMetaLabelClassName}>{t('Session', 'Termin')}</p>
+                  <p className={formMetaLabelClassName}>{t('Date', 'Termin')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">{selectedOption ? formatDay(selectedOption.startsAt, catalog.locale) : '-'}</p>
                   {selectedOption ? <p className="mt-0.5 break-words text-[var(--casa-muted)]">{sittingFacts(selectedOption, catalog.locale)}</p> : null}
                 </div>
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Candidate', 'Kandidat:in')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
-                    {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr. ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms. ') : 'Mx. ')) : ''}
+                    {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms ') : (catalog.locale === 'de' ? 'Mx. ' : 'Mx '))) : ''}
                     {watch('firstName')} {watch('lastName')}
                   </p>
                   <p className="mt-0.5 break-words text-[var(--casa-muted)]">{watch('email')}</p>
@@ -512,7 +512,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
               <p className={cn(formHintClassName, 'flex gap-2.5')}>
                 <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-                {t('We confirm your exam place by email once payment and your details are checked.', 'Wir bestätigen dir deinen Prüfungsplatz per E-Mail, sobald wir deine Zahlung und deine Angaben geprüft haben.')}
+                {t('We’ll confirm your exam place by email once we have checked your payment and your details.', 'Wir bestätigen dir deinen Prüfungsplatz per E-Mail, sobald wir deine Zahlung und deine Angaben geprüft haben.')}
               </p>
 
               <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
@@ -527,7 +527,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     }
                   />
                   <Label htmlFor="official-name-confirmed" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                    {t('My name and birth date match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
+                    {t('My name and date of birth match my passport or official ID exactly.', 'Name und Geburtsdatum stimmen exakt mit meinem Pass oder amtlichen Ausweis überein.')}
                     <RequiredMark />
                   </Label>
                 </div>
@@ -544,7 +544,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     }
                   />
                   <Label htmlFor="exam-policy-accepted" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                    {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich weiß, dass mein Prüfungsplatz erst bestätigt wird, wenn meine Dokumente und meine Zahlung geprüft sind.')}
+                    {t('I understand that my exam place is only confirmed once my documents and my payment have been checked.', 'Ich weiß, dass mein Prüfungsplatz erst bestätigt wird, wenn meine Dokumente und meine Zahlung geprüft sind.')}
                     <RequiredMark />
                   </Label>
                 </div>
@@ -676,7 +676,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               type="button"
               onClick={handleCloseSuccess}
               className="absolute top-4 right-4 text-[var(--casa-text-subtle)] hover:text-[var(--casa-muted)] rounded-full p-2 hover:bg-[var(--casa-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
-              aria-label={t('Close success modal', 'Bestätigung schließen')}
+              aria-label={t('Close this message', 'Bestätigung schließen')}
             >
               <span className="text-xl font-bold">✕</span>
             </button>
@@ -686,12 +686,12 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             </div>
 
             <h2 id="modal-title" className="text-2xl font-bold tracking-tight text-[var(--casa-ink)] mt-5">
-              {catalog.locale === 'de' ? 'Danke für deine Prüfungsanmeldung' : 'Registration successful'}
+              {catalog.locale === 'de' ? 'Danke für deine Prüfungsanmeldung' : 'Thank you for your exam registration'}
             </h2>
             <p className="max-w-md text-sm text-[var(--casa-muted)] mt-2">
               {catalog.locale === 'de'
                 ? 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.'
-                : 'Your candidate registration is received. CASA will contact you by email with confirmation and the next required steps.'}
+                : 'We’ll look at your registration now and get back to you by email as soon as we can.'}
             </p>
             {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
 
@@ -706,9 +706,9 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                         { title: 'Wir schicken dir alles für den Prüfungstag', description: 'Vor dem Termin bekommst du die nötigen Unterlagen und Hinweise per E-Mail.' },
                       ]
                     : [
-                        { title: 'Candidate review', description: 'We validate details and session availability.' },
-                        { title: 'Confirmation', description: 'You receive payment and document deadlines.' },
-                        { title: 'Next steps', description: 'We send the required documents and exam-day guidance by email.' },
+                        { title: 'We check your registration', description: 'We look at your details and check that there is still a place free on the date you chose.' },
+                        { title: 'You hear back from us', description: 'Our reply includes the deadlines for payment and documents.' },
+                        { title: 'We send you everything for exam day', description: 'Before the exam, you’ll receive the documents and information you need by email.' },
                       ]
                 }
               />
@@ -719,7 +719,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 href="/"
                 className={cn(formPrimaryButtonClassName, 'flex w-full items-center justify-center')}
               >
-                {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to Home'}
+                {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to the home page'}
               </Link>
             </div>
           </div>

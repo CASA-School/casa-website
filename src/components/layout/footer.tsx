@@ -12,14 +12,14 @@ const deFooterText: Record<string, string> = {
   'Here to help': 'Wir beraten dich gern',
   'Ready to start German in Bremen?': 'Bereit für Deutsch in Bremen?',
   'Find my course': 'Kurs finden',
-  'Talk to an advisor': 'Beratung anfragen',
+  'Get advice': 'Beratung anfragen',
   'Non-profit language school in Bremen. Since 1983.': 'Gemeinnützige Sprachschule in Bremen. Seit 1983.',
-  'Office Hours': 'Bürozeiten',
-  'Monday - Thursday: 08:30 - 19:00': 'Montag–Donnerstag: 08:30–19:00 Uhr',
-  'Friday: 08:30 - 13:00': 'Freitag: 08:30–13:00 Uhr',
+  'Office hours': 'Bürozeiten',
+  'Monday–Thursday: 08:30–19:00': 'Montag–Donnerstag: 08:30–19:00 Uhr',
+  'Friday: 08:30–13:00': 'Freitag: 08:30–13:00 Uhr',
   'Am Dobben 14-16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
   School: 'Schule',
-  'Our School': 'Unsere Schule',
+  'Our school': 'Unsere Schule',
   'Non-profit status': 'Gemeinnützigkeit',
   Team: 'Team',
   'Cooperation partners': 'Kooperationspartner',
@@ -129,7 +129,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                 href="/contact"
                 className="casa-cta-link inline-flex items-center gap-2 text-sm font-semibold text-white underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-panel)]"
               >
-                {footerText('Talk to an advisor', locale)}
+                {footerText('Get advice', locale)}
                 <svg aria-hidden="true" viewBox="0 0 22 8" fill="none" className="h-2 w-[20px] shrink-0">
                   <path
                     d="M0 4h20M16.5 0.6L20.4 4l-3.9 3.4"
@@ -266,7 +266,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               </div>
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                  {footerText('Office Hours', locale)}
+                  {footerText('Office hours', locale)}
                 </p>
                 <ul className="space-y-1 text-sm text-[var(--casa-text-subtle)]">
                   {footerConfig.contact.officeHours.map((entry) => (

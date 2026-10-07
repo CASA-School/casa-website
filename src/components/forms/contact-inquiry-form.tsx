@@ -326,7 +326,12 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 message: 'Bitte schreib uns eine kurze Nachricht (12–3000 Zeichen).',
                 topic: 'Bitte wähle ein Thema aus.',
               } as Partial<Record<keyof typeof initialFields, string>>)[key] ?? 'Bitte prüfe diese Angabe.'
-            : issue.message;
+            : ({
+                firstName: 'Please enter your first name (at least 2 characters).',
+                email: 'Please enter a valid email address.',
+                message: 'Please write us a short message (12–3,000 characters).',
+                topic: 'Please choose a topic.',
+              } as Partial<Record<keyof typeof initialFields, string>>)[key] ?? issue.message;
         }
       }
 

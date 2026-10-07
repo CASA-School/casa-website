@@ -54,7 +54,8 @@ const WEEKS_FOR_BRIDGE_STAFF_CONFIRMED = '8-9';
  * The German descriptions are the old casa-bremen.de page „Niveaustufen“
  * (/sprachkurse/niveaustufen, which now redirects here): what a learner can do
  * on each level, after the CEFR's global scale, already in „du“. Brought back
- * 2026-10-07 in the site's plain voice; the English lines are unchanged.
+ * 2026-10-07 in the site's plain voice; the English says the same, written
+ * afresh in plain British English rather than quoting the CEFR's own wording.
  */
 const LEVELS: Level[] = [
   {
@@ -62,7 +63,7 @@ const LEVELS: Level[] = [
     label: 'A1',
     weeks: WEEKS_PER_LEVEL,
     description: {
-      en: 'Absolute beginner. Greetings, basic phrases, numbers, and everyday vocabulary.',
+      en: 'You understand familiar, everyday expressions and very simple sentences, and you can use them yourself to say what you need in daily life. You can introduce yourself and others and ask people questions about themselves, for example where they live, who they know or what they have. You can also answer questions like these yourself. You can communicate in a simple way if the person you are talking to speaks slowly and clearly and is willing to help you.',
       de: 'Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.',
     },
   },
@@ -71,7 +72,7 @@ const LEVELS: Level[] = [
     label: 'A2',
     weeks: WEEKS_PER_LEVEL,
     description: {
-      en: 'Foundation level. Short conversations, simple directions, and basic written communication.',
+      en: 'You understand sentences and frequently used expressions on topics that concern you directly, for example you and your family, shopping, work or your local area. You can make yourself understood in simple, everyday situations, as long as the exchange is straightforward and about familiar things. In simple words, you can describe your background and education, your surroundings and the things you need at the moment.',
       de: 'Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.',
     },
   },
@@ -80,7 +81,7 @@ const LEVELS: Level[] = [
     label: 'B1',
     weeks: WEEKS_PER_LEVEL,
     description: {
-      en: 'Independent user. Express opinions, handle most travel situations, write simple texts.',
+      en: 'You understand the main points when clear standard German is used and the subject is familiar, such as work, school or free time. You can deal with most situations you are likely to come across when travelling in German-speaking countries. You can talk about familiar topics and your interests in simple, connected sentences. You can tell people about experiences and events, describe your dreams, hopes and goals, and briefly explain your plans and views or give reasons for them.',
       de: 'Du verstehst die Hauptpunkte, wenn klare Standardsprache verwendet wird und es um vertraute Dinge aus Arbeit, Schule oder Freizeit geht. Die meisten Situationen, die dir auf Reisen in deutschsprachigen Ländern begegnen, kannst du bewältigen. Über vertraute Themen und deine Interessen kannst du dich einfach und zusammenhängend äußern. Du kannst von Erfahrungen und Ereignissen erzählen, Träume, Hoffnungen und Ziele beschreiben und deine Pläne und Ansichten kurz begründen oder erklären.',
     },
   },
@@ -88,14 +89,14 @@ const LEVELS: Level[] = [
     // Not a CEFR level of its own: B1+ is a single step of the intensive course
     // (one entry in CASA_LEVEL_SEQUENCE, src/config/calculator/pricing.ts:25),
     // and it is where the textbook switches from Netzwerk neu to Kontext
-    // (pricing.ts:98). The German text says who it is for, as the old
-    // casa-bremen.de page did; the English one says what changes at it.
+    // (pricing.ts:98). Both languages say who it is for, as the old
+    // casa-bremen.de page did, and that the course moves on to Kontext here.
     id: 'b1plus',
     label: 'B1+',
     weeks: WEEKS_FOR_BRIDGE_STAFF_CONFIRMED,
     isBridge: true,
     description: {
-      en: 'Bridge level before B2. This is where the course moves on to the Kontext textbook.',
+      en: 'You understand the most important information when clear standard German is spoken and the subject is familiar, such as work, school, free time or travel. You can talk in connected sentences about familiar topics and your interests, describe experiences, dreams, hopes and goals, and give explanations and reasons. But you’d still like to work on grammar and sentence structure, practise useful phrases, build your vocabulary and feel more confident. If so, B1+ is the right level for you. Here you build on the vocabulary, grammar and phrases from B1 and practise speaking and writing freely. This gives you a solid foundation for B2. From B1+ onwards, the course uses the Kontext textbook.',
       de: 'Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.',
     },
   },
@@ -104,7 +105,7 @@ const LEVELS: Level[] = [
     label: 'B2',
     weeks: WEEKS_PER_LEVEL,
     description: {
-      en: 'Upper-intermediate. Understand complex texts, interact fluently with native speakers.',
+      en: 'You understand the main content of complex texts on concrete and abstract subjects, and in your own field you can follow specialist discussions too. You can communicate so spontaneously and fluently that an ordinary conversation with native speakers takes no great effort on either side. You can express yourself clearly and in detail on many different subjects, explain your point of view on a current issue and set out the pros and cons of different options.',
       de: 'Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.',
     },
   },
@@ -113,7 +114,7 @@ const LEVELS: Level[] = [
     label: 'C1',
     weeks: WEEKS_PER_LEVEL,
     description: {
-      en: 'Advanced. Academic and professional fluency, nuanced expression, complex written production.',
+      en: 'You understand many demanding, longer texts and can also read between the lines. You express yourself spontaneously and fluently, and you rarely have to stop and search for words. You use the language effectively and flexibly in social and working life, in vocational training and at university. You express yourself on complex subjects clearly, in detail and in a well-structured way, linking your ideas with suitable language.',
       de: 'Du verstehst viele anspruchsvolle, längere Texte und erfasst auch, was zwischen den Zeilen steht. Du drückst dich spontan und fließend aus, ohne oft erkennbar nach Worten suchen zu müssen. Im gesellschaftlichen und beruflichen Leben, in der Ausbildung und im Studium setzt du die Sprache wirksam und flexibel ein. Zu komplexen Sachverhalten äußerst du dich klar, gut gegliedert und ausführlich und verknüpfst deine Gedanken dabei mit passenden sprachlichen Mitteln.',
     },
   },
@@ -213,13 +214,14 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           textbook: 'Lehrwerk',
         }
       : {
-          eyebrow: 'Your learning path',
-          title: 'From A1 to C1 — step by step',
-          description: `In the intensive format: ${LESSONS_PER_WEEK} lessons per week (45 minutes each), typically around ${WEEKS_PER_LEVEL} weeks per full level.`,
-          pace: 'In the evening course, half a level takes about one trimester.',
+          eyebrow: 'Levels',
+          title: 'What you can do at each level',
+          description:
+            'At our school, courses run continuously at levels A1, A2, B1, B1+, B2 and C1. We keep strictly to the Common European Framework of Reference for Languages (CEFR).',
+          pace: `On the intensive course, you have ${LESSONS_PER_WEEK} lessons of 45 minutes a week, and a whole level usually takes ${WEEKS_PER_LEVEL.replace('-', '–')} weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.`,
           paceLabel: 'Time per level',
           weeks: 'weeks',
-          rate: `${LESSONS_PER_WEEK} lessons per week (45 min each)`,
+          rate: `${LESSONS_PER_WEEK} lessons a week (45 min each)`,
           textbook: 'Textbook',
         };
 
@@ -293,7 +295,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
             </span>
             {activeLevel.isBridge ? (
               <span className="text-xs font-semibold text-[var(--casa-text-subtle)]">
-                {locale === 'de' ? 'Zwischenstufe' : 'Bridge step'}
+                {locale === 'de' ? 'Zwischenstufe' : 'In-between level'}
               </span>
             ) : null}
           </div>

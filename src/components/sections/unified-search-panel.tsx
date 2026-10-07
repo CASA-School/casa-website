@@ -17,11 +17,11 @@ type UnifiedSearchPanelProps = {
 
 const copy = {
   en: {
-    title: 'Search courses, exams, FAQ, and news in one place',
-    placeholder: 'Search by level, exam name, visa question, or topic…',
+    title: 'Search courses, exams, FAQ and news in one place',
+    placeholder: 'Search by level, exam, visa question or topic…',
     submit: 'Search',
-    inputLabel: 'Search query',
-    scopeLabel: 'Search scope',
+    inputLabel: 'Search term',
+    scopeLabel: 'Where to search',
     scopes: {
       all: 'Everything',
       courses: 'Courses',
@@ -30,8 +30,8 @@ const copy = {
       news: 'News',
     },
     quickLinks: [
-      { label: 'Visa intensive', query: 'visa intensive' },
-      { label: 'telc B2 dates', query: 'telc b2 dates' },
+      { label: 'Visa for intensive courses', query: 'visa intensive' },
+      { label: 'Dates for telc Deutsch B2', query: 'telc b2 dates' },
       { label: 'Host family', query: 'host family' },
     ],
   },

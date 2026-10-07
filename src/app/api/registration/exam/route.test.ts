@@ -48,7 +48,7 @@ describe('exam registration route', () => {
     const response = await POST(request(valid));
     expect(response.status).toBe(400);
     expect((await response.json()).message).toBe(
-      'Registration for this exam session is no longer possible. Please choose another session.'
+      'Registration for this exam date is no longer possible. Please choose another date.'
     );
     expect(mocks.store).not.toHaveBeenCalled();
   });

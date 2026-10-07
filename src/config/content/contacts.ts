@@ -143,7 +143,7 @@ const CONTACTS = {
      casa-bremen.de's team page lists Firmenunterricht among her areas too. */
   company: {
     teamId: 'meike-grosse-hundrup',
-    role: { en: 'Company training', de: 'Firmenunterricht' },
+    role: { en: 'In-company teaching', de: 'Firmenunterricht' },
     email: 'info@casa-bremen.de',
     booking: true,
     source: 'assigned by CASA 2026-09-08; call offered from 2026-09-08',
@@ -153,7 +153,7 @@ const CONTACTS = {
      Prüfungen among Tanja's areas as well. */
   exams: {
     teamId: 'tanja-langenickel',
-    role: { en: 'telc examinations', de: 'telc Prüfungen' },
+    role: { en: 'telc exams', de: 'telc Prüfungen' },
     email: 'info@casa-bremen.de',
     source: 'assigned by CASA 2026-09-08; matches the casa-bremen.de team page (2026-10-07)',
   },

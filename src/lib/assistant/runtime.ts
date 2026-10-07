@@ -356,18 +356,18 @@ function wittyLead(locale: AssistantRuntimeLocale, intent: AssistantIntent) {
   }
 
   const enCopy: Record<AssistantIntent, string> = {
-    course_match: 'Great direction.',
-    placement: 'Smart starting point.',
-    exam_pathway: 'Perfect, we can map this clearly.',
-    accommodation: 'Good question for a smooth Bremen start.',
-    visa: 'Important point.',
-    registration: 'Perfect, let us move straight into the process.',
-    contact: 'Direct contact is the right move here.',
-    career: 'Nice, here is the fastest path.',
-    resource: 'Sure, these are the best CASA resources.',
-    school: 'Knowing CASA history and background is always good.',
+    course_match: 'I’d be glad to help you find the right course.',
+    placement: 'I’d be glad to help you find out your level.',
+    exam_pathway: 'I’m happy to explain our exams.',
+    accommodation: 'I’m happy to help you with accommodation.',
+    visa: 'That’s an important question.',
+    registration: 'I’m happy to show you how registration works.',
+    contact: 'Our team is best placed to help you with that.',
+    career: 'We’re glad you’re interested in working at CASA.',
+    resource: 'I’m happy to show you some useful pages from CASA.',
+    school: 'I’m happy to tell you more about CASA.',
     smalltalk: 'Happy to help.',
-    unknown: 'I can help with that.',
+    unknown: 'I’m happy to help.',
   };
   return enCopy[intent];
 }
@@ -476,16 +476,16 @@ function safetyRefusal(locale: AssistantRuntimeLocale): Pick<AssistantResponsePa
   return {
     intent: 'contact',
     message:
-      'I cannot process sensitive documents in chat (passport scans, IDs, or medical files). The safe path is the official CASA process.',
-    cta: { label: 'Open contact form', href: '/contact' },
+      'I can’t handle sensitive documents such as passport copies or medical records in the chat. Please contact our team directly about them.',
+    cta: { label: 'Go to the contact form', href: '/contact' },
     quickLinks: [
       { label: 'Contact', href: '/contact' },
       { label: 'FAQ', href: '/faq' },
     ],
     planSteps: plan(locale, [
-      'Open the contact form',
-      'Describe your case in one short message',
-      'Wait for the CASA team response',
+      'Open the contact form.',
+      'Briefly describe what you need.',
+      'Our team will get back to you.',
     ], []),
   };
 }
@@ -519,16 +519,16 @@ function visaResponse(locale: AssistantRuntimeLocale): Pick<AssistantResponsePay
   return {
     intent: 'visa',
     message:
-      'Important point. How long a course must run and how many lessons a week a language visa requires is set by the German embassy or consulate handling your application. CASA’s own guidance is in our FAQ, and our advice team can tell you which course fits your case.\n\nThis is not legal certainty. Please confirm your exact case with the CASA team and your responsible embassy.',
-    cta: { label: 'Request visa guidance', href: '/contact?topic=Course advice' },
+      'That’s an important question. How long a course must last for a language visa, and how many lessons a week it needs, is decided by the German embassy or consulate responsible for you. You’ll find what CASA says about it in our FAQ, and our advice team can tell you which course suits your situation.\n\nThis is not binding legal advice. Please also have your case checked by the CASA team and by the embassy.',
+    cta: { label: 'Ask for advice about your visa', href: '/contact?topic=Course advice' },
     quickLinks: [
       { label: 'FAQ', href: '/faq' },
-      { label: 'Contact Office', href: '/contact?topic=Course advice' },
+      { label: 'Contact', href: '/contact?topic=Course advice' },
     ],
     planSteps: plan(locale, [
-      'Ask the CASA team which course fits your case',
-      'Secure registration and course confirmation',
-      'Validate your case with embassy and CASA office',
+      'Check with our team which course suits you.',
+      'Register and wait for your course confirmation.',
+      'Go through your documents with the embassy and with us.',
     ], []),
   };
 }
@@ -564,17 +564,17 @@ function examResponse(locale: AssistantRuntimeLocale, latestMessage: string) {
   return {
     intent: 'exam_pathway' as const,
     message:
-      `${wittyLead(locale, 'exam_pathway')} CASA currently supports telc Deutsch B2 and telc Deutsch C1 Hochschule with dedicated preparation courses and clear booking routes.`,
-    cta: { label: 'Open exam pathway', href: targetHref },
+      `${wittyLead(locale, 'exam_pathway')} At CASA you can take telc Deutsch B2 and telc Deutsch C1 Hochschule, and we run our own preparation courses for both.`,
+    cta: { label: 'Go to the exam page', href: targetHref },
     quickLinks: uniqueLinks([
       { label: 'Exams', href: '/exams' },
-      { label: 'Register exam', href: '/registration/exam' },
-      { label: 'Exam guidance', href: '/contact' },
+      { label: 'Exam registration', href: '/registration/exam' },
+      { label: 'Exam advice', href: '/contact' },
     ]),
     planSteps: plan(locale, [
-      'Select your target exam (B2 or C1 Hochschule)',
-      'Check date and deadline',
-      'Complete exam registration',
+      'Choose telc Deutsch B2 or telc Deutsch C1 Hochschule.',
+      'Check the date and the registration deadline.',
+      'Register for the exam online.',
     ], []),
     basedOn: ['/exams', '/registration/exam'],
   };
@@ -603,16 +603,16 @@ function accommodationResponse(locale: AssistantRuntimeLocale) {
   return {
     intent: 'accommodation' as const,
     message:
-      `${wittyLead(locale, 'accommodation')} I can compare shared flats and host families and route you to the best request flow.`,
+      `${wittyLead(locale, 'accommodation')} I’ll show you how a shared flat and a host family differ, and where you can ask for accommodation.`,
     cta: { label: 'Compare accommodation', href: '/accommodation' },
     quickLinks: uniqueLinks([
       { label: 'Accommodation', href: '/accommodation' },
-      { label: 'Housing request', href: '/contact?topic=accommodation' },
+      { label: 'Accommodation request', href: '/contact?topic=accommodation' },
     ]),
     planSteps: plan(locale, [
-      'Compare shared flat vs host family',
-      'List your key preferences',
-      'Submit your request to CASA',
+      'Compare a shared flat and a host family.',
+      'Note down what matters to you, for example allergies or quiet hours.',
+      'Send us your request.',
     ], []),
     basedOn: ['/accommodation', '/contact?topic=accommodation'],
   };
@@ -651,11 +651,11 @@ function registrationResponse(locale: AssistantRuntimeLocale, latestMessage: str
   return {
     intent: 'registration' as const,
     message:
-      `${wittyLead(locale, 'registration')} I will route you directly to ${
+      `${wittyLead(locale, 'registration')} I’ll take you straight to the ${
         examMode ? 'exam' : 'course'
-      } registration and then to the safest next step.`,
+      } registration form, which has three steps.`,
     cta: {
-      label: examMode ? 'Register exam' : 'Register course',
+      label: examMode ? 'Go to exam registration' : 'Go to course registration',
       href,
     },
     quickLinks: uniqueLinks([
@@ -664,9 +664,9 @@ function registrationResponse(locale: AssistantRuntimeLocale, latestMessage: str
       { label: 'Contact', href: '/contact' },
     ]),
     planSteps: plan(locale, [
-      'Choose the matching offer',
-      'Complete registration details',
-      'Confirm next deadline after submission',
+      'Choose your course or exam.',
+      'Fill in the form completely.',
+      'Read our confirmation and look out for the next deadline.',
     ], []),
     basedOn: [href],
   };
@@ -699,16 +699,16 @@ function contactResponse(locale: AssistantRuntimeLocale, latestMessage: string) 
     return {
       intent: 'contact' as const,
       message:
-        `${wittyLead(locale, 'contact')} CASA does not currently offer a live learner or staff dashboard on the public site. For login or account questions, the safe path is direct contact with the team.`,
-      cta: { label: 'Open contact', href: '/contact' },
+        `${wittyLead(locale, 'contact')} Our public website has no login area for learners or staff at the moment. If you have a question about an account or a login, please write to us using the contact form.`,
+      cta: { label: 'Go to the contact form', href: '/contact' },
       quickLinks: uniqueLinks([
         { label: 'Contact form', href: '/contact' },
         { label: 'FAQ', href: '/faq' },
       ]),
       planSteps: plan(locale, [
-        'Describe the support issue briefly',
-        'Submit the contact form',
-        'Wait for the CASA team follow-up',
+        'Briefly describe what you need.',
+        'Send the contact form.',
+        'Our team will get back to you.',
       ], []),
       basedOn: ['/contact', '/faq'],
     };
@@ -736,16 +736,16 @@ function contactResponse(locale: AssistantRuntimeLocale, latestMessage: string) 
   return {
     intent: 'contact' as const,
     message:
-      `${wittyLead(locale, 'contact')} I can route you to the right admissions or accommodation contact path instantly.`,
-    cta: { label: 'Open contact', href: '/contact' },
+      `${wittyLead(locale, 'contact')} I’ll gladly take you to the contact form, whether you’d like advice or have a question about accommodation.`,
+    cta: { label: 'Go to the contact form', href: '/contact' },
     quickLinks: uniqueLinks([
       { label: 'Contact form', href: '/contact' },
-      { label: 'Housing request', href: '/contact?topic=accommodation' },
+      { label: 'Accommodation request', href: '/contact?topic=accommodation' },
     ]),
     planSteps: plan(locale, [
-      'Choose your topic',
-      'Submit the contact form',
-      'Wait for CASA follow-up',
+      'Tell us briefly what it’s about.',
+      'Fill in the contact form.',
+      'We’ll get back to you.',
     ], []),
       basedOn: ['/contact'],
   };
@@ -757,16 +757,16 @@ function careerResponse(locale: AssistantRuntimeLocale) {
     message:
       locale === 'de'
         ? `${wittyLead(locale, 'career')} Auf unserer Karriereseite findest du offene Stellen im Unterricht, in der Verwaltung und in der Betreuung.`
-        : `${wittyLead(locale, 'career')} The careers page lists open teaching, operations, and support roles.`,
+        : `${wittyLead(locale, 'career')} On our careers page you’ll find open positions in teaching, administration and student support.`,
     cta: {
-      label: locale === 'de' ? 'Zur Karriereseite' : 'View careers',
+      label: locale === 'de' ? 'Zur Karriereseite' : 'Go to the careers page',
       href: '/careers',
     },
     quickLinks: [{ label: locale === 'de' ? 'Karriere' : 'Careers', href: '/careers' }],
     planSteps: plan(locale, [
-      'Open careers',
-      'Review role scope and requirements',
-      'Submit your application',
+      'Open our careers page.',
+      'Read what the position asks for.',
+      'Send us your application.',
     ], [
       'Öffne unsere Karriereseite.',
       'Lies, was die Stelle verlangt.',
@@ -799,16 +799,16 @@ function resourceResponse(locale: AssistantRuntimeLocale) {
   return {
     intent: 'resource' as const,
     message:
-      `${wittyLead(locale, 'resource')} News plus the combined Study & Life in Germany guide are the fastest way to get practical orientation.`,
-    cta: { label: 'Open resources', href: '/news' },
+      `${wittyLead(locale, 'resource')} Our News page and the guide “Study & life in Germany” give you a good overview.`,
+    cta: { label: 'Go to News', href: '/news' },
     quickLinks: uniqueLinks([
       { label: 'News', href: '/news' },
-      { label: 'Study & Life in Germany', href: '/resources/study-in-germany' },
+      { label: 'Study & life in Germany', href: '/resources/study-in-germany' },
     ]),
     planSteps: plan(locale, [
-      'Choose the most relevant resource stream',
-      'Skim top practical articles',
-      'Take the next concrete action',
+      'Choose the topic that interests you.',
+      'Read the articles that fit.',
+      'Think about your next step.',
     ], []),
     basedOn: ['/news', '/resources/study-in-germany'],
   };
@@ -837,16 +837,16 @@ function smalltalkResponse(locale: AssistantRuntimeLocale) {
   return {
     intent: 'smalltalk' as const,
     message:
-      'Hi, I am CLARA - your CASA navigation assistant. I can route you to the best course, exam, accommodation, or registration path in seconds.',
-    cta: { label: 'Start with course options', href: '/courses' },
+      'Hello, I’m CLARA, and I help you find your way around the CASA website. I’m happy to show you the way to courses, exams, accommodation or registration.',
+    cta: { label: 'Go to the courses', href: '/courses' },
     quickLinks: uniqueLinks([
       { label: 'Courses', href: '/courses' },
       { label: 'Exams', href: '/exams' },
       { label: 'Accommodation', href: '/accommodation' },
     ]),
     planSteps: plan(locale, [
-      'Tell me your goal (course, exam, housing, registration)',
-      'I will give your fastest next step',
+      'Tell me whether it’s about a course, an exam, accommodation or registration.',
+      'I’ll show you the next step.',
     ], []),
     basedOn: ['/courses', '/exams', '/accommodation'],
   };
@@ -903,11 +903,11 @@ function kbFallbackResponse(
 
     return {
       intent: intentFromTopic(lead.topic) as AssistantIntent,
-      message: `${wittyLead(locale, intentFromTopic(lead.topic))} Based on CASA information: ${leadSummary}${
-        secondSummary ? `\n\nAlso relevant: ${secondSummary}` : ''
+      message: `${wittyLead(locale, intentFromTopic(lead.topic))} This is what our website says about it: ${leadSummary}${
+        secondSummary ? `\n\nIt also says: ${secondSummary}` : ''
       }`,
       cta: {
-        label: 'Open next step',
+        label: 'Go to the right page',
         href: lead.url,
       },
       quickLinks: uniqueLinks(
@@ -916,9 +916,9 @@ function kbFallbackResponse(
           : [{ label: 'Contact', href: '/contact' }]
       ),
       planSteps: plan(locale, [
-        'Open the recommended page',
-        'Check the key guidance',
-        'Contact CASA if you need case-specific advice',
+        'Open the page that fits.',
+        'Read the most important information there.',
+        'If you still have questions, write to us.',
       ], []),
       basedOn: kb.passages.map((passage) => passage.url),
     };
@@ -943,14 +943,14 @@ function kbFallbackResponse(
   return {
     intent: 'unknown' as const,
     message:
-      'I can help with courses, exam pathways, accommodation, registration, and support questions. Share your goal in one sentence and I will map the fastest next step.',
+      'I can help you choose a course and answer questions about exams, accommodation, registration and anything else to do with CASA. Tell me in one sentence what you’re planning, and I’ll show you the next step.',
     cta: { label: 'Browse courses', href: '/courses' },
     quickLinks: uniqueLinks([
       { label: 'Courses', href: '/courses' },
       { label: 'Exams', href: '/exams' },
       { label: 'Contact', href: '/contact' },
     ]),
-    planSteps: plan(locale, ['Tell me your goal', 'Open your best next step'], []),
+    planSteps: plan(locale, ['Tell me what you’re planning.', 'Open the page I show you.'], []),
     basedOn: ['/courses'],
   };
 }
@@ -1155,14 +1155,14 @@ export async function runAssistantTurn({
         message:
           runtimeLocale === 'de'
             ? `${wittyLead(runtimeLocale, 'placement')} Damit ich dir einen passenden Kurs empfehlen kann, brauche ich zuerst dein aktuelles Niveau, also A1, A2, B1, B2 oder C1. Wenn du es nicht kennst, mach einfach einen der kostenlosen Einstufungstests.`
-            : `${wittyLead(runtimeLocale, 'placement')} For a precise recommendation, I first need your current level (A1, A2, B1, B2, or C1).`,
+            : `${wittyLead(runtimeLocale, 'placement')} To recommend a course that suits you, I first need to know your current level (A1, A2, B1, B2 or C1). If you don’t know it, simply take one of the free placement tests.`,
         cta: {
-          label: runtimeLocale === 'de' ? 'Zum Einstufungstest' : 'Start placement',
+          label: runtimeLocale === 'de' ? 'Zum Einstufungstest' : 'Go to the placement test',
           href: '/placement-test',
         },
         quickLinks: uniqueLinks([
           {
-            label: runtimeLocale === 'de' ? 'Einstufungstest' : 'Placement Test',
+            label: runtimeLocale === 'de' ? 'Einstufungstest' : 'Placement test',
             href: '/placement-test',
           },
           {
@@ -1171,9 +1171,9 @@ export async function runAssistantTurn({
           },
         ]),
         planSteps: plan(runtimeLocale, [
-          'Confirm your CEFR level',
-          'Match course format and schedule',
-          'Start registration',
+          'Find out your level.',
+          'Choose the course format that fits your daily life.',
+          'Register online.',
         ], [
           'Finde dein Niveau heraus.',
           'Wähle das Kursformat, das zu deinem Alltag passt.',
@@ -1191,25 +1191,25 @@ export async function runAssistantTurn({
         message:
           runtimeLocale === 'de'
             ? `${wittyLead(runtimeLocale, 'course_match')} Möchtest du lieber im Intensivkurs unter der Woche lernen oder abends neben Arbeit oder Studium?`
-            : `${wittyLead(runtimeLocale, 'course_match')} Which rhythm fits better: intensive weekdays or evening format around work/study?`,
+            : `${wittyLead(runtimeLocale, 'course_match')} Would you rather learn on an intensive course during the week, or in the evenings alongside work or study?`,
         cta: {
-          label: runtimeLocale === 'de' ? 'Zu den Kursen' : 'Open course options',
+          label: runtimeLocale === 'de' ? 'Zu den Kursen' : 'Go to the courses',
           href: '/courses',
         },
         quickLinks: uniqueLinks([
           {
-            label: runtimeLocale === 'de' ? 'Intensivkurse' : 'Intensive Courses',
+            label: runtimeLocale === 'de' ? 'Intensivkurse' : 'Intensive courses',
             href: '/courses/intensive-german',
           },
           {
-            label: runtimeLocale === 'de' ? 'Abendkurse' : 'Evening Courses',
+            label: runtimeLocale === 'de' ? 'Abendkurse' : 'Evening courses',
             href: '/courses/evening-course',
           },
         ]),
         planSteps: plan(runtimeLocale, [
-          'Choose intensive or evening rhythm',
-          'Review best-fit options',
-          'Reserve your seat',
+          'Choose between the intensive course and the evening course.',
+          'Look at the dates that suit you.',
+          'Register for your course.',
         ], [
           'Entscheide dich für den Intensivkurs oder den Abendkurs.',
           'Sieh dir die passenden Termine an.',
@@ -1249,21 +1249,21 @@ export async function runAssistantTurn({
       message:
         runtimeLocale === 'de'
           ? `${wittyLead(runtimeLocale, 'course_match')} Diese Kurse passen zu deinen Angaben. Ich habe sie so sortiert, dass der passendste oben steht.`
-          : `${wittyLead(runtimeLocale, 'course_match')} Here are the strongest course options based on your inputs. I sorted them for the fastest reliable start path.`,
+          : `${wittyLead(runtimeLocale, 'course_match')} These courses match what you’ve told me. I’ve sorted them so that the best match is at the top.`,
       cta: {
-        label: runtimeLocale === 'de' ? 'Zur Kursanmeldung' : 'Start course registration',
+        label: runtimeLocale === 'de' ? 'Zur Kursanmeldung' : 'Go to course registration',
         href: '/registration/course',
       },
       cards,
       quickLinks: uniqueLinks([
-        { label: runtimeLocale === 'de' ? 'Kursanmeldung' : 'Course Registration', href: '/registration/course' },
-        { label: runtimeLocale === 'de' ? 'Alle Kurse' : 'Courses', href: '/courses' },
-        { label: runtimeLocale === 'de' ? 'Beratung' : 'Contact', href: '/contact?topic=Course advice' },
+        { label: runtimeLocale === 'de' ? 'Kursanmeldung' : 'Course registration', href: '/registration/course' },
+        { label: runtimeLocale === 'de' ? 'Alle Kurse' : 'All courses', href: '/courses' },
+        { label: runtimeLocale === 'de' ? 'Beratung' : 'Advice', href: '/contact?topic=Course advice' },
       ]),
       planSteps: plan(runtimeLocale, [
-        'Pick your preferred course option',
-        'Confirm your start date',
-        'Complete registration',
+        'Choose a course.',
+        'Pick a start date.',
+        'Send your registration.',
       ], [
         'Wähle einen Kurs aus.',
         'Such dir einen Starttermin aus.',
@@ -1281,7 +1281,7 @@ export async function runAssistantTurn({
     message: `${fallback.message}\n\n${
       runtimeLocale === 'de'
         ? 'Dabei halte ich mich an den Sicherheitsleitfaden für CLARA.'
-        : 'Note: I follow the CLARA safety guide.'
+        : 'I keep to the safety guidelines for CLARA when I answer.'
     }`,
     cta: fallback.cta,
     quickLinks: fallback.quickLinks,

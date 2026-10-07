@@ -19,7 +19,7 @@ const copy = {
   en: {
     week: 'week',
     weeks: 'weeks',
-    units: 'teaching units',
+    units: 'lessons',
     bestFor: 'Best for',
     afternoons: 'The afternoons',
     from: 'from',

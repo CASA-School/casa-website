@@ -393,8 +393,14 @@ describe('confirmation to the sender', () => {
     expect(organiser).toContain('Ihr CASA-Team');
     expect(organiser).not.toContain('Dein CASA-Team');
 
+    // English has one register: learners are greeted by first name, organisers formally.
     const english = (await confirmation('course', { ...course, locale: 'en' })).message.body.content as string;
-    expect(english).toContain('Dear Ms Rossi,');
+    expect(english).toContain('Hello Maria,');
+    expect(english).not.toContain('Ms Rossi');
+    const englishOrganiser = (await confirmation('groups', {
+      requestId: 'r', locale: 'en', firstName: 'Jonas', lastName: 'Weber', email: 'jonas@example.com', topicKey: 'group-booking',
+    })).message.body.content as string;
+    expect(englishOrganiser).toContain('Dear Jonas Weber,');
   });
 
   it('writes in the language of the form', async () => {

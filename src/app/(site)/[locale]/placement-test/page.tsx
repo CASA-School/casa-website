@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       locale === 'de'
         ? 'Mit den kostenlosen Online-Einstufungstests von A1 bis C1 findest du dein Deutschniveau. In Bremen kannst du auch ohne Termin zur persönlichen Einstufung zu CASA kommen.'
-        : 'Find your German level: free online placement tests from A1 to C1, or a personal placement at CASA in Bremen, no appointment needed.',
+        : 'Find your German level with the free online placement tests from A1 to C1. In Bremen, you can also come to CASA and take a placement test in person, without an appointment.',
     path: '/placement-test',
     keywords: ['German placement test Bremen', 'Einstufungstest Deutsch', 'Einstufungstest Bremen', 'CASA Bremen'],
   });
@@ -81,25 +81,25 @@ export default async function PlacementTestPage() {
       : {
           heroTitle: 'Find your German level',
           heroBody:
-            'The right placement is the basis for learning well. Take a free online test, or come to our school for a personal placement.',
+            'Learning well starts with a group at the right level. To find yours, take a free online test or come to the school for a placement test in person.',
           heroCta: 'Go to the tests',
           meta: ['Free online tests', 'In person, no appointment'],
           howTitle: 'How it works',
           steps: [
             'Always start with the A1 test.',
-            'Take your time, and do the test on your own, without help such as a dictionary.',
-            'Enter your name and email address in the test form, so that we can match your result to you.',
+            'Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.',
+            'Enter your name and email address in the test form so that we can match your result to you.',
           ],
-          sendTitle: 'Send us your result',
-          sendBody: 'Once a test has been evaluated, please send your results to',
+          sendTitle: 'Send us your results',
+          sendBody: 'Once a test has been marked, please send the result to',
           beginnerTitle: 'No German at all yet?',
-          beginnerBody: 'Then you don’t need a placement test. You start with a course at level A1.',
+          beginnerBody: 'Then you don’t need a placement test. You simply start with a course at level A1.',
           beginnerCta: 'Register for a course',
           finalNote:
-            'Intensive courses are placed on site in any case, and we may adjust your level regardless of certificates you already hold.',
+            'If you join an intensive course, we will place you here at the school anyway, and we may adjust your course level even if you already have a certificate.',
           inPersonTitle: 'Prefer to come in person?',
           inPersonBody:
-            'If you live in or near Bremen, you are welcome to come to the school for a personal placement and advice. It is not binding, and it lets you get to know the school and ask your questions. No appointment is needed: come Monday to Thursday 08:30–19:00 or Friday 08:30–13:00, and allow at least an hour.',
+            'If you live in or near Bremen, you’re very welcome to come to the school for a placement test and advice in person. The placement test doesn’t commit you to anything, and it’s a chance to get to know the school and ask your questions. You don’t need an appointment. Just drop in Monday to Thursday from 08:30 to 19:00 or on Friday from 08:30 to 13:00, and allow at least an hour.',
           inPersonCta: 'Contact and address',
           prepTitle: 'What to prepare',
         };

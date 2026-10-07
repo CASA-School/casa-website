@@ -33,12 +33,12 @@ export default async function ExamRegistrationPage({
       title={locale === 'de' ? 'Prüfungsanmeldung' : 'Exam registration'}
       intro={locale === 'de'
         ? 'In drei Schritten meldest du dich zu deiner Prüfung an.'
-        : 'Book your exam in three steps.'}
+        : 'Register for your exam in three steps.'}
       formId="exam-registration-form"
       helpTitle={locale === 'de' ? 'Fragen zur Prüfung?' : 'Questions about the exam?'}
       helpBody={locale === 'de'
         ? 'Wir helfen dir gern bei der Wahl von Prüfung und Termin.'
-        : 'We are glad to help you choose an exam and a date.'}
+        : 'We’re happy to help you choose an exam and a date.'}
     >
       <ExamWizard catalog={examCatalog} />
     </RegistrationPageShell>

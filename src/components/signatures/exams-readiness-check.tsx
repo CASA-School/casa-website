@@ -31,7 +31,7 @@ export function ExamsReadinessCheck({ title, description, checklist, locale = 'e
           aria-hidden
         />
       </div>
-      <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{locale === 'de' ? `${progress} % erledigt` : `${progress}% ready`}</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{locale === 'de' ? `${progress} % erledigt` : `${progress}% done`}</p>
 
       <ul className="mt-4 space-y-2">
         {checklist.map((item) => (

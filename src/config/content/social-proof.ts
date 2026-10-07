@@ -112,7 +112,7 @@ const TESTIMONIALS: TestimonialSource[] = [
     excerpt:
       'I regularly visited evening German courses (A2 to B2) and also had my telc B2 exam at CASA. It was great! My teachers, among them Claudia, were all very nice, professional, and motivated.',
     context: {
-      en: 'Evening courses A2 to B2, and the telc B2 exam',
+      en: 'Evening courses A2 to B2 and the telc Deutsch B2 exam',
       de: 'Abendkurse A2 bis B2 und die telc-B2-Prüfung',
     },
     translation: {
@@ -170,7 +170,7 @@ const TESTIMONIALS: TestimonialSource[] = [
     excerpt:
       'Sehr qualifizierte und professionelle Lehrer*innen, familiäre Atmosphäre. Man fühlt sich wie zu Hause.',
     context: {
-      en: 'Company course participant',
+      en: 'Participant, in-company teaching',
       de: 'Teilnehmer Firmenunterricht',
     },
   },
@@ -184,7 +184,7 @@ const TESTIMONIALS: TestimonialSource[] = [
     excerpt:
       'Eine meiner besten Lernerfahrungen! Die Lehrer sind professionell, die Kurse sind effektiv und außerdem ist das Management-Team sehr freundlich und hilfsbereit.',
     context: {
-      en: 'Educational leave course',
+      en: 'Bildungszeit course',
       de: 'Bildungszeit-Kurs',
     },
   },

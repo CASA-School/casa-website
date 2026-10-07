@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: CareerDetailPageProps): Promi
   return createPublicMetadata({
     locale,
     // createPublicMetadata already appends "| CASA Bremen"
-    title: `${position.title} — ${locale === 'de' ? 'Arbeiten bei CASA' : 'Careers'}`,
+    title: `${position.title} — ${locale === 'de' ? 'Arbeiten bei CASA' : 'Working at CASA'}`,
     description: position.shortDescription,
     path: `/careers/${slug}`,
     keywords: ['CASA careers', position.title, 'Language school jobs Bremen'],
@@ -88,9 +88,9 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
           'Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.',
         ]
       : [
-          'Learner-centered collaboration with teachers and coordination',
-          'Quality-driven execution in your functional area',
-          'Clear communication in an international environment',
+          'You work closely with the teachers and the coordination team.',
+          'You take responsibility for your area and pay close attention to quality.',
+          'You communicate clearly with people from many different countries.',
         ];
 
   const copy =
@@ -123,14 +123,14 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
           location: 'Location',
           contract: 'Contract',
           mode: 'Work mode',
-          about: 'About the role',
+          about: 'About the job',
           responsibilities: 'Responsibilities',
           requirements: 'Requirements',
           processTitle: 'Application process',
           processSteps: [
-            'Share your profile and motivation',
-            'CV review with the CASA team',
-            'Interview and next-step alignment',
+            'You send us your CV and tell us why you would like to work at CASA.',
+            'The CASA team reads your application.',
+            'At the interview, we get to know each other and talk about the next steps.',
           ],
         };
 

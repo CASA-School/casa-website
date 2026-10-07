@@ -4,34 +4,38 @@ import type { AccommodationNarrative, ContentLocale } from '@/lib/content/types'
  * 2026-09-16. A private room and self-catering are offered; meals, organised
  * family activities and daily conversation are not included services.
  *
- * The German highlights carry the live pages' own facts again (2026-10-07):
- * where the WGs are, room sizes, bedding, house rules, the host-family fallback
- * when no WG room is free, and respect in the shared home. The index shows the
+ * The highlights carry the live pages' own facts again (German 2026-10-07,
+ * English to match the same day): where the WGs are, room sizes, bedding, house
+ * rules, the host-family fallback when no WG room is free, and respect in the
+ * shared home. Both languages keep the same order, so the index shows the same
  * first four of each list; the detail page shows all of them. */
 export const accommodationNarrativesByLocale: Record<ContentLocale, AccommodationNarrative[]> = {
   en: [
     {
       id: 'flat',
       locale: 'en',
-      headline: 'Shared flats',
-      summary: 'Your own room, a shared kitchen and people to come home to after class.',
+      headline: 'CASA shared flats',
+      summary: 'In a CASA shared flat, you have a room of your own and share everyday life with other people who are learning German in Bremen.',
       highlights: [
-        'Private room with furnished essentials',
-        'Shared kitchen and bathroom',
-        'Plan your own day and cook when it suits you',
-        'Housemates are usually other international learners',
+        'Three bright flats are on the second and third floors of our school building. Each has five rooms of 14–18 m².',
+        'We have three more flats elsewhere in Bremen. All of them can be reached by bus and tram.',
+        'Your room is furnished, with a pillow, a duvet and bed linen ready for you. All you need to bring are towels and your personal things.',
+        'You share the kitchen and bathroom with the others. The kitchen is fully equipped, and there is Wi-Fi too.',
+        'As in a typical German shared flat, you do your own shopping and cooking and share the cleaning with the others. Smoking is not allowed.',
+        'People from many countries live together in our flats, so respect and openness towards each other are especially important here.',
+        'Rooms in our shared flats are only for intensive-course participants aged 18 or over, and we have just a few of them. If none is free when you arrive, we will find you a room with a host family.',
       ],
     },
     {
       id: 'host',
       locale: 'en',
       headline: 'Host families',
-      summary: 'A room of your own in a Bremen home, with a kitchen where you can prepare your meals.',
+      summary: 'With a host family, you have your own room in a Bremen household. You make your first contacts straight away and can try out your German in everyday life.',
       highlights: [
-        'Your own furnished room in a private household',
-        'Kitchen and bathroom are usually shared',
-        'Self-catering: you prepare your own meals',
-        'Available to participants on CASA intensive courses',
+        'You have your own furnished room with everything you need.',
+        'You usually share the kitchen and bathroom with your hosts. You prepare your own meals in the kitchen.',
+        'Guests and hosts approach each other’s culture with respect and openness, so the stay is a good experience for everyone.',
+        'Rooms with host families are only for participants on our intensive courses.',
       ],
     },
   ],

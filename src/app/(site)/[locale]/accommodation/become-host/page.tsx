@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Gastgeber werden' : 'Become a host',
-    description: locale === 'de' ? 'Sie haben ein Zimmer frei? Heißen Sie internationale CASA-Teilnehmende in Bremen willkommen und lernen Sie Menschen aus aller Welt kennen.' : 'Have a room to spare? Welcome international CASA students into your home in Bremen and meet people from around the world.',
+    description: locale === 'de' ? 'Sie haben ein Zimmer frei? Heißen Sie internationale CASA-Teilnehmende in Bremen willkommen und lernen Sie Menschen aus aller Welt kennen.' : 'Have a room to spare? Welcome international CASA learners into your home in Bremen and meet people from around the world.',
     path: '/accommodation/become-host',
     keywords: ['Host family Bremen', 'Become host family', 'Student accommodation'],
   });
@@ -145,25 +145,25 @@ export default async function BecomeHostFamilyPage() {
           */
           title: 'Become a host',
           description:
-            'Since 1983 we have matched students with homes in Bremen. What matters is reliability and an open household.',
+            'We have been placing learners with hosts in Bremen since 1983. If you are open to other cultures and have a furnished room free, you are very welcome to host with us.',
           breadcrumbs: [
             { label: 'Home', href: '/' },
             { label: 'Accommodation', href: '/accommodation' },
             { label: 'Become a host family' },
           ],
           heroCtas: [
-            { label: 'Apply as host family', href: '/contact?topic=host-family', kind: 'primary' as const },
+            { label: 'Offer a room', href: '/contact?topic=host-family', kind: 'primary' as const },
             { label: 'View accommodation', href: '/accommodation', kind: 'secondary' as const },
           ],
-          storyEyebrow: 'How hosting works at CASA',
-          storyTitle: 'Hosting is more than offering a room',
+          storyEyebrow: 'Hosting with CASA',
+          storyTitle: 'What we look for in a host',
           storyDescription:
-            'We are looking for welcoming households where international students can feel at ease. CASA helps with matching and practical arrangements and remains your contact during the stay.',
+            'Many of our learners live with hosts when they first come to Bremen, so that they get to know the language and the city better. That is why we are looking for open-minded households, whether a family, a couple or someone living alone, where they can feel welcome. We help with the matching and all the arrangements, and we are there for you throughout the stay.',
           storyBullets: [
-            'Furnished single room with bed, desk, and storage',
-            'Access to bathroom and shared household facilities',
-            'Good public transport connection to CASA',
-            'Clear house rules and shared expectations',
+            'You have a furnished room free, with a bed, a desk and a wardrobe.',
+            'Your guest can use a bathroom and cook meals in the kitchen.',
+            'It helps if our school is easy to reach from your home by bus or tram.',
+            'From the start, you agree clearly on the house rules and what you expect of each other.',
           ],
           /*
             Taken from CASA's own check-in/check-out form
@@ -172,53 +172,53 @@ export default async function BecomeHostFamilyPage() {
             check its own room against the list before enquiring.
           */
           roomEyebrow: 'The room',
-          roomTitle: 'What the room needs',
+          roomTitle: 'What the room should have',
           roomDescription:
-            'At arrival and again at departure, the host and the student record the condition together on one form. These are the items it rates:',
+            'When your guest arrives and again when they leave, the two of you note the condition of the room together on a form. These are the things it lists.',
           roomItems: [
             'A bed and a mattress',
             'A desk and a chair',
             'A wardrobe, plus a shelf or bedside table',
             'A working lamp',
-            'Bed linen — the count is recorded',
+            'Bed linen (the number of pieces is noted)',
           ],
-          agreementEyebrow: 'The agreement',
-          agreementTitle: 'What you set, and what goes in writing',
+          agreementEyebrow: 'Agreements',
+          agreementTitle: 'House rules and arrangements',
           agreementDescription:
-            'The house rules and the shared facilities are yours to decide. Both are written down alongside the room\u2019s condition and signed by both sides, at arrival and at departure. That protects your household as much as it protects the student.',
+            'You decide the rules in your home. To avoid misunderstandings later, everything is written down on the form along with the condition of the room. That protects your household just as much as your guest.',
           agreementBullets: [
-            'House rules you set: smoking, visitors, cleaning',
-            'Facilities you share: kitchen, bathroom, washing machine, WLAN',
-            'All of it signed by both sides, at arrival and at departure',
-            'Questions go to the accommodation team: accommodation@casa-bremen.de',
+            'You set the house rules, for example on smoking, visitors and cleaning.',
+            'You decide what your guest may use, such as the kitchen, bathroom, washing machine and Wi-Fi.',
+            'You and your guest sign the form when they arrive and again when they leave.',
+            'If you have any questions, you can reach our accommodation team at accommodation@casa-bremen.de.',
           ],
-          comparisonEyebrow: 'Hosting formats',
-          comparisonTitle: 'Individual course participants or group stays',
+          comparisonEyebrow: 'Your guests',
+          comparisonTitle: 'Individual learners or groups',
           comparisonDescription:
-            'CASA places both longer-stay intensive learners and short-term educational groups with host households.',
-          partnershipEyebrow: 'The partnership',
-          partnershipTitle: 'Who carries what',
+            'We place learners from our intensive courses, who usually stay for a month or more. Groups also come to us throughout the year, for example from Italy, Mexico, Denmark and Japan.',
+          partnershipEyebrow: 'Working together',
+          partnershipTitle: 'Who does what',
           partnershipDescription:
-            'You offer a home and a taste of everyday life in Bremen. CASA arranges the match, helps you prepare and remains a point of contact for you and your guest.',
+            'You offer your guest a home and a glimpse of everyday life in Bremen. We arrange the placement, prepare the stay with you and are there for both of you.',
           partnershipBullets: [
-            'You provide a furnished room with kitchen and bathroom access for the agreed dates',
-            'CASA chooses the match: by course format, length of stay, and student profile',
-            'CASA briefs you first: the profile, the dates, and anything particular, before anyone arrives',
-            'CASA stays reachable: one contact for both sides, not only at the start',
-            'In writing before you agree: the rate for your format',
+            'You provide a furnished room for the agreed period, and your guest can use the kitchen and bathroom.',
+            'If you host guests from a group, you meet them at the station or airport when they arrive and include them in your family life as much as you can.',
+            'We choose your guests to suit their course, length of stay and profile, and tell you everything important in advance.',
+            'Throughout the stay, you and your guest have a contact person at CASA.',
+            'We tell you in writing how much the hosting allowance is before you agree.',
           ],
           processEyebrow: 'Next step',
-          processTitle: 'Become a host household in three steps',
+          processTitle: 'How to become a host family',
           processDescription:
-            'We will talk through what hosting could look like, so you have the information and time to decide.',
+            'We talk you through what a stay could look like, so you can decide in your own time.',
           processSteps: [
-            { step: '1', title: 'Share interest', description: 'Send a short inquiry with household profile and availability.' },
-            { step: '2', title: 'Profile alignment', description: 'CASA aligns format, duration, and practical expectations.' },
-            { step: '3', title: 'Confirm placement', description: 'You receive full details before final confirmation.' },
+            { step: '1', title: 'Your message', description: 'Send us a few lines about who lives in your home, which room you are offering, and when it is free and for how long.' },
+            { step: '2', title: 'A conversation', description: 'We talk with you about which guests would suit you, how long they would stay and what matters to you.' },
+            { step: '3', title: 'Your go-ahead', description: 'You get all the details before you give your final go-ahead.' },
           ],
-          processCta: { label: 'Apply as host family', href: '/contact?topic=host-family' },
-          intensiveTitle: 'Intensive-course students',
-          groupTitle: 'Group stays',
+          processCta: { label: 'Offer a room', href: '/contact?topic=host-family' },
+          intensiveTitle: 'Intensive-course learners',
+          groupTitle: 'Groups',
         };
 
   return (
@@ -252,21 +252,21 @@ export default async function BecomeHostFamilyPage() {
         infoItems={[
           {
             label: locale === 'de' ? 'Sie stellen' : 'You provide',
-            value: locale === 'de' ? 'Ein möbliertes Zimmer' : 'A furnished single room',
+            value: locale === 'de' ? 'Ein möbliertes Zimmer' : 'A furnished room',
           },
           {
             label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical stay',
             value: locale === 'de' ? '1 bis 4 Wochen oder länger' : '1 to 4 weeks, or longer',
           },
           {
-            label: locale === 'de' ? 'Vergütung' : 'Rate',
+            label: locale === 'de' ? 'Vergütung' : 'Allowance',
             value: locale === 'de' ? 'Schriftlich, bevor Sie zusagen' : 'In writing, before you agree',
           },
         ]}
         notes={
           locale === 'de'
             ? 'Wir vermitteln passende Gäste, informieren Sie vorab und bleiben für beide Seiten erreichbar.'
-            : 'CASA chooses the match, briefs you first, and stays reachable for both sides.'
+            : 'We find guests who suit you, tell you about them in advance and are there for both of you.'
         }
         ctas={copy.heroCtas}
         photo={photos.becomeHost}
@@ -322,18 +322,18 @@ export default async function BecomeHostFamilyPage() {
             rightTitle={copy.groupTitle}
             rows={[
               {
-                label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical duration',
-                left: locale === 'de' ? 'Meist ein oder mehrere Monate' : 'Usually 1 to several months',
-                right: locale === 'de' ? 'Meist eine bis vier Wochen' : 'Usually 1 to 4 weeks',
+                label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical stay',
+                left: locale === 'de' ? 'Meist ein oder mehrere Monate' : 'Usually a month or more',
+                right: locale === 'de' ? 'Meist eine bis vier Wochen' : 'Usually one to four weeks',
               },
               {
-                label: locale === 'de' ? 'Anzahl der Gäste' : 'Placement size',
-                left: locale === 'de' ? 'Ein Gast' : 'Individual placement',
-                right: locale === 'de' ? 'In der Regel 1 bis 6 Lernende, in Einzel- oder Doppelzimmern' : 'Usually 1 to 6 students',
+                label: locale === 'de' ? 'Anzahl der Gäste' : 'Number of guests',
+                left: locale === 'de' ? 'Ein Gast' : 'One guest',
+                right: locale === 'de' ? 'In der Regel 1 bis 6 Lernende, in Einzel- oder Doppelzimmern' : 'Usually 1 to 6 learners, in single or double rooms',
               },
               {
                 label: locale === 'de' ? 'Verpflegung' : 'Meals',
-                left: locale === 'de' ? 'Ihr Gast kocht selbst in Ihrer Küche' : 'Self-catering with kitchen access',
+                left: locale === 'de' ? 'Ihr Gast kocht selbst in Ihrer Küche' : 'Your guest cooks for themselves in your kitchen',
                 /*
                   Was "Often coordinated with half-board" / "Häufig mit
                   Halbpension organisiert". The verified fact is narrower —
@@ -342,17 +342,17 @@ export default async function BecomeHostFamilyPage() {
                   breakfast and dinner specifically, which is not what "optional"
                   states, so this now says what is actually published.
                 */
-                right: locale === 'de' ? 'Mit oder ohne Verpflegung, je nach Absprache' : 'Meals optional, agreed per stay',
+                right: locale === 'de' ? 'Mit oder ohne Verpflegung, je nach Absprache' : 'With or without meals, as agreed',
               },
               {
-                label: locale === 'de' ? 'Tagesablauf' : 'Daily rhythm',
-                left: locale === 'de' ? 'Der Intensivkurs findet bei CASA statt' : 'Intensive classes take place at CASA',
-                right: locale === 'de' ? 'Fester Ablauf mit Unterricht und Programm' : 'Structured schedule around program timetable',
+                label: locale === 'de' ? 'Tagesablauf' : 'Daily routine',
+                left: locale === 'de' ? 'Der Intensivkurs findet bei CASA statt' : 'The intensive course takes place at CASA',
+                right: locale === 'de' ? 'Fester Ablauf mit Unterricht und Programm' : 'A fixed timetable of lessons and activities',
               },
               {
-                label: locale === 'de' ? 'Begleitung durch CASA' : 'CASA support',
-                left: locale === 'de' ? 'Wir wählen passende Gäste aus und bleiben Ihre Ansprechpartner' : 'Matching, communication, and support contact',
-                right: locale === 'de' ? 'Wir stimmen den Ablauf mit Ihnen ab und bleiben Ihre Ansprechpartner' : 'Coordination, scheduling alignment, and support contact',
+                label: locale === 'de' ? 'Begleitung durch CASA' : 'Support from CASA',
+                left: locale === 'de' ? 'Wir wählen passende Gäste aus und bleiben Ihre Ansprechpartner' : 'We choose suitable guests and remain your point of contact',
+                right: locale === 'de' ? 'Wir stimmen den Ablauf mit Ihnen ab und bleiben Ihre Ansprechpartner' : 'We agree the schedule with you and remain your point of contact',
               },
               {
                 /*
@@ -365,15 +365,15 @@ export default async function BecomeHostFamilyPage() {
                   invented here. What the page can promise honestly is when the
                   host learns it. Ask CASA for the rates and put them here.
                 */
-                label: locale === 'de' ? 'Aufwandsentschädigung' : 'Compensation',
+                label: locale === 'de' ? 'Aufwandsentschädigung' : 'Hosting allowance',
                 left:
                   locale === 'de'
                     ? 'Pro Aufenthalt, schriftlich vereinbart, bevor Sie zusagen'
-                    : 'A per-placement rate, in writing before you agree',
+                    : 'Per stay, confirmed in writing before you agree',
                 right:
                   locale === 'de'
                     ? 'Pro Gruppenaufenthalt, schriftlich vereinbart, bevor Sie zusagen'
-                    : 'A per-group rate, in writing before you agree',
+                    : 'Per group stay, confirmed in writing before you agree',
               },
             ]}
           />

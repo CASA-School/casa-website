@@ -262,12 +262,12 @@ const COPY = {
     groupReply: 'Your group enquiry to CASA',
     group: 'Group',
     companyKind: 'Company enquiry',
-    companyTitle: 'New company training enquiry',
-    companySource: 'from the company training enquiry',
+    companyTitle: 'New enquiry about in-company teaching',
+    companySource: 'from the enquiry about in-company teaching',
     companyLead: (name: string, org: string | null, size: string | null) =>
       `${name}${org ? ` (${org})` : ''} is asking about German classes${size ? ` for ${size} participants` : ''}.`,
-    companyReply: 'Your company training enquiry to CASA',
-    company: 'Company training',
+    companyReply: 'Your enquiry to CASA about in-company teaching',
+    company: 'In-company teaching',
     people: (n: string) => `${n} people`,
 
     courseKind: 'Course registration',
@@ -976,8 +976,9 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     reference: text(p.requestId),
     firstName: first,
     lastName: last,
-    // "Dear Ms Rossi," where the form asked for a salutation. German learners
-    // read "Hallo {firstName}," instead; `{name}` greets the „Sie“ kinds.
+    // "Ms Rossi" where the form asked for a salutation. Learners read "Hallo
+    // {firstName}," / "Hello {firstName},"; `{name}` greets the „Sie“ kinds,
+    // organisers and companies ("Guten Tag Jonas Weber," / "Dear Jonas Weber,").
     // The joined name has to pass the same check as each part, or the first name alone is used.
     name: formal ? `${formal} ${last}` : (first && last ? greetableName(`${first} ${last}`) : null) ?? first,
     phone: '+49 421 460 414 30',
@@ -1043,9 +1044,10 @@ export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, 
     CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind && candidate.variant === variant)
     ?? CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind)!;
   const copy = entry[locale];
-  // Learners read „du“; group organisers and companies keep „Sie“ (confirmation-copy.ts).
-  const shared = locale === 'de' && 'address' in entry && entry.address === 'Sie'
-    ? CONFIRMATION_COPY.sharedSie
+  // Learners read „du“ and their first name; group organisers and companies keep
+  // „Sie“ and a formal greeting, in English too (confirmation-copy.ts).
+  const shared = 'address' in entry && entry.address === 'Sie'
+    ? CONFIRMATION_COPY.sharedSie[locale]
     : CONFIRMATION_COPY.shared[locale];
   const values = confirmationValues(kind, payload, locale);
   const line = (template: string, fallback: string | null = null) => fill(template, values) ?? fallback;

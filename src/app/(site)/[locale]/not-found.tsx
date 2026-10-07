@@ -58,7 +58,7 @@ export default async function NotFound() {
       : {
           eyebrow: 'Error 404',
           title: 'Page not found',
-          body: 'The link may be out of date, or the address may contain a typo. These will take you on from here.',
+          body: 'The link may be out of date, or there may be a typo in the address. You can carry on from here.',
           courses: 'Browse German courses',
           placement: 'Take the placement test',
           contact: 'Contact us',

@@ -133,12 +133,12 @@ export default async function NewsPage() {
       : {
           featured: 'Article of the month',
           mastheadLede:
-            "CASA's monthly NewsFlash: courses, exams, dates and news from the school - kept short and tagged by level.",
+            'Our NewsFlash comes out every month. In it you’ll find information about courses and exams, important dates and news from the school. The items are short, and each one shows which level it suits.',
           quoteTitle: 'Quote of the month',
           editorTitle: 'Who writes this?',
           tickerLabel: 'Dates in this issue',
           wordTitle: 'Word of the month',
-          readArticle: 'Open full article',
+          readArticle: 'Read the full article',
         };
 
   const newsListSchema = {

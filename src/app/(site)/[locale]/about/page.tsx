@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === 'de' ? 'Über CASA' : 'About CASA',
     description: locale === 'de'
       ? 'CASA ist eine gemeinnützige Sprachschule in Bremen. Lerne unser Leitbild, unser Team und das internationale Miteinander bei uns kennen.'
-      : 'Meet CASA, a non-profit language school in Bremen where people from around the world learn German, make connections and feel at home.',
+      : 'CASA is a non-profit language school in Bremen. Get to know our mission statement, our team and the international community at our school.',
     path: '/about',
     keywords: ['About CASA', 'CASA Bremen mission', 'Language school community'],
   });
@@ -39,7 +39,7 @@ export default async function AboutPage() {
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Unsere Schule' : 'Our School' },
+    { label: locale === 'de' ? 'Unsere Schule' : 'Our school' },
   ];
 
   /*
@@ -57,7 +57,7 @@ export default async function AboutPage() {
         { value: '1983', label: 'founded in Bremen' },
         { value: '30,000+', label: 'learners have studied German with us' },
         { value: '150+', label: 'countries represented in our classes' },
-        { value: '7–80+', label: 'years young: the age range of our learners' },
+        { value: '7–80+', label: 'years young, from our youngest learners to our oldest' },
       ];
 
   const leitbild = locale === 'de'
@@ -91,32 +91,32 @@ export default async function AboutPage() {
         ],
       }
     : {
-        eyebrow: 'CASA mission',
-        title: 'Bringing people together through language',
+        eyebrow: 'CASA mission statement',
+        title: 'Talking together, reaching out to each other',
         intro:
-          'A group of young educators founded CASA in 1983. Today, our non-profit school welcomes people from around the world. Different languages, experiences and perspectives enrich the life we share here.',
+          'CASA means ‘house’. Our non-profit language school is a meeting place where people from all kinds of backgrounds come together and find room to bring their own culture into a community. CASA was founded in 1983 by a group of young educators. We try to live by our motto every day, with our learners just as much as with our colleagues and our partners.',
         qualityEyebrow: 'Quality',
         qualityTitle: 'Our quality standards',
-        qualityIntro: 'Five commitments we hold our teaching to.',
+        qualityIntro: 'Quality has mattered to us since we were founded, and it shows above all in these five things.',
         qualityBullets: [
-          'Courses that respond to the needs of our students',
-          'A team with teaching expertise and an understanding of people',
-          'Well-equipped spaces for learning together',
-          'Materials suited to adult learners',
-          'Listening to feedback and continually improving our teaching',
+          'Our range of courses is reliable and up to date.',
+          'Our team are highly skilled in their subject, in teaching and in working with people.',
+          'Our rooms are well equipped, technology included.',
+          'We use teaching and learning materials that are suitable for adults.',
+          'We regularly take a critical look at our courses and at our own work.',
         ],
         aimsTitle: 'Our aims',
         aimsText:
-          'We want you to feel able to express yourself, understand others and take part in everyday life. Whether you are considering university, looking for work or moving to a new city, we help you think through the language skills and next steps you need.',
+          'We specialise in German as a foreign language, and we teach with professionalism and passion. Good language skills are key to settling in Germany, finding your feet at work or studying at a German university. That is why our lessons focus on using the language straight away in conversation. We want you to be able to express yourself well, understand the people around you better and manage your everyday life on your own. We are happy to talk with you about the steps that suit your plans.',
         approachEyebrow: 'Beyond the classroom',
-        approachTitle: 'Learning through connection',
+        approachTitle: 'Learning by meeting people',
         approachText:
-          'Language comes to life when you use it with other people. In class and beyond, we make room for conversations, shared experiences and friendships that help a new place feel familiar.',
+          'We see ourselves as bridge-builders between people. For us, learning is one of the best experiences there is, and it needs a pleasant and stimulating setting. That is why our teaching follows Begegnungspädagogik, an approach that puts meeting people at the heart of learning. We want your class to have a good atmosphere for learning. You work out new material together by solving tasks as a group, and by sharing ideas with one another you grow, both in your language and as people. So we make room for meeting and exchange, in class and beyond.',
         encounterBullets: [
-          'Hosting learners with German families',
-          'Organizing tandem partnerships',
-          'Cultural activities in Bremen and trips further afield',
-          'Creating space for partner work in class',
+          'Living with host families in Bremen',
+          'Tandem partnerships with German speakers',
+          'A culture programme in Bremen and trips around the region',
+          'Pair work and exchange in class',
         ],
       };
 
@@ -142,24 +142,24 @@ export default async function AboutPage() {
         primaryCta: 'Tandem anfragen',
       }
     : {
-        eyebrow: 'Tandem program',
-        title: 'Share your language, discover another',
+        eyebrow: 'Language tandem',
+        title: 'Two languages, one conversation',
         intro:
-          'A tandem brings two people together to practise each other’s languages. You can use your German, share your own language and get to know someone in Bremen.',
+          'In a language tandem, two people learn from each other. You practise your German and help your partner learn your language, and you get to know each other along the way. We are also looking for German-speaking tandem partners. If you speak German and would like to practise another language, please get in touch.',
         stepsTitle: 'How it works',
         steps: [
-          'Tell us which language you speak and which you would like to practise.',
-          'We look for a suitable language partner.',
-          'When we find a match, we help you get in touch.',
+          'Write to us and tell us which language you speak and which one you would like to learn or improve.',
+          'We look for a suitable tandem partner for you.',
+          'As soon as we have found someone, we get in touch and arrange a first meeting with you both here at the school. If you would like to keep meeting, you swap contact details. You are also welcome to carry on meeting at the school.',
         ],
-        benefitsTitle: 'Why it helps',
+        benefitsTitle: 'What a tandem gives you',
         benefits: [
-          'More real speaking practice',
-          'More confidence in everyday situations',
-          'Cultural exchange with people in Bremen',
-          'Stronger link between class and real communication',
+          'You refresh and improve your language skills.',
+          'You speak more and feel more confident in everyday life.',
+          'You get to know new people and their culture.',
+          'You use what you learn in class in real conversations.',
         ],
-        primaryCta: 'Ask about tandem',
+        primaryCta: 'Ask about a tandem',
       };
 
   return (
@@ -171,12 +171,12 @@ export default async function AboutPage() {
         frame — see `photoLibrary.heroTeam` in public-page-config.ts.
       */}
       <HeroAPhotoLed
-        eyebrow={locale === 'de' ? 'Unsere Schule' : 'Our School'}
-        title={locale === 'de' ? 'Ein Ort zum Lernen und Ankommen' : 'A school where you belong'}
+        eyebrow={locale === 'de' ? 'Unsere Schule' : 'Our school'}
+        title={locale === 'de' ? 'Ein Ort zum Lernen und Ankommen' : 'A place to learn and settle in'}
         description={
           locale === 'de'
             ? 'Bei CASA begegnen sich Menschen aus aller Welt. Wir sind stolz auf diese Vielfalt und auf ein familiäres Miteinander, in dem du mit deinen Fragen und Plänen willkommen bist.'
-            : 'People from around the world make CASA what it is. We are proud of that diversity and of the close, welcoming community we build together.'
+            : 'At CASA, people from all over the world come together. We are proud of this diversity and of our friendly, family atmosphere, where you are always welcome to bring your questions and plans.'
         }
         photo={pageConfig.photos.hero}
         ctas={pageConfig.ctas.slice(0, 1)}
@@ -225,7 +225,7 @@ export default async function AboutPage() {
               <p className="mt-3 text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.aimsText}</p>
               <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
                 <TextCta href="/ueber-uns/gemeinnuetzigkeit">
-                  {locale === 'de' ? 'Was gemeinnützig bei uns heißt' : 'What being a non-profit means here'}
+                  {locale === 'de' ? 'Was gemeinnützig bei uns heißt' : 'What being a non-profit means at CASA'}
                 </TextCta>
                 <TextCta href="/team">
                   {locale === 'de' ? 'Das CASA-Team kennenlernen' : 'Meet the CASA team'}

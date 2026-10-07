@@ -92,7 +92,7 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
-      en: 'Intensive courses, partnerships, in-company training',
+      en: 'Intensive courses, partnerships, in-company teaching',
       de: 'Intensivkurse, Kooperationen, Firmenunterricht',
     },
   },
@@ -102,7 +102,7 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
-      en: 'Intensive courses, telc examinations',
+      en: 'Intensive courses, telc exams',
       de: 'Intensivkurse, telc Prüfungen',
     },
   },
@@ -122,7 +122,7 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
-      en: 'Intensive courses, medical and nursing courses, quality management',
+      en: 'Intensive courses, German for nursing and medicine, quality management',
       de: 'Intensivkurse, Medizin- und Pflegekurse, Qualitätsmanagement',
     },
   },
@@ -132,7 +132,7 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
-      en: 'Intensive courses, evening and special courses, quality management',
+      en: 'Intensive courses, evening courses, special courses, quality management',
       de: 'Intensivkurse, Abendkurse, Spezialkurse, Qualitätsmanagement',
     },
   },
@@ -215,7 +215,7 @@ export const teamSpotlightsByLocale: Record<ContentLocale, TeamSpotlight[]> = {
 export const teachingStaffStatement: Record<ContentLocale, { title: string; body: string }> = {
   en: {
     title: 'Our teachers',
-    body: 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages, and most have lived or worked abroad — so we know from the inside that learning a language is not always easy, and we do our best to make it easier.',
+    body: 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages, and most of us have lived abroad and know from experience what it means to learn a foreign language. So we know it is not always easy, and we do our best to make it as easy as possible for you.',
   },
   de: {
     title: 'Unsere Lehrkräfte',

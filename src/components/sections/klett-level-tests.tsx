@@ -45,7 +45,7 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
       : {
           title: 'The placement tests',
           intro:
-            'The tests take you away from our website: the links lead to the test portal of the publisher Klett, whose textbooks we use at these levels. There you will find tasks on reading and listening, vocabulary and grammar for each level.',
+            'To take the tests, you leave our website. The links go to the test portal of the publisher Klett, whose textbooks we use at these levels. There you’ll find tasks on reading and listening, vocabulary and grammar for each level. Good luck!',
           start: (level: string) => `Start the ${level} test`,
           opens: 'Opens Klett’s test portal in a new window',
           textbook: 'Textbook',
