@@ -1,3 +1,5 @@
+import { CheckCircle2 } from 'lucide-react';
+
 import { Link } from '@/i18n/navigation';
 import { MediaFrame } from '@/components/ui/media-frame';
 
@@ -19,7 +21,13 @@ type EditorialSplitProps = {
    */
   eyebrow?: string;
   title: string;
+  /**
+   * The lead beside the photograph: about 200 characters, four lines at desktop.
+   * The box is as tall as its photograph, and a longer lead made the text column
+   * outgrow it (2026-10-07: 587px of text beside a 368px photo on /team).
+   */
   description: string;
+  /** Short points, set in a row under the photograph rather than beside it. */
   bullets: string[];
   photo: EditorialSplitPhoto;
   mediaSide?: 'left' | 'right';
@@ -40,6 +48,14 @@ type EditorialSplitProps = {
   }>;
   className?: string;
 };
+
+/** Three points read as a row; two and four as pairs, four in a row at full width. */
+function pointColumns(count: number) {
+  if (count === 3) return '@3xl:grid-cols-3';
+  if (count === 2) return '@xl:grid-cols-2';
+  if (count === 4) return '@xl:grid-cols-2 @5xl:grid-cols-4';
+  return count > 4 ? '@xl:grid-cols-2 @5xl:grid-cols-3' : undefined;
+}
 
 export function EditorialSplit({
   eyebrow,
@@ -63,14 +79,14 @@ export function EditorialSplit({
           out. Measured on /accommodation/become-host — panel headings at x=76,
           unfilled ones at x=40.
         */
-        'casa-editorial-measure px-6 py-8 md:px-9 md:py-10',
+        'casa-editorial-measure @container px-6 py-8 md:px-9 md:py-10',
         tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
         className
       )}
     >
       <div
         className={cn(
-          'grid items-start gap-10 lg:grid-cols-[1fr_1fr]',
+          'grid items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12',
           mediaSide === 'left' && 'lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1'
         )}
       >
@@ -79,17 +95,9 @@ export function EditorialSplit({
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
           ) : null}
           <h2 className="mt-2 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
-          <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
-          <ul className="mt-6 space-y-2.5">
-            {bullets.map((bullet) => (
-              <li key={bullet} className="flex gap-2 text-base text-[var(--casa-ink)]">
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--casa-blue)]" />
-                <span>{bullet}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
           {ctas.length > 0 ? (
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               {ctas.map((cta) => (
                 <Button
                   key={`${cta.href}-${cta.label}`}
@@ -127,6 +135,25 @@ export function EditorialSplit({
           />
         </figure>
       </div>
+
+      {/*
+        THE POINTS GO UNDER THE PHOTOGRAPH (2026-10-07). Beside it they stacked
+        under the lead until the text column ran 200-500px past the photo on
+        most pages that use this box: /team, the accommodation and exam pages,
+        Bildungszeit. In a row they read as what they are, separate points, and
+        the box keeps its photograph's height. The columns follow the box's own
+        width, because it sits both full-width and in the detail pages' column.
+      */}
+      {bullets.length > 0 ? (
+        <ul className={cn('mt-8 grid gap-x-8 gap-y-4 border-t border-[color:var(--casa-sand)] pt-6', pointColumns(bullets.length))}>
+          {bullets.map((bullet) => (
+            <li key={bullet} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)] md:text-base">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-blue)] md:mt-1" aria-hidden />
+              <span>{bullet}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </section>
   );
 }

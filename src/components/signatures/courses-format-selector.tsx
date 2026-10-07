@@ -1,6 +1,9 @@
 'use client';
 
+import { ArrowRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
+
+import { Link } from '@/i18n/navigation';
 
 type CourseFormatItem = {
   id: string;
@@ -9,7 +12,10 @@ type CourseFormatItem = {
   outcomes: string[];
   schedule: string;
   intensity: string;
-  facts?: string[];
+  /** The published fees, or the note that replaces them for a format quoted per enquiry. */
+  facts?: { fees: Array<{ label: string; amount: string }>; feeNote?: string };
+  /** The course's own page, which has the rest. */
+  href?: string;
 };
 
 type CoursesFormatSelectorProps = {
@@ -23,6 +29,7 @@ type CoursesFormatSelectorProps = {
     intensity?: string;
     outcomes?: string;
     facts?: string;
+    more?: string;
   };
 };
 
@@ -132,21 +139,32 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
         formats is comparing cost more than anything else, which is why this sits
         full width beneath both columns rather than being squeezed into one.
       */}
-      {selected.facts?.length ? (
+      {selected.facts && (selected.facts.fees.length > 0 || selected.facts.feeNote) ? (
         <div className="mt-4 rounded-lg border border-[color:var(--casa-sand)] bg-white p-5 md:p-7">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-            {labels?.facts ?? 'How this format works'}
+            {labels?.facts ?? 'Costs'}
           </p>
-          <ul className="mt-4 grid gap-3 md:grid-cols-3">
-            {selected.facts.map((fact) => (
-              <li
-                key={fact}
-                className="rounded-lg border border-[color:var(--casa-sand)]/70 bg-[var(--casa-bg)] px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)]"
-              >
-                {fact}
-              </li>
-            ))}
-          </ul>
+          {selected.facts.fees.length > 0 ? (
+            <dl className="mt-3 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+              {selected.facts.fees.map((fee) => (
+                <div key={fee.label} className="flex items-baseline justify-between gap-4 border-b border-[color:var(--casa-sand)] py-2.5">
+                  <dt className="text-sm text-[var(--casa-muted)]">{fee.label}</dt>
+                  <dd className="shrink-0 text-sm font-semibold text-[var(--casa-ink)]">{fee.amount}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="mt-3 text-sm leading-relaxed text-[var(--casa-ink)]">{selected.facts.feeNote}</p>
+          )}
+          {selected.href ? (
+            <Link
+              href={selected.href}
+              className="group/cta mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--casa-ink)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text)] hover:underline"
+            >
+              {labels?.more ?? 'View course plan'}
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover/cta:translate-x-1" aria-hidden />
+            </Link>
+          ) : null}
         </div>
       ) : null}
     </section>
