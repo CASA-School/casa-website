@@ -84,7 +84,7 @@ export default async function PartnersPage() {
             <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
               {de
                 ? 'Mit diesen Organisationen arbeitet CASA in Bremen und darüber hinaus zusammen. Als gemeinnützige Sprachschule verbinden wir Deutschunterricht mit Beratung und Begegnung.'
-                : 'These are the organisations CASA works with, in Bremen and beyond. As a non-profit language school, we bring German teaching together with advice and opportunities to meet others.'}
+                : 'These are the organisations CASA works with, in Bremen and beyond. As a non-profit language school, we combine German teaching with advice and opportunities to meet people.'}
             </p>
           </header>
 

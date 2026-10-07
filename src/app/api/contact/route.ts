@@ -12,7 +12,7 @@ function successMessage(locale: 'en' | 'de') {
     return 'Vielen Dank! Deine Anfrage ist bei uns angekommen. Wir melden uns so bald wie möglich bei dir.';
   }
 
-  return 'Thank you. Your request has been received. The CASA team will reply shortly.';
+  return 'Thank you! Your enquiry has reached us. We’ll get back to you as soon as we can.';
 }
 
 function failureMessage(locale: 'en' | 'de') {
@@ -20,7 +20,7 @@ function failureMessage(locale: 'en' | 'de') {
     return 'Deine Anfrage konnte gerade nicht gesendet werden. Bitte versuche es noch einmal oder melde dich direkt bei uns.';
   }
 
-  return 'Your request could not be submitted right now. Please try again or contact the office directly.';
+  return 'Your enquiry could not be sent just now. Please try again or get in touch with us directly.';
 }
 
 export async function POST(request: NextRequest) {

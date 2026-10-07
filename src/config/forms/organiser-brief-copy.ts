@@ -25,12 +25,12 @@ export type OrganiserCopy = {
 export const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
   en: {
     legendGroup: 'Group enquiry details',
-    legendCompany: 'Company training details',
+    legendCompany: 'In-company teaching details',
     intro:
-      'Every field below is optional — send what you already know and we will fill in the rest by email. This is a non-binding enquiry, not a quotation.',
+      'All the fields in this section are optional. Send us what you already know, and we’ll sort out the rest by email. Your enquiry is non-binding and is not yet a quotation.',
     announcementGroup: 'Group enquiry details added below. All of these fields are optional.',
-    announcementCompany: 'Company training details added below. All of these fields are optional.',
-    selectPlaceholder: 'Optional — select if known',
+    announcementCompany: 'In-company teaching details added below. All of these fields are optional.',
+    selectPlaceholder: 'Optional, if known',
     labels: {
       organisationName: 'Organisation or company',
       groupSize: 'Number of participants',
@@ -50,7 +50,7 @@ export const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
     },
     placeholders: {
       organisationName: 'Gymnasium Beispiel / Example GmbH',
-      participantLevels: 'Mixed A2-B1, or not tested yet',
+      participantLevels: 'Mixed A2–B1, or not tested yet',
       preferredDates: 'Second half of July',
     },
     options: {
@@ -70,8 +70,8 @@ export const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
       },
       ageBand: {
         'under-14': 'Under 14',
-        '14-17': '14-17',
-        '18-25': '18-25',
+        '14-17': '14–17',
+        '18-25': '18–25',
         '26-plus': '26 and older',
         mixed: 'Mixed ages',
       },

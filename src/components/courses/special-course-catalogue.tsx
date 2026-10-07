@@ -7,6 +7,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { skillTokens } from '@/config/brand/tokens';
 import {
   SPECIAL_COURSE_TERM_LABEL,
+  SPECIAL_COURSE_TERM_LABEL_EN,
   specialCourseModules,
   type SpecialCourseModule,
 } from '@/config/courses/special-course-modules';
@@ -70,14 +71,14 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
       : {
           eyebrow: 'Module catalogue',
           title: 'Which module fits your week?',
-          lead: 'Special courses complement a main course — or stand alone when you want to deepen one specific skill.',
-          constants: 'Every module: one evening a week, 90 minutes, 12 weeks, €192.',
+          lead: 'We regularly run special courses on different topics. Perhaps there was something in your language course that you found difficult and would like to get better at. Or perhaps you want to revise, refresh or go deeper into something in particular. That is what our special courses are for.',
+          constants: 'Each module runs for 12 weeks, on one evening a week for 90 minutes, and costs €192.',
           filterLevel: 'Level',
           filterWeekday: 'Evening',
           all: 'All',
-          empty: 'No modules match this selection. Try resetting the filters.',
+          empty: 'There is no module for this selection. Reset the filters to see them all again.',
           reset: 'Reset filters',
-          termNote: `Dates for ${SPECIAL_COURSE_TERM_LABEL}. All modules run 18:30–20:00; dates are confirmed during registration.`,
+          termNote: `These are the dates for the ${SPECIAL_COURSE_TERM_LABEL_EN} term. All courses run from 18:30 to 20:00, and we confirm the dates when you register.`,
           countLabel: (n: number) => `${n} ${n === 1 ? 'module' : 'modules'}`,
           readMore: 'Read more',
         };

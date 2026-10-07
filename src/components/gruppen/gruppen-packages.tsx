@@ -20,10 +20,10 @@ const copy = {
     eyebrow: 'The packages',
     title: 'Four programmes, named after the Town Musicians',
     description:
-      'The rooster is the shortest trip. The donkey at the base is the one you build yourself. Everything between is a question of how long you stay and which afternoons fill it.',
+      'The rooster is the shortest trip. The donkey at the very bottom is the one you put together yourself. The packages in between differ in length and in their afternoon programme.',
     week: 'week',
     weeks: 'weeks',
-    units: 'Teaching units',
+    units: 'Lessons',
     afternoons: 'Afternoons',
     afternoonsFlexible: `your choice, up to ${MAX_ACTIVITIES_PER_WEEK} a week`,
     lengthFlexible: '1–4 weeks',

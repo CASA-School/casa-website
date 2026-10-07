@@ -7,6 +7,7 @@ import { skillTokens } from '@/config/brand/tokens';
 import {
   SPECIAL_COURSE_CONSTANTS,
   SPECIAL_COURSE_TERM_LABEL,
+  SPECIAL_COURSE_TERM_LABEL_EN,
   type SpecialCourseModule,
 } from '@/config/courses/special-course-modules';
 import type { ContentLocale } from '@/lib/content/types';
@@ -20,7 +21,7 @@ const copy = {
     evening: 'Evening',
     time: 'Time',
     dates: 'Dates',
-    shape: 'Shape',
+    shape: 'Length',
     level: 'Entry level',
     practises: 'What you practise',
     forWhom: 'Who it is for',
@@ -28,8 +29,9 @@ const copy = {
     shapeValue: (weeks: number, minutes: number) =>
       `${weeks} weeks · one ${minutes}-minute session a week`,
     complements:
-      'Special courses complement a main course — or stand alone when you want to deepen one specific skill.',
-    termNote: (term: string) => `Dates for ${term}; confirmed during registration.`,
+      'A special course adds to the course you are already taking. You can also take one on its own if you want to work on a particular skill.',
+    // The German term label ("Herbst 2026") is passed in; English names the term itself.
+    termNote: () => `These are the dates for the ${SPECIAL_COURSE_TERM_LABEL_EN} term. We confirm them when you register.`,
   },
   de: {
     close: 'Schließen',
@@ -89,10 +91,10 @@ function formatPrice(value: number, locale: ContentLocale) {
  *
  * AND THE DESCRIPTIVE COPY: intro, who it is for, what you practise, entry
  * expectations. Each renders only when the matching field on `module.detail` is
- * present. Today that is the German `intro` of seven modules, restored from the
- * old casa-bremen.de Spezialkurse page; a module or a locale without one shows
- * the general sentence instead. Filling `detail` in is a data-only change; see
- * the note on `SpecialCourseDetail`.
+ * present. Today that is the `intro` of seven modules, in both languages,
+ * restored from the old casa-bremen.de Spezialkurse page; a module or a locale
+ * without one shows the general sentence instead. Filling `detail` in is a
+ * data-only change; see the note on `SpecialCourseDetail`.
  *
  * No photograph in the header, for the reason the Gruppen dialog gives: it cost
  * ~180px at the top of a panel that has to scroll, and there is no photograph

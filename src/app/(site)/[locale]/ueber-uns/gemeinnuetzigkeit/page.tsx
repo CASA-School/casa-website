@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       : {
           title: 'Non-profit status & mission',
           description:
-            'How CASA, a non-profit language school, reinvests course fees in education, integration, teachers and social projects.',
+            'CASA is a non-profit language school. Our income from course fees goes back into education, integration, our teachers and social projects.',
         }),
   });
 }
@@ -88,30 +88,30 @@ export default async function NonProfitStatusPage() {
     : {
         breadcrumbs: [
           { label: 'Home', href: '/' },
-          { label: 'Our School', href: '/about' },
+          { label: 'Our school', href: '/about' },
           { label: 'Non-profit status' },
         ],
         hero: {
           eyebrow: 'Non-profit status & mission',
-          title: 'Language brings people together',
+          title: 'What being a non-profit means at CASA',
           description:
-            'As a non-profit language school, we help people learn, understand one another and take part in life in Bremen. Our income goes back into that work.',
+            'As a non-profit language school, we are committed to education, understanding and inclusion. Our income goes back into this work.',
           ctas: [{ label: 'See the impact', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
         fundingText:
-          'CASA is funded substantially through course fees. These funds maintain the education program and support services that are especially important for international learners and vulnerable groups.',
+          'We are funded largely through course fees. This income pays for the day-to-day running of the school and secures services that are especially important to international learners and vulnerable groups.',
         fundingBullets: [
-          'Qualified teachers and pedagogical support',
-          'Small, speaking-focused groups with reliable course structure',
-          'Facilities, advising, and safe learning rooms in Bremen',
-          'Educational projects, language exchange and reduced fees where possible',
+          'Qualified teachers and educational guidance',
+          'Small groups where there is plenty of speaking, and courses that run reliably',
+          'Facilities, advice and safe places to learn in Bremen',
+          'Social education projects, language tandems and, where possible, reduced fees',
         ],
-        legalTitle: 'Legal status and references',
+        legalTitle: 'Legal form and recognition',
         legalRows: [
           ['Legal form', 'CASA – Internationale Sprachschule gGmbH'],
-          ['Register', 'Amtsgericht Bremen HRB 32761 HB'],
-          ['Recognition', 'State-recognized independent youth welfare provider'],
-          ['Tax classification', 'Recognized for promotion of public and vocational education'],
+          ['Commercial register', 'Amtsgericht Bremen HRB 32761 HB'],
+          ['Recognition', 'A state-recognised independent youth welfare provider'],
+          ['Tax status', 'Recognised for promoting adult education and vocational training'],
         ],
       };
 
@@ -144,7 +144,7 @@ export default async function NonProfitStatusPage() {
         <Container className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           <div>
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{locale === 'de' ? 'Gemeinnützigkeit & Transparenz' : 'Non-profit status & transparency'}</p>
-            <h2 id="nonprofit-transparency-title" className="mt-3 text-3xl font-bold">{locale === 'de' ? 'Deine Kursgebühren bleiben in der Bildungsarbeit.' : 'Your course fees support our educational work.'}</h2>
+            <h2 id="nonprofit-transparency-title" className="mt-3 text-3xl font-bold">{locale === 'de' ? 'Deine Kursgebühren bleiben in der Bildungsarbeit.' : 'Your course fees go back into our educational work.'}</h2>
             <p className="mt-5 leading-relaxed text-[var(--casa-muted)]">{copy.fundingText}</p>
             <p className="mt-4 font-semibold leading-relaxed">{locale === 'de' ? 'Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.' : 'Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.'}</p>
             <ul className="mt-6 grid gap-x-6 gap-y-4 sm:grid-cols-2">{copy.fundingBullets.map(item => <li key={item} className="border-l-2 border-[var(--casa-blue)]/30 pl-4 text-sm leading-relaxed text-[var(--casa-muted)]">{item}</li>)}</ul>

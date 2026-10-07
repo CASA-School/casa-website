@@ -137,7 +137,7 @@ export function GuidedPicker({
               <figcaption className="absolute inset-x-0 bottom-0 p-5 text-sm font-semibold text-white md:p-6">
                 {locale === 'de'
                   ? 'Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.'
-                  : 'Small groups, clear course routes, and direct next steps.'}
+                  : 'You learn in small groups with us, and we show you the next step.'}
               </figcaption>
             </figure>
           ) : null}

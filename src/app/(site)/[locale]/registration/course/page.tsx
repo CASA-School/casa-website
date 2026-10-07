@@ -37,12 +37,12 @@ export default async function CourseRegistrationPage({
       title={locale === 'de' ? 'Kursanmeldung' : 'Course registration'}
       intro={locale === 'de'
         ? 'In drei Schritten meldest du dich zu deinem Kurs an.'
-        : 'Book your course in three steps.'}
+        : 'Register for your course in three steps.'}
       formId="course-registration-form"
       helpTitle={locale === 'de' ? 'Fragen zur Anmeldung?' : 'Questions about registering?'}
       helpBody={locale === 'de'
         ? 'Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.'
-        : 'We are glad to help you choose a course, a level and a date.'}
+        : 'We’re happy to help you choose a course, a level and a date.'}
     >
       <CourseWizard catalog={registrationData} examCatalog={examCatalog} />
     </RegistrationPageShell>

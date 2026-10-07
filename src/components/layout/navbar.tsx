@@ -75,8 +75,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   const isRegistrationPage = pathname?.startsWith('/registration');
   const registerHref = isExamContext ? '/registration/exam' : '/registration/course';
   const registerText = isExamContext
-    ? (contentLocale === 'de' ? 'Zur Prüfungsanmeldung' : 'Register for Exam')
-    : (contentLocale === 'de' ? 'Zur Kursanmeldung' : 'Register Now');
+    ? (contentLocale === 'de' ? 'Zur Prüfungsanmeldung' : 'Register for an exam')
+    : (contentLocale === 'de' ? 'Zur Kursanmeldung' : 'Register for a course');
   /*
    * Short form for the band between xl and 2xl.
    *

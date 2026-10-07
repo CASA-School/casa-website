@@ -113,7 +113,7 @@ export function rateLimit(
   const retryAfterSeconds = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
   const message =
     requestLocale(request) === 'en'
-      ? 'Too many requests. Please wait a few minutes and try again.'
+      ? 'Too many requests in a short time. Please try again in a few minutes.'
       : 'Zu viele Anfragen in kurzer Zeit. In ein paar Minuten ist das Senden wieder möglich.';
 
   return NextResponse.json(

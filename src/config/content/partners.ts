@@ -71,7 +71,7 @@ export const hereAhead: Partner = {
   },
   about: {
     de: 'Eine gemeinsame Einrichtung der staatlichen Hochschulen im Land Bremen.',
-    en: 'A joint academy of the state universities in Bremen.',
+    en: 'A joint academy of the public universities in the state of Bremen.',
   },
   programmes: [primeProgramme],
 };
@@ -120,7 +120,7 @@ export const hoodTraining: Partner = {
   label: { de: 'Sport und Jugendarbeit', en: 'Sport and youth work' },
   text: {
     de: 'Hood Training ist eine gemeinnützige Organisation der Kinder- und Jugendhilfe in Bremen. Mit Sport- und Bewegungsangeboten in den Stadtteilen erreicht sie Kinder und Jugendliche und verbindet das mit sozialer Arbeit und Bildungsangeboten.',
-    en: 'Hood Training is a non-profit youth organisation in Bremen. Its sport and exercise sessions in local neighbourhoods reach children and young people, alongside social work and education.',
+    en: 'Hood Training is a non-profit youth organisation in Bremen. Through sport and exercise sessions in local neighbourhoods, it reaches children and young people and combines this with social work and educational activities.',
   },
 };
 

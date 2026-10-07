@@ -188,7 +188,7 @@ describe('registration messages follow the page locale', () => {
 
   it('keeps the English messages on the English page', () => {
     const parsed = createExamRegistrationFormSchema('en').safeParse({ ...validExamFormInput, salutation: undefined });
-    expect(parsed.error?.issues[0]?.message).toBe('Please select a salutation.');
+    expect(parsed.error?.issues[0]?.message).toBe('Please choose a salutation.');
   });
 
   it('answers a missing or malformed field in German as well', () => {

@@ -23,11 +23,10 @@ import type { ContentLocale } from '@/lib/content/types';
  * casa-bremen.de/sprachkurse/deutsch-spezialkurse page (restored 2026-10-07),
  * rewritten in the site's voice. Seven of the eight modules have one; the C1+
  * conversation module is new and the old page never described it, so it keeps
- * the dialog's general sentence. The German text is written; `en` stays unset
- * until an English description is approved, and the dialog falls back to its
- * general English sentence. Nothing here may be written from inference — a
- * module's content is a claim about what CASA teaches
- * (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md).
+ * the dialog's general sentence. The English says what the German says, and a
+ * module or locale without an intro falls back to that general sentence.
+ * Nothing here may be written from inference — a module's content is a claim
+ * about what CASA teaches (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md).
  *
  * The dialog renders each section only when its field is present, so filling
  * these in is a data-only change with no component work.
@@ -67,6 +66,8 @@ export const SPECIAL_COURSE_CONSTANTS = {
 } as const;
 
 export const SPECIAL_COURSE_TERM_LABEL = 'Herbst 2026';
+/** The same term on the English pages. Change it together with the German label. */
+export const SPECIAL_COURSE_TERM_LABEL_EN = 'autumn 2026';
 
 export const specialCourseModules: SpecialCourseModule[] = [
   {
@@ -82,6 +83,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'speaking',
     detail: {
       intro: {
+        en: 'In this course you work on your German pronunciation. You practise sounds, word stress, sentence melody and intonation through a variety of exercises, and you get personal feedback. That way you speak more fluently, more clearly and with more confidence, in everyday life, at work and in exams.',
         de: 'In diesem Kurs verbesserst du gezielt deine deutsche Aussprache. Du übst Laute, Wortakzent, Satzmelodie und Intonation mit abwechslungsreichen Übungen und bekommst persönliches Feedback. So sprichst du im Alltag, im Beruf und in Prüfungen flüssiger, verständlicher und mit mehr Selbstvertrauen.',
       },
     },
@@ -90,7 +92,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     id: 'telc-c1-hochschule-training',
     category: { en: 'Exam preparation', de: 'Prüfungsvorbereitung' },
     title: {
-      en: 'telc C1 Hochschule — spoken and written expression',
+      en: 'telc Deutsch C1 Hochschule: spoken and written expression',
       de: 'telc C1 Hochschule – Training für den mündlichen und schriftlichen Ausdruck',
     },
     level: 'C1',
@@ -102,6 +104,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'exam',
     detail: {
       intro: {
+        en: 'In this course you practise written and spoken expression with real exam tasks. You learn to express yourself better at an academic level and go into the exam with more confidence.',
         de: 'In diesem Kurs trainierst du den schriftlichen und mündlichen Ausdruck mit authentischen Prüfungsaufgaben. So verbesserst du deine Ausdrucksfähigkeit auf akademischem Niveau und gehst sicherer in die Prüfung.',
       },
     },
@@ -119,6 +122,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'grammar',
     detail: {
       intro: {
+        en: 'In this course we revise and consolidate the most important topics of basic grammar together. It suits you if you are learning at A2 level, and also if you are further on and want to brush up on the basics.',
         de: 'In diesem Kurs wiederholen und festigen wir gemeinsam die wichtigsten Themen der Basisgrammatik. Er passt zu dir, wenn du auf A2-Niveau lernst, und auch dann, wenn du schon weiter bist und deine Grundlagen gezielt auffrischen möchtest.',
       },
     },
@@ -126,7 +130,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
   {
     id: 'grammatik-kompakt',
     category: { en: 'Grammar', de: 'Grammatik' },
-    title: { en: 'Grammar compact — succeeding at B1/B2', de: 'Grammatik kompakt – Erfolgreich auf B1/B2' },
+    title: { en: 'Compact grammar: success at B1/B2', de: 'Grammatik kompakt – Erfolgreich auf B1/B2' },
     level: 'B1/B2',
     weekday: { en: 'Thursday', de: 'Donnerstag' },
     time: '18:30 - 20:00',
@@ -136,6 +140,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'grammar',
     detail: {
       intro: {
+        en: 'In this course you consolidate the most important grammar topics at levels B1 and B2, such as sentence structure, tenses, the subjunctive (Konjunktiv II), the passive, relative clauses and prepositions. We explain them clearly and practise them so that you can use them straight away. Together we lay the foundations for confident, fluent German.',
         de: 'In diesem Kurs festigst du die wichtigsten Grammatikthemen der Niveaustufen B1 und B2, zum Beispiel Satzbau, Zeiten, Konjunktiv II, Passiv, Relativsätze und Präpositionen. Wir erklären sie verständlich und üben sie so, dass du sie gleich anwenden kannst. So schaffen wir gemeinsam die Grundlagen für sicheres und flüssiges Deutsch.',
       },
     },
@@ -143,7 +148,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
   {
     id: 'schreiben-basal',
     category: { en: 'Writing', de: 'Schreiben' },
-    title: { en: 'Writing made easy — foundations', de: 'Schreiben leicht gemacht – Basales Schreiben' },
+    title: { en: 'Writing made easy: the basics', de: 'Schreiben leicht gemacht – Basales Schreiben' },
     level: 'A2/B1',
     weekday: { en: 'Tuesday', de: 'Dienstag' },
     time: '18:30 - 20:00',
@@ -153,6 +158,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'writing',
     detail: {
       intro: {
+        en: 'In this course you learn the basics of writing step by step. We practise short emails, messages, descriptions and other everyday texts, and look at text structure, word choice, typical phrases and common mistakes in grammar and spelling.',
         de: 'In diesem Kurs lernst du Schritt für Schritt die Grundlagen des Schreibens. Wir üben kurze E-Mails, Nachrichten, Beschreibungen und andere Alltagstexte. Dabei geht es um den Aufbau des Textes, die richtige Wortwahl, typische Redemittel und häufige Fehler in Grammatik und Rechtschreibung.',
       },
     },
@@ -170,6 +176,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'writing',
     detail: {
       intro: {
+        en: 'In this course you practise writing at B level. You learn to structure emails, opinion pieces, reports and other kinds of text clearly and to write them correctly. With focused exercises, personal feedback and practical tips, you improve your writing style step by step and write with more confidence, in everyday life, at work and in exams.',
         de: 'In diesem Kurs trainierst du das Schreiben auf B-Niveau. Du lernst, E-Mails, Stellungnahmen, Berichte und andere Textsorten klar aufzubauen und sprachlich korrekt zu schreiben. Mit gezielten Übungen, persönlichem Feedback und praktischen Tipps verbesserst du Schritt für Schritt deinen Schreibstil und schreibst sicherer, im Alltag, im Beruf und in Prüfungen.',
       },
     },
@@ -178,7 +185,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     id: 'sprechwerkstatt-b1-b2',
     category: { en: 'Conversation', de: 'Konversation' },
     title: {
-      en: 'B1/B2 speaking workshop — communicate clearly and convincingly',
+      en: 'B1/B2 speaking workshop: communicate confidently and convincingly',
       de: 'B1/B2 Sprechwerkstatt – Sicher und überzeugend kommunizieren',
     },
     level: 'B1/B2',
@@ -190,6 +197,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'speaking',
     detail: {
       intro: {
+        en: 'In this course you develop your speaking skills. Together we practise presentations, discussions, debates and conversations for different occasions. Along the way you widen your vocabulary, improve how you express yourself and speak more freely and confidently, in everyday life and at work.',
         de: 'In diesem Kurs entwickelst du gezielt dein Sprechen weiter. Gemeinsam üben wir Präsentationen, Diskussionen, Debatten und Gespräche zu unterschiedlichen Anlässen. Dabei erweiterst du deinen Wortschatz, verbesserst deine Ausdrucksweise und sprichst im Alltag und im Beruf freier und sicherer.',
       },
     },

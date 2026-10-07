@@ -240,7 +240,7 @@ export default async function HomePage() {
         : course.narrative?.audience ||
           (locale === 'de'
             ? 'Geeignet für internationale Lernende'
-            : 'Best for: international learners'),
+            : 'Suitable for international learners'),
       outcomes: course.narrative?.outcomes ?? [],
       href: getCoursePath(course.slug),
       ctaLabel: locale === 'de' ? 'Kurs ansehen' : 'Explore this course',
@@ -281,7 +281,7 @@ export default async function HomePage() {
           narrative?.audience ||
           (locale === 'de'
             ? 'Ergänzende Programme für besondere Lernziele.'
-            : 'Additional programs for specific learning goals.'),
+            : 'Additional programmes for specific learning goals.'),
         href: getCoursePath(course.slug),
       };
     })
@@ -336,7 +336,7 @@ export default async function HomePage() {
           item.narrative?.summary ||
           (locale === 'de'
             ? 'Gezielte Vorbereitung mit Prüfungsstrategie, Simulation und Feedback.'
-            : 'Focused preparation with exam strategy, simulation, and feedback.'),
+            : 'Focused preparation with exam strategies, mock exams and feedback.'),
         level: item.examType.level || '',
         href: examDetailHref(item.examType.code),
         nextDate: nextSession?.starts_at ? formatDate(nextSession.starts_at, locale) : null,
@@ -535,7 +535,7 @@ export default async function HomePage() {
               <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                 {locale === 'de'
                   ? 'Deutsch für den medizinischen Alltag, für dein Team oder im Rahmen der Bildungszeit: Erzähl uns, was du brauchst.'
-                  : 'German for medical practice, for your team or as part of educational leave. Tell us what you need and we will help you explore the options.'}
+                  : 'German for medical practice, for your team or during your Bildungszeit, Bremen’s paid leave for further training. Tell us what you need and we will help you explore the options.'}
               </p>
             </div>
 
@@ -738,7 +738,7 @@ export default async function HomePage() {
                 text:
                   locale === 'de'
                     ? 'Unterricht, Vergütung und Lernräume.'
-                    : 'Teaching, fair pay, and learning spaces.',
+                    : 'Teaching, fair pay and learning spaces.',
               },
               {
                 title: locale === 'de' ? 'Integrationsprojekte' : 'Integration projects',
@@ -837,7 +837,7 @@ export default async function HomePage() {
                         {exam.level}
                       </span>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/72">
-                        {locale === 'de' ? 'Vorbereitung + Anmeldung' : 'Prep + registration'}
+                        {locale === 'de' ? 'Vorbereitung + Anmeldung' : 'Preparation + registration'}
                       </span>
                     </div>
                   </Link>
@@ -885,12 +885,12 @@ export default async function HomePage() {
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
                   ? 'Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.'
-                  : 'While you’re on an intensive course with us, we can find you a room in a CASA flat share or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.'}
+                  : 'While you’re on an intensive course with us, we can find you a room in a CASA shared flat or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.'}
               </p>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {[
-                  locale === 'de' ? 'CASA-WG' : 'CASA flat share',
+                  locale === 'de' ? 'CASA-WG' : 'CASA shared flat',
                   locale === 'de' ? 'Gastfamilie' : 'Host family',
                   locale === 'de' ? 'Persönliche Vermittlung' : 'Personal help finding a room',
                   locale === 'de' ? 'Verfügbarkeit auf Anfrage' : 'Availability on request',
@@ -985,7 +985,7 @@ export default async function HomePage() {
             description={
               locale === 'de'
                 ? 'Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.'
-                : 'Learners share stories about progress, confidence, and life in Bremen.'
+                : 'Learners share stories about progress, confidence and life in Bremen.'
             }
             cards={testimonialCards}
             featuredQuote={featuredQuote}

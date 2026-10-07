@@ -73,7 +73,7 @@ export function DecisionRail({
         {showDeadline ? (
           <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-              {locale === 'de' ? 'Anmeldefrist' : 'Registration window'}
+              {locale === 'de' ? 'Anmeldefrist' : 'Registration deadline'}
             </p>
             <div className="mt-2">
               <DeadlineBadge deadlineIso={deadlineIso} locale={locale} />
@@ -136,7 +136,7 @@ export function DecisionRail({
                 aria-disabled="true"
                 className="casa-button-prism mt-4 inline-flex w-full items-center justify-center rounded-lg bg-[var(--casa-ink-deep)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
               >
-                {locale === 'de' ? 'Termin buchen' : 'Book a call'}
+                {locale === 'de' ? 'Termin buchen' : 'Book an appointment'}
               </button>
             ) : null}
           </div>

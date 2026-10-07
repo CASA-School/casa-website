@@ -38,14 +38,14 @@ const ROUTE_META: Array<{
   { href: '/partners', topic: 'school', label: { en: 'Cooperation partners', de: 'Kooperationspartner' } },
   { href: '/team', topic: 'school', label: { en: 'Team', de: 'Team' } },
   { href: '/courses', topic: 'courses', label: { en: 'Courses', de: 'Kurse' } },
-  { href: '/placement-test', topic: 'placement', label: { en: 'Placement Test', de: 'Einstufungstest' } },
-  { href: '/registration/course', topic: 'registration', label: { en: 'Course Registration', de: 'Kursanmeldung' } },
+  { href: '/placement-test', topic: 'placement', label: { en: 'Placement test', de: 'Einstufungstest' } },
+  { href: '/registration/course', topic: 'registration', label: { en: 'Course registration', de: 'Kursanmeldung' } },
   { href: '/exams', topic: 'exams', label: { en: 'Exams', de: 'Prüfungen' } },
-  { href: '/registration/exam', topic: 'registration', label: { en: 'Exam Registration', de: 'Prüfungsanmeldung' } },
+  { href: '/registration/exam', topic: 'registration', label: { en: 'Exam registration', de: 'Prüfungsanmeldung' } },
   { href: '/accommodation', topic: 'accommodation', label: { en: 'Accommodation', de: 'Unterkunft' } },
   { href: '/contact', topic: 'contact', label: { en: 'Contact', de: 'Kontakt' } },
   { href: '/news', topic: 'resources', label: { en: 'News', de: 'Aktuelles' } },
-  { href: '/resources/study-in-germany', topic: 'resources', label: { en: 'Study & Life in Germany', de: 'Studium & Leben in Deutschland' } },
+  { href: '/resources/study-in-germany', topic: 'resources', label: { en: 'Study & life in Germany', de: 'Studium & Leben in Deutschland' } },
   { href: '/resources/living-in-germany', topic: 'resources', label: { en: 'Living in Germany', de: 'Leben in Deutschland' } },
   { href: '/resources/why-germany', topic: 'resources', label: { en: 'Why Germany', de: 'Warum Deutschland' } },
   { href: '/careers', topic: 'careers', label: { en: 'Careers', de: 'Karriere' } },
@@ -277,12 +277,12 @@ function buildPolicyPassages(): KbPassage[] {
     {
       id: 'policy-visa-en',
       locale: 'en',
-      title: 'Visa policy guidance',
+      title: 'Visa and language courses',
       url: '/faq',
       topic: 'visa',
       keywords: ['visa', 'course', 'intensive', 'residence permit', 'confirmation', 'embassy'],
       content:
-        'Language visa guidance: the German embassy or consulate handling your application sets how long a course must run and how many lessons a week it needs. CASA’s own guidance is in the FAQ, and the CASA advice team can tell you which course fits your case. After registration and payment for at least the first course, CASA sends the visa letter by email. This is not legal advice — confirm your case with the CASA office and your embassy.',
+        'How long a course must last for a language visa, and how many lessons a week it needs, is decided by the German embassy or consulate responsible for you. You’ll find what CASA says about it in the FAQ, and the CASA advice team can tell you which course suits your situation. As soon as the fee for at least the first course has arrived, CASA emails you the visa letter. This is not legal advice. Please check your case with CASA and with the embassy.',
     },
     {
       id: 'policy-visa-de',
@@ -298,12 +298,12 @@ function buildPolicyPassages(): KbPassage[] {
     {
       id: 'policy-exams-en',
       locale: 'en',
-      title: 'Official exam pathways at CASA',
+      title: 'Exams at CASA',
       url: '/exams',
       topic: 'exams',
       keywords: ['exam', 'telc', 'b2', 'c1', 'certificate', 'hochschule', 'preparation'],
       content:
-        'CASA currently offers telc Deutsch B2 (EUR 190) and telc Deutsch C1 Hochschule (EUR 210), with dedicated preparation courses and registration support. TestDaF is not currently offered at CASA but may return in future — contact CASA for updates.',
+        'At CASA you can currently take telc Deutsch B2 (€190) and telc Deutsch C1 Hochschule (€210). We run preparation courses for both, and you register for the exam through us too. We don’t offer TestDaF at the moment, but it may come back in future. Just ask CASA about it.',
     },
     {
       id: 'policy-exams-de',
@@ -323,12 +323,12 @@ function buildSchoolPassages(): KbPassage[] {
     {
       id: 'school-overview-en',
       locale: 'en',
-      title: 'About CASA language school in Bremen',
+      title: 'About CASA, the language school in Bremen',
       url: '/about',
       topic: 'school',
       keywords: ['about', 'casa', 'school', 'bremen', 'founded', '1983', 'learners', 'countries', 'small classes'],
       content:
-        'CASA is a German-language school in Bremen, Germany, founded in 1983. Over 30,000 learners from 150+ countries have studied here. Courses cover all CEFR levels (A1–C1) in small, interaction-focused groups. CASA is AZAV-certified and offers Bildungszeit-eligible programs. Tandem programs, community activities, and city orientation support social integration. The school is located in the Am Dobben area of Bremen.',
+        'CASA is a non-profit German language school in Bremen, founded in 1983.More than 30,000 learners from over 150 countries have studied with us. Our courses cover every level from A1 to C1, and we teach in small groups where there is plenty of speaking. CASA is AZAV-certified and offers courses for Bildungszeit, the paid training leave in Bremen. Tandems, shared activities and help with finding your way around the city support social integration. The school is at Am Dobben 14–16 in Bremen.',
     },
     {
       id: 'school-overview-de',
@@ -348,7 +348,7 @@ function buildSchoolPassages(): KbPassage[] {
       topic: 'school',
       keywords: ['nonprofit', 'non-profit', 'gGmbH', 'public benefit', 'mission', 'reinvestment', 'gemeinnuetzig'],
       content:
-        'CASA is organized as CASA – Internationale Sprachschule gGmbH. Course fees are reinvested in teaching quality, fair pay, facilities, social education projects, tandem formats, and integration support. The non-profit mission centers education, intercultural understanding, and social integration in Bremen.',
+        'CASA is run by CASA – Internationale Sprachschule gGmbH, a non-profit company. Course fees go back into good teaching, fair pay, our premises, social education projects, tandems and support with integration. Our non-profit work is centred on education, international understanding and social integration in Bremen.',
     },
     {
       id: 'school-nonprofit-de',
@@ -368,7 +368,7 @@ function buildSchoolPassages(): KbPassage[] {
       topic: 'school',
       keywords: ['integration', 'projects', 'partners', 'cooperation', 'Here Ahead', 'Garantiefonds Hochschule', 'GF-H', 'Visionskultur', 'Creative HUB', 'Hood Training', 'TANDEM', 'tandem', 'community'],
       content:
-        'CASA works with partners in Bremen and beyond. HERE AHEAD, a joint academy of the state universities in Bremen, prepares international applicants for university, and CASA plans and teaches its language courses. CASA works with the Garantiefonds Hochschule educational advice service, which checks eligibility for scholarships processed by the Otto Benecke Stiftung. Further partners are Visionskultur (Creative HUB), Hood Training and TANDEM International, the network of language schools CASA belongs to. Free tandem conversation and cultural programmes complement the courses.',
+        'CASA works with partners in Bremen and beyond. HERE AHEAD, a joint academy of the state universities in Bremen, prepares international applicants for university, and CASA plans and teaches its language courses. CASA works with the Garantiefonds Hochschule educational advice service, which checks eligibility for scholarships processed by the Otto Benecke Stiftung. Further partners are Visionskultur (Creative HUB), Hood Training and TANDEM International, the network of language schools CASA belongs to. Free language tandems and culture programmes complement the courses.',
     },
     {
       id: 'school-integration-projects-de',
@@ -393,7 +393,7 @@ function buildAccommodationDetailPassages(): KbPassage[] {
       topic: 'accommodation',
       keywords: ['accommodation', 'flat', 'wg', 'host family', 'price', '580', 'deposit', 'kaution', 'room', 'housing'],
       content:
-        'CASA offers two accommodation types, both available only to students on the intensive courses — and the shared flats only to participants of legal age. Shared flat (WG): private furnished room, shared kitchen and bathroom, WLAN, bedding provided, bring your own towels, no smoking. Host family: own furnished room, kitchen and bathroom normally shared, self-catering. Both cost 580 EUR for 4 weeks, then 145 EUR per additional week, with a 50 EUR placement fee and a 580 EUR deposit refunded if the flat and keys come back as received. The Christmas and Easter closure weeks add 145 EUR/week. A shared-flat room is not guaranteed: if none is free, CASA places the student with a host family instead. CASA cannot help with finding a flat of your own but will send useful links on request.',
+        'CASA only arranges accommodation for participants on the intensive courses, and only adults move into our shared flats. In a shared flat, you have your own furnished room and share the kitchen and bathroom. Wi-Fi and bed linen are provided, but please bring your own towels. Smoking is not allowed. With a host family in Bremen, you also have your own furnished room, usually share the kitchen and bathroom with your hosts, and cook for yourself. Meals and daily conversation are not guaranteed there. Both options cost €580 for 4 weeks and then €145 for each further week. On top of that, there is a one-off booking fee of €50 and a deposit of €580. You get the deposit back after you leave, as long as the accommodation and keys are in the condition you found them in. During the closures at Christmas and Easter, €145 a week is added. There are only a limited number of shared-flat rooms. If none is free, CASA finds you a room with a host family instead. We can’t help you find a flat of your own, but we’re glad to send you useful links if you ask.',
     },
     {
       id: 'accommodation-detail-de',
@@ -418,7 +418,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'b2', 'exam', '190', 'fee', 'date', 'august', 'october', 'november', 'preparation', 'certificate'],
       content:
-        'CASA offers telc Deutsch B2: EUR 190 for the full exam, EUR 160 for a single written or oral part. The exam runs approx. 09:00–17:00 at the school. The preparation course costs EUR 260 (two evenings a week, Mon/Wed 18:30–20:00). Current exam dates and registration deadlines are on the exam page. Preparation includes strategy drills, timed mock sections, and individual error correction. Ideal for work, training, and daily life in Germany.',
+        'At CASA you can take telc Deutsch B2. The full exam costs €190, and a single written or oral part costs €160. The exam runs from about 09:00 to 17:00 and takes place at our school. The preparation course costs €260 and runs on two evenings a week, on Mondays and Wednesdays from 18:30 to 20:00. You’ll find the current exam dates and registration deadlines on the exam page. In the preparation course, you practise exam strategies, sit mock exams and get personal feedback on your mistakes. The certificate is useful for work, vocational training and everyday life in Germany.',
     },
     {
       id: 'exam-telc-b2-de',
@@ -433,12 +433,12 @@ function buildExamDetailPassages(): KbPassage[] {
     {
       id: 'exam-telc-c1-en',
       locale: 'en',
-      title: 'telc C1 Hochschule at CASA – dates and fees',
+      title: 'telc Deutsch C1 Hochschule at CASA – dates and fees',
       url: '/exams/c1',
       topic: 'exams',
       keywords: ['telc', 'c1', 'hochschule', 'university', '210', 'fee', 'date', 'september', 'october', 'november', 'preparation', 'academic'],
       content:
-        'CASA offers telc Deutsch C1 Hochschule: EUR 210 for the full exam, EUR 185 for a single part. It always takes place on a Friday, approx. 08:30–17:00. The preparation course is a four-week block at EUR 520, plus EUR 50 on a first registration at CASA. Current exam dates and registration deadlines are on the exam page. Focused on academic language, argumentation, lecture comprehension, and formal writing. Required for many German university admissions.',
+        'At CASA you can take telc Deutsch C1 Hochschule. The full exam costs €210, and a single part costs €185. The exam always takes place on a Friday, from about 08:30 to 17:00. The preparation course is a four-week block and costs €520, plus €50 if it is your first registration at CASA. You’ll find the current exam dates and registration deadlines on the exam page. The focus is on academic language, building an argument, understanding lectures and formal writing. Many universities in Germany ask for this certificate for admission.',
     },
     {
       id: 'exam-telc-c1-de',
@@ -458,7 +458,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['testdaf', 'test daf', 'daad', 'exam', 'university', 'nicht', 'not offered'],
       content:
-        'TestDaF is currently not offered at CASA. CASA focuses on telc Deutsch B2 and telc C1 Hochschule. TestDaF may return to the CASA program in the future. If you are specifically looking for TestDaF preparation, contact CASA directly to ask about future availability.',
+        'We don’t offer TestDaF at CASA at the moment. With us, you can take telc Deutsch B2 and telc Deutsch C1 Hochschule. TestDaF may come back into our programme in future. If you’re looking specifically for TestDaF preparation, it’s best to ask us directly.',
     },
     {
       id: 'exam-testdaf-de',
@@ -483,7 +483,7 @@ function buildPlacementPassages(): KbPassage[] {
       topic: 'placement',
       keywords: ['placement', 'level', 'test', 'a1', 'a2', 'b1', 'b2', 'c1', 'cefr', 'beginner', 'intermediate', 'advanced', 'which level'],
       content:
-        'CASA uses CEFR levels (A1–C1) to place learners. A1 = absolute beginner; A2 = elementary; B1 = intermediate; B2 = upper-intermediate; C1 = advanced. If you know some German, take a free online placement test before registering: the tests are on the test portal of the publisher Klett (Netzwerk neu for A1–B1, Kontext for B1+–C1), linked from /placement-test. Always start with the A1 test, do it alone without a dictionary, enter your name and email in the test form, and send your result to online@casa-bremen.de. Absolute beginners (zero German) can register directly at A1. You can also come to the school for a personal placement during office hours, with no appointment; allow at least an hour.',
+        'CASA places learners using the levels of the Common European Framework of Reference (CEFR), from A1 to C1. A1 is the level for beginners, A2 stands for basic knowledge, B1 for intermediate, B2 for upper intermediate and C1 for advanced. On the intensive course, B1+ sits between B1 and B2. Like a whole level, it takes about eight to nine weeks. If you already know some German, take a free online placement test before you register. The tests are on the test portal of the publisher Klett (Netzwerk neu for A1–B1, Kontext for B1+–C1) and are linked from our placement test page. Always start with the A1 test, do it on your own without a dictionary, enter your name and email address in the test form and send your result to online@casa-bremen.de. If you don’t know any German yet, simply register for an A1 course straight away. To take a placement test in person, you can come to the school during our office hours without an appointment. Please allow at least an hour.',
     },
     {
       id: 'placement-de',
@@ -503,12 +503,12 @@ function buildCourseDetailPassages(): KbPassage[] {
     {
       id: 'course-intensive-en',
       locale: 'en',
-      title: 'Intensive German course – schedule and prices',
+      title: 'Intensive courses – timetable and prices',
       url: '/courses/intensive-german',
       topic: 'courses',
       keywords: ['intensive', 'german', 'course', '940', '520', 'price', 'morning', 'full time', '20 lessons', 'monday friday'],
       content:
-        'Intensive German: A1–C1, 20 lessons/week of 45 minutes. Mornings Mon–Fri 09:00–12:30, or afternoons Mon–Thu 13:00–17:30. Price: EUR 520 for 4 weeks, EUR 940 for 8 weeks, EUR 117.50 for each additional week. Plus a one-time EUR 50 enrolment fee and EUR 23.99–26.99 for the book. Current start dates are on the course page. Beginners welcome.',
+        'Our intensive courses run from A1 to C1, with 20 lessons of 45 minutes a week. You learn in the mornings from Monday to Friday, 09:00–12:30, or in the afternoons from Monday to Thursday, 13:00–17:30. The course costs €520 for 4 weeks and €940 for 8 weeks, and €117.50 for each further week. On top of that, there is a one-off enrolment fee of €50 and €23.99–26.99 for the textbook. You’ll find the current start dates on the course page. Complete beginners are welcome too.',
     },
     {
       id: 'course-intensive-de',
@@ -523,12 +523,12 @@ function buildCourseDetailPassages(): KbPassage[] {
     {
       id: 'course-evening-en',
       locale: 'en',
-      title: 'Evening German course – schedule and prices',
+      title: 'Evening courses – timetable and prices',
       url: '/courses/evening-course',
       topic: 'courses',
       keywords: ['evening', 'abend', 'course', '476', 'price', 'after work', 'part time', 'monday wednesday', 'tuesday thursday'],
       content:
-        'Evening German: A1–C1, 4 lessons/week. Mon/Wed or Tue/Thu, 18:30–20:00. EUR 476 per trimester plus the course book. Ideal for learners studying alongside work or other commitments. Current terms and start dates are on the course page.',
+        'Our evening courses run from A1 to C1, with 4 lessons a week, on Mondays and Wednesdays or on Tuesdays and Thursdays from 18:30 to 20:00. A trimester costs €476, plus the textbook. The evening course suits you well if you work or study alongside it. You’ll find the current trimesters and start dates on the course page.',
     },
     {
       id: 'course-evening-de',
@@ -543,12 +543,12 @@ function buildCourseDetailPassages(): KbPassage[] {
     {
       id: 'course-medical-en',
       locale: 'en',
-      title: 'Medical German course at CASA',
+      title: 'German for nursing and medicine at CASA',
       url: '/courses/german-for-medical',
       topic: 'courses',
       keywords: ['medical', 'doctor', 'healthcare', 'b2', 'c1', 'fachsprachprüfung', 'fsp', 'professional'],
       content:
-        'German for Medical Professionals: for doctors before and after the Fachsprachprüfung, entering at CEFR level B2 or C1. The fee, weekly hours and dates are available from the CASA advice team.',
+        'German for nursing and medicine is for doctors before and after the Fachsprachprüfung, the specialist language exam for doctors. You join at level B2 or C1. Our advice team can tell you the fee, the weekly hours and the dates.',
     },
     {
       id: 'course-medical-de',
@@ -563,12 +563,12 @@ function buildCourseDetailPassages(): KbPassage[] {
     {
       id: 'course-bildungszeit-en',
       locale: 'en',
-      title: 'Bildungszeit German – superintensive block',
+      title: 'Bildungszeit – super-intensive block',
       url: '/courses/bildungszeit',
       topic: 'courses',
       keywords: ['bildungszeit', 'educational leave', 'entitlement', 'employer', '280', 'intensive', 'block'],
       content:
-        'Bildungszeit German: from B1, superintensive — a morning and an afternoon intensive course in parallel, 30–40 hours a week, which is what educational-leave recognition requires. EUR 280 for 1 week, EUR 520 for 2 weeks, plus books (EUR 46–54 for two) and EUR 50 on a first registration. Join any Monday. Under the Bremisches Bildungszeitgesetz, employees working in Bremen have ten days over two years. Confirm eligibility with CASA and your employer before registering.',
+        'Our course for Bildungszeit, the paid training leave in Bremen, is open from level B1. It is super-intensive, because you attend one intensive course in the morning and another in the afternoon, 30–40 hours a week in total, as recognition as Bildungszeit requires. One week costs €280 and two weeks cost €520. On top of that come the textbooks (€46–54 for two) and €50 on your first registration. You can join on any Monday. Under the Bremisches Bildungszeitgesetz, employees who work in Bremen are entitled to ten days over two years. Before you register, please check with CASA and your employer whether you are entitled.',
     },
     {
       id: 'course-bildungszeit-de',
@@ -662,7 +662,7 @@ function buildFooterPassages(): KbPassage[] {
       url: '/contact',
       topic: 'contact',
       keywords: ['contact', 'office', 'phone', 'address', 'email'],
-      content: `Phone ${footerConfig.contact.phone}. Address ${footerConfig.contact.address}. Office hours ${footerConfig.contact.officeHours.join('; ')}.`,
+      content: `You can reach us by phone on ${footerConfig.contact.phone}. Our address is ${footerConfig.contact.address}. We’re here for you Monday to Thursday from 08:30 to 19:00 and on Friday from 08:30 to 13:00.`,
     },
     {
       id: 'footer-contact-de',

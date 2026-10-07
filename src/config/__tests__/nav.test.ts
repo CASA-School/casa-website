@@ -20,4 +20,25 @@ describe('menu descriptions', () => {
       expect(german, item.href).not.toMatch(/\.\.\.$/);
     }
   });
+
+  /*
+   * The same cap cut the English menu itself: "Meet teachers and staff guiding
+   * each learner journey." is 53 characters, so /en showed "…learner jour...".
+   * Every English description is written to fit.
+   */
+  it('shows every description in English uncut', () => {
+    for (const item of dropdownItems) {
+      expect(localizeNavDescription(item.description, 'en'), item.href).toBe(item.description);
+    }
+  });
+});
+
+describe('menu labels', () => {
+  // Bildungszeit is the legal name of Bremen's paid training leave; the English
+  // menu calls it by that name, as the course pages do.
+  it('names Bildungszeit by its German name in English too', () => {
+    const bildungszeit = dropdownItems.find((item) => item.href === '/courses/bildungszeit');
+
+    expect(bildungszeit?.label).toBe('Bildungszeit');
+  });
 });

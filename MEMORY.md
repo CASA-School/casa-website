@@ -2372,3 +2372,17 @@ level descriptions on the placement page, each Spezialkurs module's own text, th
 course, the medical topics. Time-bound data (dates, prices) and dropped offers were left to the
 team. B1+ sits between B1 and B2 in a learning path as a whole term („B1+ · 8 Wochen"), taught
 with Kontext.
+
+## 40. English says what the German says (2026-10-07)
+
+After the German rewrite (pass 39) the English pages said less than the German, and sometimes
+something else. Every English page now carries the same facts and sections as its German page,
+written as natural British English rather than translated: the restored WG, Leitbild, team,
+level and Spezialkurs content, the exam pages' details, the FAQ additions, the guides. One English
+name per thing across the site (Intensive courses, Evening courses, Special courses, German for
+nursing and medicine, In-company teaching, Classes for groups, Bildungszeit as a proper name,
+"Get advice"), sentence-case menu labels and British spelling; the English menu no longer cuts a
+description to "…learner jour…" (a test checks the 52-character limit). Learners' English e-mails
+greet by first name, as the German now does; organisers keep a formal greeting. Two native English
+editing passes followed. Open for the team: the English-only "Academic Coordinator" job ad, the
+English rendering of the motto, and the calculator's B1+ price.

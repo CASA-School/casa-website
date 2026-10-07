@@ -27,17 +27,17 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
             {de ? 'Unser gesellschaftlicher Auftrag' : 'Our public-benefit mission'}
           </p>
           <h2 id="nonprofit-mission-title" className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
-            {de ? 'Gemeinnützig für Bildung und Teilhabe' : 'A non-profit school. A shared purpose.'}
+            {de ? 'Gemeinnützig für Bildung und Teilhabe' : 'A non-profit for education and inclusion'}
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-[var(--casa-ink)]">
             {de
               ? 'Als gemeinnützige Sprachschule verbinden wir Deutschunterricht mit Beratung und Begegnung. Sprachkenntnisse eröffnen Wege in den Alltag, in Ausbildung, Studium und Beruf.'
-              : 'As a non-profit language school, we bring teaching, personal advice and opportunities to meet others together. German opens doors in everyday life, education and work.'}
+              : 'As a non-profit language school, we combine German teaching with advice and opportunities to meet people. Language skills open the way into everyday life, vocational training, university and work.'}
           </p>
           <p className="mt-4 leading-relaxed text-[var(--casa-muted)]">
             {de
               ? 'Wir begleiten internationale Lernende und Menschen, die in Bremen neu anfangen. Unsere Bildungskooperationen helfen auf dem Weg ins Studium. Kostenfreie Sprachtandems, Ausflüge und Begegnungen schaffen Verbindungen im Alltag.'
-              : 'We support international learners and people making a new start in Bremen. Our education partnerships help them prepare for university; free language exchanges, outings and meetups build connections beyond the classroom.'}
+              : 'We support international learners and people who are making a new start in Bremen. Our education partnerships help them on the way to university. Free language tandems, outings and get-togethers create connections in everyday life.'}
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
           <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">
             {de
               ? 'Mit diesen Organisationen arbeiten wir in Bremen und darüber hinaus zusammen.'
-              : 'The organisations we work with, in Bremen and beyond.'}
+              : 'These are the organisations we work with, in Bremen and beyond.'}
           </p>
           <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label={de ? 'Kooperationspartner' : 'Cooperation partners'}>
             {partners.map((partner) => (

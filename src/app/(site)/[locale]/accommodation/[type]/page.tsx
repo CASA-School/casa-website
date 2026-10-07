@@ -36,10 +36,10 @@ export async function generateMetadata({ params }: AccommodationDetailPageProps)
     locale,
     title: type === 'flat'
       ? (locale === 'de' ? 'CASA-WGs' : 'CASA shared flats')
-      : (locale === 'de' ? 'Wohnen bei Bremer Gastgebern' : 'Stay with local hosts'),
+      : (locale === 'de' ? 'Wohnen bei Bremer Gastgebern' : 'Living with hosts in Bremen'),
     description: locale === 'de'
       ? 'Hier findest du alles über Wohnen, Kosten und Anreise während deines Intensivkurses. Bei Fragen helfen wir dir persönlich weiter.'
-      : 'Your room during your intensive course: accommodation details, costs and arrival information, with personal support from CASA.',
+      : 'Find out where you will live during your intensive course, what it costs and how you get here. If you have any questions, we will help you personally.',
     path: `/accommodation/${type}`,
   });
 }
@@ -121,7 +121,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       <HeroCUtilityRail
-        eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation detail'}
+        eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
         title={detail.headline}
         description={detail.summary}
         breadcrumbs={breadcrumbs}
@@ -142,7 +142,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
         notes={
           locale === 'de'
             ? 'Ob ein Zimmer frei ist, bestätigen wir dir nach deiner Anfrage.'
-            : 'Availability is confirmed after your request.'
+            : 'We confirm whether a room is free once you have sent your request.'
         }
         ctas={pageConfig.ctas}
         photo={detailHeroPhoto}
@@ -155,31 +155,31 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
           <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
             <div className="min-w-0 space-y-12 md:space-y-14">
               <AccommodationArrivalChecklist
-                title={locale === 'de' ? 'Ankunfts- und Stadtteil-Checkliste' : 'Neighborhood + arrival checklist'}
+                title={locale === 'de' ? 'Ankunfts- und Stadtteil-Checkliste' : 'Arrival and neighbourhood checklist'}
                 description={
                   locale === 'de'
                     ? 'Eine Checkliste zum Ausdrucken für deine Anreise und deine erste Woche.'
-                    : 'Printable checklist for arrival, orientation, and your first week.'
+                    : 'A checklist to print out for your arrival and your first week.'
                 }
                 neighborhoodTitle={locale === 'de' ? 'Im Stadtteil' : 'In the neighbourhood'}
                 checklistTitle={locale === 'de' ? 'Vor der Ankunft' : 'Before you arrive'}
                 printLabel={locale === 'de' ? 'Checkliste drucken' : 'Print checklist'}
                 neighborhoodNotes={[
-                  locale === 'de' ? 'Bus- und Bahnverbindungen zur Schule heraussuchen' : 'Check public transport access to school',
-                  locale === 'de' ? 'Supermärkte und Apotheken in der Nähe finden' : 'Locate nearby groceries and pharmacies',
-                  locale === 'de' ? 'Ruhige Orte zum Lernen in der Umgebung finden' : 'Identify quiet places for study',
+                  locale === 'de' ? 'Bus- und Bahnverbindungen zur Schule heraussuchen' : 'Look up bus and tram connections to the school',
+                  locale === 'de' ? 'Supermärkte und Apotheken in der Nähe finden' : 'Find supermarkets and pharmacies nearby',
+                  locale === 'de' ? 'Ruhige Orte zum Lernen in der Umgebung finden' : 'Find quiet places to study in the area',
                 ]}
                 arrivalChecklist={[
-                  locale === 'de' ? 'Ankunftszeit bestätigen' : 'Confirm check-in time',
-                  locale === 'de' ? 'Hausregeln lesen und akzeptieren' : 'Review and accept house rules',
-                  locale === 'de' ? 'Notfallkontakt abspeichern' : 'Save emergency support contact',
-                  locale === 'de' ? 'Kaution, Vermittlungsgebühr und Kündigungsfrist prüfen' : 'Review deposit, placement fee, and cancellation timing',
-                  locale === 'de' ? 'Den Weg zur Schule vorher einmal ausprobieren' : 'Test first commute to CASA',
+                  locale === 'de' ? 'Ankunftszeit bestätigen' : 'Confirm your arrival time',
+                  locale === 'de' ? 'Hausregeln lesen und akzeptieren' : 'Read and accept the house rules',
+                  locale === 'de' ? 'Notfallkontakt abspeichern' : 'Save the emergency contact',
+                  locale === 'de' ? 'Kaution, Vermittlungsgebühr und Kündigungsfrist prüfen' : 'Check the deposit, booking fee and notice period',
+                  locale === 'de' ? 'Den Weg zur Schule vorher einmal ausprobieren' : 'Try out your route to school before your first day',
                 ]}
               />
 
               <EditorialSplit
-                eyebrow={locale === 'de' ? 'So wohnst du' : 'Living snapshot'}
+                eyebrow={locale === 'de' ? 'So wohnst du' : 'How you will live'}
                 title={optionTitle}
                 description={detail.summary}
                 bullets={detail.highlights}
@@ -188,12 +188,12 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
 
               <section>
                 <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
-                  {locale === 'de' ? 'Was die Unterkunft kostet' : 'Your accommodation costs at a glance'}
+                  {locale === 'de' ? 'Was die Unterkunft kostet' : 'What accommodation costs'}
                 </h2>
                 <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                   {locale === 'de'
                     ? 'In der CASA-WG und bei einer Gastfamilie zahlst du dieselben Preise.'
-                    : 'The same rates apply to a CASA shared flat and a room with local hosts.'}
+                    : 'You pay the same in a CASA shared flat as with a host family.'}
                 </p>
                 <FeeStrip figures={localizeAccommodationCosts(locale)} className="mt-6" />
                 <p className="mt-4 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">
@@ -215,12 +215,12 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
               */}
               <section>
                 <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
-                  {locale === 'de' ? 'Die Übergabe wird gemeinsam festgehalten' : 'The handover is documented together'}
+                  {locale === 'de' ? 'Die Übergabe wird gemeinsam festgehalten' : 'The handover is recorded together'}
                 </h2>
                 <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                   {locale === 'de'
                     ? 'Wenn du ankommst und wenn du abreist, schaust du dir das Zimmer zusammen mit der Person an, die dafür zuständig ist. Was ihr seht, haltet ihr gemeinsam auf einem Formular fest. So lassen sich Fragen zum Zimmer und zur Kaution später für beide Seiten gut klären.'
-                    : 'At arrival and departure, the host and student record the condition of the room together. The handover form gives both sides a shared record when discussing the room and deposit.'}
+                    : 'When you arrive and again when you leave, you look round the room together with the person responsible for it. You both note down what you see on a form. That makes it easy for both sides to sort out any questions about the room or the deposit later.'}
                 </p>
                 <ul className="mt-6 grid gap-3 sm:grid-cols-2">
                   {checkInSummary(locale).map((item) => (
@@ -240,18 +240,18 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
 
               <ComparisonModule
                 eyebrow={locale === 'de' ? 'Wohnen bei CASA' : 'Living with CASA'}
-                title={locale === 'de' ? 'WG oder privater Haushalt?' : 'Shared flat or local household?'}
+                title={locale === 'de' ? 'WG oder privater Haushalt?' : 'Shared flat or private household?'}
                 description={locale === 'de'
                   ? 'Das bieten dir die beiden Wohnmöglichkeiten während deines Intensivkurses.'
-                  : 'What each accommodation option offers during your intensive course.'}
+                  : 'What the two options offer you during your intensive course.'}
                 rowHeading={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
                 leftTitle={locale === 'de' ? 'CASA-WG' : 'CASA shared flat'}
-                rightTitle={locale === 'de' ? 'Privater Haushalt' : 'Local household'}
+                rightTitle={locale === 'de' ? 'Privater Haushalt' : 'Private household'}
                 rows={[
                   {
                     label: locale === 'de' ? 'Zusammenleben' : 'Who you live with',
                     left: locale === 'de' ? 'Mit anderen internationalen Kursteilnehmenden' : 'Other international course participants',
-                    right: locale === 'de' ? 'Bei Privatpersonen in Bremen' : 'Local hosts in Bremen',
+                    right: locale === 'de' ? 'Bei Privatpersonen in Bremen' : 'Private hosts in Bremen',
                   },
                   {
                     label: locale === 'de' ? 'Dein Zimmer' : 'Your room',
@@ -270,7 +270,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                   },
                   {
                     label: locale === 'de' ? 'Für wen?' : 'Who can book?',
-                    left: locale === 'de' ? 'Volljährige Teilnehmende unserer Intensivkurse' : 'Intensive-course participants aged 18 or over',
+                    left: locale === 'de' ? 'Volljährige Teilnehmende unserer Intensivkurse' : 'Participants aged 18 or over on our intensive courses',
                     right: locale === 'de' ? 'Teilnehmende unserer Intensivkurse' : 'Participants on our intensive courses',
                   },
                 ]}
@@ -278,27 +278,27 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
 
               <ProcessSteps
                 eyebrow={locale === 'de' ? 'Anfrage' : 'Enquire'}
-                title={locale === 'de' ? 'Unterkunft anfragen' : 'Request this accommodation now'}
+                title={locale === 'de' ? 'Unterkunft anfragen' : 'Request accommodation'}
                 description={
                   locale === 'de'
                     ? 'Sag uns, was du dir wünschst. Wir schicken dir passende Möglichkeiten und sagen dir, wie es weitergeht.'
-                    : 'Share your preference and we will send options with next steps.'
+                    : 'Tell us what you would like. We will send you suitable options and let you know what happens next.'
                 }
                 steps={[
                   {
                     step: locale === 'de' ? '1' : '1',
-                    title: locale === 'de' ? 'Wunsch nennen' : 'Share preference',
-                    description: locale === 'de' ? 'Sag uns, wie du wohnen möchtest und für welchen Zeitraum.' : 'Select type and preferred dates.',
+                    title: locale === 'de' ? 'Wunsch nennen' : 'Tell us your preference',
+                    description: locale === 'de' ? 'Sag uns, wie du wohnen möchtest und für welchen Zeitraum.' : 'Let us know how you would like to live and for which dates.',
                   },
                   {
                     step: locale === 'de' ? '2' : '2',
-                    title: locale === 'de' ? 'Vorschläge prüfen' : 'Receive matching',
-                    description: locale === 'de' ? 'Du bekommst passende Möglichkeiten mit den Kosten und siehst, was frei ist.' : 'Review options, costs, and availability.',
+                    title: locale === 'de' ? 'Vorschläge prüfen' : 'Look through our suggestions',
+                    description: locale === 'de' ? 'Du bekommst passende Möglichkeiten mit den Kosten und siehst, was frei ist.' : 'You receive suitable options with their costs and can see what is available.',
                   },
                   {
                     step: locale === 'de' ? '3' : '3',
                     title: locale === 'de' ? 'Zusagen' : 'Confirm',
-                    description: locale === 'de' ? 'Nach der Buchung besprechen wir mit dir deine Anreise und die Schlüsselübergabe.' : 'Arrange your arrival and key collection after booking.',
+                    description: locale === 'de' ? 'Nach der Buchung besprechen wir mit dir deine Anreise und die Schlüsselübergabe.' : 'Once you have booked, we talk through your arrival and how you collect your keys.',
                   },
                 ]}
               />

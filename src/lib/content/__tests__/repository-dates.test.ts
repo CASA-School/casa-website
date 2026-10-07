@@ -159,7 +159,7 @@ describe('course detail', () => {
     expect((await getCourseDetail('german-for-groups', 'en'))?.course.name).toBe('Classes for groups');
     expect((await getCourseDetail('special-courses', 'de'))?.course.name).toBe('Spezialkurse');
     expect((await getCourseDetail('bildungszeit', 'de'))?.course.name).toBe('Bildungszeit');
-    expect((await getCourseDetail('bildungszeit', 'en'))?.course.name).toBe('Bildungszeit German');
+    expect((await getCourseDetail('bildungszeit', 'en'))?.course.name).toBe('Bildungszeit');
   });
 });
 

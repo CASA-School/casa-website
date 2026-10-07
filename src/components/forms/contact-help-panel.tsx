@@ -10,17 +10,17 @@ type ContactHelpPanelProps = {
 };
 
 const dayLabels: Record<string, { de: string; en: string }> = {
-  'Monday - Thursday': { de: 'Montag – Donnerstag', en: 'Monday – Thursday' },
+  'Monday–Thursday': { de: 'Montag – Donnerstag', en: 'Monday – Thursday' },
   Friday: { de: 'Freitag', en: 'Friday' },
 };
 
-/** "Monday - Thursday: 08:30 - 19:00" from the footer config, as a day and a time. */
+/** "Monday–Thursday: 08:30–19:00" from the footer config, as a day and a time. */
 function officeHours(locale: ContentLocale) {
   return footerConfig.contact.officeHours.map((line) => {
     const [days, ...time] = line.split(': ');
     return {
       days: dayLabels[days]?.[locale] ?? days,
-      time: time.join(': ').replace(' - ', ' – '),
+      time: time.join(': ').replace(/\s*[-–]\s*/, '–'),
     };
   });
 }

@@ -40,7 +40,7 @@ export const footerConfig: FooterConfig = {
     {
       title: 'School',
       items: [
-        { label: 'Our School', href: '/about#mission' },
+        { label: 'Our school', href: '/about#mission' },
         { label: 'Non-profit status', href: '/ueber-uns/gemeinnuetzigkeit' },
         { label: 'Team', href: '/team' },
         { label: 'Cooperation partners', href: '/partners' },
@@ -78,8 +78,8 @@ export const footerConfig: FooterConfig = {
       { label: 'info@casa-bremen.de', href: 'mailto:info@casa-bremen.de' },
     ],
     officeHours: [
-      'Monday - Thursday: 08:30 - 19:00',
-      'Friday: 08:30 - 13:00',
+      'Monday–Thursday: 08:30–19:00',
+      'Friday: 08:30–13:00',
     ],
   },
   socialLinks: [

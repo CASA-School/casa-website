@@ -160,11 +160,11 @@ export const newsFlashIssue: NewsFlashIssue = {
   },
 
   ticker: [
-    { de: '02.10.–04.10. · Tag der Deutschen Einheit in der Innenstadt', en: '02.10.–04.10. · German Unity Day in the city centre' },
-    { de: '16.10. · telc B2-Prüfung bei CASA', en: '16.10. · telc B2 exam at CASA' },
-    { de: '16.10.–01.11. · Freimarkt auf der Bürgerweide', en: '16.10.–01.11. · Freimarkt fair on the Bürgerweide' },
-    { de: '24.10. · Freimarktsumzug, 10 Uhr', en: '24.10. · Freimarkt parade, 10:00' },
-    { de: '30.10. · telc C1-HS-Prüfung bei CASA', en: '30.10. · telc C1 Hochschule exam at CASA' },
+    { de: '02.10.–04.10. · Tag der Deutschen Einheit in der Innenstadt', en: '2–4 October · German Unity Day in the city centre' },
+    { de: '16.10. · telc B2-Prüfung bei CASA', en: '16 October · telc Deutsch B2 exam at CASA' },
+    { de: '16.10.–01.11. · Freimarkt auf der Bürgerweide', en: '16 October – 1 November · Freimarkt fair on the Bürgerweide' },
+    { de: '24.10. · Freimarktsumzug, 10 Uhr', en: '24 October · Freimarkt parade, 10:00' },
+    { de: '30.10. · telc C1-HS-Prüfung bei CASA', en: '30 October · telc Deutsch C1 Hochschule exam at CASA' },
   ],
 
   /*
@@ -180,15 +180,15 @@ export const newsFlashIssue: NewsFlashIssue = {
     body: [
       {
         de: 'Das CASA-Team lädt euch zu einem monatlichen Treffen abends im Lagerhaus (Schildstraße 12–19, 28203 Bremen) ein. Dort möchten wir mit euch zusammen auf Deutsch ins Gespräch kommen und miteinander Zeit verbringen.',
-        en: 'The CASA team invites you to a monthly evening get-together at the Lagerhaus (Schildstraße 12–19, 28203 Bremen). We want to talk with you in German and spend time together.',
+        en: 'The CASA team would like to invite you to a monthly evening get-together at the Lagerhaus (Schildstraße 12–19, 28203 Bremen). We’d love to chat with you in German and spend some time together.',
       },
       {
         de: 'Die Termine werden bald kommen.',
-        en: 'The dates will follow soon.',
+        en: 'We’ll announce the dates soon.',
       },
       {
         de: 'Alle sind herzlich eingeladen!',
-        en: 'Everyone is warmly invited!',
+        en: 'Everyone is very welcome!',
       },
     ],
   },
@@ -209,7 +209,7 @@ export const newsFlashIssue: NewsFlashIssue = {
         levels: ['C'],
         body: {
           de: 'Im September durften wir wieder eine weitere Gruppe aus dem Ausland begrüßen. Die Schülergruppe kam aus Viborg in Dänemark. Gemeinsam mit unseren Freiwilligendienstlerinnen haben sie nach dem Unterricht am Vormittag Bremen auf verschiedene Arten erkundet. Sie haben unter anderem das Universum und den Bunker Valentin in Bremen Farge besucht.',
-          en: 'In September we welcomed another group from abroad: a school group from Viborg in Denmark. After their morning lessons they explored Bremen in many ways together with our volunteers, visiting the Universum science centre and the Valentin submarine bunker in Bremen-Farge, among other places.',
+          en: 'In September we welcomed another group from abroad, a school group from Viborg in Denmark. After their morning lessons, they explored Bremen in lots of different ways with our volunteers. Among other places, they visited the Universum science centre and the Valentin submarine bunker in Bremen-Farge.',
         },
       },
     ],
@@ -223,7 +223,7 @@ export const newsFlashIssue: NewsFlashIssue = {
       title: { de: 'Wir drücken allen …', en: 'Fingers crossed for …' },
       body: {
         de: '…, die bei uns am 16.10.2026 ihre telc B2-Prüfung oder am 30.10.2026 ihre telc C1-HS-Prüfung schreiben, … die Daumen!',
-        en: '… everyone sitting their telc B2 exam with us on 16.10.2026 or their telc C1 Hochschule exam on 30.10.2026!',
+        en: '… everyone sitting their telc Deutsch B2 exam with us on 16 October 2026 or their telc Deutsch C1 Hochschule exam on 30 October 2026!',
       },
     },
     {
@@ -234,7 +234,7 @@ export const newsFlashIssue: NewsFlashIssue = {
       title: { de: 'Podcast zum Deutschlernen', en: 'Podcasts for learning German' },
       body: {
         de: 'Sprachen kann man einfacher lernen, wenn man sie hört. Hier sind einige Podcasts, die ihr auf dem Weg zu CASA und/oder in eurer Freizeit hören könnt:',
-        en: 'Languages are easier to learn when you hear them. Here are some podcasts to listen to on your way to CASA or in your free time:',
+        en: 'Languages are easier to learn when you hear them. Here are some podcasts you can listen to on your way to CASA or in your free time:',
       },
       list: [
         { de: 'Easy German: Learn German with native speakers', en: 'Easy German: Learn German with native speakers' },
@@ -253,9 +253,9 @@ export const newsFlashIssue: NewsFlashIssue = {
         en: 'Tips from the office:',
       },
       list: [
-        { de: '02.10.–04.10.: Große Veranstaltung zum Tag der Deutschen Einheit in der Innenstadt Bremens', en: '02.10.–04.10.: Big German Unity Day celebration in Bremen city centre' },
-        { de: '16.10.–01.11.: Freimarkt auf der Bürgerweide', en: '16.10.–01.11.: Freimarkt fair on the Bürgerweide' },
-        { de: '24.10.: Freimarktsumzug, 10 Uhr', en: '24.10.: Freimarkt parade, 10:00' },
+        { de: '02.10.–04.10.: Große Veranstaltung zum Tag der Deutschen Einheit in der Innenstadt Bremens', en: '2–4 October: A big German Unity Day celebration in Bremen city centre' },
+        { de: '16.10.–01.11.: Freimarkt auf der Bürgerweide', en: '16 October – 1 November: Freimarkt fair on the Bürgerweide' },
+        { de: '24.10.: Freimarktsumzug, 10 Uhr', en: '24 October: Freimarkt parade, 10:00' },
       ],
     },
   ],

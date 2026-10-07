@@ -228,7 +228,7 @@ export default async function CourseDetailPage({
         kind: 'secondary' as const,
       }
     : {
-        label: locale === 'de' ? 'Beratung anfragen' : 'Request guidance',
+        label: locale === 'de' ? 'Beratung anfragen' : 'Get advice',
         href: '/contact?topic=Course advice',
         kind: 'secondary' as const,
       };
@@ -280,7 +280,7 @@ export default async function CourseDetailPage({
           : 'On request',
     },
     'lessons-per-week': {
-      label: locale === 'de' ? 'Unterrichtseinheiten pro Woche' : 'Lessons/week',
+      label: locale === 'de' ? 'Unterrichtseinheiten pro Woche' : 'Lessons a week',
       // 0 is the "CASA publishes no weekly load" sentinel, not a real zero.
       // Firmenunterricht is agreed per contract; German for Medical simply has
       // no published figure. Rendering "0" would read as "no lessons".
@@ -309,7 +309,7 @@ export default async function CourseDetailPage({
         quoteAudience === 'group'
           ? locale === 'de'
             ? 'Unterricht, Kulturprogramm, Unterkunft, Nahverkehrsticket'
-            : 'Lessons, culture programme, accommodation, transit pass'
+            : 'Lessons, culture programme, accommodation, public transport ticket'
           : locale === 'de'
             ? 'Lehrplan nach Bedarfsanalyse, Unterricht im Betrieb oder bei CASA'
             : 'Syllabus built from a needs analysis, taught on site or at CASA',
@@ -403,14 +403,14 @@ export default async function CourseDetailPage({
   const processDescription = courseNextSteps?.description ?? (isOrganisationQuote
     ? locale === 'de'
       ? 'So entsteht ein Firmenkurs bei CASA.'
-      : 'From needs consultation to training plan, both without obligation.'
+      : 'This is how we put together a course for your company.'
     : archetype.cta === 'request-quote'
       ? locale === 'de'
         ? 'Von der ersten Anfrage bis zum fertigen Programm sind es drei Schritte.'
-        : 'From first enquiry to a confirmed programme.'
+        : 'It takes three steps.'
       : locale === 'de'
         ? 'Von der Einstufung bis zum ersten Kurstag sind es drei Schritte.'
-        : 'What happens next before your first class day.');
+        : 'There are three steps between your placement and your first day in class.');
 
   // Quote products have a different journey: nobody registers, someone briefs.
   // Firmenunterricht speaks about the company in the third person, as the old
@@ -419,11 +419,11 @@ export default async function CourseDetailPage({
     ? [
         {
           step: '1',
-          title: locale === 'de' ? 'Studienberatung' : 'Needs consultation',
+          title: locale === 'de' ? 'Studienberatung' : 'Consultation',
           description:
             locale === 'de'
               ? 'Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.'
-              : 'We establish learning needs, goals, and the language levels in your team.',
+              : 'In a first meeting we find out what your team needs to learn and how much German they already speak.',
         },
         {
           step: '2',
@@ -431,7 +431,7 @@ export default async function CourseDetailPage({
           description:
             locale === 'de'
               ? 'Auf dieser Grundlage stellen wir den Ausbildungsplan für die Mitarbeiterinnen und Mitarbeiter zusammen.'
-              : 'From that we build the syllabus for your employees.',
+              : 'On that basis we put together the training plan for your staff.',
         },
         {
           step: '3',
@@ -439,7 +439,7 @@ export default async function CourseDetailPage({
           description:
             locale === 'de'
               ? 'Danach erhält die Firma unser Angebot. Beratung und Angebot sind stets unverbindlich.'
-              : 'Both the consultation and the quote are always without obligation.',
+              : 'You then receive our quote. Neither the consultation nor the quote commits you to anything.',
         },
       ]
     : isGroupQuote
@@ -450,7 +450,7 @@ export default async function CourseDetailPage({
             description:
               locale === 'de'
                 ? 'Schreiben Sie uns, wie groß Ihre Gruppe ist, wie alt die Teilnehmenden sind, wann Sie kommen möchten und was Ihnen wichtig ist.'
-                : 'Group size, ages, dates, and what you want to focus on.',
+                : 'Tell us how big your group is, how old the participants are, when you would like to come and what matters to you.',
           },
           {
             step: '2',
@@ -458,7 +458,7 @@ export default async function CourseDetailPage({
             description:
               locale === 'de'
                 ? 'Gemeinsam mit Ihnen planen wir Unterricht, Kulturprogramm und Unterkunft.'
-                : 'We plan lessons, culture programme, and accommodation together.',
+                : 'Together with you, we plan the lessons, the culture programme and the accommodation.',
           },
           {
             step: '3',
@@ -466,7 +466,7 @@ export default async function CourseDetailPage({
             description:
               locale === 'de'
                 ? 'Sie erhalten ein unverbindliches Angebot mit allen Leistungen und Kosten.'
-                : 'A no-obligation quote covering everything included.',
+                : 'You receive a no-obligation quote listing everything that is included and what it costs.',
           },
         ]
       : /*
@@ -486,7 +486,7 @@ export default async function CourseDetailPage({
             description:
               locale === 'de'
                 ? 'Mach den kostenlosen Online-Test oder komm zur Einstufung bei uns vorbei. Wenn du noch gar kein Deutsch sprichst, beginnst du direkt bei A1.'
-                : 'A free online test, or in person at the school. With no German at all, you start straight at A1.',
+                : 'Do the free online test, or come to the school and take the placement test in person. If you do not speak any German yet, you start straight at A1.',
           },
           {
             step: '2',
@@ -494,15 +494,15 @@ export default async function CourseDetailPage({
             description:
               locale === 'de'
                 ? 'Such dir einen Starttermin aus und schick uns deine Anmeldung.'
-                : 'Choose a start date and confirm your details.',
+                : 'Choose a start date and send us your registration.',
           },
           {
             step: '3',
-            title: locale === 'de' ? 'Start vorbereiten' : 'Prepare your start',
+            title: locale === 'de' ? 'Start vorbereiten' : 'Get ready to start',
             description:
               locale === 'de'
                 ? 'Plane deine Zeit und leg deine Unterlagen bereit. Wenn du noch eine Unterkunft in Bremen brauchst, vermitteln wir dir gern ein Zimmer.'
-                : 'Materials, schedule, optional housing support.',
+                : 'Plan your time and get your documents ready. If you still need somewhere to live in Bremen, we are happy to arrange a room for you.',
           },
         ]);
 
@@ -511,36 +511,36 @@ export default async function CourseDetailPage({
   const audienceTitle = courseAudience?.title ?? (isOrganisationQuote
     ? locale === 'de'
       ? 'Für Firmen und ihre Mitarbeitenden'
-      : 'For companies planning language work as part of staff qualification'
+      : 'For companies and their staff'
     : isGroupQuote
       ? locale === 'de'
         ? 'Für Schulklassen und Gruppen'
-        : 'For groups coming to Bremen with a clear goal'
+        : 'For school classes and groups'
       : locale === 'de'
         ? 'Für wen der Kurs gedacht ist'
-        : 'This course fits learners who want structure and human support');
+        : 'Who the course is for');
 
   const audienceBullets = courseAudience?.bullets ?? (isOrganisationQuote
     ? [
-        locale === 'de' ? 'Den Lehrplan legen wir gemeinsam mit der Firma fest.' : 'A syllabus agreed with you, not off the shelf',
+        locale === 'de' ? 'Den Lehrplan legen wir gemeinsam mit der Firma fest.' : 'We agree the syllabus with your company.',
         // CASA states this requirement plainly on the Firmenunterricht page.
         locale === 'de'
           ? 'Die Teilnehmenden sollten ungefähr auf demselben Sprachniveau sein.'
-          : 'Participants should be at roughly the same language level',
+          : 'The participants should be at roughly the same language level.',
         locale === 'de'
           ? 'Wir begleiten die sprachliche und die interkulturelle Qualifikation.'
-          : 'Language and intercultural training from one provider',
+          : 'We support both the language and the intercultural side of their training.',
       ]
     : isGroupQuote
       ? [
-          locale === 'de' ? 'Inhalte und Tempo stimmen wir mit Ihnen ab.' : 'Content and pace agreed with you',
-          locale === 'de' ? 'Unterkunft und Kulturprogramm organisieren wir für Sie.' : 'Accommodation and culture programme arranged',
-          locale === 'de' ? 'Von der Anfrage bis zur Abreise haben Sie eine feste Ansprechperson.' : 'One contact from enquiry through to departure',
+          locale === 'de' ? 'Inhalte und Tempo stimmen wir mit Ihnen ab.' : 'We agree the content and pace with you.',
+          locale === 'de' ? 'Unterkunft und Kulturprogramm organisieren wir für Sie.' : 'We organise the accommodation and the culture programme for you.',
+          locale === 'de' ? 'Von der Anfrage bis zur Abreise haben Sie eine feste Ansprechperson.' : 'From your first enquiry until the day you leave, you have one person to talk to.',
         ]
       : [
           locale === 'de' ? 'Klare Lernziele pro Woche' : 'Clear weekly learning goals',
           locale === 'de' ? 'Praxisorientierte Aufgaben und Feedback' : 'Practice tasks with direct feedback',
-          locale === 'de' ? 'Nächste Schritte Richtung Prüfung oder Alltag' : 'Next-step orientation for exams or daily life',
+          locale === 'de' ? 'Nächste Schritte Richtung Prüfung oder Alltag' : 'Next steps towards an exam or everyday life',
         ]);
 
   const courseSchema = {
@@ -584,7 +584,7 @@ export default async function CourseDetailPage({
           description={
             locale === 'de'
               ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchen Sie bei uns zusammen. Sie bringen die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
-              : 'A German language trip where the classroom, the host family, the canteen and the afternoon programme are one booking. You bring the group; we arrange everything from the moment they land.'
+              : 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.'
           }
           ctas={[
             {
@@ -606,7 +606,7 @@ export default async function CourseDetailPage({
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Kursdetail' : 'Course detail'}
         title={detail.course.name}
-        description={detail.course.narrative?.promise || (locale === 'de' ? 'Schritt für Schritt von einer Niveaustufe zur nächsten.' : 'Clear learning path with measurable progress.')}
+        description={detail.course.narrative?.promise || (locale === 'de' ? 'Schritt für Schritt von einer Niveaustufe zur nächsten.' : 'Step by step from one level to the next.')}
         breadcrumbs={breadcrumbs}
         infoTitle={locale === 'de' ? 'Kursinfo' : 'Course info'}
         infoItems={infoItems}
@@ -621,10 +621,10 @@ export default async function CourseDetailPage({
           archetype.cta === 'request-quote'
             ? locale === 'de'
               ? 'Umfang und Preis bestätigen wir im Angebot.'
-              : 'Scope and price are confirmed in the quote.'
+              : 'We confirm the scope and the price in our quote.'
             : locale === 'de'
               ? 'Termine und freie Plätze bestätigen wir dir bei der Anmeldung.'
-              : 'Dates and availability are confirmed during registration.'
+              : 'We confirm the dates and your place when you register.'
         }
         ctas={[primaryDecisionCta, secondaryDecisionCta]}
         photo={{
@@ -676,7 +676,7 @@ export default async function CourseDetailPage({
                       detail.course.slug === 'bildungszeit'
                         ? locale === 'de'
                           ? 'In der Bildungszeit besuchst du zwei Intensivkurse gleichzeitig, vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, und nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr. Einsteigen kannst du an jedem Montag.'
-                          : 'Bildungszeit is two intensive courses in parallel, one in the morning and one in the afternoon. You can join on any Monday.'
+                          : 'During Bildungszeit you attend two intensive courses at the same time, in the morning from Monday to Friday, 09:00–12:30, and in the afternoon from Monday to Thursday, 13:00–17:30. You can join on any Monday.'
                         : undefined
                     }
                   />
@@ -707,7 +707,7 @@ export default async function CourseDetailPage({
                         locale === 'de' ? 'Flüssigeres Verstehen und Sprechen' : 'Stronger listening and speaking fluency',
                       ]
                     }
-                    practiceTitle={locale === 'de' ? 'Das übst du' : 'What you will practice'}
+                    practiceTitle={locale === 'de' ? 'Das übst du' : 'What you practise'}
                     locale={locale}
                   />
                   );
@@ -788,14 +788,18 @@ export default async function CourseDetailPage({
                             ? isGroupQuote
                               ? 'Aus einer Gruppenreise'
                               : 'Erfahrungen'
-                            : 'From a group visit'
+                            : isGroupQuote
+                              ? 'From a group visit'
+                              : 'Experiences'
                         }
                         title={
                           locale === 'de'
                             ? isGroupQuote
                               ? 'Was eine begleitende Lehrkraft berichtet'
                               : 'Was Teilnehmende über CASA sagen'
-                            : 'What an accompanying teacher wrote'
+                            : isGroupQuote
+                              ? 'What an accompanying teacher wrote'
+                              : 'What participants say about CASA'
                         }
                         quote={story.quote}
                         person={story.personDisplay}
@@ -814,11 +818,11 @@ export default async function CourseDetailPage({
                   return (
                   <TestimonialGrid
                     key={sectionKey}
-                    title={locale === 'de' ? 'Was Lernende über CASA sagen' : 'How learners describe this course'}
+                    title={locale === 'de' ? 'Was Lernende über CASA sagen' : 'What learners say about CASA'}
                     description={
                       locale === 'de'
                         ? 'Lernende erzählen, wie sie ihren Kurs bei uns erlebt haben.'
-                        : 'Stories from classroom rhythm and language progress.'
+                        : 'Learners describe what their course with us was like.'
                     }
                     cards={testimonialCards}
                     locale={locale}
@@ -829,7 +833,7 @@ export default async function CourseDetailPage({
                   return (
                   <section key={sectionKey} className="space-y-5">
                     <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)]">
-                      {locale === 'de' ? 'Andere Kurse bei CASA' : 'Compare other course paths'}
+                      {locale === 'de' ? 'Andere Kurse bei CASA' : 'Other courses at CASA'}
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2">
                       {related.map((course) => {
@@ -856,13 +860,13 @@ export default async function CourseDetailPage({
                             <div className="p-4">
                               <h3 className="text-lg font-bold leading-tight text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">{course.name}</h3>
                               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--casa-muted)]">
-                                {course.narrative?.promise || (locale === 'de' ? 'Ein Deutschkurs bei CASA in Bremen.' : 'Structured German course with clear next steps.')}
+                                {course.narrative?.promise || (locale === 'de' ? 'Ein Deutschkurs bei CASA in Bremen.' : 'A German course at CASA in Bremen.')}
                               </p>
                               <p className="mt-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                                 {course.level_min || 'A1'} - {course.level_max || 'C1'}
                                 {/* 0 is the "no published weekly load" sentinel, not a figure. */}
                                 {course.lessons_per_week > 0
-                                  ? ` · ${course.lessons_per_week} ${locale === 'de' ? 'UE pro Woche' : 'lessons/week'}`
+                                  ? ` · ${course.lessons_per_week} ${locale === 'de' ? 'UE pro Woche' : 'lessons a week'}`
                                   : null}
                               </p>
                             </div>
@@ -881,7 +885,7 @@ export default async function CourseDetailPage({
             <DecisionRail
               locale={locale}
               // Neutral in German: this card serves learners and organisers.
-              infoTitle={locale === 'de' ? 'Auf einen Blick' : 'Your decision'}
+              infoTitle={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               /*
                 No `notes`. It was `contactLine` — "Your contact: Ina Eismann,

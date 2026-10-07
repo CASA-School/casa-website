@@ -73,7 +73,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 3,
     category: 'city',
     blurb: {
-      en: 'A team scavenger hunt through the old town — the classic icebreaker for day one.',
+      en: 'A team scavenger hunt through the old town, the classic first-day activity.',
       de: 'Eine Rallye in Teams durch die Altstadt, der Klassiker für den ersten Tag.',
     },
   },
@@ -113,7 +113,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 7,
     category: 'science',
     blurb: {
-      en: 'Green-house worlds from Asia in the Rhododendron park.',
+      en: 'The greenhouse worlds of Asia in the Rhododendron Park.',
       de: 'Gewächshauswelten Asiens im Rhododendronpark.',
     },
   },
@@ -143,7 +143,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 12,
     category: 'sport',
     blurb: {
-      en: 'Dressing rooms, players tunnel and press room at Werder Bremen.',
+      en: 'Dressing rooms, players’ tunnel and press room at Werder Bremen.',
       de: 'Kabine, Spielertunnel und Presseraum bei Werder Bremen.',
     },
   },
@@ -153,7 +153,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 14,
     category: 'science',
     blurb: {
-      en: 'Hands-on science centre — technology, nature and humankind over three floors.',
+      en: 'A hands-on museum about technology, nature and people, over three floors.',
       de: 'Ein Museum zum Mitmachen über Technik, Natur und Mensch auf drei Ebenen.',
     },
   },
@@ -173,7 +173,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 25,
     category: 'city',
     blurb: {
-      en: 'The night watchman walks the old town after dark and tells its stories.',
+      en: 'After dark, the night watchman takes you through the old town.',
       de: 'Der Nachtwächter zieht nach Einbruch der Dunkelheit durch die Altstadt.',
     },
   },
@@ -203,7 +203,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 30,
     category: 'culture',
     blurb: {
-      en: 'Europe’s emigration museum — every visitor follows one real biography.',
+      en: 'A museum about emigration, where you follow the life story of a real person.',
       de: 'Ein Museum über die Auswanderung, in dem man der Lebensgeschichte eines echten Menschen folgt.',
     },
   },
@@ -213,7 +213,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 50,
     category: 'daytrip',
     blurb: {
-      en: 'A full day in the Hanseatic neighbour: Speicherstadt, harbour and Elbphilharmonie.',
+      en: 'A whole day in Hamburg, with the Speicherstadt, the harbour and the Elbphilharmonie.',
       de: 'Ein ganzer Tag in Hamburg mit Speicherstadt, Hafen und Elbphilharmonie.',
     },
   },
@@ -223,7 +223,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
     price: 70,
     category: 'daytrip',
     blurb: {
-      en: 'The Baltic brick-Gothic capital, Holstentor and marzipan included.',
+      en: 'A day in Lübeck, with its brick Gothic architecture, the Holstentor and marzipan.',
       de: 'Ein Tag in Lübeck mit Backsteingotik, Holstentor und Marzipan.',
     },
   },
@@ -274,11 +274,11 @@ export const GRUPPEN_MODULES: GruppenModule[] = [
     id: 'language-class',
     required: true,
     name: {
-      en: 'German intensive class',
+      en: 'Intensive German course',
       de: 'Deutsch-Intensivkurs',
     },
     detail: {
-      en: 'Mon–Fri, 09:00–12:30. 20 teaching units per week, taught in level-matched groups.',
+      en: 'Mon–Fri, 09:00–12:30. 20 lessons a week, taught in groups matched to level.',
       de: 'Mo–Fr, 09:00–12:30. 20 Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.',
     },
     priceByWeeks: { 1: 150, 2: 300, 3: 450, 4: 600 },
@@ -286,7 +286,7 @@ export const GRUPPEN_MODULES: GruppenModule[] = [
   {
     id: 'teaching-material',
     name: {
-      en: 'Teaching material',
+      en: 'Course materials',
       de: 'Lehrmaterial',
     },
     detail: {
@@ -348,7 +348,7 @@ export type GruppenPackage = {
   slug: GruppenPackageSlug;
   /** The Town Musician this package is named after. */
   animal: LocalizedText;
-  /** Scope descriptor shown next to the animal name, e.g. "1 Week Discovery". */
+  /** Scope descriptor shown next to the animal name, e.g. "1 week of discovery". */
   descriptor: LocalizedText;
   /**
    * Position in the monument, counted from the ground up: 1 = Esel (bottom),
@@ -388,19 +388,19 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     slug: 'hahn',
     stackPosition: 4,
     animal: { en: 'Hahn', de: 'Hahn' },
-    descriptor: { en: '1 Week Discovery', de: '1 Woche Entdecken' },
+    descriptor: { en: '1 week of discovery', de: '1 Woche Entdecken' },
     weeks: 1,
     priceFrom: 595,
     tagline: {
-      en: 'The rooster rides on top of the stack — the shortest way to meet Bremen.',
+      en: 'The rooster sits right at the top. With this package, your group gets to know Bremen in a week.',
       de: 'Der Hahn sitzt ganz oben. Mit ihm lernt Ihre Gruppe Bremen in einer Woche kennen.',
     },
     intro: {
-      en: 'The rooster sits at the top of the stack and sees the whole city at once. One week, twenty teaching units, and four afternoons that take your group behind the scenes at the Weserstadion and inside the studios of Radio Bremen. The shortest way to find out what a language trip to Bremen feels like.',
+      en: 'The rooster sits right at the top and can see the whole city. In one week your group has twenty lessons and four afternoons of activities, which include a look behind the scenes at the Weserstadion and a visit to the studios of Radio Bremen. It is the quickest way to find out what a language trip to Bremen feels like.',
       de: 'Der Hahn sitzt ganz oben und überblickt die ganze Stadt. In einer Woche hat Ihre Gruppe zwanzig Unterrichtseinheiten und vier Nachmittage mit Programm. Dabei geht es unter anderem hinter die Kulissen des Weserstadions und in die Studios von Radio Bremen. So finden Sie auf dem kürzesten Weg heraus, wie sich eine Sprachreise nach Bremen anfühlt.',
     },
     bestFor: {
-      en: 'First-time groups, tight school calendars, and a first trip abroad for younger classes.',
+      en: 'First-time groups, tight school calendars and a first trip abroad for younger classes.',
       de: 'Gruppen beim ersten Mal, enge Schulkalender und die erste Auslandsfahrt jüngerer Klassen.',
     },
     activities: ['cityrallye', 'weserstadion', 'radio-bremen', 'universum'],
@@ -409,19 +409,19 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     slug: 'katze',
     stackPosition: 3,
     animal: { en: 'Katze', de: 'Katze' },
-    descriptor: { en: '2 Week Explorer', de: '2 Wochen Erkunden' },
+    descriptor: { en: '2 weeks of exploring', de: '2 Wochen Erkunden' },
     weeks: 2,
     priceFrom: 1130,
     tagline: {
-      en: 'The cat, third from the ground — long enough that the German starts arriving on its own.',
+      en: 'The cat stands third from the ground. Two weeks is long enough for the German to start coming by itself.',
       de: 'Die Katze steht an dritter Stelle. Zwei Wochen sind lang genug, dass das Deutsch von selbst kommt.',
     },
     intro: {
-      en: 'Two weeks is where a language trip stops being a visit and starts being a stay. Forty teaching units, eight afternoons, and enough time in one host family for the dinner-table German to arrive on its own. The cat explores with curiosity and lands sure-footed — from the Botanika greenhouses to the night watchman’s lantern.',
+      en: 'Two weeks in Bremen is a proper stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough for the German at the dinner table to come by itself. Like the cat, the group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.',
       de: 'Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Ihre Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.',
     },
     bestFor: {
-      en: 'Two weeks is the length most school groups choose: broad cultural range, balanced pace.',
+      en: 'Most school groups, who usually choose two weeks for a wide culture programme at a balanced pace.',
       de: 'Die meisten Schulgruppen wählen zwei Wochen, mit einem breiten Kulturprogramm in ausgewogenem Tempo.',
     },
     activities: [
@@ -439,19 +439,19 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     slug: 'hund',
     stackPosition: 2,
     animal: { en: 'Hund', de: 'Hund' },
-    descriptor: { en: '2 Weeks Plus Hamburg', de: '2 Wochen plus Hamburg' },
+    descriptor: { en: '2 weeks plus Hamburg', de: '2 Wochen plus Hamburg' },
     weeks: 2,
     priceFrom: 1300,
     tagline: {
-      en: 'The dog, on the donkey’s back — the same two weeks, pointed at the region.',
+      en: 'The dog stands on the donkey’s back. Its two weeks also take your group out into the region.',
       de: 'Der Hund steht auf dem Rücken des Esels. Seine zwei Wochen führen auch hinaus in die Region.',
     },
     intro: {
-      en: 'The same two weeks as the Katze, pointed outward: a full day in Hamburg, the harbour by boat, the Klimahaus in Bremerhaven. For groups who have already done a language trip and want the region rather than the town — nose to the ground, new territory, further every day.',
+      en: 'The dog has the same two weeks as the cat and also takes your group out into the region, with a whole day in Hamburg, a boat tour of the harbour and the Klimahaus in Bremerhaven. It suits groups who have been on a language trip before and would like to see more of the region.',
       de: 'Der Hund hat dieselben zwei Wochen wie die Katze und führt Ihre Gruppe auch hinaus in die Region, mit einem ganzen Tag in Hamburg, einer Hafenrundfahrt und dem Klimahaus in Bremerhaven. Er passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.',
     },
     bestFor: {
-      en: 'Returning groups, older students, and classes who want day trips beyond Bremen.',
+      en: 'Returning groups, older students and classes who want day trips beyond Bremen.',
       de: 'Wiederkehrende Gruppen, ältere Lernende und Klassen, die Tagesausflüge über Bremen hinaus wollen.',
     },
     activities: [
@@ -472,19 +472,19 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     slug: 'esel',
     stackPosition: 1,
     animal: { en: 'Esel', de: 'Esel' },
-    descriptor: { en: 'Build Your Own', de: 'Selbst zusammenstellen' },
+    descriptor: { en: 'Build your own', de: 'Selbst zusammenstellen' },
     weeks: null,
     priceFrom: null,
     tagline: {
-      en: 'The donkey at the base carries the other three — and this is the one you build yourself.',
+      en: 'The donkey stands at the very bottom and carries the other three. This is the package you put together yourself.',
       de: 'Der Esel steht ganz unten und trägt die anderen drei. Dieses Paket stellen Sie selbst zusammen.',
     },
     intro: {
-      en: 'The donkey stands at the bottom of the stack and carries all the others. This is the package that carries everything else: pick your own length from one to four weeks, switch off any module you have already arranged, and choose your own afternoons from the full list of sixteen. It is also the only route to a three- or four-week stay.',
+      en: 'The donkey stands at the very bottom and carries all the others. With this package you choose the length yourself, from one to four weeks. You leave out anything you have already organised, and you put the afternoons together from all sixteen activities. Three or four weeks are only possible with this package.',
       de: 'Der Esel steht ganz unten und trägt alle anderen. Bei diesem Paket wählen Sie die Dauer selbst, von einer bis vier Wochen. Bausteine, die Sie schon selbst organisiert haben, lassen Sie weg, und die Nachmittage stellen Sie aus allen sechzehn Angeboten zusammen. Drei oder vier Wochen gibt es nur mit diesem Paket.',
     },
     bestFor: {
-      en: 'Groups with their own accommodation or transport, unusual dates, longer stays, or a specific curriculum to match.',
+      en: 'Groups with their own accommodation or travel arrangements, unusual dates, longer stays or a particular curriculum.',
       de: 'Gruppen mit eigener Unterkunft oder Anreise, ungewöhnlichen Terminen, längeren Aufenthalten oder einem bestimmten Lehrplan.',
     },
     activities: [],
@@ -506,11 +506,11 @@ export const GRUPPEN_PACKAGES_BY_STACK = [...GRUPPEN_PACKAGES].sort(
 export const GRUPPEN_ALWAYS_INCLUDED: { name: LocalizedText; detail: LocalizedText }[] = [
   {
     name: {
-      en: 'German intensive class, Mon–Fri 09:00–12:30',
+      en: 'Intensive German course, Mon–Fri 09:00–12:30',
       de: 'Deutsch-Intensivkurs, Mo–Fr 09:00–12:30',
     },
     detail: {
-      en: '20 teaching units per week in level-matched groups.',
+      en: '20 lessons a week in groups matched to level.',
       de: '20 Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.',
     },
   },
@@ -540,13 +540,13 @@ export const GRUPPEN_ALWAYS_INCLUDED: { name: LocalizedText; detail: LocalizedTe
       de: 'ÖPNV-Ticket Bremen',
     },
     detail: {
-      en: 'Valid for the whole stay, so the group moves independently.',
+      en: 'Valid for the whole stay, so the group can get around on its own.',
       de: 'Gültig für den gesamten Aufenthalt, damit die Gruppe selbstständig unterwegs ist.',
     },
   },
   {
     name: {
-      en: 'Teaching material',
+      en: 'Course materials',
       de: 'Lehrmaterial',
     },
     detail: {
@@ -556,11 +556,11 @@ export const GRUPPEN_ALWAYS_INCLUDED: { name: LocalizedText; detail: LocalizedTe
   },
   {
     name: {
-      en: 'Afternoon cultural programme',
+      en: 'Afternoon culture programme',
       de: 'Kulturprogramm am Nachmittag',
     },
     detail: {
-      en: 'Booked, paid and accompanied by CASA — tickets and timings included.',
+      en: 'We book it, pay for it and come along, with tickets and timings included.',
       de: 'Wir buchen, bezahlen und begleiten das Programm, Tickets und Zeitplanung inklusive.',
     },
   },
@@ -572,7 +572,7 @@ export const GRUPPEN_ALWAYS_INCLUDED: { name: LocalizedText; detail: LocalizedTe
  * Says nothing GRUPPEN_ALWAYS_INCLUDED does not already assert.
  */
 export const GRUPPEN_INCLUDED_SUMMARY: LocalizedText = {
-  en: 'Every package covers the class, the host family, all meals, the Bremen transit ticket, the teaching material and the afternoon programme.',
+  en: 'Every package includes the lessons, the host family, all meals, the Bremen public transport ticket, the course materials and the afternoon programme.',
   de: 'In jedem Paket sind Unterricht, Gastfamilie, alle Mahlzeiten, das Bremer Nahverkehrsticket, das Lehrmaterial und das Nachmittagsprogramm enthalten.',
 };
 

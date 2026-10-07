@@ -31,7 +31,7 @@ export default async function TeamPage() {
 
   const breadcrumbs = [
     { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Unsere Schule' : 'Our School', href: '/about' },
+    { label: locale === 'de' ? 'Unsere Schule' : 'Our school', href: '/about' },
     { label: locale === 'de' ? 'Team' : 'Team' },
   ];
 
@@ -46,14 +46,14 @@ export default async function TeamPage() {
       */}
       <HeroAPhotoLed
         eyebrow="Team"
-        title={locale === 'de' ? 'Wir sind für dich da' : 'The people here for you'}
+        title={locale === 'de' ? 'Wir sind für dich da' : 'We are here for you'}
         description={
           locale === 'de'
             ? 'Unser Team begleitet dich persönlich im Unterricht, bei der Wahl deines Kurses und bei allen Fragen zu deinem Aufenthalt in Bremen.'
-            : 'In the classroom, when choosing a course or as you settle into Bremen, our team are here to help.'
+            : 'Our team supports you personally in class, when you choose your course and with any questions about your stay in Bremen.'
         }
         photo={pageConfig.photos.team}
-        ctas={[{ label: locale === 'de' ? 'Beratung anfragen' : 'Talk to admissions', href: '/contact', kind: 'primary' }]}
+        ctas={[{ label: locale === 'de' ? 'Beratung anfragen' : 'Get advice', href: '/contact', kind: 'primary' }]}
         breadcrumbs={breadcrumbs}
       />
 
@@ -61,14 +61,14 @@ export default async function TeamPage() {
       <section className="py-16 md:py-20 bg-white">
         <Container>
           <TeamDirectory
-            title={locale === 'de' ? 'Das CASA-Team' : 'Filterable team directory'}
+            title={locale === 'de' ? 'Das CASA-Team' : 'The CASA team'}
             description={
               locale === 'de'
                 ? 'Hier stellen wir dir die Menschen vor, die bei uns die Schule leiten und organisieren. So findest du schnell die richtige Ansprechperson für deine Frage.'
-                : 'Get to know our team and find the right person to talk to.'
+                : 'Here you can meet the people who run and organise our school and quickly find the right person for your question.'
             }
             team={team}
-            contactLabel={locale === 'de' ? 'Schreib uns' : 'Contact team'}
+            contactLabel={locale === 'de' ? 'Schreib uns' : 'Write to us'}
             contactHref="/contact"
           />
         </Container>
@@ -78,21 +78,21 @@ export default async function TeamPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
-            eyebrow={locale === 'de' ? 'Unser Team' : 'People first'}
-            title={locale === 'de' ? 'Wer wir sind' : 'Support that brings everything together'}
+            eyebrow={locale === 'de' ? 'Unser Team' : 'Our team'}
+            title={locale === 'de' ? 'Wer wir sind' : 'Who we are'}
             description={
               locale === 'de'
                 ? 'Unser Team ist eine bunte Mischung aus erfahrenen Kolleginnen und Kollegen und jungen Menschen, die gerade ins Berufsleben starten. Uns alle verbindet die Leidenschaft für die Sprache, die wir jeden Tag vermitteln. Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen. Wir wissen also, dass es nicht immer leicht ist, und tun unser Bestes, um es dir so leicht wie möglich zu machen.'
-                : 'Our teachers and office team work closely together, so you can focus on learning and know who to turn to with questions.'
+                : 'Our team is a colourful mix of experienced colleagues and young people just starting out in their careers. What we all share is a passion for the language we teach every day. Most of us have lived or worked abroad and know from experience what it means to learn a foreign language. So we know it is not always easy, and we do our best to make it as easy as possible for you.'
             }
             bullets={[
-              locale === 'de' ? 'Unsere Lehrkräfte sind Muttersprachlerinnen und Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen.' : 'Clear roles and responsive communication',
-              locale === 'de' ? 'Neben unserem Können als Lehrerinnen und Lehrer ist uns die Offenheit für andere Kulturen wichtig. Sie bringt uns immer wieder auf neue Ideen für unsere Arbeit.' : 'Personal support throughout your time at CASA',
-              locale === 'de' ? 'Wir alle legen großen Wert auf eine persönliche und lernfreundliche Atmosphäre, in der du dich wohlfühlst.' : 'Focus on progress and integration',
+              locale === 'de' ? 'Unsere Lehrkräfte sind Muttersprachlerinnen und Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen.' : 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages.',
+              locale === 'de' ? 'Neben unserem Können als Lehrerinnen und Lehrer ist uns die Offenheit für andere Kulturen wichtig. Sie bringt uns immer wieder auf neue Ideen für unsere Arbeit.' : 'Alongside our skills as teachers, we value openness to other cultures. It keeps giving us new ideas for our work.',
+              locale === 'de' ? 'Wir alle legen großen Wert auf eine persönliche und lernfreundliche Atmosphäre, in der du dich wohlfühlst.' : 'We all care a great deal about a personal, friendly atmosphere for learning, where you feel at ease.',
             ]}
             photo={{
               ...pageConfig.photos.mission,
-              caption: 'International students practicing together after class - Learning continues outside the classroom.',
+              caption: 'International students practising together after class. Learning carries on outside the classroom.',
             }}
           />
         </Container>

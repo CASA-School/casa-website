@@ -21,112 +21,115 @@ import type { ResourceGuideData, ResourceGuideSlug } from './types';
  *   - German terms a reader will meet on a form (Anmeldung,
  *     Wohnungsgeberbestätigung, Ausbildung, WG) are given in German, because
  *     that is what the form says.
+ *
+ * Brought in line with the German rewrite on 2026-10-07: the same facts in the
+ * same order, in plain British English.
  */
 
 export const studyInGermanyGuideEn: ResourceGuideData = {
   slug: 'study-in-germany',
   path: '/resources/study-in-germany',
-  metaTitle: 'Study and life in Germany: planning your next steps',
+  metaTitle: 'Study and life in Germany: your next steps',
   metaDescription:
-    'What it takes to study in Germany, from choosing a programme to your first month here: entry requirements, language levels, applications, funding and housing.',
+    'What you need to study in Germany, from choosing a degree programme to your first month here. It covers admission, language level, applications, funding and housing.',
   hero: {
-    title: 'Study & Life in Germany',
-    summary: 'A guide to choosing a course of study, preparing your application and settling in.',
-    lead: 'Planning to study in Germany brings plenty of questions. Start with your goals, then work through the language, application and practical arrangements at your own pace.',
+    title: 'Study & life in Germany',
+    summary: 'Help with choosing what to study, applying and your first steps in Germany.',
+    lead: 'Would you like to study in Germany? This guide helps you plan, from choosing what to study and taking a language course to arriving here.',
     photo: {
       src: '/media/casa/study-learners-attentive.webp',
       alt: 'Two learners listening attentively',
     },
-    ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
+    ctas: [{ label: 'See our courses', href: '/courses' }],
   },
   quickFacts: [
-    'Many public degree programmes have no tuition fees, but exceptions apply. Check both tuition fees and the semester contribution for your chosen programme.',
-    'Check which language certificates your chosen programme accepts; requirements vary by course and teaching language.',
-    'A student visa usually requires proof of funds and health insurance before you travel, not after you arrive.',
-    'Alongside meeting people and exploring your new city, allow time for address registration, banking, insurance and enrolment.',
+    'Many public degree programmes have no tuition fees, but there are exceptions. For the programme you want, check the tuition fees and the semester contribution separately.',
+    'Which proof of language skills you need depends on the programme and the language it is taught in. What your university says is what counts.',
+    'For a student visa, you usually need proof of funds and health insurance before you even travel.',
+    'As well as getting to know your new city, you will need time to register your address, open a bank account, sort out insurance and enrol at university.',
   ],
-  stepsTitle: 'The steps, in order',
+  stepsTitle: 'The steps in the right order',
   steps: [
     {
       title: 'Choose the kind of programme',
-      text: 'Universities and universities of applied sciences offer different balances of research and practical study. Vocational training, known as Ausbildung, is another route into a profession; company-based programmes usually include pay.',
-      action: 'Write down one target: subject, city, and the semester you want to start.',
+      text: 'Universities and universities of applied sciences put different weight on research and practical work. Vocational training, called Ausbildung, also leads to a profession, and company-based training is usually paid.',
+      action: 'Write down your goal, with the subject, the city and the semester you would like to start in.',
     },
     {
       title: 'Check the entry requirements',
-      text: 'Every programme sets its own: school certificates, grades, a language certificate, sometimes an entrance test. Two programmes at the same university can ask for different things.',
-      action: 'Shortlist three to five programmes and list what each one requires.',
+      text: 'Every programme sets its own requirements. These can include school certificates, grades, a language certificate and sometimes an aptitude test. Even two programmes at the same university can ask for different things.',
+      action: 'Pick three to five programmes and note down what each one requires.',
     },
     {
-      title: 'Decide German-taught or English-taught',
-      text: 'German-taught degrees usually require advanced German and an accepted certificate. English-taught degrees have their own language requirements; German is still useful for life outside university.',
-      action: 'Check the exact certificate and result your programme requires, then plan from your current level.',
+      title: 'Consider the teaching language',
+      text: 'To study in German, you usually need advanced German and a recognised certificate. Programmes taught in English have their own requirements. Either way, German helps you in everyday life.',
+      action: 'Check which certificate and which result you need, and plan from your current level.',
     },
     {
-      title: 'Plan the language backwards from your start date',
-      text: 'Learning takes time, and the right pace depends on your starting level and weekly study time. Work back from your intended start date and leave room for exams and their results.',
-      action: 'A placement test gives you a useful starting point for a realistic language plan.',
+      title: 'Allow time to learn German',
+      text: 'How much time you need depends on what you already know and how much you study each week. Work back from the date you want to start your degree, and remember to allow for exam dates and the wait for results.',
+      action: 'A placement test shows you where you stand, so you can plan realistically.',
     },
     {
-      title: 'Get the documents in order early',
-      text: 'Check which documents your university needs and whether it requires certified copies or translations. Preparing these early gives you time to resolve questions before the deadline.',
-      action: 'Keep one folder: originals, certified copies, translations, CV, passport.',
+      title: 'Get all your documents together early',
+      text: 'Check which documents your university needs and whether you need certified copies or translations. If you start early, you will have enough time to sort out any questions before the application deadline.',
+      action: 'Keep one folder for your originals, certified copies, translations, CV and passport.',
     },
     {
       title: 'Apply, directly or through uni-assist',
-      text: 'Some universities take international applications themselves, others route them through uni-assist, and a few do both depending on the programme. Either way, processing takes weeks.',
-      action: 'Apply when the window opens rather than near the deadline.',
+      text: 'Some universities handle international applications themselves, others have them checked by uni-assist, and at some it depends on the programme. Either way, the checks take several weeks.',
+      action: 'Apply as soon as the application period opens, and don’t wait until just before the deadline.',
     },
     {
       title: 'Prove your funding and arrange insurance',
-      text: 'Most student visa applications require evidence that you can cover your first year, usually through a blocked account, plus health insurance valid in Germany. What counts as evidence depends on your nationality.',
-      action: 'Use the current checklist from the German embassy or consulate responsible for your application.',
+      text: 'For a student visa, you usually have to show that you can pay for your first year, normally with a blocked account (Sperrkonto). You also need health insurance that is valid in Germany. What counts as proof depends on your nationality.',
+      action: 'Use the current checklist from the German embassy or consulate that handles your application.',
     },
     {
       title: 'Arrive, register, enrol',
-      text: 'Check the deadlines for address registration, enrolment and any residence permit you need. Some arrangements can run in parallel; your university and the relevant offices can explain what applies to you.',
-      action: 'Use the Living in Germany guide to plan the practical side of your arrival.',
+      text: 'Check the deadlines for registering your address, for enrolling and for your residence permit, if you need one. You can do some of these at the same time. Your university and the relevant offices can help you plan.',
+      action: 'The Living in Germany guide has tips for preparing the practical side of your arrival.',
     },
   ],
   sections: [
     {
-      title: 'Which programme type fits you',
-      intro: 'Think about the subject you enjoy, how you like to learn and the work you might want to do afterwards.',
+      title: 'Which kind of study suits you',
+      intro: 'Think about which subject interests you, how you like to learn and the field you would like to work in later.',
       bullets: [
-        'Universities usually place a strong emphasis on academic study and research.',
-        'Universities of applied sciences often combine academic study with practical projects and placements.',
-        'Company-based vocational training combines work and learning. Check the entry requirements, pay and qualification for the programme that interests you.',
+        'Universities usually put particular emphasis on academic work and research.',
+        'Universities of applied sciences often combine study with practical projects and work placements.',
+        'Company-based vocational training combines working and learning. Find out about the entry requirements, the pay and the qualification for the training that interests you.',
       ],
     },
     {
       title: 'Applications and deadlines',
-      intro: 'Keep the application period and any document deadlines together in one calendar so you can prepare in good time.',
+      intro: 'Put the application periods and the deadlines for your documents in one calendar. That way you can plan your preparation well.',
       bullets: [
-        'Check per programme whether you apply directly or through uni-assist. Both can exist at one university.',
-        'Deadlines for the winter semester generally fall in summer, and for the summer semester in winter. Confirm each one at the source.',
-        'Allow weeks for processing, and allow again for whatever comes back incomplete.',
-        'Keep every document both digitally and on paper. You will be asked for each at different points.',
+        'Check for each programme whether you apply directly or through uni-assist. One university can have both.',
+        'Deadlines for the winter semester usually fall in the summer, and deadlines for the summer semester in the winter. Double-check every deadline directly with the university.',
+        'Allow a few weeks for your application to be checked, and more weeks if documents come back incomplete.',
+        'Keep every document both digitally and on paper. You will be asked for both at different times.',
       ],
     },
     {
-      title: 'Language: how much, and how fast',
-      intro: 'Your German level decides which degrees are open to you, and how much of daily life you can handle without help.',
+      title: 'How much German you need',
+      intro: 'Your level of German decides which programmes are open to you and how much of everyday life you can manage without help.',
       bullets: [
-        'Your chosen university decides which German certificates and results it accepts for admission.',
-        'German can help with finding a home, making appointments and getting to know people, even if your degree is taught in English.',
-        'Choose a learning schedule you can sustain. An intensive course offers more class time; evening classes can fit around other commitments.',
-        'At CASA, we discuss your level and plans with you, then help you choose a German course and, if needed, separate telc preparation.',
+        'Your university decides which German certificates and results it accepts for admission.',
+        'Even if your programme is taught in English, German helps you find somewhere to live, deal with appointments and meet new people.',
+        'Choose a pace of learning that fits your everyday life. An intensive course gives you more class time, and an evening course fits well around other commitments.',
+        'At CASA, we talk through your level and your plans with you in person. Together we find the right German course for you and, if you need it, extra preparation for your telc exam.',
       ],
-      link: { label: 'Start with a placement test', href: '/placement-test' },
+      link: { label: 'Take the placement test', href: '/placement-test' },
     },
     {
       title: 'Funding, housing and the first month',
-      intro: 'Plan for your arrival as well as your studies: housing, insurance and initial purchases can fall due close together.',
+      intro: 'Plan your arrival as well as your studies. Accommodation, insurance and your first purchases can all fall in the same few weeks.',
       bullets: [
-        'Budget for the semester contribution even where there is no tuition. It often includes a local transport pass.',
-        'Compare local rents and check your tenancy agreement for the deposit, payment dates and any additional costs.',
-        'Ask the university, bank and insurer which documents they need and when, so you can coordinate your arrangements.',
-        'Leave some room in your budget for one-off purchases and unexpected costs in the first weeks.',
+        'Budget for the semester contribution, even if there are no tuition fees. It often includes a semester ticket for local transport.',
+        'Compare local rents and check the deposit, payment dates and any extra costs in your tenancy agreement.',
+        'Ask your university, bank and insurer which documents they need and when. That way you can fit the different steps together.',
+        'Some money in reserve helps with your first purchases and unexpected costs in the first few weeks.',
       ],
       link: { label: 'Read the Living in Germany guide', href: '/resources/living-in-germany' },
     },
@@ -135,38 +138,38 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
     {
       question: 'Do I need German before I arrive?',
       answer:
-        'Check the language requirements of your chosen programme. Even for an English-taught degree, some German can make everyday conversations, appointments and meeting people easier.',
+        'That depends on the entry requirements of your programme. Even if your programme is taught in English, a little German helps, for example in everyday conversations, at appointments and when you meet new people.',
     },
     {
       question: 'Is studying in Germany free?',
       answer:
-        'Many public programmes have no tuition fees, but there are exceptions by institution, programme and student status. A semester contribution is a separate cost. Ask your university for the full current fees.',
+        'Many public programmes have no tuition fees. There are exceptions, though, depending on the university, the programme and your personal status. The semester contribution comes on top as a separate cost. Ask your university about the current total costs.',
     },
     {
       question: 'What is uni-assist?',
       answer:
-        'A shared service that checks international applications on behalf of many German universities. Some use it, others handle applications themselves, and a few do both depending on the programme.',
+        'It is a joint service that checks international applications on behalf of many German universities. Some universities use it, others handle applications themselves, and at some it depends on the programme.',
     },
     {
       question: 'How early should I apply?',
       answer:
-        'As soon as the application window opens. Documents come back for correction, translations take time, and a visa appointment can add weeks after you have the offer.',
+        'As soon as the application period opens. Documents sometimes come back for correction, translations take time, and once you have been admitted, you often have to wait several weeks for a visa appointment.',
     },
     {
-      question: 'Do I have to prove that I can pay?',
+      question: 'Do I have to prove that I can pay for my studies?',
       answer:
-        'Most student visa applicants do, usually through a blocked account. The amount and the accepted evidence depend on your nationality, so use your embassy’s current checklist.',
+        'For the visa, usually yes, most often with a blocked account. The amount and the proof that is accepted depend on your nationality, so use your embassy’s current list.',
     },
   ],
   officialLinks: [
     {
       label: 'Study in Germany',
-      description: 'The official portal: programmes, requirements, funding, arrival.',
+      description: 'The official portal on degree programmes, requirements, funding and arrival.',
       url: 'https://www.study-in-germany.com/en/',
     },
     {
       label: 'uni-assist',
-      description: 'How to apply through the shared application service.',
+      description: 'How applying through the joint application service works.',
       url: 'https://www.uni-assist.de/en/how-to-apply/apply-online/',
     },
     {
@@ -176,7 +179,7 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
     },
     {
       label: 'Studierendenwerke',
-      description: 'Student services: halls of residence, insurance, everyday costs.',
+      description: 'The student services organisations explain halls of residence, insurance and everyday costs.',
       url: 'https://www.studierendenwerke.de/en/topics/student-finance/costs-of-study/insurances-for-students/studienvoraussetzung-kranken-und-pflegeversicherung',
     },
   ],
@@ -185,103 +188,103 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
 export const livingInGermanyGuideEn: ResourceGuideData = {
   slug: 'living-in-germany',
   path: '/resources/living-in-germany',
-  metaTitle: 'Living in Germany: settling into everyday life',
+  metaTitle: 'Living in Germany: arriving and settling in',
   metaDescription:
-    'Registering your address, opening a bank account, health insurance, finding a room and the daily habits that make the first month in Germany easier.',
+    'How to register your address, open a bank account, get health insurance and find a room, and what makes your first month in Germany easier.',
   hero: {
     title: 'Living in Germany',
-    summary: 'Practical help with accommodation, appointments and everyday life as you settle in.',
-    lead: 'A new home brings practical tasks as well as new possibilities. This guide helps you prepare the essentials and leave time to get to know the place and the people around you.',
+    summary: 'Practical tips on accommodation, appointments and your new everyday life.',
+    lead: 'A new home brings questions as well as new possibilities. This guide helps you get the essentials ready, so that you have time for the people and places around you.',
     photo: {
       src: '/media/casa/bremen-schnoor-houses.jpg',
       alt: 'Gabled houses in the Schnoor quarter of Bremen',
     },
-    ctas: [{ label: 'See CASA accommodation', href: '/accommodation' }],
+    ctas: [{ label: 'See our accommodation', href: '/accommodation' }],
   },
   quickFacts: [
-    'Address registration, called Anmeldung, is one of the practical tasks to arrange after moving. Check the local requirements and available appointments.',
-    'Health insurance is a condition of enrolment and of your permit, not an optional extra.',
-    'Start looking for accommodation early and keep the documents you need ready for enquiries and viewings.',
-    'Most public offices work by appointment, and appointments are often booked weeks ahead.',
+    'After you move, registering your address, called the Anmeldung, is one of the first important things to do. Find out about the local rules and which appointments are available.',
+    'Without health insurance, you cannot enrol at university or get a residence permit.',
+    'Start looking for somewhere to live early, and have your documents ready for enquiries and viewings.',
+    'Most public offices work by appointment, and appointments are often booked up weeks in advance.',
   ],
-  stepsTitle: 'Planning your first weeks',
+  stepsTitle: 'Plan your first weeks',
   steps: [
     {
       title: 'Before you fly',
-      text: 'Arrange somewhere to stay that you are allowed to register at if you can, and bring your documents as originals plus certified copies.',
-      action: 'Book whatever office appointments can be booked from abroad.',
+      text: 'If you can, arrange somewhere to stay where you are allowed to register your address, and bring your documents as originals and as certified copies.',
+      action: 'Book any office appointments that you can already make from abroad.',
     },
     {
       title: 'Make sure people can reach you',
-      text: 'Keep a working phone number and email address, and check how you will receive post. Universities, banks and public offices may send important letters.',
+      text: 'A working phone number, email address and postal address make a lot of things easier. Universities, banks and public authorities also send important information by post.',
       action: 'Make sure your name appears on your letterbox and that you can receive calls and messages.',
     },
     {
-      title: 'Arrange your address registration',
-      text: 'Your local citizens’ office explains how to register your address and which documents to bring. Keep the registration certificate for later appointments.',
-      action: 'Bring your passport, the landlord’s confirmation (Wohnungsgeberbestätigung) and the form.',
+      title: 'Register your address',
+      text: 'Your local citizens’ office (Bürgeramt) will tell you how to register your address and which documents you need. Keep the registration certificate (Meldebescheinigung) somewhere safe, because you will need it for other appointments.',
+      action: 'Bring your passport, the landlord’s confirmation (Wohnungsgeberbestätigung) and the completed form.',
     },
     {
-      title: 'Arrange everyday banking',
-      text: 'Check how you will pay rent and other regular bills. If you need a new account, compare fees, services and the documents the bank requires.',
-      action: 'Decide whether you want a branch you can walk into or an app-only account before you choose.',
+      title: 'Set up your everyday banking',
+      text: 'Work out how you will pay your rent and regular bills. If you need a new account, compare the fees, the services and the documents the bank asks for.',
+      action: 'Decide beforehand whether you want a local branch or an account that only works through an app.',
     },
     {
-      title: 'Confirm insurance and residence requirements',
-      text: 'Confirm that your health cover meets the requirement for your status, then apply for your residence permit if your nationality needs one.',
-      action: 'Keep every confirmation letter. Each one gets asked for again later.',
+      title: 'Sort out insurance and your residence permit',
+      text: 'Check that your health insurance is enough for your status. Then apply for a residence permit, if your nationality means you need one.',
+      action: 'Keep every confirmation, because you will be asked for each one again later.',
     },
     {
-      title: 'Move from temporary to permanent housing',
-      text: 'If you start in temporary accommodation, allow time to look for a longer-term home. Prepare a short introduction and check what each landlord or shared household needs from you.',
-      action: 'Write a short introduction and keep your documents together in one file.',
+      title: 'From a temporary to a permanent home',
+      text: 'If you start somewhere temporary, allow time to look for a permanent home. A short introduction about yourself and the right documents help with every enquiry.',
+      action: 'Write a few sentences about yourself and put all your documents in one file.',
     },
     {
-      title: 'Make room for everyday life',
-      text: 'A conversation with a neighbour, a shared meal or a regular activity can help you feel more at ease. Small opportunities to use German count, too.',
-      action: 'Choose one everyday situation in which you would like to try speaking German this week.',
+      title: 'Settle into everyday life',
+      text: 'A chat with the neighbours, a meal together or a regular activity can help you settle in. Small chances to speak German count too.',
+      action: 'Think of one everyday situation in which you would like to try out your German this week.',
     },
   ],
   sections: [
     {
-      title: 'Finding a place to live',
-      intro: 'Think about your budget, the journey to your course and how much you would like to share daily life with others.',
+      title: 'Find the right place to live',
+      intro: 'Think about your budget, how you will get to your course and how much of your everyday life you would like to share with others.',
       bullets: [
-        'Student residences can be an affordable option. Check eligibility and apply early, as waiting lists may be long.',
-        'In a shared flat, or WG, you have your own room and share spaces such as the kitchen with your housemates.',
-        'A private flat gives you independence and asks for a deposit, proof of income and patience with the market.',
-        'For intensive-course participants, CASA arranges rooms with local hosts or in shared flats, subject to availability.',
+        'A student hall of residence can be an affordable option. Check the requirements and apply early, because waiting lists can be long.',
+        'In a shared flat, known as a WG, you have your own room and share spaces such as the kitchen with others.',
+        'A flat of your own gives you independence. For that you need a deposit, proof of income and patience while you look.',
+        'If you are on an intensive course at CASA, we can find you a room with a private host or in a shared flat, depending on availability.',
       ],
-      link: { label: 'See the accommodation CASA arranges', href: '/accommodation' },
+      link: { label: 'See CASA’s accommodation', href: '/accommodation' },
     },
     {
-      title: 'Budgeting for the real first month',
-      intro: 'The first weeks often include one-off costs alongside your usual living expenses. A little room in your budget can help.',
+      title: 'What the first month costs',
+      intro: 'In the first few weeks, one-off costs often come on top of your regular expenses. A little room in your budget makes the start easier.',
       bullets: [
-        'Compare rents in the neighbourhoods you are considering and include transport costs in your budget.',
-        'Check the deposit and payment arrangements in your tenancy agreement, including the conditions for its return.',
-        'Remember initial purchases such as bedding, kitchen essentials and travel tickets.',
-        'Keep a reserve for unexpected costs or a longer period in temporary accommodation.',
+        'Compare rents in the parts of town you are considering, and include your travel costs.',
+        'Check the deposit and payment arrangements in your tenancy agreement, and note the conditions for getting your deposit back.',
+        'Remember first purchases such as bedding, basic kitchen equipment and travel tickets.',
+        'A reserve helps with unexpected costs, or if you stay longer in temporary accommodation.',
       ],
     },
     {
-      title: 'Keep your documents together',
-      intro: 'A folder with your important documents and digital copies makes appointments and applications easier to manage.',
+      title: 'Keep important documents to hand',
+      intro: 'A folder with your important documents and digital copies makes appointments and applications easier.',
       bullets: [
-        'Health insurance is required both for enrolment and for the residence permit.',
-        'Travel insurance is generally not accepted for a long stay, even when the dates cover it.',
-        'Personal liability insurance, Haftpflichtversicherung, is not compulsory but is normal here, and landlords ask about it.',
-        'Keep one folder: registration certificate, insurance confirmation, tenancy contract, enrolment certificate.',
+        'You need health insurance to enrol and to get your residence permit.',
+        'Travel insurance is usually not accepted for a longer stay, even if it covers the right dates.',
+        'It is common in Germany to have personal liability insurance (Haftpflichtversicherung), although it is not compulsory, and many landlords ask about it.',
+        'Keep one folder for your registration certificate, insurance confirmation, tenancy agreement and certificate of enrolment.',
       ],
     },
     {
       title: 'Working while you study',
-      intro: 'A part-time job may fit alongside your studies. Check the rules that apply to your nationality and residence status before making plans.',
+      intro: 'A part-time job can fit alongside your studies. Check beforehand which rules apply to your nationality and residence status.',
       bullets: [
-        'What you are allowed to work depends on your residence title and your nationality. The conditions are printed on the permit itself.',
-        'Your university’s international office can help you find advice; the immigration authority can confirm the conditions of your residence permit.',
-        'Speaking German can open up more opportunities to work with colleagues and customers.',
-        'Allow enough time for classes, independent study and rest when deciding how much work to take on.',
+        'How much you are allowed to work depends on your residence permit and your nationality. The conditions are written on the permit itself.',
+        'Your university’s International Office can help you find your way. The immigration office (Ausländerbehörde) can confirm the conditions of your residence permit.',
+        'With German, you have more options when dealing with colleagues and customers.',
+        'When you choose your working hours, leave time for classes, independent study and rest.',
       ],
     },
   ],
@@ -289,43 +292,43 @@ export const livingInGermanyGuideEn: ResourceGuideData = {
     {
       question: 'What do I need for the Anmeldung?',
       answer:
-        'Your passport, the confirmation from your landlord that you live at the address (Wohnungsgeberbestätigung), and the completed form. Book the appointment as soon as you have the confirmation, because slots go quickly.',
+        'You need your passport, the confirmation from your landlord (Wohnungsgeberbestätigung) and the completed form. Book the appointment as soon as you have the confirmation, because appointments go quickly.',
     },
     {
-      question: 'Do I need health insurance immediately?',
+      question: 'Do I need health insurance straight away?',
       answer:
-        'For a long stay, yes. Enrolment and the residence permit both require valid cover, and ordinary travel insurance usually does not qualify.',
+        'For a longer stay, yes. You need valid insurance cover to enrol and for your residence permit, and ordinary travel insurance is usually not enough.',
     },
     {
-      question: 'Is finding a room really that hard?',
+      question: 'Is finding somewhere to live really that hard?',
       answer:
-        'In the popular student cities it is. What helps is applying early, answering the same day, and having your documents in a single file so a viewing can turn into a contract.',
+        'In the popular student cities, unfortunately, yes. It helps to ask early, reply on the same day and have all your documents in one file, so that a viewing can turn into a tenancy agreement.',
     },
     {
-      question: 'May I work while I study?',
+      question: 'Can I work while I study?',
       answer:
-        'Usually, within limits that depend on your residence title and your nationality. Read the conditions on your own permit and confirm them with the immigration office rather than with other students.',
+        'Usually yes, but only within certain limits that depend on your residence permit and your nationality. Read the conditions on your own residence permit and have the immigration office confirm them. Don’t rely on what other students tell you.',
     },
     {
       question: 'What should I bring from home?',
       answer:
-        'Original certificates with certified copies, several passport photographs, documentation for any medication you take, and digital copies of all of it.',
+        'Bring your original certificates and certified copies, as well as several passport photos and paperwork for any medication you take. You should also have a digital copy of everything.',
     },
   ],
   officialLinks: [
     {
       label: 'Studierendenwerke',
-      description: 'Student services: halls of residence, insurance, everyday costs.',
+      description: 'The student services organisations explain halls of residence, insurance and everyday costs.',
       url: 'https://www.studierendenwerke.de/en/topics/student-finance/costs-of-study/insurances-for-students/studienvoraussetzung-kranken-und-pflegeversicherung',
     },
     {
       label: 'Make it in Germany',
-      description: 'The federal portal on residence and working rules.',
+      description: 'The federal government’s portal on residence and work.',
       url: 'https://www.make-it-in-germany.com/en/',
     },
     {
       label: 'Federal Foreign Office: blocked account',
-      description: 'Proof of funds for a student visa.',
+      description: 'What counts as proof of funds for a student visa.',
       url: 'https://www.auswaertiges-amt.de/en/sperrkonto-388600',
     },
   ],
@@ -336,85 +339,85 @@ export const whyGermanyGuideEn: ResourceGuideData = {
   path: '/resources/why-germany',
   metaTitle: 'Why study and learn German in Germany?',
   metaDescription:
-    'What Germany offers a student in practice: what it costs, which qualifications are recognised, how study and work fit together, and where speaking German changes the outcome.',
+    'What studying in Germany offers you, what it costs, which qualifications are recognised, how study and work fit together and where German helps you.',
   hero: {
     title: 'Why Germany',
-    summary: 'What Germany offers a student in practice, and where German changes the outcome.',
-    lead: 'Explore what studying and living in Germany could mean for you, from choosing a programme to building friendships and feeling at home in a new city.',
+    summary: 'What Germany can offer you in your studies and in everyday life, and where German helps.',
+    lead: 'What could studying and living in Germany mean for you? This guide helps you find out, from choosing your path in education to making new friends and a home in a new city.',
     photo: {
       src: '/media/casa/group-course-walking-bremen.jpg',
       alt: 'CASA learners walking through Bremen together',
       // The group spans the whole width: shown as its full 3:2 frame, no head cut.
       aspectRatio: '3 / 2',
     },
-    ctas: [{ label: 'Explore CASA courses', href: '/courses' }],
+    ctas: [{ label: 'See our courses', href: '/courses' }],
   },
   quickFacts: [
-    'Many public degree programmes have no tuition fees, but check for exceptions and budget for semester contributions and living costs.',
-    'Compare academic study and vocational training, and check where your intended qualification will be recognised.',
-    'Studying and working can be combined, within the conditions written on your residence permit.',
-    'German can help you join in more of everyday life, from conversations with neighbours to opportunities at work.',
+    'Many public degree programmes have no tuition fees. Even so, check for possible exceptions and budget for semester contributions and living costs.',
+    'Compare academic study and vocational training, and find out where the qualification you are aiming for is recognised.',
+    'You can combine study and work, as long as you keep to the conditions in your residence permit.',
+    'With German, you have more options in everyday life, in conversations with your neighbours just as much as at work.',
   ],
-  stepsTitle: 'A way to decide',
+  stepsTitle: 'How to decide',
   steps: [
     {
-      title: 'What would you like to do?',
-      text: 'You may want to study, begin a career, develop your German or make a new home. Your goal is a useful starting point for exploring the options.',
+      title: 'What do you want to achieve?',
+      text: 'Perhaps you want to study, get on in your career, improve your German or make a new home. What you want is a good starting point for exploring the options.',
     },
     {
-      title: 'Which city can you actually afford?',
-      text: 'Look at rent, transport and everyday costs alongside the courses and opportunities each city offers.',
+      title: 'Which city can you afford?',
+      text: 'Compare rents, travel costs and everyday spending, and also the education on offer and the opportunities in each city.',
     },
     {
-      title: 'Which route fits the way you learn?',
-      text: 'Compare academic study, applied degree programmes and vocational training. Each offers a different way to develop your skills.',
+      title: 'Which path suits you?',
+      text: 'An academic degree, a practical degree programme and vocational training each give you different ways to develop your skills.',
     },
     {
-      title: 'What German will you need?',
-      text: 'Check the requirements of your course or profession. Think about everyday life too: the conversations you would like to have and the tasks you want to handle independently.',
+      title: 'How much German do you need?',
+      text: 'Check the requirements for your programme or your profession. Think about your everyday life too. Which conversations would you like to have, and what would you like to be able to do on your own?',
     },
     {
       title: 'When do you want to start, and what does that mean today?',
-      text: 'Work back from your intended start date, allowing time for language learning, applications, exams and any visa arrangements.',
+      text: 'Work back from the date you want to start, and allow time for learning German, applications, exams and, if you need one, your visa.',
     },
   ],
   sections: [
     {
-      title: 'What it actually costs',
-      intro: 'Compare the complete budget, including fees, rent, insurance, travel and day-to-day spending.',
+      title: 'What it really costs',
+      intro: 'Look at your whole budget, including fees, rent, insurance, travel and everyday spending.',
       bullets: [
-        'Check tuition fees and the semester contribution separately; public programmes can also charge tuition in some circumstances.',
-        'Rent sets your monthly budget, and it is decided by the city you choose rather than by the university.',
-        'If you need a student visa, check the current funding requirements and accepted evidence before you apply.',
+        'Check tuition fees and the semester contribution separately. Public programmes can also charge fees in certain circumstances.',
+        'Rent shapes your monthly budget. How much you pay depends on the city you live in.',
+        'If you need a student visa, find out about the current funding requirements and the accepted proof before you apply.',
       ],
     },
     {
-      title: 'Explore different qualifications',
-      intro: 'The right qualification depends on what you want to do and where you hope to use it.',
+      title: 'Get to know the different qualifications',
+      intro: 'Which qualification suits you depends on your goals and on where you would like to work later.',
       bullets: [
-        'Compare the content and practical experience offered by universities and universities of applied sciences.',
-        'Company-based vocational training combines learning with paid work towards a professional qualification.',
-        'Before booking a language exam, check which certificate and result your university or employer accepts.',
+        'Compare the course content and the amount of practical work at universities and at universities of applied sciences.',
+        'Company-based vocational training combines learning with paid work and leads to a vocational qualification.',
+        'Before you book a language exam, check which certificate and which result your university or employer accepts.',
       ],
-      link: { label: 'See the exam pathways', href: '/exams' },
+      link: { label: 'See our exams', href: '/exams' },
     },
     {
-      title: 'Where German changes the outcome',
-      intro: 'German creates more opportunities to take part, ask questions and get to know the people around you. You can begin with small conversations.',
+      title: 'Where German helps you',
+      intro: 'With German, you can join in, ask questions and get to know people. Even small conversations can make a big difference.',
       bullets: [
-        'At home, German helps you speak with housemates, understand correspondence and get to know your neighbours.',
-        'For appointments and official letters, German can help you understand the details and ask for clarification.',
-        'At work, German helps you communicate with colleagues and customers and explore a wider range of roles.',
-        'Through shared interests, local activities and everyday conversations, you can meet people and build friendships.',
+        'At home, German helps you talk to your flatmates, understand letters and get to know the neighbourhood.',
+        'At appointments and with official letters, German can help you understand the details and ask the right questions.',
+        'At work, German makes it easier to deal with colleagues and customers, and you have a wider choice of jobs.',
+        'Shared interests, local activities and everyday conversations can lead to new contacts and friendships.',
       ],
-      link: { label: 'Find a course that fits your timeline', href: '/courses' },
+      link: { label: 'Find a course that fits your schedule', href: '/courses' },
     },
   ],
   faq: [
     {
       question: 'Is Germany a good choice if I do not speak German yet?',
       answer:
-        'Yes, and it becomes a considerably better one as your German improves. The useful move is to start before you arrive rather than afterwards.',
+        'Yes, and it gets even better the more German you speak. It makes sense to start learning before you arrive.',
     },
     {
       question: 'Is studying here expensive?',
@@ -422,35 +425,35 @@ export const whyGermanyGuideEn: ResourceGuideData = {
         'Costs vary by programme and city. Check tuition fees, the semester contribution and living costs together, including rent and insurance.',
     },
     {
-      question: 'Do I need to prove my funding?',
+      question: 'Do I need to prove how I will pay for my studies?',
       answer:
-        'Most student visa applicants do. Your embassy publishes the current amount and the forms of evidence it accepts.',
+        'For the visa, usually yes. Your embassy publishes the current amount and the kinds of proof it accepts.',
     },
     {
-      question: 'Why start German before arriving?',
+      question: 'Why should I start learning German before I arrive?',
       answer:
-        'Even a little German can help with your first conversations and appointments. Start when you can, then build on it once you arrive.',
+        'Even a little German can help you with conversations and appointments. Start as soon as you can, and keep learning once you arrive.',
     },
     {
       question: 'Why Bremen?',
       answer:
-        'Bremen offers city life, places to explore by the Weser and opportunities to meet people from around the world. At CASA, you can learn German, join activities and get personal help finding your feet.',
+        'Bremen offers city life, places to explore along the Weser and the chance to meet people from all over the world. At CASA, you learn German, take part in activities with others and get personal support as you settle in.',
     },
   ],
   officialLinks: [
     {
       label: 'Study in Germany',
-      description: 'The official portal for programmes and planning.',
+      description: 'The official portal for degree programmes and planning.',
       url: 'https://www.study-in-germany.com/en/',
     },
     {
       label: 'Make it in Germany',
-      description: 'The federal portal on working and living in Germany.',
+      description: 'The federal government’s portal on working and living in Germany.',
       url: 'https://www.make-it-in-germany.com/en/',
     },
     {
       label: 'Federal Foreign Office: blocked account',
-      description: 'Proof of funds for a student visa.',
+      description: 'What counts as proof of funds for a student visa.',
       url: 'https://www.auswaertiges-amt.de/en/sperrkonto-388600',
     },
   ],

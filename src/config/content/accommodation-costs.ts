@@ -31,7 +31,7 @@ export const accommodationCosts: AccommodationCost[] = [
     },
   },
   {
-    label: { en: 'One-time placement fee', de: 'Einmalige Vermittlungsgebühr' },
+    label: { en: 'One-off booking fee', de: 'Einmalige Vermittlungsgebühr' },
     amount: ACCOMMODATION_FEES.commissionFee,
     note: {
       en: 'For arranging your accommodation.',
@@ -43,7 +43,7 @@ export const accommodationCosts: AccommodationCost[] = [
     amount: ACCOMMODATION_FEES.deposit,
     refundable: true,
     note: {
-      en: 'Returned after departure, provided the accommodation and keys are handed back in the condition in which you received them.',
+      en: 'You get the deposit back after you leave, as long as the accommodation and keys are in the same condition as when you received them.',
       de: 'Nach deiner Abreise bekommst du die Kaution zurück, wenn Unterkunft und Schlüssel im gleichen Zustand sind wie bei der Übernahme.',
     },
   },
@@ -79,5 +79,5 @@ export function accommodationHolidayNote(locale: ContentLocale) {
   const amount = eur(ACCOMMODATION_FEES.perAdditionalWeek, locale);
   return locale === 'de'
     ? `Wenn du über Weihnachten oder Ostern bleibst, zahlst du für die Wochen, in denen die Schule geschlossen ist, eine zusätzliche Unterkunftsgebühr von ${amount} pro Woche.`
-    : `Staying over Christmas or Easter? An additional accommodation charge of ${amount} per week applies during the school closure.`;
+    : `If you stay over Christmas or Easter, you pay an additional accommodation charge of ${amount} a week for the weeks when the school is closed.`;
 }

@@ -208,7 +208,7 @@ export function coursePlan(input: {
 
 /** A plan row's dates, or that CASA plans them. */
 export function planRowDates(row: PlanRow, locale: ContentLocale) {
-  if (!row.start) return locale === 'de' ? 'Den Termin planen wir gemeinsam mit dir' : 'Date to follow – we plan it with you';
+  if (!row.start) return locale === 'de' ? 'Den Termin planen wir gemeinsam mit dir' : 'We’ll plan the date together with you';
   return row.end ? termRange(row.start, row.end, locale) : formatDay(row.start, locale);
 }
 
@@ -361,9 +361,9 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
         ) : null}
         {unavailable.length > 0 ? (
           <p className={cn(formHintClassName, 'pt-1')}>
-            {t(`On request: ${joinNames(unavailable, locale)}.`, `${joinNames(unavailable, locale)} bieten wir auf Anfrage an.`)}{' '}
+            {t(`We offer ${joinNames(unavailable, locale)} on request.`, `${joinNames(unavailable, locale)} bieten wir auf Anfrage an.`)}{' '}
             <Link href="/contact?topic=course-advice" className={linkClassName}>
-              {t('Ask us', 'Schreib uns')}
+              {t('Write to us', 'Schreib uns')}
             </Link>
           </p>
         ) : null}
@@ -456,7 +456,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
           locale={locale}
           error={errors?.courseInstanceId?.message}
           errorId={`course-${index}-courseInstanceId-error`}
-          emptyText={t('No dates to book online right now.', 'Im Moment gibt es hier keine Termine, die du online buchen kannst.')}
+          emptyText={t('There are no dates here that you can book online at the moment.', 'Im Moment gibt es hier keine Termine, die du online buchen kannst.')}
         />
       ) : null}
 

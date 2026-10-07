@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === 'de' ? 'Kontakt und Beratung' : 'Contact and advice',
     description: locale === 'de'
       ? 'Du hast Fragen zu Deutschkursen, Prüfungen, Unterkunft oder deinen nächsten Schritten? Das CASA-Team in Bremen nimmt sich Zeit für dich.'
-      : 'Questions about German courses, exams, accommodation or what comes next? Talk to the CASA team in Bremen for personal advice.',
+      : 'Do you have questions about German courses, exams, accommodation or your next steps? The CASA team in Bremen will take the time to help you.',
     path: '/contact',
     keywords: ['Contact CASA', 'Admissions Bremen', 'Language school support'],
   });
@@ -68,7 +68,7 @@ const topicCatalog: TopicConfig[] = [
   },
   {
     key: 'company-courses',
-    labels: { en: 'Company courses', de: 'Firmenunterricht' },
+    labels: { en: 'In-company teaching', de: 'Firmenunterricht' },
     aliases: ['company', 'company-courses', 'corporate', 'business', 'firmenunterricht', 'firmenkurse', 'firma'],
   },
   {
@@ -109,10 +109,10 @@ function getInitialTopicKey(rawTopic: string | undefined, locale: 'en' | 'de') {
 
 const formCopyByLocale = {
   en: {
-    formTitle: 'Tell us how we can help',
-    formBody: 'Have a question or a plan in mind? Write to us — we’ll help you find your next step.',
+    formTitle: 'How can we help you?',
+    formBody: 'Do you have a question, or do you already have a plan? Write to us. We’ll be glad to help.',
     submit: 'Send message',
-    submitting: 'Sending your request...',
+    submitting: 'Sending your enquiry...',
     firstNameLabel: 'First name',
     firstNamePlaceholder: 'Anna',
     lastNameLabel: 'Last name (optional)',
@@ -122,11 +122,11 @@ const formCopyByLocale = {
     topicLabel: 'What is it about?',
     messageLabel: 'Message',
     messagePlaceholder: 'What would you like to know?',
-    successTitle: 'Request received',
-    successBody: 'Thank you for getting in touch. Our team will read your message and reply to your questions.',
-    sendAnother: 'Send another request',
-    errorTitle: 'Submission issue',
-    errorBody: 'Please try again or contact us directly if your request is time-sensitive.',
+    successTitle: 'Enquiry received',
+    successBody: 'Thank you for your message. We’ll read your enquiry and get back to you.',
+    sendAnother: 'Send another enquiry',
+    errorTitle: 'Your message could not be sent',
+    errorBody: 'Please try again. If it’s urgent, contact the office directly.',
   },
   de: {
     formTitle: 'Wie können wir dir helfen?',
@@ -232,10 +232,10 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <div className="min-w-0 space-y-5 md:sticky md:top-28 md:self-start">
               <ContactHelpPanel
                 locale={locale}
-                title={locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk?'}
+                title={locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk to someone?'}
                 body={locale === 'de'
                   ? 'Ruf uns während der Bürozeiten an oder schreib uns eine E-Mail. In dieser Zeit kannst du auch ohne Termin bei uns im Büro vorbeikommen. Wir nehmen uns Zeit für deine Fragen.'
-                  : 'Call us during office hours or send us an email. We’re happy to talk through your questions.'}
+                  : 'Give us a call during office hours or send us an email. You’re also welcome to drop in at the office during those hours without an appointment. We’ll take the time to answer your questions.'}
               />
 
               <nav

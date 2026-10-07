@@ -13,7 +13,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
     },
     {
       value: '30,000+',
-      label: 'Learners supported over the years',
+      label: 'Learners we have supported',
       locale: 'en',
       sourceUrl: 'internal-dashboard-aggregate:2026-06-17',
       sourceType: 'internal',
@@ -22,7 +22,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
     },
     {
       value: '150+ countries',
-      label: 'Students represented in CASA classrooms',
+      label: 'People from all over the world in our courses',
       locale: 'en',
       sourceUrl: 'internal-dashboard-aggregate:2026-06-17',
       sourceType: 'internal',
@@ -31,7 +31,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
     },
     {
       value: '40+ staff & teachers',
-      label: 'Academic and administrative team',
+      label: 'Teachers and office staff in our team',
       locale: 'en',
       sourceUrl: 'https://www.casa-bremen.de/unsere-sprachschule/',
       sourceType: 'internal',

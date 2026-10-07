@@ -96,7 +96,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
         <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
         <p className="mt-3 max-w-measure text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
-        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label={locale === 'de' ? 'Team nach Bereich filtern' : 'Team role filters'}>
+        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label={locale === 'de' ? 'Team nach Bereich filtern' : 'Filter the team by area'}>
           {roles.map((role) => (
             <button
               key={role}
@@ -117,14 +117,14 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] p-3">
           <label htmlFor="team-directory-search" className="sr-only">
-            {locale === 'de' ? 'Team durchsuchen' : 'Search team'}
+            {locale === 'de' ? 'Team durchsuchen' : 'Search the team'}
           </label>
           <input
             id="team-directory-search"
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder={locale === 'de' ? 'Nach Name oder Aufgabe suchen' : 'Search by name, role, or focus'}
+            placeholder={locale === 'de' ? 'Nach Name oder Aufgabe suchen' : 'Search by name or responsibility'}
             className="h-10 w-full max-w-md rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
           />
           <p className="text-xs font-semibold text-[var(--casa-muted)]">
@@ -234,7 +234,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
           <p className="mt-6 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-4 py-3 text-sm text-[var(--casa-muted)]">
             {locale === 'de'
               ? 'Zu deiner Suche haben wir leider niemanden gefunden.'
-              : 'No team members found for this search.'}
+              : 'Sorry, we could not find anyone matching your search.'}
           </p>
         ) : null}
 
@@ -272,7 +272,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
           className="fixed inset-0 z-50 overflow-y-auto bg-[color:var(--casa-ink-deep)]/65 px-3 py-4 sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label={locale === 'de' ? `Profil von ${activeMember.name}` : `${activeMember.name} profile`}
+          aria-label={locale === 'de' ? `Profil von ${activeMember.name}` : `Profile of ${activeMember.name}`}
           onClick={() => setActiveMemberId(null)}
         >
           <div className="flex min-h-full items-end justify-center sm:items-center">

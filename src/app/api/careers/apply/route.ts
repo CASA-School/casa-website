@@ -19,7 +19,7 @@ function successMessage(locale: 'en' | 'de') {
     return 'Vielen Dank! Deine Bewerbung ist bei uns angekommen. Wir melden uns so bald wie möglich bei dir.';
   }
 
-  return 'Thank you. Your application has been received. The CASA team will get back to you shortly.';
+  return 'Thank you! Your application has reached us. We’ll get back to you as soon as we can.';
 }
 
 function failureMessage(locale: 'en' | 'de') {
@@ -27,7 +27,7 @@ function failureMessage(locale: 'en' | 'de') {
     return 'Deine Bewerbung konnte gerade nicht gesendet werden. Bitte versuche es noch einmal oder schreib uns über das Kontaktformular.';
   }
 
-  return 'Your application could not be submitted right now. Please try again or use the contact form.';
+  return 'Your application could not be sent just now. Please try again or write to us using the contact form.';
 }
 
 function invalidCvMessage(locale: 'en' | 'de') {
@@ -35,7 +35,7 @@ function invalidCvMessage(locale: 'en' | 'de') {
     return 'Bitte lade deinen Lebenslauf als PDF, DOC oder DOCX hoch (max. 8 MB).';
   }
 
-  return 'Please upload your resume as PDF, DOC, or DOCX (max 8 MB).';
+  return 'Please upload your CV as a PDF, DOC or DOCX file (max. 8 MB).';
 }
 
 function storageUnavailableMessage(locale: 'en' | 'de') {
@@ -43,7 +43,7 @@ function storageUnavailableMessage(locale: 'en' | 'de') {
     return 'Online-Bewerbungen sind gerade kurzzeitig nicht möglich. Bitte melde dich direkt bei uns, solange wir das Hochladen von Lebensläufen wieder einrichten.';
   }
 
-  return 'Applications are temporarily unavailable. Please contact CASA directly while CV upload storage is being restored.';
+  return 'Online applications are briefly unavailable. Please get in touch with us directly while we set up CV uploads again.';
 }
 
 function extractLocale(value: FormDataEntryValue | null): 'en' | 'de' {

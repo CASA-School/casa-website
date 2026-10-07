@@ -707,7 +707,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     ],
     ctas: [
       { label: { en: 'Find my course', de: 'Kurs finden' }, href: '/courses', kind: 'primary' },
-      { label: { en: 'Talk to an advisor', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
+      { label: { en: 'Get advice', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
       // The editorial hero again (2026-10-01): text left, one photograph right,
@@ -743,8 +743,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'home-photo',
     sections: ['figures', 'mission-story', 'quality-standards', 'partners', 'learning-through-connection', 'tandem', 'testimonial'],
     ctas: [
-      { label: { en: 'Talk to admissions', de: 'Beratung anfragen' }, href: '/contact', kind: 'primary' },
-      { label: { en: 'Find my course path', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
+      { label: { en: 'Get advice', de: 'Beratung anfragen' }, href: '/contact', kind: 'primary' },
+      { label: { en: 'Find the right course', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
     ],
     photos: {
       // The people who run the school, not the building: slot 55.
@@ -762,8 +762,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'home-photo',
     sections: ['team-directory', 'people-story', 'community-snippet'],
     ctas: [
-      { label: { en: 'Talk to admissions', de: 'Beratung anfragen' }, href: '/contact', kind: 'primary' },
-      { label: { en: 'Find my course path', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
+      { label: { en: 'Get advice', de: 'Beratung anfragen' }, href: '/contact', kind: 'primary' },
+      { label: { en: 'Find the right course', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
     ],
     photos: {
       hero: photoLibrary.studentClass,
@@ -779,8 +779,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'index-chooser',
     sections: ['featured-courses', 'how-it-works', 'proof-mini', 'faq-topics'],
     ctas: [
-      { label: { en: 'Reserve course spot', de: 'Zur Kursanmeldung' }, href: '/registration/course', kind: 'primary' },
-      { label: { en: 'Get level recommendation', de: 'Einstufung starten' }, href: '/placement-test', kind: 'secondary' },
+      { label: { en: 'Register for a course', de: 'Zur Kursanmeldung' }, href: '/registration/course', kind: 'primary' },
+      { label: { en: 'Check your German level', de: 'Einstufung starten' }, href: '/placement-test', kind: 'secondary' },
     ],
     photos: {
       /*
@@ -819,8 +819,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'detail-utility',
     sections: ['outcomes', 'weekly-rhythm', 'for-whom', 'materials', 'next-steps', 'faq', 'related-courses'],
     ctas: [
-      { label: { en: 'Reserve this course', de: 'Kurs anfragen' }, href: '/registration/course', kind: 'primary' },
-      { label: { en: 'Talk to admissions', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
+      { label: { en: 'Ask about this course', de: 'Kurs anfragen' }, href: '/registration/course', kind: 'primary' },
+      { label: { en: 'Get advice', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
       supportCard: photoLibrary.consultationDesk,
@@ -858,7 +858,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // One entry, not two. "Check exam dates" was a second, differently
       // labelled CTA pointing at the identical href — the same click, offered
       // twice, which reads as a choice and is not one.
-      { label: { en: 'Reserve exam seat', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
+      { label: { en: 'Register for an exam', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
     ],
     photos: {
       // telc B2 card (slot 18), telc C1 Hochschule card (68), the hero (11).
@@ -873,8 +873,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'detail-utility',
     sections: ['exam-timeline', 'what-to-bring', 'faq'],
     ctas: [
-      { label: { en: 'Reserve exam seat', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
-      { label: { en: 'Get exam guidance', de: 'Prüfungsberatung anfragen' }, href: '/contact', kind: 'secondary' },
+      { label: { en: 'Register for an exam', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
+      { label: { en: 'Get exam advice', de: 'Prüfungsberatung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
       supportCard: photoLibrary.examPrepTable,
@@ -895,8 +895,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'index-chooser',
     sections: ['option-cards', 'trust-panel', 'photo-story', 'faq'],
     ctas: [
-      { label: { en: 'Request housing match', de: 'Unterkunft anfragen' }, href: '/contact?topic=accommodation', kind: 'primary' },
-      { label: { en: 'Reserve course + housing', de: 'Kurs und Unterkunft anfragen' }, href: '/registration/course', kind: 'secondary' },
+      { label: { en: 'Ask about accommodation', de: 'Unterkunft anfragen' }, href: '/contact?topic=accommodation', kind: 'primary' },
+      { label: { en: 'Ask about a course and accommodation', de: 'Kurs und Unterkunft anfragen' }, href: '/registration/course', kind: 'secondary' },
     ],
     photos: {
       thumbA: photoLibrary.sharedFlat,
@@ -911,8 +911,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     heroType: 'detail-utility',
     sections: ['living-snapshot', 'comparison-bullets', 'request-cta', 'faq'],
     ctas: [
-      { label: { en: 'Request housing match', de: 'Unterkunft anfragen' }, href: '/contact?topic=accommodation', kind: 'primary' },
-      { label: { en: 'Talk to admissions', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
+      { label: { en: 'Ask about accommodation', de: 'Unterkunft anfragen' }, href: '/contact?topic=accommodation', kind: 'primary' },
+      { label: { en: 'Get advice', de: 'Beratung anfragen' }, href: '/contact', kind: 'secondary' },
     ],
     photos: {
       // Per type: the 4:3 crop (phones), a 2.4:1 hero crop (lg up), a second photo.
@@ -934,31 +934,31 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
   imprint: {
     heroType: 'minimal-utility',
     sections: ['legal-content'],
-    ctas: [{ label: { en: 'Contact office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
+    ctas: [{ label: { en: 'Contact the office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
     photos: {},
   },
   privacy: {
     heroType: 'minimal-utility',
     sections: ['legal-content'],
-    ctas: [{ label: { en: 'Contact office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
+    ctas: [{ label: { en: 'Contact the office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
     photos: {},
   },
   terms: {
     heroType: 'minimal-utility',
     sections: ['legal-content'],
-    ctas: [{ label: { en: 'Contact office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
+    ctas: [{ label: { en: 'Contact the office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
     photos: {},
   },
   faq: {
     heroType: 'minimal-utility',
     sections: ['faq-topics', 'quick-help'],
-    ctas: [{ label: { en: 'Contact office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
+    ctas: [{ label: { en: 'Contact the office', de: 'Büro kontaktieren' }, href: '/contact', kind: 'primary' }],
     photos: {},
   },
   contact: {
     heroType: 'minimal-utility',
     sections: ['contact-cards', 'contact-form', 'map-placeholder'],
-    ctas: [{ label: { en: 'Get my CASA plan', de: 'CASA-Plan anfragen' }, href: '/contact', kind: 'primary' }],
+    ctas: [{ label: { en: 'Ask for a CASA plan', de: 'CASA-Plan anfragen' }, href: '/contact', kind: 'primary' }],
     photos: {
       support: photoLibrary.consultationDesk,
     },
