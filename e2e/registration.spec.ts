@@ -21,9 +21,11 @@ test('the intensive course books a whole level and a learning path from one choi
 
   const ladder = page.locator('label', { has: page.locator('input[name="course-0-path"]') });
   await expect(ladder.first()).toHaveText('Nur A1');
-  await ladder.filter({ hasText: 'bis B1' }).click();
+  // B1+ is a rung of its own, between B1 and B2.
+  await expect(ladder.filter({ has: page.locator('input[value="B1+"]') })).toHaveText('bis B1+');
+  await ladder.filter({ has: page.locator('input[value="B1"]') }).click();
 
-  await expect(plan).toContainText('Ihr Lernweg');
+  await expect(plan).toContainText('Dein Lernweg');
   await expect(plan).toContainText('24 Wochen');
   await expect(plan.locator('ol > li')).toHaveCount(3);
   for (const [index, level] of ['A1', 'A2', 'B1'].entries()) {

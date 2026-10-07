@@ -153,6 +153,13 @@ constant from the site-verified `WEEKS_PER_LEVEL` so the two provenances never b
 number did not come from the same rejection of `cost-calculator.ts`'s derived-from-a-price-tier
 4 weeks (see the code comment there for why that number was wrong on its own terms).
 
+**2026-10-07:** confirmed again that B1+ belongs to the intensive course's progression (B1.2 →
+B1+ → B2.1) and is taught with Kontext. The registration now offers it as „B1+ · 8 Wochen" and a
+learning path from B1 to B2 runs through it as a whole term (`src/lib/registration/levels.ts`,
+`level-path.ts`). The placement page dropped the visible provenance line „Angabe der Schule, nicht
+auf casa-bremen.de veröffentlicht" — on CASA's own site it read as an internal remark; the
+provenance stays in this document and in the code comment.
+
 **Cover artwork is NOT licensed and must not be published.** See the block comment in
 `klett-textbooks.ts`: Klett's Impressum expressly reserves rights, their press page grants
 royalty-free use for the *logo* only and only for editorial purposes, and CJEU C-161/17
