@@ -23,9 +23,11 @@ export function CoursePracticalDetails({
   if (!fees?.length && !feeNote && conditions.length === 0) return null;
 
   const feeList = fees ?? [];
+  // No "Ihr"/"dein" in the German heading: the same section serves learners
+  // (German for Medical) and organisers (groups, companies).
   const title = feeList.length
     ? (locale === 'de' ? 'Kursgebühren im Überblick' : 'Course fees at a glance')
-    : (locale === 'de' ? 'Ihr Kurs im Überblick' : 'Planning your course');
+    : (locale === 'de' ? 'Der Kurs im Überblick' : 'Planning your course');
 
   return (
     <section>

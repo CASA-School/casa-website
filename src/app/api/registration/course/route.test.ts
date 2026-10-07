@@ -58,14 +58,14 @@ describe('course registration route', () => {
   it('answers a German page in German when a field is missing', async () => {
     const response = await POST(request({ ...valid, salutation: undefined }));
     expect(response.status).toBe(400);
-    expect((await response.json()).message).toBe('Bitte wählen Sie eine Anrede aus.');
+    expect((await response.json()).message).toBe('Bitte wähle eine Anrede aus.');
   });
 
   it('refuses an option the catalogue does not offer, in the page language', async () => {
     mocks.catalog.mockResolvedValue(catalog);
     const response = await POST(request({ ...valid, courses: [{ courseTypeId: TYPE_ID, courseInstanceId: '20000000-0000-4000-8000-00000000dead' }] }));
     expect(response.status).toBe(400);
-    expect((await response.json()).message).toBe('Dieser Starttermin ist nicht mehr buchbar. Bitte wählen Sie einen anderen Termin.');
+    expect((await response.json()).message).toBe('Dieser Starttermin ist nicht mehr buchbar. Bitte wähle einen anderen Termin.');
     expect(mocks.store).not.toHaveBeenCalled();
     expect(mocks.notify).not.toHaveBeenCalled();
   });
@@ -178,7 +178,7 @@ describe('course registration route', () => {
     for (const level of ['C2', '']) {
       const response = await POST(request({ ...valid, courses: [{ courseTypeId: INTENSIVE_ID, courseInstanceId: INTENSIVE_OPTION_ID, level }] }));
       expect(response.status, level).toBe(400);
-      expect((await response.json()).message).toBe('Bitte wählen Sie ein Niveau aus.');
+      expect((await response.json()).message).toBe('Bitte wähle ein Niveau aus.');
     }
     expect(mocks.store).not.toHaveBeenCalled();
   });
@@ -194,7 +194,7 @@ describe('course registration route', () => {
       examPolicyAccepted: true,
     }));
     expect(response.status).toBe(400);
-    expect((await response.json()).message).toBe('Dieser Prüfungstermin ist nicht mehr buchbar. Bitte wählen Sie einen anderen Termin.');
+    expect((await response.json()).message).toBe('Dieser Prüfungstermin ist nicht mehr buchbar. Bitte wähle einen anderen Termin.');
     expect(mocks.store).not.toHaveBeenCalled();
   });
 

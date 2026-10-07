@@ -96,7 +96,7 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
         <li className="flex gap-3">
           <Clock className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
           <div className="min-w-0">
-            <p className="font-semibold text-white">{de ? 'Öffnungszeiten' : 'Office hours'}</p>
+            <p className="font-semibold text-white">{de ? 'Bürozeiten' : 'Office hours'}</p>
             <dl className="mt-1.5 space-y-1 text-white/85">
               {officeHours(locale).map((row) => (
                 <div key={row.days} className="flex flex-wrap justify-between gap-x-4">

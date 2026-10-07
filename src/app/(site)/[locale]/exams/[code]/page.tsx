@@ -173,6 +173,55 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     ? `/registration/exam?sessionId=${encodeURIComponent(selectedSession.id)}`
     : '/registration/exam';
 
+  /*
+   * What the old casa-bremen.de exam pages explained and the move lost, brought
+   * back 2026-10-07 in German: the exam day and its hours, when results arrive,
+   * who telc C1 Hochschule is for (the narrative), what its preparation course
+   * covers and requires, and that the exam can be taken without the course.
+   * Facts come from those pages, the FAQ and docs/COURSE_FACTS_SOURCE_OF_TRUTH.md;
+   * the dates themselves come from the catalogue and are never written here. An
+   * exam CASA has published nothing about (TestDaF) gets the general lines. The
+   * English strings are unchanged.
+   */
+  const isB2 = detail.examType.code === 'telc_b2';
+  const isC1 = detail.examType.code === 'telc_c1_hochschule';
+  const examDayDe = isB2
+    ? 'Die Prüfung findet bei uns in der Schule statt und dauert etwa von 9 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.'
+    : isC1
+      ? 'Die Prüfung ist immer an einem Freitag und dauert etwa von 8:30 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.'
+      : 'Komm rechtzeitig und bring deine Unterlagen mit.';
+  const preparationDe = isC1
+    ? {
+        title: 'Der Vorbereitungskurs',
+        description:
+          'Bei uns kannst du telc Deutsch C1 Hochschule ablegen und dich in einem vierwöchigen Kurs darauf vorbereiten. Du kannst die Prüfung auch ohne den Kurs machen, wir empfehlen dir aber, beides zusammen zu belegen.',
+        bullets: [
+          'Im Kurs lernst du die formalen Anforderungen der Prüfung kennen und übst mit Original-Prüfungsaufgaben von telc.',
+          'Gemeinsam entwickeln wir Strategien für die Aufgaben. Wir üben Hören, Lesen, Schreiben und Sprechen, vor allem aber Schreiben und Sprechen.',
+          'Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.',
+          'Eine Garantie, die Prüfung zu bestehen, kann dir der Kurs nicht geben.',
+          'Wenn du dich zum ersten Mal an unserer Schule anmeldest, kommt eine einmalige Einschreibegebühr von 50 € dazu.',
+        ],
+      }
+    : isB2
+      ? {
+          title: 'Der Vorbereitungskurs',
+          description: 'Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.',
+          bullets: [
+            'Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.',
+            'Plane genug Zeit bis zum Prüfungstermin ein, damit du in Ruhe üben kannst.',
+          ],
+        }
+      : {
+          title: 'Gut vorbereitet in die Prüfung',
+          description: 'Wer die Aufgaben kennt und genug Zeit zum Üben hat, geht ruhiger in die Prüfung.',
+          bullets: [
+            'Plane genug Zeit bis zum Prüfungstermin ein.',
+            'Übe mit den typischen Aufgaben der Prüfung.',
+            'Geh vor dem Prüfungstag die Liste der Unterlagen durch.',
+          ],
+        };
+
   const examSchema = {
     '@context': 'https://schema.org',
     '@type': 'EducationalOccupationalCredential',
@@ -188,13 +237,13 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Prüfungsdetail' : 'Exam detail'}
         title={detail.examType.name}
-        description={detail.narrative?.summary || (locale === 'de' ? 'Klarer Ablauf bis zum Ergebnis.' : 'Clear process from registration to results.')}
+        description={detail.narrative?.summary || (locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.' : 'Clear process from registration to results.')}
         breadcrumbs={breadcrumbs}
         /* Not "Exam info rail" — "rail" is our word for the component, not a
            thing a visitor has a name for. The German string never said it. */
         infoTitle={locale === 'de' ? 'Prüfungsinfos' : 'Exam info'}
         infoItems={infoItems}
-        notes={locale === 'de' ? 'Sessiondaten und Fristen werden fortlaufend aktualisiert.' : 'Session dates and deadlines are updated continuously.'}
+        notes={locale === 'de' ? 'Prüfungstermine und Anmeldefristen halten wir hier aktuell.' : 'Session dates and deadlines are updated continuously.'}
         /*
          * The hero primary carries the session id.
          *
@@ -219,53 +268,98 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
             {/* `min-w-0`, as on /courses/[slug]: no child may widen the column. */}
             <div className="min-w-0 space-y-12 md:space-y-14">
               <ExamDayTimelineSignature
-                title={locale === 'de' ? 'Ablauf und Unterlagen für den Prüfungstag' : 'Exam day timeline + what to bring'}
+                title={locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis' : 'Exam day timeline + what to bring'}
                 description={
                   locale === 'de'
-                    ? 'Von Registrierung bis Ergebnis mit klaren Vorbereitungsschritten.'
+                    ? 'Hier siehst du, wie deine Prüfung abläuft und was du am Prüfungstag mitbringst.'
                     : 'From registration to results with clear preparation checkpoints.'
                 }
                 timeline={[
-                  { label: '1', title: locale === 'de' ? 'Anmelden' : 'Register', description: locale === 'de' ? 'Session wählen und Daten bestätigen.' : 'Select session and confirm details.' },
-                  { label: '2', title: locale === 'de' ? 'Vorbereiten' : 'Prepare', description: locale === 'de' ? 'Lernplan mit Fokus auf Schwächen.' : 'Prepare with a focused study plan.' },
-                  { label: '3', title: locale === 'de' ? 'Prüfungstag' : 'Exam day', description: locale === 'de' ? 'Früh da sein, Dokumente bereithalten.' : 'Arrive early with required documents.' },
-                  { label: '4', title: locale === 'de' ? 'Ergebnisse' : 'Results', description: locale === 'de' ? 'Nächste Lernschritte planen.' : 'Plan next steps after results.' },
+                  { label: '1', title: locale === 'de' ? 'Anmelden' : 'Register', description: locale === 'de' ? 'Such dir einen Prüfungstermin aus und melde dich vor Ablauf der Anmeldefrist an.' : 'Select session and confirm details.' },
+                  {
+                    label: '2',
+                    title: locale === 'de' ? 'Vorbereiten' : 'Prepare',
+                    description:
+                      locale === 'de'
+                        ? isB2 || isC1
+                          ? 'Bereite dich in unserem Vorbereitungskurs oder allein auf die Aufgaben vor.'
+                          : 'Bereite dich gezielt auf die Aufgaben der Prüfung vor.'
+                        : 'Prepare with a focused study plan.',
+                  },
+                  { label: '3', title: locale === 'de' ? 'Prüfungstag' : 'Exam day', description: locale === 'de' ? examDayDe : 'Arrive early with required documents.' },
+                  {
+                    label: '4',
+                    title: locale === 'de' ? 'Ergebnis' : 'Results',
+                    description:
+                      locale === 'de'
+                        ? isB2 || isC1
+                          ? 'Ergebnis und Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir sagen dir Bescheid, sobald sie da sind.'
+                          : 'Wir sagen dir Bescheid, sobald dein Ergebnis da ist.'
+                        : 'Plan next steps after results.',
+                  },
                 ]}
+                bringTitle={locale === 'de' ? 'Das bringst du mit' : 'What to bring'}
                 bringItems={[
                   locale === 'de' ? 'Gültiger Ausweis' : 'Valid photo ID',
                   locale === 'de' ? 'Anmeldebestätigung' : 'Registration confirmation',
-                  locale === 'de' ? 'Erlaubte Materialien gemäß Richtlinie' : 'Permitted materials per exam rules',
+                  locale === 'de' ? 'Erlaubte Hilfsmittel laut Prüfungsregeln' : 'Permitted materials per exam rules',
                 ]}
               />
 
               <EditorialSplit
-                eyebrow={locale === 'de' ? 'Qualität der Vorbereitung' : 'Preparation quality'}
-                title={locale === 'de' ? 'Prüfungserfolg entsteht vor dem Prüfungstag' : 'Exam success is built before exam day'}
+                eyebrow={locale === 'de' ? 'Vorbereitung' : 'Preparation quality'}
+                title={locale === 'de' ? preparationDe.title : 'Exam success is built before exam day'}
                 description={
                   locale === 'de'
-                    ? 'Strukturierte Vorbereitung reduziert Stress und verbessert Ergebnisse.'
+                    ? preparationDe.description
                     : 'Structured preparation reduces stress and improves exam outcomes.'
                 }
-                bullets={[
-                  locale === 'de' ? 'Realistische Zeitplanung bis zum Termin' : 'Realistic planning before session date',
-                  locale === 'de' ? 'Fokus auf typische Aufgabenformate' : 'Practice focused on exam task types',
-                  locale === 'de' ? 'Klare Checkliste für den Prüfungstag' : 'Clear checklist for exam-day readiness',
-                ]}
+                bullets={
+                  locale === 'de'
+                    ? preparationDe.bullets
+                    : [
+                        'Realistic planning before session date',
+                        'Practice focused on exam task types',
+                        'Clear checklist for exam-day readiness',
+                      ]
+                }
                 photo={examStoryPhoto}
               />
 
               <ProcessSteps
-                eyebrow={locale === 'de' ? 'Nächste Aktion' : 'Action path'}
-                title={locale === 'de' ? 'Nächster Schritt für Kandidat:innen' : 'Next step for candidates'}
+                eyebrow={locale === 'de' ? 'Anmeldung' : 'Action path'}
+                title={locale === 'de' ? 'So meldest du dich an' : 'Next step for candidates'}
                 description={
                   locale === 'de'
-                    ? 'Wenn Sie bereit sind, wechseln Sie direkt in die Anmeldung.'
+                    ? 'Wenn du bereit bist, meldest du dich direkt über unser Formular an.'
                     : 'If you are ready, continue directly to registration.'
                 }
                 steps={[
-                  { step: locale === 'de' ? '1' : '1', title: locale === 'de' ? 'Termin wählen' : 'Choose session', description: locale === 'de' ? 'Passendes Datum auswählen.' : 'Select the right date.' },
-                  { step: locale === 'de' ? '2' : '2', title: locale === 'de' ? 'Daten bestätigen' : 'Confirm details', description: locale === 'de' ? 'Kandidatenangaben prüfen.' : 'Confirm candidate information.' },
-                  { step: locale === 'de' ? '3' : '3', title: locale === 'de' ? 'Absenden' : 'Submit', description: locale === 'de' ? 'Anmeldung finalisieren.' : 'Complete registration.' },
+                  {
+                    step: '1',
+                    title: locale === 'de' ? 'Termin wählen' : 'Choose session',
+                    // The form offers Vollprüfung, Nur schriftlich and Nur mündlich.
+                    description:
+                      locale === 'de'
+                        ? 'Wähle deinen Prüfungstermin und entscheide, ob du die ganze Prüfung oder nur den schriftlichen oder den mündlichen Teil ablegst.'
+                        : 'Select the right date.',
+                  },
+                  {
+                    step: '2',
+                    title: locale === 'de' ? 'Daten eingeben' : 'Confirm details',
+                    description:
+                      locale === 'de'
+                        ? 'Gib deine Daten genau so an, wie sie in deinem Ausweis stehen.'
+                        : 'Confirm candidate information.',
+                  },
+                  {
+                    step: '3',
+                    title: locale === 'de' ? 'Absenden' : 'Submit',
+                    description:
+                      locale === 'de'
+                        ? 'Schick die Anmeldung ab. Sobald wir deine Angaben und die Zahlung geprüft haben, bestätigen wir dir deinen Platz per E-Mail.'
+                        : 'Complete registration.',
+                  },
                 ]}
               />
 
@@ -279,7 +373,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
 
             <DecisionRail
               locale={locale}
-              infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
+              infoTitle={locale === 'de' ? 'Auf einen Blick' : 'Your decision'}
               infoItems={decisionItems}
               /*
                 No `notes`. Same leak as the accommodation rail carried: copy

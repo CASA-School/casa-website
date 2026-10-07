@@ -46,25 +46,25 @@ export default async function BecomeHostFamilyPage() {
           */
           title: 'Gastfamilie werden',
           description:
-            'Seit 1983 vermitteln wir Lernende an Bremer Gastgeber. Entscheidend sind Offenheit und Zuverlässigkeit.',
+            'Seit 1983 vermitteln wir Lernende an Gastgeber in Bremen. Wenn Sie offen für andere Kulturen sind und ein möbliertes Zimmer frei haben, sind Sie bei uns herzlich willkommen.',
           breadcrumbs: [
             { label: 'Start', href: '/' },
             { label: 'Unterkunft', href: '/accommodation' },
             { label: 'Gastfamilie werden' },
           ],
           heroCtas: [
-            { label: 'Gastfamilie anfragen', href: '/contact?topic=host-family', kind: 'primary' as const },
+            { label: 'Zimmer anbieten', href: '/contact?topic=host-family', kind: 'primary' as const },
             { label: 'Unterkunft ansehen', href: '/accommodation', kind: 'secondary' as const },
           ],
-          storyEyebrow: 'Wie Hosting bei CASA funktioniert',
-          storyTitle: 'Gastgebersein bedeutet mehr als ein Zimmer anzubieten',
+          storyEyebrow: 'Gastgeben bei CASA',
+          storyTitle: 'Was wir uns von Gastgebern wünschen',
           storyDescription:
-            'Wir suchen offene Haushalte, in denen sich internationale Teilnehmende willkommen fühlen. CASA hilft bei der Vermittlung und den Absprachen und bleibt während des Aufenthalts an Ihrer Seite.',
+            'Viele unserer Lernenden wohnen in ihrer ersten Zeit in Bremen bei Gastgebern, um die Sprache und die Stadt besser kennenzulernen. Dafür suchen wir offene Haushalte, ob Familie, Paar oder Einzelperson, in denen sie sich willkommen fühlen. Wir helfen bei der Vermittlung und bei allen Absprachen und sind während des Aufenthalts für Sie da.',
           storyBullets: [
-            'Möbliertes Einzelzimmer mit Bett, Schreibtisch und Stauraum',
-            'Zugang zu Bad und alltagsnaher Wohnnutzung',
-            'Gute ÖPNV-Erreichbarkeit zur CASA Sprachschule',
-            'Klare Hausregeln und gegenseitige Erwartungen',
+            'Sie haben ein möbliertes Zimmer mit Bett, Schreibtisch und Kleiderschrank frei.',
+            'Ihr Gast kann ein Bad nutzen und in der Küche Mahlzeiten zubereiten.',
+            'Es hilft, wenn unsere Schule von Ihnen aus gut mit Bus und Bahn zu erreichen ist.',
+            'Hausregeln und gegenseitige Erwartungen sprechen Sie von Anfang an klar ab.',
           ],
           /*
             Aus dem CASA Check-in/Check-out-Formular selbst
@@ -75,7 +75,7 @@ export default async function BecomeHostFamilyPage() {
           roomEyebrow: 'Das Zimmer',
           roomTitle: 'Was das Zimmer mitbringen sollte',
           roomDescription:
-            'Bei An- und Abreise halten Gastgeber und Lernende den Zustand gemeinsam auf einem Formular fest. Bewertet werden genau diese Positionen:',
+            'Bei der Ankunft und bei der Abreise halten Sie und Ihr Gast auf einem Formular gemeinsam fest, in welchem Zustand das Zimmer ist. Darauf stehen genau diese Dinge.',
           roomItems: [
             'Bett und Matratze',
             'Schreibtisch und Stuhl',
@@ -84,42 +84,42 @@ export default async function BecomeHostFamilyPage() {
             'Bettwäsche (Anzahl wird festgehalten)',
           ],
           agreementEyebrow: 'Vereinbarungen',
-          agreementTitle: 'Was Sie festlegen — und was schriftlich steht',
+          agreementTitle: 'Hausregeln und Absprachen',
           agreementDescription:
-            'Hausregeln und Mitbenutzung bestimmen Sie. Beides wird zusammen mit dem Zimmerzustand dokumentiert und von beiden Seiten unterschrieben — bei der Ankunft und bei der Abreise. Das schützt Ihren Haushalt genauso wie die Lernenden.',
+            'Was in Ihrem Haushalt gilt, bestimmen Sie. Damit es später keine Missverständnisse gibt, wird alles zusammen mit dem Zustand des Zimmers auf dem Formular festgehalten. Das schützt Ihren Haushalt genauso wie Ihren Gast.',
           agreementBullets: [
-            'Hausregeln, die Sie setzen: Rauchen, Besuch, Reinigung',
-            'Mitbenutzung, die Sie anbieten: Küche, Bad, Waschmaschine, WLAN',
-            'Alles wird bei Ankunft und Abreise von beiden Seiten unterschrieben',
-            'Fragen beantwortet das Unterkunftsteam: accommodation@casa-bremen.de',
+            'Sie legen die Hausregeln fest, zum Beispiel zu Rauchen, Besuch und Reinigung.',
+            'Sie entscheiden, was Ihr Gast mitbenutzen darf, etwa Küche, Bad, Waschmaschine und WLAN.',
+            'Bei der Ankunft und bei der Abreise unterschreiben Sie und Ihr Gast das Formular.',
+            'Bei Fragen erreichen Sie unser Unterkunftsteam unter accommodation@casa-bremen.de.',
           ],
-          comparisonEyebrow: 'Aufnahmeformate',
-          comparisonTitle: 'Einzelkursteilnehmende oder Gruppenaufenthalte',
+          comparisonEyebrow: 'Ihre Gäste',
+          comparisonTitle: 'Einzelne Lernende oder Gruppen',
           comparisonDescription:
-            'CASA vermittelt sowohl langfristigere Aufenthalte für Intensivkurse als auch kurze Aufenthalte für Gruppenprogramme.',
+            'Wir vermitteln Lernende aus unseren Intensivkursen, die meist einen oder mehrere Monate bleiben. Außerdem kommen das ganze Jahr über Gruppen zu uns, zum Beispiel aus Italien, Mexiko, Dänemark und Japan.',
           partnershipEyebrow: 'Die Zusammenarbeit',
           partnershipTitle: 'Wer was übernimmt',
           partnershipDescription:
-            'Sie bieten ein Zuhause und Einblicke in den Alltag. CASA kümmert sich um die Vermittlung, bereitet den Aufenthalt mit Ihnen vor und bleibt für beide Seiten ansprechbar.',
+            'Sie bieten Ihrem Gast ein Zuhause und einen Einblick in den Alltag in Bremen. Wir kümmern uns um die Vermittlung, bereiten den Aufenthalt mit Ihnen vor und sind für beide Seiten da.',
           partnershipBullets: [
-            'Sie stellen für den vereinbarten Zeitraum ein möbliertes Zimmer mit Zugang zu Küche und Bad bereit',
-            'CASA wählt aus: passend nach Kursformat, Aufenthaltsdauer und Profil',
-            'CASA informiert vorab: Profil, Zeitraum und besondere Hinweise, bevor jemand ankommt',
-            'CASA bleibt erreichbar: eine Ansprechperson für beide Seiten, nicht nur am Anfang',
-            'Schriftlich vor der Zusage: der Satz für Ihr Format',
+            'Sie stellen für die vereinbarte Zeit ein möbliertes Zimmer bereit, und Ihr Gast kann Küche und Bad mitbenutzen.',
+            'Wenn Sie Gäste aus einer Gruppe aufnehmen, begrüßen Sie sie bei der Ankunft am Bahnhof oder Flughafen und beziehen sie möglichst in Ihren Familienalltag ein.',
+            'Wir wählen Ihre Gäste passend zu Kurs, Aufenthaltsdauer und Profil aus und informieren Sie vorab über alles Wichtige.',
+            'Während des ganzen Aufenthalts haben Sie und Ihr Gast bei uns eine Ansprechperson.',
+            'Wie hoch die Aufwandsentschädigung ist, erfahren Sie schriftlich, bevor Sie zusagen.',
           ],
           processEyebrow: 'Nächster Schritt',
-          processTitle: 'In drei Schritten Gastgeberhaushalt werden',
+          processTitle: 'So werden Sie Gastfamilie',
           processDescription:
             'Wir besprechen mit Ihnen, wie ein Aufenthalt aussehen könnte, damit Sie in Ruhe entscheiden können.',
           processSteps: [
-            { step: '1', title: 'Interesse senden', description: 'Kurze Anfrage mit Haushaltsprofil und Verfügbarkeit.' },
-            { step: '2', title: 'Profilabgleich', description: 'CASA stimmt Formate, Dauer und Rahmenbedingungen mit Ihnen ab.' },
-            { step: '3', title: 'Placement bestätigen', description: 'Sie erhalten alle Details vor der finalen Zusage.' },
+            { step: '1', title: 'Ihre Nachricht', description: 'Schreiben Sie uns kurz, wer bei Ihnen wohnt, welches Zimmer Sie anbieten und wann und wie lange es frei ist.' },
+            { step: '2', title: 'Ein Gespräch', description: 'Wir sprechen mit Ihnen darüber, welche Gäste zu Ihnen passen, wie lange sie bleiben und was Ihnen wichtig ist.' },
+            { step: '3', title: 'Ihre Zusage', description: 'Sie bekommen alle Einzelheiten, bevor Sie endgültig zusagen.' },
           ],
-          processCta: { label: 'Gastfamilie anfragen', href: '/contact?topic=host-family' },
-          intensiveTitle: 'Intensivkurs-Lernende',
-          groupTitle: 'Gruppenaufenthalte',
+          processCta: { label: 'Zimmer anbieten', href: '/contact?topic=host-family' },
+          intensiveTitle: 'Lernende im Intensivkurs',
+          groupTitle: 'Gruppen',
         }
       : {
           eyebrow: 'Host with CASA',
@@ -252,7 +252,7 @@ export default async function BecomeHostFamilyPage() {
         infoItems={[
           {
             label: locale === 'de' ? 'Sie stellen' : 'You provide',
-            value: locale === 'de' ? 'Möbliertes Einzelzimmer' : 'A furnished single room',
+            value: locale === 'de' ? 'Ein möbliertes Zimmer' : 'A furnished single room',
           },
           {
             label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical stay',
@@ -260,12 +260,12 @@ export default async function BecomeHostFamilyPage() {
           },
           {
             label: locale === 'de' ? 'Vergütung' : 'Rate',
-            value: locale === 'de' ? 'Vorab schriftlich' : 'In writing, before you agree',
+            value: locale === 'de' ? 'Schriftlich, bevor Sie zusagen' : 'In writing, before you agree',
           },
         ]}
         notes={
           locale === 'de'
-            ? 'CASA vermittelt passende Gäste, informiert Sie vorab und bleibt für beide Seiten erreichbar.'
+            ? 'Wir vermitteln passende Gäste, informieren Sie vorab und bleiben für beide Seiten erreichbar.'
             : 'CASA chooses the match, briefs you first, and stays reachable for both sides.'
         }
         ctas={copy.heroCtas}
@@ -323,17 +323,17 @@ export default async function BecomeHostFamilyPage() {
             rows={[
               {
                 label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical duration',
-                left: locale === 'de' ? 'Meist 1 bis mehrere Monate' : 'Usually 1 to several months',
-                right: locale === 'de' ? 'Meist 1 bis 4 Wochen' : 'Usually 1 to 4 weeks',
+                left: locale === 'de' ? 'Meist ein oder mehrere Monate' : 'Usually 1 to several months',
+                right: locale === 'de' ? 'Meist eine bis vier Wochen' : 'Usually 1 to 4 weeks',
               },
               {
-                label: locale === 'de' ? 'Gruppengröße' : 'Placement size',
-                left: locale === 'de' ? 'Einzelplacement' : 'Individual placement',
-                right: locale === 'de' ? 'In der Regel 1 bis 6 Lernende' : 'Usually 1 to 6 students',
+                label: locale === 'de' ? 'Anzahl der Gäste' : 'Placement size',
+                left: locale === 'de' ? 'Ein Gast' : 'Individual placement',
+                right: locale === 'de' ? 'In der Regel 1 bis 6 Lernende, in Einzel- oder Doppelzimmern' : 'Usually 1 to 6 students',
               },
               {
                 label: locale === 'de' ? 'Verpflegung' : 'Meals',
-                left: locale === 'de' ? 'Selbstverpflegung mit Küchenbenutzung' : 'Self-catering with kitchen access',
+                left: locale === 'de' ? 'Ihr Gast kocht selbst in Ihrer Küche' : 'Self-catering with kitchen access',
                 /*
                   Was "Often coordinated with half-board" / "Häufig mit
                   Halbpension organisiert". The verified fact is narrower —
@@ -342,17 +342,17 @@ export default async function BecomeHostFamilyPage() {
                   breakfast and dinner specifically, which is not what "optional"
                   states, so this now says what is actually published.
                 */
-                right: locale === 'de' ? 'Verpflegung optional, nach Absprache' : 'Meals optional, agreed per stay',
+                right: locale === 'de' ? 'Mit oder ohne Verpflegung, je nach Absprache' : 'Meals optional, agreed per stay',
               },
               {
-                label: locale === 'de' ? 'Tagesstruktur' : 'Daily rhythm',
+                label: locale === 'de' ? 'Tagesablauf' : 'Daily rhythm',
                 left: locale === 'de' ? 'Der Intensivkurs findet bei CASA statt' : 'Intensive classes take place at CASA',
-                right: locale === 'de' ? 'Klar strukturierter Ablauf mit Programmzeiten' : 'Structured schedule around program timetable',
+                right: locale === 'de' ? 'Fester Ablauf mit Unterricht und Programm' : 'Structured schedule around program timetable',
               },
               {
-                label: locale === 'de' ? 'CASA Begleitung' : 'CASA support',
-                left: locale === 'de' ? 'Matching, Kommunikation, Supportkontakt' : 'Matching, communication, and support contact',
-                right: locale === 'de' ? 'Koordination, Ablaufabstimmung, Supportkontakt' : 'Coordination, scheduling alignment, and support contact',
+                label: locale === 'de' ? 'Begleitung durch CASA' : 'CASA support',
+                left: locale === 'de' ? 'Wir wählen passende Gäste aus und bleiben Ihre Ansprechpartner' : 'Matching, communication, and support contact',
+                right: locale === 'de' ? 'Wir stimmen den Ablauf mit Ihnen ab und bleiben Ihre Ansprechpartner' : 'Coordination, scheduling alignment, and support contact',
               },
               {
                 /*
@@ -368,11 +368,11 @@ export default async function BecomeHostFamilyPage() {
                 label: locale === 'de' ? 'Aufwandsentschädigung' : 'Compensation',
                 left:
                   locale === 'de'
-                    ? 'Vergütung je Aufenthalt, schriftlich vor der Zusage'
+                    ? 'Pro Aufenthalt, schriftlich vereinbart, bevor Sie zusagen'
                     : 'A per-placement rate, in writing before you agree',
                 right:
                   locale === 'de'
-                    ? 'Satz je Gruppenaufenthalt, schriftlich vor der Zusage'
+                    ? 'Pro Gruppenaufenthalt, schriftlich vereinbart, bevor Sie zusagen'
                     : 'A per-group rate, in writing before you agree',
               },
             ]}

@@ -216,6 +216,6 @@ export function nextStepsHeading(archetype: CourseArchetype, locale: ContentLoca
   }
 
   return locale === 'de'
-    ? { eyebrow: 'Nächste Schritte', title: 'Nach dem Kursentscheid' }
+    ? { eyebrow: 'Nächste Schritte', title: 'So geht es weiter' }
     : { eyebrow: 'Next steps', title: 'After choosing this course' };
 }

@@ -14,9 +14,11 @@ import type { ContentLocale } from '@/lib/content/types';
  * ASSIGNED BY CASA on 2026-09-08. This is the operative allocation, and where it
  * differs from what casa-bremen.de/ueber-uns/casa-team currently prints, this
  * list wins — a published team page goes stale, and the person who told us this
- * works there. Three of the assignments do differ from that page's `areas`,
- * flagged individually below so the next reader can re-confirm rather than
- * assume.
+ * works there. Re-checked 2026-10-07: every assignment below that the live page
+ * covers agrees with the `areas` it prints (it names no one for Bildungszeit).
+ * The three "differences" noted here before came from our own /team roster,
+ * whose `areas` had drifted one person along; that roster now matches the live
+ * page too.
  *
  * NAMES ARE NOT WRITTEN HERE. Each entry points at a `TEAM` id and the name is
  * read from config/content/team-spotlights.ts, which is the verified roster.
@@ -75,19 +77,17 @@ const CONTACTS = {
   },
 
   /* Replaces Mareike Thomeczek, who was written inline on /accommodation/[type].
-     The team page lists Natàlia under "Kurse & telc Prüfungen" and Mareike under
-     "Kurse & Unterkunft", so this reverses what that page implies — CASA's
-     instruction, 2026-09-08. Worth re-confirming at launch. */
+     CASA's instruction, 2026-09-08; casa-bremen.de's team page lists CASA
+     Unterkunft among Natàlia's areas as well. */
   accommodation: {
     teamId: 'natalia-sostres',
     role: { en: 'Courses & accommodation', de: 'Kurse & Unterkunft' },
     email: 'accommodation@casa-bremen.de',
-    source: 'assigned by CASA 2026-09-08 (team page still shows telc exams)',
+    source: 'assigned by CASA 2026-09-08; matches the casa-bremen.de team page (2026-10-07)',
   },
 
-  /* CASA's own team page already lists intensive courses among her areas, so
-     this is the one assignment that agrees with what is published. Same person
-     as `accommodation` below — the role differs by surface, which is the point
+  /* CASA's own team page lists intensive courses among her areas. Same person
+     as `accommodation` above — the role differs by surface, which is the point
      of keying contacts by surface rather than by person. */
   intensive: {
     teamId: 'natalia-sostres',
@@ -113,9 +113,10 @@ const CONTACTS = {
     source: 'assigned by Rahman 2026-10-01',
   },
 
-  /* Bildungszeit (and, until 2026-10-01, the medical course). The team page prints no `areas` for her
-     at all, and puts the medical/nursing courses with Alissa Trouillet — so both
-     of these are CASA's instruction rather than anything published.
+  /* Bildungszeit (and, until 2026-10-01, the medical course). casa-bremen.de's
+     team page gives her intensive courses, partnerships and Firmenunterricht,
+     and names no one for Bildungszeit, so this one is CASA's instruction rather
+     than anything published.
 
      No `booking`: these two are bought by an individual learner deciding on a
      course, and the register/quote button beside these facts is the action they
@@ -124,7 +125,7 @@ const CONTACTS = {
     teamId: 'meike-grosse-hundrup',
     role: { en: 'Courses & advice', de: 'Kurse & Beratung' },
     email: 'info@casa-bremen.de',
-    source: 'assigned by CASA 2026-09-08 (not on the public team page)',
+    source: 'assigned by CASA 2026-09-08 (Bildungszeit is not on the public team page)',
   },
 
   /* SAME PERSON AS `professional`, SPLIT OFF FOR THE BOOKING FLAG.
@@ -139,8 +140,7 @@ const CONTACTS = {
      instead of a condition inside a component. Bildungszeit and the medical
      course keep `professional` and show no button.
      
-     The team page attributes Firmenunterricht to Tanja Langenickel; CASA's
-     instruction of 2026-09-08 overrides that, as recorded above. */
+     casa-bremen.de's team page lists Firmenunterricht among her areas too. */
   company: {
     teamId: 'meike-grosse-hundrup',
     role: { en: 'Company training', de: 'Firmenunterricht' },
@@ -149,13 +149,13 @@ const CONTACTS = {
     source: 'assigned by CASA 2026-09-08; call offered from 2026-09-08',
   },
 
-  /* The team page gives telc exams to Natàlia Sostres and lists Tanja under
-     "Kurse & Kooperationen, Firmenunterricht". CASA's instruction, 2026-09-08. */
+  /* CASA's instruction, 2026-09-08; casa-bremen.de's team page lists telc
+     Prüfungen among Tanja's areas as well. */
   exams: {
     teamId: 'tanja-langenickel',
     role: { en: 'telc examinations', de: 'telc Prüfungen' },
     email: 'info@casa-bremen.de',
-    source: 'assigned by CASA 2026-09-08 (team page still shows Firmenunterricht)',
+    source: 'assigned by CASA 2026-09-08; matches the casa-bremen.de team page (2026-10-07)',
   },
 } as const satisfies Record<string, CasaContact>;
 

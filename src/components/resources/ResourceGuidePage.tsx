@@ -73,11 +73,11 @@ const chrome = {
     eyebrow: 'Ratgeber',
     contents: 'Inhalt',
     glance: 'Das Wichtigste zuerst',
-    topics: 'Vertiefung',
+    topics: 'Genauer erklärt',
     faq: 'Häufige Fragen',
     sources: 'Offizielle Quellen',
     related: 'Die anderen Ratgeber',
-    disclaimer: 'Anforderungen ändern sich. Prüfen Sie die offizielle Quelle für Ihr Land, bevor Sie handeln.',
+    disclaimer: 'Die Anforderungen ändern sich immer wieder. Bitte prüfe die offizielle Quelle für dein Land, bevor du etwas unternimmst.',
   },
 } satisfies Record<ContentLocale, Record<string, string>>;
 

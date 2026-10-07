@@ -294,10 +294,10 @@ export const accommodationCheckInForm = {
 export function checkInSummary(locale: ContentLocale) {
   return locale === 'de'
     ? [
-        'Zustand von Zimmer, Möbeln und Wänden, gemeinsam festgehalten',
-        'Anzahl der übergebenen Schlüssel und der Bettwäsche',
-        'Was mitbenutzt werden darf: Küche, Bad, Waschmaschine, WLAN',
-        'Fotos zur Dokumentation, wenn beide Seiten zustimmen',
+        'In welchem Zustand Zimmer, Möbel und Wände sind',
+        'Wie viele Schlüssel und wie viel Bettwäsche du bekommst',
+        'Ob du Küche, Bad, Waschmaschine und WLAN mitbenutzen darfst',
+        'Fotos vom Zimmer, wenn beide Seiten einverstanden sind',
       ]
     : [
         'The condition of the room, the furniture and the walls, recorded together',

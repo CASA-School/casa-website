@@ -27,7 +27,7 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
             {de ? 'Unser gesellschaftlicher Auftrag' : 'Our public-benefit mission'}
           </p>
           <h2 id="nonprofit-mission-title" className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
-            {de ? 'Gemeinnützig. Für Bildung und Teilhabe.' : 'A non-profit school. A shared purpose.'}
+            {de ? 'Gemeinnützig für Bildung und Teilhabe' : 'A non-profit school. A shared purpose.'}
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-[var(--casa-ink)]">
             {de
@@ -36,7 +36,7 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
           </p>
           <p className="mt-4 leading-relaxed text-[var(--casa-muted)]">
             {de
-              ? 'Wir begleiten internationale Lernende und Menschen, die in Bremen neu anfangen. Unsere Bildungskooperationen unterstützen den Weg ins Studium; kostenfreie Sprachtandems, Ausflüge und Begegnungen schaffen Verbindungen im Alltag.'
+              ? 'Wir begleiten internationale Lernende und Menschen, die in Bremen neu anfangen. Unsere Bildungskooperationen helfen auf dem Weg ins Studium. Kostenfreie Sprachtandems, Ausflüge und Begegnungen schaffen Verbindungen im Alltag.'
               : 'We support international learners and people making a new start in Bremen. Our education partnerships help them prepare for university; free language exchanges, outings and meetups build connections beyond the classroom.'}
           </p>
         </div>

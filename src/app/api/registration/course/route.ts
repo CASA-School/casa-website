@@ -17,7 +17,7 @@ import {
 
 function successMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Vielen Dank. Ihre Kursanfrage ist eingegangen. Das CASA-Team meldet sich zeitnah mit den nächsten Schritten.';
+    return 'Vielen Dank! Deine Kursanmeldung ist bei uns angekommen. Wir melden uns so bald wie möglich mit den nächsten Schritten bei dir.';
   }
 
   return 'Thank you. Your course request has been received. The CASA team will contact you shortly with next steps.';
@@ -25,7 +25,7 @@ function successMessage(locale: 'en' | 'de') {
 
 function failureMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Ihre Kursanfrage konnte gerade nicht übermittelt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie das CASA-Team direkt.';
+    return 'Deine Kursanmeldung konnte gerade nicht übermittelt werden. Bitte versuch es noch einmal oder wende dich direkt an das CASA-Team.';
   }
 
   return 'Your course request could not be submitted right now. Please try again or contact the CASA team directly.';
@@ -33,7 +33,7 @@ function failureMessage(locale: 'en' | 'de') {
 
 function unavailableMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Dieser Starttermin ist nicht mehr buchbar. Bitte wählen Sie einen anderen Termin.';
+    return 'Dieser Starttermin ist nicht mehr buchbar. Bitte wähle einen anderen Termin.';
   }
 
   return 'This start date can no longer be booked. Please choose another date.';
@@ -41,12 +41,12 @@ function unavailableMessage(locale: 'en' | 'de') {
 
 function examUnavailableMessage(locale: 'en' | 'de') {
   return locale === 'de'
-    ? 'Dieser Prüfungstermin ist nicht mehr buchbar. Bitte wählen Sie einen anderen Termin.'
+    ? 'Dieser Prüfungstermin ist nicht mehr buchbar. Bitte wähle einen anderen Termin.'
     : 'This exam date can no longer be booked. Please choose another date.';
 }
 
 function levelMessage(locale: 'en' | 'de') {
-  return locale === 'de' ? 'Bitte wählen Sie ein Niveau aus.' : 'Please choose a level.';
+  return locale === 'de' ? 'Bitte wähle ein Niveau aus.' : 'Please choose a level.';
 }
 
 export async function POST(request: NextRequest) {

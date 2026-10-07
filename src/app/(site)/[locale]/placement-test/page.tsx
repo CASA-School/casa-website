@@ -18,10 +18,11 @@ import { createPublicMetadata } from '@/lib/seo';
  * finished, so CASA decided to go back to the Klett tests the old
  * casa-bremen.de offered, while the own test stays in development behind
  * `placementTestEnabled()` (src/lib/placement/availability.ts). The copy follows
- * the old site's page, in the new site's "Sie": start with A1, take the test
+ * the old site's page, in its „du“ (2026-10-07): start with A1, take the test
  * alone without aids, enter name and email in Klett's form, send the result to
  * online@, no test for complete beginners, and placement in person without an
- * appointment.
+ * appointment. The old page „Niveaustufen“ redirects here, so the level section
+ * at the end carries its descriptions of each level.
  *
  * The address stays: about 67 legacy redirects, the sitemap, the footer and
  * twenty internal links point here.
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === 'de' ? 'Deutsch-Einstufungstest' : 'German placement test',
     description:
       locale === 'de'
-        ? 'Finden Sie Ihr Deutschniveau: kostenlose Online-Einstufungstests von A1 bis C1 oder eine persönliche Einstufung bei CASA in Bremen, ohne Termin.'
+        ? 'Mit den kostenlosen Online-Einstufungstests von A1 bis C1 findest du dein Deutschniveau. In Bremen kannst du auch ohne Termin zur persönlichen Einstufung zu CASA kommen.'
         : 'Find your German level: free online placement tests from A1 to C1, or a personal placement at CASA in Bremen, no appointment needed.',
     path: '/placement-test',
     keywords: ['German placement test Bremen', 'Einstufungstest Deutsch', 'Einstufungstest Bremen', 'CASA Bremen'],
@@ -53,29 +54,29 @@ export default async function PlacementTestPage() {
   const copy =
     locale === 'de'
       ? {
-          heroTitle: 'Finden Sie Ihr Deutschniveau',
+          heroTitle: 'Finde dein Deutschniveau',
           heroBody:
-            'Die richtige Einstufung ist die Grundlage für erfolgreiches Lernen. Machen Sie dazu einen kostenlosen Online-Test oder kommen Sie zur persönlichen Einstufung zu uns in die Schule.',
+            'Die richtige Einstufung in die passende Lerngruppe ist die Grundlage für erfolgreiches Lernen. Mach dazu einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.',
           heroCta: 'Zu den Tests',
           meta: ['Kostenlose Online-Tests', 'Vor Ort ohne Termin'],
-          howTitle: 'So gehen Sie vor',
+          howTitle: 'So gehst du vor',
           steps: [
-            'Beginnen Sie immer mit dem A1-Test.',
-            'Nehmen Sie sich Ruhe und Zeit, und machen Sie den Test allein und ohne Hilfsmittel wie Wörterbücher.',
-            'Tragen Sie im Testformular Ihren Namen und Ihre E-Mail-Adresse ein, damit wir Ihr Ergebnis zuordnen können.',
+            'Beginne immer mit dem A1-Test.',
+            'Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.',
+            'Trag im Testformular deinen Namen und deine E-Mail-Adresse ein, damit wir dein Ergebnis zuordnen können.',
           ],
-          sendTitle: 'Senden Sie uns Ihr Ergebnis',
-          sendBody: 'Schicken Sie uns Ihre Ergebnisse nach der Auswertung des jeweiligen Tests bitte an',
+          sendTitle: 'Schick uns deine Ergebnisse',
+          sendBody: 'Wenn ein Test ausgewertet ist, schick das Ergebnis bitte an',
           beginnerTitle: 'Noch gar keine Deutschkenntnisse?',
-          beginnerBody: 'Dann brauchen Sie keinen Einstufungstest. Sie beginnen mit einem Kurs auf dem Niveau A1.',
+          beginnerBody: 'Dann brauchst du keinen Einstufungstest und beginnst einfach mit einem Kurs auf dem Niveau A1.',
           beginnerCta: 'Zur Kursanmeldung',
           finalNote:
-            'Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch und behalten uns vor, das Kursniveau anzupassen – unabhängig von zuvor erworbenen Zertifikaten.',
+            'Bei den Intensivkursen stufen wir dich ohnehin vor Ort ein. Wir behalten uns dabei vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.',
           inPersonTitle: 'Lieber persönlich in Bremen?',
           inPersonBody:
-            'Wenn Sie in Bremen oder Umgebung leben, kommen Sie gern zur persönlichen Einstufung und Beratung in die Schule. Sie ist unverbindlich, und Sie lernen dabei die Schule kennen und können Ihre Fragen stellen. Ein Termin ist nicht nötig: Kommen Sie Montag bis Donnerstag von 08:30 bis 19:00 Uhr oder freitags von 08:30 bis 13:00 Uhr, und planen Sie mindestens eine Stunde ein.',
+            'Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in die Schule ein. Die Einstufung ist unverbindlich, und du lernst dabei die Schule kennen und kannst deine Fragen stellen. Einen Termin brauchst du nicht. Komm einfach Montag bis Donnerstag von 08:30 bis 19:00 Uhr oder freitags von 08:30 bis 13:00 Uhr vorbei, und plane mindestens eine Stunde ein.',
           inPersonCta: 'Kontakt und Adresse',
-          prepTitle: 'Was Sie vorbereiten können',
+          prepTitle: 'Was du vorbereiten kannst',
         }
       : {
           heroTitle: 'Find your German level',

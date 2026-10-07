@@ -27,10 +27,8 @@ type Level = {
  * published anywhere, so this states the weekly RATE instead of a total.
  *
  * This is the SITE-VERIFIED figure for full levels (A1-C1). B1+ carries its
- * own, separately-sourced constant — see WEEKS_FOR_BRIDGE_STAFF_CONFIRMED
- * below — because the verified row scopes itself to A1-C1 and the
- * visitor-facing wording says 'one full CEFR level', neither of which covers
- * the bridge step.
+ * own constant — see WEEKS_FOR_BRIDGE_STAFF_CONFIRMED below — because it is
+ * not a full level.
  */
 const WEEKS_PER_LEVEL = '8-9';
 const LESSONS_PER_WEEK = 20;
@@ -38,20 +36,26 @@ const LESSONS_PER_WEEK = 20;
 /**
  * B1+ duration — staff-confirmed, tracked separately from WEEKS_PER_LEVEL.
  *
- * casa-bremen.de does not publish a B1+ duration, and the derived '4 weeks'
- * (one CASA_LEVEL_SEQUENCE step x the half-level constant) was rejected: that
- * constant is a PRICE tier, not a duration, and it did not even match the
- * verified per-week rate. Rahman (project owner, in direct contact with CASA)
- * confirmed 2026-08-13 that B1+ runs about 2 months in practice — the same
- * order as a full level, despite billing at the half-level rate (see
- * CASA_LEVEL_GROUPS in pricing.ts, unaffected by this).
+ * casa-bremen.de does not publish a B1+ duration. Rahman (project owner, in
+ * direct contact with CASA) confirmed 2026-08-13 that B1+ runs about two months,
+ * the same order as a full level, despite billing at the half-level rate (see
+ * CASA_LEVEL_GROUPS in pricing.ts). It is one step of the intensive course,
+ * between B1.2 and B2.1, taught with Kontext B1+; the registration offers it as
+ * "B1+ · 8 Wochen" (src/lib/registration/levels.ts).
  *
- * CASA apparently runs B1+ as two internal parts (B1+.1 / B1+.2). Per the same
- * conversation, that split is intentionally NOT modelled here — one B1+ card,
- * not two tabs — until there is a reason to break it out.
+ * The card used to add "Angabe der Schule, nicht auf casa-bremen.de
+ * veröffentlicht" under the duration. That was a note about where the number
+ * came from, and on CASA's own site it read as an internal remark; it lives
+ * here and in docs/COURSE_FACTS_SOURCE_OF_TRUTH.md now (2026-10-07).
  */
 const WEEKS_FOR_BRIDGE_STAFF_CONFIRMED = '8-9';
 
+/*
+ * The German descriptions are the old casa-bremen.de page „Niveaustufen“
+ * (/sprachkurse/niveaustufen, which now redirects here): what a learner can do
+ * on each level, after the CEFR's global scale, already in „du“. Brought back
+ * 2026-10-07 in the site's plain voice; the English lines are unchanged.
+ */
 const LEVELS: Level[] = [
   {
     id: 'a1',
@@ -59,7 +63,7 @@ const LEVELS: Level[] = [
     weeks: WEEKS_PER_LEVEL,
     description: {
       en: 'Absolute beginner. Greetings, basic phrases, numbers, and everyday vocabulary.',
-      de: 'Absolute Anfängerstufe. Begrüßungen, Grundphrasen, Zahlen und Alltagsvokabular.',
+      de: 'Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.',
     },
   },
   {
@@ -68,7 +72,7 @@ const LEVELS: Level[] = [
     weeks: WEEKS_PER_LEVEL,
     description: {
       en: 'Foundation level. Short conversations, simple directions, and basic written communication.',
-      de: 'Grundstufe. Kurze Gespräche, einfache Wegbeschreibungen und grundlegende schriftliche Kommunikation.',
+      de: 'Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.',
     },
   },
   {
@@ -77,23 +81,22 @@ const LEVELS: Level[] = [
     weeks: WEEKS_PER_LEVEL,
     description: {
       en: 'Independent user. Express opinions, handle most travel situations, write simple texts.',
-      de: 'Selbstständige Sprachverwendung. Meinungen äußern, Reisesituationen meistern, einfache Texte verfassen.',
+      de: 'Du verstehst die Hauptpunkte, wenn klare Standardsprache verwendet wird und es um vertraute Dinge aus Arbeit, Schule oder Freizeit geht. Die meisten Situationen, die dir auf Reisen in deutschsprachigen Ländern begegnen, kannst du bewältigen. Über vertraute Themen und deine Interessen kannst du dich einfach und zusammenhängend äußern. Du kannst von Erfahrungen und Ereignissen erzählen, Träume, Hoffnungen und Ziele beschreiben und deine Pläne und Ansichten kurz begründen oder erklären.',
     },
   },
   {
-    // Not a CEFR level of its own: CASA bills B1+ as a single half-level step
+    // Not a CEFR level of its own: B1+ is a single step of the intensive course
     // (one entry in CASA_LEVEL_SEQUENCE, src/config/calculator/pricing.ts:25),
     // and it is where the textbook switches from Netzwerk neu to Kontext
-    // (pricing.ts:98). The descriptor is deliberately factual rather than
-    // invented: the CEFR defines no B1+, so it is described by what changes at
-    // it.
+    // (pricing.ts:98). The German text says who it is for, as the old
+    // casa-bremen.de page did; the English one says what changes at it.
     id: 'b1plus',
     label: 'B1+',
     weeks: WEEKS_FOR_BRIDGE_STAFF_CONFIRMED,
     isBridge: true,
     description: {
       en: 'Bridge level before B2. This is where the course moves on to the Kontext textbook.',
-      de: 'Übergangsniveau vor B2. Hier wechselt der Kurs zum Lehrwerk Kontext.',
+      de: 'Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.',
     },
   },
   {
@@ -102,7 +105,7 @@ const LEVELS: Level[] = [
     weeks: WEEKS_PER_LEVEL,
     description: {
       en: 'Upper-intermediate. Understand complex texts, interact fluently with native speakers.',
-      de: 'Gehobene Mittelstufe. Komplexe Texte verstehen und fließend mit Muttersprachlern kommunizieren.',
+      de: 'Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.',
     },
   },
   {
@@ -111,7 +114,7 @@ const LEVELS: Level[] = [
     weeks: WEEKS_PER_LEVEL,
     description: {
       en: 'Advanced. Academic and professional fluency, nuanced expression, complex written production.',
-      de: 'Fortgeschrittene Stufe. Akademische und berufliche Sprachkompetenz, nuancierter Ausdruck.',
+      de: 'Du verstehst viele anspruchsvolle, längere Texte und erfasst auch, was zwischen den Zeilen steht. Du drückst dich spontan und fließend aus, ohne oft erkennbar nach Worten suchen zu müssen. Im gesellschaftlichen und beruflichen Leben, in der Ausbildung und im Studium setzt du die Sprache wirksam und flexibel ein. Zu komplexen Sachverhalten äußerst du dich klar, gut gegliedert und ausführlich und verknüpfst deine Gedanken dabei mit passenden sprachlichen Mitteln.',
     },
   },
 ];
@@ -199,14 +202,14 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
   const copy =
     locale === 'de'
       ? {
-          eyebrow: 'Ihr Lernweg',
-          title: 'Von A1 bis C1 — Schritt für Schritt',
-          description: `Im Intensivformat: ${LESSONS_PER_WEEK} UE pro Woche (je 45 Minuten), in der Regel etwa ${WEEKS_PER_LEVEL} Wochen pro vollständiger Niveaustufe.`,
-          pace: 'Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.',
+          eyebrow: 'Niveaustufen',
+          title: 'Was du auf jeder Stufe kannst',
+          description:
+            'In unserer Schule finden fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1 statt. Wir orientieren uns dabei streng am Gemeinsamen Europäischen Referenzrahmen (GER).',
+          pace: `Im Intensivkurs hast du ${LESSONS_PER_WEEK} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel ${WEEKS_PER_LEVEL.replace('-', '–')} Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.`,
           paceLabel: 'Dauer pro Niveaustufe',
           weeks: 'Wochen',
           rate: `${LESSONS_PER_WEEK} UE pro Woche (je 45 Min.)`,
-          bridgeSourceNote: 'Angabe der Schule, nicht auf casa-bremen.de veröffentlicht.',
           textbook: 'Lehrwerk',
         }
       : {
@@ -217,7 +220,6 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           paceLabel: 'Time per level',
           weeks: 'weeks',
           rate: `${LESSONS_PER_WEEK} lessons per week (45 min each)`,
-          bridgeSourceNote: "As told to us by the school, not published on casa-bremen.de.",
           textbook: 'Textbook',
         };
 
@@ -311,9 +313,6 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
               <span className="ml-1 text-sm font-semibold text-[var(--casa-text-subtle)]">{copy.weeks}</span>
             </p>
             <p className="mt-0.5 text-sm text-[var(--casa-muted)]">{copy.rate}</p>
-            {activeLevel.isBridge ? (
-              <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">{copy.bridgeSourceNote}</p>
-            ) : null}
           </div>
         </div>
 

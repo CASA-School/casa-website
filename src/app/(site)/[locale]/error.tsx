@@ -20,7 +20,7 @@ export default function SiteError({ retry }: { error: Error & { digest?: string 
       ? {
           eyebrow: 'Fehler',
           title: 'Etwas ist schiefgelaufen',
-          body: 'Diese Seite konnte gerade nicht geladen werden. Bitte versuchen Sie es noch einmal. Wenn der Fehler bleibt, erreichen Sie uns über die Kontaktseite.',
+          body: 'Diese Seite konnte gerade nicht geladen werden. Bitte versuch es noch einmal. Wenn der Fehler bleibt, erreichst du uns über die Kontaktseite.',
           retry: 'Erneut versuchen',
           home: 'Zur Startseite',
           contact: 'Kontakt aufnehmen',

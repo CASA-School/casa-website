@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     locale,
     title: locale === 'de' ? 'Unterkunft in Bremen' : 'Accommodation in Bremen',
     description: locale === 'de'
-      ? 'Ein Zimmer für Ihren Intensivkurs: Entdecken Sie CASA-WGs und private Gastgeber in Bremen, mit persönlicher Vermittlung und klaren Kosten.'
+      ? 'Für deinen Intensivkurs vermitteln wir dir ein Zimmer in einer CASA-WG oder bei Gastgebern in Bremen. Hier findest du beide Möglichkeiten und was sie kosten.'
       : 'Find a room for your intensive German course: explore CASA shared flats and local hosts in Bremen, with personal advice and clear costs.',
     path: '/accommodation',
     keywords: ['Accommodation Bremen', 'Host families', 'Shared flats'],
@@ -72,10 +72,10 @@ export default async function AccommodationPage() {
       <HeroAPhotoLed
         breadcrumbs={breadcrumbs}
         eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
-        title={locale === 'de' ? 'Ein Zuhause für Ihre Zeit in Bremen' : 'A place to call home in Bremen'}
+        title={locale === 'de' ? 'Ein Zuhause für deine Zeit in Bremen' : 'A place to call home in Bremen'}
         description={
           locale === 'de'
-            ? 'In einer CASA-WG oder bei Bremer Gastgebern: Wir helfen Ihnen, eine Unterkunft für Ihren Intensivkurs zu finden und sich vor Ort einzuleben.'
+            ? 'Während deines Intensivkurses kannst du in einer CASA-WG oder bei Gastgebern in Bremen wohnen. Wir helfen dir, ein passendes Zimmer zu finden und dich gut einzuleben.'
             : 'A CASA shared flat or a room with local hosts: we help you find somewhere to live during your intensive German course and settle into Bremen.'
         }
         photo={pageConfig.photos.thumbC}
@@ -124,11 +124,11 @@ export default async function AccommodationPage() {
         <Container>
           <div className="px-6 md:px-9">
             <BandHeading
-              eyebrow={locale === 'de' ? 'Wohnoptionen' : 'Accommodation options'}
-              title={locale === 'de' ? 'Zwei Hauptoptionen für Ihren Aufenthalt' : 'Two primary options for your stay'}
+              eyebrow={locale === 'de' ? 'Wohnmöglichkeiten' : 'Accommodation options'}
+              title={locale === 'de' ? 'Zwei Möglichkeiten zu wohnen' : 'Two primary options for your stay'}
               description={
                 locale === 'de'
-                  ? 'Beide kosten dasselbe. Die Wahl ist eine Frage des Alltags, nicht des Preises.'
+                  ? 'Beide kosten gleich viel. So kannst du ganz danach entscheiden, wie du in Bremen leben möchtest.'
                   : 'Both cost the same. Choosing between them is a question of daily life, not of price.'
               }
             />
@@ -136,16 +136,18 @@ export default async function AccommodationPage() {
             <CourseFormatRows
               className="mt-12 md:mt-16"
               tone="dark"
-              /* Four, not the default three: each option publishes exactly four
-                 highlights and dropping one would be losing content to a layout
-                 default. Same reason become-host raises it. */
+              /* Four, not the default three: dropping a published highlight
+                 would be losing content to a layout default. Same reason
+                 become-host raises it. The German WG list is longer (its
+                 restored house facts); the index shows its first four, the
+                 detail page all of them. */
               maxOutcomes={4}
               rows={[
                 {
                   id: 'flat',
-                  title: flat?.headline || (locale === 'de' ? 'CASA WGs' : 'Shared flats'),
+                  title: flat?.headline || (locale === 'de' ? 'CASA-WGs' : 'Shared flats'),
                   description: flat?.summary || '',
-                  bestFor: locale === 'de' ? 'Gut für: eigenständiger Alltag' : 'Best for: independent routines',
+                  bestFor: locale === 'de' ? 'Passt zu dir, wenn du deinen Alltag gern selbst gestaltest.' : 'Best for: independent routines',
                   outcomes: flat?.highlights || [],
                   /* No `meta`. It carried accommodationPriceSummary(locale) as a
                      kicker above the title — "€580 FOR 4 WEEKS, THEN €145 A WEEK"
@@ -161,7 +163,7 @@ export default async function AccommodationPage() {
                   id: 'host',
                   title: host?.headline || (locale === 'de' ? 'Gastfamilien' : 'Host families'),
                   description: host?.summary || '',
-                  bestFor: locale === 'de' ? 'Gut für: tägliche Sprachpraxis' : 'Best for: daily language immersion',
+                  bestFor: locale === 'de' ? 'Passt zu dir, wenn du Leben und Kultur in Deutschland aus der Nähe erleben möchtest.' : 'Best for: daily language immersion',
                   outcomes: host?.highlights || [],
                   href: '/accommodation/host',
                   ctaLabel: locale === 'de' ? 'Gastfamilien ansehen' : 'See host families',
@@ -201,7 +203,7 @@ export default async function AccommodationPage() {
         <section className="bg-white py-16 md:py-24">
           <Container>
             <HumanStoryBlock
-              eyebrow={locale === 'de' ? 'Wohn-Erfahrung' : 'Housing story'}
+              eyebrow={locale === 'de' ? 'Erfahrungen' : 'Housing story'}
               title={locale === 'de' ? 'Ankommen und sich wohlfühlen' : 'Settle well, learn better'}
               quote={leadStory.quote}
               person={leadStory.personDisplay}
@@ -212,7 +214,7 @@ export default async function AccommodationPage() {
               }}
               supportingText={
                 locale === 'de'
-                  ? 'Ein eigenes Zimmer und Menschen in Ihrer Nähe machen den Start leichter. Bei Fragen zu Ihrer Unterkunft sind wir für Sie da.'
+                  ? 'Ein eigenes Zimmer und Menschen in deiner Nähe machen den Start leichter. Bei Fragen zu deiner Unterkunft sind wir für dich da.'
                   : 'A room of your own and people nearby can make the first weeks easier. If you have questions about your accommodation, we are here to help.'
               }
             />
@@ -256,27 +258,27 @@ export default async function AccommodationPage() {
           */}
           <ProcessSteps
             eyebrow={locale === 'de' ? 'Ablauf' : 'How requests work'}
-            title={locale === 'de' ? 'Unterkunftsanfrage in drei Schritten' : 'Request accommodation in three steps'}
+            title={locale === 'de' ? 'So fragst du eine Unterkunft an' : 'Request accommodation in three steps'}
             description={
               locale === 'de'
-                ? 'Teilen Sie uns Ihre Wünsche mit. Wir prüfen die Möglichkeiten und besprechen alles Weitere mit Ihnen.'
+                ? 'Sag uns, was du dir wünschst. Wir prüfen, was möglich ist, und besprechen alles Weitere mit dir.'
                 : 'Tell us what you are looking for. We will check the options and talk through the arrangements with you.'
             }
             steps={[
               {
                 step: locale === 'de' ? '1' : '1',
-                title: locale === 'de' ? 'Präferenz senden' : 'Share preference',
-                description: locale === 'de' ? 'WG oder Gastfamilie wählen.' : 'Choose shared flat or host family.',
+                title: locale === 'de' ? 'Wunsch nennen' : 'Share preference',
+                description: locale === 'de' ? 'Sag uns, ob du lieber in einer WG oder bei einer Gastfamilie wohnen möchtest.' : 'Choose shared flat or host family.',
               },
               {
                 step: locale === 'de' ? '2' : '2',
-                title: locale === 'de' ? 'Matching erhalten' : 'Receive matching options',
-                description: locale === 'de' ? 'Passende Optionen mit Details.' : 'Receive suitable options with details.',
+                title: locale === 'de' ? 'Vorschläge bekommen' : 'Receive matching options',
+                description: locale === 'de' ? 'Wir schicken dir passende Möglichkeiten mit allen Einzelheiten.' : 'Receive suitable options with details.',
               },
               {
                 step: locale === 'de' ? '3' : '3',
-                title: locale === 'de' ? 'Bestätigen und einziehen' : 'Confirm and move in',
-                description: locale === 'de' ? 'Check-in Informationen folgen.' : 'Check-in details are shared next.',
+                title: locale === 'de' ? 'Zusagen und einziehen' : 'Confirm and move in',
+                description: locale === 'de' ? 'Danach bekommst du von uns alles, was du für deine Ankunft wissen musst.' : 'Check-in details are shared next.',
               },
             ]}
           />
@@ -318,7 +320,7 @@ export default async function AccommodationPage() {
               </h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">
                 {locale === 'de'
-                  ? 'CASA vermittelt seit 1983 Lernende an Gastgeber in Bremen. Familien, Paare und Einzelpersonen können gastgeben.'
+                  ? 'Seit 1983 vermitteln wir Lernende an Gastgeber in Bremen. Gastgeber können Familien, Paare und Einzelpersonen sein.'
                   : 'CASA has matched learners with households in Bremen since 1983. Families, couples and single-person households can all host.'}
               </p>
             </div>

@@ -40,7 +40,7 @@ describe('exam registration route', () => {
   it('answers a German page in German when a field is missing', async () => {
     const response = await POST(request({ ...valid, locale: 'de', firstName: '' }));
     expect(response.status).toBe(400);
-    expect((await response.json()).message).toBe('Bitte geben Sie Ihren Vornamen an (mindestens 2 Zeichen).');
+    expect((await response.json()).message).toBe('Bitte gib deinen Vornamen an (mindestens 2 Zeichen).');
   });
 
   it('refuses a session the catalogue no longer offers', async () => {

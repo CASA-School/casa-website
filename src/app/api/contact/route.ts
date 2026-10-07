@@ -9,7 +9,7 @@ import { contactInquirySchema, organiserBriefFields } from '@/lib/validation/con
 
 function successMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Vielen Dank. Ihre Anfrage ist eingegangen. Das CASA-Team meldet sich zeitnah.';
+    return 'Vielen Dank! Deine Anfrage ist bei uns angekommen. Wir melden uns so bald wie möglich bei dir.';
   }
 
   return 'Thank you. Your request has been received. The CASA team will reply shortly.';
@@ -17,7 +17,7 @@ function successMessage(locale: 'en' | 'de') {
 
 function failureMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Ihre Anfrage konnte gerade nicht übermittelt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie das Team direkt.';
+    return 'Deine Anfrage konnte gerade nicht gesendet werden. Bitte versuche es noch einmal oder melde dich direkt bei uns.';
   }
 
   return 'Your request could not be submitted right now. Please try again or contact the office directly.';

@@ -215,7 +215,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
       const result = (await response.json().catch(() => null)) as ExamRegistrationApiResult | null;
       if (!response.ok || result?.status !== 'accepted') {
-        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
+        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.'));
       }
 
       setConfirmationSent(result?.confirmationSent === true);
@@ -231,7 +231,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
       const message =
         error instanceof Error && !(error instanceof TypeError)
           ? error.message
-          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
+          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.');
       setSubmissionError(message);
       trackCasaEvent('form_error', {
         form: 'exam_registration',
@@ -360,7 +360,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Personal information', 'Persönliche Angaben')}
-              description={t('Your details must match your official ID exactly.', 'Ihre Angaben müssen exakt zu Ihrem amtlichen Ausweis passen.')}
+              description={t('Your details must match your official ID exactly.', 'Deine Angaben müssen genau mit deinem amtlichen Ausweis übereinstimmen.')}
             />
 
             <div className={formFieldGroupClassName}>
@@ -512,7 +512,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
               <p className={cn(formHintClassName, 'flex gap-2.5')}>
                 <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-                {t('We confirm your exam place by email once payment and your details are checked.', 'Wir bestätigen Ihren Prüfungsplatz per E-Mail, sobald Zahlung und Angaben geprüft sind.')}
+                {t('We confirm your exam place by email once payment and your details are checked.', 'Wir bestätigen dir deinen Prüfungsplatz per E-Mail, sobald wir deine Zahlung und deine Angaben geprüft haben.')}
               </p>
 
               <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
@@ -544,7 +544,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     }
                   />
                   <Label htmlFor="exam-policy-accepted" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                    {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich verstehe, dass die Prüfungsbestätigung von Dokumenten- und Zahlungsprüfung abhängt.')}
+                    {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich weiß, dass mein Prüfungsplatz erst bestätigt wird, wenn meine Dokumente und meine Zahlung geprüft sind.')}
                     <RequiredMark />
                   </Label>
                 </div>
@@ -599,7 +599,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
         {showStepAlert && (
           // Keyed by attempt, so a repeated failed Weiter is announced again.
           <div key={stepFailures} className={formAlertClassName} role="alert" aria-live="assertive">
-            <p>{t('Please check the highlighted fields.', 'Bitte prüfen Sie die markierten Angaben.')}</p>
+            <p>{t('Please check the highlighted fields.', 'Bitte prüfe die markierten Angaben.')}</p>
           </div>
         )}
 
@@ -607,7 +607,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
           <div className={formAlertClassName} role="alert" aria-live="assertive">
             <p>{submissionError}</p>
             <p className="mt-1">
-              {t('Reach us directly:', 'So erreichen Sie uns direkt:')}{' '}
+              {t('Reach us directly:', 'So erreichst du uns direkt:')}{' '}
               <a href={footerConfig.contact.emails[0].href} className="font-semibold underline underline-offset-4">
                 {footerConfig.contact.emails[0].label}
               </a>
@@ -686,11 +686,11 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             </div>
 
             <h2 id="modal-title" className="text-2xl font-bold tracking-tight text-[var(--casa-ink)] mt-5">
-              {catalog.locale === 'de' ? 'Prüfungsanfrage eingegangen' : 'Registration successful'}
+              {catalog.locale === 'de' ? 'Danke für deine Prüfungsanmeldung' : 'Registration successful'}
             </h2>
             <p className="max-w-md text-sm text-[var(--casa-muted)] mt-2">
               {catalog.locale === 'de'
-                ? 'Ihre Prüfungsanmeldung wird nun geprüft. Das CASA-Team meldet sich zeitnah per E-Mail bei Ihnen.'
+                ? 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.'
                 : 'Your candidate registration is received. CASA will contact you by email with confirmation and the next required steps.'}
             </p>
             {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
@@ -701,9 +701,9 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 steps={
                   catalog.locale === 'de'
                     ? [
-                        { title: 'Anmeldeprüfung', description: 'Daten und Terminverfügbarkeit werden geprüft.' },
-                        { title: 'Bestätigung', description: 'Sie erhalten Fristen für Zahlung und Dokumente.' },
-                        { title: 'Nächste Schritte', description: 'Wir senden die relevanten Unterlagen und Hinweise vor dem Termin per E-Mail.' },
+                        { title: 'Wir prüfen deine Anmeldung', description: 'Wir sehen uns deine Angaben an und prüfen, ob zum gewählten Termin noch ein Platz frei ist.' },
+                        { title: 'Du bekommst eine Rückmeldung', description: 'Darin stehen die Fristen für Zahlung und Dokumente.' },
+                        { title: 'Wir schicken dir alles für den Prüfungstag', description: 'Vor dem Termin bekommst du die nötigen Unterlagen und Hinweise per E-Mail.' },
                       ]
                     : [
                         { title: 'Candidate review', description: 'We validate details and session availability.' },

@@ -83,9 +83,9 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
   const fallbackResponsibilities =
     locale === 'de'
       ? [
-          'Lernorientierte Zusammenarbeit mit Lehrkräften und Koordination',
-          'Qualitätsbewusste Umsetzung in Ihrem Verantwortungsbereich',
-          'Klar strukturierte Kommunikation im internationalen Umfeld',
+          'Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.',
+          'Du übernimmst Verantwortung für deinen Bereich und achtest auf gute Qualität.',
+          'Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.',
         ]
       : [
           'Learner-centered collaboration with teachers and coordination',
@@ -104,14 +104,14 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
           location: 'Standort',
           contract: 'Vertrag',
           mode: 'Arbeitsmodell',
-          about: 'Über die Rolle',
+          about: 'Über die Stelle',
           responsibilities: 'Aufgaben',
           requirements: 'Anforderungen',
           processTitle: 'Bewerbungsablauf',
           processSteps: [
-            'Profil und Motivation senden',
-            'CV-Review durch das CASA-Team',
-            'Interview und gemeinsamer nächster Schritt',
+            'Du schickst uns deinen Lebenslauf und schreibst uns, warum du bei CASA arbeiten möchtest.',
+            'Das CASA-Team liest deine Unterlagen.',
+            'Im Vorstellungsgespräch lernen wir uns kennen und besprechen die nächsten Schritte.',
           ],
         }
       : {

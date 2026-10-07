@@ -9,7 +9,7 @@
 
 ## Completed scope
 1. Inventory tracked assets, unused code and superseded documentation. Remove only verified obsolete tracked files; Git preserves recovery.
-2. Rewrite public copy in existing content/page files; preserve facts, prices, schedules, routes and verified quotations. German uses the site's established Sie form, English natural British English.
+2. Rewrite public copy in existing content/page files; preserve facts, prices, schedules, routes and verified quotations. German used the Sie form at the time; since 2026-10-07 it says du to learners (see below), English natural British English.
 3. Record new-site additions versus the live site and outstanding launch decisions.
 4. Run build, lint, typecheck, unit tests, knip and isolated-port e2e; render core routes in both languages.
 
@@ -112,6 +112,7 @@ Other unused exports are intentionally not a deletion list: UI primitive APIs, a
 
 ## Editorial work completed
 - Rewrote homepage, About, course/exam narratives, accommodation, contact, team, FAQ, careers, hosting and nonprofit introductions in natural EN/DE. Preserved German Sie and the German Leitbild; English homepage: “Learn German. Feel at home.”
+- **Superseded 2026-10-07:** the CASA team asked for „du" so the school sounds friendlier, in casa-bremen.de's warm, complete sentences. Learners now get du everywhere in German; group organisers, host families and the legal texts keep Sie and companies are written about in the third person, exactly as casa-bremen.de does. The rule is in `src/config/brand/voice-and-tone.ts`.
 - Added the previously unrendered cultural programme to the homepage: tandem, student meetups, Bremen and regional trips including Hamburg and Lübeck (user brief; no invented frequency).
 - Explained one-to-one advice and orientation for study, work and moving cities, without promising admission, employment or housing.
 - Corrected unsupported shared-meal/utility/privacy assertions, removed the invented 1990s milestone, unverified one-day response promise and TestDaF narratives. Verified quotations and numeric prices/schedules remain unchanged.

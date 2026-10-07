@@ -96,7 +96,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
         <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
         <p className="mt-3 max-w-measure text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
-        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="Team role filters">
+        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label={locale === 'de' ? 'Team nach Bereich filtern' : 'Team role filters'}>
           {roles.map((role) => (
             <button
               key={role}
@@ -124,7 +124,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder={locale === 'de' ? 'Nach Name, Rolle oder Fokus suchen' : 'Search by name, role, or focus'}
+            placeholder={locale === 'de' ? 'Nach Name oder Aufgabe suchen' : 'Search by name, role, or focus'}
             className="h-10 w-full max-w-md rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
           />
           <p className="text-xs font-semibold text-[var(--casa-muted)]">
@@ -233,7 +233,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
         {filtered.length === 0 ? (
           <p className="mt-6 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-4 py-3 text-sm text-[var(--casa-muted)]">
             {locale === 'de'
-              ? 'Keine Teammitglieder zu dieser Suche gefunden.'
+              ? 'Zu deiner Suche haben wir leider niemanden gefunden.'
               : 'No team members found for this search.'}
           </p>
         ) : null}
@@ -272,7 +272,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
           className="fixed inset-0 z-50 overflow-y-auto bg-[color:var(--casa-ink-deep)]/65 px-3 py-4 sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label={`${activeMember.name} profile`}
+          aria-label={locale === 'de' ? `Profil von ${activeMember.name}` : `${activeMember.name} profile`}
           onClick={() => setActiveMemberId(null)}
         >
           <div className="flex min-h-full items-end justify-center sm:items-center">
@@ -309,7 +309,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
                       type="button"
                       onClick={() => setActiveMemberId(null)}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--casa-sand)] text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--casa-blue)]"
-                      aria-label="Close profile"
+                      aria-label={locale === 'de' ? 'Profil schließen' : 'Close profile'}
                     >
                       <X className="h-4 w-4" />
                     </button>

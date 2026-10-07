@@ -44,28 +44,28 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           key: 'new-learners',
           icon: 'courses',
           title: 'Niveau finden',
-          description: 'Sie fangen neu an oder haben schon Deutsch gelernt? Gemeinsam finden wir Ihren Einstieg.',
+          description: 'Du fängst neu an oder hast schon Deutsch gelernt? Gemeinsam finden wir deinen Einstieg.',
           primaryAction: { href: '/placement-test' },
         },
         {
           key: 'working-professionals',
           icon: 'inCompany',
           title: 'Deutsch neben der Arbeit',
-          description: 'Wählen Sie Abend-, Berufs- oder Firmenformate, die zu Ihrer Woche passen.',
+          description: 'Wähle Abend-, Berufs- oder Firmenformate, die zu deiner Woche passen.',
           primaryAction: { href: '#course-evening-german' },
         },
         {
           key: 'exam-candidates',
           icon: 'exams',
           title: 'Auf eine Prüfung vorbereiten',
-          description: 'Bereiten Sie sich gezielt auf telc Deutsch B2 oder telc Deutsch C1 Hochschule vor.',
+          description: 'Bereite dich gezielt auf telc Deutsch B2 oder telc Deutsch C1 Hochschule vor.',
           primaryAction: { href: '#exam-preparation' },
         },
         {
           key: 'housing-onboarding',
           icon: 'accommodation',
           title: 'In Bremen ankommen',
-          description: 'Planen Sie Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.',
+          description: 'Plane Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.',
           primaryAction: { href: '#accommodation-support' },
         },
       ]
@@ -141,7 +141,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
               {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
             </p>
             <h2 className="max-w-2xl text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
-              {locale === 'de' ? 'Wo starten Sie?' : "Choose where you're starting from"}
+              {locale === 'de' ? 'Wo startest du?' : "Choose where you're starting from"}
             </h2>
           </div>
           <span className="casa-tricolor-rule block h-1 w-28 rounded-full md:w-36" aria-hidden />

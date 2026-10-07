@@ -78,9 +78,9 @@ const tables: Record<TableName, MockRow[]> = {
       location: 'Bremen',
       employment_type: 'Teilzeit / Vollzeit',
       work_mode: 'Präsenz',
-      short_description: 'Unterrichten Sie internationale Lernende in kleinen Gruppen mit kommunikativer Methodik.',
+      short_description: 'Du unterrichtest internationale Lernende in kleinen Gruppen und arbeitest mit kommunikativen Methoden.',
       description:
-        'Sie planen Unterricht, begleiten Lernfortschritte und arbeiten eng mit Koordination und Student Services zusammen.',
+        'Du planst deinen Unterricht, begleitest die Fortschritte deiner Lernenden und arbeitest eng mit der Koordination und der Verwaltung zusammen.',
       requirements:
         'DaF/DaZ-Qualifikation oder vergleichbar\nUnterrichtserfahrung\nSehr gute Kommunikationsfähigkeit',
       apply_url: null,

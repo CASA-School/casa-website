@@ -121,7 +121,7 @@ export default async function FaqPage() {
             title={locale === 'de' ? 'FAQ nach Thema durchsuchen' : 'Browse FAQs by topic'}
             description={
               locale === 'de'
-                ? 'Filtern Sie nach Thema und suchen Sie direkt in Fragen und Antworten.'
+                ? 'Wähle ein Thema oder suche direkt in den Fragen und Antworten.'
                 : 'Filter by topic and search directly inside questions and answers.'
             }
             topics={topics}
@@ -135,16 +135,16 @@ export default async function FaqPage() {
         <Container>
           <EditorialSplit
             eyebrow={locale === 'de' ? 'Persönliche Beratung' : 'Human support'}
-            title={locale === 'de' ? 'Ihre Frage ist noch offen?' : 'Still have a question?'}
+            title={locale === 'de' ? 'Hast du noch eine Frage?' : 'Still have a question?'}
             description={
               locale === 'de'
-                ? 'Manches lässt sich am besten im Gespräch klären. Erzählen Sie uns, was Sie beschäftigt – wir nehmen uns Zeit für Sie.'
+                ? 'Manches lässt sich am besten im Gespräch klären. Erzähl uns, was dich beschäftigt. Wir nehmen uns gern Zeit für dich.'
                 : 'Some questions are easier to talk through. Tell us what is on your mind and our team will take time to help.'
             }
             bullets={[
-              locale === 'de' ? 'Schnelle Rückmeldung für dringende Fragen' : 'Fast responses for urgent questions',
-              locale === 'de' ? 'Klare Empfehlungen für nächste Schritte' : 'Clear recommendations for next steps',
-              locale === 'de' ? 'Unterstützung für Kurs, Prüfung und Unterkunft' : 'Support across courses, exams, and accommodation',
+              locale === 'de' ? 'Bei dringenden Fragen melden wir uns schnell bei dir.' : 'Fast responses for urgent questions',
+              locale === 'de' ? 'Wir sagen dir, welche nächsten Schritte für dich sinnvoll sind.' : 'Clear recommendations for next steps',
+              locale === 'de' ? 'Wir helfen dir bei Fragen zu Kursen, Prüfungen und Unterkunft.' : 'Support across courses, exams, and accommodation',
             ]}
             photo={{
               ...pageConfig.photos.support,
@@ -160,28 +160,28 @@ export default async function FaqPage() {
       <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
-            eyebrow={locale === 'de' ? 'Nächste Aktion' : 'Next action'}
-            title={locale === 'de' ? 'Von Frage zu Entscheidung' : 'From question to decision'}
+            eyebrow={locale === 'de' ? 'So geht es weiter' : 'Next action'}
+            title={locale === 'de' ? 'In drei Schritten zur Antwort' : 'From question to decision'}
             description={
               locale === 'de'
-                ? 'So finden Sie die passende Information oder persönliche Unterstützung.'
+                ? 'So findest du die passende Information oder bekommst persönliche Unterstützung.'
                 : 'Find the information you need or get in touch for personal help.'
             }
             steps={[
               {
                 step: locale === 'de' ? '1' : '1',
                 title: locale === 'de' ? 'Thema wählen' : 'Pick topic',
-                description: locale === 'de' ? 'Kurs, Prüfung oder Unterkunft.' : 'Courses, exams, or accommodation.',
+                description: locale === 'de' ? 'Wähle oben ein Thema, zum Beispiel Kurse, Prüfungen oder Unterkunft.' : 'Courses, exams, or accommodation.',
               },
               {
                 step: locale === 'de' ? '2' : '2',
-                title: locale === 'de' ? 'Antworten prüfen' : 'Review answers',
-                description: locale === 'de' ? 'Schnell die relevanten Punkte lesen.' : 'Read the most relevant points quickly.',
+                title: locale === 'de' ? 'Antworten lesen' : 'Review answers',
+                description: locale === 'de' ? 'Lies die Antworten zu deinem Thema.' : 'Read the most relevant points quickly.',
               },
               {
                 step: locale === 'de' ? '3' : '3',
                 title: locale === 'de' ? 'Kontakt aufnehmen' : 'Contact team',
-                description: locale === 'de' ? 'Bei Bedarf direkte Beratung anfragen.' : 'Reach out for direct guidance if needed.',
+                description: locale === 'de' ? 'Wenn noch etwas offen ist, schreib uns oder ruf uns an.' : 'Reach out for direct guidance if needed.',
               },
             ]}
           />

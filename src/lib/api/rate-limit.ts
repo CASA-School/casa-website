@@ -114,7 +114,7 @@ export function rateLimit(
   const message =
     requestLocale(request) === 'en'
       ? 'Too many requests. Please wait a few minutes and try again.'
-      : 'Zu viele Anfragen. Bitte warten Sie einige Minuten und versuchen Sie es dann erneut.';
+      : 'Zu viele Anfragen in kurzer Zeit. In ein paar Minuten ist das Senden wieder möglich.';
 
   return NextResponse.json(
     {

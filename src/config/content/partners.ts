@@ -87,7 +87,7 @@ export const garantiefonds: Partner = {
     en: 'CASA works with the Garantiefonds Hochschule educational advice service. Its advisers check eligibility and forward funding applications to the Otto Benecke Stiftung e.V. for processing.',
   },
   about: {
-    de: 'Der Garantiefonds Hochschule fördert unter anderem junge Geflüchtete und Spätaussiedler unter 30 Jahren, die sich auf ein Studium in Deutschland vorbereiten – zum Beispiel mit Stipendien für Sprachkurse.',
+    de: 'Der Garantiefonds Hochschule fördert unter anderem junge Geflüchtete und Spätaussiedler unter 30 Jahren, die sich auf ein Studium in Deutschland vorbereiten, zum Beispiel mit Stipendien für Sprachkurse.',
     en: 'The Garantiefonds Hochschule supports young refugees and late repatriates under 30 who are preparing to study in Germany, for example with scholarships for language courses.',
   },
 };

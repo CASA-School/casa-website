@@ -319,10 +319,11 @@ describe('confirmation to the sender', () => {
     expect(message.body.content).toContain('Lehrkraft DaF');
   });
 
-  it('greets formally by salutation, never reveals the visa need, and drops an unscheduled row', async () => {
-    const formal = (await confirmation('course', course)).message.body.content as string;
-    expect(formal).toContain('Guten Tag Frau Rossi,');
-    expect(formal).not.toContain('Visum');
+  it('greets a learner by first name, never reveals the visa need, and drops an unscheduled row', async () => {
+    const greeted = (await confirmation('course', course)).message.body.content as string;
+    expect(greeted).toContain('Hallo Maria,');
+    expect(greeted).not.toContain('Frau Rossi');
+    expect(greeted).not.toContain('Visum');
     const unscheduled = (await confirmation('course', {
       ...course, courseInstanceLabel: '12.01.2027 - 05.02.2027 | Tage werden noch festgelegt | CASA Am Dobben',
     })).message.body.content as string;
@@ -370,12 +371,30 @@ describe('confirmation to the sender', () => {
     for (const firstName of ['wwwꓸcasa-erstattungꓸde', '零一七六二三四五六七八']) {
       const content = (await confirmation('contact', { requestId: 'r', locale: 'de', firstName, email: 'v@example.com', message: 'x' }))
         .message.body.content as string;
-      expect(content).toContain('Guten Tag,');
+      expect(content).toContain('Hallo,');
       expect(content).not.toContain(firstName);
     }
     const contact = (await confirmation('contact', { requestId: 'r', locale: 'de', firstName: 'Ada', email: 'ada@example.com' }))
       .message.body.content as string;
     expect(contact).toContain('href="tel:+4942146041430"');
+  });
+
+  it('says „du“ to a learner and keeps „Sie“ for a group organiser', async () => {
+    // Live, so the test-mode line for the team is not part of the mail.
+    const learner = (await confirmation('course', course, 'live')).message.body.content as string;
+    expect(learner).toContain('Schön, dass du bei uns Deutsch lernen möchtest');
+    expect(learner).toContain('Dein CASA-Team');
+    expect(learner).not.toMatch(/\b(Sie|Ihre?[nmrs]?|Ihnen)\b/);
+
+    const organiser = (await confirmation('groups', {
+      requestId: 'r', locale: 'de', firstName: 'Jonas', lastName: 'Weber', email: 'jonas@example.com', topicKey: 'group-booking',
+    })).message.body.content as string;
+    expect(organiser).toContain('Guten Tag Jonas Weber,');
+    expect(organiser).toContain('Ihr CASA-Team');
+    expect(organiser).not.toContain('Dein CASA-Team');
+
+    const english = (await confirmation('course', { ...course, locale: 'en' })).message.body.content as string;
+    expect(english).toContain('Dear Ms Rossi,');
   });
 
   it('writes in the language of the form', async () => {

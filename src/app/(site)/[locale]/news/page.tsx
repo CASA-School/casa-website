@@ -123,7 +123,7 @@ export default async function NewsPage() {
       ? {
           featured: 'Artikel des Monats',
           mastheadLede:
-            'Der monatliche NewsFlash der CASA: Kurse, Prüfungen, Termine und Neues aus dem Haus - kurz gehalten und nach Niveau gekennzeichnet.',
+            'Jeden Monat erscheint unser NewsFlash. Darin findest du Informationen zu Kursen und Prüfungen, wichtige Termine und Neues aus der Schule. Die Beiträge sind kurz, und bei jedem steht, für welches Niveau er passt.',
           quoteTitle: 'Zitat des Monats',
           editorTitle: 'Wer schreibt hier?',
           tickerLabel: 'Termine dieser Ausgabe',

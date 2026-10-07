@@ -179,10 +179,10 @@ describe('registration messages follow the page locale', () => {
     );
 
     expect(messages).toMatchObject({
-      salutation: 'Bitte wählen Sie eine Anrede aus.',
-      firstName: 'Bitte geben Sie Ihren Vornamen an (mindestens 2 Zeichen).',
-      birthDate: 'Bitte geben Sie Ihr Geburtsdatum an.',
-      acceptTerms: 'Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen, um fortzufahren.',
+      salutation: 'Bitte wähle eine Anrede aus.',
+      firstName: 'Bitte gib deinen Vornamen an (mindestens 2 Zeichen).',
+      birthDate: 'Bitte gib dein Geburtsdatum an.',
+      acceptTerms: 'Bitte akzeptiere die Allgemeinen Geschäftsbedingungen, um fortzufahren.',
     });
   });
 
@@ -198,7 +198,7 @@ describe('registration messages follow the page locale', () => {
     for (const issue of missing.error?.issues ?? []) {
       expect(issue.message).not.toMatch(/Invalid input|expected/);
     }
-    expect(notAnObject.error?.issues[0]?.message).toBe('Bitte prüfen Sie diese Angabe.');
+    expect(notAnObject.error?.issues[0]?.message).toBe('Bitte prüfe diese Angabe.');
   });
 
   it('reads the locale a submission declares before validating it', () => {

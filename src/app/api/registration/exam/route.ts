@@ -13,7 +13,7 @@ import {
 
 function successMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Vielen Dank. Ihre Prüfungsanfrage ist eingegangen. Das CASA-Team meldet sich zeitnah mit den nächsten Schritten.';
+    return 'Vielen Dank! Deine Prüfungsanmeldung ist bei uns angekommen. Wir melden uns so bald wie möglich mit den nächsten Schritten bei dir.';
   }
 
   return 'Thank you. Your exam request has been received. The CASA team will contact you shortly with next steps.';
@@ -21,7 +21,7 @@ function successMessage(locale: 'en' | 'de') {
 
 function failureMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Ihre Prüfungsanfrage konnte gerade nicht übermittelt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie das CASA-Team direkt.';
+    return 'Deine Prüfungsanmeldung konnte gerade nicht übermittelt werden. Bitte versuch es noch einmal oder wende dich direkt an das CASA-Team.';
   }
 
   return 'Your exam request could not be submitted right now. Please try again or contact the CASA team directly.';
@@ -29,7 +29,7 @@ function failureMessage(locale: 'en' | 'de') {
 
 function unavailableMessage(locale: 'en' | 'de') {
   if (locale === 'de') {
-    return 'Für diesen Prüfungstermin ist keine Anmeldung mehr möglich. Bitte wählen Sie einen anderen Termin.';
+    return 'Für diesen Prüfungstermin ist keine Anmeldung mehr möglich. Bitte wähle einen anderen Termin.';
   }
 
   return 'Registration for this exam session is no longer possible. Please choose another session.';

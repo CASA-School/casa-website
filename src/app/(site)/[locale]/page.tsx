@@ -327,10 +327,10 @@ export default async function HomePage() {
         prepTitle:
           item.examType.code === 'telc_b2'
             ? locale === 'de'
-              ? 'B2 Vorbereitungskurs'
+              ? 'Vorbereitungskurs B2'
               : 'B2 preparation course'
             : locale === 'de'
-              ? 'C1 Hochschule Vorbereitungskurs'
+              ? 'Vorbereitungskurs C1 Hochschule'
               : 'C1 Hochschule preparation course',
         description:
           item.narrative?.summary ||
@@ -400,7 +400,7 @@ export default async function HomePage() {
         }
         description={
           locale === 'de'
-            ? 'Bei CASA können Sie nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen Ihnen, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.'
+            ? 'Bei CASA kannst du nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.'
             : 'At CASA you don’t just learn German, you meet people from all over the world. We help you settle into Bremen, with personal support and a welcoming community.'
         }
         ctas={[
@@ -440,11 +440,11 @@ export default async function HomePage() {
                 {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
               </p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de' ? 'Was sind Ihre Lernziele?' : 'What are your learning goals?'}
+                {locale === 'de' ? 'Was sind deine Lernziele?' : 'What are your learning goals?'}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
-                  ? 'Sie möchten studieren, beruflich weiterkommen oder sich im Alltag sicherer fühlen? Finden Sie einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.'
+                  ? 'Du möchtest studieren, beruflich weiterkommen oder dich im Alltag sicherer fühlen? Finde einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.'
                   : 'You may be planning to study, looking ahead to work or settling into everyday life. Start with what matters to you; we can work out the details together.'}
               </p>
               <span className="casa-tricolor-rule mt-7 block h-1 w-28 rounded-full md:w-36" aria-hidden />
@@ -490,12 +490,12 @@ export default async function HomePage() {
               eyebrow={locale === 'de' ? 'Kurs finden' : 'Find your course'}
               title={
                 locale === 'de'
-                  ? 'Finden Sie das Kursformat, das zu Ihrem Ziel passt'
+                  ? 'Finde das Kursformat, das zu deinem Ziel passt'
                   : 'Find the course format that matches your goal'
               }
               description={
                 locale === 'de'
-                  ? 'Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu Ihren Vorkenntnissen und Ihrem Alltag passt.'
+                  ? 'Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu deinen Vorkenntnissen und deinem Alltag passt.'
                   : 'Study intensively, join an evening class or focus on a particular skill. We can help you find a course that suits your level and your everyday commitments.'
               }
             />
@@ -534,7 +534,7 @@ export default async function HomePage() {
               </h2>
               <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                 {locale === 'de'
-                  ? 'Deutsch für den medizinischen Alltag, für Ihr Team oder im Rahmen der Bildungszeit: Erzählen Sie uns, was Sie brauchen.'
+                  ? 'Deutsch für den medizinischen Alltag, für dein Team oder im Rahmen der Bildungszeit: Erzähl uns, was du brauchst.'
                   : 'German for medical practice, for your team or as part of educational leave. Tell us what you need and we will help you explore the options.'}
               </p>
             </div>
@@ -626,12 +626,12 @@ export default async function HomePage() {
               eyebrow={locale === 'de' ? 'Warum CASA' : 'Why CASA'}
               title={
                 locale === 'de'
-                  ? 'Wir hören zu. Und begleiten Sie.'
+                  ? 'Wir hören zu. Und begleiten dich.'
                   : 'Your plans start with a conversation'
               }
               description={
                 locale === 'de'
-                  ? 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit Ihnen, was Ihnen jetzt weiterhilft – beim Deutschlernen und bei Ihren nächsten Schritten.'
+                  ? 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.'
                   : 'Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.'
               }
               bullets={[
@@ -639,7 +639,7 @@ export default async function HomePage() {
                   ? 'Persönliche Beratung bezüglich Kurswahl, Sprachniveau und Prüfungen'
                   : 'One-to-one advice on choosing a course, your language level and exams',
                 locale === 'de'
-                  ? 'Orientierung, wenn Sie studieren, Arbeit suchen oder eine Ausbildung machen möchten'
+                  ? 'Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest'
                   : 'Guidance if you’re planning to study, looking for work or hoping to start vocational training',
                 locale === 'de'
                   ? 'Unterstützung bei der Unterkunft und beim Ankommen in Bremen'
@@ -701,7 +701,7 @@ export default async function HomePage() {
             eyebrow={locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
             title={
               locale === 'de'
-                ? 'Ihre Kursgebühren fördern Bildung.'
+                ? 'Deine Kursgebühren fördern Bildung.'
                 : 'Your course fees support education.'
             }
             description={
@@ -785,12 +785,12 @@ export default async function HomePage() {
                 </p>
                 <h2 className="mt-3 text-3xl font-bold md:text-4xl">
                   {locale === 'de'
-                    ? 'Gut vorbereitet in Ihre telc-Prüfung'
+                    ? 'Gut vorbereitet in deine telc-Prüfung'
                     : 'Prepare for your telc exam with us'}
                 </h2>
                 <p className="mt-4 text-base leading-relaxed text-white/72 md:text-lg">
                   {locale === 'de'
-                    ? 'Sie brauchen ein Zertifikat telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen Ihnen bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an.'
+                    ? 'Du brauchst ein Zertifikat telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen dir bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an.'
                     : 'Need a telc Deutsch B2 or telc Deutsch C1 Hochschule certificate? We’ll help you choose the right exam, and we run our own preparation courses.'}
                 </p>
                 {/*
@@ -868,7 +868,7 @@ export default async function HomePage() {
               </div>
               <p className="absolute inset-x-0 bottom-0 p-5 text-base font-bold text-white md:p-6">
                 {locale === 'de'
-                  ? 'Ein eigenes Zimmer für Ihren Start in Bremen.'
+                  ? 'Ein eigenes Zimmer für deinen Start in Bremen.'
                   : 'A room of your own as you settle into Bremen.'}
               </p>
             </div>
@@ -879,12 +879,12 @@ export default async function HomePage() {
               </p>
               <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
                 {locale === 'de'
-                  ? 'Ein Zuhause für Ihre Zeit in Bremen'
+                  ? 'Ein Zuhause für deine Zeit in Bremen'
                   : 'A place to call home in Bremen'}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
                 {locale === 'de'
-                  ? 'Für die Zeit Ihres Intensivkurses bei uns vermitteln wir Ihnen Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu Ihnen passt und verfügbar ist.'
+                  ? 'Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.'
                   : 'While you’re on an intensive course with us, we can find you a room in a CASA flat share or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.'}
               </p>
 

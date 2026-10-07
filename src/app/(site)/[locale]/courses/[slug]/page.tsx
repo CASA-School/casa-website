@@ -216,7 +216,7 @@ export default async function CourseDetailPage({
           kind: 'primary' as const,
         }
       : {
-          label: locale === 'de' ? 'Jetzt registrieren' : 'Register now',
+          label: locale === 'de' ? 'Jetzt anmelden' : 'Register now',
           href: selectedInstance ? `/registration/course?courseId=${selectedInstance.id}` : '/registration/course',
           kind: 'primary' as const,
         };
@@ -271,15 +271,16 @@ export default async function CourseDetailPage({
           : undefined,
     },
     duration: {
-      label: locale === 'de' ? 'Dauer' : 'Duration',
+      // The value is the term's dates, not a length: "Zeitraum", not "Dauer".
+      label: locale === 'de' ? 'Zeitraum' : 'Dates',
       value: selectedInstance
-        ? `${formatDate(selectedInstance.start_date, locale)} - ${formatDate(selectedInstance.end_date, locale)}`
+        ? `${formatDate(selectedInstance.start_date, locale)} – ${formatDate(selectedInstance.end_date, locale)}`
         : locale === 'de'
           ? 'Auf Anfrage'
           : 'On request',
     },
     'lessons-per-week': {
-      label: locale === 'de' ? 'Lektionen/Woche' : 'Lessons/week',
+      label: locale === 'de' ? 'Unterrichtseinheiten pro Woche' : 'Lessons/week',
       // 0 is the "CASA publishes no weekly load" sentinel, not a real zero.
       // Firmenunterricht is agreed per contract; German for Medical simply has
       // no published figure. Rendering "0" would read as "no lessons".
@@ -401,17 +402,19 @@ export default async function CourseDetailPage({
   const courseAudience = getCourseAudienceContent(detail.course.slug, locale);
   const processDescription = courseNextSteps?.description ?? (isOrganisationQuote
     ? locale === 'de'
-      ? 'Von der Studienberatung bis zum Ausbildungsplan - beides unverbindlich.'
+      ? 'So entsteht ein Firmenkurs bei CASA.'
       : 'From needs consultation to training plan, both without obligation.'
     : archetype.cta === 'request-quote'
       ? locale === 'de'
-        ? 'Von der ersten Anfrage bis zum bestätigten Programm.'
+        ? 'Von der ersten Anfrage bis zum fertigen Programm sind es drei Schritte.'
         : 'From first enquiry to a confirmed programme.'
       : locale === 'de'
-        ? 'So geht es weiter bis zum ersten Unterrichtstag.'
+        ? 'Von der Einstufung bis zum ersten Kurstag sind es drei Schritte.'
         : 'What happens next before your first class day.');
 
   // Quote products have a different journey: nobody registers, someone briefs.
+  // Firmenunterricht speaks about the company in the third person, as the old
+  // casa-bremen.de page did; the group steps keep "Sie" for the organiser.
   const processStepItems = courseNextSteps?.steps ?? (isOrganisationQuote
     ? [
         {
@@ -419,7 +422,7 @@ export default async function CourseDetailPage({
           title: locale === 'de' ? 'Studienberatung' : 'Needs consultation',
           description:
             locale === 'de'
-              ? 'Wir klären Lernbedürfnisse, Lernziele und Sprachkompetenzen im Team.'
+              ? 'Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.'
               : 'We establish learning needs, goals, and the language levels in your team.',
         },
         {
@@ -427,7 +430,7 @@ export default async function CourseDetailPage({
           title: locale === 'de' ? 'Ausbildungsplan' : 'Training plan',
           description:
             locale === 'de'
-              ? 'Daraus entwickeln wir den Lehrplan für Ihre Mitarbeitenden.'
+              ? 'Auf dieser Grundlage stellen wir den Ausbildungsplan für die Mitarbeiterinnen und Mitarbeiter zusammen.'
               : 'From that we build the syllabus for your employees.',
         },
         {
@@ -435,7 +438,7 @@ export default async function CourseDetailPage({
           title: locale === 'de' ? 'Unverbindliches Angebot' : 'No-obligation quote',
           description:
             locale === 'de'
-              ? 'Beratung und Angebot sind stets unverbindlich.'
+              ? 'Danach erhält die Firma unser Angebot. Beratung und Angebot sind stets unverbindlich.'
               : 'Both the consultation and the quote are always without obligation.',
         },
       ]
@@ -446,7 +449,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Anfrage senden' : 'Send your enquiry',
             description:
               locale === 'de'
-                ? 'Gruppengröße, Alter, Zeitraum und Schwerpunkte.'
+                ? 'Schreiben Sie uns, wie groß Ihre Gruppe ist, wie alt die Teilnehmenden sind, wann Sie kommen möchten und was Ihnen wichtig ist.'
                 : 'Group size, ages, dates, and what you want to focus on.',
           },
           {
@@ -454,7 +457,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Programm abstimmen' : 'Shape the programme',
             description:
               locale === 'de'
-                ? 'Unterricht, Kulturprogramm und Unterkunft gemeinsam planen.'
+                ? 'Gemeinsam mit Ihnen planen wir Unterricht, Kulturprogramm und Unterkunft.'
                 : 'We plan lessons, culture programme, and accommodation together.',
           },
           {
@@ -462,7 +465,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Angebot erhalten' : 'Receive your quote',
             description:
               locale === 'de'
-                ? 'Unverbindliches Angebot mit allen Leistungen und Kosten.'
+                ? 'Sie erhalten ein unverbindliches Angebot mit allen Leistungen und Kosten.'
                 : 'A no-obligation quote covering everything included.',
           },
         ]
@@ -482,7 +485,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Einstufung machen' : 'Take the placement test',
             description:
               locale === 'de'
-                ? 'Ein kostenloser Online-Test oder persönlich bei uns. Ganz ohne Vorkenntnisse beginnen Sie direkt bei A1.'
+                ? 'Mach den kostenlosen Online-Test oder komm zur Einstufung bei uns vorbei. Wenn du noch gar kein Deutsch sprichst, beginnst du direkt bei A1.'
                 : 'A free online test, or in person at the school. With no German at all, you start straight at A1.',
           },
           {
@@ -490,13 +493,16 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Termin buchen' : 'Book your start date',
             description:
               locale === 'de'
-                ? 'Starttermin wählen und Angaben bestätigen.'
+                ? 'Such dir einen Starttermin aus und schick uns deine Anmeldung.'
                 : 'Choose a start date and confirm your details.',
           },
           {
             step: '3',
             title: locale === 'de' ? 'Start vorbereiten' : 'Prepare your start',
-            description: locale === 'de' ? 'Unterlagen, Zeitplan, optional Unterkunft.' : 'Materials, schedule, optional housing support.',
+            description:
+              locale === 'de'
+                ? 'Plane deine Zeit und leg deine Unterlagen bereit. Wenn du noch eine Unterkunft in Bremen brauchst, vermitteln wir dir gern ein Zimmer.'
+                : 'Materials, schedule, optional housing support.',
           },
         ]);
 
@@ -504,32 +510,32 @@ export default async function CourseDetailPage({
   // different reassurance than a learner picking a start date.
   const audienceTitle = courseAudience?.title ?? (isOrganisationQuote
     ? locale === 'de'
-      ? 'Für Unternehmen, die Sprache als Teil der Qualifikation planen'
+      ? 'Für Firmen und ihre Mitarbeitenden'
       : 'For companies planning language work as part of staff qualification'
     : isGroupQuote
       ? locale === 'de'
-        ? 'Für Gruppen, die mit einem klaren Ziel nach Bremen kommen'
+        ? 'Für Schulklassen und Gruppen'
         : 'For groups coming to Bremen with a clear goal'
       : locale === 'de'
-        ? 'Dieser Kurs passt zu Lernenden, die Struktur und Menschlichkeit suchen'
+        ? 'Für wen der Kurs gedacht ist'
         : 'This course fits learners who want structure and human support');
 
   const audienceBullets = courseAudience?.bullets ?? (isOrganisationQuote
     ? [
-        locale === 'de' ? 'Lehrplan gemeinsam festgelegt, nicht von der Stange' : 'A syllabus agreed with you, not off the shelf',
+        locale === 'de' ? 'Den Lehrplan legen wir gemeinsam mit der Firma fest.' : 'A syllabus agreed with you, not off the shelf',
         // CASA states this requirement plainly on the Firmenunterricht page.
         locale === 'de'
-          ? 'Teilnehmende sollten etwa auf demselben Sprachniveau sein'
+          ? 'Die Teilnehmenden sollten ungefähr auf demselben Sprachniveau sein.'
           : 'Participants should be at roughly the same language level',
         locale === 'de'
-          ? 'Sprachliche und interkulturelle Qualifikation aus einer Hand'
+          ? 'Wir begleiten die sprachliche und die interkulturelle Qualifikation.'
           : 'Language and intercultural training from one provider',
       ]
     : isGroupQuote
       ? [
-          locale === 'de' ? 'Inhalte und Tempo nach Absprache' : 'Content and pace agreed with you',
-          locale === 'de' ? 'Unterkunft und Kulturprogramm organisiert' : 'Accommodation and culture programme arranged',
-          locale === 'de' ? 'Eine Ansprechperson von der Anfrage bis zur Abreise' : 'One contact from enquiry through to departure',
+          locale === 'de' ? 'Inhalte und Tempo stimmen wir mit Ihnen ab.' : 'Content and pace agreed with you',
+          locale === 'de' ? 'Unterkunft und Kulturprogramm organisieren wir für Sie.' : 'Accommodation and culture programme arranged',
+          locale === 'de' ? 'Von der Anfrage bis zur Abreise haben Sie eine feste Ansprechperson.' : 'One contact from enquiry through to departure',
         ]
       : [
           locale === 'de' ? 'Klare Lernziele pro Woche' : 'Clear weekly learning goals',
@@ -577,7 +583,7 @@ export default async function CourseDetailPage({
           }
           description={
             locale === 'de'
-              ? 'Eine Sprachreise, bei der Unterricht, Gastfamilie, Kantine und Nachmittagsprogramm eine einzige Buchung sind. Sie bringen die Gruppe; wir organisieren alles ab der Ankunft.'
+              ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchen Sie bei uns zusammen. Sie bringen die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
               : 'A German language trip where the classroom, the host family, the canteen and the afternoon programme are one booking. You bring the group; we arrange everything from the moment they land.'
           }
           ctas={[
@@ -600,7 +606,7 @@ export default async function CourseDetailPage({
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Kursdetail' : 'Course detail'}
         title={detail.course.name}
-        description={detail.course.narrative?.promise || (locale === 'de' ? 'Klarer Lernweg mit messbaren Schritten.' : 'Clear learning path with measurable progress.')}
+        description={detail.course.narrative?.promise || (locale === 'de' ? 'Schritt für Schritt von einer Niveaustufe zur nächsten.' : 'Clear learning path with measurable progress.')}
         breadcrumbs={breadcrumbs}
         infoTitle={locale === 'de' ? 'Kursinfo' : 'Course info'}
         infoItems={infoItems}
@@ -614,10 +620,10 @@ export default async function CourseDetailPage({
         notes={
           archetype.cta === 'request-quote'
             ? locale === 'de'
-              ? 'Umfang und Preis werden im Angebot bestätigt.'
+              ? 'Umfang und Preis bestätigen wir im Angebot.'
               : 'Scope and price are confirmed in the quote.'
             : locale === 'de'
-              ? 'Termine und Verfügbarkeit werden bei der Anmeldung bestätigt.'
+              ? 'Termine und freie Plätze bestätigen wir dir bei der Anmeldung.'
               : 'Dates and availability are confirmed during registration.'
         }
         ctas={[primaryDecisionCta, secondaryDecisionCta]}
@@ -669,7 +675,7 @@ export default async function CourseDetailPage({
                     note={
                       detail.course.slug === 'bildungszeit'
                         ? locale === 'de'
-                          ? 'Die Bildungszeit umfasst zwei parallele Intensivkurse — einen am Vormittag, einen am Nachmittag. Der Einstieg ist immer montags möglich.'
+                          ? 'In der Bildungszeit besuchst du zwei Intensivkurse gleichzeitig, vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, und nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr. Einsteigen kannst du an jedem Montag.'
                           : 'Bildungszeit is two intensive courses in parallel, one in the morning and one in the afternoon. You can join on any Monday.'
                         : undefined
                     }
@@ -701,7 +707,7 @@ export default async function CourseDetailPage({
                         locale === 'de' ? 'Flüssigeres Verstehen und Sprechen' : 'Stronger listening and speaking fluency',
                       ]
                     }
-                    practiceTitle={locale === 'de' ? 'Das üben Sie' : 'What you will practice'}
+                    practiceTitle={locale === 'de' ? 'Das übst du' : 'What you will practice'}
                     locale={locale}
                   />
                   );
@@ -769,13 +775,26 @@ export default async function CourseDetailPage({
                     );
                     if (!story) return null;
 
+                    /*
+                      The heading names the voice. Elena accompanied a school
+                      group; on Firmenunterricht the quote is Majd's, about
+                      CASA's teachers, so that page says no more than that.
+                    */
                     return (
                       <HumanStoryBlock
                         key={sectionKey}
-                        eyebrow={locale === 'de' ? 'Aus einer Gruppenreise' : 'From a group visit'}
+                        eyebrow={
+                          locale === 'de'
+                            ? isGroupQuote
+                              ? 'Aus einer Gruppenreise'
+                              : 'Erfahrungen'
+                            : 'From a group visit'
+                        }
                         title={
                           locale === 'de'
-                            ? 'Was eine begleitende Lehrkraft berichtet'
+                            ? isGroupQuote
+                              ? 'Was eine begleitende Lehrkraft berichtet'
+                              : 'Was Teilnehmende über CASA sagen'
                             : 'What an accompanying teacher wrote'
                         }
                         quote={story.quote}
@@ -795,10 +814,10 @@ export default async function CourseDetailPage({
                   return (
                   <TestimonialGrid
                     key={sectionKey}
-                    title={locale === 'de' ? 'Wie Lernende diesen Kurs erleben' : 'How learners describe this course'}
+                    title={locale === 'de' ? 'Was Lernende über CASA sagen' : 'How learners describe this course'}
                     description={
                       locale === 'de'
-                        ? 'Stimmen aus Kursalltag und Lernfortschritt.'
+                        ? 'Lernende erzählen, wie sie ihren Kurs bei uns erlebt haben.'
                         : 'Stories from classroom rhythm and language progress.'
                     }
                     cards={testimonialCards}
@@ -810,7 +829,7 @@ export default async function CourseDetailPage({
                   return (
                   <section key={sectionKey} className="space-y-5">
                     <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)]">
-                      {locale === 'de' ? 'Andere Kurswege vergleichen' : 'Compare other course paths'}
+                      {locale === 'de' ? 'Andere Kurse bei CASA' : 'Compare other course paths'}
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2">
                       {related.map((course) => {
@@ -837,13 +856,13 @@ export default async function CourseDetailPage({
                             <div className="p-4">
                               <h3 className="text-lg font-bold leading-tight text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">{course.name}</h3>
                               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--casa-muted)]">
-                                {course.narrative?.promise || (locale === 'de' ? 'Strukturierter Deutschkurs mit klaren nächsten Schritten.' : 'Structured German course with clear next steps.')}
+                                {course.narrative?.promise || (locale === 'de' ? 'Ein Deutschkurs bei CASA in Bremen.' : 'Structured German course with clear next steps.')}
                               </p>
                               <p className="mt-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                                 {course.level_min || 'A1'} - {course.level_max || 'C1'}
                                 {/* 0 is the "no published weekly load" sentinel, not a figure. */}
                                 {course.lessons_per_week > 0
-                                  ? ` · ${course.lessons_per_week} ${locale === 'de' ? 'Lektionen/Woche' : 'lessons/week'}`
+                                  ? ` · ${course.lessons_per_week} ${locale === 'de' ? 'UE pro Woche' : 'lessons/week'}`
                                   : null}
                               </p>
                             </div>
@@ -861,7 +880,8 @@ export default async function CourseDetailPage({
 
             <DecisionRail
               locale={locale}
-              infoTitle={locale === 'de' ? 'Ihre Entscheidung' : 'Your decision'}
+              // Neutral in German: this card serves learners and organisers.
+              infoTitle={locale === 'de' ? 'Auf einen Blick' : 'Your decision'}
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               /*
                 No `notes`. It was `contactLine` — "Your contact: Ina Eismann,

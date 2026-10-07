@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
     locale,
     title: locale === 'de' ? 'Kontakt und Beratung' : 'Contact and advice',
     description: locale === 'de'
-      ? 'Fragen zu Deutschkursen, Prüfungen, Unterkunft oder Ihren nächsten Schritten? Das CASA-Team in Bremen nimmt sich Zeit für Sie.'
+      ? 'Du hast Fragen zu Deutschkursen, Prüfungen, Unterkunft oder deinen nächsten Schritten? Das CASA-Team in Bremen nimmt sich Zeit für dich.'
       : 'Questions about German courses, exams, accommodation or what comes next? Talk to the CASA team in Bremen for personal advice.',
     path: '/contact',
     keywords: ['Contact CASA', 'Admissions Bremen', 'Language school support'],
@@ -68,14 +68,14 @@ const topicCatalog: TopicConfig[] = [
   },
   {
     key: 'company-courses',
-    labels: { en: 'Company courses', de: 'Firmenkurse' },
+    labels: { en: 'Company courses', de: 'Firmenunterricht' },
     aliases: ['company', 'company-courses', 'corporate', 'business', 'firmenunterricht', 'firmenkurse', 'firma'],
   },
   {
     key: 'other',
     labels: { en: 'Other questions', de: 'Sonstige Fragen' },
     aliases: ['other', 'agency', 'agency-partnership', 'agentur', 'agenturpartnerschaft',
-      'career', 'careers', 'job', 'jobs', 'karriere'],
+      'career', 'careers', 'job', 'jobs', 'karriere', 'tandem', 'sprachtandem'],
   },
 ];
 
@@ -129,8 +129,8 @@ const formCopyByLocale = {
     errorBody: 'Please try again or contact us directly if your request is time-sensitive.',
   },
   de: {
-    formTitle: 'Wie können wir Ihnen helfen?',
-    formBody: 'Sie haben eine Frage oder schon einen Plan? Schreiben Sie uns – wir helfen Ihnen gerne weiter.',
+    formTitle: 'Wie können wir dir helfen?',
+    formBody: 'Du hast eine Frage oder schon einen Plan? Schreib uns. Wir helfen dir gern weiter.',
     submit: 'Nachricht senden',
     submitting: 'Anfrage wird übermittelt...',
     firstNameLabel: 'Vorname',
@@ -141,12 +141,12 @@ const formCopyByLocale = {
     emailPlaceholder: 'you@example.com',
     topicLabel: 'Worum geht es?',
     messageLabel: 'Nachricht',
-    messagePlaceholder: 'Was möchten Sie gerne wissen?',
+    messagePlaceholder: 'Was möchtest du wissen?',
     successTitle: 'Anfrage eingegangen',
-    successBody: 'Vielen Dank für Ihre Nachricht. Unser Team liest Ihre Anfrage und meldet sich bei Ihnen.',
+    successBody: 'Vielen Dank für deine Nachricht. Wir lesen deine Anfrage und melden uns bei dir.',
     sendAnother: 'Weitere Anfrage senden',
     errorTitle: 'Übermittlung nicht möglich',
-    errorBody: 'Bitte erneut versuchen oder bei Zeitdruck direkt im Büro melden.',
+    errorBody: 'Bitte versuche es noch einmal. Wenn es eilig ist, melde dich direkt im Büro.',
   },
 } as const;
 
@@ -175,7 +175,7 @@ const selfServiceLinks: { href: string; icon: LucideIcon; meaning: Meaning; labe
     icon: Compass,
     meaning: 'orientation',
     label: { de: 'Einstufungstest', en: 'Placement test' },
-    detail: { de: 'Ihr Niveau online herausfinden', en: 'Find your level online' },
+    detail: { de: 'Dein Niveau online herausfinden', en: 'Find your level online' },
   },
 ];
 
@@ -219,7 +219,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             </h1>
             <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
               {locale === 'de'
-                ? 'Schreiben Sie uns, rufen Sie an oder kommen Sie vorbei.'
+                ? 'Schreib uns, ruf an oder komm vorbei.'
                 : 'Write to us, give us a call or drop by.'}
             </p>
           </header>
@@ -234,7 +234,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                 locale={locale}
                 title={locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk?'}
                 body={locale === 'de'
-                  ? 'Rufen Sie uns während der Öffnungszeiten an oder schreiben Sie uns eine E-Mail. Wir nehmen uns Zeit für Ihre Fragen.'
+                  ? 'Ruf uns während der Bürozeiten an oder schreib uns eine E-Mail. In dieser Zeit kannst du auch ohne Termin bei uns im Büro vorbeikommen. Wir nehmen uns Zeit für deine Fragen.'
                   : 'Call us during office hours or send us an email. We’re happy to talk through your questions.'}
               />
 

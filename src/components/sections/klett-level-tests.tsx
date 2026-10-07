@@ -37,7 +37,7 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
       ? {
           title: 'Die Einstufungstests',
           intro:
-            'Für die Tests verlassen Sie unsere Website: Die Links führen zum Testportal des Klett Verlags, mit dessen Lehrwerken wir auf diesen Stufen arbeiten. Dort erwarten Sie Aufgaben zu Lese- und Hörverstehen, Wortschatz und Grammatik des jeweiligen Niveaus.',
+            'Für die Tests verlässt du unsere Website. Die Links führen zum Testportal des Klett Verlags, mit dessen Lehrwerken wir auf diesen Stufen arbeiten. Dort findest du Aufgaben zum Lese- und Hörverstehen, zum Wortschatz und zur Grammatik der jeweiligen Stufe. Viel Erfolg!',
           start: (level: string) => `${level}-Test starten`,
           opens: 'Öffnet das Testportal von Klett in einem neuen Fenster',
           textbook: 'Lehrwerk',

@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Prüfungsanmeldung' : 'Exam registration',
-    description: locale === 'de' ? 'Melden Sie sich zu Ihrer telc-Prüfung bei CASA in Bremen an. Wählen Sie Prüfung und Termin und tragen Sie Ihre Daten ein.' : 'Register for your telc exam at CASA in Bremen. Choose your exam and date, then enter your details.',
+    description: locale === 'de' ? 'Melde dich bei CASA in Bremen zu deiner telc-Prüfung an. Wähle Prüfung und Termin und trag deine Daten ein.' : 'Register for your telc exam at CASA in Bremen. Choose your exam and date, then enter your details.',
     path: '/registration/exam',
   });
 }
@@ -32,12 +32,12 @@ export default async function ExamRegistrationPage({
       locale={locale}
       title={locale === 'de' ? 'Prüfungsanmeldung' : 'Exam registration'}
       intro={locale === 'de'
-        ? 'In drei Schritten zu Ihrem Prüfungsplatz.'
+        ? 'In drei Schritten meldest du dich zu deiner Prüfung an.'
         : 'Book your exam in three steps.'}
       formId="exam-registration-form"
       helpTitle={locale === 'de' ? 'Fragen zur Prüfung?' : 'Questions about the exam?'}
       helpBody={locale === 'de'
-        ? 'Wir helfen gern bei der Wahl von Prüfung und Termin.'
+        ? 'Wir helfen dir gern bei der Wahl von Prüfung und Termin.'
         : 'We are glad to help you choose an exam and a date.'}
     >
       <ExamWizard catalog={examCatalog} />

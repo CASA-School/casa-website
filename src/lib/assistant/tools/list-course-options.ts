@@ -64,7 +64,7 @@ function dateLabel(value: string, locale: AssistantRuntimeLocale) {
 
 // "Einstieg" / "Joining" for a term under way, as the course page labels it.
 const labels = {
-  de: { nextStart: 'Nächster Start', joining: 'Einstieg', lessons: 'Lektionen/Woche' },
+  de: { nextStart: 'Nächster Start', joining: 'Einstieg', lessons: 'UE pro Woche' },
   en: { nextStart: 'Next start', joining: 'Joining', lessons: 'Lessons/week' },
 } as const;
 
@@ -172,7 +172,7 @@ export async function listCourseOptions(
       description:
         course.narrative?.promise ||
         (locale === 'de'
-          ? 'Praxisnahe Lernziele mit klarer Struktur.'
+          ? 'Der Kurs hat einen klaren Aufbau und Lernziele aus der Praxis.'
           : 'Practical outcomes with a clear learning structure.'),
       href: getCoursePath(course.slug),
       badges: [course.level_min ?? 'A1', course.level_max ?? 'C1'],
@@ -192,7 +192,7 @@ export async function listCourseOptions(
     description:
       item.course.narrative?.promise ||
       (locale === 'de'
-        ? 'Praxisnahe Lernziele mit klarer Struktur.'
+        ? 'Der Kurs hat einen klaren Aufbau und Lernziele aus der Praxis.'
         : 'Practical outcomes with a clear learning structure.'),
     href: getCoursePath(item.course.slug),
     badges: [item.course.level_min ?? 'A1', item.course.level_max ?? 'C1'],

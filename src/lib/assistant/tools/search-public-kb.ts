@@ -44,7 +44,7 @@ const ROUTE_META: Array<{
   { href: '/registration/exam', topic: 'registration', label: { en: 'Exam Registration', de: 'Prüfungsanmeldung' } },
   { href: '/accommodation', topic: 'accommodation', label: { en: 'Accommodation', de: 'Unterkunft' } },
   { href: '/contact', topic: 'contact', label: { en: 'Contact', de: 'Kontakt' } },
-  { href: '/news', topic: 'resources', label: { en: 'News', de: 'News' } },
+  { href: '/news', topic: 'resources', label: { en: 'News', de: 'Aktuelles' } },
   { href: '/resources/study-in-germany', topic: 'resources', label: { en: 'Study & Life in Germany', de: 'Studium & Leben in Deutschland' } },
   { href: '/resources/living-in-germany', topic: 'resources', label: { en: 'Living in Germany', de: 'Leben in Deutschland' } },
   { href: '/resources/why-germany', topic: 'resources', label: { en: 'Why Germany', de: 'Warum Deutschland' } },
@@ -293,7 +293,7 @@ function buildPolicyPassages(): KbPassage[] {
       // ASCII spellings stay so learners typing without umlauts still match.
       keywords: ['visum', 'kurs', 'intensiv', 'aufenthalt', 'botschaft', 'kursbestaetigung', 'kursbestätigung'],
       content:
-        'Sprachvisumhinweis: Welche Kursdauer und wie viele Unterrichtseinheiten pro Woche nötig sind, legt die zuständige deutsche Auslandsvertretung fest. Was CASA dazu sagt, steht in den FAQ; das CASA-Beratungsteam sagt Ihnen, welcher Kurs zu Ihrem Fall passt. Sobald die Gebühr für mindestens den ersten Kurs eingegangen ist, sendet CASA den Visumsbrief per E-Mail. Kein Rechtsrat — bitte Einzelfall mit CASA und Botschaft klären.',
+        'Wie lange ein Kurs für ein Sprachvisum dauern muss und wie viele Unterrichtseinheiten pro Woche nötig sind, legt die zuständige deutsche Auslandsvertretung fest. Was CASA dazu sagt, findest du in den FAQ, und das CASA-Beratungsteam sagt dir, welcher Kurs zu deinem Fall passt. Sobald die Gebühr für mindestens den ersten Kurs eingegangen ist, schickt CASA dir den Visumsbrief per E-Mail. Das ist keine Rechtsberatung. Bitte kläre deinen Fall mit CASA und mit der Botschaft.',
     },
     {
       id: 'policy-exams-en',
@@ -313,7 +313,7 @@ function buildPolicyPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['prüfung', 'telc', 'b2', 'c1', 'zertifikat', 'hochschule', 'vorbereitung'],
       content:
-        'CASA bietet aktuell telc Deutsch B2 (190 €) und telc Deutsch C1 Hochschule (210 €) inklusive Vorbereitungskursen und Anmeldung. TestDaF wird derzeit nicht angeboten, könnte aber künftig zurückkehren — bitte CASA kontaktieren.',
+        'Bei CASA kannst du derzeit telc Deutsch B2 (190 €) und telc Deutsch C1 Hochschule (210 €) ablegen. Für beide gibt es bei uns Vorbereitungskurse, und auch die Anmeldung läuft über uns. TestDaF bieten wir derzeit nicht an, es könnte aber künftig wieder dazukommen. Frag dafür einfach bei CASA nach.',
     },
   ];
 }
@@ -338,7 +338,7 @@ function buildSchoolPassages(): KbPassage[] {
       topic: 'school',
       keywords: ['über', 'casa', 'schule', 'sprachschule', 'bremen', 'gegründet', '1983', 'lernende', 'länder', 'kleine gruppen'],
       content:
-        'CASA ist eine Sprachschule für Deutsch in Bremen, gegründet 1983. Mehr als 30.000 Lernende aus über 150 Ländern haben hier studiert. Kurse umfassen alle CEFR-Niveaus (A1–C1) in kleinen, interaktionsorientierten Gruppen. CASA ist AZAV-zertifiziert und bietet Bildungszeit-fähige Kurse. Tandem-Programme, Gemeinschaftsaktivitäten und Stadtorientierung unterstützen die soziale Integration. Die Schule liegt im Bremer Viertel Am Dobben.',
+        'CASA ist eine gemeinnützige Sprachschule für Deutsch in Bremen und wurde 1983 gegründet. Mehr als 30.000 Lernende aus über 150 Ländern haben bei uns gelernt. Unsere Kurse gibt es auf allen Niveaus von A1 bis C1, und wir unterrichten in kleinen Gruppen, in denen viel gesprochen wird. CASA ist nach AZAV zertifiziert und bietet Kurse für die Bildungszeit an. Tandems, gemeinsame Aktivitäten und Hilfe bei der Orientierung in der Stadt unterstützen die soziale Integration. Die Schule liegt Am Dobben 14–16 in Bremen.',
     },
     {
       id: 'school-nonprofit-en',
@@ -358,7 +358,7 @@ function buildSchoolPassages(): KbPassage[] {
       topic: 'school',
       keywords: ['gemeinnützig', 'gemeinnuetzig', 'gGmbH', 'gemeinwohl', 'mission', 'reinvestition', 'mittelverwendung'],
       content:
-        'CASA ist als CASA – Internationale Sprachschule gGmbH organisiert. Kursgebühren werden in Unterrichtsqualität, faire Vergütung, Räume, soziale Bildungsprojekte, Tandemformate und Integrationsunterstützung reinvestiert. Die gemeinnützige Mission fokussiert Bildung, Völkerverständigung und soziale Integration in Bremen.',
+        'Hinter CASA steht die CASA – Internationale Sprachschule gGmbH, eine gemeinnützige Gesellschaft. Die Kursgebühren fließen zurück in guten Unterricht, faire Bezahlung, unsere Räume, soziale Bildungsprojekte, Tandems und die Unterstützung bei der Integration. Im Mittelpunkt unserer gemeinnützigen Arbeit stehen Bildung, Völkerverständigung und soziale Integration in Bremen.',
     },
     {
       id: 'school-integration-projects-en',
@@ -403,7 +403,7 @@ function buildAccommodationDetailPassages(): KbPassage[] {
       topic: 'accommodation',
       keywords: ['unterkunft', 'wg', 'gastfamilie', 'preis', '580', 'kaution', 'zimmer', 'wohnen', 'einzimmerwohnung'],
       content:
-        'CASA vermittelt Unterkünfte ausschließlich an Teilnehmende der Intensivkurse; CASA-WGs stehen nur Volljährigen zur Verfügung. WG: eigenes möbliertes Zimmer, gemeinsame Küche und Bad, WLAN und Bettwäsche; Handtücher bitte mitbringen. Bei Privatpersonen in Bremen: eigenes möbliertes Zimmer, Küche und Bad werden in der Regel gemeinsam genutzt, Selbstverpflegung. Mahlzeiten und tägliche Gespräche sind keine zugesicherten Leistungen. Beide Optionen kosten 580 € für 4 Wochen, danach 145 € pro weitere Woche. Hinzu kommen einmalig 50 € Vermittlungsgebühr und 580 € rückerstattbare Kaution. Die Rückzahlung erfolgt nach Abreise, sofern Unterkunft und Schlüssel im gleichen Zustand wie bei der Übernahme sind. Während der Schließzeiten zu Weihnachten und Ostern fallen zusätzlich 145 € pro Woche an. WG-Zimmer sind begrenzt; ist keines frei, vermittelt CASA ein Zimmer bei privaten Gastgebern.',
+        'CASA vermittelt Unterkünfte nur an Teilnehmende der Intensivkurse, und in unsere WGs ziehen nur Volljährige. In der WG hast du ein eigenes möbliertes Zimmer und teilst dir Küche und Bad. WLAN und Bettwäsche sind da, Handtücher bringst du bitte selbst mit. Bei privaten Gastgebern in Bremen hast du ebenfalls ein eigenes möbliertes Zimmer, Küche und Bad teilst du dir in der Regel mit ihnen, und du versorgst dich selbst. Mahlzeiten und tägliche Gespräche sind dort nicht zugesichert. Beide Unterkünfte kosten 580 € für 4 Wochen und danach 145 € für jede weitere Woche. Dazu kommen einmalig 50 € Vermittlungsgebühr und 580 € Kaution. Die Kaution bekommst du nach deiner Abreise zurück, wenn Unterkunft und Schlüssel in dem Zustand sind, in dem du sie übernommen hast. Während der Schließzeiten zu Weihnachten und Ostern kommen 145 € pro Woche dazu. WG-Zimmer gibt es nur begrenzt. Ist keines frei, vermittelt CASA dir ein Zimmer bei privaten Gastgebern.',
     },
   ];
 }
@@ -428,7 +428,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['telc', 'b2', 'prüfung', '190', 'gebühr', 'termin', 'august', 'oktober', 'november', 'vorbereitung', 'zertifikat'],
       content:
-        'CASA bietet telc Deutsch B2 an: 190 € für die gesamte Prüfung, 160 € für einen schriftlichen oder mündlichen Teil. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet in der Schule statt. Der Vorbereitungskurs kostet 260 € (zwei Abende pro Woche, Mo/Mi 18:30–20:00). Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Vorbereitung umfasst Strategietraining, Prüfungssimulationen und individuelle Fehleranalyse. Geeignet für Arbeit, Ausbildung und Alltag in Deutschland.',
+        'Bei CASA kannst du telc Deutsch B2 ablegen. Die ganze Prüfung kostet 190 €, ein einzelner schriftlicher oder mündlicher Teil 160 €. Die Prüfung dauert etwa von 09:00 bis 17:00 Uhr und findet bei uns in der Schule statt. Der Vorbereitungskurs kostet 260 € und läuft an zwei Abenden pro Woche, montags und mittwochs von 18:30 bis 20:00 Uhr. Die aktuellen Prüfungstermine und Anmeldefristen findest du auf der Prüfungsseite. In der Vorbereitung übst du Strategien für die Prüfung, schreibst Probeprüfungen und bekommst eine persönliche Rückmeldung zu deinen Fehlern. Das Zertifikat ist für Arbeit, Ausbildung und Alltag in Deutschland geeignet.',
     },
     {
       id: 'exam-telc-c1-en',
@@ -443,12 +443,12 @@ function buildExamDetailPassages(): KbPassage[] {
     {
       id: 'exam-telc-c1-de',
       locale: 'de',
-      title: 'telc C1 Hochschule bei CASA – Termine und Kosten',
+      title: 'telc Deutsch C1 Hochschule bei CASA – Termine und Kosten',
       url: '/exams/c1',
       topic: 'exams',
       keywords: ['telc', 'c1', 'hochschule', 'universität', '210', 'gebühr', 'termin', 'september', 'oktober', 'november', 'vorbereitung', 'akademisch'],
       content:
-        'CASA bietet telc Deutsch C1 Hochschule an: 210 € für die gesamte Prüfung, 185 € für einen Teil. Sie findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein vierwöchiger Block für 520 €, bei der ersten Anmeldung bei CASA zuzüglich 50 €. Aktuelle Prüfungstermine und Anmeldefristen stehen auf der Prüfungsseite. Fokus auf akademische Sprache, Argumentation, Vorlesungsverstehen und formales Schreiben. Für viele Hochschulzulassungen in Deutschland erforderlich.',
+        'Bei CASA kannst du telc Deutsch C1 Hochschule ablegen. Die ganze Prüfung kostet 210 €, ein einzelner Teil 185 €. Die Prüfung findet immer an einem Freitag statt, etwa von 08:30 bis 17:00 Uhr. Der Vorbereitungskurs ist ein Block von vier Wochen und kostet 520 €, bei deiner ersten Anmeldung bei CASA kommen 50 € dazu. Die aktuellen Prüfungstermine und Anmeldefristen findest du auf der Prüfungsseite. Im Mittelpunkt stehen akademische Sprache, Argumentieren, das Verstehen von Vorlesungen und formales Schreiben. Viele Hochschulen in Deutschland verlangen das Zertifikat für die Zulassung.',
     },
     {
       id: 'exam-testdaf-en',
@@ -468,7 +468,7 @@ function buildExamDetailPassages(): KbPassage[] {
       topic: 'exams',
       keywords: ['testdaf', 'test daf', 'daad', 'prüfung', 'hochschule', 'nicht verfügbar', 'zukunft'],
       content:
-        'TestDaF wird bei CASA aktuell nicht angeboten. CASA konzentriert sich auf telc Deutsch B2 und telc C1 Hochschule. TestDaF könnte künftig wieder ins CASA-Programm aufgenommen werden. Wer gezielt TestDaF-Vorbereitung sucht, sollte direkt bei CASA nach zukünftiger Verfügbarkeit fragen.',
+        'TestDaF bieten wir bei CASA derzeit nicht an. Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. TestDaF könnte künftig wieder in unser Programm kommen. Wenn du gezielt eine Vorbereitung auf TestDaF suchst, frag am besten direkt bei uns nach.',
     },
   ];
 }
@@ -493,7 +493,7 @@ function buildPlacementPassages(): KbPassage[] {
       topic: 'placement',
       keywords: ['einstufung', 'einstufungstest', 'niveau', 'a1', 'a2', 'b1', 'b2', 'c1', 'cefr', 'anfänger', 'mittelstufe', 'fortgeschritten', 'welches niveau'],
       content:
-        'CASA arbeitet mit CEFR-Niveaus (A1–C1) für die Einstufung. A1 = absolute Anfänger; A2 = Grundkenntnisse; B1 = Mittelstufe; B2 = Oberstufe; C1 = Fortgeschrittene. Wer bereits Deutschkenntnisse hat, macht vor der Anmeldung einen kostenlosen Online-Einstufungstest: Die Tests liegen auf dem Testportal des Klett Verlags (Netzwerk neu für A1–B1, Kontext für B1+–C1) und sind unter /placement-test verlinkt. Beginnen Sie immer mit dem A1-Test, machen Sie ihn allein und ohne Wörterbuch, tragen Sie im Testformular Namen und E-Mail-Adresse ein und senden Sie das Ergebnis an online@casa-bremen.de. Absolute Anfänger (keine Vorkenntnisse) können direkt im A1-Kurs starten. Eine persönliche Einstufung in der Schule ist während der Bürozeiten ohne Termin möglich; bitte planen Sie mindestens eine Stunde ein.',
+        'CASA stuft nach den Niveaus des Gemeinsamen Europäischen Referenzrahmens ein, von A1 bis C1. A1 ist die Stufe für Anfängerinnen und Anfänger, A2 steht für Grundkenntnisse, B1 für die Mittelstufe, B2 für die Oberstufe und C1 für Fortgeschrittene. Zwischen B1 und B2 liegt im Intensivkurs die B1+. Sie dauert wie eine ganze Stufe etwa acht bis neun Wochen. Wenn du schon etwas Deutsch kannst, mach vor der Anmeldung einen kostenlosen Online-Einstufungstest. Die Tests liegen auf dem Testportal des Klett Verlags (Netzwerk neu für A1–B1, Kontext für B1+–C1) und sind auf unserer Seite zum Einstufungstest verlinkt. Beginne immer mit dem A1-Test, mach ihn allein und ohne Wörterbuch, trag im Testformular deinen Namen und deine E-Mail-Adresse ein und schick dein Ergebnis an online@casa-bremen.de. Wenn du noch gar kein Deutsch kannst, meldest du dich einfach direkt für einen A1-Kurs an. Zur persönlichen Einstufung kannst du während unserer Bürozeiten ohne Termin in die Schule kommen. Plane dafür mindestens eine Stunde ein.',
     },
   ];
 }
@@ -518,7 +518,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['intensiv', 'deutsch', 'kurs', '940', '520', 'preis', 'morgens', 'vollzeit', '20 lektionen', 'montag freitag'],
       content:
-        'Intensivkurs Deutsch: A1–C1, 20 Unterrichtseinheiten à 45 Minuten pro Woche. Vormittags Mo–Fr 09:00–12:30 oder nachmittags Mo–Do 13:00–17:30. Preis: 520 € für 4 Wochen, 940 € für 8 Wochen, 117,50 € für jede weitere Woche. Zusätzlich einmalig 50 € Anmeldegebühr und 23,99–26,99 € für das Lehrbuch. Aktuelle Starttermine stehen auf der Kursseite. Anfänger willkommen.',
+        'Unsere Intensivkurse gibt es von A1 bis C1, mit 20 Unterrichtseinheiten à 45 Minuten pro Woche. Du lernst vormittags von Montag bis Freitag von 09:00 bis 12:30 Uhr oder nachmittags von Montag bis Donnerstag von 13:00 bis 17:30 Uhr. Der Kurs kostet 520 € für 4 Wochen und 940 € für 8 Wochen, jede weitere Woche 117,50 €. Dazu kommen einmalig 50 € Einschreibegebühr und 23,99–26,99 € für das Lehrbuch. Die aktuellen Starttermine findest du auf der Kursseite. Auch wer ganz neu mit Deutsch anfängt, ist willkommen.',
     },
     {
       id: 'course-evening-en',
@@ -538,7 +538,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['abend', 'abendkurs', 'kurs', '476', 'preis', 'nach der arbeit', 'teilzeit', 'montag mittwoch', 'dienstag donnerstag'],
       content:
-        'Abendkurs Deutsch: A1–C1, 4 Lektionen/Woche. Mo/Mi oder Di/Do, 18:30–20:00. 476 € pro Trimester zzgl. Lehrwerk. Ideal für Lernende neben Arbeit oder Studium. Aktuelle Trimester und Starttermine stehen auf der Kursseite.',
+        'Unsere Abendkurse gibt es von A1 bis C1, mit 4 Unterrichtseinheiten pro Woche, montags und mittwochs oder dienstags und donnerstags von 18:30 bis 20:00 Uhr. Ein Trimester kostet 476 €, dazu kommt das Lehrwerk. Der Abendkurs passt gut, wenn du nebenbei arbeitest oder studierst. Die aktuellen Trimester und Starttermine findest du auf der Kursseite.',
     },
     {
       id: 'course-medical-en',
@@ -553,12 +553,12 @@ function buildCourseDetailPassages(): KbPassage[] {
     {
       id: 'course-medical-de',
       locale: 'de',
-      title: 'Medizinisches Deutsch bei CASA',
+      title: 'Deutsch für Pflege und Medizin bei CASA',
       url: '/courses/german-for-medical',
       topic: 'courses',
       keywords: ['medizin', 'arzt', 'gesundheit', 'b2', 'c1', 'fachsprachprüfung', 'fsp', 'professionell'],
       content:
-        'Deutsch für Mediziner: für Ärztinnen und Ärzte vor und nach der Fachsprachprüfung, Einstieg auf Niveau B2 oder C1. Gebühr, Wochenstunden und Termine erfahren Sie beim CASA-Beratungsteam.',
+        'Deutsch für Pflege und Medizin ist für Ärztinnen und Ärzte vor und nach der Fachsprachprüfung gedacht. Du steigst auf dem Niveau B2 oder C1 ein. Gebühr, Wochenstunden und Termine erfährst du bei unserem Beratungsteam.',
     },
     {
       id: 'course-bildungszeit-en',
@@ -578,7 +578,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['bildungszeit', 'bildungsurlaub', 'arbeitgeber', '280', 'intensiv', 'block', 'freistellung'],
       content:
-        'Bildungszeit Deutsch: ab B1, superintensiv — ein Intensivkurs am Vormittag und einer am Nachmittag parallel, 30–40 Stunden pro Woche, wie es die Anerkennung als Bildungszeit verlangt. 280 € für 1 Woche, 520 € für 2 Wochen, zuzüglich Lehrbücher (46–54 € für zwei) und 50 € bei der ersten Anmeldung. Einstieg an jedem Montag. Nach dem Bremischen Bildungszeitgesetz haben Beschäftigte in Bremen Anspruch auf zehn Tage in zwei Jahren. Berechtigung bitte vor der Anmeldung mit CASA und Arbeitgeber klären.',
+        'Den Kurs für die Bildungszeit gibt es ab B1. Er ist superintensiv, denn du besuchst einen Intensivkurs am Vormittag und einen am Nachmittag, zusammen 30–40 Stunden pro Woche, so wie es die Anerkennung als Bildungszeit verlangt. Eine Woche kostet 280 €, zwei Wochen kosten 520 €. Dazu kommen die Lehrbücher (46–54 € für zwei) und 50 € bei deiner ersten Anmeldung. Du kannst an jedem Montag einsteigen. Nach dem Bremischen Bildungszeitgesetz haben Beschäftigte, die in Bremen arbeiten, Anspruch auf zehn Tage in zwei Jahren. Bitte kläre vor der Anmeldung mit CASA und deinem Arbeitgeber, ob du Anspruch hast.',
     },
   ];
 }
@@ -671,7 +671,7 @@ function buildFooterPassages(): KbPassage[] {
       url: '/contact',
       topic: 'contact',
       keywords: ['kontakt', 'telefon', 'adresse', 'email', 'büro'],
-      content: `Telefon ${footerConfig.contact.phone}. Adresse ${footerConfig.contact.address}. Öffnungszeiten ${footerConfig.contact.officeHours.join('; ')}.`,
+      content: `Du erreichst uns telefonisch unter ${footerConfig.contact.phone}. Unsere Adresse ist Am Dobben 14–16, 28203 Bremen. Wir sind montags bis donnerstags von 08:30 bis 19:00 Uhr und freitags von 08:30 bis 13:00 Uhr für dich da.`,
     },
   ];
 }

@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? {
           title: 'Gemeinnützigkeit & Mission',
           description:
-            'Wie CASA als gemeinnützige Sprachschule Kursgebühren in Bildung, Integration, Lehrkräfte und soziale Projekte reinvestiert.',
+            'CASA ist eine gemeinnützige Sprachschule. Unsere Einnahmen aus Kursgebühren fließen zurück in Bildung, Integration, unsere Lehrkräfte und soziale Projekte.',
         }
       : {
           title: 'Non-profit status & mission',
@@ -64,18 +64,18 @@ export default async function NonProfitStatusPage() {
         ],
         hero: {
           eyebrow: 'Gemeinnützigkeit & Mission',
-          title: 'Sprache verbindet. Bildung eröffnet Wege.',
+          title: 'Was gemeinnützig bei uns heißt',
           description:
             'Als gemeinnützige Sprachschule setzen wir uns für Bildung, Verständigung und Teilhabe ein. Unsere Einnahmen fließen zurück in diese Arbeit.',
           ctas: [{ label: 'Wirkung ansehen', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
         fundingText:
-          'CASA finanziert sich wesentlich über Kursgebühren. Diese Einnahmen tragen den laufenden Bildungsbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.',
+          'Wir finanzieren uns zum großen Teil über Kursgebühren. Mit diesen Einnahmen tragen wir den laufenden Schulbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.',
         fundingBullets: [
           'Qualifizierte Lehrkräfte und pädagogische Begleitung',
-          'Kleine, sprechaktive Gruppen mit zuverlässiger Kursstruktur',
+          'Kleine Gruppen, in denen viel gesprochen wird, und ein verlässlicher Kursablauf',
           'Ausstattung, Beratung und sichere Lernräume in Bremen',
-          'Soziale Bildungsprojekte, Tandemangebote und vergünstigte Zugänge, wo möglich',
+          'Soziale Bildungsprojekte, Sprachtandems und, wo es möglich ist, ermäßigte Gebühren',
         ],
         legalTitle: 'Rechtsform und Nachweise',
         legalRows: [
@@ -144,7 +144,7 @@ export default async function NonProfitStatusPage() {
         <Container className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           <div>
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{locale === 'de' ? 'Gemeinnützigkeit & Transparenz' : 'Non-profit status & transparency'}</p>
-            <h2 id="nonprofit-transparency-title" className="mt-3 text-3xl font-bold">{locale === 'de' ? 'Ihre Kursgebühren bleiben in der Bildungsarbeit.' : 'Your course fees support our educational work.'}</h2>
+            <h2 id="nonprofit-transparency-title" className="mt-3 text-3xl font-bold">{locale === 'de' ? 'Deine Kursgebühren bleiben in der Bildungsarbeit.' : 'Your course fees support our educational work.'}</h2>
             <p className="mt-5 leading-relaxed text-[var(--casa-muted)]">{copy.fundingText}</p>
             <p className="mt-4 font-semibold leading-relaxed">{locale === 'de' ? 'Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.' : 'Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.'}</p>
             <ul className="mt-6 grid gap-x-6 gap-y-4 sm:grid-cols-2">{copy.fundingBullets.map(item => <li key={item} className="border-l-2 border-[var(--casa-blue)]/30 pl-4 text-sm leading-relaxed text-[var(--casa-muted)]">{item}</li>)}</ul>

@@ -21,13 +21,13 @@ const pageCopy = {
   de: {
     title: 'Kosten- und Kursweg-Rechner',
     description:
-      'Schätzen Sie Dauer und Kosten für Ihren Deutschkurs bei CASA, inklusive optionaler Prüfung und Unterkunft.',
+      'Hier kannst du Dauer und Kosten deines Deutschkurses bei CASA schätzen, auf Wunsch mit Prüfung und Unterkunft.',
     breadcrumbHome: 'Start',
     breadcrumbCurrent: 'Rechner',
-    eyebrow: 'CASA Planungstool',
-    heading: 'Kurs, Prüfung und Unterkunft schnell berechnen',
+    eyebrow: 'Kostenrechner',
+    heading: 'Was kosten Kurs, Prüfung und Unterkunft?',
     intro:
-      'Wählen Sie aktuelles Niveau, Zielniveau und optionale Leistungen. Die Schätzung aktualisiert sich sofort und zeigt rückerstattbare Kaution getrennt.',
+      'Wähle dein aktuelles Niveau, dein Zielniveau und die Leistungen, die du dazubuchen möchtest. Die Schätzung passt sich sofort an. Die rückerstattbare Kaution zeigen wir getrennt.',
   },
 } as const;
 

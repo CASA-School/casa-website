@@ -63,10 +63,10 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           nextStepTitle: 'Der nächste Schritt',
 
           nextStepBody:
-            'Aus dem Gelesenen soll Fortschritt werden? Wir empfehlen Ihnen den passenden Kurs und einen realistischen Zeitplan.',
+            'Wenn du mit deinem Deutsch weiterkommen möchtest, empfehlen wir dir gern einen passenden Kurs und einen realistischen Zeitplan.',
 
           findCourse: 'Kurs finden',
-          talkToAdmissions: 'Lieber erst beraten lassen',
+          talkToAdmissions: 'Lass dich zuerst beraten',
 
           relatedTitle: 'Weitere Artikel',
         }
