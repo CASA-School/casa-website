@@ -2386,3 +2386,21 @@ description to "…learner jour…" (a test checks the 52-character limit). Lear
 greet by first name, as the German now does; organisers keep a formal greeting. Two native English
 editing passes followed. Open for the team: the English-only "Academic Coordinator" job ad, the
 English rendering of the motto, and the calculator's B1+ price.
+
+## 41. Cards keep their text budget; the exams page rebuilt; a compact team (2026-10-07)
+
+Restoring casa-bremen.de's texts (pass 39) put whole paragraphs into boxes built for a few lines:
+the C1 exam card ran twice the height of the B2 one on /exams and the homepage, „Wer wir sind"
+had 587px of text beside a 368px photo, and the same happened in the accommodation, exam and
+Leitbild splits. The rule now (CLAUDE.md, Conventions): a card or a box holds the short version,
+and the rest goes on the page that is about it, never lost. The C1 exam has a card `summary` and a
+longer `intro` for its own page. `EditorialSplit` sets title and lead beside the photograph and its
+points in a row beneath it, so the box keeps the photograph's height. The Leitbild's class sentence
+moved into „Unsere Ziele", the tandem has four even steps, the placement page's opening hours are
+two facts rather than a sentence, and the course-format panel on /sprachkurse shows the fees as a
+price list (the conditions are on each course page). /exams below the hero: two fact cards (fee,
+partial exam, preparation course, next date and deadline; fees shared with the exam pages in
+`src/config/content/exam-fees.ts`), the learner's story, three steps that now carry the old
+readiness checklist, the partners. The team grid is square, two to five to a row, instead of
+386px-tall 4:5 cards; portraits use plain `next/image`, because CasaImage swaps any photo
+outside the photo register for a stand-in.
