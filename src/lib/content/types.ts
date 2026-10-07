@@ -151,7 +151,7 @@ export type TeamSpotlight = {
   photo?: {
     src: string;
     alt: string;
-    /** CSS object-position, so a face sits well in the 4:5 crop. */
+    /** CSS object-position, so a face sits well in the square crop. */
     position?: string;
   };
   /** Drawn in the photo's place until one is on file. */
@@ -181,7 +181,10 @@ export type ExamNarrative = {
   code: string;
   locale: ContentLocale;
   headline: string;
+  /** What a card says: about 160 characters, so the exam cards stay the same size. */
   summary: string;
+  /** The exam's own page says more, when there is more to say about who it is for. */
+  intro?: string;
   outcomes: string[];
   prepHighlights: string[];
 };
