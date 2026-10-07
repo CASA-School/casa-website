@@ -1,8 +1,9 @@
 /*
  * A friendly stand-in for a colleague whose photo is not on file yet
- * (2026-10-07): one of the Bremer Stadtmusikanten, drawn flat in the card's
- * 4:5 frame, so the team grid stays even. An animal, never a face: a made-up
- * portrait beside a real name would say something untrue about a real person.
+ * (2026-10-07): one of the Bremer Stadtmusikanten, drawn flat in the same
+ * square frame as a portrait, so the team grid stays even. An animal, never a
+ * face: a made-up portrait beside a real name would say something untrue about
+ * a real person.
  * The group packages already use the same four animals.
  */
 import type { TeamPlaceholderAnimal } from '@/lib/content/types';
@@ -124,13 +125,13 @@ const ANIMALS: Record<TeamPlaceholderAnimal, (props: { p: Palette }) => React.JS
   esel: Esel,
 };
 
-/** Fills its 4:5 parent; decorative, as the card names the person. */
+/** Fills its square parent; decorative, as the caption names the person. */
 export function TeamPlaceholder({ animal }: { animal: TeamPlaceholderAnimal }) {
   const palette = PALETTES[animal];
   const Animal = ANIMALS[animal];
 
   return (
-    <svg viewBox="0 0 400 500" className="absolute inset-0 h-full w-full" aria-hidden="true" focusable="false">
+    <svg viewBox="0 50 400 400" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true" focusable="false">
       <rect width="400" height="500" fill={palette.ground} />
       <circle cx="200" cy="290" r="150" fill="#ffffff" opacity="0.35" />
       <Animal p={palette} />

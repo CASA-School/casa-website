@@ -1,8 +1,9 @@
 'use client';
 
-import { Link } from '@/i18n/navigation';
-import { CasaImage as Image } from '@/components/ui/casa-image';
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
+
+import { Link } from '@/i18n/navigation';
 
 import type { TeamSpotlight } from '@/lib/content/types';
 import { TeamPlaceholder } from '@/components/signatures/team-placeholder';
@@ -17,43 +18,48 @@ type TeamDirectoryProps = {
 };
 
 /*
- * THE TEAM, WITH FACES (2026-10-07). Every card opens with the same 4:5 frame:
- * the colleague's portrait, or one of the Bremer Stadtmusikanten until a
+ * THE TEAM, WITH FACES (2026-10-07). Every person opens with the same square
+ * frame: the colleague's portrait, or one of the Bremer Stadtmusikanten until a
  * portrait is on file, so the grid stays even. „Alle" shows everyone at once,
  * grouped under the areas the filters name; the search box and the „show more"
  * button went, because a team of this size is quicker to look at than to search.
+ *
+ * Square, five to a row on a wide screen and two on a phone: the first version
+ * gave each person a 4:5 card, 386px tall at 1440 and nearly the whole screen
+ * on a phone. The portraits are plain `next/image`, not CasaImage — that one
+ * swaps any photograph outside the photo register for a stand-in panel, and a
+ * portrait already has its own stand-in.
  */
 function MemberCard({ member }: { member: TeamSpotlight }) {
+  const areas = member.areas ?? member.highlight;
+
   return (
-    <article className="h-full overflow-hidden rounded-3xl bg-white shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]/70">
-      <div className="relative aspect-[4/5] overflow-hidden bg-[var(--casa-surface-subtle)]">
+    <article className="break-words">
+      <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--casa-surface-subtle)]">
         {member.photo ? (
           <Image
             src={member.photo.src}
             alt={member.photo.alt}
             fill
-            sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
+            sizes="(min-width: 1280px) 250px, (min-width: 1024px) 22vw, (min-width: 640px) 30vw, 45vw"
             className="object-cover"
-            style={{ objectPosition: member.photo.position ?? 'center 30%' }}
+            style={{ objectPosition: member.photo.position ?? 'center 25%' }}
           />
         ) : member.placeholder ? (
           <TeamPlaceholder animal={member.placeholder} />
         ) : null}
       </div>
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-[var(--casa-ink)]">{member.name}</h3>
-        <p className="mt-0.5 text-sm font-semibold text-[var(--casa-muted)]">{member.title}</p>
-        {member.areas || member.highlight ? (
-          <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">{member.areas ?? member.highlight}</p>
-        ) : null}
-      </div>
+      <h3 className="mt-3 text-base font-bold leading-snug text-[var(--casa-ink)]">{member.name}</h3>
+      {/* Hyphenated: two to a row on a phone, „Bundesfreiwilligendienst" ran into the next tile. */}
+      <p className="mt-0.5 hyphens-auto text-sm font-semibold leading-snug text-[var(--casa-muted)]">{member.title}</p>
+      {areas ? <p className="mt-1.5 text-sm leading-snug text-[var(--casa-muted)]">{areas}</p> : null}
     </article>
   );
 }
 
 function MemberGrid({ members }: { members: TeamSpotlight[] }) {
   return (
-    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 xl:grid-cols-5">
       {members.map((member) => (
         <li key={member.id}>
           <MemberCard member={member} />
