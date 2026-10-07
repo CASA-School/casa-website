@@ -234,8 +234,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                 locale={locale}
                 title={locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk to someone?'}
                 body={locale === 'de'
-                  ? 'Ruf uns während der Bürozeiten an oder schreib uns eine E-Mail. In dieser Zeit kannst du auch ohne Termin bei uns im Büro vorbeikommen. Wir nehmen uns Zeit für deine Fragen.'
-                  : 'Give us a call during office hours or send us an email. You’re also welcome to drop in at the office during those hours without an appointment. We’ll take the time to answer your questions.'}
+                  ? 'Ruf uns an oder schreib uns. Während der Bürozeiten kannst du auch ohne Termin vorbeikommen, wir nehmen uns Zeit für dich.'
+                  : 'Call us or send us an email. During office hours you can also drop in without an appointment, and we’ll take time for you.'}
               />
 
               <nav

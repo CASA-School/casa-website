@@ -98,16 +98,15 @@ type SelectorCourseLike = {
  */
 function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', scheduleTags: string[]) {
   const practical = localizePracticalFacts(course.slug, locale);
+  /*
+   * The fees, as a price list (2026-10-07). This also carried the first two
+   * `conditions`, which are paragraphs, and the fees joined into one line with
+   * "·", so three small cards ran to seven lines each while the reader was
+   * comparing formats. The conditions are on each course's own page.
+   */
   const registryFacts = practical
-    ? [
-        practical.fees?.length
-          ? `${locale === 'de' ? 'Kosten' : 'Costs'}: ${practical.fees
-              .map((fee) => `${fee.label} ${fee.amount}`)
-              .join(' · ')}`
-          : practical.feeNote,
-        ...practical.conditions.slice(0, 2),
-      ].filter((entry): entry is string => Boolean(entry))
-    : [];
+    ? { fees: practical.fees?.map(({ label, amount }) => ({ label, amount })) ?? [], feeNote: practical.feeNote }
+    : undefined;
   const fallbackOutcomes =
     locale === 'de'
       ? ['Mehr Sicherheit im Sprechen', 'Strukturierte Lernroutine', 'Klare nächste Lernschritte']
@@ -359,6 +358,7 @@ export default async function CoursesPage({
       intensity: copy.intensity,
       outcomes: copy.outcomes,
       facts: copy.facts,
+      href: getCoursePath(course.slug),
     };
   });
 
@@ -586,7 +586,8 @@ export default async function CoursesPage({
                 schedule: locale === 'de' ? 'Kursrhythmus' : 'Course rhythm',
                 intensity: locale === 'de' ? 'Lernumfang' : 'Workload',
                 outcomes: locale === 'de' ? 'Was du erreichen kannst' : 'What you can achieve',
-                facts: locale === 'de' ? 'So läuft dieses Format bei CASA' : 'How this format works at CASA',
+                facts: locale === 'de' ? 'Kosten' : 'Costs',
+                more: locale === 'de' ? 'Kursplan ansehen' : 'View course plan',
               }}
             />
           </div>

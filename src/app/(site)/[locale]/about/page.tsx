@@ -79,10 +79,13 @@ export default async function AboutPage() {
         aimsTitle: 'Unsere Ziele',
         aimsText:
           'Wir haben uns auf Deutsch als Fremdsprache spezialisiert und unterrichten mit Professionalität und Leidenschaft. Gute Sprachkenntnisse sind ein Schlüssel, um in Deutschland anzukommen, im Beruf Fuß zu fassen oder an einer deutschen Universität zu studieren. Deshalb legen wir im Unterricht den Schwerpunkt darauf, die Sprache direkt im Gespräch anzuwenden. Wir möchten, dass du dich anderen gut mitteilen, deine Mitmenschen besser verstehen und deinen Alltag selbstständig gestalten kannst. Welche Schritte zu deinen Plänen passen, besprechen wir gern mit dir.',
+        aimsClassText:
+          'In deiner Lerngruppe soll eine gute Lernatmosphäre herrschen. Ihr erarbeitet euch neue Inhalte gemeinsam, indem ihr zusammen Aufgaben löst, und entwickelt euch im Austausch miteinander sprachlich und persönlich weiter.',
         approachEyebrow: 'Mehr als Unterricht',
         approachTitle: 'Lernen durch Begegnung',
         approachText:
-          'Wir verstehen uns als Brückenbauer zwischen Menschen. Lernen ist für uns eine der schönsten Erfahrungen, und dafür braucht es ein angenehmes und anregendes Umfeld. Deshalb setzen wir auf Begegnungspädagogik. In deiner Lerngruppe soll eine gute Lernatmosphäre herrschen. Ihr erarbeitet euch neue Inhalte gemeinsam, indem ihr zusammen Aufgaben löst, und entwickelt euch im Austausch miteinander sprachlich und persönlich weiter. Dafür schaffen wir im Unterricht und darüber hinaus Raum für Begegnung und Austausch.',
+          'Wir verstehen uns als Brückenbauer zwischen Menschen. Lernen ist für uns eine der schönsten Erfahrungen, und dafür braucht es ein angenehmes und anregendes Umfeld. Deshalb setzen wir auf Begegnungspädagogik.',
+        encounterIntro: 'Dafür schaffen wir im Unterricht und darüber hinaus Raum für Begegnung und Austausch:',
         encounterBullets: [
           'Wohnen bei Gastfamilien in Bremen',
           'Tandempartnerschaften mit Deutschsprachigen',
@@ -108,10 +111,13 @@ export default async function AboutPage() {
         aimsTitle: 'Our aims',
         aimsText:
           'We specialise in German as a foreign language, and we teach with professionalism and passion. Good language skills are key to settling in Germany, finding your feet at work or studying at a German university. That is why our lessons focus on using the language straight away in conversation. We want you to be able to express yourself well, understand the people around you better and manage your everyday life on your own. We are happy to talk with you about the steps that suit your plans.',
+        aimsClassText:
+          'We want your class to have a good atmosphere for learning. You work out new material together by solving tasks as a group, and by sharing ideas with one another you grow, both in your language and as people.',
         approachEyebrow: 'Beyond the classroom',
         approachTitle: 'Learning by meeting people',
         approachText:
-          'We see ourselves as bridge-builders between people. For us, learning is one of the best experiences there is, and it needs a pleasant and stimulating setting. That is why our teaching follows Begegnungspädagogik, an approach that puts meeting people at the heart of learning. We want your class to have a good atmosphere for learning. You work out new material together by solving tasks as a group, and by sharing ideas with one another you grow, both in your language and as people. So we make room for meeting and exchange, in class and beyond.',
+          'We see ourselves as bridge-builders between people. For us, learning is one of the best experiences there is, and it needs a pleasant and stimulating setting. That is why our teaching follows Begegnungspädagogik, an approach that puts meeting people at the heart of learning.',
+        encounterIntro: 'So we make room for meeting and exchange, in class and beyond:',
         encounterBullets: [
           'Living with host families in Bremen',
           'Tandem partnerships with German speakers',
@@ -125,12 +131,15 @@ export default async function AboutPage() {
         eyebrow: 'Sprachtandem',
         title: 'Zwei Sprachen, ein gemeinsames Gespräch',
         intro:
-          'Im Sprachtandem lernen zwei Menschen voneinander. Du übst Deutsch und hilfst deinem Gegenüber beim Lernen deiner Sprache, und dabei lernt ihr euch kennen. Wir suchen auch deutschsprachige Tandempartnerinnen und -partner. Wenn du Deutsch sprichst und eine andere Sprache üben möchtest, melde dich gern.',
+          'Im Sprachtandem lernen zwei Menschen voneinander. Du übst Deutsch und hilfst deinem Gegenüber beim Lernen deiner Sprache, und dabei lernt ihr euch kennen.',
+        germanSpeakers:
+          'Wir suchen auch deutschsprachige Tandempartnerinnen und -partner. Wenn du Deutsch sprichst und eine andere Sprache üben möchtest, melde dich gern.',
         stepsTitle: 'So funktioniert es',
         steps: [
           'Schreib uns, welche Sprache du sprichst und welche du lernen oder verbessern möchtest.',
           'Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner für dich.',
-          'Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule. Wenn ihr euch weiter treffen möchtet, tauscht ihr eure Kontaktdaten aus. Gern könnt ihr euch auch weiterhin bei uns treffen.',
+          'Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule.',
+          'Wenn ihr euch weiter treffen möchtet, tauscht ihr eure Kontaktdaten aus. Gern könnt ihr euch auch weiterhin bei uns treffen.',
         ],
         benefitsTitle: 'Was dir ein Tandem bringt',
         benefits: [
@@ -145,12 +154,15 @@ export default async function AboutPage() {
         eyebrow: 'Language tandem',
         title: 'Two languages, one conversation',
         intro:
-          'In a language tandem, two people learn from each other. You practise your German and help your partner learn your language, and you get to know each other along the way. We are also looking for German-speaking tandem partners. If you speak German and would like to practise another language, please get in touch.',
+          'In a language tandem, two people learn from each other. You practise your German and help your partner learn your language, and you get to know each other along the way.',
+        germanSpeakers:
+          'We are also looking for German-speaking tandem partners. If you speak German and would like to practise another language, please get in touch.',
         stepsTitle: 'How it works',
         steps: [
           'Write to us and tell us which language you speak and which one you would like to learn or improve.',
           'We look for a suitable tandem partner for you.',
-          'As soon as we have found someone, we get in touch and arrange a first meeting with you both here at the school. If you would like to keep meeting, you swap contact details. You are also welcome to carry on meeting at the school.',
+          'As soon as we have found someone, we get in touch and arrange a first meeting with you both here at the school.',
+          'If you would like to keep meeting, you swap contact details. You are also welcome to carry on meeting at the school.',
         ],
         benefitsTitle: 'What a tandem gives you',
         benefits: [
@@ -223,6 +235,7 @@ export default async function AboutPage() {
               <p className="text-pretty text-lg leading-relaxed text-[var(--casa-ink)] md:text-xl">{leitbild.intro}</p>
               <h3 className="mt-10 text-xl font-bold text-[var(--casa-ink)]">{leitbild.aimsTitle}</h3>
               <p className="mt-3 text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.aimsText}</p>
+              <p className="mt-4 text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.aimsClassText}</p>
               <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
                 <TextCta href="/ueber-uns/gemeinnuetzigkeit">
                   {locale === 'de' ? 'Was gemeinnützig bei uns heißt' : 'What being a non-profit means at CASA'}
@@ -288,8 +301,12 @@ export default async function AboutPage() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{leitbild.approachEyebrow}</p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">{leitbild.approachTitle}</h2>
+              {/* A lead beside the photograph (2026-10-07): the old site's whole
+                  paragraph ran the column past it. The sentence about the
+                  learning group is in „Unsere Ziele" above. */}
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.approachText}</p>
-              <ul className="mt-7 grid gap-3 sm:grid-cols-2">
+              <p className="mt-6 text-sm font-semibold text-[var(--casa-ink)]">{leitbild.encounterIntro}</p>
+              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
                 {leitbild.encounterBullets.map((item) => (
                   <li
                     key={item}
@@ -312,9 +329,10 @@ export default async function AboutPage() {
 
           <div className="mx-auto mt-10 max-w-[64rem] md:mt-12">
             <h3 className="sr-only">{tandemGuide.stepsTitle}</h3>
-            <ol className="grid divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] md:grid-cols-3 md:divide-x md:divide-y-0">
+            {/* Two by two, with hairlines from the gap: the four steps are two lines each. */}
+            <ol className="grid gap-px overflow-hidden rounded-xl bg-[var(--casa-sand)] shadow-[var(--shadow-card)] sm:grid-cols-2">
               {tandemGuide.steps.map((step, index) => (
-                <li key={step} className="p-6 md:p-7">
+                <li key={step} className="bg-white p-6 md:p-7">
                   <span className="text-xs font-semibold tracking-eyebrow text-[var(--casa-accent-text)]" aria-hidden>
                     {String(index + 1).padStart(2, '0')}
                   </span>
@@ -334,8 +352,11 @@ export default async function AboutPage() {
             </ul>
           </div>
 
-          <div className="mt-10 text-center">
-            <TextCta href="/contact?topic=tandem">{tandemGuide.primaryCta}</TextCta>
+          <div className="mx-auto mt-10 max-w-[40rem] text-center">
+            <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{tandemGuide.germanSpeakers}</p>
+            <div className="mt-4">
+              <TextCta href="/contact?topic=tandem">{tandemGuide.primaryCta}</TextCta>
+            </div>
           </div>
         </Container>
       </section>

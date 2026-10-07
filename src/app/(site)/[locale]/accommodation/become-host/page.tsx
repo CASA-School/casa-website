@@ -59,7 +59,7 @@ export default async function BecomeHostFamilyPage() {
           storyEyebrow: 'Gastgeben bei CASA',
           storyTitle: 'Was wir uns von Gastgebern wünschen',
           storyDescription:
-            'Viele unserer Lernenden wohnen in ihrer ersten Zeit in Bremen bei Gastgebern, um die Sprache und die Stadt besser kennenzulernen. Dafür suchen wir offene Haushalte, ob Familie, Paar oder Einzelperson, in denen sie sich willkommen fühlen. Wir helfen bei der Vermittlung und bei allen Absprachen und sind während des Aufenthalts für Sie da.',
+            'Viele unserer Lernenden wohnen in ihrer ersten Zeit in Bremen bei Gastgebern. Dafür suchen wir offene Haushalte, ob Familie, Paar oder Einzelperson, in denen sie sich willkommen fühlen.',
           storyBullets: [
             'Sie haben ein möbliertes Zimmer mit Bett, Schreibtisch und Kleiderschrank frei.',
             'Ihr Gast kann ein Bad nutzen und in der Küche Mahlzeiten zubereiten.',
@@ -158,7 +158,7 @@ export default async function BecomeHostFamilyPage() {
           storyEyebrow: 'Hosting with CASA',
           storyTitle: 'What we look for in a host',
           storyDescription:
-            'Many of our learners live with hosts when they first come to Bremen, so that they get to know the language and the city better. That is why we are looking for open-minded households, whether a family, a couple or someone living alone, where they can feel welcome. We help with the matching and all the arrangements, and we are there for you throughout the stay.',
+            'Many of our learners live with hosts when they first come to Bremen. That is why we are looking for open-minded households, whether a family, a couple or someone living alone, where they can feel welcome.',
           storyBullets: [
             'You have a furnished room free, with a bed, a desk and a wardrobe.',
             'Your guest can use a bathroom and cook meals in the kitchen.',

@@ -82,12 +82,12 @@ export default async function TeamPage() {
             title={locale === 'de' ? 'Wer wir sind' : 'Who we are'}
             description={
               locale === 'de'
-                ? 'Unser Team ist eine bunte Mischung aus erfahrenen Kolleginnen und Kollegen und jungen Menschen, die gerade ins Berufsleben starten. Uns alle verbindet die Leidenschaft für die Sprache, die wir jeden Tag vermitteln. Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen. Wir wissen also, dass es nicht immer leicht ist, und tun unser Bestes, um es dir so leicht wie möglich zu machen.'
-                : 'Our team is a colourful mix of experienced colleagues and young people just starting out in their careers. What we all share is a passion for the language we teach every day. Most of us have lived or worked abroad and know from experience what it means to learn a foreign language. So we know it is not always easy, and we do our best to make it as easy as possible for you.'
+                ? 'Unser Team ist eine bunte Mischung aus erfahrenen Kolleginnen und Kollegen und jungen Menschen, die gerade ins Berufsleben starten. Uns alle verbindet die Leidenschaft für die Sprache, die wir jeden Tag vermitteln.'
+                : 'Our team is a colourful mix of experienced colleagues and young people just starting out in their careers. What we all share is a passion for the language we teach every day.'
             }
             bullets={[
               locale === 'de' ? 'Unsere Lehrkräfte sind Muttersprachlerinnen und Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen.' : 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages.',
-              locale === 'de' ? 'Neben unserem Können als Lehrerinnen und Lehrer ist uns die Offenheit für andere Kulturen wichtig. Sie bringt uns immer wieder auf neue Ideen für unsere Arbeit.' : 'Alongside our skills as teachers, we value openness to other cultures. It keeps giving us new ideas for our work.',
+              locale === 'de' ? 'Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen.' : 'Most of us have lived or worked abroad and know from experience what it means to learn a foreign language.',
               locale === 'de' ? 'Wir alle legen großen Wert auf eine persönliche und lernfreundliche Atmosphäre, in der du dich wohlfühlst.' : 'We all care a great deal about a personal, friendly atmosphere for learning, where you feel at ease.',
             ]}
             photo={{

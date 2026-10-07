@@ -74,7 +74,11 @@ export default async function PlacementTestPage() {
             'Bei den Intensivkursen stufen wir dich ohnehin vor Ort ein. Wir behalten uns dabei vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.',
           inPersonTitle: 'Lieber persönlich in Bremen?',
           inPersonBody:
-            'Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in die Schule ein. Die Einstufung ist unverbindlich, und du lernst dabei die Schule kennen und kannst deine Fragen stellen. Einen Termin brauchst du nicht. Komm einfach Montag bis Donnerstag von 08:30 bis 19:00 Uhr oder freitags von 08:30 bis 13:00 Uhr vorbei, und plane mindestens eine Stunde ein.',
+            'Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in die Schule ein. Die Einstufung ist unverbindlich, und du lernst dabei die Schule kennen und kannst deine Fragen stellen.',
+          inPersonFacts: [
+            { label: 'Ohne Termin', lines: ['Montag bis Donnerstag 08:30–19:00 Uhr', 'Freitag 08:30–13:00 Uhr'] },
+            { label: 'Dauer', lines: ['Plane mindestens eine Stunde ein.'] },
+          ],
           inPersonCta: 'Kontakt und Adresse',
           prepTitle: 'Was du vorbereiten kannst',
         }
@@ -99,7 +103,11 @@ export default async function PlacementTestPage() {
             'If you join an intensive course, we will place you here at the school anyway, and we may adjust your course level even if you already have a certificate.',
           inPersonTitle: 'Prefer to come in person?',
           inPersonBody:
-            'If you live in or near Bremen, you’re very welcome to come to the school for a placement test and advice in person. The placement test doesn’t commit you to anything, and it’s a chance to get to know the school and ask your questions. You don’t need an appointment. Just drop in Monday to Thursday from 08:30 to 19:00 or on Friday from 08:30 to 13:00, and allow at least an hour.',
+            'If you live in or near Bremen, you’re very welcome to come to the school for a placement test and advice in person. The placement test doesn’t commit you to anything, and it’s a chance to get to know the school and ask your questions.',
+          inPersonFacts: [
+            { label: 'No appointment needed', lines: ['Monday to Thursday 08:30–19:00', 'Friday 08:30–13:00'] },
+            { label: 'Time', lines: ['Allow at least an hour.'] },
+          ],
           inPersonCta: 'Contact and address',
           prepTitle: 'What to prepare',
         };
@@ -182,7 +190,19 @@ export default async function PlacementTestPage() {
                 <Building2 className="h-5 w-5" aria-hidden />
               </div>
               <h2 className="text-2xl font-bold tracking-tight">{copy.inPersonTitle}</h2>
-              <p className="mt-3 flex-1 text-base leading-relaxed text-[var(--casa-muted)]">{copy.inPersonBody}</p>
+              <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{copy.inPersonBody}</p>
+              {/* The opening hours as facts, not a sentence (2026-10-07): in the
+                  paragraph they made this card twice the height of its neighbour. */}
+              <dl className="mt-5 grid flex-1 content-start gap-3 sm:grid-cols-2">
+                {copy.inPersonFacts.map((fact) => (
+                  <div key={fact.label} className="rounded-xl bg-[var(--casa-canvas)] px-4 py-3">
+                    <dt className="text-xs text-[var(--casa-muted)]">{fact.label}</dt>
+                    {fact.lines.map((line) => (
+                      <dd key={line} className="mt-1 text-sm font-semibold leading-snug text-[var(--casa-ink)]">{line}</dd>
+                    ))}
+                  </div>
+                ))}
+              </dl>
               <div className="mt-6">
                 <TextCta href="/contact?topic=placement-in-person">{copy.inPersonCta}</TextCta>
               </div>
