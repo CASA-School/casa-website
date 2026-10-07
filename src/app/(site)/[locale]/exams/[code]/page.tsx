@@ -13,6 +13,7 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import { getExamDetail } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
+import { getExamFees } from '@/config/content/exam-fees';
 
 type ExamDetailPageProps = {
   params: Promise<{ code: string }>;
@@ -28,38 +29,6 @@ function formatDate(value: string, locale: 'en' | 'de') {
   }).format(new Date(value));
 }
 
-/**
- * THE AMOUNTS ONLY — each row's label already says which fee it is.
- *
- * These were full sentences, and the decision card rendered them under labels
- * saying the same thing:
- *
- *   EXAM FEE        Full exam EUR 190
- *   PREPARATION     Preparation EUR 260
- *   PARTIAL REPEAT  Partial repeat EUR 160
- *
- * Three rows each naming themselves twice, in the card a candidate scrolls back
- * to for the figure. The label carries the meaning now and the value carries the
- * number. Amounts unchanged, still per docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
- */
-function getExamFeeDetails(code: string, locale: 'en' | 'de') {
-  // "190 €" on German pages, "€190" on English ones (brief 2026-10-02).
-  const euro = (amount: number) => (locale === 'de' ? `${amount}\u00a0€` : `€${amount}`);
-
-  if (code === 'telc_b2') {
-    return { full: euro(190), partial: euro(160), prep: euro(260) };
-  }
-
-  if (code === 'telc_c1_hochschule') {
-    return { full: euro(210), partial: euro(185), prep: euro(520) };
-  }
-
-  return {
-    full: locale === 'de' ? 'Wird bestätigt' : 'To be confirmed',
-    partial: locale === 'de' ? 'Nach Rücksprache' : 'On request',
-    prep: locale === 'de' ? 'Nach Rücksprache' : 'On request',
-  };
-}
 
 export async function generateMetadata({ params }: ExamDetailPageProps): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -136,9 +105,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           : undefined,
     },
     { label: levelLabel, value: detail.examType.level || '-' },
-    { label: locale === 'de' ? 'Prüfungsgebühr' : 'Exam fee', value: getExamFeeDetails(detail.examType.code, locale).full },
-    { label: locale === 'de' ? 'Vorbereitung' : 'Preparation', value: getExamFeeDetails(detail.examType.code, locale).prep },
-    { label: locale === 'de' ? 'Teilprüfung' : 'Partial exam', value: getExamFeeDetails(detail.examType.code, locale).partial },
+    { label: locale === 'de' ? 'Prüfungsgebühr' : 'Exam fee', value: getExamFees(detail.examType.code, locale).full },
+    { label: locale === 'de' ? 'Vorbereitung' : 'Preparation', value: getExamFees(detail.examType.code, locale).prep },
+    { label: locale === 'de' ? 'Teilprüfung' : 'Partial exam', value: getExamFees(detail.examType.code, locale).partial },
     /*
       NO LOCATION ROW. It read "CASA Bremen Exam Center", which is the same
       building for every exam CASA runs — a constant cannot inform a choice, and
@@ -273,7 +242,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Prüfungsdetail' : 'Exam detail'}
         title={detail.examType.name}
-        description={detail.narrative?.summary || (locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.' : 'We support you from registration through to your result.')}
+        description={detail.narrative?.intro || detail.narrative?.summary || (locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.' : 'We support you from registration through to your result.')}
         breadcrumbs={breadcrumbs}
         /* Not "Exam info rail" — "rail" is our word for the component, not a
            thing a visitor has a name for. The German string never said it. */

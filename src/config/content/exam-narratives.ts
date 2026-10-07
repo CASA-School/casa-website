@@ -1,5 +1,13 @@
 import type { ContentLocale, ExamNarrative } from '@/lib/content/types';
 
+/*
+ * `summary` is what a card says, on /exams and on the homepage: about 160
+ * characters, the length of the B2 one. The old site's longer description of
+ * who C1 Hochschule is for (restored 2026-10-07) went into those cards too and
+ * filled the C1 card twice over, so it lives in `intro` now, which only the
+ * exam's own page shows.
+ */
+
 export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
   en: [
     {
@@ -15,8 +23,10 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       code: 'telc_c1_hochschule',
       locale: 'en',
       headline: 'telc Deutsch C1 Hochschule for university admission',
-      // Who the exam is for, after the old casa-bremen.de page, as in German.
       summary:
+        'With telc Deutsch C1 Hochschule you show that your German is good enough for university. Many German-speaking universities require the certificate for admission.',
+      // Who the exam is for, after the old casa-bremen.de page, as in German.
+      intro:
         'telc Deutsch C1 Hochschule tests your German at a very advanced level, as you need it for university. The exam is for you if you want to prove your German because you plan to study at a German-speaking university, are already a student or work in an academic profession.',
       outcomes: ['More confidence with academic German', 'Better understanding of lectures', 'Staying calm under exam pressure'],
       prepHighlights: ['University-style tasks', 'Mock exams', 'Personal feedback on what to work on next'],
@@ -36,8 +46,10 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       code: 'telc_c1_hochschule',
       locale: 'de',
       headline: 'telc C1 Hochschule für die Zulassung an Hochschulen',
-      // Who the exam is for, after the old casa-bremen.de page (2026-10-07).
       summary:
+        'Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.',
+      // Who the exam is for, after the old casa-bremen.de page (2026-10-07).
+      intro:
         'telc Deutsch C1 Hochschule prüft Deutschkenntnisse für die Hochschule auf weit fortgeschrittenem Niveau. Die Prüfung ist für dich, wenn du an einer deutschsprachigen Hochschule studieren möchtest, schon studierst oder in einem akademischen Beruf arbeitest und deine Deutschkenntnisse nachweisen möchtest.',
       outcomes: ['Mehr akademische Sprachsicherheit', 'Besseres Vorlesungsverstehen', 'Souveräner Umgang mit Prüfungsdruck'],
       prepHighlights: ['Hochschulnahe Aufgaben', 'Prüfungssimulationen', 'Persönliches Feedback zum Weiterlernen'],

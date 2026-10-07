@@ -14,7 +14,7 @@ export type SignatureSectionKey =
   | 'course-weekly-rhythm'
   | 'accommodation-playbook'
   | 'accommodation-arrival-checklist'
-  | 'exams-readiness-check'
+  | 'exam-option-cards'
   | 'exam-day-timeline'
   | 'about-milestones'
   | 'team-directory'
@@ -74,8 +74,8 @@ export const layoutRhythmMap: Record<PageLayoutKey, LayoutRhythmSpec> = {
   },
   'exams-index': {
     hero: 'C',
-    patterns: ['GuidedPicker', 'ProcessSteps', 'ProofBand'],
-    signature: 'exams-readiness-check',
+    patterns: ['ProcessSteps', 'ProofBand'],
+    signature: 'exam-option-cards',
     allowQuickChooser: false,
   },
   'exam-detail': {

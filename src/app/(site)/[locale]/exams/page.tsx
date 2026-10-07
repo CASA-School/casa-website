@@ -1,14 +1,10 @@
 import type { Metadata } from 'next';
 
 import { HeroAPhotoLed } from '@/components/heroes';
-import {
-  GuidedPicker,
-  HumanStoryBlock,
-  ProcessSteps,
-  ProofBand,
-} from '@/components/sections';
-import { ExamsReadinessCheck } from '@/components/signatures';
+import { HumanStoryBlock, ProcessSteps, ProofBand } from '@/components/sections';
+import { ExamOptionCards, type ExamOption } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
+import { getExamFees } from '@/config/content/exam-fees';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -29,15 +25,13 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-// German pages write "190 €", English "€190" (brief 2026-10-02), as the course pages do.
-function examFeeSummary(code: string, locale: 'en' | 'de') {
-  if (code === 'telc_b2') {
-    return locale === 'de' ? 'Vollprüfung 190\u00a0€, Vorbereitung 260\u00a0€' : 'Full exam €190, preparation €260';
-  }
-  if (code === 'telc_c1_hochschule') {
-    return locale === 'de' ? 'Vollprüfung 210\u00a0€, Vorbereitung 520\u00a0€' : 'Full exam €210, preparation €520';
-  }
-  return locale === 'de' ? 'Gebühr wird bestätigt' : 'Fee to be confirmed';
+function formatExamDate(value: string, locale: 'en' | 'de') {
+  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Berlin',
+  }).format(new Date(value));
 }
 
 function examDetailHref(code: string, anchorId: string) {
@@ -58,32 +52,37 @@ export default async function ExamsPage() {
   // Fatameh is the only CASA learner who writes about sitting an exam.
   const leadStory = candidateStory;
 
-  const examItems = catalog.items.slice(0, 4).map((item) => {
+  const examOptions: ExamOption[] = catalog.items.slice(0, 4).map((item) => {
     // getExamCatalog holds only sittings still open for registration, so
-    // there is no closed-deadline state to label here.
+    // the first one is the next date a candidate can still book.
     const nextSession = item.sessions[0];
+    const fees = getExamFees(item.examType.code, locale);
 
     return {
-      id: item.examType.id,
-      title: item.examType.name,
-      description:
+      anchorId: item.examType.code === 'telc_c1_hochschule' ? 'c1' : item.examType.code === 'telc_b2' ? 'b2' : item.anchorId,
+      level: item.examType.level ?? '',
+      name: item.examType.name,
+      summary:
         item.narrative?.summary ||
         (locale === 'de' ? 'Eine anerkannte Prüfung mit festen Terminen und Anmeldefristen.' : 'A recognised exam with fixed dates and registration deadlines.'),
-      bestFor: item.examType.level || (locale === 'de' ? 'Für deinen nächsten Schritt' : 'For your next step'),
       href: examDetailHref(item.examType.code, item.anchorId),
-      // The card opens the exam's own page, so the label says so.
-      ctaLabel: locale === 'de' ? 'Mehr zur Prüfung' : 'More about the exam',
-      meta: examFeeSummary(item.examType.code, locale),
-      deadlineIso: nextSession?.registration_deadline ?? null,
-      media: {
-        src:
-          item.examType.code === 'telc_b2'
-            ? pageConfig.photos.thumbA.src
-            : item.examType.code === 'telc_c1_hochschule'
-              ? pageConfig.photos.thumbB.src
-              : pageConfig.photos.thumbC.src,
-        alt: item.examType.name,
-      },
+      facts: [
+        {
+          label: locale === 'de' ? 'Prüfungsgebühr' : 'Exam fee',
+          value: fees.full,
+          note: locale === 'de' ? `Teilprüfung ${fees.partial}` : `Partial exam ${fees.partial}`,
+        },
+        { label: locale === 'de' ? 'Vorbereitungskurs' : 'Preparation course', value: fees.prep, note: fees.prepRhythm },
+        nextSession
+          ? {
+              label: locale === 'de' ? 'Nächster Termin' : 'Next exam date',
+              value: formatExamDate(nextSession.starts_at, locale),
+              note: nextSession.registration_deadline
+                ? `${locale === 'de' ? 'Anmeldeschluss' : 'Register by'} ${formatExamDate(nextSession.registration_deadline, locale)}`
+                : undefined,
+            }
+          : { label: locale === 'de' ? 'Nächster Termin' : 'Next exam date', value: locale === 'de' ? 'Wird bekannt gegeben' : 'To be announced' },
+      ],
     };
   });
 
@@ -126,53 +125,36 @@ export default async function ExamsPage() {
         photo={pageConfig.photos.thumbC}
       />
 
-      <div id="b2" className="scroll-mt-28" />
-      <div id="c1" className="scroll-mt-28" />
+      {/*
+        BELOW THE HERO (2026-10-07): the two exams as fact cards, a learner's
+        story, the three steps, the partners. The photo cards and the separate
+        readiness checklist went. The checklist's five ticks were the cards'
+        facts (which exam, what it costs) and the steps' advice (the deadline,
+        time to prepare, a valid ID), so they are said there now, once.
 
-      <div id="exam-sessions" className="scroll-mt-28" />
-
-      {/* Section 1: Options Shortlist */}
-      <section className="py-16 md:py-20 bg-white">
+        The legacy anchors #b2 and #c1 sit on the cards themselves;
+        #exam-sessions, an older one, still lands on the section.
+      */}
+      <section id="exam-sessions" className="scroll-mt-28 bg-white py-16 md:py-20">
         <Container>
-          <GuidedPicker
-            eyebrow={locale === 'de' ? 'Prüfungsoptionen' : 'Exam options'}
-            title={locale === 'de' ? 'Unsere Prüfungen' : 'Our exams'}
-            description={
-              locale === 'de'
-                ? 'Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.'
-                : 'Choose an exam to see the requirements, what to expect and how to register.'
-            }
-            items={examItems}
-            locale={locale}
-          />
+          <div className="casa-editorial-measure">
+            <ExamOptionCards
+              eyebrow={locale === 'de' ? 'Prüfungsoptionen' : 'Exam options'}
+              title={locale === 'de' ? 'Unsere Prüfungen' : 'Our exams'}
+              description={
+                locale === 'de'
+                  ? 'Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.'
+                  : 'Choose an exam to see the requirements, what to expect and how to register.'
+              }
+              items={examOptions}
+              linkLabel={locale === 'de' ? 'Mehr zur Prüfung' : 'More about the exam'}
+            />
+          </div>
         </Container>
       </section>
 
-      {/* Section 2: Readiness Check */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
-        <Container>
-          <ExamsReadinessCheck
-            locale={locale}
-            title={locale === 'de' ? 'Bereit für die Prüfung?' : 'Ready for the exam?'}
-            description={
-              locale === 'de'
-                ? 'Mit dieser Liste prüfst du, ob du an alles gedacht hast.'
-                : 'Use this list to check that you have thought of everything.'
-            }
-            checklist={[
-              locale === 'de' ? 'Ich weiß, welche Prüfung ich brauche.' : 'I know which exam I need.',
-              locale === 'de' ? 'Ich kenne die Anmeldefrist.' : 'I know the registration deadline.',
-              locale === 'de' ? 'Ich habe Zeit für die Vorbereitung eingeplant.' : 'I have set aside time to prepare.',
-              locale === 'de' ? 'Ich kenne die Kosten für Prüfung und Vorbereitung.' : 'I know what the exam and the preparation cost.',
-              locale === 'de' ? 'Mein Ausweis ist gültig.' : 'My ID is valid.',
-            ]}
-          />
-        </Container>
-      </section>
-
-      {/* Section 3: Story */}
       {leadStory ? (
-        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
+        <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
           <Container>
             <HumanStoryBlock
               eyebrow={locale === 'de' ? 'Eine Teilnehmerin erzählt' : 'One learner’s story'}
@@ -200,10 +182,12 @@ export default async function ExamsPage() {
         </section>
       ) : null}
 
-      {/* Section 5: Steps */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
         <Container>
+          {/* Plain and without the panel's inset, so its heading lines up with „Unsere Prüfungen". */}
           <ProcessSteps
+            tone="plain"
+            className="px-0 md:px-0"
             eyebrow={locale === 'de' ? 'Ablauf' : 'How it works'}
             title={locale === 'de' ? 'So kommst du zur Prüfung' : 'Getting to exam day'}
             description={
@@ -215,25 +199,25 @@ export default async function ExamsPage() {
               {
                 step: '1',
                 title: locale === 'de' ? 'Anmeldung' : 'Registration',
-                description: locale === 'de' ? 'Such dir einen Prüfungstermin aus und gib im Formular deine Daten an.' : 'Choose an exam date and enter your details in the form.',
+                description: locale === 'de' ? 'Such dir einen Prüfungstermin aus und melde dich vor dem Anmeldeschluss über unser Formular an.' : 'Choose an exam date and register using our form before the registration deadline.',
               },
               {
                 step: '2',
                 title: locale === 'de' ? 'Vorbereitung' : 'Preparation',
-                description: locale === 'de' ? 'Bereite dich in einem unserer Vorbereitungskurse oder allein gezielt auf die Aufgaben vor.' : 'Prepare for the exam tasks in one of our preparation courses or on your own.',
+                description: locale === 'de' ? 'Plane genug Zeit ein und bereite dich in einem unserer Vorbereitungskurse oder allein auf die Aufgaben vor.' : 'Leave yourself enough time and prepare for the tasks in one of our preparation courses or on your own.',
               },
               {
                 step: '3',
                 title: locale === 'de' ? 'Prüfungstag' : 'Exam day',
-                description: locale === 'de' ? 'Komm rechtzeitig zu uns in die Schule und bring deinen Ausweis und deine Anmeldebestätigung mit.' : 'Come to the school in good time and bring your ID and your registration confirmation.',
+                description: locale === 'de' ? 'Komm rechtzeitig zu uns in die Schule und bring deinen gültigen Ausweis und deine Anmeldebestätigung mit.' : 'Come to the school in good time and bring a valid ID and your registration confirmation.',
               },
             ]}
+            cta={{ label: locale === 'de' ? 'Zur Prüfungsanmeldung' : 'Register for an exam', href: '/registration/exam' }}
           />
         </Container>
       </section>
 
-      {/* Section 6: Proof Band */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProofBand
             locale={locale}

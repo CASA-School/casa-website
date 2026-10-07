@@ -1,7 +1,7 @@
 export { CoursesFormatSelector } from './courses-format-selector';
 export { CourseLevelGoals } from './course-level-goals';
 export { AccommodationArrivalChecklist } from './accommodation-arrival-checklist';
-export { ExamsReadinessCheck } from './exams-readiness-check';
+export { ExamOptionCards, type ExamOption } from './exam-option-cards';
 export { ExamDayTimelineSignature } from './exam-day-timeline-signature';
 export { TeamDirectory } from './team-directory';
 export { FaqTopicNavigator } from './faq-topic-navigator';
