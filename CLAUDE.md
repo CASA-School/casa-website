@@ -198,6 +198,12 @@ legal texts (AGB, Datenschutz, Impressum); companies are written about in the th
 person. That is the split casa-bremen.de itself uses. The rule lives in
 `src/config/brand/voice-and-tone.ts`; do not convert copy back to Sie.
 
+**Cards have a text budget.** A card, a split box or a step holds the short version: about
+four lines of lead, points of one or two lines, and siblings of about the same length. The full
+text goes on the page that is about it (the exam's own page, the course page, the Leitbild),
+never dropped, since CASA wants everything casa-bremen.de says kept. When copy is restored or added,
+check every place that text renders, not only the page being edited (MEMORY.md pass 41).
+
 **Content composition.** Public pages compose through `src/config/public-page-config.ts`
 and repository-backed view models rather than hardcoded inline content. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
