@@ -191,6 +191,13 @@ inside the route handler.
 new base components. Icons come from `lucide-react` via `src/config/icon-map.ts`.
 Respect `prefers-reduced-motion` and existing `focus-visible` patterns.
 
+**German address: du for learners.** Since 2026-10-07 the German site says „du"
+(lowercase) to learners, at the CASA team's request, in casa-bremen.de's warm,
+complete-sentence voice. „Sie" stays for group organisers, host families and the
+legal texts (AGB, Datenschutz, Impressum); companies are written about in the third
+person. That is the split casa-bremen.de itself uses. The rule lives in
+`src/config/brand/voice-and-tone.ts`; do not convert copy back to Sie.
+
 **Content composition.** Public pages compose through `src/config/public-page-config.ts`
 and repository-backed view models rather than hardcoded inline content. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a

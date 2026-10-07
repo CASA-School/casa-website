@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Kursanmeldung' : 'Course registration',
-    description: locale === 'de' ? 'Melden Sie sich zu einem Deutschkurs bei CASA in Bremen an. Wählen Sie Ihren Kurs und teilen Sie uns Ihre Wünsche mit.' : 'Register for a German course at CASA in Bremen. Choose your course and tell us about your plans.',
+    description: locale === 'de' ? 'Melde dich zu einem Deutschkurs bei CASA in Bremen an. Wähle deinen Kurs und teile uns deine Wünsche mit.' : 'Register for a German course at CASA in Bremen. Choose your course and tell us about your plans.',
     path: '/registration/course',
   });
 }
@@ -36,12 +36,12 @@ export default async function CourseRegistrationPage({
       locale={locale}
       title={locale === 'de' ? 'Kursanmeldung' : 'Course registration'}
       intro={locale === 'de'
-        ? 'In drei Schritten zu Ihrem Kursplatz.'
+        ? 'In drei Schritten meldest du dich zu deinem Kurs an.'
         : 'Book your course in three steps.'}
       formId="course-registration-form"
       helpTitle={locale === 'de' ? 'Fragen zur Anmeldung?' : 'Questions about registering?'}
       helpBody={locale === 'de'
-        ? 'Wir helfen gern bei Kurs, Niveau und Termin.'
+        ? 'Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.'
         : 'We are glad to help you choose a course, a level and a date.'}
     >
       <CourseWizard catalog={registrationData} examCatalog={examCatalog} />

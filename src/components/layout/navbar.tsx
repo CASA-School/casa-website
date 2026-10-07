@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { HeaderSearchPopover } from '@/components/layout/header-search-popover';
 import { MobileNav } from '@/components/layout/mobile-nav';
-import { localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
+import { localizeNavDescription, localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import { localizeHref } from '@/i18n/pathnames';
@@ -565,7 +565,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                           </p>
                                           {subItem.description && (
                                             <p className="mt-0.5 text-xs text-[var(--casa-muted)]">
-                                              {localizeNavText(subItem.description, contentLocale)}
+                                              {localizeNavDescription(subItem.description, contentLocale)}
                                             </p>
                                           )}
                                         </div>

@@ -113,7 +113,7 @@ const TESTIMONIALS: TestimonialSource[] = [
       'I regularly visited evening German courses (A2 to B2) and also had my telc B2 exam at CASA. It was great! My teachers, among them Claudia, were all very nice, professional, and motivated.',
     context: {
       en: 'Evening courses A2 to B2, and the telc B2 exam',
-      de: 'Abendkurse A2 bis B2 und die telc B2 Prüfung',
+      de: 'Abendkurse A2 bis B2 und die telc-B2-Prüfung',
     },
     translation: {
       de: {

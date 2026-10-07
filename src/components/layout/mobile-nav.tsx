@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { iconMap } from '@/config/icon-map';
-import { localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
+import { localizeNavDescription, localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
 import { localizeHref } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
@@ -87,7 +87,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
         </SheetTitle>
         <SheetDescription className="sr-only">
           {contentLocale === 'de'
-            ? 'Öffnen Sie die wichtigsten Bereiche von CASA, wechseln Sie die Sprache oder gehen Sie direkt zur Anmeldung oder Kontaktaufnahme.'
+            ? 'Hier findest du die wichtigsten Bereiche von CASA. Du kannst die Sprache wechseln oder direkt zur Anmeldung und zum Kontakt gehen.'
             : 'Browse CASA sections, switch language, or jump directly to registration and admissions.'}
         </SheetDescription>
         <div className="flex h-full flex-col bg-white">
@@ -315,7 +315,7 @@ function MobileLink({ item, locale, isActive }: { item: NavItem; locale: Content
             {localizeNavText(item.label, locale)}
           </div>
           {item.description ? (
-            <div className="mt-0.5 text-xs text-[var(--casa-muted)]">{localizeNavText(item.description, locale)}</div>
+            <div className="mt-0.5 text-xs text-[var(--casa-muted)]">{localizeNavDescription(item.description, locale)}</div>
           ) : null}
         </div>
       </Link>

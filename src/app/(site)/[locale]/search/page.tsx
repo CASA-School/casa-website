@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ...createPublicMetadata({
       locale,
       title: locale === 'de' ? 'Suche' : 'Search',
-      description: locale === 'de' ? 'Finden Sie Deutschkurse, Prüfungen, Antworten und Neuigkeiten auf der CASA-Website.' : 'Find German courses, exams, answers and news on the CASA website.',
+      description: locale === 'de' ? 'Hier findest du Deutschkurse, Prüfungen, Antworten und Neuigkeiten auf der CASA-Website.' : 'Find German courses, exams, answers and news on the CASA website.',
       path: '/search',
       keywords: ['CASA search', 'courses exams faq news'],
     }),
@@ -139,7 +139,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           courses: 'Kurse',
           exams: 'Prüfungen',
           faq: 'FAQ',
-          news: 'News',
+          news: 'Aktuelles',
         }[scope]
       : {
           all: 'All content',
@@ -153,7 +153,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     courses: locale === 'de' ? 'Kurs' : 'Course',
     exams: locale === 'de' ? 'Prüfung' : 'Exam',
     faq: 'FAQ',
-    news: 'News',
+    news: locale === 'de' ? 'Aktuelles' : 'News',
   };
   const resultActionLabels: Record<PublicSearchResultType, string> = {
     courses: locale === 'de' ? 'Kurs ansehen' : 'View course',
@@ -166,10 +166,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <HeroEMinimal
         eyebrow={locale === 'de' ? 'Suche' : 'Search'}
-        title={locale === 'de' ? 'Ein Suchfeld für Kurse, Prüfungen, FAQ und News' : 'One search entry for courses, exams, FAQ, and news'}
+        title={locale === 'de' ? 'Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles' : 'One search entry for courses, exams, FAQ, and news'}
         description={
           locale === 'de'
-            ? 'Finden Sie Informationen schneller, ohne zwischen Seiten zu wechseln.'
+            ? 'So findest du schnell, was du suchst, ohne dich durch viele Seiten zu klicken.'
             : 'Find answers faster without jumping between pages.'
         }
         breadcrumbs={[
@@ -179,7 +179,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         cta={{ label: locale === 'de' ? 'Kontakt' : 'Contact', href: '/contact', kind: 'secondary' }}
         meta={[
           locale === 'de' ? 'Zentrale Suche' : 'Unified search',
-          locale === 'de' ? 'Kurse + Prüfungen + FAQ + News' : 'Courses + Exams + FAQ + News',
+          locale === 'de' ? 'Kurse + Prüfungen + FAQ + Aktuelles' : 'Courses + Exams + FAQ + News',
         ]}
       />
 
@@ -190,13 +190,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {shouldSearch ? (
             <p className="text-sm text-[var(--casa-muted)]">
               {locale === 'de'
-                ? `${totalResults} Treffer für "${q}" in "${scopeLabel}"`
+                ? `${totalResults} Treffer für „${q}“ in „${scopeLabel}“`
                 : `${totalResults} results for "${q}" in "${scopeLabel}"`}
             </p>
           ) : (
             <p className="text-sm text-[var(--casa-muted)]">
               {locale === 'de'
-                ? 'Geben Sie einen Suchbegriff ein, um Ergebnisse zu sehen.'
+                ? 'Gib einen Suchbegriff ein, dann siehst du hier die Ergebnisse.'
                 : 'Enter a search term to see results.'}
             </p>
           )}
@@ -206,7 +206,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               <h2 className="text-lg font-bold">{locale === 'de' ? 'Keine Treffer gefunden' : 'No matching results found'}</h2>
               <p className="mt-2 text-sm text-[var(--casa-muted)]">
                 {locale === 'de'
-                  ? 'Versuchen Sie ein breiteres Stichwort oder wechseln Sie den Suchbereich.'
+                  ? 'Versuch es mit einem allgemeineren Wort oder wähle einen anderen Suchbereich.'
                   : 'Try a broader keyword or switch the search scope.'}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -277,7 +277,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ) : null}
 
           {resultGroups.news.length > 0 ? (
-            <SearchResultGroup title="News" count={search.counts.news}>
+            <SearchResultGroup title={locale === 'de' ? 'Aktuelles' : 'News'} count={search.counts.news}>
               {resultGroups.news.map((result) => (
                 <SearchResultCard
                   key={result.id}

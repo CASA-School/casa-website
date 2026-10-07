@@ -65,7 +65,7 @@ const examCatalogWithoutDates = {
   defaultOptionId: '',
 } as unknown as RegistrationExamCatalog;
 
-const STEP_ALERT = 'Bitte prüfen Sie die markierten Angaben.';
+const STEP_ALERT = 'Bitte prüfe die markierten Angaben.';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -129,9 +129,9 @@ describe.each([
     expect(firstName.getAttribute('aria-invalid')).toBe('true');
     expect(firstName.getAttribute('aria-describedby')).toBe('firstName-error');
     expect(container.querySelector('#firstName-error')?.textContent).toBe(
-      'Bitte geben Sie Ihren Vornamen an (mindestens 2 Zeichen).'
+      'Bitte gib deinen Vornamen an (mindestens 2 Zeichen).'
     );
-    expect(container.querySelector('#salutation-error')?.textContent).toBe('Bitte wählen Sie eine Anrede aus.');
+    expect(container.querySelector('#salutation-error')?.textContent).toBe('Bitte wähle eine Anrede aus.');
     expect(container.textContent).not.toMatch(/is required|Please select/);
 
     // The salutation select has no form ref, so it is focused by its id.
@@ -217,7 +217,7 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     await act(async () => root.render(<CourseWizard catalog={catalog} />));
     const radios = [...container.querySelectorAll<HTMLInputElement>('input[name="course-0-type"]')];
     expect(radios.map((radio) => radio.value)).toEqual([TYPE_ID, INTENSIVE_ID]);
-    expect(container.textContent).toContain('Auf Anfrage: Deutsch für Pflege und Medizin.');
+    expect(container.textContent).toContain('Deutsch für Pflege und Medizin bieten wir auf Anfrage an.');
 
     await click(button('Noch einen Kurs hinzufügen'));
     expect(container.querySelectorAll('input[name="course-1-type"]')).toHaveLength(2);
@@ -228,7 +228,7 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     await act(async () => root.render(<CourseWizard catalog={{ ...catalog, defaultCourseTypeId: INTENSIVE_ID, defaultOptionId: INTENSIVE_OPTION_ID }} />));
     await click(button('Weiter'));
     expect(container.querySelector('h2')?.textContent).toBe('Kurs auswählen');
-    expect(container.querySelector('#course-0-level-error')?.textContent).toBe('Bitte wählen Sie ein Niveau aus.');
+    expect(container.querySelector('#course-0-level-error')?.textContent).toBe('Bitte wähle ein Niveau aus.');
     expect(document.activeElement).toBe(container.querySelector('#course-0-level'));
   });
 
@@ -257,7 +257,7 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     expect(groups[0].textContent).toContain('26. Oktober 2026');
     // Said once, over its dates: no summary card repeats it.
     expect(container.textContent?.split('Mo–Fr · 09:00–12:30')).toHaveLength(2);
-    expect(container.textContent).not.toContain('Ihre Auswahl');
+    expect(container.textContent).not.toMatch(/(Ihre|Deine) Auswahl/);
   });
 
   it('offers no learning path before a level is chosen', async () => {

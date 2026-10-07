@@ -208,7 +208,7 @@ export function coursePlan(input: {
 
 /** A plan row's dates, or that CASA plans them. */
 export function planRowDates(row: PlanRow, locale: ContentLocale) {
-  if (!row.start) return locale === 'de' ? 'Termin folgt – wir planen ihn mit Ihnen' : 'Date to follow – we plan it with you';
+  if (!row.start) return locale === 'de' ? 'Den Termin planen wir gemeinsam mit dir' : 'Date to follow – we plan it with you';
   return row.end ? termRange(row.start, row.end, locale) : formatDay(row.start, locale);
 }
 
@@ -241,7 +241,7 @@ function PlanSummary({ plan, locale }: { plan: CoursePlan; locale: ContentLocale
   return (
     <div className="rounded-xl bg-[var(--casa-canvas)] px-4 py-4 sm:px-5" aria-live="polite">
       <p className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
-        <span className="font-semibold text-[var(--casa-ink)]">{de ? 'Ihr Lernweg' : 'Your learning path'}</span>
+        <span className="font-semibold text-[var(--casa-ink)]">{de ? 'Dein Lernweg' : 'Your learning path'}</span>
         <span className="text-[var(--casa-muted)]">{[span, weeks].filter(Boolean).join(' · ')}</span>
       </p>
       <ol className="mt-3 space-y-2">
@@ -351,7 +351,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
               icon={courseIcons[type.slug] ?? GraduationCap}
               meaning="courses"
               title={type.name}
-              meta={type.lessons_per_week > 0 ? t(`${type.lessons_per_week} lessons a week`, `${type.lessons_per_week} Lektionen pro Woche`) : undefined}
+              meta={type.lessons_per_week > 0 ? t(`${type.lessons_per_week} lessons a week`, `${type.lessons_per_week} Unterrichtseinheiten pro Woche`) : undefined}
               onSelect={() => chooseType(type.id)}
             />
           ))}
@@ -361,9 +361,9 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
         ) : null}
         {unavailable.length > 0 ? (
           <p className={cn(formHintClassName, 'pt-1')}>
-            {t(`On request: ${joinNames(unavailable, locale)}.`, `Auf Anfrage: ${joinNames(unavailable, locale)}.`)}{' '}
+            {t(`On request: ${joinNames(unavailable, locale)}.`, `${joinNames(unavailable, locale)} bieten wir auf Anfrage an.`)}{' '}
             <Link href="/contact?topic=course-advice" className={linkClassName}>
-              {t('Ask us', 'Anfragen')}
+              {t('Ask us', 'Schreib uns')}
             </Link>
           </p>
         ) : null}
@@ -456,7 +456,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
           locale={locale}
           error={errors?.courseInstanceId?.message}
           errorId={`course-${index}-courseInstanceId-error`}
-          emptyText={t('No dates to book online right now.', 'Derzeit keine Termine zum Online-Buchen.')}
+          emptyText={t('No dates to book online right now.', 'Im Moment gibt es hier keine Termine, die du online buchen kannst.')}
         />
       ) : null}
 

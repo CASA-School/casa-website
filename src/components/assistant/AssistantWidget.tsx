@@ -121,31 +121,31 @@ const dictionary = {
   de: {
     title: 'CLARA',
     subtitle: 'Suche und nächste Schritte',
-    placeholder: 'Fragen Sie CLARA alles zu CASA...',
+    placeholder: 'Frag CLARA alles zu CASA …',
     send: 'Senden',
     quickActionsTitle: 'Schnellstart',
     quickActions: [
-      { label: 'Passender Kurs', prompt: 'Hilf mir, den besten CASA-Kurs für mein Niveau und meinen Wochenrhythmus zu finden.' },
-      { label: 'Prüfungsweg', prompt: 'Welcher Weg passt besser: telc B2 oder C1 Hochschule?' },
-      { label: 'Unterkunft', prompt: 'Ich brauche Orientierung zwischen WG und Gastfamilie.' },
-      { label: 'Kontaktweg', prompt: 'Ich brauche den richtigen CASA-Kontaktweg für mein Anliegen.' },
+      { label: 'Passender Kurs', prompt: 'Hilf mir, einen CASA-Kurs zu finden, der zu meinem Niveau und meinem Wochenrhythmus passt.' },
+      { label: 'Prüfungen', prompt: 'Was passt besser zu mir, telc B2 oder C1 Hochschule?' },
+      { label: 'Unterkunft', prompt: 'Was passt besser zu mir, eine WG oder eine Gastfamilie?' },
+      { label: 'Kontakt', prompt: 'Ich möchte CASA kontaktieren. Wie erreiche ich euch per Telefon oder E-Mail?' },
     ],
     greeting:
-      'Hallo, ich bin CLARA. Ich begleite Sie durch Kurse, Prüfungen, Unterkunft, Anmeldung und Supportwege bei CASA. Nennen Sie Ihr Ziel, dann liefere ich den schnellsten nächsten Schritt.',
+      'Hallo, ich bin CLARA. Ich helfe dir bei Fragen zu Kursen, Prüfungen, Unterkunft und Anmeldung bei CASA. Schreib mir, was du vorhast, dann zeige ich dir den nächsten Schritt.',
     localeLabel: 'Sprache',
     soon: 'Bald',
-    thinking: 'CLARA plant Ihren besten Weg...',
-    liveSuggestionsTitle: 'Live-Prompts',
+    thinking: 'CLARA sucht die passende Antwort …',
+    liveSuggestionsTitle: 'Vorschläge',
     processingStages: [
-      'Ich lese Ihr Ziel...',
-      'Ich gleiche CASA-Wege ab...',
-      'Ich baue den besten nächsten Schritt...',
+      'Ich lese deine Frage …',
+      'Ich suche die passenden Seiten …',
+      'Ich stelle dir den nächsten Schritt zusammen …',
     ],
     assistantLabel: 'CLARA',
-    userLabel: 'Sie',
+    userLabel: 'Du',
     closeLabel: 'Assistent schließen',
     planLabel: 'Nächste Schritte',
-    linksLabel: 'Nützliche Kurzwege',
+    linksLabel: 'Nützliche Links',
     resultsLabel: 'Angezeigt',
     detailsLabel: 'Details',
     optionSingular: 'Option',
@@ -193,32 +193,32 @@ function buildLiveSuggestions(locale: 'en' | 'de', input: string): QuickAction[]
     const actions: QuickAction[] = [];
     if (/(kurs|niveau|b1|b2|c1|a1|a2|abend|intensiv)/.test(normalized)) {
       actions.push(
-        { label: 'Passender Kurs', prompt: 'Ich suche den besten CASA-Kurs für mein Niveau und Zeitplan.' },
-        { label: 'Einstufung starten', prompt: 'Hilf mir bei der Einstufung und gib mir danach den besten Kursweg.' }
+        { label: 'Passender Kurs', prompt: 'Ich suche einen CASA-Kurs, der zu meinem Niveau und meinem Zeitplan passt.' },
+        { label: 'Einstufung', prompt: 'Hilf mir bei der Einstufung und zeig mir danach einen passenden Kurs.' }
       );
     }
     if (/(prüfung|prufung|telc|zertifikat)/.test(normalized)) {
       actions.push(
-        { label: 'Prüfungsweg', prompt: 'Führe mich zum besten Prüfungsweg inklusive nächstem Termin.' },
-        { label: 'Prüfung anmelden', prompt: 'Ich möchte eine Prüfung anmelden. Zeig mir den schnellsten Ablauf.' }
+        { label: 'Prüfungen', prompt: 'Welche Prüfung passt zu mir, und wann ist der nächste Termin?' },
+        { label: 'Prüfungsanmeldung', prompt: 'Ich möchte mich zu einer Prüfung anmelden. Wie geht das?' }
       );
     }
     if (/(unterkunft|wg|gastfamilie|wohnen)/.test(normalized)) {
       actions.push(
         { label: 'Unterkunft vergleichen', prompt: 'Vergleiche WG und Gastfamilie für mich und gib eine klare Empfehlung.' },
-        { label: 'Unterkunftsanfrage', prompt: 'Ich brauche den schnellsten Weg zur Unterkunftsanfrage.' }
+        { label: 'Unterkunftsanfrage', prompt: 'Wie frage ich eine Unterkunft an?' }
       );
     }
     if (/(portal|dashboard|konto|login)/.test(normalized)) {
       actions.push(
-        { label: 'Kontaktweg', prompt: 'Ich brauche Hilfe bei einem Login- oder Kontothema auf der öffentlichen CASA-Seite.' },
-        { label: 'Support kontaktieren', prompt: 'Zeig mir den schnellsten CASA-Kontaktweg für Supportfragen.' }
+        { label: 'Kontakt', prompt: 'Ich habe eine Frage zu einem Login oder Konto.' },
+        { label: 'Team kontaktieren', prompt: 'Ich möchte das CASA-Team kontaktieren. Wie erreiche ich euch per Telefon oder im Büro?' }
       );
     }
     if (/(visum|visa|botschaft|aufenthalt)/.test(normalized)) {
       actions.push({
-        label: 'Visa Orientierung',
-        prompt: 'Gib mir die wichtigsten CASA-Hinweise zum Sprachvisum und den sicheren nächsten Schritt.',
+        label: 'Visum',
+        prompt: 'Was muss ich beim Sprachvisum beachten?',
       });
     }
 
@@ -423,7 +423,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
     } catch {
       const fallbackText =
         displayLocale === 'de'
-          ? 'Ich bin gerade nicht ganz sicher. Der beste sichere Schritt ist der direkte Kontakt mit dem CASA-Team.'
+          ? 'Da bin ich mir gerade nicht sicher. Am besten wendest du dich direkt an unser Team.'
           : 'I am not fully sure right now. The safest next step is direct contact with the CASA team.';
 
       setMessages((current) => [
@@ -431,7 +431,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
         {
           ...makeMessage('assistant', fallbackText),
           cta: {
-            label: displayLocale === 'de' ? 'Kontakt öffnen' : 'Open contact',
+            label: displayLocale === 'de' ? 'Zum Kontaktformular' : 'Open contact',
             href: '/contact',
           },
         },

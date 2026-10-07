@@ -5,6 +5,8 @@ type ExamDayTimelineSignatureProps = {
   description: string;
   timeline: TimelineItem[];
   bringItems: string[];
+  /** Heading of the checklist. The page passes it per locale; it was English on every page. */
+  bringTitle?: string;
 };
 
 export function ExamDayTimelineSignature({
@@ -12,6 +14,7 @@ export function ExamDayTimelineSignature({
   description,
   timeline,
   bringItems,
+  bringTitle = 'What to bring',
 }: ExamDayTimelineSignatureProps) {
   return (
     <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7" data-testid="exam-timeline">
@@ -21,7 +24,7 @@ export function ExamDayTimelineSignature({
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
         <Timeline items={timeline} />
         <aside className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-4" data-testid="exam-what-to-bring">
-          <h3 className="text-base font-bold text-[var(--casa-ink)]">What to bring</h3>
+          <h3 className="text-base font-bold text-[var(--casa-ink)]">{bringTitle}</h3>
           <ul className="mt-2 space-y-2">
             {bringItems.map((item) => (
               <li key={item} className="text-base text-[var(--casa-ink)]">

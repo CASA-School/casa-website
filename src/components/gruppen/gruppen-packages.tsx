@@ -38,7 +38,7 @@ const copy = {
     eyebrow: 'Die Pakete',
     title: 'Vier Programme, benannt nach den Stadtmusikanten',
     description:
-      'Der Hahn ist die kürzeste Reise. Der Esel an der Basis ist das Paket, das Sie selbst zusammenstellen. Dazwischen geht es um die Dauer und darum, womit die Nachmittage gefüllt sind.',
+      'Der Hahn ist die kürzeste Reise. Den Esel ganz unten stellen Sie selbst zusammen. Die Pakete dazwischen unterscheiden sich in der Dauer und im Programm am Nachmittag.',
     week: 'Woche',
     weeks: 'Wochen',
     units: 'Unterrichtseinheiten',

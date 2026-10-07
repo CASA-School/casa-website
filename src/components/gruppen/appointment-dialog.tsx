@@ -37,7 +37,7 @@ const copy = {
     schedule: '30 Minuten · Montag–Donnerstag', zone: 'Alle Zeiten gelten für Bremen.',
     date: 'Tag auswählen', time: 'Uhrzeit auswählen', next: 'Weiter', back: 'Termin ändern',
     previousMonth: 'Vorheriger Monat', nextMonth: 'Nächster Monat', close: 'Schließen', loading: 'Termine werden geladen …',
-    unavailable: 'Die Terminauswahl ist gerade nicht verfügbar. Schreiben Sie uns – wir vereinbaren gerne einen Termin mit Ihnen.',
+    unavailable: 'Die Terminauswahl ist gerade nicht verfügbar. Schreiben Sie uns, dann vereinbaren wir gern einen Termin mit Ihnen.',
     contact: 'Anfrage senden', noTimes: 'An diesem Tag ist leider kein Termin mehr frei. Bitte wählen Sie einen anderen Tag.',
     choose: 'Wählen Sie einen Tag, um die freien Uhrzeiten zu sehen.', details: 'Wie kann Ina Sie erreichen?',
     first: 'Vorname', last: 'Nachname', email: 'E-Mail-Adresse', message: 'Worüber möchten Sie sprechen? (optional)',

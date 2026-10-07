@@ -82,7 +82,7 @@ describe('assistant runtime', () => {
       });
 
       expect(response.intent).toBe('visa');
-      expect(response.message).not.toMatch(/3 (months|Monate)|20 (lessons|Lektionen)/);
+      expect(response.message).not.toMatch(/3 (months|Monate)|20 (lessons|Lektionen|Unterrichtseinheiten|UE)/);
       expect(response.quickLinks?.some((link) => link.href === '/faq')).toBe(true);
     }
   });
@@ -214,7 +214,7 @@ describe('assistant course cards', () => {
       for (const card of cards) {
         const labels = card.meta.map((entry) => entry.label);
         expect(labels, card.id).not.toContain(locale === 'de' ? 'Preis' : 'Price');
-        expect(labels, card.id).not.toContain(locale === 'de' ? 'Lektionen/Woche' : 'Lessons/week');
+        expect(labels, card.id).not.toContain(locale === 'de' ? 'UE pro Woche' : 'Lessons/week');
       }
     }
   });

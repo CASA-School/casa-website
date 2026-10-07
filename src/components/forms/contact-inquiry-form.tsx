@@ -321,11 +321,11 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
         if (key && !nextErrors[key]) {
           nextErrors[key] = locale === 'de'
             ? ({
-                firstName: 'Bitte geben Sie Ihren Vornamen an (mindestens 2 Zeichen).',
-                email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
-                message: 'Bitte schreiben Sie eine kurze Nachricht (12–3000 Zeichen).',
-                topic: 'Bitte wählen Sie ein Thema aus.',
-              } as Partial<Record<keyof typeof initialFields, string>>)[key] ?? 'Bitte prüfen Sie diese Angabe.'
+                firstName: 'Bitte gib deinen Vornamen an (mindestens 2 Zeichen).',
+                email: 'Bitte gib eine gültige E-Mail-Adresse ein.',
+                message: 'Bitte schreib uns eine kurze Nachricht (12–3000 Zeichen).',
+                topic: 'Bitte wähle ein Thema aus.',
+              } as Partial<Record<keyof typeof initialFields, string>>)[key] ?? 'Bitte prüfe diese Angabe.'
             : issue.message;
         }
       }
@@ -414,7 +414,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               {confirmationSent ? <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
               {requestId ? (
                 <p className="mt-3 text-xs font-medium text-[var(--casa-muted)]">
-                  {locale === 'de' ? 'Ihre Referenz' : 'Your reference'}: <span className="break-all font-mono">{requestId}</span>
+                  {locale === 'de' ? 'Deine Referenz' : 'Your reference'}: <span className="break-all font-mono">{requestId}</span>
                 </p>
               ) : null}
             </div>
@@ -769,7 +769,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
           <div className="flex flex-col gap-5 border-t border-[color:var(--casa-sand)] pt-6 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-md text-xs leading-relaxed text-[var(--casa-muted)]">
-              {locale === 'de' ? '* Pflichtfelder. Wie wir Ihre Daten verarbeiten, erfahren Sie in unserer ' : '* Required fields. Read how we handle your information in our '}
+              {locale === 'de' ? '* Pflichtfelder. Wie wir deine Daten verarbeiten, erfährst du in unserer ' : '* Required fields. Read how we handle your information in our '}
               <Link href="/privacy" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">{locale === 'de' ? 'Datenschutzerklärung' : 'privacy policy'}</Link>.
             </p>
             <Button

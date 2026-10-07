@@ -54,15 +54,16 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
     locale === 'de'
       ? {
           eyebrow: 'Modulübersicht',
-          title: 'Welches Modul passt in Ihre Woche?',
-          lead: 'Spezialkurse ergänzen einen laufenden Kurs — oder stehen für sich, wenn Sie gezielt eine Fertigkeit vertiefen wollen.',
-          constants: 'Alle Module: ein Abend pro Woche, 90 Minuten, 12 Wochen, 192 €.',
+          title: 'Welches Modul passt in deine Woche?',
+          // The old casa-bremen.de introduction to its Spezialkurse, in du.
+          lead: 'Wir bieten regelmäßig Spezialkurse mit unterschiedlichen Lerninhalten an. Vielleicht ist dir in deinem Sprachkurs ein Thema schwergefallen, in dem du besser werden möchtest. Oder du möchtest gezielt etwas wiederholen, auffrischen oder vertiefen. Dafür sind unsere Spezialkurse da.',
+          constants: 'Jedes Modul läuft 12 Wochen lang an einem Abend pro Woche, jeweils 90 Minuten, und kostet 192 €.',
           filterLevel: 'Niveau',
           filterWeekday: 'Abend',
           all: 'Alle',
-          empty: 'Keine Module für diese Auswahl. Bitte Filter zurücksetzen.',
+          empty: 'Für diese Auswahl gibt es kein Modul. Setz die Filter zurück, dann siehst du wieder alle.',
           reset: 'Filter zurücksetzen',
-          termNote: `Termine für ${SPECIAL_COURSE_TERM_LABEL}. Alle Kurse 18:30–20:00 Uhr; Termine werden bei der Anmeldung bestätigt.`,
+          termNote: `Das sind die Termine für ${SPECIAL_COURSE_TERM_LABEL}. Alle Kurse finden von 18:30 bis 20:00 Uhr statt, und wir bestätigen dir die Termine bei der Anmeldung.`,
           countLabel: (n: number) => `${n} ${n === 1 ? 'Modul' : 'Module'}`,
           readMore: 'Mehr erfahren',
         }

@@ -29,8 +29,8 @@ export function ApplySection({ locale, position, acceptsUploads }: ApplySectionP
     locale === 'de'
       ? {
           title: 'Jetzt bewerben',
-          byEmail: 'Bitte senden Sie Ihre Bewerbung mit Lebenslauf und Motivationsschreiben per E-Mail an',
-          byContact: 'Bitte schreiben Sie uns über das Kontaktformular, wir melden uns mit den nächsten Schritten.',
+          byEmail: 'Bitte schick deine Bewerbung mit Lebenslauf und Motivationsschreiben per E-Mail an',
+          byContact: 'Bitte schreib uns über das Kontaktformular. Wir melden uns dann bei dir und besprechen die nächsten Schritte.',
           contactCta: 'Zum Kontaktformular',
           subject: 'Bewerbung',
         }

@@ -35,7 +35,8 @@ import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
  *
  * VERIFIED 2026-08-18 against casa-bremen.de/ueber-uns/casa-team. Job titles
  * updated 2026-10-01 to CASA's confirmed staff list (the go-live brief): the
- * former titles described responsibilities, which stay in `areas`.
+ * former titles described responsibilities, which stay in `areas`. `areas`
+ * re-checked against the live page on 2026-10-07.
  * Staff change. Re-check this list before launch and at each term.
  */
 
@@ -78,9 +79,16 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Director of Studies, evening courses', de: 'Studienleitung Abendkurse' },
     group: 'leadership',
   },
+  /*
+    The five course and office colleagues, in casa-bremen.de's order and with
+    its `areas`, re-checked against the live team page on 2026-10-07. These
+    areas had drifted one person along (Tanja carried Meike's, Natàlia Tanja's,
+    Mareike Natàlia's), and Alissa carried Mareike's medical courses. They now
+    agree with the live page and with config/content/contacts.ts.
+  */
   {
-    id: 'tanja-langenickel',
-    name: 'Tanja Langenickel',
+    id: 'meike-grosse-hundrup',
+    name: 'Meike Große Hundrup',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -89,13 +97,23 @@ const TEAM: TeamMemberSource[] = [
     },
   },
   {
+    id: 'tanja-langenickel',
+    name: 'Tanja Langenickel',
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
+    group: 'courses',
+    areas: {
+      en: 'Intensive courses, telc examinations',
+      de: 'Intensivkurse, telc Prüfungen',
+    },
+  },
+  {
     id: 'natalia-sostres',
     name: 'Natàlia Sostres',
     title: { en: 'Head of Office', de: 'Büroleitung' },
     group: 'office',
     areas: {
-      en: 'Intensive courses, telc examinations',
-      de: 'Intensivkurse, telc Prüfungen',
+      en: 'Intensive courses, CASA accommodation, agencies',
+      de: 'Intensivkurse, CASA Unterkunft, Agenturen',
     },
   },
   {
@@ -104,8 +122,8 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
-      en: 'Intensive courses, CASA accommodation, agencies',
-      de: 'Intensivkurse, CASA Unterkunft, Agenturen',
+      en: 'Intensive courses, medical and nursing courses, quality management',
+      de: 'Intensivkurse, Medizin- und Pflegekurse, Qualitätsmanagement',
     },
   },
   {
@@ -114,15 +132,9 @@ const TEAM: TeamMemberSource[] = [
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
-      en: 'Intensive courses, evening and special courses, medical and nursing courses, quality management',
-      de: 'Intensivkurse, Abendkurse, Spezialkurse, Medizin- und Pflegekurse, Qualitätsmanagement',
+      en: 'Intensive courses, evening and special courses, quality management',
+      de: 'Intensivkurse, Abendkurse, Spezialkurse, Qualitätsmanagement',
     },
-  },
-  {
-    id: 'meike-grosse-hundrup',
-    name: 'Meike Große Hundrup',
-    title: { en: 'Course administration', de: 'Kursverwaltung' },
-    group: 'courses',
   },
   {
     id: 'manuela-meerhoff',
@@ -207,6 +219,6 @@ export const teachingStaffStatement: Record<ContentLocale, { title: string; body
   },
   de: {
     title: 'Unsere Lehrkräfte',
-    body: 'Unsere Lehrkräfte sind Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen, und die meisten haben durch Auslandsaufenthalte selbst erfahren, was es heißt, eine Fremdsprache zu lernen. Wir wissen also, dass es nicht immer leicht ist — und tun unser Bestes, um es so leicht wie möglich zu machen.',
+    body: 'Unsere Lehrkräfte sind Muttersprachlerinnen und Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen, und die meisten haben durch Auslandsaufenthalte selbst erfahren, was es heißt, eine Fremdsprache zu lernen. Wir wissen also, dass es nicht immer leicht ist, und tun unser Bestes, um es dir so leicht wie möglich zu machen.',
   },
 };

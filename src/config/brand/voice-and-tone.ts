@@ -17,7 +17,7 @@ export const voicePrinciples = [
   },
   {
     title: 'Natural in each language',
-    description: 'Write German in the established Sie form and English in natural British English. Preserve meaning and verified facts, not sentence structure. Prefer Beratung and Gemeinschaft to Support and Community in German prose.',
+    description: 'Write German the way casa-bremen.de does: warm, plain, complete sentences, with "wir" speaking for CASA. Address learners with du (lowercase: du, dich, dir, dein); keep Sie for group organisers and teachers booking a class trip, host families, companies and the legal texts. Write English in natural British English. Preserve meaning and verified facts, not sentence structure. Prefer Beratung and Gemeinschaft to Support and Community in German prose.',
   },
   {
     title: 'Care without overpromising',

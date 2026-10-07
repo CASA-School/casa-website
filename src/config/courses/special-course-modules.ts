@@ -19,20 +19,22 @@ import type { ContentLocale } from '@/lib/content/types';
 /**
  * The per-module detail the dialog shows beyond the schedule.
  *
- * EVERY FIELD IS OPTIONAL AND EVERY ONE IS CURRENTLY UNSET — deliberately.
- * docs/GROUP_PRICING_AND_SPECIAL_COURSES.md Part 2 lists "say who each module is
- * for in one line" as the single most useful missing sentence, and it is still
- * missing: casa-bremen.de/sprachkurse/deutsch-spezialkurse publishes the
- * timetable and the price, not a description of each module. Nothing here may be
- * written from inference — a module's content is a claim about what CASA teaches
+ * `intro` carries each module's own description from the old
+ * casa-bremen.de/sprachkurse/deutsch-spezialkurse page (restored 2026-10-07),
+ * rewritten in the site's voice. Seven of the eight modules have one; the C1+
+ * conversation module is new and the old page never described it, so it keeps
+ * the dialog's general sentence. The German text is written; `en` stays unset
+ * until an English description is approved, and the dialog falls back to its
+ * general English sentence. Nothing here may be written from inference — a
+ * module's content is a claim about what CASA teaches
  * (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md).
  *
  * The dialog renders each section only when its field is present, so filling
  * these in is a data-only change with no component work.
  */
 export type SpecialCourseDetail = {
-  /** One or two sentences on what the module does. */
-  intro?: { en: string; de: string };
+  /** What the module does, in a few sentences. */
+  intro?: { en?: string; de: string };
   /** Who it suits — the sentence the doc asks for. */
   forWhom?: { en: string; de: string };
   /** What a participant practises, as short parallel phrases. */
@@ -53,7 +55,7 @@ export type SpecialCourseModule = {
   endDate: string;
   priceEur: number;
   skill: SkillKey;
-  /** Absent on every module today. See SpecialCourseDetail. */
+  /** See SpecialCourseDetail. */
   detail?: SpecialCourseDetail;
 };
 
@@ -78,6 +80,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-11-30',
     priceEur: 192,
     skill: 'speaking',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs verbesserst du gezielt deine deutsche Aussprache. Du übst Laute, Wortakzent, Satzmelodie und Intonation mit abwechslungsreichen Übungen und bekommst persönliches Feedback. So sprichst du im Alltag, im Beruf und in Prüfungen flüssiger, verständlicher und mit mehr Selbstvertrauen.',
+      },
+    },
   },
   {
     id: 'telc-c1-hochschule-training',
@@ -93,6 +100,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-11-30',
     priceEur: 192,
     skill: 'exam',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs trainierst du den schriftlichen und mündlichen Ausdruck mit authentischen Prüfungsaufgaben. So verbesserst du deine Ausdrucksfähigkeit auf akademischem Niveau und gehst sicherer in die Prüfung.',
+      },
+    },
   },
   {
     id: 'basisgrammatik',
@@ -105,6 +117,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-11-30',
     priceEur: 192,
     skill: 'grammar',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs wiederholen und festigen wir gemeinsam die wichtigsten Themen der Basisgrammatik. Er passt zu dir, wenn du auf A2-Niveau lernst, und auch dann, wenn du schon weiter bist und deine Grundlagen gezielt auffrischen möchtest.',
+      },
+    },
   },
   {
     id: 'grammatik-kompakt',
@@ -117,6 +134,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-12-03',
     priceEur: 192,
     skill: 'grammar',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs festigst du die wichtigsten Grammatikthemen der Niveaustufen B1 und B2, zum Beispiel Satzbau, Zeiten, Konjunktiv II, Passiv, Relativsätze und Präpositionen. Wir erklären sie verständlich und üben sie so, dass du sie gleich anwenden kannst. So schaffen wir gemeinsam die Grundlagen für sicheres und flüssiges Deutsch.',
+      },
+    },
   },
   {
     id: 'schreiben-basal',
@@ -129,6 +151,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-12-01',
     priceEur: 192,
     skill: 'writing',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs lernst du Schritt für Schritt die Grundlagen des Schreibens. Wir üben kurze E-Mails, Nachrichten, Beschreibungen und andere Alltagstexte. Dabei geht es um den Aufbau des Textes, die richtige Wortwahl, typische Redemittel und häufige Fehler in Grammatik und Rechtschreibung.',
+      },
+    },
   },
   {
     id: 'schreiben-b1-b2',
@@ -141,6 +168,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-12-03',
     priceEur: 192,
     skill: 'writing',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs trainierst du das Schreiben auf B-Niveau. Du lernst, E-Mails, Stellungnahmen, Berichte und andere Textsorten klar aufzubauen und sprachlich korrekt zu schreiben. Mit gezielten Übungen, persönlichem Feedback und praktischen Tipps verbesserst du Schritt für Schritt deinen Schreibstil und schreibst sicherer, im Alltag, im Beruf und in Prüfungen.',
+      },
+    },
   },
   {
     id: 'sprechwerkstatt-b1-b2',
@@ -156,6 +188,11 @@ export const specialCourseModules: SpecialCourseModule[] = [
     endDate: '2026-12-02',
     priceEur: 192,
     skill: 'speaking',
+    detail: {
+      intro: {
+        de: 'In diesem Kurs entwickelst du gezielt dein Sprechen weiter. Gemeinsam üben wir Präsentationen, Diskussionen, Debatten und Gespräche zu unterschiedlichen Anlässen. Dabei erweiterst du deinen Wortschatz, verbesserst deine Ausdrucksweise und sprichst im Alltag und im Beruf freier und sicherer.',
+      },
+    },
   },
   {
     id: 'fachliches-auftreten-c1',

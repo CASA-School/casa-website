@@ -119,10 +119,10 @@ export const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
     legendGroup: 'Angaben zur Gruppenanfrage',
     legendCompany: 'Angaben zum Firmenunterricht',
     intro:
-      'Alle Felder unten sind optional — senden Sie, was Sie bereits wissen, den Rest klären wir per E-Mail. Dies ist eine unverbindliche Anfrage, kein Angebot.',
+      'Alle Felder in diesem Bereich sind optional. Schick uns, was du schon weißt. Den Rest klären wir per E-Mail. Deine Anfrage ist unverbindlich und noch kein Angebot.',
     announcementGroup: 'Angaben zur Gruppenanfrage wurden ergänzt. Alle Felder sind optional.',
     announcementCompany: 'Angaben zum Firmenunterricht wurden ergänzt. Alle Felder sind optional.',
-    selectPlaceholder: 'Optional — falls bekannt',
+    selectPlaceholder: 'Optional, falls bekannt',
     labels: {
       organisationName: 'Organisation oder Unternehmen',
       groupSize: 'Anzahl der Teilnehmenden',
@@ -142,7 +142,7 @@ export const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
     },
     placeholders: {
       organisationName: 'Gymnasium Beispiel / Beispiel GmbH',
-      participantLevels: 'Gemischt A2-B1 oder noch nicht getestet',
+      participantLevels: 'Gemischt A2–B1 oder noch nicht getestet',
       preferredDates: 'Zweite Julihälfte',
     },
     options: {
@@ -162,8 +162,8 @@ export const organiserCopy: Record<ContentLocale, OrganiserCopy> = {
       },
       ageBand: {
         'under-14': 'Unter 14',
-        '14-17': '14-17',
-        '18-25': '18-25',
+        '14-17': '14–17',
+        '18-25': '18–25',
         '26-plus': '26 und älter',
         mixed: 'Gemischte Altersgruppen',
       },

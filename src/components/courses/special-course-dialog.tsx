@@ -41,14 +41,14 @@ const copy = {
     dates: 'Zeitraum',
     shape: 'Umfang',
     level: 'Einstiegsniveau',
-    practises: 'Das üben Sie',
+    practises: 'Das übst du',
     forWhom: 'Für wen',
     requirements: 'Vor der Anmeldung',
     shapeValue: (weeks: number, minutes: number) =>
       `${weeks} Wochen · ein Termin pro Woche, ${minutes} Minuten`,
     complements:
-      'Spezialkurse ergänzen einen laufenden Kurs — oder stehen für sich, wenn Sie gezielt eine Fertigkeit vertiefen wollen.',
-    termNote: (term: string) => `Termine für ${term}; werden bei der Anmeldung bestätigt.`,
+      'Ein Spezialkurs ergänzt deinen laufenden Kurs. Du kannst ihn auch einzeln belegen, wenn du gezielt an einer Fertigkeit arbeiten möchtest.',
+    termNote: (term: string) => `Das sind die Termine für ${term}. Wir bestätigen sie dir bei der Anmeldung.`,
   },
 } as const;
 
@@ -87,12 +87,12 @@ function formatPrice(value: number, locale: ContentLocale) {
  * `special-course-modules.ts` — nothing in this component states a fact of its
  * own.
  *
- * WHAT IT WILL SHOW is the descriptive copy: intro, who it is for, what you
- * practise, entry expectations. Each renders only when the matching field on
- * `module.detail` is present, and every field is currently unset — CASA
- * publishes the timetable and the price for these modules, not a description of
- * each one, and a module's content is a claim about what is taught. Filling
- * `detail` in is a data-only change; see the note on `SpecialCourseDetail`.
+ * AND THE DESCRIPTIVE COPY: intro, who it is for, what you practise, entry
+ * expectations. Each renders only when the matching field on `module.detail` is
+ * present. Today that is the German `intro` of seven modules, restored from the
+ * old casa-bremen.de Spezialkurse page; a module or a locale without one shows
+ * the general sentence instead. Filling `detail` in is a data-only change; see
+ * the note on `SpecialCourseDetail`.
  *
  * No photograph in the header, for the reason the Gruppen dialog gives: it cost
  * ~180px at the top of a panel that has to scroll, and there is no photograph

@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
     locale,
     title: locale === 'de' ? 'telc-Prüfungen in Bremen' : 'telc exams in Bremen',
     description: locale === 'de'
-      ? 'telc Deutsch B2 und telc Deutsch C1 Hochschule bei CASA in Bremen: Termine, Vorbereitungskurse und persönliche Beratung zur Anmeldung.'
+      ? 'Bei CASA in Bremen kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. Hier findest du Termine, Vorbereitungskurse und Hilfe bei der Anmeldung.'
       : 'Take telc Deutsch B2 or telc Deutsch C1 Hochschule at CASA in Bremen. Find exam dates, preparation courses and help with registration.',
     path: '/exams',
     keywords: ['CASA exams', 'telc Deutsch B2', 'telc Deutsch C1 Hochschule'],
@@ -68,10 +68,11 @@ export default async function ExamsPage() {
       title: item.examType.name,
       description:
         item.narrative?.summary ||
-        (locale === 'de' ? 'Anerkannte Prüfungsroute mit klaren Fristen.' : 'Recognized exam pathway with clear deadlines.'),
-      bestFor: item.examType.level || (locale === 'de' ? 'Geeignet für CEFR-Fortschritt' : 'Best for: CEFR progression'),
+        (locale === 'de' ? 'Eine anerkannte Prüfung mit festen Terminen und Anmeldefristen.' : 'Recognized exam pathway with clear deadlines.'),
+      bestFor: item.examType.level || (locale === 'de' ? 'Für deinen nächsten Schritt' : 'Best for: CEFR progression'),
       href: examDetailHref(item.examType.code, item.anchorId),
-      ctaLabel: locale === 'de' ? 'Zur Prüfungsanmeldung' : 'Reserve exam seat',
+      // The card opens the exam's own page, so the German label says so.
+      ctaLabel: locale === 'de' ? 'Mehr zur Prüfung' : 'Reserve exam seat',
       meta: examFeeSummary(item.examType.code, locale),
       deadlineIso: nextSession?.registration_deadline ?? null,
       media: {
@@ -114,10 +115,10 @@ export default async function ExamsPage() {
       */}
       <HeroAPhotoLed
         eyebrow={locale === 'de' ? 'Prüfungen' : 'Exams'}
-        title={locale === 'de' ? 'Ihre telc-Prüfung bei CASA' : 'Your telc exam at CASA'}
+        title={locale === 'de' ? 'Deine telc-Prüfung bei CASA' : 'Your telc exam at CASA'}
         description={
           locale === 'de'
-            ? 'Sie brauchen ein Deutschzertifikat für Ihren nächsten Schritt? Hier finden Sie Informationen zu telc Deutsch B2 und telc Deutsch C1 Hochschule, Vorbereitung und Terminen.'
+            ? 'Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten.'
             : 'Need a German certificate for your next step? Explore telc Deutsch B2 and telc Deutsch C1 Hochschule, with preparation courses and upcoming dates.'
         }
         breadcrumbs={breadcrumbs}
@@ -135,10 +136,10 @@ export default async function ExamsPage() {
         <Container>
           <GuidedPicker
             eyebrow={locale === 'de' ? 'Prüfungsoptionen' : 'Exam shortlist'}
-            title={locale === 'de' ? 'Primäre Prüfungsoptionen' : 'Primary exam options'}
+            title={locale === 'de' ? 'Unsere Prüfungen' : 'Primary exam options'}
             description={
               locale === 'de'
-                ? 'Wählen Sie eine Prüfung, um mehr über Voraussetzungen, Ablauf und Anmeldung zu erfahren.'
+                ? 'Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.'
                 : 'Choose an exam to see the requirements, what to expect and how to register.'
             }
             items={examItems}
@@ -151,18 +152,19 @@ export default async function ExamsPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ExamsReadinessCheck
-            title={locale === 'de' ? 'Prüfungsreife selbst prüfen' : 'Exam readiness self-check'}
+            locale={locale}
+            title={locale === 'de' ? 'Bereit für die Prüfung?' : 'Exam readiness self-check'}
             description={
               locale === 'de'
-                ? 'Interaktive Checkliste für Anmeldung, Vorbereitung und Dokumente.'
+                ? 'Mit dieser Liste prüfst du, ob du an alles gedacht hast.'
                 : 'Interactive checklist for registration, preparation, and required documents.'
             }
             checklist={[
-              locale === 'de' ? 'Prüfungstyp ist klar definiert' : 'I have selected the right exam type',
-              locale === 'de' ? 'Ich kenne die Anmeldefrist' : 'I have noted the registration deadline',
-              locale === 'de' ? 'Ich habe Zeit für die Vorbereitung eingeplant' : 'I have a preparation plan',
-              locale === 'de' ? 'Prüfungs- und Vorbereitungskosten sind geklärt' : 'I have checked exam and preparation fees',
-              locale === 'de' ? 'Ausweisdokument ist gültig' : 'My identification is valid',
+              locale === 'de' ? 'Ich weiß, welche Prüfung ich brauche.' : 'I have selected the right exam type',
+              locale === 'de' ? 'Ich kenne die Anmeldefrist.' : 'I have noted the registration deadline',
+              locale === 'de' ? 'Ich habe Zeit für die Vorbereitung eingeplant.' : 'I have a preparation plan',
+              locale === 'de' ? 'Ich kenne die Kosten für Prüfung und Vorbereitung.' : 'I have checked exam and preparation fees',
+              locale === 'de' ? 'Mein Ausweis ist gültig.' : 'My identification is valid',
             ]}
           />
         </Container>
@@ -173,7 +175,7 @@ export default async function ExamsPage() {
         <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-white">
           <Container>
             <HumanStoryBlock
-              eyebrow={locale === 'de' ? 'Kandidatenstimme' : 'Candidate story'}
+              eyebrow={locale === 'de' ? 'Eine Teilnehmerin erzählt' : 'Candidate story'}
               title={locale === 'de' ? 'Mit mehr Sicherheit in die Prüfung' : 'Exam confidence comes from calm preparation'}
               quote={leadStory.quote}
               person={leadStory.personDisplay}
@@ -184,11 +186,12 @@ export default async function ExamsPage() {
               }}
               supportingText={
                 locale === 'de'
-                  ? 'Kandidatinnen und Kandidaten profitieren von klaren Fristen, Struktur und persönlicher Begleitung.'
+                  ? 'Wer die Aufgaben kennt und genug Zeit zum Üben hat, geht ruhiger in die Prüfung.'
                   : 'Knowing the format and having time to practise can make exam day feel more manageable.'
               }
               cta={{
-                label: locale === 'de' ? 'Prüfungsdetails ansehen' : 'Explore exam details',
+                // The link opens the telc Deutsch B2 page, the exam Fatameh took.
+                label: locale === 'de' ? 'Mehr zu telc Deutsch B2' : 'Explore exam details',
                 href: '/exams/b2',
               }}
               mediaSide="right"
@@ -201,28 +204,28 @@ export default async function ExamsPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
-            eyebrow={locale === 'de' ? 'Vorbereitungsweg' : 'Preparation pathway'}
-            title={locale === 'de' ? 'Anmelden – Vorbereiten – Prüfung ablegen' : 'Register → Prepare → Sit exam'}
+            eyebrow={locale === 'de' ? 'Ablauf' : 'Preparation pathway'}
+            title={locale === 'de' ? 'So kommst du zur Prüfung' : 'Register → Prepare → Sit exam'}
             description={
               locale === 'de'
-                ? 'Von der Anmeldung bis zum Prüfungstag: So bereiten Sie sich vor.'
+                ? 'Von der Anmeldung bis zum Prüfungstag sind es drei Schritte.'
                 : 'From registration to exam day, these steps help you get ready.'
             }
             steps={[
               {
-                step: locale === 'de' ? '1' : '1',
-                title: locale === 'de' ? 'Registrierung' : 'Registration',
-                description: locale === 'de' ? 'Prüfungstermin auswählen und persönliche Daten angeben.' : 'Choose an exam date and enter your details.',
+                step: '1',
+                title: locale === 'de' ? 'Anmeldung' : 'Registration',
+                description: locale === 'de' ? 'Such dir einen Prüfungstermin aus und gib im Formular deine Daten an.' : 'Choose an exam date and enter your details.',
               },
               {
-                step: locale === 'de' ? '2' : '2',
+                step: '2',
                 title: locale === 'de' ? 'Vorbereitung' : 'Preparation',
-                description: locale === 'de' ? 'Lernplan mit Fokus auf Schwächen erstellen.' : 'Build a focused prep plan around weak areas.',
+                description: locale === 'de' ? 'Bereite dich in einem unserer Vorbereitungskurse oder allein gezielt auf die Aufgaben vor.' : 'Build a focused prep plan around weak areas.',
               },
               {
-                step: locale === 'de' ? '3' : '3',
+                step: '3',
                 title: locale === 'de' ? 'Prüfungstag' : 'Exam day',
-                description: locale === 'de' ? 'Dokumente bereit und frühzeitig vor Ort.' : 'Bring documents and arrive early.',
+                description: locale === 'de' ? 'Komm rechtzeitig zu uns in die Schule und bring deinen Ausweis und deine Anmeldebestätigung mit.' : 'Bring documents and arrive early.',
               },
             ]}
           />
@@ -237,7 +240,7 @@ export default async function ExamsPage() {
             title={locale === 'de' ? 'Vertrauen und Standards' : 'Trust and standards'}
             credibilityLine={
               locale === 'de'
-                ? 'Anerkannte Partner plus langjährige Erfahrung in Prüfungsbegleitung.'
+                ? 'Wir arbeiten mit anerkannten Partnern zusammen und haben langjährige Erfahrung mit Prüfungen.'
                 : 'Recognized partners plus long-standing exam support experience.'
             }
           />

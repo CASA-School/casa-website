@@ -2357,3 +2357,18 @@ checkbox are gone. The shared pickers live in `src/components/registration/choic
 The nationality list names countries in the page's language (`Intl.DisplayNames`: "Deutschland",
 "South Korea", never `country-list`'s "Korea (the Republic of)"), searches without accents, and
 sends the name shown; `countryCodeFromName` resolves German and English display names.
+
+## 39. German in „du", in casa-bremen.de's voice (2026-10-07)
+
+The team's first comment on the content: say „du", so CASA sounds friendlier, and write sentences
+the way casa-bremen.de does, complete and human rather than marketing fragments. Every German text
+for learners now says du (pages, forms, error messages, the learners' confirmation e-mails, CLARA);
+group organisers, host families and the legal texts keep Sie and companies stay in the third
+person, which is casa-bremen.de's own split (`src/config/brand/voice-and-tone.ts`, CLAUDE.md). The
+approved homepage and course-format texts changed address only. A page-by-page comparison with
+casa-bremen.de (a shared review page for the team) showed what the new pages had lost, and the
+durable facts came back: the WG details, the Leitbild's explanations, the team's real areas, the
+level descriptions on the placement page, each Spezialkurs module's own text, the C1 preparation
+course, the medical topics. Time-bound data (dates, prices) and dropped offers were left to the
+team. B1+ sits between B1 and B2 in a learning path as a whole term („B1+ · 8 Wochen"), taught
+with Kontext.

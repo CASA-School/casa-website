@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Arbeiten bei CASA' : 'Work with us',
-    description: locale === 'de' ? 'Werden Sie Teil unseres internationalen Teams in Bremen. Entdecken Sie offene Stellen bei CASA.' : 'Join our international team in Bremen. Explore current opportunities at CASA language school.',
+    description: locale === 'de' ? 'Werde Teil unseres internationalen Teams in Bremen. Hier findest du die offenen Stellen bei CASA.' : 'Join our international team in Bremen. Explore current opportunities at CASA language school.',
     path: '/careers',
     keywords: ['CASA careers', 'Language school jobs Bremen', 'DaF teacher jobs'],
   });
@@ -38,7 +38,7 @@ export default async function CareersPage() {
           eyebrow: 'Karriere',
           title: 'Arbeiten bei CASA in Bremen',
           description:
-            'Arbeiten Sie mit Menschen, denen guter Unterricht, persönliche Begegnung und eine offene Gemeinschaft am Herzen liegen.',
+            'Bei CASA arbeitest du mit Menschen, denen guter Unterricht, persönliche Begegnung und eine offene Gemeinschaft am Herzen liegen.',
           cta: 'Offene Stellen ansehen',
           openingLabel: 'Offene Stelle',
           team: 'Team',
@@ -49,13 +49,13 @@ export default async function CareersPage() {
           deadline: 'Bewerbungsfrist',
           requirements: 'Anforderungsprofil',
           apply: 'Details ansehen',
-          noOpeningsTitle: 'Aktuell keine offenen Positionen',
+          noOpeningsTitle: 'Zurzeit keine offenen Stellen',
           noOpeningsBody:
-            'Senden Sie uns gern eine Initiativbewerbung. Wir melden uns, sobald eine passende Rolle verfügbar ist.',
+            'Du kannst uns gern eine Initiativbewerbung schicken. Wir melden uns bei dir, sobald eine passende Stelle frei wird.',
           noOpeningsCta: 'Initiativbewerbung senden',
-          footerTitle: 'Sie möchten Teil der CASA Community werden?',
+          footerTitle: 'Möchtest du bei CASA mitarbeiten?',
           footerBody:
-            'Wir freuen uns auf Bewerbungen von Menschen, die Lernen, Vielfalt und Teamarbeit aktiv gestalten wollen.',
+            'Wir freuen uns über Bewerbungen von Menschen, die Lernen, Vielfalt und die Arbeit im Team mitgestalten möchten.',
           footerCta: 'Bewerbung senden',
         }
       : {
@@ -96,7 +96,7 @@ export default async function CareersPage() {
         description={copy.description}
         breadcrumbs={breadcrumbs}
         cta={{ label: copy.cta, href: '#open-roles', kind: 'primary' }}
-        meta={['CASA Bremen', locale === 'de' ? 'Internationale Community' : 'International community']}
+        meta={['CASA Bremen', locale === 'de' ? 'Internationale Gemeinschaft' : 'International community']}
       />
 
       <section id="open-roles" className="py-16 md:py-20">
@@ -146,7 +146,7 @@ export default async function CareersPage() {
                           <Users className="mt-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
                           <div>
                             <dt className="font-semibold text-[var(--casa-ink)]">{copy.team}</dt>
-                            <dd>{position.team || (locale === 'de' ? 'CASA Team' : 'CASA Team')}</dd>
+                            <dd>{position.team || (locale === 'de' ? 'CASA-Team' : 'CASA Team')}</dd>
                           </div>
                         </div>
                         <div className="inline-flex items-start gap-2">

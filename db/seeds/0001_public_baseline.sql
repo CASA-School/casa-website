@@ -221,8 +221,8 @@ German language school context preferred',
     'Bremen',
     'Teilzeit / Vollzeit',
     'Präsenz',
-    'Unterrichten Sie internationale Lernende in kleinen Gruppen mit kommunikativer Methodik.',
-    'Sie planen Unterricht, begleiten Lernfortschritte und arbeiten eng mit Koordination und Student Services zusammen.',
+    'Du unterrichtest internationale Lernende in kleinen Gruppen und arbeitest mit kommunikativen Methoden.',
+    'Du planst deinen Unterricht, begleitest die Fortschritte deiner Lernenden und arbeitest eng mit der Koordination und der Verwaltung zusammen.',
     'DaF/DaZ-Qualifikation oder vergleichbar
 Unterrichtserfahrung
 Sehr gute Kommunikationsfähigkeit',

@@ -28,9 +28,9 @@ export const placementNarrativesByLocale: Record<ContentLocale, PlacementNarrati
       'In die passende Kursgruppe einsteigen',
     ],
     prepChecklist: [
-      'Vorhandene Zertifikate mitbringen',
-      'Lernziele kurz beschreiben',
-      'Wunschzeitraum für den Kursstart angeben',
+      'Bring deine Zertifikate mit, wenn du schon welche hast.',
+      'Überleg dir kurz, was du mit deinem Deutsch erreichen möchtest.',
+      'Sag uns, wann du ungefähr mit dem Kurs beginnen möchtest.',
     ],
   },
 };

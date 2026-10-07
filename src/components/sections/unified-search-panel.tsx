@@ -36,7 +36,7 @@ const copy = {
     ],
   },
   de: {
-    title: 'Kurse, Prüfungen, FAQ und News an einem Ort durchsuchen',
+    title: 'Kurse, Prüfungen, FAQ und Aktuelles an einem Ort durchsuchen',
     placeholder: 'Nach Niveau, Prüfung, Visafrage oder Thema suchen…',
     submit: 'Suchen',
     inputLabel: 'Suchbegriff',
@@ -46,11 +46,11 @@ const copy = {
       courses: 'Kurse',
       exams: 'Prüfungen',
       faq: 'FAQ',
-      news: 'News',
+      news: 'Aktuelles',
     },
     quickLinks: [
       { label: 'Visum Intensiv', query: 'visum intensivkurs' },
-      { label: 'telc B2 Termine', query: 'telc b2 termine' },
+      { label: 'Termine für telc Deutsch B2', query: 'telc b2 termine' },
       { label: 'Gastfamilie', query: 'gastfamilie' },
     ],
   },

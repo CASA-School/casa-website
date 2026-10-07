@@ -50,7 +50,7 @@ export default async function NotFound() {
       ? {
           eyebrow: 'Fehler 404',
           title: 'Seite nicht gefunden',
-          body: 'Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommen Sie direkt weiter.',
+          body: 'Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommst du direkt weiter.',
           courses: 'Deutschkurse ansehen',
           placement: 'Einstufungstest machen',
           contact: 'Kontakt aufnehmen',

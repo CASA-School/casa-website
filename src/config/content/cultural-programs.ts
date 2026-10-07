@@ -45,7 +45,7 @@ export const culturalProgramsByLocale: Record<ContentLocale, CulturalProgramItem
       id: 'community-events',
       locale: 'de',
       title: 'Neue Menschen kennenlernen',
-      summary: 'Bei unseren Treffen kommen Teilnehmende aus verschiedenen Kursen zusammen. Hier können Sie Erfahrungen austauschen, Freundschaften schließen und sich nach und nach in Bremen zu Hause fühlen.',
+      summary: 'Bei unseren Treffen kommen Teilnehmende aus verschiedenen Kursen zusammen. Hier kannst du Erfahrungen austauschen, Freundschaften schließen und dich nach und nach in Bremen zu Hause fühlen.',
       cadence: 'Aktuelles Programm auf Anfrage',
     },
   ],

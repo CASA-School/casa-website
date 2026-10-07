@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     locale,
     title: locale === 'de' ? 'Über CASA' : 'About CASA',
     description: locale === 'de'
-      ? 'CASA ist eine gemeinnützige Sprachschule in Bremen. Lernen Sie unser Team, unser Leitbild und das internationale Miteinander kennen.'
+      ? 'CASA ist eine gemeinnützige Sprachschule in Bremen. Lerne unser Leitbild, unser Team und das internationale Miteinander bei uns kennen.'
       : 'Meet CASA, a non-profit language school in Bremen where people from around the world learn German, make connections and feel at home.',
     path: '/about',
     keywords: ['About CASA', 'CASA Bremen mission', 'Language school community'],
@@ -65,27 +65,27 @@ export default async function AboutPage() {
         eyebrow: 'CASA Leitbild',
         title: 'Miteinander reden – aufeinander zugehen',
         intro:
-          'Seit 1983 kommen bei CASA Menschen aus aller Welt zusammen. Gegründet von einer Gruppe junger Pädagoginnen und Pädagogen, ist unsere gemeinnützige Sprachschule bis heute ein Ort, an dem Lernen und Begegnung zusammengehören.',
+          'CASA heißt auf Deutsch „Haus“. Unsere gemeinnützige Sprachschule ist ein Ort der Begegnung, an dem Menschen unterschiedlichster Herkunft zusammenkommen und Raum finden, sich mit ihrem kulturellen Hintergrund in eine Gemeinschaft einzubringen. Gegründet wurde CASA 1983 von einer Gruppe junger Pädagoginnen und Pädagogen. Unseren Leitspruch versuchen wir jeden Tag zu leben, mit unseren Lernenden genauso wie mit unseren Kolleginnen und Kollegen und unseren Partnern.',
         qualityEyebrow: 'Qualität',
         qualityTitle: 'Unsere Qualitätsstandards',
-        qualityIntro: 'Fünf Zusagen, an denen wir unseren Unterricht messen lassen.',
+        qualityIntro: 'Seit unserer Gründung legen wir großen Wert auf hohe Qualität. Das zeigt sich vor allem in diesen fünf Punkten.',
         qualityBullets: [
-          'Kurse, die sich an den Bedürfnissen unserer Teilnehmenden orientieren',
-          'Hohe fachliche, pädagogische und soziale Kompetenz unserer Mitarbeitenden',
-          'Zeitgemäße räumliche und technische Ausstattung',
-          'Erwachsenengerechte Lehr- und Lernmaterialien',
-          'Regelmäßige Rückmeldungen und gemeinsame Weiterentwicklung unseres Unterrichts',
+          'Unser Kursangebot ist verlässlich und aktuell.',
+          'Unser Team bringt viel fachliches, pädagogisches und soziales Können mit.',
+          'Unsere Räume sind gut ausgestattet, auch technisch.',
+          'Wir arbeiten mit Lehr- und Lernmaterialien, die für Erwachsene geeignet sind.',
+          'Wir hinterfragen unser Angebot und unsere Arbeit regelmäßig und selbstkritisch.',
         ],
         aimsTitle: 'Unsere Ziele',
         aimsText:
-          'Wir möchten, dass Sie sich auf Deutsch ausdrücken, andere verstehen und Ihren Alltag selbstständig gestalten können. Ob Studium, Beruf oder ein neuer Lebensmittelpunkt: Wir besprechen mit Ihnen, welche sprachlichen Schritte zu Ihren Plänen passen.',
+          'Wir haben uns auf Deutsch als Fremdsprache spezialisiert und unterrichten mit Professionalität und Leidenschaft. Gute Sprachkenntnisse sind ein Schlüssel, um in Deutschland anzukommen, im Beruf Fuß zu fassen oder an einer deutschen Universität zu studieren. Deshalb legen wir im Unterricht den Schwerpunkt darauf, die Sprache direkt im Gespräch anzuwenden. Wir möchten, dass du dich anderen gut mitteilen, deine Mitmenschen besser verstehen und deinen Alltag selbstständig gestalten kannst. Welche Schritte zu deinen Plänen passen, besprechen wir gern mit dir.',
         approachEyebrow: 'Mehr als Unterricht',
         approachTitle: 'Lernen durch Begegnung',
         approachText:
-          'Deutsch wird lebendig, wenn Menschen miteinander sprechen. Deshalb schaffen wir auch außerhalb des Unterrichts Gelegenheiten, sich kennenzulernen, Erfahrungen zu teilen und Freundschaften zu schließen.',
+          'Wir verstehen uns als Brückenbauer zwischen Menschen. Lernen ist für uns eine der schönsten Erfahrungen, und dafür braucht es ein angenehmes und anregendes Umfeld. Deshalb setzen wir auf Begegnungspädagogik. In deiner Lerngruppe soll eine gute Lernatmosphäre herrschen. Ihr erarbeitet euch neue Inhalte gemeinsam, indem ihr zusammen Aufgaben löst, und entwickelt euch im Austausch miteinander sprachlich und persönlich weiter. Dafür schaffen wir im Unterricht und darüber hinaus Raum für Begegnung und Austausch.',
         encounterBullets: [
-          'Unterbringung in deutschen Gastfamilien',
-          'Organisation von Tandempartnerschaften',
+          'Wohnen bei Gastfamilien in Bremen',
+          'Tandempartnerschaften mit Deutschsprachigen',
           'Kulturprogramm in Bremen und Ausflüge in die Region',
           'Partnerübungen und Austausch im Unterricht',
         ],
@@ -125,19 +125,19 @@ export default async function AboutPage() {
         eyebrow: 'Sprachtandem',
         title: 'Zwei Sprachen, ein gemeinsames Gespräch',
         intro:
-          'Im Sprachtandem lernen zwei Menschen voneinander: Sie üben Deutsch und unterstützen Ihr Gegenüber beim Lernen Ihrer Sprache. Dabei geht es auch um das Kennenlernen und den Austausch im Alltag.',
+          'Im Sprachtandem lernen zwei Menschen voneinander. Du übst Deutsch und hilfst deinem Gegenüber beim Lernen deiner Sprache, und dabei lernt ihr euch kennen. Wir suchen auch deutschsprachige Tandempartnerinnen und -partner. Wenn du Deutsch sprichst und eine andere Sprache üben möchtest, melde dich gern.',
         stepsTitle: 'So funktioniert es',
         steps: [
-          'Sagen Sie uns, welche Sprache Sie sprechen und welche Sie üben möchten.',
-          'Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner.',
-          'Sobald sich jemand Passendes findet, helfen wir Ihnen, miteinander in Kontakt zu kommen.',
+          'Schreib uns, welche Sprache du sprichst und welche du lernen oder verbessern möchtest.',
+          'Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner für dich.',
+          'Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule. Wenn ihr euch weiter treffen möchtet, tauscht ihr eure Kontaktdaten aus. Gern könnt ihr euch auch weiterhin bei uns treffen.',
         ],
-        benefitsTitle: 'Warum es wirkt',
+        benefitsTitle: 'Was dir ein Tandem bringt',
         benefits: [
-          'Mehr Sprechpraxis im Alltag',
-          'Mehr Sicherheit in realen Situationen',
-          'Kultureller Austausch mit Menschen vor Ort',
-          'Verbindung von Unterricht und echter Kommunikation',
+          'Du frischst deine Sprachkenntnisse auf und verbesserst sie.',
+          'Du sprichst mehr und wirst im Alltag sicherer.',
+          'Du lernst neue Menschen und ihre Kultur kennen.',
+          'Was du im Unterricht lernst, wendest du im echten Gespräch an.',
         ],
         primaryCta: 'Tandem anfragen',
       }
@@ -175,7 +175,7 @@ export default async function AboutPage() {
         title={locale === 'de' ? 'Ein Ort zum Lernen und Ankommen' : 'A school where you belong'}
         description={
           locale === 'de'
-            ? 'Bei CASA begegnen sich Menschen aus aller Welt. Wir sind stolz auf diese Vielfalt und auf ein familiäres Miteinander, in dem Sie mit Ihren Fragen und Plänen willkommen sind.'
+            ? 'Bei CASA begegnen sich Menschen aus aller Welt. Wir sind stolz auf diese Vielfalt und auf ein familiäres Miteinander, in dem du mit deinen Fragen und Plänen willkommen bist.'
             : 'People from around the world make CASA what it is. We are proud of that diversity and of the close, welcoming community we build together.'
         }
         photo={pageConfig.photos.hero}
@@ -335,7 +335,7 @@ export default async function AboutPage() {
           </div>
 
           <div className="mt-10 text-center">
-            <TextCta href="/contact">{tandemGuide.primaryCta}</TextCta>
+            <TextCta href="/contact?topic=tandem">{tandemGuide.primaryCta}</TextCta>
           </div>
         </Container>
       </section>

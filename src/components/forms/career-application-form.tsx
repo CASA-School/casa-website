@@ -41,7 +41,7 @@ export function CareerApplicationForm({
             lastName: 'Nachname',
             email: 'E-Mail',
             phone: 'Telefon (optional)',
-            linkedin: 'LinkedIn URL (optional)',
+            linkedin: 'LinkedIn-URL (optional)',
             cv: 'Lebenslauf',
             cvHint: 'PDF, DOC oder DOCX, max. 8 MB',
             letter: 'Motivation',
@@ -50,8 +50,8 @@ export function CareerApplicationForm({
             success: 'Bewerbung eingegangen',
             error: 'Bewerbung konnte nicht gesendet werden',
             requestId: 'Vorgangsnummer',
-            cvRequired: 'Bitte laden Sie einen Lebenslauf hoch.',
-            cvInvalid: 'Nur PDF, DOC oder DOCX bis max. 8 MB sind erlaubt.',
+            cvRequired: 'Bitte lade deinen Lebenslauf hoch.',
+            cvInvalid: 'Bitte lade deinen Lebenslauf als PDF, DOC oder DOCX mit höchstens 8 MB hoch.',
           }
         : {
             title: 'Apply for this role',

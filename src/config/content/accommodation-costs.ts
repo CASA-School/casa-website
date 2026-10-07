@@ -19,7 +19,7 @@ export const accommodationCosts: AccommodationCost[] = [
     amount: ACCOMMODATION_FEES.base4Weeks,
     note: {
       en: 'Your room for the first four weeks.',
-      de: 'Ihr Zimmer für die ersten vier Wochen.',
+      de: 'Dein Zimmer für die ersten vier Wochen.',
     },
   },
   {
@@ -27,7 +27,7 @@ export const accommodationCosts: AccommodationCost[] = [
     amount: ACCOMMODATION_FEES.perAdditionalWeek,
     note: {
       en: 'If you stay longer than four weeks.',
-      de: 'Wenn Sie länger als vier Wochen bleiben.',
+      de: 'Wenn du länger als vier Wochen bleibst.',
     },
   },
   {
@@ -35,7 +35,7 @@ export const accommodationCosts: AccommodationCost[] = [
     amount: ACCOMMODATION_FEES.commissionFee,
     note: {
       en: 'For arranging your accommodation.',
-      de: 'Für die Vermittlung Ihrer Unterkunft.',
+      de: 'Für die Vermittlung deiner Unterkunft.',
     },
   },
   {
@@ -44,7 +44,7 @@ export const accommodationCosts: AccommodationCost[] = [
     refundable: true,
     note: {
       en: 'Returned after departure, provided the accommodation and keys are handed back in the condition in which you received them.',
-      de: 'Nach der Abreise erhalten Sie die Kaution zurück, sofern Unterkunft und Schlüssel im gleichen Zustand wie bei der Übernahme sind.',
+      de: 'Nach deiner Abreise bekommst du die Kaution zurück, wenn Unterkunft und Schlüssel im gleichen Zustand sind wie bei der Übernahme.',
     },
   },
 ];
@@ -78,6 +78,6 @@ export function accommodationPriceSummary(locale: ContentLocale) {
 export function accommodationHolidayNote(locale: ContentLocale) {
   const amount = eur(ACCOMMODATION_FEES.perAdditionalWeek, locale);
   return locale === 'de'
-    ? `Aufenthalt über Weihnachten oder Ostern: Während der Schließzeiten fällt eine zusätzliche Unterkunftsgebühr von ${amount} pro Woche an.`
+    ? `Wenn du über Weihnachten oder Ostern bleibst, zahlst du für die Wochen, in denen die Schule geschlossen ist, eine zusätzliche Unterkunftsgebühr von ${amount} pro Woche.`
     : `Staying over Christmas or Easter? An additional accommodation charge of ${amount} per week applies during the school closure.`;
 }

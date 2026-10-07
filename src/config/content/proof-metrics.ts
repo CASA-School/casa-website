@@ -51,7 +51,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
     },
     {
       value: '30.000+',
-      label: 'Begleitete Lernende über die Jahre',
+      label: 'Lernende, die wir begleitet haben',
       locale: 'de',
       sourceUrl: 'internal-dashboard-aggregate:2026-06-17',
       sourceType: 'internal',
@@ -60,7 +60,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
     },
     {
       value: '150+ Herkunftsländer',
-      label: 'Vertretene Nationen in den CASA-Kursen',
+      label: 'Menschen aus aller Welt in unseren Kursen',
       locale: 'de',
       sourceUrl: 'internal-dashboard-aggregate:2026-06-17',
       sourceType: 'internal',

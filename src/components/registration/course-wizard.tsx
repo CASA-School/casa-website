@@ -236,7 +236,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
       const result = (await response.json().catch(() => null)) as CourseRegistrationApiResult | null;
       if (!response.ok || result?.status !== 'accepted') {
-        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'));
+        throw new Error(result?.message || t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.'));
       }
 
       setConfirmationSent(result?.confirmationSent === true);
@@ -252,7 +252,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
       const message =
         error instanceof Error && !(error instanceof TypeError)
           ? error.message
-          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
+          : t('Registration failed. Please try again.', 'Die Anmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.');
       setSubmissionError(message);
       trackCasaEvent('form_error', {
         form: 'course_registration',
@@ -699,7 +699,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
               <p className={cn(formHintClassName, 'flex gap-2.5')}>
                 <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-                {t('We confirm your place by email once we have checked your registration.', 'Wir bestätigen Ihren Platz per E-Mail, sobald wir Ihre Anmeldung geprüft haben.')}
+                {t('We confirm your place by email once we have checked your registration.', 'Wir bestätigen dir deinen Platz per E-Mail, sobald wir deine Anmeldung geprüft haben.')}
               </p>
 
               <div className={cn(formTileClassName, 'space-y-4 bg-white')}>
@@ -732,7 +732,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                         }
                       />
                       <Label htmlFor="exam-policy-accepted" className="block cursor-pointer text-sm font-medium leading-relaxed text-[var(--casa-ink)]">
-                        {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich verstehe, dass die Prüfungsbestätigung von Dokumenten- und Zahlungsprüfung abhängt.')}
+                        {t('I understand exam seat confirmation depends on document and payment validation.', 'Ich weiß, dass mein Prüfungsplatz erst bestätigt wird, wenn meine Dokumente und meine Zahlung geprüft sind.')}
                         <RequiredMark />
                       </Label>
                     </div>
@@ -788,7 +788,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
         {showStepAlert && (
           // Keyed by attempt, so a repeated failed Weiter is announced again.
           <div key={stepFailures} className={formAlertClassName} role="alert" aria-live="assertive">
-            <p>{t('Please check the highlighted fields.', 'Bitte prüfen Sie die markierten Angaben.')}</p>
+            <p>{t('Please check the highlighted fields.', 'Bitte prüfe die markierten Angaben.')}</p>
           </div>
         )}
 
@@ -796,7 +796,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
           <div className={formAlertClassName} role="alert" aria-live="assertive">
             <p>{submissionError}</p>
             <p className="mt-1">
-              {t('Reach us directly:', 'So erreichen Sie uns direkt:')}{' '}
+              {t('Reach us directly:', 'So erreichst du uns direkt:')}{' '}
               <a href={footerConfig.contact.emails[0].href} className="font-semibold underline underline-offset-4">
                 {footerConfig.contact.emails[0].label}
               </a>
@@ -875,11 +875,11 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
             </div>
 
             <h2 id="modal-title" className="text-2xl font-bold tracking-tight text-[var(--casa-ink)] mt-5">
-              {catalog.locale === 'de' ? 'Registrierung erfolgreich' : 'Registration successful'}
+              {catalog.locale === 'de' ? 'Danke für deine Anmeldung' : 'Registration successful'}
             </h2>
             <p className="max-w-md text-sm text-[var(--casa-muted)] mt-2">
               {catalog.locale === 'de'
-                ? 'Ihre Kursanmeldung wird nun geprüft. Das CASA-Team meldet sich zeitnah per E-Mail bei Ihnen.'
+                ? 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.'
                 : 'Your enrollment request is now in review. CASA admissions will contact you by email with availability and next steps.'}
             </p>
             {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
@@ -890,9 +890,9 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
                 steps={
                   catalog.locale === 'de'
                     ? [
-                        { title: 'Anmeldeprüfung', description: 'Wir prüfen Daten, Verfügbarkeit und Kursfit.' },
-                        { title: 'Bestätigung', description: 'Sie erhalten Rückmeldung mit Zahlungs- und Startdetails.' },
-                        { title: 'Nächste Schritte', description: 'Wir senden Ihnen per E-Mail die benötigten Unterlagen und Fristen.' },
+                        { title: 'Wir prüfen deine Anmeldung', description: 'Wir sehen uns deine Angaben an und prüfen, ob noch ein Platz frei ist und der Kurs zu dir passt.' },
+                        { title: 'Du bekommst eine Rückmeldung', description: 'Darin stehen die Details zur Zahlung und zum Kursstart.' },
+                        { title: 'Wir schicken dir alles Weitere', description: 'Per E-Mail bekommst du die Unterlagen und Fristen, die du brauchst.' },
                       ]
                     : [
                         { title: 'Admissions review', description: 'We validate profile, availability, and course fit.' },

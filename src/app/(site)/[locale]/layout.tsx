@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       title: 'CASA Bremen',
       description:
         locale === 'de'
-          ? 'CASA Internationale Sprachschule in Bremen. Deutschkurse, telc Prüfungen, Unterkunft und Begleitung für internationale Lernende.'
+          ? 'CASA ist eine gemeinnützige Sprachschule in Bremen. Wir bieten Deutschkurse und telc-Prüfungen an, vermitteln Unterkünfte und begleiten internationale Lernende.'
           : 'CASA Internationale Sprachschule in Bremen. Courses, exams, accommodation, and learner support for international students.',
       path: '/',
       locale,

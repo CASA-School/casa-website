@@ -6,9 +6,10 @@ type ExamsReadinessCheckProps = {
   title: string;
   description: string;
   checklist: string[];
+  locale?: 'de' | 'en';
 };
 
-export function ExamsReadinessCheck({ title, description, checklist }: ExamsReadinessCheckProps) {
+export function ExamsReadinessCheck({ title, description, checklist, locale = 'en' }: ExamsReadinessCheckProps) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   const completed = useMemo(
@@ -30,7 +31,7 @@ export function ExamsReadinessCheck({ title, description, checklist }: ExamsRead
           aria-hidden
         />
       </div>
-      <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{progress}% ready</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--casa-muted)]">{locale === 'de' ? `${progress} % erledigt` : `${progress}% ready`}</p>
 
       <ul className="mt-4 space-y-2">
         {checklist.map((item) => (

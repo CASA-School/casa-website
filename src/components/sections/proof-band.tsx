@@ -27,7 +27,7 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
   // Default to standard homepage copy if not explicitly overridden
   const defaultTitle = locale === 'de' ? 'Qualität und Partnerschaften' : 'Quality and partnerships';
   const defaultCredibilityLine = locale === 'de'
-    ? 'Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für Sie.'
+    ? 'Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.'
     : 'Our experience and partnerships support the work we do for our students.';
 
   const displayTitle = title ?? defaultTitle;

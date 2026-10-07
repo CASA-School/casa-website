@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Deutschkurse in Bremen' : 'German courses in Bremen',
-    description: locale === 'de' ? 'Intensivkurse, Abendkurse und weitere Deutschkurse bei CASA. Finden Sie das passende Angebot für Ihren Alltag und Ihre Ziele.' : 'Explore intensive, evening and specialist German courses at CASA. Find a course that fits your everyday life and your goals.',
+    description: locale === 'de' ? 'Bei CASA gibt es Intensivkurse, Abendkurse und weitere Deutschkurse. Hier findest du den Kurs, der zu deinem Alltag und deinen Zielen passt.' : 'Explore intensive, evening and specialist German courses at CASA. Find a course that fits your everyday life and your goals.',
     path: '/courses',
     keywords: ['CASA courses', 'German course Bremen', 'Course formats A1 C1'],
   });
@@ -125,7 +125,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
   const baseIntensity =
     course.lessons_per_week > 0
       ? locale === 'de'
-        ? `${course.lessons_per_week} Lektionen/Woche`
+        ? `${course.lessons_per_week} Unterrichtseinheiten pro Woche`
         : `${course.lessons_per_week} lessons/week`
       : locale === 'de'
         ? 'Nach Absprache'
@@ -136,13 +136,13 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
     return {
       bestFor:
         locale === 'de'
-          ? 'Lernende mit schnellem Fortschrittsziel für Studium, Beruf oder Visumsplanung.'
+          ? 'Alle, die für Studium, Beruf oder Visum schnell vorankommen möchten.'
           : 'Learners who need rapid progress for studies, career, or visa planning.',
       schedule:
         locale === 'de'
-          ? 'Monatliche Starts, abwechselnd am Vormittag und am Nachmittag'
+          ? 'Neue Kurse jeden Monat, abwechselnd am Vormittag und am Nachmittag'
           : 'Monthly starts, alternating morning and afternoon cohorts',
-      intensity: locale === 'de' ? '20 Lektionen/Woche (45 Min. pro Lektion)' : '20 lessons/week (45 minutes each)',
+      intensity: locale === 'de' ? '20 Unterrichtseinheiten à 45 Minuten pro Woche' : '20 lessons/week (45 minutes each)',
       outcomes: baseOutcomes,
       facts: registryFacts,
     };
@@ -156,9 +156,9 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
           : 'Working professionals and trainees who need structured progress after work.',
       schedule:
         locale === 'de'
-          ? 'Ganzjährig, in der Regel 2 Abende/Woche (Mo/Mi oder Di/Do), 18:30 bis 20:00 Uhr'
+          ? 'Das ganze Jahr über, meist zweimal pro Woche (Mo/Mi oder Di/Do) von 18:30 bis 20:00 Uhr'
           : 'Year-round, usually 2 evenings/week (Mon/Wed or Tue/Thu), 18:30 to 20:00',
-      intensity: locale === 'de' ? 'Halbes Niveau in ca. 3,5 Monaten' : 'Half-level progression in about 3.5 months',
+      intensity: locale === 'de' ? 'Ein halbes Niveau in etwa 3,5 Monaten' : 'Half-level progression in about 3.5 months',
       outcomes: baseOutcomes,
       facts: registryFacts,
     };
@@ -168,7 +168,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
     return {
       bestFor:
         locale === 'de'
-          ? 'Ärztinnen, Ärzte und medizinische Fachkräfte mit Ziel klinischer Sprachsicherheit.'
+          ? 'Ärztinnen, Ärzte und medizinische Fachkräfte, die im Klinikalltag sicher Deutsch sprechen möchten.'
           : 'Doctors and healthcare professionals preparing for clinical communication.',
       /*
        * NOT the Friday dates that used to be here.
@@ -196,7 +196,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
         locale === 'de'
           ? 'Berufstätige, die Bildungszeit oder AZAV-bezogene Deutschförderung planen.'
           : 'Employees planning educational leave or AZAV-related German training.',
-      schedule: locale === 'de' ? 'Kompakte Tagesblöcke nach bestätigter Planung' : 'Compact daytime blocks after confirmed planning',
+      schedule: locale === 'de' ? 'Kompakte Tagesblöcke nach Absprache' : 'Compact daytime blocks after confirmed planning',
       intensity: baseIntensity,
       outcomes: baseOutcomes,
       facts: registryFacts,
@@ -207,9 +207,9 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
     return {
       bestFor:
         locale === 'de'
-          ? 'Unternehmen, die Team-Kommunikation auf Deutsch im Arbeitsalltag verbessern wollen.'
+          ? 'Unternehmen, deren Teams im Arbeitsalltag besser auf Deutsch kommunizieren sollen.'
           : 'Company teams that need stronger German communication at work.',
-      schedule: locale === 'de' ? 'Nach Teambedarf: vor Ort, online oder hybrid' : 'Based on team needs: on-site, online, or hybrid',
+      schedule: locale === 'de' ? 'Je nach Bedarf vor Ort, online oder hybrid' : 'Based on team needs: on-site, online, or hybrid',
       intensity: baseIntensity,
       outcomes: baseOutcomes,
       facts: registryFacts,
@@ -220,7 +220,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
     return {
       bestFor:
         locale === 'de'
-          ? 'Lernende mit klaren Schwerpunkten wie Schreiben, Sprechen oder Grammatik.'
+          ? 'Alle, die gezielt an Schreiben, Sprechen oder Grammatik arbeiten möchten.'
           : 'Learners who want targeted progress in one skill area (speaking, writing, or grammar).',
       schedule: baseSchedule,
       intensity: baseIntensity,
@@ -395,8 +395,8 @@ export default async function CoursesPage({
       */}
       <HeroAPhotoLed
         eyebrow={hero.eyebrow}
-        title={locale === 'de' ? 'Finden Sie Ihren Deutschkurs' : 'Find your German course'}
-        description={locale === 'de' ? 'Ob Sie neu anfangen, neben der Arbeit lernen oder sich auf ein bestimmtes Ziel vorbereiten: Wir helfen Ihnen, den passenden Deutschkurs zu finden.' : 'Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.'}
+        title={locale === 'de' ? 'Finde deinen Deutschkurs' : 'Find your German course'}
+        description={locale === 'de' ? 'Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.' : 'Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.'}
         photo={pageConfig.photos.thumbA}
         ctas={pageConfig.ctas.slice(0, 1)}
         breadcrumbs={breadcrumbs}
@@ -448,7 +448,7 @@ export default async function CoursesPage({
               </p>
               <p className="mt-2 text-sm leading-relaxed text-white/72">
                 {locale === 'de'
-                  ? 'Ändern Sie einen Filter, oder lassen Sie uns Ihr Niveau gemeinsam bestimmen.'
+                  ? 'Ändere einen Filter, oder lass uns dein Niveau gemeinsam bestimmen.'
                   : 'Change one filter, or let us work out your level together.'}
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
@@ -497,10 +497,10 @@ export default async function CoursesPage({
           <BandHeading
             tone="light"
             eyebrow={locale === 'de' ? 'Vor der Anmeldung' : 'Before you enrol'}
-            title={locale === 'de' ? 'Vier Dinge, die Sie vorher wissen sollten' : 'Four things worth knowing first'}
+            title={locale === 'de' ? 'Vier Dinge, die du vorher wissen solltest' : 'Four things worth knowing first'}
             description={
               locale === 'de'
-                ? 'Hier finden Sie Antworten zu Einstufung, Lerntempo und Vorbereitung auf eine Prüfung.'
+                ? 'Hier findest du Antworten zur Einstufung, zum Lerntempo und zur Prüfungsvorbereitung.'
                 : 'Start with the essentials: placement, pace and preparing for an exam.'
             }
           />
@@ -508,26 +508,26 @@ export default async function CoursesPage({
           <ul className="mx-auto grid max-w-[76rem] gap-x-10 gap-y-10 md:grid-cols-2 md:gap-y-12">
             {[
               {
-                title: locale === 'de' ? 'Ihr Niveau steht am Anfang' : 'Your level comes first',
+                title: locale === 'de' ? 'Dein Niveau steht am Anfang' : 'Your level comes first',
                 body:
                   locale === 'de'
-                    ? 'Wenn Sie bereits Deutsch sprechen, hilft uns die Einstufung bei der Kurswahl. Machen Sie einen kostenlosen Online-Test und schicken Sie uns Ihr Ergebnis, oder kommen Sie persönlich vorbei.'
+                    ? 'Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Mach einen kostenlosen Online-Test und schick uns dein Ergebnis, oder komm persönlich bei uns vorbei.'
                     : 'If you already know some German, placement helps us recommend a course. Take a free online test and send us your result, or come in person.',
                 linkHref: '/placement-test',
                 linkLabel: locale === 'de' ? 'Zum Einstufungstest' : 'Take the placement test',
               },
               {
-                title: locale === 'de' ? 'Wie schnell ein Niveau vergeht' : 'How long a level takes',
+                title: locale === 'de' ? 'Wie lange ein Niveau dauert' : 'How long a level takes',
                 body:
                   locale === 'de'
-                    ? 'Im Intensivkurs dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen bei 20 UE pro Woche. Im Abendkurs sind es rund 3,5 Monate für ein halbes Niveau, also etwa 1,5 Stufen pro Jahr.'
+                    ? 'Im Intensivkurs mit 20 Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.'
                     : 'Intensive covers a full CEFR level in about 8 to 9 weeks at 20 lessons a week. Evening covers half a level in roughly 3.5 months — around 1.5 levels a year.',
               },
               {
                 title: locale === 'de' ? 'Prüfungsvorbereitung ist ein eigener Kurs' : 'Exam preparation is a separate course',
                 body:
                   locale === 'de'
-                    ? 'Die Vorbereitung auf telc-Prüfungen ist nicht im Intensivkurs enthalten. Wenn Sie ein Zertifikat brauchen, können Sie einen zusätzlichen Vorbereitungskurs buchen.'
+                    ? 'Die Vorbereitung auf eine telc-Prüfung ist nicht im Intensivkurs enthalten. Wenn du ein Zertifikat brauchst, kannst du zusätzlich einen Vorbereitungskurs buchen.'
                     : 'Preparation for telc exams is separate from the intensive course. If you need a certificate, you can book an additional preparation course.',
                 linkHref: '/exams',
                 linkLabel: locale === 'de' ? 'Prüfungen ansehen' : 'See exams',
@@ -536,7 +536,7 @@ export default async function CoursesPage({
                 title: locale === 'de' ? 'Zwei Formate ohne Listenpreis' : 'Two formats are quoted individually',
                 body:
                   locale === 'de'
-                    ? 'Unterricht für Gruppen und Firmenunterricht werden nach Bedarf zusammengestellt und individuell angeboten — beim Gruppenkurs inklusive Unterkunft, Kulturprogramm und Nahverkehrsticket.'
+                    ? 'Den Unterricht für Gruppen und den Firmenunterricht stellen wir nach Bedarf zusammen und machen dafür ein eigenes Angebot. Beim Gruppenkurs gehören Unterkunft, Kulturprogramm und ein Nahverkehrsticket dazu.'
                     : 'Classes for groups and in-company teaching are built to a brief and quoted individually — the group programme including accommodation, a culture programme and a transit pass.',
                 linkHref: '/contact',
                 linkLabel: locale === 'de' ? 'Angebot anfragen' : 'Request a quote',
@@ -576,16 +576,16 @@ export default async function CoursesPage({
               }
               description={
                 locale === 'de'
-                  ? 'Wählen Sie ein Format und sehen Sie Rhythmus, Lernumfang und typische Ergebnisse.'
+                  ? 'Wähle ein Format und sieh dir Rhythmus, Lernumfang und typische Ergebnisse an.'
                   : 'Pick a format to see its rhythm, weekly load and likely outcomes.'
               }
               items={selectorItems}
               labels={{
                 signature: locale === 'de' ? 'Kursentscheidung' : 'Course decision',
-                bestFor: locale === 'de' ? 'Am besten geeignet für' : 'Best for',
+                bestFor: locale === 'de' ? 'Geeignet für' : 'Best for',
                 schedule: locale === 'de' ? 'Kursrhythmus' : 'Schedule rhythm',
                 intensity: locale === 'de' ? 'Lernumfang' : 'Learning load',
-                outcomes: locale === 'de' ? 'Wahrscheinliche Lernergebnisse' : 'Likely outcomes',
+                outcomes: locale === 'de' ? 'Was du erreichen kannst' : 'Likely outcomes',
                 facts: locale === 'de' ? 'So läuft dieses Format bei CASA' : 'How this format works at CASA',
               }}
             />

@@ -56,7 +56,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Intensive courses, evening courses, special courses and in-company training, plus classes for groups, German for nursing and medicine and Bildungszeit. We do not offer Integrationskurse or occupation-specific language courses (berufsbezogene Sprachkurse).',
-      de: 'Intensivkurse, Abendkurse, Spezialkurse und Firmenunterricht, außerdem Unterricht für Gruppen, Deutsch für Pflege und Medizin und Bildungszeit. Wir bieten leider keine Integrationskurse oder berufsbezogene Sprachkurse an.',
+      de: 'Wir bieten Intensivkurse, Abendkurse, Spezialkurse und Firmenunterricht an, außerdem Unterricht für Gruppen, Deutsch für Pflege und Medizin und Bildungszeit. Integrationskurse und berufsbezogene Sprachkurse bieten wir leider nicht an.',
     },
     source: 'faq',
   },
@@ -69,7 +69,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'No. Our courses are for self-paying participants, and course fees cannot be covered by the BAMF or the Jobcenter. CASA does cooperate with Here Ahead and Bildungsberatung Garantiefonds Hochschule, which fund study-preparation language courses — it is worth checking whether you qualify for one of those.',
-      de: 'Nein. Unsere Sprachkurse richten sich ausschließlich an Selbstzahler; die Kursgebühren können nicht vom BAMF oder Jobcenter übernommen werden. CASA kooperiert allerdings mit Here Ahead und der Bildungsberatung Garantiefonds Hochschule, die studienvorbereitende Sprachkurse fördern — bitte prüfen Sie, ob Sie für eine dieser Förderungen infrage kommen.',
+      de: 'Nein. Unsere Sprachkurse richten sich ausschließlich an Selbstzahler. Die Kursgebühren können leider nicht vom BAMF oder Jobcenter übernommen werden. CASA kooperiert aber mit Here Ahead und der Bildungsberatung Garantiefonds Hochschule, die studienvorbereitende Sprachkurse fördern. Bitte prüfe, ob du für eine dieser Förderungen infrage kommst.',
     },
     source: 'faq + the funding cooperations on the German homepage',
   },
@@ -82,7 +82,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Either through our online form or in person at the office. Please take a placement test first and send us the result, so we can put you in the right group.',
-      de: 'Sie können sich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte machen Sie vorher einen Einstufungstest und senden Sie uns das Ergebnis, damit wir Sie in die passende Lerngruppe einstufen können.',
+      de: 'Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.',
     },
     source: 'faq',
   },
@@ -95,7 +95,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Monday to Thursday 08:30–19:00 and Friday 08:30–13:00. You are welcome to come by in person during those hours — no appointment needed. The school closes over Easter (30 March to 6 April 2026) and Christmas (21 December 2026 to 1 January 2027).',
-      de: 'Montag bis Donnerstag von 08:30 bis 19:00 Uhr und freitags von 08:30 bis 13:00 Uhr. In dieser Zeit können Sie gerne persönlich vorbeikommen, ohne Termin. Schließzeiten: Ostern (30.03. bis 06.04.26) und Weihnachten (21.12.26 bis 01.01.27).',
+      de: 'Das Büro ist von Montag bis Donnerstag von 08:30 bis 19:00 Uhr und am Freitag von 08:30 bis 13:00 Uhr geöffnet. In dieser Zeit kannst du gern ohne Termin persönlich vorbeikommen. Über Ostern (30.03. bis 06.04.26) und Weihnachten (21.12.26 bis 01.01.27) ist die Schule geschlossen.',
     },
     source: 'faq + the office hours and closures in the German footer',
   },
@@ -108,7 +108,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Because the right level decides whether the course works for you. In a group that is too hard, you and everyone else find it frustrating; in one that is too easy, you are not being stretched. So we ask you to take the test and send us the result. Start with the A1 test even if you are past that level, and send your results to online@casa-bremen.de.',
-      de: 'Weil das richtige Niveau darüber entscheidet, ob der Kurs für Sie funktioniert. In einem Kurs, der zu schwierig ist, ist das für Sie und die anderen Teilnehmenden frustrierend; ist er zu leicht, sind Sie unterfordert. Bitte starten Sie immer mit dem A1-Test und senden Sie Ihre Ergebnisse an online@casa-bremen.de.',
+      de: 'Uns ist es sehr wichtig, dass wir das richtige Niveau für dich finden und du mit deinem Sprachkurs bei uns zufrieden bist. Wenn ein Kurs zu schwierig für dich ist, ist das für dich und für die anderen Teilnehmenden frustrierend. Ist der Kurs zu leicht, bist du unterfordert. Deshalb bitten wir dich, vorher einen Einstufungstest zu machen. Bitte starte immer mit dem A1-Test und schick deine Ergebnisse an online@casa-bremen.de.',
     },
     source: 'faq + /anmeldung/einstufungstest',
   },
@@ -121,7 +121,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Please let the office and your teacher know. We cannot offer a replacement lesson online. Course fees remain payable in full for lessons you miss.',
-      de: 'Bitte informieren Sie das Büro und Ihre Lehrkraft. Wir können leider keinen Unterrichtsersatz online anbieten. Die Kursgebühren sind auch für versäumte Unterrichtsstunden in voller Höhe zu zahlen.',
+      de: 'Bitte sag dem Büro und deiner Lehrkraft Bescheid, dass du krank bist. Wir können leider keinen Unterrichtsersatz online anbieten. Die Kursgebühren musst du auch für versäumte Unterrichtsstunden in voller Höhe zahlen.',
     },
     source: 'faq + AGB §5.5',
   },
@@ -134,7 +134,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Exams at B2 and C1 level: telc Deutsch B2 and telc Deutsch C1 Hochschule. We do not offer exams for A1 to B1. Results and certificates arrive about six weeks after the exam, and we let every candidate know as soon as they are in.',
-      de: 'Prüfungen auf B2- und C1-Niveau: telc Deutsch B2 und telc Deutsch C1 Hochschule. Für die Niveaus A1 bis B1 bieten wir keine Prüfungen an. Ergebnis und Zertifikat liegen etwa 6 Wochen nach der Prüfung vor; wir informieren alle Teilnehmenden, sobald sie eingegangen sind.',
+      de: 'Bei uns kannst du die Prüfungen telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. Für die Niveaus A1 bis B1 bieten wir leider keine Prüfungen an. Das Ergebnis und das Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir informieren alle Teilnehmenden, sobald sie bei uns eingegangen sind.',
     },
     source: 'faq + the two Prüfungszentrum pages',
   },
@@ -149,7 +149,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'You have to book courses of 20 lessons a week for at least three months. Our intensive courses meet that requirement; evening and special courses do not.',
-      de: 'Sie müssen Sprachkurse mit 20 Wochenstunden für mindestens drei Monate buchen. Unsere Intensivkurse erfüllen diese Voraussetzung; Abend- und Spezialkurse nicht.',
+      de: 'Um ein Sprachvisum beantragen zu können, musst du Sprachkurse mit 20 Wochenstunden für mindestens drei Monate buchen. Unsere Intensivkurse erfüllen diese Voraussetzung, unsere Abend- und Spezialkurse nicht.',
     },
     source: 'faq',
   },
@@ -162,7 +162,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'As soon as we have received payment for at least the first course, we send the visa letter by email. If you live outside Germany, the full fee for the first course — and any accommodation costs — is due on registration. On request we can also send the confirmation by post, or by DHL Express for an additional charge.',
-      de: 'Sobald wir die Gebühr für mindestens den ersten Kurs erhalten haben, senden wir Ihnen den Visumsbrief per E-Mail zu. Bei Wohnsitz im Ausland wird mit der Anmeldung der Gesamtbetrag der Kursgebühren für den ersten Kurs und ggf. die Unterkunftskosten fällig. Auf Anfrage ist der Versand auch per Post oder gegen Aufpreis per DHL-Express möglich.',
+      de: 'Sobald wir die Gebühr für mindestens den ersten Kurs von dir erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Wenn du im Ausland wohnst, sind mit der Anmeldung die gesamten Kursgebühren für den ersten Kurs fällig und, falls du eine Unterkunft buchst, auch die Unterkunftskosten. Auf Anfrage schicken wir dir den Brief auch per Post oder gegen Aufpreis per DHL-Express.',
     },
     source: 'faq + AGB §5.3',
   },
@@ -175,7 +175,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'You can postpone your course once free of charge, up to 21 days before it starts. Each further postponement costs €100. If the process drags on, we can also put your booking on hold indefinitely — tell us when your visa comes through and we will offer you the next possible start date.',
-      de: 'Sie können Ihren Kurs einmal kostenfrei verschieben, bis 21 Tage vor Kursbeginn. Jede weitere Verschiebung kostet 100 €. Wenn der Prozess länger dauert, können wir Ihre Buchung auch auf unbestimmte Zeit deaktivieren — informieren Sie uns, sobald Sie Ihr Visum erhalten haben, und wir bieten Ihnen den nächstmöglichen Kursbeginn an.',
+      de: 'Wenn sich dein Visumsverfahren verzögert, kannst du deinen Kurs bis 21 Tage vor Kursbeginn einmal kostenfrei verschieben. Jede weitere Verschiebung kostet 100 €. Wenn dein Visumsantrag länger dauert als gedacht, können wir deine Buchung auch auf unbestimmte Zeit deaktivieren. Gib uns Bescheid, sobald du dein Visum erhalten hast. Wir bieten dir dann den nächstmöglichen Kursbeginn an.',
     },
     source: 'faq + AGB §7.2',
   },
@@ -188,7 +188,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'We refund the course fee minus a €100 processing fee, provided you tell us at least two weeks before the course starts and can show the official refusal document. Later than that, part of the fee falls due under the standard four-week notice period.',
-      de: 'Wir erstatten die Kursgebühr abzüglich einer Bearbeitungsgebühr von 100 €, sofern wir die Information spätestens zwei Wochen vor Kursbeginn erhalten und ein offizielles Ablehnungsdokument vorliegt. Andernfalls berechnen wir Teile der Kursgebühr gemäß der Kündigungsfrist von vier Wochen.',
+      de: 'Dann erstatten wir dir die Kursgebühr abzüglich einer Bearbeitungsgebühr von 100 €. Das gilt, wenn wir die Information spätestens zwei Wochen vor Kursbeginn von dir erhalten und du uns ein offizielles Ablehnungsdokument vorlegst. Andernfalls berechnen wir Teile der Kursgebühr gemäß der Kündigungsfrist von vier Wochen.',
     },
     source: 'faq + AGB §7.2',
   },
@@ -201,7 +201,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'No. If you entered Germany on a visa for a language course or for study, all the courses the visa was issued for have to be completed in full — the contract is bound to the visa and cannot be cancelled by you. Any remaining fee is still payable. CASA is also obliged to inform the authorities on request if a participant does not attend for the full visa period.',
-      de: 'Nein. Ist die Einreise mit einem Visum für einen Sprachkurs oder für ein Studium erfolgt, sind sämtliche Kurse, für die das Visum ausgestellt wurde, vollständig zu absolvieren — der Vertrag ist an das Visum gebunden und kann nicht durch Sie gekündigt werden. Die restliche Kursgebühr ist zu zahlen. CASA gibt autorisierten Behörden auf Anfrage außerdem Auskunft, wenn ein Teilnehmender den Kurs nicht für den vollen Visumszeitraum besucht.',
+      de: 'Nein. Wenn du mit einem Visum für einen Sprachkurs oder für ein Studium nach Deutschland eingereist bist, musst du alle Kurse, für die das Visum ausgestellt wurde, vollständig absolvieren. Der Vertrag ist an das Visum gebunden, und du kannst ihn nicht kündigen. Die restliche Kursgebühr musst du zahlen. Außerdem gibt CASA autorisierten Behörden auf Anfrage Auskunft, wenn jemand den Kurs nicht für den vollen Zeitraum des Visums besucht.',
     },
     source: 'AGB §7.3 and §7.4, and the warning on the German registration form',
   },
@@ -216,7 +216,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Yes — a room in a CASA shared flat or with a host family. Both are available only to students on our intensive courses, and the shared flats only to participants who are of legal age. We cannot guarantee a shared-flat room: if none is free for your dates, we arrange a room with a host family instead.',
-      de: 'Ja — ein Zimmer in einer CASA Wohngemeinschaft oder bei einer Gastfamilie. Beides steht ausschließlich Teilnehmenden unserer Intensivkurse zur Verfügung, die WG-Zimmer außerdem nur volljährigen Studierenden. Wir können kein WG-Zimmer garantieren: Ist zum gewünschten Zeitraum keines frei, organisieren wir ein Zimmer bei einer Gastfamilie.',
+      de: 'Ja. Bei uns kannst du ein Zimmer in einer CASA-Wohngemeinschaft oder bei einer Gastfamilie buchen. Beides steht ausschließlich Teilnehmenden unserer Intensivkurse zur Verfügung, die WG-Zimmer außerdem nur volljährigen Studierenden. Ein Zimmer in einer CASA-WG können wir leider nicht garantieren. Wenn zum gewünschten Zeitraum keines frei ist, organisieren wir dir ein Zimmer bei einer Gastfamilie.',
     },
     source: 'faq + the two Unterkunft pages',
   },
@@ -229,7 +229,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'We cannot support you in finding your own flat. We are glad to send you links that make the search easier if you ask.',
-      de: 'Wir können leider keine Unterstützung bei der Wohnungssuche anbieten. Auf Anfrage schicken wir Ihnen aber gerne hilfreiche Links, die die Wohnungssuche erleichtern.',
+      de: 'Bei der Wohnungssuche können wir dich leider nicht unterstützen. Auf Anfrage schicken wir dir aber gern hilfreiche Links, die dir die Suche erleichtern.',
     },
     source: 'faq',
   },
@@ -244,7 +244,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'A group course can be cancelled with four weeks’ notice, always counted in full weeks. Cancel more than four weeks before the course starts and we refund what you have paid, minus a €100 processing fee and any bank or postage charges. Cancel later than that and you owe everything booked that falls inside the four weeks from your cancellation date.',
-      de: 'Ein Gruppenkurs kann mit einer Kündigungsfrist von vier Wochen gekündigt werden, wobei immer volle Wochen gerechnet werden. Bei einer Kündigung bis zu vier Wochen vor Kursbeginn erstatten wir die gezahlten Gebühren abzüglich einer Bearbeitungsgebühr von 100 € sowie etwaiger Bank- und Versandgebühren. Eine spätere Kündigung verpflichtet zur Zahlung aller gebuchten Leistungen, die im Rahmen der Vier-Wochen-Frist ab dem Kündigungsdatum liegen.',
+      de: 'Einen Gruppenkurs kannst du mit einer Kündigungsfrist von vier Wochen kündigen. Dabei rechnen wir immer volle Wochen. Wenn du bis zu vier Wochen vor Kursbeginn kündigst, erstatten wir dir die gezahlten Gebühren abzüglich einer Bearbeitungsgebühr von 100 € sowie etwaiger Bank- und Versandgebühren. Wenn du später kündigst, musst du alle gebuchten Leistungen bezahlen, die innerhalb der vier Wochen ab dem Kündigungsdatum liegen.',
     },
     source: 'faq + AGB §6.1',
   },
@@ -257,7 +257,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'In writing only — email or letter. We cannot accept a cancellation given verbally. Simply not turning up, or stopping mid-course, does not count as a cancellation and is not refunded. The full conditions are in our Terms and Conditions, point 6.',
-      de: 'Nur schriftlich — per E-Mail oder Brief. Mündliche Kündigungen können wir leider nicht akzeptieren. Nichtantritt oder Kursabbruch gilt nicht als Kündigung und wird nicht erstattet. Die vollständigen Bedingungen stehen in unseren Geschäftsbedingungen, Punkt 6.',
+      de: 'Kündigungen sind nur schriftlich möglich. Du kannst uns dafür eine E-Mail oder einen Brief schreiben. Mündliche Kündigungen können wir leider nicht akzeptieren. Wenn du einen Kurs nicht antrittst oder abbrichst, gilt das nicht als Kündigung, und die Gebühren werden nicht erstattet. Alle Kündigungsbedingungen kannst du in unseren Geschäftsbedingungen unter Punkt 6 (Kündigung / Absage / Umbuchung) nachlesen.',
     },
     source: 'faq + AGB §6.2 and §6.4',
   },
@@ -270,7 +270,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Yes, at any time within the cancellation deadline above. Fees already paid transfer to the new course, minus any processing charge, and can go to a different course type if that suits you better. If you already know at registration that you will miss whole weeks, tell us — we can often deduct that time from the fee, though for teaching reasons we may decline, or place you a level lower on your return.',
-      de: 'Ja, jederzeit unter Einhaltung der oben genannten Stornofrist. Bereits bezahlte Gebühren werden abzüglich etwaiger Bearbeitungsgebühren auf einen anderen Kurs übertragen, gegebenenfalls auch auf eine andere Kursart. Wenn Sie bei der Anmeldung schon wissen, dass Sie ganze Wochen nicht wahrnehmen können, sagen Sie es uns — wir können diesen Zeitraum oft von den Kursgebühren abziehen. Aus didaktischen Gründen behalten wir uns vor, dies abzulehnen oder nach der Rückkehr eine Umstufung vorzunehmen.',
+      de: 'Ja, das ist jederzeit möglich, wenn du die oben genannte Kündigungsfrist einhältst. Bereits bezahlte Gebühren übertragen wir abzüglich etwaiger Bearbeitungsgebühren auf einen anderen Kurs, gegebenenfalls auch auf eine andere Kursart. Wenn du schon bei der Anmeldung weißt, dass du ganze Wochen nicht teilnehmen kannst, sag uns bitte Bescheid. Wir können diesen Zeitraum oft von den Kursgebühren abziehen. Aus didaktischen Gründen behalten wir uns aber vor, dies abzulehnen oder nach deiner Rückkehr eine Umstufung vorzunehmen.',
     },
     source: 'AGB §6.5 and §6.6',
   },
@@ -285,7 +285,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Intensive courses run in international groups of 10 to 15. Evening and special courses are small groups too. The point of the size is speaking time: it is what makes individual feedback and correction of written work possible.',
-      de: 'Die Intensivkurse finden in internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Abend- und Spezialkurse sind ebenfalls Kleingruppen. Der Grund für die Gruppengröße ist Sprechzeit — sie macht individuelles Feedback und die Korrektur schriftlicher Arbeiten möglich.',
+      de: 'Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.',
     },
     source: '/sprachkurse/deutsch-intensiv',
   },
@@ -298,7 +298,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'For evening courses: with some German already, yes, whenever seats are free — and if a course is full we can put you on the waiting list. With no German at all (A1.1) you have to start at the beginning of a course. Educational-leave participants can join on any Monday.',
-      de: 'Bei den Abendkursen: mit Vorkenntnissen jederzeit, solange Plätze frei sind — und bei ausgebuchten Kursen setzen wir Sie gern auf die Warteliste. Ohne Vorkenntnisse (A1.1) müssen Sie am Kursstart beginnen. In die Bildungszeit können Sie immer montags einsteigen.',
+      de: 'In unsere Abendkurse kannst du mit Vorkenntnissen jederzeit einsteigen, wenn es noch freie Plätze gibt. Wenn ein Kurs ausgebucht ist, setzen wir dich gern auf die Warteliste. Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du am Kursstart beginnen. In die Bildungszeit kannst du immer montags einsteigen.',
     },
     source: '/sprachkurse/deutsch-am-abend and /sprachkurse/bildungszeit-deutsch',
   },
@@ -311,7 +311,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'No. Preparation for an exam is explicitly not part of the intensive courses. There are separate preparation courses: €260 for telc B2 (two evenings a week over a month) and €520 for telc C1 Hochschule (a four-week block). For C1, note that C1 vocabulary and grammar are assumed from a completed C1 course rather than taught in the preparation course, and no preparation course can guarantee a pass.',
-      de: 'Nein. Die Vorbereitung auf eine Prüfung ist ausdrücklich nicht Bestandteil der Intensivkurse. Es gibt separate Vorbereitungskurse: 260 € für telc B2 (zwei Abende pro Woche über einen Monat) und 520 € für telc C1 Hochschule (ein vierwöchiger Block). Für die C1 gilt: Wortschatz, Redemittel und Grammatik der C1 werden in Form eines erfolgreich abgeschlossenen C1-Kurses vorausgesetzt und sind nicht Inhalt des Kurses. Eine Garantie, die Prüfung zu bestehen, bietet kein Vorbereitungskurs.',
+      de: 'Nein. Die Vorbereitung auf eine Prüfung ist ausdrücklich nicht Bestandteil der Intensivkurse. Dafür gibt es eigene Vorbereitungskurse. Der Kurs für telc B2 kostet 260 € und findet einen Monat lang an zwei Abenden pro Woche statt. Der Kurs für telc C1 Hochschule kostet 520 € und ist ein vierwöchiger Block. Wortschatz, Redemittel und Grammatik der C1 sind nicht Teil des C1-Vorbereitungskurses. Wir setzen sie in Form eines erfolgreich abgeschlossenen C1-Kurses voraus. Alternativ machen wir mit dir vor Ort einen Einstufungstest. Kein Vorbereitungskurs kann garantieren, dass du die Prüfung bestehst.',
     },
     source: '/sprachkurse/deutsch-intensiv and the two Prüfungszentrum pages',
   },
@@ -324,7 +324,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Two. A one-time enrolment fee of €50 on your first registration at CASA, and the course book — €23.99 to €26.99 depending on level, or €46 to €54 for Bildungszeit, which uses two. Weekends and public holidays in Bremen have no classes and are not refunded.',
-      de: 'Zwei. Eine einmalige Einschreibegebühr von 50 € bei der Erstanmeldung an unserer Schule und das Lehrwerk — 23,99 € bis 26,99 € je nach Niveaustufe, bei der Bildungszeit 46 € bis 54 € für zwei Bücher. An Wochenenden und gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt; Feiertage werden nicht erstattet.',
+      de: 'Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von 50 €. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.',
     },
     source: '/sprachkurse/deutsch-intensiv, /sprachkurse/bildungszeit-deutsch, AGB §4',
   },
@@ -337,7 +337,7 @@ const FAQ: FaqSource[] = [
     },
     answer: {
       en: 'Yes, and you are very welcome to if you are in Bremen or nearby. No appointment is needed — just come by during office hours and bring at least an hour. It is free of obligation and it lets you see the school and ask whatever else you want to know. Note that intensive courses are placed on site in any case, and CASA may adjust your level regardless of certificates you already hold.',
-      de: 'Ja, und wenn Sie in Bremen oder Umgebung leben, laden wir Sie herzlich dazu ein. Ein Termin ist nicht erforderlich — kommen Sie einfach während der Bürozeiten vorbei und bringen Sie mindestens eine Stunde Zeit mit. Die Einstufung ist unverbindlich und Sie können die Schule kennenlernen und Fragen stellen. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch und behalten uns vor, das Kursniveau anzupassen — unabhängig von zuvor erworbenen Zertifikaten.',
+      de: 'Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Einen Termin brauchst du nicht. Komm einfach während der Bürozeiten vorbei und bring mindestens eine Stunde Zeit mit. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.',
     },
     source: '/anmeldung/einstufungstest and /sprachkurse/deutsch-intensiv',
   },

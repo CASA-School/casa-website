@@ -80,40 +80,31 @@ export function CourseLevelGoals({
   const kontextLevels = levels.filter((l) => l.textbook === 'kontext');
 
   /*
-   * The range in each label is THIS COURSE'S levels, not the Klett series'.
+   * The range under each label is THE TEXTBOOK'S range: Netzwerk neu covers
+   * A1–B1 and Kontext covers B1+–C1, on every course page (CASA, 2026-10-07).
    *
-   * These were hard-coded as "(A1 – B1)" and "(B1+ – C1)", which are the ranges
-   * the two textbook series cover. On a course that covers all of them that reads
-   * correctly. On Bildungszeit — B1 upward, and the one format on the site that
-   * is not open at A1 — the page announced "Netzwerk Textbook (A1 – B1)" directly
-   * above a single B1 row, which is the series' range being read as the course's.
-   * German for Medical (B2 and C1) had the same problem in the other direction.
-   *
-   * Derived from the rows actually rendered, so a label can no longer disagree
-   * with the list underneath it.
+   * It used to be derived from the rows below it, so the intensive page read
+   * "Kontext B2 – C1" and the evening page the same, which states the wrong
+   * range for the book. The chips in the rows still show this course's own
+   * levels, so Bildungszeit (from B1) shows a single B1 chip under Netzwerk neu.
    */
-  const range = (items: LevelGoalItem[]) =>
-    items.length === 0
-      ? ''
-      : items.length === 1
-        ? items[0].level
-        : `${items[0].level} – ${items[items.length - 1].level}`;
-
   const groups = [
     {
       items: netzwerkLevels,
-      label: locale === 'de' ? 'Lehrwerk Netzwerk' : 'Netzwerk Textbook',
+      label: locale === 'de' ? 'Lehrwerk Netzwerk neu' : 'Netzwerk Textbook',
+      range: 'A1 – B1',
       blurb:
         locale === 'de'
-          ? 'Alltagswörter, Grammatik-Grundlagen und Dialoge'
+          ? 'Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.'
           : 'Daily vocabulary, grammar basics, and dialogues',
     },
     {
       items: kontextLevels,
       label: locale === 'de' ? 'Lehrwerk Kontext' : 'Kontext Textbook',
+      range: 'B1+ – C1',
       blurb:
         locale === 'de'
-          ? 'Komplexe Satzstrukturen, Fachsprache und Diskussionen'
+          ? 'Mit Kontext übst du komplexe Satzstrukturen, Fachsprache und Diskussionen.'
           : 'Complex structures, professional terminology, and debate',
     },
   ].filter((group) => group.items.length > 0);
@@ -164,7 +155,7 @@ export function CourseLevelGoals({
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                 {group.label}
               </p>
-              <p className="mt-1.5 text-base font-bold text-[var(--casa-ink)]">{range(group.items)}</p>
+              <p className="mt-1.5 text-base font-bold text-[var(--casa-ink)]">{group.range}</p>
               <p className="mt-2 max-w-[18rem] text-sm leading-relaxed text-[var(--casa-muted)]">{group.blurb}</p>
             </div>
 
