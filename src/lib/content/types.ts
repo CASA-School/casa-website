@@ -132,9 +132,13 @@ export type CulturalProgramItem = {
  * then it is absent and the directory renders a monogram. Do not point it at the
  * synthetic images in public/media/casa/team/ (CLAUDE.md hard rule 3).
  */
+/** The Bremer Stadtmusikanten, the team page's stand-ins for a missing photo. */
+export type TeamPlaceholderAnimal = 'hahn' | 'katze' | 'hund' | 'esel';
+
 export type TeamSpotlight = {
   id: string;
   locale: ContentLocale;
+  /** As the site shows it: first name and the initial of the last name („Tanja L."). */
   name: string;
   title: string;
   /** Directory filter group, e.g. "Courses & exams". */
@@ -147,7 +151,11 @@ export type TeamSpotlight = {
   photo?: {
     src: string;
     alt: string;
+    /** CSS object-position, so a face sits well in the 4:5 crop. */
+    position?: string;
   };
+  /** Drawn in the photo's place until one is on file. */
+  placeholder?: TeamPlaceholderAnimal;
   socials?: Array<{
     platform: 'linkedin' | 'instagram' | 'email';
     href: string;
