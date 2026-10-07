@@ -1,4 +1,4 @@
-import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
+import type { ContentLocale, TeamPlaceholderAnimal, TeamSpotlight } from '@/lib/content/types';
 
 /**
  * The CASA team, as CASA publishes it.
@@ -19,10 +19,14 @@ import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
  *
  * SO: real names and real published responsibilities, and nothing else.
  *
- * - No photographs. The files in public/media/casa/team/ are synthetic images
- *   generated for six invented people. Attaching a synthetic face to a real
- *   colleague's name is worse than the invented staff were, not better. The
- *   directory renders a monogram until real portraits are on file, with consent.
+ * - Photographs only of real colleagues who agreed (2026-10-07: CASA supplied
+ *   portraits for most of the team). The six synthetic images that once sat in
+ *   public/media/casa/team/ are gone: a made-up face beside a real colleague's
+ *   name is never acceptable. Without a portrait the card shows one of the
+ *   Bremer Stadtmusikanten (components/signatures/team-placeholder.tsx).
+ * - Names on public pages are the first name and the last name's initial
+ *   („Tanja L."), at the teachers' request (2026-10-07); `name` keeps the full
+ *   name for the legal pages and e-mails.
  * - No bios and no "focus" prose. CASA publishes a role and a list of areas.
  *   Anything past that would be fiction about a named person.
  * - No social links. Only one staff email is published anywhere on the site
@@ -42,11 +46,24 @@ import type { ContentLocale, TeamSpotlight } from '@/lib/content/types';
 
 type TeamMemberSource = {
   id: string;
+  /** The full name, for the legal pages and e-mails; never printed on a public page. */
   name: string;
+  /**
+   * How the site names this person: the first name and the initial of the last
+   * name, with a period („Tanja L."). The teachers asked for it (2026-10-07).
+   * Written out, not derived: „Meike Große Hundrup" and „Lisa Anh Dao" defeat
+   * any rule about which word is the last name.
+   */
+  shortName: string;
+  /**
+   * A portrait in public/media/casa/team/, only with the person's consent.
+   * `position` is the CSS object-position that keeps the face in the 4:5 crop.
+   */
+  photo?: { file: string; position?: string };
   /** The job title CASA prints. German is the source; EN is our translation. */
   title: { en: string; de: string };
   /** Directory filter group. Ours, for navigation — not a CASA job grade. */
-  group: 'leadership' | 'courses' | 'office' | 'volunteer';
+  group: 'leadership' | 'courses' | 'office' | 'teachers' | 'volunteer';
   /** Published responsibilities, verbatim in intent. */
   areas?: { en: string; de: string };
 };
@@ -55,6 +72,7 @@ const GROUP_LABELS: Record<TeamMemberSource['group'], Record<ContentLocale, stri
   leadership: { en: 'Leadership', de: 'Leitung' },
   courses: { en: 'Courses & exams', de: 'Kurse & Prüfungen' },
   office: { en: 'Office & advice', de: 'Verwaltung & Beratung' },
+  teachers: { en: 'Teachers', de: 'Lehrkräfte' },
   volunteer: { en: 'Volunteer service', de: 'Bundesfreiwilligendienst' },
 };
 
@@ -62,12 +80,14 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'bettina-rick',
     name: 'Bettina Rick',
+    shortName: 'Bettina R.',
     title: { en: 'Managing Director', de: 'Geschäftsführerin' },
     group: 'leadership',
   },
   {
     id: 'claudia-groene',
     name: 'Claudia Gröne',
+    shortName: 'Claudia G.',
     title: { en: 'Director of Studies', de: 'Studienleitung' },
     group: 'leadership',
   },
@@ -76,6 +96,7 @@ const TEAM: TeamMemberSource[] = [
     // 2026-10-01). On the team page only; she is not a course contact.
     id: 'mariella-baier',
     name: 'Mariella Baier',
+    shortName: 'Mariella B.',
     title: { en: 'Director of Studies, evening courses', de: 'Studienleitung Abendkurse' },
     group: 'leadership',
   },
@@ -89,6 +110,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'meike-grosse-hundrup',
     name: 'Meike Große Hundrup',
+    shortName: 'Meike G.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -99,6 +121,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'tanja-langenickel',
     name: 'Tanja Langenickel',
+    shortName: 'Tanja L.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -109,6 +132,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'natalia-sostres',
     name: 'Natàlia Sostres',
+    shortName: 'Natàlia S.',
     title: { en: 'Head of Office', de: 'Büroleitung' },
     group: 'office',
     areas: {
@@ -119,6 +143,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'mareike-thomeczek',
     name: 'Mareike Thomeczek',
+    shortName: 'Mareike T.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -129,6 +154,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'alissa-trouillet',
     name: 'Alissa Trouillet',
+    shortName: 'Alissa T.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -139,12 +165,14 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'manuela-meerhoff',
     name: 'Manuela Meerhoff',
+    shortName: 'Manuela M.',
     title: { en: 'Accounts', de: 'Buchhaltung' },
     group: 'office',
   },
   {
     id: 'ina-eismann',
     name: 'Ina Eismann',
+    shortName: 'Ina E.',
     title: { en: 'Accounts', de: 'Buchhaltung' },
     group: 'office',
     areas: {
@@ -155,6 +183,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'ilka-ahrens',
     name: 'Ilka Ahrens',
+    shortName: 'Ilka A.',
     title: { en: 'Resource management', de: 'Ressourcenmanagement' },
     group: 'office',
   },
@@ -163,25 +192,41 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'lisa-anh-dao',
     name: 'Lisa Anh Dao',
+    shortName: 'Lisa Anh D.',
     title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
     group: 'volunteer',
   },
   {
     id: 'maryam-trawally',
     name: 'Maryam Trawally',
+    shortName: 'Maryam T.',
     title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
     group: 'volunteer',
   },
 ];
 
+/* The stand-ins take turns, so two neighbours rarely share an animal. */
+const PLACEHOLDERS: TeamPlaceholderAnimal[] = ['katze', 'hund', 'hahn', 'esel'];
+const placeholderFor = new Map(
+  TEAM.filter((member) => !member.photo).map((member, index) => [member.id, PLACEHOLDERS[index % PLACEHOLDERS.length]] as const),
+);
+
 function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotlight {
   return {
     id: member.id,
     locale,
-    name: member.name,
+    name: member.shortName,
     title: member.title[locale],
     role: GROUP_LABELS[member.group][locale],
     areas: member.areas?.[locale],
+    photo: member.photo
+      ? {
+          src: `/media/casa/team/${member.photo.file}`,
+          alt: locale === 'de' ? `Porträt von ${member.shortName}` : `Portrait of ${member.shortName}`,
+          position: member.photo.position,
+        }
+      : undefined,
+    placeholder: member.photo ? undefined : placeholderFor.get(member.id),
   };
 }
 
@@ -196,7 +241,8 @@ function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotl
 export function teamContactById(id: string): { name: string; title: { en: string; de: string } } | undefined {
   const member = TEAM.find((entry) => entry.id === id);
 
-  return member ? { name: member.name, title: member.title } : undefined;
+  // The public name, as on the team page.
+  return member ? { name: member.shortName, title: member.title } : undefined;
 }
 
 export const teamSpotlightsByLocale: Record<ContentLocale, TeamSpotlight[]> = {
