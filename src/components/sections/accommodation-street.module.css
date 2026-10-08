@@ -282,7 +282,7 @@
 
 @keyframes casa-street-tram {
   from {
-    transform: translateX(-230px);
+    transform: translateX(-240px);
   }
   to {
     transform: translateX(760px);

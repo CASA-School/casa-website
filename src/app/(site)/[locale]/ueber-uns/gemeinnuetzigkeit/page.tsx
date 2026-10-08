@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { NonprofitIncomeRing } from '@/components/sections/nonprofit-income-ring';
 import { NonprofitMission } from '@/components/sections/nonprofit-mission';
+import nightHero from '@/components/sections/night-hero.module.css';
 import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
@@ -135,7 +136,7 @@ export default async function NonProfitStatusPage() {
         with the ring where HeroBleedPhoto would be. The photo it replaced, slot 79,
         stays in the library unused.
       */}
-      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={copy.breadcrumbs} className="overflow-x-clip">
+      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={copy.breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
         <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
           <HeroLede
             eyebrow={copy.hero.eyebrow}
