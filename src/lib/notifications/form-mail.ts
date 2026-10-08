@@ -158,12 +158,14 @@ const COPY = {
     minutes: (n: string) => `${n} Minuten`,
     confirmAppointment: 'Termin bestätigen',
     confirmHint: (address: string) => `Die Antwort geht an ${address}. Ergänzen Sie vor dem Senden, wie das Gespräch stattfindet.`,
-    confirmSubject: (day: string, time: string) => `Ihr Beratungstermin bei CASA: ${day}, ${time} Uhr`,
+    // Group organisers read „du“ (Rahman, 2026-10-08), so the confirmation greets by first name.
+    confirmGreeting: (first: string | null) => (first ? `Hallo ${first},` : 'Hallo,'),
+    confirmSubject: (day: string, time: string) => `Dein Beratungstermin bei CASA: ${day}, ${time} Uhr`,
     confirmBody: (greeting: string, day: string, time: string, minutes: string) =>
-      `${greeting}\n\nvielen Dank für Ihre Anfrage. Gerne bestätige ich Ihren Beratungstermin am ${day}, um ${time} Uhr (Bremer Zeit). `
-      + `Wir nehmen uns etwa ${minutes} Minuten Zeit für Ihre Fragen und Ideen.\n\n`
+      `${greeting}\n\nvielen Dank für deine Anfrage. Gerne bestätige ich deinen Beratungstermin am ${day}, um ${time} Uhr (Bremer Zeit). `
+      + `Wir nehmen uns etwa ${minutes} Minuten Zeit für deine Fragen und Ideen.\n\n`
       + 'So sprechen wir: [Telefon, Videolink oder bei CASA, Am Dobben 14–16, 28203 Bremen]\n\n'
-      + 'Ich freue mich auf unser Gespräch.\n\nMit freundlichen Grüßen\n',
+      + 'Ich freue mich auf unser Gespräch.\n\nHerzliche Grüße\n',
 
     careersKind: 'Bewerbung',
     careersTitle: 'Neue Bewerbung',
@@ -330,6 +332,7 @@ const COPY = {
     minutes: (n: string) => `${n} minutes`,
     confirmAppointment: 'Confirm appointment',
     confirmHint: (address: string) => `The reply goes to ${address}. Before sending, add how the conversation will take place.`,
+    confirmGreeting: (first: string | null) => (first ? `Hello ${first},` : 'Hello,'),
     confirmSubject: (day: string, time: string) => `Your consultation with CASA: ${day}, ${time}`,
     confirmBody: (greeting: string, day: string, time: string, minutes: string) =>
       `${greeting}\n\nThank you for your request. I am happy to confirm your consultation on ${day} at ${time} (Bremen time). `
@@ -614,7 +617,7 @@ function appointmentMail(p: Payload, locale: Locale, c: Copy): Mail {
   const time = text(p.localTime);
   const minutes = p.durationMinutes ? String(p.durationMinutes) : '30';
   const address = validEmail(p.email);
-  const greeting = c.greeting(String(p.salutation ?? ''), text(p.firstName), text(p.lastName));
+  const greeting = c.confirmGreeting(text(p.firstName));
   return {
     subject: `${c.appointmentKind}: ${[fullName(p), [day, time ? c.subjectTime(time) : null].filter(Boolean).join(', ')].filter(Boolean).join(' – ')}`,
     kindLabel: c.appointmentKind,
@@ -977,8 +980,8 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     firstName: first,
     lastName: last,
     // "Ms Rossi" where the form asked for a salutation. Learners read "Hallo
-    // {firstName}," / "Hello {firstName},"; `{name}` greets the „Sie“ kinds,
-    // organisers and companies ("Guten Tag Jonas Weber," / "Dear Jonas Weber,").
+    // {firstName}," / "Hello {firstName},", group organisers too; `{name}` greets
+    // the „Sie“ kind, companies ("Guten Tag Jonas Weber," / "Dear Jonas Weber,").
     // The joined name has to pass the same check as each part, or the first name alone is used.
     name: formal ? `${formal} ${last}` : (first && last ? greetableName(`${first} ${last}`) : null) ?? first,
     phone: '+49 421 460 414 30',
@@ -1044,7 +1047,7 @@ export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, 
     CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind && candidate.variant === variant)
     ?? CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind)!;
   const copy = entry[locale];
-  // Learners read „du“ and their first name; group organisers and companies keep
+  // Learners and group organisers read „du“ and their first name; companies keep
   // „Sie“ and a formal greeting, in English too (confirmation-copy.ts).
   const shared = 'address' in entry && entry.address === 'Sie'
     ? CONFIRMATION_COPY.sharedSie[locale]

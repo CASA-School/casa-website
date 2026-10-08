@@ -275,13 +275,13 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
   'german-for-groups': {
     feeNote: {
       en: 'We work out the price separately for each group. Tell us the group size, ages, dates and what you would like to focus on, and we will be glad to put together an individual, no-obligation quote.',
-      de: 'Wir kalkulieren für jede Gruppe einzeln. Nennen Sie uns Gruppengröße, das ungefähre Sprachniveau, Alter, Zeitraum und Ihre Schwerpunkte, dann erstellen wir Ihnen gern ein individuelles und unverbindliches Angebot.',
+      de: 'Wir kalkulieren für jede Gruppe einzeln. Nenn uns Gruppengröße, das ungefähre Sprachniveau, Alter, Zeitraum und eure Schwerpunkte, dann erstellen wir dir gern ein individuelles und unverbindliches Angebot.',
     },
     conditions: [
       {
         // The focus on speaking is the old casa-bremen.de wording.
         en: 'Teaching is 20 lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.',
-        de: 'Der Unterricht umfasst 20 Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn Sie besondere Inhalte oder eine andere Stundenzahl wünschen, setzen wir Ihre Vorstellungen gern um.',
+        de: 'Der Unterricht umfasst 20 Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.',
       },
       {
         en: 'Every participant receives a certificate of attendance at the end of the course.',
@@ -290,7 +290,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
       {
         // Who the hosts are is the old casa-bremen.de wording.
         en: 'We arrange accommodation for your group with Bremen host families, in single or double rooms, with or without meals. We choose every home in person, and all of them have good public transport links. Our hosts, whether they live on their own or are families with children, give guests from all over the world a warm welcome.',
-        de: 'Wir kümmern uns um die Unterbringung Ihrer Gruppe in Einzel- oder Doppelzimmern bei Bremer Gastfamilien, wahlweise mit oder ohne Verpflegung. Alle Unterkünfte wählen wir persönlich aus, und alle sind gut an den Nahverkehr angebunden. Unsere Gastgeberinnen und Gastgeber, ob Einzelpersonen oder Familien mit Kindern, heißen Gäste aus aller Welt herzlich willkommen.',
+        de: 'Wir kümmern uns um die Unterbringung deiner Gruppe in Einzel- oder Doppelzimmern bei Bremer Gastfamilien, wahlweise mit oder ohne Verpflegung. Alle Unterkünfte wählen wir persönlich aus, und alle sind gut an den Nahverkehr angebunden. Unsere Gastgeberinnen und Gastgeber, ob Einzelpersonen oder Familien mit Kindern, heißen Gäste aus aller Welt herzlich willkommen.',
       },
       {
         en: 'Host families meet the students when they arrive at the station or the airport, and everyone gets a public transport ticket for the whole of their stay.',

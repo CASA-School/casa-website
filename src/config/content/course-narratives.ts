@@ -168,15 +168,15 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       locale: 'de',
       audience: 'Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen.',
       audienceInPromise: true,
-      promise: 'Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu Ihrer Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten. Alle Teilnehmenden erhalten eine Teilnahmebescheinigung.',
+      promise: 'Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu deiner Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten. Alle Teilnehmenden erhalten eine Teilnahmebescheinigung.',
       outcomes: [
-        'Unterrichtsinhalte passend zu Ihrer Gruppe und ihren Zielen',
+        'Unterrichtsinhalte passend zu deiner Gruppe und ihren Zielen',
         'Täglich Deutsch auch außerhalb des Unterrichts',
         'Kultur vor Ort in Bremer Gastfamilien kennenlernen',
       ],
       teachingStyle: [
         '20 Unterrichtsstunden pro Woche',
-        'Sprechorientierter Unterricht mit Inhalten Ihrer Wahl',
+        'Sprechorientierter Unterricht mit Inhalten deiner Wahl',
         'Kulturprogramm und Ausflüge fest im Wochenplan',
       ],
     },

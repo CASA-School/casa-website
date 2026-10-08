@@ -191,6 +191,7 @@ describe('public form notifications', () => {
     expect(content).toContain('Termin bestätigen');
     expect(content).toContain('mailto:jonas@example.com?subject=');
     expect(content).toContain(encodeURIComponent('am Donnerstag, 8. Oktober 2026, um 10:30 Uhr (Bremer Zeit)'));
+    expect(content).toContain(encodeURIComponent('Hallo Jonas,\n\nvielen Dank für deine Anfrage.'));
     expect(content).toContain('Diese Uhrzeit ist ab sofort für andere Anfragen reserviert.');
   });
   it('requires an explicit valid recipient in live mode', async () => {
@@ -379,7 +380,7 @@ describe('confirmation to the sender', () => {
     expect(contact).toContain('href="tel:+4942146041430"');
   });
 
-  it('says „du“ to a learner and keeps „Sie“ for a group organiser', async () => {
+  it('says „du“ to a learner and a group organiser and keeps „Sie“ for a company', async () => {
     // Live, so the test-mode line for the team is not part of the mail.
     const learner = (await confirmation('course', course, 'live')).message.body.content as string;
     expect(learner).toContain('Schön, dass du bei uns Deutsch lernen möchtest');
@@ -389,18 +390,25 @@ describe('confirmation to the sender', () => {
     const organiser = (await confirmation('groups', {
       requestId: 'r', locale: 'de', firstName: 'Jonas', lastName: 'Weber', email: 'jonas@example.com', topicKey: 'group-booking',
     })).message.body.content as string;
-    expect(organiser).toContain('Guten Tag Jonas Weber,');
-    expect(organiser).toContain('Ihr CASA-Team');
-    expect(organiser).not.toContain('Dein CASA-Team');
+    expect(organiser).toContain('Hallo Jonas,');
+    expect(organiser).toContain('Dein CASA-Team');
+    // Groups mail no confirmation live without a mailbox; leave out the test-mode line for the team.
+    expect(organiser.replace(/Testbetrieb:[^<]*/, '')).not.toMatch(/\b(Sie|Ihre?[nmrs]?|Ihnen)\b/);
 
-    // English has one register: learners are greeted by first name, organisers formally.
+    const company = (await confirmation('groups', {
+      requestId: 'r', locale: 'de', firstName: 'Jonas', lastName: 'Weber', email: 'jonas@example.com', topicKey: 'company-courses',
+    })).message.body.content as string;
+    expect(company).toContain('Guten Tag Jonas Weber,');
+    expect(company).toContain('Ihr CASA-Team');
+
+    // English has one register: learners and organisers are greeted by first name, companies formally.
     const english = (await confirmation('course', { ...course, locale: 'en' })).message.body.content as string;
     expect(english).toContain('Hello Maria,');
     expect(english).not.toContain('Ms Rossi');
     const englishOrganiser = (await confirmation('groups', {
       requestId: 'r', locale: 'en', firstName: 'Jonas', lastName: 'Weber', email: 'jonas@example.com', topicKey: 'group-booking',
     })).message.body.content as string;
-    expect(englishOrganiser).toContain('Dear Jonas Weber,');
+    expect(englishOrganiser).toContain('Hello Jonas,');
   });
 
   it('writes in the language of the form', async () => {

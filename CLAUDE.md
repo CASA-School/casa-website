@@ -191,11 +191,12 @@ inside the route handler.
 new base components. Icons come from `lucide-react` via `src/config/icon-map.ts`.
 Respect `prefers-reduced-motion` and existing `focus-visible` patterns.
 
-**German address: du for learners.** Since 2026-10-07 the German site says „du"
-(lowercase) to learners, at the CASA team's request, in casa-bremen.de's warm,
-complete-sentence voice. „Sie" stays for group organisers, host families and the
-legal texts (AGB, Datenschutz, Impressum); companies are written about in the third
-person. That is the split casa-bremen.de itself uses. The rule lives in
+**German address: du all over.** The German site says „du" (lowercase), in
+casa-bremen.de's warm, complete-sentence voice: to learners since 2026-10-07, at the
+CASA team's request, and to group organisers too since 2026-10-08 (Rahman: „du all
+over"), on the group page, its dialogs and its emails. „Sie" is left only where
+nobody has converted it yet: host families, the company copy and its email, and the
+legal texts (AGB, Datenschutz, Impressum). The rule lives in
 `src/config/brand/voice-and-tone.ts`; do not convert copy back to Sie.
 
 **Cards have a text budget.** A card, a split box or a step holds the short version: about

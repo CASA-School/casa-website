@@ -397,7 +397,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     },
     intro: {
       en: 'The rooster sits right at the top and can see the whole city. In one week your group has twenty lessons and four afternoons of activities, which include a look behind the scenes at the Weserstadion and a visit to the studios of Radio Bremen. It is the quickest way to find out what a language trip to Bremen feels like.',
-      de: 'Der Hahn sitzt ganz oben und überblickt die ganze Stadt. In einer Woche hat Ihre Gruppe zwanzig Unterrichtseinheiten und vier Nachmittage mit Programm. Dabei geht es unter anderem hinter die Kulissen des Weserstadions und in die Studios von Radio Bremen. So finden Sie auf dem kürzesten Weg heraus, wie sich eine Sprachreise nach Bremen anfühlt.',
+      de: 'Der Hahn sitzt ganz oben und überblickt die ganze Stadt. In einer Woche hat deine Gruppe zwanzig Unterrichtseinheiten und vier Nachmittage mit Programm. Dabei geht es unter anderem hinter die Kulissen des Weserstadions und in die Studios von Radio Bremen. So findest du auf dem kürzesten Weg heraus, wie sich eine Sprachreise nach Bremen anfühlt.',
     },
     bestFor: {
       en: 'First-time groups, tight school calendars and a first trip abroad for younger classes.',
@@ -418,7 +418,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     },
     intro: {
       en: 'Two weeks in Bremen is a proper stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough for the German at the dinner table to come by itself. Like the cat, the group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.',
-      de: 'Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Ihre Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.',
+      de: 'Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.',
     },
     bestFor: {
       en: 'Most school groups, who usually choose two weeks for a wide culture programme at a balanced pace.',
@@ -448,7 +448,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     },
     intro: {
       en: 'The dog has the same two weeks as the cat and also takes your group out into the region, with a whole day in Hamburg, a boat tour of the harbour and the Klimahaus in Bremerhaven. It suits groups who have been on a language trip before and would like to see more of the region.',
-      de: 'Der Hund hat dieselben zwei Wochen wie die Katze und führt Ihre Gruppe auch hinaus in die Region, mit einem ganzen Tag in Hamburg, einer Hafenrundfahrt und dem Klimahaus in Bremerhaven. Er passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.',
+      de: 'Der Hund hat dieselben zwei Wochen wie die Katze und führt deine Gruppe auch hinaus in die Region, mit einem ganzen Tag in Hamburg, einer Hafenrundfahrt und dem Klimahaus in Bremerhaven. Er passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.',
     },
     bestFor: {
       en: 'Returning groups, older students and classes who want day trips beyond Bremen.',
@@ -481,7 +481,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     },
     intro: {
       en: 'The donkey stands at the very bottom and carries all the others. With this package you choose the length yourself, from one to four weeks. You leave out anything you have already organised, and you put the afternoons together from all sixteen activities. Three or four weeks are only possible with this package.',
-      de: 'Der Esel steht ganz unten und trägt alle anderen. Bei diesem Paket wählen Sie die Dauer selbst, von einer bis vier Wochen. Bausteine, die Sie schon selbst organisiert haben, lassen Sie weg, und die Nachmittage stellen Sie aus allen sechzehn Angeboten zusammen. Drei oder vier Wochen gibt es nur mit diesem Paket.',
+      de: 'Der Esel steht ganz unten und trägt alle anderen. Bei diesem Paket wählst du die Dauer selbst, von einer bis vier Wochen. Bausteine, die du schon selbst organisiert hast, lässt du weg, und die Nachmittage stellst du aus allen sechzehn Angeboten zusammen. Drei oder vier Wochen gibt es nur mit diesem Paket.',
     },
     bestFor: {
       en: 'Groups with their own accommodation or travel arrangements, unusual dates, longer stays or a particular curriculum.',

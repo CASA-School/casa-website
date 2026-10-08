@@ -4,8 +4,7 @@
  * the server mail code. Shown only when the server says the confirmation
  * reached the sender, never in test mode, when it went to the test inbox.
  *
- * The German line names no one: learners read „du“ and the group appointment
- * dialog keeps „Sie“, and both show this same sentence.
+ * The German line names no one, so it reads the same in every form.
  */
 export function confirmationNotice(locale: 'de' | 'en') {
   return locale === 'de'
