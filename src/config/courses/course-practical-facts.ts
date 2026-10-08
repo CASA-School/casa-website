@@ -275,7 +275,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
   'german-for-groups': {
     feeNote: {
       en: 'We work out the price separately for each group. Tell us the group size, ages, dates and what you would like to focus on, and we will be glad to put together an individual, no-obligation quote.',
-      de: 'Wir kalkulieren für jede Gruppe einzeln. Nennen Sie uns Gruppengröße, Alter, Zeitraum und Ihre Schwerpunkte, dann erstellen wir Ihnen gern ein individuelles und unverbindliches Angebot.',
+      de: 'Wir kalkulieren für jede Gruppe einzeln. Nennen Sie uns Gruppengröße, das ungefähre Sprachniveau, Alter, Zeitraum und Ihre Schwerpunkte, dann erstellen wir Ihnen gern ein individuelles und unverbindliches Angebot.',
     },
     conditions: [
       {

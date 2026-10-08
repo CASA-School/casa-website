@@ -583,7 +583,7 @@ export default async function CourseDetailPage({
           }
           description={
             locale === 'de'
-              ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchen Sie bei uns zusammen. Sie bringen die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
+              ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchen Sie bei uns im Komplettpaket. Sie bringen die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
               : 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.'
           }
           ctas={[

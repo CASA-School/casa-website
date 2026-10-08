@@ -36,9 +36,9 @@ const copy = {
   },
   de: {
     eyebrow: 'Die Pakete',
-    title: 'Vier Programme, benannt nach den Stadtmusikanten',
+    title: 'Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen',
     description:
-      'Der Hahn ist die kürzeste Reise. Den Esel ganz unten stellen Sie selbst zusammen. Die Pakete dazwischen unterscheiden sich in der Dauer und im Programm am Nachmittag.',
+      'Besuche uns in Bremen für eine Woche (Hahn), zwei Wochen (Katze/Hund) oder ganz nach eigenem Geschmack (Esel).',
     week: 'Woche',
     weeks: 'Wochen',
     units: 'Unterrichtseinheiten',
