@@ -147,9 +147,9 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'in-company',
       locale: 'de',
       audience: 'Teams, die Deutsch direkt im Arbeitsalltag brauchen.',
-      promise: 'Fachbezogenes Sprachtraining mit direktem Praxisbezug. Passgenaue und bedarfsgerechte Angebote für den Arbeitsalltag in Ihrer Firma.',
+      promise: 'Fachbezogenes Sprachtraining mit direktem Praxisbezug. Passgenaue und bedarfsgerechte Angebote für den Arbeitsalltag in deiner Firma.',
       outcomes: [
-        'Speziell auf Ihre Firma zugeschnittenes Curriculum für sichere Kommunikation in der beruflichen Praxis',
+        'Speziell auf deine Firma zugeschnittenes Curriculum für sichere Kommunikation in der beruflichen Praxis',
         'Besseres Verständnis bei Arbeitsanweisungen und -aufträgen',
         'Sicheres Auftreten in der Teamkommunikation',
       ],

@@ -165,13 +165,13 @@ export default async function PartnersPage() {
 
           <div className="mt-10 flex flex-col gap-4 border-t border-[color:var(--casa-sand)] pt-8 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-lg font-semibold text-[var(--casa-ink)]">
-              {de ? 'Sie möchten mit CASA zusammenarbeiten?' : 'Would you like to work with CASA?'}
+              {de ? 'Du möchtest mit CASA zusammenarbeiten?' : 'Would you like to work with CASA?'}
             </p>
             <Link
               href="/contact?topic=other"
               className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"
             >
-              {de ? 'Schreiben Sie uns' : 'Get in touch'}
+              {de ? 'Schreib uns' : 'Get in touch'}
               <ArrowRight className="size-4" aria-hidden />
             </Link>
           </div>

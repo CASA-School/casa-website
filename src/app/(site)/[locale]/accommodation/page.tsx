@@ -315,7 +315,7 @@ export default async function AccommodationPage() {
               </p>
               <h2 className="mt-3 text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
                 {locale === 'de'
-                  ? 'Sie wohnen in Bremen und haben ein Zimmer frei?'
+                  ? 'Du wohnst in Bremen und hast ein Zimmer frei?'
                   : 'Do you live in Bremen with a room to spare?'}
               </h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">

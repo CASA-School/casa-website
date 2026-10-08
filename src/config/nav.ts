@@ -64,7 +64,7 @@ const deNavText: Record<string, string> = {
   'Host families': 'Gastfamilien',
   'With a host family, you speak German every day.': 'In einer Gastfamilie sprichst du jeden Tag Deutsch.',
   'Become a host family': 'Gastfamilie werden',
-  'Host learners from all over the world.': 'Nehmen Sie Lernende aus aller Welt bei sich auf.',
+  'Host learners from all over the world.': 'Nimm Lernende aus aller Welt bei dir auf.',
   Exams: 'Prüfungen',
   Certificates: 'Zertifikate',
   'Prepare for the exam and take it with us.': 'Bereite dich vor und mach die Prüfung bei uns.',

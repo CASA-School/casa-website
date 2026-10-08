@@ -228,7 +228,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       title: locale === 'de' ? 'Lernziele nach Niveaustufen' : 'Learning goals by level',
       description:
         locale === 'de'
-          ? 'Die Kursziele stimmen wir auf das Sprachniveau Ihres Teams ab.'
+          ? 'Die Kursziele stimmen wir auf das Sprachniveau deines Teams ab.'
           : 'We match the course goals to your team\'s language level.',
       levels: [
         { level: 'A1-B1', textbook: 'netzwerk', focus: locale === 'de' ? 'Grundlegende Arbeitsplatzkommunikation, E-Mail-Korrespondenz und Telefonate' : 'Basic workplace communication, emails and phone calls' },

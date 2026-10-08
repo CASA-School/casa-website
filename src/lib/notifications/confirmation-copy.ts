@@ -12,11 +12,8 @@
  * placeholder has no value is left out.
  *
  * Address: everyone reads „du“ and is greeted by first name — learners and
- * applicants since 2026-10-07, group organisers since 2026-10-08 (Rahman: du
- * all over). Companies keep „Sie“ for now: their kind carries
- * `"address": "Sie"`, which swaps the shared lines for `sharedSie`. English has
- * one register, so there the swap changes only the greeting: "Hello
- * {firstName}," for everyone, "Dear {name}," for companies.
+ * applicants since 2026-10-07, group organisers and companies since 2026-10-08
+ * (Rahman: du all over). English greets the same way: "Hello {firstName},".
  */
 export const CONFIRMATION_COPY = {
   "kinds": [
@@ -129,13 +126,12 @@ export const CONFIRMATION_COPY = {
     {
       "kind": "groups",
       "variant": "company",
-      "address": "Sie",
       "de": {
-        "subject": "Ihre Anfrage zum Firmenunterricht ist angekommen",
-        "preheader": "Wir melden uns per E-Mail und klären gemeinsam mit Ihnen, was Ihr Team braucht.",
-        "heading": "Danke für Ihre Anfrage zum Firmenunterricht",
-        "intro": "schön, dass Sie Ihre Mitarbeitenden beim Deutschlernen unterstützen möchten. Ihre Angaben sind gut bei uns angekommen, und Ihre Anfrage ist selbstverständlich unverbindlich.",
-        "summaryTitle": "Ihre Anfrage",
+        "subject": "Deine Anfrage zum Firmenunterricht ist angekommen",
+        "preheader": "Wir melden uns per E-Mail und klären gemeinsam mit dir, was dein Team braucht.",
+        "heading": "Danke für deine Anfrage zum Firmenunterricht",
+        "intro": "schön, dass du deine Mitarbeitenden beim Deutschlernen unterstützen möchtest. Deine Angaben sind gut bei uns angekommen, und deine Anfrage ist selbstverständlich unverbindlich.",
+        "summaryTitle": "Deine Anfrage",
         "summaryRows": [
           {
             "label": "Referenz",
@@ -145,16 +141,16 @@ export const CONFIRMATION_COPY = {
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir sehen uns Ihre Angaben an, melden uns so bald wie möglich per E-Mail und klären mit Ihnen, was noch offen ist."
+            "text": "Wir sehen uns deine Angaben an, melden uns so bald wie möglich per E-Mail und klären mit dir, was noch offen ist."
           },
           {
-            "text": "In einer gemeinsamen Beratung ermitteln wir Lernbedürfnisse, Ziele und Sprachniveaus in Ihrem Team und entwickeln daraus einen passenden Unterrichtsplan."
+            "text": "In einer gemeinsamen Beratung ermitteln wir Lernbedürfnisse, Ziele und Sprachniveaus in deinem Team und entwickeln daraus einen passenden Unterrichtsplan."
           },
           {
-            "text": "Wenn alles zusammenpasst, erhalten Sie ein Angebot. Beratung und Angebot sind für Sie unverbindlich."
+            "text": "Wenn alles zusammenpasst, erhältst du ein Angebot. Beratung und Angebot sind für dich unverbindlich."
           }
         ],
-        "closing": "Wir freuen uns auf das Gespräch mit Ihnen."
+        "closing": "Wir freuen uns auf das Gespräch mit dir."
       },
       "en": {
         "subject": "Your enquiry about in-company teaching has reached CASA",
@@ -581,28 +577,6 @@ export const CONFIRMATION_COPY = {
     },
     "en": {
       "greetingNamed": "Hello {firstName},",
-      "greetingNeutral": "Hello,",
-      "replyNote": "Would you like to add something, or do you have a question? Simply reply to this email. Your reply goes straight to our team.",
-      "signoff": "Best wishes from Bremen",
-      "team": "The CASA team",
-      "footer": "Non-profit language school in Bremen. Since 1983.\nCASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany\nPhone +49 421 460 414 30 · {siteHost}/en\nOffice hours: Monday to Thursday 08:30–19:00, Friday 08:30–13:00 (Bremen time)\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick\nYou’re receiving this email because this address was entered in a form on {siteHost}. If that wasn’t you, please reply briefly to this email and we’ll delete the details. You can read how we handle your data at {siteUrl}/en/privacy."
-    }
-  },
-  /**
-   * The shared lines for the kinds marked `"address": "Sie"`: „Sie“ in German,
-   * and in English the formal greeting by name.
-   */
-  "sharedSie": {
-    "de": {
-      "greetingNamed": "Guten Tag {name},",
-      "greetingNeutral": "Guten Tag,",
-      "replyNote": "Möchten Sie noch etwas ergänzen oder haben Sie eine Frage? Antworten Sie einfach auf diese E-Mail. Ihre Antwort geht direkt an unser Team.",
-      "signoff": "Herzliche Grüße aus Bremen",
-      "team": "Ihr CASA-Team",
-      "footer": "Gemeinnützige Sprachschule in Bremen. Seit 1983.\nCASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen\nTelefon +49 421 460 414 3-0 · {siteHost}\nBürozeiten: Montag bis Donnerstag 08:30–19:00 Uhr, Freitag 08:30–13:00 Uhr\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick\nSie erhalten diese E-Mail, weil auf {siteHost} ein Formular mit Ihrer E-Mail-Adresse abgeschickt wurde. Falls nicht Sie es waren, antworten Sie bitte kurz auf diese E-Mail. Dann löschen wir die Angaben. Wie wir mit Ihren Daten umgehen, lesen Sie unter {siteUrl}/datenschutz."
-    },
-    "en": {
-      "greetingNamed": "Dear {name},",
       "greetingNeutral": "Hello,",
       "replyNote": "Would you like to add something, or do you have a question? Simply reply to this email. Your reply goes straight to our team.",
       "signoff": "Best wishes from Bremen",
