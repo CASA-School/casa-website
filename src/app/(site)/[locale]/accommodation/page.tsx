@@ -151,10 +151,16 @@ export default async function AccommodationPage() {
         centred heading all three now share, and the rows take the matching
         `tone="dark"`.
       */}
-      <section className="bg-[var(--casa-ink-deep)] py-20 text-white md:py-32">
+      {/*
+        Light since 2026-10-08: the hero is now an ink band (the night street), and
+        two ink bands in a row ran together into one (Rahman). The rows and the
+        heading take their light tone; the band is still the shared composition.
+      */}
+      <section className="bg-[var(--casa-bg)] py-20 md:py-32">
         <Container>
           <div className="px-6 md:px-9">
             <BandHeading
+              tone="light"
               eyebrow={locale === 'de' ? 'Wohnmöglichkeiten' : 'Accommodation options'}
               title={locale === 'de' ? 'Zwei Möglichkeiten zu wohnen' : 'Two options for your stay'}
               description={
@@ -166,7 +172,7 @@ export default async function AccommodationPage() {
 
             <CourseFormatRows
               className="mt-12 md:mt-16"
-              tone="dark"
+              tone="light"
               /* Four, not the default three: dropping a published highlight
                  would be losing content to a layout default. Same reason
                  become-host raises it. The WG list is longer in both

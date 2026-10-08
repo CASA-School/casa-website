@@ -10,8 +10,8 @@
  * yellow, and the one button turns yellow with ink type, since an ink button
  * would vanish on the ink ground. Scoped to the hero: nothing leaks below it.
  *
- * A hairline closes the band, because on /accommodation the next section is an
- * ink band too and the two would otherwise run together.
+ * The section after a night hero should be light: two ink bands in a row run
+ * together into one (on /accommodation the options band went light for this).
  */
 .night {
   --casa-ink: #ffffff;
@@ -24,7 +24,7 @@
     radial-gradient(46% 70% at 76% 52%, rgb(255 213 0 / 0.07), transparent 70%),
     radial-gradient(40% 60% at 8% 0%, rgb(0 159 227 / 0.08), transparent 70%),
     var(--casa-ink-deep);
-  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  border-bottom-width: 0;
 }
 
 .night :global(.casa-button-prism) {

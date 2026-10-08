@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { useCallback, useRef, useState, type CSSProperties } from 'react';
 
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 import styles from './accommodation-street.module.css';
+import glowStyles from './hero-glow.module.css';
+import { useHeroGlow } from './use-hero-glow';
 
 /**
  * A Bremen street at dusk, drawn in the line style of the CASA film — the
@@ -17,7 +19,8 @@ import styles from './accommodation-street.module.css';
  * modern block is the CASA shared flat, the house with the chimney a host
  * family. Each is a link to its detail page; hovering or focusing one lights it
  * fully, the rest of the street steps back, and a caption gives that option's
- * published summary. The warm glow leans towards the pointer.
+ * published summary. The warm light follows the pointer across the whole hero
+ * (use-hero-glow.ts); the street has no box of its own on the night hero.
  *
  * Contextual, not an availability claim (CLAUDE.md hard rule 5): it shows the
  * kind of home, never a particular room.
@@ -229,48 +232,30 @@ const vars = (v: Record<string, string | number>) => v as CSSProperties;
 
 export function AccommodationStreet({ options, label, className }: AccommodationStreetProps) {
   const [active, setActive] = useState<'flat' | 'host' | null>(null);
-  const panel = useRef<HTMLElement>(null);
-  const followPointer = useRef(false);
+  const glow = useRef<HTMLDivElement>(null);
+  useHeroGlow(glow);
 
-  useEffect(() => {
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    followPointer.current = fine && !still;
-  }, []);
-
-  const onPointerMove = useCallback((event: PointerEvent<HTMLElement>) => {
-    const el = panel.current;
-    if (!el || !followPointer.current) return;
-    const box = el.getBoundingClientRect();
-    el.style.setProperty('--glow-x', `${(((event.clientX - box.left) / box.width) * 100).toFixed(1)}%`);
-    el.style.setProperty('--glow-y', `${(((event.clientY - box.top) / box.height) * 100).toFixed(1)}%`);
-  }, []);
-
-  const onPointerLeave = useCallback(() => {
-    panel.current?.style.removeProperty('--glow-x');
-    panel.current?.style.removeProperty('--glow-y');
-    setActive(null);
-  }, []);
+  const onPointerLeave = useCallback(() => setActive(null), []);
 
   let windowIndex = 0;
 
   return (
     <figure
-      ref={panel}
       role="group"
       aria-label={label}
-      onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       className={cn(
         styles.panel,
-        'relative aspect-[3/2] w-full overflow-hidden rounded-[var(--casa-radius-feature)] bg-[var(--casa-ink-deep)] text-white',
+        // No box of its own: the street stands on the night hero's ground, and the
+        // drawing fades out at both ends instead of stopping at an edge.
+        'relative aspect-[3/2] w-full text-white',
         className
       )}
       data-active={active ?? undefined}
     >
-      <div aria-hidden="true" className={styles.glow} />
+      <div ref={glow} aria-hidden="true" className={glowStyles.glow} />
 
-      <svg viewBox="0 0 720 480" className="absolute inset-0 h-full w-full" aria-hidden="true" focusable="false">
+      <svg viewBox="0 0 720 480" className={cn(styles.drawing, 'absolute inset-0 h-full w-full')} aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id="casa-street-lamp" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--casa-sun)" stopOpacity="0.22" />
@@ -411,10 +396,9 @@ export function AccommodationStreet({ options, label, className }: Accommodation
           style={{ ...HOTSPOT[option.id], ...vars({ '--node-index': i }) }}
           data-current={active === option.id || undefined}
         >
-          {/* The marker sits on the roof. The host family's label stands beside it, in
-              the sky the pitched roof leaves free; the WG's flat roof has no such
-              sky beside it (and the windmill stands to its left), so its label
-              sits above. Both stay below the caption. */}
+          {/* The marker sits on the roof and its label in the free sky above it: beside
+              it, the WG's would cross its parapet and the windmill, the host
+              family's its chimney. Both stay below the caption. */}
           <span aria-hidden="true" className={cn(styles.marker, 'absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2')}>
             <span className={styles.bead}>
               <span className={styles.beadCore} />
@@ -423,9 +407,7 @@ export function AccommodationStreet({ options, label, className }: Accommodation
               className={cn(
                 styles.markerLabel,
                 'absolute',
-                option.id === 'flat'
-                  ? 'bottom-full left-1/2 mb-2 -translate-x-1/2 text-center'
-                  : 'left-full top-1/2 ml-2.5 -translate-y-1/2 text-left'
+                'bottom-full left-1/2 mb-2 -translate-x-1/2 text-center'
               )}
             >
               {option.title}

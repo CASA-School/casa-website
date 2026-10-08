@@ -1,0 +1,33 @@
+/*
+ * The night hero's warm light (see use-hero-glow.ts). The element reaches a
+ * full viewport past the drawing on every side, so the hero section — which
+ * clips — is what bounds the light, never the element's own edge (a shorter box
+ * cut the gradient into a hard-edged band on phones).
+ * Symmetric on purpose: 50% 50% of this box is the drawing's centre, which is
+ * where the light rests without a pointer.
+ */
+
+@property --glow-x {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 50%;
+}
+
+@property --glow-y {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 50%;
+}
+
+.glow {
+  position: absolute;
+  top: -100vh;
+  bottom: -100vh;
+  left: -100vw;
+  right: -100vw;
+  pointer-events: none;
+  background: radial-gradient(min(34rem, 80vw) circle at var(--glow-x) var(--glow-y), rgb(255 213 0 / 0.13), transparent 70%);
+  transition:
+    --glow-x 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    --glow-y 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
