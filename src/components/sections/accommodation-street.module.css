@@ -1,0 +1,312 @@
+/*
+ * The Bremen street in the accommodation hero. Same rules as the income ring
+ * (nonprofit-income-ring.module.css):
+ *
+ * - Entrance on load fills `both` and animates `opacity` / `stroke-dashoffset`
+ *   / the standalone `scale`; interactive states use other properties, so a
+ *   finished animation never overrides them.
+ * - Under prefers-reduced-motion nothing animates in or moves: the street
+ *   renders finished, the lit windows lit, the tram parked mid-street.
+ *
+ * Timeline: ground line 0.2–1.2 s; each house's outline draws from
+ * 0.35 s + 0.12 s × its index, its fill fading in behind; windows light from
+ * 1.25 s house by house; markers pop at 2.1 s and pulse once at 2.7 s; the tram
+ * starts crossing at 2.6 s and a few windows begin to go on and off.
+ */
+
+@property --glow-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 62%;
+}
+
+@property --glow-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 70%;
+}
+
+.panel {
+  transition:
+    --glow-x 1.1s cubic-bezier(0.2, 0.8, 0.2, 1),
+    --glow-y 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(46% 56% at var(--glow-x) var(--glow-y), rgb(255 213 0 / 0.12), transparent 72%);
+  pointer-events: none;
+}
+
+.far {
+  opacity: 0.32;
+}
+
+.sails {
+  transform-box: view-box;
+}
+
+.house {
+  transition: opacity 0.35s ease;
+}
+
+.line {
+  transition: stroke 0.3s ease;
+}
+
+.litActive,
+.spill {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* One option chosen: its building lights fully and turns yellow; the street steps back. */
+.panel[data-active] .house {
+  opacity: 0.42;
+}
+
+.panel[data-active='flat'] .house[data-kind='flat'],
+.panel[data-active='host'] .house[data-kind='host'] {
+  opacity: 1;
+}
+
+.panel[data-active='flat'] .house[data-kind='flat'] .line,
+.panel[data-active='host'] .house[data-kind='host'] .line {
+  stroke: var(--casa-sun);
+}
+
+.panel[data-active='flat'] .house[data-kind='flat'] .litActive,
+.panel[data-active='host'] .house[data-kind='host'] .litActive,
+.panel[data-active='flat'] .house[data-kind='flat'] .spill,
+.panel[data-active='host'] .house[data-kind='host'] .spill {
+  opacity: 1;
+}
+
+.tram {
+  transform: translateX(470px);
+}
+
+.caption {
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.captionOut {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.hotspot {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.marker {
+  display: block;
+  transition: filter 0.35s ease;
+}
+
+/* The other option's marker steps back with its street. `filter: opacity()`,
+   not `opacity`: the entrance animation holds `opacity` at its end value. */
+.panel[data-active] .hotspot:not([data-current]) .marker {
+  filter: opacity(0.35);
+}
+
+.markerLabel {
+  white-space: nowrap;
+  font-size: clamp(0.66rem, 1.15vw, 0.95rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.bead {
+  position: relative;
+  display: block;
+  height: clamp(0.95rem, 1.7vw, 1.45rem);
+  width: clamp(0.95rem, 1.7vw, 1.45rem);
+  border-radius: 9999px;
+  border: 2.5px solid var(--casa-sun);
+  background: var(--casa-ink-deep);
+  padding: 2.5px;
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease;
+}
+
+.beadCore {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--casa-sun);
+}
+
+.hotspot:hover .bead,
+.hotspot[data-current] .bead {
+  transform: scale(1.22);
+  box-shadow:
+    0 0 0 5px rgb(255 213 0 / 0.16),
+    0 0 22px rgb(255 213 0 / 0.5);
+}
+
+.hotspot:hover .markerLabel,
+.hotspot[data-current] .markerLabel {
+  color: var(--casa-sun);
+}
+
+.hotspot:focus-visible .bead {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .groundLine {
+    animation: casa-street-draw 1s cubic-bezier(0.45, 0.05, 0.25, 1) 0.2s both;
+  }
+
+  .line {
+    animation: casa-street-draw 1.1s cubic-bezier(0.45, 0.05, 0.25, 1) calc(0.35s + var(--h) * 0.12s) both;
+  }
+
+  .fill {
+    animation: casa-street-fade 0.7s ease-out calc(0.75s + var(--h) * 0.12s) both;
+  }
+
+  .lit {
+    animation: casa-street-fade 0.5s ease-out var(--in) both;
+  }
+
+  /* A few windows go dark for a moment now and then, as in a real street. */
+  .life {
+    animation:
+      casa-street-fade 0.5s ease-out var(--in) both,
+      casa-street-life var(--life) ease-in-out calc(var(--in) + 2.5s + var(--life-delay)) infinite;
+  }
+
+  .far,
+  .moon,
+  .prop {
+    animation: casa-street-fade 1.2s ease-out 0.3s both;
+  }
+
+  .far {
+    animation-name: casa-street-far;
+  }
+
+  .star {
+    animation: casa-street-twinkle 4.5s ease-in-out calc(var(--s) * -0.37s) infinite;
+  }
+
+  /* One lap of the Mühle am Wall's sails every half minute. */
+  .sails {
+    animation: casa-street-turn 30s linear infinite;
+  }
+
+  .tram {
+    animation: casa-street-tram 26s linear 2.6s infinite both;
+  }
+
+  .marker {
+    animation: casa-street-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) calc(2.1s + var(--node-index) * 0.18s) both;
+  }
+
+  .bead::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    border: 2px solid var(--casa-sun);
+    opacity: 0;
+    animation: casa-street-invite 1.3s ease-out calc(2.7s + var(--node-index) * 0.18s) 1 both;
+  }
+}
+
+@keyframes casa-street-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes casa-street-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes casa-street-far {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.32;
+  }
+}
+
+@keyframes casa-street-life {
+  0%,
+  62%,
+  100% {
+    opacity: 1;
+  }
+  68%,
+  86% {
+    opacity: 0;
+  }
+}
+
+@keyframes casa-street-twinkle {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes casa-street-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes casa-street-tram {
+  from {
+    transform: translateX(-230px);
+  }
+  to {
+    transform: translateX(760px);
+  }
+}
+
+@keyframes casa-street-pop {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes casa-street-invite {
+  from {
+    opacity: 0.75;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 2.1;
+  }
+}
