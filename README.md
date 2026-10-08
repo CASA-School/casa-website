@@ -127,6 +127,7 @@ Current homepage metrics use rounded aggregate values from the 2026-06-17 dashbo
 
 ## Current Status Docs
 
+- [Image branch merge handoff — 2026-10-08](docs/IMAGE_LAUNCH_MERGE_HANDOFF_2026_10_08.md) — complete branch, merge procedure, final accommodation imagery, verification and preview-cache notes.
 - [Recent website changes](docs/RECENT_CHANGES.md) — latest design, image and nonprofit-page handoff; responsive image rules and verification.
 - [Deployment cleanup and bilingual copy](docs/RELEASE_CLEANUP_COPY.md) — September 2026 review, additions compared with the old site, remaining launch decisions and verification.
 
