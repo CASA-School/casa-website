@@ -196,3 +196,25 @@ or `ImageResponse` (no generated OG images; `og:image` is a static file), so the
 was not reachable on the deployed revision. `next` and `eslint-config-next` were bumped to
 16.3.8, still pinned exactly; nothing else in the lockfile moved, and the production audit
 reports 0 vulnerabilities.
+
+## 2026-10-08 — Dependabot backlog merged, dev advisories cleared but one
+
+All 13 open Dependabot PRs (dev-scope patch and minor bumps; three rebased first because
+their September CI had failed on main's old audit state) were merged with green CI. A
+semver-compatible `npm audit fix` (no `--force`) then moved `fast-uri` 3.1.7 → 3.1.8 and
+`qs` 6.15.3 → 6.16.0 (both under `shadcn` → `@modelcontextprotocol/sdk`), with `knip`
+5.83.1 → 5.88.1 and `shadcn` 3.8.4 → 3.8.5 along the way. `package.json` did not change,
+and the production audit still reports 0 vulnerabilities.
+
+**Left on purpose: `braces` (GHSA-vfj7-8cjw-p6xm, high).** It is a stack-exhaustion DoS
+through deeply nested brace patterns, published 2026-09-18, affecting `braces` ≤ 3.0.3.
+**No patched release exists**: 3.0.3 is the latest. It reaches the tree only through
+dev tools, via `micromatch` → `fast-glob`, from `knip`, the `shadcn` CLI,
+`@next/eslint-plugin-next` and `ts-morph`. Each of them globs this repository's own
+files, never input from a visitor, so the path is not reachable from the site, and none
+of it is in the production image. `npm audit` offers only downgrades (`eslint-config-next`
+14, `shadcn` 1.0, `knip` 6), which are not acceptable. The 9 "high" lines in the full audit
+are all this one advisory. Re-check when `braces` 3.0.4 (or a `micromatch` that drops it)
+ships; `npm audit fix` will then clear it.
+
+Verified: lint, typecheck, 615 unit tests, knip, build; production audit 0.
