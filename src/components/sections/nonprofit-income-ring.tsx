@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { useCallback, useId, useRef, useState, type CSSProperties } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import glowStyles from './hero-glow.module.css';
 import styles from './nonprofit-income-ring.module.css';
+import { useHeroGlow } from './use-hero-glow';
 
 /**
  * Where CASA's income goes, as a loop: course fees travel round a ring and come
@@ -13,15 +15,15 @@ import styles from './nonprofit-income-ring.module.css';
  * light flowing round, on the ink ground with a warm glow behind it.
  *
  * It stands in the hero's media slot on /ueber-uns/gemeinnuetzigkeit, in place
- * of a photograph, so it fills the slot the way HeroBleedPhoto does: same
- * radius, a shape per breakpoint (square on phones, 4:3, then 3:2 beside the
- * lede), with the ring kept round inside it and the labels in the margin.
+ * of a photograph: a shape per breakpoint (square on phones, 4:3, then 3:2
+ * beside the lede), with the ring kept round inside it and the labels around.
  *
  * Interactive: each marker and its label is one button. Hover, focus or a tap
  * makes it active — the marker lifts, the other labels step back, and the
  * centre swaps CASA for that point's full sentence (the page's own funding
- * text, word for word). Leaving the panel, Escape, or tapping it again returns
- * to CASA. The warm glow leans towards the pointer.
+ * text, word for word). Leaving the ring, Escape, or tapping it again returns
+ * to CASA. The warm light follows the pointer across the whole hero
+ * (use-hero-glow.ts); the ring has no box of its own on the night hero.
  *
  * It shows destinations, never amounts. CASA has published no split of its
  * spending, so the ring must not grow percentages or segment sizes until CASA
@@ -73,48 +75,28 @@ const step = (i: number) => ({ ['--node-index' as string]: i }) as CSSProperties
 export function NonprofitIncomeRing({ nodes, details, label, className }: NonprofitIncomeRingProps) {
   const id = useId();
   const [active, setActive] = useState<number | null>(null);
-  const panel = useRef<HTMLElement>(null);
-  const followPointer = useRef(false);
+  const glow = useRef<HTMLDivElement>(null);
+  useHeroGlow(glow);
 
-  useEffect(() => {
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    followPointer.current = fine && !still;
-  }, []);
-
-  // The glow leans towards the pointer; CSS eases it (registered properties).
-  const onPointerMove = useCallback((event: PointerEvent<HTMLElement>) => {
-    const el = panel.current;
-    if (!el || !followPointer.current) return;
-    const box = el.getBoundingClientRect();
-    el.style.setProperty('--glow-x', `${(((event.clientX - box.left) / box.width) * 100).toFixed(1)}%`);
-    el.style.setProperty('--glow-y', `${(((event.clientY - box.top) / box.height) * 100).toFixed(1)}%`);
-  }, []);
-
-  const onPointerLeave = useCallback(() => {
-    panel.current?.style.removeProperty('--glow-x');
-    panel.current?.style.removeProperty('--glow-y');
-    setActive(null);
-  }, []);
+  const onPointerLeave = useCallback(() => setActive(null), []);
 
   return (
     <figure
-      ref={panel}
       role="group"
       aria-label={label}
-      onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       onKeyDown={(event) => {
         if (event.key === 'Escape') setActive(null);
       }}
       className={cn(
         styles.panel,
-        'relative aspect-square w-full overflow-hidden rounded-[var(--casa-radius-feature)] bg-[var(--casa-ink-deep)] text-white sm:aspect-[4/3] lg:aspect-[3/2]',
+        // No box of its own: the ring stands on the night hero's ground.
+        'relative aspect-square w-full text-white sm:aspect-[4/3] lg:aspect-[3/2]',
         className
       )}
       data-active={active ?? undefined}
     >
-      <div aria-hidden="true" className={styles.glow} />
+      <div ref={glow} aria-hidden="true" className={glowStyles.glow} />
 
       {/* The ring box: always square, centred, sized by the panel's height. */}
       <div className="absolute left-1/2 top-1/2 aspect-square h-[44%] -translate-x-1/2 -translate-y-1/2 sm:h-[58%] lg:h-[62%]">

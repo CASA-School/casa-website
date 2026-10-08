@@ -13,32 +13,6 @@
  * ring renders finished and the interaction still works.
  */
 
-@property --glow-x {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
-}
-
-@property --glow-y {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
-}
-
-.panel {
-  transition:
-    --glow-x 1.1s cubic-bezier(0.2, 0.8, 0.2, 1),
-    --glow-y 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* Warm light behind the ring; it leans towards the pointer (set from JS). */
-.glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(42% 58% at var(--glow-x) var(--glow-y), rgb(255 213 0 / 0.15), transparent 72%);
-  pointer-events: none;
-}
-
 .flow {
   transform-box: view-box;
   transform-origin: 200px 200px;
