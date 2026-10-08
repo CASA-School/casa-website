@@ -107,10 +107,7 @@ export default async function ExamsPage() {
         the rest — and the fifth row restated the button anyway ("Next step /
         check date, reserve seat").
 
-        `thumbC` (learners writing in class), not `thumbA`. thumbA is the
-        close-up of exam notes that the telc B2 option card renders below; a
-        detail crop that small also has nothing left to read once the bleed
-        mask dissolves a third of its width.
+        `thumbC`: learners writing in class.
       */}
       <HeroAPhotoLed
         eyebrow={locale === 'de' ? 'Prüfungen' : 'Exams'}

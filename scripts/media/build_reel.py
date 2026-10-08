@@ -50,6 +50,24 @@ HOST = (Path.home() / 'Tasks/10-active/work/CASA - Various Tasks/casa-external-a
         / 'output/casa-photo-package-external-agency-review-2026-09-15/consent-confirmed-by-casa-2026-09-15')
 OUT = REPO / 'public/media/casa'
 
+# THE WARM EDITORIAL GRADE (2026-10-08). Rahman: the photos should have warm,
+# editorial light; the modern grade of 2026-10-02 left them bright and neutral,
+# white walls glaring. Every classroom recipe keeps the white balance measured on
+# its own white wall and warms it by one shared amount, deepens the midtones to
+# L* 52 and holds the highlights at 89, so a wall reads cream and skin warm.
+# Global light and colour only, as before. The older frames of the pool (011-036)
+# are warm already; they get the same tone with a lighter touch (OLDER_*).
+EDITORIAL_TONE = (6, 52, 89)
+EDITORIAL_CHROMA = 1.09
+OLDER_CHROMA = 1.04
+OLDER_WB = (1.0, 1.0, 0.98)
+
+
+def warm(wb):
+    r, g, b = wb
+    return (round(r * 1.06, 3), g, round(b * 0.89, 3))
+
+
 # crop_y: top of the full-width 2:1 box in the original's pixels.
 # desktop_y: top of the 12:5 desktop band inside that box, in the same pixels.
 # tone: target lightness (0-100) for the crop's 5th, 50th and 95th percentile.
@@ -68,21 +86,21 @@ SLIDES = [
         'out': 'course-intensive-class.webp',
         'source': POOL / '060_IMG_0253.JPG',
         'box': (566, 130, 1920, 1440),
-        'tone': (5, 63, 93), 'chroma': 1.02, 'wb': (0.955, 1.0, 1.055),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.955, 1.0, 1.055)),
     },
     {
         # Slot 58, its course-page hero: the same class as a 2.4:1 band.
         'out': 'course-intensive-hero.webp',
         'source': POOL / '060_IMG_0253.JPG',
         'box': (260, 435, 2230, 929),
-        'tone': (5, 63, 93), 'chroma': 1.02, 'wb': (0.955, 1.0, 1.055),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.955, 1.0, 1.055)),
     },
     {
         # Slot 59, the course page's second photo: the same class, the teacher presenting.
         'out': 'course-intensive-story.webp',
         'source': POOL / '061_IMG_0254.JPG',
         'box': (1070, 280, 1400, 933),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.965, 1.0, 1.045),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.965, 1.0, 1.045)),
     },
     {
         # Slot 5, Abendkurse: three learners laughing over a shared exercise.
@@ -90,14 +108,14 @@ SLIDES = [
         'out': 'course-evening-table.webp',
         'source': POOL / '088_IMG_0303.JPG',
         'box': (40, 30, 1960, 1470),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.03),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.98, 1.0, 1.03)),
     },
     {
         # Slot 60, its course-page hero.
         'out': 'course-evening-hero.webp',
         'source': POOL / '088_IMG_0303.JPG',
         'box': (40, 300, 1960, 817),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.03),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.98, 1.0, 1.03)),
     },
     {
         # Slot 8, Spezialkurse: the teacher speaking at the smart board, her
@@ -106,7 +124,7 @@ SLIDES = [
         'out': 'course-special-smartboard.webp',
         'source': POOL / '067_IMG_0266.JPG',
         'box': (490, 138, 2070, 1552),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.0, 1.0, 0.995),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.0, 1.0, 0.995)),
     },
     {
         # Slot 61, its course-page hero.
@@ -114,7 +132,7 @@ SLIDES = [
         'source': POOL / '067_IMG_0266.JPG',
         # y 470, not 560 (crop pass 2026-10-02): room above the teacher's head.
         'box': (0, 470, 2560, 1067),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.0, 1.0, 0.995),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.0, 1.0, 0.995)),
     },
     {
         # Slot 62, Bildungszeit: a learner smiling up from his exercise while
@@ -122,7 +140,7 @@ SLIDES = [
         'out': 'course-bildungszeit-class.webp',
         'source': POOL / '094_IMG_0315.JPG',
         'box': (170, 0, 2227, 1670),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.03),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.99, 1.0, 1.03)),
     },
     {
         # Slot 63, its course-page hero.
@@ -130,22 +148,7 @@ SLIDES = [
         'source': POOL / '094_IMG_0315.JPG',
         # y 0, not 100 (crop pass 2026-10-02): room above the teacher's head.
         'box': (0, 0, 2560, 1067),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.03),
-    },
-    {
-        # Slot 64, Firmenunterricht: a CASA classroom, the logo on the screen.
-        # No people in it.
-        'out': 'course-company-classroom.webp',
-        'source': POOL / '053_IMG_0211.JPG',
-        'box': (150, 0, 2251, 1688),
-        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.969, 1.0, 1.027),
-    },
-    {
-        # Slot 65, its course-page hero.
-        'out': 'course-company-hero.webp',
-        'source': POOL / '053_IMG_0211.JPG',
-        'box': (0, 330, 2560, 1067),
-        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.969, 1.0, 1.027),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.99, 1.0, 1.03)),
     },
     {
         # Slot 56, the homepage's "Wir hören zu": the teacher with smiling learners.
@@ -153,7 +156,7 @@ SLIDES = [
         'source': POOL / '087_IMG_0302.JPG',
         # y 60, not 170 (crop pass 2026-10-02): room above the teacher's head.
         'box': (60, 60, 1620, 1080),
-        'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (0.99, 1.0, 1.034),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.99, 1.0, 1.034)),
     },
     {
         # Slot 57, a single room in a CASA shared flat, for the accommodation block.
@@ -203,9 +206,9 @@ SLIDES = [
         'out': 'hero-classroom-lesson.webp',
         'source': POOL / '093_IMG_0314.JPG',
         'box': (129, 0, 2110, 1688),
-        'tone': (6, 61, 93),
-        'chroma': 1.03,
-        'wb': (0.97, 0.995, 1.04),
+        'tone': EDITORIAL_TONE,
+        'chroma': EDITORIAL_CHROMA,
+        'wb': warm((0.97, 0.995, 1.04)),
     },
     {
         # Slot 51. A lesson on Wechselpräpositionen; the board is the teacher's own handwriting.
@@ -279,7 +282,7 @@ SLIDES = [
         'out': 'exam-b2-class.webp',
         'source': POOL / '079_IMG_0286.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.01, 1.0, 0.99),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 0.99)),
     },
     {
         # Slot 11, the exams hero (since the crop pass of 2026-10-02): four
@@ -288,24 +291,7 @@ SLIDES = [
         'out': 'learners-writing-class.jpg',
         'source': POOL / '066_IMG_0265.JPG',
         'box': (0, 0, 2134, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.02, 1.0, 0.985),
-    },
-    {
-        # Slot 68, the telc C1 Hochschule card and that page's hero on phones:
-        # three learners at the long table, heads with room above. 4:3. Replaced
-        # 032 (its original frame cuts a learner's crown).
-        'out': 'exam-c1-writing.webp',
-        'source': POOL / '065_IMG_0264.JPG',
-        'box': (820, 230, 1740, 1305),
-        'tone': (5, 61, 93), 'chroma': 1.03, 'wb': (1.02, 1.0, 0.97),
-    },
-    {
-        # Slot 69, the telc C1 Hochschule hero band: the whole row of five
-        # learners, about 200px above the tallest head. 2.4:1.
-        'out': 'exam-c1-hero.webp',
-        'source': POOL / '065_IMG_0264.JPG',
-        'box': (0, 250, 2560, 1067),
-        'tone': (5, 61, 93), 'chroma': 1.03, 'wb': (1.02, 1.0, 0.97),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.02, 1.0, 0.985)),
     },
     {
         # Slot 70, the telc C1 Hochschule page's second photo: two learners
@@ -313,7 +299,7 @@ SLIDES = [
         'out': 'exam-c1-speaking.webp',
         'source': POOL / '074_IMG_0278.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.015, 1.0, 0.975),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.015, 1.0, 0.975)),
     },
     {
         # Slot 71, the exams page's candidate story: two learners reading
@@ -321,7 +307,7 @@ SLIDES = [
         'out': 'exam-story-writing.webp',
         'source': POOL / '078_IMG_0285.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.975),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.04, 1.0, 0.975)),
     },
     {
         # Slot 13, "Ihre Frage ist noch offen?" (FAQ) and the contact page: one
@@ -329,7 +315,7 @@ SLIDES = [
         'out': 'individual-tutoring.jpg',
         'source': POOL / '011_IMG_0021.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.98, 1.0, 1.10),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
     },
     {
         # Slot 80, the nonprofit page's hero: learners and volunteers sharing
@@ -337,7 +323,7 @@ SLIDES = [
         'out': 'community-shared-meal.webp',
         'source': POOL / '043_IMG_0178.JPG',
         'box': (0, 0, 2560, 1685),
-        'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.96),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.04, 1.0, 0.96)),
     },
     {
         # Slot 82, the "Studieren in Deutschland" hero: two learners listening
@@ -346,7 +332,7 @@ SLIDES = [
         'out': 'study-learners-attentive.webp',
         'source': POOL / '026_IMG_0185.JPG',
         'box': (0, 0, 2560, 2056),
-        'tone': (5, 62, 93), 'chroma': 1.02, 'wb': (0.975, 1.0, 1.12),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
     },
     {
         # Slot 25, the "Leben in Deutschland" guide's hero: the Schnoor. The
@@ -457,7 +443,93 @@ SLIDES = [
         'out': 'home-community-breakfast.webp',
         'source': POOL / '050_IMG_0194.JPG',
         'box': (0, 150, 1680, 2240),
-        'tone': (5, 63, 93), 'chroma': 1.03, 'wb': (1.04, 1.0, 0.96),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.04, 1.0, 0.96)),
+    },
+    # THE SECOND PASS (2026-10-08). Firmenunterricht's photographs were an empty
+    # classroom, the C1 Hochschule hero did not look good, and three slots still
+    # showed a stand-in. Only frames whose people Rahman confirmed: 076 and 077
+    # (2026-10-01), 061 (2026-10-02), 012, 023, 024, 031 and 032 (the brief).
+    {
+        # Slot 84, Firmenunterricht: two colleagues going through a document.
+        'out': 'course-company-colleagues.webp',
+        'source': POOL / '076_IMG_0283.JPG',
+        'box': (200, 0, 2247, 1685),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.005, 1.0, 0.99)),
+    },
+    {
+        # Slot 85, its course-page hero.
+        'out': 'course-company-colleagues-hero.webp',
+        'source': POOL / '076_IMG_0283.JPG',
+        'box': (0, 280, 2560, 1067),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.005, 1.0, 0.99)),
+    },
+    {
+        # Slot 86, Firmenunterricht's second photo: a learner reading closely.
+        'out': 'course-company-focus.webp',
+        'source': POOL / '032_IMG_0473.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+    },
+    {
+        # Slot 87, beside a Firmenunterricht participant's quote: a hand with a
+        # pen, no face, so the photo cannot be read as the person quoted (hard rule 2).
+        'out': 'course-company-writing.webp',
+        'source': POOL / '024_IMG_0156.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+    },
+    {
+        # Slot 88, Deutsch fuer Pflege und Medizin: two learners going through a
+        # text together, as in a practised conversation. Not a clinic: CASA has
+        # no photograph of one, and slot 37 waits for it.
+        'out': 'course-medical-dialogue.webp',
+        'source': POOL / '077_IMG_0284.JPG',
+        'box': (100, 0, 2276, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 1.0)),
+    },
+    {
+        # Slot 89, its course-page hero.
+        'out': 'course-medical-dialogue-hero.webp',
+        'source': POOL / '077_IMG_0284.JPG',
+        'box': (0, 180, 2560, 1067),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 1.0)),
+    },
+    {
+        # Slot 90, the medical course page's second photo: two learners writing.
+        'out': 'course-medical-writing.webp',
+        'source': POOL / '012_IMG_0031.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+    },
+    {
+        # Slot 91, Bildungszeit's second photo (was the empty classroom): a
+        # learner smiling across the table, his books in front of him.
+        'out': 'course-bildungszeit-learner.webp',
+        'source': POOL / '031_IMG_0472.JPG',
+        'box': (0, 0, 2560, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+    },
+    {
+        # Slot 92, telc C1 Hochschule on phones: three learners writing in a row.
+        'out': 'exam-c1-study.webp',
+        'source': POOL / '023_IMG_0147.JPG',
+        'box': (284, 0, 2276, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+    },
+    {
+        # Slot 93, the telc C1 Hochschule hero band from lg up.
+        'out': 'exam-c1-study-hero.webp',
+        'source': POOL / '023_IMG_0147.JPG',
+        'box': (0, 0, 2560, 1067),
+        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+    },
+    {
+        # Slot 94, the team page's "Wer wir sind": a teacher at the screen with
+        # her class, the whole frame (slot 59 is a close crop of it).
+        'out': 'team-lesson-wide.webp',
+        'source': POOL / '061_IMG_0254.JPG',
+        'box': (0, 0, 2560, 1680),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.965, 1.0, 1.045)),
     },
 ]
 

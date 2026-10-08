@@ -344,6 +344,17 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
       de: 'Klare Beratung macht die nächsten Schritte einfach verständlich.',
     },
   },
+  teamLesson: {
+    src: '/media/casa/team-lesson-wide.webp',
+    alt: {
+      en: 'A teacher at the screen with her class',
+      de: 'Eine Lehrerin am Bildschirm mit ihrer Klasse',
+    },
+    caption: {
+      en: 'A lesson at CASA',
+      de: 'Unterricht bei CASA',
+    },
+  },
   campusDiscussion: {
     src: '/media/casa/course-discussion-row.jpg',
     alt: {
@@ -563,15 +574,52 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Teilnehmende schreiben, die Lehrerin schreibt Grammatik an die Tafel', en: 'Learners writing while the teacher writes grammar on the board' },
     caption: { de: 'Bildungszeit', en: 'Bildungszeit' },
   },
-  companyClassroom: {
-    src: '/media/casa/course-company-classroom.webp',
-    alt: { de: 'Ein heller CASA-Kursraum, das Logo auf dem Bildschirm', en: 'A bright CASA classroom, the logo on the screen' },
+  /*
+   * FIRMENUNTERRICHT, MEDICAL AND BILDUNGSZEIT, SECOND PASS (2026-10-08). The
+   * empty classroom that stood for Firmenunterricht (and for Bildungszeit's
+   * second photo) gave way to people at work; the medical course had no
+   * photograph at all. Slots 84-91.
+   */
+  companyColleagues: {
+    src: '/media/casa/course-company-colleagues.webp',
+    alt: { de: 'Zwei Kollegen besprechen gemeinsam ein Dokument', en: 'Two colleagues going through a document together' },
     caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
   },
-  companyHero: {
-    src: '/media/casa/course-company-hero.webp',
-    alt: { de: 'Ein heller CASA-Kursraum mit Tischen und Stühlen', en: 'A bright CASA classroom with tables and chairs' },
+  companyColleaguesHero: {
+    src: '/media/casa/course-company-colleagues-hero.webp',
+    alt: { de: 'Zwei Kollegen besprechen gemeinsam ein Dokument', en: 'Two colleagues going through a document together' },
     caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
+  },
+  companyFocus: {
+    src: '/media/casa/course-company-focus.webp',
+    alt: { de: 'Eine Teilnehmerin liest konzentriert, neben ihr eine Kollegin', en: 'A learner reading closely, a colleague beside her' },
+    caption: { de: 'Deutsch für den Arbeitsalltag', en: 'German for everyday work' },
+  },
+  // Beside a named participant's quote: a hand and a pen, no face (hard rule 2).
+  companyQuote: {
+    src: '/media/casa/course-company-writing.webp',
+    alt: { de: 'Eine Hand mit Stift, dahinter der Kurs', en: 'A hand holding a pen, the class behind it' },
+    caption: { de: 'Im Kurs', en: 'In class' },
+  },
+  medicalDialogue: {
+    src: '/media/casa/course-medical-dialogue.webp',
+    alt: { de: 'Zwei Teilnehmerinnen gehen gemeinsam einen Text durch', en: 'Two learners going through a text together' },
+    caption: { de: 'Deutsch für Pflege und Medizin', en: 'German for nursing and medicine' },
+  },
+  medicalDialogueHero: {
+    src: '/media/casa/course-medical-dialogue-hero.webp',
+    alt: { de: 'Zwei Teilnehmerinnen gehen gemeinsam einen Text durch', en: 'Two learners going through a text together' },
+    caption: { de: 'Deutsch für Pflege und Medizin', en: 'German for nursing and medicine' },
+  },
+  medicalWriting: {
+    src: '/media/casa/course-medical-writing.webp',
+    alt: { de: 'Zwei Teilnehmerinnen schreiben in ihre Hefte', en: 'Two learners writing in their notebooks' },
+    caption: { de: 'Schreiben üben', en: 'Writing practice' },
+  },
+  bildungszeitLearner: {
+    src: '/media/casa/course-bildungszeit-learner.webp',
+    alt: { de: 'Ein Teilnehmer lächelt über den Tisch, vor ihm seine Bücher', en: 'A learner smiling across the table, his books in front of him' },
+    caption: { de: 'Bildungszeit', en: 'Bildungszeit' },
   },
   /*
    * A ROOM IN A CASA SHARED FLAT (slot 57), for the homepage's "Ein eigenes
@@ -603,14 +651,15 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Zwei Teilnehmer gehen gemeinsam ihre Blätter durch', en: 'Two learners going through their papers together' },
     caption: { de: 'Vorbereitung im Kurs', en: 'Preparing in class' },
   },
+  // Slots 92-93 (2026-10-08): the row of five that was here did not look good in the hero.
   examC1: {
-    src: '/media/casa/exam-c1-writing.webp',
-    alt: { de: 'Drei Teilnehmer am langen Kurstisch folgen dem Unterricht', en: 'Three learners at the long course table following the lesson' },
+    src: '/media/casa/exam-c1-study.webp',
+    alt: { de: 'Drei Teilnehmerinnen schreiben nebeneinander', en: 'Three learners writing side by side' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Hero: {
-    src: '/media/casa/exam-c1-hero.webp',
-    alt: { de: 'Fünf Teilnehmer in einer Reihe am Kurstisch', en: 'Five learners in a row at the course table' },
+    src: '/media/casa/exam-c1-study-hero.webp',
+    alt: { de: 'Drei Teilnehmerinnen schreiben nebeneinander', en: 'Three learners writing side by side' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Class: {
@@ -659,7 +708,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Der Esstisch einer Gastfamilie', en: 'A host family\'s dining table' },
     caption: { de: 'Am Tisch der Gastfamilie', en: 'At the host family\'s table' },
   },
-  /* Awaited (slot 81): no host family's guest room has been photographed yet. */
+  /* Awaited (slot 81): no host family's guest room has been photographed yet.
+     Until then the become-a-host room row shows the host family's dining area (slot 77). */
   hostFamilyGuestRoom: {
     src: '/media/casa/host-family-guest-room.jpg',
     alt: { de: 'Ein Gästezimmer in einer Gastfamilie', en: 'A guest room in a host family' },
@@ -767,7 +817,8 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
     ],
     photos: {
       hero: photoLibrary.studentClass,
-      mission: photoLibrary.campusDiscussion,
+      // „Wer wir sind": a teacher with her class (slot 94); slot 6 was never photographed.
+      mission: photoLibrary.teamLesson,
       // The team page's hero: the CASA team in the courtyard (slot 55, 3:2).
       team: photoLibrary.heroTeam,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
@@ -837,13 +888,18 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       groups: photoLibrary.groupCourseBremenMusicians,
       // A group lunch in the courtyard (slot 21, pool W009).
       groupsStory: photoLibrary.groupCourseLunch,
-      medical: photoLibrary.medicalConsultation,
-      company: photoLibrary.companyClassroom,
-      companyHero: photoLibrary.companyHero,
-      companyStory: photoLibrary.teacherGuiding,
+      // Slot 37 (a clinical photograph) is still awaited; until then slots 88-90.
+      medical: photoLibrary.medicalDialogue,
+      medicalHero: photoLibrary.medicalDialogueHero,
+      medicalStory: photoLibrary.medicalWriting,
+      company: photoLibrary.companyColleagues,
+      companyHero: photoLibrary.companyColleaguesHero,
+      companyStory: photoLibrary.companyFocus,
+      // `<key>Quote` sits beside the course's testimonial; without one it is the group walk.
+      companyQuote: photoLibrary.companyQuote,
       bildungszeit: photoLibrary.bildungszeitClass,
       bildungszeitHero: photoLibrary.bildungszeitHero,
-      bildungszeitStory: photoLibrary.companyClassroom,
+      bildungszeitStory: photoLibrary.bildungszeitLearner,
       academic: photoLibrary.classroomMapVocabulary,
       business: photoLibrary.whiteboardPractice,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
@@ -861,11 +917,9 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Register for an exam', de: 'Zur Prüfungsanmeldung' }, href: '/registration/exam', kind: 'primary' },
     ],
     photos: {
-      // telc B2 card (slot 18), telc C1 Hochschule card (68), the hero (11).
-      thumbA: photoLibrary.examPrepTable,
-      thumbB: photoLibrary.examC1,
+      // The hero (slot 11). The exam cards have no photographs since 2026-10-08.
       thumbC: photoLibrary.studentSuccess,
-      // The candidate story: its own photo, so the B2 card's is not shown twice.
+      // The candidate story (slot 71).
       story: photoLibrary.examStory,
     },
   },
@@ -926,7 +980,10 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       becomeHost: photoLibrary.hostFamilyKitchenDetail,
       becomeHostHero: photoLibrary.hostFamilyKitchenHero,
       becomeHostStory: photoLibrary.hostFamilyDinner,
-      becomeHostRoom: photoLibrary.hostFamilyGuestRoom,
+      // The host family's own home until a guest room is photographed (slot 81);
+      // a CASA-WG room must not stand in for it (hard rule 5). Frame 11, the one
+      // photo of that home this page does not already show.
+      becomeHostRoom: photoLibrary.hostFamilyTable,
       becomeHostAgreement: photoLibrary.hostFamilyBathroom,
       becomeHostPartnership: photoLibrary.hostFamilyKitchen,
     },
