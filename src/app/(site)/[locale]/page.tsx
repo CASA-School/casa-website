@@ -584,7 +584,7 @@ export default async function HomePage() {
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2'
                       )}
                     >
-                      <span className={cn('absolute inset-x-0 top-0 h-1', meaningClasses.courses.bar)} aria-hidden />
+                      <span className={cn('casa-card-edge', meaningClasses.courses.bar)} aria-hidden />
                       <span className="text-xs font-semibold uppercase tracking-eyebrow tabular-nums text-[var(--casa-muted)]">
                         {String(index + 1).padStart(2, '0')}
                       </span>

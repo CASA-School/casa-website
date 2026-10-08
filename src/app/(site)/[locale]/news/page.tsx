@@ -269,7 +269,7 @@ export default async function NewsPage() {
                             {item.levels ? <CefrBandBadge bands={item.levels} className="mt-2" /> : null}
                           </div>
                         </div>
-                        <p className="mt-3 text-[15px] leading-relaxed text-[var(--casa-ink)]/75">
+                        <p className="mt-3 text-[15px] leading-relaxed text-[var(--casa-muted)]">
                           {localizedText(item.body, locale)}
                         </p>
                       </div>
@@ -336,7 +336,7 @@ export default async function NewsPage() {
                     <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--casa-gold-deep)]">
                       <FeatureAsideIcon className="h-4 w-4" aria-hidden />
                     </span>
-                    <p className="text-[15px] leading-relaxed text-[var(--casa-ink)]/80">
+                    <p className="text-[15px] leading-relaxed text-[var(--casa-muted)]">
                       {localizedText(newsFlashIssue.feature.aside.text, locale)}
                     </p>
                   </aside>
@@ -354,7 +354,7 @@ export default async function NewsPage() {
               <p className="mt-3 text-2xl font-bold text-[var(--casa-ink)]">
                 &ldquo;{newsFlashIssue.wordOfTheMonth.word}&rdquo;
               </p>
-              <p className="mt-2 text-[15px] leading-relaxed text-[var(--casa-ink)]/75">
+              <p className="mt-2 text-[15px] leading-relaxed text-[var(--casa-muted)]">
                 {localizedText(newsFlashIssue.wordOfTheMonth.definition, locale)}
               </p>
             </aside>

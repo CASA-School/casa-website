@@ -341,17 +341,27 @@
    * clear AA on --casa-sand (#e2e8f0), which is far darker than this canvas.
    * Measured on #f6fafb — ink 16.99, muted 5.31, accent-text 5.30.
    */
-  --casa-canvas: #f6fafb;
+  /* White since 2026-10-08 (Rahman): ONE light ground for the whole site. The
+     cool #f6fafb canvas sat 2% off the white bands it alternated with, which
+     read as a slightly dirty white rather than as a second surface. Sections
+     now separate by spacing and the ink bands; cards by their shadows. Kept as
+     a token, so a warm paper ground is a one-line change if CASA ever wants it. */
+  --casa-canvas: #ffffff;
   --casa-surface-subtle: #eef4f5;
   --casa-surface-wash: #fbfdfd;
 
   /*
-   * THE SURFACE LADDER. Four grounds, and that is the whole list.
+   * THE SURFACE LADDER. Three grounds and a panel, and that is the whole list
+   * (2026-10-08: the canvas and white merged into one light ground).
    *
-   *   --casa-canvas     #f6fafb   the page. `main` paints it; bands inherit it.
-   *   --casa-bg / white #ffffff   a raised band, a card, an input.
-   *   --casa-ink-deep   #111827   an inverted band.
+   *   --casa-canvas     #ffffff   the page; `main` paints it; bands inherit it.
+   *   --casa-bg / white #ffffff   the same white: a band, a card, an input.
+   *   --casa-ink-deep   #111827   an inverted band (and the night heroes).
    *   --casa-warm-soft  #fff3da   a warm panel INSIDE one of the above.
+   *
+   * On the one light ground, a card is told from its band by its shadow
+   * (--shadow-card / --shadow-soft carry a hairline ring for exactly that),
+   * never by a second near-white.
    *
    * `--casa-surface-wash` is a panel tint, never a band, and only ever used
    * BARE. `--casa-surface-subtle` is the one step darker than canvas, for
@@ -385,7 +395,12 @@
   --casa-ink: #0f172a;
   /* Was #64748b (4.76:1 on white but 4.32:1 on --casa-warm-soft and 3.86:1 on
      --casa-sand). Darkened so body text clears AA on every light surface. */
-  --casa-muted: #5b697e;
+  /* Darkened again 2026-10-08 (Rahman: secondary copy read too bright on the
+     light grounds). #5b697e was 5.58:1 on white; #46536a is 7.76:1 on white,
+     7.05:1 on --casa-warm-soft and 6.30:1 on --casa-sand — AAA for running text,
+     same cool slate family. Small captions keep the lighter
+     --casa-subtle-on-light (#5b697e). */
+  --casa-muted: #46536a;
   /* A form field at rest is a soft well (src/components/forms/form-styles.tsx):
      a cool fill, a hairline edge and an inset shadow, so the field reads as a
      place to type rather than a drawn box. Active it turns white, with the CASA
@@ -649,10 +664,17 @@
    * (36, 51, 59) instead of cold slate (15, 23, 42). Light falls off gradually.
    * The warmer ink is also what stops the greys reading cold.
    */
-  --shadow-soft:  0 1px 2px rgba(36, 51, 59, 0.04), 0 2px 8px rgba(36, 51, 59, 0.05);
-  --shadow-card:  0 2px 4px rgba(36, 51, 59, 0.04), 0 10px 28px rgba(36, 51, 59, 0.08);
-  --shadow-modal: 0 8px 16px rgba(36, 51, 59, 0.06), 0 22px 54px rgba(36, 51, 59, 0.13);
-  --shadow-hero:  0 12px 24px rgba(36, 51, 59, 0.07), 0 32px 72px rgba(36, 51, 59, 0.16);
+  /*
+   * 2026-10-08 (Rahman: card shadows should look premium). Three layers each:
+   * a hairline ring that gives the card a crisp edge on the white ground (so
+   * no border is needed), a short contact shadow, and a long, soft ambient
+   * shadow pulled in by a negative spread so it pools under the card rather
+   * than haloing round it. Same warm ink (36, 51, 59) as before.
+   */
+  --shadow-soft:  0 0 0 1px rgba(36, 51, 59, 0.06), 0 1px 2px rgba(36, 51, 59, 0.05), 0 8px 20px -10px rgba(36, 51, 59, 0.14);
+  --shadow-card:  0 0 0 1px rgba(36, 51, 59, 0.06), 0 1px 3px rgba(36, 51, 59, 0.06), 0 14px 28px -16px rgba(36, 51, 59, 0.2);
+  --shadow-modal: 0 0 0 1px rgba(36, 51, 59, 0.07), 0 4px 10px -2px rgba(36, 51, 59, 0.08), 0 28px 60px -20px rgba(36, 51, 59, 0.30);
+  --shadow-hero:  0 0 0 1px rgba(36, 51, 59, 0.06), 0 8px 18px -6px rgba(36, 51, 59, 0.10), 0 40px 90px -28px rgba(36, 51, 59, 0.34);
 
   /*
    * Coloured elevation — a brand-blue glow under primary actions and selected
@@ -1149,6 +1171,23 @@ h3 {
  * Hard stops, never a gradient between the colours: sRGB interpolation from
  * the blue to the yellow passes through green.
  */
+/*
+ * A card's coloured top edge (2026-10-08, Rahman: make the brand colours on the
+ * cards' top edges elegant). Was a blunt 4px bar across the full width. Now a
+ * 2px line that fades out towards both corners, so the colour reads as light
+ * along the edge rather than a strip glued on. The colour stays where it was,
+ * in the bar's own background class (meaning.ts, or the logo stripe); the mask
+ * does the fade. Put it on an aria-hidden span inside a `relative` card.
+ */
+.casa-card-edge {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
 .casa-logo-stripe {
   background-image: linear-gradient(
     90deg,

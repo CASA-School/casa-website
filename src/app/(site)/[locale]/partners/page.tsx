@@ -47,7 +47,7 @@ function ExternalLink({ href, children, locale }: { href: string; children: Reac
 function PartnerCard({ partner, locale }: { partner: Partner; locale: ContentLocale }) {
   return (
     <li className="relative flex flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8">
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--casa-blue)]" />
+      <span aria-hidden="true" className="casa-card-edge bg-[var(--casa-blue)]" />
       <PartnerLogoTile partner={partner} />
       <p className={cn('text-sm font-semibold text-[var(--casa-accent-text)]', partner.logo && 'mt-6')}>{partner.label[locale]}</p>
       <h2 className="mt-1 text-2xl font-bold text-[var(--casa-ink)]">{partner.name}</h2>
@@ -90,7 +90,7 @@ export default async function PartnersPage() {
 
           {main ? (
             <article className="relative mt-8 overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)] sm:p-10">
-              <span aria-hidden="true" className="casa-logo-stripe absolute inset-x-0 top-0 h-1" />
+              <span aria-hidden="true" className="casa-logo-stripe casa-card-edge" />
               <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-12">
                 <div className="min-w-0">
                   <PartnerLogoTile partner={main} size="lg" />
