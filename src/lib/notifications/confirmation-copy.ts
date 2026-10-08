@@ -11,12 +11,12 @@
  * produced or checked, never from the sender's free text; a line whose
  * placeholder has no value is left out.
  *
- * Address (2026-10-07): learners and applicants read „du“, as on the old
- * casa-bremen.de, and are greeted by first name. Group organisers and
- * companies keep „Sie“, as there: their kinds carry `"address": "Sie"`, which
- * swaps the shared lines for `sharedSie`. English has one register, so there
- * the swap changes only the greeting: learners and applicants read "Hello
- * {firstName},", organisers and companies keep "Dear {name},".
+ * Address: everyone reads „du“ and is greeted by first name — learners and
+ * applicants since 2026-10-07, group organisers since 2026-10-08 (Rahman: du
+ * all over). Companies keep „Sie“ for now: their kind carries
+ * `"address": "Sie"`, which swaps the shared lines for `sharedSie`. English has
+ * one register, so there the swap changes only the greeting: "Hello
+ * {firstName}," for everyone, "Dear {name}," for companies.
  */
 export const CONFIRMATION_COPY = {
   "kinds": [
@@ -73,13 +73,12 @@ export const CONFIRMATION_COPY = {
     {
       "kind": "groups",
       "variant": "",
-      "address": "Sie",
       "de": {
-        "subject": "Ihre Gruppenanfrage ist bei CASA angekommen",
-        "preheader": "Wir melden uns per E-Mail und planen das Programm gern gemeinsam mit Ihnen.",
-        "heading": "Danke für Ihre Gruppenanfrage",
-        "intro": "schön, dass Sie für Ihre Gruppe an CASA denken. Ihre Angaben sind gut bei uns angekommen, und Ihre Anfrage ist selbstverständlich unverbindlich.",
-        "summaryTitle": "Ihre Anfrage",
+        "subject": "Deine Gruppenanfrage ist bei CASA angekommen",
+        "preheader": "Wir melden uns per E-Mail und planen das Programm gern gemeinsam mit dir.",
+        "heading": "Danke für deine Gruppenanfrage",
+        "intro": "schön, dass du für deine Gruppe an CASA denkst. Deine Angaben sind gut bei uns angekommen, und deine Anfrage ist selbstverständlich unverbindlich.",
+        "summaryTitle": "Deine Anfrage",
         "summaryRows": [
           {
             "label": "Referenz",
@@ -89,13 +88,13 @@ export const CONFIRMATION_COPY = {
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir sehen uns Ihre Angaben an, melden uns so bald wie möglich per E-Mail und klären mit Ihnen, was noch offen ist."
+            "text": "Wir sehen uns deine Angaben an, melden uns so bald wie möglich per E-Mail und klären mit dir, was noch offen ist."
           },
           {
-            "text": "Gemeinsam planen wir den Unterricht so, wie es zu Ihrer Gruppe passt, und wenn Sie möchten, auch Kulturprogramm und Unterkunft."
+            "text": "Gemeinsam planen wir den Unterricht so, wie es zu deiner Gruppe passt, und wenn du möchtest, auch Kulturprogramm und Unterkunft."
           },
           {
-            "text": "Wenn alles zusammenpasst, erhalten Sie ein Angebot mit allen Leistungen und Kosten. Auch das Angebot ist unverbindlich."
+            "text": "Wenn alles zusammenpasst, erhältst du ein Angebot mit allen Leistungen und Kosten. Auch das Angebot ist unverbindlich."
           }
         ],
         "closing": "Wir freuen uns auf die gemeinsame Planung."
@@ -418,13 +417,12 @@ export const CONFIRMATION_COPY = {
     {
       "kind": "appointment",
       "variant": "",
-      "address": "Sie",
       "de": {
-        "subject": "Ihre Terminanfrage bei CASA: {dayShort}, {time} Uhr",
-        "preheader": "Wir halten Ihnen die Zeit vorerst frei, und {contactPerson} meldet sich persönlich per E-Mail bei Ihnen.",
-        "heading": "Ihre Wunschzeit ist vorerst reserviert",
-        "intro": "vielen Dank für Ihre Anfrage. Schön, dass Sie mit uns über Ihre Gruppe sprechen möchten.",
-        "summaryTitle": "Ihre Wunschzeit",
+        "subject": "Deine Terminanfrage bei CASA: {dayShort}, {time} Uhr",
+        "preheader": "Wir halten dir die Zeit vorerst frei, und {contactPerson} meldet sich persönlich per E-Mail bei dir.",
+        "heading": "Deine Wunschzeit ist vorerst reserviert",
+        "intro": "vielen Dank für deine Anfrage. Schön, dass du mit uns über deine Gruppe sprechen möchtest.",
+        "summaryTitle": "Deine Wunschzeit",
         "summaryRows": [
           {
             "label": "Datum",
@@ -454,16 +452,16 @@ export const CONFIRMATION_COPY = {
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "{contactPerson} prüft Ihre Anfrage und meldet sich persönlich per E-Mail bei Ihnen. Erst mit der Bestätigung steht der Termin fest. Darin erfahren Sie auch, wie das Gespräch stattfindet."
+            "text": "{contactPerson} prüft deine Anfrage und meldet sich persönlich per E-Mail bei dir. Erst mit der Bestätigung steht der Termin fest. Darin erfährst du auch, wie das Gespräch stattfindet."
           },
           {
-            "text": "Notieren Sie sich gern schon Ihre Ideen, offenen Fragen und Wünsche für Ihre Gruppe."
+            "text": "Notier dir gern schon deine Ideen, offenen Fragen und Wünsche für deine Gruppe."
           },
           {
-            "text": "Passt Ihnen die Zeit doch nicht, oder brauchen Sie den Termin nicht mehr? Antworten Sie einfach auf diese E-Mail. Dann suchen wir gemeinsam einen anderen Termin oder geben die Zeit wieder frei."
+            "text": "Passt dir die Zeit doch nicht, oder brauchst du den Termin nicht mehr? Antworte einfach auf diese E-Mail. Dann suchen wir gemeinsam einen anderen Termin oder geben die Zeit wieder frei."
           }
         ],
-        "closing": "Wir freuen uns, von Ihrer Gruppe zu hören."
+        "closing": "Wir freuen uns, von deiner Gruppe zu hören."
       },
       "en": {
         "subject": "Your CASA appointment request: {dayShort}, {time}",

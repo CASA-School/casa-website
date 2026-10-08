@@ -414,7 +414,8 @@ export default async function CourseDetailPage({
 
   // Quote products have a different journey: nobody registers, someone briefs.
   // Firmenunterricht speaks about the company in the third person, as the old
-  // casa-bremen.de page did; the group steps keep "Sie" for the organiser.
+  // casa-bremen.de page did; the group steps say "du" to the organiser, as the
+  // whole site does (Rahman, 2026-10-08).
   const processStepItems = courseNextSteps?.steps ?? (isOrganisationQuote
     ? [
         {
@@ -449,7 +450,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Anfrage senden' : 'Send your enquiry',
             description:
               locale === 'de'
-                ? 'Schreiben Sie uns, wie groß Ihre Gruppe ist, wie alt die Teilnehmenden sind, wann Sie kommen möchten und was Ihnen wichtig ist.'
+                ? 'Schreib uns, wie groß deine Gruppe ist, wie alt die Teilnehmenden sind, wann ihr kommen möchtet und was dir wichtig ist.'
                 : 'Tell us how big your group is, how old the participants are, when you would like to come and what matters to you.',
           },
           {
@@ -457,7 +458,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Programm abstimmen' : 'Shape the programme',
             description:
               locale === 'de'
-                ? 'Gemeinsam mit Ihnen planen wir Unterricht, Kulturprogramm und Unterkunft.'
+                ? 'Gemeinsam mit dir planen wir Unterricht, Kulturprogramm und Unterkunft.'
                 : 'Together with you, we plan the lessons, the culture programme and the accommodation.',
           },
           {
@@ -465,7 +466,7 @@ export default async function CourseDetailPage({
             title: locale === 'de' ? 'Angebot erhalten' : 'Receive your quote',
             description:
               locale === 'de'
-                ? 'Sie erhalten ein unverbindliches Angebot mit allen Leistungen und Kosten.'
+                ? 'Du erhältst ein unverbindliches Angebot mit allen Leistungen und Kosten.'
                 : 'You receive a no-obligation quote listing everything that is included and what it costs.',
           },
         ]
@@ -533,9 +534,9 @@ export default async function CourseDetailPage({
       ]
     : isGroupQuote
       ? [
-          locale === 'de' ? 'Inhalte und Tempo stimmen wir mit Ihnen ab.' : 'We agree the content and pace with you.',
-          locale === 'de' ? 'Unterkunft und Kulturprogramm organisieren wir für Sie.' : 'We organise the accommodation and the culture programme for you.',
-          locale === 'de' ? 'Von der Anfrage bis zur Abreise haben Sie eine feste Ansprechperson.' : 'From your first enquiry until the day you leave, you have one person to talk to.',
+          locale === 'de' ? 'Inhalte und Tempo stimmen wir mit dir ab.' : 'We agree the content and pace with you.',
+          locale === 'de' ? 'Unterkunft und Kulturprogramm organisieren wir für dich.' : 'We organise the accommodation and the culture programme for you.',
+          locale === 'de' ? 'Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.' : 'From your first enquiry until the day you leave, you have one person to talk to.',
         ]
       : [
           locale === 'de' ? 'Klare Lernziele pro Woche' : 'Clear weekly learning goals',
@@ -583,7 +584,7 @@ export default async function CourseDetailPage({
           }
           description={
             locale === 'de'
-              ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchen Sie bei uns im Komplettpaket. Sie bringen die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
+              ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchst du bei uns im Komplettpaket. Du bringst die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
               : 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.'
           }
           ctas={[
