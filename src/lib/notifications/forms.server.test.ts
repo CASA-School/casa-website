@@ -171,17 +171,17 @@ describe('public form notifications', () => {
     expect(body.message.body.content).toContain('src="cid:casa-logo"');
     expect(body.message.body.content).toContain('@media only screen and (max-width: 620px)');
   });
-  it('prepares a reply in the sender\'s language, greeting them by salutation', async () => {
+  it('prepares a reply in the sender\'s language, greeting them by first name', async () => {
     const de = (await sentMessage('course', {
       requestId: 'r', salutation: 'ms', firstName: 'Maria', lastName: 'Rossi', email: 'maria@example.com', courseTypeLabel: 'Intensivkurs', locale: 'de',
     })).message.body.content as string;
     expect(de).toContain('Maria antworten');
-    expect(de).toContain(`subject=${encodeURIComponent('Ihre Kursanmeldung bei CASA')}`);
-    expect(de).toContain(encodeURIComponent('Sehr geehrte Frau Rossi,'));
+    expect(de).toContain(`subject=${encodeURIComponent('Deine Kursanmeldung bei CASA')}`);
+    expect(de).toContain(encodeURIComponent('Hallo Maria,'));
     const en = (await sentMessage('contact', { requestId: 'r', firstName: 'Sam', email: 'sam@example.com', locale: 'en' }))
       .message.body.content as string;
     expect(en).toContain('Reply to Sam');
-    expect(en).toContain(encodeURIComponent('Dear Sam,'));
+    expect(en).toContain(encodeURIComponent('Hello Sam,'));
   });
   it('offers the contact person a ready confirmation for an appointment', async () => {
     const content = (await sentMessage('appointment', {
@@ -380,7 +380,7 @@ describe('confirmation to the sender', () => {
     expect(contact).toContain('href="tel:+4942146041430"');
   });
 
-  it('says „du“ to a learner and a group organiser and keeps „Sie“ for a company', async () => {
+  it('says „du“ to everyone: a learner, a group organiser and a company', async () => {
     // Live, so the test-mode line for the team is not part of the mail.
     const learner = (await confirmation('course', course, 'live')).message.body.content as string;
     expect(learner).toContain('Schön, dass du bei uns Deutsch lernen möchtest');
@@ -398,10 +398,11 @@ describe('confirmation to the sender', () => {
     const company = (await confirmation('groups', {
       requestId: 'r', locale: 'de', firstName: 'Jonas', lastName: 'Weber', email: 'jonas@example.com', topicKey: 'company-courses',
     })).message.body.content as string;
-    expect(company).toContain('Guten Tag Jonas Weber,');
-    expect(company).toContain('Ihr CASA-Team');
+    expect(company).toContain('Hallo Jonas,');
+    expect(company).toContain('Dein CASA-Team');
+    expect(company.replace(/Testbetrieb:[^<]*/, '')).not.toMatch(/\b(Sie|Ihre?[nmrs]?|Ihnen)\b/);
 
-    // English has one register: learners and organisers are greeted by first name, companies formally.
+    // English greets everyone by first name too.
     const english = (await confirmation('course', { ...course, locale: 'en' })).message.body.content as string;
     expect(english).toContain('Hello Maria,');
     expect(english).not.toContain('Ms Rossi');

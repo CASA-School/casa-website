@@ -66,10 +66,8 @@ const COPY = {
     person: 'Person',
     contact: 'Kontakt',
     salutations: { mr: 'Herr', ms: 'Frau', mx: 'Mx.', neutral: 'Keine Anrede' } as Record<string, string>,
-    greeting: (salutation: string, first: string | null, last: string | null) =>
-      salutation === 'ms' && last ? `Sehr geehrte Frau ${last},`
-      : salutation === 'mr' && last ? `Sehr geehrter Herr ${last},`
-      : `Guten Tag ${[first, last].filter(Boolean).join(' ')},`,
+    // Everyone reads „du“ (Rahman, 2026-10-08), so a reply greets by first name.
+    greeting: (first: string | null) => (first ? `Hallo ${first},` : 'Hallo,'),
     replyTo: (first: string) => `${first} antworten`,
 
     contactKind: 'Kontaktanfrage',
@@ -78,7 +76,7 @@ const COPY = {
     contactLead: (name: string, topic: string | null) =>
       topic ? `${name} hat über das Kontaktformular eine Nachricht zum Thema „${topic}“ geschickt.`
       : `${name} hat über das Kontaktformular eine Nachricht geschickt.`,
-    contactReply: 'Ihre Anfrage bei CASA',
+    contactReply: 'Deine Anfrage bei CASA',
     topic: 'Thema',
     enquiry: 'Anfrage',
 
@@ -87,14 +85,14 @@ const COPY = {
     groupSource: 'aus der Gruppenanfrage',
     groupLead: (name: string, org: string | null, size: string | null) =>
       `${name}${org ? ` (${org})` : ''} fragt einen Gruppenaufenthalt${size ? ` für ${size} Personen` : ''} an.`,
-    groupReply: 'Ihre Gruppenanfrage bei CASA',
+    groupReply: 'Deine Gruppenanfrage bei CASA',
     group: 'Gruppe',
     companyKind: 'Firmenanfrage',
     companyTitle: 'Neue Anfrage für Firmenunterricht',
     companySource: 'aus der Anfrage für Firmenunterricht',
     companyLead: (name: string, org: string | null, size: string | null) =>
       `${name}${org ? ` (${org})` : ''} fragt Deutschunterricht${size ? ` für ${size} Teilnehmende` : ''} an.`,
-    companyReply: 'Ihre Anfrage zum Firmenunterricht bei CASA',
+    companyReply: 'Deine Anfrage zum Firmenunterricht bei CASA',
     company: 'Firmenunterricht',
     people: (n: string) => `${n} Personen`,
 
@@ -103,7 +101,7 @@ const COPY = {
     courseSource: 'aus der Kursanmeldung',
     courseLead: (name: string, course: string | null) =>
       course ? `${name} hat sich für den Kurs „${course}“ angemeldet.` : `${name} hat sich für einen Kurs angemeldet.`,
-    courseReply: 'Ihre Kursanmeldung bei CASA',
+    courseReply: 'Deine Kursanmeldung bei CASA',
     course: 'Kurs',
     dates: 'Zeitraum',
     schedule: 'Unterricht',
@@ -134,7 +132,7 @@ const COPY = {
     examSource: 'aus der Prüfungsanmeldung',
     examLead: (name: string, exam: string | null) =>
       exam ? `${name} hat sich zur Prüfung „${exam}“ angemeldet.` : `${name} hat sich zu einer Prüfung angemeldet.`,
-    examReply: 'Ihre Prüfungsanmeldung bei CASA',
+    examReply: 'Deine Prüfungsanmeldung bei CASA',
     exam: 'Prüfung',
     examSession: 'Termin',
     examPart: 'Prüfungsteil',
@@ -158,8 +156,6 @@ const COPY = {
     minutes: (n: string) => `${n} Minuten`,
     confirmAppointment: 'Termin bestätigen',
     confirmHint: (address: string) => `Die Antwort geht an ${address}. Ergänzen Sie vor dem Senden, wie das Gespräch stattfindet.`,
-    // Group organisers read „du“ (Rahman, 2026-10-08), so the confirmation greets by first name.
-    confirmGreeting: (first: string | null) => (first ? `Hallo ${first},` : 'Hallo,'),
     confirmSubject: (day: string, time: string) => `Dein Beratungstermin bei CASA: ${day}, ${time} Uhr`,
     confirmBody: (greeting: string, day: string, time: string, minutes: string) =>
       `${greeting}\n\nvielen Dank für deine Anfrage. Gerne bestätige ich deinen Beratungstermin am ${day}, um ${time} Uhr (Bremer Zeit). `
@@ -239,11 +235,7 @@ const COPY = {
     person: 'Person',
     contact: 'Contact',
     salutations: { mr: 'Mr', ms: 'Ms', mx: 'Mx', neutral: 'No salutation' } as Record<string, string>,
-    greeting: (salutation: string, first: string | null, last: string | null) =>
-      salutation === 'ms' && last ? `Dear Ms ${last},`
-      : salutation === 'mr' && last ? `Dear Mr ${last},`
-      : salutation === 'mx' && last ? `Dear Mx ${last},`
-      : `Dear ${[first, last].filter(Boolean).join(' ')},`,
+    greeting: (first: string | null) => (first ? `Hello ${first},` : 'Hello,'),
     replyTo: (first: string) => `Reply to ${first}`,
 
     contactKind: 'Contact enquiry',
@@ -332,7 +324,6 @@ const COPY = {
     minutes: (n: string) => `${n} minutes`,
     confirmAppointment: 'Confirm appointment',
     confirmHint: (address: string) => `The reply goes to ${address}. Before sending, add how the conversation will take place.`,
-    confirmGreeting: (first: string | null) => (first ? `Hello ${first},` : 'Hello,'),
     confirmSubject: (day: string, time: string) => `Your consultation with CASA: ${day}, ${time}`,
     confirmBody: (greeting: string, day: string, time: string, minutes: string) =>
       `${greeting}\n\nThank you for your request. I am happy to confirm your consultation on ${day} at ${time} (Bremen time). `
@@ -432,7 +423,7 @@ function replyAction(p: Payload, c: Copy, subject: string): Action | null {
   const address = validEmail(p.email);
   const first = text(p.firstName) ?? fullName(p);
   if (!address || !first) return null;
-  const greeting = c.greeting(String(p.salutation ?? ''), text(p.firstName), text(p.lastName));
+  const greeting = c.greeting(text(p.firstName));
   return { label: c.replyTo(first), href: mailto(address, subject, `${greeting}\n\n`), hint: c.replyHint };
 }
 
@@ -617,7 +608,7 @@ function appointmentMail(p: Payload, locale: Locale, c: Copy): Mail {
   const time = text(p.localTime);
   const minutes = p.durationMinutes ? String(p.durationMinutes) : '30';
   const address = validEmail(p.email);
-  const greeting = c.confirmGreeting(text(p.firstName));
+  const greeting = c.greeting(text(p.firstName));
   return {
     subject: `${c.appointmentKind}: ${[fullName(p), [day, time ? c.subjectTime(time) : null].filter(Boolean).join(', ')].filter(Boolean).join(' – ')}`,
     kindLabel: c.appointmentKind,
@@ -972,18 +963,10 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
   const size = typeof brief.groupSize === 'number' && Number.isInteger(brief.groupSize) ? String(brief.groupSize) : null;
   const stay = p.accommodationRequired === true ? (c.accommodationTypes[String(p.accommodationType)] ?? null) : null;
   const site = getSiteUrl();
-  const formal = (kind === 'course' || kind === 'exam') && last
-    ? ({ de: { ms: 'Frau', mr: 'Herr' }, en: { ms: 'Ms', mr: 'Mr' } } as const)[locale][String(p.salutation) as 'ms' | 'mr']
-    : undefined;
   return {
     reference: text(p.requestId),
     firstName: first,
     lastName: last,
-    // "Ms Rossi" where the form asked for a salutation. Learners read "Hallo
-    // {firstName}," / "Hello {firstName},", group organisers too; `{name}` greets
-    // the „Sie“ kind, companies ("Guten Tag Jonas Weber," / "Dear Jonas Weber,").
-    // The joined name has to pass the same check as each part, or the first name alone is used.
-    name: formal ? `${formal} ${last}` : (first && last ? greetableName(`${first} ${last}`) : null) ?? first,
     phone: '+49 421 460 414 30',
     siteUrl: site,
     siteHost: site.replace(/^https?:\/\//, ''),
@@ -1047,11 +1030,8 @@ export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, 
     CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind && candidate.variant === variant)
     ?? CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind)!;
   const copy = entry[locale];
-  // Learners and group organisers read „du“ and their first name; companies keep
-  // „Sie“ and a formal greeting, in English too (confirmation-copy.ts).
-  const shared = 'address' in entry && entry.address === 'Sie'
-    ? CONFIRMATION_COPY.sharedSie[locale]
-    : CONFIRMATION_COPY.shared[locale];
+  // Everyone reads „du“ and is greeted by first name (confirmation-copy.ts).
+  const shared = CONFIRMATION_COPY.shared[locale];
   const values = confirmationValues(kind, payload, locale);
   const line = (template: string, fallback: string | null = null) => fill(template, values) ?? fallback;
 

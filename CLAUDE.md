@@ -193,10 +193,10 @@ Respect `prefers-reduced-motion` and existing `focus-visible` patterns.
 
 **German address: du all over.** The German site says „du" (lowercase), in
 casa-bremen.de's warm, complete-sentence voice: to learners since 2026-10-07, at the
-CASA team's request, and to group organisers too since 2026-10-08 (Rahman: „du all
-over"), on the group page, its dialogs and its emails. „Sie" is left only where
-nobody has converted it yet: host families, the company copy and its email, and the
-legal texts (AGB, Datenschutz, Impressum). The rule lives in
+CASA team's request, and since 2026-10-08 (Rahman: „du all over") to group organisers,
+host families, companies and partners, in every page, dialog and
+email. „Sie" is left only in the legal texts (AGB, Datenschutz, Impressum) and in the
+closed placement test's own screens. The rule lives in
 `src/config/brand/voice-and-tone.ts`; do not convert copy back to Sie.
 
 **Cards have a text budget.** A card, a split box or a step holds the short version: about
