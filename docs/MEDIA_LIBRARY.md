@@ -36,7 +36,7 @@ older issues is built.
 | `exam-preparation-writing.jpg`, `exam-b2-hero.webp`, `exam-b2-class.webp` | Slots 18, 66, 67: the telc B2 card and page (W007 4:3 and 2.4:1, 023). Since 2026-10-02. |
 | `learners-writing-class.jpg`, `exam-c1-speaking.webp`, `exam-story-writing.webp` | Slots 11, 70, 71: the exams hero, the telc C1 Hochschule page's second photo (074) and the exams page's candidate story (078). |
 | `individual-tutoring.jpg` | Slot 13 (011): FAQ "Ihre Frage ist noch offen?" and the contact page. |
-| `community-shared-meal.webp`, `study-learners-dictionary.webp`, `bremen-schnoor-houses.jpg` | Slots 79, 80, 25: the nonprofit page's hero (043, whole 3:2 frame), the two Ratgeber heroes (034 5:4, W003 5:4). |
+| `community-shared-meal.webp`, `study-learners-dictionary.webp`, `bremen-schnoor-houses.jpg` | Slots 79, 80, 25: slot 79 (043, whole 3:2 frame) is unused since 2026-10-08, when the income ring replaced it as the nonprofit page's hero; 80 and 25 are the two Ratgeber heroes (034 5:4, W003 5:4). |
 | `group-course-lunch-table.jpg` | Slot 21 (W009): Unterricht für Gruppen's second photo and the /courses card. |
 | `student-room-balcony.jpg`, `student-room-alternative-1.jpg`, `casa-wg-room-hero.webp`, `shared-flat-kitchen-table.jpg` | Slots 26, 30, 78, 28: CASA-WG rooms (003, 004) and kitchen (W013). |
 | `host-family-*.{jpg,webp}` | Slots 27, 72-77: one real Bremen host family's home (photo package frames 08-12). Slot 81 (`host-family-guest-room.jpg`) is awaited. |
