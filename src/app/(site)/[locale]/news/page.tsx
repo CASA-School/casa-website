@@ -123,7 +123,7 @@ export default async function NewsPage() {
       ? {
           featured: 'Artikel des Monats',
           mastheadLede:
-            'Jeden Monat erscheint unser NewsFlash. Darin findest du Informationen zu Kursen und Prüfungen, wichtige Termine und Neues aus der Schule. Die Beiträge sind kurz, und bei jedem steht, für welches Niveau er passt.',
+            'Jeden Monat erscheint unser NewsFlash mit Informationen zu Kursen und Prüfungen, wichtigen Terminen und Neuem aus der Schule.',
           quoteTitle: 'Zitat des Monats',
           editorTitle: 'Wer schreibt hier?',
           tickerLabel: 'Termine dieser Ausgabe',
@@ -133,7 +133,7 @@ export default async function NewsPage() {
       : {
           featured: 'Article of the month',
           mastheadLede:
-            'Our NewsFlash comes out every month. In it you’ll find information about courses and exams, important dates and news from the school. The items are short, and each one shows which level it suits.',
+            'Our NewsFlash comes out every month, with information about courses and exams, important dates and news from the school.',
           quoteTitle: 'Quote of the month',
           editorTitle: 'Who writes this?',
           tickerLabel: 'Dates in this issue',

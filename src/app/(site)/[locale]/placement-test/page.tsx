@@ -56,7 +56,7 @@ export default async function PlacementTestPage() {
       ? {
           heroTitle: 'Finde dein Deutschniveau',
           heroBody:
-            'Die richtige Einstufung in die passende Lerngruppe ist die Grundlage für erfolgreiches Lernen. Mach dazu einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.',
+            'Die richtige Einstufung ist die Grundlage für erfolgreiches Lernen. Mach einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.',
           heroCta: 'Zu den Tests',
           meta: ['Kostenlose Online-Tests', 'Vor Ort ohne Termin'],
           howTitle: 'So gehst du vor',
