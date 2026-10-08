@@ -1,0 +1,39 @@
+/*
+ * The night hero: the ground for heroes whose picture is drawn in code (the
+ * income ring on /ueber-uns/gemeinnuetzigkeit, the Bremen street on
+ * /accommodation). Pass `.night` to HeroSurface's className.
+ *
+ * The whole band takes the ink ground the drawings are made on, so the picture
+ * is part of the hero instead of a dark box on a light one. HeroLede reads
+ * --casa-ink and --casa-muted, so redefining them here turns its type white
+ * without touching the shared component; the eyebrow takes the drawings'
+ * yellow, and the one button turns yellow with ink type, since an ink button
+ * would vanish on the ink ground. Scoped to the hero: nothing leaks below it.
+ *
+ * A hairline closes the band, because on /accommodation the next section is an
+ * ink band too and the two would otherwise run together.
+ */
+.night {
+  --casa-ink: #ffffff;
+  --casa-muted: var(--casa-subtle-on-dark);
+  --casa-accent-text: var(--casa-sun);
+  --casa-accent-text-hover: #ffe14d;
+  --casa-sand: rgb(255 255 255 / 0.1);
+  color: #ffffff;
+  background:
+    radial-gradient(46% 70% at 76% 52%, rgb(255 213 0 / 0.07), transparent 70%),
+    radial-gradient(40% 60% at 8% 0%, rgb(0 159 227 / 0.08), transparent 70%),
+    var(--casa-ink-deep);
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.night :global(.casa-button-prism) {
+  background: var(--casa-sun);
+  border-color: rgb(255 213 0 / 0.65);
+  color: var(--casa-ink-deep);
+  box-shadow: 0 12px 32px -14px rgb(255 213 0 / 0.5);
+}
+
+.night :global(.casa-button-prism:hover) {
+  background: #ffe14d;
+}

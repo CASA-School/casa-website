@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { HumanStoryBlock, ProcessSteps } from '@/components/sections';
 import { AccommodationStreet } from '@/components/sections/accommodation-street';
+import nightHero from '@/components/sections/night-hero.module.css';
 import { BandHeading } from '@/components/sections/band-heading';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { Container } from '@/components/ui/container';
@@ -73,7 +74,7 @@ export default async function AccommodationPage() {
         summary on hover or focus. Same composition as HeroAPhotoLed
         (HeroSurface + HeroLede), with the street where HeroBleedPhoto would be.
       */}
-      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className="overflow-x-clip">
+      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
         <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
           <HeroLede
             eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
