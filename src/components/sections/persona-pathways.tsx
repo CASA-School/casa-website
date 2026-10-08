@@ -164,7 +164,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
               data-casa-persona={pathway.key}
             >
               <span
-                className={cn('absolute inset-x-0 top-0 h-1', meaning.bar)}
+                className={cn('casa-card-edge', meaning.bar)}
                 aria-hidden
               />
 

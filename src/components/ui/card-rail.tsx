@@ -141,7 +141,11 @@ export function CardRail({
         className={cn(
           // `group/rail` so an item can react to data-scrollable — the cards on
           // the homepage band stretch to fill the row when nothing scrolls.
-          'group/rail course-rail-scroll flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2',
+          // Room inside the scroller for the cards' shadows (bottom) and their hover
+          // lift (top), given back by negative margins so the layout is unchanged:
+          // an overflow-x scroller clips vertically too, and pb-2 cut the card
+          // shadows flat into a grey band under the row.
+          'group/rail course-rail-scroll -mb-6 -mt-2 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-8 pt-2',
           railClassName,
           'motion-safe:scroll-smooth',
           // The rail is focusable so keyboard users can scroll it with arrow keys.

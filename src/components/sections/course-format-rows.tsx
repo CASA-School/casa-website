@@ -113,7 +113,7 @@ export function CourseFormatRows({
               <p
                 className={cn(
                   'mt-3 max-w-measure text-base leading-relaxed',
-                  isDark ? 'text-white/56' : 'text-[var(--casa-muted)]/80'
+                  isDark ? 'text-white/56' : 'text-[var(--casa-muted)]'
                 )}
               >
                 {row.bestFor}
