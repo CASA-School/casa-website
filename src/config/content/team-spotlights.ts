@@ -24,9 +24,9 @@ import type { ContentLocale, TeamPlaceholderAnimal, TeamSpotlight } from '@/lib/
  *   public/media/casa/team/ are gone: a made-up face beside a real colleague's
  *   name is never acceptable. Without a portrait the card shows one of the
  *   Bremer Stadtmusikanten (components/signatures/team-placeholder.tsx).
- * - Names on public pages are the first name and the last name's initial
- *   („Tanja L."), at the teachers' request (2026-10-07); `name` keeps the full
- *   name for the legal pages and e-mails.
+ * - Staff appear by their full name. Teachers appear by their first name and
+ *   the initial of their last name („Vorname N."), as the teachers asked; that
+ *   is for teachers only (Rahman, 2026-10-08).
  * - No bios and no "focus" prose. CASA publishes a role and a list of areas.
  *   Anything past that would be fiction about a named person.
  * - No social links. Only one staff email is published anywhere on the site
@@ -46,15 +46,14 @@ import type { ContentLocale, TeamPlaceholderAnimal, TeamSpotlight } from '@/lib/
 
 type TeamMemberSource = {
   id: string;
-  /** The full name, for the legal pages and e-mails; never printed on a public page. */
+  /** The full name, as staff appear on the site. */
   name: string;
   /**
-   * How the site names this person: the first name and the initial of the last
-   * name, with a period („Tanja L."). The teachers asked for it (2026-10-07).
-   * Written out, not derived: „Meike Große Hundrup" and „Lisa Anh Dao" defeat
-   * any rule about which word is the last name.
+   * Teachers only: the first name and the initial of the last name, with a
+   * period („Vorname N."), as the teachers asked. Written out, not derived: a
+   * name like „Lisa Anh Dao" defeats any rule about which word is the last name.
    */
-  shortName: string;
+  shortName?: string;
   /**
    * A portrait in public/media/casa/team/, only with the person's consent.
    * `position` is the CSS object-position that keeps the face in the square crop.
@@ -80,14 +79,12 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'bettina-rick',
     name: 'Bettina Rick',
-    shortName: 'Bettina R.',
     title: { en: 'Managing Director', de: 'Geschäftsführerin' },
     group: 'leadership',
   },
   {
     id: 'claudia-groene',
     name: 'Claudia Gröne',
-    shortName: 'Claudia G.',
     title: { en: 'Director of Studies', de: 'Studienleitung' },
     group: 'leadership',
   },
@@ -96,7 +93,6 @@ const TEAM: TeamMemberSource[] = [
     // 2026-10-01). On the team page only; she is not a course contact.
     id: 'mariella-baier',
     name: 'Mariella Baier',
-    shortName: 'Mariella B.',
     title: { en: 'Director of Studies, evening courses', de: 'Studienleitung Abendkurse' },
     group: 'leadership',
   },
@@ -110,7 +106,6 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'meike-grosse-hundrup',
     name: 'Meike Große Hundrup',
-    shortName: 'Meike G.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -121,7 +116,6 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'tanja-langenickel',
     name: 'Tanja Langenickel',
-    shortName: 'Tanja L.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -132,7 +126,6 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'natalia-sostres',
     name: 'Natàlia Sostres',
-    shortName: 'Natàlia S.',
     title: { en: 'Head of Office', de: 'Büroleitung' },
     group: 'office',
     areas: {
@@ -143,7 +136,6 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'mareike-thomeczek',
     name: 'Mareike Thomeczek',
-    shortName: 'Mareike T.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -154,7 +146,6 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'alissa-trouillet',
     name: 'Alissa Trouillet',
-    shortName: 'Alissa T.',
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -165,14 +156,12 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'manuela-meerhoff',
     name: 'Manuela Meerhoff',
-    shortName: 'Manuela M.',
     title: { en: 'Accounts', de: 'Buchhaltung' },
     group: 'office',
   },
   {
     id: 'ina-eismann',
     name: 'Ina Eismann',
-    shortName: 'Ina E.',
     title: { en: 'Accounts', de: 'Buchhaltung' },
     group: 'office',
     areas: {
@@ -183,7 +172,6 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'ilka-ahrens',
     name: 'Ilka Ahrens',
-    shortName: 'Ilka A.',
     title: { en: 'Resource management', de: 'Ressourcenmanagement' },
     group: 'office',
   },
@@ -192,14 +180,12 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'lisa-anh-dao',
     name: 'Lisa Anh Dao',
-    shortName: 'Lisa Anh D.',
     title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
     group: 'volunteer',
   },
   {
     id: 'maryam-trawally',
     name: 'Maryam Trawally',
-    shortName: 'Maryam T.',
     title: { en: 'Federal Volunteer Service', de: 'Bundesfreiwilligendienst' },
     group: 'volunteer',
   },
@@ -211,18 +197,25 @@ const placeholderFor = new Map(
   TEAM.filter((member) => !member.photo).map((member, index) => [member.id, PLACEHOLDERS[index % PLACEHOLDERS.length]] as const),
 );
 
+/** Staff by their full name; teachers by first name and initial. */
+function publicName(member: TeamMemberSource) {
+  return member.group === 'teachers' ? (member.shortName ?? member.name) : member.name;
+}
+
 function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotlight {
+  const name = publicName(member);
+
   return {
     id: member.id,
     locale,
-    name: member.shortName,
+    name,
     title: member.title[locale],
     role: GROUP_LABELS[member.group][locale],
     areas: member.areas?.[locale],
     photo: member.photo
       ? {
           src: `/media/casa/team/${member.photo.file}`,
-          alt: locale === 'de' ? `Porträt von ${member.shortName}` : `Portrait of ${member.shortName}`,
+          alt: locale === 'de' ? `Porträt von ${name}` : `Portrait of ${name}`,
           position: member.photo.position,
         }
       : undefined,
@@ -242,7 +235,7 @@ export function teamContactById(id: string): { name: string; title: { en: string
   const member = TEAM.find((entry) => entry.id === id);
 
   // The public name, as on the team page.
-  return member ? { name: member.shortName, title: member.title } : undefined;
+  return member ? { name: publicName(member), title: member.title } : undefined;
 }
 
 export const teamSpotlightsByLocale: Record<ContentLocale, TeamSpotlight[]> = {

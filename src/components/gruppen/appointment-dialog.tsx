@@ -16,7 +16,7 @@ import type { AppointmentDay } from '@/lib/appointments/schedule';
 const copy = {
   en: {
     trigger: 'Book a call', title: 'Let’s plan your group’s visit',
-    intro: 'Choose a time to talk with Ina E. about your plans, your questions and what your group needs.',
+    intro: 'Choose a time to talk with Ina Eismann about your plans, your questions and what your group needs.',
     schedule: '30 minutes · Monday–Thursday', zone: 'All times are local to Bremen.',
     date: 'Choose a day', time: 'Choose a time', next: 'Continue', back: 'Change appointment',
     previousMonth: 'Previous month', nextMonth: 'Next month', close: 'Close', loading: 'Loading appointments…',
@@ -33,7 +33,7 @@ const copy = {
   },
   de: {
     trigger: 'Termin buchen', title: 'Gemeinsam Ihre Gruppenreise planen',
-    intro: 'Besprechen Sie mit Ina E. Ihre Ideen, offenen Fragen und Wünsche für Ihre Gruppe.',
+    intro: 'Besprechen Sie mit Ina Eismann Ihre Ideen, offenen Fragen und Wünsche für Ihre Gruppe.',
     schedule: '30 Minuten · Montag–Donnerstag', zone: 'Alle Zeiten gelten für Bremen.',
     date: 'Tag auswählen', time: 'Uhrzeit auswählen', next: 'Weiter', back: 'Termin ändern',
     previousMonth: 'Vorheriger Monat', nextMonth: 'Nächster Monat', close: 'Schließen', loading: 'Termine werden geladen …',
@@ -137,7 +137,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
 
   return <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]">
     <header className="border-b border-[var(--casa-sand)] px-5 pb-6 pt-8 sm:px-8">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Ina E. · CASA Bremen</p>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Ina Eismann · CASA Bremen</p>
       <DialogTitle ref={reference ? stepHeading : undefined} tabIndex={reference ? -1 : undefined} className="pr-7 text-2xl sm:text-3xl">{reference ? t.success : t.title}</DialogTitle>
       <DialogDescription className="mt-3 max-w-xl text-sm">{reference ? t.thanks : t.intro}</DialogDescription>
       {reference && confirmationSent ? <p className="mt-2 max-w-xl text-sm font-medium text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}

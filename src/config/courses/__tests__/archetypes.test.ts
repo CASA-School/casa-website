@@ -217,14 +217,14 @@ describe('course archetypes', () => {
 
   it('holds CASA\'s allocation (2026-09-08, medical course 2026-10-01), so a reassignment has to be deliberate', () => {
     const expected: Record<string, string> = {
-      'intensive-german': 'Natàlia S.',
-      'evening-german': 'Alissa T.',
-      'special-courses': 'Alissa T.',
-      'medical-german': 'Mareike T.',
-      bildungszeit: 'Meike G.',
+      'intensive-german': 'Natàlia Sostres',
+      'evening-german': 'Alissa Trouillet',
+      'special-courses': 'Alissa Trouillet',
+      'medical-german': 'Mareike Thomeczek',
+      bildungszeit: 'Meike Große Hundrup',
       // Also Meike, but through the `company` key, which carries the call.
-      'in-company': 'Meike G.',
-      'german-for-groups': 'Ina E.',
+      'in-company': 'Meike Große Hundrup',
+      'german-for-groups': 'Ina Eismann',
     };
 
     for (const [slug, name] of Object.entries(expected)) {
@@ -266,8 +266,8 @@ describe('course archetypes', () => {
   it('spells the two names that are easy to get wrong', () => {
     // à on the SECOND a, not the first; and ß, not ss. Both come off the roster
     // rather than being typed per surface, and this is what that buys.
-    expect(getCasaContact('accommodation', 'en').name).toBe('Natàlia S.');
-    expect(getCasaContact('professional', 'en').name).toBe('Meike G.');
+    expect(getCasaContact('accommodation', 'en').name).toBe('Natàlia Sostres');
+    expect(getCasaContact('professional', 'en').name).toBe('Meike Große Hundrup');
   });
 
   it('gives every public course a profile and a resolvable photo key', () => {

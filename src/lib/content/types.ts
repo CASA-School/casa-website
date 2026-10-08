@@ -138,7 +138,7 @@ export type TeamPlaceholderAnimal = 'hahn' | 'katze' | 'hund' | 'esel';
 export type TeamSpotlight = {
   id: string;
   locale: ContentLocale;
-  /** As the site shows it: first name and the initial of the last name („Tanja L."). */
+  /** As the site shows it: staff in full, teachers as first name and initial („Vorname N."). */
   name: string;
   title: string;
   /** Directory filter group, e.g. "Courses & exams". */
