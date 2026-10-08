@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { HeaderSearchPopover } from '@/components/layout/header-search-popover';
 import { MobileNav } from '@/components/layout/mobile-nav';
+import { NIGHT_HERO_PATHS } from '@/components/sections/night-hero-routes';
 import { localizeNavDescription, localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
+import nightStyles from './navbar-night.module.css';
 
 const CLOSE_DELAY_MS = 110;
 const COURSES_PANEL_WIDTH_PX = 46 * 16;
@@ -44,6 +47,8 @@ type NavbarProps = {
 export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  // On a night-hero page the bar takes the hero's ink ground (navbar-night.module.css).
+  const night = NIGHT_HERO_PATHS.has(pathname ?? '');
 
   const navRef = useRef<HTMLElement | null>(null);
   const navContainerRef = useRef<HTMLDivElement | null>(null);
@@ -333,6 +338,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
       ref={navRef}
       className={cn(
         'sticky top-0 z-[900] bg-white transition-[height,box-shadow] duration-300 ease-out motion-reduce:transition-none',
+        night && nightStyles.night,
         compact ? 'h-16' : 'h-20',
         scrolled || activeDropdown ? 'shadow-[var(--shadow-soft)]' : undefined
       )}
@@ -383,6 +389,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
         <Link href="/" aria-label="Go to CASA homepage" className="flex shrink-0 items-center focus-visible:outline-none">
           <Logo
             className={cn('w-auto transition-[height] duration-300 ease-out motion-reduce:transition-none', compact ? 'h-10' : 'h-12')}
+            variant={night ? 'onDark' : 'default'}
             preload
           />
         </Link>

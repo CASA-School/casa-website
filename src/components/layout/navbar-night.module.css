@@ -1,0 +1,50 @@
+/*
+ * The navbar on a night-hero page (NIGHT_HERO_PATHS): the hero's ink ground, so
+ * header and hero read as one band. The bar's type turns white by redefining the
+ * tokens its classes read, as night-hero.module.css does for HeroLede.
+ *
+ * Everything that opens as a white panel inside the header (the mega-menu
+ * dropdowns, the search results) gets the light tokens back through
+ * `.bg-white`, so menus look exactly as on every other page. The language menu
+ * renders in a portal and is untouched. The logo switches to its own on-dark
+ * artwork (Logo variant="onDark") in navbar.tsx.
+ */
+.night {
+  background-color: var(--casa-ink-deep);
+  --casa-ink: #ffffff;
+  --casa-muted: var(--casa-subtle-on-dark);
+  --casa-text-subtle: var(--casa-subtle-on-dark);
+  --casa-sand: rgb(255 255 255 / 0.18);
+  --casa-surface-subtle: rgb(255 255 255 / 0.1);
+  --casa-canvas: rgb(255 255 255 / 0.06);
+  --casa-accent-text: var(--casa-sun);
+  --casa-accent-text-hover: #ffe14d;
+}
+
+/* `:global`: CSS Modules would otherwise rename .bg-white and the reset would match nothing. */
+.night :global(.bg-white) {
+  --casa-ink: #0f172a;
+  --casa-muted: #5b697e;
+  --casa-text-subtle: var(--casa-subtle-on-light);
+  --casa-sand: #e2e8f0;
+  --casa-surface-subtle: #eef4f5;
+  --casa-canvas: #f6fafb;
+  --casa-accent-text: var(--casa-accent-on-light);
+  --casa-accent-text-hover: var(--casa-accent-on-light-hover);
+}
+
+/* The one button: yellow with ink type, as in the night hero (an ink button vanishes on ink). */
+.night :global(.casa-button-prism) {
+  background: var(--casa-sun);
+  border-color: rgb(255 213 0 / 0.65);
+  color: var(--casa-ink-deep);
+}
+
+.night :global(.casa-button-prism:hover) {
+  background: #ffe14d;
+}
+
+/* The phone menu button is a ghost Button, whose colour is the dark foreground. */
+.night [aria-label='Open navigation menu'] {
+  color: #ffffff;
+}
