@@ -308,7 +308,8 @@ export function CoursesHeroVisual({ steps, rest, current, label, className }: Co
       </div>
 
       {/* The caption, in the sky above the low steps: the overview at rest, the chosen
-          level's goal, duration and link otherwise. All share one grid cell and cross-fade. */}
+          level's title and goal otherwise — no link line: the step itself is the link
+          (Rahman, 2026-10-08). All share one grid cell and cross-fade. */}
       <div aria-hidden="true" className={cn(styles.captions, 'pointer-events-none absolute inset-x-0 top-0 grid sm:inset-x-auto sm:left-[4%] sm:top-[5%] sm:w-[46%]')}>
         <div className={cn(styles.caption, shown !== null && styles.captionOut)}>
           <p className={styles.restTitle}>{rest.title}</p>
@@ -318,10 +319,6 @@ export function CoursesHeroVisual({ steps, rest, current, label, className }: Co
           <div key={step.level} className={cn(styles.caption, shown !== i && styles.captionOut)}>
             <p className={styles.level}>{step.level}</p>
             <p className={styles.focus}>{step.focus}</p>
-            <p className={styles.fact}>{step.fact}</p>
-            <Link href={step.href} tabIndex={-1} className={cn(styles.cta, 'pointer-events-auto')}>
-              {step.cta} →
-            </Link>
           </div>
         ))}
       </div>

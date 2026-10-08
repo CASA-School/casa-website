@@ -6,13 +6,25 @@
  *   / the standalone `scale`; interactive states use other properties, so a
  *   finished animation never overrides them.
  * - Under prefers-reduced-motion nothing animates in or moves: the street
- *   renders finished, the lit windows lit, the tram parked mid-street.
+ *   renders finished, the lit windows lit, the sails at rest in an X, the tram
+ *   parked mid-street.
  *
- * Timeline: ground line 0.2–1.2 s; each house's outline draws from
- * 0.35 s + 0.12 s × its index, its fill fading in behind; windows light from
- * 1.25 s house by house; markers pop at 2.1 s and pulse once at 2.7 s; the tram
- * starts crossing at 2.6 s and a few windows begin to go on and off.
+ * Timeline: ground line 0.2–1.2 s; each house's contour draws from
+ * 0.35 s + 0.12 s × its order, its fill and unlit panes fading in behind, then
+ * its structure and glazing bars at 1.15 s + 0.12 s × order; windows light from
+ * 1.25 s house by house; the Dom and the mill behind come up 1.5–2.5 s; markers
+ * pop at 2.1 s and pulse once at 2.7 s; the mill starts turning at 2.4 s; the
+ * tram starts crossing at 2.6 s and a few windows begin to go on and off.
+ *
+ * Type and the caption are sized by the drawing's own width (container query
+ * units), not the viewport: the drawing is about 340 px wide on a phone, 500 px
+ * beside the lede at 1024 and 720 px at 1440.
  */
+
+.panel {
+  container-type: inline-size;
+  --bead: clamp(0.95rem, 3.2cqw, 1.45rem);
+}
 
 .drawing {
   /* The street dissolves at both ends rather than stopping at the box's edge. */
@@ -24,15 +36,27 @@
   opacity: 0.32;
 }
 
+/* At rest the sails stand in an X; turning, they go anticlockwise (see the component). */
 .sails {
   transform-box: view-box;
+  transform: rotate(-45deg);
 }
 
 .house {
   transition: opacity 0.35s ease;
 }
 
-.line {
+.starZone {
+  transition: opacity 0.35s ease;
+}
+
+.panel[data-active='host'] .starZone[data-zone='host'],
+.panel[data-active='flat'] .starZone[data-zone='flat'] {
+  opacity: 0;
+}
+
+.line,
+.detail {
   transition: stroke 0.3s ease;
 }
 
@@ -42,9 +66,21 @@
   transition: opacity 0.4s ease;
 }
 
-/* One option chosen: its building lights fully and turns yellow; the street steps back. */
+/* One option chosen: its building lights fully and turns yellow; the street steps back.
+   The houses' solid silhouette behind them does not dim (see the component), so a faded
+   house never shows the landmarks through it. */
 .panel[data-active] .house {
   opacity: 0.42;
+}
+
+/* Bremen behind steps back with the street, so the Dom never outshines a dimmed house.
+   On its own wrapper: `.far` itself holds `opacity` from its entrance animation. */
+.farDim {
+  transition: opacity 0.35s ease;
+}
+
+.panel[data-active] .farDim {
+  opacity: 0.55;
 }
 
 .panel[data-active='flat'] .house[data-kind='flat'],
@@ -52,8 +88,9 @@
   opacity: 1;
 }
 
-.panel[data-active='flat'] .house[data-kind='flat'] .line,
-.panel[data-active='host'] .house[data-kind='host'] .line {
+/* Contour and structure turn yellow; the fine material lines stay as they are. */
+.panel[data-active='flat'] .house[data-kind='flat'] :is(.line, .detail),
+.panel[data-active='host'] .house[data-kind='host'] :is(.line, .detail) {
   stroke: var(--casa-sun);
 }
 
@@ -68,10 +105,49 @@
   transform: translateX(470px);
 }
 
+.captions {
+  top: 3.6cqw;
+}
+
 .caption {
+  width: 43%;
   transition:
     opacity 0.35s ease,
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Beside the lede at lg the drawing is about 500 px wide and the type is at its
+   floor: a wider caption keeps the longest summary to five lines, clear of the
+   sails, and still 13 u from the moon. */
+@container (max-width: 600px) {
+  .caption {
+    width: 46%;
+  }
+}
+
+.captionTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1rem, 2.7cqw, 1.3rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.captionText,
+.captionCta {
+  margin-top: 0.45em;
+  font-size: clamp(0.7rem, 1.72cqw, 0.85rem);
+  line-height: 1.38;
+}
+
+.captionText {
+  text-wrap: pretty;
+  color: rgb(255 255 255 / 0.8);
+}
+
+.captionCta {
+  font-weight: 600;
+  color: var(--casa-sun);
 }
 
 .captionOut {
@@ -95,20 +171,31 @@
   filter: opacity(0.35);
 }
 
+/* Above the marker, centred; the WG's runs to the right from the marker's left edge. */
 .markerLabel {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: 0.5rem;
+  transform: translateX(-50%);
   white-space: nowrap;
-  font-size: clamp(0.66rem, 1.15vw, 0.95rem);
+  font-size: clamp(0.66rem, 2.1cqw, 0.95rem);
   font-weight: 600;
   line-height: 1.1;
   color: #fff;
   transition: color 0.3s ease;
 }
 
+.markerLabel[data-anchor='start'] {
+  left: 0;
+  transform: none;
+}
+
 .bead {
   position: relative;
   display: block;
-  height: clamp(0.95rem, 1.7vw, 1.45rem);
-  width: clamp(0.95rem, 1.7vw, 1.45rem);
+  height: var(--bead);
+  width: var(--bead);
   border-radius: 9999px;
   border: 2.5px solid var(--casa-sun);
   background: var(--casa-ink-deep);
@@ -153,7 +240,9 @@
     animation: casa-street-draw 1.1s cubic-bezier(0.45, 0.05, 0.25, 1) calc(0.35s + var(--h) * 0.12s) both;
   }
 
-  .fill {
+  /* The fill and the unlit panes come in behind the contour, never before it. */
+  .fill,
+  .pane {
     animation: casa-street-fade 0.7s ease-out calc(0.75s + var(--h) * 0.12s) both;
   }
 
@@ -168,23 +257,31 @@
       casa-street-life var(--life) ease-in-out calc(var(--in) + 2.5s + var(--life-delay)) infinite;
   }
 
+  .detail,
+  .texture,
+  .bars {
+    animation: casa-street-fade 0.6s ease-out calc(1.15s + var(--h) * 0.12s) both;
+  }
+
   .far,
   .moon,
   .prop {
     animation: casa-street-fade 1.2s ease-out 0.3s both;
   }
 
+  /* Bremen behind the street comes up once the houses stand: the far towers run down
+     behind them, and drawn earlier their shafts would stand on the pavement. */
   .far {
-    animation-name: casa-street-far;
+    animation: casa-street-far 1s ease-out 1.5s both;
   }
 
   .star {
     animation: casa-street-twinkle 4.5s ease-in-out calc(var(--s) * -0.37s) infinite;
   }
 
-  /* One lap of the Mühle am Wall's sails every half minute. */
+  /* One lap of the Mühle am Wall's sails every half minute, from rest. */
   .sails {
-    animation: casa-street-turn 30s linear infinite;
+    animation: casa-street-turn 30s linear 2.4s infinite both;
   }
 
   .tram {
@@ -255,9 +352,13 @@
   }
 }
 
+/* Anticlockwise seen from the front: a right-handed mill, its lattice trailing. */
 @keyframes casa-street-turn {
+  from {
+    transform: rotate(-45deg);
+  }
   to {
-    transform: rotate(360deg);
+    transform: rotate(-405deg);
   }
 }
 

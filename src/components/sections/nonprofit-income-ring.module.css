@@ -1,62 +1,192 @@
 /*
  * The income ring in the non-profit hero.
  *
- * Entrance on load: the line draws clockwise from 12 o'clock at an even pen
- * speed, so it reaches node i at 0.3 s + i × 0.4 s; dots, markers and labels key
- * their delays to that, the markers pulse once (2.2 s on) to say they can be
- * pressed, and the light starts turning once the ring has closed.
+ * LINE WEIGHTS, in screen pixels at every size (the SVG has no viewBox), after
+ * the stroke tiers in docs/CODED_HERO_ILLUSTRATION_GUIDE.md §1.2 R1:
+ *   T1 2.0   the markers' rims and the active point's arc: the parts you press
+ *   T2 1.25  the track, the rail the light runs on; the markers' invite pulse
+ *   light    points of light are fills, not lines (R5: light is emitted): large
+ *            ones 5 px across with a glow, small ones 3 px, about twice the track
+ * Active, the T1 parts and the label turn --casa-sun; the light dims so the
+ * sentence in the centre reads.
  *
- * The entrance animates `opacity` and the standalone `scale` property and fills
- * `both`, so it keeps its end state. The interactive states therefore use other
- * properties (`transform`, `color`, `box-shadow`) and are never overridden by
- * a finished animation. Under prefers-reduced-motion nothing animates in; the
- * ring renders finished and the interaction still works.
+ * SIZE. The ring box is a square of side S, centred in the panel:
+ *   S = min(72% of the panel's height, what the side labels leave, 355 px)
+ * The side labels sit off the 3 and 9 o'clock markers, so half the panel's
+ * width must hold 0.425 S (the track's radius) plus --side: half a marker, the
+ * gap, the label and a margin. Under 560 px of panel the side labels break to
+ * one word a line. --side is in em of the label type (set on the ring box), from
+ * the widest label measured in Plus Jakarta Sans semibold: "Soziale Projekte"
+ * 7.72 em, and its widest word "Gruppen" 4.30 em. Inside the box, cqw is
+ * S / 100. CASA is 18% of S, capped at 0.85 of the hero headline's size at the
+ * same width (.word): the headline shrinks faster than the ring below 1024 px,
+ * so the ring's size alone cannot keep the headline leading.
+ *
+ * Entrance on load: the line draws clockwise from 12 o'clock at an even pen
+ * speed, so it reaches node i at 0.3 s + i × 0.4 s; points of light, markers
+ * and labels key their delays to that, the markers pulse once (2.2 s on) to say
+ * they can be pressed, and the light starts turning once the ring has closed.
+ *
+ * The entrance animates `opacity`, `transform` on the labels and the
+ * standalone `scale` on the markers, and fills `both`, so it keeps its end
+ * state. The interactive states therefore use other properties or elements
+ * (the marker's inner body and halo, `color`, the arc's dash, the flow group's
+ * opacity)
+ * and are never overridden by a finished animation. Under
+ * prefers-reduced-motion nothing animates in or moves: the ring renders
+ * finished and the active states switch without drawing.
  */
 
+.panel {
+  container: casa-ring-panel / inline-size;
+}
+
+.ring {
+  --side: calc(4.3em + 28px);
+  container: casa-ring / inline-size;
+  aspect-ratio: 1;
+  height: min(72%, calc((50cqw - var(--side)) / 0.425), 355px);
+}
+
+@container casa-ring-panel (min-width: 560px) {
+  .ring {
+    --side: calc(7.72em + 36px);
+  }
+}
+
+/* --- the drawing --- */
+
+.track,
+.arc,
 .flow {
   transform-box: view-box;
-  transform-origin: 200px 200px;
+  transform-origin: 50% 50%;
 }
 
-.centre {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.75rem, 4.6vw, 4.4rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  color: #fff;
+.track {
+  stroke: rgb(255 255 255 / 0.3);
+  stroke-width: 1.25px;
+  transform: rotate(-90deg);
 }
 
-/* CASA and the four sentences share one grid cell and cross-fade. */
+.big {
+  fill: var(--casa-sun);
+}
+
+.small {
+  fill: var(--casa-sun);
+  fill-opacity: 0.6;
+}
+
+.flow {
+  transition: opacity 0.4s ease;
+}
+
+.panel[data-active] .flow {
+  opacity: 0.45;
+}
+
+/* Hidden when off: a fully offset dash can still leave its round cap behind as
+   a dot. With motion, it stays drawn while it retracts (below). */
+.arc {
+  stroke: var(--casa-sun);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+.arc[data-on] {
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+/* --- the centre --- */
+
+/* CASA and the four sentences share one grid cell and cross-fade. Both boxes
+   are trimmed to cap height and baseline, so the grid centres the letters. */
 .swap {
   grid-area: 1 / 1;
-  transition:
-    opacity 0.35s ease,
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  text-box: trim-both cap alphabetic;
+  transition: opacity 0.35s ease;
 }
 
 .swapOut {
   opacity: 0;
-  transform: scale(0.94);
 }
 
+/* 18% of the ring, but never more than 0.85 of the hero headline: 1em here is
+   the H1's own size, set on the centre in the TSX (the tokens are @theme inline,
+   so no CSS variable exists to read). All capitals at the H1's size would tie
+   with its capitals and outweigh its lower case; at 0.85 the headline leads. */
+.word {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: min(18cqw, 0.85em);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  /* The tracking also follows the last letter; give it back so CASA centres. */
+  margin-right: -0.04em;
+  line-height: 1;
+  color: #fff;
+}
+
+/* The full sentence: 60% of the ring wide, so its corners clear the track and
+   the 3 and 9 o'clock markers at every size (checked with the longest one,
+   five lines on a phone). 12 px on the smallest ring, 13 px at 1024, 15 px at
+   1440, 16 px at most. */
+.sentence {
+  max-width: 60cqw;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(0.75rem, 0.4rem + 2.6cqw, 1rem);
+  font-weight: 500;
+  line-height: 1.4;
+  /* Not the headline tracking the centre's text-*xl class would hand down. */
+  letter-spacing: normal;
+  text-wrap: balance;
+  color: #fff;
+}
+
+/* --- the markers --- */
+
 .node {
+  width: clamp(24px, 9.5cqw, 34px);
+  height: clamp(24px, 9.5cqw, 34px);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* The outer span carries the entrance (and the invite pulse); the body inside
+   it lifts, so neither overrides the other. Yellow is never dimmed by opacity
+   (it turns olive on the ink): the other points step back by their labels. */
 .bead {
   position: relative;
   display: block;
   height: 100%;
   width: 100%;
+}
+
+/* The halo of an active marker: it starts at the rim, as the exams seals' spill does. */
+.bead::before {
+  content: '';
+  position: absolute;
+  inset: -110%;
   border-radius: 9999px;
-  border: 3px solid var(--casa-sun);
+  background: radial-gradient(closest-side, rgb(255 213 0 / 0.3) 31%, rgb(255 213 0 / 0.1) 62%, rgb(255 213 0 / 0) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.beadBody {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  border: 2px solid var(--casa-sun);
   background: var(--casa-ink-deep);
-  padding: 3px;
-  transition:
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.3s ease;
+  /* % of the marker's width: the ink gap keeps its proportion at every size. */
+  padding: 12%;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .beadCore {
@@ -67,31 +197,52 @@
   background: var(--casa-sun);
 }
 
-.node:hover .bead,
-.node[aria-pressed='true'] .bead {
-  transform: scale(1.22);
-  box-shadow:
-    0 0 0 6px rgb(255 213 0 / 0.16),
-    0 0 26px rgb(255 213 0 / 0.5);
+.node[aria-pressed='true'] .bead::before {
+  opacity: 1;
 }
 
-.node:focus-visible .bead {
+.node[aria-pressed='true'] .beadBody {
+  transform: scale(1.12);
+}
+
+.node:focus-visible .beadBody {
   outline: 2px solid #fff;
   outline-offset: 4px;
 }
 
+/* --- the labels --- */
+
 .label {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.005em;
+  text-box: trim-both cap alphabetic;
   color: rgb(255 255 255 / 0.92);
   transition: color 0.3s ease;
 }
 
-/* With one point chosen, the others step back and the chosen label turns yellow. */
+.end {
+  width: max-content;
+  max-width: 14rem;
+}
+
+/* Side labels: one word a line in a narrow panel, one line in a wide one. */
+.side {
+  width: min-content;
+}
+
+@container casa-ring-panel (min-width: 560px) {
+  .side {
+    width: max-content;
+  }
+}
+
 .panel[data-active] .label {
   color: rgb(255 255 255 / 0.42);
 }
 
-.panel[data-active] .node[aria-pressed='true'] .label,
-.node:hover .label {
+.panel[data-active] .node[aria-pressed='true'] .label {
   color: var(--casa-sun);
 }
 
@@ -109,6 +260,29 @@
     animation: casa-ring-turn 60s linear 2.1s infinite;
   }
 
+  /* Traced out from the marker at the seals' pace; retracted a little faster. */
+  .arc {
+    transition:
+      stroke-dashoffset 0.6s cubic-bezier(0.45, 0.05, 0.25, 1),
+      opacity 0s linear 0.6s;
+  }
+
+  .arc[data-on] {
+    transition:
+      stroke-dashoffset 0.7s cubic-bezier(0.45, 0.05, 0.25, 1),
+      opacity 0s;
+  }
+
+  .swap {
+    transition:
+      opacity 0.35s ease,
+      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .swapOut {
+    transform: scale(0.94);
+  }
+
   .bead {
     animation: casa-ring-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) calc(0.3s + var(--node-index) * 0.4s) both;
   }
@@ -117,9 +291,9 @@
   .bead::after {
     content: '';
     position: absolute;
-    inset: -3px;
+    inset: 0;
     border-radius: 9999px;
-    border: 2px solid var(--casa-sun);
+    border: 1.25px solid var(--casa-sun);
     opacity: 0;
     animation: casa-ring-invite 1.3s ease-out calc(2.2s + var(--node-index) * 0.18s) 1 both;
   }
