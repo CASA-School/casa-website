@@ -242,7 +242,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Prüfungsdetail' : 'Exam detail'}
         title={detail.examType.name}
-        description={detail.narrative?.intro || detail.narrative?.summary || (locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.' : 'We support you from registration through to your result.')}
+        description={detail.narrative?.summary || (locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.' : 'We support you from registration through to your result.')}
         breadcrumbs={breadcrumbs}
         /* Not "Exam info rail" — "rail" is our word for the component, not a
            thing a visitor has a name for. The German string never said it. */
@@ -272,6 +272,19 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
             {/* `min-w-0`, as on /courses/[slug]: no child may widen the column. */}
             <div className="min-w-0 space-y-12 md:space-y-14">
+              {/*
+                Who the exam is for, in the old site's words (2026-10-08). It
+                was the hero's text, five lines beside the facts card; the hero
+                says the short version and the page says this.
+              */}
+              {detail.narrative?.intro ? (
+                <section aria-labelledby="exam-audience">
+                  <h2 id="exam-audience" className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
+                    {locale === 'de' ? 'Für wen ist die Prüfung?' : 'Who is the exam for?'}
+                  </h2>
+                  <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{detail.narrative.intro}</p>
+                </section>
+              ) : null}
               <ExamDayTimelineSignature
                 title={locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis' : 'From registration to your result'}
                 description={

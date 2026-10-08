@@ -343,7 +343,7 @@ export const whyGermanyGuideEn: ResourceGuideData = {
   hero: {
     title: 'Why Germany',
     summary: 'What Germany can offer you in your studies and in everyday life, and where German helps.',
-    lead: 'What could studying and living in Germany mean for you? This guide helps you find out, from choosing your path in education to making new friends and a home in a new city.',
+    lead: 'What could studying and living in Germany mean for you? This guide helps you find out.',
     photo: {
       src: '/media/casa/group-course-walking-bremen.jpg',
       alt: 'CASA learners walking through Bremen together',

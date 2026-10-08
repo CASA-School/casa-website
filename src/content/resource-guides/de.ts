@@ -324,7 +324,7 @@ export const whyGermanyGuideDe: ResourceGuideData = {
   hero: {
     title: 'Warum Deutschland',
     summary: 'Hier erfährst du, was Deutschland dir im Studium und im Alltag bietet und wobei dir Deutsch hilft.',
-    lead: 'Was könnten ein Studium und ein Leben in Deutschland für dich bedeuten? Dieser Ratgeber hilft dir, es herauszufinden, von der Wahl deines Bildungswegs bis zu neuen Freundschaften und einem Zuhause in einer anderen Stadt.',
+    lead: 'Was könnten ein Studium und ein Leben in Deutschland für dich bedeuten? Dieser Ratgeber hilft dir, es herauszufinden.',
     photo: {
       src: '/media/casa/group-course-walking-bremen.jpg',
       alt: 'CASA-Lernende gehen gemeinsam durch Bremen',
