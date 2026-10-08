@@ -170,9 +170,13 @@ const STARS = (
 // The sun's light on the water: five strokes under it, each shorter than the last.
 const GLINTS = [52, 38, 26, 16, 8].map((w, i) => ({ w, y: HORIZON + 10 + i * 11 + i * i, o: r2(0.7 - i * 0.12) }));
 
-/** Digits in the sans: Playfair's 1 reads as an l. */
+/**
+ * Every word with a digit in the sans, whole: Playfair's 1 reads as an l, and a
+ * sans 1 after a Playfair C still reads "Cl", so the level code "C1" is set in
+ * Plus Jakarta Sans as one piece, as on the seal (guide §1.2 R10).
+ */
 function SansDigits({ text }: { text: string }) {
-  return text.split(/(\d+)/).map((part, i) =>
+  return text.split(/(\S*\d\S*)/).map((part, i) =>
     i % 2 ? (
       <span key={i} className="font-sans">
         {part}
@@ -367,7 +371,7 @@ export function ExamsHeroVisual({ exams, parts, label, locale, className }: Exam
               <SansDigits text={exam.name} />
             </p>
             <p className="mx-auto mt-1.5 max-w-[33rem] text-pretty text-[0.74rem] leading-snug text-white/80 xl:text-[0.82rem]">
-              {exam.summary} <span className="whitespace-nowrap font-semibold text-[var(--casa-sun)]">{exam.cta} →</span>
+              {exam.summary}
             </p>
           </div>
         ))}
