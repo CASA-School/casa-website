@@ -393,7 +393,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     priceFrom: 595,
     tagline: {
       en: 'The rooster sits right at the top. With this package, your group gets to know Bremen in a week.',
-      de: 'Der Hahn sitzt ganz oben. Mit ihm lernt Ihre Gruppe Bremen in einer Woche kennen.',
+      de: 'Der Hahn sitzt ganz oben. Behalte den Überblick und lerne Bremen in einer Woche kennen.',
     },
     intro: {
       en: 'The rooster sits right at the top and can see the whole city. In one week your group has twenty lessons and four afternoons of activities, which include a look behind the scenes at the Weserstadion and a visit to the studios of Radio Bremen. It is the quickest way to find out what a language trip to Bremen feels like.',
@@ -401,7 +401,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     },
     bestFor: {
       en: 'First-time groups, tight school calendars and a first trip abroad for younger classes.',
-      de: 'Gruppen beim ersten Mal, enge Schulkalender und die erste Auslandsfahrt jüngerer Klassen.',
+      de: 'Gruppen, die das erste Mal zu uns kommen, enge Schulkalender und die erste Auslandsfahrt jüngerer Klassen.',
     },
     activities: ['cityrallye', 'weserstadion', 'radio-bremen', 'universum'],
   },
@@ -414,7 +414,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     priceFrom: 1130,
     tagline: {
       en: 'The cat stands third from the ground. Two weeks is long enough for the German to start coming by itself.',
-      de: 'Die Katze steht an dritter Stelle. Zwei Wochen sind lang genug, dass das Deutsch von selbst kommt.',
+      de: 'Die Katze steht an dritter Stelle. Schärfe deine Sinne, sei neugierig und lande auf allen vier Pfoten in unserer schönen Hansestadt.',
     },
     intro: {
       en: 'Two weeks in Bremen is a proper stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough for the German at the dinner table to come by itself. Like the cat, the group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.',
@@ -444,7 +444,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     priceFrom: 1300,
     tagline: {
       en: 'The dog stands on the donkey’s back. Its two weeks also take your group out into the region.',
-      de: 'Der Hund steht auf dem Rücken des Esels. Seine zwei Wochen führen auch hinaus in die Region.',
+      de: 'Der Hund steht auf dem Rücken des Esels. Geh mit ihm auf Wanderschaft in Bremen und darüber hinaus.',
     },
     intro: {
       en: 'The dog has the same two weeks as the cat and also takes your group out into the region, with a whole day in Hamburg, a boat tour of the harbour and the Klimahaus in Bremerhaven. It suits groups who have been on a language trip before and would like to see more of the region.',
@@ -477,7 +477,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     priceFrom: null,
     tagline: {
       en: 'The donkey stands at the very bottom and carries the other three. This is the package you put together yourself.',
-      de: 'Der Esel steht ganz unten und trägt die anderen drei. Dieses Paket stellen Sie selbst zusammen.',
+      de: 'Der Esel steht ganz unten und trägt die anderen drei. Sei stur und unabhängig und stelle dir dein eigenes Programm zusammen.',
     },
     intro: {
       en: 'The donkey stands at the very bottom and carries all the others. With this package you choose the length yourself, from one to four weeks. You leave out anything you have already organised, and you put the afternoons together from all sixteen activities. Three or four weeks are only possible with this package.',
