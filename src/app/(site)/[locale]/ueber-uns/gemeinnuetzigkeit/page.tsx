@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 
+import { NonprofitIncomeRing } from '@/components/sections/nonprofit-income-ring';
 import { NonprofitMission } from '@/components/sections/nonprofit-mission';
-import { HeroAPhotoLed } from '@/components/heroes';
+import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -69,6 +70,11 @@ export default async function NonProfitStatusPage() {
             'Als gemeinnützige Sprachschule setzen wir uns für Bildung, Verständigung und Teilhabe ein. Unsere Einnahmen fließen zurück in diese Arbeit.',
           ctas: [{ label: 'Wirkung ansehen', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
+        ring: {
+          nodes: ['Qualifizierte Lehrkräfte', 'Kleine Gruppen', 'Beratung & Lernräume', 'Soziale Projekte'] as const,
+          label:
+            'Wohin unsere Einnahmen fließen: in qualifizierte Lehrkräfte, kleine Gruppen, Beratung und Lernräume sowie soziale Projekte.',
+        },
         fundingText:
           'Wir finanzieren uns zum großen Teil über Kursgebühren. Mit diesen Einnahmen tragen wir den laufenden Schulbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.',
         fundingBullets: [
@@ -98,6 +104,10 @@ export default async function NonProfitStatusPage() {
             'As a non-profit language school, we are committed to education, understanding and inclusion. Our income goes back into this work.',
           ctas: [{ label: 'See the impact', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
         },
+        ring: {
+          nodes: ['Qualified teachers', 'Small groups', 'Advice & places to learn', 'Social projects'] as const,
+          label: 'Where our income goes: qualified teachers, small groups, advice and places to learn, and social projects.',
+        },
         fundingText:
           'We are funded largely through course fees. This income pays for the day-to-day running of the school and secures services that are especially important to international learners and vulnerable groups.',
         fundingBullets: [
@@ -118,23 +128,25 @@ export default async function NonProfitStatusPage() {
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <JsonLdScript id="nonprofit-status-schema" data={pageSchema(locale)} />
-      <HeroAPhotoLed
-        eyebrow={copy.hero.eyebrow}
-        title={copy.hero.title}
-        description={copy.hero.description}
-        /* Slot 79: learners and volunteers at a shared breakfast. The people sit
-           along both edges of the frame, so the hero shows it whole (3:2). */
-        photo={{
-          src: '/media/casa/community-shared-meal.webp',
-          alt:
-            locale === 'de'
-              ? 'Teilnehmende und Freiwillige frühstücken gemeinsam in einem CASA-Kursraum, einer spielt Gitarre'
-              : 'Learners and volunteers sharing breakfast in a CASA classroom, one playing the guitar',
-          aspectRatio: '3 / 2',
-        }}
-        ctas={copy.hero.ctas}
-        breadcrumbs={copy.breadcrumbs}
-      />
+      {/*
+        The hero's media slot holds the income ring from the CASA film instead of a
+        photograph (Rahman, 2026-10-08): on this page the picture to show is where
+        the money goes. Same composition as HeroAPhotoLed (HeroSurface + HeroLede),
+        with the ring where HeroBleedPhoto would be. The photo it replaced, slot 79,
+        stays in the library unused.
+      */}
+      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={copy.breadcrumbs} className="overflow-x-clip">
+        <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+          <HeroLede
+            eyebrow={copy.hero.eyebrow}
+            title={copy.hero.title}
+            description={copy.hero.description}
+            ctas={copy.hero.ctas}
+            className="lg:py-6"
+          />
+          <NonprofitIncomeRing nodes={copy.ring.nodes} label={copy.ring.label} />
+        </div>
+      </HeroSurface>
 
       {/*
         The gGmbH comes first (CASA, 2026-10-05): what happens to course fees and

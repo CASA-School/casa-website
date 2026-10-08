@@ -1,0 +1,108 @@
+/*
+ * The ring's entrance, on page load (it lives in the hero, above the fold).
+ * The line draws clockwise from 12 o'clock at an even pen speed, so the time it
+ * reaches each node is exact: node i at 0.3 s + i × 0.4 s. Dots, nodes and
+ * labels key their delays to that; the flow starts turning once the ring has
+ * closed. Every animation fills `both`, so nothing needs a hidden start state,
+ * and under prefers-reduced-motion none of it runs: the ring renders finished.
+ */
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(42% 58% at 50% 50%, rgb(255 213 0 / 0.14), transparent 72%);
+  pointer-events: none;
+}
+
+.centre {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 76px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  fill: #fff;
+}
+
+.node {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.flow {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .track {
+    animation: casa-ring-draw 1.6s linear 0.3s both;
+  }
+
+  .particle {
+    animation: casa-ring-fade 0.35s ease-out calc(0.3s + var(--p) * 1.6s) both;
+  }
+
+  /* One lap a minute: alive, never busy. */
+  .flow {
+    animation: casa-ring-turn 60s linear 2.1s infinite;
+  }
+
+  .node {
+    animation: casa-ring-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) calc(0.3s + var(--node-index) * 0.4s) both;
+  }
+
+  .label {
+    animation: casa-ring-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) calc(0.42s + var(--node-index) * 0.4s) both;
+  }
+
+  .centre {
+    animation: casa-ring-fade 0.9s ease-out 0.1s both;
+  }
+}
+
+@keyframes casa-ring-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes casa-ring-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes casa-ring-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* `transform`, not `translate`: Tailwind 4's -translate-* utilities that place
+   each label use the `translate` property, and animating it would undo them. */
+@keyframes casa-ring-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes casa-ring-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
