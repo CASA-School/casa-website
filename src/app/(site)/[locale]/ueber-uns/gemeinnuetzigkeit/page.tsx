@@ -144,7 +144,7 @@ export default async function NonProfitStatusPage() {
             ctas={copy.hero.ctas}
             className="lg:py-6"
           />
-          <NonprofitIncomeRing nodes={copy.ring.nodes} label={copy.ring.label} />
+          <NonprofitIncomeRing nodes={copy.ring.nodes} details={copy.fundingBullets} label={copy.ring.label} />
         </div>
       </HeroSurface>
 
