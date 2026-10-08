@@ -175,7 +175,7 @@ export function CourseFormatRows({
               src={row.media.src}
               alt={row.media.alt}
               fill
-              sizes="(min-width: 768px) 34vw, 92vw"
+              sizes="(min-width: 1440px) 652px, (min-width: 1024px) calc((100vw - 136px) / 2), (min-width: 768px) calc((100vw - 120px) / 2), calc(100vw - 40px)"
               className="object-cover"
             />
           </div>

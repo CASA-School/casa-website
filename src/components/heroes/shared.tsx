@@ -132,7 +132,13 @@ export function HeroPhotoCard({
       three dots that read as macOS traffic lights. Review doc §4.2.)
     */
     <figure className={cn('h-72 md:h-96', className)}>
-      <MediaFrame src={photo.src} alt={photo.alt} priority={priority} className="h-full w-full" />
+      <MediaFrame
+        src={photo.src}
+        alt={photo.alt}
+        priority={priority}
+        className="h-full w-full"
+        sizes="(min-width: 1680px) 827px, (min-width: 1024px) calc((100vw - 120px) * 0.53), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
+      />
     </figure>
   );
 }

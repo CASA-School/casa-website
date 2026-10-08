@@ -22,7 +22,7 @@ only: every other photograph on the site stays a real, source-faithful photograp
 ## One image per slot
 
 Each image replaces a file in `public/media/casa/` at the same path, shape and size,
-so no code changes.
+while labels and accessible descriptions are applied centrally by CasaImage.
 
 | Slot | File | Shape, pixels | What it shows | Where it appears |
 | --- | --- | --- | --- | --- |
@@ -66,9 +66,30 @@ so no code changes.
 5. Look at /unterkunft, /unterkunft/wohnen-in-einer-gastfamilie and
    /unterkunft/gastfamilie-werden at 390, 1024 and 1440px.
 
-## Labelling (recommended; Rahman decides)
+## Labelling (approved by Rahman, 2026-10-08)
 
-The images will be illustrations, not this family's home. A small "Beispielbild"
-(DE) / "Example image" (EN) caption would stop a learner from reading a generated
+The images will be illustrations, not this family's home. Every generated placement receives a small "Beispielbild"
+(DE) / "Example image" (EN) corner caption to stop a learner from reading a generated
 room as the room they will get. That is the point of hard rule 5: accommodation
 photos are contextual, not availability claims.
+
+## Delivered finishing pass, 2026-10-08
+
+Slots 27 and 72–77 now use five generated masters based on references 08–12,
+exported at the original delivery shapes/sizes with quality 90. The visible
+corner labels are HTML overlays, translated by document language; decorative
+halo duplicates do not receive another label. Alt descriptions disclose AI.
+No generated people or invented text are included.
+
+The seven camera-source recipes were removed from `build_reel.py`. Rebuild these
+illustrations with `python3 scripts/media/build_host_family.py`; its manifest
+records exact prompts, reference files and master checksums. Master PNGs stay in
+`~/Archive/CASA/host-family-illustrations-2026-10-08/`. Generated pixels are
+resampled to preserve the existing requested sizes; this is separate from the
+no-upscaling rule for real photographs.
+
+**Pending slot 81:** the three newer references in the brief were not found in
+the reviewed source folders. Codex requested their local path. A bedroom layout
+is not inferred from a kitchen/WG reference. Until that dedicated photo arrives,
+`becomeHostRoom` retains the labelled dining-area example (77); this remaining
+subject mismatch is documented rather than presented as a completed bedroom.

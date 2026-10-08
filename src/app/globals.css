@@ -1278,6 +1278,25 @@ h3 {
 
 /* The sharp photograph. Radius comes from the feature step, so it tracks
    the scale; the shadow is gone because the halo is now the elevation. */
+/* Keep the disclosure sharp and translated, including in client-rendered cards.
+   Decorative halo copies have an empty alt and never receive a second label. */
+.casa-example-label {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 2;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--casa-ink-deep);
+  color: white;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  pointer-events: none;
+}
+.casa-example-label [lang="en"] { display: none; }
+html[lang^="en"] .casa-example-label [lang="de"] { display: none; }
+html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
+
 .casa-media__frame {
   position: relative;
   z-index: 1;

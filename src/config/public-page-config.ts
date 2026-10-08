@@ -248,8 +248,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   hostFamilyDinner: {
     src: '/media/casa/host-family-room.jpg',
     alt: {
-      en: 'The dining table in a host family\'s home, with the open kitchen beyond',
-      de: 'Der Esstisch in der Wohnung einer Gastfamilie, dahinter die offene Küche',
+      en: 'AI-generated example image: The dining table in a host family\'s home, with the open kitchen beyond',
+      de: 'KI-generiertes Beispielbild: Der Esstisch in der Wohnung einer Gastfamilie, dahinter die offene Küche',
     },
     caption: {
       en: 'Accommodation support is about feeling settled enough to learn.',
@@ -582,23 +582,23 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
    */
   companyColleagues: {
     src: '/media/casa/course-company-colleagues.webp',
-    alt: { de: 'Zwei Kollegen besprechen gemeinsam ein Dokument', en: 'Two colleagues going through a document together' },
+    alt: { de: 'Zwei Lernende besprechen gemeinsam ein Dokument', en: 'Two learners going through a document together' },
     caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
   },
   companyColleaguesHero: {
     src: '/media/casa/course-company-colleagues-hero.webp',
-    alt: { de: 'Zwei Kollegen besprechen gemeinsam ein Dokument', en: 'Two colleagues going through a document together' },
+    alt: { de: 'Zwei Lernende besprechen gemeinsam ein Dokument', en: 'Two learners going through a document together' },
     caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
   },
   companyFocus: {
     src: '/media/casa/course-company-focus.webp',
-    alt: { de: 'Eine Teilnehmerin liest konzentriert, neben ihr eine Kollegin', en: 'A learner reading closely, a colleague beside her' },
+    alt: { de: 'Zwei Lernende lesen gemeinsam ihre Unterlagen', en: 'Two learners reading their papers together' },
     caption: { de: 'Deutsch für den Arbeitsalltag', en: 'German for everyday work' },
   },
   // Beside a named participant's quote: a hand and a pen, no face (hard rule 2).
   companyQuote: {
     src: '/media/casa/course-company-writing.webp',
-    alt: { de: 'Eine Hand mit Stift, dahinter der Kurs', en: 'A hand holding a pen, the class behind it' },
+    alt: { de: 'Eine Hand schreibt mit einem Stift auf Papier', en: 'A hand writing on paper with a pen' },
     caption: { de: 'Im Kurs', en: 'In class' },
   },
   medicalDialogue: {
@@ -613,7 +613,7 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   },
   medicalWriting: {
     src: '/media/casa/course-medical-writing.webp',
-    alt: { de: 'Zwei Teilnehmerinnen schreiben in ihre Hefte', en: 'Two learners writing in their notebooks' },
+    alt: { de: 'Vier Lernende üben das Schreiben im Kurs', en: 'Four learners practising writing in class' },
     caption: { de: 'Schreiben üben', en: 'Writing practice' },
   },
   bildungszeitLearner: {
@@ -651,15 +651,15 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Zwei Teilnehmer gehen gemeinsam ihre Blätter durch', en: 'Two learners going through their papers together' },
     caption: { de: 'Vorbereitung im Kurs', en: 'Preparing in class' },
   },
-  // Slots 92-93 (2026-10-08): the row of five that was here did not look good in the hero.
+  // Slots 92-93: approved whole-head reading scene, replacing source-cut frame 023.
   examC1: {
     src: '/media/casa/exam-c1-study.webp',
-    alt: { de: 'Drei Teilnehmerinnen schreiben nebeneinander', en: 'Three learners writing side by side' },
+    alt: { de: 'Zwei Lernende lesen gemeinsam Prüfungstexte', en: 'Two learners reading exam texts together' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Hero: {
     src: '/media/casa/exam-c1-study-hero.webp',
-    alt: { de: 'Drei Teilnehmerinnen schreiben nebeneinander', en: 'Three learners writing side by side' },
+    alt: { de: 'Zwei Lernende lesen gemeinsam Prüfungstexte', en: 'Two learners reading exam texts together' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Class: {
@@ -673,39 +673,39 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     caption: { de: 'Mit Ruhe vorbereiten', en: 'Calm preparation' },
   },
   /*
-   * ACCOMMODATION (2026-10-02). Host-family photographs come from one real
-   * Bremen household (consent CASA 2026-09-15, website use cleared by Rahman
-   * 2026-10-02); CASA-WG photographs from the pool. A WG photo never stands
+   * ACCOMMODATION (2026-10-08). Host-family images are labelled AI examples
+   * based on one real Bremen household; prompts and provenance are in
+   * scripts/media/host_family_illustrations.json. CASA-WG photos stay real. A WG photo never stands
    * in for a host family's, or the other way round (CLAUDE.md hard rule 5).
    */
   hostFamilyLivingHero: {
     src: '/media/casa/host-family-living-hero.webp',
-    alt: { de: 'Der Esstisch in der Wohnung einer Gastfamilie, dahinter die offene Küche', en: 'The dining table in a host family\'s home, with the open kitchen beyond' },
+    alt: { de: 'KI-generiertes Beispielbild: Der Esstisch in der Wohnung einer Gastfamilie, dahinter die offene Küche', en: 'AI-generated example image: The dining table in a host family\'s home, with the open kitchen beyond' },
     caption: { de: 'Wohnen in einer Gastfamilie', en: 'Living with a host family' },
   },
   hostFamilyKitchen: {
     src: '/media/casa/host-family-kitchen.webp',
-    alt: { de: 'Die Küche einer Gastfamilie', en: 'A host family\'s kitchen' },
+    alt: { de: 'KI-generiertes Beispielbild: Die Küche einer Gastfamilie', en: 'AI-generated example image: A host family\'s kitchen' },
     caption: { de: 'Küche zum Mitbenutzen', en: 'A kitchen to share' },
   },
   hostFamilyKitchenDetail: {
     src: '/media/casa/host-family-kitchen-detail.webp',
-    alt: { de: 'Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'A host family\'s bright kitchen with two windows' },
+    alt: { de: 'KI-generiertes Beispielbild: Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'AI-generated example image: A host family\'s bright kitchen with two windows' },
     caption: { de: 'Gastgeber werden', en: 'Become a host' },
   },
   hostFamilyKitchenHero: {
     src: '/media/casa/host-family-kitchen-hero.webp',
-    alt: { de: 'Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'A host family\'s bright kitchen with two windows' },
+    alt: { de: 'KI-generiertes Beispielbild: Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'AI-generated example image: A host family\'s bright kitchen with two windows' },
     caption: { de: 'Gastgeber werden', en: 'Become a host' },
   },
   hostFamilyBathroom: {
     src: '/media/casa/host-family-guest-bathroom.webp',
-    alt: { de: 'Das Gästebad einer Gastfamilie', en: 'A host family\'s guest bathroom' },
+    alt: { de: 'KI-generiertes Beispielbild: Das Gästebad einer Gastfamilie', en: 'AI-generated example image: A host family\'s guest bathroom' },
     caption: { de: 'Bad zum Mitbenutzen', en: 'A bathroom to share' },
   },
   hostFamilyTable: {
     src: '/media/casa/host-family-dining-table.webp',
-    alt: { de: 'Der Esstisch einer Gastfamilie', en: 'A host family\'s dining table' },
+    alt: { de: 'KI-generiertes Beispielbild: Der Esstisch einer Gastfamilie', en: 'AI-generated example image: A host family\'s dining table' },
     caption: { de: 'Am Tisch der Gastfamilie', en: 'At the host family\'s table' },
   },
   /* Awaited (slot 81): no host family's guest room has been photographed yet.
@@ -920,7 +920,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // The hero (slot 11). The exam cards have no photographs since 2026-10-08.
       thumbC: photoLibrary.studentSuccess,
       // The candidate story (slot 71).
-      story: photoLibrary.examStory,
+      story: photoLibrary.companyQuote,
     },
   },
   'exam-detail': {

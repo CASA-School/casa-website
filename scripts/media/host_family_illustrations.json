@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-08",
+  "tool": "image_gen.imagegen",
+  "kind": "AI-generated room illustrations",
+  "sourceRoot": "Tasks/10-active/work/CASA - Various Tasks/casa-external-agency-photo-package-2026-09-15/output/casa-photo-package-external-agency-review-2026-09-15/consent-confirmed-by-casa-2026-09-15",
+  "mastersRoot": "Archive/CASA/host-family-illustrations-2026-10-08",
+  "images": [
+    {
+      "name": "living",
+      "reference": "08-host-family-home-living-area.jpg",
+      "prompt": "Use case: precise-object-edit. Asset type: explicitly labelled AI example illustration for the CASA host-family accommodation website. Reference image is the edit target; preserve the home's recognizable layout, material palette and the furniture/fixtures described. The dining table in the foreground and open white kitchen beyond. Preserve the oak table, dark fabric chairs, plank floor, wall opening, white cabinet fronts and black worktop. Compose landscape 4:3, ideally 2560x1920 pixels, eye level, table and recognizable kitchen in the middle of the frame. Reduce the unnecessary ceiling and floor. Leave enough composition room so a central 2.4:1 band is useful. Make a clean, source-based photorealistic room illustration in soft warm daylight, cream walls and natural oak. Believable everyday Bremen home, not a luxury showroom. Replace the blue evening window cast with gentle neutral daylight. No people, faces or hands anywhere, including reflections and family photographs. Remove personal photographs, children's drawings, readable letters, names, toys, toothbrushes, toiletries, post and personal clutter. No text, signs, logos, screens or watermarks. Do NOT render Beispielbild lettering; that will be added as a sharp website overlay. Restrained natural color and light, no HDR, no orange cast, no wide-angle stretch. Preserve plausible scale and straight verticals. Produce one single image, no collage, no before/after, no borders.",
+      "sha256": "23b79c2f64405f49c08c4d1320f6eb0fd7aaeb8b035b660b8fd80fb64c6e4c4b",
+      "size": [
+        1448,
+        1086
+      ]
+    },
+    {
+      "name": "kitchen",
+      "reference": "09-host-family-home-kitchen.jpg",
+      "prompt": "Use case: precise-object-edit. Asset type: explicitly labelled AI example illustration for the CASA host-family accommodation website. Reference image is the edit target; preserve the home's recognizable layout, material palette and the furniture/fixtures described. The white fitted kitchen with dark worktop, black sink tap, wooden floor and one window. Preserve cabinet layout, ordinary white fronts and black handles. Landscape 3:2, ideally 2560x1707 pixels. Level verticals. Keep the room comfortably lived-in with a neutral unlabelled kettle and one fruit bowl; tidy the sink and worktop. Remove the hanging coat. Make a clean, source-based photorealistic room illustration in soft warm daylight, cream walls and natural oak. Believable everyday Bremen home, not a luxury showroom. Replace the blue evening window cast with gentle neutral daylight. No people, faces or hands anywhere, including reflections and family photographs. Remove personal photographs, children's drawings, readable letters, names, toys, toothbrushes, toiletries, post and personal clutter. No text, signs, logos, screens or watermarks. Do NOT render Beispielbild lettering; that will be added as a sharp website overlay. Restrained natural color and light, no HDR, no orange cast, no wide-angle stretch. Preserve plausible scale and straight verticals. Produce one single image, no collage, no before/after, no borders.",
+      "sha256": "f1e3469d4547e8235e329625a391064f46b8a5d185af12f9f0e83a1fbaa23c27",
+      "size": [
+        1536,
+        1024
+      ]
+    },
+    {
+      "name": "kitchen-detail",
+      "reference": "12-host-family-home-kitchen-detail.jpg",
+      "prompt": "Use case: precise-object-edit. Asset type: explicitly labelled AI example illustration for the CASA host-family accommodation website. Reference image is the edit target; preserve the home's recognizable layout, material palette and the furniture/fixtures described. The opposite kitchen view with white cabinets, dark worktop, two windows and the small wooden sewing-machine table between the windows. Keep this specific furniture and arrangement, not an invented modern kitchen. Landscape 3:2, ideally 2560x1707 pixels; cabinets and windows fully readable in a useful centre band for 2.4:1 hero. Remove the wall photo collage and piled personal papers. Plain off-white blinds with no text. Make a clean, source-based photorealistic room illustration in soft warm daylight, cream walls and natural oak. Believable everyday Bremen home, not a luxury showroom. Replace the blue evening window cast with gentle neutral daylight. No people, faces or hands anywhere, including reflections and family photographs. Remove personal photographs, children's drawings, readable letters, names, toys, toothbrushes, toiletries, post and personal clutter. No text, signs, logos, screens or watermarks. Do NOT render Beispielbild lettering; that will be added as a sharp website overlay. Restrained natural color and light, no HDR, no orange cast, no wide-angle stretch. Preserve plausible scale and straight verticals. Produce one single image, no collage, no before/after, no borders.",
+      "sha256": "ee06a68e7c2b2ba8aa0cac722ed91993bd582bcb2fc9186b4b69999e8cb5e6f6",
+      "size": [
+        1536,
+        1024
+      ]
+    },
+    {
+      "name": "bathroom",
+      "reference": "10-host-family-home-guest-bathroom.jpg",
+      "prompt": "Use case: precise-object-edit. Asset type: explicitly labelled AI example illustration for the CASA host-family accommodation website. Reference image is the edit target; preserve the home's recognizable layout, material palette and the furniture/fixtures described. The simple guest bathroom with a white bowl sink on an oak surface, white vanity cabinet, toilet, gray wall tile and timber-framed mirror. Preserve those fixtures and their plausible physical relationship, clean tidy but ordinary. Landscape 3:2, ideally 2600x1733 pixels. Avoid foreground edge distortion and show sink/toilet as context. Keep mirror reflection free of people; remove personal toiletries, reed diffuser, anchor/stars and labels. Make a clean, source-based photorealistic room illustration in soft warm daylight, cream walls and natural oak. Believable everyday Bremen home, not a luxury showroom. Replace the blue evening window cast with gentle neutral daylight. No people, faces or hands anywhere, including reflections and family photographs. Remove personal photographs, children's drawings, readable letters, names, toys, toothbrushes, toiletries, post and personal clutter. No text, signs, logos, screens or watermarks. Do NOT render Beispielbild lettering; that will be added as a sharp website overlay. Restrained natural color and light, no HDR, no orange cast, no wide-angle stretch. Preserve plausible scale and straight verticals. Produce one single image, no collage, no before/after, no borders.",
+      "sha256": "69c6f3d21dae7f0216c5d369bc396d6cf92e1a2faa19b3ecbddf114e7a76d5aa",
+      "size": [
+        1536,
+        1024
+      ]
+    },
+    {
+      "name": "dining",
+      "reference": "11-host-family-home-living-dining-wide.jpg",
+      "prompt": "Use case: precise-object-edit. Asset type: explicitly labelled AI example illustration for the CASA host-family accommodation website. Reference image is the edit target; preserve the home's recognizable layout, material palette and the furniture/fixtures described. The dining/living area beyond the wide doorway, oak dining table with dark fabric chairs, dark sofa with modest pink cushions, row of windows, oak floor. Landscape 4:3, ideally 2560x1920 pixels. Camera just inside the dining area, so the dining table and sofa\u2014not an empty expanse of floor or a chair back\u2014tell the story. Keep actual reference layout and everyday furniture. Leave out the foreground hanging lamp, coats, wall pinboard, family photographs and letters. Make a clean, source-based photorealistic room illustration in soft warm daylight, cream walls and natural oak. Believable everyday Bremen home, not a luxury showroom. Replace the blue evening window cast with gentle neutral daylight. No people, faces or hands anywhere, including reflections and family photographs. Remove personal photographs, children's drawings, readable letters, names, toys, toothbrushes, toiletries, post and personal clutter. No text, signs, logos, screens or watermarks. Do NOT render Beispielbild lettering; that will be added as a sharp website overlay. Restrained natural color and light, no HDR, no orange cast, no wide-angle stretch. Preserve plausible scale and straight verticals. Produce one single image, no collage, no before/after, no borders.",
+      "sha256": "ddccc4691abc756e55acce307a3e8361110ecd68894eb237d65f36cbc7962fb2",
+      "size": [
+        1448,
+        1086
+      ]
+    }
+  ],
+  "pending": "Slot 81: genuine guest-bedroom reference not available locally; no replacement invented."
+}
