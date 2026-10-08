@@ -1,6 +1,6 @@
 # CASA Media Library
 
-Approved photographs live in `public/media/casa/` and are served from `/media/casa/…`.
+Approved photographs and labelled host-room illustrations live in `public/media/casa/` and are served from `/media/casa/…`.
 
 The two August 2026 NewsFlash photographs (`newsflash-editor-lisa-dao.jpg`,
 `newsflash-kicktipp-winners.jpg`) were removed with that issue on 2026-10-02; the
@@ -20,10 +20,10 @@ older issues is built.
 | `home-class-welcome.webp` | Slot 56, the homepage's "Wir hören zu" and Abendkurse's second photo (since 2026-10-02). Pool frame 087, 3:2, modern grade. |
 | `course-*-hero.webp` | Slots 58, 60, 61, 63: each course page's 2.4:1 hero crop (Intensivkurse, Abendkurse, Spezialkurse, Bildungszeit), shown from `lg` up. |
 | `course-intensive-story.webp`, `course-bildungszeit-class.webp` | Slots 59, 62: Intensivkurse's second photo (061) and Bildungszeit (094). |
-| `course-company-colleagues.webp`, `course-company-colleagues-hero.webp`, `course-company-focus.webp`, `course-company-writing.webp` | Slots 84-87 (2026-10-08): Firmenunterricht. Two colleagues over a document (076, 4:3 and 2.4:1), a learner reading closely (032), and a hand with a pen (024) beside the participant's quote, so no face stands for the person quoted. They replaced an empty classroom (053, slots 64 and 65, retired). |
-| `course-medical-dialogue.webp`, `course-medical-dialogue-hero.webp`, `course-medical-writing.webp` | Slots 88-90 (2026-10-08): Deutsch für Pflege und Medizin, two learners going through a text (077, 4:3 and 2.4:1) and two learners writing (012). Slot 37, a clinical photograph, is still awaited. |
+| `course-company-colleagues.webp`, `course-company-colleagues-hero.webp`, `course-company-focus.webp`, `course-company-writing.webp` | Slots 84-87 (2026-10-08): Firmenunterricht. Two learners over a document (076, 4:3 and 2.4:1), two learners reading (079, replacing source-cut 032), and a face-free hand/pen crop (024) beside company and exam quotes. Learner roles and speaker identity are not inferred. They replaced an empty classroom (053, slots 64 and 65, retired). |
+| `course-medical-dialogue.webp`, `course-medical-dialogue-hero.webp`, `course-medical-writing.webp` | Slots 88-90 (2026-10-08): Deutsch für Pflege und Medizin, two learners going through a text (077, 4:3 and 2.4:1) and four learners practising writing (066, replacing source-cut 012). Slot 37, a clinical photograph, is still awaited. |
 | `course-bildungszeit-learner.webp` | Slot 91 (2026-10-08): Bildungszeit's second photo, a learner smiling across the table (031). |
-| `exam-c1-study.webp`, `exam-c1-study-hero.webp` | Slots 92-93 (2026-10-08): telc C1 Hochschule, three learners writing (023, 4:3 and 2.4:1). They replaced the row of five (065, slots 68 and 69, retired). |
+| `exam-c1-study.webp`, `exam-c1-study-hero.webp` | Slots 92-93 (2026-10-08): telc C1 Hochschule, two learners reading exam texts (078, 4:3 and 2.4:1). These replace source-cut 023; the earlier rejected row of five (065, slots 68 and 69) stays retired. |
 | `team-lesson-wide.webp` | Slot 94 (2026-10-08): the team page's „Wer wir sind", the whole frame of 061 (a teacher at the screen with her class). |
 | `casa-wg-room.webp` | Slot 57, the homepage's accommodation block. Pool file 008, a room in a CASA-WG, 4:3, light correction only. |
 | `casa-building-golden.webp` | Slot 44. AI-processed (misspelled window sign, changed windows): `ready: false` since 2026-10-01 so it cannot render. Do not use. |
@@ -33,13 +33,13 @@ older issues is built.
 | `reel-team-courtyard.webp` | Slot 53. Real 2:1 crop of pool frame 098, light correction only. Made for the retired reel; available. |
 | `reel-partner-practice.webp` | Slot 52. Real 2:1 crop of pool frame 075, light correction only. Made for the retired reel; available. |
 | `reel-walking-bremen-wide.webp` | Slot 50. Real 2:1 crop of pool frame W012 (the slot 23 photograph), light correction only. Made for the retired reel; available. |
-| `exam-preparation-writing.jpg`, `exam-b2-hero.webp`, `exam-b2-class.webp` | Slots 18, 66, 67: the telc B2 card and page (W007 4:3 and 2.4:1, 023). Since 2026-10-02. |
-| `learners-writing-class.jpg`, `exam-c1-speaking.webp`, `exam-story-writing.webp` | Slots 11, 70, 71: the exams hero, the telc C1 Hochschule page's second photo (074) and the exams page's candidate story (078). |
+| `exam-preparation-writing.jpg`, `exam-b2-hero.webp`, `exam-b2-class.webp` | Slots 18, 66, 67: the telc B2 card and page (W007 4:3 and 2.4:1, 079). Since 2026-10-02. |
+| `learners-writing-class.jpg`, `exam-c1-speaking.webp`, `exam-story-writing.webp` | Slots 11, 70, 71: the exams hero, the telc C1 Hochschule page's second photo (074) and a retained reading scene (078), currently unused. The exam named-quote story uses face-free slot 87 instead. |
 | `individual-tutoring.jpg` | Slot 13 (011): FAQ "Ihre Frage ist noch offen?" and the contact page. |
-| `community-shared-meal.webp`, `study-learners-dictionary.webp`, `bremen-schnoor-houses.jpg` | Slots 79, 80, 25: slot 79 (043, whole 3:2 frame) is unused since 2026-10-08, when the income ring replaced it as the nonprofit page's hero; 80 and 25 are the two Ratgeber heroes (034 5:4, W003 5:4). |
-| `group-course-lunch-table.jpg` | Slot 21 (W009): Unterricht für Gruppen's second photo and the /courses card. |
+| `community-shared-meal.webp`, `study-learners-attentive.webp`, `bremen-schnoor-houses.jpg` | Slots 79, 82, 25: slot 79 (043, whole 3:2 frame) is unused since 2026-10-08, when the income ring replaced it as the nonprofit page's hero; study guide (026, 5:4; replaces retired 034/80), life guide (W003, 5:4). |
+| `group-course-lunch-table.jpg` | Slot 21 (W009): group-course second photo and /courses card. Cropped to exclude the source-cut front-right head, retaining complete heads in the rest of the group (2026-10-08). |
 | `student-room-balcony.jpg`, `student-room-alternative-1.jpg`, `casa-wg-room-hero.webp`, `shared-flat-kitchen-table.jpg` | Slots 26, 30, 78, 28: CASA-WG rooms (003, 004) and kitchen (W013). |
-| `host-family-*.{jpg,webp}` | Slots 27, 72-77: one real Bremen host family's home (photo package frames 08-12). Slot 81 (`host-family-guest-room.jpg`) is awaited. |
+| `host-family-*.{jpg,webp}` | Slots 27, 72-77: AI-generated room examples based on host photo-package frames 08-12. Every placement carries Beispielbild / Example image; accessible descriptions disclose AI generation. Slot 81 waits for the dedicated guest-bedroom reference path. See HOST_FAMILY_IMAGES.md. |
 
 Slots 46–49 were the AI-edited reel images of 21 September; their files were deleted on
 2026-09-23 and their numbers are retired, not reused.
@@ -74,11 +74,18 @@ recipe in `scripts/media/build_reel.py` now keeps the white balance measured on 
 own wall and warms it by one shared amount (`warm()`), with midtones at L* 52 and
 highlights at 89 (`EDITORIAL_TONE`, `EDITORIAL_CHROMA`). The older, already warm frames
 (011-036) get the same tone with a lighter touch (`OLDER_*`). Global light and colour
-only, as before, and `--verify` passes for all 54 recipes. Not regraded: the rooms
-(WG and host family), the outdoor group photographs and the team in the courtyard.
+only, as before. The approved finishing pass lifts dim 060/031 faces and reduces
+orange/yellow cast in 088/011 selectively; the shared grade remains. `--verify`
+passes for all 47 camera-source recipes. Host-room illustrations are excluded
+and exported by `build_host_family.py` from checksum-verified masters. WG rooms,
+outdoor photographs and the courtyard team keep their existing grades.
 
-Second-pass photographs use only frames whose people have recorded consent: 076 and
-077 (2026-10-01), 061 (2026-10-02), and 012, 023, 024, 031 and 032 (the brief).
+Recorded selection approvals cover 076/077 (2026-10-01), 061 and the approved
+October brief. Replacements 066, 074, 078 and 079 already served in approved exam
+placements. The finishing pass introduces no new identifiable people. W009 is
+the existing school-group frame; the older brief still asks CASA to confirm its
+consent before go-live. That publication follow-up remains open; this review
+does not manufacture a new consent record.
 Frames 070, 089, 091 and 092 were tried and dropped: 089 shows a learner who may be a
 minor, and 091 and 092 were rejected before.
 
@@ -89,6 +96,26 @@ listed with its page in `docs/MEDIA_PHOTO_NUMBERS.md`). To fill one: pick a shot
 pool, save it at the slot's path as a 2400px JPEG, and set `ready: true` on the registry
 entry. That slot renders the photograph; every other slot stays a numbered placeholder
 until its turn.
+
+## Current finishing pass — 8 October 2026
+
+Seven labelled host-room derivatives replace the existing room photos. The
+models use the actual references, without people or private correspondence.
+Generated PNG masters and an exact manifest stay outside the deployment tree
+in `~/Archive/CASA/host-family-illustrations-2026-10-08/`; committed prompts,
+references, sizes and SHA-256 hashes are in
+`scripts/media/host_family_illustrations.json`. Generated masters are resampled
+to the requested existing delivery sizes; real camera crops are never upscaled.
+
+The social card is now actual 1200×630 artwork using the current approved logo
+and real lesson photo. The four course rows request images for their measured
+652px desktop frames, including DPR 2; shared detail heroes now request for
+their actual 53% content column (699.6px at 1440px). The team directory currently has 13
+entries with animal illustrations; that choice is unchanged.
+
+Details, verification and the remaining bedroom/reference follow-up:
+[IMAGE_FINISHING_2026_10_08.md](IMAGE_FINISHING_2026_10_08.md). The dated sections
+below are history; this current inventory and finishing entry take precedence.
 
 ## Building image preview — 21 September 2026
 
@@ -122,8 +149,9 @@ phone captures confirm that the building, entrance and signs remain visible.
 ## Rules
 
 - Source-faithful edits only: crop, resize, light exposure and colour correction.
-  No generative editing of any kind — no expansion, relighting, retouching or
-  "improvement" by an image model. A frame that needs more room than the photograph
+  No generative people/building editing — no expansion, relighting, retouching or
+  "improvement" by an image model. The explicit 2026-10-08 exception is labelled
+  host-room illustrations only, documented in HOST_FAMILY_IMAGES.md. A frame that needs more room than the photograph
   has gets a different photograph. (The 21 September exception is withdrawn; see below.)
 - Art-direct images for each screen size, not just their container: preserve subjects,
   faces, architecture and important signs; check the full motion cycle. Use separate
@@ -262,8 +290,9 @@ in host-family frame 11, a photo collage in frame 12, the mirror in bathroom fra
   photo-led hero's fade dissolves a close-up of paper.
 - Each exam and accommodation detail page now has its own 4:3 photo, a 2.4:1 hero crop
   for `lg` up (`photoWide`) and a different second photo, as the course pages do.
-- /unterkunft/gastfamilie-werden shows only a host family's rooms (no WG photo). Its
-  "Das Zimmer" row stays an icon panel (slot 81) until a guest room is photographed.
+- /unterkunft/gastfamilie-werden shows only host-family context (no WG photo).
+  Its room row temporarily uses dining-area example slot 77 until the dedicated
+  bedroom reference is available for slot 81; it is not evidence of a bedroom.
 - Consent for the identifiable people in 012, 023, 024, 031, 032, 034, 011, 043 and
   W009 (a visiting school group, likely minors) rests on Rahman's approval of the brief;
   confirm with CASA before go-live, as for earlier slots.

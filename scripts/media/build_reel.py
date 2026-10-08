@@ -44,10 +44,6 @@ from PIL import Image, ImageOps
 
 REPO = Path(__file__).resolve().parents[2]
 POOL = Path.home() / 'Archive/CASA/website-cleanup-2026-09-16/editorial-2026'
-# Host-family photographs (iPhone originals and resized iPhone derivatives) from
-# the CASA photo package, cleared for the website by Rahman on 2026-10-02.
-HOST = (Path.home() / 'Tasks/10-active/work/CASA - Various Tasks/casa-external-agency-photo-package-2026-09-15'
-        / 'output/casa-photo-package-external-agency-review-2026-09-15/consent-confirmed-by-casa-2026-09-15')
 OUT = REPO / 'public/media/casa'
 
 # THE WARM EDITORIAL GRADE (2026-10-08). Rahman: the photos should have warm,
@@ -86,14 +82,14 @@ SLIDES = [
         'out': 'course-intensive-class.webp',
         'source': POOL / '060_IMG_0253.JPG',
         'box': (566, 130, 1920, 1440),
-        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.955, 1.0, 1.055)),
+        'tone': (6, 56, 89), 'chroma': 1.06, 'wb': warm((0.955, 1.0, 1.055)),
     },
     {
         # Slot 58, its course-page hero: the same class as a 2.4:1 band.
         'out': 'course-intensive-hero.webp',
         'source': POOL / '060_IMG_0253.JPG',
         'box': (260, 435, 2230, 929),
-        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.955, 1.0, 1.055)),
+        'tone': (6, 56, 89), 'chroma': 1.06, 'wb': warm((0.955, 1.0, 1.055)),
     },
     {
         # Slot 59, the course page's second photo: the same class, the teacher presenting.
@@ -108,14 +104,14 @@ SLIDES = [
         'out': 'course-evening-table.webp',
         'source': POOL / '088_IMG_0303.JPG',
         'box': (40, 30, 1960, 1470),
-        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.98, 1.0, 1.03)),
+        'tone': (6, 54, 89), 'chroma': 1.02, 'wb': (1.019, 1.0, 0.979),
     },
     {
         # Slot 60, its course-page hero.
         'out': 'course-evening-hero.webp',
         'source': POOL / '088_IMG_0303.JPG',
         'box': (40, 300, 1960, 817),
-        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.98, 1.0, 1.03)),
+        'tone': (6, 54, 89), 'chroma': 1.02, 'wb': (1.019, 1.0, 0.979),
     },
     {
         # Slot 8, Spezialkurse: the teacher speaking at the smart board, her
@@ -255,9 +251,8 @@ SLIDES = [
     # Same modern grade as above. Every frame was checked at 100-200%: no
     # distorted faces or hands, no misspelled text. Private details are left
     # out by the crop, never retouched: the candidate's date of birth on the
-    # telc answer sheet in W007, the children's photographs on the windowsills
-    # and the pinboard of letters in host-family frame 11, the photo collage
-    # on the kitchen wall in frame 12, the mirror in the guest bathroom (10).
+    # telc answer sheet in W007.
+    # The host-family illustrations have a separate manifest and builder.
     # The classroom 012/023/024/011 walls are cream and the light is tungsten,
     # so their white balance is only half-corrected towards neutral.
     {
@@ -315,7 +310,7 @@ SLIDES = [
         'out': 'individual-tutoring.jpg',
         'source': POOL / '011_IMG_0021.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+        'tone': (6, 54, 89), 'chroma': 1.02, 'wb': (1.0, 1.0, 1.06),
     },
     {
         # Slot 80, the nonprofit page's hero: learners and volunteers sharing
@@ -347,7 +342,7 @@ SLIDES = [
         # courtyard. The editorial file has a purple cast and lifted blacks.
         'out': 'group-course-lunch-table.jpg',
         'source': POOL / 'W009_group-course-lunch-table_editorial.jpg',
-        'box': (0, 0, 2400, 1600),
+        'box': (0, 0, 1900, 1267),
         'tone': (4, 52, 92), 'chroma': 1.05, 'wb': (0.92, 1.0, 0.93),
     },
     {
@@ -380,62 +375,6 @@ SLIDES = [
         'tone': (6, 62, 93), 'chroma': 1.0, 'wb': (0.965, 1.0, 0.99),
     },
     {
-        # Slot 27, the host-family card and the host-family page's hero on
-        # phones: a host family's dining table, the open kitchen beyond. The
-        # box leaves out a wall display and a bag at the left edge.
-        'out': 'host-family-room.jpg',
-        'source': HOST / '08-host-family-home-living-area.jpg',
-        'box': (180, 1400, 2420, 1815),
-        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.92, 1.0, 1.07), 'jpeg_quality': 95,
-    },
-    {
-        # Slot 72, the host-family page's hero from lg up: the same room as a 2.4:1 band.
-        'out': 'host-family-living-hero.webp',
-        'source': HOST / '08-host-family-home-living-area.jpg',
-        'box': (180, 1650, 2420, 1008),
-        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.92, 1.0, 1.07),
-    },
-    {
-        # Slot 73, a host family's kitchen. The box leaves out a coat on the right.
-        'out': 'host-family-kitchen.webp',
-        'source': HOST / '09-host-family-home-kitchen.jpg',
-        'box': (0, 1100, 2250, 1500),
-        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.92, 1.0, 1.12),
-    },
-    {
-        # Slot 74, the become-a-host hero on phones: the kitchen from the other
-        # side, the sewing-machine table between the windows. The box leaves
-        # out a wall of family photographs on the left.
-        'out': 'host-family-kitchen-detail.webp',
-        'source': HOST / '12-host-family-home-kitchen-detail.jpg',
-        'box': (1400, 300, 4312, 2875),
-        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.94, 1.0, 1.12), 'max_width': 2560,
-    },
-    {
-        # Slot 75, the become-a-host hero from lg up: the same kitchen as a 2.4:1 band.
-        'out': 'host-family-kitchen-hero.webp',
-        'source': HOST / '12-host-family-home-kitchen-detail.jpg',
-        'box': (1400, 900, 4312, 1797),
-        'tone': (5, 60, 92), 'chroma': 1.0, 'wb': (0.94, 1.0, 1.12), 'max_width': 2560,
-    },
-    {
-        # Slot 76, the guest bathroom. The box stops below the mirror.
-        'out': 'host-family-guest-bathroom.webp',
-        'source': HOST / '10-host-family-home-guest-bathroom.jpg',
-        'box': (0, 1350, 2600, 1733),
-        'tone': (5, 62, 93), 'chroma': 1.0, 'wb': (0.99, 1.0, 1.01),
-    },
-    {
-        # Slot 77, the host family's dining table. Frame 11 is the wide living
-        # room, but its windowsills carry framed photographs of the family's
-        # children and its right wall a pinboard of letters; this box starts
-        # below the sills and stays left of the pinboard.
-        'out': 'host-family-dining-table.webp',
-        'source': HOST / '11-host-family-home-living-dining-wide.jpg',
-        'box': (330, 2660, 1700, 1275),
-        'tone': (5, 58, 92), 'chroma': 1.0, 'wb': (0.93, 1.0, 1.12),
-    },
-    {
         # Slot 83, the homepage's "community events" tile: a learner clapping at
         # the shared breakfast (the slot 79 morning). A portrait frame, because
         # that tile is portrait from lg; the wide walking group it replaced
@@ -464,18 +403,18 @@ SLIDES = [
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.005, 1.0, 0.99)),
     },
     {
-        # Slot 86, Firmenunterricht's second photo: a learner reading closely.
+        # Slot 86: learners reading together, replacing source-cut frame 032.
         'out': 'course-company-focus.webp',
-        'source': POOL / '032_IMG_0473.JPG',
+        'source': POOL / '079_IMG_0286.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 0.99)),
     },
     {
-        # Slot 87, beside a Firmenunterricht participant's quote: a hand with a
-        # pen, no face, so the photo cannot be read as the person quoted (hard rule 2).
+        # Slot 87: face-free hand crop for company/exam quotes. Leaves out all
+        # blurred background heads, including the source-cut crowns.
         'out': 'course-company-writing.webp',
         'source': POOL / '024_IMG_0156.JPG',
-        'box': (0, 0, 2560, 1707),
+        'box': (1300, 867, 1260, 840),
         'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
     },
     {
@@ -495,11 +434,11 @@ SLIDES = [
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 1.0)),
     },
     {
-        # Slot 90, the medical course page's second photo: two learners writing.
+        # Slot 90: writing practice, replacing source-cut frame 012.
         'out': 'course-medical-writing.webp',
-        'source': POOL / '012_IMG_0031.JPG',
-        'box': (0, 0, 2560, 1707),
-        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+        'source': POOL / '066_IMG_0265.JPG',
+        'box': (0, 200, 2250, 1500),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.02, 1.0, 0.985)),
     },
     {
         # Slot 91, Bildungszeit's second photo (was the empty classroom): a
@@ -507,21 +446,21 @@ SLIDES = [
         'out': 'course-bildungszeit-learner.webp',
         'source': POOL / '031_IMG_0472.JPG',
         'box': (0, 0, 2560, 1707),
-        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+        'tone': (6, 56, 89), 'chroma': 1.02, 'wb': (1.0, 1.0, 1.06),
     },
     {
-        # Slot 92, telc C1 Hochschule on phones: three learners writing in a row.
+        # Slot 92: two learners reading exam texts; replaces source-cut frame 023.
         'out': 'exam-c1-study.webp',
-        'source': POOL / '023_IMG_0147.JPG',
-        'box': (284, 0, 2276, 1707),
-        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+        'source': POOL / '078_IMG_0285.JPG',
+        'box': (100, 0, 2276, 1707),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.04, 1.0, 0.975)),
     },
     {
         # Slot 93, the telc C1 Hochschule hero band from lg up.
         'out': 'exam-c1-study-hero.webp',
-        'source': POOL / '023_IMG_0147.JPG',
-        'box': (0, 0, 2560, 1067),
-        'tone': EDITORIAL_TONE, 'chroma': OLDER_CHROMA, 'wb': OLDER_WB,
+        'source': POOL / '078_IMG_0285.JPG',
+        'box': (0, 220, 2560, 1067),
+        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.04, 1.0, 0.975)),
     },
     {
         # Slot 94, the team page's "Wer wir sind": a teacher at the screen with

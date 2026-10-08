@@ -67,16 +67,25 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
     // already positions the image itself.
     const positioned = /(^|\s|:)object-(center|top|bottom|left|right|\[)/.test(className ?? '') || Boolean(style?.objectPosition);
     return (
-      <NextImage
-        src={src}
-        alt={alt}
-        fill={fill}
-        width={width}
-        height={height}
-        className={positioned || !slot?.position ? className : `${className ?? ''} ${slot.position}`.trim()}
-        style={style}
-        {...rest}
-      />
+      <>
+        <NextImage
+          src={src}
+          alt={alt}
+          fill={fill}
+          width={width}
+          height={height}
+          className={positioned || !slot?.position ? className : `${className ?? ''} ${slot.position}`.trim()}
+          style={style}
+          {...rest}
+          data-casa-illustration={slot?.illustration && alt !== '' ? '' : undefined}
+        />
+        {slot?.illustration && alt !== '' ? (
+          <span className="casa-example-label" aria-hidden="true" data-casa-example="">
+            <span lang="de">Beispielbild</span>
+            <span lang="en">Example image</span>
+          </span>
+        ) : null}
+      </>
     );
   }
 
