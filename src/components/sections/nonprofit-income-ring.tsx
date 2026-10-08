@@ -135,7 +135,8 @@ export function NonprofitIncomeRing({ nodes, details, label, className }: Nonpro
       className={cn(
         styles.panel,
         // No box of its own: the ring stands on the night hero's ground.
-        'relative w-full text-white aspect-[6/5] sm:aspect-[4/3] xl:aspect-[3/2]',
+        // Shape per breakpoint as --ar, width capped by the hero's viewport rule (HeroSurface) at that shape, so the drawing never pushes the hero past the screen and its overlays stay aligned.
+        'relative text-white [--ar:6/5] sm:[--ar:4/3] xl:[--ar:3/2] mx-auto aspect-[var(--ar)] w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
         className
       )}
       data-active={active ?? undefined}
