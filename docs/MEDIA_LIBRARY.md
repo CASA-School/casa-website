@@ -18,8 +18,13 @@ older issues is built.
 | `course-evening-table.webp` | Slot 5, Abendkurs. Pool frame 088, 4:3, light correction only. |
 | `course-special-smartboard.webp` | Slot 8, Spezialkurse (since 2026-10-02). Pool frame 067: the teacher at the smart board with her class, 4:3, modern grade. |
 | `home-class-welcome.webp` | Slot 56, the homepage's "Wir hören zu" and Abendkurse's second photo (since 2026-10-02). Pool frame 087, 3:2, modern grade. |
-| `course-*-hero.webp` | Slots 58, 60, 61, 63, 65: each course page's 2.4:1 hero crop (Intensivkurse, Abendkurse, Spezialkurse, Bildungszeit, Firmenunterricht), shown from `lg` up. |
-| `course-intensive-story.webp`, `course-bildungszeit-class.webp`, `course-company-classroom.webp` | Slots 59, 62, 64: Intensivkurse's second photo (061), Bildungszeit (094) and Firmenunterricht (053, no people). |
+| `course-*-hero.webp` | Slots 58, 60, 61, 63: each course page's 2.4:1 hero crop (Intensivkurse, Abendkurse, Spezialkurse, Bildungszeit), shown from `lg` up. |
+| `course-intensive-story.webp`, `course-bildungszeit-class.webp` | Slots 59, 62: Intensivkurse's second photo (061) and Bildungszeit (094). |
+| `course-company-colleagues.webp`, `course-company-colleagues-hero.webp`, `course-company-focus.webp`, `course-company-writing.webp` | Slots 84-87 (2026-10-08): Firmenunterricht. Two colleagues over a document (076, 4:3 and 2.4:1), a learner reading closely (032), and a hand with a pen (024) beside the participant's quote, so no face stands for the person quoted. They replaced an empty classroom (053, slots 64 and 65, retired). |
+| `course-medical-dialogue.webp`, `course-medical-dialogue-hero.webp`, `course-medical-writing.webp` | Slots 88-90 (2026-10-08): Deutsch für Pflege und Medizin, two learners going through a text (077, 4:3 and 2.4:1) and two learners writing (012). Slot 37, a clinical photograph, is still awaited. |
+| `course-bildungszeit-learner.webp` | Slot 91 (2026-10-08): Bildungszeit's second photo, a learner smiling across the table (031). |
+| `exam-c1-study.webp`, `exam-c1-study-hero.webp` | Slots 92-93 (2026-10-08): telc C1 Hochschule, three learners writing (023, 4:3 and 2.4:1). They replaced the row of five (065, slots 68 and 69, retired). |
+| `team-lesson-wide.webp` | Slot 94 (2026-10-08): the team page's „Wer wir sind", the whole frame of 061 (a teacher at the screen with her class). |
 | `casa-wg-room.webp` | Slot 57, the homepage's accommodation block. Pool file 008, a room in a CASA-WG, 4:3, light correction only. |
 | `casa-building-golden.webp` | Slot 44. AI-processed (misspelled window sign, changed windows): `ready: false` since 2026-10-01 so it cannot render. Do not use. |
 | `about-team-courtyard.webp` | Slot 55, About hero since 2026-10-01. Pool frame 098 (the slot 53 team) as its whole 3:2 frame, light correction only. |
@@ -29,7 +34,7 @@ older issues is built.
 | `reel-partner-practice.webp` | Slot 52. Real 2:1 crop of pool frame 075, light correction only. Made for the retired reel; available. |
 | `reel-walking-bremen-wide.webp` | Slot 50. Real 2:1 crop of pool frame W012 (the slot 23 photograph), light correction only. Made for the retired reel; available. |
 | `exam-preparation-writing.jpg`, `exam-b2-hero.webp`, `exam-b2-class.webp` | Slots 18, 66, 67: the telc B2 card and page (W007 4:3 and 2.4:1, 023). Since 2026-10-02. |
-| `learners-writing-class.jpg`, `exam-c1-*.webp`, `exam-story-writing.webp` | Slots 11, 68-71: the exams hero (012, 5:4), the telc C1 Hochschule card and page (032 4:3 and 2.4:1, 031), the exams page's candidate story (024). |
+| `learners-writing-class.jpg`, `exam-c1-speaking.webp`, `exam-story-writing.webp` | Slots 11, 70, 71: the exams hero, the telc C1 Hochschule page's second photo (074) and the exams page's candidate story (078). |
 | `individual-tutoring.jpg` | Slot 13 (011): FAQ "Ihre Frage ist noch offen?" and the contact page. |
 | `community-shared-meal.webp`, `study-learners-dictionary.webp`, `bremen-schnoor-houses.jpg` | Slots 79, 80, 25: the nonprofit page's hero (043, whole 3:2 frame), the two Ratgeber heroes (034 5:4, W003 5:4). |
 | `group-course-lunch-table.jpg` | Slot 21 (W009): Unterricht für Gruppen's second photo and the /courses card. |
@@ -60,6 +65,22 @@ removed on 2026-09-10. The product owner chose the new pool over it; the files h
 survived because the site switched to numbered placeholders on 2026-08-17 instead of
 deleting them. Their sources and enhancement parameters are in the Git history of
 this document's former path, `public/media/casa/README.md`.
+
+## The warm editorial grade (2026-10-08)
+
+Rahman asked for warm, editorial light. The modern grade of 2026-10-02 had left the
+classroom photographs bright and neutral, with glaring white walls. Every classroom
+recipe in `scripts/media/build_reel.py` now keeps the white balance measured on its
+own wall and warms it by one shared amount (`warm()`), with midtones at L* 52 and
+highlights at 89 (`EDITORIAL_TONE`, `EDITORIAL_CHROMA`). The older, already warm frames
+(011-036) get the same tone with a lighter touch (`OLDER_*`). Global light and colour
+only, as before, and `--verify` passes for all 54 recipes. Not regraded: the rooms
+(WG and host family), the outdoor group photographs and the team in the courtyard.
+
+Second-pass photographs use only frames whose people have recorded consent: 076 and
+077 (2026-10-01), 061 (2026-10-02), and 012, 023, 024, 031 and 032 (the brief).
+Frames 070, 089, 091 and 092 were tried and dropped: 089 shows a learner who may be a
+minor, and 091 and 092 were rejected before.
 
 ## How a photograph goes live
 

@@ -1,6 +1,6 @@
 # Website photography: current handoff
 
-Updated 2026-10-02. The authoritative numbered shot list is
+Updated 2026-10-08. The authoritative numbered shot list is
 [`src/config/content/photo-numbers.ts`](../src/config/content/photo-numbers.ts).
 It contains the subject brief, delivery path and `ready` flag for every slot.
 The previous table here drifted from that registry and still named fabricated
@@ -14,11 +14,20 @@ staff members after the code had removed them.
   (`casa-building-daylight.webp`) are user-supplied, AI-processed building
   images. Neither is used on a page any more: the About hero moved to 55 on
   2026-10-01.
-- The homepage's course rows are **4, 5, 8** (real photographs since 2026-10-01; **37**,
-  the medical row, is still a placeholder), "Wir hören zu" is **56** and the
+- The homepage's course rows are **4, 5, 8**, "Wir hören zu" is **56** and the
   accommodation block is **57** (a CASA-WG room). Since 2026-10-02 the course pages
-  have their own hero crops (**58, 60, 61, 63, 65**) and second photos (**59, 62, 64**,
+  have their own hero crops (**58, 60, 61, 63, 85**) and second photos (**59, 62, 86**,
   plus 10 and 56). See MEDIA_LIBRARY.md for the set and the modern grade.
+- Second pass, 2026-10-08: Firmenunterricht shows two colleagues at work (**84, 85**)
+  and a learner reading (**86**) instead of an empty classroom (64 and 65, retired); its
+  participant's quote sits beside a hand and a pen (**87**), not the group walk. The
+  medical course has photographs (**88, 89, 90**; **37** still waits for a clinical one),
+  Bildungszeit's second photo is **91**, telc C1 Hochschule has a new photo and hero
+  (**92, 93**; 68 and 69 retired) and the team page's „Wer wir sind" is **94**. No page
+  shows a stand-in. All classroom photographs now share one warm editorial grade.
+  Still awaited: **37** (a clinical setting) and **81** (a host family's guest room; the
+  become-a-host room row shows **77** until then). The host-family slots (27, 72–77, 81)
+  will become AI illustrations: `docs/HOST_FAMILY_IMAGES.md`.
 - The About hero is **55** (since 2026-10-01): the CASA team in the courtyard, the
   whole 3:2 frame of 098 with light correction only.
 - The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light

@@ -804,13 +804,17 @@ export default async function CourseDetailPage({
                         quote={story.quote}
                         person={story.personDisplay}
                         context={story.country}
-                        photo={{
-                          src: '/media/casa/group-course-walking-bremen.jpg',
-                          alt:
-                            locale === 'de'
-                              ? 'Eine CASA-Gruppe unterwegs in Bremen'
-                              : 'A CASA group out in Bremen',
-                        }}
+                        // The course's own quote photo; the group walk only where the
+                        // quote is a group's (it stood beside a Firmenunterricht quote too).
+                        photo={
+                          pageConfig.photos[`${coursePhotoKey}Quote`] ?? {
+                            src: '/media/casa/group-course-walking-bremen.jpg',
+                            alt:
+                              locale === 'de'
+                                ? 'Eine CASA-Gruppe unterwegs in Bremen'
+                                : 'A CASA group out in Bremen',
+                          }
+                        }
                       />
                     );
                   }
