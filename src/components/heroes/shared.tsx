@@ -67,9 +67,20 @@ export function HeroSurface({ children, className, themeClassName, breadcrumbs, 
    * shorter meant the one dimension HeroSurface still controls was the one
    * dimension where the accommodation hero and the homepage hero disagreed.
    */
+  /*
+   * THE VIEWPORT RULE (Rahman, 2026-10-08). A and D — the heroes with a
+   * picture — fill exactly the first screen below the navbar: the viewport
+   * height minus the header (`--casa-header-h`, the navbar's h-20). Their
+   * content sits centred in it, and the picture is capped by
+   * `--hero-media-max-h` so it never pushes the hero past the screen: on a
+   * phone, where the picture stacks under the text, it gets a share of the
+   * screen; beside the lede it gets what is left after the hero's padding and
+   * breadcrumbs (11rem). HeroBleedPhoto and the coded drawings read that cap.
+   * C and E stay compact: a legal page has no business filling the screen.
+   */
   const heightClass =
     archetype === 'A' || archetype === 'D'
-      ? 'min-h-[52vh] md:min-h-[58vh]'
+      ? 'flex min-h-[calc(100svh-var(--casa-header-h))] flex-col justify-center [--hero-media-max-h:28svh] lg:[--hero-media-max-h:calc(100svh-var(--casa-header-h)-11rem)]'
       : archetype === 'C' || archetype === 'E'
         ? 'min-h-[40vh] md:min-h-[46vh]'
         : 'min-h-[46vh] md:min-h-[52vh]';
@@ -77,7 +88,9 @@ export function HeroSurface({ children, className, themeClassName, breadcrumbs, 
   return (
     <section
       className={cn(
-        'hero-grain border-b border-[color:var(--casa-sand)] py-10 md:py-12 lg:py-14',
+        // --casa-header-h mirrors the navbar's h-20 (navbar.tsx): the hero sits right under it.
+        // A short desktop screen (a 1024 × 768 laptop) gets tighter padding, as it gets a smaller title (HeroLede).
+        'hero-grain border-b border-[color:var(--casa-sand)] py-10 [--casa-header-h:5rem] md:py-12 lg:py-14 [@media(min-width:64rem)_and_(max-height:53.75rem)]:py-10!',
         heightClass,
         themeClassName,
         className
@@ -170,7 +183,8 @@ export function HeroLede({
       </p>
 
       {/* `text-wrap: balance` comes from the [data-hero-archetype] h1 rule in globals.css. */}
-      <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--casa-ink)] sm:text-5xl lg:text-6xl">
+      {/* One step smaller on a short desktop screen, so the lede fits the viewport rule (HeroSurface). */}
+      <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--casa-ink)] sm:text-5xl lg:text-6xl [@media(min-width:64rem)_and_(max-height:53.75rem)]:text-5xl!">
         {title}
       </h1>
 
@@ -264,7 +278,10 @@ export function HeroBleedPhoto({
           shape there instead (16:9, then 2:1), and the registry position
           (photo-numbers.ts) places it.
         */
-        photo.aspectRatio ? 'w-full' : 'h-[19rem] sm:h-auto sm:aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-[33rem]',
+        // Capped by the hero's viewport rule (HeroSurface): object-cover crops a little rather than overflow.
+        photo.aspectRatio
+          ? 'w-full max-h-[var(--hero-media-max-h)]'
+          : 'h-[19rem] max-h-[var(--hero-media-max-h)] sm:h-auto sm:aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-[min(33rem,var(--hero-media-max-h))]',
         className
       )}
       style={{ aspectRatio: photo.aspectRatio }}
