@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 
-import { HeroAPhotoLed } from '@/components/heroes';
+import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { HumanStoryBlock, ProcessSteps } from '@/components/sections';
+import { AccommodationStreet } from '@/components/sections/accommodation-street';
 import { BandHeading } from '@/components/sections/band-heading';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { Container } from '@/components/ui/container';
@@ -64,23 +65,52 @@ export default async function AccommodationPage() {
         inside the options section, so this page put them somewhere no other
         accommodation page did.
 
-        `thumbC` (the shared kitchen), not `thumbA`. thumbA is the student room
-        the "Shared flats" option card renders 400px below, so the hero was
-        showing one of the two answers while asking the reader to choose between
-        them. A kitchen table is the shared ground of both options.
+        THE PICTURE (Rahman, 2026-10-08): a Bremen street at dusk drawn in the
+        CASA film's line style, the sister of the non-profit page's income ring,
+        in place of the shared-kitchen photograph (thumbC). It shows both answers
+        at once, which the photo could not: the CASA-WG and a host family's
+        house, each a link to its detail page, with the option's published
+        summary on hover or focus. Same composition as HeroAPhotoLed
+        (HeroSurface + HeroLede), with the street where HeroBleedPhoto would be.
       */}
-      <HeroAPhotoLed
-        breadcrumbs={breadcrumbs}
-        eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
-        title={locale === 'de' ? 'Ein Zuhause für deine Zeit in Bremen' : 'A home for your time in Bremen'}
-        description={
-          locale === 'de'
-            ? 'Während deines Intensivkurses kannst du in einer CASA-WG oder bei Gastgebern in Bremen wohnen. Wir helfen dir, ein passendes Zimmer zu finden und dich gut einzuleben.'
-            : 'During your intensive course, you can live in a CASA shared flat or with hosts in Bremen. We help you find the right room and settle in well.'
-        }
-        photo={pageConfig.photos.thumbC}
-        ctas={pageConfig.ctas.slice(0, 1)}
-      />
+      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className="overflow-x-clip">
+        <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+          <HeroLede
+            eyebrow={locale === 'de' ? 'Unterkunft' : 'Accommodation'}
+            title={locale === 'de' ? 'Ein Zuhause für deine Zeit in Bremen' : 'A home for your time in Bremen'}
+            description={
+              locale === 'de'
+                ? 'Während deines Intensivkurses kannst du in einer CASA-WG oder bei Gastgebern in Bremen wohnen. Wir helfen dir, ein passendes Zimmer zu finden und dich gut einzuleben.'
+                : 'During your intensive course, you can live in a CASA shared flat or with hosts in Bremen. We help you find the right room and settle in well.'
+            }
+            ctas={pageConfig.ctas.slice(0, 1)}
+            className="lg:py-6"
+          />
+          <AccommodationStreet
+            label={
+              locale === 'de'
+                ? 'Eine Bremer Straße am Abend: links eine CASA-WG, rechts das Haus einer Gastfamilie.'
+                : "A Bremen street at dusk: a CASA shared flat on the left, a host family's house on the right."
+            }
+            options={[
+              {
+                id: 'flat',
+                title: flat?.headline || (locale === 'de' ? 'CASA-WGs' : 'Shared flats'),
+                summary: flat?.summary || '',
+                href: '/accommodation/flat',
+                cta: locale === 'de' ? 'WGs ansehen' : 'See shared flats',
+              },
+              {
+                id: 'host',
+                title: host?.headline || (locale === 'de' ? 'Gastfamilien' : 'Host families'),
+                summary: host?.summary || '',
+                href: '/accommodation/host',
+                cta: locale === 'de' ? 'Gastfamilien ansehen' : 'See host families',
+              },
+            ]}
+          />
+        </div>
+      </HeroSurface>
 
       {/*
         Section 1: the two options, as the site's format rows.
