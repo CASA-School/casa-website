@@ -300,7 +300,10 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 4. **Photo edits stay source-faithful** — crop, resize, light exposure/color
    correction only. No generative editing (expansion, relighting, retouching by an
    image model). The homepage hero photograph (and the retired reel's crops) are built and
-   checked by `scripts/media/build_reel.py`.
+   checked by `scripts/media/build_reel.py`, in one warm editorial grade (2026-10-08).
+   **One exception (Rahman, 2026-10-08):** the host-family rooms (slots 27, 72–77, 81)
+   will be AI-generated illustrations made from real host-family photos, rooms only
+   and never people. `docs/HOST_FAMILY_IMAGES.md` has the brief.
 5. **Accommodation photos are contextual, not availability claims.**
 6. **Placement test content and results.** All 163 placement items are
    `PILOT_UNREVIEWED` and need two qualified DaF reviewers before live use. Never
@@ -350,6 +353,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |
+| `docs/HOST_FAMILY_IMAGES.md` | **Brief for the AI-generated host-family images** (Codex): slots, sizes, rules, and what to change in the repo when they arrive |
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
 | `docs/GROUP_PRICING_AND_SPECIAL_COURSES.md` | Group price model ported from the coordinator's workbook, its three bugs, and the special-courses rebuild direction |
 | `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` | **Read before changing any course number.** Prices/hours verified against casa-bremen.de, with an explicit unverified list |

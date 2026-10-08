@@ -2404,3 +2404,21 @@ partial exam, preparation course, next date and deadline; fees shared with the e
 readiness checklist, the partners. The team grid is square, two to five to a row, instead of
 386px-tall 4:5 cards; portraits use plain `next/image`, because CasaImage swaps any photo
 outside the photo register for a stand-in.
+
+## 42. Warm editorial photos, short heroes, full staff names (2026-10-08)
+
+Rahman's review of pass 41. Heroes say a short version only: the C1 Hochschule hero
+uses the card `summary`, and the old site's "who is it for" text is a section on the
+page („Für wen ist die Prüfung?"). The NewsFlash, placement and Warum Deutschland leads
+are one or two sentences. Photos: every classroom recipe in `scripts/media/build_reel.py`
+now has one warm editorial grade (`warm()`, `EDITORIAL_TONE`), replacing the bright
+neutral modern grade of pass 34, which Rahman found unedited. Firmenunterricht shows
+colleagues at work instead of an empty classroom. Its participant's quote no longer sits
+beside the group walk; it sits beside a faceless hand with a pen (hard rule 2). The C1
+hero is new, and the medical course, Bildungszeit and the team page have photographs
+where stand-ins or the empty room were (slots 84-94). New frames come only from people
+with recorded consent. No page shows a stand-in. Staff appear by full name again; the
+„Vorname N." form is for teachers only. The host-family photos will become AI
+illustrations made by Codex: a scoped exception to hard rule 4, with the brief in
+`docs/HOST_FAMILY_IMAGES.md`. The three new host-family reference photos are not in
+the repo.
