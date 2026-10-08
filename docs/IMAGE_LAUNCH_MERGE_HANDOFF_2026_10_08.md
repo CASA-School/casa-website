@@ -1,14 +1,17 @@
 # Image branch merge handoff — 8 October 2026
 
 Status: implementation complete and verified locally. This document covers the
-whole `codex/image-launch-finishing` branch. No push, merge or deployment has
-been performed. The documentation follow-up adds this handoff and its README link;
+whole `codex/image-launch-finishing` branch. Following the user's explicit request,
+the branch was pushed to GitHub on 8 October 2026. No merge or deployment has been
+performed. The documentation follow-up adds this handoff and its README link;
 it does not change application behaviour.
 
 ## 1. Evidence and branch identity
 
 - Repository: `/Users/rahmanshafiee/Downloads/CASA`.
-- Branch to integrate: `codex/image-launch-finishing` (local branch, no upstream).
+- Branch to integrate: `codex/image-launch-finishing`, tracking
+  `casa/codex/image-launch-finishing`.
+- [GitHub branch](https://github.com/CASA-School/casa-website/tree/codex/image-launch-finishing).
 - Remote name in this checkout: `casa`, not `origin`.
 - Base: `65c7fbb001bfa1aaf01211e1097f55ab5ef9f0e1`.
 - Local `main` and locally cached `casa/main` both pointed to that base when
@@ -22,7 +25,7 @@ Implementation commits, in order:
 | `6fb1f0941ecdc18f77866a941d591aad6cbc654a` | Site-wide image finishing: source-faithful selections/crops/grades, initial labelled host examples, responsive image requests, social card, provenance and regression coverage. |
 | `525606957ea348409bf5fa461cb592da6c7d7582` | Supplied-reference bedroom/kitchen/bathroom, all accommodation disclosures, real WG improvements, final WebP bedroom and loading regression. |
 
-Merge the complete branch, including the subsequent documentation commit.
+Merge the complete branch, including the subsequent documentation commits.
 **Do not cherry-pick only `5256069`: it depends on `6fb1f09`.**
 
 Detailed evidence and implementation reports:
@@ -96,14 +99,16 @@ commands for the receiving agent; they have **not** been executed here:
 git fetch casa
 git switch main
 git merge --ff-only casa/main
-git merge --no-ff codex/image-launch-finishing
+git merge --no-ff casa/codex/image-launch-finishing
 ```
 
 If `main` has diverged, stop the fast-forward procedure and reconcile the
 actual histories. Do not reset or force overwrite another agent's commits.
 For another agreed target, adapt the target explicitly rather than assume main.
-The branch is available on this laptop; another machine cannot fetch it until
-an authorized push or transfer occurs. This handoff does not authorize publishing.
+The branch is now available to other authorized checkouts through `git fetch casa`
+(use the equivalent remote name if it differs there). Remote-branch review can use
+`casa/codex/image-launch-finishing` in place of the local branch in the read-only
+commands above. Branch publication does not authorize production deployment.
 
 Most likely overlapping files are `src/config/public-page-config.ts`,
 `src/config/content/photo-numbers.ts`, `src/components/ui/casa-image.tsx`,
@@ -224,5 +229,6 @@ the implementation results above remain the most recent application verification
 
 The existing **W009 school-group consent publication follow-up** remains open;
 this branch creates no new consent assertion. Confirm it before go-live.
-Merge readiness is separate from deployment authorization. No remote push,
-production deployment or domain cutover has been performed by this work.
+Merge readiness is separate from deployment authorization. The branch has been
+pushed at the user's request; no production deployment or domain cutover has
+been performed by this work.
