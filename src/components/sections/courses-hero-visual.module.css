@@ -1,0 +1,341 @@
+/*
+ * The level staircase in the courses hero. Same rules as the income ring and
+ * the Bremen street (nonprofit-income-ring.module.css,
+ * accommodation-street.module.css):
+ *
+ * - Entrance on load fills `both` and animates `opacity` / `transform` /
+ *   `stroke-dashoffset` / the standalone `scale`; interactive states use other
+ *   properties or other elements (`.lit` over `.flash`, `color` on the labels,
+ *   the caption swap inside a wrapper that does the fading in), so a finished
+ *   animation never overrides them.
+ * - Under prefers-reduced-motion nothing animates in or moves: the stair
+ *   renders finished and the sun rests on C1.
+ *
+ * Timeline: ground line 0.1–1.0 s; the pen climbs the stair 0.25–1.65 s, the
+ * blocks filling in behind it and each label rising as the pen passes; the sun
+ * falls from 1.16 s and lands on A1 at --land0 (1.6 s), then hops one step per
+ * --beat (0.46 s), each step flashing as it lands, reaches C1 at 3.9 s and
+ * settles by 4.3 s.
+ */
+
+.panel {
+  container-type: inline-size;
+  --land0: 1.6s;
+  --beat: 0.46s;
+}
+
+.base {
+  transition: opacity 0.35s ease;
+}
+
+.panel[data-active] .base {
+  opacity: 0.4;
+}
+
+.flash {
+  opacity: 0;
+}
+
+.lit {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.lit[data-on] {
+  opacity: 1;
+}
+
+.squash {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.trail {
+  opacity: 0.32;
+}
+
+/* On a phone the drawing is at half scale: the pen line keeps about the same weight on screen. */
+@container (max-width: 520px) {
+  .line,
+  .ground {
+    stroke-width: 3.2px;
+  }
+
+  .joints {
+    stroke-width: 2px;
+  }
+
+  .trail {
+    stroke-width: 3.4px;
+    stroke-dasharray: 0 14;
+  }
+}
+
+/* ---- The steps (links) and their labels ---- */
+
+.step {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.label {
+  position: absolute;
+  left: 50%;
+  translate: -50% -50%;
+  white-space: nowrap;
+  border-radius: 4px;
+  padding: 0.1em 0.3em;
+  /* Plus Jakarta Sans: Playfair's 1 reads as an l. */
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(0.75rem, 2.6cqw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  color: rgb(255 255 255 / 0.92);
+  transition: color 0.3s ease;
+}
+
+.panel[data-active] .step:not([data-on]) .label {
+  color: rgb(255 255 255 / 0.4);
+}
+
+.step:hover .label,
+.step[data-on] .label {
+  color: var(--casa-sun);
+}
+
+.step:focus-visible .label {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* ---- The caption ---- */
+
+.caption {
+  grid-area: 1 / 1;
+  align-self: start;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s linear 0s;
+}
+
+.captionOut {
+  opacity: 0;
+  transform: translateY(6px);
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s linear 0.3s;
+}
+
+.restTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.15rem, 3.7cqw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.level {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(1.3rem, 4.4cqw, 2.1rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--casa-sun);
+}
+
+.focus {
+  margin-top: 0.55em;
+  max-width: 34ch;
+  text-wrap: pretty;
+  font-size: clamp(0.82rem, 2.1cqw, 1rem);
+  line-height: 1.42;
+  color: rgb(255 255 255 / 0.88);
+}
+
+.fact {
+  margin-top: 0.5em;
+  font-size: clamp(0.76rem, 1.85cqw, 0.88rem);
+  line-height: 1.35;
+  color: var(--casa-subtle-on-dark);
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 0.55em;
+  font-size: clamp(0.8rem, 1.95cqw, 0.95rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--casa-sun);
+  text-underline-offset: 3px;
+}
+
+.cta:hover {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ground {
+    animation: casa-stairs-draw 0.9s cubic-bezier(0.45, 0.05, 0.25, 1) 0.1s both;
+  }
+
+  /* The pen climbs the stair at an even speed, then runs down the far side. */
+  .line {
+    animation: casa-stairs-draw 1.4s cubic-bezier(0.37, 0, 0.63, 1) 0.25s both;
+  }
+
+  .fill {
+    animation: casa-stairs-fade 0.9s ease-out 0.7s both;
+  }
+
+  .joints {
+    animation: casa-stairs-fade 0.6s ease-out 1.2s both;
+  }
+
+  .label {
+    animation: casa-stairs-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(0.45s + var(--i) * 0.13s) both;
+  }
+
+  .captions {
+    animation: casa-stairs-fade 0.8s ease-out 0.5s both;
+  }
+
+  .flash {
+    animation: casa-stairs-flash 1.3s ease-out calc(var(--land0) + var(--i) * var(--beat)) both;
+  }
+
+  /* Hop k is flown from land0 + k × beat; its trail draws in step with the sun. */
+  .trailPen {
+    animation: casa-stairs-draw var(--beat) linear calc(var(--land0) + var(--i) * var(--beat)) both;
+  }
+
+  .drop {
+    animation:
+      casa-stairs-drop 0.44s cubic-bezier(0.33, 0, 0.67, 0.33) calc(var(--land0) - 0.44s) both,
+      casa-stairs-fade 0.12s linear calc(var(--land0) - 0.44s) both;
+  }
+
+  /* The base of every hop is one straight line: equal steps, constant speed. */
+  .climb {
+    animation: casa-stairs-climb calc(var(--beat) * var(--hops)) linear var(--land0) both;
+  }
+
+  .hop {
+    animation: casa-stairs-hop var(--beat) linear var(--land0) var(--hops) both;
+  }
+
+  /* On C1 it gives a little and settles instead of stopping dead. */
+  .settle {
+    animation: casa-stairs-settle 0.42s linear calc(var(--land0) + var(--beat) * var(--hops)) both;
+  }
+
+  /* A touch of squash at every landing, A1 to C1. */
+  .squash {
+    animation: casa-stairs-squash var(--beat) ease-out var(--land0) calc(var(--hops) + 1) forwards;
+  }
+}
+
+@keyframes casa-stairs-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes casa-stairs-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* `transform`, not `translate`: the label is centred with the `translate` property. */
+@keyframes casa-stairs-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes casa-stairs-flash {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Falls with gravity: quadratic ease-in. */
+@keyframes casa-stairs-drop {
+  from {
+    transform: translateY(calc(var(--drop) * -1));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes casa-stairs-climb {
+  from {
+    transform: translate(var(--climb-x), var(--climb-y));
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* A parabola: quadratic ease-out to the top, quadratic ease-in back down. The two
+   cubic-béziers are the quadratics exactly (degree-elevated control points). */
+@keyframes casa-stairs-hop {
+  0% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.333, 0.667, 0.667, 1);
+  }
+  50% {
+    transform: translateY(calc(var(--hop) * -1));
+    animation-timing-function: cubic-bezier(0.333, 0, 0.667, 0.333);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes casa-stairs-settle {
+  0% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.333, 0.667, 0.667, 1);
+  }
+  40% {
+    transform: translateY(-6px);
+    animation-timing-function: cubic-bezier(0.333, 0, 0.667, 0.333);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes casa-stairs-squash {
+  0% {
+    scale: 1.14 0.84;
+  }
+  30%,
+  100% {
+    scale: 1;
+  }
+}

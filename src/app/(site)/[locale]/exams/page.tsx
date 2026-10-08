@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 
-import { HeroAPhotoLed } from '@/components/heroes';
+import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { HumanStoryBlock, ProcessSteps, ProofBand } from '@/components/sections';
+import { ExamsHeroVisual, type ExamSeal } from '@/components/sections/exams-hero-visual';
+import nightHero from '@/components/sections/night-hero.module.css';
 import { ExamOptionCards, type ExamOption } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getExamFees } from '@/config/content/exam-fees';
@@ -91,36 +93,74 @@ export default async function ExamsPage() {
     { label: locale === 'de' ? 'Prüfungen' : 'Exams' },
   ];
 
+  /*
+    The hero's seals: exactly the exams the catalogue offers, drawn for two.
+    The centre shows telc, the level and what follows it in the name
+    ("Hochschule"); the caption the same summary as the option card.
+  */
+  const sealFor = (option: ExamOption): ExamSeal => ({
+    id: option.anchorId,
+    name: option.name,
+    level: option.level,
+    qualifier: option.name.replace(/^telc\s+(Deutsch\s+)?/i, '').replace(option.level, '').trim() || undefined,
+    summary: option.summary,
+    href: option.href,
+    cta: locale === 'de' ? 'Mehr zur Prüfung' : 'More about the exam',
+  });
+  const telcOptions = examOptions.filter((option) => /^telc\b/i.test(option.name) && option.level);
+  const examSeals: readonly [ExamSeal, ExamSeal] | null =
+    telcOptions.length === 2 ? [sealFor(telcOptions[0]), sealFor(telcOptions[1])] : null;
+
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       {/*
-        THE SITE'S STANDARD HERO. This was HeroCUtilityRail — the course/exam
-        DETAIL hero, with a bordered "Exam quick facts" card on the right. On a
-        detail page that card is right: the reader has already chosen the exam
-        and wants its four numbers. On this index the reader has not chosen yet,
-        and a card of aggregate figures answered a question nobody had arrived
-        with while making the index look like one more detail page.
+        THE PICTURE (Rahman, 2026-10-08): the exams CASA runs, drawn in the CASA
+        film's line style as two seals on a calm horizon at sunrise, in place of
+        the photograph of learners writing in class (thumbC). A sister of the
+        non-profit page's income ring and the accommodation page's street, on
+        the same night hero; the courses hero has the film's staircase, so this
+        one is deliberately not a staircase. One seal per exam this page offers
+        (the catalogue's two), each a link to its exam page with the published
+        summary on hover or focus; round each, the two parts the registration
+        form offers, written and oral. Same composition as HeroAPhotoLed
+        (HeroSurface + HeroLede), with the seals where the photo was.
 
-        The card's five rows are not relocated into the hero. Levels, fees,
-        preparation prices and session dates are all still on this page — the
-        option cards below carry the per-exam fee, and the detail pages carry
-        the rest — and the fifth row restated the button anyway ("Next step /
-        check date, reserve seat").
+        It used to be HeroCUtilityRail, the DETAIL hero with an "Exam quick
+        facts" card. On this index the reader has not chosen an exam yet; the
+        fees, preparation prices and dates are in the option cards below and on
+        the detail pages, so nothing moved into the hero.
 
-        `thumbC`: learners writing in class.
+        The section after it is white, so the ink hero does not run into a
+        second dark band.
       */}
-      <HeroAPhotoLed
-        eyebrow={locale === 'de' ? 'Prüfungen' : 'Exams'}
-        title={locale === 'de' ? 'Deine telc-Prüfung bei CASA' : 'Your telc exam at CASA'}
-        description={
-          locale === 'de'
-            ? 'Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten.'
-            : 'Do you need a German certificate for your next step? You can take telc Deutsch B2 and telc Deutsch C1 Hochschule with us, and prepare for them in one of our courses.'
-        }
-        breadcrumbs={breadcrumbs}
-        ctas={pageConfig.ctas.slice(0, 1)}
-        photo={pageConfig.photos.thumbC}
-      />
+      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
+        <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+          <HeroLede
+            eyebrow={locale === 'de' ? 'Prüfungen' : 'Exams'}
+            title={locale === 'de' ? 'Deine telc-Prüfung bei CASA' : 'Your telc exam at CASA'}
+            description={
+              locale === 'de'
+                ? 'Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten.'
+                : 'Do you need a German certificate for your next step? You can take telc Deutsch B2 and telc Deutsch C1 Hochschule with us, and prepare for them in one of our courses.'
+            }
+            ctas={pageConfig.ctas.slice(0, 1)}
+            className="lg:py-6"
+          />
+          {examSeals ? (
+            <ExamsHeroVisual
+              locale={locale}
+              label={
+                locale === 'de'
+                  ? `Die Prüfungen bei CASA: ${examSeals.map((seal) => seal.name).join(' und ')}, jede mit einem schriftlichen und einem mündlichen Teil.`
+                  : `The exams at CASA: ${examSeals.map((seal) => seal.name).join(' and ')}, each with a written and an oral part.`
+              }
+              // The registration form's split: Vollprüfung, nur schriftlich, nur mündlich.
+              parts={locale === 'de' ? ['Schriftlich', 'Mündlich'] : ['Written', 'Oral']}
+              exams={examSeals}
+            />
+          ) : null}
+        </div>
+      </HeroSurface>
 
       {/*
         BELOW THE HERO (2026-10-07): the two exams as fact cards, a learner's
