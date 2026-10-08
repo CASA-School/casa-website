@@ -78,8 +78,9 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
           style={style}
           {...rest}
           data-casa-illustration={slot?.illustration && alt !== '' ? '' : undefined}
+          data-casa-example-image={(slot?.example || slot?.illustration) && alt !== '' ? '' : undefined}
         />
-        {slot?.illustration && alt !== '' ? (
+        {(slot?.example || slot?.illustration) && alt !== '' ? (
           <span className="casa-example-label" aria-hidden="true" data-casa-example="">
             <span lang="de">Beispielbild</span>
             <span lang="en">Example image</span>

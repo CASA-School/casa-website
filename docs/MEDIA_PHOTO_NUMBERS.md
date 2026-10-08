@@ -25,9 +25,9 @@ staff members after the code had removed them.
   Bildungszeit's second photo is **91**, telc C1 Hochschule has a new photo and hero
   (**92, 93**; 68 and 69 retired) and the team page's „Wer wir sind" is **94**. No page
   shows a stand-in. All classroom photographs now share one warm editorial grade.
-  Still awaited: **37** (a clinical setting) and **81** (a host family's guest room; the
-  become-a-host room row shows **77** until then). The host-family slots (27, 72–77, 81)
-  will become AI illustrations: `docs/HOST_FAMILY_IMAGES.md`.
+  Still awaited: **37** (a clinical setting). **81** is now the reference-based
+  guest-bedroom example, shown on both host-family pages. The host-family slots
+  (27, 72–77, 81) are labelled AI illustrations: `docs/HOST_FAMILY_IMAGES.md`.
 - The About hero is **55** (since 2026-10-01): the CASA team in the courtyard, the
   whole 3:2 frame of 098 with light correction only.
 - The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light
@@ -38,8 +38,10 @@ staff members after the code had removed them.
   panel in the colour of what it is about (red courses, yellow accommodation, ink exams, blue everything
   else) with that meaning's icon. The number is in the markup as `data-casa-placeholder` and in this list.
 - Since 2026-10-02 slots **11, 13, 18, 21, 25-28, 30** and the new **66-80** are real
-  photographs (exams, accommodation, nonprofit, groups, Ratgeber, FAQ); **81** is an
-  awaited host-family guest room. See MEDIA_LIBRARY.md, "The placeholder pass".
+  photographs (exams, accommodation, nonprofit, groups, Ratgeber, FAQ), except the
+  host-room illustrations replaced 2026-10-08; **81** is now a guest-bedroom example.
+  All accommodation foreground images, including real WG photos, are marked
+  Beispielbild / Example image. See MEDIA_LIBRARY.md, "The placeholder pass".
 - Crop pass 2026-10-02: slots 11, 67-71 re-sourced (frames with room above the heads),
   **80** retired for **82**, **83** added (homepage community tile). Ready slots may carry
   a `position` (object-position per breakpoint), computed by `scripts/media/fit_positions.py`.

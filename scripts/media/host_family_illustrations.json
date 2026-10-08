@@ -54,7 +54,46 @@
         1448,
         1086
       ]
+    },
+    {
+      "name": "guest-room",
+      "reference": "IMG_3849.jpeg",
+      "referenceRoot": "Downloads",
+      "archivedReference": "supplied-references/IMG_3849.jpeg",
+      "referenceSha256": "59b404ae54fa5dc54ac8677036327975d5d520161260639ef846ff7300217323",
+      "prompt": "Use case: precise-object-edit. Asset type: photorealistic AI example image for CASA accommodation website. Input image is the actual room reference/edit target. Single bed along the back-left wall beneath ordinary white open bookshelves; desk with black office chair underneath the right-side divided window; a pink armchair at front-left, oak floor and a radiator. Preserve this actual modest room layout, single-bed scale, pink armchair, navy roller blind, functional desk lamp and ample working surface. Make the bed with simple neutral linen and a folded mint blanket. Remove family photographs, whiteboard handwriting, private drawings and paper clutter; blank unlettered book spines. Do not add a wardrobe, extra bed or additional space. Remove the leaning mirror if necessary to prevent misleading reflections. Eye-level natural landscape 4:3 framing with bed, desk and armchair readable together, less empty ceiling. Keep recognizable architecture, furnishing, materials and modest everyday standard. Bright but restrained warm daylight, natural texture, no HDR or heavy orange tint. No people, faces, hands, family photographs, readable text, logos or screens. Do not invent amenities or enlarge the room. Do not render Beispielbild lettering or any watermark; the website adds a sharp translated corner label. Produce one image only, no borders/collage. High detail, ideally at least 2400 pixels wide.",
+      "sha256": "352c9864124fdbacc2ab500a8174d775dae40b59725ff0d48cfab774204b4f04",
+      "size": [
+        1448,
+        1086
+      ]
+    },
+    {
+      "name": "kitchen-new",
+      "reference": "IMG_3910.jpeg",
+      "referenceRoot": "Downloads",
+      "archivedReference": "supplied-references/IMG_3910.jpeg",
+      "referenceSha256": "d1fcb3217638f32c7c092c8ec59d136eade6ed61bdcca9132ab62260e3e96d76",
+      "prompt": "Use case: precise-object-edit. Asset type: photorealistic AI example image for CASA accommodation website. Input image is the actual room reference/edit target. The white traditional L-shaped fitted kitchen, inset cabinet fronts with small knobs, glass-front upper cupboard, tiled floor and backsplash, silver dishwasher, large divided window on the right, white rounded rectangular dining table with four white wooden chairs and the adjustable pendant above. Preserve the reference room dimensions and fixture/furniture placement. Tidy personal worktop clutter and cabinet tops; keep one kettle, a fruit bowl and a modest potted plant. Remove all letters and labels. Balanced natural window daylight, cream whites without sunset yellow cast, straighten verticals. Landscape 3:2 framing, ordinary lived-in German home rather than a remodel. Keep recognizable architecture, furnishing, materials and modest everyday standard. Bright but restrained warm daylight, natural texture, no HDR or heavy orange tint. No people, faces, hands, family photographs, readable text, logos or screens. Do not invent amenities or enlarge the room. Do not render Beispielbild lettering or any watermark; the website adds a sharp translated corner label. Produce one image only, no borders/collage. High detail, ideally at least 2400 pixels wide.",
+      "sha256": "0204657ab2d551a09e0b78d758abc35fc3a668e0996a223d4c2931e32a3382c4",
+      "size": [
+        1536,
+        1024
+      ]
+    },
+    {
+      "name": "bathroom-new",
+      "reference": "IMG_3916.jpeg",
+      "referenceRoot": "Downloads",
+      "archivedReference": "supplied-references/IMG_3916.jpeg",
+      "referenceSha256": "9bfeb1d083cb26e1877c38d7d5cee3999c7bd8174fe465dbe21875a7f94e9020",
+      "prompt": "Use case: precise-object-edit. Asset type: photorealistic AI example image for CASA accommodation website. Input image is the actual room reference/edit target. The narrow ordinary tiled bathroom, bathtub in front-left, wall-mounted rectangular washbasin at the far end beneath a wide mirror cabinet, slim white storage unit on the left, large divided window and radiator on the right. Preserve this actual narrow room, small fixtures, original tile style and arrangement. Remove toiletries, toothbrushes, step stool, bath toys, baskets clutter and cleaning products. Keep a neatly folded plain towel. Gentle neutral daylight, straighter verticals, no invented extra floor space or hotel upgrade. Landscape 3:2 view through doorway shows bathtub and basin clearly; window and radiator stay recognizable. Mirror reflection physically plausible, no people. Keep recognizable architecture, furnishing, materials and modest everyday standard. Bright but restrained warm daylight, natural texture, no HDR or heavy orange tint. No people, faces, hands, family photographs, readable text, logos or screens. Do not invent amenities or enlarge the room. Do not render Beispielbild lettering or any watermark; the website adds a sharp translated corner label. Produce one image only, no borders/collage. High detail, ideally at least 2400 pixels wide.",
+      "sha256": "506df0f1a32f99fb3b5db5d7b08d75ac5600a05ff35f4c3f7cf50889c5902d3a",
+      "size": [
+        1536,
+        1024
+      ]
     }
   ],
-  "pending": "Slot 81: genuine guest-bedroom reference not available locally; no replacement invented."
+  "followUp": "Three references supplied by Rahman 2026-10-08. Slot 81 resolved; kitchen and bathroom refreshed from IMG_3910 and IMG_3916."
 }
