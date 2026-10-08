@@ -4,11 +4,14 @@ import { Link } from '@/i18n/navigation';
 
 import { ArrowRight } from 'lucide-react';
 
-import { HeroAPhotoLed } from '@/components/heroes';
+import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import {
   ProofBand,
 } from '@/components/sections';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
+import { CoursesHeroVisual, type CoursesStaircaseStep } from '@/components/sections/courses-hero-visual';
+import nightHero from '@/components/sections/night-hero.module.css';
+import { getCourseLevelGoals } from '@/config/courses/course-profiles';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { CoursesFormatSelector } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
@@ -378,6 +381,39 @@ export default async function CoursesPage({
     { label: locale === 'de' ? 'Kurse' : 'Courses' },
   ];
 
+  /*
+   * THE STAIRCASE'S WORDS, every one already published on this site.
+   *
+   * - `focus` is the intensive course page's own learning goal for the level
+   *   (getCourseLevelGoals, the „Lernziele nach Niveaustufen" section), the short
+   *   version a card holds. The full „what you can do" text per level stays on
+   *   the placement page's level overview.
+   * - `fact`: a whole level takes about 8–9 weeks in the intensive course
+   *   (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, verified), and B1+ just as long,
+   *   a whole term taught with Kontext (staff-confirmed 2026-08-13 and
+   *   2026-10-07; level-progression-timeline.tsx says the same in public).
+   * - Each step links to this page filtered to that level (`?level=`, which the
+   *   format list below still honours), landing on the list. B1+ is the
+   *   exception: it is a step of the intensive course only, while the filter's
+   *   level ranges would also offer it in formats that teach in half levels, so
+   *   it links to the intensive course itself.
+   */
+  const levelGoals = getCourseLevelGoals('intensive-german', locale).levels;
+  const staircaseSteps: CoursesStaircaseStep[] = CEFR_LADDER.map((step) => ({
+    level: step,
+    focus: levelGoals.find((goal) => goal.level === step)?.focus ?? '',
+    fact: locale === 'de' ? 'Im Intensivkurs etwa 8–9 Wochen' : 'About 8–9 weeks in the intensive course',
+    href: step === 'B1+' ? getCoursePath('intensive-german') : `/courses?level=${encodeURIComponent(step)}#formats`,
+    cta:
+      step === 'B1+'
+        ? locale === 'de'
+          ? 'Zum Intensivkurs'
+          : 'See the intensive course'
+        : locale === 'de'
+          ? `Kurse für ${step} ansehen`
+          : `See courses for ${step}`,
+  }));
+
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       {/*
@@ -392,16 +428,41 @@ export default async function CoursesPage({
         the thing that tells you where you are. In the hero it also had to be
         the photograph's replacement, so /courses was the one index with no
         photograph at all.
-      */}
-      <HeroAPhotoLed
-        eyebrow={hero.eyebrow}
-        title={locale === 'de' ? 'Finde deinen Deutschkurs' : 'Find your German course'}
-        description={locale === 'de' ? 'Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.' : 'Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.'}
-        photo={pageConfig.photos.thumbA}
-        ctas={pageConfig.ctas.slice(0, 1)}
-        breadcrumbs={breadcrumbs}
-      />
 
+        THE PICTURE (Rahman, 2026-10-08): the level staircase from the CASA film,
+        drawn in code, in place of the classroom photograph (thumbA). Same
+        composition as HeroAPhotoLed (HeroSurface + HeroLede) on the night hero,
+        as /accommodation and the non-profit page do, with the stair where
+        HeroBleedPhoto would be. Each step says what the level means at CASA and
+        leads to the formats that teach it.
+      */}
+      <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
+        <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+          <HeroLede
+            eyebrow={hero.eyebrow}
+            title={locale === 'de' ? 'Finde deinen Deutschkurs' : 'Find your German course'}
+            description={locale === 'de' ? 'Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.' : 'Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.'}
+            ctas={pageConfig.ctas.slice(0, 1)}
+            className="lg:py-6"
+          />
+          <CoursesHeroVisual
+            label={
+              locale === 'de'
+                ? 'Die Niveaustufen bei CASA als Treppe, von A1 bis C1. Jede Stufe führt zu den passenden Kursen.'
+                : "CASA's levels as a staircase, from A1 to C1. Each step leads to the courses for that level."
+            }
+            rest={{
+              title: locale === 'de' ? 'Stufe für Stufe' : 'Step by step',
+              text:
+                locale === 'de'
+                  ? 'Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.'
+                  : 'Six levels from A1 to C1, each about 8–9 weeks in the intensive course.',
+            }}
+            steps={staircaseSteps}
+            current={selectedLevel || undefined}
+          />
+        </div>
+      </HeroSurface>
 
       {/*
         Section 1: the formats.
@@ -413,24 +474,47 @@ export default async function CoursesPage({
         own markup (ProofBand's two widths, and a course's photograph changing
         between surfaces).
 
-        Two deliberate differences from the homepage. All six formats get a row
-        rather than four flagships plus a rail: this is the index, and ranking
-        formats is a homepage editorial choice that would be a strange thing for
-        an index to do. And the band is ink-deep, which gives /courses the
-        two-surface rhythm it did not have — every band on the page was the same
-        wash, top to bottom.
+        All six formats get a row rather than four flagships plus a rail: this
+        is the index, and ranking formats is a homepage editorial choice that
+        would be a strange thing for an index to do.
+
+        Light since 2026-10-08. The band was ink-deep to give the page a second
+        surface; the hero is now the ink band (the night staircase), and two ink
+        bands in a row run together into one. The heading and rows take their
+        light tone. `id="formats"` is where the staircase's level links land: on
+        the heading, so the site's scroll-padding (globals.css) sets it just under
+        the sticky header with the band's white above it.
       */}
-      <section className="bg-[var(--casa-ink-deep)] py-20 text-white md:py-32">
+      <section className="bg-[var(--casa-bg)] py-20 md:py-32">
         <Container className="space-y-12 md:space-y-14">
-          <BandHeading
-            eyebrow={locale === 'de' ? 'Kursauswahl' : 'Choosing a course'}
-            title={locale === 'de' ? 'Unsere Kursformate im Überblick' : 'Our course formats at a glance'}
-            description={
-              locale === 'de'
-                ? `${courseCountWord.de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.`
-                : `${courseCountWord.en} ways to reach the same goal. What changes is the rhythm; the standard stays the same.`
-            }
-          />
+          <div id="formats">
+            <BandHeading
+              tone="light"
+              eyebrow={locale === 'de' ? 'Kursauswahl' : 'Choosing a course'}
+              title={locale === 'de' ? 'Unsere Kursformate im Überblick' : 'Our course formats at a glance'}
+              description={
+                locale === 'de'
+                  ? `${courseCountWord.de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.`
+                  : `${courseCountWord.en} ways to reach the same goal. What changes is the rhythm; the standard stays the same.`
+              }
+            />
+            {/* A level chosen on the staircase narrows the list; say so, and offer the way back. */}
+            {selectedLevel ? (
+              <p className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-[var(--casa-muted)]">
+                <span>
+                  {locale === 'de' ? 'Kurse für ' : 'Courses for '}
+                  <span className="font-bold text-[var(--casa-ink)]">{selectedLevel}</span>
+                </span>
+                <span aria-hidden="true">·</span>
+                <Link
+                  href="/courses#formats"
+                  className="font-bold text-[var(--casa-ink)] underline underline-offset-4 transition-colors hover:text-[var(--casa-accent-text)]"
+                >
+                  {locale === 'de' ? 'Alle Kurse zeigen' : 'Show all courses'}
+                </Link>
+              </p>
+            ) : null}
+          </div>
 
           {/*
             An honest empty state. The page used to answer an empty filter by
@@ -440,13 +524,13 @@ export default async function CoursesPage({
             and offers the way back.
           */}
           {courseRows.length === 0 ? (
-            <div className="mx-auto max-w-[46rem] rounded-xl border border-white/20 bg-white/5 px-6 py-8 text-center">
-              <p className="text-base font-bold text-white">
+            <div className="mx-auto max-w-[46rem] rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-6 py-8 text-center">
+              <p className="text-base font-bold text-[var(--casa-ink)]">
                 {locale === 'de'
                   ? 'Für diese Kombination gibt es derzeit keinen Kurs.'
                   : 'No course matches that combination right now.'}
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-white/72">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">
                 {locale === 'de'
                   ? 'Ändere einen Filter, oder lass uns dein Niveau gemeinsam bestimmen.'
                   : 'Change one filter, or let us work out your level together.'}
@@ -454,20 +538,20 @@ export default async function CoursesPage({
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/courses"
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)]"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--casa-sand)] px-5 py-2.5 text-sm font-bold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-ink-deep)] hover:bg-[var(--casa-ink-deep)] hover:text-white"
                 >
                   {locale === 'de' ? 'Filter zurücksetzen' : 'Reset filters'}
                 </Link>
                 <Link
                   href="/placement-test"
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:border-white hover:bg-white hover:text-[var(--casa-ink-deep)]"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--casa-sand)] px-5 py-2.5 text-sm font-bold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-ink-deep)] hover:bg-[var(--casa-ink-deep)] hover:text-white"
                 >
                   {locale === 'de' ? 'Einstufungstest' : 'Placement test'}
                 </Link>
               </div>
             </div>
           ) : (
-            <CourseFormatRows rows={courseRows} tone="dark" />
+            <CourseFormatRows rows={courseRows} tone="light" />
           )}
         </Container>
       </section>
