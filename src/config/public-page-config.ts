@@ -259,8 +259,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   sharedFlat: {
     src: '/media/casa/student-room-balcony.jpg',
     alt: {
-      en: 'A bright room in a CASA shared flat with a bed, a desk and balcony doors',
-      de: 'Ein helles Zimmer in einer CASA-WG mit Bett, Schreibtisch und Balkontür',
+      en: 'Example image: A bright room in a CASA shared flat with a bed, a desk and balcony doors',
+      de: 'Beispielbild: Ein helles Zimmer in einer CASA-WG mit Bett, Schreibtisch und Balkontür',
     },
     caption: {
       en: 'Student housing works best when study, rest, and daily life have space.',
@@ -630,8 +630,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   wgRoom: {
     src: '/media/casa/casa-wg-room.webp',
     alt: {
-      de: 'Ein Einzelzimmer in einer CASA-WG mit Bett, Sessel und Schreibtisch',
-      en: 'A single room in a CASA shared flat with a bed, an armchair and a desk',
+      de: 'Beispielbild: Ein Einzelzimmer in einer CASA-WG mit Bett, Sessel und Schreibtisch',
+      en: 'Example image: A single room in a CASA shared flat with a bed, an armchair and a desk',
     },
     caption: { de: 'Ein eigenes Zimmer', en: 'A room of your own' },
   },
@@ -674,7 +674,7 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   },
   /*
    * ACCOMMODATION (2026-10-08). Host-family images are labelled AI examples
-   * based on one real Bremen household; prompts and provenance are in
+   * based on supplied home photographs; prompts and provenance are in
    * scripts/media/host_family_illustrations.json. CASA-WG photos stay real. A WG photo never stands
    * in for a host family's, or the other way round (CLAUDE.md hard rule 5).
    */
@@ -690,12 +690,12 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   },
   hostFamilyKitchenDetail: {
     src: '/media/casa/host-family-kitchen-detail.webp',
-    alt: { de: 'KI-generiertes Beispielbild: Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'AI-generated example image: A host family\'s bright kitchen with two windows' },
+    alt: { de: 'KI-generiertes Beispielbild: Die weiße Küche einer Gastfamilie mit Esstisch am Fenster', en: 'AI-generated example image: A host family\'s white kitchen with a dining table by the window' },
     caption: { de: 'Gastgeber werden', en: 'Become a host' },
   },
   hostFamilyKitchenHero: {
     src: '/media/casa/host-family-kitchen-hero.webp',
-    alt: { de: 'KI-generiertes Beispielbild: Die helle Küche einer Gastfamilie mit zwei Fenstern', en: 'AI-generated example image: A host family\'s bright kitchen with two windows' },
+    alt: { de: 'KI-generiertes Beispielbild: Die weiße Küche einer Gastfamilie mit Esstisch am Fenster', en: 'AI-generated example image: A host family\'s white kitchen with a dining table by the window' },
     caption: { de: 'Gastgeber werden', en: 'Become a host' },
   },
   hostFamilyBathroom: {
@@ -708,21 +708,20 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'KI-generiertes Beispielbild: Der Esstisch einer Gastfamilie', en: 'AI-generated example image: A host family\'s dining table' },
     caption: { de: 'Am Tisch der Gastfamilie', en: 'At the host family\'s table' },
   },
-  /* Awaited (slot 81): no host family's guest room has been photographed yet.
-     Until then the become-a-host room row shows the host family's dining area (slot 77). */
+  // Slot81: reference-based bedroom illustration supplied 2026-10-08.
   hostFamilyGuestRoom: {
-    src: '/media/casa/host-family-guest-room.jpg',
-    alt: { de: 'Ein Gästezimmer in einer Gastfamilie', en: 'A guest room in a host family' },
+    src: '/media/casa/host-family-guest-room.webp',
+    alt: { de: 'KI-generiertes Beispielbild: Ein Gästezimmer mit Einzelbett, Schreibtisch am Fenster und rosa Sessel', en: 'AI-generated example image: A guest room with a single bed, a desk by the window and a pink armchair' },
     caption: { de: 'Das Zimmer', en: 'The room' },
   },
   wgRoomSingle: {
     src: '/media/casa/student-room-alternative-1.jpg',
-    alt: { de: 'Ein Einzelzimmer in einer CASA-WG mit Bett, Schreibtisch und Tulpen', en: 'A single room in a CASA shared flat with a bed, a desk and tulips' },
+    alt: { de: 'Beispielbild: Ein Einzelzimmer in einer CASA-WG mit Bett, Schreibtisch und Tulpen', en: 'Example image: A single room in a CASA shared flat with a bed, a desk and tulips' },
     caption: { de: 'Die CASA-WG', en: 'The CASA shared flat' },
   },
   wgRoomHero: {
     src: '/media/casa/casa-wg-room-hero.webp',
-    alt: { de: 'Ein Einzelzimmer in einer CASA-WG mit Bett und großen Fenstern', en: 'A single room in a CASA shared flat with a bed and large windows' },
+    alt: { de: 'Beispielbild: Ein Einzelzimmer in einer CASA-WG mit Bett und großen Fenstern', en: 'Example image: A single room in a CASA shared flat with a bed and large windows' },
     caption: { de: 'Die CASA-WG', en: 'The CASA shared flat' },
   },
   /* The homepage's "community events" tile (slot 83): portrait from lg up. */
@@ -736,7 +735,7 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   },
   wgKitchen: {
     src: '/media/casa/shared-flat-kitchen-table.jpg',
-    alt: { de: 'Die Gemeinschaftsküche einer CASA-WG mit Esstisch', en: 'The shared kitchen of a CASA flat with its table' },
+    alt: { de: 'Beispielbild: Die Gemeinschaftsküche einer CASA-WG mit Esstisch', en: 'Example image: The shared kitchen of a CASA flat with its table' },
     caption: { de: 'Gemeinsame Küche', en: 'Shared kitchen' },
   },
 };
@@ -975,15 +974,13 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       flatStory: photoLibrary.wgKitchen,
       host: photoLibrary.hostFamilyDinner,
       hostHero: photoLibrary.hostFamilyLivingHero,
-      hostStory: photoLibrary.hostFamilyKitchen,
+      hostStory: photoLibrary.hostFamilyGuestRoom,
       // /accommodation/become-host
       becomeHost: photoLibrary.hostFamilyKitchenDetail,
       becomeHostHero: photoLibrary.hostFamilyKitchenHero,
       becomeHostStory: photoLibrary.hostFamilyDinner,
-      // The host family's own home until a guest room is photographed (slot 81);
-      // a CASA-WG room must not stand in for it (hard rule 5). Frame 11, the one
-      // photo of that home this page does not already show.
-      becomeHostRoom: photoLibrary.hostFamilyTable,
+      // Dedicated host guest-bedroom reference, never a CASA-WG bedroom.
+      becomeHostRoom: photoLibrary.hostFamilyGuestRoom,
       becomeHostAgreement: photoLibrary.hostFamilyBathroom,
       becomeHostPartnership: photoLibrary.hostFamilyKitchen,
     },

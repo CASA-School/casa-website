@@ -15,11 +15,12 @@ MANIFEST = json.loads(Path(__file__).with_name('host_family_illustrations.json')
 EXPORTS = [
     ('living', 'host-family-room.jpg', (2420, 1815)),
     ('living', 'host-family-living-hero.webp', (2420, 1008)),
-    ('kitchen', 'host-family-kitchen.webp', (2250, 1500)),
-    ('kitchen-detail', 'host-family-kitchen-detail.webp', (2560, 1707)),
-    ('kitchen-detail', 'host-family-kitchen-hero.webp', (2560, 1067)),
-    ('bathroom', 'host-family-guest-bathroom.webp', (2600, 1733)),
+    ('kitchen-new', 'host-family-kitchen.webp', (2250, 1500)),
+    ('kitchen-new', 'host-family-kitchen-detail.webp', (2560, 1707)),
+    ('kitchen-new', 'host-family-kitchen-hero.webp', (2560, 1067)),
+    ('bathroom-new', 'host-family-guest-bathroom.webp', (2600, 1733)),
     ('dining', 'host-family-dining-table.webp', (1700, 1275)),
+    ('guest-room', 'host-family-guest-room.webp', (2400, 1800)),
 ]
 
 

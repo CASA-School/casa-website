@@ -159,7 +159,7 @@ SLIDES = [
         'out': 'casa-wg-room.webp',
         'source': POOL / '008_6.jpg',
         'box': (200, 0, 2276, 1707),
-        'tone': (6, 60, 92), 'chroma': 1.03, 'wb': (0.94, 1.0, 0.975),
+        'tone': (8, 63, 93), 'chroma': 0.98, 'wb': (0.93, 1.0, 1.02),
     },
     {
         # Slot 10, vocabulary on a Bremen map (hands only), Spezialkurse's second photo.
@@ -350,21 +350,21 @@ SLIDES = [
         'out': 'student-room-balcony.jpg',
         'source': POOL / '003_3.jpg',
         'box': (100, 0, 2276, 1707),
-        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.95, 1.0, 1.03),
+        'tone': (8, 63, 94), 'chroma': 0.98, 'wb': (0.94, 1.0, 1.065),
     },
     {
         # Slot 30, the CASA-WG page's hero on phones: a single room, desk and tulips.
         'out': 'student-room-alternative-1.jpg',
         'source': POOL / '004_4.jpg',
         'box': (140, 0, 2276, 1707),
-        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.0),
+        'tone': (8, 63, 94), 'chroma': 0.98, 'wb': (0.97, 1.0, 1.035),
     },
     {
         # Slot 79, the CASA-WG page's hero from lg up.
         'out': 'casa-wg-room-hero.webp',
         'source': POOL / '004_4.jpg',
         'box': (0, 300, 2560, 1067),
-        'tone': (6, 62, 93), 'chroma': 1.03, 'wb': (0.98, 1.0, 1.0),
+        'tone': (8, 63, 94), 'chroma': 0.98, 'wb': (0.97, 1.0, 1.035),
     },
     {
         # Slot 28, the CASA-WG page's second photo: the shared kitchen. The
@@ -372,7 +372,7 @@ SLIDES = [
         'out': 'shared-flat-kitchen-table.jpg',
         'source': POOL / 'W013_shared-flat-kitchen-table_editorial.jpg',
         'box': (300, 150, 2000, 1333),
-        'tone': (6, 62, 93), 'chroma': 1.0, 'wb': (0.965, 1.0, 0.99),
+        'tone': (8, 63, 94), 'chroma': 0.97, 'wb': (0.965, 1.0, 1.035),
     },
     {
         # Slot 83, the homepage's "community events" tile: a learner clapping at

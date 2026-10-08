@@ -2,7 +2,8 @@
 
 Status: implemented locally on `codex/image-launch-finishing`, based on clean
 `main` at `65c7fbb`. User approved the photographer/editor review changes.
-The bedroom reference is still required for slot 81. No deployment occurred.
+The bedroom reference was pending at this first pass; it is now resolved in
+[ACCOMMODATION_IMAGES_2026_10_08.md](ACCOMMODATION_IMAGES_2026_10_08.md). No deployment occurred.
 
 ## 1. Evidence
 
