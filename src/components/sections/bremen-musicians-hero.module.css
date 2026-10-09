@@ -15,7 +15,7 @@
  * press), far legs 1.5, details 1.25, the ground and the leader lines 1.25 and 1.
  *
  * Timeline: sky 0–1 s; ground 0.1–1 s out from the middle; the donkey walks in
- * 0.3–2 s in four strides; the dog leaps 2.05–2.85 s, the cat 2.85–3.6 s, the
+ * from the right, head first, 0.3–2 s in four strides, its label after it stops; the dog leaps 2.05–2.85 s, the cat 2.85–3.6 s, the
  * rooster flies in 3.6–4.5 s, flapping; each label and its leader line arrive
  * as the animal lands; all four sing once from 4.45 s.
  */
@@ -269,7 +269,7 @@
     animation: casa-mus-draw 0.9s cubic-bezier(0.45, 0.05, 0.25, 1) 0.1s both;
   }
 
-  /* Sideways: the donkey walks in from the left; the others come from the right. */
+  /* Sideways: all four travel left, head first, from the right. */
   .enter {
     animation: casa-mus-x 0.8s cubic-bezier(0.25, 0.55, 0.45, 1) var(--d) both;
   }
