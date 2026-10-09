@@ -21,9 +21,9 @@ https://ca-casa-website.livelycliff-6187a034.germanywestcentral.azurecontainerap
 Deploy with `./infra/azure/deploy.sh` — it builds in ACR (no local Docker) and
 rolls a new revision pinned to the image digest.
 
-**It runs with no `DATABASE_URL`, on purpose.** Public content falls back to the
-in-repo fixtures, which is a supported runtime mode, so every public page and
-image optimisation via `sharp` can be tested without waiting for the database.
+**It runs on its own database since 2026-10-09** (revision 0000037) — see "Database"
+below. Until then it ran with no `DATABASE_URL`, on the in-repo fixtures; that mode is still
+supported and is what the comparison before connecting was made against.
 
 **No lead form works on it (corrected 2026-09-23).** Without a database nothing
 is stored, so a submission reaches CASA only through `notifyForm`
@@ -199,8 +199,34 @@ Two things follow:
 A retention rule for applications also needs stating — how long CASA keeps unsuccessful
 applicants' CVs is a policy question, not a technical one.
 
+## Database (2026-10-09)
+
+- **Server:** `psql-casa-website-f8d745` in `rg-casa-website-prod`, Belgium Central (Germany West
+  Central is blocked for Postgres on this subscription), Postgres 17, Burstable B1ms, 32 GB with
+  auto-grow off, 14 days of backups, no HA. Own server, as decided on 2026-08-12.
+- **Network:** private access only, in its own delegated subnet `snet-postgres-website`
+  (10.43.0.16/28) of `vnet-casa-data-prod`, which is peered with the container environment's
+  `vnet-casa-prod`; name resolution through the shared private DNS zone
+  `casa.private.postgres.database.azure.com`. Same pattern as the student app's server, separate
+  server, subnet and credentials.
+- **Roles:** the server admin `casaadmin` created the login role `casa_web`, which owns the
+  database `casa_website` and its public schema (`infra/azure/db/bootstrap.mjs`). The admin
+  password was used once and not stored; reset it with
+  `az postgres flexible-server update --admin-password` if it is ever needed. The site's
+  connection string, with `sslmode=verify-full`, is the Container App secret `database-url`.
+- **Migrations:** `./infra/azure/db-job.sh migrate` builds a small image (migration runner, SQL,
+  pg) and runs it as the Container Apps job `caj-casa-website-db`, recreated on every run with only
+  the secrets that task needs. `deploy.sh` runs it before updating the app.
+- **Checked before connecting:** every public page was compared, text for text, with and without
+  a database. The database lacked the exam sessions (fixed by `db/seeds/0005_exam_sessions.sql`);
+  the remaining differences were intended (the application form appears, a finished term is
+  hidden, the job posting carries the date it reached the database).
+- **Image cache:** Azure Files share `next-image-cache` in `stcasawebsitef8d745`, registered on the
+  environment as `website-image-cache` and mounted at `/app/.next/cache/images`.
+
 ## Migration order
 
+0. ~~Provision the PostgreSQL server, migrate, seed, connect~~ **done 2026-10-09** (see "Database").
 1. ~~Provision `rg-casa-website-prod`~~ **done 2026-08-12** — empty, germanywestcentral, tagged
    `project=casa-website`. Costs nothing while empty. Provision the PostgreSQL Flexible Server
    (B1ms, 32 GB) next; that is the first line item that actually bills.
