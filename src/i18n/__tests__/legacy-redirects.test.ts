@@ -40,8 +40,7 @@ describe('legacy redirects', () => {
       const resolved = toInternalPath(path);
       const canonical = toPublicPath(resolved.internalPath, resolved.locale);
       const route = routeFor(resolved.internalPath);
-      const reviewOnly = route && /^\/(design-|landing-page-alt|homepage-reorganized)/.test(route.internal);
-      return canonical === path && route && !reviewOnly ? [] : [`${from} -> ${to}`];
+      return canonical === path && route ? [] : [`${from} -> ${to}`];
     });
     expect(wrong).toEqual([]);
   });

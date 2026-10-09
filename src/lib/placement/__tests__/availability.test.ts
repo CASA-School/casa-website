@@ -51,12 +51,6 @@ describe('placementTestEnabled', () => {
     }
   });
 
-  it('is not opened by the internal-surfaces switch', () => {
-    baseline();
-    vi.stubEnv('NODE_ENV', 'production');
-    vi.stubEnv('CASA_ENABLE_INTERNAL_SURFACES', 'true');
-    expect(placementTestEnabled()).toBe(false);
-  });
 });
 
 describe('the guards on CASA\'s own test', () => {

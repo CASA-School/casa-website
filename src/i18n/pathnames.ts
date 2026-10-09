@@ -96,15 +96,6 @@ export const routes: readonly RouteDefinition[] = [
   { internal: '/resources/study-in-germany', de: '/ratgeber/studieren-in-deutschland' },
   { internal: '/resources/living-in-germany', de: '/ratgeber/leben-in-deutschland' },
   { internal: '/resources/why-germany', de: '/ratgeber/warum-deutschland' },
-
-  // Internal review surfaces: same path in both languages, 404 in production.
-  { internal: '/design-system', de: '/design-system' },
-  { internal: '/design-system/card-treatments', de: '/design-system/card-treatments' },
-  { internal: '/design-system/course-format-variants', de: '/design-system/course-format-variants' },
-  { internal: '/design-system/layout-patterns', de: '/design-system/layout-patterns' },
-  { internal: '/design-alternatives', de: '/design-alternatives' },
-  { internal: '/landing-page-alt', de: '/landing-page-alt' },
-  { internal: '/homepage-reorganized', de: '/homepage-reorganized' },
 ];
 
 /**

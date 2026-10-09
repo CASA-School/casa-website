@@ -81,9 +81,6 @@ English under `/en`; the list uses the internal English paths. See `docs/I18N_RO
 - `/calculator`
 - `/resources/why-germany`, `/resources/study-in-germany`, `/resources/living-in-germany`
 - `/accommodation/become-host`
-- `/design-system`, `/design-alternatives`, `/landing-page-alt`, `/homepage-reorganized`
-  — internal review surfaces, 404 on a production build unless
-  `CASA_ENABLE_INTERNAL_SURFACES=true`
 
 ## Integrations
 - Postgres via `pg` — a local container (`npm run db:up`) in development, Azure

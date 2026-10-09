@@ -12,7 +12,7 @@ Repo evidence: `src/app/globals.css`, `src/config/brand/*`, `src/components/ui/*
 ## Token Sources
 - Global CSS variables and Tailwind v4 theme bridge: `src/app/globals.css`.
 - Brand primitives, semantic tokens, and component mappings: `src/config/brand/tokens.ts`.
-- Usage governance for hero/media/CTA/public-registration patterns: `src/config/brand/usage-rules.ts`.
+- Usage rules for interaction, heroes, media and registration: "Usage rules" at the end of this file. Voice: `docs/VOICE_AND_TONE.md`.
 - Shadcn setup, aliasing, and icon library: `components.json`.
 
 ## Core Token Values
@@ -38,8 +38,8 @@ Repo evidence: `src/app/globals.css`, `src/config/brand/*`, `src/components/ui/*
 weight 900 and weight 800 render an identical `724.27px` advance width. Treat
 `font-black` as "the heaviest available weight", not as a step above `font-extrabold`.
 
-`font-extrabold` is **not** part of the scale — `src/config/brand/usage-rules.ts`
-forbids it. Since it would render the same as `font-black` anyway, the ladder uses
+`font-extrabold` is **not** part of the scale — the usage rules below
+forbid it. Since it would render the same as `font-black` anyway, the ladder uses
 three classes that produce three genuinely distinct rendered weights:
 
 | Class | Renders | Use for |
@@ -121,3 +121,38 @@ container).
 - Breadcrumb and landmark navigation on utility and public conversion pages.
 - Form inputs carry `aria-invalid` styling paths.
 - Reduced-motion fallback is implemented globally.
+
+## Usage rules
+
+Moved from `src/config/brand/usage-rules.ts` on 2026-10-09 with the internal design pages. Its per-page CTA table and its section-spacing rules were dropped: the CTA labels were long out of date, and backgrounds now follow the surface roles in `src/app/globals.css` ("What each surface is for"), not alternation.
+
+### Interaction
+
+- Letter-spacing: 2 values only — tracking-[0.12em] for primary eyebrow/overline labels, tracking-[0.08em] for secondary metadata and tiny helper text. tracking-tight is allowed on headings. Do not use tracking-wide, tracking-wider, or arbitrary values like 0.10em/0.14em/0.16em/0.18em.
+- Transition duration: 2 values only — duration-200 for micro-interactions (hover, focus, colour, opacity), duration-300 for layout-affecting transitions (panels expanding, progress bars, slide-ins). Do not use duration-150 or duration-500 in CASA components.
+- Button height: h-11 (44px) for all standard CTAs and form submit buttons. h-12 (48px) only for marketing/hero variant buttons (variant="marketing-*" or rounded-full hero CTAs). h-10 is reserved for compact icon-only buttons or image max-height constraints. Do not mix heights arbitrarily.
+- Font weight: 4 values only — font-black for the page H1 and hero stat numbers, kept scarce because Plus Jakarta Sans only loads 400-800 so it renders at 800; font-bold for section headings, card titles, label values, buttons, and counters; font-semibold for eyebrows, uppercase micro-labels, badges, and inline links; font-medium for inline emphasis in body copy. Do not use font-extrabold — it has no defined role in the CASA type scale and would render identically to font-black.
+- Focus states: all interactive elements must use focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/20 focus-visible:ring-offset-0 focus-visible:outline-none. On dark backgrounds (footer, ink panels) use focus-visible:ring-[var(--casa-sun)]/60 with ring-offset-2. Never use ring-ring (shadcn default) in CASA components.
+
+### Heroes
+
+- Hero layout anatomy is fixed across pages; only background surface tokens and media vary.
+- Each hero must include one primary CTA and one secondary CTA only.
+- Tertiary support actions belong in contextual side panels, not inside hero button groups.
+- Hero themes must preserve contrast and readable copy on all breakpoints.
+
+### Media
+
+- Prefer real CASA media with people interaction over generic stock images.
+- Use landscape assets with clear focal subject and enough safe area for crop.
+- Always provide meaningful alt text that describes human context, not file content.
+- Mark temporary placeholders so they can be replaced once authentic media is available.
+
+### Registration
+
+- Single high-contrast form column with clear next-step guidance and no account prerequisites.
+- Inline validation should be immediate after field touch and persistent.
+- Every submission error must include a direct support path to contact admissions.
+- Registration routes must set expectations clearly: CASA follows up by email after review.
+- Date fields must avoid generic OS-level date pickers. Implement custom-designed controlled calendar inputs with direct dropdown selectors for quick month/year selection.
+
