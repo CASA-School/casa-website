@@ -98,8 +98,10 @@ registration then answer **503** when nothing was stored and nothing delivered,
 and succeed with `stored: false` when the notification went out. Group appointments work the same
 way (2026-10-09): without a database the popup still offers Ina's schedule, the request goes out by
 mail alone with `held: false`, nothing holds the time and no copy calls it reserved, and the route
-answers 503 if the mail does not go out. Career applications answer 503 whenever there is no
-database, mail or not. With neither
+answers 503 if the mail does not go out. The interest list (2026-10-09, a popup on German for
+Medical, which has no set dates) behaves like the contact form: stored as an enquiry when there is
+a database, mailed to info@, 503 only when neither happened. Career applications answer 503
+whenever there is no database, mail or not. With neither
 a database nor mail — the Azure revision as deployed — every lead form fails;
 `docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md` has the launch checklist.
 The sender also gets a confirmation email (`confirmToSender`): to `admin@` in test mode, to
@@ -127,7 +129,7 @@ conclude nothing had come in.
 | `PLACEMENT_RESULT_WEBHOOK_URL` | Placement result hand-off to the CASA dashboard |
 | `FORM_DELIVERY_MODE` | `live` sends to the real recipients; anything else is test mode (all mail to `admin@casa-bremen.de`, no webhooks) |
 | `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID` | Sender mailbox and managed identity for lead notification mail via Microsoft Graph |
-| `FORM_RECIPIENT_<FORM>` | Per-form recipient in live mode (`CONTACT`, `GROUPS`, `COURSE`, `EXAM`, `CAREERS`, `PLACEMENT`, `APPOINTMENT`) |
+| `FORM_RECIPIENT_<FORM>` | Per-form recipient in live mode (`CONTACT`, `GROUPS`, `COURSE`, `EXAM`, `CAREERS`, `PLACEMENT`, `APPOINTMENT`). The interest list (German for Medical's popup, `/api/interest`) uses `CONTACT` |
 | `CASA_ENABLE_PLACEMENT_TEST` | Opens CASA's own placement test (runner, result page, `/api/placement/*`). Unset: open in development, closed in production. The public `/placement-test` page always shows the Klett tests |
 | `FORM_REPLY_TO_CAREERS` | Management mailbox that receives replies to an application's confirmation; live, no application confirmation is sent without it |
 | `NEXT_PUBLIC_SITE_URL` | Origin for canonical, hreflang, sitemap and JSON-LD URLs; default `https://casa-bremen.de`. Inlined at build time, so it only takes effect when passed into the image build (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`) |

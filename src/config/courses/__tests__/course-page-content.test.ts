@@ -83,10 +83,10 @@ describe('per-course page content', () => {
     }
   });
 
-  it('opens the advisory-track journey with a conversation, not a registration', () => {
+  it('opens the medical journey with the interest list, not a registration (no dates exist yet)', () => {
     const first = getCourseNextSteps('medical-german', 'en')?.steps[0]?.title ?? '';
 
     expect(first).not.toMatch(/registration/i);
-    expect(first).toMatch(/contact|office/i);
+    expect(first).toMatch(/interest/i);
   });
 });

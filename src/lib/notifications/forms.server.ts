@@ -11,7 +11,9 @@ export const TEST_FORM_RECIPIENT = 'admin@casa-bremen.de';
 /** Test mode is the safe default, including when a deployment forgets its setting. */
 export function formDeliveryConfig(kind: FormKind) {
   const test = process.env.FORM_DELIVERY_MODE !== 'live';
-  const recipient = test ? TEST_FORM_RECIPIENT : process.env[`FORM_RECIPIENT_${kind.toUpperCase()}`];
+  // An interest-list entry goes to the contact mailbox (info@), like any other enquiry.
+  const mailbox = kind === 'interest' ? 'CONTACT' : kind.toUpperCase();
+  const recipient = test ? TEST_FORM_RECIPIENT : process.env[`FORM_RECIPIENT_${mailbox}`];
   return { test, recipient: z.email().safeParse(recipient).success ? recipient! : null };
 }
 
