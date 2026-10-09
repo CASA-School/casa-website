@@ -1,4 +1,5 @@
 import { IconKey } from './icon-map';
+import type { Meaning } from '@/config/brand/meaning';
 import type { ContentLocale } from '@/lib/content/types';
 
 export type NavItem = {
@@ -17,6 +18,14 @@ export type NavSection = {
 export type NavDropdown = {
   trigger: string;
   href?: string;
+  /**
+   * The phone menu's first row inside this dropdown, linking to `href`. On a
+   * phone the trigger opens the dropdown instead of navigating, so without it
+   * /courses, /exams and /accommodation had no way in from the menu.
+   */
+  overview?: { label: string; description: string };
+  /** The logo colour of this part of the school (config/brand/meaning.ts). */
+  meaning?: Meaning;
   // Left side categories
   categories?: {
     label: string;
@@ -100,6 +109,14 @@ const deNavText: Record<string, string> = {
   'Germany Insights': 'Deutschland verstehen',
   'Why Germany': 'Warum Deutschland',
   'Reasons to learn and grow in Germany': 'Gründe für Lernen und Entwicklung in Deutschland',
+  'All courses at a glance': 'Alle Kurse im Überblick',
+  'Compare every course format.': 'Alle Kursformate im Vergleich.',
+  'Accommodation at a glance': 'Unterkunft im Überblick',
+  'Shared flat or host family in Bremen.': 'CASA-WG oder Gastfamilie in Bremen.',
+  'Our exam centre': 'Unser Prüfungszentrum',
+  'telc exams, dates and registration.': 'telc-Prüfungen, Termine und Anmeldung.',
+  'About CASA': 'Über CASA',
+  'Who we are and what matters to us.': 'Wer wir sind und was uns wichtig ist.',
 };
 
 export function localizeNavText(value: string | undefined, locale: ContentLocale) {
@@ -130,6 +147,8 @@ export const navConfig = {
     {
       trigger: 'Courses',
       href: '/courses',
+      overview: { label: 'All courses at a glance', description: 'Compare every course format.' },
+      meaning: 'courses',
       sections: [
         {
           title: 'Intensive & part-time',
@@ -216,6 +235,8 @@ export const navConfig = {
     {
       trigger: 'Accommodation',
       href: '/accommodation',
+      overview: { label: 'Accommodation at a glance', description: 'Shared flat or host family in Bremen.' },
+      meaning: 'arrival',
       sections: [
         {
           title: 'Accommodation options',
@@ -245,6 +266,8 @@ export const navConfig = {
     {
       trigger: 'Exams',
       href: '/exams',
+      overview: { label: 'Our exam centre', description: 'telc exams, dates and registration.' },
+      meaning: 'exams',
       sections: [
         {
           title: 'Certificates',
@@ -268,6 +291,8 @@ export const navConfig = {
     {
       trigger: 'Our school',
       href: '/about',
+      overview: { label: 'About CASA', description: 'Who we are and what matters to us.' },
+      meaning: 'orientation',
       sections: [
         {
           title: 'About us',
@@ -339,6 +364,8 @@ export const navConfig = {
     {
       trigger: 'Resources',
       href: '/news',
+      // No overview row: /news is already the panel's first item.
+      meaning: 'orientation',
       sections: [
         {
           title: 'News & guides',

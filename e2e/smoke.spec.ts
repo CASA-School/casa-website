@@ -102,7 +102,7 @@ test('desktop navbar dropdown is dynamic and courses panel stays inside project 
   await expect(page.getByTestId('nav-panel-exams')).not.toBeVisible();
 });
 
-test('mobile nav language menu opens independently from the close control', async ({ page }) => {
+test('mobile nav switches language and closes independently', async ({ page }) => {
   await page.context().clearCookies();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/en');
@@ -111,30 +111,47 @@ test('mobile nav language menu opens independently from the close control', asyn
   const sheet = page.locator('[data-slot="sheet-content"]');
   await expect(sheet).toBeVisible();
 
-  const localeTrigger = page.getByTestId('mobile-locale-trigger');
-  await expect(localeTrigger).toBeVisible();
-  await expect(page.getByTestId('mobile-locale-option-de')).toHaveCount(0);
-
-  await localeTrigger.click();
-  await expect(page.getByTestId('mobile-locale-option-de')).toBeVisible();
-  await expect(sheet).toBeVisible();
-
+  await expect(page.getByTestId('mobile-locale-option-en')).toHaveAttribute('aria-pressed', 'true');
   await page.getByTestId('mobile-locale-option-de').click();
 
   // The language lives in the URL, so switching navigates to the German root.
   await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 
-  // Reopen mobile nav menu if it closed automatically during refresh/hydration
   if (await sheet.isHidden()) {
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
     await expect(sheet).toBeVisible();
   }
-
-  await expect(localeTrigger).toContainText(/de/i);
-  await expect(page.getByTestId('mobile-locale-option-de')).toHaveCount(0);
+  await expect(page.getByTestId('mobile-locale-option-de')).toHaveAttribute('aria-pressed', 'true');
 
   await page.getByLabel('Navigation schließen').click();
   await expect(sheet).not.toBeVisible();
+});
+
+test('mobile nav reaches every overview page through its panel', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const open = () => page.getByRole('button', { name: 'Open navigation menu' }).click();
+
+  for (const [section, overview, url] of [
+    ['Kurse', 'Alle Kurse im Überblick', /\/sprachkurse$/],
+    ['Unterkunft', 'Unterkunft im Überblick', /\/unterkunft$/],
+    ['Prüfungen', 'Unser Prüfungszentrum', /\/pruefungszentrum$/],
+    ['Unsere Schule', 'Über CASA', /\/ueber-uns\/casa-leitbild$/],
+  ] as const) {
+    await open();
+    await page.getByRole('button', { name: section }).click();
+    await page.getByRole('link', { name: new RegExp(overview) }).click();
+    await expect(page).toHaveURL(url);
+  }
+
+  // Escape steps back out of a panel before it closes the menu.
+  await open();
+  await page.getByRole('button', { name: 'Kurse' }).click();
+  await expect(page.getByRole('button', { name: 'Menü', exact: true })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Kurse' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-slot="sheet-content"]')).not.toBeVisible();
 });
 
 test('hero archetypes map correctly across key public routes', async ({ page }) => {

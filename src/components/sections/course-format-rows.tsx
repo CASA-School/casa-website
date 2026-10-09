@@ -57,10 +57,13 @@ export function CourseFormatRows({
   rows,
   tone = 'dark',
   maxOutcomes = 3,
+  titleAs: Title = 'h3',
   className,
 }: {
   rows: CourseFormatRow[];
   tone?: 'dark' | 'light';
+  /** h4 when the rows sit under a group heading of their own, as on /courses. */
+  titleAs?: 'h3' | 'h4';
   /**
    * Course rows show three outcomes so six formats stay comparable at a glance.
    * A page reusing this composition to explain something may need the full list —
@@ -93,14 +96,16 @@ export function CourseFormatRows({
                 {row.meta}
               </p>
             ) : null}
-            <h3
+            <Title
               className={cn(
                 'mt-3 text-2xl font-bold leading-tight md:text-4xl',
+                // globals.css sets the display face on h1–h3 only; an h4 title must look the same.
+                Title === 'h4' && 'font-display tracking-[0.006em]',
                 isDark ? 'text-white' : 'text-[var(--casa-ink)]'
               )}
             >
               {row.title}
-            </h3>
+            </Title>
             <p
               className={cn(
                 'mt-4 max-w-measure text-base leading-relaxed md:mt-5',
