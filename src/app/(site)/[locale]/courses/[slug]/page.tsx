@@ -7,7 +7,10 @@ import { CoursePracticalDetails } from '@/components/courses/course-practical-de
 import { CourseTermTable } from '@/components/courses/course-term-table';
 import type { CourseTermGroup } from '@/components/courses/course-term-table';
 import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
-import { HeroAPhotoLed, HeroCUtilityRail } from '@/components/heroes';
+import { HeroCUtilityRail } from '@/components/heroes';
+import { HeroLede, HeroSurface } from '@/components/heroes/shared';
+import { BremenMusiciansHero } from '@/components/sections/bremen-musicians-hero';
+import nightHero from '@/components/sections/night-hero.module.css';
 import { DecisionRail, EditorialSplit, HumanStoryBlock, ProcessSteps, TestimonialGrid } from '@/components/sections';
 import { serializeJsonLd } from '@/components/seo/json-ld';
 import { CourseLevelGoals } from '@/components/signatures';
@@ -19,6 +22,7 @@ import { redirectLocalized } from '@/i18n/redirect';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { GruppenPackages } from '@/components/gruppen/gruppen-packages';
+import { GRUPPEN_PACKAGES_BY_STACK } from '@/config/gruppen/packages';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
 import { getCourseContactKey, getCourseLevelGoals, getCoursePhotoKey, getCourseProfile, getQuoteAudience } from '@/config/courses/course-profiles';
@@ -569,40 +573,49 @@ export default async function CourseDetailPage({
         both said the wrong things and made the one genuinely distinct product on
         the site look like another catalogue row.
 
-        HeroAPhotoLed is the composition the homepage already uses and the one
-        this page wants: the photograph carrying the page, and — per that
-        component's own rule — one eyebrow, one headline, one sentence, one
-        button.
+        THE PICTURE (Ina's idea, 2026-10-09): the Bremen Town Musicians, drawn in
+        code on the night hero like the income ring, the street, the staircase
+        and the telc seals. The four packages are named after them, and the
+        monument stacks them as the packages stack: Esel at the bottom, then
+        Hund, Katze, Hahn. Each animal is labelled with its package and opens
+        it. Same composition as HeroAPhotoLed (HeroSurface + HeroLede) — one
+        eyebrow, one headline, one sentence, one button — with the drawing where
+        the photograph of a CASA group at the monument was.
       */}
       {isGroupQuote ? (
-        <HeroAPhotoLed
-          eyebrow={locale === 'de' ? 'CASA Gruppen' : 'CASA Gruppen'}
-          title={
-            locale === 'de'
-              ? 'Mit der ganzen Klasse nach Bremen'
-              : 'Bring the whole class to Bremen'
-          }
-          description={
-            locale === 'de'
-              ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchst du bei uns im Komplettpaket. Du bringst die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
-              : 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.'
-          }
-          ctas={[
-            {
-              label: locale === 'de' ? 'Gruppenangebot anfragen' : 'Request a group quote',
-              href: '/contact?topic=group-booking',
-              kind: 'primary',
-            },
-          ]}
-          photo={{
-            src: '/media/casa/group-course-bremen-musicians.jpg',
-            alt:
-              locale === 'de'
-                ? 'Eine CASA-Gruppe am Denkmal der Bremer Stadtmusikanten'
-                : 'A CASA group at the Bremen Town Musicians monument',
-          }}
-          breadcrumbs={breadcrumbs}
-        />
+        <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
+          <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+            <HeroLede
+              eyebrow="CASA Gruppen"
+              title={locale === 'de' ? 'Mit der ganzen Klasse nach Bremen' : 'Bring the whole class to Bremen'}
+              description={
+                locale === 'de'
+                  ? 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchst du bei uns im Komplettpaket. Du bringst die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.'
+                  : 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.'
+              }
+              ctas={[
+                {
+                  label: locale === 'de' ? 'Gruppenangebot anfragen' : 'Request a group quote',
+                  href: '/contact?topic=group-booking',
+                  kind: 'primary',
+                },
+              ]}
+              className="lg:py-6"
+            />
+            <BremenMusiciansHero
+              label={
+                locale === 'de'
+                  ? 'Die Bremer Stadtmusikanten, nach denen unsere vier Gruppenpakete heißen: der Esel unten, darauf Hund, Katze und Hahn.'
+                  : 'The Bremen Town Musicians, after whom our four group packages are named: the donkey at the bottom, then the dog, the cat and the rooster.'
+              }
+              packages={GRUPPEN_PACKAGES_BY_STACK.map((item) => ({
+                slug: item.slug,
+                animal: item.animal[locale],
+                descriptor: item.descriptor[locale],
+              }))}
+            />
+          </div>
+        </HeroSurface>
       ) : (
       <HeroCUtilityRail
         eyebrow={locale === 'de' ? 'Kursdetail' : 'Course detail'}

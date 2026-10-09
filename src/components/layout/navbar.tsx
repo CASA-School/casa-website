@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Link } from '@/i18n/navigation';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { usePathname } from '@/i18n/navigation';
 import { Globe, Menu } from 'lucide-react';
 
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { HeaderSearchPopover } from '@/components/layout/header-search-popover';
 import { MobileNav } from '@/components/layout/mobile-nav';
-import { NIGHT_HERO_PATHS } from '@/components/sections/night-hero-routes';
+import { isNightHeroPage } from '@/components/sections/night-hero-routes';
 import { localizeNavDescription, localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
@@ -48,7 +48,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   // On a night-hero page the bar takes the hero's ink ground (navbar-night.module.css).
-  const night = NIGHT_HERO_PATHS.has(pathname ?? '');
+  const params = useParams<{ slug?: string }>();
+  const night = isNightHeroPage(pathname, params?.slug);
 
   const navRef = useRef<HTMLElement | null>(null);
   const navContainerRef = useRef<HTMLDivElement | null>(null);
