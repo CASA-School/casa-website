@@ -65,6 +65,20 @@ fi
 IDENTITY_ID="$(az identity show -n "$IDENTITY" -g "$WEBSITE_RG" --query id -o tsv)"
 
 if az containerapp show -n "$APP" -g "$WEBSITE_RG" >/dev/null 2>&1; then
+  # Migrations first (2026-10-09): the new code may rely on them, and 0016's
+  # sign-in throttle fails closed without its table. The database is private,
+  # so they run as a job inside Azure; a failed migration stops the release here.
+  if az containerapp secret list -n "$APP" -g "$WEBSITE_RG" --query "[].name" -o tsv | grep -qx database-url; then
+    echo "==> migrations"
+    MIGLOG="$(mktemp)"
+    if ! ./infra/azure/db-job.sh migrate > "$MIGLOG" 2>&1; then
+      tail -40 "$MIGLOG" >&2
+      echo "migrations failed; $APP not updated" >&2
+      exit 1
+    fi
+    grep -E 'Applying [0-9]|migration\(s\) applied|Pending' "$MIGLOG" | sed 's/^F /    /' || true
+    rm -f "$MIGLOG"
+  fi
   echo "==> updating $APP"
   az containerapp update -n "$APP" -g "$WEBSITE_RG" --image "$IMAGE" -o none
 else
@@ -91,6 +105,12 @@ curl -s -o /dev/null -w "==> GET / -> %{http_code} in %{time_total}s\n" "https:/
 # optimizer for every photograph at the widths browsers actually request, so no
 # visitor pays for the first conversion. The sitemap lists canonical
 # casa-bremen.de URLs; only their paths are used, against this app's own FQDN.
+#
+# Since 2026-10-09 the optimizer's cache is an Azure Files share mounted at
+# /app/.next/cache/images (storage `website-image-cache` on the environment), so
+# it survives releases and is shared by every replica: after the first fill,
+# only new photographs cost an encode. Two at a time, because 942 encodes four
+# at a time on half a CPU left real visitors' images queued for over a minute.
 echo "==> warming pages and images"
 WARM="$(mktemp)"
 curl -s "https://${FQDN}/sitemap.xml" | grep -o '<loc>[^<]*</loc>' \
@@ -103,6 +123,6 @@ done < "$WARM.pages" \
   | grep -E '&w=(64|96|128|256|384|640|750|828|1080|1200|1920)&' \
   | sort -u > "$WARM" || true
 # Warming is best effort: a slow page or a failed request must never fail a release.
-xargs -P 4 -I{} curl -s -o /dev/null --max-time 60 -H 'Accept: image/webp,image/*,*/*;q=0.8' "https://${FQDN}{}" < "$WARM" || true
+xargs -P 2 -I{} curl -s -o /dev/null --max-time 120 -H 'Accept: image/webp,image/*,*/*;q=0.8' "https://${FQDN}{}" < "$WARM" || true
 echo "==> warmed $(wc -l < "$WARM.pages" | tr -d ' ') pages and $(wc -l < "$WARM" | tr -d ' ') image sizes"
 rm -f "$WARM" "$WARM.pages"
