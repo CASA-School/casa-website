@@ -147,6 +147,7 @@ const COPY = {
       day && time ? `${name} möchte eine Gruppenberatung am ${day}, um ${time} Uhr vereinbaren.`
       : `${name} möchte eine Gruppenberatung vereinbaren.`,
     appointmentNote: 'Diese Uhrzeit ist ab sofort für andere Anfragen reserviert.',
+    appointmentNoteUnheld: 'Diese Uhrzeit ist nicht reserviert: Die Website speichert gerade keine Termine. Vor dem Bestätigen prüfen, ob sie noch frei ist.',
     appointment: 'Termin',
     date: 'Datum',
     time: 'Uhrzeit',
@@ -315,6 +316,7 @@ const COPY = {
       day && time ? `${name} would like a group consultation on ${day} at ${time}.`
       : `${name} would like a group consultation.`,
     appointmentNote: 'This time is now reserved and no longer offered to others.',
+    appointmentNoteUnheld: 'This time is not reserved: the website is not storing appointments at the moment. Check that it is still free before confirming.',
     appointment: 'Appointment',
     date: 'Date',
     time: 'Time',
@@ -623,7 +625,7 @@ function appointmentMail(p: Payload, locale: Locale, c: Copy): Mail {
             hint: c.confirmHint(address),
           }
         : null,
-    note: c.appointmentNote,
+    note: p.held === false ? c.appointmentNoteUnheld : c.appointmentNote,
     sections: [
       {
         title: c.appointment,
@@ -1025,7 +1027,9 @@ function paragraph(value: string, style = '') {
 
 export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, options: ConfirmationOptions) {
   const locale: Locale = payload.locale === 'en' ? 'en' : 'de';
-  const variant = kind === 'groups' && isCompanyTopic(text(payload.topicKey)) ? 'company' : '';
+  const variant = kind === 'groups' && isCompanyTopic(text(payload.topicKey)) ? 'company'
+    : kind === 'appointment' && payload.held === false ? 'unheld'
+    : '';
   const entry =
     CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind && candidate.variant === variant)
     ?? CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind)!;

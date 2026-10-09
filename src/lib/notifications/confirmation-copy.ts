@@ -14,6 +14,10 @@
  * Address: everyone reads „du“ and is greeted by first name — learners and
  * applicants since 2026-10-07, group organisers and companies since 2026-10-08
  * (Rahman: du all over). English greets the same way: "Hello {firstName},".
+ *
+ * An appointment request sent without a database (`held: false` in the
+ * payload) takes the "unheld" variant: nothing holds the time then, so it never
+ * says the time is reserved or will be released.
  */
 export const CONFIRMATION_COPY = {
   "kinds": [
@@ -501,6 +505,103 @@ export const CONFIRMATION_COPY = {
           },
           {
             "text": "If the time turns out not to suit you, or you no longer need the appointment, simply reply to this email. We’ll then look for another time together or release the slot."
+          }
+        ],
+        "closing": "We look forward to hearing about your group."
+      },
+      "replyNote": false
+    },
+    {
+      "kind": "appointment",
+      "variant": "unheld",
+      "de": {
+        "subject": "Deine Terminanfrage bei CASA: {dayShort}, {time} Uhr",
+        "preheader": "{contactPerson} prüft deine Wunschzeit und meldet sich persönlich per E-Mail bei dir.",
+        "heading": "Deine Terminanfrage ist angekommen",
+        "intro": "vielen Dank für deine Anfrage. Schön, dass du mit uns über deine Gruppe sprechen möchtest.",
+        "summaryTitle": "Deine Wunschzeit",
+        "summaryRows": [
+          {
+            "label": "Datum",
+            "value": "{day}"
+          },
+          {
+            "label": "Uhrzeit",
+            "value": "{time} Uhr (Ortszeit Bremen)"
+          },
+          {
+            "label": "Dauer",
+            "value": "{duration} Minuten"
+          },
+          {
+            "label": "Gespräch mit",
+            "value": "{contactPerson}"
+          },
+          {
+            "label": "Status",
+            "value": "Angefragt, noch nicht bestätigt"
+          },
+          {
+            "label": "Referenz",
+            "value": "{reference}"
+          }
+        ],
+        "nextStepsTitle": "So geht es weiter",
+        "nextSteps": [
+          {
+            "text": "{contactPerson} prüft, ob die Zeit passt, und meldet sich persönlich per E-Mail bei dir. Erst mit der Bestätigung steht der Termin fest. Darin erfährst du auch, wie das Gespräch stattfindet."
+          },
+          {
+            "text": "Notier dir gern schon deine Ideen, offenen Fragen und Wünsche für deine Gruppe."
+          },
+          {
+            "text": "Passt dir die Zeit doch nicht, oder brauchst du den Termin nicht mehr? Antworte einfach auf diese E-Mail. Dann suchen wir gemeinsam einen anderen Termin."
+          }
+        ],
+        "closing": "Wir freuen uns, von deiner Gruppe zu hören."
+      },
+      "en": {
+        "subject": "Your CASA appointment request: {dayShort}, {time}",
+        "preheader": "{contactPerson} will check your chosen time and email you personally.",
+        "heading": "Your appointment request has reached us",
+        "intro": "Thank you for your request. We’re glad you’d like to talk to us about your group.",
+        "summaryTitle": "Your chosen time",
+        "summaryRows": [
+          {
+            "label": "Date",
+            "value": "{day}"
+          },
+          {
+            "label": "Time",
+            "value": "{time} (Bremen time)"
+          },
+          {
+            "label": "Duration",
+            "value": "{duration} minutes"
+          },
+          {
+            "label": "With",
+            "value": "{contactPerson}"
+          },
+          {
+            "label": "Status",
+            "value": "Requested, not yet confirmed"
+          },
+          {
+            "label": "Reference",
+            "value": "{reference}"
+          }
+        ],
+        "nextStepsTitle": "What happens next",
+        "nextSteps": [
+          {
+            "text": "{contactPerson} will check that the time works and email you personally. Only that email confirms the appointment. It will also tell you how the conversation will take place."
+          },
+          {
+            "text": "If you like, you can already note down your ideas, questions and what your group needs."
+          },
+          {
+            "text": "If the time turns out not to suit you, or you no longer need the appointment, simply reply to this email. We’ll then look for another time together."
           }
         ],
         "closing": "We look forward to hearing about your group."

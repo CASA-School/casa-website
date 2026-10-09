@@ -23,11 +23,24 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.clearAllMocks(); });
 
 describe('appointment requests', () => {
-  it('requires persistence and never fabricates availability', async () => {
+  it('without a database offers the schedule and sends the request by mail, holding nothing', async () => {
     vi.stubEnv('DATABASE_URL', '');
-    expect((await GET()).status).toBe(503);
-    expect((await POST(request())).status).toBe(503);
+    mocks.notify.mockResolvedValue({ delivered: true, channel: 'graph' });
+    const days = await GET();
+    expect(days.status).toBe(200);
+    expect(await days.json()).toMatchObject({ data: { held: false, days: expect.arrayContaining([{ date: '2026-09-21', times: ['10:00', '10:30', '13:00', '13:30'] }]) } });
+    const response = await POST(request());
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({ data: { status: 'requested', held: false, notified: true } });
     expect(mocks.reserve).not.toHaveBeenCalled();
+    expect(mocks.notify.mock.calls[0][1]).toMatchObject({ held: false, localDate: '2026-09-21', localTime: '10:30' });
+    expect(mocks.notify.mock.calls[0][3]).toEqual({ stored: false });
+    expect(mocks.confirm.mock.calls[0][1]).toMatchObject({ held: false });
+  });
+  it('without a database refuses when the mail cannot go out: nothing would reach CASA', async () => {
+    vi.stubEnv('DATABASE_URL', '');
+    expect((await POST(request())).status).toBe(503);
+    expect(mocks.confirm).not.toHaveBeenCalled();
   });
   it('rejects Friday, unsupported start times, closures and missing consent', async () => {
     vi.stubEnv('GROUP_APPOINTMENT_BLOCKED_DATES', '2026-09-22');
@@ -45,7 +58,7 @@ describe('appointment requests', () => {
     const response = await POST(request());
     expect(response.status).toBe(201);
     expect(mocks.reserve.mock.calls[0][0].toISOString()).toBe('2026-09-21T08:30:00.000Z');
-    expect(await response.json()).toMatchObject({ data: { status: 'requested', notified: false }, error: null });
+    expect(await response.json()).toMatchObject({ data: { status: 'requested', held: true, notified: false }, error: null });
     expect(mocks.notify.mock.calls[0][3]).toEqual({ stored: true });
   });
   it('refuses a seventh request from one client in ten minutes, before reserving a slot', async () => {

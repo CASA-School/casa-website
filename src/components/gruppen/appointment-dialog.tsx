@@ -29,6 +29,7 @@ const copy = {
     submit: 'Request appointment', sending: 'Sending…', error: 'Your request could not be sent. Please try again.',
     taken: 'Someone has just requested this time. Please choose another appointment.',
     success: 'Your request is with us', thanks: 'Thank you. Your chosen time is reserved while Ina checks your request. She’ll email you to confirm the appointment and how to join.',
+    thanksUnheld: 'Thank you. Ina will check your chosen time and email you to confirm the appointment and how to join.',
     reference: 'Your reference', done: 'Done', weekdays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
   },
   de: {
@@ -46,6 +47,7 @@ const copy = {
     submit: 'Termin anfragen', sending: 'Wird gesendet …', error: 'Deine Anfrage konnte nicht gesendet werden. Bitte versuch es erneut.',
     taken: 'Dieser Termin wurde gerade angefragt. Bitte wähle einen anderen Termin.',
     success: 'Deine Anfrage ist angekommen', thanks: 'Vielen Dank. Deine Wunschzeit ist vorerst für dich reserviert. Ina prüft deine Anfrage und meldet sich per E-Mail mit der Terminbestätigung und den Informationen zur Teilnahme.',
+    thanksUnheld: 'Vielen Dank. Ina prüft deine Wunschzeit und meldet sich per E-Mail mit der Terminbestätigung und den Informationen zur Teilnahme.',
     reference: 'Deine Referenz', done: 'Fertig', weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
   },
 } as const;
@@ -77,6 +79,8 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
   const [error, setError] = useState('');
   const [reference, setReference] = useState('');
   const [confirmationSent, setConfirmationSent] = useState(false);
+  // False without a database: the request still reaches Ina, but nothing holds the time.
+  const [held, setHeld] = useState(true);
   const stepHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -130,6 +134,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
       if (!response.ok) throw new Error('failed');
       const body = await response.json();
       setConfirmationSent(body.data.confirmationSent === true);
+      setHeld(body.data.held !== false);
       setReference(body.data.requestId);
     } catch { setError(t.error); }
     finally { setSending(false); }
@@ -139,7 +144,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
     <header className="border-b border-[var(--casa-sand)] px-5 pb-6 pt-8 sm:px-8">
       <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">Ina Eismann · CASA Bremen</p>
       <DialogTitle ref={reference ? stepHeading : undefined} tabIndex={reference ? -1 : undefined} className="pr-7 text-2xl sm:text-3xl">{reference ? t.success : t.title}</DialogTitle>
-      <DialogDescription className="mt-3 max-w-xl text-sm">{reference ? t.thanks : t.intro}</DialogDescription>
+      <DialogDescription className="mt-3 max-w-xl text-sm">{reference ? (held ? t.thanks : t.thanksUnheld) : t.intro}</DialogDescription>
       {reference && confirmationSent ? <p className="mt-2 max-w-xl text-sm font-medium text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
       <p className="mt-4 flex items-center gap-2 text-sm text-[var(--casa-ink)]"><Clock aria-hidden className="size-4" />{t.schedule}</p>
     </header>

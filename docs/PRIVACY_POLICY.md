@@ -59,6 +59,9 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
 - **Database**: Azure Database for PostgreSQL in **Belgium Central**, backups ≤ 35 days (§3, §18, §19).
   None is provisioned yet. The subscription blocks PostgreSQL in Germany West Central (checked
   2026-09-30, as `docs/AZURE_DEPLOYMENT_PLAN.md` says); the website and the logs stay there.
+  Until it exists, §15's „in unserem internen Arbeitsbereich gespeichert" and „der Termin wird für
+  andere Anfragen gesperrt" are not true: an appointment request then travels by mail alone and
+  holds no time (2026-10-09, `docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md`).
 - **Mail**: Graph mail from a CASA mailbox, `FORM_DELIVERY_MODE=live`, and every
   `FORM_RECIPIENT_*` set to the routing in §16. During testing all mail goes to `admin@`.
 - **Staff host**: `admin.casa-bremen.de` live and `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset (§5).
