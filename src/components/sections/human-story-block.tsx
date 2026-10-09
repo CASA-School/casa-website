@@ -38,7 +38,8 @@ export function HumanStoryBlock({
   return (
     <section
       data-reveal="true"
-      className={cn('casa-editorial-measure rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10', className)}
+      // A feature block, so a white card (globals.css, "What each surface is for"): warm is for guidance.
+      className={cn('casa-editorial-measure rounded-3xl bg-white px-6 py-8 shadow-[var(--shadow-card)] md:px-9 md:py-10', className)}
     >
       <div
         className={cn(
