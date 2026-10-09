@@ -187,7 +187,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
         fragment with ten rem of air beside it.
       */}
       <DocSection id="overview" title={t.glance}>
-        <ul className="grid gap-x-10 gap-y-4 rounded-xl bg-[var(--casa-warm-soft)]/45 p-6 md:grid-cols-2 md:p-8">
+        <ul className="grid gap-x-10 gap-y-4 rounded-xl bg-[var(--casa-warm-soft)]/35 p-6 md:grid-cols-2 md:p-8">
           {data.quickFacts.map((fact) => (
             <li key={fact} className="flex gap-3 text-base leading-relaxed text-[var(--casa-ink)]">
               <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />

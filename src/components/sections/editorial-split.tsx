@@ -32,15 +32,15 @@ type EditorialSplitProps = {
   photo: EditorialSplitPhoto;
   mediaSide?: 'left' | 'right';
   /**
-   * `warm` is the homepage standard for this section type. `plain` is the same
-   * composition with no fill, for when a page needs more than one of these.
-   *
-   * Three warm panels down one page is a tunnel — measured on
-   * /accommodation/become-host, which ran warm / white / warm / open / warm with
-   * no inverted band at all. The component is still the standard; how many times
-   * a page may PAINT it is a separate question, and the answer is once.
+   * `card` (the default since 2026-10-09) stands the block on the page as a
+   * white card with the card shadow; `plain` is the same composition with no
+   * surface. It used to be the warm panel, but warm is the GUIDANCE surface
+   * (steps, prices, what you practise — globals.css, "What each surface is
+   * for"), and course pages ran three warm panels back to back: this block,
+   * the steps and the story. Now the feature blocks stand up (white + shadow)
+   * and the guidance lies flat (warm), so the two alternate down a page.
    */
-  tone?: 'warm' | 'plain';
+  tone?: 'card' | 'plain';
   ctas?: Array<{
     label: string;
     href: string;
@@ -65,7 +65,7 @@ export function EditorialSplit({
   photo,
   mediaSide = 'right',
   ctas = [],
-  tone = 'warm',
+  tone = 'card',
   className,
 }: EditorialSplitProps) {
   return (
@@ -80,7 +80,7 @@ export function EditorialSplit({
           unfilled ones at x=40.
         */
         'casa-editorial-measure @container px-6 py-8 md:px-9 md:py-10',
-        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
+        tone === 'card' ? 'rounded-3xl bg-white shadow-[var(--shadow-card)]' : undefined,
         className
       )}
     >

@@ -951,7 +951,7 @@ export default async function HomePage() {
               </figure>
             ))}
             {tandemProgram ? (
-              <article className="flex flex-col justify-between rounded-xl bg-[var(--casa-blue-tint)] p-6 md:col-span-2 md:p-7 lg:col-span-1 lg:h-[23rem]">
+              <article className="flex flex-col justify-between rounded-xl bg-[var(--casa-warm-soft)]/35 p-6 md:col-span-2 md:p-7 lg:col-span-1 lg:h-[23rem]">
                 <div>
                   <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-[var(--casa-accent-text)]" aria-hidden>
                     <TandemIcon className="h-6 w-6" />

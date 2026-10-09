@@ -12,12 +12,6 @@ export type ProcessStep = {
 type ProcessStepsProps = {
   /** Optional — see EditorialSplit. */
   eyebrow?: string;
-  /**
-   * `plain` drops the warm fill. Default stays `warm` so nothing changes where
-   * this is a page's single accent — /accommodation had FOUR warm panels in nine
-   * sections, which is what made it read as a tunnel.
-   */
-  tone?: 'warm' | 'plain';
   title: string;
   description: string;
   steps: ProcessStep[];
@@ -34,7 +28,6 @@ export function ProcessSteps({
   description,
   steps,
   cta,
-  tone = 'warm',
   className,
 }: ProcessStepsProps) {
   const heading = (
@@ -81,9 +74,13 @@ export function ProcessSteps({
 
   return (
     <section data-reveal="true" className={cn(
-        /* Same inset in both tones — see EditorialSplit. */
-        'casa-editorial-measure px-6 py-8 md:px-9 md:py-10',
-        tone === 'warm' ? 'rounded-3xl bg-[var(--casa-warm-soft)]/35' : undefined,
+        /*
+          Always the warm panel (2026-10-09). This is the site's guidance surface —
+          the steps, the prices, what you practise — so "Ablauf" looks the same on
+          every page. A `plain` variant existed and /exams used it; on the one light
+          ground it left that page's steps with no surface at all.
+        */
+        'casa-editorial-measure rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10',
         className
       )}>
       {/*

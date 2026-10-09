@@ -363,6 +363,33 @@
    * (--shadow-card / --shadow-soft carry a hairline ring for exactly that),
    * never by a second near-white.
    *
+   * WHAT EACH SURFACE IS FOR (2026-10-09, Rahman: "intentional, not random").
+   * Pick the surface by the role of the content, never by taste:
+   *
+   *   white            the page, and everything read in passing on it.
+   *   white + shadow   an OBJECT that stands on the page: a card to choose or
+   *                    click (a course, an exam, a person, an article) and the
+   *                    two feature blocks, EditorialSplit and HumanStoryBlock.
+   *                    Never a tinted card.
+   *   warm panel       GUIDANCE: what helps you act — the steps (ProcessSteps,
+   *                    always), the prices (FeeStrip), what you practise
+   *                    (the level goals' panel), a guide's key facts. One strength only:
+   *                    `bg-[var(--casa-warm-soft)]/35`, a rounded panel inside
+   *                    white, never a full-width band, never two in a row —
+   *                    objects (white + shadow) sit between them, so a course
+   *                    page reads prices, who it is for, steps, a voice.
+   *   ink              EMPHASIS: the drawn night heroes, a dark proof band, the
+   *                    footer. At most one dark band per page below the hero.
+   *   blue tint        INTERACTION only: a selected option, an icon's circle.
+   *                    Never a content panel.
+   *
+   * The one deliberate exception is /aktuelles, which keeps the printed
+   * newsletter's rubric colours (tip, wish, person, the feature's aside).
+   * Measured on the live site 2026-10-09: before this pass the warm panel was
+   * spelled at /35, /40 (fee tables), /45 (guides) and solid; the homepage's
+   * tandem tile was the one blue content panel; the fee table's deposit row
+   * (blue/5 over warm) mixed to a grey-green; /exams drew its steps plain.
+   *
    * `--casa-surface-wash` is a panel tint, never a band, and only ever used
    * BARE. `--casa-surface-subtle` is the one step darker than canvas, for
    * pressed and active states.

@@ -221,10 +221,7 @@ export default async function ExamsPage() {
 
       <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
         <Container>
-          {/* Plain and without the panel's inset, so its heading lines up with „Unsere Prüfungen". */}
           <ProcessSteps
-            tone="plain"
-            className="px-0 md:px-0"
             eyebrow={locale === 'de' ? 'Ablauf' : 'How it works'}
             title={locale === 'de' ? 'So kommst du zur Prüfung' : 'Getting to exam day'}
             description={

@@ -486,7 +486,7 @@ export function PlacementRunner({
             gets out of the way. Repeating it on every item would train the
             learner to stop reading the top of the screen. */}
         {phaseHint && attempt.positionInPhase === 1 ? (
-          <p className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/40 px-3 py-2 text-xs leading-relaxed text-[var(--casa-ink)] sm:text-sm">
+          <p className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-3 py-2 text-xs leading-relaxed text-[var(--casa-ink)] sm:text-sm">
             {phaseHint}
           </p>
         ) : null}
