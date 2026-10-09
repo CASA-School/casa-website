@@ -85,6 +85,7 @@ export function GruppenPackageDialog({
   return (
     <DialogContent
       closeLabel={t.close}
+      brandStripe
       className={`flex max-h-[calc(100dvh-2rem)] flex-col p-0 ${isEsel ? 'max-w-3xl' : 'max-w-2xl'}`}
     >
       <div className="shrink-0 border-b border-[color:var(--casa-sand)] px-6 py-6 sm:px-8 sm:py-7">

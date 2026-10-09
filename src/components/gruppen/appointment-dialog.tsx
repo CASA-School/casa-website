@@ -59,7 +59,7 @@ export function AppointmentDialog({ locale }: { locale: ContentLocale }) {
     <DialogTrigger asChild>
       <Button variant="prism" className="mt-4 h-11 w-full">{t.trigger}</Button>
     </DialogTrigger>
-    <DialogContent closeLabel={t.close} className="max-w-3xl">
+    <DialogContent closeLabel={t.close} brandStripe className="max-w-3xl">
       {open && <AppointmentFlow locale={locale} onDone={() => setOpen(false)} />}
     </DialogContent>
   </Dialog>;

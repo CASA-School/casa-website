@@ -64,10 +64,17 @@ function DialogContent({
   children,
   showCloseButton = true,
   closeLabel = 'Close',
+  brandStripe = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
   closeLabel?: string;
+  /**
+   * The logo's red, blue and yellow along the top edge. For the public popups
+   * in which CASA speaks to one visitor (and the new-website notice); cards keep
+   * their one meaning colour, and the workspace never takes it.
+   */
+  brandStripe?: boolean;
 }) {
   return (
     <DialogPrimitive.Portal>
@@ -95,6 +102,9 @@ function DialogContent({
             )}
             {...props}
           >
+            {brandStripe ? (
+              <span aria-hidden className="casa-logo-stripe pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px]" />
+            ) : null}
             {children}
             {showCloseButton ? (
               <DialogPrimitive.Close

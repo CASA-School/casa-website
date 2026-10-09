@@ -128,6 +128,7 @@ export function SpecialCourseDialog({
   return (
     <DialogContent
       closeLabel={t.close}
+      brandStripe
       className="flex max-h-[calc(100dvh-2rem)] max-w-2xl flex-col p-0"
     >
       <div className="shrink-0 border-b border-[color:var(--casa-sand)] px-6 py-6 sm:px-8 sm:py-7">

@@ -19,8 +19,10 @@ import { CONFIRMATION_COPY } from './confirmation-copy';
  * desktop Outlook renders with Word's engine, a ghost table to hold its width,
  * and one media query that stacks label and value on a phone. The logo is an
  * inline attachment (`cid:`), so no client blocks it as remote content. One
- * accent colour, CASA blue; the full red, blue and sun triad stays in the logo,
- * as on the website.
+ * accent colour, CASA blue, inside the card. The logo's red, blue and yellow
+ * appear once, as a stripe along the card's top edge: on the website that
+ * stripe marks CASA itself speaking (the navbar, the footer, the popups), and
+ * every email is that. Table cells with `bgcolor`, so Outlook draws it too.
  */
 
 export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'placement' | 'appointment' | 'interest';
@@ -823,6 +825,8 @@ const MUTED = '#64748b';
 const RULE = '#e2e8f0';
 const CANVAS = '#f4f6f9';
 const ACCENT = '#009fe3';
+/** The logo's colours, in the order of `.casa-logo-stripe` in globals.css. */
+const LOGO_STRIPE = [['#e30613', '34%'], ['#009fe3', '33%'], ['#ffd500', '33%']] as const;
 const LINK = '#006f9f';
 const TINT = '#eef7fb';
 
@@ -912,7 +916,10 @@ function renderShell(input: {
     + `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${escape(input.preheader)}${preheaderPad}</div>`
     + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${CANVAS}" style="background:${CANVAS};"><tr><td class="shell" align="center" style="padding:32px 16px;">`
     + `<!--[if mso]><table role="presentation" width="640" cellpadding="0" cellspacing="0"><tr><td><![endif]-->`
-    + `<table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:640px;background:#ffffff;border:1px solid ${RULE};border-top:4px solid ${ACCENT};border-radius:10px;">`
+    + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;border-collapse:collapse;"><tr>`
+    + LOGO_STRIPE.map(([colour, width]) => `<td width="${width}" height="4" bgcolor="${colour}" style="height:4px;background:${colour};font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td>`).join('')
+    + `</tr></table>`
+    + `<table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:640px;background:#ffffff;border:1px solid ${RULE};border-top:0;border-radius:0 0 10px 10px;">`
     + (input.testLine
       ? `<tr><td class="px" style="${SANS}padding:10px 40px;font-size:13px;line-height:19px;color:#7a5a00;background:#fff3da;">${escape(input.testLine)}</td></tr>`
       : '')

@@ -113,7 +113,7 @@ export function InterestDialog({ course, locale }: { course: InterestCourseSlug;
         }
       }}
     >
-      <DialogContent closeLabel={t.close} className="max-w-2xl">
+      <DialogContent closeLabel={t.close} brandStripe className="max-w-2xl">
         {open && <InterestFlow course={course} locale={locale} onDone={() => setOpen(false)} />}
       </DialogContent>
     </Dialog>
