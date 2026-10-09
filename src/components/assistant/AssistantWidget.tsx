@@ -521,7 +521,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
             <p className="whitespace-pre-line">{message.content}</p>
 
             {message.planSteps && message.planSteps.length > 0 ? (
-              <div className="mt-3 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-3 py-2.5">
+              <div className="mt-3 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] px-3 py-2.5">
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                   {copy.planLabel}
                 </p>
@@ -560,7 +560,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
             {message.cards && message.cards.length > 0 ? (
               <div className="mt-3 overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white">
-                <div className="flex items-center justify-between gap-2 border-b border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-3 py-2">
+                <div className="flex items-center justify-between gap-2 border-b border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                     {copy.resultsLabel}
                   </p>
@@ -572,7 +572,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
                   <Link
                     key={card.id}
                     href={card.href}
-                    className="group block border-b border-[color:var(--casa-sand)]/70 bg-white p-3 text-[var(--casa-ink)] transition-colors last:border-b-0 hover:bg-[var(--casa-warm-soft)]/35"
+                    className="group block border-b border-[color:var(--casa-sand)]/70 bg-white p-3 text-[var(--casa-ink)] transition-colors last:border-b-0 hover:bg-[var(--casa-warm-panel)]"
                   >
                     <div className="flex items-start gap-2">
                       <span className="mt-0.5 rounded-full bg-[var(--casa-blue)]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">

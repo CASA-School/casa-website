@@ -338,8 +338,9 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
     <header
       ref={navRef}
       className={cn(
-        'sticky top-0 z-[900] bg-white transition-[height,box-shadow] duration-300 ease-out motion-reduce:transition-none',
-        night && nightStyles.night,
+        'sticky top-0 z-[900] transition-[height,box-shadow] duration-300 ease-out motion-reduce:transition-none',
+        // The ground's colour and grain on light pages, so the page runs up under the bar; ink on night pages.
+        night ? nightStyles.night : nightStyles.day,
         compact ? 'h-16' : 'h-20',
         scrolled || activeDropdown ? 'shadow-[var(--shadow-soft)]' : undefined
       )}

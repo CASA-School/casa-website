@@ -209,7 +209,7 @@ export default async function AboutPage() {
         - The story block's photograph, a numbered placeholder (slot 12). The
           quote stands on its own as a pull quote.
       */}
-      <section className="bg-white py-14 md:py-16" aria-label={locale === 'de' ? 'CASA in Zahlen' : 'CASA in figures'}>
+      <section className="py-14 md:py-16" aria-label={locale === 'de' ? 'CASA in Zahlen' : 'CASA in figures'}>
         <Container>
           <dl className="mx-auto grid max-w-[85rem] grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-[color:var(--casa-sand)]">
             {stats.map((stat) => (
@@ -285,7 +285,7 @@ export default async function AboutPage() {
         </Container>
       </section>
 
-      <section id="begegnung" className="scroll-mt-28 bg-white py-16 md:py-24">
+      <section id="begegnung" className="scroll-mt-28 py-16 md:py-24">
         <Container>
           <div className="mx-auto grid max-w-[85rem] gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-16">
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] shadow-[var(--shadow-modal)]">
@@ -366,7 +366,7 @@ export default async function AboutPage() {
         rule 2), and no grid of the site's other quotes, which the homepage has.
       */}
       {communityStory ? (
-        <section className="bg-white py-16 md:py-24">
+        <section className="py-16 md:py-24">
           <Container>
             <figure className="mx-auto max-w-[50rem] text-center">
               <span aria-hidden className="block font-display text-6xl leading-none text-[var(--casa-accent-text)]">“</span>

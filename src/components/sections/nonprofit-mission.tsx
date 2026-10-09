@@ -20,7 +20,7 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
   const de = locale === 'de';
 
   return (
-    <section id="integrationsprojekte" className="scroll-mt-28 bg-white py-16 md:py-24" aria-labelledby="nonprofit-mission-title">
+    <section id="integrationsprojekte" className="scroll-mt-28 py-16 md:py-24" aria-labelledby="nonprofit-mission-title">
       <Container className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-20">
         <div className="max-w-xl">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">

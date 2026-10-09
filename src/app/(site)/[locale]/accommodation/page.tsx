@@ -156,7 +156,7 @@ export default async function AccommodationPage() {
         two ink bands in a row ran together into one (Rahman). The rows and the
         heading take their light tone; the band is still the shared composition.
       */}
-      <section className="bg-[var(--casa-bg)] py-20 md:py-32">
+      <section className="py-20 md:py-32">
         <Container>
           <div className="px-6 md:px-9">
             <BandHeading
@@ -237,7 +237,7 @@ export default async function AccommodationPage() {
 
       {/* Section 5: Story */}
       {leadStory ? (
-        <section className="bg-white py-16 md:py-24">
+        <section className="py-16 md:py-24">
           <Container>
             <HumanStoryBlock
               eyebrow={locale === 'de' ? 'Erfahrungen' : 'Experiences'}
@@ -343,7 +343,7 @@ export default async function AccommodationPage() {
         option on this page possible, which is why the invitation belongs at the
         end of the student journey rather than competing with it at the top.
       */}
-      <section className="bg-white py-16 md:py-24">
+      <section className="py-16 md:py-24">
         <Container>
           <div className="flex flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between md:px-9">
             <div className="max-w-measure">

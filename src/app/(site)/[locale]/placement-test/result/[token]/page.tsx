@@ -126,7 +126,7 @@ export default async function PlacementResultPage({
 
           {/* ---- 2. what happens next ---------------------------------- */}
           {notice ? (
-            <section className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-6 sm:p-7">
+            <section className="rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] p-6 sm:p-7">
               <div className="flex items-start gap-3.5">
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--casa-blue)]/12 text-[var(--casa-accent-text)]">
                   <UserRound className="h-4.5 w-4.5" aria-hidden />

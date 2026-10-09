@@ -186,7 +186,7 @@ export default async function CareersPage() {
                       </div>
 
                       {requirementLines.length > 0 ? (
-                        <div className="mt-5 rounded-xl bg-[var(--casa-warm-soft)]/35 p-4">
+                        <div className="mt-5 rounded-xl bg-[var(--casa-warm-panel)] p-4">
                           <h3 className="text-sm font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">{copy.requirements}</h3>
                           <ul className="mt-2 space-y-1.5">
                             {requirementLines.map((line) => (

@@ -1,5 +1,5 @@
 /*
- * The navbar on a night-hero page (NIGHT_HERO_PATHS): the hero's ink ground, so
+ * The navbar on a night-hero page (isNightHeroPage): the hero's ink ground, so
  * header and hero read as one band. The bar's type turns white by redefining the
  * tokens its classes read, as night-hero.module.css does for HeroLede.
  *
@@ -21,14 +21,33 @@
   --casa-accent-text-hover: #ffe14d;
 }
 
+/*
+ * The navbar on every other page (2026-10-09): the page's own ground and grain,
+ * so the page runs up under the bar without a seam; the logo stripe is its edge
+ * and a soft shadow returns once the page scrolls. On the ground a pill must be
+ * lighter than it, not darker: hover a soft white, the current section white.
+ * The white menus inside the bar get the page's tokens back, as on night pages.
+ */
+.day {
+  background-color: var(--casa-ground);
+  background-image: var(--casa-grain);
+  --casa-canvas: rgb(255 255 255 / 0.72);
+  --casa-surface-subtle: #ffffff;
+}
+
+.day :global(.bg-white) {
+  --casa-canvas: var(--casa-ground);
+  --casa-surface-subtle: #eef4f5;
+}
+
 /* `:global`: CSS Modules would otherwise rename .bg-white and the reset would match nothing. */
 .night :global(.bg-white) {
   --casa-ink: #0f172a;
-  --casa-muted: #5b697e;
+  --casa-muted: #46536a;
   --casa-text-subtle: var(--casa-subtle-on-light);
   --casa-sand: #e2e8f0;
   --casa-surface-subtle: #eef4f5;
-  --casa-canvas: #f6fafb;
+  --casa-canvas: var(--casa-ground);
   --casa-accent-text: var(--casa-accent-on-light);
   --casa-accent-text-hover: var(--casa-accent-on-light-hover);
 }

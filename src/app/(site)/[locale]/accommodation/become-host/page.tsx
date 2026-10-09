@@ -396,7 +396,7 @@ export default async function BecomeHostFamilyPage() {
         and the course default of three exists to keep six formats comparable, not
         to cap content.
       */}
-      <section className="border-t border-[color:var(--casa-sand)]/40 bg-white py-16 md:py-24">
+      <section className="border-t border-[color:var(--casa-sand)]/40 py-16 md:py-24">
         {/*
           `px-6 md:px-9` so these rows share the panels' content column. Without
           it the row headings sat at x=40 while every panel heading on the page
@@ -453,7 +453,7 @@ export default async function BecomeHostFamilyPage() {
         It also removes the last section on this page whose text sat at a
         different left edge from the panels around it.
       */}
-      <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
             eyebrow={copy.processEyebrow}

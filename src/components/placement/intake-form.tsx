@@ -157,7 +157,7 @@ export function IntakeForm({
 
       {/* The direct-beginner consequence, stated before the button is pressed. */}
       {directBeginner ? (
-        <div className="flex items-start gap-2.5 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 p-3">
+        <div className="flex items-start gap-2.5 rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] p-3">
           <CheckCircle2
             className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-accent-text)]"
             aria-hidden
