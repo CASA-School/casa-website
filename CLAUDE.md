@@ -162,7 +162,7 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0017_drop_course_registration_smoker.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0018_evening_price_from_378.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -422,8 +422,8 @@ is still valid.
   B1ms, Belgium Central, in its own subnet of the private data network (no public access, like
   the student app's). The site connects as `casa_web` through the Container App secret
   `database-url`. A laptop cannot reach it: `./infra/azure/db-job.sh migrate|status|owner` runs
-  the task as a Container Apps job, and `deploy.sh` runs `migrate` before every release. All
-  17 migrations and the seeds are applied; `db/seeds/0005_exam_sessions.sql` gives the database
+  the task as a Container Apps job, and `deploy.sh` runs `migrate` before every release, so
+  every migration and seed in `main` is applied; `db/seeds/0005_exam_sessions.sql` gives the database
   the exam dates the fallback had. No workspace account exists yet (`db-job.sh owner`).
 - **The image optimizer's cache is an Azure Files share (2026-10-09)**, mounted at
   `/app/.next/cache/images` from `stcasawebsitef8d745/next-image-cache`, so it survives releases
