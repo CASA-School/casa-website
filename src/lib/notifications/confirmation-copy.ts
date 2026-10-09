@@ -72,6 +72,70 @@ export const CONFIRMATION_COPY = {
       }
     },
     {
+      "kind": "interest",
+      "variant": "",
+      "de": {
+        "subject": "Du stehst auf unserer Interessentenliste",
+        "preheader": "Sobald genug Interessierte zusammen sind, melden wir uns mit den Terminen bei dir.",
+        "heading": "Danke für dein Interesse",
+        "intro": "schön, dass du beim Kurs „{course}“ dabei sein möchtest. Deine Angaben sind gut bei uns angekommen, und dein Eintrag ist selbstverständlich unverbindlich.",
+        "summaryTitle": "Dein Eintrag",
+        "summaryRows": [
+          {
+            "label": "Kurs",
+            "value": "{course}"
+          },
+          {
+            "label": "Referenz",
+            "value": "{reference}"
+          }
+        ],
+        "nextStepsTitle": "So geht es weiter",
+        "nextSteps": [
+          {
+            "text": "Wir sammeln die Interessierten für diesen Kurs. Einen festen Termin gibt es noch nicht."
+          },
+          {
+            "text": "Sobald genug Interessierte zusammen sind, legen wir den Kurszeitraum fest und melden uns per E-Mail oder Telefon bei dir."
+          },
+          {
+            "text": "Dann entscheidest du, ob du dich verbindlich anmeldest. Bis dahin entstehen dir keine Kosten."
+          }
+        ],
+        "closing": "Wir freuen uns darauf, dich im Kurs zu begrüßen."
+      },
+      "en": {
+        "subject": "You’re on our interest list",
+        "preheader": "As soon as enough people have signed up, we’ll get in touch with the dates.",
+        "heading": "Thank you for your interest",
+        "intro": "We’re glad you’d like to join “{course}”. We’ve received your details, and being on the list doesn’t commit you to anything.",
+        "summaryTitle": "Your entry",
+        "summaryRows": [
+          {
+            "label": "Course",
+            "value": "{course}"
+          },
+          {
+            "label": "Reference",
+            "value": "{reference}"
+          }
+        ],
+        "nextStepsTitle": "What happens next",
+        "nextSteps": [
+          {
+            "text": "We’re collecting names for this course. There are no fixed dates yet."
+          },
+          {
+            "text": "As soon as there are enough people, we’ll set the course dates and get in touch by email or phone."
+          },
+          {
+            "text": "Then you decide whether to register. Until then, there’s nothing to pay."
+          }
+        ],
+        "closing": "We look forward to welcoming you to the course."
+      }
+    },
+    {
       "kind": "groups",
       "variant": "",
       "de": {

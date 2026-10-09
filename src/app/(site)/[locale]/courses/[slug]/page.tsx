@@ -22,6 +22,8 @@ import { redirectLocalized } from '@/i18n/redirect';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { GruppenPackages } from '@/components/gruppen/gruppen-packages';
+import { InterestDialog } from '@/components/courses/interest-dialog';
+import { hasInterestList, INTEREST_ANCHOR } from '@/config/courses/interest-list';
 import { GRUPPEN_PACKAGES_BY_STACK } from '@/config/gruppen/packages';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
 import type { CourseFactKey } from '@/config/courses/archetypes';
@@ -214,8 +216,17 @@ export default async function CourseDetailPage({
   // docs/COPY_AND_COURSE_ARCHETYPE_REVIEW.md.
   const quoteOnly = isQuoteOnly(detail.course);
   const quoteTopic = detail.course.slug === 'in-company' ? 'company-courses' : 'group-booking';
+  // A course without set dates collects interested people first (config/courses/interest-list.ts).
+  const courseSlug = detail.course.slug;
+  const interestCourse = hasInterestList(courseSlug) ? courseSlug : null;
 
-  const primaryDecisionCta = quoteOnly
+  const primaryDecisionCta = interestCourse
+    ? {
+        label: locale === 'de' ? 'Interesse anmelden' : 'Register your interest',
+        href: `${getCoursePath(courseSlug)}#${INTEREST_ANCHOR}`,
+        kind: 'primary' as const,
+      }
+    : quoteOnly
     ? {
         label: locale === 'de' ? 'Angebot anfragen' : 'Request a quote',
         href: `/contact?topic=${quoteTopic}`,
@@ -233,7 +244,13 @@ export default async function CourseDetailPage({
           kind: 'primary' as const,
         };
 
-  const secondaryDecisionCta = quoteOnly
+  const secondaryDecisionCta = interestCourse
+    ? {
+        label: locale === 'de' ? 'Frage stellen' : 'Ask a question',
+        href: '/contact?topic=Course advice',
+        kind: 'secondary' as const,
+      }
+    : quoteOnly
     ? {
         label: locale === 'de' ? 'Programm besprechen' : 'Talk through the programme',
         href: `/contact?topic=${quoteTopic}`,
@@ -341,11 +358,15 @@ export default async function CourseDetailPage({
    * never empty out.
    */
   const byArrangement = locale === 'de' ? 'Nach Absprache' : 'By arrangement';
-  const infoItems = archetype.facts
-    .filter((fact) => archetypeAllowsFact(archetype, fact))
-    .map((fact) => factRows[fact])
-    .filter((row): row is NonNullable<typeof row> => Boolean(row))
-    .filter((row) => row.value !== byArrangement);
+  const infoItems = [
+    ...archetype.facts
+      .filter((fact) => archetypeAllowsFact(archetype, fact))
+      .map((fact) => factRows[fact])
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .filter((row) => row.value !== byArrangement),
+    // When and how much, for a course whose archetype has no rows for them (course-practical-facts.ts).
+    ...(practicalFacts?.summary ?? []),
+  ];
 
   /*
    * The hero rail already lists every fact this archetype permits. The sticky
@@ -641,7 +662,11 @@ export default async function CourseDetailPage({
           registration" is false where there is nothing to register for.
         */
         notes={
-          archetype.cta === 'request-quote'
+          interestCourse
+            ? locale === 'de'
+              ? 'Einen festen Termin gibt es noch nicht. Melde dein Interesse an, dann melden wir uns, sobald die Gruppe steht.'
+              : 'There are no fixed dates yet. Register your interest and we will get in touch once the group is complete.'
+            : archetype.cta === 'request-quote'
             ? locale === 'de'
               ? 'Umfang und Preis bestätigen wir im Angebot.'
               : 'We confirm the scope and the price in our quote.'
@@ -928,7 +953,9 @@ export default async function CourseDetailPage({
               */
               // Gated on the CTA policy, not the slug, so Firmenunterricht is
               // covered too: neither page has anything to register for.
-              showDeadline={archetype.cta !== 'request-quote'}
+              showDeadline={archetype.cta !== 'request-quote' && !interestCourse}
+              // An interest list has no registration window; the rail offers the list instead.
+              action={interestCourse ? { label: primaryDecisionCta.label, href: primaryDecisionCta.href } : undefined}
               /*
                 The named owner of this format, from CASA's 2026-09-08
                 allocation in config/content/contacts.ts. Every routed format has
@@ -940,6 +967,7 @@ export default async function CourseDetailPage({
           </div>
         </Container>
       </section>
+      {interestCourse ? <InterestDialog course={interestCourse} locale={locale} /> : null}
     </main>
   );
 }

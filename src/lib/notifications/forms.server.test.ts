@@ -45,11 +45,16 @@ describe('public form notifications', () => {
 
   it('defaults every form to the test inbox even if production recipients exist', () => {
     vi.stubEnv('FORM_DELIVERY_MODE', '');
-    const kinds: FormKind[] = ['contact', 'groups', 'course', 'exam', 'careers', 'placement', 'appointment'];
+    const kinds: FormKind[] = ['contact', 'groups', 'course', 'exam', 'careers', 'placement', 'appointment', 'interest'];
     for (const kind of kinds) {
       vi.stubEnv(`FORM_RECIPIENT_${kind.toUpperCase()}`, 'real-recipient@example.com');
       expect(formDeliveryConfig(kind)).toEqual({ test: true, recipient: TEST_FORM_RECIPIENT });
     }
+  });
+  it('sends an interest-list entry to the contact mailbox when live', () => {
+    vi.stubEnv('FORM_DELIVERY_MODE', 'live');
+    vi.stubEnv('FORM_RECIPIENT_CONTACT', 'info@example.com');
+    expect(formDeliveryConfig('interest')).toEqual({ test: false, recipient: 'info@example.com' });
   });
   it('never falls back to an uncontrolled webhook while testing', async () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'test');
@@ -193,6 +198,21 @@ describe('public form notifications', () => {
     expect(content).toContain(encodeURIComponent('am Donnerstag, 8. Oktober 2026, um 10:30 Uhr (Bremer Zeit)'));
     expect(content).toContain(encodeURIComponent('Hallo Jonas,\n\nvielen Dank für deine Anfrage.'));
     expect(content).toContain('Diese Uhrzeit ist ab sofort für andere Anfragen reserviert.');
+  });
+  it('lists an interest-list entry with its level and free times, and offers a reply', async () => {
+    const message = (await sentMessage('interest', {
+      requestId: 'r', locale: 'de', firstName: 'Amira', lastName: 'Haddad', email: 'amira@example.com', phone: '+49 170 1234567',
+      course: 'medical-german', courseName: 'Deutsch für Pflege und Medizin', level: 'B2', profession: 'doctor',
+      days: ['mon', 'fri'], times: ['afternoon', 'evening'], message: '',
+    }, { stored: false })).message;
+    const content = message.body.content as string;
+    expect(message.subject).toBe('[TEST] Interessentenliste: Amira Haddad – Deutsch für Pflege und Medizin');
+    expect(content).toContain('Amira Haddad möchte am Kurs „Deutsch für Pflege und Medizin“ teilnehmen.');
+    expect(content).toContain('Montag, Freitag');
+    expect(content).toContain('Nachmittags, Abends');
+    expect(content).toContain('Ärztin oder Arzt');
+    expect(content).toContain('href="tel:+491701234567"');
+    expect(content).toContain('Amira antworten');
   });
   it('never calls an appointment reserved when nothing could hold it', async () => {
     const content = (await sentMessage('appointment', {
@@ -386,6 +406,16 @@ describe('confirmation to the sender', () => {
     const contact = (await confirmation('contact', { requestId: 'r', locale: 'de', firstName: 'Ada', email: 'ada@example.com' }))
       .message.body.content as string;
     expect(contact).toContain('href="tel:+4942146041430"');
+  });
+
+  it('tells an interested learner they are on the list, and that nothing is booked yet', async () => {
+    const content = (await confirmation('interest', {
+      requestId: 'r', locale: 'de', firstName: 'Amira', email: 'amira@example.com', courseName: 'Deutsch für Pflege und Medizin',
+    })).message.body.content as string;
+    expect(content).toContain('Danke für dein Interesse');
+    expect(content).toContain('Deutsch für Pflege und Medizin');
+    expect(content).toContain('Bis dahin entstehen dir keine Kosten.');
+    expect(content).toContain('Hallo Amira,');
   });
 
   it('confirms an appointment request without promising a time nothing could hold', async () => {

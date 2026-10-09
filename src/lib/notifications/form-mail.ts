@@ -1,3 +1,4 @@
+import { INTEREST_DAYS, INTEREST_LEVELS, INTEREST_PROFESSIONS, INTEREST_TIMES, interestLabels } from '@/config/courses/interest-list';
 import { organiserCopy } from '@/config/forms/organiser-brief-copy';
 import { INTAKE_QUESTIONS } from '@/config/placement/intake';
 import { getSiteUrl } from '@/lib/seo';
@@ -22,7 +23,7 @@ import { CONFIRMATION_COPY } from './confirmation-copy';
  * as on the website.
  */
 
-export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'placement' | 'appointment';
+export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'placement' | 'appointment' | 'interest';
 type Locale = 'de' | 'en';
 type Payload = Record<string, unknown>;
 
@@ -163,6 +164,19 @@ const COPY = {
       + `Wir nehmen uns etwa ${minutes} Minuten Zeit für deine Fragen und Ideen.\n\n`
       + 'So sprechen wir: [Telefon, Videolink oder bei CASA, Am Dobben 14–16, 28203 Bremen]\n\n'
       + 'Ich freue mich auf unser Gespräch.\n\nHerzliche Grüße\n',
+
+    interestKind: 'Interessentenliste',
+    interestTitle: 'Neuer Eintrag auf der Interessentenliste',
+    interestSource: 'aus der Interessentenliste',
+    interestLead: (name: string, course: string | null) =>
+      course ? `${name} möchte am Kurs „${course}“ teilnehmen.` : `${name} möchte an einem Kurs teilnehmen.`,
+    interestReply: 'Dein Interesse an unserem Kurs',
+    interestEntry: 'Eintrag',
+    interestLevel: 'Niveau',
+    interestProfession: 'Beruf',
+    interestAvailability: 'Wann es passt',
+    interestDays: 'Tage',
+    interestTimes: 'Tageszeit',
 
     careersKind: 'Bewerbung',
     careersTitle: 'Neue Bewerbung',
@@ -332,6 +346,19 @@ const COPY = {
       + `We will take about ${minutes} minutes for your questions and ideas.\n\n`
       + 'How we will meet: [phone, video link or at CASA, Am Dobben 14–16, 28203 Bremen]\n\n'
       + 'I look forward to speaking with you.\n\nKind regards\n',
+
+    interestKind: 'Interest list',
+    interestTitle: 'New name on the interest list',
+    interestSource: 'from the interest list',
+    interestLead: (name: string, course: string | null) =>
+      course ? `${name} would like to join the course “${course}”.` : `${name} would like to join a course.`,
+    interestReply: 'Your interest in our course',
+    interestEntry: 'Entry',
+    interestLevel: 'Level',
+    interestProfession: 'Job',
+    interestAvailability: 'When it suits',
+    interestDays: 'Days',
+    interestTimes: 'Time of day',
 
     careersKind: 'Job application',
     careersTitle: 'New job application',
@@ -707,6 +734,51 @@ function placementMail(p: Payload, locale: Locale, c: Copy): Mail {
   };
 }
 
+/** An interest-list entry: who, their level and when they are free; nothing is booked. */
+function interestMail(p: Payload, locale: Locale, c: Copy): Mail {
+  const name = fullName(p) ?? c.name;
+  const course = text(p.courseName);
+  const list = (value: unknown) => (Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : []);
+  const level = text(p.level) ? interestLabels(INTEREST_LEVELS, [String(p.level)], locale) : null;
+  const profession = text(p.profession) ? interestLabels(INTEREST_PROFESSIONS, [String(p.profession)], locale) : null;
+  const phone = text(p.phone);
+  return {
+    subject: `${c.interestKind}: ${[fullName(p), course].filter(Boolean).join(' – ')}`,
+    kindLabel: c.interestKind,
+    title: c.interestTitle,
+    lead: c.interestLead(name, course),
+    chips: [level, profession].filter((chip): chip is string => Boolean(chip)),
+    action: replyAction(p, c, c.interestReply),
+    note: null,
+    sections: [
+      {
+        title: c.interestEntry,
+        rows: [
+          { label: c.course, value: course },
+          { label: c.interestLevel, value: level },
+          { label: c.interestProfession, value: profession },
+        ],
+      },
+      {
+        title: c.interestAvailability,
+        rows: [
+          { label: c.interestDays, value: interestLabels(INTEREST_DAYS, list(p.days), locale) || null },
+          { label: c.interestTimes, value: interestLabels(INTEREST_TIMES, list(p.times), locale) || null },
+        ],
+      },
+      { title: null, rows: [{ label: c.message, value: text(p.message), block: true }] },
+      {
+        title: c.contact,
+        rows: [
+          { label: c.name, value: fullName(p) },
+          emailRow(p, c),
+          { label: c.phone, value: phone, href: phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : undefined },
+        ],
+      },
+    ],
+  };
+}
+
 function mailFor(kind: FormKind, p: Payload, locale: Locale): Mail {
   const c = COPY[locale];
   switch (kind) {
@@ -723,6 +795,8 @@ function mailFor(kind: FormKind, p: Payload, locale: Locale): Mail {
       return careersMail(p, c);
     case 'placement':
       return placementMail(p, locale, c);
+    case 'interest':
+      return interestMail(p, locale, c);
   }
 }
 
@@ -734,6 +808,7 @@ const SOURCES: Record<FormKind, (c: Copy, p: Payload) => string> = {
   appointment: (c) => c.appointmentSource,
   careers: (c) => c.careersSource,
   placement: (c) => c.placementSource,
+  interest: (c) => c.interestSource,
 };
 
 const escape = (value: string) =>
@@ -972,7 +1047,7 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     phone: '+49 421 460 414 30',
     siteUrl: site,
     siteHost: site.replace(/^https?:\/\//, ''),
-    course: kind === 'course' ? text(p.courseTypeLabel) : null,
+    course: kind === 'course' ? text(p.courseTypeLabel) : kind === 'interest' ? text(p.courseName) : null,
     courseLevel: kind === 'course' ? text(p.currentLevel) : null,
     // Every course after the first (further courses, the terms of a learning path), one line each.
     moreCourses: kind === 'course'

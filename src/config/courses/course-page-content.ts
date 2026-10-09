@@ -199,11 +199,11 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
 
     /* ------------------------------------------------------------------ */
     /*
-     * Every bullet here is a restatement of the verified `conditions` already in
-     * course-practical-facts.ts. Nothing is added. In particular there is no
-     * fee, no weekly hour count and no date, because CASA publishes none of the
-     * three for this course — see the facts doc, and note that a dated news post
-     * suggesting 26.06-28.08.2026 was checked and found inconclusive.
+     * Every bullet here is a restatement of the `conditions` in
+     * course-practical-facts.ts. Since 2026-10-09 CASA's terms are known
+     * (Fridays 13:00–16:30, ten sessions, €400) but there are still no set
+     * dates: the course forms from its interest list (config/courses/
+     * interest-list.ts), and the next steps say so.
      */
     'medical-german': {
       audience: {
@@ -221,41 +221,40 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
             ? 'Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.'
             : 'You practise conversations, listening and the written documentation your work involves.',
           de
-            ? 'Termine, Umfang und Preis legen wir für jede Gruppe fest und nennen sie dir auf Anfrage.'
-            : 'We set the dates, the hours and the price for each group, and we will give you the details on request.',
+            ? 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen.'
+            : 'The course runs on Fridays from 13:00 to 16:30, over ten sessions.',
         ],
       },
       nextSteps: {
         /*
-         * This archetype's CTA policy is `advisory-call`, and the generic steps
-         * it was inheriting opened with "Complete registration" — a self-serve
-         * action that does not exist for this course. The steps now match the
-         * policy.
+         * The interest list (2026-10-09): there is nothing to register for until
+         * enough people are interested, so the first step is the list itself —
+         * the popup every "Interesse anmelden" link opens — not the office.
          */
         description: de
-          ? 'Dieser Kurs beginnt mit einem Gespräch im Büro.'
-          : 'This course starts with a conversation in our office.',
+          ? 'Für diesen Kurs gibt es noch keinen festen Termin. So kommt die Gruppe zustande.'
+          : 'This course has no fixed dates yet. This is how the group comes together.',
         steps: [
           {
             step: '1',
-            title: de ? 'Im Büro melden' : 'Contact the office',
+            title: de ? 'Interesse anmelden' : 'Register your interest',
             description: de
-              ? 'Erzähl uns von deinem Fachgebiet, deinem aktuellen Niveau und deinem Zeitrahmen.'
-              : 'Tell us about your specialism, your current level and your timeframe.',
+              ? 'Trag dich mit deinem Niveau und deinen freien Zeiten in die Interessentenliste ein. Das ist unverbindlich.'
+              : 'Add your name to the interest list with your level and the times you are free. It doesn’t commit you to anything.',
           },
           {
             step: '2',
-            title: de ? 'Niveau prüfen' : 'Check your level',
+            title: de ? 'Die Gruppe kommt zusammen' : 'The group comes together',
             description: de
-              ? 'Der Kurs setzt B2 oder C1 voraus. Mit der Einstufung klären wir, auf welchem Niveau du einsteigst.'
-              : 'The course requires B2 or C1. The placement test shows which of the two levels you start at.',
+              ? 'Sobald genug Interessierte zusammen sind, legen wir den Kurszeitraum fest. Der Kurs setzt B2 oder C1 voraus.'
+              : 'As soon as there are enough people, we set the course dates. The course requires B2 or C1.',
           },
           {
             step: '3',
-            title: de ? 'Gruppe und Termine abstimmen' : 'Agree the group and the dates',
+            title: de ? 'Termine erhalten und anmelden' : 'Get the dates and register',
             description: de
-              ? 'Umfang, Termine und Kosten hängen von der Gruppe ab. Sobald die Gruppe steht, nennen wir sie dir.'
-              : 'The hours, dates and cost depend on the group. As soon as the group is settled, we will let you know.',
+              ? 'Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.'
+              : 'We get in touch by email or phone with the dates. Then you register for your place.',
           },
         ],
       },

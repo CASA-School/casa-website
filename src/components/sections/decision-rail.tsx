@@ -2,6 +2,7 @@ import { AppointmentDialog } from '@/components/gruppen/appointment-dialog';
 import type { ContentLocale } from '@/lib/content/types';
 
 import { PersonMonogram } from '@/components/ui/person-monogram';
+import { Link } from '@/i18n/navigation';
 
 import { StickyInfoCard, type StickyInfoItem } from './sticky-info-card';
 import { DeadlineBadge } from './deadline-badge';
@@ -29,6 +30,12 @@ type DecisionRailProps = {
    * one individual mailbox, so the role address is the honest route.
    */
   contact?: { name: string; role: string; booking: boolean; appointment?: 'groups' } | null;
+  /**
+   * One action under the facts, for a page whose next step is not a
+   * registration window: German for Medical's interest list, whose link opens
+   * the list's popup on the page.
+   */
+  action?: { label: string; href: string };
 };
 
 export function DecisionRail({
@@ -39,6 +46,7 @@ export function DecisionRail({
   deadlineIso,
   showDeadline = true,
   contact,
+  action,
 }: DecisionRailProps) {
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -69,6 +77,17 @@ export function DecisionRail({
       */}
       <div className="overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70">
         <StickyInfoCard title={infoTitle} items={infoItems} notes={notes} unstyled />
+
+        {action ? (
+          <div className="px-6 pb-5">
+            <Link
+              href={action.href}
+              className="casa-button-prism inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[var(--casa-ink-deep)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
+            >
+              {action.label}
+            </Link>
+          </div>
+        ) : null}
 
         {showDeadline ? (
           <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">

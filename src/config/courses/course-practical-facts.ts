@@ -38,6 +38,13 @@ export type FeeRow = {
 };
 
 export type CoursePracticalFacts = {
+  /**
+   * The two or three facts that answer "when and how much" at a glance, for a
+   * course whose archetype allows no such rows in its info card (German for
+   * Medical's professional-track allows only the level range). Shown in the
+   * hero's course info card and in the decision rail, after the archetype's own.
+   */
+  summary?: { label: { en: string; de: string }; value: { en: string; de: string } }[];
   /** Omit entirely for formats CASA quotes per enquiry. */
   fees?: FeeRow[];
   /** Replaces the fee table when there is no published price. */
@@ -219,9 +226,38 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
   },
 
   'medical-german': {
+    /*
+     * CASA's current terms for this course (Rahman, 2026-10-09): Fridays
+     * 13:00–16:30, ten sessions, €400, the book €45.90, and the €50 enrolment
+     * fee on a first registration. There are no set dates: CASA collects the
+     * people interested (the interest list, config/courses/interest-list.ts)
+     * and fixes the dates once the group is big enough.
+     */
+    summary: [
+      { label: { en: 'Course days', de: 'Kurstage' }, value: { en: 'Fridays, 13:00–16:30', de: 'Freitags, 13:00–16:30 Uhr' } },
+      { label: { en: 'Course fee', de: 'Kursgebühr' }, value: { en: '€400 for 10 sessions', de: '400\u00a0€ für 10 Termine' } },
+    ],
+    fees: [
+      {
+        label: { en: 'Course fee, 10 sessions', de: 'Kursgebühr, 10 Termine' },
+        amount: EUR('€400'),
+      },
+      {
+        label: { en: 'Textbook', de: 'Lehrbuch' },
+        amount: EUR('€45.90'),
+      },
+      {
+        label: { en: 'One-off enrolment fee', de: 'Einmalige Einschreibegebühr' },
+        amount: EUR('€50'),
+        note: {
+          en: 'Only charged the first time you register at our school.',
+          de: 'Fällt nur bei deiner ersten Anmeldung an unserer Schule an.',
+        },
+      },
+    ],
     feeNote: {
-      en: 'We set the dates, the number of hours and the fee separately for each group. Ask us in the office and we will give you the current details for your situation.',
-      de: 'Termine, Stundenumfang und Gebühr legen wir für jede Gruppe einzeln fest. Frag uns im Büro, dann nennen wir dir die aktuellen Angaben für deine Situation.',
+      en: 'There are no fixed course dates yet. We collect everyone who is interested and set the dates as soon as there are enough people for a group. Register your interest and we will get in touch with you.',
+      de: 'Einen festen Kurszeitraum gibt es noch nicht. Wir sammeln alle Interessierten und legen die Termine fest, sobald genug für eine Gruppe zusammen sind. Melde dein Interesse an, dann melden wir uns bei dir.',
     },
     /*
      * The German lines bring back what the old /sprachkurse/deutsch-fuer-mediziner
@@ -232,6 +268,10 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
      * other medical staff.
      */
     conditions: [
+      {
+        en: 'The course runs on Fridays from 13:00 to 16:30, over ten sessions.',
+        de: 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen.',
+      },
       {
         en: 'The course is for doctors and other healthcare professionals. Doctors can take it before or after the Fachsprachprüfung Medizin, the specialist language exam for doctors. It is based on levels B2 and C1 of the Common European Framework of Reference.',
         de: 'Der Kurs richtet sich an Ärztinnen und Ärzte vor und nach der Fachsprachprüfung Medizin und an medizinische Fachkräfte. Er orientiert sich an den Niveaustufen B2 und C1 des Gemeinsamen Europäischen Referenzrahmens.',
@@ -317,6 +357,7 @@ export function localizePracticalFacts(slug: string, locale: ContentLocale) {
   }
 
   return {
+    summary: facts.summary?.map((row) => ({ label: row.label[locale], value: row.value[locale] })),
     fees: facts.fees?.map((fee) => ({
       label: fee.label[locale],
       amount: fee.amount[locale],
