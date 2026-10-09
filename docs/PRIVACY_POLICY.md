@@ -84,10 +84,9 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
    a confidentiality undertaking.
 7. Longer storage of applications "for future vacancies" (§14) needs a consent box that does
    not exist yet — build one or drop the sentence.
-7a. The interest list (§8, §16, §19; 2026-10-09): ASSUMPTION — entries are kept twelve months
-   after the entry, like contact enquiries, so a list for a course that takes long to fill
-   loses its oldest names. Confirm the period, or choose „until the course runs or you ask to
-   be removed".
+7a. ~~The interest list's retention~~ **Confirmed 2026-10-09 (Rahman):** entries are kept twelve
+   months after the entry, like contact enquiries, as §8, §16 and §19 already state. The list is
+   used only to tell people when the course starts, never for marketing.
 
 8. AGB 2.2 promises „eine Kopie der Anmeldung per E-Mail". The new receipt deliberately shows only
    the name, the catalogue choices and the reference, so a mistyped address reveals little. Either

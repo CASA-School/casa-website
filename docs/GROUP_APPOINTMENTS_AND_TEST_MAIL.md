@@ -136,8 +136,11 @@ registration routes also logged simulated confirmation emails.
   The message contains the local time, duration and visitor's note. They are **requests awaiting
   Ina's confirmation**, not Outlook events. No video link is invented; since 2026-10-01 the request itself is acknowledged automatically,
   and the appointment is still confirmed only by Ina's personal email.
-- ASSUMPTION: dates run from tomorrow through six weeks ahead. `GROUP_APPOINTMENT_BLOCKED_DATES`
-  accepts comma-separated local dates for holidays/closures. Confirm these with Ina before launch.
+- Dates run from tomorrow through six weeks ahead, Monday to Thursday only: Ina does not work
+  Friday to Sunday (Rahman, 2026-10-09). The public holidays in Bremen (the nine nationwide ones
+  and Reformationstag) are closed by `isPublicHoliday()`. Ina's leave goes in
+  `GROUP_APPOINTMENT_BLOCKED_DATES` as dates and ranges (`2026-12-21..2027-01-04`); Rahman sends
+  the dates once the site is live.
 - To cancel during the pilot, staff records the cancellation in the enquiry; an operator removes
   only that request's row from `group_appointments`. Keep the enquiry/activity history.
   There is no self-service cancellation, rescheduling or Outlook calendar synchronisation yet.

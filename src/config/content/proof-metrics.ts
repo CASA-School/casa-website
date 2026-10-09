@@ -35,8 +35,8 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
       locale: 'en',
       sourceUrl: 'https://www.casa-bremen.de/unsere-sprachschule/',
       sourceType: 'internal',
-      verificationStatus: 'draft',
-      asOf: '2026-02-09',
+      verificationStatus: 'verified',
+      asOf: '2026-10-09', // confirmed by Rahman Shafiee
     },
   ],
   de: [
@@ -73,8 +73,8 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
       locale: 'de',
       sourceUrl: 'https://www.casa-bremen.de/unsere-sprachschule/',
       sourceType: 'internal',
-      verificationStatus: 'draft',
-      asOf: '2026-02-09',
+      verificationStatus: 'verified',
+      asOf: '2026-10-09', // confirmed by Rahman Shafiee
     },
   ],
 };

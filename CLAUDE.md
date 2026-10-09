@@ -54,6 +54,7 @@ npm run db:migrate   # applies db/migrations
 npm run db:seed      # applies db/seeds
 npm run admin:seed   # creates the first staff workspace account
 npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
+npm run db:azure -- migrate   # migrations + seeds on the Azure database, run as a job inside Azure
 npm run placement:port  # re-ports the placement item bank from its source markdown
 ```
 
@@ -154,7 +155,7 @@ src/components   ui primitives (src/components/ui) + domain modules
                  (heroes, sections, layout, forms, registration, courses,
                   news, resources, signatures, assistant, calculator, ...)
 src/components/admin   the workspace's own design layer — shell, ui.tsx, icons
-src/config       nav, footer, brand tokens, page patterns, content fixtures
+src/config       nav, footer, brand tokens, content fixtures
 src/content      locale content modules
 src/lib          content repository, db helpers, api envelope, search,
                  assistant, validation, analytics, seo, mock fallback
@@ -202,7 +203,7 @@ CASA team's request, and since 2026-10-08 (Rahman: „du all over") to group org
 host families, companies and partners, in every page, dialog and
 email. „Sie" is left only in the legal texts (AGB, Datenschutz, Impressum) and in the
 closed placement test's own screens. The rule lives in
-`src/config/brand/voice-and-tone.ts`; do not convert copy back to Sie.
+`docs/VOICE_AND_TONE.md`; do not convert copy back to Sie.
 
 **Cards have a text budget.** A card, a split box or a step holds the short version: about
 four lines of lead, points of one or two lines, and siblings of about the same length. The full
@@ -296,8 +297,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    public-safe *aggregate* metrics — never a row from any operational table,
    including the workspace's own. Current approved values (2026-06-17 sync):
    `30,000+ learners supported`, `150+ countries represented`,
-   `7-80+ age range represented`, `45,000+ course bookings`.
-   The `40+ staff/teachers` claim is **draft** and must not ship unverified.
+   `7-80+ age range represented`, `45,000+ course bookings`, and
+   `40+ staff/teachers` (confirmed by Rahman, 2026-10-09).
 2. **No person-specific portraits with named testimonials** unless the identity and
    the quote-to-person relationship are explicitly verified.
 3. **Team portraits are synthetic placeholders** for layout only
@@ -375,7 +376,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PREMIUM_UI_REVIEW_2026-08-16.md` | **Current UI/design backlog.** Measured design-layer review across type, spacing, colour, shape, motion, primitives, media and composition, with a 10-step order of work |
 | `docs/DEPENDENCY_SECURITY_2026-08-16.md` | **Read before touching dependencies.** Advisory triage and resolution, why the CI audit gate is production-scope only, and the `ws` / `next-intl` reachability findings |
 | `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md` | Token comparison with the CASA student app and what should converge |
-| `docs/EXPERIMENTAL_LANDING_PAGES.md` | Review-only routes and rollback steps |
+| `docs/VOICE_AND_TONE.md` | How the public site writes in German (du) and British English |
 | `docs/TEAM_UPDATE_2026-06-23.md` | Team-facing status, demo flow, open decisions |
 | `docs/WEBAPP_REVIEW.md` | Historical Feb 2026 audit, largely superseded |
 | `docs/RELEASE_CLEANUP_COPY.md` | September cleanup, copy decisions and launch handoff |
@@ -417,8 +418,16 @@ is still valid.
   accounts today, so a dedicated `WebIntake` account with its own privilege set is a
   precondition, not a nicety; FileMaker is LAN-only, so the push must run on-prem.
   Blocked on the decisions in that document's §7.
-- **Migration 0016 must be applied before deploying this build.** The staff sign-in
-  throttle fails closed without `staff_sign_in_failures`: nobody can sign in.
+- **The website's database exists (2026-10-09).** `psql-casa-website-f8d745`, Postgres 17,
+  B1ms, Belgium Central, in its own subnet of the private data network (no public access, like
+  the student app's). The site connects as `casa_web` through the Container App secret
+  `database-url`. A laptop cannot reach it: `./infra/azure/db-job.sh migrate|status|owner` runs
+  the task as a Container Apps job, and `deploy.sh` runs `migrate` before every release. All
+  17 migrations and the seeds are applied; `db/seeds/0005_exam_sessions.sql` gives the database
+  the exam dates the fallback had. No workspace account exists yet (`db-job.sh owner`).
+- **The image optimizer's cache is an Azure Files share (2026-10-09)**, mounted at
+  `/app/.next/cache/images` from `stcasawebsitef8d745/next-image-cache`, so it survives releases
+  and replicas share it. Before, each new replica started cold and photos hung for over a minute.
 - **No retention policy.** Enquiries, registrations, placement attempts and stored
   CVs are all personal data, none of it deleted on a schedule. A period needs a
   named privacy owner at CASA.
@@ -430,10 +439,11 @@ is still valid.
   `paths` alias to `./src/lib/icons/streamline-lucide-adapter`. `npm run typecheck` and
   `npm run build` both pass. The ~47 imports resolve through the adapter; do not "fix" this
   by re-adding the dependency without checking the adapter first.
-- `/design-alternatives`, `/landing-page-alt`, and `/homepage-reorganized` are
-  `noindex, nofollow` but **publicly reachable by direct URL**. Robots metadata is
-  not access control. These need protection or removal before go-live.
-- `/design-system` is an internal surface; check its indexing behavior.
+- ~~Review-only routes reachable in production~~ **Removed 2026-10-09** (Rahman: no dead
+  code). `/design-system`, `/design-alternatives`, `/landing-page-alt` and
+  `/homepage-reorganized` are gone, with the switch that guarded them and the modules only
+  they used; the voice rules moved to `docs/VOICE_AND_TONE.md`, the usage rules to
+  `UI_SYSTEM.md`.
 - `docs/DEV_SETUP.md` claims Node 25+ / npm 11+, but CI pins Node 20 and local
   development has run on Node 22. Treat the doc's version floor as unverified.
 - ~~Course detail pages assume one universal template~~ **Resolved 2026-08-12.** The archetype
@@ -479,7 +489,7 @@ is still valid.
 - `@neondatabase/serverless` is gone; both products run on one `pg` pool. The Azure work
   in `docs/AZURE_DEPLOYMENT_PLAN.md` §1 is done — the careers CV upload is now an explicit
   `BEGIN`/`INSERT`/`INSERT`/`COMMIT` and still needs a real test against a managed server
-  before cutover, not just a build. **No Postgres server is provisioned in Azure yet.**
+  before cutover, not just a build. The Azure server exists since 2026-10-09 (see above).
 - No canonical production deployment doc yet (domain, rollback owner). The custom domain
   for the website is still unassigned: `lernen.casa-bremen.de` points at the *student app*,
   and `www.casa-bremen.de` still resolves to the old site at 195.34.167.82. The Container
