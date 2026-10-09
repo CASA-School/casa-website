@@ -1,0 +1,458 @@
+/*
+ * The Bremen Town Musicians in the group page's hero. Same rules as the other
+ * coded heroes (exams-hero-visual.module.css):
+ *
+ * - The entrance fills `both` and animates `transform` on nested groups (the
+ *   sideways move, the arc, the landing squash and the donkey's stride each on
+ *   its own element) and `opacity`; the interactive states use other
+ *   properties (stroke colour, the registered --casa-mus-a for line opacity,
+ *   label colour), so a finished animation never overrides them.
+ * - Under prefers-reduced-motion nothing animates in or moves: the stack
+ *   renders finished; a chosen animal still lights up and shows its notes.
+ *
+ * LINE WEIGHTS, in screen pixels at every size (vector-effect), after the tiers
+ * in docs/CODED_HERO_ILLUSTRATION_GUIDE.md §1.2: outlines 2 (the parts you
+ * press), far legs 1.5, details 1.25, the ground and the leader lines 1.25 and 1.
+ *
+ * Timeline: sky 0–1 s; ground 0.1–1 s out from the middle; the donkey walks in
+ * 0.3–2 s in four strides; the dog leaps 2.05–2.85 s, the cat 2.85–3.6 s, the
+ * rooster flies in 3.6–4.5 s, flapping; each label and its leader line arrive
+ * as the animal lands; all four sing once from 4.45 s.
+ */
+
+@property --casa-mus-a {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.92;
+}
+
+.panel {
+  container-type: inline-size;
+}
+
+/* --- the drawing --- */
+
+.animal {
+  --casa-mus-a: 0.92;
+  cursor: pointer;
+  transition: --casa-mus-a 0.35s ease;
+}
+
+.panel[data-active] .animal:not([data-on]) {
+  --casa-mus-a: 0.38;
+}
+
+.o,
+.leg {
+  fill: var(--casa-ink-panel);
+  stroke: #fff;
+  stroke-opacity: var(--casa-mus-a);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  transition:
+    stroke 0.3s ease,
+    fill 0.3s ease;
+}
+
+.far {
+  fill: #161f30;
+  stroke: #fff;
+  stroke-opacity: calc(var(--casa-mus-a) * 0.42);
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.line {
+  fill: none;
+  stroke: #fff;
+  stroke-opacity: var(--casa-mus-a);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 0.3s ease;
+}
+
+.d {
+  fill: none;
+  stroke: #fff;
+  stroke-opacity: calc(var(--casa-mus-a) * 0.5);
+  stroke-width: 1.25px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.mane {
+  stroke-dasharray: 2 3;
+  stroke-opacity: calc(var(--casa-mus-a) * 0.65);
+}
+
+.eye {
+  fill: #fff;
+  fill-opacity: var(--casa-mus-a);
+}
+
+.comb {
+  fill: var(--casa-sun);
+}
+
+/* Lit: the chosen animal's lines turn the sun's yellow and its body warms. */
+.animal[data-on] .o,
+.animal[data-on] .leg,
+.animal[data-on] .line {
+  stroke: var(--casa-sun);
+}
+
+.animal[data-on] .o,
+.animal[data-on] .leg {
+  fill: #252c35;
+}
+
+.star {
+  opacity: 0.55;
+}
+
+.ground {
+  fill: none;
+  stroke-width: 1.25px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* --- the leader lines and labels --- */
+
+.leader path {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.3);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 0.3s ease;
+}
+
+.leader circle {
+  fill: rgb(255 255 255 / 0.7);
+  transition: fill 0.3s ease;
+}
+
+.leader[data-on] path {
+  stroke: var(--casa-sun);
+}
+
+.leader[data-on] circle {
+  fill: var(--casa-sun);
+}
+
+.label {
+  display: grid;
+  gap: 0.2em;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.labelName {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(0.95rem, 0.45rem + 2.5cqw, 1.5rem);
+  line-height: 1.05;
+  transition: color 0.3s ease;
+}
+
+.labelDesc {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.66rem, 0.42rem + 1.15cqw, 0.88rem);
+  line-height: 1.25;
+  color: rgb(255 255 255 / 0.72);
+  transition: color 0.3s ease;
+}
+
+.label[data-on] .labelName {
+  color: var(--casa-sun);
+}
+
+.label[data-on] .labelDesc {
+  color: #fff;
+}
+
+.panel[data-active] .label:not([data-on]) .labelName {
+  color: rgb(255 255 255 / 0.45);
+}
+
+.panel[data-active] .label:not([data-on]) .labelDesc {
+  color: rgb(255 255 255 / 0.4);
+}
+
+.label:focus-visible .labelName {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+/* --- the notes --- */
+
+.chorus {
+  opacity: 0;
+}
+
+.song {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.singing {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sky {
+    animation: casa-mus-fade 1s ease-out both;
+  }
+
+  .star {
+    animation: casa-mus-twinkle 4.5s ease-in-out calc(1s + var(--s) * 0.37s) infinite;
+  }
+
+  .ground {
+    stroke-dasharray: 1 1;
+    animation: casa-mus-draw 0.9s cubic-bezier(0.45, 0.05, 0.25, 1) 0.1s both;
+  }
+
+  /* Sideways: the donkey walks in from the left; the others come from the right. */
+  .enter {
+    animation: casa-mus-x 0.8s cubic-bezier(0.25, 0.55, 0.45, 1) var(--d) both;
+  }
+
+  /* Up: an arc from the ground onto the back below, peaking above it. */
+  .rise {
+    animation: casa-mus-arc 0.8s linear var(--d) both;
+  }
+
+  /* Down: a soft squash on landing, from the feet. */
+  .land {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: casa-mus-land 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) calc(var(--d) + 0.78s) both;
+  }
+
+  .esel.enter {
+    animation: casa-mus-x 1.7s cubic-bezier(0.3, 0.6, 0.35, 1) var(--d) both;
+  }
+
+  .esel .rise {
+    animation: casa-mus-bob 0.425s ease-in-out var(--d) 4 both;
+  }
+
+  .esel .land {
+    animation: none;
+  }
+
+  /* The stride: near front and far hind legs together, the other pair opposite. */
+  .esel .stride {
+    transform-box: view-box;
+    transform-origin: var(--ox) var(--oy);
+  }
+
+  .esel .strideA {
+    animation: casa-mus-step 0.425s ease-in-out var(--d) 4 both;
+  }
+
+  .esel .strideB {
+    animation: casa-mus-step-b 0.425s ease-in-out var(--d) 4 both;
+  }
+
+  .katze.enter,
+  .katze .rise {
+    animation-duration: 0.75s;
+  }
+
+  .katze .land {
+    animation-delay: calc(var(--d) + 0.73s);
+  }
+
+  /* The rooster flies in from the sky, dips past its perch and settles, flapping. */
+  .hahn.enter {
+    animation: casa-mus-x 0.9s cubic-bezier(0.25, 0.6, 0.4, 1) var(--d) both;
+  }
+
+  .hahn .rise {
+    animation: casa-mus-fly 0.9s ease-out var(--d) both;
+  }
+
+  .hahn .land {
+    animation-delay: calc(var(--d) + 0.86s);
+  }
+
+  .hahn .wing {
+    transform-box: view-box;
+    transform-origin: 268px 172px;
+    animation: casa-mus-flap 0.15s ease-in-out var(--d) 6 both;
+  }
+
+  .leader path {
+    stroke-dasharray: 1 1;
+    animation: casa-mus-draw 0.45s ease-out var(--t) both;
+  }
+
+  .leader circle {
+    animation: casa-mus-fade 0.3s ease-out var(--t) both;
+  }
+
+  .label {
+    animation: casa-mus-label 0.55s cubic-bezier(0.16, 1, 0.3, 1) var(--t) both;
+  }
+
+  .chorus {
+    animation: casa-mus-sing 1.5s ease-out calc(4.45s + var(--c) * 0.12s) 1 both;
+  }
+
+  .singing {
+    animation: casa-mus-sing 1.4s ease-out infinite;
+  }
+}
+
+@keyframes casa-mus-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes casa-mus-twinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes casa-mus-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes casa-mus-x {
+  0% {
+    transform: translateX(var(--dx));
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes casa-mus-arc {
+  0% {
+    transform: translateY(var(--dy));
+    animation-timing-function: cubic-bezier(0.22, 0.7, 0.42, 1);
+  }
+  58% {
+    transform: translateY(calc(var(--lift) * -1));
+    animation-timing-function: cubic-bezier(0.55, 0, 0.78, 0.45);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes casa-mus-fly {
+  0% {
+    transform: translateY(var(--dy));
+  }
+  72% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes casa-mus-land {
+  0% {
+    transform: scale(1.05, 0.9);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes casa-mus-bob {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+@keyframes casa-mus-step {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: rotate(8deg);
+  }
+  75% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes casa-mus-step-b {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes casa-mus-flap {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: rotate(-32deg);
+  }
+}
+
+/* `transform`, not `translate`: the label's -translate-y-1/2 uses `translate`. */
+@keyframes casa-mus-label {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes casa-mus-sing {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
