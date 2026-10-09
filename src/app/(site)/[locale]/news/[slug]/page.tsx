@@ -104,7 +104,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     mainEntityOfPage: toAbsoluteUrl(`/news/${post.slug}`),
   };
   return (
-    <main className="bg-white text-[var(--casa-ink)]">
+    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <JsonLdScript id={`news-article-schema-${post.slug}`} data={articleSchema} />
       {/*
         NO PageHero here, deliberately.

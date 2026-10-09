@@ -19,7 +19,7 @@ export function FeeStrip({ figures, className }: { figures: FeeFigure[]; classNa
     <dl
       data-fee-strip
       className={cn(
-        'overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35',
+        'overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)]',
         className
       )}
     >

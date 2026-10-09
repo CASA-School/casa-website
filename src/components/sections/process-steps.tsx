@@ -80,7 +80,7 @@ export function ProcessSteps({
           every page. A `plain` variant existed and /exams used it; on the one light
           ground it left that page's steps with no surface at all.
         */
-        'casa-editorial-measure rounded-3xl bg-[var(--casa-warm-soft)]/35 px-6 py-8 md:px-9 md:py-10',
+        'casa-editorial-measure rounded-3xl bg-[var(--casa-warm-panel)] px-6 py-8 md:px-9 md:py-10',
         className
       )}>
       {/*

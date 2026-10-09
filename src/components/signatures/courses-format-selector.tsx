@@ -116,7 +116,7 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
           </dl>
         </article>
 
-        <article className="bg-[var(--casa-warm-soft)]/35 p-5 md:p-7">
+        <article className="bg-[var(--casa-warm-panel)] p-5 md:p-7">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{labels?.outcomes ?? 'Likely outcomes'}</p>
           <ul className="mt-4 space-y-3">
             {selected.outcomes.slice(0, 3).map((outcome) => (

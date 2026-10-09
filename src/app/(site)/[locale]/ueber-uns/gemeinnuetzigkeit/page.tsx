@@ -153,7 +153,7 @@ export default async function NonProfitStatusPage() {
         The gGmbH comes first (CASA, 2026-10-05): what happens to course fees and
         the legal facts, then the mission. The partners have their own page.
       */}
-      <section className="bg-[var(--casa-bg)] py-14 md:py-20" aria-labelledby="nonprofit-transparency-title">
+      <section className="py-14 md:py-20" aria-labelledby="nonprofit-transparency-title">
         <Container className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           <div>
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{locale === 'de' ? 'Gemeinnützigkeit & Transparenz' : 'Non-profit status & transparency'}</p>

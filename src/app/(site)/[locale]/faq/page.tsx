@@ -115,7 +115,7 @@ export default async function FaqPage() {
         meta={hero.proofMetrics.slice(0, 2).map((item) => `${item.value} ${item.label}`)}
       />
 
-      <section className="py-16 md:py-20 bg-white">
+      <section className="py-16 md:py-20">
         <Container>
           <FaqTopicNavigator
             title={locale === 'de' ? 'FAQ nach Thema durchsuchen' : 'Browse FAQs by topic'}
@@ -157,7 +157,7 @@ export default async function FaqPage() {
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
             eyebrow={locale === 'de' ? 'So geht es weiter' : 'What to do next'}

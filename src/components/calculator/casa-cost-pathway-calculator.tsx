@@ -475,9 +475,9 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
           />
 
           <div className="grid gap-2 text-xs font-semibold text-[var(--casa-muted)] md:grid-cols-3">
-            <p className="rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2">{copy.priceHints.intensive}</p>
-            <p className="rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2">{copy.priceHints.evening}</p>
-            <p className="rounded-xl bg-[var(--casa-warm-soft)]/35 px-3 py-2">{copy.priceHints.accommodation}</p>
+            <p className="rounded-xl bg-[var(--casa-warm-panel)] px-3 py-2">{copy.priceHints.intensive}</p>
+            <p className="rounded-xl bg-[var(--casa-warm-panel)] px-3 py-2">{copy.priceHints.evening}</p>
+            <p className="rounded-xl bg-[var(--casa-warm-panel)] px-3 py-2">{copy.priceHints.accommodation}</p>
           </div>
         </FieldCard>
 

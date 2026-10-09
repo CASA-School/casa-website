@@ -227,7 +227,7 @@ export function CareerApplicationForm({
 
         <div className="space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.cv}</span>
-          <label htmlFor="career-cv" className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-warm-soft)]/35 px-4 py-3">
+          <label htmlFor="career-cv" className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] px-4 py-3">
             <Upload className="h-4 w-4 text-[var(--casa-accent-text)]" />
             <span className="text-sm text-[var(--casa-muted)]">{cvFile ? cvFile.name : copy.cvHint}</span>
             <input

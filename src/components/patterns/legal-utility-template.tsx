@@ -13,7 +13,7 @@ export function LegalUtilityTemplate({ document, locale, breadcrumbs }: LegalUti
   const content = publishedLegal[document][locale];
 
   return (
-    <main className="bg-[var(--casa-bg)] text-[var(--casa-ink)] print:bg-white">
+    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)] print:bg-white">
       <HeroEMinimal eyebrow="" description="" title={content.title} breadcrumbs={breadcrumbs} />
       <section className="py-10 md:py-12 print:py-4">
         <Container>

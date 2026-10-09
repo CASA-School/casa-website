@@ -341,27 +341,43 @@
    * clear AA on --casa-sand (#e2e8f0), which is far darker than this canvas.
    * Measured on #f6fafb — ink 16.99, muted 5.31, accent-text 5.30.
    */
-  /* White since 2026-10-08 (Rahman): ONE light ground for the whole site. The
-     cool #f6fafb canvas sat 2% off the white bands it alternated with, which
-     read as a slightly dirty white rather than as a second surface. Sections
-     now separate by spacing and the ink bands; cards by their shadows. Kept as
-     a token, so a warm paper ground is a one-line change if CASA ever wants it. */
-  --casa-canvas: #ffffff;
+  /* A cool off-white since 2026-10-09 (Rahman, "option B"): ONE ground for the
+     whole site, with every object on it white. On a white ground a white card
+     had only its shadow (2026-10-08 to -09), and its edge vanished on many
+     screens. The old cool canvas (#f6fafb, 2026-08) failed for other reasons:
+     it alternated with white BANDS, two near-whites side by side that read as a
+     dirty white, and it sat only 11 RGB units off white. This one is 16 units
+     off, slightly blue (the ink bands' hue family, so dark and light read as one
+     palette), and nothing white is ever a band. Contrast on it: ink 16.5:1,
+     muted 7.2:1, accent text 5.1:1. A fine grain sits on it (--casa-grain). */
+  --casa-ground: #f3f6f9;
+  /* The page paints the ground through --casa-canvas; components may redefine
+     --casa-canvas locally (the navbar does), --casa-ground never. */
+  --casa-canvas: var(--casa-ground);
+  /* The warm GUIDANCE panel as an absolute cream: warm-soft/35 composited over
+     the cool ground would turn a greyish beige. */
+  --casa-warm-panel: #fdf8ef;
+  /* Paper grain for the ground: fractal noise in the ink's hue at 4.5%, a 180px
+     seamless tile. Felt rather than seen; if it is visible at arm's length it
+     is too strong. Never over text, photographs or cards — only `main`. */
+  --casa-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.07  0 0 0 0 0.09  0 0 0 0 0.15  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   --casa-surface-subtle: #eef4f5;
   --casa-surface-wash: #fbfdfd;
 
   /*
    * THE SURFACE LADDER. Three grounds and a panel, and that is the whole list
-   * (2026-10-08: the canvas and white merged into one light ground).
+   * (2026-10-09: one cool ground; white is for objects only).
    *
-   *   --casa-canvas     #ffffff   the page; `main` paints it; bands inherit it.
-   *   --casa-bg / white #ffffff   the same white: a band, a card, an input.
+   *   --casa-canvas     #f3f6f9   the page, with its grain; `main` paints it;
+   *                               every band inherits it (no band is white).
+   *   --casa-bg / white #ffffff   an OBJECT on it: a card, an input, a menu.
    *   --casa-ink-deep   #111827   an inverted band (and the night heroes).
-   *   --casa-warm-soft  #fff3da   a warm panel INSIDE one of the above.
+   *   --casa-warm-panel #fdf8ef   the warm guidance panel INSIDE one of the above
+   *                               (--casa-warm-soft #fff3da is its solid form).
    *
-   * On the one light ground, a card is told from its band by its shadow
-   * (--shadow-card / --shadow-soft carry a hairline ring for exactly that),
-   * never by a second near-white.
+   * On the one cool ground, a card is told from its band by its own white and
+   * its shadow (--shadow-card / --shadow-soft carry a hairline ring), never by
+   * a second near-white band.
    *
    * WHAT EACH SURFACE IS FOR (2026-10-09, Rahman: "intentional, not random").
    * Pick the surface by the role of the content, never by taste:
@@ -373,8 +389,8 @@
    *                    Never a tinted card.
    *   warm panel       GUIDANCE: what helps you act — the steps (ProcessSteps,
    *                    always), the prices (FeeStrip), what you practise
-   *                    (the level goals' panel), a guide's key facts. One strength only:
-   *                    `bg-[var(--casa-warm-soft)]/35`, a rounded panel inside
+   *                    (the level goals' panel), a guide's key facts. One colour only:
+   *                    `bg-[var(--casa-warm-panel)]`, a rounded panel inside
    *                    white, never a full-width band, never two in a row —
    *                    objects (white + shadow) sit between them, so a course
    *                    page reads prices, who it is for, steps, a voice.
@@ -1039,6 +1055,7 @@ h3 {
 .bg-white,
 .bg-\[var\(--casa-bg\)\],
 .bg-\[var\(--casa-warm-soft\)\],
+.bg-\[var\(--casa-warm-panel\)\],
 .bg-\[var\(--casa-sand\)\] {
   --casa-accent-text: var(--casa-accent-on-light);
   --casa-accent-text-hover: var(--casa-accent-on-light-hover);
@@ -2163,4 +2180,16 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   --pz-r: 14px;
   --pz-sh: 0 1px 2px rgba(17, 24, 39, 0.04), 0 8px 24px -12px rgba(17, 24, 39, 0.12);
   --pz-sh2: 0 12px 40px -12px rgba(17, 24, 39, 0.25), 0 2px 6px rgba(17, 24, 39, 0.06);
+}
+
+/* The ground's grain (--casa-grain): only on the page's own `main`, under every
+   band, card and photograph. Print stays plain. */
+main.bg-\[var\(--casa-canvas\)\] {
+  background-image: var(--casa-grain);
+}
+
+@media print {
+  main.bg-\[var\(--casa-canvas\)\] {
+    background: #fff;
+  }
 }

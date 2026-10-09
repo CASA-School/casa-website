@@ -160,7 +160,7 @@ export default async function NewsPage() {
   };
 
   return (
-    <main className="bg-white text-[var(--casa-ink)]">
+    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       {posts.length > 0 ? <JsonLdScript id="news-list-schema" data={newsListSchema} /> : null}
       {/*
         NEWSFLASH masthead, ported from the printed edition (August 2026).

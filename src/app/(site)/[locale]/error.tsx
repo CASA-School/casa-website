@@ -35,7 +35,7 @@ export default function SiteError({ retry }: { error: Error & { digest?: string 
         };
 
   return (
-    <main className="flex-1 bg-white text-[var(--casa-ink)]">
+    <main className="flex-1 bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <section className="py-16 md:py-24">
         <Container>
           <div className="max-w-measure">

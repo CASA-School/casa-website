@@ -45,8 +45,9 @@ import type { ContentLocale } from '@/lib/content/types';
  *     each heading clamped to a readable measure, the content beneath it using
  *     the full container. It was briefly a centred column, which only worked
  *     under the centred hero and made the guides an outlier under this one.
- *   - Alternating white and canvas grounds separate the sections, so no section
- *     needs a card, a tint or a rule of its own.
+ *   - The sections share the one ground and are divided by hairlines (since
+ *     2026-10-09, when white became a surface for objects only; they used to
+ *     alternate white and canvas bands).
  *
  * LANGUAGE. Both languages are real content now: `src/content/resource-guides/`
  * holds an English and a German set with the same structure, and a test keeps
@@ -89,21 +90,18 @@ function DocSection({
   id,
   title,
   lead,
-  ground = 'canvas',
   children,
 }: {
   id: string;
   title: string;
   lead?: string;
-  ground?: 'canvas' | 'white';
   children: React.ReactNode;
 }) {
   return (
     <section
       id={id}
-      className={`scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 py-14 md:py-18 ${
-        ground === 'white' ? 'bg-white' : ''
-      }`}
+      // Every section on the one ground, divided by its hairline (no white bands, globals.css).
+      className="scroll-mt-28 border-b border-[color:var(--casa-sand)]/40 py-14 md:py-18"
     >
       <Container>
         {/*
@@ -156,7 +154,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
         The contents. A guide is read by people looking for one answer, so the
         first thing below the headline is the list of answers it holds.
       */}
-      <nav aria-label={t.contents} className="border-b border-[color:var(--casa-sand)] bg-white py-6">
+      <nav aria-label={t.contents} className="border-b border-[color:var(--casa-sand)] py-6">
         <Container>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-8">
             <p className="shrink-0 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
@@ -187,7 +185,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
         fragment with ten rem of air beside it.
       */}
       <DocSection id="overview" title={t.glance}>
-        <ul className="grid gap-x-10 gap-y-4 rounded-xl bg-[var(--casa-warm-soft)]/35 p-6 md:grid-cols-2 md:p-8">
+        <ul className="grid gap-x-10 gap-y-4 rounded-xl bg-[var(--casa-warm-panel)] p-6 md:grid-cols-2 md:p-8">
           {data.quickFacts.map((fact) => (
             <li key={fact} className="flex gap-3 text-base leading-relaxed text-[var(--casa-ink)]">
               <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" aria-hidden />
@@ -202,7 +200,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
         running down it — not a two-column grid, where step 2 sat beside step 1
         and the reader had to guess the order.
       */}
-      <DocSection id="roadmap" title={data.stepsTitle} ground="white">
+      <DocSection id="roadmap" title={data.stepsTitle}>
         <ol className="grid gap-x-14 gap-y-9 md:grid-cols-2">
           {data.steps.map((step, index) => (
             <li key={step.title} className="flex gap-5 border-t border-[color:var(--casa-sand)] pt-5">
@@ -245,7 +243,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
         </div>
       </DocSection>
 
-      <DocSection id="questions" title={t.faq} ground="white">
+      <DocSection id="questions" title={t.faq}>
         <Accordion type="single" collapsible className="max-w-[60rem] border-t border-[color:var(--casa-sand)]">
           {data.faq.map((item) => (
             <AccordionItem key={item.question} value={item.question} className="border-[color:var(--casa-sand)]">
@@ -279,7 +277,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
 
       </DocSection>
 
-      <DocSection id="related" title={t.related} ground="white">
+      <DocSection id="related" title={t.related}>
         <ul className="grid gap-x-12 gap-y-6 sm:grid-cols-2">
           {related.map((guide) => (
             <li key={guide.slug} className="border-t border-[color:var(--casa-sand)] pt-5">

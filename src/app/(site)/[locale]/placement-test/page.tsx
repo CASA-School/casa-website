@@ -113,7 +113,7 @@ export default async function PlacementTestPage() {
         };
 
   return (
-    <main className="min-h-screen bg-white text-[var(--casa-ink)]">
+    <main className="min-h-screen bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <HeroEMinimal
         eyebrow={locale === 'de' ? 'Einstufung' : 'Placement'}
         title={copy.heroTitle}

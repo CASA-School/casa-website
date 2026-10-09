@@ -172,7 +172,7 @@ export default async function ExamsPage() {
         The legacy anchors #b2 and #c1 sit on the cards themselves;
         #exam-sessions, an older one, still lands on the section.
       */}
-      <section id="exam-sessions" className="scroll-mt-28 bg-white py-16 md:py-20">
+      <section id="exam-sessions" className="scroll-mt-28 py-16 md:py-20">
         <Container>
           <div className="casa-editorial-measure">
             <ExamOptionCards
@@ -219,7 +219,7 @@ export default async function ExamsPage() {
         </section>
       ) : null}
 
-      <section className="py-16 md:py-20 bg-white border-t border-[color:var(--casa-sand)]/40">
+      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
             eyebrow={locale === 'de' ? 'Ablauf' : 'How it works'}

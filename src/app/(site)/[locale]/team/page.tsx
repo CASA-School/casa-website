@@ -58,7 +58,7 @@ export default async function TeamPage() {
       />
 
       {/* Section 1: Team Directory */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="py-16 md:py-20">
         <Container>
           <TeamDirectory
             title={locale === 'de' ? 'Das CASA-Team' : 'The CASA team'}

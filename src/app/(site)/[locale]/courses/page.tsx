@@ -485,7 +485,7 @@ export default async function CoursesPage({
         the heading, so the site's scroll-padding (globals.css) sets it just under
         the sticky header with the band's white above it.
       */}
-      <section className="bg-[var(--casa-bg)] py-20 md:py-32">
+      <section className="py-20 md:py-32">
         <Container className="space-y-12 md:space-y-14">
           <div id="formats">
             <BandHeading

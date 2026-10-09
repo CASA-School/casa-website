@@ -195,7 +195,7 @@ export function CourseLevelGoals({
         outcomes instead of a bulleted afterthought.
       */}
       {shown.length ? (
-        <div className="mt-8 rounded-xl bg-[var(--casa-warm-soft)]/35 px-5 py-5 md:px-7 md:py-6">
+        <div className="mt-8 rounded-xl bg-[var(--casa-warm-panel)] px-5 py-5 md:px-7 md:py-6">
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
             {practiceTitle}
           </p>
