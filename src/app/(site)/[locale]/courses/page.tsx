@@ -350,6 +350,33 @@ export default async function CoursesPage({
     };
   });
 
+  /*
+    Seven formats in one alternating list read as one long, even scroll. Three
+    quiet group headings (2026-10-09, after a design review) let a reader skip to
+    the kind of course they came for: general German, a particular goal, or a
+    group or company booking. A format no group names still renders, in a last
+    group without a heading, so a new course cannot drop off the page.
+  */
+  const formatGroups = (() => {
+    const groups = [
+      { key: 'learn', title: { de: 'Deutsch lernen', en: 'Learning German' }, slugs: ['intensive-german', 'evening-german'] },
+      { key: 'goal', title: { de: 'Für besondere Ziele', en: 'For a particular goal' }, slugs: ['special-courses', 'medical-german', 'bildungszeit'] },
+      { key: 'organisations', title: { de: 'Für Gruppen und Firmen', en: 'For groups and companies' }, slugs: ['german-for-groups', 'in-company'] },
+    ];
+    const named = new Set(groups.flatMap((group) => group.slugs));
+    const bySlug = new Map(featuredCourses.map((course, index) => [course.slug, courseRows[index]]));
+    const result: { key: string; title: string | null; rows: typeof courseRows }[] = groups
+      .map((group) => ({
+        key: group.key,
+        title: group.title[locale === 'de' ? 'de' : 'en'],
+        rows: group.slugs.flatMap((slug) => (bySlug.has(slug) ? [bySlug.get(slug)!] : [])),
+      }))
+      .filter((group) => group.rows.length > 0);
+    const rest = featuredCourses.flatMap((course, index) => (named.has(course.slug) ? [] : [courseRows[index]]));
+    if (rest.length > 0) result.push({ key: 'more', title: null, rows: rest });
+    return result;
+  })();
+
   const selectorItems = featuredCourses.map((course) => {
     const copy = buildSelectorCopy(course, locale, finderData.scheduleTagsByCourseId[course.id] || []);
 
@@ -551,7 +578,21 @@ export default async function CoursesPage({
               </div>
             </div>
           ) : (
-            <CourseFormatRows rows={courseRows} tone="light" />
+            <div className="space-y-20 md:space-y-28">
+              {formatGroups.map((group) => (
+                <section key={group.key} aria-labelledby={group.title ? `formats-${group.key}` : undefined}>
+                  {group.title ? (
+                    <div className="mx-auto mb-10 flex max-w-[85rem] items-center gap-5 md:mb-14">
+                      <h3 id={`formats-${group.key}`} className="shrink-0 text-base font-semibold text-[var(--casa-ink)] md:text-lg">
+                        {group.title}
+                      </h3>
+                      <span aria-hidden className="h-px flex-1 bg-[color:var(--casa-sand)]" />
+                    </div>
+                  ) : null}
+                  <CourseFormatRows rows={group.rows} tone="light" titleAs={group.title ? 'h4' : 'h3'} />
+                </section>
+              ))}
+            </div>
           )}
         </Container>
       </section>

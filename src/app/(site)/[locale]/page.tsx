@@ -816,7 +816,7 @@ export default async function HomePage() {
                         {String(index + 1).padStart(2, '0')}
                       </span>
                       {exam.nextDate ? (
-                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/76">
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-[0.8125rem] font-bold text-white/76">
                           {locale === 'de' ? 'Nächste Prüfung' : 'Next exam'}: {exam.nextDate}
                         </span>
                       ) : null}
@@ -833,10 +833,10 @@ export default async function HomePage() {
                     </p>
 
                     <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
-                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/72">
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-[0.8125rem] font-bold text-white/72">
                         {exam.level}
                       </span>
-                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/72">
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-[0.8125rem] font-bold text-white/72">
                         {locale === 'de' ? 'Vorbereitung + Anmeldung' : 'Preparation + registration'}
                       </span>
                     </div>

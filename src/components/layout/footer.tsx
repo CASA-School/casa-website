@@ -50,7 +50,7 @@ const deFooterText: Record<string, string> = {
   'Am Dobben 14–16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
 };
 
-function footerText(value: string, locale: ContentLocale) {
+export function footerText(value: string, locale: ContentLocale) {
   if (locale !== 'de') {
     return value;
   }

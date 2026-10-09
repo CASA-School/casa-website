@@ -78,7 +78,7 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
         <footer className="mt-auto pt-6">
           <div className="border-t border-[color:var(--casa-sand)] pt-4">
             <p className="text-sm font-semibold text-[var(--casa-ink)]">{card.person}</p>
-            <p className="mt-1 min-h-10 text-xs leading-5 text-[var(--casa-muted)]">{card.country}</p>
+            <p className="mt-1 min-h-10 text-[0.8125rem] leading-5 text-[var(--casa-muted)]">{card.country}</p>
           </div>
         </footer>
       </blockquote>
@@ -175,7 +175,7 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
               {paused ? (de ? 'Abspielen' : 'Play') : 'Pause'}
             </button>}
             <button type="button" className={controlClass} aria-label={de ? 'Vorherige Stimmen' : 'Previous stories'} onClick={() => { setPaused(true); goTo(current <= 0 ? last : current - 1); }}><ChevronLeft className="h-4 w-4" /></button>
-            <span className="min-w-10 text-center text-xs font-semibold tabular-nums text-[var(--casa-muted)]">{current + 1} / {last + 1}</span>
+            <span className="min-w-10 text-center text-[0.8125rem] font-semibold tabular-nums text-[var(--casa-muted)]">{current + 1} / {last + 1}</span>
             <button type="button" className={controlClass} aria-label={de ? 'Nächste Stimmen' : 'Next stories'} onClick={() => { setPaused(true); goTo(current >= last ? 0 : current + 1); }}><ChevronRight className="h-4 w-4" /></button>
           </div>
         )}
