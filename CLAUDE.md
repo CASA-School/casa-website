@@ -442,6 +442,11 @@ is still valid.
   longer knows any course slug. A page's facts rail and section order come from its archetype;
   `scheduled-cohort` is the default, so an unregistered course keeps legacy behaviour.
   `professional-track` and `module-catalogue` exist but still need content (work board U5, U6).
+- **The "new website" notice is temporary (2026-10-09).** A card in the bottom-left
+  corner, after the hero, links to the contact form on the topic „Feedback zur Website".
+  It runs on the preview and for six to eight weeks after the switch from the old site;
+  then set `enabled: false` in `src/config/site-notice.ts`. Closing it holds for the visit
+  only, since the privacy policy (§5) says the site stores nothing in the browser.
 - **CASA's own placement test is in development and closed on the public site
   (decided 2026-10-01).** The public page `/placement-test` (`/anmeldung/einstufungstest`)
   links to the six Klett online tests again, as the old casa-bremen.de did. The runner,

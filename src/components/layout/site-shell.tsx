@@ -7,6 +7,7 @@ import { AssistantLauncher } from '@/components/assistant';
 import { InteractionTracker } from '@/components/analytics/interaction-tracker';
 import { Footer } from '@/components/layout/footer';
 import { Navbar } from '@/components/layout/navbar';
+import { NewSiteNotice } from '@/components/layout/new-site-notice';
 import { ScrollEffects } from '@/components/ui/scroll-effects';
 import type { ContentLocale } from '@/lib/content/types';
 
@@ -65,6 +66,7 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
       </div>
       {!hideSiteChrome && <Footer contentLocale={contentLocale} closingCta={!isRegistrationPage} />}
       {!isFocusedTestSurface && <AssistantLauncher />}
+      {!isFocusedTestSurface && <NewSiteNotice contentLocale={contentLocale} />}
     </>
   );
 }
