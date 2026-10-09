@@ -163,14 +163,14 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
   'special-courses': {
     fees: [
       {
-        label: { en: 'Per module', de: 'Pro Modul' },
+        label: { en: 'Per module of 12 evenings', de: 'Pro Modul mit 12 Abenden' },
         amount: EUR('€192'),
       },
     ],
     conditions: [
       {
-        en: 'A module runs for 12 weeks, on one evening a week, for 90 minutes from 18:30 to 20:00.',
-        de: 'Ein Modul läuft 12 Wochen lang an einem Abend pro Woche, jeweils 90 Minuten von 18:30 bis 20:00 Uhr.',
+        en: 'A module runs on one evening a week for 90 minutes, usually 12 evenings. A module that starts later has fewer evenings, at €16 each.',
+        de: 'Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu 16 € pro Abend.',
       },
       {
         en: 'You can take a module on its own or alongside another course. The modules are a good choice if you want to revise, refresh or go deeper into particular topics.',

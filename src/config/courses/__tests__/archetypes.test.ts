@@ -13,7 +13,7 @@ import {
   getQuoteAudience,
 } from '@/config/courses/course-profiles';
 import { CASA_CONTACT_KEYS, getCasaContact } from '@/config/content/contacts';
-import { specialCourseModules } from '@/config/courses/special-course-modules';
+import { SPECIAL_COURSE_CONSTANTS, specialCourseModules } from '@/config/courses/special-course-modules';
 import { skillTokens } from '@/config/brand/tokens';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
 import { socialProofByLocale } from '@/config/content/social-proof';
@@ -150,14 +150,22 @@ describe('course archetypes', () => {
     }
   });
 
-  it('keeps the special-course constants actually constant, since the UI states them once', () => {
-    // The catalogue prints "one evening a week, 90 minutes, 12 weeks, EUR 192"
-    // a single time at the top. If any module drifts, that line starts lying.
-    const prices = new Set(specialCourseModules.map((m) => m.priceEur));
-    const times = new Set(specialCourseModules.map((m) => m.time));
-
-    expect([...prices]).toEqual([192]);
-    expect([...times]).toEqual(['18:30 - 20:00']);
+  it('keeps the special-course constants true, since the UI states them once', () => {
+    // The catalogue says once: one evening a week, 90 minutes, EUR 16 an evening,
+    // EUR 192 for a full module of 12. Each module's price is its evenings at 16,
+    // and every evening is 90 minutes, whichever slot it runs in (FileMaker, 2026-10-09).
+    const minutes = (time: string) => {
+      const [from, to] = time.split(' - ').map((part) => {
+        const [h, m] = part.split(':').map(Number);
+        return h * 60 + m;
+      });
+      return to - from;
+    };
+    for (const courseModule of specialCourseModules) {
+      expect(courseModule.priceEur, courseModule.id).toBe(courseModule.sessions * SPECIAL_COURSE_CONSTANTS.pricePerSessionEur);
+      expect(minutes(courseModule.time), courseModule.id).toBe(SPECIAL_COURSE_CONSTANTS.minutesPerSession);
+    }
+    expect(specialCourseModules.filter((courseModule) => courseModule.sessions === 12).length).toBeGreaterThan(0);
   });
 
   it('shows testimonials on every archetype, now that real ones exist per course', () => {

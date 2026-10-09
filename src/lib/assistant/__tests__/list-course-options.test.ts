@@ -45,8 +45,8 @@ describe('assistant course card dates', () => {
   });
 
   it('states no date once no evening term is left to join or start', async () => {
-    // Both published evening terms end by 17 December.
-    vi.setSystemTime(new Date('2026-12-20T10:00:00+01:00'));
+    // The last published evening terms (Wintertrimester 2027) end on 15 April.
+    vi.setSystemTime(new Date('2027-04-20T10:00:00+02:00'));
 
     const card = await eveningCard('en');
 

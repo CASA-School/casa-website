@@ -80,15 +80,30 @@ separate pages, which is why it is now safe to render.
 
 ### Published term table
 
-Seeded in `db/seeds/0001_public_baseline.sql` and mirrored in `public-fixtures.ts`.
+Seeded in `db/seeds/0001_public_baseline.sql` and `0006_terms_from_filemaker_2026_10.sql`,
+mirrored in `public-fixtures.ts`. **Source since 2026-10-09: FileMaker** (`Course` and `Exam`,
+read-only), everything that starts within twelve months; refresh both files from FileMaker
+when CASA plans further ahead.
 
 | Format | Slot | Terms |
 | --- | --- | --- |
-| Intensive | morning, **Mon–Fri** 09:00–12:30 | 31.08–23.10.26 · 26.10–18.12.26 · 04.01–26.02.27 · 01.03–30.04.27 |
-| Intensive | afternoon, **Mon–Thu** 13:00–17:30 | 03.08–24.09.26 · 28.09–19.11.26 · 23.11.26–28.01.27 · 01.02–01.04.27 |
-| Evening | Mon/Wed 18:30–20:00 | 24.08–16.12.26 (A2.1, A2.2, B1.2, B2.1, B2.2, C1.1) |
-| Evening | Tue/Thu 18:30–20:00 | 25.08–17.12.26 (A1.1, A1.2, B1.1, C1.2) |
-| Bildungszeit | full day, morning + afternoon in parallel | follows the intensive terms; join any Monday |
+| Intensive | morning, **Mon–Fri** 09:00–12:30 | 31.08–23.10.26 · 26.10–18.12.26 · 04.01–26.02.27 · 01.03–30.04.27 · 03.05–25.06.27 · 28.06–27.08.27 · 30.08–22.10.27 |
+| Intensive | afternoon, **Mon–Thu** 13:00–17:30 | 03.08–24.09.26 · 28.09–19.11.26 · 23.11.26–28.01.27 · 01.02–01.04.27 · 05.04–27.05.27 · 31.05–29.07.27 · 02.08–23.09.27 · 27.09–18.11.27 |
+| Evening | Mon/Wed 18:30–20:00 | 24.08–16.12.26 (A2.1, A2.2, B1.2, B2.1, B2.2, C1.1) · 04.01–14.04.27 |
+| Evening | Tue/Thu 18:30–20:00 | 25.08–17.12.26 (A1.1, A1.2, B1.1, C1.2) · 05.01–15.04.27 |
+| Bildungszeit | full day, morning + afternoon in parallel | follows the morning intensive terms; join any Monday |
+| telc Deutsch B2 | about 09:00–17:00 | 16.10.26 · 13.11.26 · 22.01.27 · 12.03.27 · 21.05.27 · 18.06.27 · 20.08.27 · 08.10.27 |
+| telc Deutsch C1 Hochschule | about 08:30–17:00 | 30.10.26 · 27.11.26 · 05.02.27 · 05.03.27 · 09.04.27 · 14.05.27 · 04.06.27 · 02.07.27 · 03.09.27 · 01.10.27 |
+| C1 preparation | Mon–Fri 09:00–12:30, four weeks | `src/config/content/exam-preparation-courses.ts`, ending before each C1 day |
+
+Exam registration deadlines are not in FileMaker; they follow the rule the published dates
+already used, one month minus one day before the exam. **Open:** FileMaker prices the evening
+Wintertrimester 2027 at €378 (Mon/Wed) and €392 (Tue/Thu), against the €476 of the autumn term
+that the site shows as the evening course price; the price is the course type's, not the term's.
+
+Special courses (`special-course-modules.ts`) were checked against FileMaker the same day: four
+modules had wrong dates, one the wrong weekday and time. A module costs €16 an evening, €192
+for the usual twelve; one that starts later has fewer evenings.
 
 **The afternoon intensive is four days, not five.** Getting this wrong overstates the weekly
 commitment by a fifth, and it is the single easiest fact on this page to mis-copy.
