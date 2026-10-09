@@ -67,7 +67,9 @@ describe('course pricing', () => {
     expect(course('intensive-german').lessons_per_week).toBe(20);
     expect(course('intensive-german').default_price).toBe(520);
     expect(course('evening-german').lessons_per_week).toBe(4);
-    expect(course('evening-german').default_price).toBe(476);
+    // From 378 EUR: a trimester is priced by its length (FileMaker, 2026-10-09).
+    expect(course('evening-german').default_price).toBe(378);
+    expect(course('evening-german').pricing_mode).toBe('from');
     expect(course('special-courses').lessons_per_week).toBe(2);
     expect(course('bildungszeit').lessons_per_week).toBe(40);
     // German for Groups is the school-group package, not a speaking club.

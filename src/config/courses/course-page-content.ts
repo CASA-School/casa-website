@@ -95,8 +95,8 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
           de
             ? 'In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.'
             : 'In one trimester you complete half a level, so about one and a half levels a year.',
-          // 476 EUR is a per-trimester fee, not an entry point — which is why the
-          // course carries pricing_mode 'fixed' rather than 'from'.
+          // The fee is per trimester and depends on its length, so the course
+          // shows "from 378 EUR" (pricing_mode 'from', migration 0018).
           de
             ? 'Du buchst und bezahlst immer ein Trimester.'
             : 'You always book and pay for one trimester at a time.',

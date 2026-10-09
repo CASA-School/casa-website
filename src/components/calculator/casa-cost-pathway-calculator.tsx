@@ -102,7 +102,7 @@ const calculatorCopy = {
     */
     priceHints: {
       intensive: 'Intensive course: €520 / 4 weeks, €940 / full level',
-      evening: 'Evening course: €476 / trimester',
+      evening: 'Evening course: from €378 / trimester',
       accommodation: 'Accommodation: €580 / 4 weeks, then €145 / week',
     },
     validationError: 'Your target level must be higher than your current level.',
@@ -164,7 +164,7 @@ const calculatorCopy = {
     },
     priceHints: {
       intensive: 'Intensivkurs: 520\u00a0€ / 4 Wochen, 940\u00a0€ / ganzes Niveau',
-      evening: 'Abendkurs: 476\u00a0€ / Trimester',
+      evening: 'Abendkurs: ab 378\u00a0€ / Trimester',
       accommodation: 'Wohnen: 580\u00a0€ / 4 Wochen, danach 145\u00a0€ / Woche',
     },
     validationError: 'Das Zielniveau muss höher sein als das aktuelle Niveau.',

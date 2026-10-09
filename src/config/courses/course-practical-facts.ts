@@ -129,10 +129,10 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     fees: [
       {
         label: { en: 'Course fee per trimester', de: 'Kursgebühr pro Trimester' },
-        amount: EUR('€476'),
+        amount: { en: 'from €378', de: 'ab 378\u00a0€' },
         note: {
-          en: 'Plus the course materials. Their price depends on the level.',
-          de: 'Dazu kommt das Lehrwerk. Sein Preis hängt von der Niveaustufe ab.',
+          en: 'The fee depends on the length of the trimester. Plus the course materials, whose price depends on the level.',
+          de: 'Die Gebühr hängt von der Länge des Trimesters ab. Dazu kommt das Lehrwerk, sein Preis hängt von der Niveaustufe ab.',
         },
       },
     ],
