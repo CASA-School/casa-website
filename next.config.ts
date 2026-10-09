@@ -70,7 +70,14 @@ const nextConfig: NextConfig = {
   // and every interactive test fails. Loopback only; has no effect on a build.
   allowedDevOrigins: ['127.0.0.1'],
   images: {
-    formats: ['image/avif', 'image/webp'],
+    /*
+     * WebP only (2026-10-09). AVIF came first in this list, so every browser got
+     * AVIF, and AVIF is slow to encode: on the container's 0.5 vCPU the first
+     * request for one 1920px photograph took 3.8 s (then 0.15 s from the cache).
+     * WebP encodes several times faster at a few KB more, and every browser we
+     * support takes it. deploy.sh warms the cache after each release as well.
+     */
+    formats: ['image/webp'],
     /*
      * 30 is for the media halo (src/components/ui/media-frame.tsx), which
      * requests a second copy of each photograph at `sizes="64px"` purely to

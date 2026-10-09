@@ -70,15 +70,15 @@ if az containerapp show -n "$APP" -g "$WEBSITE_RG" >/dev/null 2>&1; then
 else
   echo "==> creating $APP"
   ENV_ID="$(az containerapp env show -n "$ENV_NAME" -g "$PLATFORM_RG" --query id -o tsv)"
-  # minReplicas 0 is deliberate: a brochure site with no session traffic should
-  # cost nothing while idle, and a cold start is an acceptable trade for that.
-  # See docs/AZURE_DEPLOYMENT_PLAN.md.
+  # minReplicas 1 (2026-10-09): scale-to-zero made the first visitor after a
+  # quiet spell wait ~19 s and emptied the image cache every time. One warm
+  # replica costs a few euros a month; see docs/AZURE_DEPLOYMENT_PLAN.md.
   az containerapp create -n "$APP" -g "$WEBSITE_RG" \
     --environment "$ENV_ID" --image "$IMAGE" \
     --registry-server "${ACR}.azurecr.io" --registry-identity "$IDENTITY_ID" \
     --user-assigned "$IDENTITY_ID" \
     --target-port 3000 --ingress external --transport auto \
-    --min-replicas 0 --max-replicas 2 --cpu 0.5 --memory 1.0Gi \
+    --min-replicas 1 --max-replicas 2 --cpu 0.5 --memory 1.0Gi \
     --env-vars NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 -o none
 fi
 
@@ -86,3 +86,23 @@ FQDN="$(az containerapp show -n "$APP" -g "$WEBSITE_RG" \
   --query properties.configuration.ingress.fqdn -o tsv)"
 echo "==> live at https://${FQDN}/"
 curl -s -o /dev/null -w "==> GET / -> %{http_code} in %{time_total}s\n" "https://${FQDN}/"
+
+# Warm the new revision: render every page in the sitemap once and ask the image
+# optimizer for every photograph at the widths browsers actually request, so no
+# visitor pays for the first conversion. The sitemap lists canonical
+# casa-bremen.de URLs; only their paths are used, against this app's own FQDN.
+echo "==> warming pages and images"
+WARM="$(mktemp)"
+curl -s "https://${FQDN}/sitemap.xml" | grep -o '<loc>[^<]*</loc>' \
+  | sed -E 's#<loc>https?://[^/]+##; s#</loc>##' > "$WARM.pages" || true
+while read -r page; do
+  curl -s --max-time 60 -H 'Accept: text/html' "https://${FQDN}${page:-/}"
+done < "$WARM.pages" \
+  | grep -oE '/_next/image\?url=[^"& ]+(&amp;|&)w=[0-9]+(&amp;|&)q=[0-9]+' \
+  | sed 's/&amp;/\&/g' \
+  | grep -E '&w=(64|96|128|256|384|640|750|828|1080|1200|1920)&' \
+  | sort -u > "$WARM" || true
+# Warming is best effort: a slow page or a failed request must never fail a release.
+xargs -P 4 -I{} curl -s -o /dev/null --max-time 60 -H 'Accept: image/webp,image/*,*/*;q=0.8' "https://${FQDN}{}" < "$WARM" || true
+echo "==> warmed $(wc -l < "$WARM.pages" | tr -d ' ') pages and $(wc -l < "$WARM" | tr -d ' ') image sizes"
+rm -f "$WARM" "$WARM.pages"
