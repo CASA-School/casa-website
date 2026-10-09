@@ -3,6 +3,8 @@
 import { Link } from '@/i18n/navigation';
 import { Logo } from '@/components/ui/logo';
 import { footerConfig } from '@/config/footer';
+import { closureRange, upcomingClosures } from '@/config/school-closures';
+import { bremenDate } from '@/lib/appointments/schedule';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
@@ -15,6 +17,7 @@ const deFooterText: Record<string, string> = {
   'Get advice': 'Beratung anfragen',
   'Non-profit language school in Bremen. Since 1983.': 'Gemeinnützige Sprachschule in Bremen. Seit 1983.',
   'Office hours': 'Bürozeiten',
+  Closures: 'Schließzeiten',
   'Monday–Thursday: 08:30–19:00': 'Montag–Donnerstag: 08:30–19:00 Uhr',
   'Friday: 08:30–13:00': 'Freitag: 08:30–13:00 Uhr',
   'Am Dobben 14-16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
@@ -69,6 +72,7 @@ type FooterProps = {
 };
 
 export function Footer({ contentLocale: locale, closingCta = true }: FooterProps) {
+  const closures = upcomingClosures(bremenDate());
   const socialIconMap = {
     facebook: Facebook,
     instagram: Instagram,
@@ -273,6 +277,20 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                     <li key={entry}>{footerText(entry, locale)}</li>
                   ))}
                 </ul>
+                {closures.length > 0 ? (
+                  <>
+                    <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
+                      {footerText('Closures', locale)}
+                    </p>
+                    <ul className="space-y-1 text-sm text-[var(--casa-text-subtle)]">
+                      {closures.map((closure) => (
+                        <li key={closure.from}>
+                          {closure.label[locale]}: {closureRange(closure, locale)}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
               </div>
             </div>
           </div>

@@ -44,10 +44,10 @@ describe('per-course page content', () => {
   });
 
   /*
-   * German for Medical publishes only its B2/C1 entry and the FSP framing. The
-   * fee, the weekly hours and the dates are internally sourced and unconfirmed —
-   * see docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, which records the 26.06-28.08.2026
-   * dates as checked and inconclusive. This asserts none of them come back.
+   * German for Medical has no set dates (it forms from its interest list), so
+   * no old date may come back, and the fee belongs to the facts rail, not to
+   * these blocks. The four UE per Friday are confirmed (2026-10-09, FileMaker)
+   * and stated — see docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
    */
   it('publishes no unconfirmed figures for German for Medical', () => {
     const text = JSON.stringify([
@@ -59,7 +59,8 @@ describe('per-course page content', () => {
 
     expect(text).not.toMatch(/400/);
     expect(text).not.toMatch(/26\.06|28\.08|26 Jun|28 Aug/);
-    expect(text).not.toMatch(/\b4 (UE|lessons)\b/);
+    // 4 UE per Friday is confirmed since 2026-10-09 (FileMaker course 4868: 40 UE over ten Fridays).
+    expect(text).toMatch(/je 4 UE/);
   });
 
   it('starts the Bildungszeit level table at B1, not A1', () => {

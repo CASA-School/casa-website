@@ -32,6 +32,12 @@ describe('Ina appointment schedule', () => {
     expect(spring.some(day => day.date === '2027-03-30')).toBe(true);
     expect(isAppointmentDate('2027-05-06', new Date('2027-04-20T09:00:00Z'))).toBe(false);
   });
+  it('closes while the school is closed, as casa-bremen.de listed it', () => {
+    const december = appointmentDays(new Set(), new Date('2026-12-14T09:00:00Z'));
+    expect(december.some(day => day.date >= '2026-12-21' && day.date <= '2027-01-01')).toBe(false);
+    expect(december.some(day => day.date === '2026-12-17')).toBe(true);
+    expect(december.some(day => day.date === '2027-01-04')).toBe(true);
+  });
   it('reads Ina\'s leave as dates and ranges', () => {
     const blocked = parseBlockedDates(' 2026-12-21..2026-12-24 , 2027-02-12,');
     expect([...blocked]).toEqual(['2026-12-21', '2026-12-22', '2026-12-23', '2026-12-24', '2027-02-12']);
