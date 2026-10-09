@@ -37,10 +37,11 @@ const COURSE_TYPES: CourseTypeRow[] = [
     level_min: 'A1',
     level_max: 'C1',
     lessons_per_week: 4,
-    // 476 EUR is the Herbsttrimester price CASA currently publishes, and it is a
-    // per-trimester fee rather than an entry point -- so 'fixed', not 'from'.
-    default_price: 476,
-    pricing_mode: 'fixed',
+    // A trimester is priced by its length (FileMaker, 2026-10-09): Herbst 2026
+    // 476 EUR, Winter 2027 378 / 392 EUR. One price per course type, so "from"
+    // the lowest (Rahman, 2026-10-09; migration 0018).
+    default_price: 378,
+    pricing_mode: 'from',
     // 4 UE a week cannot meet the published 20-a-week visa requirement.
     visa_eligible: false,
     currency: 'EUR',

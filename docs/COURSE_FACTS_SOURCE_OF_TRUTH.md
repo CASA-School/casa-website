@@ -97,9 +97,9 @@ when CASA plans further ahead.
 | C1 preparation | Mon–Fri 09:00–12:30, four weeks | `src/config/content/exam-preparation-courses.ts`, ending before each C1 day |
 
 Exam registration deadlines are not in FileMaker; they follow the rule the published dates
-already used, one month minus one day before the exam. **Open:** FileMaker prices the evening
-Wintertrimester 2027 at €378 (Mon/Wed) and €392 (Tue/Thu), against the €476 of the autumn term
-that the site shows as the evening course price; the price is the course type's, not the term's.
+already used, one month minus one day before the exam. FileMaker prices the evening Wintertrimester
+2027 at €378 (Mon/Wed) and €392 (Tue/Thu), the autumn term at €476. **Decided 2026-10-09
+(Rahman): the site shows „ab 378 €"** (pricing_mode `from`, migration 0018).
 
 Special courses (`special-course-modules.ts`) were checked against FileMaker the same day: four
 modules had wrong dates, one the wrong weekday and time. A module costs €16 an evening, €192

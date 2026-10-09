@@ -526,9 +526,9 @@ function buildCourseDetailPassages(): KbPassage[] {
       title: 'Evening courses – timetable and prices',
       url: '/courses/evening-course',
       topic: 'courses',
-      keywords: ['evening', 'abend', 'course', '476', 'price', 'after work', 'part time', 'monday wednesday', 'tuesday thursday'],
+      keywords: ['evening', 'abend', 'course', '378', '476', 'price', 'after work', 'part time', 'monday wednesday', 'tuesday thursday'],
       content:
-        'Our evening courses run from A1 to C1, with 4 lessons a week, on Mondays and Wednesdays or on Tuesdays and Thursdays from 18:30 to 20:00. A trimester costs €476, plus the textbook. The evening course suits you well if you work or study alongside it. You’ll find the current trimesters and start dates on the course page.',
+        'Our evening courses run from A1 to C1, with 4 lessons a week, on Mondays and Wednesdays or on Tuesdays and Thursdays from 18:30 to 20:00. A trimester costs from €378, depending on its length, plus the textbook. The evening course suits you well if you work or study alongside it. You’ll find the current trimesters and start dates on the course page.',
     },
     {
       id: 'course-evening-de',
@@ -536,9 +536,9 @@ function buildCourseDetailPassages(): KbPassage[] {
       title: 'Abendkurs Deutsch – Stundenplan und Preise',
       url: '/courses/evening-course',
       topic: 'courses',
-      keywords: ['abend', 'abendkurs', 'kurs', '476', 'preis', 'nach der arbeit', 'teilzeit', 'montag mittwoch', 'dienstag donnerstag'],
+      keywords: ['abend', 'abendkurs', 'kurs', '378', '476', 'preis', 'nach der arbeit', 'teilzeit', 'montag mittwoch', 'dienstag donnerstag'],
       content:
-        'Unsere Abendkurse gibt es von A1 bis C1, mit 4 Unterrichtseinheiten pro Woche, montags und mittwochs oder dienstags und donnerstags von 18:30 bis 20:00 Uhr. Ein Trimester kostet 476 €, dazu kommt das Lehrwerk. Der Abendkurs passt gut, wenn du nebenbei arbeitest oder studierst. Die aktuellen Trimester und Starttermine findest du auf der Kursseite.',
+        'Unsere Abendkurse gibt es von A1 bis C1, mit 4 Unterrichtseinheiten pro Woche, montags und mittwochs oder dienstags und donnerstags von 18:30 bis 20:00 Uhr. Ein Trimester kostet ab 378 €, je nach Länge, dazu kommt das Lehrwerk. Der Abendkurs passt gut, wenn du nebenbei arbeitest oder studierst. Die aktuellen Trimester und Starttermine findest du auf der Kursseite.',
     },
     {
       id: 'course-medical-en',
