@@ -16,7 +16,7 @@ import { useHeroGlow } from './use-hero-glow';
  * the telc seals: flat line art on the night hero, the warm light following the
  * pointer across the whole hero.
  *
- * Motion: the donkey walks in and stops; the dog leaps onto its back, the cat
+ * Motion: the donkey walks in, head first, and stops; the dog leaps onto its back, the cat
  * onto the dog, and the rooster flies up onto the cat; each package's label
  * arrives as its animal lands, and the stack below dips a little under its
  * weight; then all four sing once, as the musicians did at the robbers'
@@ -232,16 +232,19 @@ function Hahn() {
 const DRAWINGS: Record<MusicianSlug, () => ReactNode> = { esel: Esel, hund: Hund, katze: Katze, hahn: Hahn };
 
 /*
- * How each animal arrives, as offsets the entrance animates away: the donkey
- * from the left; the dog and the cat from the ground to the right of the
- * donkey (dy is their height above the ground), the rooster from the sky.
+ * How each animal arrives, as offsets the entrance animates away. They all
+ * face left, so they all travel left, head first: the donkey walks in from the
+ * right; the dog and the cat leap from the ground to the right of the donkey
+ * (dy is their height above the ground); the rooster flies in from the sky.
+ * `settled` is when the animal stands still, and its label arrives then: the
+ * donkey walks through where its label goes, so its label waits for it.
  * The cat and the rooster sit 5 units higher than drawn, on the dog's back.
  */
-const ENTRANCE: Record<MusicianSlug, { dx: number; dy: number; lift: number; delay: number }> = {
-  esel: { dx: -120, dy: 0, lift: 0, delay: 0.3 },
-  hund: { dx: 150, dy: GROUND - 301, lift: 32, delay: 2.05 },
-  katze: { dx: 140, dy: GROUND - 240, lift: 30, delay: 2.85 },
-  hahn: { dx: 150, dy: -90, lift: 0, delay: 3.6 },
+const ENTRANCE: Record<MusicianSlug, { dx: number; dy: number; lift: number; delay: number; settled: number }> = {
+  esel: { dx: 170, dy: 0, lift: 0, delay: 0.3, settled: 1.95 },
+  hund: { dx: 150, dy: GROUND - 301, lift: 32, delay: 2.05, settled: 2.75 },
+  katze: { dx: 140, dy: GROUND - 240, lift: 30, delay: 2.85, settled: 3.55 },
+  hahn: { dx: 150, dy: -90, lift: 0, delay: 3.6, settled: 4.3 },
 };
 
 /** Opens the package's dialog in the section below: its card's own button. */
@@ -311,7 +314,7 @@ export function BremenMusiciansHero({ packages, label, className }: BremenMusici
         {ORDER.map((slug) => {
           const { row, anchor } = LAYOUT[slug];
           return (
-            <g key={slug} className={styles.leader} data-on={active === slug || undefined} style={vars({ '--t': `${ENTRANCE[slug].delay + 0.75}s` })}>
+            <g key={slug} className={styles.leader} data-on={active === slug || undefined} style={vars({ '--t': `${ENTRANCE[slug].settled + 0.05}s` })}>
               <path d={`M${anchor[0]} ${anchor[1]} L${LABEL_X - 6} ${row}`} pathLength={1} />
               <circle cx={anchor[0]} cy={anchor[1]} r={2.2} />
             </g>
@@ -384,7 +387,7 @@ export function BremenMusiciansHero({ packages, label, className }: BremenMusici
             onFocus={() => setActive(slug)}
             onBlur={() => setActive(null)}
             className={cn(styles.label, 'absolute -translate-y-1/2 focus-visible:outline-none')}
-            style={{ left: pct(LABEL_X, VB_X, W), top: pct(LAYOUT[slug].row, VB_Y, H), ...vars({ '--t': `${ENTRANCE[slug].delay + 0.7}s` }) }}
+            style={{ left: pct(LABEL_X, VB_X, W), top: pct(LAYOUT[slug].row, VB_Y, H), ...vars({ '--t': `${ENTRANCE[slug].settled}s` }) }}
             data-on={active === slug || undefined}
           >
             <span className={styles.labelName}>{item.animal}</span>
