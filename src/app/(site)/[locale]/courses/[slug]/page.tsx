@@ -33,6 +33,14 @@ import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/co
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 
+/* What each of the Bremen Town Musicians says in the group page's hero. */
+const MUSICIAN_VOICES = {
+  esel: { de: 'I-aah!', en: 'Hee-haw!' },
+  hund: { de: 'Wau!', en: 'Woof!' },
+  katze: { de: 'Miau!', en: 'Miaow!' },
+  hahn: { de: 'Kikeriki!', en: 'Cock-a-doodle-doo!' },
+} as const;
+
 function formatDate(value: string, locale: 'en' | 'de') {
   return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
     day: 'numeric',
@@ -612,6 +620,7 @@ export default async function CourseDetailPage({
                 slug: item.slug,
                 animal: item.animal[locale],
                 descriptor: item.descriptor[locale],
+                voice: MUSICIAN_VOICES[item.slug][locale],
               }))}
             />
           </div>

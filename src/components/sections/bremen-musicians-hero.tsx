@@ -18,14 +18,18 @@ import { useHeroGlow } from './use-hero-glow';
  *
  * Motion: the donkey walks in and stops; the dog leaps onto its back, the cat
  * onto the dog, and the rooster flies up onto the cat; each package's label
- * arrives as its animal lands; then all four sing once, as the musicians did
- * at the robbers' window. Under prefers-reduced-motion the stack renders
- * finished and still.
+ * arrives as its animal lands, and the stack below dips a little under its
+ * weight; then all four sing once, as the musicians did at the robbers'
+ * window. Afterwards they stay quietly alive: now and then the donkey twitches
+ * an ear, the dog wags, the cat flicks its tail, the rooster's tail sways.
+ * Under prefers-reduced-motion the stack renders finished and still.
  *
  * Each animal is its package: its label names the package (the animal and the
- * package's descriptor, the same words as the card below), hovering or
- * focusing it lights the animal in the sun's yellow and makes it sing, and a
- * click opens that package's dialog in the section below. The labels are the
+ * package's descriptor, the same words as the card below). Hovering or
+ * focusing it lights the animal in the sun's yellow; it says its line (I-aah,
+ * Wau, Miau, Kikeriki), sings, and moves — the donkey's ear, the dog's tail,
+ * the cat's tail, the rooster's wing — and a click opens that package's dialog
+ * in the section below. The labels are the
  * links, so a keyboard reaches all four; the drawing answers the pointer too.
  *
  * The animals are drawn facing left, towards the headline, in a 580 × 410 box
@@ -43,6 +47,8 @@ export type MusicianPackage = {
   animal: string;
   /** The package's descriptor, as on its card: "1 Woche Entdecken". */
   descriptor: string;
+  /** What the animal says when it is chosen: "Kikeriki!". */
+  voice: string;
 };
 
 type BremenMusiciansHeroProps = {
@@ -67,11 +73,11 @@ const vars = (v: Record<string, string | number>) => v as CSSProperties;
  * starts from. Labels begin at LABEL_X.
  */
 const LABEL_X = 392;
-const LAYOUT: Record<MusicianSlug, { row: number; anchor: [number, number]; mouth: [number, number] }> = {
-  hahn: { row: 140, anchor: [342, 145], mouth: [236, 128] },
-  katze: { row: 210, anchor: [308, 222], mouth: [231, 202] },
-  hund: { row: 280, anchor: [320, 258], mouth: [180, 229] },
-  esel: { row: 350, anchor: [371, 342], mouth: [86, 309] },
+const LAYOUT: Record<MusicianSlug, { row: number; anchor: [number, number]; mouth: [number, number]; voice: [number, number] }> = {
+  hahn: { row: 140, anchor: [342, 145], mouth: [236, 128], voice: [226, 104] },
+  katze: { row: 210, anchor: [308, 222], mouth: [231, 202], voice: [222, 188] },
+  hund: { row: 280, anchor: [320, 258], mouth: [180, 229], voice: [212, 194] },
+  esel: { row: 350, anchor: [371, 342], mouth: [86, 309], voice: [118, 244] },
 };
 
 const ORDER: MusicianSlug[] = ['esel', 'hund', 'katze', 'hahn'];
@@ -115,8 +121,10 @@ function Esel() {
       <path className={styles.far} d="M138 252 C134 230,134 204,140 186 C143 180,148 182,148 190 C147 210,148 232,150 250 Z" />
       <path className={styles.line} d="M352 306 C362 318,368 340,366 372" />
       <path className={styles.o} d="M362 370 C356 382,358 394,365 400 C372 393,373 382,368 370 Z" />
-      <path className={styles.o} d="M146 254 C148 226,156 200,166 182 C170 176,176 178,175 186 C172 206,166 230,162 256 Z" />
-      <path className={styles.d} d="M155 244 C158 224,163 204,170 188" />
+      <g className={styles.earTwitch}>
+        <path className={styles.o} d="M146 254 C148 226,156 200,166 182 C170 176,176 178,175 186 C172 206,166 230,162 256 Z" />
+        <path className={styles.inner} d="M153 250 C155 228,160 208,168 192 C169 200,165 224,159 252 Z" />
+      </g>
       <path
         className={styles.o}
         d="M214 298 C236 300,256 304,276 303 C298 302,318 294,336 296 C350 297,358 306,361 320 C364 334,360 348,350 358 C344 363,336 366,326 367 C300 371,262 372,238 368 C224 365,212 360,204 351 C196 342,190 332,186 320 C180 308,172 298,160 290 C154 286,150 285,147 286 C144 296,136 308,124 314 C114 320,102 322,94 318 C86 314,82 304,86 294 C92 282,112 266,128 254 C136 248,144 244,152 244 C172 250,196 276,214 298 Z"
@@ -127,9 +135,15 @@ function Esel() {
       <g className={cn(styles.stride, styles.strideB)} style={vars({ '--ox': '338px', '--oy': '356px' })}>
         <path className={styles.leg} d={hindLeg} />
       </g>
+      {/* A donkey's pale muzzle and eye ring, inset from the outline so it stays whole. */}
+      <path className={styles.pale} d="M107 314 C103 316,98 317,95 316 C88 312,85 304,88 295 C92 288,99 280,105 275 C100 288,102 302,107 314 Z" />
+      <circle className={styles.pale} cx={131} cy={265} r={5.6} />
       <path className={cn(styles.d, styles.mane)} d="M152 238 C174 244,200 272,220 294" />
       <circle className={styles.eye} cx={131} cy={265} r={2.6} />
+      <path className={styles.d} d="M125 260 q6 -5 12 0" />
       <path className={styles.d} d="M106 272 C100 286,102 302,108 316" />
+      {/* Hooves. */}
+      <path className={styles.d} d="M197 463 H211 M333 463 H347" />
       <path className={styles.d} d="M89 294 q3 -1 4 3" />
       <path className={styles.d} d="M90 310 q8 3 16 0" />
     </>
@@ -143,7 +157,9 @@ function Hund() {
     <>
       <path className={styles.far} transform="translate(12 -1)" d={`${frontLeg} Z`} />
       <path className={styles.far} transform="translate(-11 -1)" d={`${hindLeg} Z`} />
-      <path className={styles.line} d="M316 246 C326 238,332 226,330 212" />
+      <g className={styles.wag}>
+        <path className={styles.o} d="M315 247 C325 240,331 228,330 212 C335 222,336 238,320 252 Z" />
+      </g>
       <path
         className={styles.o}
         d="M242 240 C262 236,286 238,302 242 C312 244,318 250,318 258 C318 264,314 268,308 268 C298 266,288 260,276 262 C262 266,248 270,238 268 C230 266,226 258,226 250 C224 242,220 236,214 230 C208 232,200 234,192 234 C186 234,182 231,182 227 C182 223,186 221,192 220 C198 219,204 216,207 212 C210 206,218 202,226 203 C234 206,238 222,242 240 Z"
@@ -154,6 +170,7 @@ function Hund() {
       <circle className={styles.eye} cx={210} cy={214} r={2.2} />
       <circle className={styles.eye} cx={185} cy={224} r={2.6} />
       <path className={styles.d} d="M186 231 q8 1 14 -2" />
+      <path className={styles.d} d="M229 250 q-3 5 -1 10 M233 256 q-2 4 0 8" />
     </>
   );
 }
@@ -165,7 +182,9 @@ function Katze() {
     <>
       <path className={styles.far} transform="translate(8 -1)" d={`${frontLeg} Z`} />
       <path className={styles.far} transform="translate(-8 -1)" d={`${hindLeg} Z`} />
-      <path className={styles.line} d="M305 224 C316 218,320 204,314 192 C310 184,304 186,306 192" />
+      <g className={styles.flick}>
+        <path className={styles.o} d="M302 220 C314 214,319 202,314 190 C311 184,305 184,305 189 C309 192,312 200,309 207 C307 213,304 218,300 225 Z" />
+      </g>
       <path
         className={styles.o}
         d="M266 216 C276 211,292 211,300 216 C306 220,308 228,305 233 C300 236,292 235,284 234 C274 234,266 236,260 234 C254 232,252 226,254 220 C256 216,260 215,266 216 Z"
@@ -178,6 +197,7 @@ function Katze() {
       />
       <circle className={styles.eye} cx={244} cy={203} r={1.8} />
       <path className={styles.d} d="M235 209 L224 206 M235 211 L225 213" />
+      <path className={styles.d} d="M276 213 q2 5 0 9 M284 212 q2 5 0 9 M292 214 q2 4 0 8 M294 232 C292 226,296 220,302 222" />
     </>
   );
 }
@@ -185,18 +205,24 @@ function Katze() {
 function Hahn() {
   return (
     <>
-      <path className={styles.o} d="M296 170 C302 148,318 128,338 126 C330 134,316 150,302 174 Z" />
-      <path className={styles.o} d="M298 174 C310 156,328 148,342 150 C332 156,316 166,301 178 Z" />
-      <path className={styles.o} d="M299 179 C312 170,326 168,338 172 C326 175,312 179,300 183 Z" />
+      <g className={styles.sway}>
+        <path className={styles.o} d="M296 170 C302 148,318 128,338 126 C330 134,316 150,302 174 Z" />
+        <path className={styles.o} d="M298 174 C310 156,328 148,342 150 C332 156,316 166,301 178 Z" />
+        <path className={styles.o} d="M299 179 C312 170,326 168,338 172 C326 175,312 179,300 183 Z" />
+      </g>
       <path className={styles.line} d="M272 194 L271 212 M282 195 L284 211 M265 212 L277 212 M279 211 L290 211" />
       <path
         className={styles.o}
         d="M260 131 C258 127,252 126,249 129 C247 131,247 133,246 134 L237 130 L246 137 L238 141 L247 140 C245 143,245 148,248 151 C251 153,253 149,252 145 C254 152,256 162,257 170 C258 182,264 192,276 195 C286 197,294 192,298 184 C300 178,300 174,298 170 C290 166,280 166,272 162 C266 158,263 150,263 142 C263 137,262 133,260 131 Z"
       />
       <path className={styles.comb} d="M249 129 C247 123,250 120,252 124 C252 118,256 117,257 122 C258 117,262 118,261 124 C262 125,262 128,260 131 Z" />
+      <path className={styles.comb} d="M247.5 142 C245 146,246 151,249 152 C251.5 151,252 147,250.5 143 Z" />
+      <path className={styles.d} d="M262 146 q4 8 2 16 M258 151 q3 8 1 15" />
       <g className={styles.wing}>
-        <path className={styles.o} d="M266 170 C274 162,290 160,298 168 C296 178,286 186,272 186 C266 182,264 176,266 170 Z" />
-        <path className={styles.d} d="M272 178 C280 176,288 176,294 172 M274 183 C282 182,288 180,292 177" />
+        <g className={styles.flap}>
+          <path className={styles.o} d="M266 170 C274 162,290 160,298 168 C296 178,286 186,272 186 C266 182,264 176,266 170 Z" />
+          <path className={styles.d} d="M272 178 C280 176,288 176,294 172 M274 183 C282 182,288 180,292 177" />
+        </g>
       </g>
       <circle className={styles.eye} cx={254} cy={134} r={1.8} />
     </>
@@ -313,7 +339,9 @@ export function BremenMusiciansHero({ packages, label, className }: BremenMusici
                 >
                   <g className={styles.rise}>
                     <g className={styles.land}>
-                      <Drawing />
+                      <g className={styles.carry}>
+                        <Drawing />
+                      </g>
                     </g>
                   </g>
                 </g>
@@ -322,14 +350,21 @@ export function BremenMusiciansHero({ packages, label, className }: BremenMusici
           );
         })}
 
-        {/* The animals sing: all four once at the end of the entrance, and the
-            chosen one while it is chosen. */}
+        {/* The animals sing, all four once at the end of the entrance; the chosen
+            one says its line. */}
         {ORDER.map((slug, i) => (
           <Notes key={`c-${slug}`} at={LAYOUT[slug].mouth} className={styles.chorus} style={vars({ '--c': i })} />
         ))}
-        {ORDER.map((slug) => (
-          <Notes key={`s-${slug}`} at={LAYOUT[slug].mouth} className={cn(styles.song, active === slug && styles.singing)} />
-        ))}
+        {ORDER.map((slug) => {
+          const voice = bySlug.get(slug)?.voice;
+          if (!voice) return null;
+          const [x, y] = LAYOUT[slug].voice;
+          return (
+            <text key={`v-${slug}`} className={cn(styles.voice, active === slug && styles.speaking)} x={x} y={y} textAnchor="end">
+              {voice}
+            </text>
+          );
+        })}
       </svg>
 
       {ORDER.map((slug) => {
