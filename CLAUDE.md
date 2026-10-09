@@ -310,6 +310,12 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    **One exception (Rahman, 2026-10-08):** the host-family rooms (slots 27, 72–77, 81)
    will be AI-generated illustrations made from real host-family photos, rooms only
    and never people. `docs/HOST_FAMILY_IMAGES.md` has the brief.
+   **Second exception (Rahman, 2026-10-09):** slot 90, the German for Medical
+   classroom photo (`course-medical-writing.webp`), has its stained walls, door and
+   smeared whiteboard cleaned — a declared `retouch` step in its `build_reel.py` recipe
+   (`scripts/media/retouch.py`, fixed regions, classical image processing, no image
+   model). The learners are unchanged: no person-coloured pixel moves, checked when
+   it was made. Any further retouch needs Rahman's explicit approval, like this one.
 5. **Accommodation photos are contextual, not availability claims.**
 6. **Placement test content and results.** All 163 placement items are
    `PILOT_UNREVIEWED` and need two qualified DaF reviewers before live use. Never

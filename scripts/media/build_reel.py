@@ -3,7 +3,9 @@
 Every slide is a CROP of a real photograph plus global light and colour
 correction: white balance, a tone curve on lightness, and a chroma factor.
 Nothing is generated, retouched, moved or removed, which is CLAUDE.md hard
-rule 4. A slide that needs more width than its photograph has gets a different
+rule 4. One declared exception (Rahman, 2026-10-09): slot 90's recipe carries a
+`retouch` step that cleans the classroom's walls, door and whiteboard behind
+the learners, on fixed regions, never the people (scripts/media/retouch.py). A slide that needs more width than its photograph has gets a different
 photograph, not invented surroundings.
 
     python3 scripts/media/build_reel.py            # write public/media/casa/reel-*.webp
@@ -41,6 +43,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image, ImageOps
+
+from retouch import MEDICAL_WRITING, clean_background
 
 REPO = Path(__file__).resolve().parents[2]
 POOL = Path.home() / 'Archive/CASA/website-cleanup-2026-09-16/editorial-2026'
@@ -434,11 +438,15 @@ SLIDES = [
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 1.0)),
     },
     {
-        # Slot 90: writing practice, replacing source-cut frame 012.
+        # Slot 90: writing practice, replacing source-cut frame 012. Its stained
+        # walls, door and smeared whiteboard are cleaned (Rahman, 2026-10-09:
+        # "give it proper ai touch so it looks clean and elegant"); the
+        # learners are untouched. The one retouch in this file, see retouch.py.
         'out': 'course-medical-writing.webp',
         'source': POOL / '066_IMG_0265.JPG',
         'box': (0, 200, 2250, 1500),
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.02, 1.0, 0.985)),
+        'retouch': MEDICAL_WRITING,
     },
     {
         # Slot 91, Bildungszeit's second photo (was the empty classroom): a
@@ -506,6 +514,9 @@ def render(slide):
         if x0 < 0 or y0 < 0 or x0 + bw > w or y0 + bh > h:
             raise SystemExit(f"{slide['out']}: box {slide['box']} does not fit {w}x{h}")
         out = correct(rgb[y0:y0 + bh, x0:x0 + bw], slide)
+        # The one declared retouch (retouch.py): the background only, deterministic, so --verify holds.
+        if 'retouch' in slide:
+            out = clean_background(out, slide['retouch'])
         # 'max_width' only ever scales DOWN (the 5712px iPhone originals).
         limit = slide.get('max_width')
         if limit and out.shape[1] > limit:

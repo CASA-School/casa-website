@@ -155,7 +155,10 @@ phone captures confirm that the building, entrance and signs remain visible.
 - Source-faithful edits only: crop, resize, light exposure and colour correction.
   No generative people/building editing — no expansion, relighting, retouching or
   "improvement" by an image model. The explicit 2026-10-08 exception is labelled
-  host-room illustrations only, documented in HOST_FAMILY_IMAGES.md. A frame that needs more room than the photograph
+  host-room illustrations only, documented in HOST_FAMILY_IMAGES.md. The second,
+  2026-10-09: slot 90's walls, door and whiteboard are cleaned behind the learners
+  (`scripts/media/retouch.py`, a declared step of its recipe, so `--verify` holds);
+  the people are untouched. A frame that needs more room than the photograph
   has gets a different photograph. (The 21 September exception is withdrawn; see below.)
 - Art-direct images for each screen size, not just their container: preserve subjects,
   faces, architecture and important signs; check the full motion cycle. Use separate
