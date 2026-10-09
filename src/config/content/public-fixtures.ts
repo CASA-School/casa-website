@@ -268,11 +268,25 @@ function buildCourseInstances(): CourseInstanceRow[] {
     courseInstance('000000010006', 'intensive-german', '2026-09-28', '2026-11-19', intensiveAfternoon, 15),
     courseInstance('000000010007', 'intensive-german', '2026-11-23', '2027-01-28', intensiveAfternoon, 15),
     courseInstance('000000010008', 'intensive-german', '2027-02-01', '2027-04-01', intensiveAfternoon, 15),
+    // From FileMaker, 2026-10-09 (db/seeds/0006): the terms starting within a year.
+    courseInstance('000000010009', 'intensive-german', '2027-05-03', '2027-06-25', intensiveMorning, 15),
+    courseInstance('000000010010', 'intensive-german', '2027-06-28', '2027-08-27', intensiveMorning, 15),
+    courseInstance('000000010011', 'intensive-german', '2027-08-30', '2027-10-22', intensiveMorning, 15),
+    courseInstance('000000010012', 'intensive-german', '2027-04-05', '2027-05-27', intensiveAfternoon, 15),
+    courseInstance('000000010013', 'intensive-german', '2027-05-31', '2027-07-29', intensiveAfternoon, 15),
+    courseInstance('000000010014', 'intensive-german', '2027-08-02', '2027-09-23', intensiveAfternoon, 15),
+    courseInstance('000000010015', 'intensive-german', '2027-09-27', '2027-11-18', intensiveAfternoon, 15),
     courseInstance('000000020001', 'evening-german', '2026-08-24', '2026-12-16', eveningMondayWednesday, 12),
     courseInstance('000000020002', 'evening-german', '2026-08-25', '2026-12-17', eveningTuesdayThursday, 12),
+    courseInstance('000000020003', 'evening-german', '2027-01-04', '2027-04-14', eveningMondayWednesday, 12),
+    courseInstance('000000020004', 'evening-german', '2027-01-05', '2027-04-15', eveningTuesdayThursday, 12),
     courseInstance('000000050001', 'bildungszeit', '2026-08-31', '2026-10-23', bildungszeitFullDay, 15),
     courseInstance('000000050002', 'bildungszeit', '2026-10-26', '2026-12-18', bildungszeitFullDay, 15),
     courseInstance('000000050003', 'bildungszeit', '2027-01-04', '2027-02-26', bildungszeitFullDay, 15),
+    courseInstance('000000050004', 'bildungszeit', '2027-03-01', '2027-04-30', bildungszeitFullDay, 15),
+    courseInstance('000000050005', 'bildungszeit', '2027-05-03', '2027-06-25', bildungszeitFullDay, 15),
+    courseInstance('000000050006', 'bildungszeit', '2027-06-28', '2027-08-27', bildungszeitFullDay, 15),
+    courseInstance('000000050007', 'bildungszeit', '2027-08-30', '2027-10-22', bildungszeitFullDay, 15),
   ];
 }
 
@@ -287,10 +301,26 @@ function buildExamSessions(): ExamSessionRow[] {
     examSession('000000010001', 'telc_b2', '2026-08-21T07:00:00.000Z', '2026-08-21T15:00:00.000Z', '2026-07-20'),
     examSession('000000010002', 'telc_b2', '2026-10-16T07:00:00.000Z', '2026-10-16T15:00:00.000Z', '2026-09-15'),
     examSession('000000010003', 'telc_b2', '2026-11-13T08:00:00.000Z', '2026-11-13T16:00:00.000Z', '2026-10-12'),
+    // From FileMaker's `Exam` table, 2026-10-09 (db/seeds/0006). Deadlines follow
+    // the published rule: one month minus one day before the exam.
+    examSession('000000010004', 'telc_b2', '2027-01-22T08:00:00.000Z', '2027-01-22T16:00:00.000Z', '2026-12-21'),
+    examSession('000000010005', 'telc_b2', '2027-03-12T08:00:00.000Z', '2027-03-12T16:00:00.000Z', '2027-02-11'),
+    examSession('000000010006', 'telc_b2', '2027-05-21T07:00:00.000Z', '2027-05-21T15:00:00.000Z', '2027-04-20'),
+    examSession('000000010007', 'telc_b2', '2027-06-18T07:00:00.000Z', '2027-06-18T15:00:00.000Z', '2027-05-17'),
+    examSession('000000010008', 'telc_b2', '2027-08-20T07:00:00.000Z', '2027-08-20T15:00:00.000Z', '2027-07-19'),
+    examSession('000000010009', 'telc_b2', '2027-10-08T07:00:00.000Z', '2027-10-08T15:00:00.000Z', '2027-09-07'),
     examSession('000000020001', 'telc_c1_hochschule', '2026-09-04T06:30:00.000Z', '2026-09-04T15:00:00.000Z', '2026-08-03'),
     examSession('000000020002', 'telc_c1_hochschule', '2026-10-02T06:30:00.000Z', '2026-10-02T15:00:00.000Z', '2026-09-01'),
     examSession('000000020003', 'telc_c1_hochschule', '2026-10-30T07:30:00.000Z', '2026-10-30T16:00:00.000Z', '2026-09-29'),
     examSession('000000020004', 'telc_c1_hochschule', '2026-11-27T07:30:00.000Z', '2026-11-27T16:00:00.000Z', '2026-10-26'),
+    examSession('000000020005', 'telc_c1_hochschule', '2027-02-05T07:30:00.000Z', '2027-02-05T16:00:00.000Z', '2027-01-04'),
+    examSession('000000020006', 'telc_c1_hochschule', '2027-03-05T07:30:00.000Z', '2027-03-05T16:00:00.000Z', '2027-02-04'),
+    examSession('000000020007', 'telc_c1_hochschule', '2027-04-09T06:30:00.000Z', '2027-04-09T15:00:00.000Z', '2027-03-08'),
+    examSession('000000020008', 'telc_c1_hochschule', '2027-05-14T06:30:00.000Z', '2027-05-14T15:00:00.000Z', '2027-04-13'),
+    examSession('000000020009', 'telc_c1_hochschule', '2027-06-04T06:30:00.000Z', '2027-06-04T15:00:00.000Z', '2027-05-03'),
+    examSession('000000020010', 'telc_c1_hochschule', '2027-07-02T06:30:00.000Z', '2027-07-02T15:00:00.000Z', '2027-06-01'),
+    examSession('000000020011', 'telc_c1_hochschule', '2027-09-03T06:30:00.000Z', '2027-09-03T15:00:00.000Z', '2027-08-02'),
+    examSession('000000020012', 'telc_c1_hochschule', '2027-10-01T06:30:00.000Z', '2027-10-01T15:00:00.000Z', '2027-08-31'),
   ];
 }
 

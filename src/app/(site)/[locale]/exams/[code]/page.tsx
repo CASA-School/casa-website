@@ -14,6 +14,8 @@ import { getExamDetail } from '@/lib/content/repository';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
+import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
+import { bremenDate } from '@/lib/appointments/schedule';
 
 type ExamDetailPageProps = {
   params: Promise<{ code: string }>;
@@ -164,12 +166,17 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     : isC1
       ? 'The exam is always on a Friday and runs from about 08:30 to 17:00. Arrive in good time and bring your documents with you.'
       : 'Arrive in good time and bring your documents with you.';
+  // The next preparation courses from FileMaker, as casa-bremen.de listed them on its C1 page.
+  const nextPreparation = nextPreparationCourses(isC1 ? 'telc_c1_hochschule' : 'telc_b2', bremenDate());
+  const nextPreparationDe = [preparationCoursesSentence(nextPreparation, 'de')].filter((line): line is string => Boolean(line));
+  const nextPreparationEn = [preparationCoursesSentence(nextPreparation, 'en')].filter((line): line is string => Boolean(line));
   const preparationDe = isC1
     ? {
         title: 'Der Vorbereitungskurs',
         description:
           'Bei uns kannst du telc Deutsch C1 Hochschule ablegen und dich in einem vierwöchigen Kurs darauf vorbereiten. Du kannst die Prüfung auch ohne den Kurs machen, wir empfehlen dir aber, beides zusammen zu belegen.',
         bullets: [
+          ...nextPreparationDe,
           'Im Kurs lernst du die formalen Anforderungen der Prüfung kennen und übst mit Original-Prüfungsaufgaben von telc.',
           'Gemeinsam entwickeln wir Strategien für die Aufgaben. Wir üben Hören, Lesen, Schreiben und Sprechen, vor allem aber Schreiben und Sprechen.',
           'Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.',
@@ -182,6 +189,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           title: 'Der Vorbereitungskurs',
           description: 'Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.',
           bullets: [
+          ...nextPreparationDe,
             'Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.',
             'Plane genug Zeit bis zum Prüfungstermin ein, damit du in Ruhe üben kannst.',
           ],
@@ -201,6 +209,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
         description:
           'You can take telc Deutsch C1 Hochschule with us and prepare for it in a four-week course. You can also take the exam without the course, but we recommend doing both.',
         bullets: [
+          ...nextPreparationEn,
           'In the course you get to know the formal requirements of the exam and practise with original telc exam tasks.',
           'Together we work out strategies for the tasks. We practise listening, reading, writing and speaking, but above all writing and speaking.',
           'You should have successfully completed a C1 course, because C1 vocabulary, phrases and grammar are not taught in this course. Alternatively, you can take a placement test with us at the school.',
@@ -213,6 +222,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           title: 'The preparation course',
           description: 'Our preparation course for telc Deutsch B2 runs for one month, on two evenings a week.',
           bullets: [
+          ...nextPreparationEn,
             'Preparation is not part of the intensive courses. If you need the certificate, you book it separately.',
             'Leave yourself enough time before the exam date, so that you can practise without rushing.',
           ],

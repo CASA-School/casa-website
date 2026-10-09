@@ -26,8 +26,8 @@ const copy = {
     practises: 'What you practise',
     forWhom: 'Who it is for',
     requirements: 'Before you join',
-    shapeValue: (weeks: number, minutes: number) =>
-      `${weeks} weeks · one ${minutes}-minute session a week`,
+    shapeValue: (sessions: number, minutes: number) =>
+      `${sessions} evenings · one ${minutes}-minute session a week`,
     complements:
       'A special course adds to the course you are already taking. You can also take one on its own if you want to work on a particular skill.',
     // The German term label ("Herbst 2026") is passed in; English names the term itself.
@@ -46,8 +46,8 @@ const copy = {
     practises: 'Das übst du',
     forWhom: 'Für wen',
     requirements: 'Vor der Anmeldung',
-    shapeValue: (weeks: number, minutes: number) =>
-      `${weeks} Wochen · ein Termin pro Woche, ${minutes} Minuten`,
+    shapeValue: (sessions: number, minutes: number) =>
+      `${sessions} Abende · ein Termin pro Woche, ${minutes} Minuten`,
     complements:
       'Ein Spezialkurs ergänzt deinen laufenden Kurs. Du kannst ihn auch einzeln belegen, wenn du gezielt an einer Fertigkeit arbeiten möchtest.',
     termNote: (term: string) => `Das sind die Termine für ${term}. Wir bestätigen sie dir bei der Anmeldung.`,
@@ -110,7 +110,8 @@ export function SpecialCourseDialog({
   const t = copy[locale];
   const skill = skillTokens[courseModule.skill];
   const detail = courseModule.detail;
-  const { weeks, minutesPerSession } = SPECIAL_COURSE_CONSTANTS;
+  const { minutesPerSession } = SPECIAL_COURSE_CONSTANTS;
+  const { sessions } = courseModule;
 
   /*
     The schedule rows. Built as data rather than markup so the grid below stays
@@ -121,7 +122,7 @@ export function SpecialCourseDialog({
     { label: t.level, value: courseModule.level },
     { label: t.evening, value: courseModule.weekday[locale] ?? courseModule.weekday.en },
     { label: t.time, value: courseModule.time.replace(' - ', '–') },
-    { label: t.shape, value: t.shapeValue(weeks, minutesPerSession) },
+    { label: t.shape, value: t.shapeValue(sessions, minutesPerSession) },
     { label: t.dates, value: formatDateRange(courseModule.startDate, courseModule.endDate, locale) },
   ];
 
@@ -219,7 +220,7 @@ export function SpecialCourseDialog({
               {formatPrice(courseModule.priceEur, locale)}
             </span>
             <span className="text-sm text-[var(--casa-muted)]">
-              {t.shapeValue(weeks, minutesPerSession)}
+              {t.shapeValue(sessions, minutesPerSession)}
             </span>
           </p>
           <Button asChild variant="prism" className="h-11 whitespace-normal px-6">

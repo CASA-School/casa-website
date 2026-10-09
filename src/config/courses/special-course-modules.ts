@@ -5,13 +5,15 @@ import type { ContentLocale } from '@/lib/content/types';
  * Special Courses module catalogue.
  *
  * "Special Courses" is one route standing in for eight distinct products. Every
- * module is a single 90-minute evening session per week over ~12 weeks at
- * EUR 192, which is why the parent course carries `pricing_mode: 'fixed'` and
+ * module is a single 90-minute evening session per week at €16 an evening:
+ * twelve evenings and €192 for most, fewer for a module that starts later in
+ * the term. The parent course carries `pricing_mode: 'fixed'` at €192 and
  * `lessons_per_week: 2` rather than the old 8 / EUR 460.
  *
- * Verified 2026-08-12 against casa-bremen.de/sprachkurse/deutsch-spezialkurse
- * (autumn 2026 term). Dates change every term — they are the first thing to go
- * stale here, so `termLabel` exists to make that obvious in the UI.
+ * Dates, weekdays, times and prices checked 2026-10-09 against FileMaker
+ * (Spezialkurs courses 5031-5044, autumn 2026 term); four had been wrong. Dates
+ * change every term — they are the first thing to go stale here, so
+ * `termLabel` exists to make that obvious in the UI.
  *
  * `skill` drives the module's accent colour via the shared skill tokens, so a
  * writing module reads teal here and in the student app.
@@ -52,17 +54,23 @@ export type SpecialCourseModule = {
   time: string;
   startDate: string;
   endDate: string;
+  /** Evenings in this term. A module that starts later has fewer, at €16 each. */
+  sessions: number;
   priceEur: number;
   skill: SkillKey;
   /** See SpecialCourseDetail. */
   detail?: SpecialCourseDetail;
 };
 
-/** Constant across all eight modules, so the dialog states it once per module. */
+/**
+ * Constant across all eight modules, so the dialog states it once per module.
+ * A full module has twelve evenings at €16 (FileMaker, 2026-10-09); one that
+ * starts later in the term has fewer evenings and costs less (`sessions`).
+ */
 export const SPECIAL_COURSE_CONSTANTS = {
-  weeks: 12,
   minutesPerSession: 90,
   sessionsPerWeek: 1,
+  pricePerSessionEur: 16,
 } as const;
 
 export const SPECIAL_COURSE_TERM_LABEL = 'Herbst 2026';
@@ -77,9 +85,10 @@ export const specialCourseModules: SpecialCourseModule[] = [
     level: 'B1+',
     weekday: { en: 'Monday', de: 'Montag' },
     time: '18:30 - 20:00',
-    startDate: '2026-09-14',
-    endDate: '2026-11-30',
-    priceEur: 192,
+    startDate: '2026-10-05',
+    endDate: '2026-12-14',
+    sessions: 11,
+    priceEur: 176,
     skill: 'speaking',
     detail: {
       intro: {
@@ -99,7 +108,8 @@ export const specialCourseModules: SpecialCourseModule[] = [
     weekday: { en: 'Monday', de: 'Montag' },
     time: '18:30 - 20:00',
     startDate: '2026-09-14',
-    endDate: '2026-11-30',
+    endDate: '2026-12-14',
+    sessions: 12,
     priceEur: 192,
     skill: 'exam',
     detail: {
@@ -118,6 +128,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     time: '18:30 - 20:00',
     startDate: '2026-09-14',
     endDate: '2026-11-30',
+    sessions: 12,
     priceEur: 192,
     skill: 'grammar',
     detail: {
@@ -136,6 +147,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     time: '18:30 - 20:00',
     startDate: '2026-09-17',
     endDate: '2026-12-03',
+    sessions: 12,
     priceEur: 192,
     skill: 'grammar',
     detail: {
@@ -150,11 +162,12 @@ export const specialCourseModules: SpecialCourseModule[] = [
     category: { en: 'Writing', de: 'Schreiben' },
     title: { en: 'Writing made easy: the basics', de: 'Schreiben leicht gemacht – Basales Schreiben' },
     level: 'A2/B1',
-    weekday: { en: 'Tuesday', de: 'Dienstag' },
-    time: '18:30 - 20:00',
-    startDate: '2026-09-15',
-    endDate: '2026-12-01',
-    priceEur: 192,
+    weekday: { en: 'Thursday', de: 'Donnerstag' },
+    time: '18:00 - 19:30',
+    startDate: '2026-10-22',
+    endDate: '2026-12-17',
+    sessions: 9,
+    priceEur: 144,
     skill: 'writing',
     detail: {
       intro: {
@@ -172,6 +185,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     time: '18:30 - 20:00',
     startDate: '2026-09-17',
     endDate: '2026-12-03',
+    sessions: 12,
     priceEur: 192,
     skill: 'writing',
     detail: {
@@ -191,9 +205,10 @@ export const specialCourseModules: SpecialCourseModule[] = [
     level: 'B1/B2',
     weekday: { en: 'Wednesday', de: 'Mittwoch' },
     time: '18:30 - 20:00',
-    startDate: '2026-09-16',
-    endDate: '2026-12-02',
-    priceEur: 192,
+    startDate: '2026-10-07',
+    endDate: '2026-12-16',
+    sessions: 11,
+    priceEur: 176,
     skill: 'speaking',
     detail: {
       intro: {
@@ -214,6 +229,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     time: '18:30 - 20:00',
     startDate: '2026-09-15',
     endDate: '2026-12-01',
+    sessions: 12,
     priceEur: 192,
     skill: 'speaking',
   },

@@ -76,6 +76,7 @@ describe('course registration catalog (fallback mode)', () => {
     const catalog = await getCourseRegistrationCatalog('de');
 
     // 3 Aug (afternoon) and 31 Aug (morning) have begun and cannot be joined.
+    // The terms through autumn 2027 come from FileMaker (db/seeds/0006).
     expect(catalog.optionsByCourseTypeId[INTENSIVE].map((option) => option.startDate)).toEqual([
       '2026-09-28',
       '2026-10-26',
@@ -83,6 +84,13 @@ describe('course registration catalog (fallback mode)', () => {
       '2027-01-04',
       '2027-02-01',
       '2027-03-01',
+      '2027-04-05',
+      '2027-05-03',
+      '2027-05-31',
+      '2027-06-28',
+      '2027-08-02',
+      '2027-08-30',
+      '2027-09-27',
     ]);
     expect(catalog.defaultCourseTypeId).toBe(INTENSIVE);
     expect(catalog.defaultOptionId).toBe('30000000-0000-4000-8000-000000010006');
@@ -94,6 +102,8 @@ describe('course registration catalog (fallback mode)', () => {
     expect(catalog.optionsByCourseTypeId[EVENING].map((option) => option.startDate)).toEqual([
       '2026-08-24',
       '2026-08-25',
+      '2027-01-04',
+      '2027-01-05',
     ]);
     expect(catalog.optionsByCourseTypeId[BILDUNGSZEIT][0].startDate).toBe('2026-08-31');
   });
@@ -134,8 +144,9 @@ describe('course finder next start', () => {
     const finder = await getCourseFinderData('de');
 
     expect(finder.nextStartByCourseId[INTENSIVE]).toBe('2026-09-28');
-    // The evening terms are joined, not started: no "Nächster Start: 24. Aug."
-    expect(finder.nextStartByCourseId[EVENING]).toBeNull();
+    // The running evening terms are joined, not started: no "Nächster Start: 24. Aug."
+    // The next start is the Wintertrimester's first evening.
+    expect(finder.nextStartByCourseId[EVENING]).toBe('2027-01-04');
     // ...and that null is not "to be announced": they can be joined today.
     expect(finder.joinableNowByCourseId[EVENING]).toBe(true);
     expect(finder.joinableNowByCourseId[INTENSIVE]).toBe(false);
@@ -167,12 +178,27 @@ describe('exam sittings (fallback mode)', () => {
   it('drops sittings that have happened or whose deadline has passed', async () => {
     const catalog = await getExamRegistrationCatalog('de');
 
+    // 21.08 and 16.10 are gone (held, or past their deadline); the 2027 days come from FileMaker.
     expect(catalog.optionsByExamTypeId[TELC_B2].map((option) => option.startsAt)).toEqual([
       '2026-11-13T08:00:00.000Z',
+      '2027-01-22T08:00:00.000Z',
+      '2027-03-12T08:00:00.000Z',
+      '2027-05-21T07:00:00.000Z',
+      '2027-06-18T07:00:00.000Z',
+      '2027-08-20T07:00:00.000Z',
+      '2027-10-08T07:00:00.000Z',
     ]);
     expect(catalog.optionsByExamTypeId[TELC_C1].map((option) => option.startsAt)).toEqual([
       '2026-10-30T07:30:00.000Z',
       '2026-11-27T07:30:00.000Z',
+      '2027-02-05T07:30:00.000Z',
+      '2027-03-05T07:30:00.000Z',
+      '2027-04-09T06:30:00.000Z',
+      '2027-05-14T06:30:00.000Z',
+      '2027-06-04T06:30:00.000Z',
+      '2027-07-02T06:30:00.000Z',
+      '2027-09-03T06:30:00.000Z',
+      '2027-10-01T06:30:00.000Z',
     ]);
     expect(catalog.optionsByExamTypeId[TELC_C1][0].deadlineStatus).toBe('closing-soon');
   });
@@ -191,12 +217,13 @@ describe('exam sittings (fallback mode)', () => {
   it('keeps a sitting open through its deadline day in Bremen', async () => {
     setClock('2026-10-12T23:30:00+02:00');
     const onTheDay = await getExamRegistrationCatalog('de');
-    expect(onTheDay.optionsByExamTypeId[TELC_B2].map((option) => option.registrationDeadline)).toEqual(['2026-10-12']);
+    expect(onTheDay.optionsByExamTypeId[TELC_B2][0].registrationDeadline).toBe('2026-10-12');
     expect(onTheDay.optionsByExamTypeId[TELC_B2][0].deadlineStatus).toBe('closing-soon');
 
     setClock('2026-10-13T00:30:00+02:00');
     const dayAfter = await getExamRegistrationCatalog('de');
-    expect(dayAfter.optionsByExamTypeId[TELC_B2]).toEqual([]);
+    expect(dayAfter.optionsByExamTypeId[TELC_B2].map((option) => option.registrationDeadline)).not.toContain('2026-10-12');
+    expect(dayAfter.optionsByExamTypeId[TELC_B2][0].registrationDeadline).toBe('2026-12-21');
   });
 });
 

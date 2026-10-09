@@ -263,7 +263,7 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
     /* ------------------------------------------------------------------ */
     /*
      * Facts from special-course-modules.ts: every module is one evening a week,
-     * 90 minutes, 12 weeks, 192 EUR, in the Herbst 2026 term. Levels across the
+     * 90 minutes, usually 12 weeks at 192 EUR (16 EUR an evening), in the Herbst 2026 term. Levels across the
      * catalogue run A2/B1 to C1+, and the four skills are grammar, writing,
      * speaking and exam preparation.
      */
@@ -277,8 +277,8 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
             ? 'Jedes Modul hat einen Schwerpunkt, zum Beispiel Grammatik, Schreiben, Aussprache, Sprechen oder die Vorbereitung auf eine Prüfung.'
             : 'Each module has one focus, such as grammar, writing, pronunciation, speaking or preparing for an exam.',
           de
-            ? 'Ein Modul läuft 12 Wochen lang an einem Abend pro Woche, jeweils 90 Minuten. Du kannst es neben einem anderen Kurs oder auch einzeln besuchen.'
-            : 'A module runs for 12 weeks, on one evening a week for 90 minutes. You can take it alongside another course or on its own.',
+            ? 'Ein Modul läuft meist 12 Wochen lang an einem Abend pro Woche, jeweils 90 Minuten. Du kannst es neben einem anderen Kurs oder auch einzeln besuchen.'
+            : 'A module usually runs for 12 weeks, on one evening a week for 90 minutes. You can take it alongside another course or on its own.',
           de
             ? 'Je nach Modul liegt das Einstiegsniveau zwischen A2/B1 und C1+.'
             : 'Depending on the module, the entry level is between A2/B1 and C1+.',
