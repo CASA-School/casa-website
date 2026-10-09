@@ -90,7 +90,7 @@ staff conclude nothing had come in.
 - `src/lib/admin`: the pool itself, auth, password hashing, the shared queue
   layer, per-domain reads, and the write path from the public site (`intake.ts`).
 - `src/lib/mock`: fallback dataset for public careers content.
-- `src/config`: nav, brand tokens, page patterns, and content fixtures.
+- `src/config`: nav, brand tokens and content fixtures.
 - `db/migrations`: SQL-first schema, `0001` … `0013_booking_accommodation.sql`.
 - `db/seeds`: baseline public data. Applied to real databases, so no fake people.
 - `scripts/admin`: `seed-staff.mjs` (first account), `seed-demo.mjs` (demo records).
@@ -122,7 +122,6 @@ staff conclude nothing had come in.
   - `ADMIN_DB_POOL_MAX` — pool size, default 5
 - Host routing:
   - `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST`
-  - `CASA_ENABLE_INTERNAL_SURFACES`
 - Public submission integrations:
   - `FORM_DELIVERY_MODE`, `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID`,
     `FORM_RECIPIENT_<FORM>` — lead notification mail (see Runtime Modes)

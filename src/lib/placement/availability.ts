@@ -9,8 +9,7 @@
  *
  * On in local development and the e2e suite, off on a production build. To open
  * it on a deployment, set CASA_ENABLE_PLACEMENT_TEST=true (read per request, no
- * rebuild); remove the variable to close it again. Same parsing as
- * `internalSurfacesEnabled()`, kept separate so opening one never opens the other.
+ * rebuild); remove the variable to close it again.
  */
 export function placementTestEnabled(): boolean {
   const flag = process.env.CASA_ENABLE_PLACEMENT_TEST?.trim().toLowerCase();

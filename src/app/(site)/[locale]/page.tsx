@@ -420,15 +420,10 @@ export default async function HomePage() {
       </section>
 
       {/*
-        Heading rail + content column, the composition every band on
-        /landing-page-alt uses and the reason that page reads as designed while
-        this one read as a tunnel. The header used to sit ON TOP of a full-width
-        4-up row, which gives the eye nothing to anchor on and makes the band
-        indistinguishable from the one above it at any width.
-
-        The 0.82/1.18 ratio (0.41/0.59) is the reference page's own — see
-        `alt-why-casa` at src/app/landing-page-alt/page.tsx:477, which is this
-        exact shape: four cards in a 2x2 beside a rail.
+        Heading rail + content column. The header used to sit ON TOP of a
+        full-width 4-up row, which gives the eye nothing to anchor on and makes
+        the band indistinguishable from the one above it at any width. Four
+        cards in a 2x2 beside the rail, at 0.82/1.18 (0.41/0.59).
       */}
       <BandSeam />
 
@@ -469,8 +464,7 @@ export default async function HomePage() {
         <Container className="space-y-12 md:space-y-14">
 
           {/*
-            Centred alternating rows, ported from /design-system/layout-patterns
-            (pattern 5). Replaces a 3-up card grid whose photos rendered at
+            Centred alternating rows. Replaces a 3-up card grid whose photos rendered at
             2.97:1 and whose `min-h-[25rem]` floor left ~80px of dead space above
             every CTA.
 
@@ -479,8 +473,7 @@ export default async function HomePage() {
             uniform slab. Content is held at 68rem inside the site frame so the
             reading width stays tight while the band itself stays full width.
 
-            Kept LIGHT deliberately. The design-system version sits on ink-deep,
-            but the very next band (`exam-preparation-pathways`) is the page's
+            Kept LIGHT deliberately. The very next band (`exam-preparation-pathways`) is the page's
             only dark section and is load-bearing as the mid-page reset — two
             dark bands in a row would destroy that contrast. Composition carries
             the distinction here instead of colour.
