@@ -14,7 +14,7 @@ https://ca-casa-website.livelycliff-6187a034.germanywestcentral.azurecontainerap
 | --- | --- | --- |
 | Resource group | `rg-casa-website-prod` | germanywestcentral |
 | Container App | `ca-casa-website` | shared `cae-casa-prod` env, external ingress, port 3000 |
-| Scaling | `minReplicas: 0`, `maxReplicas: 2` | 0.5 vCPU / 1 GiB |
+| Scaling | `minReplicas: 1`, `maxReplicas: 2` (since 2026-10-09) | 0.5 vCPU / 1 GiB |
 | Image | `acrcasaprodf8d745.azurecr.io/casa-website` | pinned by digest, built by `az acr build` |
 | Identity | `id-casa-website-prod` | `AcrPull` on the shared registry; no registry admin credentials |
 
@@ -302,6 +302,12 @@ The baseline is not what blows budgets. These are:
 - **PostgreSQL storage auto-grow**, which ratchets up and never comes back down.
 
 ### Revision: use `minReplicas: 1`, not 0
+
+**Applied 2026-10-09** (`az containerapp update --min-replicas 1`), after measuring the cost of
+scale-to-zero on the live app: the first request after idle took 19 s against 0.15 s warm, and
+every restart emptied the image optimizer's cache, so photos paid AVIF encoding again (3.8 s for one
+1920px image on 0.5 vCPU). The same pass switched the optimizer to WebP and made `deploy.sh` warm
+every page and image size after each release.
 
 Earlier in this plan scale-to-zero was recommended to save money. **That was the wrong call for
 this particular site.** Its entire purpose is discovery and lead capture, and it is being tuned
