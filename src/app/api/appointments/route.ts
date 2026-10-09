@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { rateLimit } from '@/lib/api/rate-limit';
 import { apiError, apiSuccess } from '@/lib/api/response';
 import { isDatabaseConfigured } from '@/lib/db/env';
-import { appointmentDays, appointmentInstant, APPOINTMENT_TIMES, isAppointmentDate } from '@/lib/appointments/schedule';
+import { appointmentDays, appointmentInstant, APPOINTMENT_TIMES, isAppointmentDate, parseBlockedDates } from '@/lib/appointments/schedule';
 import { reserveAppointment, takenAppointments } from '@/lib/appointments/repository.server';
 import { confirmToSender, notifyForm } from '@/lib/notifications/forms.server';
 
@@ -21,7 +21,7 @@ const schema = z.object({
 });
 
 function blockedDates() {
-  return new Set((process.env.GROUP_APPOINTMENT_BLOCKED_DATES ?? '').split(',').map(value => value.trim()));
+  return parseBlockedDates(process.env.GROUP_APPOINTMENT_BLOCKED_DATES);
 }
 
 /*
