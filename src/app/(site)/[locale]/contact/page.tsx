@@ -34,6 +34,8 @@ type TopicConfig = {
     de: string;
   };
   aliases: string[];
+  /** Offered only when a link asks for it with `?topic=`. */
+  onlyWhenRequested?: boolean;
 };
 
 type ContactPageProps = {
@@ -41,6 +43,13 @@ type ContactPageProps = {
 };
 
 const topicCatalog: TopicConfig[] = [
+  {
+    // The new-website notice links here (src/config/site-notice.ts).
+    key: 'website-feedback',
+    labels: { en: 'Website feedback', de: 'Feedback zur Website' },
+    aliases: ['website-feedback', 'feedback'],
+    onlyWhenRequested: true,
+  },
   {
     key: 'course-advice',
     labels: { en: 'Courses', de: 'Kurse' },
@@ -185,14 +194,16 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   const rhythm = getLayoutRhythm('legal');
 
   const copy = formCopyByLocale[locale];
-  const topics = topicCatalog.map((topic) => ({
-    key: topic.key,
-    label: locale === 'de' ? topic.labels.de : topic.labels.en,
-  }));
   const topicParamValue = Array.isArray(resolvedSearchParams.topic)
     ? resolvedSearchParams.topic[0]
     : resolvedSearchParams.topic;
   const initialTopicKey = getInitialTopicKey(topicParamValue, locale);
+  const topics = topicCatalog
+    .filter((topic) => !topic.onlyWhenRequested || topic.key === initialTopicKey)
+    .map((topic) => ({
+      key: topic.key,
+      label: locale === 'de' ? topic.labels.de : topic.labels.en,
+    }));
 
   const contactSchema = {
     '@context': 'https://schema.org',

@@ -9,6 +9,7 @@ import {
   FileCheck2,
   GraduationCap,
   Home,
+  LaptopMinimalCheck,
   Loader2,
   MessageCircle,
   Send,
@@ -122,7 +123,8 @@ const initialFields = {
  * the course formats, ink for exams, yellow for accommodation, blue for the
  * rest. A key the page adds later falls back to the blue speech bubble.
  */
-const topicLook: Record<string, { icon: LucideIcon; meaning: Meaning }> = {
+const topicLook: Record<string, { icon: LucideIcon; meaning: Meaning; wide?: boolean }> = {
+  'website-feedback': { icon: LaptopMinimalCheck, meaning: 'orientation', wide: true },
   'course-advice': { icon: GraduationCap, meaning: 'courses' },
   'exam-registration': { icon: FileCheck2, meaning: 'exams' },
   'accommodation-support': { icon: Home, meaning: 'arrival' },
@@ -510,7 +512,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             The topic as six chips, not a dropdown: the choice is the first thing
             the form asks, and a closed select hid the six answers behind a click.
             Native radios, so arrow keys move between them and the browser
-            announces "1 of 6".
+            announces "1 of 6". Website feedback joins them as a full-width
+            seventh only when the new-website notice sent the visitor here.
           */}
           <fieldset id="topic" tabIndex={-1} className={cn(formFieldGroupClassName, 'min-w-0 sm:col-span-2')}>
             <legend className={cn(formLabelClassName, 'mb-2')}>
@@ -527,6 +530,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                     key={option.key}
                     className={cn(
                       'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 py-2.5 text-sm font-semibold leading-snug text-[var(--casa-ink)] transition-[border-color,background-color,box-shadow] duration-150',
+                      look.wide && 'col-span-2 sm:col-span-3',
                       'has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
                       checked
                         ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/45 shadow-[inset_0_0_0_1px_var(--casa-accent-text)]'
@@ -550,7 +554,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                     <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses[look.meaning].circle)}>
                       <TopicIcon className="size-[1.125rem]" aria-hidden />
                     </span>
-                    <span className="min-w-0">{option.label}</span>
+                    <span className="min-w-0 hyphens-auto">{option.label}</span>
                     {checked ? <CheckCircle2 className="ml-auto size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden /> : null}
                   </label>
                 );

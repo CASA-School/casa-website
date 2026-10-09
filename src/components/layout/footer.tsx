@@ -95,7 +95,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
   );
 
   return (
-    <footer className="bg-[var(--casa-ink-deep)] text-white">
+    <footer data-site-footer className="bg-[var(--casa-ink-deep)] text-white">
       {/*
         The line over the footer: the logo stripe in thirds (globals.css,
         .casa-logo-stripe), the same as the header's bottom edge. It replaced a
