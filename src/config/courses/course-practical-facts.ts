@@ -229,17 +229,20 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     /*
      * CASA's current terms for this course (Rahman, 2026-10-09): Fridays
      * 13:00–16:30, ten sessions, €400, the book €45.90, and the €50 enrolment
-     * fee on a first registration. There are no set dates: CASA collects the
+     * fee on a first registration. 40 teaching units of 45 minutes, four per
+     * Friday: FileMaker course 4868 („Deutsch für Mediziner", 16.01.–27.03.26)
+     * records 40, and 4833 and 4947 ran the same ten Fridays at the same price. There are no set dates: CASA collects the
      * people interested (the interest list, config/courses/interest-list.ts)
      * and fixes the dates once the group is big enough.
      */
     summary: [
       { label: { en: 'Course days', de: 'Kurstage' }, value: { en: 'Fridays, 13:00–16:30', de: 'Freitags, 13:00–16:30 Uhr' } },
+      { label: { en: 'Lessons', de: 'Umfang' }, value: { en: '40 lessons of 45 minutes, 4 each Friday', de: '40 UE à 45 Minuten, 4 pro Termin' } },
       { label: { en: 'Course fee', de: 'Kursgebühr' }, value: { en: '€400 for 10 sessions', de: '400\u00a0€ für 10 Termine' } },
     ],
     fees: [
       {
-        label: { en: 'Course fee, 10 sessions', de: 'Kursgebühr, 10 Termine' },
+        label: { en: 'Course fee, 10 sessions (40 lessons)', de: 'Kursgebühr, 10 Termine (40 UE)' },
         amount: EUR('€400'),
       },
       {
@@ -269,8 +272,8 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
      */
     conditions: [
       {
-        en: 'The course runs on Fridays from 13:00 to 16:30, over ten sessions.',
-        de: 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen.',
+        en: 'The course runs on Fridays from 13:00 to 16:30, over ten sessions of four 45-minute lessons each.',
+        de: 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen mit je vier Unterrichtseinheiten à 45 Minuten.',
       },
       {
         en: 'The course is for doctors and other healthcare professionals. Doctors can take it before or after the Fachsprachprüfung Medizin, the specialist language exam for doctors. It is based on levels B2 and C1 of the Common European Framework of Reference.',

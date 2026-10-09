@@ -221,8 +221,8 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
             ? 'Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.'
             : 'You practise conversations, listening and the written documentation your work involves.',
           de
-            ? 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen.'
-            : 'The course runs on Fridays from 13:00 to 16:30, over ten sessions.',
+            ? 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen mit je 4 UE.'
+            : 'The course runs on Fridays from 13:00 to 16:30, over ten sessions of 4 lessons.',
         ],
       },
       nextSteps: {

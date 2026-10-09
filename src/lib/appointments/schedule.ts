@@ -1,3 +1,5 @@
+import { isSchoolClosed } from '@/config/school-closures';
+
 /** CASA-approved hours. Dates and times always refer to Bremen, never the visitor's zone. */
 export const APPOINTMENT_ZONE = 'Europe/Berlin';
 export const APPOINTMENT_TIMES = ['10:00', '10:30', '13:00', '13:30'] as const;
@@ -74,7 +76,7 @@ export function isAppointmentDate(date: string, now = new Date()) {
   const today = bremenDate(now);
   // Monday to Thursday: Ina does not work Friday to Sunday.
   return date > today && date <= addDays(today, APPOINTMENT_HORIZON_DAYS)
-    && parsed.getUTCDay() >= 1 && parsed.getUTCDay() <= 4 && !isPublicHoliday(date);
+    && parsed.getUTCDay() >= 1 && parsed.getUTCDay() <= 4 && !isPublicHoliday(date) && !isSchoolClosed(date);
 }
 
 export type AppointmentDay = { date: string; times: string[] };
