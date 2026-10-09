@@ -24,10 +24,16 @@ function blockedDates() {
   return new Set((process.env.GROUP_APPOINTMENT_BLOCKED_DATES ?? '').split(',').map(value => value.trim()));
 }
 
+/*
+ * Without a database (the fallback mode) the dialog still offers Ina's
+ * schedule and a request still reaches her, by mail alone: nothing can hold a
+ * time then, so `held` is false and no copy anywhere says the time is
+ * reserved. Ina checks the time when she confirms, as she always does.
+ */
 export async function GET() {
-  if (!isDatabaseConfigured()) return apiError('UNAVAILABLE', 'Appointment requests are currently unavailable.', 503);
+  if (!isDatabaseConfigured()) return apiSuccess({ days: appointmentDays(new Set(), new Date(), blockedDates()), held: false });
   try {
-    return apiSuccess({ days: appointmentDays(await takenAppointments(), new Date(), blockedDates()) });
+    return apiSuccess({ days: appointmentDays(await takenAppointments(), new Date(), blockedDates()), held: true });
   } catch {
     return apiError('UNAVAILABLE', 'Appointment requests are currently unavailable.', 503);
   }
@@ -47,8 +53,26 @@ export async function POST(request: Request) {
     return apiError('INVALID_SLOT', 'Please choose another date.', 400);
   }
   const startsAt = appointmentInstant(input.date, input.time);
-  if (!startsAt || !isDatabaseConfigured()) return apiError('UNAVAILABLE', 'Appointment requests are currently unavailable.', 503);
+  if (!startsAt) return apiError('UNAVAILABLE', 'Appointment requests are currently unavailable.', 503);
   const requestId = crypto.randomUUID();
+  const notification = {
+    requestId, submittedAt: new Date().toISOString(), locale: input.locale, firstName: input.firstName, lastName: input.lastName, email: input.email,
+    startsAt: startsAt.toISOString(), localDate: input.date, localTime: input.time,
+    timeZone: 'Europe/Berlin', durationMinutes: 30, message: input.message,
+  };
+
+  // No database: the mail to Ina is the only record, so it has to go out.
+  if (!isDatabaseConfigured()) {
+    const unheld = { ...notification, held: false };
+    const delivery = await notifyForm('appointment', unheld, null, { stored: false });
+    if (!delivery.delivered) return apiError('UNAVAILABLE', 'Your request could not be sent. Please try again.', 503);
+    const confirmation = await confirmToSender('appointment', unheld);
+    return apiSuccess(
+      { requestId, status: 'requested', held: false, notified: true, confirmationSent: confirmation.reachedSender },
+      201,
+    );
+  }
+
   try {
     const reserved = await reserveAppointment(startsAt, {
       requestId, locale: input.locale, firstName: input.firstName,
@@ -64,17 +88,12 @@ export async function POST(request: Request) {
     console.error('[appointments] reservation failed', { requestId });
     return apiError('UNAVAILABLE', 'Your request could not be saved. Please try again.', 503);
   }
-  const notification = {
-    requestId, submittedAt: new Date().toISOString(), locale: input.locale, firstName: input.firstName, lastName: input.lastName, email: input.email,
-    startsAt: startsAt.toISOString(), localDate: input.date, localTime: input.time,
-    timeZone: 'Europe/Berlin', durationMinutes: 30, message: input.message,
-  };
   const [delivery, confirmation] = await Promise.all([
     notifyForm('appointment', notification, null, { stored: true }),
     confirmToSender('appointment', notification),
   ]);
   return apiSuccess(
-    { requestId, status: 'requested', notified: delivery.delivered, confirmationSent: confirmation.reachedSender },
+    { requestId, status: 'requested', held: true, notified: delivery.delivered, confirmationSent: confirmation.reachedSender },
     201,
   );
 }

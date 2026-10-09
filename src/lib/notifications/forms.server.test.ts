@@ -194,6 +194,14 @@ describe('public form notifications', () => {
     expect(content).toContain(encodeURIComponent('Hallo Jonas,\n\nvielen Dank für deine Anfrage.'));
     expect(content).toContain('Diese Uhrzeit ist ab sofort für andere Anfragen reserviert.');
   });
+  it('never calls an appointment reserved when nothing could hold it', async () => {
+    const content = (await sentMessage('appointment', {
+      requestId: 'r', firstName: 'Jonas', lastName: 'Becker', email: 'jonas@example.com',
+      localDate: '2026-10-08', localTime: '10:30', durationMinutes: 30, locale: 'de', held: false,
+    })).message.body.content as string;
+    expect(content).toContain('Diese Uhrzeit ist nicht reserviert');
+    expect(content).not.toContain('ab sofort für andere Anfragen reserviert');
+  });
   it('requires an explicit valid recipient in live mode', async () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'live');
     vi.stubEnv('FORM_RECIPIENT_CONTACT', '');
@@ -378,6 +386,18 @@ describe('confirmation to the sender', () => {
     const contact = (await confirmation('contact', { requestId: 'r', locale: 'de', firstName: 'Ada', email: 'ada@example.com' }))
       .message.body.content as string;
     expect(contact).toContain('href="tel:+4942146041430"');
+  });
+
+  it('confirms an appointment request without promising a time nothing could hold', async () => {
+    const appointment = {
+      requestId: 'r', locale: 'de', firstName: 'Jonas', email: 'jonas@example.com',
+      localDate: '2026-10-08', localTime: '10:30', durationMinutes: 30,
+    };
+    const held = (await confirmation('appointment', appointment)).message.body.content as string;
+    expect(held).toContain('Deine Wunschzeit ist vorerst reserviert');
+    const unheld = (await confirmation('appointment', { ...appointment, held: false })).message.body.content as string;
+    expect(unheld).toContain('Deine Terminanfrage ist angekommen');
+    expect(unheld).not.toMatch(/reserviert|wieder frei/);
   });
 
   it('says „du“ to everyone: a learner, a group organiser and a company', async () => {

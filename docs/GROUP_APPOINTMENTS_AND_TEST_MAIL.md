@@ -100,6 +100,24 @@ applications now send the person a branded confirmation in the form's language
 `bewerbungen@` is being retired. The privacy policy (§16) states this routing, so a change here
 is a change there (`docs/PRIVACY_POLICY.md`).
 
+## Without a database — 2026-10-09
+
+Rahman: the booking must happen in the popup, never send the visitor to the contact page. The
+Azure deployment has no database yet, so the popup used to say „Die Terminauswahl ist gerade nicht
+verfügbar" and link to `/contact`. Now, without `DATABASE_URL`:
+
+- `GET /api/appointments` returns Ina's schedule (`appointmentDays` with nothing taken) and
+  `held: false`.
+- `POST` skips the reservation and sends the staff alert (`stored: false`) and the sender's
+  confirmation with `held: false`. If the alert does not go out the route answers 503, since
+  nothing else would reach CASA.
+- Nothing can hold a time, so nothing says it is held: the popup thanks with „Ina prüft deine
+  Wunschzeit …", the confirmation takes the `unheld` variant („Deine Terminanfrage ist
+  angekommen", no „reserviert", no „gib die Zeit wieder frei"), and the staff alert says the time
+  is not reserved and must be checked before confirming.
+- Two visitors can ask for the same time; Ina sees both and confirms one. With the database the
+  unique slot constraint still arbitrates, as below.
+
 ## Evidence, cause and implementation
 
 The decision-rail booking buttons were inert. There was no calendar service or email sender

@@ -95,8 +95,11 @@ webhook — but only with `FORM_DELIVERY_MODE=live`. Test mode is the default,
 sends to `admin@casa-bremen.de` and never calls a webhook; live mode needs a
 `FORM_RECIPIENT_<FORM>` per form or it sends nothing. Contact and course/exam
 registration then answer **503** when nothing was stored and nothing delivered,
-and succeed with `stored: false` when the notification went out. Group appointments and career
-applications answer 503 whenever there is no database, mail or not. With neither
+and succeed with `stored: false` when the notification went out. Group appointments work the same
+way (2026-10-09): without a database the popup still offers Ina's schedule, the request goes out by
+mail alone with `held: false`, nothing holds the time and no copy calls it reserved, and the route
+answers 503 if the mail does not go out. Career applications answer 503 whenever there is no
+database, mail or not. With neither
 a database nor mail — the Azure revision as deployed — every lead form fails;
 `docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md` has the launch checklist.
 The sender also gets a confirmation email (`confirmToSender`): to `admin@` in test mode, to
