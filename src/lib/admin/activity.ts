@@ -227,6 +227,8 @@ export function describeActivity(entry: ActivityEntry): string {
       return `updated the account ${String(entry.detail?.email ?? '')}`.trim();
     case 'staff_microsoft_unlinked':
       return 'unlinked an account from Microsoft';
+    case 'staff_password_changed':
+      return 'changed their password';
     case 'staff_role_changed':
       return `changed ${String(entry.detail?.email ?? 'an account')} to ${String(
         entry.detail?.to ?? 'a new role'

@@ -319,6 +319,15 @@ export async function signOut(): Promise<void> {
   store.delete(SESSION_COOKIE);
 }
 
+/** Ends every session for one account except this request's own: a colleague who changed their password stays signed in here. */
+export async function revokeOtherSessions(staffUserId: string): Promise<void> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  await query(`DELETE FROM staff_sessions WHERE staff_user_id = $1 AND token_hash <> $2`, [
+    staffUserId,
+    token ? hashToken(token) : '',
+  ]);
+}
+
 /** Ends every session for one account. Used when a role or password changes. */
 export async function revokeAllSessions(staffUserId: string): Promise<void> {
   await query(`DELETE FROM staff_sessions WHERE staff_user_id = $1`, [staffUserId]);

@@ -10,7 +10,8 @@ import type { StaffUser } from '@/lib/admin/auth';
  *
  * Sticky, thin, and it holds the things that are true everywhere rather than
  * anything about the page underneath: the control that folds the rail, the
- * date with a way back to the day view, and who is signed in.
+ * date with a way back to the day view, and who is signed in — their name
+ * opens their own account, where they change their password.
  *
  * WHY IDENTITY MOVED HERE from the foot of the sidebar. It was the only thing
  * down there, it collided with the browser's own bottom-left furniture, and it
@@ -64,16 +65,22 @@ export function TopBar({
 
       <span aria-hidden="true" className="hidden h-6 w-px bg-ws-line sm:block" />
 
-      <span className="flex items-center gap-2.5">
-        <Avatar name={user.name} size={30} />
-        <span className="hidden min-w-0 sm:block">
-          <span className="block truncate text-sm font-semibold leading-tight text-[var(--casa-ink)]">
-            {user.name}
+      <span className="flex items-center gap-1">
+        <Link
+          href="/admin/account"
+          title="Your account"
+          className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-ws-sunk"
+        >
+          <Avatar name={user.name} size={30} />
+          <span className="hidden min-w-0 sm:block">
+            <span className="block truncate text-sm font-semibold leading-tight text-[var(--casa-ink)]">
+              {user.name}
+            </span>
+            <span className="block text-[0.7rem] leading-tight text-[var(--casa-text-subtle)]">
+              {roleLabel(user.role)}
+            </span>
           </span>
-          <span className="block text-[0.7rem] leading-tight text-[var(--casa-text-subtle)]">
-            {roleLabel(user.role)}
-          </span>
-        </span>
+        </Link>
         <form action={signOutAction}>
           <button
             type="submit"

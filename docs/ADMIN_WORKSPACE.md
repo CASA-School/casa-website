@@ -529,9 +529,14 @@ out of every `assigned_to` and leaves the activity trail pointing at nobody.
 Deactivating revokes access on the spot (every live session is closed) and
 keeps the history readable. There is no delete button.
 
-There is no self-service password reset. It would need outbound email the
-workspace does not have, and a reset link from an address nobody monitors is a
-security hole dressed as a feature.
+Every colleague changes their own password on **Your account** — their name in
+the top bar opens it (`/admin/account`, 2026-10-10): current password, new one
+twice; the session in use stays open and every other one is closed. An account
+with no password yet sets its first one there without the current field. There
+is no emailed reset link: it would need outbound email the workspace does not
+have, and a reset link from an address nobody monitors is a security hole
+dressed as a feature. A forgotten password is reset by an owner or admin on the
+Team screen, and an owner's from the shell (`npm run admin:password`).
 
 ---
 

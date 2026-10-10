@@ -41,10 +41,10 @@ import { listStaff } from '@/lib/admin/staff';
  * live session is closed, not left to expire — and keeps the history readable.
  * There is no delete button anywhere on this screen.
  *
- * Passwords are set BY an owner or admin, and there is no self-service reset.
- * A reset flow needs outbound email the workspace does not have, and a reset
- * link emailed from an address nobody monitors is a security hole dressed as a
- * feature. Nine people work here; asking one of them is faster anyway.
+ * Passwords: an owner or admin sets anyone's here, and each colleague changes
+ * their own on Your account (their name in the top bar). There is no emailed
+ * reset link: it needs outbound email the workspace does not have, and a link
+ * from an address nobody monitors is a security hole dressed as a feature.
  */
 export default async function TeamPage({
   searchParams,
