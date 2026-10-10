@@ -452,11 +452,16 @@ is still valid.
 - **No outbound email from the workspace.** Every "Reply" button is a `mailto:`,
   and there is no self-service password reset — an owner sets one from the Team
   screen, or the colleague signs in with Microsoft.
-- **Microsoft sign-in is built but not registered (2026-10-10).** The workspace
-  signs colleagues in by full name or Outlook address (migration 0020) and offers
-  "Sign in with Microsoft" once the three `AUTH_MICROSOFT_*` variables exist.
-  `infra/azure/entra-workspace-app.sh` creates the Entra app registration and wires
-  the Container App; it changes CASA's tenant, so it runs only with Rahman's go-ahead.
+- **Microsoft sign-in is registered (2026-10-10).** The workspace signs colleagues
+  in by full name or Outlook address (migration 0020) and offers "Sign in with
+  Microsoft" when the three `AUTH_MICROSOFT_*` variables exist. The Entra app
+  „CASA Workspace" (client id `6c1f6956-97b0-4e4c-ae2a-28e8e2f2864c`, single tenant,
+  tenant-wide consent for `openid profile email`) was created by
+  `infra/azure/entra-workspace-app.sh`, which also put the variables and the secret
+  (two years) on `ca-casa-website`. Its callbacks are `admin.casa-bremen.de` and
+  localhost 3000/3027; opening the workspace on another host means adding that
+  host's callback (rerun the script with it in `REDIRECTS`). The script changes
+  CASA's tenant, so it runs only with Rahman's go-ahead.
 - ~~`lucide-react` missing~~ **Resolved (verified 2026-08-12).** `lucide-react` is still
   absent from `package.json` and `node_modules`, but `tsconfig.json` now maps it via a
   `paths` alias to `./src/lib/icons/streamline-lucide-adapter`. `npm run typecheck` and
