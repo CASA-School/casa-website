@@ -73,7 +73,23 @@ With no `ADMIN_PASSWORD` it generates one and prints it **once**. Pass
 `ADMIN_PASSWORD=...` to choose your own. Running it twice reports that the
 account exists rather than resetting anything — use the Team screen for that.
 
-Sign in at `http://localhost:3000/admin`.
+That account is an **owner**, the workspace's super admin: on the Team screen
+an owner adds accounts (one at a time, or the office team in one go), sets
+anyone's password, its own included, changes roles and deactivates. Only an
+owner can make or remove another owner, and the last active owner cannot be
+removed.
+
+**When no owner can sign in**, set a new password from the shell. It changes
+the password and closes that account's sessions, nothing else:
+
+```bash
+ADMIN_EMAIL=you@casa-bremen.de npm run admin:password
+```
+
+On Azure the same runs inside the network as a job:
+`ADMIN_EMAIL=… ADMIN_PASSWORD=… ./infra/azure/db-job.sh password`.
+
+Sign in at `http://localhost:3000/admin`, with your full name or your address.
 
 ### Plausible records to look at
 

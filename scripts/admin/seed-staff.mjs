@@ -18,6 +18,13 @@
  *
  * Idempotent: run twice and the second run reports the account already exists
  * rather than resetting its password. Use the Team screen for that.
+ *
+ * THE WAY BACK IN. When no owner can sign in — a forgotten password, a laptop
+ * database nobody wrote down — `npm run admin:password` (`--reset`) sets a new
+ * password for the account with ADMIN_EMAIL, generated and printed once unless
+ * ADMIN_PASSWORD is given, and closes every session it had. It changes nothing
+ * else: not the role, not the name. On Azure: `./infra/azure/db-job.sh password`.
+ * Everyone else's password is reset by an owner on the Team screen.
  */
 import { randomBytes, scrypt as scryptCallback } from 'node:crypto';
 
@@ -60,16 +67,18 @@ async function hashPassword(password) {
   ].join('$');
 }
 
+const reset = process.argv.includes('--reset');
 const email = (process.env.ADMIN_EMAIL ?? 'admin@casa-bremen.de').trim().toLowerCase();
 const name = (process.env.ADMIN_NAME ?? 'CASA Owner').trim();
 
-// 24 random bytes as base64url: ~32 characters, well past the 12-character
+// 24 random bytes as base64url: ~32 characters, well past the 8-character
 // floor, and safe to paste into a terminal or a password manager.
 const generated = !process.env.ADMIN_PASSWORD;
 const password = process.env.ADMIN_PASSWORD ?? randomBytes(24).toString('base64url');
 
-if (password.length < 12) {
-  console.error('ADMIN_PASSWORD must be at least 12 characters.');
+// MIN_PASSWORD_LENGTH in src/lib/admin/password.ts.
+if (password.length < 8) {
+  console.error('ADMIN_PASSWORD must be at least 8 characters.');
   process.exit(1);
 }
 
@@ -80,9 +89,30 @@ try {
     email,
   ]);
 
+  if (reset) {
+    if (existing.rowCount === 0) {
+      console.error(`\nNo account has the address ${email}.\n`);
+      process.exit(1);
+    }
+    const { id, role } = existing.rows[0];
+    await client.query('BEGIN');
+    await client.query('UPDATE staff_users SET password_hash = $2, password_set_at = now(), updated_at = now() WHERE id = $1', [
+      id,
+      await hashPassword(password),
+    ]);
+    await client.query('DELETE FROM staff_sessions WHERE staff_user_id = $1', [id]);
+    await client.query('COMMIT');
+    console.log(`\nNew password set for ${email} (${role}). Every session it had is closed.\n`);
+    if (generated) {
+      console.log(`  Password  ${password}`);
+      console.log('\nThis is the only time the password is shown. Save it now.\n');
+    }
+    process.exit(0);
+  }
+
   if (existing.rowCount > 0) {
     console.log(`\n${email} already has an account (${existing.rows[0].role}).`);
-    console.log('To change its password, use the Team screen in the workspace.\n');
+    console.log('To change its password: an owner on the Team screen, or `npm run admin:password`.\n');
     process.exit(0);
   }
 

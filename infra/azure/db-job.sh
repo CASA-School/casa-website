@@ -8,6 +8,8 @@
 #                                       ADMIN_DATABASE_URL and APP_DB_PASSWORD)
 #   ./infra/azure/db-job.sh owner       the first workspace account (needs
 #                                       ADMIN_EMAIL, ADMIN_NAME, ADMIN_PASSWORD)
+#   ./infra/azure/db-job.sh password    a new password for an existing account
+#                                       (needs ADMIN_EMAIL, ADMIN_PASSWORD)
 #
 # The server psql-casa-website-f8d745 (Belgium Central, 2026-10-09) has no public
 # access; it sits in the private data network next to the student app's, so a
@@ -45,10 +47,11 @@ case "$TASK" in
     secrets+=("admin-database-url=$ADMIN_DATABASE_URL" "app-db-password=$APP_DB_PASSWORD")
     envs+=("ADMIN_DATABASE_URL=secretref:admin-database-url" "APP_DB_PASSWORD=secretref:app-db-password")
     ;;
-  owner)
-    : "${ADMIN_EMAIL:?set ADMIN_EMAIL}" "${ADMIN_NAME:?set ADMIN_NAME}" "${ADMIN_PASSWORD:?set ADMIN_PASSWORD}"
+  owner|password)
+    : "${ADMIN_EMAIL:?set ADMIN_EMAIL}" "${ADMIN_PASSWORD:?set ADMIN_PASSWORD}"
+    [ "$TASK" = password ] || : "${ADMIN_NAME:?set ADMIN_NAME}"
     secrets+=("database-url=$(az containerapp secret show -n "$APP" -g "$RG" --secret-name database-url --query value -o tsv)" "admin-password=$ADMIN_PASSWORD")
-    envs+=("DATABASE_URL=secretref:database-url" "ADMIN_PASSWORD=secretref:admin-password" "ADMIN_EMAIL=$ADMIN_EMAIL" "ADMIN_NAME=$ADMIN_NAME")
+    envs+=("DATABASE_URL=secretref:database-url" "ADMIN_PASSWORD=secretref:admin-password" "ADMIN_EMAIL=$ADMIN_EMAIL" "ADMIN_NAME=${ADMIN_NAME:-}")
     ;;
   *)
     echo "unknown task: $TASK" >&2
