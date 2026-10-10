@@ -18,7 +18,7 @@ import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
 import { bremenDate } from '@/lib/appointments/schedule';
-import { say } from '@/lib/cms/copy';
+import { pickTree, say } from '@/lib/cms/copy';
 
 type ExamDetailPageProps = {
   params: Promise<{ code: string }>;
@@ -157,86 +157,82 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
    */
   const isB2 = detail.examType.code === 'telc_b2';
   const isC1 = detail.examType.code === 'telc_c1_hochschule';
-  const examDayDe = isB2
-    ? 'Die Prüfung findet bei uns in der Schule statt und dauert etwa von 9 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.'
+  const examDay = isB2
+    ? say(locale, 'Die Prüfung findet bei uns in der Schule statt und dauert etwa von 9 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.', 'The exam takes place here at the school and runs from about 09:00 to 17:00. Arrive in good time and bring your documents with you.')
     : isC1
-      ? 'Die Prüfung ist immer an einem Freitag und dauert etwa von 8:30 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.'
-      : 'Komm rechtzeitig und bring deine Unterlagen mit.';
-  const examDayEn = isB2
-    ? 'The exam takes place here at the school and runs from about 09:00 to 17:00. Arrive in good time and bring your documents with you.'
-    : isC1
-      ? 'The exam is always on a Friday and runs from about 08:30 to 17:00. Arrive in good time and bring your documents with you.'
-      : 'Arrive in good time and bring your documents with you.';
+      ? say(locale, 'Die Prüfung ist immer an einem Freitag und dauert etwa von 8:30 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.', 'The exam is always on a Friday and runs from about 08:30 to 17:00. Arrive in good time and bring your documents with you.')
+      : say(locale, 'Komm rechtzeitig und bring deine Unterlagen mit.', 'Arrive in good time and bring your documents with you.');
   // The next preparation courses from FileMaker, as casa-bremen.de listed them on its C1 page.
+  // Built from the dates, so it is shown first and never offered for editing.
   const nextPreparation = nextPreparationCourses(isC1 ? 'telc_c1_hochschule' : 'telc_b2', bremenDate());
-  const nextPreparationDe = [preparationCoursesSentence(nextPreparation, 'de')].filter((line): line is string => Boolean(line));
-  const nextPreparationEn = [preparationCoursesSentence(nextPreparation, 'en')].filter((line): line is string => Boolean(line));
-  const preparationDe = isC1
-    ? {
-        title: 'Der Vorbereitungskurs',
-        description:
-          'Bei uns kannst du telc Deutsch C1 Hochschule ablegen und dich in einem vierwöchigen Kurs darauf vorbereiten. Du kannst die Prüfung auch ohne den Kurs machen, wir empfehlen dir aber, beides zusammen zu belegen.',
-        bullets: [
-          ...nextPreparationDe,
-          'Im Kurs lernst du die formalen Anforderungen der Prüfung kennen und übst mit Original-Prüfungsaufgaben von telc.',
-          'Gemeinsam entwickeln wir Strategien für die Aufgaben. Wir üben Hören, Lesen, Schreiben und Sprechen, vor allem aber Schreiben und Sprechen.',
-          'Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.',
-          'Eine Garantie, die Prüfung zu bestehen, kann dir der Kurs nicht geben.',
-          'Wenn du dich zum ersten Mal an unserer Schule anmeldest, kommt eine einmalige Einschreibegebühr von 50 € dazu.',
-        ],
-      }
-    : isB2
-      ? {
+  const nextPreparationLine = isB2 || isC1 ? [preparationCoursesSentence(nextPreparation, locale)].filter((line): line is string => Boolean(line)) : [];
+  const preparationCopy = isC1
+    ? pickTree(locale, {
+        de: {
           title: 'Der Vorbereitungskurs',
-          description: 'Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.',
+          description:
+            'Bei uns kannst du telc Deutsch C1 Hochschule ablegen und dich in einem vierwöchigen Kurs darauf vorbereiten. Du kannst die Prüfung auch ohne den Kurs machen, wir empfehlen dir aber, beides zusammen zu belegen.',
           bullets: [
-          ...nextPreparationDe,
-            'Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.',
-            'Plane genug Zeit bis zum Prüfungstermin ein, damit du in Ruhe üben kannst.',
+            'Im Kurs lernst du die formalen Anforderungen der Prüfung kennen und übst mit Original-Prüfungsaufgaben von telc.',
+            'Gemeinsam entwickeln wir Strategien für die Aufgaben. Wir üben Hören, Lesen, Schreiben und Sprechen, vor allem aber Schreiben und Sprechen.',
+            'Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.',
+            'Eine Garantie, die Prüfung zu bestehen, kann dir der Kurs nicht geben.',
+            'Wenn du dich zum ersten Mal an unserer Schule anmeldest, kommt eine einmalige Einschreibegebühr von {course.enrolment-fee} dazu.',
           ],
-        }
-      : {
-          title: 'Gut vorbereitet in die Prüfung',
-          description: 'Wer die Aufgaben kennt und genug Zeit zum Üben hat, geht ruhiger in die Prüfung.',
-          bullets: [
-            'Plane genug Zeit bis zum Prüfungstermin ein.',
-            'Übe mit den typischen Aufgaben der Prüfung.',
-            'Geh vor dem Prüfungstag die Liste der Unterlagen durch.',
-          ],
-        };
-  const preparationEn = isC1
-    ? {
-        title: 'The preparation course',
-        description:
-          'You can take telc Deutsch C1 Hochschule with us and prepare for it in a four-week course. You can also take the exam without the course, but we recommend doing both.',
-        bullets: [
-          ...nextPreparationEn,
-          'In the course you get to know the formal requirements of the exam and practise with original telc exam tasks.',
-          'Together we work out strategies for the tasks. We practise listening, reading, writing and speaking, but above all writing and speaking.',
-          'You should have successfully completed a C1 course, because C1 vocabulary, phrases and grammar are not taught in this course. Alternatively, you can take a placement test with us at the school.',
-          'The course cannot guarantee that you will pass the exam.',
-          'If this is your first time registering at our school, there is also a one-off enrolment fee of €50.',
-        ],
-      }
-    : isB2
-      ? {
+        },
+        en: {
           title: 'The preparation course',
-          description: 'Our preparation course for telc Deutsch B2 runs for one month, on two evenings a week.',
+          description:
+            'You can take telc Deutsch C1 Hochschule with us and prepare for it in a four-week course. You can also take the exam without the course, but we recommend doing both.',
           bullets: [
-          ...nextPreparationEn,
-            'Preparation is not part of the intensive courses. If you need the certificate, you book it separately.',
-            'Leave yourself enough time before the exam date, so that you can practise without rushing.',
+            'In the course you get to know the formal requirements of the exam and practise with original telc exam tasks.',
+            'Together we work out strategies for the tasks. We practise listening, reading, writing and speaking, but above all writing and speaking.',
+            'You should have successfully completed a C1 course, because C1 vocabulary, phrases and grammar are not taught in this course. Alternatively, you can take a placement test with us at the school.',
+            'The course cannot guarantee that you will pass the exam.',
+            'If this is your first time registering at our school, there is also a one-off enrolment fee of {course.enrolment-fee}.',
           ],
-        }
-      : {
-          title: 'Well prepared for the exam',
-          description: 'If you know the tasks and have had enough time to practise, you go into the exam feeling calmer.',
-          bullets: [
-            'Leave yourself enough time before the exam date.',
-            'Practise with the typical exam tasks.',
-            'Go through the list of documents before the exam day.',
-          ],
-        };
+        },
+      })
+    : isB2
+      ? pickTree(locale, {
+          de: {
+            title: 'Der Vorbereitungskurs',
+            description: 'Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.',
+            bullets: [
+              'Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.',
+              'Plane genug Zeit bis zum Prüfungstermin ein, damit du in Ruhe üben kannst.',
+            ],
+          },
+          en: {
+            title: 'The preparation course',
+            description: 'Our preparation course for telc Deutsch B2 runs for one month, on two evenings a week.',
+            bullets: [
+              'Preparation is not part of the intensive courses. If you need the certificate, you book it separately.',
+              'Leave yourself enough time before the exam date, so that you can practise without rushing.',
+            ],
+          },
+        })
+      : pickTree(locale, {
+          de: {
+            title: 'Gut vorbereitet in die Prüfung',
+            description: 'Wer die Aufgaben kennt und genug Zeit zum Üben hat, geht ruhiger in die Prüfung.',
+            bullets: [
+              'Plane genug Zeit bis zum Prüfungstermin ein.',
+              'Übe mit den typischen Aufgaben der Prüfung.',
+              'Geh vor dem Prüfungstag die Liste der Unterlagen durch.',
+            ],
+          },
+          en: {
+            title: 'Well prepared for the exam',
+            description: 'If you know the tasks and have had enough time to practise, you go into the exam feeling calmer.',
+            bullets: [
+              'Leave yourself enough time before the exam date.',
+              'Practise with the typical exam tasks.',
+              'Go through the list of documents before the exam day.',
+            ],
+          },
+        });
+  const preparation = { ...preparationCopy, bullets: [...nextPreparationLine, ...preparationCopy.bullets] };
 
   // The url used to be the internal `/exams/b2`, not the page's address.
   const examSchema = examGraph({
@@ -313,7 +309,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                     description:
                       isB2 || isC1 ? say(locale, 'Bereite dich in unserem Vorbereitungskurs oder allein auf die Aufgaben vor.', 'Prepare for the tasks in our preparation course or on your own.') : say(locale, 'Bereite dich gezielt auf die Aufgaben der Prüfung vor.', 'Focus your preparation on the exam tasks.'),
                   },
-                  { label: '3', title: say(locale, 'Prüfungstag', 'Exam day'), description: locale === 'de' ? examDayDe : examDayEn },
+                  { label: '3', title: say(locale, 'Prüfungstag', 'Exam day'), description: examDay },
                   {
                     label: '4',
                     title: say(locale, 'Ergebnis', 'Results'),
@@ -331,17 +327,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
 
               <EditorialSplit
                 eyebrow={say(locale, 'Vorbereitung', 'Preparation')}
-                title={locale === 'de' ? preparationDe.title : preparationEn.title}
-                description={
-                  locale === 'de'
-                    ? preparationDe.description
-                    : preparationEn.description
-                }
-                bullets={
-                  locale === 'de'
-                    ? preparationDe.bullets
-                    : preparationEn.bullets
-                }
+                title={preparation.title}
+                description={preparation.description}
+                bullets={preparation.bullets}
                 photo={examStoryPhoto}
               />
 

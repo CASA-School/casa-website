@@ -27,6 +27,7 @@ const ACCOUNT = {
   role: 'staff',
   password_hash: 'scrypt$…',
   is_active: true,
+  password_set_at: new Date('2026-01-01T00:00:00Z') as Date | null,
 };
 
 type Failure = { id: string; email: string; client_address: string };
@@ -319,5 +320,30 @@ describe('staff sessions', () => {
     const touch = sqlOf(mocks.query).find((sql) => sql.includes('UPDATE staff_sessions'));
     expect(touch).toBeDefined();
     expect(touch).not.toContain('expires_at');
+  });
+});
+
+describe('signing in by name', () => {
+  it('looks a typed name up by its folded key, and an address by the address', async () => {
+    database();
+    mocks.verifyPassword.mockResolvedValue(true);
+    mocks.cookies.mockResolvedValue({ get: () => undefined, set: vi.fn(), delete: vi.fn() });
+
+    await signIn('  Natália   Sostres ', 'correct', 'vitest', '203.0.113.9');
+    const lookup = mocks.queryFirst.mock.calls.find(([sql]) => String(sql).includes('FROM staff_users'));
+    expect(String(lookup?.[0])).toContain('username_key = ANY($1::text[])');
+    expect(lookup?.[1]).toEqual([['natalia sostres'], 'natalia sostres']);
+
+    mocks.queryFirst.mockClear();
+    await signIn('Colleague@CASA-Bremen.de', 'correct', 'vitest', '203.0.113.9');
+    const byEmail = mocks.queryFirst.mock.calls.find(([sql]) => String(sql).includes('FROM staff_users'));
+    expect(String(byEmail?.[0])).toContain('lower(email) = $1');
+    expect(byEmail?.[1]).toEqual(['colleague@casa-bremen.de']);
+  });
+
+  it('refuses a password sign-in for an account that has no password yet', async () => {
+    database({ account: { ...ACCOUNT, password_set_at: null } });
+    mocks.verifyPassword.mockResolvedValue(true);
+    await expect(signIn(ACCOUNT.email, 'anything-at-all', 'vitest', '203.0.113.9')).resolves.toBeNull();
   });
 });

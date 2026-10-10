@@ -279,8 +279,8 @@ export const GRUPPEN_MODULES: GruppenModule[] = [
       de: 'Deutsch-Intensivkurs',
     },
     detail: {
-      en: 'Mon–Fri, 09:00–12:30. 20 lessons a week, taught in groups matched to level.',
-      de: 'Mo–Fr, 09:00–12:30. 20 Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.',
+      en: 'Mon–Fri, 09:00–12:30. {course.german-for-groups.lessons} lessons a week, taught in groups matched to level.',
+      de: 'Mo–Fr, 09:00–12:30. {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.',
     },
     priceByWeeks: { 1: 150, 2: 300, 3: 450, 4: 600 },
   },
@@ -511,8 +511,8 @@ export const GRUPPEN_ALWAYS_INCLUDED: { name: LocalizedText; detail: LocalizedTe
       de: 'Deutsch-Intensivkurs, Mo–Fr 09:00–12:30',
     },
     detail: {
-      en: '20 lessons a week in groups matched to level.',
-      de: '20 Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.',
+      en: '{course.german-for-groups.lessons} lessons a week in groups matched to level.',
+      de: '{course.german-for-groups.lessons} Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.',
     },
   },
   {

@@ -223,6 +223,10 @@ export function describeActivity(entry: ActivityEntry): string {
       return `deactivated ${String(entry.detail?.email ?? 'an account')}`;
     case 'staff_reactivated':
       return `reactivated ${String(entry.detail?.email ?? 'an account')}`;
+    case 'staff_updated':
+      return `updated the account ${String(entry.detail?.email ?? '')}`.trim();
+    case 'staff_microsoft_unlinked':
+      return 'unlinked an account from Microsoft';
     case 'staff_role_changed':
       return `changed ${String(entry.detail?.email ?? 'an account')} to ${String(
         entry.detail?.to ?? 'a new role'

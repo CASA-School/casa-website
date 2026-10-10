@@ -8,6 +8,7 @@ import type { ContentLocale } from '@/lib/content/types';
 import { getDb, logDatabaseFallback } from '@/lib/db/server';
 
 import { fillCopyStore } from './copy';
+import { loadFacts, type Facts } from './facts.server';
 import { tagText } from './stega';
 
 /**
@@ -124,15 +125,19 @@ const loadValues = cache(async (): Promise<{ editing: boolean; values: Values }>
   return { editing, values: editing ? await previewValues() : await liveValues() };
 });
 
+const loadFactsOnce = cache((locale: ContentLocale) => loadFacts(locale));
+
 /**
- * Readies `say`, `pick` and `pickTree` (src/lib/cms/copy.ts) for this request.
+ * Readies `say`, `pick` and `pickTree` (src/lib/cms/copy.ts) for this request,
+ * in `locale`: the edited texts, and the live values they name (facts.server.ts).
  * Every public page awaits it before rendering, and so does the site layout;
- * it is one query at most, shared by all of them through React `cache`.
+ * both reads are shared by all of them through React `cache` and kept fifteen
+ * seconds besides.
  */
-export async function prepareCopy(): Promise<{ editing: boolean; values: Values }> {
-  const loaded = await loadValues();
-  fillCopyStore(loaded.values, loaded.editing);
-  return loaded;
+export async function prepareCopy(locale: ContentLocale): Promise<{ editing: boolean; values: Values; facts: Facts }> {
+  const [loaded, facts] = await Promise.all([loadValues(), loadFactsOnce(locale)]);
+  fillCopyStore(loaded.values, loaded.editing, locale, facts.values);
+  return { ...loaded, facts };
 }
 
 /** This language's edited values, for the client components' provider. */
@@ -144,7 +149,7 @@ export function valuesForLocale(values: Values, locale: string): Record<string, 
 }
 
 export const getPageContent = cache(async (locale: ContentLocale): Promise<PageContent> => {
-  const { editing, values } = await prepareCopy();
+  const { editing, values } = await prepareCopy(locale);
 
   const pick = (key: string, fallback: string) => {
     const value = values.get(slotId(key, locale)) ?? fallback;

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { localizeNavDescription, navConfig, type NavDropdown } from '@/config/nav';
+import { resolvers } from '@/lib/cms/copy';
+import { fillFacts } from '@/lib/cms/facts';
+
+// The menu always renders through `say`, which fills live values ("20 lessons a week").
+const facts = { 'course.intensive-german.lessons': '20' };
+const { say } = resolvers(new Map(), false, () => facts);
 
 const dropdownItems = navConfig.main
   .filter((item): item is NavDropdown => 'sections' in item)
@@ -14,9 +20,9 @@ describe('menu descriptions', () => {
    */
   it('shows every description in German on the German site, uncut', () => {
     for (const item of dropdownItems) {
-      const german = localizeNavDescription(item.description, 'de');
+      const german = localizeNavDescription(item.description, 'de', say);
 
-      expect(german, item.href).not.toBe(localizeNavDescription(item.description, 'en'));
+      expect(german, item.href).not.toBe(localizeNavDescription(item.description, 'en', say));
       expect(german, item.href).not.toMatch(/\.\.\.$/);
     }
   });
@@ -28,7 +34,7 @@ describe('menu descriptions', () => {
    */
   it('shows every description in English uncut', () => {
     for (const item of dropdownItems) {
-      expect(localizeNavDescription(item.description, 'en'), item.href).toBe(item.description);
+      expect(localizeNavDescription(item.description, 'en', say), item.href).toBe(fillFacts(item.description ?? '', facts));
     }
   });
 });

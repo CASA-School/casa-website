@@ -13,13 +13,23 @@ import {
 } from '@/app/(admin)/admin/(editor)/website/actions';
 import { formatBerlin } from '@/lib/cms/berlin-time';
 import { placeholders } from '@/lib/cms/copy-key';
-import { initialsOf, type CommentEntry, type LocaleStatus, type PresenceEntry, type SlotState, type VersionEntry } from '@/lib/cms/editor-types';
+import {
+  initialsOf,
+  type CommentEntry,
+  type EditorFacts,
+  type LocaleStatus,
+  type PresenceEntry,
+  type SlotState,
+  type VersionEntry,
+} from '@/lib/cms/editor-types';
+import { factsIn, fillFacts, isFactName } from '@/lib/cms/facts';
 import type { CmsLocale } from '@/lib/cms/locales';
 import { KIND_LABELS } from '@/lib/cms/slot-kinds';
 import type { Rect } from '@/lib/cms/protocol';
 import { cn } from '@/lib/utils';
 
 import styles from './editor.module.css';
+import { LiveValuePicker, TextWithFacts, UsedLiveValues } from './live-values';
 import { Avatar, I, Spinner, StatusDot, plural, statusLabel } from './parts';
 
 /**
@@ -29,6 +39,8 @@ import { Avatar, I, Spinner, StatusDot, plural, statusLabel } from './parts';
  * whichever has the room. One tab per language, each with its state; German
  * is the source, and any other language shows the German above its own field.
  * The field grows with the text and measures it against the slot's limit.
+ * Live values — a price, a start date — are placed from a list and filled in by
+ * the page (live-values.tsx); the meter counts the text as it will read.
  * Writing help, history and comments sit below, out of the way until asked
  * for. Closing keeps what was typed as a draft: nothing here is ever live
  * before someone publishes it.
@@ -66,6 +78,8 @@ export function TextPopover({
   canEdit,
   lockedBy,
   aiEnabled,
+  facts,
+  dataScreens,
   onPreview,
   onSaved,
   onClose,
@@ -80,6 +94,9 @@ export function TextPopover({
   canEdit: boolean;
   lockedBy: PresenceEntry | null;
   aiEnabled: boolean;
+  facts: EditorFacts;
+  /** Where each kind of live value is changed in the workspace. */
+  dataScreens: Record<string, { label: string; href: string }>;
   onPreview: (locale: string, value: string) => void;
   onSaved: (slot: SlotState | null) => void;
   onClose: () => void;
@@ -93,6 +110,7 @@ export function TextPopover({
   const [detail, setDetail] = useState<{ versions: VersionEntry[]; comments: CommentEntry[] } | null>(null);
   const [ai, setAi] = useState<AiState | null>(null);
   const [comment, setComment] = useState('');
+  const [picking, setPicking] = useState(false);
   const field = useRef<HTMLTextAreaElement>(null);
   const root = useRef<HTMLDivElement>(null);
 
@@ -103,10 +121,17 @@ export function TextPopover({
   const dirtyLocales = locales.filter((locale) => (working[locale.code] ?? '') !== (slot.locales[locale.code]?.value ?? ''));
   const dirty = dirtyLocales.length > 0;
   // Values the page fills in ({count}, {date}): an edit keeps them all.
-  const required = placeholders(state?.fallback ?? slot.locales[source.code]?.fallback ?? '');
-  const present = placeholders(text);
+  const local = (value: string) => placeholders(value).filter((name) => !isFactName(name));
+  const required = local(state?.fallback ?? slot.locales[source.code]?.fallback ?? '');
+  const present = local(text);
   const placeholderProblem = text.length > 0 && present.join(',') !== required.join(',');
-  const ratio = text.length / slot.max;
+  // Live values ({course.….price}) may come and go, if the site knows them.
+  const knownFacts = useMemo(() => new Set(facts.defs.map((def) => def.id)), [facts.defs]);
+  const unknownFact = factsIn(text).find((id) => !knownFacts.has(id));
+  const filled = (code: string, value: string) => fillFacts(value, facts.values[code] ?? facts.values.en ?? {});
+  // Measured as it will read, with each live value filled in.
+  const shown = filled(tab, text);
+  const ratio = shown.length / slot.max;
   const meter = ratio > 1 ? 'over' : ratio >= 0.9 ? 'near' : 'ok';
 
   /*
@@ -158,8 +183,22 @@ export function TextPopover({
 
   const change = (value: string) => {
     setWorking((previous) => ({ ...previous, [tab]: value }));
-    if (tab === pageLocale) onPreview(tab, value);
+    if (tab === pageLocale) onPreview(tab, filled(tab, value));
   };
+
+  /** Puts `{id}` where the cursor is, or in place of the selection. */
+  function insertFact(id: string) {
+    const node = field.current;
+    const start = node?.selectionStart ?? text.length;
+    const end = node?.selectionEnd ?? text.length;
+    const token = `{${id}}`;
+    change(text.slice(0, start) + token + text.slice(end));
+    setPicking(false);
+    requestAnimationFrame(() => {
+      node?.focus({ preventScroll: true });
+      node?.setSelectionRange(start + token.length, start + token.length);
+    });
+  }
 
   async function save(): Promise<boolean> {
     if (!dirty || readOnly) return true;
@@ -188,7 +227,7 @@ export function TextPopover({
     if (!result.ok) return notify(result.error);
     const live = result.slot?.locales[tab]?.value ?? '';
     setWorking((previous) => ({ ...previous, [tab]: live }));
-    if (tab === pageLocale) onPreview(tab, live);
+    if (tab === pageLocale) onPreview(tab, filled(tab, live));
     onSaved(result.slot);
   }
 
@@ -359,7 +398,9 @@ export function TextPopover({
                   </button>
                 ) : null}
               </div>
-              <p className="mt-1.5 text-[0.85rem] leading-relaxed text-[var(--casa-muted)]">{sourceText}</p>
+              <p className="mt-1.5 text-[0.85rem] leading-relaxed text-[var(--casa-muted)]">
+                <TextWithFacts text={sourceText} facts={facts} locale={source.code} />
+              </p>
             </div>
           ) : null}
 
@@ -396,10 +437,29 @@ export function TextPopover({
               />
             </span>
             <span className={cn(meter === 'near' && 'text-[var(--casa-warning-text)]', meter === 'over' && 'text-[var(--casa-danger-text)]')}>
-              {text.length} / {slot.max}
+              {shown.length} / {slot.max}
             </span>
             <span className="text-[var(--casa-text-subtle)]/80">{KIND_LABELS[slot.kind]}</span>
+            {!readOnly && facts.defs.length ? (
+              <button
+                type="button"
+                aria-expanded={picking}
+                onClick={() => setPicking((open) => !open)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[var(--casa-accent-text)] hover:bg-ws-sunk',
+                  picking && 'bg-ws-sunk'
+                )}
+              >
+                {I.data}
+                Live value
+              </button>
+            ) : null}
           </div>
+
+          {picking ? (
+            <LiveValuePicker facts={facts} locale={tab} onPick={(def) => insertFact(def.id)} onClose={() => setPicking(false)} />
+          ) : null}
+          <UsedLiveValues text={text} facts={facts} locale={tab} screens={dataScreens} />
 
           {meter === 'over' ? (
             <Note tone="danger">Too long for this spot. Shorten it to {slot.max} characters.</Note>
@@ -412,6 +472,7 @@ export function TextPopover({
               ))}
             </div>
           ) : null}
+          {unknownFact ? <Note tone="danger">{`{${unknownFact}}`} is not a live value. Insert one with “Live value”.</Note> : null}
           {placeholderProblem ? (
             <Note tone="danger">
               {required.length ? `Keep ${required.map((name) => `{${name}}`).join(' ')} in the text, exactly as written.` : 'Remove the {…}: nothing fills it in here.'}

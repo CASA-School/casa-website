@@ -5,6 +5,7 @@ import { DEFAULT_EDITOR_PATH, EDITOR_PAGES } from '@/config/cms/editor-pages';
 import { requireModule } from '@/lib/admin/guard';
 import { aiEnabled } from '@/lib/cms/ai.server';
 import { initialsOf } from '@/lib/cms/editor-types';
+import { loadFacts } from '@/lib/cms/facts.server';
 import { cmsLocales } from '@/lib/cms/locales';
 import { publicSiteOrigin } from '@/lib/cms/origins';
 import { createPreviewToken, safePreviewPath } from '@/lib/cms/preview-token';
@@ -21,7 +22,7 @@ export const metadata: Metadata = { title: 'Website · Workspace · CASA Bremen'
  */
 export default async function WebsiteEditorPage({ searchParams }: { searchParams: Promise<{ path?: string }> }) {
   const [user, params] = await Promise.all([requireModule('website'), searchParams]);
-  const origin = await publicSiteOrigin();
+  const [origin, de, en] = await Promise.all([publicSiteOrigin(), loadFacts('de'), loadFacts('en')]);
   const token = createPreviewToken(user.id);
 
   return (
@@ -34,6 +35,7 @@ export default async function WebsiteEditorPage({ searchParams }: { searchParams
       previewBase={`${origin}/api/cms/preview?token=${encodeURIComponent(token)}&path=`}
       initialPath={safePreviewPath(params.path ?? DEFAULT_EDITOR_PATH)}
       aiEnabled={aiEnabled()}
+      facts={{ defs: de.defs, values: { de: de.values, en: en.values } }}
     />
   );
 }

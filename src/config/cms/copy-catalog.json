@@ -140,26 +140,6 @@
    "/courses/[slug]"
   ]
  },
- "t.20-unterrichtseinheiten-45-minut.18pkjcp": {
-  "de": "20 Unterrichtseinheiten à 45 Minuten pro Woche",
-  "en": "20 lessons of 45 minutes a week",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
- "t.20-unterrichtseinheiten-pro-woch.1oh6b00": {
-  "de": "20 Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.",
-  "en": "20 lessons a week in groups matched to level.",
-  "files": [
-   "src/config/gruppen/packages.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.20-unterrichtsstunden-pro-woche.16ohdyn": {
   "de": "20 Unterrichtsstunden pro Woche",
   "en": "20 lessons a week",
@@ -249,6 +229,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.4-wochen.13zkx4h": {
+  "de": "{accommodation.rent-4-weeks} / 4 Wochen",
+  "en": "{accommodation.rent-4-weeks} / 4 weeks",
+  "files": [
+   "src/app/(site)/[locale]/accommodation/[type]/page.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]"
+  ]
+ },
  "t.4-wochen.skb2az": {
   "de": "4 Wochen",
   "en": "4 weeks",
@@ -288,16 +278,6 @@
   "pages": [
    "/courses",
    "/courses/[slug]"
-  ]
- },
- "t.580-4-wochen.1cafkdv": {
-  "de": "580 € / 4 Wochen",
-  "en": "€580 / 4 weeks",
-  "files": [
-   "src/app/(site)/[locale]/accommodation/[type]/page.tsx"
-  ],
-  "pages": [
-   "/accommodation/[type]"
   ]
  },
  "t.8-wochen-komplettes-niveau.o8zfyy": {
@@ -348,9 +328,9 @@
    "/courses/[slug]"
   ]
  },
- "t.abendkurs-ab-378-trimester.10aoal1": {
-  "de": "Abendkurs: ab 378 € / Trimester",
-  "en": "Evening course: from €378 / trimester",
+ "t.abendkurs-trimester.um595q": {
+  "de": "Abendkurs: {course.evening-german.price} / Trimester",
+  "en": "Evening course: {course.evening-german.price} / trimester",
   "files": [
    "src/components/calculator/casa-cost-pathway-calculator.tsx"
   ],
@@ -2184,6 +2164,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.bei-uns-kannst-du.byprsv": {
+  "de": "Bei uns kannst du telc Deutsch C1 Hochschule ablegen und dich in einem vierwöchigen Kurs darauf vorbereiten. Du kannst die Prüfung auch ohne den Kurs machen, wir empfehlen dir aber, beides zusammen zu belegen.",
+  "en": "You can take telc Deutsch C1 Hochschule with us and prepare for it in a four-week course. You can also take the exam without the course, but we recommend doing both.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.bei-uns-kannst-du.chkpv": {
@@ -4864,15 +4854,25 @@
    "/courses/[slug]"
   ]
  },
- "t.der-unterricht-umfasst-20.1girmpm": {
-  "de": "Der Unterricht umfasst 20 Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
-  "en": "Teaching is 20 lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.",
+ "t.der-unterricht-umfasst-unterrich.1nvd406": {
+  "de": "Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
+  "en": "Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
   "pages": [
    "/courses",
    "/courses/[slug]"
+  ]
+ },
+ "t.der-vorbereitungskurs.eagmo": {
+  "de": "Der Vorbereitungskurs",
+  "en": "The preparation course",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.der-zeitraum-ist-flexibel.mqtxoe": {
@@ -5553,6 +5553,26 @@
    "/courses/[slug]"
   ]
  },
+ "t.die-pruefung-findet-bei.1rdmrvn": {
+  "de": "Die Prüfung findet bei uns in der Schule statt und dauert etwa von 9 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.",
+  "en": "The exam takes place here at the school and runs from about 09:00 to 17:00. Arrive in good time and bring your documents with you.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
+ "t.die-pruefung-ist-immer.1ir5t6b": {
+  "de": "Die Prüfung ist immer an einem Freitag und dauert etwa von 8:30 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.",
+  "en": "The exam is always on a Friday and runs from about 08:30 to 17:00. Arrive in good time and bring your documents with you.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.die-richtige-einstufung-ist.19iulyv": {
   "de": "Die richtige Einstufung ist die Grundlage für erfolgreiches Lernen. Mach einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.",
   "en": "Learning well starts with a group at the right level. To find yours, take a free online test or come to the school for a placement test in person.",
@@ -5690,6 +5710,16 @@
   "pages": [
    "/courses",
    "/courses/[slug]"
+  ]
+ },
+ "t.die-vorbereitung-gehoert-nicht.1vomj1w": {
+  "de": "Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.",
+  "en": "Preparation is not part of the intensive courses. If you need the certificate, you book it separately.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.die-zusammenarbeit.s61ors": {
@@ -6397,6 +6427,16 @@
    "/careers/[slug]"
   ]
  },
+ "t.du-solltest-einen-c1.11ab2u8": {
+  "de": "Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.",
+  "en": "You should have successfully completed a C1 course, because C1 vocabulary, phrases and grammar are not taught in this course. Alternatively, you can take a placement test with us at the school.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.du-sprichst-fliessend-und.4qeqfb": {
   "de": "Du sprichst fließend und spontan und kannst akademische Texte analysieren.",
   "en": "You speak fluently and spontaneously and can analyse academic texts.",
@@ -6888,24 +6928,24 @@
    "/courses"
   ]
  },
- "t.ein-modul-laeuft-an.1bya21j": {
-  "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, und kostet 16 € pro Abend: 192 € für die meisten Module mit 12 Abenden.",
-  "en": "A module runs on one evening a week for 90 minutes and costs €16 an evening: €192 for most modules, which have 12 evenings.",
-  "files": [
-   "src/components/courses/special-course-catalogue.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.ein-modul-laeuft-an.1pd53ws": {
-  "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu 16 € pro Abend.",
-  "en": "A module runs on one evening a week for 90 minutes, usually 12 evenings. A module that starts later has fewer evenings, at €16 each.",
+ "t.ein-modul-laeuft-an.fwp2vw": {
+  "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu {course.special-courses.price-per-evening} pro Abend.",
+  "en": "A module runs on one evening a week for 90 minutes, usually 12 evenings. A module that starts later has fewer evenings, at {course.special-courses.price-per-evening} each.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
   "pages": [
    "/courses",
+   "/courses/[slug]"
+  ]
+ },
+ "t.ein-modul-laeuft-an.t28jo1": {
+  "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, und kostet {course.special-courses.price-per-evening} pro Abend: {course.special-courses.price-per-module} für die meisten Module mit 12 Abenden.",
+  "en": "A module runs on one evening a week for 90 minutes and costs {course.special-courses.price-per-evening} an evening: {course.special-courses.price-per-module} for most modules, which have 12 evenings.",
+  "files": [
+   "src/components/courses/special-course-catalogue.tsx"
+  ],
+  "pages": [
    "/courses/[slug]"
   ]
  },
@@ -7301,6 +7341,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.eine-garantie-die-pruefung.1y06n75": {
+  "de": "Eine Garantie, die Prüfung zu bestehen, kann dir der Kurs nicht geben.",
+  "en": "The course cannot guarantee that you will pass the exam.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.eine-gemeinsame-einrichtung-der.p8mx1m": {
@@ -9066,6 +9116,16 @@
    "/about"
   ]
  },
+ "t.geh-vor-dem-pruefungstag.818g1v": {
+  "de": "Geh vor dem Prüfungstag die Liste der Unterlagen durch.",
+  "en": "Go through the list of documents before the exam day.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.gemeinnuetzig-fuer-bildung-und.vh05lu": {
   "de": "Gemeinnützig für Bildung und Teilhabe",
   "en": "A non-profit for education and inclusion",
@@ -9156,6 +9216,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.gemeinsam-entwickeln-wir-strateg.cysbx9": {
+  "de": "Gemeinsam entwickeln wir Strategien für die Aufgaben. Wir üben Hören, Lesen, Schreiben und Sprechen, vor allem aber Schreiben und Sprechen.",
+  "en": "Together we work out strategies for the tasks. We practise listening, reading, writing and speaking, but above all writing and speaking.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.gemeinsam-erkunden-wir-bremen.nwtzk2": {
@@ -9680,6 +9750,16 @@
   ],
   "pages": [
    "/"
+  ]
+ },
+ "t.gut-vorbereitet-in-die.vn54bg": {
+  "de": "Gut vorbereitet in die Prüfung",
+  "en": "Well prepared for the exam",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.gut-zu-wissen.gnjtt": {
@@ -10245,9 +10325,31 @@
    "/courses"
   ]
  },
- "t.im-intensivkurs-mit-20.qbp6o4": {
-  "de": "Im Intensivkurs mit 20 Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-  "en": "In the intensive course, with 20 lessons a week, a complete level takes about 8–9 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.",
+ "t.im-intensivkurs-hast-du.zt3kvv": {
+  "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
+  "en": "On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level usually takes 8–9 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.",
+  "files": [
+   "src/components/sections/level-progression-timeline.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
+  "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+  "en": "In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes about 8–9 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx"
   ],
@@ -10264,6 +10366,16 @@
   "pages": [
    "/courses",
    "/courses/[slug]"
+  ]
+ },
+ "t.im-kurs-lernst-du.1cqq882": {
+  "de": "Im Kurs lernst du die formalen Anforderungen der Prüfung kennen und übst mit Original-Prüfungsaufgaben von telc.",
+  "en": "In the course you get to know the formal requirements of the exam and practise with original telc exam tasks.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.im-kurs.ida636": {
@@ -10880,9 +10992,9 @@
   ],
   "pages": []
  },
- "t.intensivkurs-520-4-wochen.9o3bmb": {
-  "de": "Intensivkurs: 520 € / 4 Wochen, 940 € / ganzes Niveau",
-  "en": "Intensive course: €520 / 4 weeks, €940 / full level",
+ "t.intensivkurs-4-wochen-ganzes.uzh6sl": {
+  "de": "Intensivkurs: {course.intensive-german.price-4-weeks} / 4 Wochen, {course.intensive-german.price-8-weeks} / ganzes Niveau",
+  "en": "Intensive course: {course.intensive-german.price-4-weeks} / 4 weeks, {course.intensive-german.price-8-weeks} / full level",
   "files": [
    "src/components/calculator/casa-cost-pathway-calculator.tsx"
   ],
@@ -11188,9 +11300,9 @@
    "/"
   ]
  },
- "t.ja-zwei-bei-deiner.22sjtt": {
-  "de": "Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von 50 €. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.",
-  "en": "Yes, two. When you first register at our school, we charge a one-off enrolment fee of €50. On top of that there are the course materials, which cost €23.99 to €26.99 depending on the level. For Bildungszeit you need two books, which cost €46 to €54 together. There are no classes at weekends or on public holidays in the state of Bremen, and public holidays are not refunded.",
+ "t.ja-zwei-bei-deiner.gx6d2r": {
+  "de": "Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von {course.enrolment-fee}. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.",
+  "en": "Yes, two. When you first register at our school, we charge a one-off enrolment fee of {course.enrolment-fee}. On top of that there are the course materials, which cost €23.99 to €26.99 depending on the level. For Bildungszeit you need two books, which cost €46 to €54 together. There are no classes at weekends or on public holidays in the state of Bremen, and public holidays are not refunded.",
   "files": [
    "src/config/content/faq.ts"
   ],
@@ -11810,6 +11922,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.komm-rechtzeitig-und-bring.13c9yp8": {
+  "de": "Komm rechtzeitig und bring deine Unterlagen mit.",
+  "en": "Arrive in good time and bring your documents with you.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.komm-rechtzeitig-zu-uns.1vnha8p": {
@@ -13514,16 +13636,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.mit-20-unterrichtseinheiten-pro.1iblbot": {
-  "de": "Mit 20 Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.",
-  "en": "With 20 lessons a week, you complete a whole level in about 8 to 9 weeks.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.mit-anderen-internationalen-kurs.1lix4xm": {
   "de": "Mit anderen internationalen Kursteilnehmenden",
   "en": "Other international course participants",
@@ -13744,6 +13856,16 @@
   ],
   "pages": []
  },
+ "t.mit-unterrichtseinheiten-pro-woc.5evtnr": {
+  "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.",
+  "en": "With {course.intensive-german.lessons} lessons a week, you complete a whole level in about 8 to 9 weeks.",
+  "files": [
+   "src/config/courses/course-page-content.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
   "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
   "en": "If you already speak some German, you can join a course that is under way at any time, as long as there are places free. If a course is full, we are happy to put you on the waiting list.",
@@ -13838,9 +13960,9 @@
    "/exams/[code]"
   ]
  },
- "t.mo-fr-09-00.19y3elk": {
-  "de": "Mo–Fr, 09:00–12:30. 20 Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.",
-  "en": "Mon–Fri, 09:00–12:30. 20 lessons a week, taught in groups matched to level.",
+ "t.mo-fr-09-00.1u1johs": {
+  "de": "Mo–Fr, 09:00–12:30. {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.",
+  "en": "Mon–Fri, 09:00–12:30. {course.german-for-groups.lessons} lessons a week, taught in groups matched to level.",
   "files": [
    "src/config/gruppen/packages.ts"
   ],
@@ -14398,9 +14520,9 @@
    "/resources/why-germany"
   ]
  },
- "t.nein-die-vorbereitung-auf.93d9cj": {
-  "de": "Nein. Die Vorbereitung auf eine Prüfung ist ausdrücklich nicht Bestandteil der Intensivkurse. Dafür gibt es eigene Vorbereitungskurse. Der Kurs für telc B2 kostet 260 € und findet einen Monat lang an zwei Abenden pro Woche statt. Der Kurs für telc C1 Hochschule kostet 520 € und ist ein vierwöchiger Block. Wortschatz, Redemittel und Grammatik der C1 sind nicht Teil des C1-Vorbereitungskurses. Wir setzen sie in Form eines erfolgreich abgeschlossenen C1-Kurses voraus. Alternativ machen wir mit dir vor Ort einen Einstufungstest. Kein Vorbereitungskurs kann garantieren, dass du die Prüfung bestehst.",
-  "en": "No. The intensive courses do not include exam preparation. We offer separate preparation courses for that. The course for telc Deutsch B2 costs €260 and runs on two evenings a week for one month. The course for telc Deutsch C1 Hochschule costs €520 and is a four-week block. C1 vocabulary, phrases and grammar are not part of the C1 preparation course. We expect you to know them from a C1 course you have successfully completed. Alternatively, you can take a placement test with us here at the school. No preparation course can guarantee that you will pass the exam.",
+ "t.nein-die-vorbereitung-auf.1v3evqr": {
+  "de": "Nein. Die Vorbereitung auf eine Prüfung ist ausdrücklich nicht Bestandteil der Intensivkurse. Dafür gibt es eigene Vorbereitungskurse. Der Kurs für telc B2 kostet {exam.telc_b2.preparation-price} und findet einen Monat lang an zwei Abenden pro Woche statt. Der Kurs für telc C1 Hochschule kostet 520 € und ist ein vierwöchiger Block. Wortschatz, Redemittel und Grammatik der C1 sind nicht Teil des C1-Vorbereitungskurses. Wir setzen sie in Form eines erfolgreich abgeschlossenen C1-Kurses voraus. Alternativ machen wir mit dir vor Ort einen Einstufungstest. Kein Vorbereitungskurs kann garantieren, dass du die Prüfung bestehst.",
+  "en": "No. The intensive courses do not include exam preparation. We offer separate preparation courses for that. The course for telc Deutsch B2 costs {exam.telc_b2.preparation-price} and runs on two evenings a week for one month. The course for telc Deutsch C1 Hochschule costs €520 and is a four-week block. C1 vocabulary, phrases and grammar are not part of the C1 preparation course. We expect you to know them from a C1 course you have successfully completed. Alternatively, you can take a placement test with us here at the school. No preparation course can guarantee that you will pass the exam.",
   "files": [
    "src/config/content/faq.ts"
   ],
@@ -15204,6 +15326,26 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.plane-genug-zeit-bis.1grbw8o": {
+  "de": "Plane genug Zeit bis zum Prüfungstermin ein.",
+  "en": "Leave yourself enough time before the exam date.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
+ "t.plane-genug-zeit-bis.k1fxmi": {
+  "de": "Plane genug Zeit bis zum Prüfungstermin ein, damit du in Ruhe üben kannst.",
+  "en": "Leave yourself enough time before the exam date, so that you can practise without rushing.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.plane-genug-zeit-ein.5hv7gn": {
@@ -18286,27 +18428,6 @@
    "/courses/[slug]"
   ]
  },
- "t.text.1hlwyug": {
-  "de": "{amount} €",
-  "en": "€{amount}",
-  "files": [
-   "src/config/content/exam-fees.ts"
-  ],
-  "pages": [
-   "/exams",
-   "/exams/[code]"
-  ]
- },
- "t.text.1vdlp78": {
-  "de": "{value} €",
-  "en": "€{value}",
-  "files": [
-   "src/config/content/accommodation-costs.ts"
-  ],
-  "pages": [
-   "/accommodation/[type]"
-  ]
- },
  "t.thema-waehlen.ctxpo4": {
   "de": "Thema wählen",
   "en": "Choose a topic",
@@ -18433,6 +18554,28 @@
    "/accommodation/become-host"
   ]
  },
+ "t.ue-pro-woche-je.60p8sx": {
+  "de": "{course.intensive-german.lessons} UE pro Woche (je 45 Min.)",
+  "en": "{course.intensive-german.lessons} lessons a week (45 min each)",
+  "files": [
+   "src/components/sections/level-progression-timeline.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.ue-pro-woche.14owcx1": {
   "de": "UE pro Woche",
   "en": "lessons a week",
@@ -18441,6 +18584,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.uebe-mit-den-typischen.owd5p6": {
+  "de": "Übe mit den typischen Aufgaben der Prüfung.",
+  "en": "Practise with the typical exam tasks.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.uebe-patientengespraeche-arztbri.19vntbz": {
@@ -18766,6 +18919,16 @@
    "/team"
   ]
  },
+ "t.unser-vorbereitungskurs-fuer-tel.k1vuoh": {
+  "de": "Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.",
+  "en": "Our preparation course for telc Deutsch B2 runs for one month, on two evenings a week.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.unsere-erfahrung-und-partnerscha.o89bok": {
   "de": "Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.",
   "en": "Our experience and our partnerships strengthen the work we do for you.",
@@ -18798,9 +18961,9 @@
    "/"
   ]
  },
- "t.unsere-intensivkurse-umfassen-20.16p06pu": {
-  "de": "Unsere Intensivkurse umfassen 20 Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-  "en": "Our intensive courses have 20 lessons of 45 minutes a week. A complete level takes 8 to 9 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.",
+ "t.unsere-intensivkurse-umfassen-un.gb0gni": {
+  "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+  "en": "Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 to 9 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -19267,6 +19430,26 @@
   ],
   "pages": [
    "/"
+  ]
+ },
+ "t.unterrichtseinheiten-45-minuten-.7yu2q7": {
+  "de": "{course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche",
+  "en": "{course.intensive-german.lessons} lessons of 45 minutes a week",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
+ "t.unterrichtseinheiten-pro-woche-i.7hr7pw": {
+  "de": "{course.german-for-groups.lessons} Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.",
+  "en": "{course.german-for-groups.lessons} lessons a week in groups matched to level.",
+  "files": [
+   "src/config/gruppen/packages.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.unterrichtseinheiten-pro-woche-u.xdlxcz": {
@@ -21269,6 +21452,16 @@
    "/calculator"
   ]
  },
+ "t.wenn-du-dich-zum.f65fpq": {
+  "de": "Wenn du dich zum ersten Mal an unserer Schule anmeldest, kommt eine einmalige Einschreibegebühr von {course.enrolment-fee} dazu.",
+  "en": "If this is your first time registering at our school, there is also a one-off enrolment fee of {course.enrolment-fee}.",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.wenn-du-ein-studienvisum.ourugn": {
   "de": "Wenn du ein Studienvisum brauchst, informiere dich vor dem Antrag über die aktuellen Vorgaben zur Finanzierung und über die anerkannten Nachweise.",
   "en": "If you need a student visa, find out about the current funding requirements and the accepted proof before you apply.",
@@ -21420,10 +21613,12 @@
   "de": "Wer die Aufgaben kennt und genug Zeit zum Üben hat, geht ruhiger in die Prüfung.",
   "en": "If you know the tasks and have had enough time to practise, you go into the exam feeling calmer.",
   "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx",
    "src/app/(site)/[locale]/exams/page.tsx"
   ],
   "pages": [
-   "/exams"
+   "/exams",
+   "/exams/[code]"
   ]
  },
  "t.wer-erhaelt-die-rechnung.2kelxp": {
@@ -22448,9 +22643,9 @@
    "/ueber-uns/gemeinnuetzigkeit"
   ]
  },
- "t.wohnen-580-4-wochen.xk3c9w": {
-  "de": "Wohnen: 580 € / 4 Wochen, danach 145 € / Woche",
-  "en": "Accommodation: €580 / 4 weeks, then €145 / week",
+ "t.wohnen-4-wochen-danach.19eskr4": {
+  "de": "Wohnen: {accommodation.rent-4-weeks} / 4 Wochen, danach {accommodation.extra-week} / Woche",
+  "en": "Accommodation: {accommodation.rent-4-weeks} / 4 weeks, then {accommodation.extra-week} / week",
   "files": [
    "src/components/calculator/casa-cost-pathway-calculator.tsx"
   ],

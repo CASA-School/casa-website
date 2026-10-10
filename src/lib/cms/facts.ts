@@ -1,0 +1,124 @@
+import {
+  ACCOMMODATION_FEES,
+  ENROLLMENT_FEE,
+  EXAM_FEES,
+  INTENSIVE_FULL_LEVEL_8_WEEKS,
+  INTENSIVE_HALF_LEVEL_4_WEEKS,
+  SPECIAL_COURSE_DEFAULT_PRICE,
+} from '@/config/calculator/pricing';
+
+/**
+ * Live values: facts a text may name instead of stating.
+ *
+ * "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche …" reads
+ * the weekly hours from the database each time the page renders, so a text
+ * never goes stale when a price, a start date or an exam day changes. Staff
+ * place these values in the website editor; they cannot type over them. The
+ * database's values come from facts.server.ts; this module holds what both
+ * sides share, and the price list's values, which need no database.
+ *
+ * A live value's name has a dot in it; a placeholder the page fills itself
+ * (`{count}`) does not.
+ */
+
+export type FactSource = 'Course dates' | 'Course types' | 'Prices' | 'Exam dates';
+
+export type FactDef = {
+  id: string;
+  /** Who it belongs to, as staff call it: „Intensivkurse", „telc Deutsch B2". */
+  group: string;
+  /** What it is: "Next start", "Price". */
+  label: string;
+  source: FactSource;
+};
+
+export type FactValues = Record<string, string>;
+
+export const isFactName = (name: string) => name.includes('.');
+
+/**
+ * What a live value with nothing behind it shows — a course with no term
+ * scheduled has no next start. Never the raw `{…}`, which no visitor should see.
+ */
+export const NO_VALUE = '–';
+
+const FACT = /\{([a-zA-Z][\w-]*(?:\.[\w-]+)+)\}/g;
+
+/** `text` with every live value filled in from `facts`. */
+export function fillFacts(text: string, facts: FactValues): string {
+  return text.includes('{') ? text.replace(FACT, (_, name: string) => facts[name] ?? NO_VALUE) : text;
+}
+
+/** The live values a text names, in order of first use. */
+export function factsIn(text: string): string[] {
+  return [...new Set([...text.matchAll(FACT)].map((match) => match[1]))];
+}
+
+/** German pages write the amount first: "580 €"; English: "€580" (go-live brief 2026-10-01). */
+export function formatEuro(amount: number, locale: string): string {
+  const whole = Number.isInteger(amount);
+  return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-IE', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: whole ? 0 : 2,
+    maximumFractionDigits: whole ? 0 : 2,
+  }).format(amount);
+}
+
+export function formatDay(iso: string, locale: string): string {
+  const date = new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso);
+  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Berlin',
+  }).format(date);
+}
+
+/** The course pages' German names, which is what staff call them. */
+export const COURSE_GROUPS: Record<string, string> = {
+  'intensive-german': 'Intensivkurse',
+  'evening-german': 'Abendkurse',
+  'special-courses': 'Spezialkurse',
+  'medical-german': 'Deutsch für Pflege und Medizin',
+  bildungszeit: 'Bildungszeit',
+  'in-company': 'Firmenunterricht',
+  'german-for-groups': 'Deutsch für Gruppen',
+  'exam-preparation': 'Prüfungsvorbereitung',
+};
+
+const EXAM_GROUPS: Record<string, string> = {
+  telc_b2: 'telc Deutsch B2',
+  telc_c1_hochschule: 'telc Deutsch C1 Hochschule',
+};
+
+/** The price list (config/calculator/pricing.ts): known without a database, so also in tests. */
+const PRICE_LIST: { def: FactDef; amount: number }[] = [
+  { def: { id: 'course.intensive-german.price-4-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 4 weeks', source: 'Prices' }, amount: INTENSIVE_HALF_LEVEL_4_WEEKS },
+  { def: { id: 'course.intensive-german.price-8-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 8 weeks', source: 'Prices' }, amount: INTENSIVE_FULL_LEVEL_8_WEEKS },
+  { def: { id: 'course.special-courses.price-per-module', group: COURSE_GROUPS['special-courses'], label: 'Price of a module', source: 'Prices' }, amount: SPECIAL_COURSE_DEFAULT_PRICE },
+  { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: 'Enrolment fee', source: 'Prices' }, amount: ENROLLMENT_FEE },
+  { def: { id: 'exam.telc_b2.preparation-price', group: EXAM_GROUPS.telc_b2, label: 'Preparation course', source: 'Prices' }, amount: EXAM_FEES.telcB2.prep },
+  { def: { id: 'exam.telc_b2.part-fee', group: EXAM_GROUPS.telc_b2, label: 'Fee for one part', source: 'Prices' }, amount: EXAM_FEES.telcB2.examPartial },
+  { def: { id: 'exam.telc_c1_hochschule.preparation-price', group: EXAM_GROUPS.telc_c1_hochschule, label: 'Preparation course', source: 'Prices' }, amount: EXAM_FEES.telcC1.prep },
+  { def: { id: 'exam.telc_c1_hochschule.part-fee', group: EXAM_GROUPS.telc_c1_hochschule, label: 'Fee for one part', source: 'Prices' }, amount: EXAM_FEES.telcC1.examPartial },
+  { def: { id: 'accommodation.rent-4-weeks', group: 'Unterkunft', label: 'Rent for 4 weeks', source: 'Prices' }, amount: ACCOMMODATION_FEES.base4Weeks },
+  { def: { id: 'accommodation.extra-week', group: 'Unterkunft', label: 'Each further week', source: 'Prices' }, amount: ACCOMMODATION_FEES.perAdditionalWeek },
+  { def: { id: 'accommodation.booking-fee', group: 'Unterkunft', label: 'Booking fee', source: 'Prices' }, amount: ACCOMMODATION_FEES.commissionFee },
+  { def: { id: 'accommodation.deposit', group: 'Unterkunft', label: 'Deposit', source: 'Prices' }, amount: ACCOMMODATION_FEES.deposit },
+];
+
+export const PRICE_LIST_DEFS: FactDef[] = PRICE_LIST.map((entry) => entry.def);
+
+const priceListCache = new Map<string, FactValues>();
+
+export function priceListFacts(locale: string): FactValues {
+  let values = priceListCache.get(locale);
+  if (!values) {
+    values = Object.fromEntries(PRICE_LIST.map(({ def, amount }) => [def.id, formatEuro(amount, locale)]));
+    priceListCache.set(locale, values);
+  }
+  return values;
+}
+
+export const examGroup = (code: string, name: string) => EXAM_GROUPS[code] ?? name;

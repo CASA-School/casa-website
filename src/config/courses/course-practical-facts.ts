@@ -1,5 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
-import { pick } from '@/lib/cms/copy';
+import { pick, withFacts } from '@/lib/cms/copy';
 
 /**
  * The practical facts CASA publishes for each course format.
@@ -65,16 +65,19 @@ function germanEuro(value: string) {
 
 const EUR = (value: string) => ({ en: value, de: germanEuro(value) });
 
+/** A live value (src/lib/cms/facts.ts): the price as the database or the price list has it today. */
+const FACT = (id: string) => ({ en: `{${id}}`, de: `{${id}}` });
+
 export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
   'intensive-german': {
     fees: [
       {
         label: { en: '4 weeks (half level)', de: '4 Wochen (Teilniveau)' },
-        amount: EUR('€520'),
+        amount: FACT('course.intensive-german.price-4-weeks'),
       },
       {
         label: { en: '8 weeks (complete level)', de: '8 Wochen (komplettes Niveau)' },
-        amount: EUR('€940'),
+        amount: FACT('course.intensive-german.price-8-weeks'),
       },
       {
         label: { en: 'Each additional week', de: 'Jede weitere Woche' },
@@ -82,7 +85,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
       },
       {
         label: { en: 'One-off enrolment fee', de: 'Einmalige Einschreibegebühr' },
-        amount: EUR('€50'),
+        amount: FACT('course.enrolment-fee'),
         note: {
           en: 'Only charged the first time you register at our school.',
           de: 'Fällt nur bei deiner ersten Anmeldung an unserer Schule an.',
@@ -96,8 +99,8 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     ],
     conditions: [
       {
-        en: 'Our intensive courses have 20 lessons of 45 minutes a week. A complete level takes 8 to 9 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.',
-        de: 'Unsere Intensivkurse umfassen 20 Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.',
+        en: 'Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 to 9 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.',
+        de: 'Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.',
       },
       {
         en: 'Courses run in the morning from Monday to Friday, 09:00–12:30, or in the afternoon from Monday to Thursday, 13:00–17:30. So the afternoon course has four days of lessons a week.',
@@ -130,7 +133,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     fees: [
       {
         label: { en: 'Course fee per trimester', de: 'Kursgebühr pro Trimester' },
-        amount: { en: 'from €378', de: 'ab 378\u00a0€' },
+        amount: FACT('course.evening-german.price'),
         note: {
           en: 'The fee depends on the length of the trimester. Plus the course materials, whose price depends on the level.',
           de: 'Die Gebühr hängt von der Länge des Trimesters ab. Dazu kommt das Lehrwerk, sein Preis hängt von der Niveaustufe ab.',
@@ -165,13 +168,13 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     fees: [
       {
         label: { en: 'Per module of 12 evenings', de: 'Pro Modul mit 12 Abenden' },
-        amount: EUR('€192'),
+        amount: FACT('course.special-courses.price-per-module'),
       },
     ],
     conditions: [
       {
-        en: 'A module runs on one evening a week for 90 minutes, usually 12 evenings. A module that starts later has fewer evenings, at €16 each.',
-        de: 'Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu 16 € pro Abend.',
+        en: 'A module runs on one evening a week for 90 minutes, usually 12 evenings. A module that starts later has fewer evenings, at {course.special-courses.price-per-evening} each.',
+        de: 'Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu {course.special-courses.price-per-evening} pro Abend.',
       },
       {
         en: 'You can take a module on its own or alongside another course. The modules are a good choice if you want to revise, refresh or go deeper into particular topics.',
@@ -198,7 +201,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
       },
       {
         label: { en: 'One-off enrolment fee', de: 'Einmalige Einschreibegebühr' },
-        amount: EUR('€50'),
+        amount: FACT('course.enrolment-fee'),
         note: {
           en: 'Only charged the first time you register at our school.',
           de: 'Fällt nur bei deiner ersten Anmeldung an unserer Schule an.',
@@ -252,7 +255,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
       },
       {
         label: { en: 'One-off enrolment fee', de: 'Einmalige Einschreibegebühr' },
-        amount: EUR('€50'),
+        amount: FACT('course.enrolment-fee'),
         note: {
           en: 'Only charged the first time you register at our school.',
           de: 'Fällt nur bei deiner ersten Anmeldung an unserer Schule an.',
@@ -324,8 +327,8 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     conditions: [
       {
         // The focus on speaking is the old casa-bremen.de wording.
-        en: 'Teaching is 20 lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.',
-        de: 'Der Unterricht umfasst 20 Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.',
+        en: 'Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.',
+        de: 'Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.',
       },
       {
         en: 'Every participant receives a certificate of attendance at the end of the course.',
@@ -364,7 +367,7 @@ export function localizePracticalFacts(slug: string, locale: ContentLocale) {
     summary: facts.summary?.map((row) => ({ label: pick(locale, row.label), value: pick(locale, row.value) })),
     fees: facts.fees?.map((fee) => ({
       label: pick(locale, fee.label),
-      amount: fee.amount[locale],
+      amount: withFacts(locale, fee.amount[locale]),
       note: (fee.note ? pick(locale, fee.note) : undefined),
     })),
     feeNote: (facts.feeNote ? pick(locale, facts.feeNote) : undefined),

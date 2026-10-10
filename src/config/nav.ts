@@ -52,7 +52,7 @@ export const deNavText: Record<string, string> = {
   Courses: 'Kurse',
   'Intensive & part-time': 'Intensiv & berufsbegleitend',
   'Intensive courses': 'Intensivkurse',
-  'You have 20 lessons a week.': 'Du lernst 20 Unterrichtseinheiten pro Woche.',
+  'You have {course.intensive-german.lessons} lessons a week.': 'Du lernst {course.intensive-german.lessons} Unterrichtseinheiten pro Woche.',
   'Evening courses': 'Abendkurse',
   'You learn after work, usually twice a week.': 'Nach Feierabend lernst du meist zweimal pro Woche.',
   'Special courses': 'Spezialkurse',
@@ -163,7 +163,7 @@ export const navConfig = {
               label: 'Intensive courses',
               href: '/courses/intensive-german',
               icon: 'intensive',
-              description: 'You have 20 lessons a week.',
+              description: 'You have {course.intensive-german.lessons} lessons a week.',
             },
             {
               label: 'Evening courses',

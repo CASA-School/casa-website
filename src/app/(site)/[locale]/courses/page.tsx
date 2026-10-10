@@ -133,7 +133,7 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
         say(locale, 'Alle, die für Studium, Beruf oder Visum schnell vorankommen möchten.', 'Anyone who wants to make quick progress for study, work or a visa.'),
       schedule:
         say(locale, 'Neue Kurse jeden Monat, abwechselnd am Vormittag und am Nachmittag', 'New courses every month, alternating between mornings and afternoons'),
-      intensity: say(locale, '20 Unterrichtseinheiten à 45 Minuten pro Woche', '20 lessons of 45 minutes a week'),
+      intensity: say(locale, '{course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche', '{course.intensive-german.lessons} lessons of 45 minutes a week'),
       outcomes: baseOutcomes,
       facts: registryFacts,
     };
@@ -601,7 +601,7 @@ export default async function CoursesPage({
               {
                 title: say(locale, 'Wie lange ein Niveau dauert', 'How long a level takes'),
                 body:
-                  say(locale, 'Im Intensivkurs mit 20 Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.', 'In the intensive course, with 20 lessons a week, a complete level takes about 8–9 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.'),
+                  say(locale, 'Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.', 'In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes about 8–9 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.'),
               },
               {
                 title: say(locale, 'Prüfungsvorbereitung ist ein eigener Kurs', 'Exam preparation is a separate course'),

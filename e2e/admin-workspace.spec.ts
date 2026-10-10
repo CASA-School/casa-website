@@ -92,7 +92,7 @@ test.describe('workspace access', () => {
       test.skip(true, 'No DATABASE_URL — sign-in is not reachable in this mode.');
     }
 
-    await page.getByLabel('Email').fill('nobody-here@casa-bremen.de');
+    await page.getByLabel('Name or email').fill('nobody-here@casa-bremen.de');
     await page.locator('input[name="password"]').fill('definitely-not-the-password');
     await page.getByRole('button', { name: 'Sign in' }).click();
 
@@ -100,7 +100,7 @@ test.describe('workspace access', () => {
     // deactivated account: distinguishing them turns this page into a way to
     // find out who works at CASA.
     await expect(
-      page.getByText('That email and password do not match an active account.')
+      page.getByText('That name or email and password do not match an active account.')
     ).toBeVisible();
 
     // And it must not have let anyone in.

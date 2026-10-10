@@ -126,6 +126,7 @@ conclude nothing had come in.
 | --- | --- |
 | `DATABASE_URL` | Database-backed reads, the workspace queues, career application persistence. **Required by `/admin`** |
 | `ADMIN_DB_POOL_MAX` | Pool size, default 5 (an Azure B1ms allows ~50 connections total) |
+| `AUTH_MICROSOFT_TENANT_ID`, `AUTH_MICROSOFT_CLIENT_ID`, `AUTH_MICROSOFT_CLIENT_SECRET` | "Sign in with Microsoft" on the workspace, against CASA's Entra ID tenant (`infra/azure/entra-workspace-app.sh`). Without them, sign-in is by name or address and password only. `AUTH_MICROSOFT_REDIRECT_URI` pins the callback |
 | `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` | Reopens `/admin` on the public host in production. For the window between deploying and pointing the admin DNS record |
 | `CONTACT_WEBHOOK_URL` | Contact form fan-out |
 | `CAREERS_APPLICATION_WEBHOOK_URL` | Career application fan-out |
@@ -171,7 +172,7 @@ src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
 src/lib/cms      the website editor's content layer: catalog, overlay, slot tags, preview, AI
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0019_website_editor.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0020_staff_sign_in_names_and_microsoft.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -225,7 +226,9 @@ and repository-backed view models rather than hardcoded inline content. **Copy g
 through `say(locale, 'Deutsch', 'English')`**, `pick` or `pickTree` (`src/lib/cms/copy.ts`;
 `useSiteCopy()` in client components), never a new `locale === 'de' ? … : …` for text, and
 `npm run cms:extract` refreshes the editor's catalog (a test fails without it). That is what
-makes a text editable in the website editor; docs/WEBSITE_EDITOR.md has the rest. Keep new work
+makes a text editable in the website editor; docs/WEBSITE_EDITOR.md has the rest. **A price, a
+lesson count or a date in copy is a live value**, `{course.intensive-german.lessons}`, filled
+from the database each render (`src/lib/cms/facts.server.ts`), never a typed number. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
 
@@ -448,7 +451,12 @@ is still valid.
   named privacy owner at CASA.
 - **No outbound email from the workspace.** Every "Reply" button is a `mailto:`,
   and there is no self-service password reset — an owner sets one from the Team
-  screen.
+  screen, or the colleague signs in with Microsoft.
+- **Microsoft sign-in is built but not registered (2026-10-10).** The workspace
+  signs colleagues in by full name or Outlook address (migration 0020) and offers
+  "Sign in with Microsoft" once the three `AUTH_MICROSOFT_*` variables exist.
+  `infra/azure/entra-workspace-app.sh` creates the Entra app registration and wires
+  the Container App; it changes CASA's tenant, so it runs only with Rahman's go-ahead.
 - ~~`lucide-react` missing~~ **Resolved (verified 2026-08-12).** `lucide-react` is still
   absent from `package.json` and `node_modules`, but `tsconfig.json` now maps it via a
   `paths` alias to `./src/lib/icons/streamline-lucide-adapter`. `npm run typecheck` and

@@ -203,7 +203,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
     .filter((topic) => !topic.onlyWhenRequested || topic.key === initialTopicKey)
     .map((topic) => ({
       key: topic.key,
-      label: locale === 'de' ? topic.labels.de : topic.labels.en,
+      label: pick(locale, topic.labels),
     }));
 
   const contactSchema = {

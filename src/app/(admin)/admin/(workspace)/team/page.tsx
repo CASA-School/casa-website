@@ -1,9 +1,12 @@
 import {
   createStaffAction,
+  createStaffBatchAction,
   resetPasswordAction,
   setActiveAction,
   setModuleAccessAction,
   setRoleAction,
+  unlinkMicrosoftAction,
+  updateStaffAction,
 } from './actions';
 import {
   Badge,
@@ -17,13 +20,15 @@ import {
   Select,
   Table,
   TableRow,
+  Textarea,
   relativeDays,
 } from '@/components/admin/ui';
-import { ConfirmSubmit } from '@/components/admin/dialogs';
+import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { roleLabel } from '@/components/admin/shell';
 import { ADJUSTABLE, LEVEL_LABELS, LEVELS, MODULE_LABELS, resolveAccess } from '@/lib/admin/access';
 import { canDeleteStaff } from '@/lib/admin/auth';
 import { requireModule } from '@/lib/admin/guard';
+import { microsoftEnabled } from '@/lib/admin/microsoft';
 import { MIN_PASSWORD_LENGTH } from '@/lib/admin/password';
 import { listStaff } from '@/lib/admin/staff';
 
@@ -50,6 +55,7 @@ export default async function TeamPage({
 
   const [params, staff] = await Promise.all([searchParams, listStaff()]);
   const isOwner = canDeleteStaff(user.role);
+  const microsoft = microsoftEnabled();
 
   return (
     <>
@@ -93,6 +99,11 @@ export default async function TeamPage({
                   </span>
                   <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
                     {account.email}
+                    {account.username && account.username !== account.name ? ` · signs in as ${account.username}` : null}
+                  </span>
+                  <span className="mt-1.5 flex flex-wrap gap-1.5">
+                    {account.microsoftLinkedAt ? <Badge tone="neutral">Microsoft</Badge> : null}
+                    {account.hasPassword ? null : <Badge tone="warning">No password yet</Badge>}
                   </span>
                 </Cell>
                 <Cell>
@@ -135,6 +146,35 @@ export default async function TeamPage({
                   )}
                 </Cell>
                 <Cell align="right">
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                  <FormDialog trigger="Edit" title={`Edit ${account.name}`} triggerVariant="ghost" size="sm">
+                    <form action={updateStaffAction} className="space-y-3 text-left">
+                      <input type="hidden" name="staffUserId" value={account.id} />
+                      <Field label="Name" htmlFor={`edit-name-${account.id}`}>
+                        <Input id={`edit-name-${account.id}`} name="name" required defaultValue={account.name} />
+                      </Field>
+                      <Field label="Signs in as" hint="Their full name, as they will type it" htmlFor={`edit-username-${account.id}`}>
+                        <Input id={`edit-username-${account.id}`} name="username" defaultValue={account.username ?? account.name} />
+                      </Field>
+                      <Field label="Outlook address" htmlFor={`edit-email-${account.id}`}>
+                        <Input id={`edit-email-${account.id}`} name="email" type="email" required defaultValue={account.email} />
+                      </Field>
+                      <Button type="submit">Save</Button>
+                    </form>
+                  </FormDialog>
+                  {account.microsoftLinkedAt && account.id !== user.id ? (
+                    <form action={unlinkMicrosoftAction} className="inline">
+                      <input type="hidden" name="staffUserId" value={account.id} />
+                      <ConfirmSubmit
+                        title={`Unlink Microsoft for ${account.name}?`}
+                        description="They are signed out. Their next Microsoft sign-in under this account's address links it again."
+                        confirmLabel="Unlink"
+                        variant="ghost"
+                      >
+                        Unlink Microsoft
+                      </ConfirmSubmit>
+                    </form>
+                  ) : null}
                   {account.id === user.id ? null : (
                     <form action={setActiveAction} className="inline">
                       <input type="hidden" name="staffUserId" value={account.id} />
@@ -158,6 +198,7 @@ export default async function TeamPage({
                       )}
                     </form>
                   )}
+                  </span>
                 </Cell>
               </TableRow>
             ))}
@@ -234,7 +275,10 @@ export default async function TeamPage({
               <Field label="Name" htmlFor="new-name">
                 <Input id="new-name" name="name" required placeholder="Full name" />
               </Field>
-              <Field label="Email" htmlFor="new-email">
+              <Field label="Signs in as" hint="Leave empty to use the name" htmlFor="new-username">
+                <Input id="new-username" name="username" placeholder="Full name, as they will type it" />
+              </Field>
+              <Field label="Outlook address" htmlFor="new-email">
                 <Input
                   id="new-email"
                   name="email"
@@ -250,16 +294,24 @@ export default async function TeamPage({
                   {isOwner ? <option value="owner">Owner — can grant the owner role</option> : null}
                 </Select>
               </Field>
+              <Field label="Website editor" hint="Staff accounts" htmlFor="new-website">
+                <Select id="new-website" name="website" defaultValue="none">
+                  <option value="none">No access</option>
+                  <option value="view">View</option>
+                  <option value="edit">Edit — drafts, sends for approval</option>
+                  <option value="full">Full — also publishes</option>
+                </Select>
+              </Field>
               <Field
                 label="Password"
-                hint={`${MIN_PASSWORD_LENGTH} characters or more`}
+                hint={microsoft ? `Optional · ${MIN_PASSWORD_LENGTH} characters or more` : `${MIN_PASSWORD_LENGTH} characters or more`}
                 htmlFor="new-password"
               >
                 <Input
                   id="new-password"
                   name="password"
                   type="password"
-                  required
+                  required={!microsoft}
                   minLength={MIN_PASSWORD_LENGTH}
                   autoComplete="new-password"
                 />
@@ -269,6 +321,31 @@ export default async function TeamPage({
           </Card>
 
           <div className="space-y-5">
+            <Card title="Add the office team">
+              <form action={createStaffBatchAction} className="space-y-3">
+                <Field label="Colleagues" hint="One per line: full name, Outlook address" htmlFor="batch-people">
+                  <Textarea
+                    id="batch-people"
+                    name="people"
+                    rows={5}
+                    required
+                    placeholder={'Vorname Nachname, v.nachname@casa-bremen.de\nVorname Nachname, v.nachname@casa-bremen.de'}
+                  />
+                </Field>
+                <Field label="Website editor" htmlFor="batch-website">
+                  <Select id="batch-website" name="website" defaultValue="edit">
+                    <option value="none">No access</option>
+                    <option value="view">View</option>
+                    <option value="edit">Edit — drafts, sends for approval</option>
+                    <option value="full">Full — also publishes</option>
+                  </Select>
+                </Field>
+                <Button type="submit" variant="secondary">
+                  Add colleagues
+                </Button>
+              </form>
+            </Card>
+
             <Card
               title="Set someone's password"
               description="Closes every session that account has open."
@@ -282,6 +359,7 @@ export default async function TeamPage({
                     {staff.map((account) => (
                       <option key={account.id} value={account.id}>
                         {account.name} — {account.email}
+                        {account.hasPassword ? '' : ' (no password yet)'}
                       </option>
                     ))}
                   </Select>

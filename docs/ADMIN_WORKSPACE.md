@@ -319,14 +319,53 @@ parameters so the cost can be raised later without a migration:
 scrypt$65536$8$1$<salt base64>$<hash base64>
 ```
 
-One rule: **12 characters, of anything.** No composition rules — they
+One rule: **8 characters, of anything** (`MIN_PASSWORD_LENGTH`, 2026-10-10;
+it was 12). The office team keeps the password it already uses for FileMaker,
+which an owner sets on the Team screen, and Microsoft — CASA's tenant, with its
+own policy and MFA — is the stronger way in. No composition rules — they
 measurably push people towards `Casa2026!` and are not in NIST 800-63B any
 more.
 
-`signIn` returns null for every failure — unknown address, wrong password,
-deactivated account — and verifies against a throwaway hash when no account
-matched, so an unknown address costs the same ~100 ms as a real one. Response
-time leaks nothing and the form is not an account-enumeration oracle.
+`signIn` returns null for every failure — unknown name or address, wrong
+password, deactivated account, an account with no password yet — and verifies
+against a throwaway hash when no account matched, so an unknown name costs the
+same ~100 ms as a real one. Response time leaks nothing and the form is not an
+account-enumeration oracle.
+
+### Signing in (2026-10-10)
+
+A colleague types **their full name or their Outlook address**, and their
+password — or uses **Sign in with Microsoft**.
+
+- **By name.** Migration 0020 gives every account a `username` (the full name
+  by default; the Team screen can change it) and a folded `username_key`:
+  lower case, accents and spacing folded, ß as ss (`src/lib/admin/sign-in-names.ts`).
+  „natalia sostres" finds „Natália Sostres"; „Mueller" finds „Müller", the exact
+  spelling winning if both exist. Two active accounts cannot share a key.
+- **By address.** Matched case-insensitively against `email`.
+- **No password yet.** An account can be created without one
+  (`password_set_at` is null): the colleague signs in with Microsoft until an
+  owner sets a password. The Team screen marks it „No password yet".
+- **Microsoft** (`src/lib/admin/microsoft.ts`, routes under
+  `/admin/auth/microsoft`). OpenID Connect against CASA's own Entra ID tenant,
+  authorization code with PKCE; state, nonce and verifier ride in a signed
+  ten-minute cookie. The id token's signature is checked against the tenant's
+  published keys, then issuer, audience, tenant, expiry and nonce. No Microsoft
+  token is kept. The account is found by `microsoft_oid` once linked, and on a
+  first sign-in by the Outlook address, which links it. An address no active
+  account has is refused: Microsoft proves who someone is, the Team screen
+  decides whether they are staff. „Unlink Microsoft" on the Team screen undoes
+  a link.
+- **Configuration.** `AUTH_MICROSOFT_TENANT_ID`, `AUTH_MICROSOFT_CLIENT_ID`,
+  `AUTH_MICROSOFT_CLIENT_SECRET` (and `AUTH_MICROSOFT_REDIRECT_URI` to pin the
+  callback). Without them the button is not shown. `infra/azure/entra-workspace-app.sh`
+  creates the single-tenant app registration „CASA Workspace" (scopes `openid
+  profile email`, admin consent) and puts the secret on the Container App;
+  `--local` also writes the three values to `.env.local`.
+- **The office team.** Owners add them on the Team screen, one line per person
+  („Full name, Outlook address") in „Add the office team": staff role, the
+  website editor at the chosen level, no password. They sign in with Microsoft
+  at once, or by name once their password is set.
 
 ### Roles, modules and levels
 

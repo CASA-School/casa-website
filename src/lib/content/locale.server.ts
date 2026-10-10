@@ -17,9 +17,11 @@ export async function getContentLocale(): Promise<ContentLocale> {
   /*
    * Every page asks for its language first, so this is also where the page's
    * copy is readied: `say`, `pick` and `pickTree` (src/lib/cms/copy.ts) read
-   * the live edits — or, in the website editor's preview, the drafts — from a
-   * store that lives for this request. One query, shared with the layout.
+   * the live edits — or, in the website editor's preview, the drafts — and the
+   * live values in this language from a store that lives for this request.
+   * Shared with the layout.
    */
-  const [locale] = await Promise.all([getLocale(), prepareCopy()]);
-  return normalizeContentLocale(locale);
+  const locale = normalizeContentLocale(await getLocale());
+  await prepareCopy(locale);
+  return locale;
 }

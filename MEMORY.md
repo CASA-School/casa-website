@@ -2450,3 +2450,33 @@ test fails when it is stale. The course pages' path keys were retired in favour 
 scheme. Proof: all 70 pages in both languages rendered identically before and after, in
 public and in preview mode, and 99 %+ of tagged texts are in the catalog. Legal texts, the
 closed placement test, emails and metadata stay out.
+
+## 45. Live values in copy; the office team signs in by name or with Microsoft (2026-10-10)
+
+Rahman: "everything should be highly dynamic, the course start and end dates will be fetched
+from our database", and the office team, the editor's first users, "log in with their
+fullname and the same password as their filemaker password … we will use microsoft for the
+authentication and verification".
+
+**Live values.** A text names a fact — `{course.intensive-german.lessons}`,
+`{course.evening-german.price}`, `{course.intensive-german.next-start}` / `.next-end`,
+`{exam.telc_b2.deadline}`, `{accommodation.rent-4-weeks}` — and the page fills it in on every
+render, in its language (src/lib/cms/facts.ts, facts.server.ts). Course types, terms, exam days
+and fees come from the database (fixtures without one); the price list from
+config/calculator/pricing.ts. The fifteen texts that stated a price or "20 lessons" now name
+the value (calculator hints, accommodation price, fee tables, special-course price,
+enrolment fee, FAQ, nav, level timeline). The editor's popup lists the values a text uses,
+inserts new ones from a search, counts the text as it reads and refuses unknown names;
+`saveDraft` checks the same. Slot names show today's value, not `{…}`. llms.txt fills them
+too. The exam page's preparation block, the contact topics and the level description, which
+had stayed outside the editor, now resolve through `say`/`pickTree`. A missing value shows „–".
+
+**Sign-in.** Migration 0020: `username` + folded `username_key` (accents, spacing, ß; ae/oe/ue
+accepted for umlauts), `microsoft_oid`, `password_set_at`. The form takes a full name or an
+Outlook address; an account may have no password yet. Microsoft: OIDC code + PKCE against
+CASA's tenant, id token verified against its keys, accounts linked by oid or matched by
+address on first sign-in, unknown addresses refused (src/lib/admin/microsoft.ts). The Team
+screen edits names and addresses, unlinks Microsoft, and adds the office team one line per
+person with website access and no password. Minimum password length 8 (FileMaker
+passwords). The Entra app registration is scripted (infra/azure/entra-workspace-app.sh) and
+**not created**: it changes CASA's tenant and waits for Rahman.
