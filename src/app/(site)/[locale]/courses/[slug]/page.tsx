@@ -35,6 +35,7 @@ import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/c
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
+import { getPageContent } from '@/lib/cms/content.server';
 import { createPublicMetadata } from '@/lib/seo';
 
 /* What each of the Bremen Town Musicians says in the group page's hero. */
@@ -106,6 +107,16 @@ export default async function CourseDetailPage({
   }
 
   /*
+   * The website editor's layer (src/lib/cms/content.server.ts): each text is the
+   * live one staff published, else what the code says. In the editor's preview
+   * every text also carries its slot tag, and facts that live in other records
+   * (dates, prices, course types) are marked as such rather than made editable.
+   */
+  const cms = await getPageContent(locale);
+  const { t } = cms;
+  const narrative = cms.tree(detail.course.slug, 'narrative', detail.course.narrative);
+
+  /*
    * Only a term a learner can still join is ever selected — not `instances[0]`,
    * which was a term that had begun weeks earlier, rendered as "Nächster Start".
    * The rule is per format (an evening term can be joined while it runs); see
@@ -140,7 +151,7 @@ export default async function CourseDetailPage({
   const courseStoryPhoto = pageConfig.photos[`${coursePhotoKey}Story`] ?? coursePhoto;
   // From `lg` the hero is a 2.2-2.6:1 band; a crop composed for it beats a slice of the 4:3.
   const courseHeroPhoto = pageConfig.photos[`${coursePhotoKey}Hero`] ?? coursePhoto;
-  const courseLevelGoals = getCourseLevelGoals(detail.course.slug, locale);
+  const courseLevelGoals = cms.tree(detail.course.slug, 'levels', getCourseLevelGoals(detail.course.slug, locale));
   const archetype = getCourseArchetype(getCourseProfile(detail.course.slug)?.archetype);
   // Only meaningful on `package-inquiry`, where two very different products
   // share one page shape. See QuoteAudience in config/courses/course-profiles.
@@ -148,7 +159,7 @@ export default async function CourseDetailPage({
   const isGroupQuote = archetype.cta === 'request-quote' && quoteAudience === 'group';
   const isOrganisationQuote = archetype.cta === 'request-quote' && quoteAudience === 'organisation';
 
-  const practicalFacts = localizePracticalFacts(detail.course.slug, locale);
+  const practicalFacts = cms.tree(detail.course.slug, 'practical', localizePracticalFacts(detail.course.slug, locale));
 
   /*
    * Group the published terms by weekly slot.
@@ -224,7 +235,7 @@ export default async function CourseDetailPage({
 
   const primaryDecisionCta = interestCourse
     ? {
-        label: locale === 'de' ? 'Interesse anmelden' : 'Register your interest',
+        label: t('coursePage.cta.interest'),
         href: `${getCoursePath(courseSlug)}#${INTEREST_ANCHOR}`,
         kind: 'primary' as const,
       }
@@ -236,19 +247,19 @@ export default async function CourseDetailPage({
       }
     : beginnerTrack
       ? {
-          label: locale === 'de' ? 'Niveau zuerst prüfen' : 'Check your level first',
+          label: t('coursePage.cta.checkLevel'),
           href: '/placement-test',
           kind: 'primary' as const,
         }
       : {
-          label: locale === 'de' ? 'Jetzt anmelden' : 'Register now',
+          label: t('coursePage.cta.register'),
           href: selectedInstance ? `/registration/course?courseId=${selectedInstance.id}` : '/registration/course',
           kind: 'primary' as const,
         };
 
   const secondaryDecisionCta = interestCourse
     ? {
-        label: locale === 'de' ? 'Frage stellen' : 'Ask a question',
+        label: t('coursePage.cta.question'),
         href: '/contact?topic=Course advice',
         kind: 'secondary' as const,
       }
@@ -259,15 +270,15 @@ export default async function CourseDetailPage({
         kind: 'secondary' as const,
       }
     : {
-        label: locale === 'de' ? 'Beratung anfragen' : 'Get advice',
+        label: t('coursePage.cta.advice'),
         href: '/contact?topic=Course advice',
         kind: 'secondary' as const,
       };
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Kurse' : 'Courses', href: '/courses' },
-    { label: detail.course.name },
+    { label: t('coursePage.breadcrumb.home'), href: '/' },
+    { label: t('coursePage.breadcrumb.courses'), href: '/courses' },
+    { label: cms.data('Course types', detail.course.name) },
   ];
 
   // The rail is built from the archetype's permitted facts, not from a fixed
@@ -281,15 +292,9 @@ export default async function CourseDetailPage({
 
   const factRows: Partial<Record<CourseFactKey, FactRow>> = {
     'next-start': {
-      label: selectedIsUnderWay
-        ? locale === 'de'
-          ? 'Einstieg'
-          : 'Joining'
-        : locale === 'de'
-          ? 'Nächster Start'
-          : 'Next start date',
+      label: selectedIsUnderWay ? t('coursePage.info.joining') : t('coursePage.info.nextStart'),
       value: selectedInstance
-        ? startLabel(selectedInstance)
+        ? cms.data('Course dates', startLabel(selectedInstance))
         : locale === 'de'
           ? 'Wird bekannt gegeben'
           : 'To be announced',
@@ -303,32 +308,32 @@ export default async function CourseDetailPage({
     },
     duration: {
       // The value is the term's dates, not a length: "Zeitraum", not "Dauer".
-      label: locale === 'de' ? 'Zeitraum' : 'Dates',
+      label: t('coursePage.info.dates'),
       value: selectedInstance
-        ? `${formatDate(selectedInstance.start_date, locale)} – ${formatDate(selectedInstance.end_date, locale)}`
+        ? cms.data('Course dates', `${formatDate(selectedInstance.start_date, locale)} – ${formatDate(selectedInstance.end_date, locale)}`)
         : locale === 'de'
           ? 'Auf Anfrage'
           : 'On request',
     },
     'lessons-per-week': {
-      label: locale === 'de' ? 'Unterrichtseinheiten pro Woche' : 'Lessons a week',
+      label: t('coursePage.info.lessons'),
       // 0 is the "CASA publishes no weekly load" sentinel, not a real zero.
       // Firmenunterricht is agreed per contract; German for Medical simply has
       // no published figure. Rendering "0" would read as "no lessons".
       value:
         detail.course.lessons_per_week > 0
-          ? String(detail.course.lessons_per_week)
+          ? cms.data('Course types', String(detail.course.lessons_per_week))
           : locale === 'de'
             ? 'Nach Absprache'
             : 'By arrangement',
     },
     'level-range': {
-      label: locale === 'de' ? 'Niveaubereich' : 'Level range',
-      value: `${detail.course.level_min || 'A1'} - ${detail.course.level_max || 'C1'}`,
+      label: t('coursePage.info.levels'),
+      value: cms.data('Course types', `${detail.course.level_min || 'A1'} - ${detail.course.level_max || 'C1'}`),
     },
     price: {
-      label: locale === 'de' ? 'Preis' : 'Price',
-      value: formatCoursePrice(detail.course, locale),
+      label: t('coursePage.info.price'),
+      value: cms.data('Prices', formatCoursePrice(detail.course, locale)),
     },
     'group-size': {
       label: locale === 'de' ? 'Gruppengröße' : 'Group size',
@@ -433,8 +438,8 @@ export default async function CourseDetailPage({
    * registration", an action that does not exist for it. See
    * config/courses/course-page-content.ts.
    */
-  const courseNextSteps = getCourseNextSteps(detail.course.slug, locale);
-  const courseAudience = getCourseAudienceContent(detail.course.slug, locale);
+  const courseNextSteps = cms.tree(detail.course.slug, 'steps', getCourseNextSteps(detail.course.slug, locale));
+  const courseAudience = cms.tree(detail.course.slug, 'audience', getCourseAudienceContent(detail.course.slug, locale));
   const processDescription = courseNextSteps?.description ?? (isOrganisationQuote
     ? locale === 'de'
       ? 'So entsteht ein Firmenkurs bei CASA.'
@@ -443,9 +448,7 @@ export default async function CourseDetailPage({
       ? locale === 'de'
         ? 'Von der ersten Anfrage bis zum fertigen Programm sind es drei Schritte.'
         : 'It takes three steps.'
-      : locale === 'de'
-        ? 'Von der Einstufung bis zum ersten Kurstag sind es drei Schritte.'
-        : 'There are three steps between your placement and your first day in class.');
+      : t('coursePage.steps.lead'));
 
   // Quote products have a different journey: nobody registers, someone briefs.
   // Firmenunterricht speaks about the company in the third person, as the old
@@ -516,30 +519,9 @@ export default async function CourseDetailPage({
          * in-person placement (/placement-test); complete beginners skip it.
          */
         [
-          {
-            step: '1',
-            title: locale === 'de' ? 'Einstufung machen' : 'Take the placement test',
-            description:
-              locale === 'de'
-                ? 'Mach den kostenlosen Online-Test oder komm zur Einstufung bei uns vorbei. Wenn du noch gar kein Deutsch sprichst, beginnst du direkt bei A1.'
-                : 'Do the free online test, or come to the school and take the placement test in person. If you do not speak any German yet, you start straight at A1.',
-          },
-          {
-            step: '2',
-            title: locale === 'de' ? 'Termin buchen' : 'Book your start date',
-            description:
-              locale === 'de'
-                ? 'Such dir einen Starttermin aus und schick uns deine Anmeldung.'
-                : 'Choose a start date and send us your registration.',
-          },
-          {
-            step: '3',
-            title: locale === 'de' ? 'Start vorbereiten' : 'Get ready to start',
-            description:
-              locale === 'de'
-                ? 'Plane deine Zeit und leg deine Unterlagen bereit. Wenn du noch eine Unterkunft in Bremen brauchst, vermitteln wir dir gern ein Zimmer.'
-                : 'Plan your time and get your documents ready. If you still need somewhere to live in Bremen, we are happy to arrange a room for you.',
-          },
+          { step: '1', title: t('coursePage.steps.1.title'), description: t('coursePage.steps.1.text') },
+          { step: '2', title: t('coursePage.steps.2.title'), description: t('coursePage.steps.2.text') },
+          { step: '3', title: t('coursePage.steps.3.title'), description: t('coursePage.steps.3.text') },
         ]);
 
   // "For whom" bullets were identical on all nine pages. An organiser needs
@@ -583,7 +565,7 @@ export default async function CourseDetailPage({
     locale,
     path: getCoursePath(detail.course.slug),
     name: detail.course.name,
-    description: detail.course.narrative?.promise || '',
+    description: narrative?.promise || '',
     levelMin: detail.course.level_min,
     levelMax: detail.course.level_max,
     price: isQuoteOnly(detail.course) || !detail.course.default_price ? null : detail.course.default_price,
@@ -650,11 +632,11 @@ export default async function CourseDetailPage({
         </HeroSurface>
       ) : (
       <HeroCUtilityRail
-        eyebrow={locale === 'de' ? 'Kursdetail' : 'Course detail'}
-        title={detail.course.name}
-        description={detail.course.narrative?.promise || (locale === 'de' ? 'Schritt für Schritt von einer Niveaustufe zur nächsten.' : 'Step by step from one level to the next.')}
+        eyebrow={t('coursePage.eyebrow')}
+        title={cms.data('Course types', detail.course.name)}
+        description={narrative?.promise || t('coursePage.leadFallback')}
         breadcrumbs={breadcrumbs}
-        infoTitle={locale === 'de' ? 'Kursinfo' : 'Course info'}
+        infoTitle={t('coursePage.info.title')}
         infoItems={infoItems}
         /*
           The hero card no longer repeats `contactLine` on quote-only formats —
@@ -665,16 +647,12 @@ export default async function CourseDetailPage({
         */
         notes={
           interestCourse
-            ? locale === 'de'
-              ? 'Einen festen Termin gibt es noch nicht. Melde dein Interesse an, dann melden wir uns, sobald die Gruppe steht.'
-              : 'There are no fixed dates yet. Register your interest and we will get in touch once the group is complete.'
+            ? t('coursePage.info.noteInterest')
             : archetype.cta === 'request-quote'
             ? locale === 'de'
               ? 'Umfang und Preis bestätigen wir im Angebot.'
               : 'We confirm the scope and the price in our quote.'
-            : locale === 'de'
-              ? 'Termine und freie Plätze bestätigen wir dir bei der Anmeldung.'
-              : 'We confirm the dates and your place when you register.'
+            : t('coursePage.info.note')
         }
         ctas={[primaryDecisionCta, secondaryDecisionCta]}
         photo={{
@@ -751,13 +729,13 @@ export default async function CourseDetailPage({
                     description={courseLevelGoals.description}
                     levels={courseLevelGoals.levels}
                     practices={
-                      detail.course.narrative?.outcomes || [
+                      narrative?.outcomes || [
                         locale === 'de' ? 'Aktive Kommunikation in Alltagssituationen' : 'Active communication in everyday situations',
                         locale === 'de' ? 'Präziser Einsatz zentraler Grammatikstrukturen' : 'More precise grammar usage in context',
                         locale === 'de' ? 'Flüssigeres Verstehen und Sprechen' : 'Stronger listening and speaking fluency',
                       ]
                     }
-                    practiceTitle={locale === 'de' ? 'Das übst du' : 'What you practise'}
+                    practiceTitle={t('coursePage.goals.practiceTitle')}
                     locale={locale}
                   />
                   );
@@ -768,7 +746,7 @@ export default async function CourseDetailPage({
                     key={sectionKey}
                     title={audienceTitle}
                     description={
-                      detail.course.narrative?.audience ||
+                      narrative?.audience ||
                       (locale === 'de'
                         ? 'Geeignet für Lernende, die klare Ziele mit persönlicher Begleitung verbinden möchten.'
                         : 'Ideal for learners who want clear outcomes with personal teaching support.')
@@ -785,7 +763,7 @@ export default async function CourseDetailPage({
                   return (
                   <ProcessSteps
                     key={sectionKey}
-                    title={processHeading.title}
+                    title={archetype.cta === 'request-quote' ? processHeading.title : t('coursePage.steps.title')}
                     description={processDescription}
                     steps={processStepItems}
                     /*
@@ -872,12 +850,8 @@ export default async function CourseDetailPage({
                   return (
                   <TestimonialGrid
                     key={sectionKey}
-                    title={locale === 'de' ? 'Was Lernende über CASA sagen' : 'What learners say about CASA'}
-                    description={
-                      locale === 'de'
-                        ? 'Lernende erzählen, wie sie ihren Kurs bei uns erlebt haben.'
-                        : 'Learners describe what their course with us was like.'
-                    }
+                    title={t('coursePage.testimonials.title')}
+                    description={t('coursePage.testimonials.lead')}
                     cards={testimonialCards}
                     locale={locale}
                   />
@@ -887,7 +861,7 @@ export default async function CourseDetailPage({
                   return (
                   <section key={sectionKey} className="space-y-5">
                     <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)]">
-                      {locale === 'de' ? 'Andere Kurse bei CASA' : 'Other courses at CASA'}
+                      {t('coursePage.related.title')}
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2">
                       {related.map((course) => {
@@ -914,7 +888,7 @@ export default async function CourseDetailPage({
                             <div className="p-4">
                               <h3 className="text-lg font-bold leading-tight text-[var(--casa-ink)] group-hover:text-[var(--casa-accent-text)]">{course.name}</h3>
                               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--casa-muted)]">
-                                {course.narrative?.promise || (locale === 'de' ? 'Ein Deutschkurs bei CASA in Bremen.' : 'A German course at CASA in Bremen.')}
+                                {cms.tree(course.slug, 'narrative', course.narrative)?.promise || (locale === 'de' ? 'Ein Deutschkurs bei CASA in Bremen.' : 'A German course at CASA in Bremen.')}
                               </p>
                               <p className="mt-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
                                 {course.level_min || 'A1'} - {course.level_max || 'C1'}
@@ -939,7 +913,7 @@ export default async function CourseDetailPage({
             <DecisionRail
               locale={locale}
               // Neutral in German: this card serves learners and organisers.
-              infoTitle={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
+              infoTitle={t('coursePage.rail.title')}
               infoItems={decisionItems.length > 0 ? decisionItems : infoItems}
               /*
                 No `notes`. It was `contactLine` — "Your contact: Ina Eismann,

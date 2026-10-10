@@ -16,10 +16,13 @@
 import type {Metadata} from 'next';
 import {NextIntlClientProvider} from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
+import { draftMode } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 
+import { EditBridge } from '@/components/cms/edit-bridge';
 import { SiteShell } from '@/components/layout/site-shell';
+import { editorOrigins } from '@/lib/cms/origins';
 import { siteGraph } from '@/lib/structured-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { defaultLocale, directionFor, isLocale } from '@/i18n/routing';
@@ -107,6 +110,8 @@ export default async function RootLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const contentLocale = locale;
+  // Only the website editor's preview has draft mode (src/app/api/cms/preview).
+  const editing = (await draftMode()).isEnabled;
 
   return (
     <html lang={locale} dir={directionFor(locale)}>
@@ -118,6 +123,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <SiteShell contentLocale={contentLocale}>{children}</SiteShell>
         </NextIntlClientProvider>
+        {editing ? <EditBridge allowedOrigins={await editorOrigins()} /> : null}
       </body>
     </html>
   );

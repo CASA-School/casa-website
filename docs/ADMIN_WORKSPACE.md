@@ -183,9 +183,17 @@ inside the shell. Without it the public site's `[locale]/[...rest]` took
 
 Since 0014 there is a second entry with the same gate:
 `src/app/(admin)/admin/(focus)/layout.tsx`, which renders the shell in focus
-mode (icon rail, no 1180px measure) for the course-planning board. Both
-layouts call the one `requireStaff()` in `src/lib/admin/guard.ts`, so "signed
-in" is still defined once; what differs is the chrome, never the check.
+mode (icon rail, no 1180px measure) for the course-planning board. Since 0019
+there is a third, `src/app/(admin)/admin/(editor)/layout.tsx`, with no shell at
+all, for the website editor (docs/WEBSITE_EDITOR.md). All three layouts call
+the one `requireStaff()` in `src/lib/admin/guard.ts`, so "signed in" is still
+defined once; what differs is the chrome, never the check.
+
+The website editor adds one public route, `/api/cms/preview`, which switches
+draft mode on for the editor's iframe. It sits on the public host because the
+iframe's page is served there, and it opens nothing without a short-lived token
+the editor page signed for a colleague holding the `website` module
+(src/lib/cms/preview-token.ts). Draft mode shows drafts, never workspace records.
 
 ### 2. Every server action checks again
 

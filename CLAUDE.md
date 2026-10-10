@@ -17,6 +17,9 @@ receives lands in a queue with a status and an owner. Routes live under
 `src/app/(admin)`. **Read `docs/ADMIN_WORKSPACE.md` before touching it.**
 The course-planning board at `/admin/kursplanung` (management only, focus-mode
 shell) has its own rules and history: **read `docs/KURSPLANUNG.md` before touching it.**
+The website editor at `/admin/website` (module `website`, full screen) lets staff
+change the public site's text on the real page: **read `docs/WEBSITE_EDITOR.md`
+before touching it or adding an editable page.**
 
 The workspace is NOT the old portal. The previous role-based student/teacher
 portal was removed and is not coming back — do not reintroduce learner-facing
@@ -135,6 +138,10 @@ conclude nothing had come in.
 | `FORM_REPLY_TO_CAREERS` | Management mailbox that receives replies to an application's confirmation; live, no application confirmation is sent without it |
 | `NEXT_PUBLIC_SITE_URL` | Origin for canonical, hreflang, sitemap and JSON-LD URLs; default `https://casa-bremen.de`. Inlined at build time, so it only takes effect when passed into the image build (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`) |
 | `NEXT_PUBLIC_SHOW_DRAFT_CLAIMS` | Optional flag for unverified public claims |
+| `ANTHROPIC_API_KEY`, `CMS_AI_MODEL` | The website editor's writing help (shorten, voice, translate, Ask). Off without a key; only website copy is sent |
+| `CMS_EXTRA_LOCALES` | Languages written in the website editor before the site routes them, e.g. `tr,ar` |
+| `CMS_PREVIEW_SECRET` | Key for the editor's preview token; defaults to one derived from `DATABASE_URL` |
+| `CMS_PUBLIC_ORIGIN`, `CMS_EDITOR_ORIGIN` | The editor's host pair when it is not casa-bremen.de / admin.casa-bremen.de |
 
 All webhooks are optional, and in live mode a webhook is used only when no
 notification mail is configured; it fires *alongside* storing the record in the
@@ -162,7 +169,8 @@ src/lib          content repository, db helpers, api envelope, search,
 src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0018_evening_price_from_378.sql)
+src/lib/cms      the website editor's content layer: catalog, overlay, slot tags, preview, AI
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0019_website_editor.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -212,7 +220,10 @@ never dropped, since CASA wants everything casa-bremen.de says kept. When copy i
 check every place that text renders, not only the page being edited (MEMORY.md pass 41).
 
 **Content composition.** Public pages compose through `src/config/public-page-config.ts`
-and repository-backed view models rather than hardcoded inline content. Keep new work
+and repository-backed view models rather than hardcoded inline content. On a page the
+website editor covers (the course pages so far), copy goes through
+`getPageContent(locale)` — `t(key)` for registry words, `tree(...)` for config objects,
+`data(...)` for values from records — never a new inline `locale === 'de'` pair. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
 
@@ -363,6 +374,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PRIVACY_POLICY.md` | **Read before changing a form, a recipient or a retention period.** The website's own privacy text, the facts it states, what must exist at launch for it to be true, and the open questions |
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
+| `docs/WEBSITE_EDITOR.md` | **Read before touching the website editor or making a page editable.** Content source maps, the catalog, drafts/releases/approval/scheduling, presence, languages, writing help |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |

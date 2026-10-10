@@ -24,6 +24,14 @@ const SECURITY_HEADERS = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
 ];
 
+const EDITOR_ORIGINS = ["'self'", 'https://admin.casa-bremen.de', process.env.CMS_EDITOR_ORIGIN].filter(Boolean).join(' ');
+
+/** Draft mode only: the editor's preview may be framed by the workspace. */
+const EDITOR_FRAME_HEADERS = [
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'Content-Security-Policy', value: `frame-ancestors ${EDITOR_ORIGINS}` },
+];
+
 /**
  * The hosts a search engine may index, as Next matches a `host` condition: the
  * Host header without its port, lower-cased, against `^(…)$`.
@@ -56,6 +64,19 @@ const nextConfig: NextConfig = {
         missing: [{ type: 'host', value: INDEXABLE_HOSTS }],
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
+      /*
+       * The website editor frames the public page (docs/WEBSITE_EDITOR.md). Only
+       * a request in draft mode may be framed, and only by this site or the
+       * workspace's host: the draft cookie exists only after /api/cms/preview
+       * checked a token the workspace signed. A public visitor never has it and
+       * keeps `frame-ancestors 'none'`. Listed last, so these two keys win.
+       */
+      {
+        source: '/:path*',
+        has: [{ type: 'cookie', key: '__prerender_bypass' }],
+        headers: EDITOR_FRAME_HEADERS,
+      },
+      { source: '/api/cms/preview', headers: EDITOR_FRAME_HEADERS },
     ];
   },
   // The old casa-bremen.de's URLs → their pages here (src/i18n/legacy-redirects.ts).
