@@ -26,6 +26,7 @@
     "db:countries": "node scripts/db/generate-countries-sql.mjs",
     "placement:port": "node scripts/placement/port-item-bank.mjs",
     "admin:seed": "node scripts/admin/seed-staff.mjs",
+    "admin:password": "node scripts/admin/seed-staff.mjs --reset",
     "admin:check": "node --env-file-if-exists=.env.local scripts/admin/check-routes.mjs"
   },
   "dependencies": {

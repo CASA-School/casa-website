@@ -55,7 +55,8 @@ npm run db:down      # stop it
 npm run db:reset     # drop the volume, migrate, seed, recreate the owner account
 npm run db:migrate   # applies db/migrations
 npm run db:seed      # applies db/seeds
-npm run admin:seed   # creates the first staff workspace account
+npm run admin:seed   # creates the first staff workspace account (an owner, the super admin)
+npm run admin:password  # new password for ADMIN_EMAIL when no owner can sign in
 npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
 npm run db:azure -- migrate   # migrations + seeds on the Azure database, run as a job inside Azure
 npm run cms:extract  # refreshes the website editor's catalog of the site's copy

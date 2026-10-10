@@ -10,5 +10,6 @@ case "$1" in
   status) node scripts/db/migrate.mjs --status ;;
   bootstrap) node bootstrap.mjs ;;
   owner) node scripts/admin/seed-staff.mjs ;;
+  password) node scripts/admin/seed-staff.mjs --reset ;;
   *) echo "unknown task: $1" >&2; exit 2 ;;
 esac
