@@ -3,8 +3,8 @@ import { randomBytes } from 'node:crypto';
 import type { AccessLevel } from './access';
 import { query, queryFirst } from './db';
 import { logActivity } from './activity';
-import { revokeAllSessions, type StaffRole, type StaffUser } from './auth';
-import { hashPassword } from './password';
+import { revokeAllSessions, revokeOtherSessions, type StaffRole, type StaffUser } from './auth';
+import { hashPassword, verifyPassword } from './password';
 import { cleanUsername, usernameKey } from './sign-in-names';
 
 /** Staff account administration. Reachable only by an owner or an admin. */
@@ -327,6 +327,45 @@ export async function setStaffPassword({
   ]);
 
   await revokeAllSessions(staffUserId);
+}
+
+/** The signed-in colleague's own sign-in details, for the account page. */
+export async function getOwnAccount(
+  staffUserId: string
+): Promise<{ username: string | null; microsoftLinkedAt: Date | null; hasPassword: boolean } | null> {
+  const row = await queryFirst<{ username: string | null; microsoft_linked_at: Date | null; has_password: boolean }>(
+    `SELECT username, microsoft_linked_at, password_set_at IS NOT NULL AS has_password FROM staff_users WHERE id = $1`,
+    [staffUserId]
+  );
+  return row ? { username: row.username, microsoftLinkedAt: row.microsoft_linked_at, hasPassword: row.has_password } : null;
+}
+
+/**
+ * A colleague changes their own password: the current one first, unless the
+ * account has none yet (it signs in with Microsoft). Every other session the
+ * account has open is closed; this one stays.
+ */
+export async function changeOwnPassword(
+  actor: StaffUser,
+  current: string,
+  next: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const row = await queryFirst<{ password_hash: string; has_password: boolean }>(
+    `SELECT password_hash, password_set_at IS NOT NULL AS has_password FROM staff_users WHERE id = $1`,
+    [actor.id]
+  );
+  if (!row) return { ok: false, error: 'Unknown account.' };
+  if (row.has_password && !(await verifyPassword(current, row.password_hash))) {
+    return { ok: false, error: 'The current password is not right.' };
+  }
+
+  await query(`UPDATE staff_users SET password_hash = $2, password_set_at = now() WHERE id = $1`, [
+    actor.id,
+    await hashPassword(next),
+  ]);
+  await revokeOtherSessions(actor.id);
+  await logActivity({ actor, entity: 'staff_user', entityId: actor.id, action: 'staff_password_changed' });
+  return { ok: true };
 }
 
 /**

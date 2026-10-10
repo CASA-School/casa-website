@@ -451,8 +451,9 @@ is still valid.
   CVs are all personal data, none of it deleted on a schedule. A period needs a
   named privacy owner at CASA.
 - **No outbound email from the workspace.** Every "Reply" button is a `mailto:`,
-  and there is no self-service password reset — an owner sets one from the Team
-  screen, or the colleague signs in with Microsoft.
+  and there is no emailed password reset: each colleague changes their own on
+  Your account (their name in the top bar), an owner or admin resets a forgotten
+  one on the Team screen, and `npm run admin:password` is the owner's way back in.
 - **Microsoft sign-in is registered (2026-10-10).** The workspace signs colleagues
   in by full name or Outlook address (migration 0020) and offers "Sign in with
   Microsoft" when the three `AUTH_MICROSOFT_*` variables exist. The Entra app
