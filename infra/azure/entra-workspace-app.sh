@@ -37,12 +37,16 @@ if [ -z "$app_id" ]; then
     --web-redirect-uris "${REDIRECTS[@]}" --query appId -o tsv)
   az ad app permission add --id "$app_id" --api "$GRAPH" \
     --api-permissions "$OPENID=Scope" "$PROFILE=Scope" "$EMAIL=Scope" >/dev/null
-  az ad sp create --id "$app_id" >/dev/null
-  az ad app permission admin-consent --id "$app_id"
 else
   echo "==> \"$NAME\" exists ($app_id); keeping it"
   [ "${SECRET_ONLY:-0}" = 1 ] || az ad app update --id "$app_id" --web-redirect-uris "${REDIRECTS[@]}"
 fi
+
+# Consent for the whole tenant, so no colleague is asked. Not `permission
+# admin-consent`: it tries to create the service principal again and fails
+# once one exists (2026-10-10). An explicit grant can be repeated.
+az ad sp show --id "$app_id" >/dev/null 2>&1 || az ad sp create --id "$app_id" >/dev/null
+az ad app permission grant --id "$app_id" --api "$GRAPH" --scope "openid profile email" >/dev/null
 
 echo "==> issuing a client secret (two years)"
 secret=$(az ad app credential reset --id "$app_id" --display-name workspace-sign-in --years 2 --append --query password -o tsv)
