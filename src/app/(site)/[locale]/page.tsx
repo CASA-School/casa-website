@@ -35,6 +35,7 @@ import { meaningClasses } from '@/config/brand/meaning';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import { BandHeading } from '@/components/sections/band-heading';
+import { pick, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -179,13 +180,13 @@ export default async function HomePage() {
       id: 'weekend-excursions',
       photo: pageConfig.photos.lifeRegion,
       title: programById('weekend-excursions')?.title ?? '',
-      line: locale === 'de' ? 'Ausflüge, Stadtspaziergänge, Kulturprogramm' : 'Trips, city walks and cultural events',
+      line: say(locale, 'Ausflüge, Stadtspaziergänge, Kulturprogramm', 'Trips, city walks and cultural events'),
     },
     {
       id: 'community-events',
       photo: pageConfig.photos.lifePeople,
       title: programById('community-events')?.title ?? '',
-      line: locale === 'de' ? 'Internationalen Teilnehmenden mit Vielfalt und Offenheit begegnen' : 'An international community, open and diverse',
+      line: say(locale, 'Internationalen Teilnehmenden mit Vielfalt und Offenheit begegnen', 'An international community, open and diverse'),
     },
   ];
 
@@ -228,23 +229,19 @@ export default async function HomePage() {
 
     return {
       id: `course-${course.slug}`,
-      title: homepageCourseTitles[course.slug]?.[locale] ?? course.name,
+      title: (homepageCourseTitles[course.slug] ? pick(locale, homepageCourseTitles[course.slug]) : undefined) ?? course.name,
       description:
         course.narrative?.promise ||
-        (locale === 'de'
-          ? 'Praxisnahe Lernziele mit klarer Struktur.'
-          : 'Practical language outcomes with clear structure.'),
+        (say(locale, 'Praxisnahe Lernziele mit klarer Struktur.', 'Practical language outcomes with clear structure.')),
       bestFor: course.narrative?.audienceInPromise
         ? ''
         : course.narrative?.audience ||
-          (locale === 'de'
-            ? 'Geeignet für internationale Lernende'
-            : 'Suitable for international learners'),
+          (say(locale, 'Geeignet für internationale Lernende', 'Suitable for international learners')),
       outcomes: course.narrative?.outcomes ?? [],
       href: getCoursePath(course.slug),
-      ctaLabel: locale === 'de' ? 'Kurs ansehen' : 'Explore this course',
+      ctaLabel: say(locale, 'Kurs ansehen', 'Explore this course'),
       meta: nextStart
-        ? `${locale === 'de' ? 'Nächster Start' : 'Next start'}: ${formatDate(nextStart, locale)}`
+        ? `${say(locale, 'Nächster Start', 'Next start')}: ${formatDate(nextStart, locale)}`
         : undefined,
       media: {
         src: photo.src,
@@ -275,12 +272,10 @@ export default async function HomePage() {
       }
 
       return {
-        title: additionalProgramLabels[slug]?.[locale] ?? course.name,
+        title: pick(locale, additionalProgramLabels[slug]) ?? course.name,
         description:
           narrative?.audience ||
-          (locale === 'de'
-            ? 'Ergänzende Programme für besondere Lernziele.'
-            : 'Additional programmes for specific learning goals.'),
+          (say(locale, 'Ergänzende Programme für besondere Lernziele.', 'Additional programmes for specific learning goals.')),
         href: getCoursePath(course.slug),
       };
     })
@@ -303,7 +298,7 @@ export default async function HomePage() {
       key: course.id,
       anchorId: course.id as string | undefined,
       title: course.title,
-      description: homepageListSummaries[course.id.replace(/^course-/, '')]?.[locale] ?? course.description,
+      description: (homepageListSummaries[course.id.replace(/^course-/, '')] ? pick(locale, homepageListSummaries[course.id.replace(/^course-/, '')]) : undefined) ?? course.description,
       href: course.href,
     })),
     ...additionalPrograms.map((program) => ({
@@ -325,17 +320,11 @@ export default async function HomePage() {
         title: item.examType.name,
         prepTitle:
           item.examType.code === 'telc_b2'
-            ? locale === 'de'
-              ? 'Vorbereitungskurs B2'
-              : 'B2 preparation course'
-            : locale === 'de'
-              ? 'Vorbereitungskurs C1 Hochschule'
-              : 'C1 Hochschule preparation course',
+            ? say(locale, 'Vorbereitungskurs B2', 'B2 preparation course')
+            : say(locale, 'Vorbereitungskurs C1 Hochschule', 'C1 Hochschule preparation course'),
         description:
           item.narrative?.summary ||
-          (locale === 'de'
-            ? 'Gezielte Vorbereitung mit Prüfungsstrategie, Simulation und Feedback.'
-            : 'Focused preparation with exam strategies, mock exams and feedback.'),
+          (say(locale, 'Gezielte Vorbereitung mit Prüfungsstrategie, Simulation und Feedback.', 'Focused preparation with exam strategies, mock exams and feedback.')),
         level: item.examType.level || '',
         href: examDetailHref(item.examType.code),
         nextDate: nextSession?.starts_at ? formatDate(nextSession.starts_at, locale) : null,
@@ -382,21 +371,17 @@ export default async function HomePage() {
       {/* Keep CASA's German Leitbild; English expresses the same welcome in its own voice. */}
       <HeroAPhotoLed
         eyebrow={
-          locale === 'de' ? 'Deutsch lernen in Bremen · seit 1983' : 'German courses in Bremen · since 1983'
+          say(locale, 'Deutsch lernen in Bremen · seit 1983', 'German courses in Bremen · since 1983')
         }
         title={
-          locale === 'de'
-            ? 'Miteinander reden – aufeinander zugehen'
-            : 'Learn German. Feel at home.'
+          say(locale, 'Miteinander reden – aufeinander zugehen', 'Learn German. Feel at home.')
         }
         description={
-          locale === 'de'
-            ? 'Bei CASA kannst du nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.'
-            : 'At CASA you don’t just learn German, you meet people from all over the world. We help you settle into Bremen, with personal support and a welcoming community.'
+          say(locale, 'Bei CASA kannst du nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.', 'At CASA you don’t just learn German, you meet people from all over the world. We help you settle into Bremen, with personal support and a welcoming community.')
         }
         ctas={[
           {
-            label: locale === 'de' ? 'Kurs finden' : 'Find my course',
+            label: say(locale, 'Kurs finden', 'Find my course'),
             href: '#course-recommendation',
             kind: 'primary',
           },
@@ -423,15 +408,13 @@ export default async function HomePage() {
           <div className="mx-auto grid max-w-[85rem] gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
+                {say(locale, 'Startpunkt wählen', 'Start here')}
               </p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de' ? 'Was sind deine Lernziele?' : 'What are your learning goals?'}
+                {say(locale, 'Was sind deine Lernziele?', 'What are your learning goals?')}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                {locale === 'de'
-                  ? 'Du möchtest studieren, beruflich weiterkommen oder dich im Alltag sicherer fühlen? Finde einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.'
-                  : 'You may be planning to study, looking ahead to work or settling into everyday life. Start with what matters to you; we can work out the details together.'}
+                {say(locale, 'Du möchtest studieren, beruflich weiterkommen oder dich im Alltag sicherer fühlen? Finde einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.', 'You may be planning to study, looking ahead to work or settling into everyday life. Start with what matters to you; we can work out the details together.')}
               </p>
               <span className="casa-tricolor-rule mt-7 block h-1 w-28 rounded-full md:w-36" aria-hidden />
             </div>
@@ -471,16 +454,12 @@ export default async function HomePage() {
           */}
           <div id="course-recommendation" className="scroll-mt-28 md:scroll-mt-32">
             <BandHeading
-              eyebrow={locale === 'de' ? 'Kurs finden' : 'Find your course'}
+              eyebrow={say(locale, 'Kurs finden', 'Find your course')}
               title={
-                locale === 'de'
-                  ? 'Finde das Kursformat, das zu deinem Ziel passt'
-                  : 'Find the course format that matches your goal'
+                say(locale, 'Finde das Kursformat, das zu deinem Ziel passt', 'Find the course format that matches your goal')
               }
               description={
-                locale === 'de'
-                  ? 'Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu deinen Vorkenntnissen und deinem Alltag passt.'
-                  : 'Study intensively, join an evening class or focus on a particular skill. We can help you find a course that suits your level and your everyday commitments.'
+                say(locale, 'Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu deinen Vorkenntnissen und deinem Alltag passt.', 'Study intensively, join an evening class or focus on a particular skill. We can help you find a course that suits your level and your everyday commitments.')
               }
             />
 
@@ -509,17 +488,13 @@ export default async function HomePage() {
           <div className="mx-auto max-w-[85rem]">
             <div className="max-w-[42rem]">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Deutsch für besondere Ziele' : 'German for specific goals'}
+                {say(locale, 'Deutsch für besondere Ziele', 'German for specific goals')}
               </p>
               <h2 className="mt-4 text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de'
-                  ? 'Für Beruf und Weiterbildung'
-                  : 'For work and professional development'}
+                {say(locale, 'Für Beruf und Weiterbildung', 'For work and professional development')}
               </h2>
               <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
-                {locale === 'de'
-                  ? 'Deutsch für den medizinischen Alltag, für dein Team oder im Rahmen der Bildungszeit: Erzähl uns, was du brauchst.'
-                  : 'German for medical practice, for your team or during your Bildungszeit, Bremen’s paid leave for further training. Tell us what you need and we will help you explore the options.'}
+                {say(locale, 'Deutsch für den medizinischen Alltag, für dein Team oder im Rahmen der Bildungszeit: Erzähl uns, was du brauchst.', 'German for medical practice, for your team or during your Bildungszeit, Bremen’s paid leave for further training. Tell us what you need and we will help you explore the options.')}
               </p>
             </div>
 
@@ -538,7 +513,7 @@ export default async function HomePage() {
                 rather than as three cards. CardRail sets the attribute.
               */}
               <CardRail
-                ariaLabel={locale === 'de' ? 'Weitere Kursformate' : 'More course formats'}
+                ariaLabel={say(locale, 'Weitere Kursformate', 'More course formats')}
                 railClassName="mr-[calc(50%-50vw)] scroll-pl-0 pr-10 data-[scrollable=false]:mr-0 data-[scrollable=false]:pr-0"
                 controlsClassName="max-w-[42rem]"
               >
@@ -579,7 +554,7 @@ export default async function HomePage() {
                         {option.description}
                       </span>
                       <span className={cn('mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold', meaningClasses.courses.link)}>
-                        {locale === 'de' ? 'Ansehen' : 'View'}
+                        {say(locale, 'Ansehen', 'View')}
                         <ArrowRight
                           className="h-4 w-4 transition-transform duration-300 motion-safe:group-hover:translate-x-1"
                           aria-hidden
@@ -607,27 +582,17 @@ export default async function HomePage() {
         <Container>
           <div className="mx-auto max-w-[85rem]">
             <EditorialSplit
-              eyebrow={locale === 'de' ? 'Warum CASA' : 'Why CASA'}
+              eyebrow={say(locale, 'Warum CASA', 'Why CASA')}
               title={
-                locale === 'de'
-                  ? 'Wir hören zu. Und begleiten dich.'
-                  : 'Your plans start with a conversation'
+                say(locale, 'Wir hören zu. Und begleiten dich.', 'Your plans start with a conversation')
               }
               description={
-                locale === 'de'
-                  ? 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.'
-                  : 'Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.'
+                say(locale, 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.', 'Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.')
               }
               bullets={[
-                locale === 'de'
-                  ? 'Persönliche Beratung bezüglich Kurswahl, Sprachniveau und Prüfungen'
-                  : 'One-to-one advice on choosing a course, your language level and exams',
-                locale === 'de'
-                  ? 'Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest'
-                  : 'Guidance if you’re planning to study, looking for work or hoping to start vocational training',
-                locale === 'de'
-                  ? 'Unterstützung bei der Unterkunft und beim Ankommen in Bremen'
-                  : 'Help with accommodation and settling into life in Bremen',
+                say(locale, 'Persönliche Beratung bezüglich Kurswahl, Sprachniveau und Prüfungen', 'One-to-one advice on choosing a course, your language level and exams'),
+                say(locale, 'Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest', 'Guidance if you’re planning to study, looking for work or hoping to start vocational training'),
+                say(locale, 'Unterstützung bei der Unterkunft und beim Ankommen in Bremen', 'Help with accommodation and settling into life in Bremen'),
               ]}
               photo={pageConfig.photos.story}
             />
@@ -682,16 +647,12 @@ export default async function HomePage() {
           */}
           <BandHeading
             tone="light"
-            eyebrow={locale === 'de' ? 'Gemeinnützige Sprachschule' : 'Non-profit language school'}
+            eyebrow={say(locale, 'Gemeinnützige Sprachschule', 'Non-profit language school')}
             title={
-              locale === 'de'
-                ? 'Deine Kursgebühren fördern Bildung.'
-                : 'Your course fees support education.'
+              say(locale, 'Deine Kursgebühren fördern Bildung.', 'Your course fees support education.')
             }
             description={
-              locale === 'de'
-                ? 'CASA ist eine gemeinnützige GmbH. Einnahmen werden in Unterrichtsqualität, faire Vergütung, Lernräume und soziale Bildungsprojekte reinvestiert.'
-                : 'CASA is a non-profit language school. Our income supports teaching, fair pay, learning spaces and projects that help people take part in society.'
+              say(locale, 'CASA ist eine gemeinnützige GmbH. Einnahmen werden in Unterrichtsqualität, faire Vergütung, Lernräume und soziale Bildungsprojekte reinvestiert.', 'CASA is a non-profit language school. Our income supports teaching, fair pay, learning spaces and projects that help people take part in society.')
             }
           />
 
@@ -711,25 +672,19 @@ export default async function HomePage() {
           <ul className="mx-auto mt-10 grid max-w-[64rem] divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] md:mt-12 md:grid-cols-3 md:divide-x md:divide-y-0">
             {[
               {
-                title: locale === 'de' ? 'Keine Gewinnausschüttung' : 'No profit distribution',
+                title: say(locale, 'Keine Gewinnausschüttung', 'No profit distribution'),
                 text:
-                  locale === 'de'
-                    ? 'Überschüsse fließen in unsere gemeinnützige Arbeit.'
-                    : 'Any surplus supports our non-profit work.',
+                  say(locale, 'Überschüsse fließen in unsere gemeinnützige Arbeit.', 'Any surplus supports our non-profit work.'),
               },
               {
-                title: locale === 'de' ? 'Reinvestition in Bildung' : 'Reinvestment in education',
+                title: say(locale, 'Reinvestition in Bildung', 'Reinvestment in education'),
                 text:
-                  locale === 'de'
-                    ? 'Unterricht, Vergütung und Lernräume.'
-                    : 'Teaching, fair pay and learning spaces.',
+                  say(locale, 'Unterricht, Vergütung und Lernräume.', 'Teaching, fair pay and learning spaces.'),
               },
               {
-                title: locale === 'de' ? 'Integrationsprojekte' : 'Integration projects',
+                title: say(locale, 'Integrationsprojekte', 'Integration projects'),
                 text:
-                  locale === 'de'
-                    ? 'Soziale Bildungsarbeit in Bremen.'
-                    : 'Helping people build a life in Bremen through education.',
+                  say(locale, 'Soziale Bildungsarbeit in Bremen.', 'Helping people build a life in Bremen through education.'),
               },
             ].map((item) => (
               <li key={item.title} className="p-6 md:p-7">
@@ -747,9 +702,7 @@ export default async function HomePage() {
 
           <div className="mt-10 text-center md:mt-12">
             <TextCta href="/ueber-uns/gemeinnuetzigkeit">
-              {locale === 'de'
-                ? 'Wie CASA Kursgebühren gemeinnützig einsetzt'
-                : 'How CASA reinvests course fees'}
+              {say(locale, 'Wie CASA Kursgebühren gemeinnützig einsetzt', 'How CASA reinvests course fees')}
             </TextCta>
           </div>
         </Container>
@@ -765,17 +718,13 @@ export default async function HomePage() {
             <div className="mx-auto grid max-w-[85rem] gap-8 lg:grid-cols-[0.78fr_minmax(0,1.22fr)] lg:items-end">
               <div className="max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
-                  {locale === 'de' ? 'Zertifikat geplant?' : 'Need a certificate?'}
+                  {say(locale, 'Zertifikat geplant?', 'Need a certificate?')}
                 </p>
                 <h2 className="mt-3 text-3xl font-bold md:text-4xl">
-                  {locale === 'de'
-                    ? 'Gut vorbereitet in deine telc-Prüfung'
-                    : 'Prepare for your telc exam with us'}
+                  {say(locale, 'Gut vorbereitet in deine telc-Prüfung', 'Prepare for your telc exam with us')}
                 </h2>
                 <p className="mt-4 text-base leading-relaxed text-white/72 md:text-lg">
-                  {locale === 'de'
-                    ? 'Du brauchst ein Zertifikat telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen dir bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an.'
-                    : 'Need a telc Deutsch B2 or telc Deutsch C1 Hochschule certificate? We’ll help you choose the right exam, and we run our own preparation courses.'}
+                  {say(locale, 'Du brauchst ein Zertifikat telc Deutsch B2 oder telc Deutsch C1 Hochschule? Wir helfen dir bei der Wahl der Prüfung und bieten eigene Vorbereitungskurse an.', 'Need a telc Deutsch B2 or telc Deutsch C1 Hochschule certificate? We’ll help you choose the right exam, and we run our own preparation courses.')}
                 </p>
                 {/*
                   A band lead-in, not a conversion. The two cards below it are
@@ -783,7 +732,7 @@ export default async function HomePage() {
                   sun-yellow button here was the third route to one place.
                 */}
                 <TextCta href="/exams" onDark className="mt-7 text-[var(--casa-sun)] hover:text-white">
-                  {locale === 'de' ? 'Prüfungsvorbereitung erkunden' : 'Explore exam preparation'}
+                  {say(locale, 'Prüfungsvorbereitung erkunden', 'Explore exam preparation')}
                 </TextCta>
               </div>
 
@@ -801,7 +750,7 @@ export default async function HomePage() {
                       </span>
                       {exam.nextDate ? (
                         <span className="rounded-full bg-white/10 px-3 py-1 text-[0.8125rem] font-bold text-white/76">
-                          {locale === 'de' ? 'Nächste Prüfung' : 'Next exam'}: {exam.nextDate}
+                          {say(locale, 'Nächste Prüfung', 'Next exam')}: {exam.nextDate}
                         </span>
                       ) : null}
                     </div>
@@ -821,7 +770,7 @@ export default async function HomePage() {
                         {exam.level}
                       </span>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-[0.8125rem] font-bold text-white/72">
-                        {locale === 'de' ? 'Vorbereitung + Anmeldung' : 'Preparation + registration'}
+                        {say(locale, 'Vorbereitung + Anmeldung', 'Preparation + registration')}
                       </span>
                     </div>
                   </Link>
@@ -851,33 +800,27 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0.7)_100%)]" aria-hidden />
               </div>
               <p className="absolute inset-x-0 bottom-0 p-5 text-base font-bold text-white md:p-6">
-                {locale === 'de'
-                  ? 'Ein eigenes Zimmer für deinen Start in Bremen.'
-                  : 'A room of your own as you settle into Bremen.'}
+                {say(locale, 'Ein eigenes Zimmer für deinen Start in Bremen.', 'A room of your own as you settle into Bremen.')}
               </p>
             </div>
 
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {locale === 'de' ? 'Ankommen in Bremen' : 'Settling in Bremen'}
+                {say(locale, 'Ankommen in Bremen', 'Settling in Bremen')}
               </p>
               <h2 className="mt-3 text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
-                {locale === 'de'
-                  ? 'Ein Zuhause für deine Zeit in Bremen'
-                  : 'A place to call home in Bremen'}
+                {say(locale, 'Ein Zuhause für deine Zeit in Bremen', 'A place to call home in Bremen')}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                {locale === 'de'
-                  ? 'Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.'
-                  : 'While you’re on an intensive course with us, we can find you a room in a CASA shared flat or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.'}
+                {say(locale, 'Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.', 'While you’re on an intensive course with us, we can find you a room in a CASA shared flat or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.')}
               </p>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {[
-                  locale === 'de' ? 'CASA-WG' : 'CASA shared flat',
-                  locale === 'de' ? 'Gastfamilie' : 'Host family',
-                  locale === 'de' ? 'Persönliche Vermittlung' : 'Personal help finding a room',
-                  locale === 'de' ? 'Verfügbarkeit auf Anfrage' : 'Availability on request',
+                  say(locale, 'CASA-WG', 'CASA shared flat'),
+                  say(locale, 'Gastfamilie', 'Host family'),
+                  say(locale, 'Persönliche Vermittlung', 'Personal help finding a room'),
+                  say(locale, 'Verfügbarkeit auf Anfrage', 'Availability on request'),
                 ].map((item) => (
                   <div
                     key={item}
@@ -891,7 +834,7 @@ export default async function HomePage() {
 
               {/* Yellow: accommodation and arrival (src/config/brand/meaning.ts). */}
               <TextCta href="/accommodation" className={cn('mt-8', meaningClasses.arrival.link)}>
-                {locale === 'de' ? 'Unterkunft erkunden' : 'Explore accommodation'}
+                {say(locale, 'Unterkunft erkunden', 'Explore accommodation')}
               </TextCta>
             </div>
           </div>
@@ -904,11 +847,9 @@ export default async function HomePage() {
         <Container>
           <BandHeading
             tone="light"
-            eyebrow={locale === 'de' ? 'Leben bei CASA' : 'Life at CASA'}
-            title={locale === 'de' ? 'Bremen entdecken. Menschen kennenlernen.' : 'Discover Bremen. Find your people.'}
-            description={locale === 'de'
-              ? 'Zum Ankommen gehört mehr als ein Sprachkurs. Gemeinsame Erlebnisse machen aus einer neuen Stadt einen vertrauten Ort.'
-              : 'Feeling at home takes more than a language course. Shared experiences help turn a new city into a familiar place.'}
+            eyebrow={say(locale, 'Leben bei CASA', 'Life at CASA')}
+            title={say(locale, 'Bremen entdecken. Menschen kennenlernen.', 'Discover Bremen. Find your people.')}
+            description={say(locale, 'Zum Ankommen gehört mehr als ein Sprachkurs. Gemeinsame Erlebnisse machen aus einer neuen Stadt einen vertrauten Ort.', 'Feeling at home takes more than a language course. Shared experiences help turn a new city into a familiar place.')}
           />
           {/*
             Two real photographs with their caption on a dark gradient, and the
@@ -944,14 +885,14 @@ export default async function HomePage() {
                   <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemProgram.summary}</p>
                 </div>
                 <TextCta href="/contact" className="mt-6 self-start">
-                  {locale === 'de' ? 'Tandem anfragen' : 'Ask about a tandem'}
+                  {say(locale, 'Tandem anfragen', 'Ask about a tandem')}
                 </TextCta>
               </article>
             ) : null}
           </div>
           <div className="mt-8 text-center">
             <TextCta href="/contact">
-              {locale === 'de' ? 'Nach dem aktuellen Programm fragen' : 'Ask what is coming up'}
+              {say(locale, 'Nach dem aktuellen Programm fragen', 'Ask what is coming up')}
             </TextCta>
           </div>
         </Container>
@@ -962,14 +903,10 @@ export default async function HomePage() {
           <div className="mx-auto max-w-[85rem]">
           <TestimonialGrid
             title={
-              locale === 'de'
-                ? 'Das sagen unsere Teilnehmenden'
-                : 'In our students’ words'
+              say(locale, 'Das sagen unsere Teilnehmenden', 'In our students’ words')
             }
             description={
-              locale === 'de'
-                ? 'Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.'
-                : 'Learners share stories about progress, confidence and life in Bremen.'
+              say(locale, 'Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.', 'Learners share stories about progress, confidence and life in Bremen.')
             }
             cards={testimonialCards}
             featuredQuote={featuredQuote}

@@ -7,6 +7,7 @@ import { toProofStripItems } from './proof-strip';
 import { shouldShowDraftClaims } from '@/lib/content/locale';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { say } from '@/lib/cms/copy';
 
 export type ProofStat = {
   value: string;
@@ -25,10 +26,8 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
   const proofMetrics = getProofMetrics(locale);
 
   // Default to standard homepage copy if not explicitly overridden
-  const defaultTitle = locale === 'de' ? 'Qualität und Partnerschaften' : 'Quality and partnerships';
-  const defaultCredibilityLine = locale === 'de'
-    ? 'Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.'
-    : 'Our experience and our partnerships strengthen the work we do for you.';
+  const defaultTitle = say(locale, 'Qualität und Partnerschaften', 'Quality and partnerships');
+  const defaultCredibilityLine = say(locale, 'Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.', 'Our experience and our partnerships strengthen the work we do for you.');
 
   const displayTitle = title ?? defaultTitle;
   const displayCredibilityLine = credibilityLine ?? defaultCredibilityLine;
@@ -105,7 +104,7 @@ export function AccreditationLogoList({ locale, className }: { locale: ContentLo
       last one alone at the left edge beside an empty cell on phones and
       tablets. Centred, the short last row reads as intended.
     */
-    <ul className={cn('flex flex-wrap justify-center gap-3 lg:gap-4', className)} aria-label={locale === 'de' ? 'Qualität und Partnerschaften' : 'Quality and partnerships'}>
+    <ul className={cn('flex flex-wrap justify-center gap-3 lg:gap-4', className)} aria-label={say(locale, 'Qualität und Partnerschaften', 'Quality and partnerships')}>
       {accreditationLogos.slice(0, 5).map((logo) => (
         <li key={logo.id} className="basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-4rem)/5)]">
           {/* A mark without a website is a plain tile, not a link to "#". */}

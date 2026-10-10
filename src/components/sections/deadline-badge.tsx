@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 
 import { bremenToday } from '@/lib/content/bookability';
 import type { ContentLocale } from '@/lib/content/types';
+import { say } from '@/lib/cms/copy';
 
 type DeadlineBadgeProps = {
   deadlineIso?: string | null;
@@ -29,7 +30,7 @@ export function DeadlineBadge({ deadlineIso, locale, className }: DeadlineBadgeP
           className
         )}
       >
-        {locale === 'de' ? 'Laufende Anmeldung' : 'Rolling registration'}
+        {say(locale, 'Laufende Anmeldung', 'Rolling registration')}
       </span>
     );
   }
@@ -48,20 +49,12 @@ export function DeadlineBadge({ deadlineIso, locale, className }: DeadlineBadgeP
 
   const text =
     state === 'closed'
-      ? locale === 'de'
-        ? 'Anmeldung geschlossen'
-        : 'Registration closed'
+      ? say(locale, 'Anmeldung geschlossen', 'Registration closed')
       : days === 0
-        ? locale === 'de'
-          ? 'Anmeldung endet heute'
-          : 'Registration closes today'
+        ? say(locale, 'Anmeldung endet heute', 'Registration closes today')
         : days === 1
-          ? locale === 'de'
-            ? 'Anmeldung endet in 1 Tag'
-            : 'Registration closes in 1 day'
-          : locale === 'de'
-            ? `Anmeldung endet in ${days} Tagen`
-            : `Registration closes in ${days} days`;
+          ? say(locale, 'Anmeldung endet in 1 Tag', 'Registration closes in 1 day')
+          : say(locale, 'Anmeldung endet in {days} Tagen', 'Registration closes in {days} days', { days });
 
   return (
     <span

@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { say } from '@/lib/cms/copy';
 
 type RegistrationTabsProps = {
   current: 'course' | 'exam';
@@ -11,14 +12,13 @@ type RegistrationTabsProps = {
 
 /** The switch between the two registration forms, at the top of both. */
 export function RegistrationTabs({ current, locale }: RegistrationTabsProps) {
-  const de = locale === 'de';
   const tabs = [
-    { key: 'course', href: '/registration/course', label: de ? 'Kursanmeldung' : 'Course registration' },
-    { key: 'exam', href: '/registration/exam', label: de ? 'Prüfungsanmeldung' : 'Exam registration' },
+    { key: 'course', href: '/registration/course', label: say(locale, 'Kursanmeldung', 'Course registration') },
+    { key: 'exam', href: '/registration/exam', label: say(locale, 'Prüfungsanmeldung', 'Exam registration') },
   ] as const;
 
   return (
-    <nav aria-label={de ? 'Art der Anmeldung' : 'Type of registration'}>
+    <nav aria-label={say(locale, 'Art der Anmeldung', 'Type of registration')}>
       <ul className="inline-flex max-w-full rounded-xl bg-[var(--casa-surface-subtle)] p-1">
         {tabs.map((tab) => {
           const active = tab.key === current;
@@ -86,7 +86,7 @@ export function RegistrationStepper({ steps, step, locale }: RegistrationStepper
               <div className="min-w-0">
                 <p className={cn('truncate text-sm font-semibold', active || complete ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
                   {item.title}
-                  {complete ? <span className="sr-only">{locale === 'de' ? ' (erledigt)' : ' (done)'}</span> : null}
+                  {complete ? <span className="sr-only">{say(locale, ' (erledigt)', ' (done)')}</span> : null}
                 </p>
               </div>
             </div>

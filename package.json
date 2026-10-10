@@ -16,6 +16,7 @@
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d --wait postgres && npm run db:migrate && npm run db:seed && npm run admin:seed",
+    "cms:extract": "node scripts/cms/extract-copy.mjs",
     "db:migrate": "node scripts/db/migrate.mjs",
     "db:migrate:status": "node scripts/db/migrate.mjs --status",
     "db:baseline": "node scripts/db/migrate.mjs --baseline=0001",

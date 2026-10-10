@@ -1,4 +1,5 @@
 import type { ContentLocale, FaqViewItem } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * CASA's FAQ, as CASA answers it.
@@ -348,8 +349,8 @@ function toFaqItem(entry: FaqSource, locale: ContentLocale): FaqViewItem {
     id: `faq-${locale}-${entry.id}`,
     locale,
     category: entry.category,
-    question: entry.question[locale],
-    answer: entry.answer[locale],
+    question: pick(locale, entry.question),
+    answer: pick(locale, entry.answer),
   };
 }
 

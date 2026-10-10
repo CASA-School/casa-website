@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import type { ContentLocale } from '@/lib/content/types';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 type CareerApplicationFormProps = {
   locale: ContentLocale;
@@ -32,10 +33,10 @@ export function CareerApplicationForm({
   positionSlug,
   positionTitle,
 }: CareerApplicationFormProps) {
+  const { pickTree } = useSiteCopy();
   const copy = useMemo(
     () =>
-      locale === 'de'
-        ? {
+      pickTree(locale, { de: {
             title: 'Jetzt bewerben',
             firstName: 'Vorname',
             lastName: 'Nachname',
@@ -52,8 +53,7 @@ export function CareerApplicationForm({
             requestId: 'Vorgangsnummer',
             cvRequired: 'Bitte lade deinen Lebenslauf hoch.',
             cvInvalid: 'Bitte lade deinen Lebenslauf als PDF, DOC oder DOCX mit höchstens 8 MB hoch.',
-          }
-        : {
+          }, en: {
             title: 'Apply now',
             firstName: 'First name',
             lastName: 'Last name',
@@ -70,8 +70,8 @@ export function CareerApplicationForm({
             requestId: 'Reference number',
             cvRequired: 'Please upload your CV.',
             cvInvalid: 'Please upload your CV as a PDF, DOC or DOCX file of no more than 8 MB.',
-          },
-    [locale]
+          } }),
+    [locale, pickTree]
   );
 
   const [firstName, setFirstName] = useState('');

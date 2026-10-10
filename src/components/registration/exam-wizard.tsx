@@ -38,6 +38,7 @@ import type { RegistrationExamCatalog } from '@/lib/content/types';
 import { formatDay } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { createExamRegistrationFormSchema } from '@/lib/validation/registration-submissions';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 type RegistrationSchema = ReturnType<typeof createExamRegistrationFormSchema>;
 type FormData = z.input<RegistrationSchema>;
@@ -67,6 +68,7 @@ const FIELD_ELEMENT_IDS: Partial<Record<keyof FormData, string>> = {
 };
 
 export function ExamWizard({ catalog }: ExamWizardProps) {
+  const { pickTree, say } = useSiteCopy();
   const isDe = catalog.locale === 'de';
   const t = (en: string, de: string) => (isDe ? de : en);
   const [step, setStep] = useState(1);
@@ -365,7 +367,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
 
             <div className={formFieldGroupClassName}>
               <Label htmlFor="salutation" className={formLabelClassName}>
-                {catalog.locale === 'de' ? 'Anrede' : 'Salutation'}
+                {say(catalog.locale, 'Anrede', 'Salutation')}
                 <RequiredMark />
               </Label>
               <Select
@@ -373,13 +375,13 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 value={watch('salutation')}
               >
                 <SelectTrigger id="salutation" aria-required {...errorProps('salutation')} className={formControlClassName}>
-                  <SelectValue placeholder={catalog.locale === 'de' ? 'Anrede auswählen...' : 'Select salutation...'} />
+                  <SelectValue placeholder={say(catalog.locale, 'Anrede auswählen...', 'Select salutation...')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mr">{catalog.locale === 'de' ? 'Herr' : 'Mr'}</SelectItem>
-                  <SelectItem value="ms">{catalog.locale === 'de' ? 'Frau' : 'Ms'}</SelectItem>
-                  <SelectItem value="mx">{catalog.locale === 'de' ? 'Mx.' : 'Mx'}</SelectItem>
-                  <SelectItem value="neutral">{catalog.locale === 'de' ? 'Keine Angabe' : 'Prefer not to say'}</SelectItem>
+                  <SelectItem value="mr">{say(catalog.locale, 'Herr', 'Mr')}</SelectItem>
+                  <SelectItem value="ms">{say(catalog.locale, 'Frau', 'Ms')}</SelectItem>
+                  <SelectItem value="mx">{say(catalog.locale, 'Mx.', 'Mx')}</SelectItem>
+                  <SelectItem value="neutral">{say(catalog.locale, 'Keine Angabe', 'Prefer not to say')}</SelectItem>
                 </SelectContent>
               </Select>
               {errors.salutation && <p id="salutation-error" className={formErrorClassName}>{errors.salutation.message}</p>}
@@ -466,7 +468,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                       aria-describedby={errors.birthDate ? 'birthDate-error' : undefined}
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder={catalog.locale === 'de' ? 'TT.MM.JJJJ' : 'dd.mm.yyyy'}
+                      placeholder={say(catalog.locale, 'TT.MM.JJJJ', 'dd.mm.yyyy')}
                       hasError={!!errors.birthDate}
                       locale={catalog.locale}
                       align="top"
@@ -503,7 +505,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 <div className={formTileClassName}>
                   <p className={formMetaLabelClassName}>{t('Candidate', 'Kandidat:in')}</p>
                   <p className="mt-1 font-semibold text-[var(--casa-ink)]">
-                    {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (catalog.locale === 'de' ? 'Herr ' : 'Mr ') : (watch('salutation') === 'ms' ? (catalog.locale === 'de' ? 'Frau ' : 'Ms ') : (catalog.locale === 'de' ? 'Mx. ' : 'Mx '))) : ''}
+                    {watch('salutation') && watch('salutation') !== 'neutral' ? (watch('salutation') === 'mr' ? (say(catalog.locale, 'Herr ', 'Mr ')) : (watch('salutation') === 'ms' ? (say(catalog.locale, 'Frau ', 'Ms ')) : (say(catalog.locale, 'Mx. ', 'Mx ')))) : ''}
                     {watch('firstName')} {watch('lastName')}
                   </p>
                   <p className="mt-0.5 break-words text-[var(--casa-muted)]">{watch('email')}</p>
@@ -657,7 +659,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
               data-casa-label="Submit exam registration"
             >
               {submitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {catalog.locale === 'de' ? 'Absenden' : 'Send'}
+              {say(catalog.locale, 'Absenden', 'Send')}
             </Button>
           )}
         </div>
@@ -686,30 +688,26 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             </div>
 
             <h2 id="modal-title" className="text-2xl font-bold tracking-tight text-[var(--casa-ink)] mt-5">
-              {catalog.locale === 'de' ? 'Danke für deine Prüfungsanmeldung' : 'Thank you for your exam registration'}
+              {say(catalog.locale, 'Danke für deine Prüfungsanmeldung', 'Thank you for your exam registration')}
             </h2>
             <p className="max-w-md text-sm text-[var(--casa-muted)] mt-2">
-              {catalog.locale === 'de'
-                ? 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.'
-                : 'We’ll look at your registration now and get back to you by email as soon as we can.'}
+              {say(catalog.locale, 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.', 'We’ll look at your registration now and get back to you by email as soon as we can.')}
             </p>
             {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
 
             <div className="w-full max-w-lg text-left mt-6">
               <NextStepsTimeline
-                title={catalog.locale === 'de' ? 'Was als Nächstes passiert' : 'What happens next'}
+                title={say(catalog.locale, 'Was als Nächstes passiert', 'What happens next')}
                 steps={
-                  catalog.locale === 'de'
-                    ? [
+                  pickTree(catalog.locale, { de: [
                         { title: 'Wir prüfen deine Anmeldung', description: 'Wir sehen uns deine Angaben an und prüfen, ob zum gewählten Termin noch ein Platz frei ist.' },
                         { title: 'Du bekommst eine Rückmeldung', description: 'Darin stehen die Fristen für Zahlung und Dokumente.' },
                         { title: 'Wir schicken dir alles für den Prüfungstag', description: 'Vor dem Termin bekommst du die nötigen Unterlagen und Hinweise per E-Mail.' },
-                      ]
-                    : [
+                      ], en: [
                         { title: 'We check your registration', description: 'We look at your details and check that there is still a place free on the date you chose.' },
                         { title: 'You hear back from us', description: 'Our reply includes the deadlines for payment and documents.' },
                         { title: 'We send you everything for exam day', description: 'Before the exam, you’ll receive the documents and information you need by email.' },
-                      ]
+                      ] })
                 }
               />
             </div>
@@ -719,7 +717,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 href="/"
                 className={cn(formPrimaryButtonClassName, 'flex w-full items-center justify-center')}
               >
-                {catalog.locale === 'de' ? 'Zurück zur Startseite' : 'Back to the home page'}
+                {say(catalog.locale, 'Zurück zur Startseite', 'Back to the home page')}
               </Link>
             </div>
           </div>

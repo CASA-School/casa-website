@@ -1,4 +1,5 @@
 import type { ContentLocale, TeamPlaceholderAnimal, TeamSpotlight } from '@/lib/content/types';
+import { pick, say } from '@/lib/cms/copy';
 
 /**
  * The CASA team, as CASA publishes it.
@@ -209,13 +210,13 @@ function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotl
     id: member.id,
     locale,
     name,
-    title: member.title[locale],
-    role: GROUP_LABELS[member.group][locale],
-    areas: member.areas?.[locale],
+    title: pick(locale, member.title),
+    role: pick(locale, GROUP_LABELS[member.group]),
+    areas: (member.areas ? pick(locale, member.areas) : undefined),
     photo: member.photo
       ? {
           src: `/media/casa/team/${member.photo.file}`,
-          alt: locale === 'de' ? `Porträt von ${name}` : `Portrait of ${name}`,
+          alt: say(locale, 'Porträt von {name}', 'Portrait of {name}', { name }),
           position: member.photo.position,
         }
       : undefined,

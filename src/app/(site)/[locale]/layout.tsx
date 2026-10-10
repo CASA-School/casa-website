@@ -19,7 +19,11 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 
+import { EditBridge } from '@/components/cms/edit-bridge';
+import { SiteCopyProvider } from '@/components/cms/site-copy-provider';
 import { SiteShell } from '@/components/layout/site-shell';
+import { prepareCopy, valuesForLocale } from '@/lib/cms/content.server';
+import { editorOrigins } from '@/lib/cms/origins';
 import { siteGraph } from '@/lib/structured-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { defaultLocale, directionFor, isLocale } from '@/i18n/routing';
@@ -107,6 +111,9 @@ export default async function RootLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const contentLocale = locale;
+  // The site's copy for this request (src/lib/cms/copy.ts): live edits, or in the
+  // website editor's preview (draft mode) the drafts, each text tagged.
+  const { editing, values } = await prepareCopy();
 
   return (
     <html lang={locale} dir={directionFor(locale)}>
@@ -116,8 +123,11 @@ export default async function RootLayout({
       >
         <JsonLdScript id="site-schema" data={siteGraph(locale)} />
         <NextIntlClientProvider messages={messages}>
-          <SiteShell contentLocale={contentLocale}>{children}</SiteShell>
+          <SiteCopyProvider locale={locale} editing={editing} values={valuesForLocale(values, locale)}>
+            <SiteShell contentLocale={contentLocale}>{children}</SiteShell>
+          </SiteCopyProvider>
         </NextIntlClientProvider>
+        {editing ? <EditBridge allowedOrigins={await editorOrigins()} /> : null}
       </body>
     </html>
   );

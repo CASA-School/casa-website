@@ -5,6 +5,7 @@ import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata } from '@/lib/seo';
+import { pickTree } from '@/lib/cms/copy';
 
 const pageCopy = {
   en: {
@@ -46,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CalculatorPage() {
   const locale = await getContentLocale();
-  const copy = pageCopy[locale];
+  const copy = pickTree(locale, pageCopy);
 
   return (
     <main className="min-h-screen bg-[var(--casa-canvas)] py-16 text-[var(--casa-ink)] md:py-20">

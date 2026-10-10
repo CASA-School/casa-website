@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import nightStyles from './navbar-night.module.css';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const CLOSE_DELAY_MS = 110;
 const COURSES_PANEL_WIDTH_PX = 46 * 16;
@@ -45,6 +46,7 @@ type NavbarProps = {
 };
 
 export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
+  const { say } = useSiteCopy();
   const pathname = usePathname();
   const router = useRouter();
   // On a night-hero page the bar takes the hero's ink ground (navbar-night.module.css).
@@ -81,8 +83,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
   const isRegistrationPage = pathname?.startsWith('/registration');
   const registerHref = isExamContext ? '/registration/exam' : '/registration/course';
   const registerText = isExamContext
-    ? (contentLocale === 'de' ? 'Zur Prüfungsanmeldung' : 'Register for an exam')
-    : (contentLocale === 'de' ? 'Zur Kursanmeldung' : 'Register for a course');
+    ? (say(contentLocale, 'Zur Prüfungsanmeldung', 'Register for an exam'))
+    : (say(contentLocale, 'Zur Kursanmeldung', 'Register for a course'));
   /*
    * Short form for the band between xl and 2xl.
    *
@@ -96,8 +98,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
    * measurement at runtime.
    */
   const registerTextShort = isExamContext
-    ? (contentLocale === 'de' ? 'Prüfung' : 'Exam')
-    : (contentLocale === 'de' ? 'Anmelden' : 'Register');
+    ? (say(contentLocale, 'Prüfung', 'Exam'))
+    : (say(contentLocale, 'Anmelden', 'Register'));
 
   const isActivePath = useCallback((href?: string) => {
     if (!href) {
@@ -497,7 +499,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                         }
                       }}
                     >
-                      {localizeNavText(dropdown.trigger, contentLocale)}
+                      {localizeNavText(dropdown.trigger, contentLocale, say)}
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 14 14"
@@ -544,7 +546,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                             <div key={`${dropdown.trigger}-${section.title}`} className="space-y-4">
                               {section.title && (
                                 <h4 className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                                  {localizeNavText(section.title, contentLocale)}
+                                  {localizeNavText(section.title, contentLocale, say)}
                                 </h4>
                               )}
 
@@ -570,11 +572,11 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
 
                                         <div>
                                           <p className="text-sm font-semibold text-[var(--casa-ink)] group-hover/item:text-[var(--casa-accent-text)]">
-                                            {localizeNavText(subItem.label, contentLocale)}
+                                            {localizeNavText(subItem.label, contentLocale, say)}
                                           </p>
                                           {subItem.description && (
                                             <p className="mt-0.5 text-xs text-[var(--casa-muted)]">
-                                              {localizeNavDescription(subItem.description, contentLocale)}
+                                              {localizeNavDescription(subItem.description, contentLocale, say)}
                                             </p>
                                           )}
                                         </div>
@@ -594,9 +596,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                               className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
                               onClick={closeDropdown}
                             >
-                              {contentLocale === 'de'
-                                ? `${localizeNavText(dropdown.trigger, contentLocale)} ansehen`
-                                : `Browse ${dropdown.trigger}`}
+                              {say(contentLocale, '{value} ansehen', 'Browse {trigger}', { value: localizeNavText(dropdown.trigger, contentLocale, say), trigger: dropdown.trigger })}
                               <svg aria-hidden="true" viewBox="0 0 14 14" className="h-3 w-3">
                                 <path
                                   d="M4.5 3.5L8 7l-3.5 3.5M8 7h1.5"
@@ -640,7 +640,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                       would have seen the only two English words in the nav.
                       mobile-nav.tsx already did this correctly.
                     */}
-                    {localizeNavText(linkItem.label, contentLocale)}
+                    {localizeNavText(linkItem.label, contentLocale, say)}
                   </Link>
                 </li>
               );
@@ -656,7 +656,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
               <DropdownMenuTrigger asChild>
                 <button
                   data-testid="locale-trigger"
-                  aria-label={`Select content language, current ${contentLocale === 'de' ? 'Deutsch' : 'English'}`}
+                  aria-label={`Select content language, current ${say(contentLocale, 'Deutsch', 'English')}`}
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] p-2 text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
                 >
                   <Globe className="h-5 w-5" />

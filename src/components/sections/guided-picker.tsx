@@ -9,6 +9,7 @@ import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
 import { DeadlineBadge } from './deadline-badge';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 export type GuidedPickerItem = {
   id?: string;
@@ -57,6 +58,7 @@ export function GuidedPicker({
   showBestFor = true,
   className,
 }: GuidedPickerProps) {
+  const { say } = useSiteCopy();
   const [showAll, setShowAll] = useState(false);
 
   const renderShowMoreButton = (limit: number = 3) => {
@@ -69,8 +71,8 @@ export function GuidedPicker({
           className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[color:var(--casa-sand)] bg-white px-5 text-sm font-bold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-canvas)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
         >
           {showAll
-            ? (locale === 'de' ? 'Weniger anzeigen' : 'Show less')
-            : (locale === 'de' ? `Mehr anzeigen (${items.length - limit} weitere)` : `Show ${items.length - limit} more`)}
+            ? (say(locale, 'Weniger anzeigen', 'Show less'))
+            : (say(locale, 'Mehr anzeigen ({value} weitere)', 'Show {value} more', { value: items.length - limit }))}
         </button>
       </div>
     );
@@ -135,9 +137,7 @@ export function GuidedPicker({
                 />
               </div>
               <figcaption className="absolute inset-x-0 bottom-0 p-5 text-sm font-semibold text-white md:p-6">
-                {locale === 'de'
-                  ? 'Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.'
-                  : 'You learn in small groups with us, and we show you the next step.'}
+                {say(locale, 'Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.', 'You learn in small groups with us, and we show you the next step.')}
               </figcaption>
             </figure>
           ) : null}
@@ -206,7 +206,7 @@ export function GuidedPicker({
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,16,32,0.05)_0%,rgba(9,16,32,0.86)_100%)]" aria-hidden />
               <div className="relative z-10 mt-auto max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-white/70">
-                  {locale === 'de' ? 'Empfohlener Startpunkt' : 'Recommended starting point'}
+                  {say(locale, 'Empfohlener Startpunkt', 'Recommended starting point')}
                 </p>
                 <h3 className="mt-3 text-3xl font-bold md:text-4xl">{leadItem.title}</h3>
                 <p className="mt-4 text-base leading-relaxed text-white/82 md:text-lg">
@@ -322,7 +322,7 @@ export function GuidedPicker({
           </ul>
           {/* Scroll nudge */}
           <p className="mt-3 text-center text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)] md:hidden">
-            {locale === 'de' ? 'Wischen für weitere Kurse' : 'Swipe to see more courses'}
+            {say(locale, 'Wischen für weitere Kurse', 'Swipe to see more courses')}
           </p>
         </div>
       </section>
@@ -408,7 +408,7 @@ export function GuidedPicker({
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,16,32,0.2)_0%,rgba(9,16,32,0.82)_100%)]" aria-hidden />
               <div className="relative z-10 mt-auto max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-white/70">
-                  {locale === 'de' ? 'Intensiver Rhythmus' : 'Intensive rhythm'}
+                  {say(locale, 'Intensiver Rhythmus', 'Intensive rhythm')}
                 </p>
                 <h3 className="mt-3 text-3xl font-bold md:text-4xl">{featuredItem.title}</h3>
                 <p className="mt-4 text-base leading-relaxed text-white/80 md:text-lg">
@@ -444,7 +444,7 @@ export function GuidedPicker({
                 ) : null}
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                    {locale === 'de' ? 'Abendrhythmus' : 'Evening rhythm'}
+                    {say(locale, 'Abendrhythmus', 'Evening rhythm')}
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-[var(--casa-ink)]">{item.title}</h3>
                   <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>

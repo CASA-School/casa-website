@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pickTree } from '@/lib/cms/copy';
 
 /**
  * Course page archetypes.
@@ -210,12 +211,8 @@ export function archetypeIncludesSection(archetype: CourseArchetype, section: Co
 /** Section heading copy that varies by archetype rather than by course. */
 export function nextStepsHeading(archetype: CourseArchetype, locale: ContentLocale) {
   if (archetype.cta === 'request-quote') {
-    return locale === 'de'
-      ? { eyebrow: 'Ablauf', title: 'Von der Anfrage zum fertigen Programm' }
-      : { eyebrow: 'How it works', title: 'From enquiry to a finished programme' };
+    return pickTree(locale, { de: { eyebrow: 'Ablauf', title: 'Von der Anfrage zum fertigen Programm' }, en: { eyebrow: 'How it works', title: 'From enquiry to a finished programme' } });
   }
 
-  return locale === 'de'
-    ? { eyebrow: 'Nächste Schritte', title: 'So geht es weiter' }
-    : { eyebrow: 'Next steps', title: 'What happens next' };
+  return pickTree(locale, { de: { eyebrow: 'Nächste Schritte', title: 'So geht es weiter' }, en: { eyebrow: 'Next steps', title: 'What happens next' } });
 }

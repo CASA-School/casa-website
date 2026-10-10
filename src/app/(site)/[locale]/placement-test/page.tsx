@@ -8,6 +8,7 @@ import { TextCta } from '@/components/ui/text-cta';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getPlacementNarrative } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { pickTree, say } from '@/lib/cms/copy';
 
 /**
  * The placement page: the Klett online tests, or placement in person.
@@ -47,13 +48,12 @@ export default async function PlacementTestPage() {
   const locale = await getContentLocale();
   const narrative = getPlacementNarrative(locale);
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Einstufung' : 'Placement test' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
+    { label: say(locale, 'Einstufung', 'Placement test') },
   ];
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           heroTitle: 'Finde dein Deutschniveau',
           heroBody:
             'Die richtige Einstufung ist die Grundlage für erfolgreiches Lernen. Mach einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.',
@@ -81,8 +81,7 @@ export default async function PlacementTestPage() {
           ],
           inPersonCta: 'Kontakt und Adresse',
           prepTitle: 'Was du vorbereiten kannst',
-        }
-      : {
+        }, en: {
           heroTitle: 'Find your German level',
           heroBody:
             'Learning well starts with a group at the right level. To find yours, take a free online test or come to the school for a placement test in person.',
@@ -110,12 +109,12 @@ export default async function PlacementTestPage() {
           ],
           inPersonCta: 'Contact and address',
           prepTitle: 'What to prepare',
-        };
+        } });
 
   return (
     <main className="min-h-screen bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <HeroEMinimal
-        eyebrow={locale === 'de' ? 'Einstufung' : 'Placement'}
+        eyebrow={say(locale, 'Einstufung', 'Placement')}
         title={copy.heroTitle}
         description={copy.heroBody}
         breadcrumbs={breadcrumbs}

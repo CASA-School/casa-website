@@ -227,9 +227,28 @@ export function describeActivity(entry: ActivityEntry): string {
       return `changed ${String(entry.detail?.email ?? 'an account')} to ${String(
         entry.detail?.to ?? 'a new role'
       )}`;
+    case 'website_published':
+      return `published ${texts(entry)} on the website`;
+    case 'website_scheduled':
+      return `scheduled ${texts(entry)} for the website`;
+    case 'website_review_requested':
+      return `asked for approval of ${texts(entry)}`;
+    case 'website_approved':
+      return `approved and published ${texts(entry)}`;
+    case 'website_rejected':
+      return `sent ${texts(entry)} back to drafts`;
+    case 'website_undone':
+      return `took ${texts(entry)} back off the website`;
+    case 'website_cancelled':
+      return `withdrew ${texts(entry)} before they went live`;
     default:
       return `${entry.action.replace(/_/g, ' ')} on ${subject}`;
   }
+}
+
+function texts(entry: ActivityEntry): string {
+  const count = Number(entry.detail?.count ?? 0);
+  return count === 1 ? 'one text' : count > 1 ? `${count} texts` : 'texts';
 }
 
 /** Where an entry points, when it points anywhere. */
@@ -254,6 +273,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'booking' && entry.entityId) {
     return `/admin/bookings/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'website_release') {
+    return '/admin/website';
   }
 
   return null;

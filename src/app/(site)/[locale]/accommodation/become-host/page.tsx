@@ -8,6 +8,7 @@ import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata } from '@/lib/seo';
+import { pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -35,8 +36,7 @@ export default async function BecomeHostFamilyPage() {
   const { photos } = getPublicPageConfig('accommodation-detail', locale);
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           eyebrow: 'Gastfamilie bei CASA',
           /*
             Kurz gehalten: die Überschrift lief bei 1280px auf vier Zeilen
@@ -120,8 +120,7 @@ export default async function BecomeHostFamilyPage() {
           processCta: { label: 'Zimmer anbieten', href: '/contact?topic=host-family' },
           intensiveTitle: 'Lernende im Intensivkurs',
           groupTitle: 'Gruppen',
-        }
-      : {
+        }, en: {
           eyebrow: 'Host with CASA',
           /*
             "Become a host", not "Become a host family".
@@ -219,7 +218,7 @@ export default async function BecomeHostFamilyPage() {
           processCta: { label: 'Offer a room', href: '/contact?topic=host-family' },
           intensiveTitle: 'Intensive-course learners',
           groupTitle: 'Groups',
-        };
+        } });
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
@@ -248,25 +247,23 @@ export default async function BecomeHostFamilyPage() {
         title={copy.title}
         description={copy.description}
         breadcrumbs={copy.breadcrumbs}
-        infoTitle={locale === 'de' ? 'Gastgeben im Überblick' : 'Hosting at a glance'}
+        infoTitle={say(locale, 'Gastgeben im Überblick', 'Hosting at a glance')}
         infoItems={[
           {
-            label: locale === 'de' ? 'Du stellst' : 'You provide',
-            value: locale === 'de' ? 'Ein möbliertes Zimmer' : 'A furnished room',
+            label: say(locale, 'Du stellst', 'You provide'),
+            value: say(locale, 'Ein möbliertes Zimmer', 'A furnished room'),
           },
           {
-            label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical stay',
-            value: locale === 'de' ? '1 bis 4 Wochen oder länger' : '1 to 4 weeks, or longer',
+            label: say(locale, 'Typischer Zeitraum', 'Typical stay'),
+            value: say(locale, '1 bis 4 Wochen oder länger', '1 to 4 weeks, or longer'),
           },
           {
-            label: locale === 'de' ? 'Vergütung' : 'Allowance',
-            value: locale === 'de' ? 'Schriftlich, bevor du zusagst' : 'In writing, before you agree',
+            label: say(locale, 'Vergütung', 'Allowance'),
+            value: say(locale, 'Schriftlich, bevor du zusagst', 'In writing, before you agree'),
           },
         ]}
         notes={
-          locale === 'de'
-            ? 'Wir vermitteln passende Gäste, informieren dich vorab und bleiben für beide Seiten erreichbar.'
-            : 'We find guests who suit you, tell you about them in advance and are there for both of you.'
+          say(locale, 'Wir vermitteln passende Gäste, informieren dich vorab und bleiben für beide Seiten erreichbar.', 'We find guests who suit you, tell you about them in advance and are there for both of you.')
         }
         ctas={copy.heroCtas}
         photo={photos.becomeHost}
@@ -317,23 +314,23 @@ export default async function BecomeHostFamilyPage() {
             eyebrow={copy.comparisonEyebrow}
             title={copy.comparisonTitle}
             description={copy.comparisonDescription}
-            rowHeading={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
+            rowHeading={say(locale, 'Auf einen Blick', 'At a glance')}
             leftTitle={copy.intensiveTitle}
             rightTitle={copy.groupTitle}
             rows={[
               {
-                label: locale === 'de' ? 'Typischer Zeitraum' : 'Typical stay',
-                left: locale === 'de' ? 'Meist ein oder mehrere Monate' : 'Usually a month or more',
-                right: locale === 'de' ? 'Meist eine bis vier Wochen' : 'Usually one to four weeks',
+                label: say(locale, 'Typischer Zeitraum', 'Typical stay'),
+                left: say(locale, 'Meist ein oder mehrere Monate', 'Usually a month or more'),
+                right: say(locale, 'Meist eine bis vier Wochen', 'Usually one to four weeks'),
               },
               {
-                label: locale === 'de' ? 'Anzahl der Gäste' : 'Number of guests',
-                left: locale === 'de' ? 'Ein Gast' : 'One guest',
-                right: locale === 'de' ? 'In der Regel 1 bis 6 Lernende, in Einzel- oder Doppelzimmern' : 'Usually 1 to 6 learners, in single or double rooms',
+                label: say(locale, 'Anzahl der Gäste', 'Number of guests'),
+                left: say(locale, 'Ein Gast', 'One guest'),
+                right: say(locale, 'In der Regel 1 bis 6 Lernende, in Einzel- oder Doppelzimmern', 'Usually 1 to 6 learners, in single or double rooms'),
               },
               {
-                label: locale === 'de' ? 'Verpflegung' : 'Meals',
-                left: locale === 'de' ? 'Dein Gast kocht selbst in deiner Küche' : 'Your guest cooks for themselves in your kitchen',
+                label: say(locale, 'Verpflegung', 'Meals'),
+                left: say(locale, 'Dein Gast kocht selbst in deiner Küche', 'Your guest cooks for themselves in your kitchen'),
                 /*
                   Was "Often coordinated with half-board" / "Häufig mit
                   Halbpension organisiert". The verified fact is narrower —
@@ -342,17 +339,17 @@ export default async function BecomeHostFamilyPage() {
                   breakfast and dinner specifically, which is not what "optional"
                   states, so this now says what is actually published.
                 */
-                right: locale === 'de' ? 'Mit oder ohne Verpflegung, je nach Absprache' : 'With or without meals, as agreed',
+                right: say(locale, 'Mit oder ohne Verpflegung, je nach Absprache', 'With or without meals, as agreed'),
               },
               {
-                label: locale === 'de' ? 'Tagesablauf' : 'Daily routine',
-                left: locale === 'de' ? 'Der Intensivkurs findet bei CASA statt' : 'The intensive course takes place at CASA',
-                right: locale === 'de' ? 'Fester Ablauf mit Unterricht und Programm' : 'A fixed timetable of lessons and activities',
+                label: say(locale, 'Tagesablauf', 'Daily routine'),
+                left: say(locale, 'Der Intensivkurs findet bei CASA statt', 'The intensive course takes place at CASA'),
+                right: say(locale, 'Fester Ablauf mit Unterricht und Programm', 'A fixed timetable of lessons and activities'),
               },
               {
-                label: locale === 'de' ? 'Begleitung durch CASA' : 'Support from CASA',
-                left: locale === 'de' ? 'Wir wählen passende Gäste aus und bleiben deine Ansprechpartner' : 'We choose suitable guests and remain your point of contact',
-                right: locale === 'de' ? 'Wir stimmen den Ablauf mit dir ab und bleiben deine Ansprechpartner' : 'We agree the schedule with you and remain your point of contact',
+                label: say(locale, 'Begleitung durch CASA', 'Support from CASA'),
+                left: say(locale, 'Wir wählen passende Gäste aus und bleiben deine Ansprechpartner', 'We choose suitable guests and remain your point of contact'),
+                right: say(locale, 'Wir stimmen den Ablauf mit dir ab und bleiben deine Ansprechpartner', 'We agree the schedule with you and remain your point of contact'),
               },
               {
                 /*
@@ -365,15 +362,11 @@ export default async function BecomeHostFamilyPage() {
                   invented here. What the page can promise honestly is when the
                   host learns it. Ask CASA for the rates and put them here.
                 */
-                label: locale === 'de' ? 'Aufwandsentschädigung' : 'Hosting allowance',
+                label: say(locale, 'Aufwandsentschädigung', 'Hosting allowance'),
                 left:
-                  locale === 'de'
-                    ? 'Pro Aufenthalt, schriftlich vereinbart, bevor du zusagst'
-                    : 'Per stay, confirmed in writing before you agree',
+                  say(locale, 'Pro Aufenthalt, schriftlich vereinbart, bevor du zusagst', 'Per stay, confirmed in writing before you agree'),
                 right:
-                  locale === 'de'
-                    ? 'Pro Gruppenaufenthalt, schriftlich vereinbart, bevor du zusagst'
-                    : 'Per group stay, confirmed in writing before you agree',
+                  say(locale, 'Pro Gruppenaufenthalt, schriftlich vereinbart, bevor du zusagst', 'Per group stay, confirmed in writing before you agree'),
               },
             ]}
           />

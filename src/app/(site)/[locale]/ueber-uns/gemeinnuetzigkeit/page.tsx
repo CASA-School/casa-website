@@ -10,6 +10,7 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import type { ContentLocale } from '@/lib/content/types';
 import { createPublicMetadata } from '@/lib/seo';
 import { organizationId, pageUrl } from '@/lib/structured-data';
+import { pickTree, say } from '@/lib/cms/copy';
 
 const PATH = '/ueber-uns/gemeinnuetzigkeit';
 const KEYWORDS = [
@@ -46,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const pageSchema = (locale: ContentLocale) => ({
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
-  name: locale === 'de' ? 'Gemeinnützigkeit & Mission' : 'Non-profit status & mission',
+  name: say(locale, 'Gemeinnützigkeit & Mission', 'Non-profit status & mission'),
   url: pageUrl(PATH, locale),
   about: { '@id': organizationId() },
 });
@@ -54,8 +55,7 @@ const pageSchema = (locale: ContentLocale) => ({
 export default async function NonProfitStatusPage() {
   const locale = await getContentLocale();
 
-  const copy = locale === 'de'
-    ? {
+  const copy = pickTree(locale, { de: {
         breadcrumbs: [
           { label: 'Start', href: '/' },
           { label: 'Unsere Schule', href: '/about' },
@@ -88,8 +88,7 @@ export default async function NonProfitStatusPage() {
           ['Anerkennung', 'Staatlich anerkannter Träger der freien Jugendhilfe'],
           ['Steuerliche Einordnung', 'Anerkennung wegen Förderung der Volks- und Berufsbildung'],
         ],
-      }
-    : {
+      }, en: {
         breadcrumbs: [
           { label: 'Home', href: '/' },
           { label: 'Our school', href: '/about' },
@@ -121,7 +120,7 @@ export default async function NonProfitStatusPage() {
           ['Recognition', 'A state-recognised independent youth welfare provider'],
           ['Tax status', 'Recognised for promoting adult education and vocational training'],
         ],
-      };
+      } });
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
@@ -153,10 +152,10 @@ export default async function NonProfitStatusPage() {
       <section className="py-14 md:py-20" aria-labelledby="nonprofit-transparency-title">
         <Container className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{locale === 'de' ? 'Gemeinnützigkeit & Transparenz' : 'Non-profit status & transparency'}</p>
-            <h2 id="nonprofit-transparency-title" className="mt-3 text-3xl font-bold">{locale === 'de' ? 'Deine Kursgebühren bleiben in der Bildungsarbeit.' : 'Your course fees go back into our educational work.'}</h2>
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{say(locale, 'Gemeinnützigkeit & Transparenz', 'Non-profit status & transparency')}</p>
+            <h2 id="nonprofit-transparency-title" className="mt-3 text-3xl font-bold">{say(locale, 'Deine Kursgebühren bleiben in der Bildungsarbeit.', 'Your course fees go back into our educational work.')}</h2>
             <p className="mt-5 leading-relaxed text-[var(--casa-muted)]">{copy.fundingText}</p>
-            <p className="mt-4 font-semibold leading-relaxed">{locale === 'de' ? 'Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.' : 'Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.'}</p>
+            <p className="mt-4 font-semibold leading-relaxed">{say(locale, 'Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.', 'Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.')}</p>
             <ul className="mt-6 grid gap-x-6 gap-y-4 sm:grid-cols-2">{copy.fundingBullets.map(item => <li key={item} className="border-l-2 border-[var(--casa-blue)]/30 pl-4 text-sm leading-relaxed text-[var(--casa-muted)]">{item}</li>)}</ul>
           </div>
           <aside className="lg:border-l lg:border-[color:var(--casa-sand)] lg:pl-10" aria-labelledby="nonprofit-legal-title">

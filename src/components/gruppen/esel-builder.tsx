@@ -15,6 +15,7 @@ import {
 } from '@/config/gruppen/packages';
 import { calculateEselQuote } from '@/lib/gruppen/quote';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 /**
  * How much of the price sheet the builder reveals.
@@ -146,7 +147,8 @@ export function EselBuilder({
   priceDisplay?: EselPriceDisplay;
   inquiryHref?: string;
 }) {
-  const t = copy[locale];
+  const { pick, pickTree } = useSiteCopy();
+  const t = pickTree(locale, copy);
   const showLinePrices = priceDisplay === 'detailed';
 
   const [weeks, setWeeks] = useState<GruppenWeeks>(2);
@@ -248,7 +250,7 @@ export function EselBuilder({
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-baseline justify-between gap-x-3">
                         <span className="text-sm font-bold text-[var(--casa-ink)]">
-                          {moduleEntry.name[locale]}
+                          {pick(locale, moduleEntry.name)}
                         </span>
                         {showLinePrices ? (
                           <span className="text-sm tabular-nums text-[var(--casa-ink)]">

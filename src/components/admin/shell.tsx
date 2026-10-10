@@ -184,6 +184,7 @@ export function WorkspaceShell({
               hrefs={[
                 '/admin/applications',
                 '/admin/kursplanung',
+                '/admin/website',
                 '/admin/activity',
                 '/admin/team',
                 '/admin/settings',
@@ -205,6 +206,12 @@ export function WorkspaceShell({
                   ]}
                 >
                   Kursplanung
+                </NavLink>
+              ) : null}
+              {/* What the public site says. Opens the editor full screen, outside the shell. */}
+              {canAccess(user, 'website') ? (
+                <NavLink href="/admin/website" icon={Icon.website} title="Website">
+                  Website
                 </NavLink>
               ) : null}
               {canAccess(user, 'activity') ? (
