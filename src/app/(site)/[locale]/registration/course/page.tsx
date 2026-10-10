@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: locale === 'de' ? 'Kursanmeldung' : 'Course registration',
+    title: locale === 'de' ? 'Kursanmeldung: Deutschkurs in Bremen buchen' : 'Course registration: book a German course in Bremen',
     description: locale === 'de' ? 'Melde dich zu einem Deutschkurs bei CASA in Bremen an. Wähle deinen Kurs und teile uns deine Wünsche mit.' : 'Register for a German course at CASA in Bremen. Choose your course and tell us about your plans.',
     path: '/registration/course',
   });

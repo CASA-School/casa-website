@@ -7,6 +7,8 @@ import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCareerPositionBySlug } from '@/lib/content/repository';
+import { jobPostingNode } from '@/lib/structured-data';
+import { JsonLdScript } from '@/components/seo/json-ld';
 import { isDatabaseConfigured } from '@/lib/db/env';
 import { createPublicMetadata } from '@/lib/seo';
 
@@ -60,7 +62,11 @@ export async function generateMetadata({ params }: CareerDetailPageProps): Promi
     locale,
     // createPublicMetadata already appends "| CASA Bremen"
     title: `${position.title} — ${locale === 'de' ? 'Arbeiten bei CASA' : 'Working at CASA'}`,
-    description: position.shortDescription,
+    // The posting is written in German; the English page gets an English summary.
+    description:
+      locale === 'de'
+        ? position.shortDescription
+        : `${position.title} at CASA: teach international learners in small groups at a non-profit language school in Bremen since 1983.`,
     path: `/careers/${slug}`,
     keywords: ['CASA careers', position.title, 'Language school jobs Bremen'],
   });
@@ -134,8 +140,24 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
           ],
         };
 
+  // Google for Jobs reads the posting from this; the description is the page's own text.
+  const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const jobSchema = jobPostingNode({
+    locale,
+    path: `/careers/${position.slug}`,
+    title: position.title,
+    descriptionHtml: [
+      ...paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+      requirements.length ? `<ul>${requirements.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '',
+    ].join(''),
+    employmentType: position.employmentType,
+    postedAt: position.postedAt,
+    closesAt: position.closesAt ?? null,
+  });
+
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
+      <JsonLdScript id="job-schema" data={jobSchema} />
       {/* Banner / Hero Section */}
       {/*
         One accent, not two. This was a blue radial in the top-left AND a sun

@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: locale === 'de' ? 'Gastgeber werden' : 'Become a host',
+    title: locale === 'de' ? 'Gastfamilie werden in Bremen' : 'Become a host family in Bremen',
     description: locale === 'de' ? 'Du hast ein Zimmer frei? Heiße internationale CASA-Teilnehmende in Bremen willkommen und lerne Menschen aus aller Welt kennen.' : 'Have a room to spare? Welcome international CASA learners into your home in Bremen and meet people from around the world.',
     path: '/accommodation/become-host',
     keywords: ['Host family Bremen', 'Become host family', 'Student accommodation'],

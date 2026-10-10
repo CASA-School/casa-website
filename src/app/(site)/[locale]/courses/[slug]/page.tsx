@@ -21,6 +21,8 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import { redirectLocalized } from '@/i18n/redirect';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
+import { courseNode } from '@/lib/structured-data';
+import { COURSE_SEO } from '@/config/seo-pages';
 import { GruppenPackages } from '@/components/gruppen/gruppen-packages';
 import { InterestDialog } from '@/components/courses/interest-dialog';
 import { hasInterestList, INTEREST_ANCHOR } from '@/config/courses/interest-list';
@@ -33,7 +35,7 @@ import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/c
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
-import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { createPublicMetadata } from '@/lib/seo';
 
 /* What each of the Bremen Town Musicians says in the group page's hero. */
 const MUSICIAN_VOICES = {
@@ -65,9 +67,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return createPublicMetadata({
     locale,
-    // createPublicMetadata already appends "| CASA Bremen"
-    title: detail.course.name,
-    description: detail.course.narrative?.promise || 'Course detail',
+    // createPublicMetadata already appends "| CASA Bremen"; config/seo-pages.ts has why.
+    title: COURSE_SEO[detail.course.slug]?.title[locale] ?? detail.course.name,
+    description: COURSE_SEO[detail.course.slug]?.description?.[locale] ?? (detail.course.narrative?.promise || 'Course detail'),
     path: `/courses/${getCanonicalCourseRouteSlug(slug)}`,
     keywords: [detail.course.name, 'CASA course detail', 'German learning outcomes'],
   });
@@ -577,17 +579,17 @@ export default async function CourseDetailPage({
           locale === 'de' ? 'Nächste Schritte Richtung Prüfung oder Alltag' : 'Next steps towards an exam or everyday life',
         ]);
 
-  const courseSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Course',
+  const courseSchema = courseNode({
+    locale,
+    path: getCoursePath(detail.course.slug),
     name: detail.course.name,
     description: detail.course.narrative?.promise || '',
-    provider: {
-      '@type': 'EducationalOrganization',
-      name: 'CASA Internationale Sprachschule Bremen',
-      url: toAbsoluteUrl('/'),
-    },
-  };
+    levelMin: detail.course.level_min,
+    levelMax: detail.course.level_max,
+    price: isQuoteOnly(detail.course) || !detail.course.default_price ? null : detail.course.default_price,
+    currency: detail.course.currency || 'EUR',
+    instances: bookableInstances,
+  });
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>

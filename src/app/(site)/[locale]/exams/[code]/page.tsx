@@ -11,7 +11,9 @@ import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getExamDetail } from '@/lib/content/repository';
-import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { examGraph } from '@/lib/structured-data';
+import { EXAM_SEO } from '@/config/seo-pages';
+import { createPublicMetadata } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
@@ -44,9 +46,9 @@ export async function generateMetadata({ params }: ExamDetailPageProps): Promise
 
   return createPublicMetadata({
     locale,
-    // createPublicMetadata already appends "| CASA Bremen"
-    title: detail.examType.name,
-    description: detail.narrative?.summary || 'CASA exam detail',
+    // createPublicMetadata already appends "| CASA Bremen"; config/seo-pages.ts has why.
+    title: EXAM_SEO[code]?.title[locale] ?? detail.examType.name,
+    description: EXAM_SEO[code]?.description?.[locale] ?? (detail.narrative?.summary || 'CASA exam detail'),
     path: `/exams/${code}`,
     keywords: [detail.examType.name, 'Exam day timeline', 'CASA exam support'],
   });
@@ -237,13 +239,17 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           ],
         };
 
-  const examSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'EducationalOccupationalCredential',
+  // The url used to be the internal `/exams/b2`, not the page's address.
+  const examSchema = examGraph({
+    locale,
+    path: `/exams/${code}`,
     name: detail.examType.name,
     description: detail.narrative?.summary || '',
-    url: toAbsoluteUrl(`/exams/${code}`),
-  };
+    level: detail.examType.level,
+    fee: detail.examType.default_fee,
+    currency: detail.examType.currency || 'EUR',
+    sessions: detail.sessions,
+  });
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>

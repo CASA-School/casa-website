@@ -35,11 +35,16 @@ export async function generateMetadata({ params }: AccommodationDetailPageProps)
   return createPublicMetadata({
     locale,
     title: type === 'flat'
-      ? (locale === 'de' ? 'CASA-WGs' : 'CASA shared flats')
+      ? (locale === 'de' ? 'CASA-WG: Zimmer für Lernende in Bremen' : 'CASA shared flats for learners in Bremen')
       : (locale === 'de' ? 'Wohnen bei Bremer Gastgebern' : 'Living with hosts in Bremen'),
-    description: locale === 'de'
-      ? 'Hier findest du alles über Wohnen, Kosten und Anreise während deines Intensivkurses. Bei Fragen helfen wir dir persönlich weiter.'
-      : 'Find out where you will live during your intensive course, what it costs and how you get here. If you have any questions, we will help you personally.',
+    // One description per type: the two pages shared one, and a search result could not tell them apart.
+    description: type === 'flat'
+      ? (locale === 'de'
+        ? 'Ein eigenes Zimmer in einer CASA-WG mit anderen Lernenden, während deines Intensivkurses in Bremen: Ausstattung, Kosten und Anreise.'
+        : 'A room of your own in a CASA shared flat with other learners during your intensive course in Bremen: what it has, what it costs and how to get there.')
+      : (locale === 'de'
+        ? 'Wohnen bei einer Gastfamilie in Bremen während deines Intensivkurses: jeden Tag Deutsch sprechen, mit Kosten, Ablauf und Anreise.'
+        : 'Live with a host family in Bremen during your intensive course and speak German every day: what it costs, how it works and how to get there.'),
     path: `/accommodation/${type}`,
   });
 }

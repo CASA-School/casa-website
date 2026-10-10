@@ -8,7 +8,8 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import type { ContentLocale } from '@/lib/content/types';
-import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { createPublicMetadata } from '@/lib/seo';
+import { organizationId, pageUrl } from '@/lib/structured-data';
 
 const PATH = '/ueber-uns/gemeinnuetzigkeit';
 const KEYWORDS = [
@@ -46,12 +47,8 @@ const pageSchema = (locale: ContentLocale) => ({
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: locale === 'de' ? 'Gemeinnützigkeit & Mission' : 'Non-profit status & mission',
-  url: toAbsoluteUrl(PATH),
-  about: {
-    '@type': 'EducationalOrganization',
-    name: 'CASA – Internationale Sprachschule gGmbH',
-    legalName: 'CASA – Internationale Sprachschule gGmbH',
-  },
+  url: pageUrl(PATH, locale),
+  about: { '@id': organizationId() },
 });
 
 export default async function NonProfitStatusPage() {

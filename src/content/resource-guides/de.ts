@@ -10,9 +10,9 @@ import type { ResourceGuideData, ResourceGuideSlug } from './types';
 export const studyInGermanyGuideDe: ResourceGuideData = {
   slug: 'study-in-germany',
   path: '/resources/study-in-germany',
-  metaTitle: 'Studium und Leben in Deutschland: deine nächsten Schritte',
+  metaTitle: 'Studium und Leben in Deutschland: nächste Schritte',
   metaDescription:
-    'Was du für ein Studium in Deutschland brauchst, von der Wahl des Studiengangs bis zum ersten Monat vor Ort. Es geht um Zulassung, Sprachniveau, Bewerbung, Finanzierung und Wohnen.',
+    'Was du für ein Studium in Deutschland brauchst, vom Studiengang bis zum ersten Monat vor Ort: Zulassung, Sprachniveau, Bewerbung, Finanzierung und Wohnen.',
   hero: {
     title: 'Studium & Leben in Deutschland',
     summary: 'Hier findest du Hilfe bei der Studienwahl, der Bewerbung und den ersten Schritten in Deutschland.',

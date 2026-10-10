@@ -15,8 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: locale === 'de' ? 'Unser Team' : 'Our team',
-    description: locale === 'de' ? 'Lerne die Menschen kennen, die dich bei CASA in Bremen unterrichten, beraten und begleiten.' : 'Meet the people who teach, advise and support you at CASA in Bremen.',
+    title: locale === 'de' ? 'Unser Team: die Menschen bei CASA in Bremen' : 'Our team: the people at CASA in Bremen',
+    description: locale === 'de' ? 'Lerne die Menschen kennen, die dich bei CASA in Bremen unterrichten, beraten und begleiten.' : 'Meet the people who teach, advise and support you at CASA, the non-profit language school in Bremen.',
     path: '/team',
     keywords: ['CASA team', 'Language school teachers', 'Bremen student support'],
   });

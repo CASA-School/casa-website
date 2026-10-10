@@ -20,10 +20,10 @@ import { notFound } from 'next/navigation';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { SiteShell } from '@/components/layout/site-shell';
+import { siteGraph } from '@/lib/structured-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { footerConfig } from '@/config/footer';
 import { defaultLocale, directionFor, isLocale } from '@/i18n/routing';
-import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { createPublicMetadata } from '@/lib/seo';
 import '../../globals.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -87,23 +87,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-const organizationSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'EducationalOrganization',
-  name: 'CASA Internationale Sprachschule Bremen',
-  legalName: 'CASA – Internationale Sprachschule gGmbH',
-  description:
-    'Non-profit German language school in Bremen for German courses, telc exam preparation, learner support, and integration projects.',
-  url: toAbsoluteUrl('/'),
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: footerConfig.contact.address,
-    addressLocality: 'Bremen',
-    addressCountry: 'DE',
-  },
-  telephone: footerConfig.contact.phone,
-  sameAs: footerConfig.socialLinks.map((item) => item.href),
-};
+
 
 export default async function RootLayout({
   children,
@@ -130,7 +114,7 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} ${playfairDisplay.variable} font-sans`}
       >
-        <JsonLdScript id="organization-schema" data={organizationSchema} />
+        <JsonLdScript id="site-schema" data={siteGraph(locale)} />
         <NextIntlClientProvider messages={messages}>
           <SiteShell contentLocale={contentLocale}>{children}</SiteShell>
         </NextIntlClientProvider>
