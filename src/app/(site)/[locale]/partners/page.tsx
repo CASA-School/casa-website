@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ...(locale === 'de'
       ? {
           title: 'Kooperationspartner',
-          description: 'Mit diesen Organisationen arbeitet CASA in Bremen und darüber hinaus zusammen: HERE AHEAD, Garantiefonds Hochschule, Visionskultur, Hood Training und TANDEM International.',
+          description: 'Mit ihnen arbeitet CASA in Bremen und darüber hinaus zusammen: HERE AHEAD, Garantiefonds Hochschule, Visionskultur, Hood Training und TANDEM International.',
         }
       : {
           title: 'Cooperation partners',

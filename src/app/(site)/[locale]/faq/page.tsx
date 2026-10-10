@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: locale === 'de' ? 'Häufige Fragen' : 'Frequently asked questions',
+    title: locale === 'de' ? 'Häufige Fragen zu Deutschkursen in Bremen' : 'FAQ: German courses in Bremen',
     description: locale === 'de' ? 'Antworten zu Deutschkursen, Prüfungen, Anmeldung und Unterkunft bei CASA in Bremen.' : 'Answers about German courses, exams, registration and accommodation at CASA in Bremen.',
     path: '/faq',
     keywords: ['CASA FAQ', 'Course FAQ', 'Exam FAQ', 'Accommodation FAQ'],

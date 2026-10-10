@@ -1,6 +1,10 @@
+import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ChevronRight } from 'lucide-react';
 
+import { JsonLdScript } from '@/components/seo/json-ld';
+import type { ContentLocale } from '@/lib/content/types';
+import { breadcrumbList } from '@/lib/structured-data';
 import { cn } from '@/lib/utils';
 
 export type BreadcrumbItem = {
@@ -13,13 +17,19 @@ type BreadcrumbsProps = {
   className?: string;
 };
 
+/**
+ * The visible trail, and the same trail as schema.org BreadcrumbList, so every
+ * page that shows breadcrumbs gives search engines its place in the site.
+ */
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+  const locale = useLocale() as ContentLocale;
   if (items.length === 0) {
     return null;
   }
 
   return (
     <nav aria-label="Breadcrumb" className={cn('mb-6', className)}>
+      <JsonLdScript id="breadcrumb-schema" data={breadcrumbList(items, locale)} />
       <ol className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-[var(--casa-muted)]">
         {items.map((item, index) => {
           const isCurrent = index === items.length - 1;

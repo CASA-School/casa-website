@@ -358,6 +358,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PUBLIC_UI_AUDIT.md` | Route inventory + responsive findings (375/768/1280) |
 | `docs/PUBLIC_UI_BACKLOG.md` | Sequenced PR-A / PR-B / PR-C plan |
 | `docs/I18N_ROUTING.md` | **Read before adding a route or a language.** German at the root, English under `/en`, the URL map, the rules, how to add a language |
+| `docs/SEO_AND_GEO.md` | **Read before touching metadata, structured data, the sitemap or llms.txt.** What the site does for search and AI answer engines, the 2026-10-10 audit, and the go-live steps (Search Console, Bing, Business Profile) |
 | `docs/LEGACY_REDIRECTS.md` | The old casa-bremen.de URLs and where each one redirects (`src/i18n/legacy-redirects.ts`): inventory, rules, judgement calls for CASA |
 | `docs/PRIVACY_POLICY.md` | **Read before changing a form, a recipient or a retention period.** The website's own privacy text, the facts it states, what must exist at launch for it to be true, and the open questions |
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |

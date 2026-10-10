@@ -126,3 +126,18 @@ done < "$WARM.pages" \
 xargs -P 2 -I{} curl -s -o /dev/null --max-time 120 -H 'Accept: image/webp,image/*,*/*;q=0.8' "https://${FQDN}{}" < "$WARM" || true
 echo "==> warmed $(wc -l < "$WARM.pages" | tr -d ' ') pages and $(wc -l < "$WARM" | tr -d ' ') image sizes"
 rm -f "$WARM" "$WARM.pages"
+
+# IndexNow (2026-10-10): tell Bing, and the answer engines that read its index
+# (ChatGPT search, Copilot), which pages exist, right after a release. Only once
+# casa-bremen.de itself serves this app: before the domain moves the key file is
+# not there, the check fails and nothing is sent. The key is public by design
+# (public/f96d21f5c67fb77d927970a72dd502f6.txt); it only proves the request comes from the site's owner.
+INDEXNOW_KEY="f96d21f5c67fb77d927970a72dd502f6"
+if [ "$(curl -s --max-time 10 "https://casa-bremen.de/$INDEXNOW_KEY.txt")" = "$INDEXNOW_KEY" ]; then
+  URLS="$(curl -s "https://casa-bremen.de/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed -E 's#</?loc>##g' | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')"
+  STATUS="$(curl -s -o /dev/null -w '%{http_code}' -X POST https://api.indexnow.org/indexnow -H 'Content-Type: application/json; charset=utf-8' \
+    -d "{\"host\":\"casa-bremen.de\",\"key\":\"$INDEXNOW_KEY\",\"keyLocation\":\"https://casa-bremen.de/$INDEXNOW_KEY.txt\",\"urlList\":$URLS}" || true)"
+  echo "==> IndexNow: $STATUS"
+else
+  echo "==> IndexNow skipped: casa-bremen.de does not serve this app yet"
+fi

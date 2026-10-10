@@ -11,7 +11,6 @@ import {
   TestimonialGrid,
 } from '@/components/sections';
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
-import { JsonLdScript } from '@/components/seo/json-ld';
 import { TextCta } from '@/components/ui/text-cta';
 import { BandSeam } from '@/components/ui/band-seam';
 import { CardRail } from '@/components/ui/card-rail';
@@ -30,7 +29,7 @@ import {
   getSocialProof,
 } from '@/lib/content/repository';
 import type { ContentLocale, CourseNarrative, CourseTypeRow } from '@/lib/content/types';
-import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { createPublicMetadata } from '@/lib/seo';
 import { publicCourseOrder } from '@/config/courses/course-order';
 import { meaningClasses } from '@/config/brand/meaning';
 import { iconMap } from '@/config/icon-map';
@@ -373,20 +372,12 @@ export default async function HomePage() {
       }
     : undefined;
 
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'CASA Internationale Sprachschule Bremen',
-    url: toAbsoluteUrl('/'),
-    inLanguage: ['en', 'de'],
-  };
-
   return (
     <main
       className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]"
       data-rhythm={rhythm.hero}
     >
-      <JsonLdScript id="website-schema" data={websiteSchema} />
+      {/* The organisation and the website come from the layout (lib/structured-data). */}
 
       {/* Keep CASA's German Leitbild; English expresses the same welcome in its own voice. */}
       <HeroAPhotoLed

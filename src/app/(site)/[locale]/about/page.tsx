@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: locale === 'de' ? 'Über CASA' : 'About CASA',
+    title: locale === 'de' ? 'Über CASA: gemeinnützige Sprachschule in Bremen' : 'About CASA, a non-profit language school in Bremen',
     description: locale === 'de'
       ? 'CASA ist eine gemeinnützige Sprachschule in Bremen. Lerne unser Leitbild, unser Team und das internationale Miteinander bei uns kennen.'
       : 'CASA is a non-profit language school in Bremen. Get to know our mission statement, our team and the international community at our school.',

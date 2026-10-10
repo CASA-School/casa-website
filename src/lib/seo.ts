@@ -12,7 +12,6 @@ import type { ContentLocale } from '@/lib/content/types';
  * means passing it into the image build, not setting it on the running app.
  */
 const DEFAULT_SITE_URL = 'https://casa-bremen.de';
-const DEFAULT_OG_IMAGE = '/images/og-default.png';
 
 function stripTrailingSlash(value: string) {
   return value.endsWith('/') ? value.slice(0, -1) : value;
@@ -56,7 +55,7 @@ export function createPublicMetadata({
   path,
   locale,
   keywords = [],
-  imagePath = DEFAULT_OG_IMAGE,
+  imagePath,
 }: PublicMetadataOptions): Metadata {
   const internalPath = path.startsWith('/') ? path : `/${path}`;
   const canonical = toAbsoluteUrl(toPublicPath(internalPath, locale));
@@ -64,7 +63,8 @@ export function createPublicMetadata({
     locales.map((entry) => [localeTags[entry].hreflang, toAbsoluteUrl(toPublicPath(internalPath, entry))])
   );
   languages['x-default'] = toAbsoluteUrl(toPublicPath(internalPath, defaultLocale));
-  const imageUrl = toAbsoluteUrl(imagePath);
+  // Each page's own share image, with its title (src/app/og.png), unless a page brings one.
+  const imageUrl = toAbsoluteUrl(imagePath ?? `/og.png?title=${encodeURIComponent(title)}&locale=${locale}`);
   const baseTitle = 'CASA Bremen';
   const fullTitle = `${title} | ${baseTitle}`;
 

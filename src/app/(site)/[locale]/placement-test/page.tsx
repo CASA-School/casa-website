@@ -36,8 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === 'de' ? 'Deutsch-Einstufungstest' : 'German placement test',
     description:
       locale === 'de'
-        ? 'Mit den kostenlosen Online-Einstufungstests von A1 bis C1 findest du dein Deutschniveau. In Bremen kannst du auch ohne Termin zur persönlichen Einstufung zu CASA kommen.'
-        : 'Find your German level with the free online placement tests from A1 to C1. In Bremen, you can also come to CASA and take a placement test in person, without an appointment.',
+        ? 'Finde dein Deutschniveau mit den kostenlosen Online-Einstufungstests von A1 bis C1, oder komm ohne Termin zur persönlichen Einstufung zu CASA in Bremen.'
+        : 'Find your German level with the free online placement tests from A1 to C1, or come to CASA in Bremen for a placement test in person, no appointment needed.',
     path: '/placement-test',
     keywords: ['German placement test Bremen', 'Einstufungstest Deutsch', 'Einstufungstest Bremen', 'CASA Bremen'],
   });

@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Datenschutz' : 'Privacy policy',
-    description: locale === 'de' ? 'Informationen zum Umgang mit personenbezogenen Daten bei der Nutzung der CASA-Website und unserer Angebote.' : 'How CASA handles personal data when you use our website and services.',
+    description: locale === 'de' ? 'Informationen zum Umgang mit personenbezogenen Daten bei der Nutzung der CASA-Website und unserer Angebote.' : 'How CASA – Internationale Sprachschule gGmbH in Bremen handles personal data when you use our website, our forms and our courses.',
     path: '/privacy',
   });
 }
