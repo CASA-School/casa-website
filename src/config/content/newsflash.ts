@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * The CASA NewsFlash issue.
@@ -262,5 +263,5 @@ export const newsFlashIssue: NewsFlashIssue = {
 };
 
 export function localizedText(value: Localized, locale: ContentLocale) {
-  return value[locale] ?? value.en;
+  return pick(locale, value) ?? value.en;
 }

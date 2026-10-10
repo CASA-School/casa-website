@@ -13,6 +13,7 @@ import { isDatabaseConfigured } from '@/lib/db/env';
 import { createPublicMetadata } from '@/lib/seo';
 
 import { ApplySection } from './apply-section';
+import { pickTree, say } from '@/lib/cms/copy';
 
 type CareerDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -87,21 +88,18 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
     paragraphs.length > 1 ? toBullets(paragraphs[1]) : [];
 
   const fallbackResponsibilities =
-    locale === 'de'
-      ? [
+    pickTree(locale, { de: [
           'Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.',
           'Du übernimmst Verantwortung für deinen Bereich und achtest auf gute Qualität.',
           'Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.',
-        ]
-      : [
+        ], en: [
           'You work closely with the teachers and the coordination team.',
           'You take responsibility for your area and pay close attention to quality.',
           'You communicate clearly with people from many different countries.',
-        ];
+        ] });
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           back: 'Zurück zu Karriere',
           applyNow: 'Jetzt bewerben',
           posted: 'Veröffentlicht',
@@ -119,8 +117,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
             'Das CASA-Team liest deine Unterlagen.',
             'Im Vorstellungsgespräch lernen wir uns kennen und besprechen die nächsten Schritte.',
           ],
-        }
-      : {
+        }, en: {
           back: 'Back to careers',
           applyNow: 'Apply now',
           posted: 'Posted',
@@ -138,7 +135,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
             'The CASA team reads your application.',
             'At the interview, we get to know each other and talk about the next steps.',
           ],
-        };
+        } });
 
   // Google for Jobs reads the posting from this; the description is the page's own text.
   const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -170,8 +167,8 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
         <Container className="space-y-6">
           <Breadcrumbs
             items={[
-              { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-              { label: locale === 'de' ? 'Karriere' : 'Careers', href: '/careers' },
+              { label: say(locale, 'Start', 'Home'), href: '/' },
+              { label: say(locale, 'Karriere', 'Careers'), href: '/careers' },
               { label: position.title },
             ]}
           />

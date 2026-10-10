@@ -23,6 +23,7 @@ import { getNewsList } from '@/lib/content/repository';
 import { publishDueScheduledPosts } from '@/lib/news/publishDueScheduledPosts';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { cn } from '@/lib/utils';
+import { pickTree } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -119,8 +120,7 @@ export default async function NewsPage() {
    * filled the fallback. They are gone, so the lead article is optional now.
    */
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           featured: 'Artikel des Monats',
           mastheadLede:
             'Jeden Monat erscheint unser NewsFlash mit Informationen zu Kursen und Prüfungen, wichtigen Terminen und Neuem aus der Schule.',
@@ -129,8 +129,7 @@ export default async function NewsPage() {
           tickerLabel: 'Termine dieser Ausgabe',
           wordTitle: 'Wort des Monats',
           readArticle: 'Vollständigen Artikel lesen',
-        }
-      : {
+        }, en: {
           featured: 'Article of the month',
           mastheadLede:
             'Our NewsFlash comes out every month, with information about courses and exams, important dates and news from the school.',
@@ -139,7 +138,7 @@ export default async function NewsPage() {
           tickerLabel: 'Dates in this issue',
           wordTitle: 'Word of the month',
           readArticle: 'Read the full article',
-        };
+        } });
 
   const newsListSchema = {
     '@context': 'https://schema.org',

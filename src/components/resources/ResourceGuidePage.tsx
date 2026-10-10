@@ -6,6 +6,7 @@ import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
 import { getOtherResourceGuides, type ResourceGuideData } from '@/content/resource-guides';
 import type { ContentLocale } from '@/lib/content/types';
+import { pickTree } from '@/lib/cms/copy';
 
 /*
  * THE THREE RESOURCE GUIDES — a document, not a marketing page.
@@ -123,7 +124,7 @@ function DocSection({
 }
 
 export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; locale: ContentLocale }) {
-  const t = chrome[locale];
+  const t = pickTree(locale, chrome);
   const primary = data.hero.ctas[0];
   const related = getOtherResourceGuides(data.slug, locale);
 

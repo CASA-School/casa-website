@@ -2,13 +2,11 @@
  * The pages the website editor lists, grouped as the site's own menu groups them.
  *
  * `path` is the German address, which is what staff see in the address bar.
- * `editable` marks the pages whose text is connected to the editor so far;
- * every other page still opens in the preview, where links can be followed as
- * usual. The legal texts are listed but locked: they change with a lawyer, not
- * in the editor.
+ * Every page's text is connected. The legal texts are listed but locked: they
+ * change with a lawyer, not in the editor.
  */
 
-export type EditorPage = { name: string; path: string; editable?: boolean; locked?: boolean };
+export type EditorPage = { name: string; path: string; locked?: boolean };
 export type EditorPageGroup = { group: string; pages: EditorPage[] };
 
 export const EDITOR_PAGES: readonly EditorPageGroup[] = [
@@ -17,13 +15,13 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     group: 'Courses',
     pages: [
       { name: 'Sprachkurse', path: '/sprachkurse' },
-      { name: 'Intensivkurse', path: '/sprachkurse/deutsch-intensiv', editable: true },
-      { name: 'Abendkurse', path: '/sprachkurse/deutsch-am-abend', editable: true },
-      { name: 'Spezialkurse', path: '/sprachkurse/deutsch-spezialkurse', editable: true },
-      { name: 'Deutsch für Pflege und Medizin', path: '/sprachkurse/deutsch-fuer-mediziner', editable: true },
-      { name: 'Bildungszeit', path: '/sprachkurse/bildungszeit-deutsch', editable: true },
-      { name: 'Firmenunterricht', path: '/sprachkurse/firmenunterricht', editable: true },
-      { name: 'Deutsch für Gruppen', path: '/sprachkurse/deutsch-fuer-gruppen', editable: true },
+      { name: 'Intensivkurse', path: '/sprachkurse/deutsch-intensiv' },
+      { name: 'Abendkurse', path: '/sprachkurse/deutsch-am-abend' },
+      { name: 'Spezialkurse', path: '/sprachkurse/deutsch-spezialkurse' },
+      { name: 'Deutsch für Pflege und Medizin', path: '/sprachkurse/deutsch-fuer-mediziner' },
+      { name: 'Bildungszeit', path: '/sprachkurse/bildungszeit-deutsch' },
+      { name: 'Firmenunterricht', path: '/sprachkurse/firmenunterricht' },
+      { name: 'Deutsch für Gruppen', path: '/sprachkurse/deutsch-fuer-gruppen' },
     ],
   },
   {

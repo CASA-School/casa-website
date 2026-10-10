@@ -12,6 +12,7 @@ import { Link } from '@/i18n/navigation';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { cn } from '@/lib/utils';
+import { pick, pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -193,7 +194,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams).then((value) => value ?? {});
   const rhythm = getLayoutRhythm('legal');
 
-  const copy = formCopyByLocale[locale];
+  const copy = pickTree(locale, formCopyByLocale);
   const topicParamValue = Array.isArray(resolvedSearchParams.topic)
     ? resolvedSearchParams.topic[0]
     : resolvedSearchParams.topic;
@@ -213,8 +214,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   };
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Kontakt' : 'Contact' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
+    { label: say(locale, 'Kontakt', 'Contact') },
   ];
 
   return (
@@ -226,12 +227,10 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           <Breadcrumbs items={breadcrumbs} />
           <header className="mt-4 max-w-2xl">
             <h1 className="text-3xl font-bold md:text-4xl">
-              {locale === 'de' ? 'Kontakt' : 'Contact'}
+              {say(locale, 'Kontakt', 'Contact')}
             </h1>
             <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-              {locale === 'de'
-                ? 'Schreib uns, ruf an oder komm vorbei.'
-                : 'Write to us, give us a call or drop by.'}
+              {say(locale, 'Schreib uns, ruf an oder komm vorbei.', 'Write to us, give us a call or drop by.')}
             </p>
           </header>
           <div
@@ -243,10 +242,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <div className="min-w-0 space-y-5 md:sticky md:top-28 md:self-start">
               <ContactHelpPanel
                 locale={locale}
-                title={locale === 'de' ? 'Lieber persönlich sprechen?' : 'Prefer to talk to someone?'}
-                body={locale === 'de'
-                  ? 'Ruf uns an oder schreib uns. Während der Bürozeiten kannst du auch ohne Termin vorbeikommen, wir nehmen uns Zeit für dich.'
-                  : 'Call us or send us an email. During office hours you can also drop in without an appointment, and we’ll take time for you.'}
+                title={say(locale, 'Lieber persönlich sprechen?', 'Prefer to talk to someone?')}
+                body={say(locale, 'Ruf uns an oder schreib uns. Während der Bürozeiten kannst du auch ohne Termin vorbeikommen, wir nehmen uns Zeit für dich.', 'Call us or send us an email. During office hours you can also drop in without an appointment, and we’ll take time for you.')}
               />
 
               <nav
@@ -254,7 +251,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                 className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-7"
               >
                 <h2 id="contact-self-service" className="text-lg font-bold text-[var(--casa-ink)]">
-                  {locale === 'de' ? 'Direkt online' : 'Do it online'}
+                  {say(locale, 'Direkt online', 'Do it online')}
                 </h2>
                 <ul className="mt-3 divide-y divide-[color:var(--casa-sand)]">
                   {selfServiceLinks.map((item) => {
@@ -270,8 +267,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                             <Icon className="size-5" aria-hidden />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-sm font-semibold text-[var(--casa-ink)]">{item.label[locale]}</span>
-                            <span className="block text-sm text-[var(--casa-muted)]">{item.detail[locale]}</span>
+                            <span className="block text-sm font-semibold text-[var(--casa-ink)]">{pick(locale, item.label)}</span>
+                            <span className="block text-sm text-[var(--casa-muted)]">{pick(locale, item.detail)}</span>
                           </span>
                           <ArrowRight
                             className="size-4 shrink-0 text-[var(--casa-muted)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--casa-ink)] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"

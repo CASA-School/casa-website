@@ -1,5 +1,6 @@
 import type { SkillKey } from '@/config/brand/tokens';
 import type { ContentLocale } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * Special Courses module catalogue.
@@ -239,7 +240,7 @@ export function specialCourseCategories(locale: ContentLocale) {
   const seen = new Map<string, { label: string; modules: SpecialCourseModule[] }>();
 
   for (const courseModule of specialCourseModules) {
-    const label = courseModule.category[locale] ?? courseModule.category.en;
+    const label = pick(locale, courseModule.category) ?? courseModule.category.en;
     const entry = seen.get(label) ?? { label, modules: [] };
     entry.modules.push(courseModule);
     seen.set(label, entry);
@@ -256,6 +257,6 @@ export function specialCourseModulesByWeekday(locale: ContentLocale) {
     (a, b) => order.indexOf(a.weekday.en) - order.indexOf(b.weekday.en)
   ).map((courseModule) => ({
     ...courseModule,
-    weekdayLabel: courseModule.weekday[locale] ?? courseModule.weekday.en,
+    weekdayLabel: pick(locale, courseModule.weekday) ?? courseModule.weekday.en,
   }));
 }

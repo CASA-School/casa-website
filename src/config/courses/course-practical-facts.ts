@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * The practical facts CASA publishes for each course format.
@@ -360,13 +361,13 @@ export function localizePracticalFacts(slug: string, locale: ContentLocale) {
   }
 
   return {
-    summary: facts.summary?.map((row) => ({ label: row.label[locale], value: row.value[locale] })),
+    summary: facts.summary?.map((row) => ({ label: pick(locale, row.label), value: pick(locale, row.value) })),
     fees: facts.fees?.map((fee) => ({
-      label: fee.label[locale],
+      label: pick(locale, fee.label),
       amount: fee.amount[locale],
-      note: fee.note?.[locale],
+      note: (fee.note ? pick(locale, fee.note) : undefined),
     })),
-    feeNote: facts.feeNote?.[locale],
-    conditions: facts.conditions.map((condition) => condition[locale]),
+    feeNote: (facts.feeNote ? pick(locale, facts.feeNote) : undefined),
+    conditions: facts.conditions.map((condition) => pick(locale, condition)),
   };
 }

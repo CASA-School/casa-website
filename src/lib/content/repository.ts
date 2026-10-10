@@ -59,6 +59,7 @@ import type {
   TeamSpotlight,
   CulturalProgramItem,
 } from '@/lib/content/types';
+import { pickTree, say } from '@/lib/cms/copy';
 
 function byLocale<T extends { locale: ContentLocale }>(items: T[], locale: ContentLocale): T[] {
   const localized = items.filter((item) => item.locale === locale);
@@ -101,7 +102,7 @@ function examAnchorId(exam: { code: string | null; name: string | null }) {
 }
 
 function attachCourseNarratives(courses: CourseTypeRow[], locale: ContentLocale): CourseWithNarrative[] {
-  const localizedNarratives = courseNarrativesByLocale[locale] ?? courseNarrativesByLocale.en;
+  const localizedNarratives = pickTree(locale, courseNarrativesByLocale) ?? courseNarrativesByLocale.en;
   const fallbackNarratives = courseNarrativesByLocale.en;
 
   return courses.map((course) => {
@@ -440,7 +441,7 @@ function buildCourseRegistrationOption(
     scheduleLabel: formatScheduleLabel(instance.schedule, locale),
     schedule: parseSchedule(instance.schedule, locale),
     underway: instance.start_date < today,
-    locationLabel: instance.location || (locale === 'de' ? 'CASA Bremen Campus' : 'CASA Bremen Campus'),
+    locationLabel: instance.location || (say(locale, 'CASA Bremen Campus', 'CASA Bremen Campus')),
     fee: courseType.default_price,
     currency: courseType.currency,
     capacity: instance.capacity,
@@ -474,7 +475,7 @@ function buildExamRegistrationOption(
     capacity: session.capacity,
     deadlineStatus: status,
     deadlineLabel: deadlineLabel(status, locale),
-    locationLabel: locale === 'de' ? 'CASA Bremen Prüfungszentrum' : 'CASA Bremen Exam Centre',
+    locationLabel: say(locale, 'CASA Bremen Prüfungszentrum', 'CASA Bremen Exam Centre'),
     status: session.status,
   };
 }
@@ -495,17 +496,17 @@ async function queryFirst<T>(db: DatabaseClient, query: string, params: unknown[
 }
 
 export function getPageHero(pageKey: HeroPageKey, locale: ContentLocale): HeroSpec {
-  const localized = heroSpecsByLocale[locale] ?? heroSpecsByLocale.en;
+  const localized = pickTree(locale, heroSpecsByLocale) ?? heroSpecsByLocale.en;
   const fallback = heroSpecsByLocale.en;
   return localized[pageKey] ?? fallback[pageKey];
 }
 
 export function getProofMetrics(locale: ContentLocale): ProofMetric[] {
-  return proofMetricsByLocale[locale] ?? proofMetricsByLocale.en;
+  return pickTree(locale, proofMetricsByLocale) ?? proofMetricsByLocale.en;
 }
 
 export function getSocialProof(locale: ContentLocale): SocialProofItem[] {
-  return socialProofByLocale[locale] ?? socialProofByLocale.en;
+  return pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
 }
 
 /**
@@ -526,29 +527,29 @@ export function getSocialProofById(id: string, locale: ContentLocale): SocialPro
 }
 
 export function getCourseNarrative(slug: string, locale: ContentLocale): CourseNarrative | null {
-  const localized = courseNarrativesByLocale[locale] ?? courseNarrativesByLocale.en;
+  const localized = pickTree(locale, courseNarrativesByLocale) ?? courseNarrativesByLocale.en;
   return localized.find((entry) => entry.slug === slug) ?? courseNarrativesByLocale.en.find((entry) => entry.slug === slug) ?? null;
 }
 
 export function getExamNarrative(code: string, locale: ContentLocale): ExamNarrative | null {
-  const localized = examNarrativesByLocale[locale] ?? examNarrativesByLocale.en;
+  const localized = pickTree(locale, examNarrativesByLocale) ?? examNarrativesByLocale.en;
   return localized.find((entry) => entry.code === code) ?? examNarrativesByLocale.en.find((entry) => entry.code === code) ?? null;
 }
 
 export function getAccommodationNarratives(locale: ContentLocale): AccommodationNarrative[] {
-  return accommodationNarrativesByLocale[locale] ?? accommodationNarrativesByLocale.en;
+  return pickTree(locale, accommodationNarrativesByLocale) ?? accommodationNarrativesByLocale.en;
 }
 
 export function getPlacementNarrative(locale: ContentLocale): PlacementNarrative {
-  return placementNarrativesByLocale[locale] ?? placementNarrativesByLocale.en;
+  return pickTree(locale, placementNarrativesByLocale) ?? placementNarrativesByLocale.en;
 }
 
 export function getCulturalPrograms(locale: ContentLocale): CulturalProgramItem[] {
-  return culturalProgramsByLocale[locale] ?? culturalProgramsByLocale.en;
+  return pickTree(locale, culturalProgramsByLocale) ?? culturalProgramsByLocale.en;
 }
 
 export function getTeamSpotlights(locale: ContentLocale): TeamSpotlight[] {
-  return teamSpotlightsByLocale[locale] ?? teamSpotlightsByLocale.en;
+  return pickTree(locale, teamSpotlightsByLocale) ?? teamSpotlightsByLocale.en;
 }
 
 export async function getCourses(locale: ContentLocale): Promise<CourseWithNarrative[]> {
@@ -1393,7 +1394,7 @@ export async function getFaq(locale: ContentLocale): Promise<FaqViewItem[]> {
   }
 
   if (faqItems.length === 0) {
-    faqItems = fallbackFaqByLocale[locale] ?? fallbackFaqByLocale.en;
+    faqItems = pickTree(locale, fallbackFaqByLocale) ?? fallbackFaqByLocale.en;
   }
 
   return faqItems;
@@ -1661,7 +1662,7 @@ export async function getNewsList(locale: ContentLocale): Promise<NewsViewItem[]
   }
 
   if (posts.length === 0) {
-    posts = fallbackNewsByLocale[locale] ?? fallbackNewsByLocale.en;
+    posts = pickTree(locale, fallbackNewsByLocale) ?? fallbackNewsByLocale.en;
   }
 
   return [...posts]
@@ -1747,7 +1748,7 @@ export async function getNewsPost(slug: string, locale: ContentLocale): Promise<
     }
   }
 
-  const localized = fallbackNewsByLocale[locale] ?? fallbackNewsByLocale.en;
+  const localized = pickTree(locale, fallbackNewsByLocale) ?? fallbackNewsByLocale.en;
   const fallback = fallbackNewsByLocale.en;
 
   return (
@@ -1758,16 +1759,16 @@ export async function getNewsPost(slug: string, locale: ContentLocale): Promise<
 }
 
 export function getRelatedNews(slug: string, locale: ContentLocale, limit = 2): NewsViewItem[] {
-  const localized = fallbackNewsByLocale[locale] ?? fallbackNewsByLocale.en;
+  const localized = pickTree(locale, fallbackNewsByLocale) ?? fallbackNewsByLocale.en;
   return localized.filter((item) => item.slug !== slug).slice(0, limit);
 }
 
 export function getLocalizedFallbackNews(locale: ContentLocale): NewsViewItem[] {
-  return fallbackNewsByLocale[locale] ?? fallbackNewsByLocale.en;
+  return pickTree(locale, fallbackNewsByLocale) ?? fallbackNewsByLocale.en;
 }
 
 export function getLocalizedFallbackFaq(locale: ContentLocale): FaqViewItem[] {
-  return fallbackFaqByLocale[locale] ?? fallbackFaqByLocale.en;
+  return pickTree(locale, fallbackFaqByLocale) ?? fallbackFaqByLocale.en;
 }
 
 export function getLocalizedCourseCatalog(locale: ContentLocale): CourseWithNarrative[] {
@@ -1803,6 +1804,6 @@ export function getLocalizedCourseInstances(courseTypeId: string): CourseInstanc
 }
 
 export function getLocalizedSocialProof(locale: ContentLocale): SocialProofItem[] {
-  const localized = socialProofByLocale[locale] ?? socialProofByLocale.en;
+  const localized = pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
   return byLocale(localized, locale);
 }

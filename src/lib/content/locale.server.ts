@@ -1,5 +1,6 @@
 import { getLocale } from 'next-intl/server';
 
+import { prepareCopy } from '@/lib/cms/content.server';
 import type { ContentLocale } from '@/lib/content/types';
 import { normalizeContentLocale } from '@/lib/content/locale';
 
@@ -13,5 +14,12 @@ import { normalizeContentLocale } from '@/lib/content/locale';
  * generateMetadata call, so callers need no change.
  */
 export async function getContentLocale(): Promise<ContentLocale> {
-  return normalizeContentLocale(await getLocale());
+  /*
+   * Every page asks for its language first, so this is also where the page's
+   * copy is readied: `say`, `pick` and `pickTree` (src/lib/cms/copy.ts) read
+   * the live edits — or, in the website editor's preview, the drafts — from a
+   * store that lives for this request. One query, shared with the layout.
+   */
+  const [locale] = await Promise.all([getLocale(), prepareCopy()]);
+  return normalizeContentLocale(locale);
 }

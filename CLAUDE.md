@@ -58,6 +58,7 @@ npm run db:seed      # applies db/seeds
 npm run admin:seed   # creates the first staff workspace account
 npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
 npm run db:azure -- migrate   # migrations + seeds on the Azure database, run as a job inside Azure
+npm run cms:extract  # refreshes the website editor's catalog of the site's copy
 npm run placement:port  # re-ports the placement item bank from its source markdown
 ```
 
@@ -220,10 +221,11 @@ never dropped, since CASA wants everything casa-bremen.de says kept. When copy i
 check every place that text renders, not only the page being edited (MEMORY.md pass 41).
 
 **Content composition.** Public pages compose through `src/config/public-page-config.ts`
-and repository-backed view models rather than hardcoded inline content. On a page the
-website editor covers (the course pages so far), copy goes through
-`getPageContent(locale)` — `t(key)` for registry words, `tree(...)` for config objects,
-`data(...)` for values from records — never a new inline `locale === 'de'` pair. Keep new work
+and repository-backed view models rather than hardcoded inline content. **Copy goes
+through `say(locale, 'Deutsch', 'English')`**, `pick` or `pickTree` (`src/lib/cms/copy.ts`;
+`useSiteCopy()` in client components), never a new `locale === 'de' ? … : …` for text, and
+`npm run cms:extract` refreshes the editor's catalog (a test fails without it). That is what
+makes a text editable in the website editor; docs/WEBSITE_EDITOR.md has the rest. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
 

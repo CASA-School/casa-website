@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pick, say } from '@/lib/cms/copy';
 
 /**
  * Exam and preparation fees, per docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
@@ -22,19 +23,19 @@ export function getExamFees(code: string, locale: ContentLocale) {
 
   if (!fees) {
     return {
-      full: locale === 'de' ? 'Wird bestätigt' : 'To be confirmed',
-      partial: locale === 'de' ? 'Nach Rücksprache' : 'On request',
-      prep: locale === 'de' ? 'Nach Rücksprache' : 'On request',
+      full: say(locale, 'Wird bestätigt', 'To be confirmed'),
+      partial: say(locale, 'Nach Rücksprache', 'On request'),
+      prep: say(locale, 'Nach Rücksprache', 'On request'),
       prepRhythm: undefined,
     };
   }
 
-  const euro = (amount: number) => (locale === 'de' ? `${amount} €` : `€${amount}`);
+  const euro = (amount: number) => (say(locale, '{amount} €', '€{amount}', { amount }));
 
   return {
     full: euro(fees.full),
     partial: euro(fees.partial),
     prep: euro(fees.prep),
-    prepRhythm: PREP_RHYTHM[code]?.[locale],
+    prepRhythm: pick(locale, PREP_RHYTHM[code]),
   };
 }

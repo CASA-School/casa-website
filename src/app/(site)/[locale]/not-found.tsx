@@ -29,6 +29,7 @@ import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
 import { Link } from '@/i18n/navigation';
 import { getContentLocale } from '@/lib/content/locale.server';
+import { pickTree } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -46,23 +47,21 @@ export default async function NotFound() {
   const locale = await getContentLocale();
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           eyebrow: 'Fehler 404',
           title: 'Seite nicht gefunden',
           body: 'Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommst du direkt weiter.',
           courses: 'Deutschkurse ansehen',
           placement: 'Einstufungstest machen',
           contact: 'Kontakt aufnehmen',
-        }
-      : {
+        }, en: {
           eyebrow: 'Error 404',
           title: 'Page not found',
           body: 'The link may be out of date, or there may be a typo in the address. You can carry on from here.',
           courses: 'Browse German courses',
           placement: 'Take the placement test',
           contact: 'Contact us',
-        };
+        } });
 
   return (
     <main className="flex-1 bg-[var(--casa-canvas)] text-[var(--casa-ink)]">

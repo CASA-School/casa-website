@@ -140,15 +140,12 @@ export function PagePicker({
                       className={cn(
                         'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors',
                         current ? 'bg-[var(--casa-blue-tint)] font-bold text-[var(--casa-accent-text)]' : 'hover:bg-ws-sunk',
-                        !page.editable && !current && 'text-[var(--casa-text-subtle)]'
+                        page.locked && !current && 'text-[var(--casa-text-subtle)]'
                       )}
                     >
                       <span className="min-w-0 flex-1 truncate">{page.name}</span>
                       {draftPaths.has(page.path) ? <StatusDot status="draft" /> : null}
                       {page.locked ? <span className="text-[var(--casa-text-subtle)]">{I.lock}</span> : null}
-                      {!page.editable && !page.locked ? (
-                        <span className="rounded-full bg-ws-sunk px-1.5 py-0.5 text-[0.65rem] font-semibold text-[var(--casa-text-subtle)]">View only</span>
-                      ) : null}
                     </button>
                   );
                 })}

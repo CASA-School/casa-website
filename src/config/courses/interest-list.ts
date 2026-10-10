@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * The interest list (Rahman, 2026-10-09): for a course CASA runs without set
@@ -60,5 +61,5 @@ export type InterestTime = (typeof INTEREST_TIMES)[number]['value'];
 
 /** The labels for a list of option values, in order, joined for a mail or a record. */
 export function interestLabels(options: Options<string>, values: readonly string[], locale: ContentLocale) {
-  return options.filter((option) => values.includes(option.value)).map((option) => option.label[locale]).join(', ');
+  return options.filter((option) => values.includes(option.value)).map((option) => pick(locale, option.label)).join(', ');
 }

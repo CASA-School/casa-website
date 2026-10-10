@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * CASA Gruppen — source of truth for the group-travel product.
@@ -582,5 +583,5 @@ export const PRICE_DISCLAIMER: LocalizedText = {
 };
 
 export function localized(text: LocalizedText, locale: ContentLocale) {
-  return text[locale];
+  return pick(locale, text);
 }

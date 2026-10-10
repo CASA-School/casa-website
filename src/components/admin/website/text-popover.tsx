@@ -12,9 +12,10 @@ import {
   slotDetailAction,
 } from '@/app/(admin)/admin/(editor)/website/actions';
 import { formatBerlin } from '@/lib/cms/berlin-time';
+import { placeholders } from '@/lib/cms/copy-key';
 import { initialsOf, type CommentEntry, type LocaleStatus, type PresenceEntry, type SlotState, type VersionEntry } from '@/lib/cms/editor-types';
 import type { CmsLocale } from '@/lib/cms/locales';
-import { KIND_LABELS } from '@/lib/cms/overlay';
+import { KIND_LABELS } from '@/lib/cms/slot-kinds';
 import type { Rect } from '@/lib/cms/protocol';
 import { cn } from '@/lib/utils';
 
@@ -101,6 +102,10 @@ export function TextPopover({
   const text = working[tab] ?? '';
   const dirtyLocales = locales.filter((locale) => (working[locale.code] ?? '') !== (slot.locales[locale.code]?.value ?? ''));
   const dirty = dirtyLocales.length > 0;
+  // Values the page fills in ({count}, {date}): an edit keeps them all.
+  const required = placeholders(state?.fallback ?? slot.locales[source.code]?.fallback ?? '');
+  const present = placeholders(text);
+  const placeholderProblem = text.length > 0 && present.join(',') !== required.join(',');
   const ratio = text.length / slot.max;
   const meter = ratio > 1 ? 'over' : ratio >= 0.9 ? 'near' : 'ok';
 
@@ -280,8 +285,12 @@ export function TextPopover({
         <header className="flex items-start gap-3 px-5 pt-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-[var(--casa-text-subtle)]">
-              <span>{slot.section}</span>
-              <span aria-hidden>·</span>
+              {slot.section !== slot.scope ? (
+                <>
+                  <span>{slot.section}</span>
+                  <span aria-hidden>·</span>
+                </>
+              ) : null}
               {slot.path ? (
                 <span>{slot.scope}</span>
               ) : (
@@ -394,6 +403,19 @@ export function TextPopover({
 
           {meter === 'over' ? (
             <Note tone="danger">Too long for this spot. Shorten it to {slot.max} characters.</Note>
+          ) : null}
+          {required.length ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs font-semibold text-[var(--casa-text-subtle)]">
+              Filled in by the page:
+              {required.map((name) => (
+                <code key={name} className="rounded-md bg-ws-sunk px-1.5 py-0.5 font-mono text-[0.72rem] text-[var(--casa-ink)]">{`{${name}}`}</code>
+              ))}
+            </div>
+          ) : null}
+          {placeholderProblem ? (
+            <Note tone="danger">
+              {required.length ? `Keep ${required.map((name) => `{${name}}`).join(' ')} in the text, exactly as written.` : 'Remove the {…}: nothing fills it in here.'}
+            </Note>
           ) : null}
           {tab === 'de' && SIE.test(text) ? <Note tone="warn">The website says „du“, not „Sie“.</Note> : null}
           {staleNote ? (
@@ -597,7 +619,7 @@ export function TextPopover({
             <button
               type="button"
               onClick={() => void save().then((ok) => ok && dirty && notify('Draft saved'))}
-              disabled={!dirty || saving}
+              disabled={!dirty || saving || placeholderProblem}
               className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--casa-ink-deep)] px-4 text-[0.8rem] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.18)] transition-colors hover:bg-[var(--casa-ink-deep-hover)] disabled:bg-ws-line-firm disabled:shadow-none"
             >
               {saving ? <Spinner className="h-3.5 w-3.5" /> : null}

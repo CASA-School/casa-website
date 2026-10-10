@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { pickTree } from '@/lib/cms/copy';
 
 /**
  * The six Klett online placement tests, one per level.
@@ -33,23 +34,21 @@ type KlettLevelTestsProps = {
 
 export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           title: 'Die Einstufungstests',
           intro:
             'Für die Tests verlässt du unsere Website. Die Links führen zum Testportal des Klett Verlags, mit dessen Lehrwerken wir auf diesen Stufen arbeiten. Dort findest du Aufgaben zum Lese- und Hörverstehen, zum Wortschatz und zur Grammatik der jeweiligen Stufe. Viel Erfolg!',
           start: (level: string) => `${level}-Test starten`,
           opens: 'Öffnet das Testportal von Klett in einem neuen Fenster',
           textbook: 'Lehrwerk',
-        }
-      : {
+        }, en: {
           title: 'The placement tests',
           intro:
             'To take the tests, you leave our website. The links go to the test portal of the publisher Klett, whose textbooks we use at these levels. There you’ll find tasks on reading and listening, vocabulary and grammar for each level. Good luck!',
           start: (level: string) => `Start the ${level} test`,
           opens: 'Opens Klett’s test portal in a new window',
           textbook: 'Textbook',
-        };
+        } });
 
   return (
     <section id="klett-level-tests" className={cn('scroll-mt-28', className)}>

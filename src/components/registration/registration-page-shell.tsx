@@ -6,6 +6,7 @@ import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { say } from '@/lib/cms/copy';
 
 type RegistrationPageShellProps = {
   locale: ContentLocale;
@@ -24,7 +25,7 @@ type RegistrationPageShellProps = {
  */
 export function RegistrationPageShell({ locale, title, intro, formId, helpTitle, helpBody, children }: RegistrationPageShellProps) {
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
     { label: title },
   ];
 

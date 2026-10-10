@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 
 import type { TeamSpotlight } from '@/lib/content/types';
 import { TeamPlaceholder } from '@/components/signatures/team-placeholder';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 
 type TeamDirectoryProps = {
@@ -70,8 +71,9 @@ function MemberGrid({ members }: { members: TeamSpotlight[] }) {
 }
 
 export function TeamDirectory({ title, description, team, contactLabel, contactHref }: TeamDirectoryProps) {
+  const { say } = useSiteCopy();
   const locale = team[0]?.locale ?? 'en';
-  const allLabel = locale === 'de' ? 'Alle' : 'All';
+  const allLabel = say(locale, 'Alle', 'All');
   const groups = useMemo(() => Array.from(new Set(team.map((member) => member.role))), [team]);
   const roles = useMemo(() => [allLabel, ...groups], [allLabel, groups]);
   const [selectedRole, setSelectedRole] = useState<string | null>(allLabel);
@@ -83,7 +85,7 @@ export function TeamDirectory({ title, description, team, contactLabel, contactH
         <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
         <p className="mt-3 max-w-measure text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 
-        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label={locale === 'de' ? 'Team nach Bereich filtern' : 'Filter the team by area'}>
+        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label={say(locale, 'Team nach Bereich filtern', 'Filter the team by area')}>
           {roles.map((role) => (
             <button
               key={role}

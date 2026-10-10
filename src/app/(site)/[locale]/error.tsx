@@ -11,28 +11,28 @@ import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
 import { useLocaleFromPath } from '@/i18n/navigation';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 export default function SiteError({ retry }: { error: Error & { digest?: string }; retry: () => void }) {
+  const { pickTree } = useSiteCopy();
   const locale = useLocaleFromPath();
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           eyebrow: 'Fehler',
           title: 'Etwas ist schiefgelaufen',
           body: 'Diese Seite konnte gerade nicht geladen werden. Bitte versuch es noch einmal. Wenn der Fehler bleibt, erreichst du uns über die Kontaktseite.',
           retry: 'Erneut versuchen',
           home: 'Zur Startseite',
           contact: 'Kontakt aufnehmen',
-        }
-      : {
+        }, en: {
           eyebrow: 'Error',
           title: 'Something went wrong',
           body: 'This page could not be loaded just now. Please try again. If it keeps happening, you can reach us through the contact page.',
           retry: 'Try again',
           home: 'Go to the home page',
           contact: 'Contact us',
-        };
+        } });
 
   return (
     <main className="flex-1 bg-[var(--casa-canvas)] text-[var(--casa-ink)]">

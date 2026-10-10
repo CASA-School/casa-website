@@ -7,6 +7,7 @@ import { ExternalLink } from 'lucide-react';
 import { levelTokens, type LevelKey } from '@/config/brand/tokens';
 import { klettTextbookByLevelId, seriesAccent } from '@/config/content/klett-textbooks';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 type Level = {
   id: LevelKey;
@@ -127,6 +128,7 @@ const LEVELS: Level[] = [
  * before Klett's image permission is on file. See config/content/klett-textbooks.
  */
 function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en' | 'de'; label: string }) {
+  const { say } = useSiteCopy();
   const book = klettTextbookByLevelId[levelId];
 
   if (!book) {
@@ -135,9 +137,7 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
 
   const accent = seriesAccent[book.series];
   const coverAlt =
-    locale === 'de'
-      ? `Titelbild des Lehrwerks ${book.title} von Ernst Klett Sprachen`
-      : `Cover of the ${book.title} textbook published by Ernst Klett Sprachen`;
+    say(locale, 'Titelbild des Lehrwerks {title} von Ernst Klett Sprachen', 'Cover of the {title} textbook published by Ernst Klett Sprachen', { title: book.title });
 
   return (
     <div className="flex gap-4 rounded-xl border border-[color:var(--casa-sand)]/70 bg-white p-5 shadow-xs">
@@ -182,7 +182,7 @@ function TextbookCard({ levelId, locale, label }: { levelId: string; locale: 'en
             rel="noopener noreferrer"
             className="mt-auto inline-flex items-center gap-1.5 pt-3 text-xs font-semibold text-[var(--casa-accent-text)] hover:underline"
           >
-            {locale === 'de' ? 'Beim Verlag ansehen' : 'View at the publisher'}
+            {say(locale, 'Beim Verlag ansehen', 'View at the publisher')}
             <ExternalLink className="h-3 w-3" aria-hidden />
           </a>
         ) : null}
@@ -197,12 +197,12 @@ type Props = {
 };
 
 export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
+  const { pickTree, say } = useSiteCopy();
   const [active, setActive] = useState<LevelKey>('a1');
   const activeLevel = LEVELS.find((l) => l.id === active)!;
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           eyebrow: 'Niveaustufen',
           title: 'Was du auf jeder Stufe kannst',
           description:
@@ -212,8 +212,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           weeks: 'Wochen',
           rate: `${LESSONS_PER_WEEK} UE pro Woche (je 45 Min.)`,
           textbook: 'Lehrwerk',
-        }
-      : {
+        }, en: {
           eyebrow: 'Levels',
           title: 'What you can do at each level',
           description:
@@ -223,7 +222,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           weeks: 'weeks',
           rate: `${LESSONS_PER_WEEK} lessons a week (45 min each)`,
           textbook: 'Textbook',
-        };
+        } });
 
   return (
     <section className={cn('rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-8', className)}>
@@ -234,7 +233,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
       <p className="mt-1 text-sm text-[var(--casa-muted)]">{copy.pace}</p>
 
       {/* Level selector */}
-      <div className="mt-7 flex flex-wrap gap-2" role="tablist" aria-label={locale === 'de' ? 'Kursstufen' : 'Course levels'}>
+      <div className="mt-7 flex flex-wrap gap-2" role="tablist" aria-label={say(locale, 'Kursstufen', 'Course levels')}>
         {LEVELS.map((level, idx) => {
           const isActive = level.id === active;
           return (
@@ -295,7 +294,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
             </span>
             {activeLevel.isBridge ? (
               <span className="text-xs font-semibold text-[var(--casa-text-subtle)]">
-                {locale === 'de' ? 'Zwischenstufe' : 'In-between level'}
+                {say(locale, 'Zwischenstufe', 'In-between level')}
               </span>
             ) : null}
           </div>

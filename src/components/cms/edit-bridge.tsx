@@ -34,7 +34,7 @@ const LAYER_CSS = `
 .cms-dot.cms-upcoming{background:#009fe3;box-shadow:0 0 0 2px #fff,0 0 0 3px #006f9f}
 .cms-bubble{position:fixed;min-width:19px;height:19px;padding:0 5px;box-sizing:border-box;border-radius:10px 10px 10px 3px;background:#111827;color:#fff;font:700 10px/19px Manrope,system-ui,sans-serif;text-align:center}
 .cms-lock{position:fixed;height:20px;padding:0 7px;border-radius:10px;background:#111827;color:#ffd500;font:700 10px/20px Manrope,system-ui,sans-serif;box-shadow:0 0 0 2px #fff}
-[data-cms-key]{cursor:text}
+[data-cms-editable]{cursor:text}
 [data-cms-key^="data:"]{cursor:pointer}
 `;
 
@@ -110,6 +110,12 @@ function mountBridge(origins: string[]): () => void {
   };
 
   const keyOf = (element: Element | null) => element?.getAttribute('data-cms-key') ?? null;
+  // Once the editor has said which texts it knows, any other tagged text stays inert.
+  let described = false;
+  const editable = (element: Element | null) => {
+    const key = keyOf(element);
+    return Boolean(key && (!described || markers[key]));
+  };
   const live = (key: string) => [...(elements.get(key) ?? [])].filter((node) => node.isConnected);
 
   function scan(): string[] {
@@ -198,7 +204,8 @@ function mountBridge(origins: string[]): () => void {
   };
 
   const onOver = (event: MouseEvent) => {
-    const target = (event.target as Element | null)?.closest?.('[data-cms-key]') ?? null;
+    const found = (event.target as Element | null)?.closest?.('[data-cms-key]') ?? null;
+    const target = editable(found) ? found : null;
     if (target !== hovered) {
       hovered = target;
       schedule();
@@ -209,9 +216,9 @@ function mountBridge(origins: string[]): () => void {
     schedule();
   };
   const onClick = (event: MouseEvent) => {
-    const target = (event.target as Element | null)?.closest?.('[data-cms-key]');
-    const key = keyOf(target ?? null);
-    if (!target || !key) return;
+    const target = (event.target as Element | null)?.closest?.('[data-cms-key]') ?? null;
+    const key = keyOf(target);
+    if (!target || !key || !editable(target)) return;
     event.preventDefault();
     event.stopPropagation();
     selected = key;
@@ -225,6 +232,13 @@ function mountBridge(origins: string[]): () => void {
     switch (message?.type) {
       case 'cms:markers':
         markers = message.markers;
+        described = true;
+        for (const [key, set] of elements) {
+          for (const element of set) {
+            if (markers[key]) element.setAttribute('data-cms-editable', '');
+            else element.removeAttribute('data-cms-editable');
+          }
+        }
         break;
       case 'cms:select':
         selected = message.key;

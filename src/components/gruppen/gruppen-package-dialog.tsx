@@ -14,6 +14,7 @@ import {
   type GruppenPackage,
 } from '@/config/gruppen/packages';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const copy = {
   en: {
@@ -72,7 +73,8 @@ export function GruppenPackageDialog({
   item: GruppenPackage;
   locale?: ContentLocale;
 }) {
-  const t = copy[locale];
+  const { pick, pickTree } = useSiteCopy();
+  const t = pickTree(locale, copy);
   const isEsel = item.priceFrom === null;
   const activities = item.activities.map((id) => getActivity(id));
 
@@ -90,13 +92,13 @@ export function GruppenPackageDialog({
     >
       <div className="shrink-0 border-b border-[color:var(--casa-sand)] px-6 py-6 sm:px-8 sm:py-7">
         <p className="pr-10 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-          {item.animal[locale]}
+          {pick(locale, item.animal)}
           {facts ? ` · ${facts}` : ''}
         </p>
         {/* Radix wires aria-labelledby from this. Renders an h2 -> Playfair. */}
-        <DialogTitle className="mt-2 pr-10 sm:text-3xl">{item.descriptor[locale]}</DialogTitle>
+        <DialogTitle className="mt-2 pr-10 sm:text-3xl">{pick(locale, item.descriptor)}</DialogTitle>
         <DialogDescription className="mt-3 max-w-measure">
-          {item.tagline[locale]}
+          {pick(locale, item.tagline)}
         </DialogDescription>
       </div>
 
@@ -106,12 +108,12 @@ export function GruppenPackageDialog({
         <>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 sm:px-8">
             <p className="max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
-              {item.intro[locale]}
+              {pick(locale, item.intro)}
             </p>
 
             <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
               <span className="font-bold text-[var(--casa-ink)]">{t.bestFor}: </span>
-              {item.bestFor[locale]}
+              {pick(locale, item.bestFor)}
             </p>
 
             <div className="mt-7">
@@ -126,7 +128,7 @@ export function GruppenPackageDialog({
                   >
                     <p className="font-bold text-[var(--casa-ink)]">{activity.name}</p>
                     <p className="mt-1 text-sm leading-relaxed text-[var(--casa-muted)]">
-                      {activity.blurb[locale]}
+                      {pick(locale, activity.blurb)}
                     </p>
                   </li>
                 ))}
@@ -134,7 +136,7 @@ export function GruppenPackageDialog({
             </div>
 
             <p className="mt-7 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">
-              {GRUPPEN_INCLUDED_SUMMARY[locale]} {PRICE_DISCLAIMER[locale]}
+              {pick(locale, GRUPPEN_INCLUDED_SUMMARY)} {pick(locale, PRICE_DISCLAIMER)}
             </p>
           </div>
 

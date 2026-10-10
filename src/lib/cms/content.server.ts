@@ -7,8 +7,7 @@ import { COURSE_PAGE_COPY, type CoursePageCopyKey } from '@/config/cms/course-pa
 import type { ContentLocale } from '@/lib/content/types';
 import { getDb, logDatabaseFallback } from '@/lib/db/server';
 
-import { treeFields } from './catalog';
-import { overlayTree } from './overlay';
+import { fillCopyStore } from './copy';
 import { tagText } from './stega';
 
 /**
@@ -116,15 +115,36 @@ export type PageContent = {
   editing: boolean;
   /** One of the course page's shared words. */
   t: (key: CoursePageCopyKey) => string;
-  /** A course's tree from config/courses/*, with its editable leaves resolved. */
-  tree: <T>(slug: string, treeId: string, value: T) => T;
   /** A value that lives in another record (a date, a price): marked in the editor, never editable. */
   data: (source: string, value: string) => string;
 };
 
-export const getPageContent = cache(async (locale: ContentLocale): Promise<PageContent> => {
+const loadValues = cache(async (): Promise<{ editing: boolean; values: Values }> => {
   const editing = (await draftMode()).isEnabled;
-  const values = editing ? await previewValues() : await liveValues();
+  return { editing, values: editing ? await previewValues() : await liveValues() };
+});
+
+/**
+ * Readies `say`, `pick` and `pickTree` (src/lib/cms/copy.ts) for this request.
+ * Every public page awaits it before rendering, and so does the site layout;
+ * it is one query at most, shared by all of them through React `cache`.
+ */
+export async function prepareCopy(): Promise<{ editing: boolean; values: Values }> {
+  const loaded = await loadValues();
+  fillCopyStore(loaded.values, loaded.editing);
+  return loaded;
+}
+
+/** This language's edited values, for the client components' provider. */
+export function valuesForLocale(values: Values, locale: string): Record<string, string> {
+  const suffix = `|${locale}`;
+  const out: Record<string, string> = {};
+  for (const [id, value] of values) if (id.endsWith(suffix)) out[id.slice(0, -suffix.length)] = value;
+  return out;
+}
+
+export const getPageContent = cache(async (locale: ContentLocale): Promise<PageContent> => {
+  const { editing, values } = await prepareCopy();
 
   const pick = (key: string, fallback: string) => {
     const value = values.get(slotId(key, locale)) ?? fallback;
@@ -135,10 +155,6 @@ export const getPageContent = cache(async (locale: ContentLocale): Promise<PageC
   return {
     editing,
     t: (key) => pick(key, COURSE_PAGE_COPY[key][locale]),
-    tree: (slug, treeId, value) =>
-      overlayTree(value, `course.${slug}.${treeId}`, treeFields(treeId), (key, fallback, field) =>
-        field.data ? data(field.data, fallback) : pick(key, fallback)
-      ),
     data,
   };
 });
