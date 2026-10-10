@@ -1,24 +1,26 @@
 import { COURSE_PAGE_COPY } from '@/config/cms/course-page-copy';
-import { courseNarrativesByLocale } from '@/config/content/course-narratives';
-import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
-import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
-import { courseProfiles, getCourseLevelGoals } from '@/config/courses/course-profiles';
-import { getCoursePath } from '@/lib/content/course-routes';
-import type { ContentLocale } from '@/lib/content/types';
+import COPY_CATALOG from '@/config/cms/copy-catalog.json';
+import { FOOTER_TEXT_DE } from '@/config/footer-text';
+import { deNavText, navConfig } from '@/config/nav';
 
-import { flattenTree, KIND_MAX, type FieldSpec, type SlotKind } from './overlay';
+import { copyKey } from './copy-key';
+import { KIND_MAX, type SlotKind } from './slot-kinds';
 
 /**
  * Every slot the website editor can change, with its default in each language.
  *
- * Two sources. The course page's shared words (config/cms/course-page-copy.ts),
- * one key each. And per-course trees: the objects the course page already gets
- * from config/courses/* for one course and one language, whose editable leaves
- * `overlay.ts` names by path. Reading a tree for German and for English gives
- * each leaf its two defaults, which is what the editor compares a translation
- * against and falls back to.
+ * Three sources:
  *
- * Built once per process. It is the repository's text, so it only changes with
+ * - The site's copy, extracted from the source by scripts/cms/extract-copy.mjs
+ *   into src/config/cms/copy-catalog.json: every German/English pair a page
+ *   resolves through `say`, `pick` or `pickTree`, keyed by the pair itself
+ *   (copy-key.ts), with the pages that render it.
+ * - The menu and the footer, whose German is a dictionary keyed by the English
+ *   (config/nav.ts, config/footer-text.ts).
+ * - The course page's shared words, which have hand-made keys
+ *   (config/cms/course-page-copy.ts).
+ *
+ * Built once per process: it is the repository's text, so it only changes with
  * a deploy.
  */
 
@@ -28,112 +30,110 @@ export type CatalogSlot = {
   section: string;
   kind: SlotKind;
   max: number;
-  /** Where it shows: one page's name, or every page of a kind. */
+  /** Where it shows: one page's name, several, or every page. */
   scope: string;
-  /** The internal path of the page it belongs to, when it belongs to one. */
+  /** The internal path of the one page it belongs to, when there is one. */
   path: string | null;
   defaults: Partial<Record<string, string>>;
 };
 
-type CourseTree = {
-  id: string;
-  section: string;
-  fields: FieldSpec[];
-  get: (slug: string, locale: ContentLocale) => unknown;
-};
-
-const narrativeFor = (slug: string, locale: ContentLocale) =>
-  courseNarrativesByLocale[locale]?.find((entry) => entry.slug === slug) ?? null;
-
-export const COURSE_TREES: readonly CourseTree[] = [
-  {
-    id: 'narrative',
-    section: 'Hero',
-    get: narrativeFor,
-    fields: [
-      { path: 'promise', label: 'Lead', kind: 'lead' },
-      { path: 'audience', label: 'Lead', kind: 'lead', section: 'Who it is for' },
-      { path: 'outcomes.*', label: ({ index }) => `Practice ${index}`, kind: 'point', section: 'Learning goals' },
-    ],
-  },
-  {
-    id: 'audience',
-    section: 'Who it is for',
-    get: getCourseAudienceContent,
-    fields: [
-      { path: 'title', label: 'Heading', kind: 'heading' },
-      { path: 'bullets.*', label: ({ index }) => `Point ${index}`, kind: 'point' },
-    ],
-  },
-  {
-    id: 'steps',
-    section: 'Next steps',
-    get: getCourseNextSteps,
-    fields: [
-      { path: 'description', label: 'Lead', kind: 'lead' },
-      { path: 'steps.*.title', label: ({ index }) => `Step ${index} · Title`, kind: 'card-title' },
-      { path: 'steps.*.description', label: ({ index }) => `Step ${index} · Text`, kind: 'card-text' },
-    ],
-  },
-  {
-    id: 'levels',
-    section: 'Learning goals',
-    get: getCourseLevelGoals,
-    fields: [
-      { path: 'title', label: 'Heading', kind: 'heading' },
-      { path: 'description', label: 'Lead', kind: 'lead' },
-      { path: 'levels.*.focus', label: ({ parent }) => `Level ${String(parent.level ?? '')}`.trim(), kind: 'card-text' },
-    ],
-  },
-  {
-    id: 'practical',
-    section: 'Good to know',
-    get: localizePracticalFacts,
-    fields: [
-      { path: 'summary.*.label', label: ({ index }) => `Fact ${index} · Label`, kind: 'label', section: 'Course info' },
-      { path: 'summary.*.value', label: ({ index }) => `Fact ${index} · Value`, kind: 'label', section: 'Course info' },
-      { path: 'fees.*.label', label: ({ index }) => `Fee ${index}`, kind: 'label', section: 'Fees' },
-      { path: 'fees.*.amount', label: ({ index }) => `Fee ${index} · Amount`, kind: 'label', section: 'Fees', data: 'Prices' },
-      { path: 'fees.*.note', label: ({ index }) => `Fee ${index} · Note`, kind: 'note', section: 'Fees' },
-      { path: 'feeNote', label: 'Fee note', kind: 'paragraph', section: 'Fees' },
-      { path: 'conditions.*', label: ({ index }) => `Paragraph ${index}`, kind: 'paragraph' },
-    ],
-  },
-];
-
-export const treeFields = (id: string): readonly FieldSpec[] =>
-  COURSE_TREES.find((tree) => tree.id === id)?.fields ?? [];
-
-/** The German page names, which is what staff call the pages. */
-export const COURSE_PAGE_NAMES: Record<string, string> = {
-  'intensive-german': 'Intensivkurse',
-  'evening-german': 'Abendkurse',
-  'special-courses': 'Spezialkurse',
-  'medical-german': 'Deutsch für Pflege und Medizin',
-  bildungszeit: 'Bildungszeit',
-  'in-company': 'Firmenunterricht',
-  'german-for-groups': 'Deutsch für Gruppen',
-  'exam-preparation': 'Prüfungsvorbereitung',
-};
-
 export const ALL_COURSE_PAGES = 'Every course page';
+export const EVERY_PAGE = 'Every page';
 
-const COPY_LOCALES: readonly ContentLocale[] = ['de', 'en'];
+/** The pages, by their internal route, with the names staff use for them. */
+export const PAGE_NAMES: Record<string, string> = {
+  '/': 'Startseite',
+  '/courses': 'Sprachkurse',
+  '/courses/[slug]': ALL_COURSE_PAGES,
+  '/exams': 'Prüfungszentrum',
+  '/exams/[code]': 'Every exam page',
+  '/accommodation': 'Unterkunft',
+  '/accommodation/[type]': 'Every accommodation page',
+  '/accommodation/become-host': 'Gastfamilie werden',
+  '/about': 'Leitbild',
+  '/team': 'Team',
+  '/ueber-uns/gemeinnuetzigkeit': 'Gemeinnützigkeit',
+  '/partners': 'Kooperationspartner',
+  '/careers': 'Karriere',
+  '/careers/[slug]': 'Every job posting',
+  '/contact': 'Kontakt',
+  '/faq': 'FAQ',
+  '/news': 'Aktuelles',
+  '/news/[slug]': 'Every news post',
+  '/calculator': 'Kostenrechner',
+  '/placement-test': 'Einstufungstest',
+  '/registration/course': 'Anmeldeformular',
+  '/registration/exam': 'Anmeldung zur Prüfung',
+  '/resources/why-germany': 'Warum Deutschland',
+  '/resources/study-in-germany': 'Studieren in Deutschland',
+  '/resources/living-in-germany': 'Leben in Deutschland',
+  '/search': 'Suche',
+  '*': EVERY_PAGE,
+  '404': 'Error pages',
+};
 
 export function slotMax(kind: SlotKind, defaults: readonly (string | undefined)[], explicit?: number): number {
   const longest = Math.max(0, ...defaults.map((value) => value?.length ?? 0));
   return Math.max(explicit ?? KIND_MAX[kind], Math.ceil(longest * 1.15));
 }
 
-function courseSlugs(): string[] {
-  return [...new Set([...Object.keys(courseProfiles), ...courseNarrativesByLocale.en.map((entry) => entry.slug)])];
+const kindFor = (text: string): SlotKind => (text.length <= 32 ? 'label' : text.length <= 120 ? 'lead' : 'paragraph');
+
+const excerpt = (text: string) => {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  return `„${clean.length > 46 ? `${clean.slice(0, 44).trimEnd()}…` : clean}“`;
+};
+
+const humanize = (file: string) => {
+  const base = file.split('/').pop()!.replace(/\.(tsx?|json)$/, '');
+  const words = base.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]/g, ' ').toLowerCase();
+  return words === 'faq' ? 'FAQ' : words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+function sectionFor(files: readonly string[]): string {
+  // The site's frame names a shared wording best, then a component, then a page.
+  const file =
+    files.find((candidate) => candidate.includes('/components/layout/')) ??
+    files.find((candidate) => !candidate.endsWith('/page.tsx')) ??
+    files[0] ??
+    '';
+  const page = /src\/app\/\(site\)\/\[locale\](.*)\/page\.tsx$/.exec(file);
+  if (page) return PAGE_NAMES[page[1] || '/'] ?? 'Page';
+  return humanize(file);
 }
+
+function scopeFor(pages: readonly string[]): { scope: string; path: string | null } {
+  if (pages.includes('*')) return { scope: EVERY_PAGE, path: null };
+  const names = pages.map((page) => PAGE_NAMES[page] ?? page);
+  if (pages.length === 1) return { scope: names[0], path: /[[*]|^404$/.test(pages[0]) ? null : pages[0] };
+  if (pages.length === 0) return { scope: 'Shared', path: null };
+  if (pages.length <= 3) return { scope: names.join(' · '), path: null };
+  return { scope: `${pages.length} pages`, path: null };
+}
+
+type Extracted = { de: string; en: string; files: string[]; pages: string[] };
 
 let memo: Map<string, CatalogSlot> | null = null;
 
 export function catalog(): Map<string, CatalogSlot> {
   if (memo) return memo;
   const slots = new Map<string, CatalogSlot>();
+
+  const addPair = (de: string, en: string, section: string, where: { scope: string; path: string | null }) => {
+    const key = copyKey(de, en);
+    if (slots.has(key)) return;
+    const kind = kindFor(de.length >= en.length ? de : en);
+    slots.set(key, {
+      key,
+      label: excerpt(de),
+      section,
+      kind,
+      max: slotMax(kind, [de, en]),
+      scope: where.scope,
+      path: where.path,
+      defaults: { de, en },
+    });
+  };
 
   for (const [key, entry] of Object.entries(COURSE_PAGE_COPY)) {
     slots.set(key, {
@@ -148,34 +148,23 @@ export function catalog(): Map<string, CatalogSlot> {
     });
   }
 
-  for (const slug of courseSlugs()) {
-    for (const tree of COURSE_TREES) {
-      const prefix = `course.${slug}.${tree.id}`;
-      for (const locale of COPY_LOCALES) {
-        for (const leaf of flattenTree(tree.get(slug, locale), prefix, tree.fields)) {
-          if (leaf.field.data) continue;
-          const existing = slots.get(leaf.key);
-          if (existing) {
-            existing.defaults[locale] = leaf.value;
-            continue;
-          }
-          slots.set(leaf.key, {
-            key: leaf.key,
-            label: leaf.label,
-            section: leaf.field.section ?? tree.section,
-            kind: leaf.field.kind,
-            max: 0,
-            scope: COURSE_PAGE_NAMES[slug] ?? slug,
-            path: getCoursePath(slug),
-            defaults: { [locale]: leaf.value },
-          });
-        }
-      }
+  // The menu: every English string in the config, with its German.
+  const everyPage = { scope: EVERY_PAGE, path: null };
+  const navStrings = new Set<string>();
+  const collect = (value: unknown) => {
+    if (typeof value === 'string') navStrings.add(value);
+    else if (Array.isArray(value)) value.forEach(collect);
+    else if (value && typeof value === 'object') {
+      for (const [name, inner] of Object.entries(value)) if (!['href', 'icon', 'id', 'meaning'].includes(name)) collect(inner);
     }
-  }
+  };
+  collect(navConfig);
+  for (const english of navStrings) if (/\p{L}{2,}/u.test(english)) addPair(deNavText[english] ?? english, english, 'Main menu', everyPage);
+  for (const [english, german] of Object.entries(FOOTER_TEXT_DE)) addPair(german, english, 'Footer', everyPage);
 
-  for (const slot of slots.values()) {
-    if (slot.max === 0) slot.max = slotMax(slot.kind, Object.values(slot.defaults));
+  // After the menu and the footer, so a wording they share with a page is named after them.
+  for (const entry of Object.values(COPY_CATALOG as Record<string, Extracted>)) {
+    addPair(entry.de, entry.en, sectionFor(entry.files), scopeFor(entry.pages));
   }
 
   memo = slots;

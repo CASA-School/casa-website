@@ -1,4 +1,5 @@
 import type { ContentLocale, SocialProofItem } from '@/lib/content/types';
+import { pick, pickTree } from '@/lib/cms/copy';
 
 /**
  * The learner testimonials CASA publishes, on the courses they were written about.
@@ -219,7 +220,7 @@ function toSocialProof(source: TestimonialSource, locale: ContentLocale): Social
     // The old field was `country`, filled with invented nationalities. CASA
     // publishes what the learner studied, not where they are from, and that is
     // the more useful line beside a course testimonial anyway.
-    country: translated ? `${source.context[locale]} · aus dem Englischen übersetzt` : source.context[locale],
+    country: translated ? `${pick(locale, source.context)} · aus dem Englischen übersetzt` : pick(locale, source.context),
     courseSlug: source.courseSlug,
     examCode: source.examCode,
     sourcePlatform: 'website',
@@ -241,7 +242,7 @@ export const socialProofByLocale: Record<ContentLocale, SocialProofItem[]> = {
  * populated section instead of a lonely single card.
  */
 export function socialProofForCourse(slug: string, locale: ContentLocale): SocialProofItem[] {
-  const all = socialProofByLocale[locale] ?? socialProofByLocale.en;
+  const all = pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
   const own = all.filter((item) => item.courseSlug === slug);
   const others = all.filter((item) => item.courseSlug !== slug);
 
@@ -261,7 +262,7 @@ export function socialProofForCourse(slug: string, locale: ContentLocale): Socia
  * A page with room for exactly one voice should name it.
  */
 export function socialProofById(id: string, locale: ContentLocale): SocialProofItem | null {
-  const all = socialProofByLocale[locale] ?? socialProofByLocale.en;
+  const all = pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
 
   return all.find((item) => item.id === `${id}-${locale}`) ?? all[0] ?? null;
 }

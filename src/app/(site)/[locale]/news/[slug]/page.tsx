@@ -15,6 +15,7 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import { getNewsList, getNewsPost } from '@/lib/content/repository';
 import { publishDueScheduledPosts } from '@/lib/news/publishDueScheduledPosts';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
+import { pickTree } from '@/lib/cms/copy';
 
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -55,8 +56,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     notFound();
   }
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           backToIssue: 'Zurück zum NewsFlash',
 
           eyebrow: 'Artikel des Monats',
@@ -69,8 +69,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           talkToAdmissions: 'Lass dich zuerst beraten',
 
           relatedTitle: 'Weitere Artikel',
-        }
-      : {
+        }, en: {
           backToIssue: 'Back to the NewsFlash',
 
           eyebrow: 'Article of the month',
@@ -83,7 +82,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           talkToAdmissions: 'Get advice first',
 
           relatedTitle: 'More articles',
-        };
+        } });
 
 
   const related = newsList.filter((item) => item.slug !== post.slug).slice(0, 2);

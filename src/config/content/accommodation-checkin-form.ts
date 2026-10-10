@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { pickTree } from '@/lib/cms/copy';
 
 /**
  * CASA's host-family check-in / check-out form, as structured data.
@@ -292,17 +293,15 @@ export const accommodationCheckInForm = {
  * terms or signature blocks that are between the host and the student.
  */
 export function checkInSummary(locale: ContentLocale) {
-  return locale === 'de'
-    ? [
+  return pickTree(locale, { de: [
         'In welchem Zustand Zimmer, Möbel und Wände sind',
         'Wie viele Schlüssel und wie viel Bettwäsche du bekommst',
         'Ob du Küche, Bad, Waschmaschine und WLAN mitbenutzen darfst',
         'Fotos vom Zimmer, wenn beide Seiten einverstanden sind',
-      ]
-    : [
+      ], en: [
         'The condition of the room, the furniture and the walls',
         'How many keys and how much bed linen you receive',
         'Whether you may use the kitchen, bathroom, washing machine and Wi-Fi',
         'Photos of the room, if both sides agree',
-      ];
+      ] });
 }

@@ -10,6 +10,7 @@ import type {
   HeroThemeKey,
   HeroVariant,
 } from '@/lib/content/types';
+import { pickTree, say } from '@/lib/cms/copy';
 
 type HeroSeed = {
   pageKey: HeroPageKey;
@@ -27,17 +28,17 @@ type HeroSeed = {
 };
 
 function pageMetrics(locale: ContentLocale, size = 4) {
-  return proofMetricsByLocale[locale].slice(0, size);
+  return pickTree(locale, proofMetricsByLocale).slice(0, size);
 }
 
 function pageStory(locale: ContentLocale, index = 0) {
-  const item = socialProofByLocale[locale][index] ?? socialProofByLocale[locale][0];
+  const item = pickTree(locale, socialProofByLocale)[index] ?? pickTree(locale, socialProofByLocale)[0];
 
   return {
     quote: item.quote,
     personDisplay: item.personDisplay,
     country: item.country,
-    roleLabel: locale === 'de' ? 'Lernstimme' : 'Student voice',
+    roleLabel: say(locale, 'Lernstimme', 'Student voice'),
     sourcePlatform: item.sourcePlatform,
     sourceUrl: item.sourceUrl,
     verificationStatus: item.verificationStatus,

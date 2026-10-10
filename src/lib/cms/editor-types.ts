@@ -1,4 +1,4 @@
-import type { SlotKind } from './overlay';
+import type { SlotKind } from './slot-kinds';
 
 /**
  * The shapes the website editor's screen receives. No database import here, so

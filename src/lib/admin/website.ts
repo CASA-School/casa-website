@@ -1,6 +1,7 @@
 import type { PoolClient } from 'pg';
 
 import { catalog, slotFor, type CatalogSlot } from '@/lib/cms/catalog';
+import { placeholders } from '@/lib/cms/copy-key';
 import {
   initialsOf,
   type ChangeItem,
@@ -148,6 +149,12 @@ export async function saveDraft(user: StaffUser, key: string, locale: string, va
   if (!text || text === liveValue(live, slot, locale)) {
     await query(`DELETE FROM website_drafts WHERE key = $1 AND locale = $2`, [key, locale]);
     return;
+  }
+
+  // A placeholder is a value the page fills in; an edit keeps every one and adds none.
+  const required = placeholders(slot.defaults[locale] ?? slot.defaults[SOURCE_LOCALE] ?? '');
+  if (placeholders(text).join(',') !== required.join(',')) {
+    throw new WebsiteEditError(`Keep ${required.map((name) => `{${name}}`).join(' ') || 'the text without {…}'} as it is.`);
   }
 
   await query(

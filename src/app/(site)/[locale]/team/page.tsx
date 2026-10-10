@@ -9,6 +9,7 @@ import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getTeamSpotlights } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -30,9 +31,9 @@ export default async function TeamPage() {
   const team = getTeamSpotlights(locale);
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Unsere Schule' : 'Our school', href: '/about' },
-    { label: locale === 'de' ? 'Team' : 'Team' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
+    { label: say(locale, 'Unsere Schule', 'Our school'), href: '/about' },
+    { label: say(locale, 'Team', 'Team') },
   ];
 
   return (
@@ -46,14 +47,12 @@ export default async function TeamPage() {
       */}
       <HeroAPhotoLed
         eyebrow="Team"
-        title={locale === 'de' ? 'Wir sind für dich da' : 'We are here for you'}
+        title={say(locale, 'Wir sind für dich da', 'We are here for you')}
         description={
-          locale === 'de'
-            ? 'Unser Team begleitet dich persönlich im Unterricht, bei der Wahl deines Kurses und bei allen Fragen zu deinem Aufenthalt in Bremen.'
-            : 'Our team supports you personally in class, when you choose your course and with any questions about your stay in Bremen.'
+          say(locale, 'Unser Team begleitet dich persönlich im Unterricht, bei der Wahl deines Kurses und bei allen Fragen zu deinem Aufenthalt in Bremen.', 'Our team supports you personally in class, when you choose your course and with any questions about your stay in Bremen.')
         }
         photo={pageConfig.photos.team}
-        ctas={[{ label: locale === 'de' ? 'Beratung anfragen' : 'Get advice', href: '/contact', kind: 'primary' }]}
+        ctas={[{ label: say(locale, 'Beratung anfragen', 'Get advice'), href: '/contact', kind: 'primary' }]}
         breadcrumbs={breadcrumbs}
       />
 
@@ -61,14 +60,12 @@ export default async function TeamPage() {
       <section className="py-16 md:py-20">
         <Container>
           <TeamDirectory
-            title={locale === 'de' ? 'Das CASA-Team' : 'The CASA team'}
+            title={say(locale, 'Das CASA-Team', 'The CASA team')}
             description={
-              locale === 'de'
-                ? 'Hier stellen wir dir die Menschen vor, die bei uns die Schule leiten und organisieren. So findest du schnell die richtige Ansprechperson für deine Frage.'
-                : 'Here you can meet the people who run and organise our school and quickly find the right person for your question.'
+              say(locale, 'Hier stellen wir dir die Menschen vor, die bei uns die Schule leiten und organisieren. So findest du schnell die richtige Ansprechperson für deine Frage.', 'Here you can meet the people who run and organise our school and quickly find the right person for your question.')
             }
             team={team}
-            contactLabel={locale === 'de' ? 'Schreib uns' : 'Write to us'}
+            contactLabel={say(locale, 'Schreib uns', 'Write to us')}
             contactHref="/contact"
           />
         </Container>
@@ -78,17 +75,15 @@ export default async function TeamPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
-            eyebrow={locale === 'de' ? 'Unser Team' : 'Our team'}
-            title={locale === 'de' ? 'Wer wir sind' : 'Who we are'}
+            eyebrow={say(locale, 'Unser Team', 'Our team')}
+            title={say(locale, 'Wer wir sind', 'Who we are')}
             description={
-              locale === 'de'
-                ? 'Unser Team ist eine bunte Mischung aus erfahrenen Kolleginnen und Kollegen und jungen Menschen, die gerade ins Berufsleben starten. Uns alle verbindet die Leidenschaft für die Sprache, die wir jeden Tag vermitteln.'
-                : 'Our team is a colourful mix of experienced colleagues and young people just starting out in their careers. What we all share is a passion for the language we teach every day.'
+              say(locale, 'Unser Team ist eine bunte Mischung aus erfahrenen Kolleginnen und Kollegen und jungen Menschen, die gerade ins Berufsleben starten. Uns alle verbindet die Leidenschaft für die Sprache, die wir jeden Tag vermitteln.', 'Our team is a colourful mix of experienced colleagues and young people just starting out in their careers. What we all share is a passion for the language we teach every day.')
             }
             bullets={[
-              locale === 'de' ? 'Unsere Lehrkräfte sind Muttersprachlerinnen und Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen.' : 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages.',
-              locale === 'de' ? 'Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen.' : 'Most of us have lived or worked abroad and know from experience what it means to learn a foreign language.',
-              locale === 'de' ? 'Wir alle legen großen Wert auf eine persönliche und lernfreundliche Atmosphäre, in der du dich wohlfühlst.' : 'We all care a great deal about a personal, friendly atmosphere for learning, where you feel at ease.',
+              say(locale, 'Unsere Lehrkräfte sind Muttersprachlerinnen und Muttersprachler mit Universitätsabschluss. Viele von uns sprechen mehrere Fremdsprachen.', 'Our teachers are native speakers with university degrees. Many of us speak several foreign languages.'),
+              say(locale, 'Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen.', 'Most of us have lived or worked abroad and know from experience what it means to learn a foreign language.'),
+              say(locale, 'Wir alle legen großen Wert auf eine persönliche und lernfreundliche Atmosphäre, in der du dich wohlfühlst.', 'We all care a great deal about a personal, friendly atmosphere for learning, where you feel at ease.'),
             ]}
             photo={{
               ...pageConfig.photos.mission,

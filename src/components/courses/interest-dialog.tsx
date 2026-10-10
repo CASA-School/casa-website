@@ -20,6 +20,7 @@ import { Link } from '@/i18n/navigation';
 import type { ContentLocale } from '@/lib/content/types';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const copy = {
   de: {
@@ -79,8 +80,9 @@ const copy = {
  * group (level and free times), then how to reach the person.
  */
 export function InterestDialog({ course, locale }: { course: InterestCourseSlug; locale: ContentLocale }) {
+  const { pickTree } = useSiteCopy();
   const [open, setOpen] = useState(false);
-  const t = copy[locale];
+  const t = pickTree(locale, copy);
 
   useEffect(() => {
     // Arriving with the anchor in the address opens it, after the first paint.
@@ -128,6 +130,7 @@ function Chips({
   legend: string; hint?: string; options: readonly Choice[]; selected: readonly string[];
   onToggle: (value: string) => void; locale: ContentLocale; multiple?: boolean;
 }) {
+  const { pick } = useSiteCopy();
   return (
     <fieldset>
       <legend className="text-sm font-semibold text-[var(--casa-ink)]">{legend}</legend>
@@ -149,7 +152,7 @@ function Chips({
                   : 'border-[var(--casa-sand)] bg-white text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]'
               )}
             >
-              {option.label[locale]}
+              {pick(locale, option.label)}
             </button>
           );
         })}
@@ -159,7 +162,8 @@ function Chips({
 }
 
 function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; locale: ContentLocale; onDone: () => void }) {
-  const t = copy[locale];
+  const { pick, pickTree } = useSiteCopy();
+  const t = pickTree(locale, copy);
   const [level, setLevel] = useState('');
   const [profession, setProfession] = useState('');
   const [days, setDays] = useState<string[]>([]);
@@ -210,7 +214,7 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
     <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]">
       <header className="border-b border-[var(--casa-sand)] px-5 pb-6 pt-8 sm:px-8">
         <p className="mb-3 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-          {t.eyebrow} · {INTEREST_COURSES[course][locale]}
+          {t.eyebrow} · {pick(locale, INTEREST_COURSES[course])}
         </p>
         <DialogTitle ref={reference ? stepHeading : undefined} tabIndex={reference ? -1 : undefined} className="pr-7 text-2xl sm:text-3xl">
           {reference ? t.success : t.title}
@@ -223,7 +227,7 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
         {reference ? (
           <div role="status" className="space-y-5">
             <Check aria-hidden className="size-7 text-[var(--casa-accent-text)]" />
-            <p className="font-semibold">{INTEREST_COURSES[course][locale]}</p>
+            <p className="font-semibold">{pick(locale, INTEREST_COURSES[course])}</p>
             <p className="break-all text-xs text-[var(--casa-muted)]">{t.reference}: {reference}</p>
             <Button variant="prism" size="lg" onClick={onDone}>{t.done}</Button>
           </div>
@@ -255,12 +259,12 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
             <div className="rounded-lg bg-[var(--casa-surface-wash)] p-4 text-sm">
               <p className="font-semibold">
                 {[
-                  INTEREST_LEVELS.find((option) => option.value === level)?.label[locale],
-                  ...days.map((day) => INTEREST_DAYS.find((option) => option.value === day)?.label[locale]),
+                  (INTEREST_LEVELS.find((option) => option.value === level)?.label ? pick(locale, INTEREST_LEVELS.find((option) => option.value === level)?.label) : undefined),
+                  ...days.map((day) => (INTEREST_DAYS.find((option) => option.value === day)?.label ? pick(locale, INTEREST_DAYS.find((option) => option.value === day)?.label) : undefined)),
                 ].filter(Boolean).join(' · ')}
               </p>
               <p className="mt-1 text-xs text-[var(--casa-muted)]">
-                {times.map((time) => INTEREST_TIMES.find((option) => option.value === time)?.label[locale]).join(', ')}
+                {times.map((time) => (INTEREST_TIMES.find((option) => option.value === time)?.label ? pick(locale, INTEREST_TIMES.find((option) => option.value === time)?.label) : undefined)).join(', ')}
               </p>
               <Button type="button" variant="link" className="mt-1 px-0" disabled={sending} onClick={() => setDetails(false)}>{t.back}</Button>
             </div>

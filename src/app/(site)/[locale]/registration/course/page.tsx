@@ -5,6 +5,7 @@ import { RegistrationPageShell } from '@/components/registration/registration-pa
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCourseRegistrationCatalog, getExamRegistrationCatalog } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -34,15 +35,11 @@ export default async function CourseRegistrationPage({
   return (
     <RegistrationPageShell
       locale={locale}
-      title={locale === 'de' ? 'Kursanmeldung' : 'Course registration'}
-      intro={locale === 'de'
-        ? 'In drei Schritten meldest du dich zu deinem Kurs an.'
-        : 'Register for your course in three steps.'}
+      title={say(locale, 'Kursanmeldung', 'Course registration')}
+      intro={say(locale, 'In drei Schritten meldest du dich zu deinem Kurs an.', 'Register for your course in three steps.')}
       formId="course-registration-form"
-      helpTitle={locale === 'de' ? 'Fragen zur Anmeldung?' : 'Questions about registering?'}
-      helpBody={locale === 'de'
-        ? 'Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.'
-        : 'We’re happy to help you choose a course, a level and a date.'}
+      helpTitle={say(locale, 'Fragen zur Anmeldung?', 'Questions about registering?')}
+      helpBody={say(locale, 'Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.', 'We’re happy to help you choose a course, a level and a date.')}
     >
       <CourseWizard catalog={registrationData} examCatalog={examCatalog} />
     </RegistrationPageShell>

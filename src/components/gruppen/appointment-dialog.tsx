@@ -12,6 +12,7 @@ import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import type { ContentLocale } from '@/lib/content/types';
 import type { AppointmentDay } from '@/lib/appointments/schedule';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const copy = {
   en: {
@@ -53,8 +54,9 @@ const copy = {
 } as const;
 
 export function AppointmentDialog({ locale }: { locale: ContentLocale }) {
+  const { pickTree } = useSiteCopy();
   const [open, setOpen] = useState(false);
-  const t = copy[locale];
+  const t = pickTree(locale, copy);
   return <Dialog open={open} onOpenChange={setOpen}>
     <DialogTrigger asChild>
       <Button variant="prism" className="mt-4 h-11 w-full">{t.trigger}</Button>
@@ -66,7 +68,8 @@ export function AppointmentDialog({ locale }: { locale: ContentLocale }) {
 }
 
 function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: () => void }) {
-  const t = copy[locale];
+  const { pickTree } = useSiteCopy();
+  const t = pickTree(locale, copy);
   const language = locale === 'de' ? 'de-DE' : 'en-GB';
   const [days, setDays] = useState<AppointmentDay[]>([]);
   const [loading, setLoading] = useState(true);

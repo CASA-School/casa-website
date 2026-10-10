@@ -7,6 +7,7 @@ import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCareerPositions } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -33,8 +34,7 @@ export default async function CareersPage() {
   const positions = await getCareerPositions(locale);
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           eyebrow: 'Karriere',
           title: 'Arbeiten bei CASA in Bremen',
           description:
@@ -57,8 +57,7 @@ export default async function CareersPage() {
           footerBody:
             'Wir freuen uns über Bewerbungen von Menschen, die Lernen, Vielfalt und die Arbeit im Team mitgestalten möchten.',
           footerCta: 'Bewerbung senden',
-        }
-      : {
+        }, en: {
           eyebrow: 'Careers',
           title: 'Working at CASA in Bremen',
           description:
@@ -81,11 +80,11 @@ export default async function CareersPage() {
           footerBody:
             'We look forward to hearing from people who would like to help shape learning, diversity and teamwork.',
           footerCta: 'Send application',
-        };
+        } });
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Karriere' : 'Careers' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
+    { label: say(locale, 'Karriere', 'Careers') },
   ];
 
   return (
@@ -96,7 +95,7 @@ export default async function CareersPage() {
         description={copy.description}
         breadcrumbs={breadcrumbs}
         cta={{ label: copy.cta, href: '#open-roles', kind: 'primary' }}
-        meta={['CASA Bremen', locale === 'de' ? 'Internationale Gemeinschaft' : 'International community']}
+        meta={['CASA Bremen', say(locale, 'Internationale Gemeinschaft', 'International community')]}
       />
 
       <section id="open-roles" className="py-16 md:py-20">
@@ -133,7 +132,7 @@ export default async function CareersPage() {
                         </p>
                         {position.isFeatured ? (
                           <span className="rounded-full bg-[var(--casa-blue)]/12 px-2.5 py-1 text-xs font-bold text-[var(--casa-accent-text)]">
-                            {locale === 'de' ? 'Empfohlen' : 'Featured'}
+                            {say(locale, 'Empfohlen', 'Featured')}
                           </span>
                         ) : null}
                       </div>
@@ -146,7 +145,7 @@ export default async function CareersPage() {
                           <Users className="mt-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
                           <div>
                             <dt className="font-semibold text-[var(--casa-ink)]">{copy.team}</dt>
-                            <dd>{position.team || (locale === 'de' ? 'CASA-Team' : 'CASA team')}</dd>
+                            <dd>{position.team || (say(locale, 'CASA-Team', 'CASA team'))}</dd>
                           </div>
                         </div>
                         <div className="inline-flex items-start gap-2">

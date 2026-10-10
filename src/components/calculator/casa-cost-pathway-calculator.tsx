@@ -19,6 +19,7 @@ import {
   type StudyMode,
 } from '@/lib/calculator/cost-calculator';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const SELECT_CLASS_NAME =
   'h-11 w-full rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 text-sm shadow-none outline-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
@@ -310,7 +311,8 @@ function ToggleLine({
 }
 
 export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentLocale }) {
-  const copy = calculatorCopy[locale];
+  const { pickTree } = useSiteCopy();
+  const copy = pickTree(locale, calculatorCopy);
   const [formState, setFormState] = useState<CasaCalculatorInput>(initialState);
   const [booksOverrideInput, setBooksOverrideInput] = useState('');
 

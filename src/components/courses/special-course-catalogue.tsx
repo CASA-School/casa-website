@@ -13,6 +13,7 @@ import {
 } from '@/config/courses/special-course-modules';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 /**
  * Special Courses module catalogue.
@@ -48,12 +49,12 @@ type Props = {
 };
 
 export function SpecialCourseCatalogue({ locale, className }: Props) {
+  const { pick, pickTree } = useSiteCopy();
   const [level, setLevel] = useState<string | null>(null);
   const [weekday, setWeekday] = useState<string | null>(null);
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           eyebrow: 'Modulübersicht',
           title: 'Welches Modul passt in deine Woche?',
           // The old casa-bremen.de introduction to its Spezialkurse, in du.
@@ -67,8 +68,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           termNote: `Das sind die Termine für ${SPECIAL_COURSE_TERM_LABEL}. Die Kurse finden abends statt, die meisten von 18:30 bis 20:00 Uhr, und wir bestätigen dir die Termine bei der Anmeldung.`,
           countLabel: (n: number) => `${n} ${n === 1 ? 'Modul' : 'Module'}`,
           readMore: 'Mehr erfahren',
-        }
-      : {
+        }, en: {
           eyebrow: 'Module catalogue',
           title: 'Which module fits your week?',
           lead: 'We regularly run special courses on different topics. Perhaps there was something in your language course that you found difficult and would like to get better at. Or perhaps you want to revise, refresh or go deeper into something in particular. That is what our special courses are for.',
@@ -81,7 +81,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           termNote: `These are the dates for the ${SPECIAL_COURSE_TERM_LABEL_EN} term. The courses run in the evening, most of them from 18:30 to 20:00, and we confirm the dates when you register.`,
           countLabel: (n: number) => `${n} ${n === 1 ? 'module' : 'modules'}`,
           readMore: 'Read more',
-        };
+        } });
 
   const levels = useMemo(
     () => [...new Set(specialCourseModules.map((m) => m.level))],
@@ -108,7 +108,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
     .map((day) => ({
       day,
       label:
-        specialCourseModules.find((m) => m.weekday.en === day)?.weekday[locale] ?? day,
+        (specialCourseModules.find((m) => m.weekday.en === day)?.weekday ? pick(locale, specialCourseModules.find((m) => m.weekday.en === day)?.weekday) : undefined) ?? day,
       modules: visible.filter((m) => m.weekday.en === day),
     }))
     .filter((column) => column.modules.length > 0);
@@ -148,7 +148,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           allLabel={copy.all}
           options={weekdays.map((value) => ({
             value,
-            label: specialCourseModules.find((m) => m.weekday.en === value)?.weekday[locale] ?? value,
+            label: (specialCourseModules.find((m) => m.weekday.en === value)?.weekday ? pick(locale, specialCourseModules.find((m) => m.weekday.en === value)?.weekday) : undefined) ?? value,
           }))}
           selected={weekday}
           onSelect={setWeekday}
@@ -277,6 +277,7 @@ function ModuleCard({
   locale: ContentLocale;
   readMoreLabel: string;
 }) {
+  const { pick, say } = useSiteCopy();
   const skill = skillTokens[courseModule.skill];
 
   return (
@@ -293,20 +294,20 @@ function ModuleCard({
     >
       {/* Skill is signalled by colour AND this label — never colour alone. */}
       <p className="text-xs font-semibold uppercase tracking-eyebrow" style={{ color: skill.text }}>
-        {courseModule.category[locale] ?? courseModule.category.en}
+        {pick(locale, courseModule.category) ?? courseModule.category.en}
       </p>
       <h4 className="mt-1.5 text-sm font-bold leading-snug text-[var(--casa-ink)]">
-        {courseModule.title[locale] ?? courseModule.title.en}
+        {pick(locale, courseModule.title) ?? courseModule.title.en}
       </h4>
       <dl className="mt-3 space-y-1 text-xs text-[var(--casa-muted)]">
         <div className="flex gap-1.5">
-          <dt className="sr-only">{locale === 'de' ? 'Niveau' : 'Level'}</dt>
+          <dt className="sr-only">{say(locale, 'Niveau', 'Level')}</dt>
           <dd className="rounded-lg bg-[var(--casa-surface-subtle)] px-1.5 py-0.5 font-bold text-[var(--casa-ink)]">
             {courseModule.level}
           </dd>
         </div>
         <div className="flex gap-1.5">
-          <dt className="sr-only">{locale === 'de' ? 'Zeitraum' : 'Dates'}</dt>
+          <dt className="sr-only">{say(locale, 'Zeitraum', 'Dates')}</dt>
           <dd className="tabular-nums">
             {formatDateRange(courseModule.startDate, courseModule.endDate, locale)}
           </dd>
@@ -327,7 +328,7 @@ function ModuleCard({
           <DialogTrigger asChild>
             <button
               type="button"
-              aria-label={`${readMoreLabel}: ${courseModule.title[locale] ?? courseModule.title.en}`}
+              aria-label={`${readMoreLabel}: ${pick(locale, courseModule.title) ?? courseModule.title.en}`}
               className="inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
             >
               {readMoreLabel}

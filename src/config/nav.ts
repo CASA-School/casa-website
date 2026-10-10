@@ -1,5 +1,7 @@
 import { IconKey } from './icon-map';
 import type { Meaning } from '@/config/brand/meaning';
+import type { Say } from '@/lib/cms/copy';
+import { readTags, tagText } from '@/lib/cms/stega';
 import type { ContentLocale } from '@/lib/content/types';
 
 export type NavItem = {
@@ -46,7 +48,7 @@ function navDescription(value: string) {
   return `${normalized.slice(0, NAV_DROPDOWN_DESCRIPTION_MAX_CHARS - 3).trimEnd()}...`;
 }
 
-const deNavText: Record<string, string> = {
+export const deNavText: Record<string, string> = {
   Courses: 'Kurse',
   'Intensive & part-time': 'Intensiv & berufsbegleitend',
   'Intensive courses': 'Intensivkurse',
@@ -119,12 +121,12 @@ const deNavText: Record<string, string> = {
   'Who we are and what matters to us.': 'Wer wir sind und was uns wichtig ist.',
 };
 
-export function localizeNavText(value: string | undefined, locale: ContentLocale) {
-  if (!value || locale !== 'de') {
-    return value;
-  }
-
-  return deNavText[value] ?? value;
+/** The menu's words in the page's language; with `say`, the live edits. */
+export function localizeNavText(value: string | undefined, locale: ContentLocale, say?: Say) {
+  if (!value) return value;
+  const german = deNavText[value] ?? value;
+  if (say) return say(locale, german, value);
+  return locale === 'de' ? german : value;
 }
 
 /**
@@ -137,9 +139,13 @@ export function localizeNavText(value: string | undefined, locale: ContentLocale
  * stored as "…learner jour...", matched no key, and the German menu showed the
  * cut English. The config now holds the full English; the cut happens here.
  */
-export function localizeNavDescription(value: string | undefined, locale: ContentLocale) {
-  const localized = localizeNavText(value, locale);
-  return localized ? navDescription(localized) : localized;
+export function localizeNavDescription(value: string | undefined, locale: ContentLocale, say?: Say) {
+  const localized = localizeNavText(value, locale, say);
+  if (!localized) return localized;
+  // Cut the text, not its editor tag (src/lib/cms/stega.ts), so it stays clickable.
+  const { clean, keys } = readTags(localized);
+  const cut = navDescription(clean);
+  return keys[0] ? tagText(cut, keys[0]) : cut;
 }
 
 export const navConfig = {

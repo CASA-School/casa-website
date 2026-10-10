@@ -1,4 +1,5 @@
 import { Link } from '@/i18n/navigation';
+import { say } from '@/lib/cms/copy';
 
 export type CourseTermGroup = {
   /** e.g. "Morning · Mon–Fri, 09:00–12:30" */
@@ -47,9 +48,9 @@ export function CourseTermTable({
   }
 
   const copy = {
-    title: locale === 'de' ? 'Kurstermine' : 'Course dates',
-    finished: locale === 'de' ? 'beendet' : 'finished',
-    'under-way': locale === 'de' ? 'läuft bereits' : 'under way',
+    title: say(locale, 'Kurstermine', 'Course dates'),
+    finished: say(locale, 'beendet', 'finished'),
+    'under-way': say(locale, 'läuft bereits', 'under way'),
   };
 
   /*

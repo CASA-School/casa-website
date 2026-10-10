@@ -9,56 +9,20 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import { FOOTER_TEXT_DE } from '@/config/footer-text';
+import type { Say } from '@/lib/cms/copy';
 
-const deFooterText: Record<string, string> = {
-  'Here to help': 'Wir beraten dich gern',
-  'Ready to start German in Bremen?': 'Bereit für Deutsch in Bremen?',
-  'Find my course': 'Kurs finden',
-  'Get advice': 'Beratung anfragen',
-  'Non-profit language school in Bremen. Since 1983.': 'Gemeinnützige Sprachschule in Bremen. Seit 1983.',
-  'Office hours': 'Bürozeiten',
-  Closures: 'Schließzeiten',
-  'Monday–Thursday: 08:30–19:00': 'Montag–Donnerstag: 08:30–19:00 Uhr',
-  'Friday: 08:30–13:00': 'Freitag: 08:30–13:00 Uhr',
-  'Am Dobben 14-16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
-  School: 'Schule',
-  'Our school': 'Unsere Schule',
-  'Non-profit status': 'Gemeinnützigkeit',
-  Team: 'Team',
-  'Cooperation partners': 'Kooperationspartner',
-  'Tandem program': 'Tandemprogramm',
-  'Partners & agencies': 'Partner & Agenturen',
-  News: 'Aktuelles',
-  'Careers & jobs': 'Karriere & Jobs',
-  Learn: 'Lernen',
-  'Intensive courses': 'Intensivkurse',
-  'Evening courses': 'Abendkurse',
-  'Special courses': 'Spezialkurse',
-  'German for nursing and medicine': 'Deutsch für Pflege und Medizin',
-  'Classes for groups': 'Unterricht für Gruppen',
-  Bildungszeit: 'Bildungszeit',
-  'In-company teaching': 'Firmenunterricht',
-  'Levels & placement': 'Niveau & Einstufung',
-  Support: 'Service',
-  Registration: 'Anmeldung',
-  'Exam dates & registration': 'Prüfungstermine & Anmeldung',
-  'Accommodation request': 'Unterkunftsanfrage',
-  FAQ: 'FAQ',
-  Contact: 'Kontakt',
-  Imprint: 'Impressum',
-  'Privacy Policy': 'Datenschutz',
-  'Terms & Conditions': 'AGB',
-  'All rights reserved.': 'Alle Rechte vorbehalten.',
-  // German pages: no country, and the en dash of a number range (brief 2026-10-02).
-  'Am Dobben 14–16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
-};
 
-export function footerText(value: string, locale: ContentLocale) {
-  if (locale !== 'de') {
-    return value;
-  }
-
-  return deFooterText[value] ?? value;
+/**
+ * The footer's words in the page's language. With `say` from `useSiteCopy()`
+ * they are the live edits (and editable in the website editor); without it,
+ * the dictionary's defaults.
+ */
+export function footerText(value: string, locale: ContentLocale, say?: Say) {
+  const german = FOOTER_TEXT_DE[value] ?? value;
+  if (say) return say(locale, german, value);
+  return locale === 'de' ? german : value;
 }
 
 type FooterProps = {
@@ -72,6 +36,7 @@ type FooterProps = {
 };
 
 export function Footer({ contentLocale: locale, closingCta = true }: FooterProps) {
+  const { pick, say } = useSiteCopy();
   const closures = upcomingClosures(bremenDate());
   const socialIconMap = {
     facebook: Facebook,
@@ -119,21 +84,21 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
           <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]/90">
-                {footerText('Here to help', locale)}
+                {footerText('Here to help', locale, say)}
               </p>
               <h3 className="mt-1 text-xl font-bold text-white">
-                {footerText('Ready to start German in Bremen?', locale)}
+                {footerText('Ready to start German in Bremen?', locale, say)}
               </h3>
             </div>
             <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
               <Button asChild variant="prism" className="rounded-lg font-bold">
-                <Link href="/courses">{footerText('Find my course', locale)}</Link>
+                <Link href="/courses">{footerText('Find my course', locale, say)}</Link>
               </Button>
               <Link
                 href="/contact"
                 className="casa-cta-link inline-flex items-center gap-2 text-sm font-semibold text-white underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-panel)]"
               >
-                {footerText('Get advice', locale)}
+                {footerText('Get advice', locale, say)}
                 <svg aria-hidden="true" viewBox="0 0 22 8" fill="none" className="h-2 w-[20px] shrink-0">
                   <path
                     d="M0 4h20M16.5 0.6L20.4 4l-3.9 3.4"
@@ -176,7 +141,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
             <Logo className="h-12 w-auto" variant="onDark" />
           </Link>
           <p className="mt-3 text-sm font-medium text-[var(--casa-text-subtle)]">
-            {footerText('Non-profit language school in Bremen. Since 1983.', locale)}
+            {footerText('Non-profit language school in Bremen. Since 1983.', locale, say)}
           </p>
 
           <div className="mt-8 space-y-2.5">
@@ -188,7 +153,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                 rel="noreferrer"
                 className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
-                {footerText(footerConfig.contact.address, locale)}
+                {footerText(footerConfig.contact.address, locale, say)}
               </a>
             </div>
             <div className="flex items-center gap-2.5">
@@ -231,7 +196,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               </Link>
             </div>
             <p className="text-sm font-medium text-[var(--casa-text-subtle)]">
-              {footerText('Non-profit language school in Bremen. Since 1983.', locale)}
+              {footerText('Non-profit language school in Bremen. Since 1983.', locale, say)}
             </p>
 
             <div className="space-y-4">
@@ -243,7 +208,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                   rel="noreferrer"
                   className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
-                  {footerText(footerConfig.contact.address, locale)}
+                  {footerText(footerConfig.contact.address, locale, say)}
                 </a>
               </div>
               <div className="flex items-center gap-3">
@@ -270,22 +235,22 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               </div>
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                  {footerText('Office hours', locale)}
+                  {footerText('Office hours', locale, say)}
                 </p>
                 <ul className="space-y-1 text-sm text-[var(--casa-text-subtle)]">
                   {footerConfig.contact.officeHours.map((entry) => (
-                    <li key={entry}>{footerText(entry, locale)}</li>
+                    <li key={entry}>{footerText(entry, locale, say)}</li>
                   ))}
                 </ul>
                 {closures.length > 0 ? (
                   <>
                     <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                      {footerText('Closures', locale)}
+                      {footerText('Closures', locale, say)}
                     </p>
                     <ul className="space-y-1 text-sm text-[var(--casa-text-subtle)]">
                       {closures.map((closure) => (
                         <li key={closure.from}>
-                          {closure.label[locale]}: {closureRange(closure, locale)}
+                          {pick(locale, closure.label)}: {closureRange(closure, locale)}
                         </li>
                       ))}
                     </ul>
@@ -298,7 +263,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
           {footerConfig.columns.map((col) => (
             <div key={col.title}>
               <h4 className="mb-6 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-text-subtle)]">
-                {footerText(col.title, locale)}
+                {footerText(col.title, locale, say)}
               </h4>
               <ul className="space-y-3">
                 {col.items.map((item) => (
@@ -307,7 +272,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                       href={item.href}
                       className="text-sm text-[var(--casa-text-subtle)] transition-colors hover:text-white hover:underline hover:decoration-[var(--casa-amber)] hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                     >
-                      {footerText(item.label, locale)}
+                      {footerText(item.label, locale, say)}
                     </Link>
                   </li>
                 ))}
@@ -328,7 +293,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
         <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-[var(--casa-text-subtle)]">
             &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
-            {footerText('All rights reserved.', locale)}
+            {footerText('All rights reserved.', locale, say)}
           </p>
 
           <div className="flex items-center gap-6">
@@ -339,7 +304,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                   href={item.href}
                   className="text-[var(--casa-text-subtle)] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
                 >
-                  {footerText(item.label, locale)}
+                  {footerText(item.label, locale, say)}
                 </Link>
               ))}
             </div>

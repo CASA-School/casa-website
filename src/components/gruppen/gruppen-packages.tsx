@@ -14,6 +14,7 @@ import {
   PRICE_DISCLAIMER,
 } from '@/config/gruppen/packages';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const copy = {
   en: {
@@ -79,7 +80,8 @@ function formatCurrency(value: number, locale: ContentLocale) {
   board, transit pass, materials) is stated once, elsewhere on the page.
 */
 export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
-  const t = copy[locale];
+  const { pick, pickTree, say } = useSiteCopy();
+  const t = pickTree(locale, copy);
 
   return (
     <section id="gruppen-packages" className="scroll-mt-28 md:scroll-mt-32" data-track-section="gruppen-packages">
@@ -101,7 +103,7 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
 
           const facts: [string, string][] = [
             [
-              locale === 'de' ? 'Dauer' : 'Length',
+              say(locale, 'Dauer', 'Length'),
               item.weeks
                 ? `${item.weeks} ${item.weeks === 1 ? t.week : t.weeks}`
                 : t.lengthFlexible,
@@ -125,13 +127,13 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
                     className="group flex h-full w-full flex-col text-left rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300 motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-modal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
                   >
                 <h3 className="text-3xl font-bold leading-tight text-[var(--casa-accent-text)] sm:text-4xl">
-                  {item.animal[locale]}
+                  {pick(locale, item.animal)}
                 </h3>
                 <p className="mt-2 text-lg font-semibold leading-snug text-[var(--casa-ink)]">
-                  {item.descriptor[locale]}
+                  {pick(locale, item.descriptor)}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--casa-muted)]">
-                  {item.tagline[locale]}
+                  {pick(locale, item.tagline)}
                 </p>
 
                 <dl className="mt-5 space-y-0 text-sm">
@@ -153,7 +155,7 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
                     {t.bestFor}
                   </p>
                   <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[var(--casa-muted)]">
-                    {item.bestFor[locale]}
+                    {pick(locale, item.bestFor)}
                   </p>
                 </div>
 
@@ -199,7 +201,7 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
         that programme's price, which is where the question is actually asked.
       */}
       <p className="mt-8 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">
-        {GRUPPEN_INCLUDED_SUMMARY[locale]} {PRICE_DISCLAIMER[locale]}
+        {pick(locale, GRUPPEN_INCLUDED_SUMMARY)} {pick(locale, PRICE_DISCLAIMER)}
       </p>
     </section>
   );

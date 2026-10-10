@@ -17,6 +17,7 @@ import {
 import type { ContentLocale } from '@/lib/content/types';
 import type { PublicSearchResponse, PublicSearchResult, PublicSearchResultType } from '@/lib/search/public-search';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 type HeaderSearchPopoverProps = {
   locale: ContentLocale;
@@ -153,7 +154,8 @@ function ResultRow({
 }
 
 export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverProps) {
-  const dictionary = copy[locale];
+  const { pickTree } = useSiteCopy();
+  const dictionary = pickTree(locale, copy);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');

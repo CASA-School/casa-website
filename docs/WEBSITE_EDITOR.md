@@ -12,34 +12,53 @@ slot's live text is the latest published revision in the database, else what the
 says. With no database, no tables, or a failed read, the site renders exactly what is
 committed (fallback parity).
 
-**Every text has a key.** Two kinds:
+**Every text resolves through `say`, `pick` or `pickTree`** (`src/lib/cms/copy.ts`):
 
-- The course page's shared words (`coursePage.*`, `src/config/cms/course-page-copy.ts`):
-  buttons, labels, section headings. Changing one changes every course page; the editor
-  says so ("Every course page").
-- Per-course trees (`course.<slug>.<tree>.<path>`, `src/lib/cms/catalog.ts`): the objects
-  `config/courses/*` already returns for one course and one language. A tree names which
-  string leaves are editable, by path, with a label, a kind and a length limit
-  (`src/lib/cms/overlay.ts`). Level codes, textbook ids, prices and hrefs are never named,
-  so never touched.
+- `say(locale, 'Deutsch', 'English', vars?)` where a `locale === 'de' ? … : …` stood;
+- `pick(locale, { de, en })` for a pair in a config;
+- `pickTree(locale, { de: …, en: … })` for a per-language object or list (items pair by
+  `slug`/`id`/`code`/`key`, never by position).
 
-The catalog reads every tree in German and English, so each slot knows its defaults in
-both and its limit: the kind's limit, or 15 % above its longest default, so no current
-text starts out "too long".
+Server components import them; client components take them from `useSiteCopy()`
+(`src/components/cms/site-copy-provider.tsx`). The server's store lives for one request
+(React `cache`), filled by `prepareCopy()`, which `getContentLocale()` and the site layout
+await; the client's comes from the layout through context. Outside a request they return
+exactly what the old ternary returned.
+
+**A text's key is made from the text** (`src/lib/cms/copy-key.ts`): a slug of the German
+and a hash of both defaults. One wording used in three places is one slot. If a developer
+rewrites the default, the key changes and an old edit stops applying, which is right: the
+code now says something else on purpose. `{name}` is a placeholder the page fills in; an
+edit must keep it (checked in the popup and on the server).
+
+**The catalog is generated.** `npm run cms:extract` (`scripts/cms/extract-copy.mjs`) reads
+the source — `say` calls, `{ de, en }` literals, per-language objects followed through
+imports — and writes `src/config/cms/copy-catalog.json` with each text's files and the
+pages that render them. A unit test fails when it is out of date. The menu and the footer
+(dictionaries keyed by English) and the course page's hand-named words
+(`config/cms/course-page-copy.ts`) are added in `src/lib/cms/catalog.ts`.
+
+Not offered: a text identical in both languages inside a data structure (a name, a brand),
+an identifier-like value, fields such as `href`, `slug`, `amount`, and anything in the legal
+pages, the closed placement test, emails, search-engine metadata or the data layer.
+A tagged text the catalog does not know (a few strings assembled in code) stays inert in
+the preview, so nothing looks clickable that is not.
 
 **Content source maps.** In draft mode — only the editor's iframe has it — every value
 carries its key after it in zero-width characters (`src/lib/cms/stega.ts`). The bridge in
-the page (`src/components/cms/edit-bridge.tsx`) finds them, takes them out of the DOM,
-and marks the element. That is how a click anywhere on the real page knows its slot
-without a wrapper in a single component. Dates, prices and course facts are tagged
-`data:<source>` instead: shown with a dashed outline and a card that opens the screen
-where they are kept, never editable as text.
+the page (`src/components/cms/edit-bridge.tsx`) finds them, takes them out of the DOM, and
+marks the element. Dates, prices and course facts are tagged `data:<source>` instead: a
+dashed outline and a card that opens the screen where they are kept.
 
 **The preview is the real page.** `/admin/website` signs a ten-minute token;
 `/api/cms/preview` checks it, switches Next's draft mode on and redirects to the page.
 Draft-mode requests may be framed by this site and the admin host (`next.config.ts`);
 every other request keeps `frame-ancestors 'none'`. Editor and page talk by
 `postMessage`, each checking the other's origin (`src/lib/cms/protocol.ts`).
+
+**Verified when every page was connected (2026-10-10):** the text of all 70 pages in both
+languages was identical before and after, in public and in preview mode; over 99 % of
+tagged texts on those pages are in the catalog.
 
 ## What staff can do
 
@@ -84,24 +103,20 @@ The public site reads live values in one query, cached fifteen seconds per proce
 until the next scheduled release, whichever is first; a publish clears the publishing
 process's copy at once (`src/lib/cms/content.server.ts`).
 
-## Adding a page
+## Writing new copy
 
-1. Move its inline `locale === 'de' ? … : …` pairs into a copy registry like
-   `course-page-copy.ts`, and read them with `getPageContent(locale).t(key)`.
-2. For copy that already lives in a config function, add a tree to the catalog and wrap
-   the call with `cms.tree(slug, treeId, value)`.
-3. Mark values from records with `cms.data(source, value)`.
-4. Set `editable: true` for the page in `src/config/cms/editor-pages.ts`.
-
-Connected so far: the course pages (Intensivkurse, Abendkurse, Spezialkurse, Medizin,
-Bildungszeit, Firmenunterricht, Gruppen), in their shared words and every per-course tree.
-Every other page opens in the preview, marked "View only".
+Write `say(locale, 'Deutsch', 'English')` (or `pick` / `pickTree` for config) instead of a
+`locale === 'de'` ternary, in a client component through `useSiteCopy()`, then run
+`npm run cms:extract`. That is all it takes for the text to be editable. Values from records
+are marked with `getPageContent(locale).data(source, value)` (course page) and never go
+through `say`.
 
 ## Before go-live
 
 - `ANTHROPIC_API_KEY` on the Container App for the writing help (or leave it off).
 - The admin host must exist; on another host pair set `CMS_PUBLIC_ORIGIN` and `CMS_EDITOR_ORIGIN`.
 - Decide who gets `edit` and who gets `full`.
-- Copy in the group and company variants of the course page (`isGroupQuote`,
-  `isOrganisationQuote` branches) is still inline; the learner variant is connected.
 - The meta description and the search titles (`src/config/seo-pages.ts`) are not slots yet.
+- Five strings assembled in code (two on the groups page, one each on the placement and
+  special courses pages, one in a level timeline) and the registration forms' helper labels
+  stay inert.

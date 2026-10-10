@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 export type UnifiedSearchScope = 'all' | 'courses' | 'exams' | 'faq' | 'news';
 
@@ -61,7 +62,8 @@ const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
 
 export function UnifiedSearchPanel({ locale, defaultScope = 'all', className }: UnifiedSearchPanelProps) {
-  const dictionary = copy[locale];
+  const { pickTree } = useSiteCopy();
+  const dictionary = pickTree(locale, copy);
   const [scope, setScope] = useState<UnifiedSearchScope>(defaultScope);
   const hydrated = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 

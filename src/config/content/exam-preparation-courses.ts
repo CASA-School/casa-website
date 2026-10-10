@@ -9,6 +9,7 @@
  * Add new courses here when CASA plans them in FileMaker.
  */
 import type { ContentLocale } from '@/lib/content/types';
+import { pick, say } from '@/lib/cms/copy';
 
 type Schedule = 'mornings' | 'afternoons' | 'evenings';
 export type PreparationCourse = { exam: 'telc_b2' | 'telc_c1_hochschule'; from: string; to: string; schedule: Schedule };
@@ -60,10 +61,10 @@ function range(course: PreparationCourse, locale: ContentLocale) {
 export function preparationCoursesSentence(courses: PreparationCourse[], locale: ContentLocale) {
   if (!courses.length) return null;
   const shared = courses.every((course) => course.schedule === courses[0].schedule);
-  const items = courses.map((course) => (shared ? range(course, locale) : `${range(course, locale)} (${SCHEDULE[course.schedule][locale]})`));
-  const and = locale === 'de' ? ' und ' : ' and ';
+  const items = courses.map((course) => (shared ? range(course, locale) : `${range(course, locale)} (${pick(locale, SCHEDULE[course.schedule])})`));
+  const and = say(locale, ' und ', ' and ');
   const list = items.length > 1 ? `${items.slice(0, -1).join(', ')}${and}${items[items.length - 1]}` : items[0];
-  const lead = locale === 'de' ? 'Die nächsten Vorbereitungskurse' : 'The next preparation courses';
-  const each = locale === 'de' ? 'jeweils' : 'each';
-  return shared ? `${lead}, ${each} ${SCHEDULE[courses[0].schedule][locale]}: ${list}.` : `${lead}: ${list}.`;
+  const lead = say(locale, 'Die nächsten Vorbereitungskurse', 'The next preparation courses');
+  const each = say(locale, 'jeweils', 'each');
+  return shared ? `${lead}, ${each} ${pick(locale, SCHEDULE[courses[0].schedule])}: ${list}.` : `${lead}: ${list}.`;
 }

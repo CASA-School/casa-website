@@ -54,6 +54,7 @@ import { cn } from '@/lib/utils';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
 
 import type { CourseForm } from './course-form-types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 /*
  * THE COURSE STEP, CALMER (2026-10-05).
@@ -100,13 +101,13 @@ type LevelLadderProps = {
 
 /** "Bis zu welchem Niveau?": the levels in a row, filled from the chosen one to the one picked. */
 function LevelLadder({ name, start, targets, value, onChange, locale }: LevelLadderProps) {
-  const de = locale === 'de';
+  const { say } = useSiteCopy();
   const rungs = [{ value: '', label: start }, ...targets.map((target) => ({ value: target, label: target }))];
   const reach = Math.max(0, rungs.findIndex((rung) => rung.value === value));
 
   return (
     <fieldset className={formFieldGroupClassName}>
-      <legend className={cn(formLabelClassName, 'mb-2')}>{de ? 'Bis zu welchem Niveau?' : 'Up to which level?'}</legend>
+      <legend className={cn(formLabelClassName, 'mb-2')}>{say(locale, 'Bis zu welchem Niveau?', 'Up to which level?')}</legend>
       <div className="flex flex-wrap items-center gap-y-2">
         {rungs.map((rung, index) => {
           const inPath = index <= reach;
@@ -134,12 +135,12 @@ function LevelLadder({ name, start, targets, value, onChange, locale }: LevelLad
                 />
                 {index === 0 ? (
                   <>
-                    <span className="sr-only">{de ? 'Nur ' : 'Only '}</span>
+                    <span className="sr-only">{say(locale, 'Nur ', 'Only ')}</span>
                     {rung.label}
                   </>
                 ) : (
                   <>
-                    <span className="sr-only">{de ? 'bis ' : 'up to '}</span>
+                    <span className="sr-only">{say(locale, 'bis ', 'up to ')}</span>
                     {rung.label}
                   </>
                 )}
@@ -221,7 +222,7 @@ const sameSchedule = (a: TermSchedule | null | undefined, b: TermSchedule | null
 
 /** The plan under the fields: the end date and the weeks, or a learning path as a short timeline. */
 function PlanSummary({ plan, locale }: { plan: CoursePlan; locale: ContentLocale }) {
-  const de = locale === 'de';
+  const { say } = useSiteCopy();
   const [first] = plan.rows;
   const last = plan.rows[plan.rows.length - 1];
   const weeks = plan.weeks ? weeksLabel(plan.weeks, locale) : null;
@@ -236,12 +237,12 @@ function PlanSummary({ plan, locale }: { plan: CoursePlan; locale: ContentLocale
     );
   }
 
-  const span = first.start && last.end ? termRange(first.start, last.end, locale) : first.start ? `${de ? 'ab' : 'from'} ${formatDay(first.start, locale)}` : null;
+  const span = first.start && last.end ? termRange(first.start, last.end, locale) : first.start ? `${say(locale, 'ab', 'from')} ${formatDay(first.start, locale)}` : null;
 
   return (
     <div className="rounded-xl bg-[var(--casa-canvas)] px-4 py-4 sm:px-5" aria-live="polite">
       <p className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
-        <span className="font-semibold text-[var(--casa-ink)]">{de ? 'Dein Lernweg' : 'Your learning path'}</span>
+        <span className="font-semibold text-[var(--casa-ink)]">{say(locale, 'Dein Lernweg', 'Your learning path')}</span>
         <span className="text-[var(--casa-muted)]">{[span, weeks].filter(Boolean).join(' · ')}</span>
       </p>
       <ol className="mt-3 space-y-2">
@@ -253,7 +254,7 @@ function PlanSummary({ plan, locale }: { plan: CoursePlan; locale: ContentLocale
                 {row.level}
               </span>
               <span className={row.start ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]'}>
-                {row.start ? planRowDates(row, locale) : de ? 'Termin folgt' : 'Date to follow'}
+                {row.start ? planRowDates(row, locale) : say(locale, 'Termin folgt', 'Date to follow')}
               </span>
               {otherTime ? <span className="text-[var(--casa-muted)]">· {daytimeLabel(otherTime as TermDaytime, locale)}</span> : null}
             </li>

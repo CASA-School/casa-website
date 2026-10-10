@@ -1,6 +1,7 @@
 import { CareerApplicationForm } from '@/components/forms/career-application-form';
 import { Link } from '@/i18n/navigation';
 import type { CareerPositionViewItem, ContentLocale } from '@/lib/content/types';
+import { pickTree } from '@/lib/cms/copy';
 
 type ApplySectionProps = {
   locale: ContentLocale;
@@ -26,21 +27,19 @@ export function ApplySection({ locale, position, acceptsUploads }: ApplySectionP
   }
 
   const copy =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           title: 'Jetzt bewerben',
           byEmail: 'Bitte schick deine Bewerbung mit Lebenslauf und Motivationsschreiben per E-Mail an',
           byContact: 'Bitte schreib uns über das Kontaktformular. Wir melden uns dann bei dir und besprechen die nächsten Schritte.',
           contactCta: 'Zum Kontaktformular',
           subject: 'Bewerbung',
-        }
-      : {
+        }, en: {
           title: 'Apply now',
           byEmail: 'Please email your application, with your CV and a cover letter, to',
           byContact: 'Please write to us using the contact form. We’ll then get back to you and talk through the next steps.',
           contactCta: 'Go to the contact form',
           subject: 'Application',
-        };
+        } });
 
   return (
     <aside className="rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] p-6 shadow-[var(--shadow-card)] sm:p-7">

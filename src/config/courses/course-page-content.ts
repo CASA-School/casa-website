@@ -1,4 +1,5 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { say } from '@/lib/cms/copy';
 
 /**
  * Per-course page prose: who the course is for, and what happens next.
@@ -57,27 +58,18 @@ type LocalisedCourseContent = {
 };
 
 function content(locale: ContentLocale): Record<string, LocalisedCourseContent> {
-  const de = locale === 'de';
 
   return {
     /* ------------------------------------------------------------------ */
     'intensive-german': {
       audience: {
-        title: de
-          ? 'In einem Jahr von A1 bis C1'
-          : 'From A1 to C1 in a year',
+        title: say(locale, 'In einem Jahr von A1 bis C1', 'From A1 to C1 in a year'),
         bullets: [
-          de
-            ? 'Mit 20 Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.'
-            : 'With 20 lessons a week, you complete a whole level in about 8 to 9 weeks.',
+          say(locale, 'Mit 20 Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.', 'With 20 lessons a week, you complete a whole level in about 8 to 9 weeks.'),
           // The afternoon course is four days, not five. The facts doc calls this
           // "the single easiest fact on this page to mis-copy".
-          de
-            ? 'Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.'
-            : 'You study in the morning or in the afternoon. The afternoon course runs from Monday to Thursday.',
-          de
-            ? 'Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.'
-            : 'New courses begin every month, and the placement test shows which level you start at.',
+          say(locale, 'Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.', 'You study in the morning or in the afternoon. The afternoon course runs from Monday to Thursday.'),
+          say(locale, 'Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.', 'New courses begin every month, and the placement test shows which level you start at.'),
         ],
       },
     },
@@ -85,41 +77,27 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
     /* ------------------------------------------------------------------ */
     'evening-german': {
       audience: {
-        title: de
-          ? 'Deutsch lernen neben dem Beruf'
-          : 'Learning German alongside your job',
+        title: say(locale, 'Deutsch lernen neben dem Beruf', 'Learning German alongside your job'),
         bullets: [
-          de
-            ? 'Du lernst an zwei Abenden pro Woche von 18:30 bis 20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.'
-            : 'You study on two evenings a week from 18:30 to 20:00, on Mondays and Wednesdays or on Tuesdays and Thursdays.',
-          de
-            ? 'In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.'
-            : 'In one trimester you complete half a level, so about one and a half levels a year.',
+          say(locale, 'Du lernst an zwei Abenden pro Woche von 18:30 bis 20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.', 'You study on two evenings a week from 18:30 to 20:00, on Mondays and Wednesdays or on Tuesdays and Thursdays.'),
+          say(locale, 'In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.', 'In one trimester you complete half a level, so about one and a half levels a year.'),
           // The fee is per trimester and depends on its length, so the course
           // shows "from 378 EUR" (pricing_mode 'from', migration 0018).
-          de
-            ? 'Du buchst und bezahlst immer ein Trimester.'
-            : 'You always book and pay for one trimester at a time.',
+          say(locale, 'Du buchst und bezahlst immer ein Trimester.', 'You always book and pay for one trimester at a time.'),
         ],
       },
       nextSteps: {
-        description: de
-          ? 'Der Abendkurs läuft das ganze Jahr über in Trimestern.'
-          : 'The evening course runs all year round in trimesters.',
+        description: say(locale, 'Der Abendkurs läuft das ganze Jahr über in Trimestern.', 'The evening course runs all year round in trimesters.'),
         steps: [
           {
             step: '1',
-            title: de ? 'Einstufung machen' : 'Take the placement test',
-            description: de
-              ? 'Mach den kostenlosen Online-Einstufungstest und schick uns dein Ergebnis, oder komm zur Einstufung bei uns vorbei.'
-              : 'Do the free online placement test and send us your result, or come to the school and take it in person.',
+            title: say(locale, 'Einstufung machen', 'Take the placement test'),
+            description: say(locale, 'Mach den kostenlosen Online-Einstufungstest und schick uns dein Ergebnis, oder komm zur Einstufung bei uns vorbei.', 'Do the free online placement test and send us your result, or come to the school and take it in person.'),
           },
           {
             step: '2',
-            title: de ? 'Trimester wählen' : 'Choose your trimester',
-            description: de
-              ? 'Such dir ein Trimester aus und melde dich an.'
-              : 'Pick a trimester and register for it.',
+            title: say(locale, 'Trimester wählen', 'Choose your trimester'),
+            description: say(locale, 'Such dir ein Trimester aus und melde dich an.', 'Pick a trimester and register for it.'),
           },
           {
             /*
@@ -128,10 +106,8 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
              * no longer says the learner picks them.
              */
             step: '3',
-            title: de ? 'Deine Abende' : 'Your evenings',
-            description: de
-              ? 'Jede Niveaustufe läuft entweder montags und mittwochs oder dienstags und donnerstags. Deine Abende bleiben das ganze Trimester über gleich.'
-              : 'Each level runs either on Mondays and Wednesdays or on Tuesdays and Thursdays. Your evenings stay the same for the whole trimester.',
+            title: say(locale, 'Deine Abende', 'Your evenings'),
+            description: say(locale, 'Jede Niveaustufe läuft entweder montags und mittwochs oder dienstags und donnerstags. Deine Abende bleiben das ganze Trimester über gleich.', 'Each level runs either on Mondays and Wednesdays or on Tuesdays and Thursdays. Your evenings stay the same for the whole trimester.'),
           },
         ],
       },
@@ -140,43 +116,29 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
     /* ------------------------------------------------------------------ */
     bildungszeit: {
       audience: {
-        title: de
-          ? 'Für alle, die im Land Bremen arbeiten'
-          : 'For everyone who works in the state of Bremen',
+        title: say(locale, 'Für alle, die im Land Bremen arbeiten', 'For everyone who works in the state of Bremen'),
         bullets: [
-          de
-            ? 'Nach dem Bremischen Bildungszeitgesetz hast du in zwei Jahren grundsätzlich Anspruch auf zehn Tage Bildungszeit.'
-            : 'Under the Bremisches Bildungszeitgesetz, you are generally entitled to ten days of Bildungszeit over two years.',
+          say(locale, 'Nach dem Bremischen Bildungszeitgesetz hast du in zwei Jahren grundsätzlich Anspruch auf zehn Tage Bildungszeit.', 'Under the Bremisches Bildungszeitgesetz, you are generally entitled to ten days of Bildungszeit over two years.'),
           // Clock hours, deliberately. This is the one CASA page that quotes them.
-          de
-            ? 'Anerkannt wird ein Sprachkurs mit 30 bis 40 Stunden Unterricht pro Woche. Dafür besuchst du zwei Intensivkurse parallel, einen am Vormittag und einen am Nachmittag.'
-            : 'A language course is recognised if it has 30 to 40 hours of teaching a week. To reach that, you attend two intensive courses side by side, one in the morning and one in the afternoon.',
-          de
-            ? 'Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.'
-            : 'You can book from one to nine weeks and start on any Monday.',
+          say(locale, 'Anerkannt wird ein Sprachkurs mit 30 bis 40 Stunden Unterricht pro Woche. Dafür besuchst du zwei Intensivkurse parallel, einen am Vormittag und einen am Nachmittag.', 'A language course is recognised if it has 30 to 40 hours of teaching a week. To reach that, you attend two intensive courses side by side, one in the morning and one in the afternoon.'),
+          say(locale, 'Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.', 'You can book from one to nine weeks and start on any Monday.'),
           // level_min is B1 in the catalogue, and the live site says so plainly.
           // Worth stating: it is the one format on the site that is not open at A1.
-          de ? 'Du brauchst mindestens Sprachkenntnisse auf B1-Niveau.' : 'Your German needs to be at B1 level or above.',
+          say(locale, 'Du brauchst mindestens Sprachkenntnisse auf B1-Niveau.', 'Your German needs to be at B1 level or above.'),
         ],
       },
       nextSteps: {
-        description: de
-          ? 'Die Bildungszeit vereinbarst du mit deinem Arbeitgeber. Wir planen den Kurs passend dazu.'
-          : 'You arrange your Bildungszeit with your employer, and we plan the course to fit.',
+        description: say(locale, 'Die Bildungszeit vereinbarst du mit deinem Arbeitgeber. Wir planen den Kurs passend dazu.', 'You arrange your Bildungszeit with your employer, and we plan the course to fit.'),
         steps: [
           {
             step: '1',
-            title: de ? 'Niveau prüfen' : 'Check your level',
-            description: de
-              ? 'Die Einstufung zeigt, ob du schon mindestens B1 erreicht hast.'
-              : 'The placement test shows whether you have already reached B1 or higher.',
+            title: say(locale, 'Niveau prüfen', 'Check your level'),
+            description: say(locale, 'Die Einstufung zeigt, ob du schon mindestens B1 erreicht hast.', 'The placement test shows whether you have already reached B1 or higher.'),
           },
           {
             step: '2',
-            title: de ? 'Zeitraum wählen' : 'Choose your dates',
-            description: de
-              ? 'Du wählst eine bis neun Wochen und beginnst an einem Montag.'
-              : 'You choose from one to nine weeks and start on a Monday.',
+            title: say(locale, 'Zeitraum wählen', 'Choose your dates'),
+            description: say(locale, 'Du wählst eine bis neun Wochen und beginnst an einem Montag.', 'You choose from one to nine weeks and start on a Monday.'),
           },
           {
             /*
@@ -188,10 +150,8 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
              * staff and then say exactly what CASA issues.
              */
             step: '3',
-            title: de ? 'Mit dem Arbeitgeber klären' : 'Arrange it with your employer',
-            description: de
-              ? 'Frag im Büro nach, welche Angaben zum Kurs du für deinen Antrag brauchst.'
-              : 'Ask us in the office which course details you need for your application.',
+            title: say(locale, 'Mit dem Arbeitgeber klären', 'Arrange it with your employer'),
+            description: say(locale, 'Frag im Büro nach, welche Angaben zum Kurs du für deinen Antrag brauchst.', 'Ask us in the office which course details you need for your application.'),
           },
         ],
       },
@@ -207,22 +167,12 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
      */
     'medical-german': {
       audience: {
-        title: de
-          ? 'Kommunikation und Dokumentation im Klinikalltag'
-          : 'Communication and documentation in everyday hospital work',
+        title: say(locale, 'Kommunikation und Dokumentation im Klinikalltag', 'Communication and documentation in everyday hospital work'),
         bullets: [
-          de
-            ? 'Der Kurs orientiert sich an den Niveaustufen B2 und C1.'
-            : 'The course is geared to levels B2 and C1.',
-          de
-            ? 'Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.'
-            : 'The content follows the specialisms and current level of the group.',
-          de
-            ? 'Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.'
-            : 'You practise conversations, listening and the written documentation your work involves.',
-          de
-            ? 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen mit je 4 UE.'
-            : 'The course runs on Fridays from 13:00 to 16:30, over ten sessions of 4 lessons.',
+          say(locale, 'Der Kurs orientiert sich an den Niveaustufen B2 und C1.', 'The course is geared to levels B2 and C1.'),
+          say(locale, 'Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.', 'The content follows the specialisms and current level of the group.'),
+          say(locale, 'Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.', 'You practise conversations, listening and the written documentation your work involves.'),
+          say(locale, 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen mit je 4 UE.', 'The course runs on Fridays from 13:00 to 16:30, over ten sessions of 4 lessons.'),
         ],
       },
       nextSteps: {
@@ -231,30 +181,22 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
          * enough people are interested, so the first step is the list itself —
          * the popup every "Interesse anmelden" link opens — not the office.
          */
-        description: de
-          ? 'Für diesen Kurs gibt es noch keinen festen Termin. So kommt die Gruppe zustande.'
-          : 'This course has no fixed dates yet. This is how the group comes together.',
+        description: say(locale, 'Für diesen Kurs gibt es noch keinen festen Termin. So kommt die Gruppe zustande.', 'This course has no fixed dates yet. This is how the group comes together.'),
         steps: [
           {
             step: '1',
-            title: de ? 'Interesse anmelden' : 'Register your interest',
-            description: de
-              ? 'Trag dich mit deinem Niveau und deinen freien Zeiten in die Interessentenliste ein. Das ist unverbindlich.'
-              : 'Add your name to the interest list with your level and the times you are free. It doesn’t commit you to anything.',
+            title: say(locale, 'Interesse anmelden', 'Register your interest'),
+            description: say(locale, 'Trag dich mit deinem Niveau und deinen freien Zeiten in die Interessentenliste ein. Das ist unverbindlich.', 'Add your name to the interest list with your level and the times you are free. It doesn’t commit you to anything.'),
           },
           {
             step: '2',
-            title: de ? 'Die Gruppe kommt zusammen' : 'The group comes together',
-            description: de
-              ? 'Sobald genug Interessierte zusammen sind, legen wir den Kurszeitraum fest. Der Kurs setzt B2 oder C1 voraus.'
-              : 'As soon as there are enough people, we set the course dates. The course requires B2 or C1.',
+            title: say(locale, 'Die Gruppe kommt zusammen', 'The group comes together'),
+            description: say(locale, 'Sobald genug Interessierte zusammen sind, legen wir den Kurszeitraum fest. Der Kurs setzt B2 oder C1 voraus.', 'As soon as there are enough people, we set the course dates. The course requires B2 or C1.'),
           },
           {
             step: '3',
-            title: de ? 'Termine erhalten und anmelden' : 'Get the dates and register',
-            description: de
-              ? 'Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.'
-              : 'We get in touch by email or phone with the dates. Then you register for your place.',
+            title: say(locale, 'Termine erhalten und anmelden', 'Get the dates and register'),
+            description: say(locale, 'Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.', 'We get in touch by email or phone with the dates. Then you register for your place.'),
           },
         ],
       },
@@ -269,46 +211,30 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
      */
     'special-courses': {
       audience: {
-        title: de
-          ? 'Gezielt wiederholen und vertiefen'
-          : 'Revise what you know and go deeper',
+        title: say(locale, 'Gezielt wiederholen und vertiefen', 'Revise what you know and go deeper'),
         bullets: [
-          de
-            ? 'Jedes Modul hat einen Schwerpunkt, zum Beispiel Grammatik, Schreiben, Aussprache, Sprechen oder die Vorbereitung auf eine Prüfung.'
-            : 'Each module has one focus, such as grammar, writing, pronunciation, speaking or preparing for an exam.',
-          de
-            ? 'Ein Modul läuft meist 12 Wochen lang an einem Abend pro Woche, jeweils 90 Minuten. Du kannst es neben einem anderen Kurs oder auch einzeln besuchen.'
-            : 'A module usually runs for 12 weeks, on one evening a week for 90 minutes. You can take it alongside another course or on its own.',
-          de
-            ? 'Je nach Modul liegt das Einstiegsniveau zwischen A2/B1 und C1+.'
-            : 'Depending on the module, the entry level is between A2/B1 and C1+.',
+          say(locale, 'Jedes Modul hat einen Schwerpunkt, zum Beispiel Grammatik, Schreiben, Aussprache, Sprechen oder die Vorbereitung auf eine Prüfung.', 'Each module has one focus, such as grammar, writing, pronunciation, speaking or preparing for an exam.'),
+          say(locale, 'Ein Modul läuft meist 12 Wochen lang an einem Abend pro Woche, jeweils 90 Minuten. Du kannst es neben einem anderen Kurs oder auch einzeln besuchen.', 'A module usually runs for 12 weeks, on one evening a week for 90 minutes. You can take it alongside another course or on its own.'),
+          say(locale, 'Je nach Modul liegt das Einstiegsniveau zwischen A2/B1 und C1+.', 'Depending on the module, the entry level is between A2/B1 and C1+.'),
         ],
       },
       nextSteps: {
-        description: de
-          ? 'Bis zu deinem Modul sind es drei kurze Schritte.'
-          : 'There are three short steps to your module.',
+        description: say(locale, 'Bis zu deinem Modul sind es drei kurze Schritte.', 'There are three short steps to your module.'),
         steps: [
           {
             step: '1',
-            title: de ? 'Modul wählen' : 'Choose your module',
-            description: de
-              ? 'Im Wochenplan oben siehst du Abend, Uhrzeit und Niveau jedes Moduls.'
-              : 'The weekly timetable above shows the evening, time and level of each module.',
+            title: say(locale, 'Modul wählen', 'Choose your module'),
+            description: say(locale, 'Im Wochenplan oben siehst du Abend, Uhrzeit und Niveau jedes Moduls.', 'The weekly timetable above shows the evening, time and level of each module.'),
           },
           {
             step: '2',
-            title: de ? 'Niveau prüfen' : 'Check the level',
-            description: de
-              ? 'Bei jedem Modul steht, welches Niveau du brauchst. Wenn du unsicher bist, hilft dir die Einstufung.'
-              : 'Each module shows the level you need. If you are not sure, the placement test will help.',
+            title: say(locale, 'Niveau prüfen', 'Check the level'),
+            description: say(locale, 'Bei jedem Modul steht, welches Niveau du brauchst. Wenn du unsicher bist, hilft dir die Einstufung.', 'Each module shows the level you need. If you are not sure, the placement test will help.'),
           },
           {
             step: '3',
-            title: de ? 'Platz reservieren' : 'Reserve your place',
-            description: de
-              ? 'Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.'
-              : 'The groups are small. When you register, you reserve your place.',
+            title: say(locale, 'Platz reservieren', 'Reserve your place'),
+            description: say(locale, 'Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.', 'The groups are small. When you register, you reserve your place.'),
           },
         ],
       },

@@ -10,6 +10,7 @@ import { getContentLocale } from '@/lib/content/locale.server';
 import { getSearchScope, searchPublicContent, type PublicSearchResultType } from '@/lib/search/public-search';
 import { createPublicMetadata } from '@/lib/seo';
 import { cn } from '@/lib/utils';
+import { say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -150,36 +151,34 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         }[scope];
 
   const resultTypeLabels: Record<PublicSearchResultType, string> = {
-    courses: locale === 'de' ? 'Kurs' : 'Course',
-    exams: locale === 'de' ? 'Prüfung' : 'Exam',
+    courses: say(locale, 'Kurs', 'Course'),
+    exams: say(locale, 'Prüfung', 'Exam'),
     faq: 'FAQ',
-    news: locale === 'de' ? 'Aktuelles' : 'News',
+    news: say(locale, 'Aktuelles', 'News'),
   };
   const resultActionLabels: Record<PublicSearchResultType, string> = {
-    courses: locale === 'de' ? 'Kurs ansehen' : 'View course',
-    exams: locale === 'de' ? 'Prüfung ansehen' : 'View exam',
-    faq: locale === 'de' ? 'FAQ öffnen' : 'Open FAQ',
-    news: locale === 'de' ? 'Artikel lesen' : 'Read article',
+    courses: say(locale, 'Kurs ansehen', 'View course'),
+    exams: say(locale, 'Prüfung ansehen', 'View exam'),
+    faq: say(locale, 'FAQ öffnen', 'Open FAQ'),
+    news: say(locale, 'Artikel lesen', 'Read article'),
   };
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <HeroEMinimal
-        eyebrow={locale === 'de' ? 'Suche' : 'Search'}
-        title={locale === 'de' ? 'Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles' : 'One search box for courses, exams, FAQ and news'}
+        eyebrow={say(locale, 'Suche', 'Search')}
+        title={say(locale, 'Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles', 'One search box for courses, exams, FAQ and news')}
         description={
-          locale === 'de'
-            ? 'So findest du schnell, was du suchst, ohne dich durch viele Seiten zu klicken.'
-            : 'Find what you’re looking for quickly, without clicking through lots of pages.'
+          say(locale, 'So findest du schnell, was du suchst, ohne dich durch viele Seiten zu klicken.', 'Find what you’re looking for quickly, without clicking through lots of pages.')
         }
         breadcrumbs={[
-          { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-          { label: locale === 'de' ? 'Suche' : 'Search' },
+          { label: say(locale, 'Start', 'Home'), href: '/' },
+          { label: say(locale, 'Suche', 'Search') },
         ]}
-        cta={{ label: locale === 'de' ? 'Kontakt' : 'Contact', href: '/contact', kind: 'secondary' }}
+        cta={{ label: say(locale, 'Kontakt', 'Contact'), href: '/contact', kind: 'secondary' }}
         meta={[
-          locale === 'de' ? 'Zentrale Suche' : 'Site-wide search',
-          locale === 'de' ? 'Kurse + Prüfungen + FAQ + Aktuelles' : 'Courses + Exams + FAQ + News',
+          say(locale, 'Zentrale Suche', 'Site-wide search'),
+          say(locale, 'Kurse + Prüfungen + FAQ + Aktuelles', 'Courses + Exams + FAQ + News'),
         ]}
       />
 
@@ -189,39 +188,33 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
           {shouldSearch ? (
             <p className="text-sm text-[var(--casa-muted)]">
-              {locale === 'de'
-                ? `${totalResults} Treffer für „${q}“ in „${scopeLabel}“`
-                : `${totalResults} ${totalResults === 1 ? 'result' : 'results'} for “${q}” in “${scopeLabel}”`}
+              {say(locale, '{totalResults} Treffer für „{q}“ in „{scopeLabel}“', '{totalResults} {value} for “{q}” in “{scopeLabel}”', { totalResults, q, scopeLabel, value: totalResults === 1 ? 'result' : 'results' })}
             </p>
           ) : (
             <p className="text-sm text-[var(--casa-muted)]">
-              {locale === 'de'
-                ? 'Gib einen Suchbegriff ein, dann siehst du hier die Ergebnisse.'
-                : 'Enter a search term and your results will appear here.'}
+              {say(locale, 'Gib einen Suchbegriff ein, dann siehst du hier die Ergebnisse.', 'Enter a search term and your results will appear here.')}
             </p>
           )}
 
           {shouldSearch && totalResults === 0 ? (
             <section className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-soft)]">
-              <h2 className="text-lg font-bold">{locale === 'de' ? 'Keine Treffer gefunden' : 'No results found'}</h2>
+              <h2 className="text-lg font-bold">{say(locale, 'Keine Treffer gefunden', 'No results found')}</h2>
               <p className="mt-2 text-sm text-[var(--casa-muted)]">
-                {locale === 'de'
-                  ? 'Versuch es mit einem allgemeineren Wort oder wähle einen anderen Suchbereich.'
-                  : 'Try a more general word or choose a different area to search.'}
+                {say(locale, 'Versuch es mit einem allgemeineren Wort oder wähle einen anderen Suchbereich.', 'Try a more general word or choose a different area to search.')}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href="/courses" className="text-sm font-semibold text-[var(--casa-accent-text)] hover:underline">
-                  {locale === 'de' ? 'Alle Kurse ansehen' : 'See all courses'}
+                  {say(locale, 'Alle Kurse ansehen', 'See all courses')}
                 </Link>
                 <Link href="/contact" className="text-sm font-semibold text-[var(--casa-accent-text)] hover:underline">
-                  {locale === 'de' ? 'Beratung anfragen' : 'Get advice'}
+                  {say(locale, 'Beratung anfragen', 'Get advice')}
                 </Link>
               </div>
             </section>
           ) : null}
 
           {resultGroups.courses.length > 0 ? (
-            <SearchResultGroup title={locale === 'de' ? 'Kurse' : 'Courses'} count={search.counts.courses}>
+            <SearchResultGroup title={say(locale, 'Kurse', 'Courses')} count={search.counts.courses}>
               {resultGroups.courses.map((result) => (
                 <SearchResultCard
                   key={result.id}
@@ -240,7 +233,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ) : null}
 
           {resultGroups.exams.length > 0 ? (
-            <SearchResultGroup title={locale === 'de' ? 'Prüfungen' : 'Exams'} count={search.counts.exams}>
+            <SearchResultGroup title={say(locale, 'Prüfungen', 'Exams')} count={search.counts.exams}>
               {resultGroups.exams.map((result) => (
                 <SearchResultCard
                   key={result.id}
@@ -277,7 +270,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ) : null}
 
           {resultGroups.news.length > 0 ? (
-            <SearchResultGroup title={locale === 'de' ? 'Aktuelles' : 'News'} count={search.counts.news}>
+            <SearchResultGroup title={say(locale, 'Aktuelles', 'News')} count={search.counts.news}>
               {resultGroups.news.map((result) => (
                 <SearchResultCard
                   key={result.id}

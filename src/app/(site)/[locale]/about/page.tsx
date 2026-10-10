@@ -13,6 +13,7 @@ import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getSocialProofById } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -38,30 +39,27 @@ export default async function AboutPage() {
   const communityStory = getSocialProofById('laura-medical', locale);
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Unsere Schule' : 'Our school' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
+    { label: say(locale, 'Unsere Schule', 'Our school') },
   ];
 
   /*
    * The approved public aggregates (CLAUDE.md hard rule 1, 2026-06-17 sync) and
    * the founding year. Nothing here is counted from an operational table.
    */
-  const stats = locale === 'de'
-    ? [
+  const stats = pickTree(locale, { de: [
         { value: '1983', label: 'gegründet in Bremen' },
         { value: '30.000+', label: 'Lernende haben bei uns Deutsch gelernt' },
         { value: '150+', label: 'Herkunftsländer in unseren Kursen' },
         { value: '7–80+', label: 'Jahre jung sind unsere Lernenden' },
-      ]
-    : [
+      ], en: [
         { value: '1983', label: 'founded in Bremen' },
         { value: '30,000+', label: 'learners have studied German with us' },
         { value: '150+', label: 'countries represented in our classes' },
         { value: '7–80+', label: 'years young, from our youngest learners to our oldest' },
-      ];
+      ] });
 
-  const leitbild = locale === 'de'
-    ? {
+  const leitbild = pickTree(locale, { de: {
         eyebrow: 'CASA Leitbild',
         title: 'Miteinander reden – aufeinander zugehen',
         intro:
@@ -92,8 +90,7 @@ export default async function AboutPage() {
           'Kulturprogramm in Bremen und Ausflüge in die Region',
           'Partnerübungen und Austausch im Unterricht',
         ],
-      }
-    : {
+      }, en: {
         eyebrow: 'CASA mission statement',
         title: 'Talking together, reaching out to each other',
         intro:
@@ -124,10 +121,9 @@ export default async function AboutPage() {
           'A culture programme in Bremen and trips around the region',
           'Pair work and exchange in class',
         ],
-      };
+      } });
 
-  const tandemGuide = locale === 'de'
-    ? {
+  const tandemGuide = pickTree(locale, { de: {
         eyebrow: 'Sprachtandem',
         title: 'Zwei Sprachen, ein gemeinsames Gespräch',
         intro:
@@ -149,8 +145,7 @@ export default async function AboutPage() {
           'Was du im Unterricht lernst, wendest du im echten Gespräch an.',
         ],
         primaryCta: 'Tandem anfragen',
-      }
-    : {
+      }, en: {
         eyebrow: 'Language tandem',
         title: 'Two languages, one conversation',
         intro:
@@ -172,7 +167,7 @@ export default async function AboutPage() {
           'You use what you learn in class in real conversations.',
         ],
         primaryCta: 'Ask about a tandem',
-      };
+      } });
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
@@ -183,12 +178,10 @@ export default async function AboutPage() {
         frame — see `photoLibrary.heroTeam` in public-page-config.ts.
       */}
       <HeroAPhotoLed
-        eyebrow={locale === 'de' ? 'Unsere Schule' : 'Our school'}
-        title={locale === 'de' ? 'Ein Ort zum Lernen und Ankommen' : 'A place to learn and settle in'}
+        eyebrow={say(locale, 'Unsere Schule', 'Our school')}
+        title={say(locale, 'Ein Ort zum Lernen und Ankommen', 'A place to learn and settle in')}
         description={
-          locale === 'de'
-            ? 'Bei CASA begegnen sich Menschen aus aller Welt. Wir sind stolz auf diese Vielfalt und auf ein familiäres Miteinander, in dem du mit deinen Fragen und Plänen willkommen bist.'
-            : 'At CASA, people from all over the world come together. We are proud of this diversity and of our friendly, family atmosphere, where you are always welcome to bring your questions and plans.'
+          say(locale, 'Bei CASA begegnen sich Menschen aus aller Welt. Wir sind stolz auf diese Vielfalt und auf ein familiäres Miteinander, in dem du mit deinen Fragen und Plänen willkommen bist.', 'At CASA, people from all over the world come together. We are proud of this diversity and of our friendly, family atmosphere, where you are always welcome to bring your questions and plans.')
         }
         photo={pageConfig.photos.hero}
         ctas={pageConfig.ctas.slice(0, 1)}
@@ -209,7 +202,7 @@ export default async function AboutPage() {
         - The story block's photograph, a numbered placeholder (slot 12). The
           quote stands on its own as a pull quote.
       */}
-      <section className="py-14 md:py-16" aria-label={locale === 'de' ? 'CASA in Zahlen' : 'CASA in figures'}>
+      <section className="py-14 md:py-16" aria-label={say(locale, 'CASA in Zahlen', 'CASA in figures')}>
         <Container>
           <dl className="mx-auto grid max-w-[85rem] grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-[color:var(--casa-sand)]">
             {stats.map((stat) => (
@@ -238,10 +231,10 @@ export default async function AboutPage() {
               <p className="mt-4 text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.aimsClassText}</p>
               <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
                 <TextCta href="/ueber-uns/gemeinnuetzigkeit">
-                  {locale === 'de' ? 'Was gemeinnützig bei uns heißt' : 'What being a non-profit means at CASA'}
+                  {say(locale, 'Was gemeinnützig bei uns heißt', 'What being a non-profit means at CASA')}
                 </TextCta>
                 <TextCta href="/team">
-                  {locale === 'de' ? 'Das CASA-Team kennenlernen' : 'Meet the CASA team'}
+                  {say(locale, 'Das CASA-Team kennenlernen', 'Meet the CASA team')}
                 </TextCta>
               </div>
             </div>
@@ -277,7 +270,7 @@ export default async function AboutPage() {
 
             <div id="partners" className="mt-16 scroll-mt-28 md:mt-20">
               <p className="text-sm font-semibold text-white/80">
-                {locale === 'de' ? 'Anerkennungen und Partnerschaften' : 'Accreditations and partnerships'}
+                {say(locale, 'Anerkennungen und Partnerschaften', 'Accreditations and partnerships')}
               </p>
               <AccreditationLogoList locale={locale} className="mt-5" />
             </div>

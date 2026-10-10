@@ -18,6 +18,7 @@ import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
 import { bremenDate } from '@/lib/appointments/schedule';
+import { say } from '@/lib/cms/copy';
 
 type ExamDetailPageProps = {
   params: Promise<{ code: string }>;
@@ -84,22 +85,20 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
   }));
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
-    { label: locale === 'de' ? 'Prüfungen' : 'Exams', href: '/exams' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
+    { label: say(locale, 'Prüfungen', 'Exams'), href: '/exams' },
     { label: detail.examType.name },
   ];
 
-  const nextDateLabel = locale === 'de' ? 'Nächster Termin' : 'Next date';
-  const levelLabel = locale === 'de' ? 'Niveau' : 'Level';
+  const nextDateLabel = say(locale, 'Nächster Termin', 'Next date');
+  const levelLabel = say(locale, 'Niveau', 'Level');
 
   const infoItems = [
     {
       label: nextDateLabel,
       value: selectedSession
         ? formatDate(selectedSession.starts_at, locale)
-        : locale === 'de'
-          ? 'Wird bekannt gegeben'
-          : 'To be announced',
+        : say(locale, 'Wird bekannt gegeben', 'To be announced'),
       selector:
         selectedSessionOptions.length > 1 && selectedSession
           ? {
@@ -109,9 +108,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           : undefined,
     },
     { label: levelLabel, value: detail.examType.level || '-' },
-    { label: locale === 'de' ? 'Prüfungsgebühr' : 'Exam fee', value: getExamFees(detail.examType.code, locale).full },
-    { label: locale === 'de' ? 'Vorbereitung' : 'Preparation', value: getExamFees(detail.examType.code, locale).prep },
-    { label: locale === 'de' ? 'Teilprüfung' : 'Partial exam', value: getExamFees(detail.examType.code, locale).partial },
+    { label: say(locale, 'Prüfungsgebühr', 'Exam fee'), value: getExamFees(detail.examType.code, locale).full },
+    { label: say(locale, 'Vorbereitung', 'Preparation'), value: getExamFees(detail.examType.code, locale).prep },
+    { label: say(locale, 'Teilprüfung', 'Partial exam'), value: getExamFees(detail.examType.code, locale).partial },
     /*
       NO LOCATION ROW. It read "CASA Bremen Exam Center", which is the same
       building for every exam CASA runs — a constant cannot inform a choice, and
@@ -256,15 +255,15 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(examSchema) }} />
 
       <HeroCUtilityRail
-        eyebrow={locale === 'de' ? 'Prüfungsdetail' : 'Exam detail'}
+        eyebrow={say(locale, 'Prüfungsdetail', 'Exam detail')}
         title={detail.examType.name}
-        description={detail.narrative?.summary || (locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.' : 'We support you from registration through to your result.')}
+        description={detail.narrative?.summary || (say(locale, 'Von der Anmeldung bis zum Ergebnis begleiten wir dich.', 'We support you from registration through to your result.'))}
         breadcrumbs={breadcrumbs}
         /* Not "Exam info rail" — "rail" is our word for the component, not a
            thing a visitor has a name for. The German string never said it. */
-        infoTitle={locale === 'de' ? 'Prüfungsinfos' : 'Exam info'}
+        infoTitle={say(locale, 'Prüfungsinfos', 'Exam info')}
         infoItems={infoItems}
-        notes={locale === 'de' ? 'Prüfungstermine und Anmeldefristen halten wir hier aktuell.' : 'We keep the exam dates and registration deadlines here up to date.'}
+        notes={say(locale, 'Prüfungstermine und Anmeldefristen halten wir hier aktuell.', 'We keep the exam dates and registration deadlines here up to date.')}
         /*
          * The hero primary carries the session id.
          *
@@ -296,56 +295,42 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
               {detail.narrative?.intro ? (
                 <section aria-labelledby="exam-audience">
                   <h2 id="exam-audience" className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">
-                    {locale === 'de' ? 'Für wen ist die Prüfung?' : 'Who is the exam for?'}
+                    {say(locale, 'Für wen ist die Prüfung?', 'Who is the exam for?')}
                   </h2>
                   <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{detail.narrative.intro}</p>
                 </section>
               ) : null}
               <ExamDayTimelineSignature
-                title={locale === 'de' ? 'Von der Anmeldung bis zum Ergebnis' : 'From registration to your result'}
+                title={say(locale, 'Von der Anmeldung bis zum Ergebnis', 'From registration to your result')}
                 description={
-                  locale === 'de'
-                    ? 'Hier siehst du, wie deine Prüfung abläuft und was du am Prüfungstag mitbringst.'
-                    : 'Here you can see how your exam works and what to bring on the day.'
+                  say(locale, 'Hier siehst du, wie deine Prüfung abläuft und was du am Prüfungstag mitbringst.', 'Here you can see how your exam works and what to bring on the day.')
                 }
                 timeline={[
-                  { label: '1', title: locale === 'de' ? 'Anmelden' : 'Register', description: locale === 'de' ? 'Such dir einen Prüfungstermin aus und melde dich vor Ablauf der Anmeldefrist an.' : 'Choose an exam date and register before the deadline.' },
+                  { label: '1', title: say(locale, 'Anmelden', 'Register'), description: say(locale, 'Such dir einen Prüfungstermin aus und melde dich vor Ablauf der Anmeldefrist an.', 'Choose an exam date and register before the deadline.') },
                   {
                     label: '2',
-                    title: locale === 'de' ? 'Vorbereiten' : 'Prepare',
+                    title: say(locale, 'Vorbereiten', 'Prepare'),
                     description:
-                      locale === 'de'
-                        ? isB2 || isC1
-                          ? 'Bereite dich in unserem Vorbereitungskurs oder allein auf die Aufgaben vor.'
-                          : 'Bereite dich gezielt auf die Aufgaben der Prüfung vor.'
-                        : isB2 || isC1
-                          ? 'Prepare for the tasks in our preparation course or on your own.'
-                          : 'Focus your preparation on the exam tasks.',
+                      isB2 || isC1 ? say(locale, 'Bereite dich in unserem Vorbereitungskurs oder allein auf die Aufgaben vor.', 'Prepare for the tasks in our preparation course or on your own.') : say(locale, 'Bereite dich gezielt auf die Aufgaben der Prüfung vor.', 'Focus your preparation on the exam tasks.'),
                   },
-                  { label: '3', title: locale === 'de' ? 'Prüfungstag' : 'Exam day', description: locale === 'de' ? examDayDe : examDayEn },
+                  { label: '3', title: say(locale, 'Prüfungstag', 'Exam day'), description: locale === 'de' ? examDayDe : examDayEn },
                   {
                     label: '4',
-                    title: locale === 'de' ? 'Ergebnis' : 'Results',
+                    title: say(locale, 'Ergebnis', 'Results'),
                     description:
-                      locale === 'de'
-                        ? isB2 || isC1
-                          ? 'Ergebnis und Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir sagen dir Bescheid, sobald sie da sind.'
-                          : 'Wir sagen dir Bescheid, sobald dein Ergebnis da ist.'
-                        : isB2 || isC1
-                          ? 'Your result and certificate are ready about 6 weeks after the exam. We will let you know as soon as they arrive.'
-                          : 'We will let you know as soon as your result arrives.',
+                      isB2 || isC1 ? say(locale, 'Ergebnis und Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir sagen dir Bescheid, sobald sie da sind.', 'Your result and certificate are ready about 6 weeks after the exam. We will let you know as soon as they arrive.') : say(locale, 'Wir sagen dir Bescheid, sobald dein Ergebnis da ist.', 'We will let you know as soon as your result arrives.'),
                   },
                 ]}
-                bringTitle={locale === 'de' ? 'Das bringst du mit' : 'What to bring'}
+                bringTitle={say(locale, 'Das bringst du mit', 'What to bring')}
                 bringItems={[
-                  locale === 'de' ? 'Gültiger Ausweis' : 'Valid photo ID',
-                  locale === 'de' ? 'Anmeldebestätigung' : 'Registration confirmation',
-                  locale === 'de' ? 'Erlaubte Hilfsmittel laut Prüfungsregeln' : 'Any materials the exam rules allow',
+                  say(locale, 'Gültiger Ausweis', 'Valid photo ID'),
+                  say(locale, 'Anmeldebestätigung', 'Registration confirmation'),
+                  say(locale, 'Erlaubte Hilfsmittel laut Prüfungsregeln', 'Any materials the exam rules allow'),
                 ]}
               />
 
               <EditorialSplit
-                eyebrow={locale === 'de' ? 'Vorbereitung' : 'Preparation'}
+                eyebrow={say(locale, 'Vorbereitung', 'Preparation')}
                 title={locale === 'de' ? preparationDe.title : preparationEn.title}
                 description={
                   locale === 'de'
@@ -361,38 +346,30 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
               />
 
               <ProcessSteps
-                eyebrow={locale === 'de' ? 'Anmeldung' : 'Registration'}
-                title={locale === 'de' ? 'So meldest du dich an' : 'How to register'}
+                eyebrow={say(locale, 'Anmeldung', 'Registration')}
+                title={say(locale, 'So meldest du dich an', 'How to register')}
                 description={
-                  locale === 'de'
-                    ? 'Wenn du bereit bist, meldest du dich direkt über unser Formular an.'
-                    : 'When you are ready, you can register straight away using our form.'
+                  say(locale, 'Wenn du bereit bist, meldest du dich direkt über unser Formular an.', 'When you are ready, you can register straight away using our form.')
                 }
                 steps={[
                   {
                     step: '1',
-                    title: locale === 'de' ? 'Termin wählen' : 'Choose a date',
+                    title: say(locale, 'Termin wählen', 'Choose a date'),
                     // The form offers Vollprüfung, Nur schriftlich and Nur mündlich.
                     description:
-                      locale === 'de'
-                        ? 'Wähle deinen Prüfungstermin und entscheide, ob du die ganze Prüfung oder nur den schriftlichen oder den mündlichen Teil ablegst.'
-                        : 'Pick your exam date and decide whether you are taking the whole exam or only the written or the oral part.',
+                      say(locale, 'Wähle deinen Prüfungstermin und entscheide, ob du die ganze Prüfung oder nur den schriftlichen oder den mündlichen Teil ablegst.', 'Pick your exam date and decide whether you are taking the whole exam or only the written or the oral part.'),
                   },
                   {
                     step: '2',
-                    title: locale === 'de' ? 'Daten eingeben' : 'Enter your details',
+                    title: say(locale, 'Daten eingeben', 'Enter your details'),
                     description:
-                      locale === 'de'
-                        ? 'Gib deine Daten genau so an, wie sie in deinem Ausweis stehen.'
-                        : 'Enter your details exactly as they appear on your ID.',
+                      say(locale, 'Gib deine Daten genau so an, wie sie in deinem Ausweis stehen.', 'Enter your details exactly as they appear on your ID.'),
                   },
                   {
                     step: '3',
-                    title: locale === 'de' ? 'Absenden' : 'Submit',
+                    title: say(locale, 'Absenden', 'Submit'),
                     description:
-                      locale === 'de'
-                        ? 'Schick die Anmeldung ab. Sobald wir deine Angaben und die Zahlung geprüft haben, bestätigen wir dir deinen Platz per E-Mail.'
-                        : 'Send off your registration. As soon as we have checked your details and your payment, we will confirm your place by email.',
+                      say(locale, 'Schick die Anmeldung ab. Sobald wir deine Angaben und die Zahlung geprüft haben, bestätigen wir dir deinen Platz per E-Mail.', 'Send off your registration. As soon as we have checked your details and your payment, we will confirm your place by email.'),
                   },
                 ]}
               />
@@ -401,13 +378,13 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                 href="/exams"
                 className="inline-flex rounded-lg border border-[color:var(--casa-sand)] px-4 py-2 text-sm font-semibold text-[var(--casa-ink)] hover:bg-[var(--casa-warm-soft)]"
               >
-                {locale === 'de' ? 'Zurück zu allen Prüfungen' : 'Back to all exams'}
+                {say(locale, 'Zurück zu allen Prüfungen', 'Back to all exams')}
               </Link>
             </div>
 
             <DecisionRail
               locale={locale}
-              infoTitle={locale === 'de' ? 'Auf einen Blick' : 'At a glance'}
+              infoTitle={say(locale, 'Auf einen Blick', 'At a glance')}
               infoItems={decisionItems}
               /*
                 No `notes`. Same leak as the accommodation rail carried: copy

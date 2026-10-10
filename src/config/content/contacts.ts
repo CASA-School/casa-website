@@ -1,5 +1,6 @@
 import { teamContactById } from '@/config/content/team-spotlights';
 import type { ContentLocale } from '@/lib/content/types';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * WHO ANSWERS, PER SURFACE — one list, for every "Your decision" card.
@@ -180,7 +181,7 @@ export function getCasaContact(key: CasaContactKey, locale: ContentLocale): Reso
 
   return {
     name: teamContactById(entry.teamId)?.name ?? OFFICE_CONTACT.name,
-    role: entry.role[locale],
+    role: pick(locale, entry.role),
     booking: (entry as CasaContact).booking === true,
     ...(key === 'groups' ? { appointment: 'groups' as const } : {}),
   };

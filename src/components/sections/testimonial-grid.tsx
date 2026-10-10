@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 /**
  * `photoSrc` / `photoAlt` are optional, and on learner testimonials they must
@@ -43,6 +44,7 @@ type TestimonialGridProps = {
 };
 
 function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: ContentLocale }) {
+  const { say } = useSiteCopy();
   return (
     <article className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-soft)]">
       {card.photoSrc ? (
@@ -58,7 +60,7 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
             <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-[color:var(--casa-ink-deep)]/65 to-transparent" />
             <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-xs font-semibold text-[var(--casa-ink)]">
               <PlayCircle className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
-              {locale === 'de' ? 'Stimme' : 'Story'}
+              {say(locale, 'Stimme', 'Story')}
             </div>
           </div>
         </figure>
@@ -87,6 +89,7 @@ function TestimonialTile({ card, locale }: { card: TestimonialCard; locale: Cont
 }
 
 export function TestimonialGrid({ title, description, cards, featuredQuote, className, locale = 'en' }: TestimonialGridProps) {
+  const { say } = useSiteCopy();
   const headingId = useId();
   const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
@@ -103,7 +106,6 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
   }, [cards, featuredQuote]);
   const last = Math.max(0, stories.length - perView);
   const current = Math.min(active, last);
-  const de = locale === 'de';
 
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -154,7 +156,7 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
     <section
       data-reveal="true"
       aria-labelledby={headingId}
-      aria-roledescription={de ? 'Karussell' : 'carousel'}
+      aria-roledescription={say(locale, 'Karussell', 'carousel')}
       // `min-w-0`: the track below is every slide laid end to end, so as a grid or
       // flex item this section would otherwise widen its column past the screen.
       className={cn('min-w-0', className)}
@@ -171,12 +173,12 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
         </div>
         {last > 0 && (
           <div className="flex items-center gap-2">
-            {!reducedMotion && <button type="button" className={cn(controlClass, 'w-auto px-3 text-xs font-semibold')} onClick={() => setPaused(value => !value)} aria-label={paused ? (de ? 'Automatischen Wechsel starten' : 'Start automatic rotation') : (de ? 'Automatischen Wechsel pausieren' : 'Pause automatic rotation')}>
-              {paused ? (de ? 'Abspielen' : 'Play') : 'Pause'}
+            {!reducedMotion && <button type="button" className={cn(controlClass, 'w-auto px-3 text-xs font-semibold')} onClick={() => setPaused(value => !value)} aria-label={paused ? (say(locale, 'Automatischen Wechsel starten', 'Start automatic rotation')) : (say(locale, 'Automatischen Wechsel pausieren', 'Pause automatic rotation'))}>
+              {paused ? (say(locale, 'Abspielen', 'Play')) : 'Pause'}
             </button>}
-            <button type="button" className={controlClass} aria-label={de ? 'Vorherige Stimmen' : 'Previous stories'} onClick={() => { setPaused(true); goTo(current <= 0 ? last : current - 1); }}><ChevronLeft className="h-4 w-4" /></button>
+            <button type="button" className={controlClass} aria-label={say(locale, 'Vorherige Stimmen', 'Previous stories')} onClick={() => { setPaused(true); goTo(current <= 0 ? last : current - 1); }}><ChevronLeft className="h-4 w-4" /></button>
             <span className="min-w-10 text-center text-[0.8125rem] font-semibold tabular-nums text-[var(--casa-muted)]">{current + 1} / {last + 1}</span>
-            <button type="button" className={controlClass} aria-label={de ? 'Nächste Stimmen' : 'Next stories'} onClick={() => { setPaused(true); goTo(current >= last ? 0 : current + 1); }}><ChevronRight className="h-4 w-4" /></button>
+            <button type="button" className={controlClass} aria-label={say(locale, 'Nächste Stimmen', 'Next stories')} onClick={() => { setPaused(true); goTo(current >= last ? 0 : current + 1); }}><ChevronRight className="h-4 w-4" /></button>
           </div>
         )}
       </div>
@@ -191,7 +193,7 @@ export function TestimonialGrid({ title, description, cards, featuredQuote, clas
         }}
       >
         {stories.map((card, index) => (
-          <div key={card.id} role="group" aria-roledescription={de ? 'Stimme' : 'slide'} aria-label={`${index + 1} / ${stories.length}`} className="flex min-w-0 shrink-0 basis-full snap-start md:basis-[calc((100%-1rem)/2)] xl:basis-[calc((100%-2rem)/3)]">
+          <div key={card.id} role="group" aria-roledescription={say(locale, 'Stimme', 'slide')} aria-label={`${index + 1} / ${stories.length}`} className="flex min-w-0 shrink-0 basis-full snap-start md:basis-[calc((100%-1rem)/2)] xl:basis-[calc((100%-2rem)/3)]">
             <TestimonialTile card={card} locale={locale} />
           </div>
         ))}

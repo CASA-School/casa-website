@@ -5,6 +5,7 @@ import { meaningClasses, type Meaning } from '@/config/brand/meaning';
 import { iconMap, type IconKey } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import type { ContentLocale } from '@/lib/content/types';
+import { pickTree, say } from '@/lib/cms/copy';
 
 type PersonaKey =
   | 'new-learners'
@@ -38,8 +39,7 @@ type PersonaPathwaysProps = {
 };
 
 function getPersonaData(locale: ContentLocale): PersonaPathway[] {
-  return locale === 'de'
-    ? [
+  return pickTree(locale, { de: [
         {
           key: 'new-learners',
           icon: 'courses',
@@ -68,8 +68,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           description: 'Plane Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.',
           primaryAction: { href: '#accommodation-support' },
         },
-      ]
-    : [
+      ], en: [
         {
           key: 'new-learners',
           icon: 'courses',
@@ -98,7 +97,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           description: 'Plan your course start, accommodation and first practical steps, with our support.',
           primaryAction: { href: '#accommodation-support' },
         },
-      ];
+      ] });
 }
 
 /*
@@ -129,7 +128,7 @@ function withPersonaContext(href: string, persona: PersonaKey) {
 
 export function PersonaPathways({ locale, presentation = 'default', className }: PersonaPathwaysProps) {
   const pathways = getPersonaData(locale);
-  const actionLabel = locale === 'de' ? 'Diesen Weg wählen' : 'Choose this path';
+  const actionLabel = say(locale, 'Diesen Weg wählen', 'Choose this path');
   const isRail = presentation === 'rail';
 
   return (
@@ -138,10 +137,10 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-              {locale === 'de' ? 'Startpunkt wählen' : 'Start here'}
+              {say(locale, 'Startpunkt wählen', 'Start here')}
             </p>
             <h2 className="max-w-2xl text-3xl font-bold text-[var(--casa-ink)] md:text-4xl">
-              {locale === 'de' ? 'Wo startest du?' : "Choose where you're starting from"}
+              {say(locale, 'Wo startest du?', 'Choose where you\'re starting from')}
             </h2>
           </div>
           <span className="casa-tricolor-rule block h-1 w-28 rounded-full md:w-36" aria-hidden />

@@ -11,6 +11,7 @@ import {
   type SpecialCourseModule,
 } from '@/config/courses/special-course-modules';
 import type { ContentLocale } from '@/lib/content/types';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const copy = {
   en: {
@@ -107,7 +108,8 @@ export function SpecialCourseDialog({
   courseModule: SpecialCourseModule;
   locale?: ContentLocale;
 }) {
-  const t = copy[locale];
+  const { pick, pickTree, say } = useSiteCopy();
+  const t = pickTree(locale, copy);
   const skill = skillTokens[courseModule.skill];
   const detail = courseModule.detail;
   const { minutesPerSession } = SPECIAL_COURSE_CONSTANTS;
@@ -120,7 +122,7 @@ export function SpecialCourseDialog({
   */
   const facts: { label: string; value: string }[] = [
     { label: t.level, value: courseModule.level },
-    { label: t.evening, value: courseModule.weekday[locale] ?? courseModule.weekday.en },
+    { label: t.evening, value: pick(locale, courseModule.weekday) ?? courseModule.weekday.en },
     { label: t.time, value: courseModule.time.replace(' - ', '–') },
     { label: t.shape, value: t.shapeValue(sessions, minutesPerSession) },
     { label: t.dates, value: formatDateRange(courseModule.startDate, courseModule.endDate, locale) },
@@ -138,14 +140,16 @@ export function SpecialCourseDialog({
           className="pr-10 text-xs font-semibold uppercase tracking-eyebrow"
           style={{ color: skill.text }}
         >
-          {courseModule.category[locale] ?? courseModule.category.en}
+          {pick(locale, courseModule.category) ?? courseModule.category.en}
         </p>
         {/* Radix wires aria-labelledby from this. Renders an h2 -> Playfair. */}
         <DialogTitle className="mt-2 pr-10 text-balance sm:text-3xl">
-          {courseModule.title[locale] ?? courseModule.title.en}
+          {pick(locale, courseModule.title) ?? courseModule.title.en}
         </DialogTitle>
         <DialogDescription className="mt-3 max-w-measure">
-          {detail?.intro?.[locale] ?? t.complements}
+          {detail?.intro && (locale === 'de' || detail.intro.en)
+            ? say(locale, detail.intro.de, detail.intro.en ?? detail.intro.de)
+            : t.complements}
         </DialogDescription>
       </div>
 
@@ -175,7 +179,7 @@ export function SpecialCourseDialog({
         {detail?.forWhom ? (
           <p className="mt-7 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
             <span className="font-bold text-[var(--casa-ink)]">{t.forWhom}: </span>
-            {detail.forWhom[locale]}
+            {pick(locale, detail.forWhom)}
           </p>
         ) : null}
 
@@ -194,7 +198,7 @@ export function SpecialCourseDialog({
                     aria-hidden
                     className="mt-[0.6rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]"
                   />
-                  <span>{entry[locale]}</span>
+                  <span>{pick(locale, entry)}</span>
                 </li>
               ))}
             </ul>
@@ -204,7 +208,7 @@ export function SpecialCourseDialog({
         {detail?.requirements ? (
           <p className="mt-7 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
             <span className="font-bold text-[var(--casa-ink)]">{t.requirements}: </span>
-            {detail.requirements[locale]}
+            {pick(locale, detail.requirements)}
           </p>
         ) : null}
 

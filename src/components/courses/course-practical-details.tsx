@@ -1,5 +1,6 @@
 import { FeeStrip } from '@/components/sections/fee-strip';
 import { cn } from '@/lib/utils';
+import { say } from '@/lib/cms/copy';
 
 type Fee = {
   label: string;
@@ -26,8 +27,8 @@ export function CoursePracticalDetails({
   // No "Ihr"/"dein" in the German heading: the same section serves learners
   // (German for Medical) and organisers (groups, companies).
   const title = feeList.length
-    ? (locale === 'de' ? 'Kursgebühren im Überblick' : 'Course fees at a glance')
-    : (locale === 'de' ? 'Der Kurs im Überblick' : 'The course at a glance');
+    ? (say(locale, 'Kursgebühren im Überblick', 'Course fees at a glance'))
+    : (say(locale, 'Der Kurs im Überblick', 'The course at a glance'));
 
   return (
     <section>
@@ -47,7 +48,7 @@ export function CoursePracticalDetails({
       {conditions.length ? (
         <>
           <h3 className="mt-8 text-lg font-semibold text-[var(--casa-ink)]">
-            {locale === 'de' ? 'Gut zu wissen' : 'Good to know'}
+            {say(locale, 'Gut zu wissen', 'Good to know')}
           </h3>
           <ul className="mt-4 md:columns-2 md:gap-x-12">
             {conditions.map((condition) => (

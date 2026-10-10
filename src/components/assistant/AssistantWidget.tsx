@@ -22,6 +22,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 type UiLocale = 'auto' | 'en' | 'de' | 'es' | 'fr' | 'zh';
 
@@ -293,6 +294,7 @@ function ClaraAvatar({ active }: { active: boolean }) {
 }
 
 export function AssistantWidget({ onClose }: AssistantWidgetProps) {
+  const { pickTree, say } = useSiteCopy();
   const [selectedLocale, setSelectedLocale] = useState<UiLocale>('auto');
   const [inferredLocale, setInferredLocale] = useState<'en' | 'de' | null>(null);
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
@@ -303,7 +305,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const displayLocale = useDisplayLocale(selectedLocale, inferredLocale);
-  const copy = dictionary[displayLocale];
+  const copy = pickTree(displayLocale, dictionary);
   const liveSuggestions = useMemo(
     () => buildLiveSuggestions(displayLocale, text),
     [displayLocale, text]
@@ -422,16 +424,14 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
       setMessages((current) => [...current, assistantMessage]);
     } catch {
       const fallbackText =
-        displayLocale === 'de'
-          ? 'Da bin ich mir gerade nicht sicher. Am besten wendest du dich direkt an unser Team.'
-          : 'I’m not sure about that right now. It’s best to contact our team directly.';
+        say(displayLocale, 'Da bin ich mir gerade nicht sicher. Am besten wendest du dich direkt an unser Team.', 'I’m not sure about that right now. It’s best to contact our team directly.');
 
       setMessages((current) => [
         ...current,
         {
           ...makeMessage('assistant', fallbackText),
           cta: {
-            label: displayLocale === 'de' ? 'Zum Kontaktformular' : 'Go to the contact form',
+            label: say(displayLocale, 'Zum Kontaktformular', 'Go to the contact form'),
             href: '/contact',
           },
         },

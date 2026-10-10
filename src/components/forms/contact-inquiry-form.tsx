@@ -50,6 +50,7 @@ import {
   type OrganiserBriefField,
 } from '@/lib/validation/contact';
 import { organiserCopy, type OrganiserChoiceField, type OrganiserCopy } from '@/config/forms/organiser-brief-copy';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 type ContactInquiryFormCopy = {
   formTitle: string;
@@ -235,6 +236,7 @@ function BriefSelectField({ id, label, placeholder, value, options, error, onCha
 }
 
 export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: ContactInquiryFormProps) {
+  const { pickTree, say } = useSiteCopy();
   const topicOptions = useMemo(() => topics.filter((option) => option.key && option.label), [topics]);
   const preferredTopic = useMemo(() => {
     if (!topicOptions.length) {
@@ -262,7 +264,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
   const activeTopicKey = fields.topic || preferredTopic;
   const activeTopicLabel = topicOptions.find((option) => option.key === activeTopicKey)?.label ?? '';
-  const briefCopy = organiserCopy[locale];
+  const briefCopy = pickTree(locale, organiserCopy);
   const showBrief = isOrganiserTopic(activeTopicKey);
   const showCompanyFields = isCompanyTopic(activeTopicKey);
   const briefLegend = showCompanyFields ? briefCopy.legendCompany : briefCopy.legendGroup;
@@ -421,7 +423,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               {confirmationSent ? <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
               {requestId ? (
                 <p className="mt-3 text-xs font-medium text-[var(--casa-muted)]">
-                  {locale === 'de' ? 'Deine Referenz' : 'Your reference'}: <span className="break-all font-mono">{requestId}</span>
+                  {say(locale, 'Deine Referenz', 'Your reference')}: <span className="break-all font-mono">{requestId}</span>
                 </p>
               ) : null}
             </div>
@@ -578,7 +580,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               onToggle={event => setBriefOpen(event.currentTarget.open)}
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-[var(--casa-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--casa-blue)] [&::-webkit-details-marker]:hidden">
-                {locale === 'de' ? 'Weitere Angaben ergänzen (optional)' : 'Add a few details (optional)'}
+                {say(locale, 'Weitere Angaben ergänzen (optional)', 'Add a few details (optional)')}
                 <ChevronDown className="size-4 shrink-0 text-[var(--casa-accent-text)] transition-transform duration-200 group-open:rotate-180" aria-hidden />
               </summary>
               <fieldset className="border-t border-[color:var(--casa-sand)] px-4 pb-5 pt-4">
@@ -778,8 +780,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
 
           <div className="flex flex-col gap-5 border-t border-[color:var(--casa-sand)] pt-6 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-md text-xs leading-relaxed text-[var(--casa-muted)]">
-              {locale === 'de' ? '* Pflichtfelder. Wie wir deine Daten verarbeiten, erfährst du in unserer ' : '* Required fields. Read how we handle your information in our '}
-              <Link href="/privacy" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">{locale === 'de' ? 'Datenschutzerklärung' : 'privacy policy'}</Link>.
+              {say(locale, '* Pflichtfelder. Wie wir deine Daten verarbeiten, erfährst du in unserer ', '* Required fields. Read how we handle your information in our ')}
+              <Link href="/privacy" className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current">{say(locale, 'Datenschutzerklärung', 'privacy policy')}</Link>.
             </p>
             <Button
               type="submit"

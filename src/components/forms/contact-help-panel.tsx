@@ -2,6 +2,7 @@ import { ArrowRight, Clock, Mail, MapPin, Phone } from 'lucide-react';
 
 import { footerConfig } from '@/config/footer';
 import type { ContentLocale } from '@/lib/content/types';
+import { pick, say } from '@/lib/cms/copy';
 
 type ContactHelpPanelProps = {
   locale: ContentLocale;
@@ -19,7 +20,7 @@ function officeHours(locale: ContentLocale) {
   return footerConfig.contact.officeHours.map((line) => {
     const [days, ...time] = line.split(': ');
     return {
-      days: dayLabels[days]?.[locale] ?? days,
+      days: pick(locale, dayLabels[days]) ?? days,
       time: time.join(': ').replace(/\s*[-–]\s*/, '–'),
     };
   });
@@ -41,7 +42,6 @@ function addressLines(locale: ContentLocale) {
  * learner stuck in a form always has the person on the other end in view.
  */
 export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps) {
-  const de = locale === 'de';
   const phone = footerConfig.contact.phone;
   const email = footerConfig.contact.emails[0];
 
@@ -87,16 +87,16 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
               rel="noreferrer"
               className="mt-1.5 inline-flex items-center gap-1.5 font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
             >
-              {de ? 'Route planen' : 'Get directions'}
+              {say(locale, 'Route planen', 'Get directions')}
               <ArrowRight className="size-3.5" aria-hidden />
-              <span className="sr-only">{de ? '(öffnet Google Maps in einem neuen Tab)' : '(opens Google Maps in a new tab)'}</span>
+              <span className="sr-only">{say(locale, '(öffnet Google Maps in einem neuen Tab)', '(opens Google Maps in a new tab)')}</span>
             </a>
           </div>
         </li>
         <li className="flex gap-3">
           <Clock className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
           <div className="min-w-0">
-            <p className="font-semibold text-white">{de ? 'Bürozeiten' : 'Office hours'}</p>
+            <p className="font-semibold text-white">{say(locale, 'Bürozeiten', 'Office hours')}</p>
             <dl className="mt-1.5 space-y-1 text-white/85">
               {officeHours(locale).map((row) => (
                 <div key={row.days} className="flex flex-wrap justify-between gap-x-4">

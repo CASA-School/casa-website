@@ -10,6 +10,7 @@ import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getFaq, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
+import { pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -35,8 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 function toTopic(category: string, locale: 'en' | 'de') {
   const value = category.toLowerCase();
   const labels =
-    locale === 'de'
-      ? {
+    pickTree(locale, { de: {
           registration: 'Anmeldung',
           courses: 'Kurse',
           exams: 'Prüfungen',
@@ -44,8 +44,7 @@ function toTopic(category: string, locale: 'en' | 'de') {
           visa: 'Visum',
           cancellation: 'Kündigung',
           general: 'Allgemeines',
-        }
-      : {
+        }, en: {
           registration: 'Registration',
           courses: 'Courses',
           exams: 'Exams',
@@ -53,7 +52,7 @@ function toTopic(category: string, locale: 'en' | 'de') {
           visa: 'Visa',
           cancellation: 'Cancellation',
           general: 'General',
-        };
+        } });
 
   if (value.includes('registr') || value.includes('anmeld')) return labels.registration;
   if (value.includes('course') || value.includes('kurs') || value.includes('niveau')) return labels.courses;
@@ -73,9 +72,7 @@ export default async function FaqPage() {
   const faqItems = await getFaq(locale);
 
   const topics =
-    locale === 'de'
-      ? ['Alle', 'Anmeldung', 'Kurse', 'Prüfungen', 'Visum', 'Unterkunft', 'Kündigung', 'Allgemeines']
-      : ['All', 'Registration', 'Courses', 'Exams', 'Visa', 'Accommodation', 'Cancellation', 'General'];
+    pickTree(locale, { de: ['Alle', 'Anmeldung', 'Kurse', 'Prüfungen', 'Visum', 'Unterkunft', 'Kündigung', 'Allgemeines'], en: ['All', 'Registration', 'Courses', 'Exams', 'Visa', 'Accommodation', 'Cancellation', 'General'] });
 
   const normalized = faqItems.map((item) => ({
     id: item.id,
@@ -98,7 +95,7 @@ export default async function FaqPage() {
   };
 
   const breadcrumbs = [
-    { label: locale === 'de' ? 'Start' : 'Home', href: '/' },
+    { label: say(locale, 'Start', 'Home'), href: '/' },
     { label: 'FAQ' },
   ];
 
@@ -111,22 +108,20 @@ export default async function FaqPage() {
         title={hero.headline}
         description={hero.subheadline}
         breadcrumbs={breadcrumbs}
-        cta={{ label: locale === 'de' ? 'Kontakt' : 'Contact', href: '/contact', kind: 'primary' }}
+        cta={{ label: say(locale, 'Kontakt', 'Contact'), href: '/contact', kind: 'primary' }}
         meta={hero.proofMetrics.slice(0, 2).map((item) => `${item.value} ${item.label}`)}
       />
 
       <section className="py-16 md:py-20">
         <Container>
           <FaqTopicNavigator
-            title={locale === 'de' ? 'FAQ nach Thema durchsuchen' : 'Browse FAQs by topic'}
+            title={say(locale, 'FAQ nach Thema durchsuchen', 'Browse FAQs by topic')}
             description={
-              locale === 'de'
-                ? 'Wähle ein Thema oder suche direkt in den Fragen und Antworten.'
-                : 'Choose a topic or search the questions and answers directly.'
+              say(locale, 'Wähle ein Thema oder suche direkt in den Fragen und Antworten.', 'Choose a topic or search the questions and answers directly.')
             }
             topics={topics}
             items={normalized}
-            searchPlaceholder={locale === 'de' ? 'FAQ durchsuchen...' : 'Search FAQ...'}
+            searchPlaceholder={say(locale, 'FAQ durchsuchen...', 'Search FAQ...')}
           />
         </Container>
       </section>
@@ -134,24 +129,22 @@ export default async function FaqPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <EditorialSplit
-            eyebrow={locale === 'de' ? 'Persönliche Beratung' : 'Personal advice'}
-            title={locale === 'de' ? 'Hast du noch eine Frage?' : 'Still have a question?'}
+            eyebrow={say(locale, 'Persönliche Beratung', 'Personal advice')}
+            title={say(locale, 'Hast du noch eine Frage?', 'Still have a question?')}
             description={
-              locale === 'de'
-                ? 'Manches lässt sich am besten im Gespräch klären. Erzähl uns, was dich beschäftigt. Wir nehmen uns gern Zeit für dich.'
-                : 'Some things are easier to sort out in a conversation. Tell us what’s on your mind. We’ll gladly make time for you.'
+              say(locale, 'Manches lässt sich am besten im Gespräch klären. Erzähl uns, was dich beschäftigt. Wir nehmen uns gern Zeit für dich.', 'Some things are easier to sort out in a conversation. Tell us what’s on your mind. We’ll gladly make time for you.')
             }
             bullets={[
-              locale === 'de' ? 'Bei dringenden Fragen melden wir uns schnell bei dir.' : 'If your question is urgent, we’ll get back to you quickly.',
-              locale === 'de' ? 'Wir sagen dir, welche nächsten Schritte für dich sinnvoll sind.' : 'We’ll tell you which next steps make sense for you.',
-              locale === 'de' ? 'Wir helfen dir bei Fragen zu Kursen, Prüfungen und Unterkunft.' : 'We can help with questions about courses, exams and accommodation.',
+              say(locale, 'Bei dringenden Fragen melden wir uns schnell bei dir.', 'If your question is urgent, we’ll get back to you quickly.'),
+              say(locale, 'Wir sagen dir, welche nächsten Schritte für dich sinnvoll sind.', 'We’ll tell you which next steps make sense for you.'),
+              say(locale, 'Wir helfen dir bei Fragen zu Kursen, Prüfungen und Unterkunft.', 'We can help with questions about courses, exams and accommodation.'),
             ]}
             photo={{
               ...pageConfig.photos.support,
               caption: 'Teacher giving feedback during speaking exercise - Personal feedback in small groups.',
             }}
             ctas={[
-              { label: locale === 'de' ? 'Kontakt aufnehmen' : 'Get in touch', href: '/contact', kind: 'primary' },
+              { label: say(locale, 'Kontakt aufnehmen', 'Get in touch'), href: '/contact', kind: 'primary' },
             ]}
           />
         </Container>
@@ -160,28 +153,26 @@ export default async function FaqPage() {
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
           <ProcessSteps
-            eyebrow={locale === 'de' ? 'So geht es weiter' : 'What to do next'}
-            title={locale === 'de' ? 'In drei Schritten zur Antwort' : 'Your answer in three steps'}
+            eyebrow={say(locale, 'So geht es weiter', 'What to do next')}
+            title={say(locale, 'In drei Schritten zur Antwort', 'Your answer in three steps')}
             description={
-              locale === 'de'
-                ? 'So findest du die passende Information oder bekommst persönliche Unterstützung.'
-                : 'Here’s how to find the information you need or get personal help.'
+              say(locale, 'So findest du die passende Information oder bekommst persönliche Unterstützung.', 'Here’s how to find the information you need or get personal help.')
             }
             steps={[
               {
                 step: locale === 'de' ? '1' : '1',
-                title: locale === 'de' ? 'Thema wählen' : 'Choose a topic',
-                description: locale === 'de' ? 'Wähle oben ein Thema, zum Beispiel Kurse, Prüfungen oder Unterkunft.' : 'Pick one of the topics above, for example courses, exams or accommodation.',
+                title: say(locale, 'Thema wählen', 'Choose a topic'),
+                description: say(locale, 'Wähle oben ein Thema, zum Beispiel Kurse, Prüfungen oder Unterkunft.', 'Pick one of the topics above, for example courses, exams or accommodation.'),
               },
               {
                 step: locale === 'de' ? '2' : '2',
-                title: locale === 'de' ? 'Antworten lesen' : 'Read the answers',
-                description: locale === 'de' ? 'Lies die Antworten zu deinem Thema.' : 'Read the answers on your topic.',
+                title: say(locale, 'Antworten lesen', 'Read the answers'),
+                description: say(locale, 'Lies die Antworten zu deinem Thema.', 'Read the answers on your topic.'),
               },
               {
                 step: locale === 'de' ? '3' : '3',
-                title: locale === 'de' ? 'Kontakt aufnehmen' : 'Get in touch',
-                description: locale === 'de' ? 'Wenn noch etwas offen ist, schreib uns oder ruf uns an.' : 'If anything is still unclear, write to us or give us a call.',
+                title: say(locale, 'Kontakt aufnehmen', 'Get in touch'),
+                description: say(locale, 'Wenn noch etwas offen ist, schreib uns oder ruf uns an.', 'If anything is still unclear, write to us or give us a call.'),
               },
             ]}
           />

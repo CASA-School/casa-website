@@ -16,6 +16,7 @@ import { Link, usePathname } from '@/i18n/navigation';
 import { localizeHref } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 /**
  * The phone and tablet menu (2026-10-09): a drill-down, not an accordion.
@@ -72,6 +73,7 @@ const RISE = 'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-
 const isDropdown = (item: NavDropdown | NavItem): item is NavDropdown => 'trigger' in item;
 
 export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProps) {
+  const { say } = useSiteCopy();
   const router = useRouter();
   const pathname = usePathname();
   const [contentLocale, setContentLocale] = useState<ContentLocale>(initialContentLocale);
@@ -181,7 +183,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                     lang={locale}
                     data-testid={`mobile-locale-option-${locale}`}
                     aria-pressed={active}
-                    aria-label={locale === 'de' ? 'Deutsch' : 'English'}
+                    aria-label={say(locale, 'Deutsch', 'English')}
                     onClick={() => (active ? undefined : switchContentLocale(locale))}
                     className={cn(
                       'h-8 min-w-9 rounded-full px-2.5 text-xs font-bold uppercase tracking-wide transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]',
@@ -220,7 +222,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
             <ul className="mx-auto max-w-xl px-5 pt-3 sm:px-8">
               {navConfig.main.map((item, index) => {
                 const current = index === currentIndex;
-                const label = localizeNavText(isDropdown(item) ? item.trigger : item.label, contentLocale);
+                const label = localizeNavText(isDropdown(item) ? item.trigger : item.label, contentLocale, say);
                 const rowClass = cn(
                   'group flex w-full items-center justify-between gap-4 py-[1.05rem] text-left font-display text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--casa-ground)]',
                   current ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)]'
@@ -268,7 +270,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                 <p className="font-display text-lg font-semibold text-[var(--casa-ink)]">{t.help}</p>
                 <ul className="mt-1.5 space-y-0.5 text-[0.8125rem] leading-relaxed text-[var(--casa-muted)]">
                   {footerConfig.contact.officeHours.map((entry) => (
-                    <li key={entry}>{footerText(entry, contentLocale)}</li>
+                    <li key={entry}>{footerText(entry, contentLocale, say)}</li>
                   ))}
                 </ul>
                 <div className="mt-4 grid grid-cols-2 gap-2.5">
@@ -295,7 +297,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
           <div
             id="mobile-nav-panel"
             role="region"
-            aria-label={dropdown ? localizeNavText(dropdown.trigger, contentLocale) : undefined}
+            aria-label={dropdown ? localizeNavText(dropdown.trigger, contentLocale, say) : undefined}
             inert={panel === null}
             className={cn(
               'absolute inset-0 overflow-y-auto overscroll-contain bg-[var(--casa-ground)] [background-image:var(--casa-grain)] transition-[translate] duration-[420ms] motion-reduce:transition-none',
@@ -315,7 +317,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                   {t.back}
                 </button>
                 <h2 className={cn('mt-1 font-display text-[2rem] font-semibold leading-tight tracking-[-0.01em] text-[var(--casa-ink)]', RISE)}>
-                  {localizeNavText(dropdown.trigger, contentLocale)}
+                  {localizeNavText(dropdown.trigger, contentLocale, say)}
                 </h2>
 
                 {dropdown.overview && dropdown.href ? (
@@ -330,9 +332,9 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                       style={{ animationDelay: '60ms' }}
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="block text-base font-semibold">{localizeNavText(dropdown.overview.label, contentLocale)}</span>
+                        <span className="block text-base font-semibold">{localizeNavText(dropdown.overview.label, contentLocale, say)}</span>
                         <span className="mt-0.5 block text-[0.8125rem] text-white/70">
-                          {localizeNavDescription(dropdown.overview.description, contentLocale)}
+                          {localizeNavDescription(dropdown.overview.description, contentLocale, say)}
                         </span>
                       </span>
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none">
@@ -349,7 +351,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                     style={{ animationDelay: `${120 + sectionIndex * 70}ms` }}
                   >
                     <h3 className="px-1 text-[0.9375rem] font-semibold text-[var(--casa-muted)]">
-                      {localizeNavText(section.title, contentLocale)}
+                      {localizeNavText(section.title, contentLocale, say)}
                     </h3>
                     <ul className="mt-2 overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-card)]">
                       {section.items.map((sub, itemIndex) => {
@@ -378,11 +380,11 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                                       active ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)]'
                                     )}
                                   >
-                                    {localizeNavText(sub.label, contentLocale)}
+                                    {localizeNavText(sub.label, contentLocale, say)}
                                   </span>
                                   {sub.description ? (
                                     <span className="mt-0.5 block text-[0.8125rem] leading-snug text-[var(--casa-muted)]">
-                                      {localizeNavDescription(sub.description, contentLocale)}
+                                      {localizeNavDescription(sub.description, contentLocale, say)}
                                     </span>
                                   ) : null}
                                 </span>

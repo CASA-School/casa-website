@@ -1,0 +1,47 @@
+/**
+ * The footer's German, keyed by its English. Its own module, without
+ * 'use client', so the website editor's catalog can read it as well as the
+ * footer (src/components/layout/footer.tsx).
+ */
+export const FOOTER_TEXT_DE: Record<string, string> = {
+  'Here to help': 'Wir beraten dich gern',
+  'Ready to start German in Bremen?': 'Bereit für Deutsch in Bremen?',
+  'Find my course': 'Kurs finden',
+  'Get advice': 'Beratung anfragen',
+  'Non-profit language school in Bremen. Since 1983.': 'Gemeinnützige Sprachschule in Bremen. Seit 1983.',
+  'Office hours': 'Bürozeiten',
+  Closures: 'Schließzeiten',
+  'Monday–Thursday: 08:30–19:00': 'Montag–Donnerstag: 08:30–19:00 Uhr',
+  'Friday: 08:30–13:00': 'Freitag: 08:30–13:00 Uhr',
+  'Am Dobben 14-16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
+  School: 'Schule',
+  'Our school': 'Unsere Schule',
+  'Non-profit status': 'Gemeinnützigkeit',
+  Team: 'Team',
+  'Cooperation partners': 'Kooperationspartner',
+  'Tandem program': 'Tandemprogramm',
+  'Partners & agencies': 'Partner & Agenturen',
+  News: 'Aktuelles',
+  'Careers & jobs': 'Karriere & Jobs',
+  Learn: 'Lernen',
+  'Intensive courses': 'Intensivkurse',
+  'Evening courses': 'Abendkurse',
+  'Special courses': 'Spezialkurse',
+  'German for nursing and medicine': 'Deutsch für Pflege und Medizin',
+  'Classes for groups': 'Unterricht für Gruppen',
+  Bildungszeit: 'Bildungszeit',
+  'In-company teaching': 'Firmenunterricht',
+  'Levels & placement': 'Niveau & Einstufung',
+  Support: 'Service',
+  Registration: 'Anmeldung',
+  'Exam dates & registration': 'Prüfungstermine & Anmeldung',
+  'Accommodation request': 'Unterkunftsanfrage',
+  FAQ: 'FAQ',
+  Contact: 'Kontakt',
+  Imprint: 'Impressum',
+  'Privacy Policy': 'Datenschutz',
+  'Terms & Conditions': 'AGB',
+  'All rights reserved.': 'Alle Rechte vorbehalten.',
+  // German pages: no country, and the en dash of a number range (brief 2026-10-02).
+  'Am Dobben 14–16, 28203 Bremen, Germany': 'Am Dobben 14–16, 28203 Bremen',
+};

@@ -1,14 +1,19 @@
+import { execFileSync } from 'node:child_process';
+
 import { describe, expect, it } from 'vitest';
 
 import { COURSE_PAGE_COPY } from '@/config/cms/course-page-copy';
+import { courseNarrativesByLocale } from '@/config/content/course-narratives';
+import { FOOTER_TEXT_DE } from '@/config/footer-text';
 import { EDITOR_PAGES } from '@/config/cms/editor-pages';
 import { toInternalPath } from '@/i18n/pathnames';
 
 import { berlinLocalToDate } from '../berlin-time';
-import { ALL_COURSE_PAGES, catalog, COURSE_PAGE_NAMES } from '../catalog';
+import { ALL_COURSE_PAGES, catalog, EVERY_PAGE } from '../catalog';
+import { counterparts, resolvers } from '../copy';
+import { copyKey, fill, placeholders } from '../copy-key';
 import { diffWords } from '../diff';
 import { cmsLocales } from '../locales';
-import { flattenTree, overlayTree, type FieldSpec } from '../overlay';
 import { createPreviewToken, safePreviewPath, verifyPreviewToken } from '../preview-token';
 import { encodeKey, hasTag, readTags, stripTags, tagText } from '../stega';
 
@@ -36,46 +41,55 @@ describe('slot tags', () => {
   });
 });
 
-describe('content trees', () => {
-  const fields: FieldSpec[] = [
-    { path: 'title', label: 'Heading', kind: 'heading' },
-    { path: 'levels.*.focus', label: ({ parent }) => `Level ${String(parent.level)}`, kind: 'card-text' },
-    { path: 'fees.*.amount', label: 'Amount', kind: 'label', data: 'Prices' },
-  ];
-  const tree = {
-    title: 'Lernziele',
-    levels: [
-      { level: 'A1', textbook: 'netzwerk', focus: 'Du stellst dich vor.' },
-      { level: 'B2', textbook: 'kontext', focus: 'Du diskutierst.' },
-    ],
-    fees: [{ label: '4 Wochen', amount: '520 €' }],
-  };
+describe('copy resolved from its pair', () => {
+  const values = new Map([[`${copyKey('Kurse ansehen', 'View courses')}|de`, 'Alle Kurse ansehen']]);
+  const live = resolvers(values, false);
+  const editing = resolvers(values, true);
 
-  it('names only the leaves a field names, with labels from their siblings', () => {
-    expect(flattenTree(tree, 'course.x.levels', fields).map((leaf) => [leaf.key, leaf.label])).toEqual([
-      ['course.x.levels.title', 'Heading'],
-      ['course.x.levels.levels.0.focus', 'Level A1'],
-      ['course.x.levels.levels.1.focus', 'Level B2'],
-      ['course.x.levels.fees.0.amount', 'Amount'],
-    ]);
+  it('returns the edit, else the default the old ternary returned', () => {
+    expect(live.say('de', 'Kurse ansehen', 'View courses')).toBe('Alle Kurse ansehen');
+    expect(live.say('en', 'Kurse ansehen', 'View courses')).toBe('View courses');
+    expect(live.say('tr', 'Kurse ansehen', 'View courses')).toBe('View courses');
+    expect(resolvers(new Map(), false).say('de', 'Kurse ansehen', 'View courses')).toBe('Kurse ansehen');
   });
 
-  it('replaces editable leaves and keeps codes, ids and the shape', () => {
-    const out = overlayTree(tree, 'course.x.levels', fields, (key, value) => (key.endsWith('1.focus') ? 'Neu' : value));
-    expect(out.levels[1]).toEqual({ level: 'B2', textbook: 'kontext', focus: 'Neu' });
-    expect(out.levels[0].textbook).toBe('netzwerk');
-    expect(out.fees[0].label).toBe('4 Wochen');
-    expect(tree.levels[1].focus).toBe('Du diskutierst.');
+  it('tags the text in the editor and nowhere else', () => {
+    expect(hasTag(live.say('de', 'Kurse ansehen', 'View courses'))).toBe(false);
+    expect(readTags(editing.say('de', 'Kurse ansehen', 'View courses'))).toEqual({
+      clean: 'Alle Kurse ansehen',
+      keys: [copyKey('Kurse ansehen', 'View courses')],
+    });
   });
 
-  it('passes a missing section through, so the page keeps its fallback', () => {
-    expect(overlayTree(null, 'p', fields, () => 'x')).toBeNull();
-    expect(overlayTree(undefined, 'p', fields, () => 'x')).toBeUndefined();
+  it('fills placeholders after resolving', () => {
+    expect(live.say('de', 'Noch {count} Plätze', '{count} places left', { count: 3 })).toBe('Noch 3 Plätze');
+    expect(placeholders('Ab {date}, {count} Plätze')).toEqual(['count', 'date']);
+    expect(fill('{n} Kurse', { n: 2 })).toBe('2 Kurse');
+  });
+
+  it('walks per-language objects and pairs list items by slug, not position', () => {
+    const tree = {
+      de: { title: 'Kurse', items: [{ slug: 'b', name: 'Abend' }, { slug: 'a', name: 'Intensiv' }], href: '/kurse' },
+      en: { title: 'Courses', items: [{ slug: 'a', name: 'Intensive' }, { slug: 'b', name: 'Evening' }], href: '/courses' },
+    };
+    const out = resolvers(new Map([[`${copyKey('Intensiv', 'Intensive')}|en`, 'Intensive German']]), false).pickTree('en', tree);
+    expect(out).toEqual({ title: 'Courses', items: [{ slug: 'a', name: 'Intensive German' }, { slug: 'b', name: 'Evening' }], href: '/courses' });
+    expect(counterparts(tree.de.items, tree.en.items, { slug: 'a' }, 0)).toEqual([tree.de.items[1], tree.en.items[0]]);
+  });
+
+  it('gives one wording one key, and keys a different translation apart', () => {
+    expect(copyKey('Jetzt anmelden', 'Register now')).toBe(copyKey('Jetzt anmelden', 'Register now'));
+    expect(copyKey('Jetzt anmelden', 'Register now')).not.toBe(copyKey('Jetzt anmelden', 'Sign up now'));
+    expect(copyKey('Jetzt anmelden', 'Register now')).toMatch(/^t\.jetzt-anmelden\.[0-9a-z]+$/);
   });
 });
 
 describe('the catalog', () => {
   const slots = [...catalog().values()];
+
+  it('is up to date with the source (npm run cms:extract)', () => {
+    expect(() => execFileSync('node', ['scripts/cms/extract-copy.mjs', '--check'], { stdio: 'pipe' })).not.toThrow();
+  });
 
   it('has the course page words in both languages', () => {
     for (const [key, entry] of Object.entries(COURSE_PAGE_COPY)) {
@@ -85,22 +99,17 @@ describe('the catalog', () => {
     }
   });
 
-  it('connects every part of the intensive course page', () => {
-    const intensive = slots.filter((slot) => slot.key.startsWith('course.intensive-german.')).map((slot) => slot.key);
-    expect(intensive).toEqual(
-      expect.arrayContaining([
-        'course.intensive-german.narrative.promise',
-        'course.intensive-german.audience.title',
-        'course.intensive-german.audience.bullets.0',
-        'course.intensive-german.levels.levels.0.focus',
-        'course.intensive-german.practical.conditions.0',
-      ])
-    );
-    expect(catalog().get('course.intensive-german.narrative.promise')?.scope).toBe(COURSE_PAGE_NAMES['intensive-german']);
+  it('knows the texts of every page, the menu and the footer', () => {
+    const intensive = courseNarrativesByLocale.de.find((entry) => entry.slug === 'intensive-german')!;
+    const intensiveEn = courseNarrativesByLocale.en.find((entry) => entry.slug === 'intensive-german')!;
+    expect(catalog().has(copyKey(intensive.promise, intensiveEn.promise))).toBe(true);
+    expect(catalog().get(copyKey('Kurse', 'Courses'))?.scope).toBe(EVERY_PAGE);
+    expect(catalog().get(copyKey(FOOTER_TEXT_DE['All rights reserved.'], 'All rights reserved.'))?.section).toBe('Footer');
+    expect(slots.length).toBeGreaterThan(1500);
   });
 
   it('never makes a price editable as text', () => {
-    expect(slots.some((slot) => slot.key.includes('.fees.') && slot.key.endsWith('.amount'))).toBe(false);
+    expect(slots.filter((slot) => /^(ab\s)?\d[\d.,]*\s?€$|^(from\s)?€\s?\d/.test(slot.defaults.de ?? '')).map((slot) => slot.defaults.de)).toEqual([]);
   });
 
   it('gives every slot a limit its own text fits', () => {
@@ -110,7 +119,10 @@ describe('the catalog', () => {
   });
 
   it('writes German with du (docs/VOICE_AND_TONE.md)', () => {
-    const formal = slots.filter((slot) => /\b(Sie|Ihnen|Ihre[mnrs]?)\b/.test(slot.defaults.de ?? '')).map((slot) => slot.key);
+    // „Sie haben …" in a news report is "they", not the formal address.
+    const formal = slots
+      .filter((slot) => /\b(Sie|Ihnen|Ihre[mnrs]?)\b/.test((slot.defaults.de ?? '').replace(/Sie haben unter anderem/g, '')))
+      .map((slot) => `${slot.key}: ${slot.defaults.de}`);
     expect(formal).toEqual([]);
   });
 });

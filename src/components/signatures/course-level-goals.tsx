@@ -1,5 +1,6 @@
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { cn } from '@/lib/utils';
+import { say } from '@/lib/cms/copy';
 
 type LevelGoalItem = {
   level: string;
@@ -91,21 +92,17 @@ export function CourseLevelGoals({
   const groups = [
     {
       items: netzwerkLevels,
-      label: locale === 'de' ? 'Lehrwerk Netzwerk neu' : 'Netzwerk neu textbook',
+      label: say(locale, 'Lehrwerk Netzwerk neu', 'Netzwerk neu textbook'),
       range: 'A1 – B1',
       blurb:
-        locale === 'de'
-          ? 'Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.'
-          : 'With Netzwerk neu you learn everyday vocabulary and the basics of grammar, and you practise dialogues.',
+        say(locale, 'Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.', 'With Netzwerk neu you learn everyday vocabulary and the basics of grammar, and you practise dialogues.'),
     },
     {
       items: kontextLevels,
-      label: locale === 'de' ? 'Lehrwerk Kontext' : 'Kontext textbook',
+      label: say(locale, 'Lehrwerk Kontext', 'Kontext textbook'),
       range: 'B1+ – C1',
       blurb:
-        locale === 'de'
-          ? 'Mit Kontext übst du komplexe Satzstrukturen, Fachsprache und Diskussionen.'
-          : 'With Kontext you practise complex sentence structures, specialist language and discussions.',
+        say(locale, 'Mit Kontext übst du komplexe Satzstrukturen, Fachsprache und Diskussionen.', 'With Kontext you practise complex sentence structures, specialist language and discussions.'),
     },
   ].filter((group) => group.items.length > 0);
 

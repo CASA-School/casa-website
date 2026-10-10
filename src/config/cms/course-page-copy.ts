@@ -1,4 +1,4 @@
-import type { SlotKind } from '@/lib/cms/overlay';
+import type { SlotKind } from '@/lib/cms/slot-kinds';
 
 /**
  * The course page's own words: the ones every course page shares.

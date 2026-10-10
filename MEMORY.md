@@ -2437,3 +2437,16 @@ history, comments, presence locks and "needs update" for translations. Writing h
 set. Connected: every course page's shared words and per-course trees; other pages open
 "View only". `docs/WEBSITE_EDITOR.md` has the design and how to connect a page. Draft
 mode is the only framed state (`next.config.ts`); the preview route needs a signed token.
+
+## 44. Every page in the website editor (2026-10-10)
+
+Rahman: "connect the rest of the pages too". The site's copy now resolves through
+`say(locale, 'de', 'en')`, `pick` and `pickTree` (src/lib/cms/copy.ts; `useSiteCopy()` in
+client components), with keys made from the text pair itself, so a codemod could convert
+the existing `locale === 'de' ? … : …` pairs (828 in 80 files, type-checked, plus the
+repository's per-language lookups and the menu/footer dictionaries) without naming 2,000
+texts by hand. `npm run cms:extract` writes the catalog (2,014 texts with their pages); a
+test fails when it is stale. The course pages' path keys were retired in favour of the same
+scheme. Proof: all 70 pages in both languages rendered identically before and after, in
+public and in preview mode, and 99 %+ of tagged texts are in the catalog. Legal texts, the
+closed placement test, emails and metadata stay out.
