@@ -19,6 +19,7 @@ vi.mock('@/lib/db/server', () => ({
 }));
 
 import {
+  getCareerPositions,
   getCourseDetail,
   getCourseFinderData,
   getCourseRegistrationCatalog,
@@ -332,5 +333,45 @@ describe.each(ZONES)('database mode, server in %s: pg returns date columns as Da
       ['term-next', '2026-10-26', '2026-12-18'],
     ]);
     expect(catalog.defaultOptionId).toBe('term-next');
+  });
+});
+
+describe('career positions (database mode)', () => {
+  it('turns the Date values pg returns into strings, so sorting and JSON-LD work', async () => {
+    // posted_at is timestamptz and closes_at a date: pg hands both over as a Date.
+    // A raw Date crashed the job page's JSON-LD on `.slice` (2026-10-10).
+    const position = {
+      slug: 'daf-lehrkraft-bremen',
+      locale: 'de',
+      title: 'DaF-Lehrkraft',
+      team: 'Unterricht',
+      location: 'Bremen',
+      employment_type: 'Teilzeit',
+      work_mode: 'Vor Ort',
+      short_description: '',
+      description: null,
+      requirements: null,
+      apply_url: null,
+      apply_email: null,
+      is_published: true,
+      is_featured: false,
+      created_at: new Date(Date.UTC(2026, 8, 1)),
+    };
+    db.current = {
+      query: async (sql: string) =>
+        sql.includes('FROM career_positions')
+          ? [
+              { ...position, id: 'older', posted_at: new Date(Date.UTC(2026, 8, 1, 8)), closes_at: null },
+              { ...position, id: 'newer', slug: 'kursleitung', posted_at: new Date(Date.UTC(2026, 9, 5, 8)), closes_at: new Date(2026, 11, 31) },
+            ]
+          : [],
+    };
+
+    const positions = await getCareerPositions('de');
+
+    expect(positions.map((item) => [item.id, item.postedAt, item.closesAt])).toEqual([
+      ['newer', '2026-10-05T08:00:00.000Z', '2026-12-31'],
+      ['older', '2026-09-01T08:00:00.000Z', null],
+    ]);
   });
 });

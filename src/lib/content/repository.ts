@@ -1455,9 +1455,10 @@ type CareerPositionRow = {
   apply_email: string | null;
   is_published: boolean;
   is_featured: boolean;
-  posted_at: string | null;
-  closes_at: string | null;
-  created_at: string | null;
+  // `pg` returns timestamptz and date columns as a Date; the fixtures use strings.
+  posted_at: string | Date | null;
+  closes_at: string | Date | null;
+  created_at: string | Date | null;
 };
 
 function toContentLocale(input: string): ContentLocale {
@@ -1480,8 +1481,8 @@ function normalizeCareerRow(item: CareerPositionRow): CareerPositionViewItem {
     applyUrl: item.apply_url,
     applyEmail: item.apply_email,
     isFeatured: item.is_featured,
-    closesAt: item.closes_at,
-    postedAt: item.posted_at || item.created_at || new Date().toISOString(),
+    closesAt: toDateInputValue(item.closes_at) || null,
+    postedAt: toTimestampString(item.posted_at || item.created_at || new Date()),
   };
 }
 
