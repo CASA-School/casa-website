@@ -1,7 +1,9 @@
 import type { PoolClient } from 'pg';
 
-import { catalog, slotFor, type CatalogSlot } from '@/lib/cms/catalog';
+import { catalog, excerpt, slotFor, type CatalogSlot } from '@/lib/cms/catalog';
 import { placeholders } from '@/lib/cms/copy-key';
+import { factsIn, fillFacts, isFactName } from '@/lib/cms/facts';
+import { loadFacts } from '@/lib/cms/facts.server';
 import {
   initialsOf,
   type ChangeItem,
@@ -44,6 +46,15 @@ const iso = (value: Date | string | null) => (value ? new Date(value).toISOStrin
 
 export class WebsiteEditError extends Error {}
 
+/** Names slots as they read on the page: a text with a live value shows today's value, not `{…}`. */
+async function slotNamer(): Promise<(slot: CatalogSlot) => string> {
+  const facts = (await loadFacts('de')).values;
+  return (slot) => {
+    const german = slot.defaults[SOURCE_LOCALE] ?? '';
+    return slot.label.startsWith('„') && factsIn(german).length ? excerpt(fillFacts(german, facts)) : slot.label;
+  };
+}
+
 function knownSlot(key: string): CatalogSlot {
   const slot = slotFor(key);
   if (!slot) throw new WebsiteEditError('This text is not editable.');
@@ -69,7 +80,8 @@ export async function describeSlots(keys: string[]): Promise<SlotState[]> {
   if (slots.length === 0) return [];
   const slotKeys = slots.map((slot) => slot.key);
 
-  const [live, drafts, upcoming, stale, comments] = await Promise.all([
+  const [nameOf, live, drafts, upcoming, stale, comments] = await Promise.all([
+    slotNamer(),
     liveMap(slotKeys),
     query<Row & { updated_at: Date; name: string | null }>(
       `SELECT d.key, d.locale, d.value, d.updated_at, s.name
@@ -127,7 +139,7 @@ export async function describeSlots(keys: string[]): Promise<SlotState[]> {
 
     return {
       key: slot.key,
-      label: slot.label,
+      label: nameOf(slot),
       section: slot.section,
       kind: slot.kind,
       max: slot.max,
@@ -152,9 +164,17 @@ export async function saveDraft(user: StaffUser, key: string, locale: string, va
   }
 
   // A placeholder is a value the page fills in; an edit keeps every one and adds none.
-  const required = placeholders(slot.defaults[locale] ?? slot.defaults[SOURCE_LOCALE] ?? '');
-  if (placeholders(text).join(',') !== required.join(',')) {
+  const local = (source: string) => placeholders(source).filter((name) => !isFactName(name));
+  const required = local(slot.defaults[locale] ?? slot.defaults[SOURCE_LOCALE] ?? '');
+  if (local(text).join(',') !== required.join(',')) {
     throw new WebsiteEditError(`Keep ${required.map((name) => `{${name}}`).join(' ') || 'the text without {…}'} as it is.`);
+  }
+  // A live value (facts.ts) may be added or removed, if it is one the site knows.
+  const named = factsIn(text);
+  if (named.length) {
+    const known = new Set((await loadFacts('de')).defs.map((def) => def.id));
+    const unknown = named.filter((id) => !known.has(id));
+    if (unknown.length) throw new WebsiteEditError(`There is no live value {${unknown[0]}}. Insert one from the list.`);
   }
 
   await query(
@@ -187,7 +207,7 @@ export async function listChanges(): Promise<ChangeItem[]> {
        FROM website_drafts d LEFT JOIN staff_users s ON s.id = d.updated_by
       ORDER BY d.updated_at`
   );
-  const live = await liveMap(drafts.map((row) => row.key));
+  const [live, nameOf] = await Promise.all([liveMap(drafts.map((row) => row.key)), slotNamer()]);
   const routed = cmsLocales().filter((locale) => locale.routed && !locale.source).map((locale) => locale.code);
   const drafted = new Set(drafts.map((row) => id(row.key, row.locale)));
 
@@ -200,7 +220,7 @@ export async function listChanges(): Promise<ChangeItem[]> {
         locale: row.locale,
         value: row.value,
         previous: liveValue(live, slot, row.locale),
-        label: slot.label,
+        label: nameOf(slot),
         section: slot.section,
         scope: slot.scope,
         path: slot.path,
@@ -378,10 +398,13 @@ export async function listReleases(limit = 40): Promise<ReleaseSummary[]> {
   );
   if (releases.length === 0) return [];
 
-  const items = await query<Row & { release_id: string; previous: string | null }>(
-    `SELECT release_id, key, locale, value, previous FROM website_revisions WHERE release_id = ANY($1) ORDER BY key, locale`,
-    [releases.map((release) => release.id)]
-  );
+  const [items, nameOf] = await Promise.all([
+    query<Row & { release_id: string; previous: string | null }>(
+      `SELECT release_id, key, locale, value, previous FROM website_revisions WHERE release_id = ANY($1) ORDER BY key, locale`,
+      [releases.map((release) => release.id)]
+    ),
+    slotNamer(),
+  ]);
 
   return releases.map((release) => ({
     id: release.id,
@@ -401,7 +424,7 @@ export async function listReleases(limit = 40): Promise<ReleaseSummary[]> {
           locale: item.locale,
           value: item.value,
           previous: item.previous ?? '',
-          label: slot ? `${slot.section} · ${slot.label}` : item.key,
+          label: slot ? `${slot.section} · ${nameOf(slot)}` : item.key,
           scope: slot?.scope ?? '',
         };
       }),
@@ -514,7 +537,11 @@ export async function leaveEditor(user: StaffUser): Promise<void> {
 export async function searchSlots(term: string, limit = 24): Promise<SearchHit[]> {
   const needle = term.trim().toLocaleLowerCase('de');
   if (needle.length < 2) return [];
-  const [live, drafts] = await Promise.all([liveMap(null), query<Row>(`SELECT key, locale, value FROM website_drafts`)]);
+  const [live, drafts, nameOf] = await Promise.all([
+    liveMap(null),
+    query<Row>(`SELECT key, locale, value FROM website_drafts`),
+    slotNamer(),
+  ]);
   const draftBy = new Map(drafts.map((row) => [id(row.key, row.locale), row.value]));
   const hits: SearchHit[] = [];
 
@@ -522,7 +549,7 @@ export async function searchSlots(term: string, limit = 24): Promise<SearchHit[]
     for (const { code } of cmsLocales()) {
       const text = draftBy.get(id(slot.key, code)) ?? liveValue(live, slot, code);
       if (!text.toLocaleLowerCase('de').includes(needle)) continue;
-      hits.push({ key: slot.key, scope: slot.scope, label: slot.label, section: slot.section, path: slot.path, locale: code, text });
+      hits.push({ key: slot.key, scope: slot.scope, label: nameOf(slot), section: slot.section, path: slot.path, locale: code, text });
       break;
     }
     if (hits.length >= limit) break;

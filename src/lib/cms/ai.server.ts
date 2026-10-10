@@ -33,7 +33,7 @@ German: warm, plain, complete sentences, the way casa-bremen.de writes. "wir" sp
 English: natural British English (practise as a verb, programme, enrol, centre, organise). Warm and plain, "we" for CASA and "you" for the reader. Headings short, in sentence case.
 Other languages: natural and warm, with the informal address where the language has one.
 Never: marketing clichés (journey, unlock, seamless, world-class, immerse yourself, elevate), dash asides, colon reveals, "not X but Y".
-Keep every fact exactly: numbers, prices, dates, times, levels, names. Keep these names as they are: CASA, Bildungszeit, telc Deutsch B2, telc Deutsch C1 Hochschule, Netzwerk neu, Kontext, Fachsprachprüfung.
+Keep every fact exactly: numbers, prices, dates, times, levels, names. Keep every {…} exactly as written, character for character: the page fills it with a value (a price, a date, a count). Keep these names as they are: CASA, Bildungszeit, telc Deutsch B2, telc Deutsch C1 Hochschule, Netzwerk neu, Kontext, Fachsprachprüfung.
 Never promise admission, a visa, a job, exam results or availability.`;
 
 async function complete(task: string, maxTokens = 1200): Promise<string> {

@@ -79,7 +79,7 @@ export function slotMax(kind: SlotKind, defaults: readonly (string | undefined)[
 
 const kindFor = (text: string): SlotKind => (text.length <= 32 ? 'label' : text.length <= 120 ? 'lead' : 'paragraph');
 
-const excerpt = (text: string) => {
+export const excerpt = (text: string) => {
   const clean = text.replace(/\s+/g, ' ').trim();
   return `„${clean.length > 46 ? `${clean.slice(0, 44).trimEnd()}…` : clean}“`;
 };

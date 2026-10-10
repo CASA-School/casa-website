@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { resolveAccess, type Access } from './access';
 import { query, queryFirst } from './db';
 import { verifyPassword } from './password';
+import { looksLikeEmail, usernameCandidates } from './sign-in-names';
 
 /**
  * Staff sessions.
@@ -80,13 +81,18 @@ type StaffRow = {
   role: StaffRole;
   password_hash: string;
   is_active: boolean;
+  password_set_at: Date | null;
 };
 
 /**
  * Verifies credentials and opens a session.
  *
- * Returns null for every failure — unknown address, wrong password, deactivated
- * account — and says nothing about which. A sign-in form that distinguishes
+ * `identifier` is what the colleague typed: their Outlook address, or their
+ * full name (matched on the folded key in sign-in-names.ts). An account with no
+ * password set yet signs in with Microsoft only.
+ *
+ * Returns null for every failure — unknown name or address, wrong password,
+ * deactivated account — and says nothing about which. A sign-in form that distinguishes
  * them is an account enumeration oracle.
  *
  * The password is verified even when no account matched, against a throwaway
@@ -100,12 +106,14 @@ type StaffRow = {
  * checks comes whether or not the account exists, too.
  */
 export async function signIn(
-  email: string,
+  identifier: string,
   password: string,
   userAgent: string | null,
   clientAddress: string
 ): Promise<{ user: StaffUser; token: string } | null> {
-  const normalised = email.trim().toLowerCase();
+  const byEmail = looksLikeEmail(identifier);
+  const candidates = byEmail ? [identifier.trim().toLowerCase()] : usernameCandidates(identifier);
+  const normalised = candidates[0];
   const address = clientAddress.slice(0, 64);
 
   if (normalised.length > MAX_EMAIL_LENGTH) {
@@ -119,10 +127,16 @@ export async function signIn(
   }
 
   const row = await queryFirst<StaffRow>(
-    `SELECT id, email, name, role, password_hash, is_active
-       FROM staff_users
-      WHERE lower(email) = $1`,
-    [normalised]
+    byEmail
+      ? `SELECT id, email, name, role, password_hash, is_active, password_set_at
+           FROM staff_users
+          WHERE lower(email) = $1`
+      : `SELECT id, email, name, role, password_hash, is_active, password_set_at
+           FROM staff_users
+          WHERE username_key = ANY($1::text[])
+          ORDER BY username_key = $2 DESC
+          LIMIT 1`,
+    byEmail ? [normalised] : [candidates, normalised]
   );
 
   if (verificationsRunning >= SIGN_IN_MAX_CONCURRENT_VERIFICATIONS) {
@@ -139,7 +153,7 @@ export async function signIn(
     verificationsRunning -= 1;
   }
 
-  if (!row || !row.is_active || !passwordMatches) {
+  if (!row || !row.is_active || !row.password_set_at || !passwordMatches) {
     // The attempt's row stays: it is the failure.
     return null;
   }
@@ -150,13 +164,7 @@ export async function signIn(
     (error) => console.error('[workspace-auth] sign-in failures not cleared', error)
   );
 
-  const token = randomBytes(32).toString('base64url');
-
-  await query(
-    `INSERT INTO staff_sessions (staff_user_id, token_hash, expires_at, user_agent)
-     VALUES ($1, $2, $3, $4)`,
-    [row.id, hashToken(token), new Date(Date.now() + SESSION_TTL_MS), userAgent]
-  );
+  const token = await openSession(row.id, userAgent);
 
   return {
     // Exceptions are resolved on the next request by getStaffUser; the sign-in
@@ -170,6 +178,42 @@ export async function signIn(
     },
     token,
   };
+}
+
+/** A new session for an account that has proved who it is, by password or by Microsoft. */
+export async function openSession(staffUserId: string, userAgent: string | null): Promise<string> {
+  const token = randomBytes(32).toString('base64url');
+  await query(
+    `INSERT INTO staff_sessions (staff_user_id, token_hash, expires_at, user_agent)
+     VALUES ($1, $2, $3, $4)`,
+    [staffUserId, hashToken(token), new Date(Date.now() + SESSION_TTL_MS), userAgent]
+  );
+  return token;
+}
+
+/**
+ * The account a Microsoft sign-in belongs to.
+ *
+ * First by the directory object id the account was linked to; else by the
+ * Outlook address, for an account not linked yet, which links it. A
+ * deactivated account, or one already linked to a different Microsoft
+ * account, is never matched.
+ */
+export async function accountForMicrosoft(oid: string, email: string): Promise<{ id: string; linked: boolean } | null> {
+  const byOid = await queryFirst<{ id: string; is_active: boolean }>(
+    `SELECT id, is_active FROM staff_users WHERE microsoft_oid = $1`,
+    [oid]
+  );
+  if (byOid) return byOid.is_active ? { id: byOid.id, linked: false } : null;
+
+  const byEmail = await queryFirst<{ id: string }>(
+    `UPDATE staff_users
+        SET microsoft_oid = $2, microsoft_linked_at = now()
+      WHERE lower(email) = $1 AND is_active AND microsoft_oid IS NULL
+      RETURNING id`,
+    [email.trim().toLowerCase(), oid]
+  );
+  return byEmail ? { id: byEmail.id, linked: true } : null;
 }
 
 /**

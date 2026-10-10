@@ -57,7 +57,8 @@ export function copyKey(de: string, en: string): string {
 
 export const isCopyKey = (key: string) => key.startsWith('t.');
 
-const PLACEHOLDER = /\{([a-zA-Z][\w]*)\}/g;
+/** `{count}` is filled by the page; `{course.intensive-german.price}` is a live value (facts.ts). */
+const PLACEHOLDER = /\{([a-zA-Z][\w.-]*)\}/g;
 
 /** The placeholders a text uses, sorted, e.g. `['count', 'date']`. */
 export function placeholders(text: string): string[] {

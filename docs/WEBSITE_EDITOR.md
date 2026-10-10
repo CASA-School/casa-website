@@ -103,6 +103,34 @@ The public site reads live values in one query, cached fifteen seconds per proce
 until the next scheduled release, whichever is first; a publish clears the publishing
 process's copy at once (`src/lib/cms/content.server.ts`).
 
+## Live values (2026-10-10)
+
+A text can name a fact instead of stating it: `{course.intensive-german.lessons}`,
+`{course.evening-german.price}`, `{course.intensive-german.next-start}`,
+`{exam.telc_b2.deadline}`, `{accommodation.rent-4-weeks}`. The page fills it in each time it
+renders, in its language („ab 378 €" / "from €378", „26. Oktober 2026" / "26 October 2026"),
+so a text never goes stale when a price, a term or an exam day changes in the database.
+
+- **Where the values come from.** `src/lib/cms/facts.server.ts`: course types (price, lessons a
+  week, levels), course terms (next start, and the end of that term), exam types and days (fee,
+  next exam day, registration deadline) — from the database, or the fixtures without one — and
+  the price list in `src/config/calculator/pricing.ts` (`priceListFacts`, also known without a
+  database). Read once per language, kept fifteen seconds per process like the live texts.
+- **How they resolve.** `say`, `pick`, `pickTree` and `withFacts` (src/lib/cms/copy.ts) fill
+  them after the edited text is chosen, on the server through `prepareCopy(locale)` and in the
+  browser through the provider, which receives the language's values. `pickTree` fills them in
+  fields it does not offer for editing too (an `amount`). A value with nothing behind it — a
+  course with no term scheduled has no next start — shows „–", never the raw `{…}`.
+- **In the editor.** The popup lists the live values a text uses, what each says today and
+  the workspace screen where it is changed; „Live value" opens a searchable list and inserts
+  one at the cursor. The length meter counts the text as it will read. A colleague may add or
+  remove live values; a name the site does not have is refused, in the popup and by
+  `saveDraft`. The page's own placeholders (`{count}`, no dot) must still be kept exactly.
+- **In the code.** Write the fact, not the number: `'{course.intensive-german.lessons}
+  Unterrichtseinheiten pro Woche'`. A test (`src/lib/cms/__tests__/facts.test.ts`) fails when a
+  text in the catalog names a value that does not exist. A new fact is one `add(…)` in
+  `facts.server.ts`, or one line in `PRICE_LIST` in `facts.ts`.
+
 ## Writing new copy
 
 Write `say(locale, 'Deutsch', 'English')` (or `pick` / `pickTree` for config) instead of a
@@ -117,6 +145,7 @@ through `say`.
 - The admin host must exist; on another host pair set `CMS_PUBLIC_ORIGIN` and `CMS_EDITOR_ORIGIN`.
 - Decide who gets `edit` and who gets `full`.
 - The meta description and the search titles (`src/config/seo-pages.ts`) are not slots yet.
-- Five strings assembled in code (two on the groups page, one each on the placement and
-  special courses pages, one in a level timeline) and the registration forms' helper labels
-  stay inert.
+- Four strings assembled in code (two on the groups page, one each on the placement and
+  special courses pages) and the registration forms' helper labels stay inert.
+- Page titles and descriptions for search (`generateMetadata`) are not slots; neither are the
+  legal pages, on purpose.

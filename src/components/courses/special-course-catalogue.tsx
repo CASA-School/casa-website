@@ -59,7 +59,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           title: 'Welches Modul passt in deine Woche?',
           // The old casa-bremen.de introduction to its Spezialkurse, in du.
           lead: 'Wir bieten regelmäßig Spezialkurse mit unterschiedlichen Lerninhalten an. Vielleicht ist dir in deinem Sprachkurs ein Thema schwergefallen, in dem du besser werden möchtest. Oder du möchtest gezielt etwas wiederholen, auffrischen oder vertiefen. Dafür sind unsere Spezialkurse da.',
-          constants: 'Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, und kostet 16 € pro Abend: 192 € für die meisten Module mit 12 Abenden.',
+          constants: 'Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, und kostet {course.special-courses.price-per-evening} pro Abend: {course.special-courses.price-per-module} für die meisten Module mit 12 Abenden.',
           filterLevel: 'Niveau',
           filterWeekday: 'Abend',
           all: 'Alle',
@@ -72,7 +72,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
           eyebrow: 'Module catalogue',
           title: 'Which module fits your week?',
           lead: 'We regularly run special courses on different topics. Perhaps there was something in your language course that you found difficult and would like to get better at. Or perhaps you want to revise, refresh or go deeper into something in particular. That is what our special courses are for.',
-          constants: 'A module runs on one evening a week for 90 minutes and costs €16 an evening: €192 for most modules, which have 12 evenings.',
+          constants: 'A module runs on one evening a week for 90 minutes and costs {course.special-courses.price-per-evening} an evening: {course.special-courses.price-per-module} for most modules, which have 12 evenings.',
           filterLevel: 'Level',
           filterWeekday: 'Evening',
           all: 'All',

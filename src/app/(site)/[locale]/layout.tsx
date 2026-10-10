@@ -112,8 +112,9 @@ export default async function RootLayout({
   const messages = await getMessages();
   const contentLocale = locale;
   // The site's copy for this request (src/lib/cms/copy.ts): live edits, or in the
-  // website editor's preview (draft mode) the drafts, each text tagged.
-  const { editing, values } = await prepareCopy();
+  // website editor's preview (draft mode) the drafts, each text tagged, and the
+  // live values (prices, dates) the texts name.
+  const { editing, values, facts } = await prepareCopy(locale);
 
   return (
     <html lang={locale} dir={directionFor(locale)}>
@@ -123,7 +124,7 @@ export default async function RootLayout({
       >
         <JsonLdScript id="site-schema" data={siteGraph(locale)} />
         <NextIntlClientProvider messages={messages}>
-          <SiteCopyProvider locale={locale} editing={editing} values={valuesForLocale(values, locale)}>
+          <SiteCopyProvider locale={locale} editing={editing} values={valuesForLocale(values, locale)} facts={facts.values}>
             <SiteShell contentLocale={contentLocale}>{children}</SiteShell>
           </SiteCopyProvider>
         </NextIntlClientProvider>

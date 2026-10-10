@@ -13,7 +13,7 @@ import {
 import type { EditorPageGroup } from '@/config/cms/editor-pages';
 import { localizeHref, toInternalPath } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
-import type { ChangeItem, PresenceEntry, SearchHit, SlotState } from '@/lib/cms/editor-types';
+import type { ChangeItem, EditorFacts, PresenceEntry, SearchHit, SlotState } from '@/lib/cms/editor-types';
 import type { CmsLocale } from '@/lib/cms/locales';
 import { dataSource, isDataKey, type FromPage, type Rect, type SlotMarker, type ToPage } from '@/lib/cms/protocol';
 import { cn } from '@/lib/utils';
@@ -61,6 +61,7 @@ export function WebsiteEditor({
   previewBase,
   initialPath,
   aiEnabled,
+  facts,
 }: {
   user: { name: string; initials: string };
   level: Level;
@@ -70,6 +71,7 @@ export function WebsiteEditor({
   previewBase: string;
   initialPath: string;
   aiEnabled: boolean;
+  facts: EditorFacts;
 }) {
   const [src, setSrc] = useState(() => previewBase + encodeURIComponent(initialPath));
   const [loading, setLoading] = useState(true);
@@ -520,6 +522,8 @@ export function WebsiteEditor({
             canEdit={canEdit}
             lockedBy={presence.find((other) => other.key === selectedSlot.key) ?? null}
             aiEnabled={aiEnabled}
+            facts={facts}
+            dataScreens={DATA_SCREENS}
             onPreview={(locale, value) => locale === lang && post({ type: 'cms:preview', key: selectedSlot.key, value })}
             onSaved={(slot) => {
               if (slot) setSlots((previous) => ({ ...previous, [slot.key]: slot }));

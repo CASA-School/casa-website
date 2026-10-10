@@ -57,7 +57,7 @@ const copyKey = (de, en) => `t.${slug(de)}.${fnv1a(`${de}\u0001${en}`)}`;
 // Must match SKIP and isText in src/lib/cms/copy.ts.
 const SKIP = new Set(['amount', 'id', 'slug', 'key', 'href', 'src', 'url', 'icon', 'image', 'photo', 'tone', 'kind', 'type', 'variant', 'locale', 'code', 'level', 'textbook', 'objectPosition', 'objectPositionClassName', 'aspectRatio', 'email', 'phone', 'meaning', 'anchor', 'placeholder']);
 const isText = (de, en) => {
-  const sample = de || en;
+  const sample = (de || en).replace(/\{[^}]*\}/g, '');
   if (de === en && /^[a-z0-9_-]+$/.test(de)) return false;
   if (!/\p{L}{2,}/u.test(sample)) return false;
   if (/^(\/|https?:|mailto:|tel:|#)/.test(sample)) return false;
@@ -144,8 +144,9 @@ for (const rel of all) {
     pagesByFile.get(file).add(pageOf(rel));
   }
 }
-// The layout's own chrome (header, footer, notice), not what the assistant pulls in.
-const layoutFiles = reach(`${SITE}/layout.tsx`, (file) => /assistant/.test(file));
+// The layout's own chrome (header, footer, notice), not what the assistant pulls in,
+// nor what the editor's own plumbing reads (the live values read every course).
+const layoutFiles = reach(`${SITE}/layout.tsx`, (file) => /assistant/.test(file) || file.startsWith('src/lib/cms/'));
 
 // --- the pairs -----------------------------------------------------------------
 const literal = (node) => {

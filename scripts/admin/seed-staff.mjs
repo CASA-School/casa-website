@@ -86,10 +86,19 @@ try {
     process.exit(0);
   }
 
+  // The same folded key as src/lib/admin/sign-in-names.ts: sign in with the full name.
+  const username = name.trim().replace(/\s+/g, ' ');
+  const usernameKey = username
+    .toLowerCase()
+    .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[øØ]/g, 'o');
+
   await client.query(
-    `INSERT INTO staff_users (email, name, role, password_hash)
-     VALUES ($1, $2, 'owner', $3)`,
-    [email, name, await hashPassword(password)]
+    `INSERT INTO staff_users (email, name, username, username_key, role, password_hash, password_set_at)
+     VALUES ($1, $2, $3, $4, 'owner', $5, now())`,
+    [email, name, username, usernameKey, await hashPassword(password)]
   );
 
   console.log('\nOwner account created.\n');

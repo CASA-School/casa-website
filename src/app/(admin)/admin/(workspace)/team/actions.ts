@@ -7,12 +7,15 @@ import { ADJUSTABLE, isLevel, roleDefault, type AccessLevel } from '@/lib/admin/
 import { canDeleteStaff, revokeAllSessions, type StaffRole } from '@/lib/admin/auth';
 import { requireModule } from '@/lib/admin/guard';
 import { describePasswordProblem } from '@/lib/admin/password';
+import { looksLikeEmail } from '@/lib/admin/sign-in-names';
 import {
   createStaffAccount,
   setStaffActive,
   setStaffAccess,
   setStaffPassword,
   setStaffRole,
+  unlinkMicrosoft,
+  updateStaffProfile,
 } from '@/lib/admin/staff';
 
 /**
@@ -35,23 +38,27 @@ function back(message: string, kind: 'error' | 'ok' = 'error'): never {
   redirect(`/admin/team?${kind}=${encodeURIComponent(message)}`);
 }
 
+const WEBSITE_LEVELS = new Set<string>(['none', 'view', 'edit', 'full']);
+
 export async function createStaffAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
 
   const email = String(formData.get('email') ?? '').trim();
   const name = String(formData.get('name') ?? '').trim();
+  const username = String(formData.get('username') ?? '').trim();
   const role = String(formData.get('role') ?? 'staff');
+  const website = String(formData.get('website') ?? 'none');
   const password = String(formData.get('password') ?? '');
 
   if (name.length < 2) {
     back('Give the account a name.');
   }
 
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+  if (!looksLikeEmail(email)) {
     back('That does not look like an email address.');
   }
 
-  if (!ROLES.has(role)) {
+  if (!ROLES.has(role) || !WEBSITE_LEVELS.has(website)) {
     back('Unknown role.');
   }
 
@@ -61,7 +68,8 @@ export async function createStaffAction(formData: FormData): Promise<void> {
     back('Only an owner can create another owner.');
   }
 
-  const problem = describePasswordProblem(password);
+  // The password is optional: without one, Microsoft until an owner sets it.
+  const problem = password ? describePasswordProblem(password) : null;
   if (problem) {
     back(problem);
   }
@@ -69,8 +77,10 @@ export async function createStaffAction(formData: FormData): Promise<void> {
   const result = await createStaffAccount({
     email,
     name,
+    username,
     role: role as StaffRole,
-    password,
+    password: password || null,
+    website: website as AccessLevel,
     actor,
   });
 
@@ -79,7 +89,78 @@ export async function createStaffAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/admin/team');
-  back(`${name} can now sign in.`, 'ok');
+  back(password ? `${name} can now sign in.` : `${name} can sign in with Microsoft. Set a password for them when you have it.`, 'ok');
+}
+
+/**
+ * Several colleagues at once: one per line, "Full name, name@casa-bremen.de".
+ * All as staff, with the website editor at the level chosen, and no password:
+ * they sign in with Microsoft until an owner sets theirs.
+ */
+export async function createStaffBatchAction(formData: FormData): Promise<void> {
+  const actor = await requireManager();
+  const website = String(formData.get('website') ?? 'edit');
+  if (!WEBSITE_LEVELS.has(website)) back('Unknown access level.');
+
+  const lines = String(formData.get('people') ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) back('Add one colleague per line: full name, email.');
+  if (lines.length > 40) back('Add at most 40 at once.');
+
+  const added: string[] = [];
+  const problems: string[] = [];
+  for (const line of lines) {
+    const match = /^(.+?)[,;\t]\s*([^\s,;]+@[^\s,;]+)$/.exec(line);
+    if (!match || match[1].trim().length < 2 || !looksLikeEmail(match[2])) {
+      problems.push(`“${line}”: write it as full name, email`);
+      continue;
+    }
+    const result = await createStaffAccount({
+      name: match[1].trim(),
+      email: match[2],
+      role: 'staff',
+      password: null,
+      website: website as AccessLevel,
+      actor,
+    });
+    if (result.ok) added.push(match[1].trim());
+    else problems.push(`${match[1].trim()}: ${result.reason}`);
+  }
+
+  revalidatePath('/admin/team');
+  if (problems.length) back(`${added.length ? `Added ${added.join(', ')}. ` : ''}Not added: ${problems.join('; ')}`);
+  back(`Added ${added.join(', ')}. They can sign in with Microsoft now; set their passwords when you have them.`, 'ok');
+}
+
+export async function updateStaffAction(formData: FormData): Promise<void> {
+  const actor = await requireManager();
+  const staffUserId = String(formData.get('staffUserId') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  const username = String(formData.get('username') ?? '').trim();
+  const email = String(formData.get('email') ?? '').trim();
+
+  if (!UUID.test(staffUserId)) back('Unknown account.');
+  if (name.length < 2) back('Give the account a name.');
+  if (!looksLikeEmail(email)) back('That does not look like an email address.');
+
+  const result = await updateStaffProfile({ staffUserId, name, username, email, actor });
+  if (!result.ok) back(result.reason);
+
+  revalidatePath('/admin/team');
+  back(`${name} updated.`, 'ok');
+}
+
+export async function unlinkMicrosoftAction(formData: FormData): Promise<void> {
+  const actor = await requireManager();
+  const staffUserId = String(formData.get('staffUserId') ?? '');
+  if (!UUID.test(staffUserId)) back('Unknown account.');
+  if (formData.get('confirmed') !== '1') back('Unlinking was not confirmed.');
+
+  await unlinkMicrosoft({ staffUserId, actor });
+  revalidatePath('/admin/team');
+  back('Microsoft unlinked. The next Microsoft sign-in under that address links it again.', 'ok');
 }
 
 export async function setActiveAction(formData: FormData): Promise<void> {

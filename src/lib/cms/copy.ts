@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { copyKey, fill } from './copy-key';
+import { fillFacts, priceListFacts, type FactValues } from './facts';
 import { tagText } from './stega';
 
 /**
@@ -20,25 +21,33 @@ import { tagText } from './stega';
  * nobody prepared — the store is empty and `say` returns exactly what the
  * ternary it replaced returned. That is the fallback, and it is the site as
  * committed.
+ *
+ * LIVE VALUES. `{course.intensive-german.price}` in a text is filled from the
+ * facts loaded for the page's language (facts.ts): a price, a lesson count, a
+ * next start date read from the database each time, never typed into the text.
  */
 
 export type CopyValues = ReadonlyMap<string, string>;
 
-type Store = { editing: boolean; values: CopyValues; bound?: ReturnType<typeof resolvers> };
+/** The live values for a language; the price list's alone when nothing loaded more. */
+export type FactsFor = (locale: string) => FactValues;
 
-const requestStore = cache((): Store => ({ editing: false, values: new Map() }));
+type Store = { editing: boolean; values: CopyValues; facts: Record<string, FactValues>; bound?: ReturnType<typeof resolvers> };
+
+const requestStore = cache((): Store => ({ editing: false, values: new Map(), facts: {} }));
 
 /** Fills this request's store. Called by `prepareCopy`, nothing else. */
-export function fillCopyStore(values: CopyValues, editing: boolean): void {
+export function fillCopyStore(values: CopyValues, editing: boolean, locale: string, facts: FactValues): void {
   const store = requestStore();
   store.values = values;
   store.editing = editing;
+  store.facts[locale] = facts;
   store.bound = undefined;
 }
 
 function bound() {
   const store = requestStore();
-  store.bound ??= resolvers(store.values, store.editing);
+  store.bound ??= resolvers(store.values, store.editing, (locale) => store.facts[locale] ?? priceListFacts(locale));
   return store.bound;
 }
 
@@ -49,31 +58,52 @@ export type Pick = (
   vars?: Record<string, unknown>
 ) => string;
 export type PickTree = <T>(locale: string, byLocale: { de: T; en: T } & Partial<Record<string, T>>) => T;
+/** A value shown but not edited — an amount, a label built in code — with its live values filled in. */
+export type WithFacts = (locale: string, text: string) => string;
 
 /** The three resolvers, bound to a set of values. The provider builds the same from context. */
-export function resolvers(values: CopyValues, editing: boolean): { say: Say; pick: Pick; pickTree: PickTree } {
+export function resolvers(
+  values: CopyValues,
+  editing: boolean,
+  factsFor: FactsFor = priceListFacts
+): { say: Say; pick: Pick; pickTree: PickTree; withFacts: WithFacts } {
+  const withFacts: WithFacts = (locale, text) => fillFacts(text, factsFor(locale));
+
   const say: Say = (locale, de, en, vars) => {
     const key = copyKey(de, en);
     const fallback = locale === 'de' ? de : en;
-    const text = fill(values.get(`${key}|${locale}`) ?? fallback, vars);
+    const text = fillFacts(fill(values.get(`${key}|${locale}`) ?? fallback, vars), factsFor(locale));
     return editing ? tagText(text, key) : text;
   };
 
   // A pair that reads the same in both languages — a name, a brand — is shown, not offered.
   const pick: Pick = (locale, pair, vars) =>
-    !pair ? '' : pair.de === pair.en ? fill(pair.de, vars) : say(locale, pair.de, pair.en, vars);
+    !pair ? '' : pair.de === pair.en ? fillFacts(fill(pair.de, vars), factsFor(locale)) : say(locale, pair.de, pair.en, vars);
 
   /*
    * A per-language object or list: both defaults are walked side by side and
    * every pair of strings at the same place resolves like `say`. Where the two
    * languages differ in shape, the current language's own value stands.
+   * A live value is filled everywhere, in the fields staff do not edit too:
+   * an `amount` of `{course.intensive-german.price-4-weeks}` shows the price.
    */
   const pickTree: PickTree = <T,>(locale: string, byLocale: { de: T; en: T } & Partial<Record<string, T>>): T => {
     const own = (byLocale as Record<string, unknown>)[locale] ?? (locale === 'de' ? byLocale.de : byLocale.en);
+    const facts = factsFor(locale);
+    const fixed = (value: unknown): unknown =>
+      typeof value === 'string'
+        ? fillFacts(value, facts)
+        : Array.isArray(value)
+          ? value.map(fixed)
+          : value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype
+            ? Object.fromEntries(Object.entries(value).map(([name, inner]) => [name, fixed(inner)]))
+            : value;
     const walk = (de: unknown, en: unknown, current: unknown): unknown => {
-      if (typeof de === 'string' && typeof en === 'string' && typeof current === 'string') {
+      if (typeof current === 'string') {
         // The same words in both languages — a name, a brand — are not offered for editing.
-        return de !== en && isText(de, en) ? say(locale, de, en) : current;
+        return typeof de === 'string' && typeof en === 'string' && de !== en && isText(de, en)
+          ? say(locale, de, en)
+          : fillFacts(current, facts);
       }
       if (Array.isArray(current)) {
         return current.map((item, index) => {
@@ -85,7 +115,7 @@ export function resolvers(values: CopyValues, editing: boolean): { say: Say; pic
         const out: Record<string, unknown> = {};
         for (const [name, value] of Object.entries(current as Record<string, unknown>)) {
           out[name] = SKIP.has(name)
-            ? value
+            ? fixed(value)
             : walk((de as Record<string, unknown> | undefined)?.[name], (en as Record<string, unknown> | undefined)?.[name], value);
         }
         return out;
@@ -95,7 +125,7 @@ export function resolvers(values: CopyValues, editing: boolean): { say: Say; pic
     return walk(byLocale.de, byLocale.en, own) as T;
   };
 
-  return { say, pick, pickTree };
+  return { say, pick, pickTree, withFacts };
 }
 
 /** The fields that name an item in a list, so the two languages pair by item, not by position. */
@@ -151,7 +181,8 @@ export const SKIP: ReadonlySet<string> = new Set([
 
 /** A pair worth editing: words, not a code, a path or a number. */
 export function isText(de: string, en: string): boolean {
-  const sample = de || en;
+  // Placeholders are not words: '{value} €' is a format, not copy.
+  const sample = (de || en).replace(/\{[^}]*\}/g, '');
   // The same lowercase word in both languages is a code (`katze`, `full`), not copy.
   if (de === en && /^[a-z0-9_-]+$/.test(de)) return false;
   if (!/\p{L}{2,}/u.test(sample)) return false;
@@ -166,3 +197,5 @@ export const say: Say = (locale, de, en, vars) => bound().say(locale, de, en, va
 export const pick: Pick = (locale, pair, vars) => bound().pick(locale, pair, vars);
 
 export const pickTree: PickTree = (locale, byLocale) => bound().pickTree(locale, byLocale);
+
+export const withFacts: WithFacts = (locale, text) => bound().withFacts(locale, text);

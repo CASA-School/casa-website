@@ -141,10 +141,15 @@ export function needsRehash(stored: string): boolean {
  * The one password rule.
  *
  * Length only. Composition rules ("one digit, one symbol") measurably push
- * people towards `Casa2026!` and are not in NIST 800-63B any more; 12
- * characters of anything is the floor that actually helps.
+ * people towards `Casa2026!` and are not in NIST 800-63B any more.
+ *
+ * Eight characters, NIST 800-63B's floor for a password a person chose, and
+ * down from twelve on 2026-10-10: the office team signs in with the password
+ * they already use for FileMaker, which an owner sets for them, and the
+ * stronger way in is Microsoft (src/lib/admin/microsoft.ts), where CASA's
+ * tenant policy and MFA apply. The sign-in throttle limits guessing either way.
  */
-export const MIN_PASSWORD_LENGTH = 12;
+export const MIN_PASSWORD_LENGTH = 8;
 
 export function describePasswordProblem(password: string): string | null {
   if (password.length < MIN_PASSWORD_LENGTH) {

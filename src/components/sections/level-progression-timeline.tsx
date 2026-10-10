@@ -32,7 +32,6 @@ type Level = {
  * not a full level.
  */
 const WEEKS_PER_LEVEL = '8-9';
-const LESSONS_PER_WEEK = 20;
 
 /**
  * B1+ duration — staff-confirmed, tracked separately from WEEKS_PER_LEVEL.
@@ -197,7 +196,7 @@ type Props = {
 };
 
 export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
-  const { pickTree, say } = useSiteCopy();
+  const { pick, pickTree, say } = useSiteCopy();
   const [active, setActive] = useState<LevelKey>('a1');
   const activeLevel = LEVELS.find((l) => l.id === active)!;
 
@@ -207,20 +206,20 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           title: 'Was du auf jeder Stufe kannst',
           description:
             'In unserer Schule finden fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1 statt. Wir orientieren uns dabei streng am Gemeinsamen Europäischen Referenzrahmen (GER).',
-          pace: `Im Intensivkurs hast du ${LESSONS_PER_WEEK} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel ${WEEKS_PER_LEVEL.replace('-', '–')} Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.`,
+          pace: 'Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.',
           paceLabel: 'Dauer pro Niveaustufe',
           weeks: 'Wochen',
-          rate: `${LESSONS_PER_WEEK} UE pro Woche (je 45 Min.)`,
+          rate: '{course.intensive-german.lessons} UE pro Woche (je 45 Min.)',
           textbook: 'Lehrwerk',
         }, en: {
           eyebrow: 'Levels',
           title: 'What you can do at each level',
           description:
             'At our school, courses run continuously at levels A1, A2, B1, B1+, B2 and C1. We keep strictly to the Common European Framework of Reference for Languages (CEFR).',
-          pace: `On the intensive course, you have ${LESSONS_PER_WEEK} lessons of 45 minutes a week, and a whole level usually takes ${WEEKS_PER_LEVEL.replace('-', '–')} weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.`,
+          pace: 'On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level usually takes 8–9 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.',
           paceLabel: 'Time per level',
           weeks: 'weeks',
-          rate: `${LESSONS_PER_WEEK} lessons a week (45 min each)`,
+          rate: '{course.intensive-german.lessons} lessons a week (45 min each)',
           textbook: 'Textbook',
         } });
 
@@ -299,7 +298,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
             ) : null}
           </div>
           <p className="text-sm leading-relaxed text-[var(--casa-ink)]">
-            {locale === 'de' ? activeLevel.description.de : activeLevel.description.en}
+            {pick(locale, activeLevel.description)}
           </p>
         </div>
 

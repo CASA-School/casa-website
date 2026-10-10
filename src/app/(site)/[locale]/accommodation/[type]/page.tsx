@@ -78,7 +78,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
     already scrolled past twice.
   */
   const decisionItems = [
-    { label: say(locale, 'Preis ab', 'Price from'), value: say(locale, '580 € / 4 Wochen', '€580 / 4 weeks') },
+    { label: say(locale, 'Preis ab', 'Price from'), value: say(locale, '{accommodation.rent-4-weeks} / 4 Wochen', '{accommodation.rent-4-weeks} / 4 weeks') },
     { label: say(locale, 'Verfügbarkeit', 'Availability'), value: say(locale, 'Auf Anfrage', 'On request') },
   ];
 
@@ -108,7 +108,7 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
    * three between them, alternating prefix and suffix inside a single card.
    */
   const infoItems = [
-    { label: say(locale, 'Preis ab', 'Price from'), value: say(locale, '580 € / 4 Wochen', '€580 / 4 weeks') },
+    { label: say(locale, 'Preis ab', 'Price from'), value: say(locale, '{accommodation.rent-4-weeks} / 4 Wochen', '{accommodation.rent-4-weeks} / 4 weeks') },
     { label: say(locale, 'Verfügbarkeit', 'Availability'), value: say(locale, 'Auf Anfrage', 'On request') },
   ];
 

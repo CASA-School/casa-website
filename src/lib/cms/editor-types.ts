@@ -1,4 +1,5 @@
 import type { SlotKind } from './slot-kinds';
+import type { FactDef, FactValues } from './facts';
 
 /**
  * The shapes the website editor's screen receives. No database import here, so
@@ -112,3 +113,6 @@ export const initialsOf = (name: string) =>
     .map((part) => part[0] ?? '')
     .join('')
     .toUpperCase();
+
+/** The live values a text can name (facts.ts), with each one's text per language. */
+export type EditorFacts = { defs: FactDef[]; values: Record<string, FactValues> };

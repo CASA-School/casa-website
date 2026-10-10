@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { prepareCopy } from '@/lib/cms/content.server';
+import { fillFacts } from '@/lib/cms/facts';
 import { footerConfig } from '@/config/footer';
 import { accommodationCosts } from '@/config/content/accommodation-costs';
 import { coursePracticalFacts } from '@/config/courses/course-practical-facts';
@@ -39,6 +41,8 @@ const links = (path: string) => `[English](${pageUrl(path, 'en')}) · [Deutsch](
 
 export async function buildLlmsTxt({ full }: { full: boolean }) {
   const today = bremenToday();
+  // The published texts and the live values (prices, lessons) the pages show.
+  const { facts } = await prepareCopy('en');
   const [courses, exams, faq] = await Promise.all([getCourses('en'), getExamCatalog('en'), full ? getFaq('en') : Promise.resolve([])]);
   const details = await Promise.all(courses.map((course) => getCourseDetail(course.slug, 'en')));
 
@@ -137,5 +141,5 @@ export async function buildLlmsTxt({ full }: { full: boolean }) {
     `Generated from the website's live data on ${date(new Date().toISOString())}.`
   );
 
-  return lines.filter((line, index, all) => !(line === '' && all[index - 1] === '')).join('\n');
+  return fillFacts(lines.filter((line, index, all) => !(line === '' && all[index - 1] === '')).join('\n'), facts.values);
 }

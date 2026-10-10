@@ -102,9 +102,9 @@ const calculatorCopy = {
       panel, on the one page that quotes both course and housing costs.
     */
     priceHints: {
-      intensive: 'Intensive course: €520 / 4 weeks, €940 / full level',
-      evening: 'Evening course: from €378 / trimester',
-      accommodation: 'Accommodation: €580 / 4 weeks, then €145 / week',
+      intensive: 'Intensive course: {course.intensive-german.price-4-weeks} / 4 weeks, {course.intensive-german.price-8-weeks} / full level',
+      evening: 'Evening course: {course.evening-german.price} / trimester',
+      accommodation: 'Accommodation: {accommodation.rent-4-weeks} / 4 weeks, then {accommodation.extra-week} / week',
     },
     validationError: 'Your target level must be higher than your current level.',
     weeks: 'weeks',
@@ -164,9 +164,9 @@ const calculatorCopy = {
       refundableDeposit: 'Rückerstattbare Kaution',
     },
     priceHints: {
-      intensive: 'Intensivkurs: 520\u00a0€ / 4 Wochen, 940\u00a0€ / ganzes Niveau',
-      evening: 'Abendkurs: ab 378\u00a0€ / Trimester',
-      accommodation: 'Wohnen: 580\u00a0€ / 4 Wochen, danach 145\u00a0€ / Woche',
+      intensive: 'Intensivkurs: {course.intensive-german.price-4-weeks} / 4 Wochen, {course.intensive-german.price-8-weeks} / ganzes Niveau',
+      evening: 'Abendkurs: {course.evening-german.price} / Trimester',
+      accommodation: 'Wohnen: {accommodation.rent-4-weeks} / 4 Wochen, danach {accommodation.extra-week} / Woche',
     },
     validationError: 'Das Zielniveau muss höher sein als das aktuelle Niveau.',
     weeks: 'Wochen',
