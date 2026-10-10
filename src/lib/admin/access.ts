@@ -30,6 +30,7 @@ export const MODULES = [
   'rooms',
   'catalogue',
   'kursplanung',
+  'website',
   'activity',
   'team',
   'settings',
@@ -60,6 +61,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   rooms: 'Rooms',
   catalogue: 'Courses & exams',
   kursplanung: 'Kursplanung',
+  website: 'Website',
   activity: 'Activity',
   team: 'Team',
   settings: 'Settings',
@@ -76,6 +78,7 @@ export const MODULE_HREFS: Record<WorkspaceModule, string> = {
   rooms: '/admin/settings/rooms',
   catalogue: '/admin/catalogue',
   kursplanung: '/admin/kursplanung',
+  website: '/admin/website',
   activity: '/admin/activity',
   team: '/admin/team',
   settings: '/admin/settings',
@@ -100,7 +103,9 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * and its capacity are defined once and change rarely, so one or two people
  * maintain them and everyone else just reads the cohort they are attached to.
  * `kursplanung` is absent because who teaches which course is management's
- * decision; the board is opened per person, like Applications.
+ * decision; the board is opened per person, like Applications. `website` is
+ * absent too: what the public site says is opened per person on the Team
+ * screen — `edit` drafts and asks for approval, `full` also publishes.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',

@@ -2422,3 +2422,18 @@ with recorded consent. No page shows a stand-in. Staff appear by full name again
 illustrations made by Codex: a scoped exception to hard rule 4, with the brief in
 `docs/HOST_FAMILY_IMAGES.md`. The three new host-family reference photos are not in
 the repo.
+
+## 43. The website editor (2026-10-10)
+
+Rahman asked for staff to edit the site's text themselves, in "the most modern way",
+with popups and room for more than two languages. `/admin/website` (module `website`,
+full screen, `(editor)` route group) shows the real public page in draft mode; every
+editable text carries its slot key in zero-width characters (content source maps), the
+bridge in the page finds them, and a click opens a popup beside the text. Defaults stay
+in the code; edits live in `website_*` tables (0019) as drafts and releases, published
+now, scheduled (resolved at read time, no job), or sent for approval, with undo,
+history, comments, presence locks and "needs update" for translations. Writing help
+(shorten, voice, translate, plain-language Ask) runs on the Anthropic API when a key is
+set. Connected: every course page's shared words and per-course trees; other pages open
+"View only". `docs/WEBSITE_EDITOR.md` has the design and how to connect a page. Draft
+mode is the only framed state (`next.config.ts`); the preview route needs a signed token.

@@ -112,6 +112,13 @@ export const Icon = {
       <path d="M11.5 9.5v4M9.5 11.5h4" />
     </svg>
   ),
+  /** A globe — the public website. */
+  website: (
+    <svg {...box}>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M2 8h12M8 2a9.5 9.5 0 0 1 0 12M8 2a9.5 9.5 0 0 0 0 12" />
+    </svg>
+  ),
   calendar: (
     <svg {...box}>
       <rect x="2" y="3.5" width="12" height="10" rx="1.3" />

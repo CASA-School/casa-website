@@ -248,6 +248,7 @@ describe('workspace auth gate', () => {
     );
 
     expect(files).toContain(path.join('(focus)', 'kursplanung', 'actions.ts'));
+    expect(files).toContain(path.join('(editor)', 'website', 'actions.ts'));
     expect(files).toContain(path.join('(workspace)', 'actions.ts'));
 
     /*
@@ -319,6 +320,7 @@ describe('workspace auth gate', () => {
       ['activity', '(workspace)/activity'],
       ['team', '(workspace)/team'],
       ['kursplanung', '(focus)/kursplanung'],
+      ['website', '(editor)/website'],
     ];
 
     for (const [module, dir] of gates) {
