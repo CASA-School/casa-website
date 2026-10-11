@@ -1,5 +1,5 @@
 import { proofMetricsByLocale } from '@/config/content/proof-metrics';
-import { socialProofByLocale } from '@/config/content/social-proof';
+import { socialProofFor } from '@/config/content/social-proof';
 import { resolveHeroMedia } from '@/config/content/media-library';
 import type {
   ContentLocale,
@@ -32,7 +32,8 @@ function pageMetrics(locale: ContentLocale, size = 4) {
 }
 
 function pageStory(locale: ContentLocale, index = 0) {
-  const item = pickTree(locale, socialProofByLocale)[index] ?? pickTree(locale, socialProofByLocale)[0];
+  const proof = socialProofFor(locale);
+  const item = proof[index] ?? proof[0];
 
   return {
     quote: item.quote,

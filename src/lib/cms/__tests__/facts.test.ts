@@ -37,6 +37,13 @@ describe('live values', () => {
     expect(formatDay('2026-11-02', 'en')).toBe('2 November 2026');
   });
 
+  it('writes them in each prepared language for the editor preview', () => {
+    expect(formatEuro(580, 'es')).toBe(nbsp('580 €'));
+    expect(formatEuro(580, 'ar')).toMatch(/580/);
+    expect(formatDay('2026-11-02', 'tr')).toBe('2 Kasım 2026');
+    expect(formatDay('2026-11-02', 'ru')).toMatch(/2 ноября 2026/);
+  });
+
   it('knows the price list without a database', () => {
     expect(priceListFacts('de')['accommodation.rent-4-weeks']).toBe(nbsp('580 €'));
     expect(priceListFacts('en')['course.intensive-german.price-8-weeks']).toBe('€940');

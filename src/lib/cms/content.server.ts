@@ -10,6 +10,7 @@ import { getDb, logDatabaseFallback } from '@/lib/db/server';
 
 import { fillCopyStore } from './copy';
 import { loadFacts, type Facts } from './facts.server';
+import { previewLanguage } from './preview-language.server';
 import { tagText } from './stega';
 
 /**
@@ -126,23 +127,44 @@ const loadValues = cache(async (): Promise<{ editing: boolean; values: Values }>
   return { editing, values: editing ? await previewValues() : await liveValues() };
 });
 
-const loadFactsOnce = cache((locale: ContentLocale) => loadFacts(locale));
+const loadFactsOnce = cache((locale: string) => loadFacts(locale));
+
+/**
+ * The page in a prepared language, for the editor's preview: that language's
+ * texts (its repository translations, then its edits and drafts) stand in the
+ * route's own language, so every `say` on the page returns them. Exported for
+ * the tests.
+ */
+export function overlayLanguage(values: Values, translations: ReadonlyMap<string, string>, display: string, locale: string): Values {
+  const out: Values = new Map(values);
+  const own = (id: string) => `${id.slice(0, id.lastIndexOf('|'))}|${locale}`;
+  for (const [id, text] of translations) out.set(own(id), text);
+  for (const [id, text] of values) if (id.endsWith(`|${display}`)) out.set(own(id), text);
+  return out;
+}
 
 /**
  * Readies `say`, `pick` and `pickTree` (src/lib/cms/copy.ts) for this request,
  * in `locale`: the edited texts, and the live values they name (facts.server.ts).
  * Every public page awaits it before rendering, and so does the site layout;
  * both reads are shared by all of them through React `cache` and kept fifteen
- * seconds besides.
+ * seconds besides. In the editor's preview of a prepared language
+ * (preview-language.server.ts), `display` names it and the page speaks it.
  */
-export async function prepareCopy(locale: ContentLocale): Promise<{ editing: boolean; values: Values; facts: Facts }> {
-  const [loaded, facts] = await Promise.all([loadValues(), loadFactsOnce(locale)]);
-  // A prepared language (translation-locales.ts) reads its repository translations under any edit.
-  const values = (PREPARED_LOCALES as readonly string[]).includes(locale)
-    ? new Map([...(await import('./translations')).translationValues(locale), ...loaded.values])
-    : loaded.values;
+export async function prepareCopy(
+  locale: ContentLocale
+): Promise<{ editing: boolean; values: Values; facts: Facts; display: string | null }> {
+  const display = await previewLanguage();
+  const [loaded, facts] = await Promise.all([loadValues(), loadFactsOnce(display ?? locale)]);
+  let values = loaded.values;
+  if (display) {
+    values = overlayLanguage(loaded.values, (await import('./translations')).translationValues(display), display, locale);
+  } else if ((PREPARED_LOCALES as readonly string[]).includes(locale)) {
+    // A prepared language once routed reads its repository translations under any edit.
+    values = new Map([...(await import('./translations')).translationValues(locale), ...loaded.values]);
+  }
   fillCopyStore(values, loaded.editing, locale, facts.values);
-  return { editing: loaded.editing, values, facts };
+  return { editing: loaded.editing, values, facts, display };
 }
 
 /** This language's edited values, for the client components' provider. */

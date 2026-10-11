@@ -1,5 +1,5 @@
 import type { ContentLocale, SocialProofItem } from '@/lib/content/types';
-import { pick, pickTree } from '@/lib/cms/copy';
+import { pick } from '@/lib/cms/copy';
 
 /**
  * The learner testimonials CASA publishes, on the courses they were written about.
@@ -229,6 +229,15 @@ function toSocialProof(source: TestimonialSource, locale: ContentLocale): Social
   };
 }
 
+/**
+ * The testimonials in `locale`, built when a page asks, so their course lines go
+ * through the website editor (edits, tags, the prepared languages). The quotes
+ * themselves stay as the learner wrote them.
+ */
+export function socialProofFor(locale: ContentLocale): SocialProofItem[] {
+  return TESTIMONIALS.map((item) => toSocialProof(item, locale));
+}
+
 export const socialProofByLocale: Record<ContentLocale, SocialProofItem[]> = {
   en: TESTIMONIALS.map((item) => toSocialProof(item, 'en')),
   de: TESTIMONIALS.map((item) => toSocialProof(item, 'de')),
@@ -242,7 +251,7 @@ export const socialProofByLocale: Record<ContentLocale, SocialProofItem[]> = {
  * populated section instead of a lonely single card.
  */
 export function socialProofForCourse(slug: string, locale: ContentLocale): SocialProofItem[] {
-  const all = pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
+  const all = socialProofFor(locale);
   const own = all.filter((item) => item.courseSlug === slug);
   const others = all.filter((item) => item.courseSlug !== slug);
 
@@ -262,7 +271,7 @@ export function socialProofForCourse(slug: string, locale: ContentLocale): Socia
  * A page with room for exactly one voice should name it.
  */
 export function socialProofById(id: string, locale: ContentLocale): SocialProofItem | null {
-  const all = pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
+  const all = socialProofFor(locale);
 
   return all.find((item) => item.id === `${id}-${locale}`) ?? all[0] ?? null;
 }

@@ -23,6 +23,7 @@ import { EditBridge } from '@/components/cms/edit-bridge';
 import { SiteCopyProvider } from '@/components/cms/site-copy-provider';
 import { SiteShell } from '@/components/layout/site-shell';
 import { prepareCopy, valuesForLocale } from '@/lib/cms/content.server';
+import { cmsDirection } from '@/lib/cms/locales';
 import { editorOrigins } from '@/lib/cms/origins';
 import { siteGraph } from '@/lib/structured-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -114,10 +115,11 @@ export default async function RootLayout({
   // The site's copy for this request (src/lib/cms/copy.ts): live edits, or in the
   // website editor's preview (draft mode) the drafts, each text tagged, and the
   // live values (prices, dates) the texts name.
-  const { editing, values, facts } = await prepareCopy(locale);
+  // In the editor's preview of a prepared language (`display`), the page speaks that language.
+  const { editing, values, facts, display } = await prepareCopy(locale);
 
   return (
-    <html lang={locale} dir={directionFor(locale)}>
+    <html lang={display ?? locale} dir={display ? cmsDirection(display) : directionFor(locale)}>
       <body
         suppressHydrationWarning
         className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} ${playfairDisplay.variable} font-sans`}

@@ -10,9 +10,11 @@ import { I } from './parts';
  * The language being edited.
  *
  * A language the site serves switches the preview to that page in that
- * language. One still being prepared keeps the German preview and opens every
- * text on its own tab, so a new language can be written page by page before it
- * is routed. Each row shows how much of this page is written and current.
+ * language. One still being prepared switches it too, in the editor only:
+ * the page renders in that language over its English address, which no
+ * visitor can reach (preview-language.server.ts), so a new language can be read
+ * and written page by page before it is routed. Each row shows how much of
+ * this page is written and current.
  */
 
 export function LanguageMenu({
@@ -60,7 +62,7 @@ export function LanguageMenu({
                   {locale.label}
                 </span>
                 <span className="block text-xs text-[var(--casa-text-subtle)]">
-                  {locale.source ? 'Source' : locale.routed ? 'On the site' : 'In preparation'}
+                  {locale.source ? 'Source' : locale.routed ? 'On the site' : 'Preview only'}
                 </span>
               </span>
               {done !== null && done !== undefined ? (

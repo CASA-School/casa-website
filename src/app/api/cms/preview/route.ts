@@ -1,7 +1,8 @@
-import { draftMode } from 'next/headers';
+import { cookies, draftMode } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { apiError } from '@/lib/api/response';
+import { PREVIEW_LANGUAGE_COOKIE } from '@/lib/cms/preview-language.server';
 import { safePreviewPath, verifyPreviewToken } from '@/lib/cms/preview-token';
 
 /**
@@ -21,5 +22,7 @@ export async function GET(request: Request) {
   }
 
   (await draftMode()).enable();
+  // A new editor session starts in German, whatever language the last one previewed.
+  (await cookies()).delete(PREVIEW_LANGUAGE_COOKIE);
   redirect(safePreviewPath(url.searchParams.get('path')));
 }

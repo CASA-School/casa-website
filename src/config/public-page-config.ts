@@ -1,3 +1,4 @@
+import { pick } from '@/lib/cms/copy';
 import type { ContentLocale } from '@/lib/content/types';
 
 export type PublicHeroType = 'home-photo' | 'index-chooser' | 'detail-utility' | 'minimal-utility';
@@ -1019,8 +1020,9 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
   },
 };
 
+/** Through the website editor (src/lib/cms/copy.ts): edits, tags and the prepared languages apply. */
 function localize(text: LocalizedText, locale: ContentLocale) {
-  return locale === 'de' ? text.de : text.en;
+  return pick(locale, text);
 }
 
 export function getPublicPageConfig(route: PublicRouteKey, locale: ContentLocale): LocalizedPublicPageConfig {

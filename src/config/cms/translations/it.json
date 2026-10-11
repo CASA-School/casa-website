@@ -243,6 +243,10 @@
     "de": "ab",
     "text": "da"
   },
+  "t.ab.zuehjf": {
+    "de": "ab {amount}",
+    "text": "da {amount}"
+  },
   "t.abend.1cpj55e": {
     "de": "Abend",
     "text": "Sera"
@@ -1142,6 +1146,10 @@
   "t.bisher-findet-der-kurs.1yi9mgk": {
     "de": "Bisher findet der Kurs freitags von 13 bis 16:30 Uhr statt. Wenn wir wissen, wann du kannst, planen wir die Gruppe danach.",
     "text": "Finora il corso si è svolto il venerdì dalle 13 alle 16:30. Se sappiamo quando sei disponibile, organizziamo il gruppo di conseguenza."
+  },
+  "t.bitte-erfragen.1531hyn": {
+    "de": "Bitte erfragen",
+    "text": "Chiedici"
   },
   "t.bitte-lade-deinen-lebenslauf.1dp57ez": {
     "de": "Bitte lade deinen Lebenslauf hoch.",
@@ -4083,6 +4091,10 @@
     "de": "Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von {course.enrolment-fee}. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.",
     "text": "Sì, due. Alla tua prima iscrizione presso la nostra scuola addebitiamo una quota d’iscrizione una tantum di {course.enrolment-fee}. A questa si aggiunge il libro di testo, che costa da 23,99 € a 26,99 € a seconda del livello. Per la Bildungszeit ti servono due libri, che insieme costano da 46 € a 54 €. Nei fine settimana e nei giorni festivi del Land di Brema non ci sono lezioni. I giorni festivi non vengono rimborsati."
   },
+  "t.ja.1xz3lgi": {
+    "de": "Ja",
+    "text": "Sì"
+  },
   "t.jahre-jung-sind-unsere.156993b": {
     "de": "Jahre jung sind unsere Lernenden",
     "text": "anni: l’età di chi impara con noi"
@@ -5251,6 +5263,10 @@
     "de": "Nein. Wenn du mit einem Visum für einen Sprachkurs oder für ein Studium nach Deutschland eingereist bist, musst du alle Kurse, für die das Visum ausgestellt wurde, vollständig absolvieren. Der Vertrag ist an das Visum gebunden, und du kannst ihn nicht kündigen. Die restliche Kursgebühr musst du zahlen. Außerdem gibt CASA autorisierten Behörden auf Anfrage Auskunft, wenn jemand den Kurs nicht für den vollen Zeitraum des Visums besucht.",
     "text": "No. Se sei in Germania con un visto per un corso di lingua o per studio, devi frequentare per intero tutti i corsi per cui il visto è stato rilasciato. Il contratto è legato al visto e non puoi disdirlo: la parte restante della quota del corso va comunque pagata. Inoltre, su richiesta, CASA fornisce informazioni alle autorità competenti se qualcuno non frequenta il corso per l’intera durata del visto."
   },
+  "t.nein.2srw4l": {
+    "de": "Nein",
+    "text": "No"
+  },
   "t.neu-beginnen.1yx0aj2": {
     "de": "Neu beginnen",
     "text": "Ricomincia"
@@ -5614,6 +5630,10 @@
   "t.preis-nach-wochen.1oeb3ss": {
     "de": "Preis nach Wochen",
     "text": "Prezzo in base alle settimane"
+  },
+  "t.preis.lfga1i": {
+    "de": "Preis",
+    "text": "Prezzo"
   },
   "t.preise-gelten-pro-person.ctsii": {
     "de": "Preise gelten pro Person und sind freibleibend. Das verbindliche Angebot bestätigen wir schriftlich, sobald uns Termine und Gruppengröße vorliegen.",

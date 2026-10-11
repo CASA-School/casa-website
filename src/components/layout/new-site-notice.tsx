@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ArrowRight, X } from 'lucide-react';
 
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
 import { Link, usePathname } from '@/i18n/navigation';
 import { NEW_SITE_NOTICE } from '@/config/site-notice';
 import type { ContentLocale } from '@/lib/content/types';
@@ -82,7 +83,8 @@ function isQuietPath(pathname: string) {
 }
 
 export function NewSiteNotice({ contentLocale }: { contentLocale: ContentLocale }) {
-  const text = copy[contentLocale === 'de' ? 'de' : 'en'];
+  const { pickTree } = useSiteCopy();
+  const text = pickTree(contentLocale, copy);
   const pathname = usePathname() ?? '/';
   const [expanded, setExpanded] = useState(false);
   const [footerInView, setFooterInView] = useState(false);

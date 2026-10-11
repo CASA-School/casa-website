@@ -75,6 +75,9 @@ describe('copy resolved from its pair', () => {
     const out = resolvers(new Map([[`${copyKey('Intensiv', 'Intensive')}|en`, 'Intensive German']]), false).pickTree('en', tree);
     expect(out).toEqual({ title: 'Courses', items: [{ slug: 'a', name: 'Intensive German' }, { slug: 'b', name: 'Evening' }], href: '/courses' });
     expect(counterparts(tree.de.items, tree.en.items, { slug: 'a' }, 0)).toEqual([tree.de.items[1], tree.en.items[0]]);
+    // An id that carries its language still names one item in both lists.
+    const faq = { de: [{ id: 'faq-de-q2' }, { id: 'faq-de-q1' }], en: [{ id: 'faq-en-q1' }, { id: 'faq-en-q2' }] };
+    expect(counterparts(faq.de, faq.en, { id: 'faq-en-q1' }, 0)).toEqual([faq.de[1], faq.en[0]]);
   });
 
   it('gives one wording one key, and keys a different translation apart', () => {

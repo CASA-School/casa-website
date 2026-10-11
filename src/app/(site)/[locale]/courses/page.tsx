@@ -347,7 +347,7 @@ export default async function CoursesPage({
     const result: { key: string; title: string | null; rows: typeof courseRows }[] = groups
       .map((group) => ({
         key: group.key,
-        title: group.title[locale === 'de' ? 'de' : 'en'],
+        title: pick(locale, group.title),
         rows: group.slugs.flatMap((slug) => (bySlug.has(slug) ? [bySlug.get(slug)!] : [])),
       }))
       .filter((group) => group.rows.length > 0);

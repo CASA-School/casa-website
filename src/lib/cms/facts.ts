@@ -54,10 +54,23 @@ export function factsIn(text: string): string[] {
   return [...new Set([...text.matchAll(FACT)].map((match) => match[1]))];
 }
 
+/** Each language's own number and date format; Arabic keeps the Western digits the texts use. */
+const NUMBERS: Record<string, string> = {
+  de: 'de-DE',
+  en: 'en-IE',
+  tr: 'tr-TR',
+  ar: 'ar-u-nu-latn',
+  es: 'es-ES',
+  it: 'it-IT',
+  ru: 'ru-RU',
+  uk: 'uk-UA',
+};
+const DATES: Record<string, string> = { ...NUMBERS, en: 'en-GB' };
+
 /** German pages write the amount first: "580 €"; English: "€580" (go-live brief 2026-10-01). */
 export function formatEuro(amount: number, locale: string): string {
   const whole = Number.isInteger(amount);
-  return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-IE', {
+  return new Intl.NumberFormat(NUMBERS[locale] ?? 'en-IE', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: whole ? 0 : 2,
@@ -67,13 +80,31 @@ export function formatEuro(amount: number, locale: string): string {
 
 export function formatDay(iso: string, locale: string): string {
   const date = new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso);
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(DATES[locale] ?? 'en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: 'Europe/Berlin',
   }).format(date);
 }
+
+/**
+ * "ab 520 €" and "Auf Anfrage" in every language, for a course's price as a live
+ * value. Not through `say`: a live value is filled into other texts and must carry
+ * no editor tag (course-pricing.ts says the same words on the page, editably).
+ * Keep them the same as the stored translations of "ab {amount}" and "Auf Anfrage".
+ */
+export const PRICE_WORDS: Record<string, { from: (amount: string) => string; onRequest: string }> = {
+  de: { from: (amount) => `ab ${amount}`, onRequest: 'Auf Anfrage' },
+  en: { from: (amount) => `from ${amount}`, onRequest: 'On request' },
+  // Turkish adds no suffix to the price: the right one depends on how the number is read aloud.
+  tr: { from: (amount) => `başlangıç fiyatı ${amount}`, onRequest: 'Talep üzerine' },
+  ar: { from: (amount) => `ابتداءً من ${amount}`, onRequest: 'عند الطلب' },
+  es: { from: (amount) => `desde ${amount}`, onRequest: 'Previa consulta' },
+  it: { from: (amount) => `da ${amount}`, onRequest: 'Su richiesta' },
+  ru: { from: (amount) => `от ${amount}`, onRequest: 'По запросу' },
+  uk: { from: (amount) => `від ${amount}`, onRequest: 'За запитом' },
+};
 
 /** The course pages' German names, which is what staff call them. */
 export const COURSE_GROUPS: Record<string, string> = {
