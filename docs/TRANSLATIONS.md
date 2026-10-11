@@ -70,7 +70,10 @@ elegance.
   exactly once if the German has it once, and move it to where the sentence needs it.
 - Level codes (A1, A2, B1, B1+, B2, C1, A1.1 …), times (09:00–12:30), numbers, prices, dates,
   e-mail addresses, phone numbers, URLs, street names.
-- Names: CASA, Bremen, telc Deutsch B2, telc Deutsch C1 Hochschule, Netzwerk neu, Kontext,
+- Place names are written as each language writes them: Bremen is *Bremen* in Spanish and
+  Turkish, *Brema* in Italian (as in «I musicanti di Brema»), *Бремен* in Russian and Ukrainian,
+  *بريمن* in Arabic. Postal addresses keep the German exactly (Am Dobben 14–16, 28203 Bremen).
+- Names: CASA, telc Deutsch B2, telc Deutsch C1 Hochschule, Netzwerk neu, Kontext,
   Klett, Goethe, FileMaker, Google, WhatsApp. **Bildungszeit** keeps its German name; where the
   German explains it, explain it (Bremen's paid leave for further training). **Fachsprachprüfung**
   keeps its German name, with the language's word for it after it the first time a text uses it.
@@ -98,7 +101,7 @@ One name for each thing, in every text of a language.
 | Intensivkurs | intensive course | curso intensivo | corso intensivo | yoğun kurs | интенсивный курс | інтенсивний курс | دورة مكثفة |
 | Abendkurs | evening course | curso vespertino | corso serale | akşam kursu | вечерний курс | вечірній курс | دورة مسائية |
 | Spezialkurse, Modul | special courses, module | cursos especiales, módulo | corsi speciali, modulo | özel kurslar, modül | специальные курсы, модуль | спеціальні курси, модуль | دورات خاصة، وحدة |
-| Deutsch für Pflege und Medizin | German for nursing and medicine | alemán para enfermería y medicina | tedesco per l’assistenza infermieristica e la medicina | hemşirelik ve tıp için Almanca | немецкий для медсестринского дела и медицины | німецька для медсестринства й медицини | الألمانية للتمريض والطب |
+| Deutsch für Pflege und Medizin | German for nursing and medicine | alemán para enfermería y medicina | tedesco per infermieristica e medicina | hemşirelik ve tıp için Almanca | немецкий для медсестринского дела и медицины | німецька для медсестринства й медицини | الألمانية للتمريض والطب |
 | Firmenunterricht | in-company teaching | clases en la empresa | corsi in azienda | şirkete özel ders | корпоративное обучение | корпоративне навчання | دروس داخل الشركات |
 | Deutsch für Gruppen | classes for groups | clases para grupos | corsi per gruppi | gruplar için dersler | занятия для групп | заняття для груп | دروس للمجموعات |
 | Prüfungsvorbereitung | exam preparation | preparación para el examen | preparazione all’esame | sınava hazırlık | подготовка к экзамену | підготовка до іспиту | التحضير للامتحان |
@@ -130,3 +133,12 @@ One name for each thing, in every text of a language.
   checked page by page.
 - What is not in the catalog still needs translating then: page titles and descriptions for
   search, the next-intl messages, form errors and emails. The legal pages stay German/English.
+- Found by the first run (2026-10-11), to settle at go-live:
+  - The courses page's „{de} Wege zum gleichen Ziel" gets its number word from the same
+    translations (`courseCountWord`, through `pick`), but in Russian, Ukrainian and Arabic the
+    noun after a number changes with it; the translations are written for today's count, so
+    check the heading with a filter that leaves two to four formats.
+  - The language's own locale tag (`tr_TR`, `ar` …) goes into `localeTags` in
+    `src/i18n/routing.ts`; the routing file is not copy.
+  - `src/config/content/accommodation-checkin-form.ts` has a German note that stops mid-sentence
+    and asks CASA for the wording; every language carries the same gap until CASA answers.

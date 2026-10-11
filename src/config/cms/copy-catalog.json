@@ -4204,26 +4204,6 @@
    "/placement-test"
   ]
  },
- "t.de-de.npgstg": {
-  "de": "de_DE",
-  "en": "en_GB",
-  "files": [
-   "src/i18n/routing.ts"
-  ],
-  "pages": [
-   "*"
-  ]
- },
- "t.de.7azju6": {
-  "de": "de",
-  "en": "en",
-  "files": [
-   "src/i18n/routing.ts"
-  ],
-  "pages": [
-   "*"
-  ]
- },
  "t.dein-beruf-optional.zrhdqo": {
   "de": "Dein Beruf (optional)",
   "en": "Your job (optional)",

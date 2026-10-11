@@ -74,6 +74,17 @@ function problem(code, slot, text) {
   return null;
 }
 
+/**
+ * A fragment the page joins to its neighbours ("Kurse für ", " und ") needs
+ * its spaces. A translator who wrote edge spaces meant them (Arabic writes
+ * " و" with none after, since the word joins the next); one who wrote none gets
+ * the German's.
+ */
+function edges(german, text) {
+  if (/^\s|\s$/.test(text)) return text;
+  return `${/^\s*/.exec(german)[0]}${text}${/\s*$/.exec(german)[0]}`;
+}
+
 /** The stored file with translations that left the site removed, and moved keys carried over. */
 function reconcile(code) {
   const stored = read(fileOf(code), {});
@@ -192,7 +203,7 @@ function merge() {
           refused += 1;
           continue;
         }
-        next[key] = { de: slot.defaults.de, text: text.trim() };
+        next[key] = { de: slot.defaults.de, text: edges(slot.defaults.de, text) };
         added += 1;
       }
     }

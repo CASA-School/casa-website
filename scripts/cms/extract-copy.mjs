@@ -79,6 +79,8 @@ const EXCLUDE = [
   /^src\/components\/placement\//,
   /^src\/app\/\(site\)\/\[locale\]\/placement-test\/(test|result)\//,
   /^src\/config\/seo-pages/,
+  // Locale tags and codes (de_DE, en), not copy.
+  /^src\/i18n\//,
   /__tests__|\.test\./,
 ];
 
