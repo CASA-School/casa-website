@@ -1,11 +1,13 @@
+import { PREPARED_LOCALES } from '@/config/cms/translation-locales';
 import { defaultLocale, locales } from '@/i18n/routing';
 
 /**
  * The languages the website editor writes.
  *
- * Every language the public site serves (`src/i18n/routing.ts`), plus any in
- * `CMS_EXTRA_LOCALES` (comma-separated codes, e.g. `tr,ar`): languages being
- * prepared before they are routed. Their texts are written and translated in the
+ * Every language the public site serves (`src/i18n/routing.ts`), then the
+ * prepared languages, translated in the repository but not routed yet
+ * (`src/config/cms/translation-locales.ts`), plus any in `CMS_EXTRA_LOCALES`
+ * (comma-separated codes, e.g. `fa`): languages being prepared before they are routed. Their texts are written and translated in the
  * editor long before a page renders them, so adding a language to the site is a
  * routing change on top of finished copy. German is the source every other
  * language is translated from and checked against.
@@ -33,10 +35,12 @@ export function nativeName(code: string): string {
   }
 }
 
-export function cmsLocales(extra: string | undefined = process.env.CMS_EXTRA_LOCALES): CmsLocale[] {
+export function cmsLocales(
+  extra: string | undefined = process.env.CMS_EXTRA_LOCALES,
+  prepared: readonly string[] = PREPARED_LOCALES
+): CmsLocale[] {
   const routed = locales.map((code) => code as string);
-  const planned = (extra ?? '')
-    .split(',')
+  const planned = [...prepared, ...(extra ?? '').split(',')]
     .map((code) => code.trim())
     .filter((code) => CODE.test(code) && !routed.includes(code));
 

@@ -4,6 +4,7 @@ import { draftMode } from 'next/headers';
 import { cache } from 'react';
 
 import { COURSE_PAGE_COPY, type CoursePageCopyKey } from '@/config/cms/course-page-copy';
+import { PREPARED_LOCALES } from '@/config/cms/translation-locales';
 import type { ContentLocale } from '@/lib/content/types';
 import { getDb, logDatabaseFallback } from '@/lib/db/server';
 
@@ -136,8 +137,12 @@ const loadFactsOnce = cache((locale: ContentLocale) => loadFacts(locale));
  */
 export async function prepareCopy(locale: ContentLocale): Promise<{ editing: boolean; values: Values; facts: Facts }> {
   const [loaded, facts] = await Promise.all([loadValues(), loadFactsOnce(locale)]);
-  fillCopyStore(loaded.values, loaded.editing, locale, facts.values);
-  return { ...loaded, facts };
+  // A prepared language (translation-locales.ts) reads its repository translations under any edit.
+  const values = (PREPARED_LOCALES as readonly string[]).includes(locale)
+    ? new Map([...(await import('./translations')).translationValues(locale), ...loaded.values])
+    : loaded.values;
+  fillCopyStore(values, loaded.editing, locale, facts.values);
+  return { editing: loaded.editing, values, facts };
 }
 
 /** This language's edited values, for the client components' provider. */

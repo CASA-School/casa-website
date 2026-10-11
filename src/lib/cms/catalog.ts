@@ -4,6 +4,7 @@ import { FOOTER_TEXT_DE } from '@/config/footer-text';
 import { deNavText, navConfig } from '@/config/nav';
 
 import { copyKey } from './copy-key';
+import { translationsFor } from './translations';
 import { KIND_MAX, type SlotKind } from './slot-kinds';
 
 /**
@@ -131,7 +132,7 @@ export function catalog(): Map<string, CatalogSlot> {
       max: slotMax(kind, [de, en]),
       scope: where.scope,
       path: where.path,
-      defaults: { de, en },
+      defaults: { ...translationsFor(key), de, en },
     });
   };
 
@@ -144,7 +145,7 @@ export function catalog(): Map<string, CatalogSlot> {
       max: slotMax(entry.kind, [entry.de, entry.en], 'max' in entry ? (entry.max as number) : undefined),
       scope: ALL_COURSE_PAGES,
       path: null,
-      defaults: { de: entry.de, en: entry.en },
+      defaults: { ...translationsFor(key), de: entry.de, en: entry.en },
     });
   }
 

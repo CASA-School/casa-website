@@ -137,7 +137,7 @@ describe('editor pages', () => {
 
 describe('languages', () => {
   it('writes the routed languages first, German as the source, and prepares more', () => {
-    const locales = cmsLocales('tr, ar, de, xx-invalid-');
+    const locales = cmsLocales('tr, ar, de, xx-invalid-', []);
     expect(locales.map((locale) => [locale.code, locale.routed, locale.source, locale.dir])).toEqual([
       ['de', true, true, 'ltr'],
       ['en', true, false, 'ltr'],
