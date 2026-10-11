@@ -60,6 +60,7 @@ npm run admin:password  # new password for ADMIN_EMAIL when no owner can sign in
 npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
 npm run db:azure -- migrate   # migrations + seeds on the Azure database, run as a job inside Azure
 npm run cms:extract  # refreshes the website editor's catalog of the site's copy
+npm run cms:translations  # the six prepared languages: status, `-- todo`, `-- merge` (docs/TRANSLATIONS.md)
 npm run placement:port  # re-ports the placement item bank from its source markdown
 ```
 
@@ -395,6 +396,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/PREMIUM_UI_REVIEW_2026-08-16.md` | **Current UI/design backlog.** Measured design-layer review across type, spacing, colour, shape, motion, primitives, media and composition, with a 10-step order of work |
 | `docs/DEPENDENCY_SECURITY_2026-08-16.md` | **Read before touching dependencies.** Advisory triage and resolution, why the CI audit gate is production-scope only, and the `ws` / `next-intl` reachability findings |
 | `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md` | Token comparison with the CASA student app and what should converge |
+| `docs/TRANSLATIONS.md` | **Read when the German changes.** The site is kept translated into tr, ar, es, it, ru, uk (prepared, not routed): the run, the brief, the glossary |
 | `docs/VOICE_AND_TONE.md` | How the public site writes in German (du) and British English |
 | `docs/TEAM_UPDATE_2026-06-23.md` | Team-facing status, demo flow, open decisions |
 | `docs/WEBAPP_REVIEW.md` | Historical Feb 2026 audit, largely superseded |
