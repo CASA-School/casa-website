@@ -24,7 +24,8 @@ import { CEFR_LADDER, filterCourses } from '@/lib/content/course-finder';
 import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 import { BandHeading } from '@/components/sections/band-heading';
-import { pickTree, say } from '@/lib/cms/copy';
+import { pick, pickTree, say } from '@/lib/cms/copy';
+import { stripTags } from '@/lib/cms/stega';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -287,6 +288,9 @@ export default async function CoursesPage({
 
     return words[featuredCourses.length] ?? { en: String(featuredCourses.length), de: String(featuredCourses.length) };
   })();
+  // The word in the page's language, so a prepared language (docs/TRANSLATIONS.md) does not show
+  // „Sieben"; untagged, since it sits inside the heading's own editable text.
+  const countWord = stripTags(pick(locale, courseCountWord));
 
   const courseRows = featuredCourses.map((course) => {
     /*
@@ -487,7 +491,7 @@ export default async function CoursesPage({
               eyebrow={say(locale, 'Kursauswahl', 'Choosing a course')}
               title={say(locale, 'Unsere Kursformate im Überblick', 'Our course formats at a glance')}
               description={
-                say(locale, '{de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.', '{en} ways to reach the same goal. What changes is the rhythm; the standard stays the same.', { de: courseCountWord.de, en: courseCountWord.en })
+                say(locale, '{de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.', '{en} ways to reach the same goal. What changes is the rhythm; the standard stays the same.', { de: countWord, en: countWord })
               }
             />
             {/* A level chosen on the staircase narrows the list; say so, and offer the way back. */}
