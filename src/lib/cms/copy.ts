@@ -131,11 +131,15 @@ export function resolvers(
 /** The fields that name an item in a list, so the two languages pair by item, not by position. */
 const IDENTITY = ['slug', 'id', 'code', 'key'] as const;
 
+/** A language marker inside an id ("faq-de-q1", "narges-intensive-en"): the same item in both lists. */
+const LANGUAGE_MARK = /(^|[-_])(?:de|en)(?=[-_]|$)/g;
+
 function identityOf(item: unknown): string | null {
   if (!item || typeof item !== 'object') return null;
   for (const field of IDENTITY) {
     const value = (item as Record<string, unknown>)[field];
-    if (typeof value === 'string' || typeof value === 'number') return `${field}:${value}`;
+    if (typeof value === 'string') return `${field}:${value.replace(LANGUAGE_MARK, '')}`;
+    if (typeof value === 'number') return `${field}:${value}`;
   }
   return null;
 }

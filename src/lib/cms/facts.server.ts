@@ -1,13 +1,13 @@
 import 'server-only';
 
 import { SPECIAL_COURSE_CONSTANTS } from '@/config/courses/special-course-modules';
-import { formatCoursePrice } from '@/lib/content/course-pricing';
 import { getCourseFinderData, getCourseRegistrationCatalog, getExamCatalog } from '@/lib/content/repository';
 import type { ContentLocale } from '@/lib/content/types';
 
 import {
   COURSE_GROUPS,
   PRICE_LIST_DEFS,
+  PRICE_WORDS,
   examGroup,
   formatDay,
   formatEuro,
@@ -20,6 +20,9 @@ import {
  * The live values (facts.ts), read from where each fact is kept: course types
  * and terms from the database (the in-repo fixtures without one), exam days and
  * fees, the price list. Formatted for the page's language.
+ *
+ * A prepared language (translation-locales.ts), previewed in the editor, reads
+ * the English data and writes each value its own way: „desde 378 €", „от 378 €".
  *
  * Read once per language and kept for fifteen seconds per process, like the
  * live texts: a page render costs no extra query, and a new term, start date or
@@ -35,7 +38,18 @@ export type Facts = { defs: FactDef[]; values: FactValues };
 
 const store = globalThis as typeof globalThis & { casaFacts?: Map<string, { until: number; facts: Facts }> };
 
-async function build(locale: ContentLocale): Promise<Facts> {
+type PriceSource = { default_price: number | string; pricing_mode?: string | null };
+
+function priceIn(course: PriceSource, locale: string): string {
+  const words = PRICE_WORDS[locale] ?? PRICE_WORDS.en;
+  const mode = course.pricing_mode ?? 'from';
+  if (mode === 'on_request') return words.onRequest;
+  const amount = formatEuro(Number(course.default_price), locale);
+  return mode === 'fixed' ? amount : words.from(amount);
+}
+
+async function build(locale: string): Promise<Facts> {
+  const data: ContentLocale = locale === 'de' ? 'de' : 'en';
   const defs: FactDef[] = [];
   const values: FactValues = {};
   const add = (def: FactDef, value: string | null | undefined) => {
@@ -44,15 +58,15 @@ async function build(locale: ContentLocale): Promise<Facts> {
   };
 
   const [finder, catalog, exams] = await Promise.all([
-    getCourseFinderData(locale),
-    getCourseRegistrationCatalog(locale),
-    getExamCatalog(locale),
+    getCourseFinderData(data),
+    getCourseRegistrationCatalog(data),
+    getExamCatalog(data),
   ]);
 
   for (const course of finder.courses) {
     const group = COURSE_GROUPS[course.slug] ?? course.slug;
     const id = `course.${course.slug}`;
-    add({ id: `${id}.price`, group, label: 'Price', source: 'Course types' }, formatCoursePrice(course, locale));
+    add({ id: `${id}.price`, group, label: 'Price', source: 'Course types' }, priceIn(course, locale));
     add(
       { id: `${id}.lessons`, group, label: 'Lessons a week', source: 'Course types' },
       course.lessons_per_week > 0 ? String(course.lessons_per_week) : null
@@ -102,7 +116,7 @@ async function build(locale: ContentLocale): Promise<Facts> {
   return { defs, values };
 }
 
-export async function loadFacts(locale: ContentLocale): Promise<Facts> {
+export async function loadFacts(locale: string): Promise<Facts> {
   const cache = (store.casaFacts ??= new Map());
   const cached = cache.get(locale);
   if (cached && Date.now() < cached.until) return cached.facts;

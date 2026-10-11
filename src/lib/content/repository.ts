@@ -2,7 +2,8 @@ import { getDb, logDatabaseFallback } from '@/lib/db/server';
 import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import { heroSpecsByLocale } from '@/config/content/heroes';
 import { proofMetricsByLocale } from '@/config/content/proof-metrics';
-import { socialProofById, socialProofByLocale, socialProofForCourse } from '@/config/content/social-proof';
+import { socialProofById, socialProofFor, socialProofForCourse } from '@/config/content/social-proof';
+import { faqText } from '@/config/content/faq';
 import { courseNarrativesByLocale } from '@/config/content/course-narratives';
 import { examNarrativesByLocale } from '@/config/content/exam-narratives';
 import { accommodationNarrativesByLocale } from '@/config/content/accommodation-narratives';
@@ -59,7 +60,7 @@ import type {
   TeamSpotlight,
   CulturalProgramItem,
 } from '@/lib/content/types';
-import { pickTree, say } from '@/lib/cms/copy';
+import { pick, pickTree, say } from '@/lib/cms/copy';
 
 function byLocale<T extends { locale: ContentLocale }>(items: T[], locale: ContentLocale): T[] {
   const localized = items.filter((item) => item.locale === locale);
@@ -186,7 +187,7 @@ function filterPublicCourseTypes(courses: CourseTypeRow[]) {
 function applyPublicCourseDisplayNames(courses: CourseTypeRow[], locale: ContentLocale) {
   return courses.map((course) => ({
     ...course,
-    name: publicCourseDisplayNames[course.slug]?.[locale] ?? course.name,
+    name: pick(locale, publicCourseDisplayNames[course.slug]) || course.name,
   }));
 }
 
@@ -506,7 +507,7 @@ export function getProofMetrics(locale: ContentLocale): ProofMetric[] {
 }
 
 export function getSocialProof(locale: ContentLocale): SocialProofItem[] {
-  return pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
+  return socialProofFor(locale);
 }
 
 /**
@@ -1383,8 +1384,8 @@ export async function getFaq(locale: ContentLocale): Promise<FaqViewItem[]> {
           id: item.id,
           locale,
           category: normalizeCategory(item.category),
-          question: item.question,
-          answer: item.answer,
+          question: faqText(locale, item.question),
+          answer: faqText(locale, item.answer),
         }));
       }
     } catch (error) {
@@ -1804,6 +1805,6 @@ export function getLocalizedCourseInstances(courseTypeId: string): CourseInstanc
 }
 
 export function getLocalizedSocialProof(locale: ContentLocale): SocialProofItem[] {
-  const localized = pickTree(locale, socialProofByLocale) ?? socialProofByLocale.en;
+  const localized = socialProofFor(locale);
   return byLocale(localized, locale);
 }

@@ -315,6 +315,14 @@
    "/registration/course"
   ]
  },
+ "t.ab.zuehjf": {
+  "de": "ab {amount}",
+  "en": "from {amount}",
+  "files": [
+   "src/lib/content/course-pricing.ts"
+  ],
+  "pages": []
+ },
  "t.abend.1cpj55e": {
   "de": "Abend",
   "en": "Evening",
@@ -1621,7 +1629,8 @@
   "en": "On request",
   "files": [
    "src/app/(site)/[locale]/accommodation/[type]/page.tsx",
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx",
+   "src/lib/content/course-pricing.ts"
   ],
   "pages": [
    "/accommodation/[type]",
@@ -2844,6 +2853,14 @@
   "pages": [
    "/courses/[slug]"
   ]
+ },
+ "t.bitte-erfragen.1531hyn": {
+  "de": "Bitte erfragen",
+  "en": "Please ask",
+  "files": [
+   "src/lib/content/course-pricing.ts"
+  ],
+  "pages": []
  },
  "t.bitte-lade-deinen-lebenslauf.1dp57ez": {
   "de": "Bitte lade deinen Lebenslauf hoch.",
@@ -11290,6 +11307,14 @@
    "/"
   ]
  },
+ "t.ja.1xz3lgi": {
+  "de": "Ja",
+  "en": "Yes",
+  "files": [
+   "src/lib/content/course-pricing.ts"
+  ],
+  "pages": []
+ },
  "t.jahre-jung-sind-unsere.156993b": {
   "de": "Jahre jung sind unsere Lernenden",
   "en": "years young, from our youngest learners to our oldest",
@@ -14530,6 +14555,14 @@
    "/"
   ]
  },
+ "t.nein.2srw4l": {
+  "de": "Nein",
+  "en": "No",
+  "files": [
+   "src/lib/content/course-pricing.ts"
+  ],
+  "pages": []
+ },
  "t.neu-beginnen.1yx0aj2": {
   "de": "Neu beginnen",
   "en": "Start again",
@@ -15487,6 +15520,14 @@
   "pages": [
    "/courses/[slug]"
   ]
+ },
+ "t.preis.lfga1i": {
+  "de": "Preis",
+  "en": "Price",
+  "files": [
+   "src/lib/content/course-pricing.ts"
+  ],
+  "pages": []
  },
  "t.preise-gelten-pro-person.ctsii": {
   "de": "Preise gelten pro Person und sind freibleibend. Das verbindliche Angebot bestätigen wir schriftlich, sobald uns Termine und Gruppengröße vorliegen.",

@@ -24,6 +24,9 @@ export type CmsLocale = {
 };
 
 const RTL = new Set(['ar', 'fa', 'he', 'ur']);
+
+/** Which way a language is written. */
+export const cmsDirection = (code: string): 'ltr' | 'rtl' => (RTL.has(code.split('-')[0]) ? 'rtl' : 'ltr');
 const CODE = /^[a-z]{2,3}(-[A-Z]{2})?$/;
 
 export function nativeName(code: string): string {
@@ -48,7 +51,7 @@ export function cmsLocales(
     code,
     label: nativeName(code),
     routed: routed.includes(code),
-    dir: RTL.has(code.split('-')[0]) ? 'rtl' : 'ltr',
+    dir: cmsDirection(code),
     source: code === defaultLocale,
   }));
 }

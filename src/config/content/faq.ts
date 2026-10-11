@@ -354,6 +354,24 @@ function toFaqItem(entry: FaqSource, locale: ContentLocale): FaqViewItem {
   };
 }
 
+const PAIRS = new Map<string, { de: string; en: string }>();
+for (const entry of FAQ) {
+  for (const pair of [entry.question, entry.answer]) {
+    PAIRS.set(pair.de, pair);
+    PAIRS.set(pair.en, pair);
+  }
+}
+
+/**
+ * A question or answer read from the database (faq_items), through the website
+ * editor when it is one the code knows: edits, tags and the prepared languages
+ * apply as they do to the fixtures. Anything else is shown as stored.
+ */
+export function faqText(locale: ContentLocale, text: string): string {
+  const pair = PAIRS.get(text);
+  return pair ? pick(locale, pair) : text;
+}
+
 export const faqByLocale: Record<ContentLocale, FaqViewItem[]> = {
   en: FAQ.map((entry) => toFaqItem(entry, 'en')),
   de: FAQ.map((entry) => toFaqItem(entry, 'de')),

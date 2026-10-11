@@ -19,6 +19,18 @@ follows.
   German in the code changes, the key changes and the old translation stops matching. That is
   how a run knows what to do: exactly the texts whose German is new.
 
+## Seeing them on the pages (editor preview, 2026-10-11)
+
+In the website editor, pick a prepared language in the language menu ("Preview only"): the
+preview reloads with every page speaking that language, its prices and dates written its way
+and Arabic right to left. It is the page's English address underneath, with the language's
+texts standing in for the English (`overlayLanguage` in `src/lib/cms/content.server.ts`). It works
+only in draft mode, which only the editor's preview has: `/api/cms/preview-language` refuses
+anyone else, and the cookie it sets (`casa_preview_language`) means nothing without draft mode.
+Visitors, search engines and the public language menu see German and English only. Whatever
+still shows in English there is a text that does not go through `say`/`pick`/`pickTree` yet
+(the learners' quotes stay in the language they were written in, on purpose).
+
 ## The run (do this every time Rahman says the German changed, or "run the translations")
 
 1. The German (and its English) are updated in the code. Then `npm run cms:extract`.
@@ -31,8 +43,9 @@ follows.
    following the brief below. **Two passes, by different agents:** a translator, then an
    independent reviewer who reads German, English and the translation side by side and
    corrects in place (accuracy, register, terminology, length, naturalness). For a big run, one
-   translator and one reviewer per language and half; for a handful of texts, one agent per
-   language, then a reviewer.
+   translator and one reviewer per language and half; for a handful of texts, one translator
+   for all six languages, then one reviewer for all six. Agents keep helper scripts in their own
+   scratchpad folder, and texts the page joins (split sentences) are checked across batches.
 5. `npm run cms:translations -- merge`: refuses any text that lost or invented a `{placeholder}`,
    is empty, or is not in the language's script; stores the rest; drops translations whose text
    left the site. Fix what it refuses and merge again.

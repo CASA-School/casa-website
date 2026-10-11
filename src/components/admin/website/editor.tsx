@@ -287,13 +287,19 @@ export function WebsiteEditor({
     openPath(localizeHref(path ?? '/courses/intensive-german', 'de'));
   }
 
+  /*
+   * A language the site serves opens the page at its address in that language.
+   * A prepared one previews over the English page: the preview-language route
+   * (only open in draft mode) sets it, and the page then speaks it, here only.
+   * Either way through that route, so it also clears a prepared language.
+   */
   function pickLanguage(code: string) {
     setPanel(null);
     setWorkLocale(code);
     const locale = locales.find((candidate) => candidate.code === code);
-    if (!locale?.routed || !page) return;
-    const target = localizeHref(toInternalPath(page.path).internalPath, code as ContentLocale);
-    if (target !== page.path) openPath(target);
+    if (!locale || !page || page.lang === code) return;
+    const target = localizeHref(toInternalPath(page.path).internalPath, (locale.routed ? code : 'en') as ContentLocale);
+    openPath(`/api/cms/preview-language?lang=${encodeURIComponent(code)}&path=${encodeURIComponent(target)}`);
   }
 
   async function undo(releaseId: string) {

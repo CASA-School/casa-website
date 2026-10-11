@@ -1,3 +1,5 @@
+import { say } from '@/lib/cms/copy';
+
 import type { ContentLocale, CourseTypeRow } from './types';
 
 type PriceSource = Pick<CourseTypeRow, 'default_price' | 'currency'> &
@@ -45,21 +47,18 @@ export function formatCoursePrice(course: PriceSource, locale: ContentLocale) {
   const mode = course.pricing_mode ?? 'from';
 
   if (mode === 'on_request') {
-    return locale === 'de' ? 'Auf Anfrage' : 'On request';
+    return say(locale, 'Auf Anfrage', 'On request');
   }
 
   const amount = formatAmount(course.default_price, course.currency, locale);
 
-  return mode === 'fixed' ? amount : locale === 'de' ? `ab ${amount}` : `from ${amount}`;
+  return mode === 'fixed' ? amount : say(locale, 'ab {amount}', 'from {amount}', { amount });
 }
 
 /** Label for the price row itself, since "Price from" is wrong for quoted products. */
 export function coursePriceLabel(course: PriceSource, locale: ContentLocale) {
-  if ((course.pricing_mode ?? 'from') === 'on_request') {
-    return locale === 'de' ? 'Preis' : 'Price';
-  }
-
-  return locale === 'de' ? 'Preis' : 'Price';
+  void course;
+  return say(locale, 'Preis', 'Price');
 }
 
 /** True when the product is quoted rather than sold at a list price. */
@@ -79,12 +78,12 @@ export function courseVisaEligibility(course: PriceSource): boolean | null {
 
 export function formatVisaEligibility(value: boolean | null, locale: ContentLocale) {
   if (value === null) {
-    return locale === 'de' ? 'Bitte erfragen' : 'Please ask';
+    return say(locale, 'Bitte erfragen', 'Please ask');
   }
 
   if (value) {
-    return locale === 'de' ? 'Ja' : 'Yes';
+    return say(locale, 'Ja', 'Yes');
   }
 
-  return locale === 'de' ? 'Nein' : 'No';
+  return say(locale, 'Nein', 'No');
 }
