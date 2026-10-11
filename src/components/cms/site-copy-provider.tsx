@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
-import { resolvers, type Pick, type PickTree, type Say, type WithFacts } from '@/lib/cms/copy';
+import { resolvers, type IntlFor, type Pick, type PickTree, type Say, type WithFacts } from '@/lib/cms/copy';
 import type { FactValues } from '@/lib/cms/facts';
 
 /**
@@ -14,7 +14,7 @@ import type { FactValues } from '@/lib/cms/facts';
  * Without a provider — a test, the workspace — every text is its default.
  */
 
-type SiteCopy = { say: Say; pick: Pick; pickTree: PickTree; withFacts: WithFacts };
+type SiteCopy = { say: Say; pick: Pick; pickTree: PickTree; withFacts: WithFacts; intl: IntlFor };
 
 const defaults = resolvers(new Map(), false);
 const SiteCopyContext = createContext<SiteCopy>(defaults);
@@ -24,6 +24,7 @@ export function SiteCopyProvider({
   editing,
   values,
   facts,
+  display = null,
   children,
 }: {
   locale: string;
@@ -32,6 +33,8 @@ export function SiteCopyProvider({
   values: Record<string, string>;
   /** Live value → its text in `locale` (src/lib/cms/facts.ts). */
   facts: FactValues;
+  /** The prepared language the editor previews, for dates and numbers. */
+  display?: string | null;
   children: ReactNode;
 }) {
   const copy = useMemo(
@@ -39,9 +42,10 @@ export function SiteCopyProvider({
       resolvers(
         new Map(Object.entries(values).map(([key, value]) => [`${key}|${locale}`, value])),
         editing,
-        () => facts
+        () => facts,
+        display
       ),
-    [values, editing, locale, facts]
+    [values, editing, locale, facts, display]
   );
   return <SiteCopyContext.Provider value={copy}>{children}</SiteCopyContext.Provider>;
 }

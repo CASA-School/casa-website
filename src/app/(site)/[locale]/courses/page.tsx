@@ -24,7 +24,7 @@ import { CEFR_LADDER, filterCourses } from '@/lib/content/course-finder';
 import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 import { BandHeading } from '@/components/sections/band-heading';
-import { pick, pickTree, say } from '@/lib/cms/copy';
+import { intl, pick, pickTree, say } from '@/lib/cms/copy';
 import { stripTags } from '@/lib/cms/stega';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -48,7 +48,7 @@ const SCHEDULE_VALUES = ['intensive', 'evening', 'daytime', 'flexible'] as const
 const GOAL_VALUES = ['exam', 'medical', 'professional', 'general'] as const;
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

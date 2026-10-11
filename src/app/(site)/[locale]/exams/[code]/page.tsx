@@ -18,7 +18,7 @@ import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
 import { bremenDate } from '@/lib/appointments/schedule';
-import { pickTree, say } from '@/lib/cms/copy';
+import { intl, pickTree, say } from '@/lib/cms/copy';
 
 type ExamDetailPageProps = {
   params: Promise<{ code: string }>;
@@ -26,7 +26,7 @@ type ExamDetailPageProps = {
 };
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

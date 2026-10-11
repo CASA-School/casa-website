@@ -9,6 +9,7 @@
  * picker shows a schedule once over the dates that share it. The repository
  * builds its labels here and the wizard formats its dates here. Client-safe.
  */
+import { intl } from '@/lib/cms/copy';
 import type { ContentLocale, TermDaytime, TermSchedule } from '@/lib/content/types';
 
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -82,7 +83,7 @@ const DAYTIME_LABELS: Record<TermDaytime, Record<ContentLocale, string>> = {
 export const daytimeLabel = (daytime: TermDaytime, locale: ContentLocale) => DAYTIME_LABELS[daytime][locale];
 
 const TIME_ZONE = 'Europe/Berlin';
-const localeTag = (locale: ContentLocale) => (locale === 'de' ? 'de-DE' : 'en-GB');
+const localeTag = (locale: ContentLocale) => (intl(locale));
 
 /** A `YYYY-MM-DD` day at noon UTC, the same calendar day in Bremen; a timestamp as it is. */
 const instant = (value: string) => (/^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00Z`) : new Date(value));

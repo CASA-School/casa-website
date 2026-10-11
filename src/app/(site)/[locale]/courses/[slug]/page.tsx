@@ -37,7 +37,7 @@ import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/co
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { getPageContent } from '@/lib/cms/content.server';
 import { createPublicMetadata } from '@/lib/seo';
-import { pick, pickTree, say } from '@/lib/cms/copy';
+import { intl, pick, pickTree, say } from '@/lib/cms/copy';
 
 /* What each of the Bremen Town Musicians says in the group page's hero. */
 const MUSICIAN_VOICES = {
@@ -48,7 +48,7 @@ const MUSICIAN_VOICES = {
 } as const;
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

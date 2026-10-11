@@ -13,14 +13,14 @@ import { isDatabaseConfigured } from '@/lib/db/env';
 import { createPublicMetadata } from '@/lib/seo';
 
 import { ApplySection } from './apply-section';
-import { pickTree, say } from '@/lib/cms/copy';
+import { intl, pickTree, say } from '@/lib/cms/copy';
 
 type CareerDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

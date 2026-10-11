@@ -1,7 +1,7 @@
 import { cache } from 'react';
 
 import { copyKey, fill } from './copy-key';
-import { fillFacts, priceListFacts, type FactValues } from './facts';
+import { fillFacts, intlTagFor, priceListFacts, type FactValues } from './facts';
 import { tagText } from './stega';
 
 /**
@@ -32,22 +32,30 @@ export type CopyValues = ReadonlyMap<string, string>;
 /** The live values for a language; the price list's alone when nothing loaded more. */
 export type FactsFor = (locale: string) => FactValues;
 
-type Store = { editing: boolean; values: CopyValues; facts: Record<string, FactValues>; bound?: ReturnType<typeof resolvers> };
+type Store = {
+  editing: boolean;
+  values: CopyValues;
+  facts: Record<string, FactValues>;
+  /** The prepared language the editor previews (preview-language.server.ts), if any. */
+  display: string | null;
+  bound?: ReturnType<typeof resolvers>;
+};
 
-const requestStore = cache((): Store => ({ editing: false, values: new Map(), facts: {} }));
+const requestStore = cache((): Store => ({ editing: false, values: new Map(), facts: {}, display: null }));
 
 /** Fills this request's store. Called by `prepareCopy`, nothing else. */
-export function fillCopyStore(values: CopyValues, editing: boolean, locale: string, facts: FactValues): void {
+export function fillCopyStore(values: CopyValues, editing: boolean, locale: string, facts: FactValues, display: string | null = null): void {
   const store = requestStore();
   store.values = values;
   store.editing = editing;
   store.facts[locale] = facts;
+  store.display = display;
   store.bound = undefined;
 }
 
 function bound() {
   const store = requestStore();
-  store.bound ??= resolvers(store.values, store.editing, (locale) => store.facts[locale] ?? priceListFacts(locale));
+  store.bound ??= resolvers(store.values, store.editing, (locale) => store.facts[locale] ?? priceListFacts(locale), store.display);
   return store.bound;
 }
 
@@ -60,14 +68,18 @@ export type Pick = (
 export type PickTree = <T>(locale: string, byLocale: { de: T; en: T } & Partial<Record<string, T>>) => T;
 /** A value shown but not edited — an amount, a label built in code — with its live values filled in. */
 export type WithFacts = (locale: string, text: string) => string;
+/** The Intl locale for a page's dates and numbers: the previewed language's own when there is one. */
+export type IntlFor = (locale: string) => string;
 
 /** The three resolvers, bound to a set of values. The provider builds the same from context. */
 export function resolvers(
   values: CopyValues,
   editing: boolean,
-  factsFor: FactsFor = priceListFacts
-): { say: Say; pick: Pick; pickTree: PickTree; withFacts: WithFacts } {
+  factsFor: FactsFor = priceListFacts,
+  display: string | null = null
+): { say: Say; pick: Pick; pickTree: PickTree; withFacts: WithFacts; intl: IntlFor } {
   const withFacts: WithFacts = (locale, text) => fillFacts(text, factsFor(locale));
+  const intl: IntlFor = (locale) => intlTagFor(display ?? locale);
 
   const say: Say = (locale, de, en, vars) => {
     const key = copyKey(de, en);
@@ -125,7 +137,7 @@ export function resolvers(
     return walk(byLocale.de, byLocale.en, own) as T;
   };
 
-  return { say, pick, pickTree, withFacts };
+  return { say, pick, pickTree, withFacts, intl };
 }
 
 /** The fields that name an item in a list, so the two languages pair by item, not by position. */
@@ -203,3 +215,5 @@ export const pick: Pick = (locale, pair, vars) => bound().pick(locale, pair, var
 export const pickTree: PickTree = (locale, byLocale) => bound().pickTree(locale, byLocale);
 
 export const withFacts: WithFacts = (locale, text) => bound().withFacts(locale, text);
+
+export const intl: IntlFor = (locale) => bound().intl(locale);

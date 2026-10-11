@@ -85,8 +85,8 @@ const CATEGORY_ORDER = ['city', 'culture', 'science', 'sport', 'daytrip'] as con
 const DEFAULT_MODULES: GruppenModuleId[] = GRUPPEN_MODULES.map((m) => m.id);
 const DEFAULT_ACTIVITIES: GruppenActivityId[] = ['cityrallye', 'weserstadion', 'universum'];
 
-function formatCurrency(value: number, locale: ContentLocale) {
-  return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+function formatCurrency(value: number, tag: string) {
+  return new Intl.NumberFormat(tag, {
     style: 'currency',
     currency: CURRENCY,
     minimumFractionDigits: 0,
@@ -147,7 +147,7 @@ export function EselBuilder({
   priceDisplay?: EselPriceDisplay;
   inquiryHref?: string;
 }) {
-  const { pick, pickTree } = useSiteCopy();
+  const { intl, pick, pickTree } = useSiteCopy();
   const t = pickTree(locale, copy);
   const showLinePrices = priceDisplay === 'detailed';
 
@@ -254,7 +254,7 @@ export function EselBuilder({
                         </span>
                         {showLinePrices ? (
                           <span className="text-sm tabular-nums text-[var(--casa-ink)]">
-                            {formatCurrency(moduleEntry.priceByWeeks[weeks], locale)}
+                            {formatCurrency(moduleEntry.priceByWeeks[weeks], intl(locale))}
                           </span>
                         ) : null}
                       </span>
@@ -321,7 +321,7 @@ export function EselBuilder({
                             </span>
                             {showLinePrices ? (
                               <span className="shrink-0 text-sm tabular-nums text-[var(--casa-muted)]">
-                                {formatCurrency(activity.price, locale)}
+                                {formatCurrency(activity.price, intl(locale))}
                               </span>
                             ) : null}
                           </label>
@@ -362,10 +362,10 @@ export function EselBuilder({
             className="flex items-baseline gap-3"
           >
             <span className="text-3xl font-black leading-none tabular-nums text-[var(--casa-ink)]">
-              {formatCurrency(quote.perPerson, locale)}
+              {formatCurrency(quote.perPerson, intl(locale))}
             </span>
             <span className="text-sm text-[var(--casa-muted)]">
-              {t.perPerson} · {formatCurrency(quote.groupTotal, locale)} {t.groupTotal(headCount)}
+              {t.perPerson} · {formatCurrency(quote.groupTotal, intl(locale))} {t.groupTotal(headCount)}
             </span>
           </p>
 

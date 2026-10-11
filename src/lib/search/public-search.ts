@@ -1,3 +1,4 @@
+import { intl } from '@/lib/cms/copy';
 import type { ContentLocale } from '@/lib/content/types';
 import { getCoursePath } from '@/lib/content/course-routes';
 import { getCourseFinderData, getExamCatalog, getFaq, getNewsList } from '@/lib/content/repository';
@@ -127,7 +128,7 @@ export async function searchPublicContent({
     getNewsList(locale),
   ]);
 
-  const dateFormatter = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  const dateFormatter = new Intl.DateTimeFormat(intl(locale), {
     dateStyle: 'medium',
     timeZone: 'Europe/Berlin',
   });

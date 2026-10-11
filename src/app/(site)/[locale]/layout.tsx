@@ -126,7 +126,7 @@ export default async function RootLayout({
       >
         <JsonLdScript id="site-schema" data={siteGraph(locale)} />
         <NextIntlClientProvider messages={messages}>
-          <SiteCopyProvider locale={locale} editing={editing} values={valuesForLocale(values, locale)} facts={facts.values}>
+          <SiteCopyProvider locale={locale} editing={editing} values={valuesForLocale(values, locale)} facts={facts.values} display={display}>
             <SiteShell contentLocale={contentLocale}>{children}</SiteShell>
           </SiteCopyProvider>
         </NextIntlClientProvider>

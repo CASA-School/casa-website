@@ -55,8 +55,8 @@ const copy = {
   },
 } as const;
 
-function formatCurrency(value: number, locale: ContentLocale) {
-  return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+function formatCurrency(value: number, tag: string) {
+  return new Intl.NumberFormat(tag, {
     style: 'currency',
     currency: CURRENCY,
     minimumFractionDigits: 0,
@@ -80,7 +80,7 @@ function formatCurrency(value: number, locale: ContentLocale) {
   board, transit pass, materials) is stated once, elsewhere on the page.
 */
 export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
-  const { pick, pickTree, say } = useSiteCopy();
+  const { intl, pick, pickTree, say } = useSiteCopy();
   const t = pickTree(locale, copy);
 
   return (
@@ -167,7 +167,7 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
                   ) : (
                     <>
                       <span className="block text-2xl font-bold leading-none tabular-nums text-[var(--casa-ink)]">
-                        {formatCurrency(item.priceFrom ?? 0, locale)}
+                        {formatCurrency(item.priceFrom ?? 0, intl(locale))}
                       </span>
                       <span className="mt-1 block text-xs text-[var(--casa-muted)]">
                         {t.from} · {t.perPerson}

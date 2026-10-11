@@ -68,9 +68,9 @@ export function AppointmentDialog({ locale }: { locale: ContentLocale }) {
 }
 
 function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: () => void }) {
-  const { pickTree } = useSiteCopy();
+  const { intl, pickTree } = useSiteCopy();
   const t = pickTree(locale, copy);
-  const language = locale === 'de' ? 'de-DE' : 'en-GB';
+  const language = intl(locale);
   const [days, setDays] = useState<AppointmentDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
