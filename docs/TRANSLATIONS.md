@@ -27,6 +27,8 @@ and Arabic right to left. It is the page's English address underneath, with the 
 texts standing in for the English (`overlayLanguage` in `src/lib/cms/content.server.ts`). It works
 only in draft mode, which only the editor's preview has: `/api/cms/preview-language` refuses
 anyone else, and the cookie it sets (`casa_preview_language`) means nothing without draft mode.
+Dates and numbers follow it too: a page formats them with `intl(locale)` (`src/lib/cms/copy.ts`;
+`useSiteCopy().intl` in client components), never `locale === 'de' ? 'de-DE' : 'en-GB'`.
 Visitors, search engines and the public language menu see German and English only. Whatever
 still shows in English there is a text that does not go through `say`/`pick`/`pickTree` yet
 (the learners' quotes stay in the language they were written in, on purpose).

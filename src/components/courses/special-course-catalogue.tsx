@@ -33,8 +33,8 @@ import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const WEEKDAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-function formatDateRange(start: string, end: string, locale: ContentLocale) {
-  const fmt = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+function formatDateRange(start: string, end: string, tag: string) {
+  const fmt = new Intl.DateTimeFormat(tag, {
     day: 'numeric',
     month: 'short',
     // A date-only string parses as UTC midnight: west of UTC it printed the day before.
@@ -277,7 +277,7 @@ function ModuleCard({
   locale: ContentLocale;
   readMoreLabel: string;
 }) {
-  const { pick, say } = useSiteCopy();
+  const { intl, pick, say } = useSiteCopy();
   const skill = skillTokens[courseModule.skill];
 
   return (
@@ -309,7 +309,7 @@ function ModuleCard({
         <div className="flex gap-1.5">
           <dt className="sr-only">{say(locale, 'Zeitraum', 'Dates')}</dt>
           <dd className="tabular-nums">
-            {formatDateRange(courseModule.startDate, courseModule.endDate, locale)}
+            {formatDateRange(courseModule.startDate, courseModule.endDate, intl(locale))}
           </dd>
         </div>
       </dl>

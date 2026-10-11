@@ -41,8 +41,8 @@ const copy = {
   },
 } as const;
 
-function formatCurrency(value: number, locale: ContentLocale) {
-  return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+function formatCurrency(value: number, tag: string) {
+  return new Intl.NumberFormat(tag, {
     style: 'currency',
     currency: CURRENCY,
     minimumFractionDigits: 0,
@@ -73,7 +73,7 @@ export function GruppenPackageDialog({
   item: GruppenPackage;
   locale?: ContentLocale;
 }) {
-  const { pick, pickTree } = useSiteCopy();
+  const { intl, pick, pickTree } = useSiteCopy();
   const t = pickTree(locale, copy);
   const isEsel = item.priceFrom === null;
   const activities = item.activities.map((id) => getActivity(id));
@@ -144,7 +144,7 @@ export function GruppenPackageDialog({
             <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
               <p className="flex items-baseline gap-3">
                 <span className="text-3xl font-black leading-none tabular-nums text-[var(--casa-ink)]">
-                  {formatCurrency(item.priceFrom ?? 0, locale)}
+                  {formatCurrency(item.priceFrom ?? 0, intl(locale))}
                 </span>
                 <span className="text-sm text-[var(--casa-muted)]">
                   {t.from} · {t.perPerson}

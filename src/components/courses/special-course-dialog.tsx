@@ -55,8 +55,8 @@ const copy = {
   },
 } as const;
 
-function formatDateRange(start: string, end: string, locale: ContentLocale) {
-  const fmt = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+function formatDateRange(start: string, end: string, tag: string) {
+  const fmt = new Intl.DateTimeFormat(tag, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -66,8 +66,8 @@ function formatDateRange(start: string, end: string, locale: ContentLocale) {
   return `${fmt.format(new Date(start))} – ${fmt.format(new Date(end))}`;
 }
 
-function formatPrice(value: number, locale: ContentLocale) {
-  return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+function formatPrice(value: number, tag: string) {
+  return new Intl.NumberFormat(tag, {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 0,
@@ -108,7 +108,7 @@ export function SpecialCourseDialog({
   courseModule: SpecialCourseModule;
   locale?: ContentLocale;
 }) {
-  const { pick, pickTree, say } = useSiteCopy();
+  const { intl, pick, pickTree, say } = useSiteCopy();
   const t = pickTree(locale, copy);
   const skill = skillTokens[courseModule.skill];
   const detail = courseModule.detail;
@@ -125,7 +125,7 @@ export function SpecialCourseDialog({
     { label: t.evening, value: pick(locale, courseModule.weekday) ?? courseModule.weekday.en },
     { label: t.time, value: courseModule.time.replace(' - ', '–') },
     { label: t.shape, value: t.shapeValue(sessions, minutesPerSession) },
-    { label: t.dates, value: formatDateRange(courseModule.startDate, courseModule.endDate, locale) },
+    { label: t.dates, value: formatDateRange(courseModule.startDate, courseModule.endDate, intl(locale)) },
   ];
 
   return (
@@ -221,7 +221,7 @@ export function SpecialCourseDialog({
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <p className="flex items-baseline gap-3">
             <span className="text-2xl font-bold leading-none tabular-nums text-[var(--casa-ink)]">
-              {formatPrice(courseModule.priceEur, locale)}
+              {formatPrice(courseModule.priceEur, intl(locale))}
             </span>
             <span className="text-sm text-[var(--casa-muted)]">
               {t.shapeValue(sessions, minutesPerSession)}

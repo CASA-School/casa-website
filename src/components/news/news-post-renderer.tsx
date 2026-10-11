@@ -1,3 +1,4 @@
+import { intl } from '@/lib/cms/copy';
 import type { ReactNode } from 'react';
 
 type RichMark = {
@@ -150,7 +151,7 @@ function renderRichBody(contentJson: unknown) {
 }
 
 export function formatNewsDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

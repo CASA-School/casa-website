@@ -163,7 +163,7 @@ export async function prepareCopy(
     // A prepared language once routed reads its repository translations under any edit.
     values = new Map([...(await import('./translations')).translationValues(locale), ...loaded.values]);
   }
-  fillCopyStore(values, loaded.editing, locale, facts.values);
+  fillCopyStore(values, loaded.editing, locale, facts.values, display);
   return { editing: loaded.editing, values, facts, display };
 }
 

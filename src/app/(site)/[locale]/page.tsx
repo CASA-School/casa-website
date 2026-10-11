@@ -35,7 +35,7 @@ import { meaningClasses } from '@/config/brand/meaning';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import { BandHeading } from '@/components/sections/band-heading';
-import { pick, say } from '@/lib/cms/copy';
+import { intl, pick, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -59,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

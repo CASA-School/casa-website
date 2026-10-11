@@ -23,7 +23,7 @@ import { getNewsList } from '@/lib/content/repository';
 import { publishDueScheduledPosts } from '@/lib/news/publishDueScheduledPosts';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
 import { cn } from '@/lib/utils';
-import { pickTree } from '@/lib/cms/copy';
+import { intl, pickTree } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -77,7 +77,7 @@ const RUBRIC_STYLE = {
 } as const;
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

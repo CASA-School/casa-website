@@ -60,7 +60,7 @@ import type {
   TeamSpotlight,
   CulturalProgramItem,
 } from '@/lib/content/types';
-import { pick, pickTree, say } from '@/lib/cms/copy';
+import { intl, pick, pickTree, say } from '@/lib/cms/copy';
 
 function byLocale<T extends { locale: ContentLocale }>(items: T[], locale: ContentLocale): T[] {
   const localized = items.filter((item) => item.locale === locale);
@@ -241,7 +241,7 @@ function fillSparseCourseTypes(courses: CourseTypeRow[], minimumCount = 6) {
 }
 
 function localeTag(locale: ContentLocale) {
-  return locale === 'de' ? 'de-DE' : 'en-GB';
+  return intl(locale);
 }
 
 // Bremen time, explicitly: the container runs in UTC, which rendered a 09:00

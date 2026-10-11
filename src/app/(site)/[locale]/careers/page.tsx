@@ -7,7 +7,7 @@ import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCareerPositions } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
-import { pickTree, say } from '@/lib/cms/copy';
+import { intl, pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 function formatDate(value: string, locale: 'en' | 'de') {
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', {
+  return new Intl.DateTimeFormat(intl(locale), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

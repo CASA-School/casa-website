@@ -67,6 +67,9 @@ const NUMBERS: Record<string, string> = {
 };
 const DATES: Record<string, string> = { ...NUMBERS, en: 'en-GB' };
 
+/** The Intl locale a page uses for its dates and numbers: German, British English, or the previewed language's own. */
+export const intlTagFor = (code: string): string => DATES[code] ?? 'en-GB';
+
 /** German pages write the amount first: "580 €"; English: "€580" (go-live brief 2026-10-01). */
 export function formatEuro(amount: number, locale: string): string {
   const whole = Number.isInteger(amount);
