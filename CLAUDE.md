@@ -422,10 +422,15 @@ is still valid.
 
 ## Known open items
 
-- **`admin.casa-bremen.de` does not exist yet.** `src/proxy.ts` already routes it,
-  and until the DNS record is created the workspace is reachable at `/admin` on the
-  public host in development only. Creating it is a prerequisite for go-live, along
-  with `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` being left unset in production.
+- **`admin.casa-bremen.de` is live (2026-10-11).** CNAME and `asuid.admin` TXT in
+  the Lands Concepts Plesk zone, bound to `ca-casa-website` with a managed
+  certificate; `src/proxy.ts` serves the workspace there, and `/admin` stays 404 on
+  the public host (`CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset). Until the site moves to
+  casa-bremen.de, the app carries `CMS_PUBLIC_ORIGIN=https://neu.casa-bremen.de` and
+  `CMS_EDITOR_ORIGIN=https://admin.casa-bremen.de`, so the website editor frames the
+  new site and not the old one; **remove both at cutover**. Rahman's owner account
+  exists on the Azure database (`db-job.sh owner`); everyone else is added from the
+  Team screen.
 - **No FileMaker bridge yet — but it is designed.** `docs/FILEMAKER_BRIDGE.md`
   (2026-09-08). Migration 0007 replaced the per-queue `external_ref` text column
   with a `filemaker_links` table and a person register; nothing writes links yet. **The shared Data API credential (`FileMaker SRV`) is the owner's own
@@ -443,7 +448,7 @@ is still valid.
   `database-url`. A laptop cannot reach it: `./infra/azure/db-job.sh migrate|status|owner` runs
   the task as a Container Apps job, and `deploy.sh` runs `migrate` before every release, so
   every migration and seed in `main` is applied; `db/seeds/0005_exam_sessions.sql` gives the database
-  the exam dates the fallback had. No workspace account exists yet (`db-job.sh owner`).
+  the exam dates the fallback had. The owner account r.shafiee@ exists since 2026-10-11.
 - **The image optimizer's cache is an Azure Files share (2026-10-09)**, mounted at
   `/app/.next/cache/images` from `stcasawebsitef8d745/next-image-cache`, so it survives releases
   and replicas share it. Before, each new replica started cold and photos hung for over a minute.
