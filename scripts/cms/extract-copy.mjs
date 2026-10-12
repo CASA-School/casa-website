@@ -71,7 +71,7 @@ const EXCLUDE = [
   /^src\/(lib|components)\/(admin|cms)\//,
   /^src\/config\/cms\//,
   /^src\/lib\/(seo|structured-data|llms)\b/,
-  /^src\/lib\/(api|assistant|notifications|validation|search|registration|placement|appointments|db)\//,
+  /^src\/lib\/(api|assistant|knowledge|notifications|validation|search|registration|placement|appointments|db)\//,
   /^src\/lib\/content\/(?!repository\.ts|course-pricing\.ts)/,
   /^src\/app\/\(site\)\/\[locale\]\/(privacy|terms|imprint)\//,
   /^src\/components\/patterns\/legal-utility-template/,

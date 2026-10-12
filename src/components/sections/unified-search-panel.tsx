@@ -8,7 +8,7 @@ import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
-export type UnifiedSearchScope = 'all' | 'courses' | 'exams' | 'faq' | 'news';
+export type UnifiedSearchScope = 'all' | 'pages' | 'courses' | 'exams' | 'faq' | 'news';
 
 type UnifiedSearchPanelProps = {
   locale: ContentLocale;
@@ -18,13 +18,14 @@ type UnifiedSearchPanelProps = {
 
 const copy = {
   en: {
-    title: 'Search courses, exams, FAQ and news in one place',
+    title: 'Search the whole website in one place',
     placeholder: 'Search by level, exam, visa question or topic…',
     submit: 'Search',
     inputLabel: 'Search term',
     scopeLabel: 'Where to search',
     scopes: {
       all: 'Everything',
+      pages: 'Pages',
       courses: 'Courses',
       exams: 'Exams',
       faq: 'FAQ',
@@ -37,13 +38,14 @@ const copy = {
     ],
   },
   de: {
-    title: 'Kurse, Prüfungen, FAQ und Aktuelles an einem Ort durchsuchen',
+    title: 'Die ganze Website an einem Ort durchsuchen',
     placeholder: 'Nach Niveau, Prüfung, Visafrage oder Thema suchen…',
     submit: 'Suchen',
     inputLabel: 'Suchbegriff',
     scopeLabel: 'Suchbereich',
     scopes: {
       all: 'Alles',
+      pages: 'Seiten',
       courses: 'Kurse',
       exams: 'Prüfungen',
       faq: 'FAQ',
@@ -105,6 +107,7 @@ export function UnifiedSearchPanel({ locale, defaultScope = 'all', className }: 
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{dictionary.scopes.all}</SelectItem>
+                <SelectItem value="pages">{dictionary.scopes.pages}</SelectItem>
                 <SelectItem value="courses">{dictionary.scopes.courses}</SelectItem>
                 <SelectItem value="exams">{dictionary.scopes.exams}</SelectItem>
                 <SelectItem value="faq">{dictionary.scopes.faq}</SelectItem>
@@ -120,6 +123,7 @@ export function UnifiedSearchPanel({ locale, defaultScope = 'all', className }: 
               className="h-11 w-full rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 text-sm font-medium text-[var(--casa-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] sm:w-48"
             >
               <option value="all">{dictionary.scopes.all}</option>
+              <option value="pages">{dictionary.scopes.pages}</option>
               <option value="courses">{dictionary.scopes.courses}</option>
               <option value="exams">{dictionary.scopes.exams}</option>
               <option value="faq">{dictionary.scopes.faq}</option>

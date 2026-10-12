@@ -7,8 +7,10 @@ import { getSearchScope, searchPublicContent } from '@/lib/search/public-search'
 
 const searchSuggestSchema = z.object({
   q: z.string().trim().max(120).optional(),
-  scope: z.enum(['all', 'courses', 'exams', 'faq', 'news']).optional(),
+  scope: z.enum(['all', 'pages', 'courses', 'exams', 'faq', 'news']).optional(),
   limit: z.coerce.number().int().min(1).max(5).optional(),
+  // Typed in the header, still being written: the last word may be unfinished.
+  prefix: z.enum(['0', '1']).optional(),
   // The language lives in the page URL, not in this request's, so the client
   // says which one it is asking for.
   locale: z.string().optional(),
@@ -32,6 +34,7 @@ export async function GET(request: Request) {
     query: parsed.data.q ?? '',
     scope: getSearchScope(parsed.data.scope),
     limitPerGroup: parsed.data.limit ?? 3,
+    prefix: parsed.data.prefix === '1',
   });
 
   return apiSuccess(result);

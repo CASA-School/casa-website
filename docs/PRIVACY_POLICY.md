@@ -46,6 +46,9 @@ the same in both languages.
 - Visas: CASA issues the learner a confirmation; no data goes to authorities.
 - Bookings move into the in-house school administration system (FileMaker).
 - No data sold, no marketing email.
+- CLARA and the search answer from CASA's own index of the website, on CASA's server (§17 as
+  published). CLARA's AI mode (`CLARA_AI`, off; docs/CLARA_AND_SEARCH.md) would send the
+  visitor's messages to a model provider: §17 must name that processor before it is switched on.
 - Since 2026-10-01 the sender gets a confirmation (receipt): their name, the reference and their
   catalogue choices, never their free text; no copy kept; at most three per inbox in 24 hours per
   server process (§14, §15, §16, §19).

@@ -1,9 +1,19 @@
-import { intl } from '@/lib/cms/copy';
-import type { ContentLocale } from '@/lib/content/types';
-import { getCoursePath } from '@/lib/content/course-routes';
-import { getCourseFinderData, getExamCatalog, getFaq, getNewsList } from '@/lib/content/repository';
+import 'server-only';
 
-export type PublicSearchScope = 'all' | 'courses' | 'exams' | 'faq' | 'news';
+import { loadFacts } from '@/lib/cms/facts.server';
+import type { ContentLocale } from '@/lib/content/types';
+import { quickAnswer, type QuickAnswer } from '@/lib/knowledge/answers';
+import { snippet, type DocType, type Hit, type KnowledgeDoc } from '@/lib/knowledge/engine';
+import { getKnowledgeIndex } from '@/lib/knowledge/index.server';
+
+/**
+ * The site search: one box over every page, course, exam, FAQ answer and news
+ * item, from the knowledge index CLARA uses (src/lib/knowledge). Forgives
+ * typos, missing umlauts, split or joined compounds and the other language;
+ * answers a price, date or office-hours question directly from the live values.
+ */
+
+export type PublicSearchScope = 'all' | 'pages' | 'courses' | 'exams' | 'faq' | 'news';
 export type PublicSearchResultType = Exclude<PublicSearchScope, 'all'>;
 
 export type PublicSearchResult = {
@@ -11,6 +21,8 @@ export type PublicSearchResult = {
   type: PublicSearchResultType;
   href: string;
   title: string;
+  /** The page a section belongs to, when the title is the section's heading. */
+  context?: string;
   snippet: string;
   badges: string[];
   meta: string[];
@@ -24,9 +36,16 @@ export type PublicSearchResponse = {
   totalResults: number;
   counts: Record<PublicSearchResultType, number>;
   groups: PublicSearchGroups;
+  /** Groups by how well their best result matched, best first. */
+  order: PublicSearchResultType[];
+  /** The best few results across all groups. */
+  top: PublicSearchResult[];
+  answer?: QuickAnswer;
+  didYouMean?: string;
 };
 
-const SUPPORTED_SCOPES: PublicSearchScope[] = ['all', 'courses', 'exams', 'faq', 'news'];
+const SUPPORTED_SCOPES: PublicSearchScope[] = ['all', 'pages', 'courses', 'exams', 'faq', 'news'];
+const GROUPS: PublicSearchResultType[] = ['pages', 'courses', 'exams', 'faq', 'news'];
 
 export function getSearchScope(scope: string | undefined): PublicSearchScope {
   if (scope && SUPPORTED_SCOPES.includes(scope as PublicSearchScope)) {
@@ -35,59 +54,37 @@ export function getSearchScope(scope: string | undefined): PublicSearchScope {
   return 'all';
 }
 
-function tokenizeQuery(query: string) {
-  return query
-    .toLowerCase()
-    .split(/\s+/)
-    .map((term) => term.trim())
-    .filter((term) => term.length > 1);
-}
+const groupOf = (type: DocType): PublicSearchResultType =>
+  type === 'course' ? 'courses' : type === 'exam' ? 'exams' : type === 'faq' ? 'faq' : type === 'news' ? 'news' : 'pages';
 
-function scoreField(value: string, terms: string[]) {
-  if (!value) {
-    return 0;
-  }
-
-  const normalized = value.toLowerCase();
-  let score = 0;
-
-  for (const term of terms) {
-    if (normalized === term) {
-      score += 10;
-    } else if (normalized.startsWith(term)) {
-      score += 6;
-    } else if (normalized.includes(term)) {
-      score += 3;
-    }
-  }
-
-  return score;
-}
-
-function scoreWeighted(fields: Array<{ value: string; weight: number }>, terms: string[]) {
-  return fields.reduce((sum, field) => sum + scoreField(field.value, terms) * field.weight, 0);
-}
-
-function truncate(text: string, length = 160) {
-  const compact = text.replace(/\s+/g, ' ').trim();
-  if (compact.length <= length) {
-    return compact;
-  }
-
-  return `${compact.slice(0, length - 1)}...`;
-}
-
-function buildSnippet(fields: string[], terms: string[]) {
-  const match = fields.find((value) => scoreField(value, terms) > 0) ?? fields[0] ?? '';
-  return truncate(match);
-}
+const TYPES_FOR: Record<PublicSearchResultType, DocType[]> = {
+  pages: ['page', 'guide', 'accommodation', 'career'],
+  courses: ['course'],
+  exams: ['exam'],
+  faq: ['faq'],
+  news: ['news'],
+};
 
 function emptyGroups(): PublicSearchGroups {
+  return { pages: [], courses: [], exams: [], faq: [], news: [] };
+}
+
+const pathOf = (url: string) => url.split('#')[0];
+
+/** A result the reader can scan: the section's heading as title, its page as context. */
+function toResult(doc: KnowledgeDoc, query: string): PublicSearchResult {
+  const type = groupOf(doc.type);
+  const isFaq = doc.type === 'faq';
+  const title = isFaq ? doc.heading ?? doc.page : doc.heading ?? doc.page;
   return {
-    courses: [],
-    exams: [],
-    faq: [],
-    news: [],
+    id: doc.id,
+    type,
+    href: doc.url,
+    title,
+    context: !isFaq && doc.heading ? doc.page : undefined,
+    snippet: snippet(doc.answer ?? doc.text, query, 200),
+    badges: (doc.badges ?? []).slice(0, 2),
+    meta: (doc.meta ?? []).slice(0, 2),
   };
 }
 
@@ -96,193 +93,74 @@ export async function searchPublicContent({
   query,
   scope,
   limitPerGroup = 8,
+  prefix = false,
+  pagePath,
 }: {
   locale: ContentLocale;
   query: string;
   scope: PublicSearchScope;
   limitPerGroup?: number;
+  /** Typing in the header: the last word may be unfinished. */
+  prefix?: boolean;
+  pagePath?: string;
 }): Promise<PublicSearchResponse> {
-  const normalizedQuery = query.trim().toLowerCase();
-  const queryTerms = tokenizeQuery(normalizedQuery);
+  const normalizedQuery = query.trim().replace(/\s+/g, ' ').slice(0, 200);
   const groups = emptyGroups();
+  const counts = { pages: 0, courses: 0, exams: 0, faq: 0, news: 0 };
+  const empty: PublicSearchResponse = { query: normalizedQuery, scope, totalResults: 0, counts, groups, order: GROUPS, top: [] };
+  if (normalizedQuery.length < 2) return empty;
 
-  if (queryTerms.length === 0) {
-    return {
-      query: normalizedQuery,
-      scope,
-      totalResults: 0,
-      counts: {
-        courses: 0,
-        exams: 0,
-        faq: 0,
-        news: 0,
-      },
-      groups,
-    };
+  const index = await getKnowledgeIndex();
+  const types = scope === 'all' ? undefined : TYPES_FOR[scope];
+  const hits = index.search(normalizedQuery, { locale, types, prefix });
+
+  // One result per page section; a page's other-language twin is shown in this language.
+  const sameLanguage = new Map<string, KnowledgeDoc>();
+  for (const doc of index.docs) {
+    if (doc.locale === locale && !sameLanguage.has(pathOf(doc.url))) sameLanguage.set(pathOf(doc.url), doc);
+  }
+  const best = hits[0]?.score ?? 0;
+  const seen = new Set<string>();
+  const kept: Array<{ hit: Hit; doc: KnowledgeDoc }> = [];
+  for (const hit of hits) {
+    // Weak tails are noise: a tenth of the best match, or a score that matched one stray word.
+    if (hit.score < best * 0.1) break;
+    const doc = hit.doc.locale === locale ? hit.doc : sameLanguage.get(pathOf(hit.doc.url)) ?? hit.doc;
+    const key = doc.type === 'faq' ? doc.id : doc.type === 'page' || doc.type === 'guide' || doc.type === 'accommodation' || doc.type === 'career' ? doc.url : pathOf(doc.url);
+    // Two sections of one page: keep the better one only.
+    const pageKey = `${groupOf(doc.type)}|${doc.type === 'faq' ? doc.id : pathOf(doc.url)}`;
+    if (seen.has(key) || seen.has(pageKey)) continue;
+    seen.add(key);
+    seen.add(pageKey);
+    kept.push({ hit, doc });
   }
 
-  const [finderData, examCatalog, faqItems, newsItems] = await Promise.all([
-    getCourseFinderData(locale),
-    getExamCatalog(locale),
-    getFaq(locale),
-    getNewsList(locale),
-  ]);
+  const groupBest = new Map<PublicSearchResultType, number>();
+  for (const { hit, doc } of kept) {
+    const type = groupOf(doc.type);
+    counts[type] += 1;
+    if (groups[type].length < limitPerGroup) groups[type].push(toResult(doc, normalizedQuery));
+    if (!groupBest.has(type)) groupBest.set(type, hit.score);
+  }
+  const order = [...GROUPS].sort((a, b) => (groupBest.get(b) ?? -1) - (groupBest.get(a) ?? -1));
 
-  const dateFormatter = new Intl.DateTimeFormat(intl(locale), {
-    dateStyle: 'medium',
-    timeZone: 'Europe/Berlin',
-  });
-  const includeScope = (candidate: PublicSearchScope) => scope === 'all' || scope === candidate;
-
-  const courseResults =
-    includeScope('courses')
-      ? finderData.courses
-          .map((course) => {
-            const score = scoreWeighted(
-              [
-                { value: course.name, weight: 5 },
-                { value: course.slug, weight: 4 },
-                { value: course.narrative?.promise ?? '', weight: 3 },
-                { value: course.narrative?.audience ?? '', weight: 2 },
-                { value: course.format ?? '', weight: 2 },
-              ],
-              queryTerms
-            );
-
-            return {
-              result: {
-                id: course.id,
-                type: 'courses',
-                href: getCoursePath(course.slug),
-                title: course.name,
-                snippet: buildSnippet(
-                  [course.narrative?.promise ?? '', course.narrative?.audience ?? '', course.format ?? ''],
-                  queryTerms
-                ),
-                badges: course.format ? [course.format] : [],
-                meta: [`${locale === 'de' ? 'Niveau' : 'Level'}: ${course.level_min} - ${course.level_max}`],
-              } satisfies PublicSearchResult,
-              score,
-              sortTitle: course.name,
-            };
-          })
-          .filter((item) => item.score > 0)
-          .sort((a, b) => b.score - a.score || a.sortTitle.localeCompare(b.sortTitle))
-      : [];
-
-  const examResults =
-    includeScope('exams')
-      ? examCatalog.items
-          .map((exam) => {
-            const score = scoreWeighted(
-              [
-                { value: exam.examType.name, weight: 5 },
-                { value: exam.examType.code, weight: 4 },
-                { value: exam.narrative?.headline ?? '', weight: 3 },
-                { value: exam.narrative?.summary ?? '', weight: 2 },
-              ],
-              queryTerms
-            );
-            const nextSession = exam.sessions[0]?.starts_at
-              ? dateFormatter.format(new Date(exam.sessions[0].starts_at))
-              : null;
-
-            return {
-              result: {
-                id: exam.examType.id,
-                type: 'exams',
-                href: `/exams/${exam.anchorId}`,
-                title: exam.examType.name,
-                snippet: buildSnippet([exam.narrative?.summary ?? '', exam.examType.name], queryTerms),
-                badges: [exam.examType.code],
-                meta: nextSession ? [`${locale === 'de' ? 'Nächster Termin' : 'Next date'}: ${nextSession}`] : [],
-              } satisfies PublicSearchResult,
-              score,
-              sortTitle: exam.examType.name,
-            };
-          })
-          .filter((item) => item.score > 0)
-          .sort((a, b) => b.score - a.score || a.sortTitle.localeCompare(b.sortTitle))
-      : [];
-
-  const faqResults =
-    includeScope('faq')
-      ? faqItems
-          .map((item) => {
-            const score = scoreWeighted(
-              [
-                { value: item.question, weight: 5 },
-                { value: item.answer, weight: 2 },
-                { value: item.category, weight: 2 },
-              ],
-              queryTerms
-            );
-
-            return {
-              result: {
-                id: item.id,
-                type: 'faq',
-                href: '/faq',
-                title: item.question,
-                snippet: buildSnippet([item.answer], queryTerms),
-                badges: [],
-                meta: [item.category],
-              } satisfies PublicSearchResult,
-              score,
-              sortTitle: item.question,
-            };
-          })
-          .filter((entry) => entry.score > 0)
-          .sort((a, b) => b.score - a.score || a.sortTitle.localeCompare(b.sortTitle))
-      : [];
-
-  const newsResults =
-    includeScope('news')
-      ? newsItems
-          .map((item) => {
-            const score = scoreWeighted(
-              [
-                { value: item.title, weight: 5 },
-                { value: item.summary, weight: 3 },
-                { value: item.body, weight: 1 },
-                { value: item.category, weight: 2 },
-              ],
-              queryTerms
-            );
-
-            return {
-              result: {
-                id: item.slug,
-                type: 'news',
-                href: `/news/${item.slug}`,
-                title: item.title,
-                snippet: buildSnippet([item.summary, item.body], queryTerms),
-                badges: [],
-                meta: [item.category],
-              } satisfies PublicSearchResult,
-              score,
-              publishedAt: item.publishedAt,
-            };
-          })
-          .filter((entry) => entry.score > 0)
-          .sort((a, b) => b.score - a.score || b.publishedAt.localeCompare(a.publishedAt))
-      : [];
-
-  groups.courses = courseResults.slice(0, limitPerGroup).map((item) => item.result);
-  groups.exams = examResults.slice(0, limitPerGroup).map((item) => item.result);
-  groups.faq = faqResults.slice(0, limitPerGroup).map((item) => item.result);
-  groups.news = newsResults.slice(0, limitPerGroup).map((item) => item.result);
+  const facts = await loadFacts(locale);
+  const corrected = index.didYouMean(normalizedQuery);
+  // "untrekunft kosten" is answered as "Unterkunft kosten".
+  const answer =
+    scope === 'all' || scope === 'courses' || scope === 'exams'
+      ? (quickAnswer(normalizedQuery, { locale, facts: facts.values, pagePath }) ?? (corrected ? quickAnswer(corrected, { locale, facts: facts.values, pagePath }) : null)) ?? undefined
+      : undefined;
 
   return {
     query: normalizedQuery,
     scope,
-    totalResults: courseResults.length + examResults.length + faqResults.length + newsResults.length,
-    counts: {
-      courses: courseResults.length,
-      exams: examResults.length,
-      faq: faqResults.length,
-      news: newsResults.length,
-    },
+    totalResults: kept.length,
+    counts,
     groups,
+    order,
+    top: kept.slice(0, 5).map(({ doc }) => toResult(doc, normalizedQuery)),
+    answer,
+    didYouMean: corrected && corrected.toLowerCase() !== normalizedQuery.toLowerCase() ? corrected : undefined,
   };
 }

@@ -5284,6 +5284,28 @@
    "/resources/why-germany"
   ]
  },
+ "t.die-ganze-website-an.17c48gx": {
+  "de": "Die ganze Website an einem Ort durchsuchen",
+  "en": "Search the whole website in one place",
+  "files": [
+   "src/components/sections/unified-search-panel.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.die-gastfamilien-begruessen-die.e5nmq2": {
   "de": "Die Gastfamilien begrüßen die Schülerinnen und Schüler bei ihrer Ankunft am Bahnhof oder Flughafen. Alle Teilnehmenden erhalten ein Ticket für den öffentlichen Nahverkehr für den Zeitraum ihres Aufenthaltes.",
   "en": "Host families meet the students when they arrive at the station or the airport, and everyone gets a public transport ticket for the whole of their stay.",
@@ -5823,6 +5845,17 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.direkt-beantwortet.1dd88et": {
+  "de": "Direkt beantwortet",
+  "en": "Quick answer",
+  "files": [
+   "src/app/(site)/[locale]/search/page.tsx",
+   "src/components/layout/header-search-popover.tsx"
+  ],
+  "pages": [
+   "*"
   ]
  },
  "t.direkt-online.1feyglf": {
@@ -7085,9 +7118,9 @@
    "/resources/why-germany"
   ]
  },
- "t.ein-suchfeld-fuer-kurse.1c4pr2u": {
-  "de": "Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles",
-  "en": "One search box for courses, exams, FAQ and news",
+ "t.ein-suchfeld-fuer-die.117t8x": {
+  "de": "Ein Suchfeld für die ganze Website",
+  "en": "One search box for the whole website",
   "files": [
    "src/app/(site)/[locale]/search/page.tsx"
   ],
@@ -12604,38 +12637,6 @@
    "/courses"
   ]
  },
- "t.kurse-pruefungen-faq-aktuelles.pgvoy6": {
-  "de": "Kurse + Prüfungen + FAQ + Aktuelles",
-  "en": "Courses + Exams + FAQ + News",
-  "files": [
-   "src/app/(site)/[locale]/search/page.tsx"
-  ],
-  "pages": [
-   "/search"
-  ]
- },
- "t.kurse-pruefungen-faq-und.siwdx0": {
-  "de": "Kurse, Prüfungen, FAQ und Aktuelles an einem Ort durchsuchen",
-  "en": "Search courses, exams, FAQ and news in one place",
-  "files": [
-   "src/components/sections/unified-search-panel.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
- },
  "t.kurse-pruefungen.1i7dit": {
   "de": "Kurse & Prüfungen",
   "en": "Courses & exams",
@@ -13544,6 +13545,17 @@
    "src/config/content/heroes.ts"
   ],
   "pages": []
+ },
+ "t.meintest-du.1j5y4gx": {
+  "de": "Meintest du",
+  "en": "Did you mean",
+  "files": [
+   "src/app/(site)/[locale]/search/page.tsx",
+   "src/components/layout/header-search-popover.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
  },
  "t.meist-ein-oder-mehrere.cgvu0i": {
   "de": "Meist ein oder mehrere Monate",
@@ -16818,6 +16830,60 @@
   ],
   "pages": [
    "404"
+  ]
+ },
+ "t.seite-oeffnen.1q2sl4c": {
+  "de": "Seite öffnen",
+  "en": "Open page",
+  "files": [
+   "src/app/(site)/[locale]/search/page.tsx"
+  ],
+  "pages": [
+   "/search"
+  ]
+ },
+ "t.seite.a7eekx": {
+  "de": "Seite",
+  "en": "Page",
+  "files": [
+   "src/app/(site)/[locale]/search/page.tsx",
+   "src/components/layout/header-search-popover.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
+ },
+ "t.seiten-kurse-pruefungen-faq.lqrh5q": {
+  "de": "Seiten, Kurse, Prüfungen, FAQ, Aktuelles",
+  "en": "Pages, courses, exams, FAQ, news",
+  "files": [
+   "src/app/(site)/[locale]/search/page.tsx"
+  ],
+  "pages": [
+   "/search"
+  ]
+ },
+ "t.seiten.1sgjmve": {
+  "de": "Seiten",
+  "en": "Pages",
+  "files": [
+   "src/app/(site)/[locale]/search/page.tsx",
+   "src/components/sections/unified-search-panel.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.seitensuche-oeffnen.8kz6xo": {

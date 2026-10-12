@@ -162,8 +162,9 @@ describe('assistant knowledge search', () => {
 
   /*
    * Figures the facts document rejects (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md):
-   * German for Medical has no published fee, hours or dates; Bildungszeit is
-   * €280 / €520 from B1, not €640 from A2; telc prep for B2 is €260.
+   * German for Medical: €400 for ten Fridays 13:00–16:30, no set dates (the
+   * course page since 2026-10-09); Bildungszeit is €280 / €520 from B1, not
+   * €640 from A2; telc prep for B2 is €260.
    */
   it('quotes only figures the facts document verifies', () => {
     const content = (query: string, locale: 'en' | 'de') =>
@@ -171,7 +172,8 @@ describe('assistant knowledge search', () => {
 
     for (const locale of ['en', 'de'] as const) {
       const medical = content(locale === 'de' ? 'medizin arzt' : 'medical doctor', locale);
-      expect(medical).not.toMatch(/\b400\b|13:00|26\. ?Jun|26 Jun/);
+      expect(medical).toContain('400');
+      expect(medical).not.toMatch(/26\. ?Jun|26 Jun/);
 
       const bildungszeit = content('bildungszeit', locale);
       expect(bildungszeit).toContain('280');

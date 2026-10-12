@@ -26,6 +26,7 @@
     "db:bootstrap": "node infra/azure/db/bootstrap.mjs",
     "db:countries": "node scripts/db/generate-countries-sql.mjs",
     "placement:port": "node scripts/placement/port-item-bank.mjs",
+    "qa:clara": "node scripts/qa/clara-eval.mjs",
     "qa:responsive": "node scripts/qa/responsive-audit.mjs",
     "qa:shots": "node scripts/qa/responsive-shots.mjs",
     "admin:seed": "node scripts/admin/seed-staff.mjs",

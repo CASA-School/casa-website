@@ -1963,6 +1963,10 @@
     "de": "Die Fristen für das Wintersemester liegen meist im Sommer, die für das Sommersemester im Winter. Prüfe jede Frist noch einmal direkt bei der Hochschule.",
     "text": "Los plazos para el semestre de invierno suelen caer en verano, y los del semestre de verano, en invierno. Comprueba cada plazo directamente con la universidad."
   },
+  "t.die-ganze-website-an.17c48gx": {
+    "de": "Die ganze Website an einem Ort durchsuchen",
+    "text": "Buscar en todo el sitio web desde un solo lugar"
+  },
   "t.die-gastfamilien-begruessen-die.e5nmq2": {
     "de": "Die Gastfamilien begrüßen die Schülerinnen und Schüler bei ihrer Ankunft am Bahnhof oder Flughafen. Alle Teilnehmenden erhalten ein Ticket für den öffentlichen Nahverkehr für den Zeitraum ihres Aufenthaltes.",
     "text": "Las familias de acogida reciben al alumnado a su llegada a la estación o al aeropuerto. Todos los participantes reciben un pase de transporte público para toda su estancia."
@@ -2142,6 +2146,10 @@
   "t.dieses-programm-anfragen.1nkejor": {
     "de": "Dieses Programm anfragen",
     "text": "Solicitar este programa"
+  },
+  "t.direkt-beantwortet.1dd88et": {
+    "de": "Direkt beantwortet",
+    "text": "Respuesta directa"
   },
   "t.direkt-online.1feyglf": {
     "de": "Direkt online",
@@ -2575,9 +2583,9 @@
     "de": "Ein Studierendenwohnheim kann eine günstige Möglichkeit sein. Prüfe die Voraussetzungen und bewirb dich früh, denn die Wartelisten können lang sein.",
     "text": "Una residencia de estudiantes puede ser una opción económica. Revisa los requisitos y presenta tu solicitud pronto, porque las listas de espera pueden ser largas."
   },
-  "t.ein-suchfeld-fuer-kurse.1c4pr2u": {
-    "de": "Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles",
-    "text": "Un buscador para cursos, exámenes, preguntas frecuentes y noticias"
+  "t.ein-suchfeld-fuer-die.117t8x": {
+    "de": "Ein Suchfeld für die ganze Website",
+    "text": "Un buscador para todo el sitio web"
   },
   "t.ein-tag-in-luebeck.1x4hf36": {
     "de": "Ein Tag in Lübeck mit Backsteingotik, Holstentor und Marzipan.",
@@ -4535,14 +4543,6 @@
     "de": "Kurse für ",
     "text": "Cursos de nivel "
   },
-  "t.kurse-pruefungen-faq-aktuelles.pgvoy6": {
-    "de": "Kurse + Prüfungen + FAQ + Aktuelles",
-    "text": "Cursos + Exámenes + Preguntas frecuentes + Noticias"
-  },
-  "t.kurse-pruefungen-faq-und.siwdx0": {
-    "de": "Kurse, Prüfungen, FAQ und Aktuelles an einem Ort durchsuchen",
-    "text": "Buscar cursos, exámenes, preguntas frecuentes y noticias en un solo lugar"
-  },
   "t.kurse-pruefungen.1i7dit": {
     "de": "Kurse & Prüfungen",
     "text": "Cursos y exámenes"
@@ -4878,6 +4878,10 @@
   "t.meinen-kurs-finden.1qfy9v9": {
     "de": "Meinen Kurs finden",
     "text": "Encontrar mi curso"
+  },
+  "t.meintest-du.1j5y4gx": {
+    "de": "Meintest du",
+    "text": "¿Quisiste decir"
   },
   "t.meist-ein-oder-mehrere.cgvu0i": {
     "de": "Meist ein oder mehrere Monate",
@@ -6126,6 +6130,22 @@
   "t.seite-nicht-gefunden.lfj758": {
     "de": "Seite nicht gefunden",
     "text": "Página no encontrada"
+  },
+  "t.seite-oeffnen.1q2sl4c": {
+    "de": "Seite öffnen",
+    "text": "Abrir la página"
+  },
+  "t.seite.a7eekx": {
+    "de": "Seite",
+    "text": "Página"
+  },
+  "t.seiten-kurse-pruefungen-faq.lqrh5q": {
+    "de": "Seiten, Kurse, Prüfungen, FAQ, Aktuelles",
+    "text": "Páginas, cursos, exámenes, preguntas frecuentes, noticias"
+  },
+  "t.seiten.1sgjmve": {
+    "de": "Seiten",
+    "text": "Páginas"
   },
   "t.seitensuche-oeffnen.8kz6xo": {
     "de": "Seitensuche öffnen",

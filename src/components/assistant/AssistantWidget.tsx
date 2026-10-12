@@ -1,6 +1,6 @@
 'use client';
 
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
   useEffect,
   useMemo,
@@ -295,6 +295,8 @@ function ClaraAvatar({ active }: { active: boolean }) {
 
 export function AssistantWidget({ onClose }: AssistantWidgetProps) {
   const { pickTree, say } = useSiteCopy();
+  // The page the visitor asks from: "what does this cost?" on a course page means that course.
+  const pagePath = usePathname();
   const [selectedLocale, setSelectedLocale] = useState<UiLocale>('auto');
   const [inferredLocale, setInferredLocale] = useState<'en' | 'de' | null>(null);
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
@@ -403,6 +405,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
             content: message.content,
           })),
           locale: selectedLocale === 'auto' ? null : selectedLocale,
+          pagePath,
         }),
       });
 

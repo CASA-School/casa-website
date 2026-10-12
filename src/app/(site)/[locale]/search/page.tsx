@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
-import { ArrowRight, BookOpen, CalendarDays, HelpCircle, Newspaper } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, FileText, HelpCircle, Newspaper, Sparkles } from 'lucide-react';
 
 import { HeroEMinimal } from '@/components/heroes';
 import { UnifiedSearchPanel } from '@/components/sections';
@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ...createPublicMetadata({
       locale,
       title: locale === 'de' ? 'Suche' : 'Search',
-      description: locale === 'de' ? 'Hier findest du Deutschkurse, Prüfungen, Antworten und Neuigkeiten auf der CASA-Website.' : 'Find German courses, exams, answers and news on the CASA website.',
+      description: locale === 'de' ? 'Hier durchsuchst du die ganze CASA-Website: Kurse, Prüfungen, Unterkunft, Antworten und Neuigkeiten.' : 'Search the whole CASA website: courses, exams, accommodation, answers and news.',
       path: '/search',
       keywords: ['CASA search', 'courses exams faq news'],
     }),
@@ -137,6 +137,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     locale === 'de'
       ? {
           all: 'Alle Inhalte',
+          pages: 'Seiten',
           courses: 'Kurse',
           exams: 'Prüfungen',
           faq: 'FAQ',
@@ -144,6 +145,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         }[scope]
       : {
           all: 'All content',
+          pages: 'Pages',
           courses: 'Courses',
           exams: 'Exams',
           faq: 'FAQ',
@@ -151,23 +153,40 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         }[scope];
 
   const resultTypeLabels: Record<PublicSearchResultType, string> = {
+    pages: say(locale, 'Seite', 'Page'),
     courses: say(locale, 'Kurs', 'Course'),
     exams: say(locale, 'Prüfung', 'Exam'),
     faq: 'FAQ',
     news: say(locale, 'Aktuelles', 'News'),
   };
   const resultActionLabels: Record<PublicSearchResultType, string> = {
+    pages: say(locale, 'Seite öffnen', 'Open page'),
     courses: say(locale, 'Kurs ansehen', 'View course'),
     exams: say(locale, 'Prüfung ansehen', 'View exam'),
     faq: say(locale, 'FAQ öffnen', 'Open FAQ'),
     news: say(locale, 'Artikel lesen', 'Read article'),
   };
 
+  const groupTitles: Record<PublicSearchResultType, string> = {
+    pages: say(locale, 'Seiten', 'Pages'),
+    courses: say(locale, 'Kurse', 'Courses'),
+    exams: say(locale, 'Prüfungen', 'Exams'),
+    faq: 'FAQ',
+    news: say(locale, 'Aktuelles', 'News'),
+  };
+  const groupIcons: Record<PublicSearchResultType, typeof BookOpen> = {
+    pages: FileText,
+    courses: BookOpen,
+    exams: CalendarDays,
+    faq: HelpCircle,
+    news: Newspaper,
+  };
+
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
       <HeroEMinimal
         eyebrow={say(locale, 'Suche', 'Search')}
-        title={say(locale, 'Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles', 'One search box for courses, exams, FAQ and news')}
+        title={say(locale, 'Ein Suchfeld für die ganze Website', 'One search box for the whole website')}
         description={
           say(locale, 'So findest du schnell, was du suchst, ohne dich durch viele Seiten zu klicken.', 'Find what you’re looking for quickly, without clicking through lots of pages.')
         }
@@ -178,7 +197,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         cta={{ label: say(locale, 'Kontakt', 'Contact'), href: '/contact', kind: 'secondary' }}
         meta={[
           say(locale, 'Zentrale Suche', 'Site-wide search'),
-          say(locale, 'Kurse + Prüfungen + FAQ + Aktuelles', 'Courses + Exams + FAQ + News'),
+          say(locale, 'Seiten, Kurse, Prüfungen, FAQ, Aktuelles', 'Pages, courses, exams, FAQ, news'),
         ]}
       />
 
@@ -213,79 +232,53 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </section>
           ) : null}
 
-          {resultGroups.courses.length > 0 ? (
-            <SearchResultGroup title={say(locale, 'Kurse', 'Courses')} count={search.counts.courses}>
-              {resultGroups.courses.map((result) => (
-                <SearchResultCard
-                  key={result.id}
-                  href={result.href}
-                  icon={<BookOpen className="h-4 w-4" aria-hidden="true" />}
-                  eyebrow={resultTypeLabels.courses}
-                  title={result.title}
-                  snippet={result.snippet}
-                  badges={result.badges}
-                  meta={result.meta}
-                  actionLabel={resultActionLabels.courses}
-                  tone="blue"
-                />
-              ))}
-            </SearchResultGroup>
+          {search.answer ? (
+            <section className="rounded-xl border border-[color:var(--casa-blue)]/25 bg-[var(--casa-warm-panel)] p-4 sm:p-5" aria-labelledby="search-answer">
+              <p id="search-answer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)]">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                {say(locale, 'Direkt beantwortet', 'Quick answer')}
+              </p>
+              <p className="mt-2 max-w-measure text-base leading-relaxed text-[var(--casa-ink)]">{search.answer.message}</p>
+              <Link href={search.answer.href} className="tap-target mt-3 inline-flex items-center gap-1 text-sm font-bold text-[var(--casa-accent-text)] hover:underline">
+                {search.answer.label}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </section>
           ) : null}
 
-          {resultGroups.exams.length > 0 ? (
-            <SearchResultGroup title={say(locale, 'Prüfungen', 'Exams')} count={search.counts.exams}>
-              {resultGroups.exams.map((result) => (
-                <SearchResultCard
-                  key={result.id}
-                  href={result.href}
-                  icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
-                  eyebrow={resultTypeLabels.exams}
-                  title={result.title}
-                  snippet={result.snippet}
-                  badges={result.badges}
-                  meta={result.meta}
-                  actionLabel={resultActionLabels.exams}
-                  tone="blue"
-                />
-              ))}
-            </SearchResultGroup>
+          {search.didYouMean ? (
+            <p className="text-sm text-[var(--casa-muted)]">
+              {say(locale, 'Meintest du', 'Did you mean')}{' '}
+              <Link href={`/search?q=${encodeURIComponent(search.didYouMean)}&scope=${scope}`} className="font-semibold text-[var(--casa-accent-text)] hover:underline">
+                {search.didYouMean}
+              </Link>
+              ?
+            </p>
           ) : null}
 
-          {resultGroups.faq.length > 0 ? (
-            <SearchResultGroup title="FAQ" count={search.counts.faq}>
-              {resultGroups.faq.map((result) => (
-                <SearchResultCard
-                  key={result.id}
-                  href={result.href}
-                  icon={<HelpCircle className="h-4 w-4" aria-hidden="true" />}
-                  eyebrow={resultTypeLabels.faq}
-                  title={result.title}
-                  snippet={result.snippet}
-                  meta={result.meta}
-                  badges={result.badges}
-                  actionLabel={resultActionLabels.faq}
-                />
-              ))}
-            </SearchResultGroup>
-          ) : null}
-
-          {resultGroups.news.length > 0 ? (
-            <SearchResultGroup title={say(locale, 'Aktuelles', 'News')} count={search.counts.news}>
-              {resultGroups.news.map((result) => (
-                <SearchResultCard
-                  key={result.id}
-                  href={result.href}
-                  icon={<Newspaper className="h-4 w-4" aria-hidden="true" />}
-                  eyebrow={resultTypeLabels.news}
-                  title={result.title}
-                  snippet={result.snippet}
-                  meta={result.meta}
-                  badges={result.badges}
-                  actionLabel={resultActionLabels.news}
-                />
-              ))}
-            </SearchResultGroup>
-          ) : null}
+          {search.order.map((type) =>
+            resultGroups[type].length > 0 ? (
+              <SearchResultGroup key={type} title={groupTitles[type]} count={search.counts[type]}>
+                {resultGroups[type].map((result) => {
+                  const Icon = groupIcons[type];
+                  return (
+                    <SearchResultCard
+                      key={result.id}
+                      href={result.href}
+                      icon={<Icon className="h-4 w-4" aria-hidden="true" />}
+                      eyebrow={result.context ?? resultTypeLabels[type]}
+                      title={result.title}
+                      snippet={result.snippet}
+                      badges={result.badges}
+                      meta={result.meta}
+                      actionLabel={resultActionLabels[type]}
+                      tone={type === 'courses' || type === 'exams' ? 'blue' : 'default'}
+                    />
+                  );
+                })}
+              </SearchResultGroup>
+            ) : null
+          )}
         </Container>
       </section>
     </main>

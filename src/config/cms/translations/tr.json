@@ -1963,6 +1963,10 @@
     "de": "Die Fristen für das Wintersemester liegen meist im Sommer, die für das Sommersemester im Winter. Prüfe jede Frist noch einmal direkt bei der Hochschule.",
     "text": "Kış dönemi için son başvuru tarihleri genellikle yaz aylarında, yaz dönemi içinse kış aylarındadır. Her tarihi doğrudan üniversiteden bir kez daha kontrol edin."
   },
+  "t.die-ganze-website-an.17c48gx": {
+    "de": "Die ganze Website an einem Ort durchsuchen",
+    "text": "Tüm web sitesinde tek yerden arayın"
+  },
   "t.die-gastfamilien-begruessen-die.e5nmq2": {
     "de": "Die Gastfamilien begrüßen die Schülerinnen und Schüler bei ihrer Ankunft am Bahnhof oder Flughafen. Alle Teilnehmenden erhalten ein Ticket für den öffentlichen Nahverkehr für den Zeitraum ihres Aufenthaltes.",
     "text": "Konukçu aileler öğrencileri varışlarında tren istasyonunda ya da havalimanında karşılar. Tüm katılımcılar kalış süreleri boyunca geçerli bir toplu taşıma bileti alır."
@@ -2142,6 +2146,10 @@
   "t.dieses-programm-anfragen.1nkejor": {
     "de": "Dieses Programm anfragen",
     "text": "Bu programı talep edin"
+  },
+  "t.direkt-beantwortet.1dd88et": {
+    "de": "Direkt beantwortet",
+    "text": "Doğrudan yanıt"
   },
   "t.direkt-online.1feyglf": {
     "de": "Direkt online",
@@ -2575,9 +2583,9 @@
     "de": "Ein Studierendenwohnheim kann eine günstige Möglichkeit sein. Prüfe die Voraussetzungen und bewirb dich früh, denn die Wartelisten können lang sein.",
     "text": "Öğrenci yurdu uygun fiyatlı bir seçenek olabilir. Koşulları kontrol edin ve erken başvurun, çünkü bekleme listeleri uzun olabilir."
   },
-  "t.ein-suchfeld-fuer-kurse.1c4pr2u": {
-    "de": "Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles",
-    "text": "Kurslar, sınavlar, SSS ve haberler için tek arama kutusu"
+  "t.ein-suchfeld-fuer-die.117t8x": {
+    "de": "Ein Suchfeld für die ganze Website",
+    "text": "Tüm web sitesi için tek bir arama kutusu"
   },
   "t.ein-tag-in-luebeck.1x4hf36": {
     "de": "Ein Tag in Lübeck mit Backsteingotik, Holstentor und Marzipan.",
@@ -4535,14 +4543,6 @@
     "de": "Kurse für ",
     "text": "Şu seviye için kurslar: "
   },
-  "t.kurse-pruefungen-faq-aktuelles.pgvoy6": {
-    "de": "Kurse + Prüfungen + FAQ + Aktuelles",
-    "text": "Kurslar + Sınavlar + SSS + Haberler"
-  },
-  "t.kurse-pruefungen-faq-und.siwdx0": {
-    "de": "Kurse, Prüfungen, FAQ und Aktuelles an einem Ort durchsuchen",
-    "text": "Kursları, sınavları, SSS'yi ve haberleri tek yerde arayın"
-  },
   "t.kurse-pruefungen.1i7dit": {
     "de": "Kurse & Prüfungen",
     "text": "Kurslar ve sınavlar"
@@ -4878,6 +4878,10 @@
   "t.meinen-kurs-finden.1qfy9v9": {
     "de": "Meinen Kurs finden",
     "text": "Size uygun kursu bulun"
+  },
+  "t.meintest-du.1j5y4gx": {
+    "de": "Meintest du",
+    "text": "Bunu mu demek istediniz:"
   },
   "t.meist-ein-oder-mehrere.cgvu0i": {
     "de": "Meist ein oder mehrere Monate",
@@ -6126,6 +6130,22 @@
   "t.seite-nicht-gefunden.lfj758": {
     "de": "Seite nicht gefunden",
     "text": "Sayfa bulunamadı"
+  },
+  "t.seite-oeffnen.1q2sl4c": {
+    "de": "Seite öffnen",
+    "text": "Sayfayı açın"
+  },
+  "t.seite.a7eekx": {
+    "de": "Seite",
+    "text": "Sayfa"
+  },
+  "t.seiten-kurse-pruefungen-faq.lqrh5q": {
+    "de": "Seiten, Kurse, Prüfungen, FAQ, Aktuelles",
+    "text": "Sayfalar, kurslar, sınavlar, SSS, haberler"
+  },
+  "t.seiten.1sgjmve": {
+    "de": "Seiten",
+    "text": "Sayfalar"
   },
   "t.seitensuche-oeffnen.8kz6xo": {
     "de": "Seitensuche öffnen",

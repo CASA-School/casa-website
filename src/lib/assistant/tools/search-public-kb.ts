@@ -548,7 +548,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['medical', 'doctor', 'healthcare', 'b2', 'c1', 'fachsprachprüfung', 'fsp', 'professional'],
       content:
-        'German for nursing and medicine is for doctors before and after the Fachsprachprüfung, the specialist language exam for doctors. You join at level B2 or C1. Our advice team can tell you the fee, the weekly hours and the dates.',
+        'German for nursing and medicine is for doctors before and after the Fachsprachprüfung, the specialist language exam for doctors. You join at level B2 or C1. The course runs on ten Fridays, 13:00–16:30, 40 lessons in all, and costs €400 plus the book (€45.90). There are no set dates: you put your name on the interest list on the course page, and we fix the dates once the group is big enough.',
     },
     {
       id: 'course-medical-de',
@@ -558,7 +558,7 @@ function buildCourseDetailPassages(): KbPassage[] {
       topic: 'courses',
       keywords: ['medizin', 'arzt', 'gesundheit', 'b2', 'c1', 'fachsprachprüfung', 'fsp', 'professionell'],
       content:
-        'Deutsch für Pflege und Medizin ist für Ärztinnen und Ärzte vor und nach der Fachsprachprüfung gedacht. Du steigst auf dem Niveau B2 oder C1 ein. Gebühr, Wochenstunden und Termine erfährst du bei unserem Beratungsteam.',
+        'Deutsch für Pflege und Medizin ist für Ärztinnen und Ärzte vor und nach der Fachsprachprüfung gedacht. Du steigst auf dem Niveau B2 oder C1 ein. Der Kurs läuft an zehn Freitagen von 13:00 bis 16:30 Uhr, 40 UE insgesamt, und kostet 400 € plus das Lehrbuch (45,90 €). Feste Termine gibt es nicht: Du trägst dich auf der Kursseite in die Interessentenliste ein, und wir legen die Termine fest, sobald die Gruppe groß genug ist.',
     },
     {
       id: 'course-bildungszeit-en',
@@ -673,6 +673,24 @@ function buildFooterPassages(): KbPassage[] {
       keywords: ['kontakt', 'telefon', 'adresse', 'email', 'büro'],
       content: `Du erreichst uns telefonisch unter ${footerConfig.contact.phone}. Unsere Adresse ist Am Dobben 14–16, 28203 Bremen. Wir sind montags bis donnerstags von 08:30 bis 19:00 Uhr und freitags von 08:30 bis 13:00 Uhr für dich da.`,
     },
+  ];
+}
+
+/**
+ * The hand-written passages: policies, the school, accommodation, exams,
+ * placement, course details and the office. The knowledge index
+ * (src/lib/knowledge) takes these alongside the site's own pages, FAQ and
+ * catalogue; the route, nav, FAQ and news passages below it builds itself.
+ */
+export function curatedPassages(): KbPassage[] {
+  return [
+    ...buildPolicyPassages(),
+    ...buildSchoolPassages(),
+    ...buildAccommodationDetailPassages(),
+    ...buildExamDetailPassages(),
+    ...buildPlacementPassages(),
+    ...buildCourseDetailPassages(),
+    ...buildFooterPassages(),
   ];
 }
 
