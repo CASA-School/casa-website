@@ -12,6 +12,8 @@ test('home renders Hero A and no top announcement bar', async ({ page }) => {
 });
 
 test('homepage decision cards guide visitors to in-page sections', async ({ page }) => {
+  // Five page loads: on a dev server that has just started, compiling them outlasts 30s.
+  test.slow();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/en');
 

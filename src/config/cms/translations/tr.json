@@ -911,6 +911,10 @@
     "de": "Bei uns kannst du die Prüfungen telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. Für die Niveaus A1 bis B1 bieten wir leider keine Prüfungen an. Das Ergebnis und das Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir informieren alle Teilnehmenden, sobald sie bei uns eingegangen sind.",
     "text": "Bizde telc Deutsch B2 ve telc Deutsch C1 Hochschule sınavlarına girebilirsiniz. Ne yazık ki A1 ile B1 arasındaki seviyeler için sınav sunmuyoruz. Sonuç ve sertifika, sınavdan yaklaşık 6 hafta sonra hazır olur. Bize ulaşır ulaşmaz tüm katılımcıları bilgilendiririz."
   },
+  "t.bei-uns-laufen-fortlaufend.6yhjpf": {
+    "de": "Bei uns laufen fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1. Hier siehst du, was du auf jeder Stufe kannst.",
+    "text": "Okulumuzda A1, A2, B1, B1+, B2 ve C1 seviyelerinde sürekli kurslar açılır. Burada her seviyede neler yapabildiğinizi görebilirsiniz."
+  },
   "t.bei-uns-lernst-du.1o2gpuc": {
     "de": "Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.",
     "text": "Bizde küçük gruplarda öğrenirsiniz; bir sonraki adımı da size biz gösteririz."
@@ -1230,6 +1234,10 @@
   "t.buchhaltung.fiaocz": {
     "de": "Buchhaltung",
     "text": "Muhasebe"
+  },
+  "t.buchstaben-aus-goldenen-paillett.my7ec0": {
+    "de": "Buchstaben aus goldenen Pailletten auf einer bemalten Leinwand",
+    "text": "Boyalı bir tuval üzerinde altın renkli pullardan harfler"
   },
   "t.buero-kontaktieren.19ubqhj": {
     "de": "Büro kontaktieren",
@@ -2055,6 +2063,10 @@
     "de": "Die Niveaustufen bei CASA als Treppe, von A1 bis C1. Jede Stufe führt zu den passenden Kursen.",
     "text": "CASA'daki seviyeler, A1'den C1'e uzanan bir merdiven olarak. Her basamak o seviyeye uygun kurslara götürür."
   },
+  "t.die-niveaustufen-von-a1.1sk5zcn": {
+    "de": "Die Niveaustufen von A1 bis C1",
+    "text": "A1'den C1'e kadar seviyeler"
+  },
   "t.die-pakete.indizy": {
     "de": "Die Pakete",
     "text": "Paketler"
@@ -2207,9 +2219,9 @@
     "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
     "text": "Öğretmenlerle ve koordinasyon ekibiyle yakın çalışırsınız."
   },
-  "t.du-baust-wortschatz-grammatik.kie2so": {
-    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.",
-    "text": "B1'de öğrendiğiniz kelime bilgisini, dilbilgisini ve kalıp ifadeleri genişletir, serbest konuşma ve yazma pratiği yaparsınız. Bu aşamadan itibaren Kontext ders kitabıyla öğrenirsiniz."
+  "t.du-baust-wortschatz-grammatik.mvn6u6": {
+    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus, übst das freie Sprechen und Schreiben und wirst sicherer. Ab hier lernst du mit Kontext.",
+    "text": "B1'de öğrendiğiniz kelime bilgisini, dilbilgisini ve kalıp ifadeleri genişletir, serbest konuşma ve yazma pratiği yapar ve kendinize daha çok güvenirsiniz. Bu aşamadan itibaren Kontext ile öğrenirsiniz."
   },
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
@@ -2279,21 +2291,9 @@
     "de": "Du hast eine Frage oder schon einen Plan? Schreib uns. Wir helfen dir gern weiter.",
     "text": "Bir sorunuz ya da hazır bir planınız mı var? Bize yazın. Size memnuniyetle yardımcı oluruz."
   },
-  "t.du-kannst-deine-meinung.1d3iikb": {
-    "de": "Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.",
-    "text": "Fikrinizi söyleyebilir, daha uzun metinleri anlayabilir ve sunum yapabilirsiniz."
-  },
-  "t.du-kannst-deine-meinung.1xja4wo": {
-    "de": "Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.",
-    "text": "Fikrinizi gerekçelendirebilir ve iş hayatında daha uzun konuşmalar yapabilirsiniz."
-  },
   "t.du-kannst-dich-entweder.i88v94": {
     "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.",
     "text": "Çevrim içi formumuz üzerinden ya da ofisimizde kaydolabilirsiniz. Sizi uygun gruba yerleştirebilmemiz için lütfen önce bir seviye tespit sınavı yapın ve sonucu bize gönderin."
-  },
-  "t.du-kannst-dich-vorstellen.uukfum": {
-    "de": "Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.",
-    "text": "Kendinizi tanıtabilir, basit sorular sorabilir ve günlük konuşmalar yapabilirsiniz."
   },
   "t.du-kannst-ein-modul.x5kfg5": {
     "de": "Du kannst ein Modul einzeln belegen oder neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.",
@@ -2303,17 +2303,13 @@
     "de": "Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.",
     "text": "Bir ila dokuz hafta arasında kayıt yaptırabilir ve herhangi bir pazartesi başlayabilirsiniz."
   },
-  "t.du-kannst-ueber-deine.wxzyen": {
-    "de": "Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.",
-    "text": "Deneyimlerinizi anlatabilir ve basit mesajlar yazabilirsiniz."
-  },
   "t.du-kannst-uns-gern.1ly90q8": {
     "de": "Du kannst uns gern eine Initiativbewerbung schicken. Wir melden uns bei dir, sobald eine passende Stelle frei wird.",
     "text": "Bize memnuniyetle açık başvuru gönderebilirsiniz. Uygun bir pozisyon açıldığında sizinle iletişime geçeriz."
   },
-  "t.du-kommst-in-alltagssituationen.1ijx71k": {
-    "de": "Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.",
-    "text": "Günlük durumlarda kendinizi idare eder ve kısa raporlar yazarsınız."
+  "t.du-kennst-dein-niveau.9un8tq": {
+    "de": "Du kennst dein Niveau noch nicht?",
+    "text": "Seviyenizi henüz bilmiyor musunuz?"
   },
   "t.du-kommunizierst-klar-und.1jpxwa6": {
     "de": "Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.",
@@ -2347,10 +2343,6 @@
     "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
     "text": "Sabah ya da öğleden sonra ders alırsınız. Öğleden sonra kursu pazartesiden perşembeye kadar sürer."
   },
-  "t.du-liest-anspruchsvolle-texte.o1gomg": {
-    "de": "Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.",
-    "text": "Zorlu metinler okur ve iş hayatında kendinizi esnek biçimde ifade edersiniz."
-  },
   "t.du-moechtest-in-deutschland.1b4asxf": {
     "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
     "text": "Almanya'da üniversite okumak mı istiyorsunuz? Bu rehber, bölüm seçiminden dil kursuna ve varışınıza kadar planlamanızda size yardımcı olur."
@@ -2371,17 +2363,9 @@
     "de": "Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.",
     "text": "Bir C1 kursunu başarıyla tamamlamış olmanız gerekir, çünkü C1 seviyesinin kelime bilgisi, kalıp ifadeleri ve dilbilgisi bu kursta işlenmez. Alternatif olarak okulumuzda bir seviye tespit sınavına girebilirsiniz."
   },
-  "t.du-sprichst-fliessend-und.4qeqfb": {
-    "de": "Du sprichst fließend und spontan und kannst akademische Texte analysieren.",
-    "text": "Akıcı ve kendiliğinden konuşur, akademik metinleri analiz edebilirsiniz."
-  },
   "t.du-sprichst-mehr-und.ack6nb": {
     "de": "Du sprichst mehr und wirst im Alltag sicherer.",
     "text": "Daha çok konuşur ve günlük hayatta kendinize daha çok güvenirsiniz."
-  },
-  "t.du-sprichst-spontan-und.c900im": {
-    "de": "Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.",
-    "text": "Kendiliğinden ve esnek biçimde konuşur, zorlu metinlerle çalışabilirsiniz."
   },
   "t.du-stehst-auf-der.141t38r": {
     "de": "Du stehst auf der Liste",
@@ -2415,9 +2399,17 @@
     "de": "Du übst gezielt Grammatik, Schreiben oder Sprechen.",
     "text": "Dilbilgisi, yazma ya da konuşma üzerine odaklanarak çalışırsınız."
   },
-  "t.du-verstehst-das-wichtigste.1drp1it": {
-    "de": "Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.",
-    "text": "Tanıdık konularda en önemli noktaları anlar ve fikrinizi gerekçelendirebilirsiniz."
+  "t.du-verstaendigst-dich-in.1gzvx9i": {
+    "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
+    "text": "Basit günlük durumlarda derdinizi anlatır, kökeninizi, eğitiminizi ve çevrenizi basit sözcüklerle tarif edersiniz."
+  },
+  "t.du-verstehst-anspruchsvolle-laen.1s0qlda": {
+    "de": "Du verstehst anspruchsvolle, längere Texte, auch zwischen den Zeilen, und drückst dich spontan, fließend und flexibel aus, im Beruf wie im Studium.",
+    "text": "Zorlu ve uzun metinleri satır aralarını da kavrayarak anlar; iş hayatında olduğu gibi üniversitede de kendinizi kendiliğinden, akıcı ve esnek biçimde ifade edersiniz."
+  },
+  "t.du-verstehst-das-wichtigste.o06fb2": {
+    "de": "Du verstehst das Wichtigste zu vertrauten Themen, erzählst von Erfahrungen, Träumen und Zielen und begründest kurz deine Ansichten.",
+    "text": "Tanıdık konularda en önemli noktaları anlar, deneyimlerinizi, hayallerinizi ve hedeflerinizi anlatır, görüşlerinizi kısaca gerekçelendirirsiniz."
   },
   "t.du-verstehst-die-hauptinhalte.9gzpz1": {
     "de": "Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.",
@@ -2431,21 +2423,17 @@
     "de": "Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.",
     "text": "Açık ve standart bir dil konuşulduğunda ve iş, okul, boş zaman ya da seyahat gibi tanıdık konular söz konusu olduğunda en önemli bilgileri anlarsınız. Tanıdık konular ve ilgi alanlarınız hakkında bağlantılı bir şekilde konuşabilir, deneyimlerinizi, hayallerinizi, umutlarınızı ve hedeflerinizi anlatabilir, açıklamalar yapıp gerekçeler sunabilirsiniz. Ancak dil yapıları ve cümle kuruluşu üzerinde çalışmak, kalıp ifadeleri pratik etmek, kelime bilginizi genişletmek ve kendinize daha çok güvenmek istiyorsunuz. O halde B1+ sizin için doğru seviyedir. Burada B1'de öğrendiğiniz kelime bilgisini, dilbilgisini ve kalıp ifadeleri genişletir, serbest konuşma ve yazma pratiği yaparsınız. Böylece B2 için sağlam bir temel oluşturursunuz. B1+ seviyesinden itibaren kursta Kontext ders kitabı kullanılır."
   },
-  "t.du-verstehst-einfache-saetze.u1to26": {
-    "de": "Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.",
-    "text": "Basit cümleleri anlar ve günlük hayat için temel kelimeleri öğrenirsiniz."
-  },
-  "t.du-verstehst-komplexe-argumente.cqrg22": {
-    "de": "Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.",
-    "text": "Karmaşık argümanları anlar ve mesleki tartışmalara katılabilirsiniz."
-  },
-  "t.du-verstehst-komplexe-texte.gg00qq": {
-    "de": "Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.",
-    "text": "Karmaşık metinleri anlar ve iş hayatında kendiliğinden konuşmalar yaparsınız."
+  "t.du-verstehst-komplexe-texte.1rbrrkb": {
+    "de": "Du verstehst komplexe Texte und Fachdiskussionen in deinem Gebiet und unterhältst dich spontan und fließend, klar und ausführlich zu vielen Themen.",
+    "text": "Karmaşık metinleri ve kendi alanınızdaki mesleki tartışmaları anlar, pek çok konuda kendiliğinden ve akıcı, açık ve ayrıntılı biçimde sohbet edersiniz."
   },
   "t.du-verstehst-saetze-und.12defvx": {
     "de": "Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.",
     "text": "Sizi doğrudan ilgilendiren konularla ilgili cümleleri ve sık kullanılan ifadeleri anlarsınız; örneğin kendiniz ve aileniz, alışveriş, iş ya da yakın çevreniz hakkında. Tanıdık konularda basit ve doğrudan bir bilgi alışverişi söz konusu olduğunda, basit günlük durumlarda derdinizi anlatabilirsiniz. Basit sözcüklerle kökeninizi ve eğitiminizi, çevrenizi ve o an ihtiyaç duyduğunuz şeyleri tarif edebilirsiniz."
+  },
+  "t.du-verstehst-und-verwendest.4wl73h": {
+    "de": "Du verstehst und verwendest vertraute Alltagsausdrücke und ganz einfache Sätze, stellst dich vor und stellst und beantwortest einfache Fragen zur Person.",
+    "text": "Tanıdık günlük ifadeleri ve çok basit cümleleri anlar ve kullanır, kendinizi tanıtır, kişisel bilgilerle ilgili basit sorular sorar ve yanıtlarsınız."
   },
   "t.du-verstehst-vertraute-alltaegli.ngwyvd": {
     "de": "Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.",
@@ -2495,6 +2483,10 @@
     "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
     "text": "Bir akşam kursu yaklaşık 3½ ay sürer. Bu sürede yarım seviyeyi, örneğin A1.2 ya da B2.1'i tamamlarsınız. Böylece bir yılda yaklaşık 1½ seviye ilerlersiniz."
   },
+  "t.ein-baby-krabbelt-und.acgqmh": {
+    "de": "Ein Baby krabbelt und schaut neugierig nach oben",
+    "text": "Emekleyen bir bebek merakla yukarı bakıyor"
+  },
   "t.ein-deutschkurs-bei-casa.2u5cuy": {
     "de": "Ein Deutschkurs bei CASA in Bremen.",
     "text": "Bremen'deki CASA'da bir Almanca kursu."
@@ -2530,6 +2522,14 @@
   "t.ein-halbes-niveau-in.ax0vri": {
     "de": "Ein halbes Niveau in etwa 3,5 Monaten",
     "text": "Yaklaşık 3,5 ayda yarım seviye"
+  },
+  "t.ein-junge-schwimmt-mit.11evmv": {
+    "de": "Ein Junge schwimmt mit einem blauen Schwimmring im Wasser",
+    "text": "Bir erkek çocuk mavi bir can simidiyle suda yüzüyor"
+  },
+  "t.ein-maedchen-springt-ueber.1yqmh9a": {
+    "de": "Ein Mädchen springt über eine Wiese, darüber blauer Himmel",
+    "text": "Bir kız çocuğu mavi gökyüzünün altında çayırda sıçrıyor"
   },
   "t.ein-modul-laeuft-an.fwp2vw": {
     "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu {course.special-courses.price-per-evening} pro Abend.",
@@ -2695,6 +2695,14 @@
     "de": "Eine Hand schreibt mit einem Stift auf Papier",
     "text": "Bir el, kalemle kâğıda yazıyor"
   },
+  "t.eine-junge-frau-kniet.mn4sk6": {
+    "de": "Eine junge Frau kniet in Startposition auf einer Straße",
+    "text": "Genç bir kadın bir yolda start pozisyonunda diz çökmüş"
+  },
+  "t.eine-laeuferin-nimmt-am.zntjqk": {
+    "de": "Eine Läuferin nimmt am Meer die Treppe hinauf",
+    "text": "Bir kadın koşucu deniz kenarında merdivenleri çıkıyor"
+  },
   "t.eine-lehrerin-am-bildschirm.1xgfl68": {
     "de": "Eine Lehrerin am Bildschirm mit ihrer Klasse",
     "text": "Ekranın başında sınıfıyla bir öğretmen"
@@ -2803,6 +2811,10 @@
     "de": "Einzelne Lernende oder Gruppen",
     "text": "Bireysel öğrenciler ya da gruplar"
   },
+  "t.elementare-sprachverwendung.17h254x": {
+    "de": "Elementare Sprachverwendung",
+    "text": "Temel kullanıcı"
+  },
   "t.empfohlen.x9gqd6": {
     "de": "Empfohlen",
     "text": "Önerilen"
@@ -2862,6 +2874,10 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "Eşek, Köpek, Kedi, Horoz – ve Bremen'e giden size özel yol"
+  },
+  "t.etwa-wochen.zc1ikx": {
+    "de": "etwa {weeks} Wochen",
+    "text": "yaklaşık {weeks} hafta"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3367,6 +3383,10 @@
     "de": "Gemeinsame Nutzung in der WG",
     "text": "Dairede ortak kullanım"
   },
+  "t.gemeinsamer-europaeischer-refere.ypd010": {
+    "de": "Gemeinsamer Europäischer Referenzrahmen",
+    "text": "Avrupa Ortak Dil Referans Çerçevesi"
+  },
   "t.gemeinschaft.1sz6tmb": {
     "de": "Gemeinschaft",
     "text": "Topluluk"
@@ -3750,6 +3770,10 @@
   "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
     "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
     "text": "Haftada {course.intensive-german.lessons} ders saati olan yoğun kursta bir seviyenin tamamı yaklaşık 8 ila 9 hafta sürer. Akşam kursunda yaklaşık 3,5 ayda yarım seviye, yani yılda yaklaşık 1,5 seviye tamamlarsınız."
+  },
+  "t.im-intensivkurs.136g3x5": {
+    "de": "Im Intensivkurs",
+    "text": "Yoğun kursta"
   },
   "t.im-klinikalltag-ist-es.taud3v": {
     "de": "Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal, dazu das Hörverstehen und die schriftliche Dokumentation im Beruf.",
@@ -4347,6 +4371,10 @@
     "de": "Kompakte Tagesblöcke nach Absprache",
     "text": "Anlaşmaya göre kısa ve yoğun gündüz blokları"
   },
+  "t.kompetente-sprachverwendung.1n1x676": {
+    "de": "Kompetente Sprachverwendung",
+    "text": "Yetkin kullanıcı"
+  },
   "t.konstanter-fortschritt-schafft-s.1wwngq": {
     "de": "Konstanter Fortschritt schafft Sicherheit für Studium und Beruf.",
     "text": "İstikrarlı ilerleme, üniversite ve iş hayatı için güven sağlar."
@@ -4615,6 +4643,10 @@
     "de": "Kursweg",
     "text": "Öğrenme yolu"
   },
+  "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
+    "de": "Läuferinnen laufen jubelnd durch das Zielband",
+    "text": "Kadın koşucular sevinç içinde bitiş şeridini göğüslüyor"
+  },
   "t.laeuft-bereits.qmroe8": {
     "de": "läuft bereits",
     "text": "devam ediyor"
@@ -4626,6 +4658,10 @@
   "t.langfristiger-fortschritt.xvw54l": {
     "de": "Langfristiger Fortschritt",
     "text": "Uzun vadeli ilerleme"
+  },
+  "t.lass-dich-gern-von.x9wxts": {
+    "de": "Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
+    "text": "Size memnuniyetle danışmanlık veririz. Ücretsiz çevrim içi seviye tespit sınavlarımız bunun için iyi bir temeldir. Henüz hiç Almanca bilmiyorsanız sınava girmeniz gerekmez; doğrudan A1'den başlarsınız."
   },
   "t.lass-dich-zuerst-beraten.8uix9j": {
     "de": "Lass dich zuerst beraten",
@@ -4694,6 +4730,10 @@
   "t.lehrwerk-netzwerk-neu.17hkji": {
     "de": "Lehrwerk Netzwerk neu",
     "text": "Netzwerk neu ders kitabı"
+  },
+  "t.lehrwerk.1oj28xk": {
+    "de": "Lehrwerk",
+    "text": "Ders kitabı"
   },
   "t.leitung.1srtrnz": {
     "de": "Leitung",
@@ -4863,6 +4903,10 @@
     "de": "Mehr Sprechsicherheit",
     "text": "Konuşurken daha fazla güven"
   },
+  "t.mehr-zu-den-niveaustufen.1wk02ex": {
+    "de": "Mehr zu den Niveaustufen",
+    "text": "Seviyeler hakkında daha fazlası"
+  },
   "t.mehr-zu-telc-deutsch.xiaprp": {
     "de": "Mehr zu telc Deutsch B2",
     "text": "telc Deutsch B2 hakkında daha fazlası"
@@ -4870,6 +4914,10 @@
   "t.mehr-zur-pruefung.185bh7": {
     "de": "Mehr zur Prüfung",
     "text": "Sınav hakkında daha fazlası"
+  },
+  "t.mehr-zur-stufe.162idne": {
+    "de": "Mehr zur Stufe {level}",
+    "text": "{level} seviyesi hakkında daha fazlası"
   },
   "t.mehrere-moeglich.1o2k99k": {
     "de": "Mehrere möglich",
@@ -5346,6 +5394,10 @@
   "t.niveauschritte.1cng3m1": {
     "de": "Niveauschritte",
     "text": "Seviye adımları"
+  },
+  "t.niveaustufen.16jh7p8": {
+    "de": "Niveaustufen",
+    "text": "Seviyeler"
   },
   "t.niveaustufen.8erybc": {
     "de": "Niveaustufen",
@@ -6099,6 +6151,10 @@
     "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
     "text": "A1'den C1'e altı seviye; yoğun kursta her biri yaklaşık 8–9 hafta."
   },
+  "t.sechs-stufen-in-drei.1buauf": {
+    "de": "Sechs Stufen in drei Bereichen",
+    "text": "Üç grupta altı seviye"
+  },
   "t.sechs.1eiph2a": {
     "de": "Sechs",
     "text": "Altı"
@@ -6154,6 +6210,10 @@
   "t.selbst-zusammenstellen.mvc58b": {
     "de": "Selbst zusammenstellen",
     "text": "Kendiniz oluşturun"
+  },
+  "t.selbststaendige-sprachverwendung.m7p0gc": {
+    "de": "Selbstständige Sprachverwendung",
+    "text": "Bağımsız kullanıcı"
   },
   "t.selbstverpflegung.ll03me": {
     "de": "Selbstverpflegung",
@@ -7315,6 +7375,10 @@
     "de": "Vollverpflegung",
     "text": "Tam pansiyon"
   },
+  "t.von-a1-bis-c1.1lsfam3": {
+    "de": "Von A1 bis C1, Stufe für Stufe",
+    "text": "A1'den C1'e, seviye seviye"
+  },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
     "text": "İlk talebinizden ayrılış gününe kadar tek bir irtibat kişiniz olur."
@@ -7578,6 +7642,10 @@
   "t.was-dir-ein-tandem.15zg4yw": {
     "de": "Was dir ein Tandem bringt",
     "text": "Tandemin size kazandırdıkları"
+  },
+  "t.was-du-auf-jeder.1qusc0s": {
+    "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
+    "text": "A1'den C1'e kadar her seviyede neler yapabildiğiniz."
   },
   "t.was-du-auf-jeder.6gi060": {
     "de": "Was du auf jeder Stufe kannst",
@@ -8067,6 +8135,10 @@
     "de": "Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.",
     "text": "Tarihlerle ilgili size e-postayla ya da telefonla ulaşırız. Ardından kesin kaydınızı yaparsınız."
   },
+  "t.wir-orientieren-uns-streng.1r8mfh1": {
+    "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
+    "text": "Avrupa Ortak Dil Referans Çerçevesi'ne (CEFR) sıkı sıkıya bağlıyız. Bu çerçeve, her seviyede neleri anlayabileceğinizi ve söyleyebileceğinizi tanımlar. B1+ ise yoğun kursumuzun B1 ile B2 arasındaki ayrı bir seviyesidir."
+  },
   "t.wir-planen-den-unterricht.119fu4": {
     "de": "Wir planen den Unterricht gemeinsam mit der Firma.",
     "text": "Dersleri şirketle birlikte planlıyoruz."
@@ -8371,6 +8443,10 @@
     "de": "Zum Einstufungstest",
     "text": "Seviye tespit sınavına geçin"
   },
+  "t.zum-einstufungstest.1c834ug": {
+    "de": "Zum Einstufungstest",
+    "text": "Seviye tespit sınavına geçin"
+  },
   "t.zum-intensivkurs.zzp7ph": {
     "de": "Zum Intensivkurs",
     "text": "Yoğun kursa göz atın"
@@ -8506,6 +8582,10 @@
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",
     "text": "Temmuz ayının ikinci yarısı"
+  },
+  "t.zwischenstufe-im-intensivkurs-zw.10lxrtl": {
+    "de": "Zwischenstufe im Intensivkurs, zwischen B1 und B2",
+    "text": "Yoğun kursta B1 ile B2 arasındaki geçiş seviyesi"
   },
   "t.zwischenstufe.1hqvqds": {
     "de": "Zwischenstufe",

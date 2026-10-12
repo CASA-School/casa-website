@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  ChartNoAxesColumn,
   Calendar,
   Building,
   GraduationCap,
@@ -32,7 +33,7 @@ export type IconKey =
   | 'exams' | 'telcB2' | 'telcC1' | 'testdaf' | 'examRegistration'
   | 'accommodation' | 'flats' | 'hostFamilies' | 'requestAccommodation' | 'becomeHost'
   | 'school' | 'mission' | 'team' | 'tandem' | 'partners' | 'gallery'
-  | 'registration' | 'placementTest' | 'calculator' | 'contact' | 'faq' | 'news'
+  | 'registration' | 'placementTest' | 'levels' | 'calculator' | 'contact' | 'faq' | 'news'
   | 'phone' | 'mail' | 'location' | 'globe' | 'check';
 
 export const iconMap: Record<IconKey, LucideIcon> = {
@@ -65,6 +66,7 @@ export const iconMap: Record<IconKey, LucideIcon> = {
   
   registration: CheckCircle2,
   placementTest: FileText,
+  levels: ChartNoAxesColumn,
   calculator: Calculator,
   contact: Phone,
   faq: HelpCircle,

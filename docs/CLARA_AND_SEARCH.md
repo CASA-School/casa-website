@@ -96,8 +96,8 @@ slower than 8 seconds falls back to the deterministic answer.
 
 ## Measuring it
 
-`src/lib/knowledge/__tests__/golden-questions.json` holds 120 questions visitors ask (70 German,
-50 English; carefully and carelessly typed; five deliberately out of scope), each with the pages
+`src/lib/knowledge/__tests__/golden-questions.json` holds 124 questions visitors ask (72 German,
+52 English; carefully and carelessly typed; five deliberately out of scope), each with the pages
 that answer it and the facts a right answer contains.
 
 - `npm run test` runs them against the structured half (`golden.test.ts`) and fails if search or

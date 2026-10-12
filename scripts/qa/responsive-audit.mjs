@@ -111,7 +111,12 @@ function measure() {
     const cs = getComputedStyle(el);
     if (cs.display === 'inline' || el.clientWidth === 0) continue;
     // A decorative piece placed outside on purpose (a connector line, a hidden radio) is not spilled text.
-    const placedOutside = [...el.querySelectorAll('*')].some((child) => /^(absolute|fixed)$/.test(getComputedStyle(child).position));
+    // A touch area widened by an absolutely placed ::before or ::after reaches past the box too.
+    const pseudoOutside = ['::before', '::after'].some((pseudo) => {
+      const style = getComputedStyle(el, pseudo);
+      return style.content !== 'none' && /^(absolute|fixed)$/.test(style.position);
+    });
+    const placedOutside = pseudoOutside || [...el.querySelectorAll('*')].some((child) => /^(absolute|fixed)$/.test(getComputedStyle(child).position));
     if (!placedOutside && el.scrollWidth > el.clientWidth + 1 && cs.textOverflow !== 'ellipsis' && !/(auto|scroll)/.test(cs.overflowX)) {
       out.spill.push({ el: describe(el), text: el.textContent.trim().replace(/\s+/g, ' ').slice(0, 70), over: el.scrollWidth - el.clientWidth });
     }

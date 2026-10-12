@@ -1,7 +1,8 @@
 import type { CasaContactKey } from '@/config/content/contacts';
 import type { ContentLocale } from '@/lib/content/types';
 import type { CourseArchetypeId } from './archetypes';
-import { say } from '@/lib/cms/copy';
+import { cefrLevel } from '@/config/content/cefr-levels';
+import { pick, say } from '@/lib/cms/copy';
 
 /**
  * Per-course profile registry.
@@ -121,40 +122,30 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
   };
 
   /*
-   * B1+ is one step of the intensive course, between B1 and B2, and the first
-   * one taught with Kontext (Kontext B1+). It has a row on the two formats that
-   * follow the intensive progression: the intensive course and Bildungszeit. Its
-   * German line is the old casa-bremen.de Niveaustufen text, and the English
-   * line says the same.
+   * The formats that teach whole levels say what each level means in the words
+   * of the levels page (config/content/cefr-levels.ts, the old casa-bremen.de
+   * „Niveaustufen"), and the section links there for the full text (2026-10-12).
+   * Groups, in-company teaching, the special courses and German for nursing and
+   * medicine keep their own lines: they say what that course does at a level.
    */
-  const b1PlusFocus =
-    say(locale, 'Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.', 'You build on the vocabulary, grammar and phrases from B1 and practise speaking and writing freely. From here on you learn with the Kontext textbook.');
+  const levelRows = (labels: string[]): LevelGoalItem[] =>
+    labels.flatMap((label) => {
+      const level = cefrLevel(label);
+      return level ? [{ level: level.label, textbook: level.textbook, focus: pick(locale, level.summary) }] : [];
+    });
 
   const goals: Record<string, { title: string; description: string; levels: LevelGoalItem[] }> = {
     'intensive-german': {
       title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),
       description:
         say(locale, 'Für jede Niveaustufe haben wir ein passendes Lehrwerk ausgewählt. Von A1 bis B1 lernst du mit Netzwerk neu, von B1+ bis C1 mit Kontext.', 'We have chosen a suitable textbook for each level. From A1 to B1 you learn with Netzwerk neu, and from B1+ to C1 with Kontext.'),
-      levels: [
-        { level: 'A1', textbook: 'netzwerk', focus: say(locale, 'Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.', 'You can introduce yourself, ask simple questions and hold everyday conversations.') },
-        { level: 'A2', textbook: 'netzwerk', focus: say(locale, 'Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.', 'You can talk about your experiences and write simple messages.') },
-        { level: 'B1', textbook: 'netzwerk', focus: say(locale, 'Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.', 'You can give your opinion, understand longer texts and give presentations.') },
-        { level: 'B1+', textbook: 'kontext', focus: b1PlusFocus },
-        { level: 'B2', textbook: 'kontext', focus: say(locale, 'Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.', 'You understand complex arguments and can take part in specialist discussions.') },
-        { level: 'C1', textbook: 'kontext', focus: say(locale, 'Du sprichst fließend und spontan und kannst akademische Texte analysieren.', 'You speak fluently and spontaneously and can analyse academic texts.') },
-      ],
+      levels: levelRows(['A1', 'A2', 'B1', 'B1+', 'B2', 'C1']),
     },
     'evening-german': {
       title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),
       description:
         say(locale, 'Auch am Abend lernst du mit den Lehrwerken Netzwerk neu und Kontext, in jedem Trimester eine halbe Niveaustufe.', 'In the evenings, too, you learn with the Netzwerk neu and Kontext textbooks, completing half a level each trimester.'),
-      levels: [
-        { level: 'A1', textbook: 'netzwerk', focus: say(locale, 'Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.', 'You understand simple sentences and learn the basic vocabulary for everyday life.') },
-        { level: 'A2', textbook: 'netzwerk', focus: say(locale, 'Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.', 'You can manage in everyday situations and write short reports.') },
-        { level: 'B1', textbook: 'netzwerk', focus: say(locale, 'Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.', 'You understand the main points on familiar topics and can give reasons for your opinion.') },
-        { level: 'B2', textbook: 'kontext', focus: say(locale, 'Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.', 'You understand complex texts and can hold spontaneous conversations at work.') },
-        { level: 'C1', textbook: 'kontext', focus: say(locale, 'Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.', 'You read demanding texts and express yourself flexibly at work.') },
-      ],
+      levels: levelRows(['A1', 'A2', 'B1', 'B2', 'C1']),
     },
     'german-for-groups': {
       title: say(locale, 'Unterricht nach Gruppenniveau', 'Lessons matched to your group'),
@@ -186,13 +177,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),
       description:
         say(locale, 'Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.', 'With two intensive courses a day, you have twice as many lessons as in a single intensive course. You can join from B1.'),
-      levels: [
-        { level: 'B1', textbook: 'netzwerk', focus: say(locale, 'Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.', 'You can give reasons for your opinions and hold longer conversations at work.') },
-        // Bildungszeit is two intensive courses, so it follows their progression.
-        { level: 'B1+', textbook: 'kontext', focus: b1PlusFocus },
-        { level: 'B2', textbook: 'kontext', focus: say(locale, 'Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.', 'You understand complex arguments and can take part in specialist discussions.') },
-        { level: 'C1', textbook: 'kontext', focus: say(locale, 'Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.', 'You speak spontaneously and flexibly and can work with demanding texts.') },
-      ],
+      levels: levelRows(['B1', 'B1+', 'B2', 'C1']),
     },
     /*
      * Also previously on the A1-B1 fallback, while the catalogue's own modules

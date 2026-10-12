@@ -268,6 +268,14 @@ export const photoSlots: PhotoSlot[] = [
   { n: 92, src: '/media/casa/exam-c1-study.webp', subject: 'Two learners reading exam texts together, source 078. 4:3 crop with whole heads, replaces source-cut frame 023. 2026-10-08.', ready: true },
   { n: 93, src: '/media/casa/exam-c1-study-hero.webp', subject: 'Two learners reading exam texts together, source 078, wide 2.4:1 crop with both heads and papers visible. Replaces source-cut frame 023. 2026-10-08.', ready: true },
   { n: 94, src: '/media/casa/team-lesson-wide.webp', subject: 'The team page\'s "Wer wir sind": a teacher at the screen with her class, the whole frame of 061 (slot 59 is a close crop of it), warm editorial grade, 2026-10-08.', ready: true },
+  // The levels page (/sprachkurse/niveaustufen), the old casa-bremen.de page's pictures, 2026-10-12.
+  { n: 95, src: '/media/casa/levels-hero.jpg', subject: 'The levels page\'s hero: the sequin lettering from the old Niveaustufen header, a 3:2 crop, warm grade.', ready: true },
+  { n: 96, src: '/media/casa/level-a1.webp', subject: 'A1: a baby crawling on a white studio ground (old site, stock), warm grade.', ready: true },
+  { n: 97, src: '/media/casa/level-a2.jpg', subject: 'A2: a boy in a swim ring (old site, stock), warm grade.', ready: true },
+  { n: 98, src: '/media/casa/level-b1.jpg', subject: 'B1: a girl leaping over grass under a blue sky (old site, stock), warm grade.', ready: true },
+  { n: 99, src: '/media/casa/level-b1plus.webp', subject: 'B1+: a runner crouched at the start line (old site, stock), warm grade.', ready: true },
+  { n: 100, src: '/media/casa/level-b2.webp', subject: 'B2: runners crossing the finish line (old site, stock), warm grade.', ready: true },
+  { n: 101, src: '/media/casa/level-c1.jpg', subject: 'C1: a runner taking the stairs by the sea (old site, stock), warm grade.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

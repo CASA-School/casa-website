@@ -911,6 +911,10 @@
     "de": "Bei uns kannst du die Prüfungen telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. Für die Niveaus A1 bis B1 bieten wir leider keine Prüfungen an. Das Ergebnis und das Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir informieren alle Teilnehmenden, sobald sie bei uns eingegangen sind.",
     "text": "У нас вы можете сдать экзамены telc Deutsch B2 и telc Deutsch C1 Hochschule. Экзаменов для уровней от A1 до B1 мы, к сожалению, не проводим. Результат и сертификат будут готовы примерно через 6 недель после экзамена. Как только они поступят к нам, мы сообщим об этом всем участникам."
   },
+  "t.bei-uns-laufen-fortlaufend.6yhjpf": {
+    "de": "Bei uns laufen fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1. Hier siehst du, was du auf jeder Stufe kannst.",
+    "text": "У нас постоянно проходят курсы уровней A1, A2, B1, B1+, B2 и C1. Здесь показано, что вы умеете на каждом уровне."
+  },
   "t.bei-uns-lernst-du.1o2gpuc": {
     "de": "Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.",
     "text": "У нас вы учитесь в небольших группах, а мы подскажем вам следующий шаг."
@@ -1230,6 +1234,10 @@
   "t.buchhaltung.fiaocz": {
     "de": "Buchhaltung",
     "text": "Бухгалтерия"
+  },
+  "t.buchstaben-aus-goldenen-paillett.my7ec0": {
+    "de": "Buchstaben aus goldenen Pailletten auf einer bemalten Leinwand",
+    "text": "Буквы из золотых пайеток на расписанном холсте"
   },
   "t.buero-kontaktieren.19ubqhj": {
     "de": "Büro kontaktieren",
@@ -2055,6 +2063,10 @@
     "de": "Die Niveaustufen bei CASA als Treppe, von A1 bis C1. Jede Stufe führt zu den passenden Kursen.",
     "text": "Уровни в CASA в виде лестницы, от A1 до C1. Каждая ступень ведет к подходящим курсам."
   },
+  "t.die-niveaustufen-von-a1.1sk5zcn": {
+    "de": "Die Niveaustufen von A1 bis C1",
+    "text": "Уровни от A1 до C1"
+  },
   "t.die-pakete.indizy": {
     "de": "Die Pakete",
     "text": "Пакеты"
@@ -2207,9 +2219,9 @@
     "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
     "text": "Вы тесно сотрудничаете с преподавателями и координаторами."
   },
-  "t.du-baust-wortschatz-grammatik.kie2so": {
-    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.",
-    "text": "Вы расширяете словарный запас, грамматику и речевые обороты уровня B1 и тренируете свободную устную и письменную речь. С этого уровня вы занимаетесь по учебнику Kontext."
+  "t.du-baust-wortschatz-grammatik.mvn6u6": {
+    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus, übst das freie Sprechen und Schreiben und wirst sicherer. Ab hier lernst du mit Kontext.",
+    "text": "Вы расширяете словарный запас, грамматику и речевые обороты уровня B1, тренируете свободную устную и письменную речь и становитесь увереннее. С этого уровня вы занимаетесь по учебнику Kontext."
   },
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
@@ -2279,21 +2291,9 @@
     "de": "Du hast eine Frage oder schon einen Plan? Schreib uns. Wir helfen dir gern weiter.",
     "text": "У вас есть вопрос или уже готовый план? Напишите нам. Мы с радостью поможем."
   },
-  "t.du-kannst-deine-meinung.1d3iikb": {
-    "de": "Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.",
-    "text": "Вы можете высказывать свое мнение, понимать более длинные тексты и выступать с презентациями."
-  },
-  "t.du-kannst-deine-meinung.1xja4wo": {
-    "de": "Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.",
-    "text": "Вы можете обосновывать свое мнение и вести более длинные разговоры на работе."
-  },
   "t.du-kannst-dich-entweder.i88v94": {
     "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.",
     "text": "Записаться можно либо через нашу онлайн-форму, либо у нас в офисе. Пожалуйста, предварительно пройдите тест на определение уровня и пришлите нам результат, чтобы мы могли определить вас в подходящую учебную группу."
-  },
-  "t.du-kannst-dich-vorstellen.uukfum": {
-    "de": "Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.",
-    "text": "Вы можете представиться, задавать простые вопросы и вести повседневные разговоры."
   },
   "t.du-kannst-ein-modul.x5kfg5": {
     "de": "Du kannst ein Modul einzeln belegen oder neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.",
@@ -2303,17 +2303,13 @@
     "de": "Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.",
     "text": "Вы можете записаться на срок от одной до девяти недель и начать в любой понедельник."
   },
-  "t.du-kannst-ueber-deine.wxzyen": {
-    "de": "Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.",
-    "text": "Вы можете рассказывать о своем опыте и писать простые сообщения."
-  },
   "t.du-kannst-uns-gern.1ly90q8": {
     "de": "Du kannst uns gern eine Initiativbewerbung schicken. Wir melden uns bei dir, sobald eine passende Stelle frei wird.",
     "text": "Вы можете прислать нам резюме по собственной инициативе. Мы свяжемся с вами, как только появится подходящая вакансия."
   },
-  "t.du-kommst-in-alltagssituationen.1ijx71k": {
-    "de": "Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.",
-    "text": "Вы справляетесь в повседневных ситуациях и пишете короткие отчеты."
+  "t.du-kennst-dein-niveau.9un8tq": {
+    "de": "Du kennst dein Niveau noch nicht?",
+    "text": "Вы пока не знаете свой уровень?"
   },
   "t.du-kommunizierst-klar-und.1jpxwa6": {
     "de": "Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.",
@@ -2347,10 +2343,6 @@
     "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
     "text": "Вы занимаетесь утром или во второй половине дня. Курс во второй половине дня проходит с понедельника по четверг."
   },
-  "t.du-liest-anspruchsvolle-texte.o1gomg": {
-    "de": "Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.",
-    "text": "Вы читаете сложные тексты и гибко выражаете свои мысли на работе."
-  },
   "t.du-moechtest-in-deutschland.1b4asxf": {
     "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
     "text": "Вы хотите учиться в Германии? Этот справочник поможет вам всё спланировать: от выбора программы и языкового курса до приезда на место."
@@ -2371,17 +2363,9 @@
     "de": "Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.",
     "text": "Вам нужно успешно закончить курс уровня C1, так как лексика, речевые обороты и грамматика уровня C1 на этом курсе не проходятся. В качестве альтернативы вы можете пройти тест на определение уровня у нас на месте."
   },
-  "t.du-sprichst-fliessend-und.4qeqfb": {
-    "de": "Du sprichst fließend und spontan und kannst akademische Texte analysieren.",
-    "text": "Вы говорите бегло и спонтанно и умеете анализировать академические тексты."
-  },
   "t.du-sprichst-mehr-und.ack6nb": {
     "de": "Du sprichst mehr und wirst im Alltag sicherer.",
     "text": "Вы больше говорите и увереннее чувствуете себя в повседневной жизни."
-  },
-  "t.du-sprichst-spontan-und.c900im": {
-    "de": "Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.",
-    "text": "Вы говорите спонтанно и гибко и умеете работать со сложными текстами."
   },
   "t.du-stehst-auf-der.141t38r": {
     "de": "Du stehst auf der Liste",
@@ -2415,9 +2399,17 @@
     "de": "Du übst gezielt Grammatik, Schreiben oder Sprechen.",
     "text": "Вы целенаправленно отрабатываете грамматику, письмо или устную речь."
   },
-  "t.du-verstehst-das-wichtigste.1drp1it": {
-    "de": "Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.",
-    "text": "Вы понимаете главное, когда речь идет о знакомых темах, и можете обосновать свое мнение."
+  "t.du-verstaendigst-dich-in.1gzvx9i": {
+    "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
+    "text": "Вы объясняетесь в простых повседневных ситуациях и простыми словами описываете свое происхождение, образование и окружение."
+  },
+  "t.du-verstehst-anspruchsvolle-laen.1s0qlda": {
+    "de": "Du verstehst anspruchsvolle, längere Texte, auch zwischen den Zeilen, und drückst dich spontan, fließend und flexibel aus, im Beruf wie im Studium.",
+    "text": "Вы понимаете сложные и длинные тексты, в том числе то, что сказано между строк, и выражаетесь спонтанно, бегло и гибко — как на работе, так и в вузе."
+  },
+  "t.du-verstehst-das-wichtigste.o06fb2": {
+    "de": "Du verstehst das Wichtigste zu vertrauten Themen, erzählst von Erfahrungen, Träumen und Zielen und begründest kurz deine Ansichten.",
+    "text": "Вы понимаете главное, когда речь идет о знакомых темах, рассказываете о своем опыте, мечтах и целях и кратко обосновываете свое мнение."
   },
   "t.du-verstehst-die-hauptinhalte.9gzpz1": {
     "de": "Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.",
@@ -2431,21 +2423,17 @@
     "de": "Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.",
     "text": "Вы понимаете самую важную информацию, когда говорят на четком литературном языке и речь идет о знакомых вещах из работы, школы, досуга или путешествий. Вы можете связно высказываться на знакомые темы и о своих интересах, говорить об опыте, мечтах, надеждах и целях, давать объяснения и обоснования. Но вы хотите еще поработать над структурами и построением предложений, потренировать речевые обороты, расширить словарный запас и стать увереннее. Тогда B1+ — подходящий для вас уровень. Здесь вы расширяете словарный запас, грамматику и речевые обороты уровня B1 и тренируете свободную устную и письменную речь. Так вы закладываете прочную основу для B2. Начиная с уровня B1+ занятия проходят по учебнику Kontext."
   },
-  "t.du-verstehst-einfache-saetze.u1to26": {
-    "de": "Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.",
-    "text": "Вы понимаете простые предложения и учите базовую лексику для повседневной жизни."
-  },
-  "t.du-verstehst-komplexe-argumente.cqrg22": {
-    "de": "Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.",
-    "text": "Вы понимаете сложную аргументацию и можете участвовать в профессиональных дискуссиях."
-  },
-  "t.du-verstehst-komplexe-texte.gg00qq": {
-    "de": "Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.",
-    "text": "Вы понимаете сложные тексты и спонтанно ведете разговоры на работе."
+  "t.du-verstehst-komplexe-texte.1rbrrkb": {
+    "de": "Du verstehst komplexe Texte und Fachdiskussionen in deinem Gebiet und unterhältst dich spontan und fließend, klar und ausführlich zu vielen Themen.",
+    "text": "Вы понимаете сложные тексты и профессиональные дискуссии в своей области и общаетесь спонтанно и бегло, ясно и подробно на многие темы."
   },
   "t.du-verstehst-saetze-und.12defvx": {
     "de": "Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.",
     "text": "Вы понимаете предложения и часто употребляемые выражения на темы, которые касаются вас напрямую: например, о вас и вашей семье, о покупках, работе или ближайшем окружении. Вы можете объясниться в простых повседневных ситуациях, когда речь идет о простом и непосредственном обмене информацией на знакомые темы. Простыми словами вы можете описать свое происхождение и образование, окружение и вещи, которые вам сейчас нужны."
+  },
+  "t.du-verstehst-und-verwendest.4wl73h": {
+    "de": "Du verstehst und verwendest vertraute Alltagsausdrücke und ganz einfache Sätze, stellst dich vor und stellst und beantwortest einfache Fragen zur Person.",
+    "text": "Вы понимаете и используете знакомые повседневные выражения и очень простые фразы, представляетесь, задаете простые вопросы о собеседнике и отвечаете на такие же вопросы о себе."
   },
   "t.du-verstehst-vertraute-alltaegli.ngwyvd": {
     "de": "Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.",
@@ -2495,6 +2483,10 @@
     "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
     "text": "Вечерний курс длится около 3½ месяцев. За это время вы проходите половину уровня, например A1.2 или B2.1. Таким образом, за год вы осваиваете около 1½ уровня."
   },
+  "t.ein-baby-krabbelt-und.acgqmh": {
+    "de": "Ein Baby krabbelt und schaut neugierig nach oben",
+    "text": "Малыш ползет и с любопытством смотрит вверх"
+  },
   "t.ein-deutschkurs-bei-casa.2u5cuy": {
     "de": "Ein Deutschkurs bei CASA in Bremen.",
     "text": "Курс немецкого в CASA в Бремене."
@@ -2530,6 +2522,14 @@
   "t.ein-halbes-niveau-in.ax0vri": {
     "de": "Ein halbes Niveau in etwa 3,5 Monaten",
     "text": "Половина уровня примерно за 3,5 месяца"
+  },
+  "t.ein-junge-schwimmt-mit.11evmv": {
+    "de": "Ein Junge schwimmt mit einem blauen Schwimmring im Wasser",
+    "text": "Мальчик плавает в воде с синим надувным кругом"
+  },
+  "t.ein-maedchen-springt-ueber.1yqmh9a": {
+    "de": "Ein Mädchen springt über eine Wiese, darüber blauer Himmel",
+    "text": "Девочка прыгает на лугу, над ней голубое небо"
   },
   "t.ein-modul-laeuft-an.fwp2vw": {
     "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu {course.special-courses.price-per-evening} pro Abend.",
@@ -2695,6 +2695,14 @@
     "de": "Eine Hand schreibt mit einem Stift auf Papier",
     "text": "Рука пишет ручкой на бумаге"
   },
+  "t.eine-junge-frau-kniet.mn4sk6": {
+    "de": "Eine junge Frau kniet in Startposition auf einer Straße",
+    "text": "Молодая женщина опустилась на колено в стартовой позиции на дороге"
+  },
+  "t.eine-laeuferin-nimmt-am.zntjqk": {
+    "de": "Eine Läuferin nimmt am Meer die Treppe hinauf",
+    "text": "Бегунья поднимается по лестнице у моря"
+  },
   "t.eine-lehrerin-am-bildschirm.1xgfl68": {
     "de": "Eine Lehrerin am Bildschirm mit ihrer Klasse",
     "text": "Преподавательница у экрана со своим классом"
@@ -2803,6 +2811,10 @@
     "de": "Einzelne Lernende oder Gruppen",
     "text": "Отдельные учащиеся или группы"
   },
+  "t.elementare-sprachverwendung.17h254x": {
+    "de": "Elementare Sprachverwendung",
+    "text": "Элементарное владение"
+  },
   "t.empfohlen.x9gqd6": {
     "de": "Empfohlen",
     "text": "Рекомендуем"
@@ -2862,6 +2874,10 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "Осёл, Собака, Кошка, Петух — и ваш собственный путь в Бремен"
+  },
+  "t.etwa-wochen.zc1ikx": {
+    "de": "etwa {weeks} Wochen",
+    "text": "примерно {weeks} недель"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3367,6 +3383,10 @@
     "de": "Gemeinsame Nutzung in der WG",
     "text": "В общем пользовании с соседями"
   },
+  "t.gemeinsamer-europaeischer-refere.ypd010": {
+    "de": "Gemeinsamer Europäischer Referenzrahmen",
+    "text": "Общеевропейская шкала языковых компетенций"
+  },
   "t.gemeinschaft.1sz6tmb": {
     "de": "Gemeinschaft",
     "text": "Сообщество"
@@ -3750,6 +3770,10 @@
   "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
     "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
     "text": "На интенсивном курсе ({course.intensive-german.lessons} академических часов в неделю) полный уровень занимает около 8–9 недель. На вечернем курсе вы проходите половину уровня примерно за 3,5 месяца, то есть около 1,5 уровня в год."
+  },
+  "t.im-intensivkurs.136g3x5": {
+    "de": "Im Intensivkurs",
+    "text": "На интенсивном курсе"
   },
   "t.im-klinikalltag-ist-es.taud3v": {
     "de": "Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal, dazu das Hörverstehen und die schriftliche Dokumentation im Beruf.",
@@ -4347,6 +4371,10 @@
     "de": "Kompakte Tagesblöcke nach Absprache",
     "text": "Компактные дневные блоки по договоренности"
   },
+  "t.kompetente-sprachverwendung.1n1x676": {
+    "de": "Kompetente Sprachverwendung",
+    "text": "Свободное владение"
+  },
   "t.konstanter-fortschritt-schafft-s.1wwngq": {
     "de": "Konstanter Fortschritt schafft Sicherheit für Studium und Beruf.",
     "text": "Стабильный прогресс дает уверенность в учебе и работе."
@@ -4615,6 +4643,10 @@
     "de": "Kursweg",
     "text": "Путь обучения"
   },
+  "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
+    "de": "Läuferinnen laufen jubelnd durch das Zielband",
+    "text": "Бегуньи с ликованием разрывают финишную ленту"
+  },
   "t.laeuft-bereits.qmroe8": {
     "de": "läuft bereits",
     "text": "уже идет"
@@ -4626,6 +4658,10 @@
   "t.langfristiger-fortschritt.xvw54l": {
     "de": "Langfristiger Fortschritt",
     "text": "Долгосрочный прогресс"
+  },
+  "t.lass-dich-gern-von.x9wxts": {
+    "de": "Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
+    "text": "Мы с удовольствием вас проконсультируем. Хорошей основой станут наши бесплатные онлайн-тесты на определение уровня. Если вы еще совсем не знаете немецкого, тест не нужен: вы просто начинаете с A1."
   },
   "t.lass-dich-zuerst-beraten.8uix9j": {
     "de": "Lass dich zuerst beraten",
@@ -4694,6 +4730,10 @@
   "t.lehrwerk-netzwerk-neu.17hkji": {
     "de": "Lehrwerk Netzwerk neu",
     "text": "Учебник Netzwerk neu"
+  },
+  "t.lehrwerk.1oj28xk": {
+    "de": "Lehrwerk",
+    "text": "Учебник"
   },
   "t.leitung.1srtrnz": {
     "de": "Leitung",
@@ -4863,6 +4903,10 @@
     "de": "Mehr Sprechsicherheit",
     "text": "Больше уверенности в устной речи"
   },
+  "t.mehr-zu-den-niveaustufen.1wk02ex": {
+    "de": "Mehr zu den Niveaustufen",
+    "text": "Подробнее об уровнях"
+  },
   "t.mehr-zu-telc-deutsch.xiaprp": {
     "de": "Mehr zu telc Deutsch B2",
     "text": "Подробнее о telc Deutsch B2"
@@ -4870,6 +4914,10 @@
   "t.mehr-zur-pruefung.185bh7": {
     "de": "Mehr zur Prüfung",
     "text": "Подробнее об экзамене"
+  },
+  "t.mehr-zur-stufe.162idne": {
+    "de": "Mehr zur Stufe {level}",
+    "text": "Подробнее об уровне {level}"
   },
   "t.mehrere-moeglich.1o2k99k": {
     "de": "Mehrere möglich",
@@ -5346,6 +5394,10 @@
   "t.niveauschritte.1cng3m1": {
     "de": "Niveauschritte",
     "text": "Шаги по уровням"
+  },
+  "t.niveaustufen.16jh7p8": {
+    "de": "Niveaustufen",
+    "text": "Уровни"
   },
   "t.niveaustufen.8erybc": {
     "de": "Niveaustufen",
@@ -6099,6 +6151,10 @@
     "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
     "text": "Шесть уровней от A1 до C1; на интенсивном курсе каждый занимает примерно 8–9 недель."
   },
+  "t.sechs-stufen-in-drei.1buauf": {
+    "de": "Sechs Stufen in drei Bereichen",
+    "text": "Шесть уровней в трех группах"
+  },
   "t.sechs.1eiph2a": {
     "de": "Sechs",
     "text": "Шесть"
@@ -6154,6 +6210,10 @@
   "t.selbst-zusammenstellen.mvc58b": {
     "de": "Selbst zusammenstellen",
     "text": "Собрать самостоятельно"
+  },
+  "t.selbststaendige-sprachverwendung.m7p0gc": {
+    "de": "Selbstständige Sprachverwendung",
+    "text": "Самостоятельное владение"
   },
   "t.selbstverpflegung.ll03me": {
     "de": "Selbstverpflegung",
@@ -7315,6 +7375,10 @@
     "de": "Vollverpflegung",
     "text": "Полный пансион"
   },
+  "t.von-a1-bis-c1.1lsfam3": {
+    "de": "Von A1 bis C1, Stufe für Stufe",
+    "text": "От A1 до C1, уровень за уровнем"
+  },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
     "text": "От запроса до отъезда у вас одно постоянное контактное лицо."
@@ -7578,6 +7642,10 @@
   "t.was-dir-ein-tandem.15zg4yw": {
     "de": "Was dir ein Tandem bringt",
     "text": "Что вам даст тандем"
+  },
+  "t.was-du-auf-jeder.1qusc0s": {
+    "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
+    "text": "Что вы умеете на каждом уровне — от A1 до C1."
   },
   "t.was-du-auf-jeder.6gi060": {
     "de": "Was du auf jeder Stufe kannst",
@@ -8067,6 +8135,10 @@
     "de": "Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.",
     "text": "Мы сообщим вам даты по электронной почте или по телефону. После этого вы записываетесь окончательно."
   },
+  "t.wir-orientieren-uns-streng.1r8mfh1": {
+    "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
+    "text": "Мы строго ориентируемся на Общеевропейскую шкалу языковых компетенций (CEFR). Она описывает, что вы можете понять и сказать на каждом уровне. B1+ — отдельный уровень нашего интенсивного курса между B1 и B2."
+  },
   "t.wir-planen-den-unterricht.119fu4": {
     "de": "Wir planen den Unterricht gemeinsam mit der Firma.",
     "text": "Мы планируем занятия вместе с компанией."
@@ -8371,6 +8443,10 @@
     "de": "Zum Einstufungstest",
     "text": "К тесту на определение уровня"
   },
+  "t.zum-einstufungstest.1c834ug": {
+    "de": "Zum Einstufungstest",
+    "text": "К тесту на определение уровня"
+  },
   "t.zum-intensivkurs.zzp7ph": {
     "de": "Zum Intensivkurs",
     "text": "К интенсивному курсу"
@@ -8506,6 +8582,10 @@
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",
     "text": "Вторая половина июля"
+  },
+  "t.zwischenstufe-im-intensivkurs-zw.10lxrtl": {
+    "de": "Zwischenstufe im Intensivkurs, zwischen B1 und B2",
+    "text": "Промежуточный уровень интенсивного курса между B1 и B2"
   },
   "t.zwischenstufe.1hqvqds": {
     "de": "Zwischenstufe",

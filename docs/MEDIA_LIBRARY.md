@@ -25,6 +25,7 @@ older issues is built.
 | `course-bildungszeit-learner.webp` | Slot 91 (2026-10-08): Bildungszeit's second photo, a learner smiling across the table (031). |
 | `exam-c1-study.webp`, `exam-c1-study-hero.webp` | Slots 92-93 (2026-10-08): telc C1 Hochschule, two learners reading exam texts (078, 4:3 and 2.4:1). These replace source-cut 023; the earlier rejected row of five (065, slots 68 and 69) stays retired. |
 | `team-lesson-wide.webp` | Slot 94 (2026-10-08): the team page's „Wer wir sind", the whole frame of 061 (a teacher at the screen with her class). |
+| `levels-hero.jpg`, `level-a1.webp` … `level-c1.jpg` | Slots 95–101 (2026-10-12): the levels page, the old casa-bremen.de „Niveaustufen" pictures (stock: crawling, swimming, leaping, the start line, the finish, the stairs) and its header's sequin lettering. Originals in `~/Archive/CASA/old-site-niveaustufen-2026-10-12`, recipes in `build_reel.py`, each keeping its own light with the warm white balance. |
 | `casa-wg-room.webp` | Slot 57, the homepage's accommodation block. Pool file 008, a room in a CASA-WG, 4:3, exposure/white-balance/colour correction only; labelled Beispielbild / Example image. |
 | `casa-building-golden.webp` | Slot 44. AI-processed (misspelled window sign, changed windows): `ready: false` since 2026-10-01 so it cannot render. Do not use. |
 | `about-team-courtyard.webp` | Slot 55, About hero since 2026-10-01. Pool frame 098 (the slot 53 team) as its whole 3:2 frame, light correction only. |

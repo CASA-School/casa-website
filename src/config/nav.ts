@@ -102,6 +102,8 @@ export const deNavText: Record<string, string> = {
   // The German site's address is /aktuelles, as on the old casa-bremen.de.
   News: 'Aktuelles',
   'What’s new at CASA, every month in our NewsFlash.': 'Jeden Monat Neues aus der Schule im NewsFlash.',
+  'Language levels': 'Niveaustufen',
+  'What you can do at each level, A1 to C1.': 'Was du auf jeder Stufe kannst, von A1 bis C1.',
   'Study & life in Germany': 'Studium & Leben in Deutschland',
   'Tips on applications, housing and daily life.': 'Tipps für Bewerbung, Wohnen und Alltag.',
   'Study in Germany': 'Studieren in Deutschland',
@@ -381,6 +383,12 @@ export const navConfig = {
               href: '/news',
               icon: 'news',
               description: 'What’s new at CASA, every month in our NewsFlash.',
+            },
+            {
+              label: 'Language levels',
+              href: '/courses/levels',
+              icon: 'levels',
+              description: 'What you can do at each level, A1 to C1.',
             },
             {
               label: 'Study & life in Germany',

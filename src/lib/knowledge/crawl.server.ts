@@ -62,7 +62,9 @@ export async function crawlSite(origin: string, { concurrency = 4, timeoutMs = 1
         }
         const page = extractPage(await response.text());
         read += 1;
-        const title = page.sections.find((section) => section.heading)?.heading ?? page.title;
+        // The page's <title>, written to say what the page is about ("Deutsch-Einstufungstest"),
+        // rather than its h1, which is often a line ("Finde dein Deutschniveau").
+        const title = page.title || page.sections.find((section) => section.heading)?.heading || internalPath;
         page.sections.forEach((section, index) => {
           docs.push({
             id: `page:${locale}:${internalPath}:${index}`,

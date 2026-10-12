@@ -21,3 +21,5 @@ export { LevelProgressionTimeline } from './level-progression-timeline';
 export { KlettLevelTests } from './klett-level-tests';
 export { FeeStrip } from './fee-strip';
 export { BandHeading } from './band-heading';
+export { CefrLevelOverview } from './cefr-level-overview';
+export { CefrLevelRows } from './cefr-level-rows';
