@@ -96,6 +96,10 @@ found, and the rule each fix left behind:
 - **Faces stay in the crop.** A group photo that is cropped wider on some screens names its
   focus (`objectPosition`); the hero's media share is 28% of the screen on a phone and 36% from
   `md`, where a tablet in portrait has the height.
+- **A drawn hero takes the full width when it is stacked under the text** (below `lg`); the
+  height cap applies only beside the text. Capped by height, the courses staircase was 57% of a
+  320px phone's width and every drawing sat centred with empty sides on a tablet. Photographs
+  keep the cap at every width, since they crop rather than shrink.
 - **A phone on its side gets the heading and the button**: hero photographs and drawings step
   aside below 500px tall (and below 1024px wide).
 - **One left edge per page.** Grids take the frame; panels the 76rem measure, and a band among
@@ -103,7 +107,8 @@ found, and the rule each fix left behind:
 
 Left open: the exams page's pen photograph is soft in the source file (a sharper one is needed,
 CSS cannot fix it); the decision card repeats below the page on tablets because it carries the
-contact person; the floating assistant button can cover the corner of a card on a phone.
+contact person; the floating assistant button can cover the corner of a card on a phone, and the temporary
+"new website" notice a link at the bottom edge (it can be closed).
 
 ## Next
 

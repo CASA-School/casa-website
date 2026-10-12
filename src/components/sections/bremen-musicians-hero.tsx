@@ -274,8 +274,8 @@ export function BremenMusiciansHero({ packages, label, className }: BremenMusici
       className={cn(
         styles.panel,
         // No box of its own: the musicians stand on the night hero's ground.
-        // Width capped by the hero's viewport rule (HeroSurface) at this shape, so the drawing never pushes the hero past the screen and the labels stay aligned.
-        'relative text-white [--ar:580/410] mx-auto aspect-[var(--ar)] w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
+        // Stacked under the text (below lg) it takes the full width; beside the text its width is capped by the hero's viewport rule (HeroSurface), so it never pushes the hero past the screen.
+        'relative text-white [--ar:580/410] mx-auto aspect-[var(--ar)] w-full lg:w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
         className
       )}
       data-active={active ?? undefined}

@@ -75,7 +75,8 @@ export function HeroSurface({ children, className, themeClassName, breadcrumbs, 
    * `--hero-media-max-h` so it never pushes the hero past the screen: on a
    * phone, where the picture stacks under the text, it gets a share of the
    * screen; beside the lede it gets what is left after the hero's padding and
-   * breadcrumbs (11rem). HeroBleedPhoto and the coded drawings read that cap.
+   * breadcrumbs (11rem). HeroBleedPhoto reads that cap at every width (it crops);
+   * the coded drawings only beside the lede, and take the full width when stacked.
    * C and E stay compact: a legal page has no business filling the screen.
    * Up to a point (2026-10-12): on a monitor taller than about 1070px the hero
    * stops at 62rem, or its centred content floated in bands of empty ground
