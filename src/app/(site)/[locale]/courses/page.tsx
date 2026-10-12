@@ -398,7 +398,7 @@ export default async function CoursesPage({
    *   year runs 9; the site says 8, Rahman 2026-10-12)
    *   (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, verified), and B1+ just as long,
    *   a whole term taught with Kontext (staff-confirmed 2026-08-13 and
-   *   2026-10-07; level-progression-timeline.tsx says the same in public).
+   *   2026-10-07; config/content/cefr-levels.ts says the same in public).
    * - Each step links to this page filtered to that level (`?level=`, which the
    *   format list below still honours), landing on the list. B1+ is the
    *   exception: it is a step of the intensive course only, while the filter's

@@ -2527,3 +2527,14 @@ lines on the course pages with a read-more link, and list it under Ressourcen in
   `build_reel.py` with each image's own tone and the warm white balance; grass, water and sky
   are full-colour JPEG so `--verify` holds. Originals in `~/Archive/CASA/old-site-niveaustufen-2026-10-12`.
 - Navbar: Ressourcen › Niveaustufen. Search and CLARA index each level (golden set 124).
+
+## 48. The placement page, tests first (2026-10-12)
+
+Rahman: "simplify the einstufungstest page, it should be easier for students to get there and
+start with the level tests" until CASA's own test is ready. The six Klett tests are now the hero:
+one tile per level, the whole tile a link (new window), the level in its CEFR colour with its band
+and textbook, A1 ringed and marked „Hier starten". Then three steps (start with A1; name and email
+in Klett's form; send the result to online@), then placement in person (hours, what to bring) beside
+„Noch gar keine Deutschkenntnisse?" and „Was die Stufen bedeuten" (→ the levels page). The level
+overview that closed the page, and `klett-textbooks.ts` that only it read, are gone: the levels page
+tells it. The smoke test now checks that the A1 test is on the first screen.

@@ -29,7 +29,7 @@ This file is the living handoff. If work stops mid-way, start here.
    a level with the hint "take the placement test first" — an unclosed loop.
 3. **Third-party dependency on content CASA cannot change**, on a page that is
    a required step before every course registration. See also the rights
-   caveats already recorded in `src/config/content/klett-textbooks.ts`.
+   caveats recorded in the former `src/config/content/klett-textbooks.ts` (removed 2026-10-12, git history).
 
 CASA remains a Klett *curriculum* school (Netzwerk neu → Kontext). Nothing here
 changes the textbooks. This replaces only the placement *instrument*.

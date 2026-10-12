@@ -239,6 +239,13 @@ test('legal and utility pages include breadcrumbs and professional shells', asyn
       const formTop = await page.locator('#contact-form').evaluate(element => element.getBoundingClientRect().top);
       expect(formTop).toBeLessThan(300);
       await expect(page.locator('main a[href="#contact-form"]')).toHaveCount(0);
+    } else if (route === '/placement-test') {
+      // The tests are the hero (2026-10-12): the A1 test is on the first screen.
+      const a1 = page.locator('a[href*="einstufungstest-netzwerkneu-a1"]');
+      await expect(a1).toBeVisible();
+      const viewport = page.viewportSize();
+      const box = await a1.boundingBox();
+      expect(box && viewport ? box.y + box.height : Infinity).toBeLessThan(viewport?.height ?? 0);
     } else {
       await expect(page.locator('section[data-hero-archetype="E"]').first()).toBeVisible();
     }

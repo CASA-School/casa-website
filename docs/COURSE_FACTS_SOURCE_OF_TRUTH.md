@@ -147,7 +147,7 @@ ISBN present in the page body; a control test confirmed the CDN 404s on fabricat
 | B2 | Kontext B2 – Kursbuch mit Audios und Videos | 978-3-12-605342-6 |
 | C1 | Kontext C1 – Hybride Ausgabe allango | 978-3-12-605349-5 |
 
-Data lives in `src/config/content/klett-textbooks.ts`.
+This list lived in `src/config/content/klett-textbooks.ts` for the placement page's level overview; both were removed on 2026-10-12 when that page was simplified (git history has them). The series per level is now `textbook` in `src/config/content/cefr-levels.ts`.
 
 **ASSUMPTION — the level→series split is not from casa-bremen.de.** Netzwerk neu up to B1 and
 Kontext from B1+ traces to `src/config/calculator/pricing.ts:95-99` (citing "Flyer Intensivkurse
@@ -162,9 +162,9 @@ which they hand out; if it is the split editions, every ISBN in this table chang
 **B1+ duration — confirmed by Rahman (project owner) 2026-08-13, not published on
 casa-bremen.de.** About 2 months (8 weeks, as the site says for every level since 2026-10-12), the same order as a full level, despite billing at
 the half-level rate — CASA apparently runs it as two internal parts (B1+.1 / B1+.2), which is
-intentionally not modelled as separate tabs here. Tracked in
-`level-progression-timeline.tsx` as `WEEKS_FOR_BRIDGE_STAFF_CONFIRMED`, kept as a distinct
-constant from the site-verified `WEEKS_PER_LEVEL` so the two provenances never blur — this
+intentionally not modelled as separate tabs here. Tracked
+in `src/config/content/cefr-levels.ts` (`weeks`, with the provenance in its comment) since the
+placement page's level overview was removed on 2026-10-12; before, as a distinct constant there, so the two provenances never blurred — this
 number did not come from the same rejection of `cost-calculator.ts`'s derived-from-a-price-tier
 4 weeks (see the code comment there for why that number was wrong on its own terms).
 
@@ -175,8 +175,8 @@ learning path from B1 to B2 runs through it as a whole term (`src/lib/registrati
 auf casa-bremen.de veröffentlicht" — on CASA's own site it read as an internal remark; the
 provenance stays in this document and in the code comment.
 
-**Cover artwork is NOT licensed and must not be published.** See the block comment in
-`klett-textbooks.ts`: Klett's Impressum expressly reserves rights, their press page grants
+**Cover artwork is NOT licensed and must not be published.** Recorded in the block comment of
+the former `klett-textbooks.ts` (git history): Klett's Impressum expressly reserves rights, their press page grants
 royalty-free use for the *logo* only and only for editorial purposes, and CJEU C-161/17
 (Renckhoff) held that re-hosting a freely available image — on a school website — is a new
 communication to the public requiring authorisation. Each entry carries

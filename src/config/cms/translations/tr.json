@@ -827,9 +827,9 @@
     "de": "beendet",
     "text": "sona erdi"
   },
-  "t.beginne-immer-mit-dem.1tmp5j9": {
-    "de": "Beginne immer mit dem A1-Test.",
-    "text": "Her zaman A1 testiyle başlayın."
+  "t.beginne-immer-mit-dem.pbpzom": {
+    "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
+    "text": "Her zaman A1 testiyle başlayın. Sakin bir an seçin ve kendinize zaman tanıyın; testi tek başınıza ve sözlük gibi yardımcı araçlar olmadan çözün."
   },
   "t.begleitende-lehrerin-schuelergru.1gou3we": {
     "de": "Begleitende Lehrerin, Schülergruppe aus Sibirien",
@@ -926,10 +926,6 @@
   "t.beide-kosten-gleich-viel.ke1dje": {
     "de": "Beide kosten gleich viel. So kannst du ganz danach entscheiden, wie du in Bremen leben möchtest.",
     "text": "İkisinin ücreti aynı. Böylece yalnızca Bremen'de nasıl yaşamak istediğinize göre karar verebilirsiniz."
-  },
-  "t.beim-verlag-ansehen.1jis0dv": {
-    "de": "Beim Verlag ansehen",
-    "text": "Yayınevinin sitesinde görün"
   },
   "t.beim-zustaendigen-buergeramt-erf.4ass0y": {
     "de": "Beim zuständigen Bürgeramt erfährst du, wie du deinen Wohnsitz anmeldest und welche Unterlagen du brauchst. Heb die Meldebescheinigung gut auf, denn du brauchst sie für weitere Termine.",
@@ -1582,10 +1578,6 @@
   "t.dauer-in-wochen.5beqem": {
     "de": "Dauer in Wochen",
     "text": "Süre (hafta)"
-  },
-  "t.dauer-pro-niveaustufe.qusozn": {
-    "de": "Dauer pro Niveaustufe",
-    "text": "Seviye başına süre"
   },
   "t.dauer.14g8nht": {
     "de": "Dauer",
@@ -3687,6 +3679,10 @@
     "de": "Hier siehst du, wie deine Prüfung abläuft und was du am Prüfungstag mitbringst.",
     "text": "Sınavınızın nasıl işlediğini ve sınav günü yanınızda neler getirmeniz gerektiğini burada görebilirsiniz."
   },
+  "t.hier-starten.1narfjb": {
+    "de": "Hier starten",
+    "text": "Buradan başlayın"
+  },
   "t.hier-stellen-wir-dir.193jzg1": {
     "de": "Hier stellen wir dir die Menschen vor, die bei uns die Schule leiten und organisieren. So findest du schnell die richtige Ansprechperson für deine Frage.",
     "text": "Burada okulumuzu yöneten ve organize eden insanları size tanıtıyoruz. Böylece sorunuz için doğru kişiyi hızla bulabilirsiniz."
@@ -3950,10 +3946,6 @@
   "t.in-unseren-wgs-leben.vvoxbh": {
     "de": "In unseren WGs leben Menschen aus vielen Ländern zusammen. Deshalb sind Respekt und Offenheit füreinander hier besonders wichtig.",
     "text": "Paylaşımlı dairelerimizde pek çok farklı ülkeden insan birlikte yaşar. Bu yüzden burada birbirine saygı ve açıklık özellikle önemlidir."
-  },
-  "t.in-unserer-schule-finden.hmkk3k": {
-    "de": "In unserer Schule finden fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1 statt. Wir orientieren uns dabei streng am Gemeinsamen Europäischen Referenzrahmen (GER).",
-    "text": "Okulumuzda A1, A2, B1, B1+, B2 ve C1 seviyelerinde sürekli kurslar açılır. Bu konuda Avrupa Ortak Dil Referans Çerçevesi'ne (CEFR) sıkı sıkıya bağlıyız."
   },
   "t.in-welchem-zustand-zimmer.1wt0a25": {
     "de": "In welchem Zustand Zimmer, Möbel und Wände sind",
@@ -4431,9 +4423,9 @@
     "de": "Kosten",
     "text": "Ücretler"
   },
-  "t.kostenlose-online-tests.ou2e7o": {
-    "de": "Kostenlose Online-Tests",
-    "text": "Ücretsiz çevrim içi testler"
+  "t.kostenlos-von-a1-bis.45ucxk": {
+    "de": "Kostenlos, von A1 bis C1",
+    "text": "Ücretsiz, A1'den C1'e"
   },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
@@ -4622,10 +4614,6 @@
   "t.kursrhythmus.13f6pyo": {
     "de": "Kursrhythmus",
     "text": "Kurs ritmi"
-  },
-  "t.kursstufen.1039r3w": {
-    "de": "Kursstufen",
-    "text": "Kurs seviyeleri"
   },
   "t.kurstage.y0hubg": {
     "de": "Kurstage",
@@ -4919,10 +4907,6 @@
     "de": "Mehr zur Prüfung",
     "text": "Sınav hakkında daha fazlası"
   },
-  "t.mehr-zur-stufe.162idne": {
-    "de": "Mehr zur Stufe {level}",
-    "text": "{level} seviyesi hakkında daha fazlası"
-  },
   "t.mehrere-moeglich.1o2k99k": {
     "de": "Mehrere möglich",
     "text": "Birden fazla seçebilirsiniz"
@@ -4974,6 +4958,10 @@
   "t.miete-fuer-4-wochen.zkoz7h": {
     "de": "Miete für 4 Wochen",
     "text": "4 haftalık kira"
+  },
+  "t.mit-a1-beginnen.12d0cvq": {
+    "de": "Mit A1 beginnen",
+    "text": "A1 ile başlayın"
   },
   "t.mit-anderen-internationalen-kurs.1lix4xm": {
     "de": "Mit anderen internationalen Kursteilnehmenden",
@@ -5303,6 +5291,10 @@
     "de": "Name Schüler/in",
     "text": "Öğrencinin adı"
   },
+  "t.name-und-e-mail.1derg1d": {
+    "de": "Name und E-Mail eintragen",
+    "text": "Adınızı ve e-postanızı girin"
+  },
   "t.navigation-schliessen.1duel2t": {
     "de": "Navigation schließen",
     "text": "Menüyü kapat"
@@ -5362,10 +5354,6 @@
   "t.nicht-vollstaendig-zurueckgegebe.15g1elg": {
     "de": "nicht vollständig zurückgegeben",
     "text": "eksik iade edildi"
-  },
-  "t.nimm-dir-ruhe-und.1dl6zbh": {
-    "de": "Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
-    "text": "Sakin bir an seçin ve kendinize zaman tanıyın; testi tek başınıza ve sözlük gibi yardımcı araçlar olmadan çözün."
   },
   "t.nimm-lernende-aus-aller.r2epvm": {
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
@@ -5454,10 +5442,6 @@
   "t.oeffentlicher-traeger-oder-foerd.mqfvv2": {
     "de": "Öffentlicher Träger oder Förderprogramm",
     "text": "Kamu kurumu veya destek programı"
-  },
-  "t.oeffnet-das-testportal-von.xfxgbc": {
-    "de": "Öffnet das Testportal von Klett in einem neuen Fenster",
-    "text": "Klett'in test portalını yeni bir pencerede açar"
   },
   "t.oeffnet-google-maps-in.guhs8": {
     "de": "(öffnet Google Maps in einem neuen Tab)",
@@ -6763,6 +6747,10 @@
     "de": "Termine",
     "text": "Tarihler"
   },
+  "t.test-starten.1y6oue4": {
+    "de": "Test starten",
+    "text": "Teste başlayın"
+  },
   "t.thema-waehlen.ctxpo4": {
     "de": "Thema wählen",
     "text": "Konu seçin"
@@ -6774,10 +6762,6 @@
   "t.tipps-fuer-bewerbung-wohnen.13kfbkj": {
     "de": "Tipps für Bewerbung, Wohnen und Alltag.",
     "text": "Başvuru, barınma ve günlük yaşam için ipuçları."
-  },
-  "t.titelbild-des-lehrwerks-von.k7009p": {
-    "de": "Titelbild des Lehrwerks {title} von Ernst Klett Sprachen",
-    "text": "Ernst Klett Sprachen yayınevinin {title} ders kitabının kapağı"
   },
   "t.trag-dich-mit-deinem.hkbcaf": {
     "de": "Trag dich mit deinem Niveau und deinen freien Zeiten in die Interessentenliste ein. Das ist unverbindlich.",
@@ -6810,10 +6794,6 @@
   "t.typischer-zeitraum.hug29x": {
     "de": "Typischer Zeitraum",
     "text": "Tipik süre"
-  },
-  "t.ue-pro-woche-je.60p8sx": {
-    "de": "{course.intensive-german.lessons} UE pro Woche (je 45 Min.)",
-    "text": "Haftada {course.intensive-german.lessons} ders saati (her biri 45 dk.)"
   },
   "t.ue-pro-woche.14owcx1": {
     "de": "UE pro Woche",
@@ -7383,6 +7363,10 @@
     "de": "Von A1 bis C1, Stufe für Stufe",
     "text": "A1'den C1'e, seviye seviye"
   },
+  "t.von-a1-bis-c1.1yk6pdi": {
+    "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
+    "text": "A1'den C1'e: “Seviyeler” sayfasında her seviyede neleri anlayabileceğinizi ve söyleyebileceğinizi görürsünüz."
+  },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
     "text": "İlk talebinizden ayrılış gününe kadar tek bir irtibat kişiniz olur."
@@ -7430,10 +7414,6 @@
   "t.vor-der-anmeldung.xbaw8l": {
     "de": "Vor der Anmeldung",
     "text": "Kayıttan önce"
-  },
-  "t.vor-ort-ohne-termin.h0iwwz": {
-    "de": "Vor Ort ohne Termin",
-    "text": "Randevusuz, yüz yüze"
   },
   "t.vorbereiten.1e2q1vg": {
     "de": "Vorbereiten",
@@ -7635,6 +7615,10 @@
     "de": "Was die Module abdecken",
     "text": "Modüllerin kapsamı"
   },
+  "t.was-die-stufen-bedeuten.1nlttzl": {
+    "de": "Was die Stufen bedeuten",
+    "text": "Seviyeler ne anlama gelir"
+  },
   "t.was-die-unterkunft-kostet.1id26qt": {
     "de": "Was die Unterkunft kostet",
     "text": "Konaklamanın maliyeti"
@@ -7650,10 +7634,6 @@
   "t.was-du-auf-jeder.1qusc0s": {
     "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
     "text": "A1'den C1'e kadar her seviyede neler yapabildiğiniz."
-  },
-  "t.was-du-auf-jeder.6gi060": {
-    "de": "Was du auf jeder Stufe kannst",
-    "text": "Her seviyede neler yapabilirsiniz"
   },
   "t.was-du-erreichen-kannst.og5hiu": {
     "de": "Was du erreichen kannst",
@@ -8419,9 +8399,9 @@
     "de": "Zu den Neuigkeiten",
     "text": "Haberleri okuyun"
   },
-  "t.zu-den-tests.1ljpa0y": {
-    "de": "Zu den Tests",
-    "text": "Testlere gidin"
+  "t.zu-den-niveaustufen.jtztoo": {
+    "de": "Zu den Niveaustufen",
+    "text": "Seviyeler sayfasına gidin"
   },
   "t.zu-diesem-modul-beraten.1us72m2": {
     "de": "Zu diesem Modul beraten lassen",
@@ -8598,9 +8578,5 @@
   "t.zwischenstufe-im-intensivkurs-zw.10lxrtl": {
     "de": "Zwischenstufe im Intensivkurs, zwischen B1 und B2",
     "text": "Yoğun kursta B1 ile B2 arasındaki geçiş seviyesi"
-  },
-  "t.zwischenstufe.1hqvqds": {
-    "de": "Zwischenstufe",
-    "text": "Geçiş seviyesi"
   }
 }
