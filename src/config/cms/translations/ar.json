@@ -1963,6 +1963,10 @@
     "de": "Die Fristen für das Wintersemester liegen meist im Sommer, die für das Sommersemester im Winter. Prüfe jede Frist noch einmal direkt bei der Hochschule.",
     "text": "تقع المواعيد النهائية للفصل الشتوي غالبًا في الصيف، ومواعيد الفصل الصيفي في الشتاء. وتحقّق من كل موعد مرة أخرى لدى الجامعة مباشرةً."
   },
+  "t.die-ganze-website-an.17c48gx": {
+    "de": "Die ganze Website an einem Ort durchsuchen",
+    "text": "ابحث في الموقع كله من مكان واحد"
+  },
   "t.die-gastfamilien-begruessen-die.e5nmq2": {
     "de": "Die Gastfamilien begrüßen die Schülerinnen und Schüler bei ihrer Ankunft am Bahnhof oder Flughafen. Alle Teilnehmenden erhalten ein Ticket für den öffentlichen Nahverkehr für den Zeitraum ihres Aufenthaltes.",
     "text": "تستقبل العائلات المضيفة الطلاب عند وصولهم إلى محطة القطار أو المطار. ويحصل جميع المشاركين على تذكرة للمواصلات العامة طوال مدة إقامتهم."
@@ -2142,6 +2146,10 @@
   "t.dieses-programm-anfragen.1nkejor": {
     "de": "Dieses Programm anfragen",
     "text": "اطلب هذا البرنامج"
+  },
+  "t.direkt-beantwortet.1dd88et": {
+    "de": "Direkt beantwortet",
+    "text": "إجابة مباشرة"
   },
   "t.direkt-online.1feyglf": {
     "de": "Direkt online",
@@ -2575,9 +2583,9 @@
     "de": "Ein Studierendenwohnheim kann eine günstige Möglichkeit sein. Prüfe die Voraussetzungen und bewirb dich früh, denn die Wartelisten können lang sein.",
     "text": "قد يكون السكن الجامعي خيارًا اقتصاديًا. فتحقّق من الشروط وقدّم طلبك مبكرًا، لأن قوائم الانتظار قد تكون طويلة."
   },
-  "t.ein-suchfeld-fuer-kurse.1c4pr2u": {
-    "de": "Ein Suchfeld für Kurse, Prüfungen, FAQ und Aktuelles",
-    "text": "حقل بحث واحد للدورات والامتحانات والأسئلة الشائعة والأخبار"
+  "t.ein-suchfeld-fuer-die.117t8x": {
+    "de": "Ein Suchfeld für die ganze Website",
+    "text": "حقل بحث واحد للموقع كله"
   },
   "t.ein-tag-in-luebeck.1x4hf36": {
     "de": "Ein Tag in Lübeck mit Backsteingotik, Holstentor und Marzipan.",
@@ -4535,14 +4543,6 @@
     "de": "Kurse für ",
     "text": "دورات المستوى "
   },
-  "t.kurse-pruefungen-faq-aktuelles.pgvoy6": {
-    "de": "Kurse + Prüfungen + FAQ + Aktuelles",
-    "text": "الدورات + الامتحانات + الأسئلة الشائعة + الأخبار"
-  },
-  "t.kurse-pruefungen-faq-und.siwdx0": {
-    "de": "Kurse, Prüfungen, FAQ und Aktuelles an einem Ort durchsuchen",
-    "text": "ابحث في الدورات والامتحانات والأسئلة الشائعة والأخبار في مكان واحد"
-  },
   "t.kurse-pruefungen.1i7dit": {
     "de": "Kurse & Prüfungen",
     "text": "الدورات والامتحانات"
@@ -4878,6 +4878,10 @@
   "t.meinen-kurs-finden.1qfy9v9": {
     "de": "Meinen Kurs finden",
     "text": "ابحث عن دورتك"
+  },
+  "t.meintest-du.1j5y4gx": {
+    "de": "Meintest du",
+    "text": "هل تقصد"
   },
   "t.meist-ein-oder-mehrere.cgvu0i": {
     "de": "Meist ein oder mehrere Monate",
@@ -6126,6 +6130,22 @@
   "t.seite-nicht-gefunden.lfj758": {
     "de": "Seite nicht gefunden",
     "text": "الصفحة غير موجودة"
+  },
+  "t.seite-oeffnen.1q2sl4c": {
+    "de": "Seite öffnen",
+    "text": "افتح الصفحة"
+  },
+  "t.seite.a7eekx": {
+    "de": "Seite",
+    "text": "صفحة"
+  },
+  "t.seiten-kurse-pruefungen-faq.lqrh5q": {
+    "de": "Seiten, Kurse, Prüfungen, FAQ, Aktuelles",
+    "text": "الصفحات، الدورات، الامتحانات، الأسئلة الشائعة، الأخبار"
+  },
+  "t.seiten.1sgjmve": {
+    "de": "Seiten",
+    "text": "الصفحات"
   },
   "t.seitensuche-oeffnen.8kz6xo": {
     "de": "Seitensuche öffnen",

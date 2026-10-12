@@ -2,6 +2,11 @@ import { performance } from 'node:perf_hooks';
 
 import { resolveAssistantLocale } from '@/lib/assistant/locale';
 import { ASSISTANT_SYSTEM_PROMPT } from '@/lib/assistant/prompt';
+import { loadFacts } from '@/lib/cms/facts.server';
+import { quickAnswer } from '@/lib/knowledge/answers';
+import { getKnowledgeIndex } from '@/lib/knowledge/index.server';
+import { aiAnswer, claraAiEnabled } from '@/lib/assistant/ai.server';
+import { groundedAnswer, type Grounding } from '@/lib/assistant/grounded';
 import { listCourseOptions } from '@/lib/assistant/tools/list-course-options';
 import { searchPublicKB } from '@/lib/assistant/tools/search-public-kb';
 import type {
@@ -959,27 +964,160 @@ type RunAssistantTurnInput = {
   messages: AssistantMessage[];
   locale?: AssistantUiLocale | null;
   userContext: AssistantUserContext;
+  /** The page the visitor asks from (internal path), for "what does this cost?". */
+  pagePath?: string | null;
 };
 
-export async function runAssistantTurn({
-  messages,
-  locale,
-  userContext,
-}: RunAssistantTurnInput): Promise<AssistantResponsePayload> {
+type Answer = Pick<AssistantResponsePayload, 'message' | 'cta' | 'intent' | 'planSteps' | 'quickLinks'> & {
+  basedOn?: string[];
+};
+
+/** "Help me find a course", as opposed to a question about one. */
+function isFinderRequest(text: string) {
+  return /\b(finde|finden|such(e|en|st)?|empfiehl\w*|empfehl\w*|passend\w*|welche[nrs]? kurs\w*|help me find|find me|recommend\w*|looking for|which course|right course|suits? me|want to learn|deutsch lernen|learn german)\b/.test(text);
+}
+
+/** A question, as opposed to an answer to CLARA's own question ("B1", "abends"). */
+function isQuestion(raw: string, text: string) {
+  return raw.includes('?') || /^(was|wie|wann|wo|wer|warum|welche|welcher|welches|gibt es|kann ich|muss ich|darf ich|brauche ich|ist |sind |what|how|when|where|who|why|which|is there|are there|can i|do i|does|is it|should i)\b/.test(text);
+}
+
+/** What CLARA never states about a visa: a minimum duration or weekly load, or that a course qualifies. */
+const VISA_FIGURES = /\b\d+ (months|Monate|Monaten)\b|\b\d+ (lessons|Lektionen|Unterrichtseinheiten|UE)\b|visumstauglich|visa-eligible|meets visa requirements/i;
+
+const PORTAL_WORDS = ['portal', 'dashboard', 'konto', 'account', 'login', 'einloggen', 'passwort', 'password'];
+
+/** The site's answer in place of a canned one, keeping the canned navigation. */
+function withGrounding(base: Answer, grounding: Grounding): Answer {
+  if (!grounding.strong || !grounding.message) return base;
+  const topPath = grounding.hits[0]?.doc.url.split('#')[0];
+  // A more specific page than the canned one ("/exams/b2" for "/exams") becomes the button.
+  const cta = topPath && topPath.startsWith(base.cta.href) && topPath.length > base.cta.href.length ? { ...base.cta, href: topPath } : base.cta;
+  return {
+    ...base,
+    message: grounding.message,
+    cta,
+    quickLinks: uniqueLinks([...grounding.links, ...(base.quickLinks ?? [])]).slice(0, 4),
+    basedOn: [...new Set([...grounding.links.map((link) => link.href), ...(base.basedOn ?? [])])],
+  };
+}
+
+/** An answer from the site alone, for questions no canned flow covers. */
+function groundedOnly(locale: AssistantRuntimeLocale, grounding: Grounding): Answer | null {
+  if (!grounding.strong || !grounding.message) return null;
+  const top = grounding.hits[0];
+  const href = top.doc.type === 'faq' ? '/faq' : top.doc.url.split('#')[0];
+  return {
+    intent: intentFromTopic(DOC_TOPIC[top.doc.type]),
+    message: grounding.message,
+    cta: {
+      label: top.doc.type === 'faq' ? (locale === 'de' ? 'Zu den häufigen Fragen' : 'Go to the FAQ') : locale === 'de' ? `Mehr dazu: ${top.doc.page}` : `More: ${top.doc.page}`,
+      href,
+    },
+    quickLinks: uniqueLinks([...grounding.links, { label: locale === 'de' ? 'Kontakt' : 'Contact', href: '/contact' }]).slice(0, 4),
+    basedOn: grounding.links.map((link) => link.href),
+  };
+}
+
+const DOC_TOPIC: Record<string, string> = {
+  course: 'courses',
+  exam: 'exams',
+  accommodation: 'accommodation',
+  career: 'careers',
+  guide: 'resources',
+  news: 'resources',
+  faq: 'faq',
+  page: 'school',
+};
+
+function notFound(locale: AssistantRuntimeLocale, grounding: Grounding): Answer {
+  return {
+    intent: 'unknown',
+    message:
+      locale === 'de'
+        ? 'Dazu habe ich auf unserer Website keine sichere Antwort gefunden. Unser Team hilft dir gern weiter, per Kontaktformular, per E-Mail an info@casa-bremen.de oder telefonisch.'
+        : 'I could not find a reliable answer to that on our website. Our team is happy to help, through the contact form, by email to info@casa-bremen.de or by phone.',
+    cta: { label: locale === 'de' ? 'Zum Kontaktformular' : 'Go to the contact form', href: '/contact' },
+    quickLinks: uniqueLinks([
+      ...grounding.links,
+      { label: locale === 'de' ? 'Häufige Fragen' : 'FAQ', href: '/faq' },
+      { label: locale === 'de' ? 'Kurse' : 'Courses', href: '/courses' },
+    ]).slice(0, 4),
+    basedOn: ['/contact'],
+  };
+}
+
+const QUICK_INTENT: Record<string, AssistantIntent> = {
+  price: 'course_match',
+  start: 'course_match',
+  lessons: 'course_match',
+  'exam-date': 'exam_pathway',
+  hours: 'contact',
+  address: 'contact',
+  contact: 'contact',
+};
+
+/** What the deterministic turn found, for the AI mode to write from. */
+type TurnContext = {
+  grounding?: Grounding;
+  facts?: Record<string, string>;
+  locale?: AssistantRuntimeLocale;
+  /** Fixed wording (safety, visa, login) or course cards: the AI mode leaves it alone. */
+  fixed?: boolean;
+};
+
+/**
+ * One turn: the deterministic answer, and in AI mode (ai.server.ts) the same
+ * answer written as conversation. The button, the links and any course cards
+ * are always the deterministic layer's; a failed or slow model call falls back
+ * to its message.
+ */
+export async function runAssistantTurn(input: RunAssistantTurnInput): Promise<AssistantResponsePayload> {
+  const turn: TurnContext = {};
+  const payload = await decideTurn(input, turn);
+  if (!claraAiEnabled() || turn.fixed || !turn.grounding || !turn.locale) return payload;
+  const start = performance.now();
+  const message = await aiAnswer({
+    messages: input.messages,
+    locale: turn.locale,
+    hits: turn.grounding.hits,
+    facts: turn.facts ?? {},
+    draft: payload.message,
+  });
+  const call = { name: 'claraAi', durationMs: Math.round(performance.now() - start), ok: Boolean(message) };
+  return { ...payload, message: message ?? payload.message, toolCalls: [...payload.toolCalls, call] };
+}
+
+async function decideTurn({ messages, locale, userContext, pagePath }: RunAssistantTurnInput, turn: TurnContext): Promise<AssistantResponsePayload> {
   const toolCalls: AssistantToolCall[] = [];
   const runtimeLocale = resolveAssistantLocale(locale, messages);
   const latestMessageRaw = latestUserMessage(messages);
   const latestMessage = normalizeText(latestMessageRaw);
   const corpus = normalizeText(userCorpus(messages));
   const previousCorpusRaw = previousUserCorpus(messages);
+  const previousUserMessage = [...messages].filter((message) => message.role === 'user').slice(-2, -1)[0]?.content ?? '';
+  const done = (answer: Answer, extra: Partial<AssistantResponsePayload> = {}): AssistantResponsePayload => ({
+    locale: runtimeLocale,
+    intent: answer.intent,
+    message: answer.message,
+    cta: answer.cta,
+    quickLinks: answer.quickLinks,
+    planSteps: answer.planSteps,
+    basedOn: answer.basedOn,
+    toolCalls,
+    ...extra,
+  });
 
   const kbStart = performance.now();
   const kb = searchPublicKB(`${latestMessageRaw} ${corpus}`, runtimeLocale, 4);
-  toolCalls.push({
-    name: 'searchPublicKB',
-    durationMs: Math.round(performance.now() - kbStart),
-    ok: true,
-  });
+  const [index, facts] = await Promise.all([getKnowledgeIndex(), loadFacts(runtimeLocale)]);
+  const followUp = Boolean(previousUserMessage) && isLikelyFollowUp(latestMessage) && !hasExplicitIntentShift(latestMessage);
+  const groundingQuery = followUp ? `${latestMessageRaw} ${previousUserMessage}` : latestMessageRaw;
+  const grounding = groundedAnswer(index, groundingQuery, runtimeLocale, { pagePath: pagePath ?? undefined });
+  toolCalls.push({ name: 'searchKnowledge', durationMs: Math.round(performance.now() - kbStart), ok: true });
+  turn.grounding = grounding;
+  turn.facts = facts.values;
+  turn.locale = runtimeLocale;
 
   const sensitiveDocQuestion = includesAny(latestMessage, [
     'passport',
@@ -994,17 +1132,8 @@ export async function runAssistantTurn({
   ]);
 
   if (sensitiveDocQuestion) {
-    const safe = safetyRefusal(runtimeLocale);
-    return {
-      locale: runtimeLocale,
-      intent: safe.intent,
-      message: safe.message,
-      cta: safe.cta,
-      quickLinks: safe.quickLinks,
-      planSteps: safe.planSteps,
-      toolCalls,
-      basedOn: ['/contact'],
-    };
+    turn.fixed = true;
+    return done({ ...safetyRefusal(runtimeLocale), basedOn: ['/contact'] });
   }
 
   const intent = detectIntent({
@@ -1022,116 +1151,69 @@ export async function runAssistantTurn({
   });
   const resolvedIntent = continuedIntent ?? intent;
 
+  // Visa questions keep their fixed, reviewed wording. A question about CASA's own
+  // rules (a refused visa, a postponement, the visa letter) also gets the passage
+  // that states them, as long as it names no minimum course or weekly load: the
+  // embassy decides those, never CLARA.
   if (resolvedIntent === 'visa') {
+    turn.fixed = true;
     const visa = visaResponse(runtimeLocale);
-    return {
-      locale: runtimeLocale,
-      intent: visa.intent,
-      message: visa.message,
-      cta: visa.cta,
-      quickLinks: visa.quickLinks,
-      planSteps: visa.planSteps,
-      toolCalls,
-      basedOn: ['/courses', '/contact?topic=Course advice'],
-    };
+    const top = grounding.hits[0];
+    const aboutRequirements = /voraussetzung|anforderung|requirement|how long|wie lange|minimum|mindest/.test(latestMessage);
+    const passage = grounding.strong && grounding.message && !aboutRequirements && !VISA_FIGURES.test(grounding.message) ? grounding.message : null;
+    return done({
+      ...visa,
+      message: passage ? `${passage}\n\n${visa.message}` : visa.message,
+      quickLinks: uniqueLinks([...(visa.quickLinks ?? []), ...(passage && top ? grounding.links : [])]).slice(0, 4),
+      basedOn: ['/courses', '/contact?topic=Course advice', '/faq'],
+    });
   }
 
-  if (resolvedIntent === 'exam_pathway') {
-    const exam = examResponse(runtimeLocale, latestMessageRaw);
-    return {
-      locale: runtimeLocale,
-      intent: exam.intent,
-      message: exam.message,
-      cta: exam.cta,
-      quickLinks: exam.quickLinks,
-      planSteps: exam.planSteps,
-      toolCalls,
-      basedOn: exam.basedOn,
-    };
+  // A price, a date, office hours: the live value, as the page prints it.
+  const quickOptions = {
+    locale: runtimeLocale,
+    facts: facts.values,
+    context: followUp ? previousUserMessage : undefined,
+    pagePath: pagePath ?? undefined,
+  };
+  const corrected = index.didYouMean(latestMessageRaw);
+  const quick = quickAnswer(latestMessageRaw, quickOptions) ?? (corrected ? quickAnswer(corrected, quickOptions) : null);
+  if (quick) {
+    toolCalls.push({ name: 'liveFacts', durationMs: 0, ok: true });
+    return done({
+      intent: QUICK_INTENT[quick.kind] ?? resolvedIntent,
+      message: quick.message,
+      cta: { label: quick.label, href: quick.href },
+      quickLinks: uniqueLinks([...grounding.links.filter((link) => link.href !== quick.href), { label: runtimeLocale === 'de' ? 'Kontakt' : 'Contact', href: '/contact' }]).slice(0, 3),
+      basedOn: [quick.href],
+    });
   }
 
-  if (resolvedIntent === 'accommodation') {
-    const accommodation = accommodationResponse(runtimeLocale);
-    return {
-      locale: runtimeLocale,
-      intent: accommodation.intent,
-      message: accommodation.message,
-      cta: accommodation.cta,
-      quickLinks: accommodation.quickLinks,
-      planSteps: accommodation.planSteps,
-      toolCalls,
-      basedOn: accommodation.basedOn,
-    };
+  const asksQuestion = isQuestion(latestMessageRaw, latestMessage);
+  const portalQuestion = includesAny(latestMessage, PORTAL_WORDS);
+
+  const canned: Partial<Record<AssistantIntent, () => Answer>> = {
+    exam_pathway: () => examResponse(runtimeLocale, latestMessageRaw),
+    accommodation: () => accommodationResponse(runtimeLocale),
+    registration: () => registrationResponse(runtimeLocale, latestMessageRaw),
+    career: () => careerResponse(runtimeLocale),
+    resource: () => resourceResponse(runtimeLocale),
+    contact: () => contactResponse(runtimeLocale, latestMessageRaw),
+  };
+
+  const cannedFor = canned[resolvedIntent];
+  if (cannedFor) {
+    const base = cannedFor();
+    // Login and account questions keep the fixed answer: there is no learner login.
+    if (resolvedIntent === 'contact' && portalQuestion) {
+      turn.fixed = true;
+      return done(base);
+    }
+    return done(withGrounding(base, grounding));
   }
 
-  if (resolvedIntent === 'registration') {
-    const registration = registrationResponse(runtimeLocale, latestMessageRaw);
-    return {
-      locale: runtimeLocale,
-      intent: registration.intent,
-      message: registration.message,
-      cta: registration.cta,
-      quickLinks: registration.quickLinks,
-      planSteps: registration.planSteps,
-      toolCalls,
-      basedOn: registration.basedOn,
-    };
-  }
-
-  if (resolvedIntent === 'career') {
-    const career = careerResponse(runtimeLocale);
-    return {
-      locale: runtimeLocale,
-      intent: career.intent,
-      message: career.message,
-      cta: career.cta,
-      quickLinks: career.quickLinks,
-      planSteps: career.planSteps,
-      toolCalls,
-      basedOn: career.basedOn,
-    };
-  }
-
-  if (resolvedIntent === 'resource') {
-    const resource = resourceResponse(runtimeLocale);
-    return {
-      locale: runtimeLocale,
-      intent: resource.intent,
-      message: resource.message,
-      cta: resource.cta,
-      quickLinks: resource.quickLinks,
-      planSteps: resource.planSteps,
-      toolCalls,
-      basedOn: resource.basedOn,
-    };
-  }
-
-  if (resolvedIntent === 'contact') {
-    const contact = contactResponse(runtimeLocale, latestMessageRaw);
-    return {
-      locale: runtimeLocale,
-      intent: contact.intent,
-      message: contact.message,
-      cta: contact.cta,
-      quickLinks: contact.quickLinks,
-      planSteps: contact.planSteps,
-      toolCalls,
-      basedOn: contact.basedOn,
-    };
-  }
-
-  if (resolvedIntent === 'smalltalk') {
-    const smalltalk = smalltalkResponse(runtimeLocale);
-    return {
-      locale: runtimeLocale,
-      intent: smalltalk.intent,
-      message: smalltalk.message,
-      cta: smalltalk.cta,
-      quickLinks: smalltalk.quickLinks,
-      planSteps: smalltalk.planSteps,
-      toolCalls,
-      basedOn: smalltalk.basedOn,
-    };
+  if (resolvedIntent === 'smalltalk' && !grounding.strong) {
+    return done(smalltalkResponse(runtimeLocale));
   }
 
   const courseSignals = includesAny(`${latestMessage} ${corpus}`, [
@@ -1142,6 +1224,14 @@ export async function runAssistantTurn({
     'level',
     'class',
   ]);
+  const wantsFinder = isFinderRequest(latestMessage) || (continuedIntent === 'course_match' && !asksQuestion);
+
+  // A specific question about courses ("Was ist B1+?") is answered from the site;
+  // a request to find one goes through the course finder below.
+  if (grounding.strong && asksQuestion && !wantsFinder) {
+    const answer = groundedOnly(runtimeLocale, grounding);
+    if (answer) return done(answer);
+  }
 
   if (resolvedIntent === 'course_match' || resolvedIntent === 'placement' || courseSignals) {
     const filters = extractCourseFilters(`${latestMessageRaw} ${corpus}`);
@@ -1149,8 +1239,7 @@ export async function runAssistantTurn({
     const missingSchedule = !filters.schedule;
 
     if (missingLevel) {
-      return {
-        locale: runtimeLocale,
+      return done({
         intent: 'placement',
         message:
           runtimeLocale === 'de'
@@ -1161,14 +1250,8 @@ export async function runAssistantTurn({
           href: '/placement-test',
         },
         quickLinks: uniqueLinks([
-          {
-            label: runtimeLocale === 'de' ? 'Einstufungstest' : 'Placement test',
-            href: '/placement-test',
-          },
-          {
-            label: runtimeLocale === 'de' ? 'Kurse' : 'Courses',
-            href: '/courses',
-          },
+          { label: runtimeLocale === 'de' ? 'Einstufungstest' : 'Placement test', href: '/placement-test' },
+          { label: runtimeLocale === 'de' ? 'Kurse' : 'Courses', href: '/courses' },
         ]),
         planSteps: plan(runtimeLocale, [
           'Find out your level.',
@@ -1179,14 +1262,12 @@ export async function runAssistantTurn({
           'Wähle das Kursformat, das zu deinem Alltag passt.',
           'Melde dich online an.',
         ]),
-        toolCalls,
         basedOn: ['/placement-test', '/courses'],
-      };
+      });
     }
 
     if (missingSchedule) {
-      return {
-        locale: runtimeLocale,
+      return done({
         intent: 'course_match',
         message:
           runtimeLocale === 'de'
@@ -1197,14 +1278,8 @@ export async function runAssistantTurn({
           href: '/courses',
         },
         quickLinks: uniqueLinks([
-          {
-            label: runtimeLocale === 'de' ? 'Intensivkurse' : 'Intensive courses',
-            href: '/courses/intensive-german',
-          },
-          {
-            label: runtimeLocale === 'de' ? 'Abendkurse' : 'Evening courses',
-            href: '/courses/evening-course',
-          },
+          { label: runtimeLocale === 'de' ? 'Intensivkurse' : 'Intensive courses', href: '/courses/intensive-german' },
+          { label: runtimeLocale === 'de' ? 'Abendkurse' : 'Evening courses', href: '/courses/evening-course' },
         ]),
         planSteps: plan(runtimeLocale, [
           'Choose between the intensive course and the evening course.',
@@ -1215,9 +1290,8 @@ export async function runAssistantTurn({
           'Sieh dir die passenden Termine an.',
           'Melde dich für deinen Kurs an.',
         ]),
-        toolCalls,
         basedOn: ['/courses'],
-      };
+      });
     }
 
     const toolStart = performance.now();
@@ -1229,66 +1303,42 @@ export async function runAssistantTurn({
     });
 
     if (cards.length === 0) {
-      const fallback = kbFallbackResponse(runtimeLocale, kb);
-      return {
-        locale: runtimeLocale,
-        intent: fallback.intent,
-        message: fallback.message,
-        cta: fallback.cta,
-        cards: [],
-        quickLinks: fallback.quickLinks,
-        planSteps: fallback.planSteps,
-        toolCalls,
-        basedOn: fallback.basedOn,
-      };
+      return done(groundedOnly(runtimeLocale, grounding) ?? notFound(runtimeLocale, grounding), { cards: [] });
     }
 
-    return {
-      locale: runtimeLocale,
-      intent: 'course_match',
-      message:
-        runtimeLocale === 'de'
-          ? `${wittyLead(runtimeLocale, 'course_match')} Diese Kurse passen zu deinen Angaben. Ich habe sie so sortiert, dass der passendste oben steht.`
-          : `${wittyLead(runtimeLocale, 'course_match')} These courses match what you’ve told me. I’ve sorted them so that the best match is at the top.`,
-      cta: {
-        label: runtimeLocale === 'de' ? 'Zur Kursanmeldung' : 'Go to course registration',
-        href: '/registration/course',
+    turn.fixed = true;
+    return done(
+      {
+        intent: 'course_match',
+        message:
+          runtimeLocale === 'de'
+            ? `${wittyLead(runtimeLocale, 'course_match')} Diese Kurse passen zu deinen Angaben. Ich habe sie so sortiert, dass der passendste oben steht.`
+            : `${wittyLead(runtimeLocale, 'course_match')} These courses match what you’ve told me. I’ve sorted them so that the best match is at the top.`,
+        cta: {
+          label: runtimeLocale === 'de' ? 'Zur Kursanmeldung' : 'Go to course registration',
+          href: '/registration/course',
+        },
+        quickLinks: uniqueLinks([
+          { label: runtimeLocale === 'de' ? 'Kursanmeldung' : 'Course registration', href: '/registration/course' },
+          { label: runtimeLocale === 'de' ? 'Alle Kurse' : 'All courses', href: '/courses' },
+          { label: runtimeLocale === 'de' ? 'Beratung' : 'Advice', href: '/contact?topic=Course advice' },
+        ]),
+        planSteps: plan(runtimeLocale, [
+          'Choose a course.',
+          'Pick a start date.',
+          'Send your registration.',
+        ], [
+          'Wähle einen Kurs aus.',
+          'Such dir einen Starttermin aus.',
+          'Schick deine Anmeldung ab.',
+        ]),
+        basedOn: cards.map((card) => card.href),
       },
-      cards,
-      quickLinks: uniqueLinks([
-        { label: runtimeLocale === 'de' ? 'Kursanmeldung' : 'Course registration', href: '/registration/course' },
-        { label: runtimeLocale === 'de' ? 'Alle Kurse' : 'All courses', href: '/courses' },
-        { label: runtimeLocale === 'de' ? 'Beratung' : 'Advice', href: '/contact?topic=Course advice' },
-      ]),
-      planSteps: plan(runtimeLocale, [
-        'Choose a course.',
-        'Pick a start date.',
-        'Send your registration.',
-      ], [
-        'Wähle einen Kurs aus.',
-        'Such dir einen Starttermin aus.',
-        'Schick deine Anmeldung ab.',
-      ]),
-      toolCalls,
-      basedOn: cards.map((card) => card.href),
-    };
+      { cards }
+    );
   }
 
-  const fallback = kbFallbackResponse(runtimeLocale, kb);
-  return {
-    locale: runtimeLocale,
-    intent: fallback.intent,
-    message: `${fallback.message}\n\n${
-      runtimeLocale === 'de'
-        ? 'Dabei halte ich mich an den Sicherheitsleitfaden für CLARA.'
-        : 'I keep to the safety guidelines for CLARA when I answer.'
-    }`,
-    cta: fallback.cta,
-    quickLinks: fallback.quickLinks,
-    planSteps: fallback.planSteps,
-    toolCalls,
-    basedOn: fallback.basedOn,
-  };
+  return done(groundedOnly(runtimeLocale, grounding) ?? (kb.passages.length > 0 ? kbFallbackResponse(runtimeLocale, kb) : notFound(runtimeLocale, grounding)));
 }
 
 export function getAssistantSystemPrompt() {

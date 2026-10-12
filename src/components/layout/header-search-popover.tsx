@@ -7,10 +7,12 @@ import {
   BookOpen,
   Building2,
   CalendarDays,
+  FileText,
   HelpCircle,
   Loader2,
   Newspaper,
   Search,
+  Sparkles,
   X,
 } from 'lucide-react';
 
@@ -34,7 +36,7 @@ const copy = {
     open: 'Open site search',
     close: 'Close search',
     title: 'Search CASA',
-    placeholder: 'Search courses, exams, FAQ and news...',
+    placeholder: 'Search the site: courses, prices, dates…',
     suggestions: 'Popular searches',
     destinations: 'Quick links',
     results: 'Results',
@@ -43,6 +45,8 @@ const copy = {
     loading: 'Searching...',
     viewAll: 'View all results',
     searchPage: 'Open search page',
+    answer: 'Quick answer',
+    didYouMean: 'Did you mean',
     destinationLinks: [
       { label: 'Courses', href: '/courses', icon: BookOpen },
       { label: 'Exams', href: '/exams', icon: CalendarDays },
@@ -55,6 +59,7 @@ const copy = {
       { label: 'Host family', query: 'host family' },
     ],
     typeLabels: {
+      pages: 'Page',
       courses: 'Course',
       exams: 'Exam',
       faq: 'FAQ',
@@ -65,7 +70,7 @@ const copy = {
     open: 'Seitensuche öffnen',
     close: 'Suche schließen',
     title: 'CASA durchsuchen',
-    placeholder: 'Kurse, Prüfungen, FAQ, Aktuelles suchen...',
+    placeholder: 'Website durchsuchen: Kurse, Preise, Termine …',
     suggestions: 'Beliebte Suchen',
     destinations: 'Direktzugriff',
     results: 'Treffer',
@@ -74,6 +79,8 @@ const copy = {
     loading: 'Suche läuft...',
     viewAll: 'Alle Ergebnisse ansehen',
     searchPage: 'Suchseite öffnen',
+    answer: 'Direkt beantwortet',
+    didYouMean: 'Meintest du',
     destinationLinks: [
       { label: 'Kurse', href: '/courses', icon: BookOpen },
       { label: 'Prüfungen', href: '/exams', icon: CalendarDays },
@@ -86,6 +93,7 @@ const copy = {
       { label: 'Gastfamilie', query: 'gastfamilie' },
     ],
     typeLabels: {
+      pages: 'Seite',
       courses: 'Kurs',
       exams: 'Prüfung',
       faq: 'FAQ',
@@ -95,6 +103,7 @@ const copy = {
 } as const;
 
 const resultIcons: Record<PublicSearchResultType, typeof BookOpen> = {
+  pages: FileText,
   courses: BookOpen,
   exams: CalendarDays,
   faq: HelpCircle,
@@ -110,17 +119,9 @@ function buildSearchHref(query: string) {
   return `/search?q=${encodeURIComponent(trimmed)}&scope=all`;
 }
 
+/** The best results across groups, as the index ranked them. */
 function flattenResults(results: PublicSearchResponse | null) {
-  if (!results) {
-    return [];
-  }
-
-  return [
-    ...results.groups.courses,
-    ...results.groups.exams,
-    ...results.groups.faq,
-    ...results.groups.news,
-  ].slice(0, 5);
+  return results?.top.slice(0, 5) ?? [];
 }
 
 function ResultRow({
@@ -146,6 +147,7 @@ function ResultRow({
       <span className="min-w-0 flex-1">
         <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{label}</span>
         <span className="mt-0.5 block truncate text-sm font-bold">{result.title}</span>
+        {result.context ? <span className="block truncate text-xs text-[var(--casa-muted)]">{result.context}</span> : null}
         <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-[var(--casa-muted)]">{result.snippet}</span>
       </span>
       <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[var(--casa-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--casa-accent-text)]" />
@@ -223,7 +225,7 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
 
       try {
         const response = await fetch(
-          `/api/search/suggest?q=${encodeURIComponent(trimmedQuery)}&scope=all&limit=3&locale=${locale}`,
+          `/api/search/suggest?q=${encodeURIComponent(trimmedQuery)}&scope=all&limit=3&prefix=1&locale=${locale}`,
           { signal: controller.signal }
         );
         const payload = (await response.json()) as ApiResponse<PublicSearchResponse>;
@@ -382,6 +384,34 @@ export function HeaderSearchPopover({ locale, isActive }: HeaderSearchPopoverPro
                     </span>
                   ) : null}
                 </div>
+
+                {results?.answer ? (
+                  <Link
+                    href={results.answer.href}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-xl border border-[color:var(--casa-blue)]/25 bg-[var(--casa-warm-panel)] px-3 py-2.5 text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/50"
+                  >
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--casa-accent-text)]">
+                      <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                      {dictionary.answer}
+                    </span>
+                    <span className="mt-1 block text-sm leading-relaxed">{results.answer.message}</span>
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[var(--casa-accent-text)]">
+                      {results.answer.label}
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                  </Link>
+                ) : null}
+
+                {results?.didYouMean ? (
+                  <p className="text-sm text-[var(--casa-muted)]">
+                    {dictionary.didYouMean}{' '}
+                    <button type="button" onClick={() => setQuery(results.didYouMean ?? '')} className="font-semibold text-[var(--casa-accent-text)] underline-offset-2 hover:underline">
+                      {results.didYouMean}
+                    </button>
+                    ?
+                  </p>
+                ) : null}
 
                 {!loading && resultRows.length === 0 ? (
                   <p className="rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-bg)] px-3 py-3 text-sm text-[var(--casa-muted)]">

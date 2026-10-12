@@ -1,0 +1,1611 @@
+[
+  {
+    "id": "price-intensive-de",
+    "locale": "de",
+    "query": "Was kostet der Intensivkurs?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german",
+      "/courses"
+    ],
+    "facts": [
+      "520",
+      "940"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "extra-costs-de",
+    "locale": "de",
+    "query": "Kommen zur Kursgebühr noch weitere Kosten dazu, zum Beispiel eine Einschreibegebühr oder das Buch?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "50",
+      "23,99",
+      "26,99"
+    ],
+    "topic": "extra_costs"
+  },
+  {
+    "id": "price-evening-de",
+    "locale": "de",
+    "query": "Wie viel kostet ein Abendkurs pro Trimester?",
+    "kind": "question",
+    "expect": [
+      "/courses/evening-course"
+    ],
+    "facts": [
+      "378"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "price-special-de",
+    "locale": "de",
+    "query": "Was kostet ein Modul bei den Spezialkursen?",
+    "kind": "question",
+    "expect": [
+      "/courses/special-courses"
+    ],
+    "facts": [
+      "192"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "price-bildungszeit-de",
+    "locale": "de",
+    "query": "Was kostet die Bildungszeit bei euch für eine oder zwei Wochen?",
+    "kind": "question",
+    "expect": [
+      "/courses/bildungszeit"
+    ],
+    "facts": [
+      "280",
+      "520"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "price-medical-de",
+    "locale": "de",
+    "query": "Was kostet der Kurs Deutsch für Pflege und Medizin?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-medical",
+      "/contact"
+    ],
+    "facts": [
+      "400"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "price-firmen-de",
+    "locale": "de",
+    "query": "Was kostet Firmenunterricht für ein Team von acht Mitarbeitenden?",
+    "kind": "question",
+    "expect": [
+      "/courses/firmenunterricht",
+      "/contact"
+    ],
+    "facts": [],
+    "topic": "course_price_quote"
+  },
+  {
+    "id": "price-groups-de",
+    "locale": "de",
+    "query": "Was kostet eine Sprachreise für eine Schulklasse bei euch?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-groups",
+      "/contact"
+    ],
+    "facts": [],
+    "topic": "course_price_quote"
+  },
+  {
+    "id": "calculator-de",
+    "locale": "de",
+    "query": "Wie viel kostet ein Intensivkurs für 8 Wochen mit Unterkunft insgesamt?",
+    "kind": "question",
+    "expect": [
+      "/calculator",
+      "/courses/intensive-german",
+      "/accommodation"
+    ],
+    "facts": [
+      "940",
+      "580"
+    ],
+    "topic": "total_cost"
+  },
+  {
+    "id": "intensive-times-de",
+    "locale": "de",
+    "query": "Zu welchen Uhrzeiten findet der Intensivkurs statt?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "12:30",
+      "17:30"
+    ],
+    "topic": "schedule"
+  },
+  {
+    "id": "afternoon-days-de",
+    "locale": "de",
+    "query": "Hat der Intensivkurs am Nachmittag auch freitags Unterricht?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "Donnerstag"
+    ],
+    "topic": "schedule"
+  },
+  {
+    "id": "evening-times-de",
+    "locale": "de",
+    "query": "An welchen Abenden und um wie viel Uhr ist der Abendkurs?",
+    "kind": "question",
+    "expect": [
+      "/courses/evening-course"
+    ],
+    "facts": [
+      "18:30",
+      "20:00"
+    ],
+    "topic": "schedule"
+  },
+  {
+    "id": "b1plus-de",
+    "locale": "de",
+    "query": "Was bedeutet B1+ und wie lange dauert diese Stufe?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german",
+      "/courses"
+    ],
+    "facts": [
+      "9 Wochen",
+      "Kontext"
+    ],
+    "topic": "levels_b1plus"
+  },
+  {
+    "id": "levels-offered-de",
+    "locale": "de",
+    "query": "Welche Niveaustufen kann ich bei euch lernen?",
+    "kind": "question",
+    "expect": [
+      "/courses",
+      "/placement-test",
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "A1",
+      "B1+",
+      "C1"
+    ],
+    "topic": "levels"
+  },
+  {
+    "id": "group-size-de",
+    "locale": "de",
+    "query": "Wie viele Teilnehmende sind in einer Lerngruppe?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "10",
+      "15"
+    ],
+    "topic": "group_size"
+  },
+  {
+    "id": "next-start-intensive-de",
+    "locale": "de",
+    "query": "Wann beginnt der nächste Intensivkurs?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german",
+      "/registration/course"
+    ],
+    "facts": [
+      "26. Oktober 2026"
+    ],
+    "topic": "next_start"
+  },
+  {
+    "id": "next-start-evening-de",
+    "locale": "de",
+    "query": "Wann fängt das nächste Trimester im Abendkurs an?",
+    "kind": "question",
+    "expect": [
+      "/courses/evening-course",
+      "/registration/course"
+    ],
+    "facts": [
+      "Januar 2027"
+    ],
+    "topic": "next_start"
+  },
+  {
+    "id": "join-running-de",
+    "locale": "de",
+    "query": "Kann ich auch mitten im Trimester in einen Abendkurs einsteigen?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/courses/evening-course"
+    ],
+    "facts": [
+      "A1.1"
+    ],
+    "topic": "join_running_course"
+  },
+  {
+    "id": "placement-needed-de",
+    "locale": "de",
+    "query": "Muss ich vor der Anmeldung einen Einstufungstest machen?",
+    "kind": "question",
+    "expect": [
+      "/placement-test",
+      "/faq"
+    ],
+    "facts": [
+      "A1",
+      "online@casa-bremen.de"
+    ],
+    "topic": "placement"
+  },
+  {
+    "id": "placement-beginner-de",
+    "locale": "de",
+    "query": "Ich habe noch nie Deutsch gelernt. Brauche ich trotzdem einen Einstufungstest?",
+    "kind": "question",
+    "expect": [
+      "/placement-test"
+    ],
+    "facts": [
+      "A1"
+    ],
+    "topic": "placement"
+  },
+  {
+    "id": "placement-in-person-de",
+    "locale": "de",
+    "query": "Kann ich mich auch persönlich in der Schule einstufen lassen statt online?",
+    "kind": "question",
+    "expect": [
+      "/placement-test",
+      "/faq"
+    ],
+    "facts": [
+      "Stunde"
+    ],
+    "topic": "placement"
+  },
+  {
+    "id": "how-register-de",
+    "locale": "de",
+    "query": "Wie melde ich mich für einen Sprachkurs an?",
+    "kind": "question",
+    "expect": [
+      "/registration/course",
+      "/faq"
+    ],
+    "facts": [],
+    "topic": "registration"
+  },
+  {
+    "id": "register-exam-de",
+    "locale": "de",
+    "query": "Wie melde ich mich zur telc-Prüfung an?",
+    "kind": "question",
+    "expect": [
+      "/registration/exam",
+      "/exams"
+    ],
+    "facts": [],
+    "topic": "exam_registration"
+  },
+  {
+    "id": "exam-fee-b2-de",
+    "locale": "de",
+    "query": "Wie hoch ist die Prüfungsgebühr für telc Deutsch B2?",
+    "kind": "question",
+    "expect": [
+      "/exams/b2",
+      "/exams"
+    ],
+    "facts": [
+      "190"
+    ],
+    "topic": "exam_fee"
+  },
+  {
+    "id": "exam-partial-b2-de",
+    "locale": "de",
+    "query": "Ich muss nur den mündlichen Teil der B2-Prüfung wiederholen. Was kostet das?",
+    "kind": "question",
+    "expect": [
+      "/exams/b2",
+      "/exams"
+    ],
+    "facts": [
+      "160"
+    ],
+    "topic": "exam_fee"
+  },
+  {
+    "id": "b2-prep-de",
+    "locale": "de",
+    "query": "Was kostet der Vorbereitungskurs für telc B2 und wann findet er statt?",
+    "kind": "question",
+    "expect": [
+      "/exams/b2",
+      "/exams"
+    ],
+    "facts": [
+      "260",
+      "Monat"
+    ],
+    "topic": "exam_preparation"
+  },
+  {
+    "id": "c1-prep-de",
+    "locale": "de",
+    "query": "Wie teuer ist der Vorbereitungskurs für telc C1 Hochschule?",
+    "kind": "question",
+    "expect": [
+      "/exams/c1",
+      "/exams"
+    ],
+    "facts": [
+      "520"
+    ],
+    "topic": "exam_preparation"
+  },
+  {
+    "id": "c1-prep-grammar-de",
+    "locale": "de",
+    "query": "Lerne ich im C1-Vorbereitungskurs auch die Grammatik der Stufe C1?",
+    "kind": "question",
+    "expect": [
+      "/exams/c1",
+      "/faq"
+    ],
+    "facts": [
+      "C1-Kurs"
+    ],
+    "topic": "exam_preparation"
+  },
+  {
+    "id": "intensive-exam-prep-de",
+    "locale": "de",
+    "query": "Ist die Prüfungsvorbereitung im Intensivkurs schon enthalten?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "Vorbereitungskurs"
+    ],
+    "topic": "exam_preparation"
+  },
+  {
+    "id": "exam-results-de",
+    "locale": "de",
+    "query": "Wann bekomme ich mein Ergebnis und das Zertifikat nach der telc-Prüfung?",
+    "kind": "question",
+    "expect": [
+      "/exams/b2",
+      "/exams/c1",
+      "/faq"
+    ],
+    "facts": [
+      "6 Wochen"
+    ],
+    "topic": "exam_results"
+  },
+  {
+    "id": "exam-levels-de",
+    "locale": "de",
+    "query": "Kann ich bei euch auch eine A2- oder B1-Prüfung ablegen?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/exams"
+    ],
+    "facts": [
+      "B2",
+      "C1 Hochschule"
+    ],
+    "topic": "exam_levels"
+  },
+  {
+    "id": "accommodation-cost-de",
+    "locale": "de",
+    "query": "Was kostet ein Zimmer bei euch für vier Wochen?",
+    "kind": "question",
+    "expect": [
+      "/accommodation",
+      "/accommodation/flat",
+      "/accommodation/host"
+    ],
+    "facts": [
+      "580",
+      "145"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "accommodation-eligibility-de",
+    "locale": "de",
+    "query": "Kann ich über CASA eine Unterkunft buchen, wenn ich nur einen Abendkurs mache?",
+    "kind": "question",
+    "expect": [
+      "/accommodation",
+      "/faq"
+    ],
+    "facts": [
+      "Intensivkurs"
+    ],
+    "topic": "accommodation_eligibility"
+  },
+  {
+    "id": "flat-age-de",
+    "locale": "de",
+    "query": "Ich bin 17. Darf ich in einer CASA-WG wohnen?",
+    "kind": "question",
+    "expect": [
+      "/accommodation/flat",
+      "/faq"
+    ],
+    "facts": [
+      "volljährig"
+    ],
+    "topic": "accommodation_eligibility"
+  },
+  {
+    "id": "deposit-de",
+    "locale": "de",
+    "query": "Wie hoch ist die Kaution für die Unterkunft und bekomme ich sie zurück?",
+    "kind": "question",
+    "expect": [
+      "/accommodation/flat",
+      "/accommodation/host",
+      "/accommodation"
+    ],
+    "facts": [
+      "580"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "flat-bedding-de",
+    "locale": "de",
+    "query": "Muss ich Bettwäsche und Handtücher in die WG mitbringen?",
+    "kind": "question",
+    "expect": [
+      "/accommodation/flat"
+    ],
+    "facts": [
+      "Handtücher"
+    ],
+    "topic": "accommodation_flat"
+  },
+  {
+    "id": "christmas-surcharge-de",
+    "locale": "de",
+    "query": "Ich bleibe über Weihnachten in meinem Zimmer, obwohl die Schule geschlossen ist. Kostet das extra?",
+    "kind": "question",
+    "expect": [
+      "/accommodation/flat",
+      "/accommodation/host"
+    ],
+    "facts": [
+      "145"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "visa-requirements-de",
+    "locale": "de",
+    "query": "Welche Voraussetzungen gibt es, um ein Sprachvisum zu beantragen?",
+    "kind": "question",
+    "expect": [
+      "/faq"
+    ],
+    "facts": [],
+    "topic": "visa"
+  },
+  {
+    "id": "visa-refused-de",
+    "locale": "de",
+    "query": "Mein Visum wurde abgelehnt. Bekomme ich die Kursgebühr zurück?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [
+      "100",
+      "zwei Wochen"
+    ],
+    "topic": "visa_refusal"
+  },
+  {
+    "id": "visa-delay-de",
+    "locale": "de",
+    "query": "Mein Visumstermin verzögert sich. Kann ich den Kursbeginn verschieben?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [
+      "21",
+      "100"
+    ],
+    "topic": "visa_postponement"
+  },
+  {
+    "id": "cancel-de",
+    "locale": "de",
+    "query": "Wie kann ich meinen Kurs kündigen und bekomme ich mein Geld zurück?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [
+      "vier Wochen",
+      "100",
+      "schriftlich"
+    ],
+    "topic": "cancellation"
+  },
+  {
+    "id": "payment-de",
+    "locale": "de",
+    "query": "Wann muss ich die Kursgebühr bezahlen, wenn ich schon in Deutschland wohne?",
+    "kind": "question",
+    "expect": [
+      "/terms"
+    ],
+    "facts": [
+      "100",
+      "4 Wochen"
+    ],
+    "topic": "payment"
+  },
+  {
+    "id": "office-hours-de",
+    "locale": "de",
+    "query": "Wann ist euer Büro geöffnet?",
+    "kind": "question",
+    "expect": [
+      "/contact",
+      "/faq"
+    ],
+    "facts": [
+      "08:30",
+      "19:00",
+      "13:00"
+    ],
+    "topic": "office_hours"
+  },
+  {
+    "id": "address-de",
+    "locale": "de",
+    "query": "Wo genau ist die Sprachschule in Bremen?",
+    "kind": "question",
+    "expect": [
+      "/contact"
+    ],
+    "facts": [
+      "Am Dobben 14",
+      "28203"
+    ],
+    "topic": "address"
+  },
+  {
+    "id": "bildungszeit-what-de",
+    "locale": "de",
+    "query": "Was ist Bildungszeit und wer hat Anspruch darauf?",
+    "kind": "question",
+    "expect": [
+      "/courses/bildungszeit"
+    ],
+    "facts": [
+      "zehn Tage",
+      "zwei Jahren"
+    ],
+    "topic": "bildungszeit"
+  },
+  {
+    "id": "medical-dates-de",
+    "locale": "de",
+    "query": "Wann startet der nächste Kurs Deutsch für Pflege und Medizin?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-medical",
+      "/contact"
+    ],
+    "facts": [
+      "16:30"
+    ],
+    "topic": "medical_course"
+  },
+  {
+    "id": "groups-de",
+    "locale": "de",
+    "query": "Wir möchten mit unserer Schulklasse eine Woche nach Bremen kommen. Was bietet ihr an?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-groups",
+      "/contact"
+    ],
+    "facts": [
+      "Gastfamilie"
+    ],
+    "topic": "groups"
+  },
+  {
+    "id": "nonprofit-de",
+    "locale": "de",
+    "query": "Ist CASA eine gemeinnützige Schule?",
+    "kind": "question",
+    "expect": [
+      "/ueber-uns/gemeinnuetzigkeit",
+      "/about"
+    ],
+    "facts": [
+      "gGmbH"
+    ],
+    "topic": "nonprofit"
+  },
+  {
+    "id": "integration-course-oos-de",
+    "locale": "de",
+    "query": "Bietet ihr Integrationskurse an?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/courses"
+    ],
+    "facts": [],
+    "topic": "out_of_scope"
+  },
+  {
+    "id": "private-lessons-oos-de",
+    "locale": "de",
+    "query": "Gebt ihr auch Einzelunterricht?",
+    "kind": "question",
+    "expect": [
+      "/contact",
+      "/courses"
+    ],
+    "facts": [],
+    "topic": "out_of_scope"
+  },
+  {
+    "id": "search-intensivkurs-preis-de",
+    "locale": "de",
+    "query": "intensivkurs preis",
+    "kind": "search",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "520"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "search-abendkurs-preis-de",
+    "locale": "de",
+    "query": "abendkurs preis",
+    "kind": "search",
+    "expect": [
+      "/courses/evening-course"
+    ],
+    "facts": [
+      "378"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "search-unterkunft-kosten-de",
+    "locale": "de",
+    "query": "unterkunft kosten",
+    "kind": "search",
+    "expect": [
+      "/accommodation",
+      "/accommodation/flat",
+      "/accommodation/host"
+    ],
+    "facts": [
+      "580"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "search-telc-b2-termin-de",
+    "locale": "de",
+    "query": "telc b2 termin",
+    "kind": "search",
+    "expect": [
+      "/exams/b2",
+      "/exams",
+      "/registration/exam"
+    ],
+    "facts": [],
+    "topic": "exam_dates"
+  },
+  {
+    "id": "search-prufung-c1-de",
+    "locale": "de",
+    "query": "prufung c1 hochschule",
+    "kind": "search",
+    "expect": [
+      "/exams/c1",
+      "/exams"
+    ],
+    "facts": [],
+    "topic": "exam_c1"
+  },
+  {
+    "id": "search-einstufugstest-de",
+    "locale": "de",
+    "query": "einstufugstest online",
+    "kind": "search",
+    "expect": [
+      "/placement-test"
+    ],
+    "facts": [],
+    "topic": "placement"
+  },
+  {
+    "id": "search-gastfamilie-werden-de",
+    "locale": "de",
+    "query": "gastfamilie werden bremen",
+    "kind": "search",
+    "expect": [
+      "/accommodation/become-host"
+    ],
+    "facts": [],
+    "topic": "host_recruitment"
+  },
+  {
+    "id": "search-wg-kaution-de",
+    "locale": "de",
+    "query": "wg zimmer kaution",
+    "kind": "search",
+    "expect": [
+      "/accommodation/flat",
+      "/accommodation"
+    ],
+    "facts": [
+      "580"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "search-kundigung-de",
+    "locale": "de",
+    "query": "kundigung kurs",
+    "kind": "search",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [],
+    "topic": "cancellation"
+  },
+  {
+    "id": "search-buro-offnungszeiten-de",
+    "locale": "de",
+    "query": "buro offnungszeiten",
+    "kind": "search",
+    "expect": [
+      "/contact",
+      "/faq"
+    ],
+    "facts": [
+      "08:30"
+    ],
+    "topic": "office_hours"
+  },
+  {
+    "id": "search-deutsch-fur-mediziner-de",
+    "locale": "de",
+    "query": "deutsch fur mediziner",
+    "kind": "search",
+    "expect": [
+      "/courses/german-for-medical"
+    ],
+    "facts": [],
+    "topic": "medical_course"
+  },
+  {
+    "id": "search-firmen-unterricht-de",
+    "locale": "de",
+    "query": "firmen unterricht deutsch",
+    "kind": "search",
+    "expect": [
+      "/courses/firmenunterricht"
+    ],
+    "facts": [],
+    "topic": "in_company"
+  },
+  {
+    "id": "search-klassenfahrt-de",
+    "locale": "de",
+    "query": "klassenfahrt bremen deutschkurs",
+    "kind": "search",
+    "expect": [
+      "/courses/german-for-groups"
+    ],
+    "facts": [],
+    "topic": "groups"
+  },
+  {
+    "id": "search-intensiv-kurs-nachmittag-de",
+    "locale": "de",
+    "query": "Intensiv Kurs Nachmittag",
+    "kind": "search",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "17:30"
+    ],
+    "topic": "schedule"
+  },
+  {
+    "id": "search-sprach-visum-de",
+    "locale": "de",
+    "query": "sprach visum voraussetzungen",
+    "kind": "search",
+    "expect": [
+      "/faq"
+    ],
+    "facts": [],
+    "topic": "visa"
+  },
+  {
+    "id": "search-gemeinutzig-de",
+    "locale": "de",
+    "query": "gemeinützig",
+    "kind": "search",
+    "expect": [
+      "/ueber-uns/gemeinnuetzigkeit"
+    ],
+    "facts": [],
+    "topic": "nonprofit"
+  },
+  {
+    "id": "search-jobs-daf-de",
+    "locale": "de",
+    "query": "jobs daf lehrkraft",
+    "kind": "search",
+    "expect": [
+      "/careers"
+    ],
+    "facts": [],
+    "topic": "careers"
+  },
+  {
+    "id": "search-evening-course-price-on-de",
+    "locale": "de",
+    "query": "evening course price",
+    "kind": "search",
+    "expect": [
+      "/courses/evening-course"
+    ],
+    "facts": [
+      "378"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "search-placement-test-on-de",
+    "locale": "de",
+    "query": "placement test online",
+    "kind": "search",
+    "expect": [
+      "/placement-test"
+    ],
+    "facts": [],
+    "topic": "placement"
+  },
+  {
+    "id": "search-testdaf-oos-de",
+    "locale": "de",
+    "query": "testdaf bremen",
+    "kind": "search",
+    "expect": [
+      "/exams",
+      "/contact"
+    ],
+    "facts": [],
+    "topic": "out_of_scope"
+  },
+  {
+    "id": "price-intensive-en",
+    "locale": "en",
+    "query": "How much does the intensive course cost?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german",
+      "/courses"
+    ],
+    "facts": [
+      "520",
+      "940"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "extra-week-en",
+    "locale": "en",
+    "query": "I want to stay ten weeks. What does each week after the first eight cost on the intensive course?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "117.50"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "evening-price-en",
+    "locale": "en",
+    "query": "How much is the evening course per term?",
+    "kind": "question",
+    "expect": [
+      "/courses/evening-course"
+    ],
+    "facts": [
+      "378"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "special-price-en",
+    "locale": "en",
+    "query": "How much does one special course module cost?",
+    "kind": "question",
+    "expect": [
+      "/courses/special-courses"
+    ],
+    "facts": [
+      "192"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "medical-price-en",
+    "locale": "en",
+    "query": "What does the German for nursing and medicine course cost?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-medical",
+      "/contact"
+    ],
+    "facts": [
+      "400"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "enrolment-fee-en",
+    "locale": "en",
+    "query": "Is there an enrolment fee on top of the course price?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "50"
+    ],
+    "topic": "extra_costs"
+  },
+  {
+    "id": "intensive-times-en",
+    "locale": "en",
+    "query": "What times are the morning and afternoon intensive classes?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "09:00",
+      "12:30",
+      "13:00",
+      "17:30"
+    ],
+    "topic": "schedule"
+  },
+  {
+    "id": "next-start-intensive-en",
+    "locale": "en",
+    "query": "When does the next intensive course start?",
+    "kind": "question",
+    "expect": [
+      "/courses/intensive-german",
+      "/registration/course"
+    ],
+    "facts": [
+      "26 October 2026"
+    ],
+    "topic": "next_start"
+  },
+  {
+    "id": "placement-needed-en",
+    "locale": "en",
+    "query": "Do I need to take a placement test before I register?",
+    "kind": "question",
+    "expect": [
+      "/placement-test",
+      "/faq"
+    ],
+    "facts": [
+      "A1",
+      "online@casa-bremen.de"
+    ],
+    "topic": "placement"
+  },
+  {
+    "id": "exams-offered-en",
+    "locale": "en",
+    "query": "Which German exams can I take at CASA, and when do the results arrive?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/exams"
+    ],
+    "facts": [
+      "B2",
+      "C1 Hochschule",
+      "six weeks"
+    ],
+    "topic": "exam_levels"
+  },
+  {
+    "id": "exam-fee-c1-en",
+    "locale": "en",
+    "query": "What is the fee for telc Deutsch C1 Hochschule, and for just one part?",
+    "kind": "question",
+    "expect": [
+      "/exams/c1",
+      "/exams"
+    ],
+    "facts": [
+      "210",
+      "185"
+    ],
+    "topic": "exam_fee"
+  },
+  {
+    "id": "c1-exam-day-en",
+    "locale": "en",
+    "query": "Which day of the week is the C1 Hochschule exam, and how long does it take?",
+    "kind": "question",
+    "expect": [
+      "/exams/c1"
+    ],
+    "facts": [
+      "Friday",
+      "08:30"
+    ],
+    "topic": "exam_schedule"
+  },
+  {
+    "id": "b2-prep-en",
+    "locale": "en",
+    "query": "How much is the telc B2 preparation course and how is it organised?",
+    "kind": "question",
+    "expect": [
+      "/exams/b2",
+      "/exams"
+    ],
+    "facts": [
+      "260",
+      "month"
+    ],
+    "topic": "exam_preparation"
+  },
+  {
+    "id": "accommodation-cost-en",
+    "locale": "en",
+    "query": "How much does accommodation cost?",
+    "kind": "question",
+    "expect": [
+      "/accommodation",
+      "/accommodation/flat",
+      "/accommodation/host"
+    ],
+    "facts": [
+      "580",
+      "145",
+      "50"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "host-eligibility-en",
+    "locale": "en",
+    "query": "Can I book a host family through you if I'm only taking the evening course?",
+    "kind": "question",
+    "expect": [
+      "/accommodation/host",
+      "/faq",
+      "/accommodation"
+    ],
+    "facts": [
+      "intensive"
+    ],
+    "topic": "accommodation_eligibility"
+  },
+  {
+    "id": "flat-age-en",
+    "locale": "en",
+    "query": "I'm 17. Can I live in a CASA shared flat?",
+    "kind": "question",
+    "expect": [
+      "/accommodation/flat",
+      "/faq"
+    ],
+    "facts": [
+      "18"
+    ],
+    "topic": "accommodation_eligibility"
+  },
+  {
+    "id": "flat-guarantee-en",
+    "locale": "en",
+    "query": "Is a room in a shared flat guaranteed?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/accommodation/flat"
+    ],
+    "facts": [
+      "host family"
+    ],
+    "topic": "accommodation_flat"
+  },
+  {
+    "id": "visa-requirements-en",
+    "locale": "en",
+    "query": "What do I need to book to apply for a language visa?",
+    "kind": "question",
+    "expect": [
+      "/faq"
+    ],
+    "facts": [],
+    "topic": "visa"
+  },
+  {
+    "id": "visa-letter-en",
+    "locale": "en",
+    "query": "When will I receive my visa letter?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [
+      "first course"
+    ],
+    "topic": "visa"
+  },
+  {
+    "id": "visa-bound-contract-en",
+    "locale": "en",
+    "query": "Once I'm in Germany on a language visa, can I stop my course early?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [],
+    "topic": "visa"
+  },
+  {
+    "id": "cancel-en",
+    "locale": "en",
+    "query": "What is your cancellation policy?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [
+      "four weeks",
+      "100",
+      "in writing"
+    ],
+    "topic": "cancellation"
+  },
+  {
+    "id": "payment-abroad-en",
+    "locale": "en",
+    "query": "I live outside Germany. When do I have to pay the course fee?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/terms"
+    ],
+    "facts": [
+      "first course"
+    ],
+    "topic": "payment"
+  },
+  {
+    "id": "office-hours-en",
+    "locale": "en",
+    "query": "What are your office hours?",
+    "kind": "question",
+    "expect": [
+      "/contact",
+      "/faq"
+    ],
+    "facts": [
+      "08:30",
+      "19:00",
+      "13:00"
+    ],
+    "topic": "office_hours"
+  },
+  {
+    "id": "phone-email-en",
+    "locale": "en",
+    "query": "How can I reach you by phone or email?",
+    "kind": "question",
+    "expect": [
+      "/contact"
+    ],
+    "facts": [
+      "460 414 30",
+      "info@casa-bremen.de"
+    ],
+    "topic": "contact"
+  },
+  {
+    "id": "closures-en",
+    "locale": "en",
+    "query": "Is the school closed over Christmas?",
+    "kind": "question",
+    "expect": [
+      "/faq",
+      "/contact"
+    ],
+    "facts": [
+      "21 Dec"
+    ],
+    "topic": "closures"
+  },
+  {
+    "id": "bildungszeit-en",
+    "locale": "en",
+    "query": "What is Bildungszeit, how many days do I get, and what level do I need?",
+    "kind": "question",
+    "expect": [
+      "/courses/bildungszeit"
+    ],
+    "facts": [
+      "ten days",
+      "two years",
+      "B1"
+    ],
+    "topic": "bildungszeit"
+  },
+  {
+    "id": "medical-level-en",
+    "locale": "en",
+    "query": "What level of German do I need for the course for doctors preparing for the Fachsprachprüfung?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-medical"
+    ],
+    "facts": [
+      "B2",
+      "C1"
+    ],
+    "topic": "medical_course"
+  },
+  {
+    "id": "groups-en",
+    "locale": "en",
+    "query": "We'd like to bring a school class to Bremen for a week. Who do I talk to about a group programme?",
+    "kind": "question",
+    "expect": [
+      "/courses/german-for-groups",
+      "/contact"
+    ],
+    "facts": [
+      "Ina Eismann"
+    ],
+    "topic": "groups"
+  },
+  {
+    "id": "careers-en",
+    "locale": "en",
+    "query": "Are you hiring German teachers at the moment?",
+    "kind": "question",
+    "expect": [
+      "/careers"
+    ],
+    "facts": [],
+    "topic": "careers"
+  },
+  {
+    "id": "partners-en",
+    "locale": "en",
+    "query": "Which organisations does CASA cooperate with?",
+    "kind": "question",
+    "expect": [
+      "/partners"
+    ],
+    "facts": [
+      "HERE AHEAD",
+      "Garantiefonds Hochschule"
+    ],
+    "topic": "partners"
+  },
+  {
+    "id": "study-free-en",
+    "locale": "en",
+    "query": "Is studying at a university in Germany free?",
+    "kind": "question",
+    "expect": [
+      "/resources/study-in-germany",
+      "/resources/why-germany"
+    ],
+    "facts": [
+      "semester contribution"
+    ],
+    "topic": "study_guide"
+  },
+  {
+    "id": "funding-en",
+    "locale": "en",
+    "query": "Can the Jobcenter or the BAMF pay for my course?",
+    "kind": "question",
+    "expect": [
+      "/faq"
+    ],
+    "facts": [],
+    "topic": "funding"
+  },
+  {
+    "id": "business-german-oos-en",
+    "locale": "en",
+    "query": "Do you offer a Business German course?",
+    "kind": "question",
+    "expect": [
+      "/courses",
+      "/courses/firmenunterricht"
+    ],
+    "facts": [],
+    "topic": "out_of_scope"
+  },
+  {
+    "id": "online-course-oos-en",
+    "locale": "en",
+    "query": "Can I take your German courses online from home?",
+    "kind": "question",
+    "expect": [
+      "/courses",
+      "/contact"
+    ],
+    "facts": [],
+    "topic": "out_of_scope"
+  },
+  {
+    "id": "search-intensive-price-en",
+    "locale": "en",
+    "query": "intensive course price",
+    "kind": "search",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [
+      "520"
+    ],
+    "topic": "course_price"
+  },
+  {
+    "id": "search-evening-classes-en",
+    "locale": "en",
+    "query": "evening classes bremen",
+    "kind": "search",
+    "expect": [
+      "/courses/evening-course"
+    ],
+    "facts": [],
+    "topic": "evening_course"
+  },
+  {
+    "id": "search-host-family-en",
+    "locale": "en",
+    "query": "host family",
+    "kind": "search",
+    "expect": [
+      "/accommodation/host",
+      "/accommodation"
+    ],
+    "facts": [],
+    "topic": "accommodation_host"
+  },
+  {
+    "id": "search-shared-flat-en",
+    "locale": "en",
+    "query": "shared flat room",
+    "kind": "search",
+    "expect": [
+      "/accommodation/flat",
+      "/accommodation"
+    ],
+    "facts": [],
+    "topic": "accommodation_flat"
+  },
+  {
+    "id": "search-telc-b2-dates-en",
+    "locale": "en",
+    "query": "telc b2 exam dates",
+    "kind": "search",
+    "expect": [
+      "/exams/b2",
+      "/exams",
+      "/registration/exam"
+    ],
+    "facts": [],
+    "topic": "exam_dates"
+  },
+  {
+    "id": "search-c1-prep-en",
+    "locale": "en",
+    "query": "c1 hochschule preparation course",
+    "kind": "search",
+    "expect": [
+      "/exams/c1"
+    ],
+    "facts": [],
+    "topic": "exam_preparation"
+  },
+  {
+    "id": "search-visa-letter-en",
+    "locale": "en",
+    "query": "visa letter",
+    "kind": "search",
+    "expect": [
+      "/faq"
+    ],
+    "facts": [],
+    "topic": "visa"
+  },
+  {
+    "id": "search-accomodation-cost-en",
+    "locale": "en",
+    "query": "accomodation cost",
+    "kind": "search",
+    "expect": [
+      "/accommodation",
+      "/accommodation/flat",
+      "/accommodation/host"
+    ],
+    "facts": [
+      "580"
+    ],
+    "topic": "accommodation_price"
+  },
+  {
+    "id": "search-germn-doctors-en",
+    "locale": "en",
+    "query": "germn for doctors",
+    "kind": "search",
+    "expect": [
+      "/courses/german-for-medical"
+    ],
+    "facts": [],
+    "topic": "medical_course"
+  },
+  {
+    "id": "search-intensiv-course-en",
+    "locale": "en",
+    "query": "intensiv german course",
+    "kind": "search",
+    "expect": [
+      "/courses/intensive-german"
+    ],
+    "facts": [],
+    "topic": "intensive_course"
+  },
+  {
+    "id": "search-registraton-form-en",
+    "locale": "en",
+    "query": "registraton form",
+    "kind": "search",
+    "expect": [
+      "/registration/course",
+      "/registration/exam"
+    ],
+    "facts": [],
+    "topic": "registration"
+  },
+  {
+    "id": "search-nonprofit-en",
+    "locale": "en",
+    "query": "non profit language school",
+    "kind": "search",
+    "expect": [
+      "/ueber-uns/gemeinnuetzigkeit",
+      "/about"
+    ],
+    "facts": [],
+    "topic": "nonprofit"
+  },
+  {
+    "id": "search-in-company-en",
+    "locale": "en",
+    "query": "in-company german classes",
+    "kind": "search",
+    "expect": [
+      "/courses/firmenunterricht"
+    ],
+    "facts": [],
+    "topic": "in_company"
+  },
+  {
+    "id": "search-become-host-en",
+    "locale": "en",
+    "query": "become a host family",
+    "kind": "search",
+    "expect": [
+      "/accommodation/become-host"
+    ],
+    "facts": [],
+    "topic": "host_recruitment"
+  },
+  {
+    "id": "search-health-insurance-en",
+    "locale": "en",
+    "query": "living in germany health insurance",
+    "kind": "search",
+    "expect": [
+      "/resources/living-in-germany"
+    ],
+    "facts": [],
+    "topic": "living_guide"
+  },
+  {
+    "id": "search-teaching-jobs-en",
+    "locale": "en",
+    "query": "teaching jobs",
+    "kind": "search",
+    "expect": [
+      "/careers"
+    ],
+    "facts": [],
+    "topic": "careers"
+  }
+]

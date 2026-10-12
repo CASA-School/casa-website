@@ -16,10 +16,10 @@ test('homepage decision cards guide visitors to in-page sections', async ({ page
   await page.goto('/en');
 
   const decisionSection = page.locator('section[data-track-section="persona-pathways"]');
-  await decisionSection
-    .locator('[data-casa-persona="new-learners"]')
-    .getByRole('link', { name: /choose this path/i })
-    .click();
+  const firstLink = decisionSection.locator('[data-casa-persona="new-learners"]').getByRole('link', { name: /choose this path/i });
+  // Mid-screen: at the bottom edge of a phone the "new website" notice sits over it.
+  await firstLink.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+  await firstLink.click();
   await expect(page).toHaveURL(/\/placement-test\?persona=new-learners$/);
 
   const inPageChecks = [

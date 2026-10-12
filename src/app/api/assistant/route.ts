@@ -30,6 +30,8 @@ const assistantRequestSchema = z.object({
       .max(MAX_MESSAGES)
   ),
   locale: z.enum(['en', 'de', 'es', 'fr', 'zh']).nullable().optional(),
+  // The internal path of the page the widget is open on.
+  pagePath: z.string().max(200).regex(/^\/[\w\-/]*$/).nullable().optional(),
   userContext: z
     .object({
       isAuthenticated: z.boolean().optional(),
@@ -78,6 +80,7 @@ export async function POST(request: NextRequest) {
     messages: parsed.data.messages,
     locale: parsed.data.locale,
     userContext: effectiveContext,
+    pagePath: parsed.data.pagePath ?? null,
   });
 
   const latencyMs = Math.round(performance.now() - start);
