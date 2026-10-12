@@ -2001,9 +2001,9 @@
    "/courses/[slug]"
   ]
  },
- "t.beginne-immer-mit-dem.1tmp5j9": {
-  "de": "Beginne immer mit dem A1-Test.",
-  "en": "Always start with the A1 test.",
+ "t.beginne-immer-mit-dem.pbpzom": {
+  "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
+  "en": "Always start with the A1 test. Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -2260,29 +2260,6 @@
   ],
   "pages": [
    "/accommodation"
-  ]
- },
- "t.beim-verlag-ansehen.1jis0dv": {
-  "de": "Beim Verlag ansehen",
-  "en": "View at the publisher",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.beim-zustaendigen-buergeramt-erf.4ass0y": {
@@ -4209,29 +4186,6 @@
   ],
   "pages": [
    "/contact"
-  ]
- },
- "t.dauer-pro-niveaustufe.qusozn": {
-  "de": "Dauer pro Niveaustufe",
-  "en": "Time per level",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.dauer.14g8nht": {
@@ -10397,6 +10351,29 @@
    "/exams/[code]"
   ]
  },
+ "t.hier-starten.1narfjb": {
+  "de": "Hier starten",
+  "en": "Start here",
+  "files": [
+   "src/components/sections/klett-level-tests.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.hier-stellen-wir-dir.193jzg1": {
   "de": "Hier stellen wir dir die Menschen vor, die bei uns die Schule leiten und organisieren. So findest du schnell die richtige Ansprechperson für deine Frage.",
   "en": "Here you can meet the people who run and organise our school and quickly find the right person for your question.",
@@ -10610,24 +10587,10 @@
   "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
   "en": "On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level takes 8 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.",
   "files": [
-   "src/app/(site)/[locale]/courses/levels/page.tsx",
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
   ],
   "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
+   "/courses/levels"
   ]
  },
  "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
@@ -11118,29 +11081,6 @@
    "src/config/content/accommodation-narratives.ts"
   ],
   "pages": []
- },
- "t.in-unserer-schule-finden.hmkk3k": {
-  "de": "In unserer Schule finden fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1 statt. Wir orientieren uns dabei streng am Gemeinsamen Europäischen Referenzrahmen (GER).",
-  "en": "At our school, courses run continuously at levels A1, A2, B1, B1+, B2 and C1. We keep strictly to the Common European Framework of Reference for Languages (CEFR).",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
  },
  "t.in-welchem-zustand-zimmer.1wt0a25": {
   "de": "In welchem Zustand Zimmer, Möbel und Wände sind",
@@ -12513,9 +12453,9 @@
    "/courses"
   ]
  },
- "t.kostenlose-online-tests.ou2e7o": {
-  "de": "Kostenlose Online-Tests",
-  "en": "Free online tests",
+ "t.kostenlos-von-a1-bis.45ucxk": {
+  "de": "Kostenlos, von A1 bis C1",
+  "en": "Free, from A1 to C1",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -13097,29 +13037,6 @@
   ],
   "pages": [
    "/courses"
-  ]
- },
- "t.kursstufen.1039r3w": {
-  "de": "Kursstufen",
-  "en": "Course levels",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.kurstage.y0hubg": {
@@ -13922,29 +13839,6 @@
    "/exams"
   ]
  },
- "t.mehr-zur-stufe.162idne": {
-  "de": "Mehr zur Stufe {level}",
-  "en": "More about {level}",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
- },
  "t.mehrere-moeglich.1o2k99k": {
   "de": "Mehrere möglich",
   "en": "Choose as many as you like",
@@ -14079,6 +13973,16 @@
   ],
   "pages": [
    "/accommodation/[type]"
+  ]
+ },
+ "t.mit-a1-beginnen.12d0cvq": {
+  "de": "Mit A1 beginnen",
+  "en": "Start with A1",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.mit-anderen-internationalen-kurs.1lix4xm": {
@@ -14946,6 +14850,16 @@
    "/accommodation/[type]"
   ]
  },
+ "t.name-und-e-mail.1derg1d": {
+  "de": "Name und E-Mail eintragen",
+  "en": "Enter your name and email",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.navigation-schliessen.1duel2t": {
   "de": "Navigation schließen",
   "en": "Close navigation menu",
@@ -15092,16 +15006,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.nimm-dir-ruhe-und.1dl6zbh": {
-  "de": "Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
-  "en": "Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.niveau-finden.8937o4": {
   "de": "Niveau finden",
   "en": "Find your level",
@@ -15179,24 +15083,10 @@
   "de": "Niveaustufen",
   "en": "Levels",
   "files": [
-   "src/app/(site)/[locale]/courses/levels/page.tsx",
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
   ],
   "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
+   "/courses/levels"
   ]
  },
  "t.noch-gar-keine-deutschkenntnisse.rb14yn": {
@@ -15327,29 +15217,6 @@
   ],
   "pages": [
    "/contact"
-  ]
- },
- "t.oeffnet-das-testportal-von.xfxgbc": {
-  "de": "Öffnet das Testportal von Klett in einem neuen Fenster",
-  "en": "Opens Klett’s test portal in a new window",
-  "files": [
-   "src/components/sections/klett-level-tests.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.oeffnet-google-maps-in.guhs8": {
@@ -19001,6 +18868,29 @@
    "/courses/[slug]"
   ]
  },
+ "t.test-starten.1y6oue4": {
+  "de": "Test starten",
+  "en": "Start the test",
+  "files": [
+   "src/components/sections/klett-level-tests.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.thema-waehlen.ctxpo4": {
   "de": "Thema wählen",
   "en": "Choose a topic",
@@ -19019,29 +18909,6 @@
   ],
   "pages": [
    "/news"
-  ]
- },
- "t.titelbild-des-lehrwerks-von.k7009p": {
-  "de": "Titelbild des Lehrwerks {title} von Ernst Klett Sprachen",
-  "en": "Cover of the {title} textbook published by Ernst Klett Sprachen",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.trag-dich-mit-deinem.hkbcaf": {
@@ -19126,29 +18993,6 @@
   ],
   "pages": [
    "/accommodation/become-host"
-  ]
- },
- "t.ue-pro-woche-je.60p8sx": {
-  "de": "{course.intensive-german.lessons} UE pro Woche (je 45 Min.)",
-  "en": "{course.intensive-german.lessons} lessons a week (45 min each)",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.ue-pro-woche.14owcx1": {
@@ -20707,6 +20551,16 @@
    "/courses/levels"
   ]
  },
+ "t.von-a1-bis-c1.1yk6pdi": {
+  "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
+  "en": "From A1 to C1: the levels page shows what you can understand and say at each level.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.von-der-anfrage-bis.10fxaxv": {
   "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
   "en": "From your first enquiry until the day you leave, you have one person to talk to.",
@@ -20829,16 +20683,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.vor-ort-ohne-termin.h0iwwz": {
-  "de": "Vor Ort ohne Termin",
-  "en": "In person, no appointment",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.vorbereiten.1e2q1vg": {
@@ -21441,6 +21285,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.was-die-stufen-bedeuten.1nlttzl": {
+  "de": "Was die Stufen bedeuten",
+  "en": "What the levels mean",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.was-die-unterkunft-kostet.1id26qt": {
   "de": "Was die Unterkunft kostet",
   "en": "What accommodation costs",
@@ -21471,29 +21325,6 @@
   ],
   "pages": [
    "/about"
-  ]
- },
- "t.was-du-auf-jeder.6gi060": {
-  "de": "Was du auf jeder Stufe kannst",
-  "en": "What you can do at each level",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.was-du-erreichen-kannst.og5hiu": {
@@ -23219,25 +23050,11 @@
    "src/components/calculator/casa-cost-pathway-calculator.tsx",
    "src/components/gruppen/esel-builder.tsx",
    "src/components/gruppen/gruppen-package-dialog.tsx",
-   "src/components/gruppen/gruppen-packages.tsx",
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/components/gruppen/gruppen-packages.tsx"
   ],
   "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
    "/calculator",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
+   "/courses/[slug]"
   ]
  },
  "t.wochen.ss0tcb": {
@@ -23558,9 +23375,9 @@
   ],
   "pages": []
  },
- "t.zu-den-tests.1ljpa0y": {
-  "de": "Zu den Tests",
-  "en": "Go to the tests",
+ "t.zu-den-niveaustufen.jtztoo": {
+  "de": "Zu den Niveaustufen",
+  "en": "Go to the levels",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -24105,29 +23922,6 @@
   "en": "An in-between step of the intensive course, between B1 and B2",
   "files": [
    "src/components/sections/cefr-level-rows.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
- },
- "t.zwischenstufe.1hqvqds": {
-  "de": "Zwischenstufe",
-  "en": "In-between level",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
   ],
   "pages": [
    "/",

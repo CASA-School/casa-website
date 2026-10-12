@@ -57,8 +57,9 @@ import type { Meaning } from '@/config/brand/meaning';
  *     Those are claims, not decoration, and were never placeholdered.
  *   - NewsFlash photographs. Real, verified images rendered through
  *     `next/image` directly (none in the October 2026 issue).
- *   - Klett textbook covers (`klett-textbooks.ts`). Licensing is unresolved,
- *     so `coverSrc` is unset and no slot renders at all today.
+ *   - Klett textbook covers: none on the site. Their licensing is unresolved,
+ *     and the level overview that would have shown them left the placement
+ *     page on 2026-10-12.
  *
  * `src/config/content/__tests__/photo-numbers.test.ts` fails the build if a
  * photograph is referenced anywhere in `src/` without a number here, if two

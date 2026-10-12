@@ -17,7 +17,6 @@ export { DecisionRail } from './decision-rail';
 export { NextStepsTimeline } from './next-steps-timeline';
 export { UnifiedSearchPanel, type UnifiedSearchScope } from './unified-search-panel';
 export { PersonaPathways } from './persona-pathways';
-export { LevelProgressionTimeline } from './level-progression-timeline';
 export { KlettLevelTests } from './klett-level-tests';
 export { FeeStrip } from './fee-strip';
 export { BandHeading } from './band-heading';

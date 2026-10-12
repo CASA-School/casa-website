@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { Building2, Check, Clock3, Mail } from 'lucide-react';
+import { Building2, ChartNoAxesColumn, Check, Mail } from 'lucide-react';
 
-import { HeroEMinimal } from '@/components/heroes';
-import { KlettLevelTests, LevelProgressionTimeline } from '@/components/sections';
+import { HeroSurface } from '@/components/heroes/shared';
+import { KlettLevelTests } from '@/components/sections';
 import { Container } from '@/components/ui/container';
 import { TextCta } from '@/components/ui/text-cta';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -13,20 +13,21 @@ import { pickTree, say } from '@/lib/cms/copy';
 /**
  * The placement page: the Klett online tests, or placement in person.
  *
- * WHAT CHANGED AND WHY (2026-10-01)
+ * SIMPLER, TESTS FIRST (Rahman, 2026-10-12): "it should be easier for students
+ * to get there and start with the level tests … beautiful and easy to navigate"
+ * until CASA's own test is ready. The six tests are in the hero, A1 marked as
+ * where to begin; then the three steps (start with A1, name and email in
+ * Klett's form, send the result to online@); then the two other ways — no test
+ * for complete beginners, placement in person — and a link to what the levels
+ * mean, which the levels page now tells in full (the level overview that used
+ * to close this page went there).
  *
- * From 2026-08-23 this page led into CASA's own adaptive test. That test is not
- * finished, so CASA decided to go back to the Klett tests the old
- * casa-bremen.de offered, while the own test stays in development behind
- * `placementTestEnabled()` (src/lib/placement/availability.ts). The copy follows
- * the old site's page, in its „du“ (2026-10-07): start with A1, take the test
- * alone without aids, enter name and email in Klett's form, send the result to
- * online@, no test for complete beginners, and placement in person without an
- * appointment. The old page „Niveaustufen“ redirects here, so the level section
- * at the end carries its descriptions of each level.
- *
- * The address stays: about 67 legacy redirects, the sitemap, the footer and
- * twenty internal links point here.
+ * WHY KLETT (2026-10-01). From 2026-08-23 this page led into CASA's own
+ * adaptive test. That test is not finished, so CASA went back to the Klett
+ * tests the old casa-bremen.de offered, while the own test stays in development
+ * behind `placementTestEnabled()` (src/lib/placement/availability.ts). The copy
+ * follows the old site's page, in its „du" (2026-10-07). This page never links
+ * into the own test (availability.test.ts checks it).
  */
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -57,13 +58,10 @@ export default async function PlacementTestPage() {
           heroTitle: 'Finde dein Deutschniveau',
           heroBody:
             'Die richtige Einstufung ist die Grundlage für erfolgreiches Lernen. Mach einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.',
-          heroCta: 'Zu den Tests',
-          meta: ['Kostenlose Online-Tests', 'Vor Ort ohne Termin'],
           howTitle: 'So gehst du vor',
           steps: [
-            'Beginne immer mit dem A1-Test.',
-            'Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.',
-            'Trag im Testformular deinen Namen und deine E-Mail-Adresse ein, damit wir dein Ergebnis zuordnen können.',
+            { title: 'Mit A1 beginnen', body: 'Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.' },
+            { title: 'Name und E-Mail eintragen', body: 'Trag im Testformular deinen Namen und deine E-Mail-Adresse ein, damit wir dein Ergebnis zuordnen können.' },
           ],
           sendTitle: 'Schick uns deine Ergebnisse',
           sendBody: 'Wenn ein Test ausgewertet ist, schick das Ergebnis bitte an',
@@ -81,17 +79,17 @@ export default async function PlacementTestPage() {
           ],
           inPersonCta: 'Kontakt und Adresse',
           prepTitle: 'Was du vorbereiten kannst',
+          levelsTitle: 'Was die Stufen bedeuten',
+          levelsBody: 'Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.',
+          levelsCta: 'Zu den Niveaustufen',
         }, en: {
           heroTitle: 'Find your German level',
           heroBody:
             'Learning well starts with a group at the right level. To find yours, take a free online test or come to the school for a placement test in person.',
-          heroCta: 'Go to the tests',
-          meta: ['Free online tests', 'In person, no appointment'],
           howTitle: 'How it works',
           steps: [
-            'Always start with the A1 test.',
-            'Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.',
-            'Enter your name and email address in the test form so that we can match your result to you.',
+            { title: 'Start with A1', body: 'Always start with the A1 test. Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.' },
+            { title: 'Enter your name and email', body: 'Enter your name and email address in the test form so that we can match your result to you.' },
           ],
           sendTitle: 'Send us your results',
           sendBody: 'Once a test has been marked, please send the result to',
@@ -109,110 +107,82 @@ export default async function PlacementTestPage() {
           ],
           inPersonCta: 'Contact and address',
           prepTitle: 'What to prepare',
+          levelsTitle: 'What the levels mean',
+          levelsBody: 'From A1 to C1: the levels page shows what you can understand and say at each level.',
+          levelsCta: 'Go to the levels',
         } });
 
   return (
     <main className="min-h-screen bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      <HeroEMinimal
-        eyebrow={say(locale, 'Einstufung', 'Placement')}
-        title={copy.heroTitle}
-        description={copy.heroBody}
-        breadcrumbs={breadcrumbs}
-        cta={{ label: copy.heroCta, href: '/placement-test#klett-level-tests', kind: 'primary' }}
-        meta={copy.meta}
-      />
+      {/* The tests are the hero: the lede beside them, the six tiles one tap away. */}
+      <HeroSurface themeClassName="hero-theme-plain" archetype="C" breadcrumbs={breadcrumbs}>
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{say(locale, 'Einstufung', 'Placement')}</p>
+            <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--casa-ink)] sm:text-5xl">{copy.heroTitle}</h1>
+            <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{copy.heroBody}</p>
+            <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-[var(--casa-ink)] shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]">
+              <span aria-hidden className="h-2 w-2 rounded-full bg-[var(--casa-sun)]" />
+              {say(locale, 'Kostenlos, von A1 bis C1', 'Free, from A1 to C1')}
+            </p>
+          </div>
+          <KlettLevelTests locale={locale} />
+        </div>
+      </HeroSurface>
 
-      {/* What to do, before the links: the A1 rule and the email to online@
-          are the two things people miss. */}
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
+      <section className="border-t border-[color:var(--casa-sand)]/40 py-16 md:py-20" aria-labelledby="placement-steps">
         <Container>
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <article className="rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)] sm:p-9">
-              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{copy.howTitle}</h2>
-              <ol className="mt-6 space-y-3">
-                {copy.steps.map((step, index) => (
-                  <li key={step} className="flex items-start gap-3 text-base leading-relaxed">
-                    <span
-                      aria-hidden
-                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--casa-blue)]/10 text-xs font-bold tabular-nums text-[var(--casa-accent-text)]"
-                    >
-                      {index + 1}
-                    </span>
-                    {step}
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-7 rounded-2xl bg-[var(--casa-surface-wash)] p-5">
-                <p className="flex items-center gap-2 text-base font-bold">
-                  <Mail className="h-5 w-5 text-[var(--casa-accent-text)]" aria-hidden />
-                  {copy.sendTitle}
-                </p>
+          <div className="casa-editorial-measure rounded-3xl bg-[var(--casa-warm-panel)] px-5 py-8 sm:px-6 md:px-9 md:py-10">
+            <span className="casa-tricolor-rule block h-1 w-20 rounded-full" aria-hidden />
+            <h2 id="placement-steps" className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{copy.howTitle}</h2>
+            <ol className="mt-8 grid gap-7 md:grid-cols-3">
+              {copy.steps.map((step, index) => (
+                <li key={step.title} className="relative min-w-0 border-l border-[color:var(--casa-sand)] pl-4">
+                  <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">{index + 1}</span>
+                  <h3 className="text-base font-semibold text-[var(--casa-ink)]">{step.title}</h3>
+                  <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{step.body}</p>
+                </li>
+              ))}
+              <li className="relative min-w-0 border-l border-[color:var(--casa-sand)] pl-4">
+                <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">3</span>
+                <h3 className="text-base font-semibold text-[var(--casa-ink)]">{copy.sendTitle}</h3>
                 <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">
                   {copy.sendBody}{' '}
-                  <a
-                    href="mailto:online@casa-bremen.de"
-                    className="font-bold text-[var(--casa-accent-text)] underline underline-offset-4"
-                  >
+                  <a href="mailto:online@casa-bremen.de" className="inline-flex items-center gap-1 font-bold text-[var(--casa-accent-text)] underline underline-offset-4">
+                    <Mail className="h-4 w-4" aria-hidden />
                     online@casa-bremen.de
                   </a>
                   .
                 </p>
-              </div>
-              <p className="mt-6 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.finalNote}</p>
-            </article>
-
-            <article className="flex flex-col rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
-              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-                <Check className="h-5 w-5" aria-hidden />
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight">{copy.beginnerTitle}</h2>
-              <p className="mt-3 flex-1 text-base leading-relaxed text-[var(--casa-muted)]">{copy.beginnerBody}</p>
-              <div className="mt-6">
-                <TextCta href="/registration/course">{copy.beginnerCta}</TextCta>
-              </div>
-            </article>
+              </li>
+            </ol>
+            <p className="mt-8 border-t border-[color:var(--casa-sand)] pt-5 text-sm leading-relaxed text-[var(--casa-muted)]">{copy.finalNote}</p>
           </div>
         </Container>
       </section>
 
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-canvas)]">
+      <section className="pb-20 md:pb-28">
         <Container>
-          <KlettLevelTests locale={locale} />
-        </Container>
-      </section>
-
-      <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
-        <Container>
-          <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <article className="flex flex-col rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+            <article className="flex flex-col rounded-3xl bg-white p-7 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-8">
               <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-coral)]/14 text-[var(--casa-coral)]">
                 <Building2 className="h-5 w-5" aria-hidden />
               </div>
               <h2 className="text-2xl font-bold tracking-tight">{copy.inPersonTitle}</h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{copy.inPersonBody}</p>
-              {/* The opening hours as facts, not a sentence (2026-10-07): in the
-                  paragraph they made this card twice the height of its neighbour. */}
-              <dl className="mt-5 grid flex-1 content-start gap-3 sm:grid-cols-2">
+              <dl className="mt-5 grid content-start gap-3 sm:grid-cols-2">
                 {copy.inPersonFacts.map((fact) => (
                   <div key={fact.label} className="rounded-xl bg-[var(--casa-canvas)] px-4 py-3">
                     <dt className="text-xs text-[var(--casa-muted)]">{fact.label}</dt>
                     {fact.lines.map((line) => (
-                      <dd key={line} className="mt-1 text-sm font-semibold leading-snug text-[var(--casa-ink)]">{line}</dd>
+                      // A time range stays on one line: "08:30–19:00" broke after the dash on a phone.
+                      <dd key={line} className="mt-1 text-sm font-semibold leading-snug text-[var(--casa-ink)]">{line.replace(/(\d)–(\d)/g, '$1–\u2060$2')}</dd>
                     ))}
                   </div>
                 ))}
               </dl>
-              <div className="mt-6">
-                <TextCta href="/contact?topic=placement-in-person">{copy.inPersonCta}</TextCta>
-              </div>
-            </article>
-
-            <article className="rounded-3xl border border-[var(--casa-sand)]/80 bg-white p-7 shadow-[var(--shadow-soft)]">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-                <Clock3 className="h-5 w-5" aria-hidden />
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight">{copy.prepTitle}</h2>
-              <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-[var(--casa-ink)]">
+              <p className="mt-6 text-sm font-semibold text-[var(--casa-ink)]">{copy.prepTitle}</p>
+              <ul className="mt-2 space-y-2 text-sm leading-relaxed text-[var(--casa-muted)]">
                 {narrative.prepChecklist.map((line) => (
                   <li key={line} className="flex items-start gap-2.5">
                     <span aria-hidden className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-amber)]" />
@@ -220,14 +190,34 @@ export default async function PlacementTestPage() {
                   </li>
                 ))}
               </ul>
+              <div className="mt-auto pt-6">
+                <TextCta href="/contact?topic=placement-in-person">{copy.inPersonCta}</TextCta>
+              </div>
             </article>
-          </div>
-        </Container>
-      </section>
 
-      <section id="level-progression" className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40 bg-[var(--casa-canvas)]">
-        <Container>
-          <LevelProgressionTimeline locale={locale} />
+            <div className="grid gap-6">
+              <article className="flex flex-col rounded-3xl bg-white p-7 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]">
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
+                  <Check className="h-5 w-5" aria-hidden />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight">{copy.beginnerTitle}</h2>
+                <p className="mt-3 flex-1 text-base leading-relaxed text-[var(--casa-muted)]">{copy.beginnerBody}</p>
+                <div className="mt-6">
+                  <TextCta href="/registration/course">{copy.beginnerCta}</TextCta>
+                </div>
+              </article>
+              <article className="flex flex-col rounded-3xl bg-white p-7 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]">
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
+                  <ChartNoAxesColumn className="h-5 w-5" aria-hidden />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight">{copy.levelsTitle}</h2>
+                <p className="mt-3 flex-1 text-base leading-relaxed text-[var(--casa-muted)]">{copy.levelsBody}</p>
+                <div className="mt-6">
+                  <TextCta href="/courses/levels">{copy.levelsCta}</TextCta>
+                </div>
+              </article>
+            </div>
+          </div>
         </Container>
       </section>
     </main>
