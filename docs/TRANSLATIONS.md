@@ -8,6 +8,17 @@ editable in the website editor, and invisible to visitors until a language is sw
 translations are re-run whenever it changes. This file is the process and the brief every run
 follows.
 
+## German and English first, the six labelled (Rahman, 2026-10-12)
+
+The site's own languages are German and English; they get the care. The six are machine
+translations (made and reviewed by AI agents, not by people) and say so: a page shown in one of
+them carries a slim strip under the header, in that language, „Maschinelle Übersetzung" with a
+sentence that it was translated automatically from German and that the German version applies
+if in doubt (`src/components/layout/machine-translation-note.tsx`). Never on a German or English
+page. In the editor's preview it is label and sentence; once a language is switched on for
+visitors it also links to the page's German original. Checks by native speakers (the Arabic name
+of the C band, for one) come later, language by language.
+
 ## Where they live
 
 - `src/config/cms/translation-locales.ts`: the six codes: `tr ar es it ru uk`.

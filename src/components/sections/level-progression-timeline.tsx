@@ -17,9 +17,8 @@ import { useSiteCopy } from '@/components/cms/site-copy-provider';
  * overview holds each level's short version and links to its section there
  * (2026-10-12); until then it carried the old page's whole text itself.
  *
- * Weeks in the intensive format: 8–9 for a full level (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md),
- * and for B1+ just as long, which casa-bremen.de does not publish and Rahman
- * confirmed with CASA on 2026-08-13 (the registration offers "B1+ · 8 Wochen").
+ * Weeks in the intensive format: 8 for a level, B1+ too (Rahman, 2026-10-12: one summer
+ * course a year runs 9 weeks; the site says 8). The registration offers "B1+ · 8 Wochen".
  */
 const LEVELS = CEFR_LEVELS;
 
@@ -108,7 +107,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           title: 'Was du auf jeder Stufe kannst',
           description:
             'In unserer Schule finden fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1 statt. Wir orientieren uns dabei streng am Gemeinsamen Europäischen Referenzrahmen (GER).',
-          pace: 'Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.',
+          pace: 'Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.',
           paceLabel: 'Dauer pro Niveaustufe',
           weeks: 'Wochen',
           rate: '{course.intensive-german.lessons} UE pro Woche (je 45 Min.)',
@@ -118,7 +117,7 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
           title: 'What you can do at each level',
           description:
             'At our school, courses run continuously at levels A1, A2, B1, B1+, B2 and C1. We keep strictly to the Common European Framework of Reference for Languages (CEFR).',
-          pace: 'On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level usually takes 8–9 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.',
+          pace: 'On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level takes 8 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.',
           paceLabel: 'Time per level',
           weeks: 'weeks',
           rate: '{course.intensive-german.lessons} lessons a week (45 min each)',

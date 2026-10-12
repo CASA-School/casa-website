@@ -6,6 +6,7 @@ import { usePathname } from '@/i18n/navigation';
 import { AssistantLauncher } from '@/components/assistant';
 import { InteractionTracker } from '@/components/analytics/interaction-tracker';
 import { Footer } from '@/components/layout/footer';
+import { MachineTranslationNote } from '@/components/layout/machine-translation-note';
 import { Navbar } from '@/components/layout/navbar';
 import { NewSiteNotice } from '@/components/layout/new-site-notice';
 import { ScrollEffects } from '@/components/ui/scroll-effects';
@@ -61,6 +62,7 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
         Skip to content
       </a>
       {!hideSiteChrome && <Navbar contentLocale={contentLocale} />}
+      {!hideSiteChrome && <MachineTranslationNote contentLocale={contentLocale} />}
       <div id="site-content" className="flex-1 flex flex-col">
         {children}
       </div>

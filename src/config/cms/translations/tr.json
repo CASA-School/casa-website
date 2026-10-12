@@ -2143,6 +2143,10 @@
     "de": "Diese Seite konnte gerade nicht geladen werden. Bitte versuch es noch einmal. Wenn der Fehler bleibt, erreichst du uns über die Kontaktseite.",
     "text": "Bu sayfa şu anda yüklenemedi. Lütfen tekrar deneyin. Hata devam ederse bize iletişim sayfasından ulaşabilirsiniz."
   },
+  "t.diese-seite-wurde-automatisch.1vxacy0": {
+    "de": "Diese Seite wurde automatisch aus dem Deutschen übersetzt. Im Zweifel gilt die deutsche Fassung.",
+    "text": "Bu sayfa Almancadan otomatik olarak çevrilmiştir. Emin olamadığınız durumlarda Almanca sürüm geçerlidir."
+  },
   "t.diesen-weg-waehlen.jq4f4l": {
     "de": "Diesen Weg wählen",
     "text": "Bu yolu seçin"
@@ -2874,10 +2878,6 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "Eşek, Köpek, Kedi, Horoz – ve Bremen'e giden size özel yol"
-  },
-  "t.etwa-wochen.zc1ikx": {
-    "de": "etwa {weeks} Wochen",
-    "text": "yaklaşık {weeks} hafta"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3759,17 +3759,17 @@
     "de": "Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.",
     "text": "İlk görüşmede ekibin neler öğrenmesi gerektiğini ve hangi dil bilgisine sahip olduğunu öğreniriz."
   },
-  "t.im-intensivkurs-etwa-8.1d0af46": {
-    "de": "Im Intensivkurs etwa 8–9 Wochen",
-    "text": "Yoğun kursta yaklaşık 8–9 hafta"
+  "t.im-intensivkurs-8-wochen.12qzs64": {
+    "de": "Im Intensivkurs 8 Wochen",
+    "text": "Yoğun kursta 8 hafta"
   },
-  "t.im-intensivkurs-hast-du.zt3kvv": {
-    "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
-    "text": "Yoğun kursta haftada 45'er dakikalık {course.intensive-german.lessons} ders saatiniz olur. Bir seviyenin tamamı burada genellikle 8–9 hafta sürer, B1+ de aynı süreyi alır. Akşam kursunda yarım seviye yaklaşık bir dönem sürer."
+  "t.im-intensivkurs-hast-du.1n5lebh": {
+    "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
+    "text": "Yoğun kursta haftada 45'er dakikalık {course.intensive-german.lessons} ders saatiniz olur. Bir seviyenin tamamı burada 8 hafta sürer, B1+ de aynı süreyi alır. Akşam kursunda yarım seviye yaklaşık bir dönem sürer."
   },
-  "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
-    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-    "text": "Haftada {course.intensive-german.lessons} ders saati olan yoğun kursta bir seviyenin tamamı yaklaşık 8 ila 9 hafta sürer. Akşam kursunda yaklaşık 3,5 ayda yarım seviye, yani yılda yaklaşık 1,5 seviye tamamlarsınız."
+  "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
+    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+    "text": "Haftada {course.intensive-german.lessons} ders saati olan yoğun kursta bir seviyenin tamamı 8 hafta sürer. Akşam kursunda yaklaşık 3,5 ayda yarım seviye, yani yılda yaklaşık 1,5 seviye tamamlarsınız."
   },
   "t.im-intensivkurs.136g3x5": {
     "de": "Im Intensivkurs",
@@ -4839,6 +4839,10 @@
     "de": "Manches lässt sich am besten im Gespräch klären. Erzähl uns, was dich beschäftigt. Wir nehmen uns gern Zeit für dich.",
     "text": "Bazı konular en iyi konuşarak netleşir. Aklınızdakileri bize anlatın. Size seve seve zaman ayırırız."
   },
+  "t.maschinelle-uebersetzung.12lzozs": {
+    "de": "Maschinelle Übersetzung",
+    "text": "Makine çevirisi"
+  },
   "t.matratze.1l7m6s5": {
     "de": "Matratze",
     "text": "Şilte"
@@ -5051,9 +5055,9 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "telc Deutsch C1 Hochschule ile Almancanızın üniversite eğitimi için yeterli olduğunu kanıtlarsınız. Almanca eğitim veren birçok üniversite, kabul için bu sertifikayı ister."
   },
-  "t.mit-unterrichtseinheiten-pro-woc.5evtnr": {
-    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.",
-    "text": "Haftada {course.intensive-german.lessons} ders saatiyle bir seviyenin tamamını yaklaşık 8 ila 9 haftada bitirirsiniz."
+  "t.mit-unterrichtseinheiten-pro-woc.1s1nce4": {
+    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.",
+    "text": "Haftada {course.intensive-german.lessons} ders saatiyle bir seviyenin tamamını 8 haftada bitirirsiniz."
   },
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
@@ -6147,9 +6151,9 @@
     "de": "Sechs Jahrhunderte europäische Kunst, mit im Unterricht vorbereiteten Aufgaben.",
     "text": "Derste hazırlanan görevlerle altı yüzyıllık Avrupa sanatı."
   },
-  "t.sechs-niveaustufen-von-a1.b0g0kk": {
-    "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
-    "text": "A1'den C1'e altı seviye; yoğun kursta her biri yaklaşık 8–9 hafta."
+  "t.sechs-niveaustufen-von-a1.1lv86gk": {
+    "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je 8 Wochen.",
+    "text": "A1'den C1'e altı seviye; yoğun kursta her biri 8 hafta."
   },
   "t.sechs-stufen-in-drei.1buauf": {
     "de": "Sechs Stufen in drei Bereichen",
@@ -6967,9 +6971,9 @@
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
     "text": "Yoğun kurslarımız 10 ila 15 katılımcılı küçük, uluslararası gruplarda yapılır. Akşam ve özel kurslar da küçük gruplardan oluşur. Böylece konuşmaya daha fazla zaman kalır; öğretmenler size kişisel geri bildirim verebilir ve yazılı çalışmalarınızı düzeltebilir."
   },
-  "t.unsere-intensivkurse-umfassen-un.gb0gni": {
-    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-    "text": "Yoğun kurslarımız haftada 45 dakikalık {course.intensive-german.lessons} ders saatinden oluşur. Bir seviyenin tamamı 8 ila 9 hafta sürer. Böylece bir yılda A1'den C1'e kadar tüm seviyeleri tamamlar, Almanya'da üniversite eğitimi ya da nitelikli bir iş için sağlam bir temel atarsınız."
+  "t.unsere-intensivkurse-umfassen-un.1mvpco1": {
+    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+    "text": "Yoğun kurslarımız haftada 45 dakikalık {course.intensive-german.lessons} ders saatinden oluşur. Bir seviyenin tamamı 8 hafta sürer. Böylece bir yılda A1'den C1'e kadar tüm seviyeleri tamamlar, Almanya'da üniversite eğitimi ya da nitelikli bir iş için sağlam bir temel atarsınız."
   },
   "t.unsere-kooperationspartner.4fwxyo": {
     "de": "Unsere Kooperationspartner",
@@ -8279,6 +8283,10 @@
     "de": "Woche",
     "text": "hafta"
   },
+  "t.wochen.15mnhxd": {
+    "de": "{weeks} Wochen",
+    "text": "{weeks} hafta"
+  },
   "t.wochen.1h4xfqj": {
     "de": "Wochen",
     "text": "hafta"
@@ -8466,6 +8474,10 @@
   "t.zum-ratgeber-leben-in.9uel6k": {
     "de": "Zum Ratgeber „Leben in Deutschland“",
     "text": "“Almanya'da yaşam” rehberine gidin"
+  },
+  "t.zur-deutschen-fassung.1esgk92": {
+    "de": "Zur deutschen Fassung",
+    "text": "Almanca sürüme gidin"
   },
   "t.zur-kursanmeldung.pofxnf": {
     "de": "Zur Kursanmeldung",

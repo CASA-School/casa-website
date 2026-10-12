@@ -2143,6 +2143,10 @@
     "de": "Diese Seite konnte gerade nicht geladen werden. Bitte versuch es noch einmal. Wenn der Fehler bleibt, erreichst du uns über die Kontaktseite.",
     "text": "تعذّر تحميل هذه الصفحة الآن. يُرجى المحاولة مرة أخرى. وإذا استمر الخطأ، يمكنك التواصل معنا عبر صفحة الاتصال."
   },
+  "t.diese-seite-wurde-automatisch.1vxacy0": {
+    "de": "Diese Seite wurde automatisch aus dem Deutschen übersetzt. Im Zweifel gilt die deutsche Fassung.",
+    "text": "تُرجمت هذه الصفحة آليًا من الألمانية. وفي حال الشك، تُعتمد النسخة الألمانية."
+  },
   "t.diesen-weg-waehlen.jq4f4l": {
     "de": "Diesen Weg wählen",
     "text": "اختر هذا المسار"
@@ -2874,10 +2878,6 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "الحمار والكلب والقطة والديك، وطريقك الخاص إلى بريمن"
-  },
-  "t.etwa-wochen.zc1ikx": {
-    "de": "etwa {weeks} Wochen",
-    "text": "نحو {weeks} أسابيع"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3759,17 +3759,17 @@
     "de": "Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.",
     "text": "في اللقاء الأول نعرف ما يحتاج الفريق إلى تعلّمه، وما لديه من معرفة لغوية."
   },
-  "t.im-intensivkurs-etwa-8.1d0af46": {
-    "de": "Im Intensivkurs etwa 8–9 Wochen",
-    "text": "في الدورة المكثفة نحو 8–9 أسابيع"
+  "t.im-intensivkurs-8-wochen.12qzs64": {
+    "de": "Im Intensivkurs 8 Wochen",
+    "text": "في الدورة المكثفة 8 أسابيع"
   },
-  "t.im-intensivkurs-hast-du.zt3kvv": {
-    "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
-    "text": "في الدورة المكثفة لديك {course.intensive-german.lessons} حصة دراسية في الأسبوع، مدة كل منها 45 دقيقة. ويستغرق المستوى الكامل فيها عادةً 8–9 أسابيع، والمستوى B1+ المدة نفسها. أما في الدورة المسائية فيستغرق نصف المستوى نحو فصل دراسي واحد."
+  "t.im-intensivkurs-hast-du.1n5lebh": {
+    "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
+    "text": "في الدورة المكثفة لديك {course.intensive-german.lessons} حصة دراسية في الأسبوع، مدة كل منها 45 دقيقة. ويستغرق المستوى الكامل فيها 8 أسابيع، والمستوى B1+ المدة نفسها. أما في الدورة المسائية فيستغرق نصف المستوى نحو فصل دراسي واحد."
   },
-  "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
-    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-    "text": "في الدورة المكثفة، بواقع {course.intensive-german.lessons} حصة دراسية في الأسبوع، يستغرق المستوى الكامل نحو 8 إلى 9 أسابيع. وفي الدورة المسائية تُنجز نصف مستوى في نحو 3,5 أشهر، أي قرابة 1,5 مستوى في السنة."
+  "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
+    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+    "text": "في الدورة المكثفة، بواقع {course.intensive-german.lessons} حصة دراسية في الأسبوع، يستغرق المستوى الكامل 8 أسابيع. وفي الدورة المسائية تُنجز نصف مستوى في نحو 3,5 أشهر، أي قرابة 1,5 مستوى في السنة."
   },
   "t.im-intensivkurs.136g3x5": {
     "de": "Im Intensivkurs",
@@ -4839,6 +4839,10 @@
     "de": "Manches lässt sich am besten im Gespräch klären. Erzähl uns, was dich beschäftigt. Wir nehmen uns gern Zeit für dich.",
     "text": "بعض الأمور يسهل توضيحها في حديث مباشر. أخبرنا بما يشغلك، ويسعدنا أن نخصّص لك الوقت."
   },
+  "t.maschinelle-uebersetzung.12lzozs": {
+    "de": "Maschinelle Übersetzung",
+    "text": "ترجمة آلية"
+  },
   "t.matratze.1l7m6s5": {
     "de": "Matratze",
     "text": "مرتبة"
@@ -5051,9 +5055,9 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "بامتحان telc Deutsch C1 Hochschule تُثبت أن مستواك في الألمانية يكفي للدراسة الجامعية. وتشترط جامعات كثيرة في البلدان الناطقة بالألمانية هذه الشهادة للقبول."
   },
-  "t.mit-unterrichtseinheiten-pro-woc.5evtnr": {
-    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.",
-    "text": "مع {course.intensive-german.lessons} حصة دراسية في الأسبوع، تُنهي مستوى كاملًا في نحو 8 إلى 9 أسابيع."
+  "t.mit-unterrichtseinheiten-pro-woc.1s1nce4": {
+    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.",
+    "text": "مع {course.intensive-german.lessons} حصة دراسية في الأسبوع، تُنهي مستوى كاملًا في 8 أسابيع."
   },
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
@@ -6147,9 +6151,9 @@
     "de": "Sechs Jahrhunderte europäische Kunst, mit im Unterricht vorbereiteten Aufgaben.",
     "text": "ستة قرون من الفن الأوروبي، مع مهام نُعدّها مسبقًا في الصف."
   },
-  "t.sechs-niveaustufen-von-a1.b0g0kk": {
-    "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
-    "text": "ستة مستويات من A1 إلى C1، يستغرق كلٌّ منها في الدورة المكثفة نحو 8–9 أسابيع."
+  "t.sechs-niveaustufen-von-a1.1lv86gk": {
+    "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je 8 Wochen.",
+    "text": "ستة مستويات من A1 إلى C1، يستغرق كلٌّ منها في الدورة المكثفة 8 أسابيع."
   },
   "t.sechs-stufen-in-drei.1buauf": {
     "de": "Sechs Stufen in drei Bereichen",
@@ -6967,9 +6971,9 @@
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
     "text": "تُعقد دوراتنا المكثفة في مجموعات تعلّم صغيرة ودولية من 10 إلى 15 مشاركًا. والدورات المسائية والخاصة أيضًا مجموعات صغيرة. وهكذا يبقى وقت أطول للتحدث، ويستطيع المعلمون أن يقدّموا لك ملاحظات شخصية ويصحّحوا أعمالك الكتابية."
   },
-  "t.unsere-intensivkurse-umfassen-un.gb0gni": {
-    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-    "text": "تشمل دوراتنا المكثفة {course.intensive-german.lessons} حصة دراسية في الأسبوع، مدة كل منها 45 دقيقة. ويستغرق المستوى الكامل من 8 إلى 9 أسابيع. وهكذا تجتاز في عام واحد المستويات من A1 إلى C1، وتضع أساسًا متينًا للدراسة الجامعية أو لعمل يتطلب مؤهلات في ألمانيا."
+  "t.unsere-intensivkurse-umfassen-un.1mvpco1": {
+    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+    "text": "تشمل دوراتنا المكثفة {course.intensive-german.lessons} حصة دراسية في الأسبوع، مدة كل منها 45 دقيقة. ويستغرق المستوى الكامل 8 أسابيع. وهكذا تجتاز في عام واحد المستويات من A1 إلى C1، وتضع أساسًا متينًا للدراسة الجامعية أو لعمل يتطلب مؤهلات في ألمانيا."
   },
   "t.unsere-kooperationspartner.4fwxyo": {
     "de": "Unsere Kooperationspartner",
@@ -8279,6 +8283,10 @@
     "de": "Woche",
     "text": "أسبوع"
   },
+  "t.wochen.15mnhxd": {
+    "de": "{weeks} Wochen",
+    "text": "{weeks} أسابيع"
+  },
   "t.wochen.1h4xfqj": {
     "de": "Wochen",
     "text": "أسابيع"
@@ -8466,6 +8474,10 @@
   "t.zum-ratgeber-leben-in.9uel6k": {
     "de": "Zum Ratgeber „Leben in Deutschland“",
     "text": "إلى دليل «الحياة في ألمانيا»"
+  },
+  "t.zur-deutschen-fassung.1esgk92": {
+    "de": "Zur deutschen Fassung",
+    "text": "إلى النسخة الألمانية"
   },
   "t.zur-kursanmeldung.pofxnf": {
     "de": "Zur Kursanmeldung",
