@@ -235,7 +235,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           </header>
           <div
             id="contact-form"
-            className="mt-6 grid scroll-mt-28 items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.65fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:gap-8"
+            className="mt-6 grid scroll-mt-28 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:gap-8"
           >
             <ContactInquiryForm locale={locale} topics={topics} initialTopicKey={initialTopicKey} copy={copy} />
 

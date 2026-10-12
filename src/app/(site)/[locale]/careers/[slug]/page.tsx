@@ -175,7 +175,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
 
           <Link
             href="/careers"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)] transition-colors"
+            className="tap-target inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)] transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {copy.back}

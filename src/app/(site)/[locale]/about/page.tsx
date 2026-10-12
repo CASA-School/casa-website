@@ -204,11 +204,11 @@ export default async function AboutPage() {
       */}
       <section className="py-14 md:py-16" aria-label={say(locale, 'CASA in Zahlen', 'CASA in figures')}>
         <Container>
-          <dl className="mx-auto grid max-w-[85rem] grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-[color:var(--casa-sand)]">
+          <dl className="mx-auto grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-[color:var(--casa-sand)]">
             {stats.map((stat) => (
               <div key={stat.value} className="flex flex-col-reverse justify-end lg:px-8 lg:first:pl-0 lg:last:pr-0">
                 <dt className="mt-2 max-w-[16rem] text-sm leading-snug text-[var(--casa-muted)] md:text-base">{stat.label}</dt>
-                <dd className="text-4xl font-black leading-none tracking-tight text-[var(--casa-ink)] md:text-5xl">{stat.value}</dd>
+                <dd className="text-3xl font-black leading-none tracking-tight text-[var(--casa-ink)] min-[380px]:text-4xl md:text-5xl lg:text-4xl xl:text-5xl">{stat.value}</dd>
               </div>
             ))}
           </dl>
@@ -218,7 +218,7 @@ export default async function AboutPage() {
       {/* `#mission` is linked from the footer and from /ueber-uns/gemeinnuetzigkeit. */}
       <section id="mission" className="scroll-mt-28 py-16 md:py-24">
         <Container>
-          <div className="mx-auto grid max-w-[85rem] gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
+          <div className="mx-auto grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{leitbild.eyebrow}</p>
               <h2 className="mt-3 text-balance text-3xl font-bold leading-tight text-[var(--casa-ink)] md:text-4xl">{leitbild.title}</h2>
@@ -248,7 +248,7 @@ export default async function AboutPage() {
       */}
       <section id="leitbild" className="scroll-mt-28 bg-[var(--casa-ink-deep)] py-20 text-white md:py-28">
         <Container>
-          <div className="mx-auto max-w-[85rem]">
+          <div className="mx-auto">
             <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">{leitbild.qualityEyebrow}</p>
@@ -280,7 +280,7 @@ export default async function AboutPage() {
 
       <section id="begegnung" className="scroll-mt-28 py-16 md:py-24">
         <Container>
-          <div className="mx-auto grid max-w-[85rem] gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-16">
+          <div className="mx-auto grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-16">
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] shadow-[var(--shadow-modal)]">
               <Image
                 src={pageConfig.photos.mission.src}

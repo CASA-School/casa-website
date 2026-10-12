@@ -825,8 +825,11 @@ h3 {
  * and course-format rows around them. Nothing in the page ever narrowed, so a
  * panel was indistinguishable in width from a grid.
  *
- * The ladder is now 85rem for grids and photo rows that want the whole frame,
- * 76rem for a panel, 46rem for a heading block inside either.
+ * The ladder: grids and photo rows take the whole frame, 76rem for a panel,
+ * 46rem for a heading block inside either. (Grids were capped at 85rem, the
+ * frame's width when it was 1440px; once the frame grew to 1680 they sat 120px
+ * in from the header and the hero at 1920, two left edges on one page. Removed
+ * 2026-10-12.)
  */
 .casa-editorial-measure {
   margin-inline: auto;
@@ -1152,15 +1155,84 @@ h3 {
   body {
     @apply bg-background text-foreground;
     line-height: 1.6;
+    /* A word wider than its box breaks rather than pushing the page sideways. */
+    overflow-wrap: break-word;
+  }
+
+  /*
+   * German compounds („Bundesfreiwilligendienst", „Hochschulzugangsberechtigung")
+   * are wider than a 320px phone's heading line. On phone widths headings may
+   * hyphenate, by the page's own language (html lang), in every engine.
+   */
+  @media (max-width: 359px) {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    dt,
+    dd {
+      -webkit-hyphens: auto;
+      hyphens: auto;
+      /* Long compounds only, where the engine supports it: „helfen" stays whole. */
+      hyphenate-limit-chars: 10 4 4;
+    }
   }
 
   :target {
     scroll-margin-top: 6rem;
   }
+
+  /*
+   * Headings balance their lines, so a heading does not end on one stranded
+   * word („…konkret / ab"); running text avoids a lone last word where the
+   * engine can. Ignored, harmlessly, by an engine without them. In the base
+   * layer on purpose: `text-wrap` also resets the wrap mode, and a heading's own
+   * `whitespace-nowrap` must still win.
+   */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  /*
+   * Playfair's default figures are old-style, so "B2" and "C1" in a heading read
+   * as B₂ and C₁. Lining figures in the display face; a `tabular-nums` utility
+   * still wins, being outside the base layer.
+   */
+  h1,
+  h2,
+  h3,
+  h4.font-display {
+    font-variant-numeric: lining-nums;
+  }
 }
 
 [data-hero-archetype] h1 {
   text-wrap: balance;
+}
+
+/*
+ * Form fields at 16px on touch screens. iOS Safari zooms the whole page in when
+ * a field smaller than 16px takes focus, and leaves it zoomed: the calculator's
+ * selects, the FAQ search and the application form all did (text-sm, 14px).
+ * Unlayered, so it wins over the field's own text-* utility; phones and tablets
+ * only, so the desktop layout keeps its sizes.
+ */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 /*
@@ -1324,10 +1396,11 @@ h3 {
    the scale; the shadow is gone because the halo is now the elevation. */
 /* Keep the disclosure sharp and translated, including in client-rendered cards.
    Decorative halo copies have an empty alt and never receive a second label. */
+/* Top-left: a photo's caption overlays its bottom edge, where the badge sat on it („Ein eig[Beispielbild]es Zimmer"). */
 .casa-example-label {
   position: absolute;
   inset-inline-start: 0.75rem;
-  bottom: 0.75rem;
+  top: 0.75rem;
   z-index: 2;
   padding: 0.25rem 0.5rem;
   border-radius: var(--radius-sm);
@@ -1680,6 +1753,62 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   /* Shapes the focus ring on text CTAs only — a control-scale mark, not a
      button. Was a hardcoded 0.5rem sitting on no step of the scale. */
   border-radius: var(--casa-radius-control);
+}
+
+/*
+ * A native <select> and number field that look the same in every engine.
+ * Safari draws its own up-down arrows and starts the text 8px in; Safari and
+ * Firefox show a number field's spin buttons, Chrome only on hover. One chevron
+ * and no spinners instead (the calculator, 2026-10-12). Colour and size stay with
+ * the element's own utilities.
+ */
+@layer components {
+  .casa-native-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235b6474' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+  }
+
+  .casa-number-plain {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .casa-number-plain::-webkit-inner-spin-button,
+  .casa-number-plain::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/*
+ * Touch targets for text links on touch screens. A text link set on its own —
+ * a footer address, a breadcrumb, "Website besuchen", a text CTA — was 17–22px
+ * tall, under the 24px minimum of WCAG 2.2 and well under a fingertip. On phones
+ * and tablets an invisible ::before reaches 8px above and below it, so the hit
+ * area grows and nothing moves. Not padding with a negative margin: that rule
+ * overrode the link's own mt-* and closed up the space above it (2026-10-12).
+ * In the components layer, so a link's own `absolute`/`relative` still wins; a
+ * stretched link that already uses ::after for the whole card is left alone.
+ * `.tap-target` for any such link; `.casa-cta-link` has it built in.
+ */
+@layer components {
+  @media (pointer: coarse) {
+    .tap-target,
+    .casa-cta-link:not([class*='after:absolute']) {
+      position: relative;
+    }
+
+    .tap-target::before,
+    .casa-cta-link:not([class*='after:absolute'])::before {
+      content: '';
+      position: absolute;
+      inset: -8px 0;
+    }
+  }
 }
 
 .casa-cta-link:focus-visible {

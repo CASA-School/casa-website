@@ -159,7 +159,7 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
           {selected.href ? (
             <Link
               href={selected.href}
-              className="group/cta mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--casa-ink)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text)] hover:underline"
+              className="tap-target group/cta mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--casa-ink)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text)] hover:underline"
             >
               {labels?.more ?? 'View course plan'}
               <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover/cta:translate-x-1" aria-hidden />

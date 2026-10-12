@@ -200,7 +200,8 @@ export function CourseLevelGoals({
             {shown.map((practice) => (
               <li key={practice} className="flex gap-2.5 text-base leading-relaxed text-[var(--casa-ink)]">
                 <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
-                <span>{practice}</span>
+                {/* „Anamnesegespräche" is wider than a three-column grid's column at 1280. */}
+                <span className="min-w-0 hyphens-auto">{practice}</span>
               </li>
             ))}
           </ul>

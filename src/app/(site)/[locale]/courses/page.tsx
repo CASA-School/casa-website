@@ -547,7 +547,7 @@ export default async function CoursesPage({
               {formatGroups.map((group) => (
                 <section key={group.key} aria-labelledby={group.title ? `formats-${group.key}` : undefined}>
                   {group.title ? (
-                    <div className="mx-auto mb-10 flex max-w-[85rem] items-center gap-5 md:mb-14">
+                    <div className="mx-auto mb-10 flex items-center gap-5 md:mb-14">
                       <h3 id={`formats-${group.key}`} className="shrink-0 text-base font-semibold text-[var(--casa-ink)] md:text-lg">
                         {group.title}
                       </h3>

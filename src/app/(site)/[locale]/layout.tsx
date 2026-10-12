@@ -21,6 +21,7 @@ import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { EditBridge } from '@/components/cms/edit-bridge';
 import { SiteCopyProvider } from '@/components/cms/site-copy-provider';
+import { OldBrowserNotice } from '@/components/layout/old-browser-notice';
 import { SiteShell } from '@/components/layout/site-shell';
 import { prepareCopy, valuesForLocale } from '@/lib/cms/content.server';
 import { cmsDirection } from '@/lib/cms/locales';
@@ -124,6 +125,7 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} ${playfairDisplay.variable} font-sans`}
       >
+        <OldBrowserNotice locale={locale} />
         <JsonLdScript id="site-schema" data={siteGraph(locale)} />
         <NextIntlClientProvider messages={messages}>
           <SiteCopyProvider locale={locale} editing={editing} values={valuesForLocale(values, locale)} facts={facts.values} display={display}>

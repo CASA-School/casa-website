@@ -293,7 +293,7 @@ function ModuleCard({
       style={{ borderLeft: `4px solid ${skill.surface}` }}
     >
       {/* Skill is signalled by colour AND this label — never colour alone. */}
-      <p className="text-xs font-semibold uppercase tracking-eyebrow" style={{ color: skill.text }}>
+      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: skill.text }}>
         {pick(locale, courseModule.category) ?? courseModule.category.en}
       </p>
       <h4 className="mt-1.5 text-sm font-bold leading-snug text-[var(--casa-ink)]">
@@ -329,7 +329,7 @@ function ModuleCard({
             <button
               type="button"
               aria-label={`${readMoreLabel}: ${pick(locale, courseModule.title) ?? courseModule.title.en}`}
-              className="inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
+              className="tap-target inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
             >
               {readMoreLabel}
               <span aria-hidden>&rarr;</span>

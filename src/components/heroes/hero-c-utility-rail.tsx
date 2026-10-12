@@ -67,8 +67,13 @@ export function HeroCUtilityRail({
 
         With `minmax(0, …)` the ratio is the ratio, whatever the card holds.
       */}
+      {/*
+        Below `lg` the first column dissolves (`contents`) so the photograph can go
+        after the info card: stacked, the card's one button sat under a full-width
+        photo, 1,000px or more down a phone (2026-10-12).
+      */}
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)]">
-        <div>
+        <div className="contents lg:block">
           <HeroLede eyebrow={eyebrow} title={title} description={description} ctas={[]} />
           {/*
             No `max-w-2xl`. The cap was 42rem and this column runs to 827px from
@@ -107,17 +112,17 @@ export function HeroCUtilityRail({
               */}
               <HeroPhotoCard
                 photo={photo}
-                className="mt-8 aspect-[4/3] h-auto md:hidden md:h-auto lg:block lg:aspect-auto lg:h-80 xl:hidden"
+                className="order-last aspect-[4/3] h-auto md:hidden md:h-auto lg:order-none lg:mt-8 lg:block lg:aspect-auto lg:h-80 xl:hidden"
                 priority
               />
               <HeroPhotoCard
                 photo={photoWide}
-                className="mt-8 hidden aspect-[12/5] h-auto md:block md:h-auto lg:hidden xl:block"
+                className="order-last hidden aspect-[12/5] h-auto md:block md:h-auto lg:order-none lg:mt-8 lg:hidden xl:block"
                 priority
               />
             </>
           ) : (
-            <HeroPhotoCard photo={photo} className="mt-8 lg:h-80" priority />
+            <HeroPhotoCard photo={photo} className="order-last lg:order-none lg:mt-8 lg:h-80" priority />
           )}
         </div>
 

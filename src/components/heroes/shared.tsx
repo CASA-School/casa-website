@@ -77,10 +77,15 @@ export function HeroSurface({ children, className, themeClassName, breadcrumbs, 
    * screen; beside the lede it gets what is left after the hero's padding and
    * breadcrumbs (11rem). HeroBleedPhoto and the coded drawings read that cap.
    * C and E stay compact: a legal page has no business filling the screen.
+   * Up to a point (2026-10-12): on a monitor taller than about 1070px the hero
+   * stops at 62rem, or its centred content floated in bands of empty ground
+   * nearly 500px deep at 2560 × 1440. Laptops and 1080p screens are unchanged.
+   * A tablet in portrait has the height for a larger share (36svh from `md`): at
+   * 28svh the team photo on /about became a 2.5:1 strip that cut the back row's heads.
    */
   const heightClass =
     archetype === 'A' || archetype === 'D'
-      ? 'flex min-h-[calc(100svh-var(--casa-header-h))] flex-col justify-center [--hero-media-max-h:28svh] lg:[--hero-media-max-h:calc(100svh-var(--casa-header-h)-11rem)]'
+      ? 'flex min-h-[min(calc(100svh-var(--casa-header-h)),62rem)] flex-col justify-center [--hero-media-max-h:28svh] md:[--hero-media-max-h:36svh] lg:[--hero-media-max-h:min(calc(100svh-var(--casa-header-h)-11rem),51rem)]'
       : archetype === 'C' || archetype === 'E'
         ? 'min-h-[40vh] md:min-h-[46vh]'
         : 'min-h-[46vh] md:min-h-[52vh]';
@@ -188,9 +193,11 @@ export function HeroLede({
         {eyebrow}
       </p>
 
-      {/* `text-wrap: balance` comes from the [data-hero-archetype] h1 rule in globals.css. */}
+      {/* `text-wrap: balance` comes from the [data-hero-archetype] h1 rule in globals.css. From lg the
+          size follows the width (48–60px): a fixed 60px put „Firmenunterricht" 49px past its column on a
+          1024px portrait tablet. */}
       {/* One step smaller on a short desktop screen, so the lede fits the viewport rule (HeroSurface). */}
-      <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--casa-ink)] sm:text-5xl lg:text-6xl [@media(min-width:64rem)_and_(max-height:53.75rem)]:text-5xl!">
+      <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--casa-ink)] sm:text-5xl lg:text-[clamp(3rem,4.2vw_+_0.5rem,3.75rem)] [@media(min-width:64rem)_and_(max-height:53.75rem)]:text-5xl!">
         {title}
       </h1>
 
@@ -285,6 +292,9 @@ export function HeroBleedPhoto({
           (photo-numbers.ts) places it.
         */
         // Capped by the hero's viewport rule (HeroSurface): object-cover crops a little rather than overflow.
+        // A phone on its side (under 500px tall, below lg) has room for the heading and the button, not a
+        // 110px strip of photo under them: the photo steps aside there.
+        '[@media(max-height:31.25rem)_and_(max-width:63.99rem)]:hidden',
         photo.aspectRatio
           ? 'w-full max-h-[var(--hero-media-max-h)]'
           : 'h-[19rem] max-h-[var(--hero-media-max-h)] sm:h-auto sm:aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-[min(33rem,var(--hero-media-max-h))]',

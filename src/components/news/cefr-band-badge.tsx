@@ -30,13 +30,13 @@ export function CefrBandBadge({ bands, className }: { bands: CefrBand[]; classNa
 
   return (
     <p className={cn('flex flex-wrap items-center gap-1.5', className)}>
-      <span className="text-[11px] font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+      <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
         Niveau
       </span>
       {bands.map((band) => (
         <span
           key={band}
-          className="inline-flex h-5 min-w-5 items-center justify-center rounded-lg px-1.5 text-[11px] font-bold leading-none"
+          className="inline-flex h-5 min-w-5 items-center justify-center rounded-lg px-1.5 text-xs font-bold leading-none"
           style={{ backgroundColor: BAND_TOKENS[band].bg, color: BAND_TOKENS[band].ink }}
         >
           {band}

@@ -1595,6 +1595,10 @@
     "de": "Dein Beruf (optional)",
     "text": "Ваша професія (необов’язково)"
   },
+  "t.dein-browser-ist-zu.9y8zt7": {
+    "de": "Dein Browser ist zu alt für diese Website, deshalb wird manches falsch angezeigt. Bitte aktualisiere ihn oder nutze Chrome, Edge, Firefox oder Safari.",
+    "text": "Ваш браузер занадто старий для цього сайту, тому деякі елементи відображаються неправильно. Будь ласка, оновіть його або скористайтеся Chrome, Edge, Firefox чи Safari."
+  },
   "t.dein-gast-kann-ein.d6vqs": {
     "de": "Dein Gast kann ein Bad nutzen und in der Küche Mahlzeiten zubereiten.",
     "text": "Ваш гість може користуватися ванною кімнатою та готувати їжу на кухні."

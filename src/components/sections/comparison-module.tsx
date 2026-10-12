@@ -83,9 +83,11 @@ export function ComparisonModule({
       </div>
 
       {/* On phones each criterion spans both columns, leaving room for the
-          two answers. Repeat the option names for assistive technology. */}
+          two answers. Repeat the option names for assistive technology. Below
+          480px the two answers stack, each under its option's name: side by
+          side at ~140px each almost every cell broke mid-word (2026-10-12). */}
       <div className="mt-8 md:hidden">
-        <div aria-hidden className={cn('grid grid-cols-2 gap-5 border-b pb-3 text-sm font-semibold', rule, strong)}>
+        <div aria-hidden className={cn('hidden grid-cols-2 gap-5 border-b pb-3 text-sm font-semibold min-[30rem]:grid', rule, strong)}>
           <span>{leftTitle}</span>
           <span>{rightTitle}</span>
         </div>
@@ -93,9 +95,9 @@ export function ComparisonModule({
           {rows.map((row) => (
             <div key={row.label} className={cn('border-b py-4', rule)}>
               <dt className={cn('text-sm font-semibold', strong)}>{row.label}</dt>
-              <dd className={cn('mt-2 grid grid-cols-2 gap-5 text-sm leading-relaxed', muted)}>
-                <span><span className="sr-only">{leftTitle}: </span>{row.left}</span>
-                <span><span className="sr-only">{rightTitle}: </span>{row.right}</span>
+              <dd className={cn('mt-2 space-y-2 text-sm leading-relaxed min-[30rem]:grid min-[30rem]:grid-cols-2 min-[30rem]:gap-5 min-[30rem]:space-y-0', muted)}>
+                <span className="block"><span className={cn('font-semibold min-[30rem]:sr-only', strong)}>{leftTitle}: </span>{row.left}</span>
+                <span className="block"><span className={cn('font-semibold min-[30rem]:sr-only', strong)}>{rightTitle}: </span>{row.right}</span>
               </dd>
             </div>
           ))}

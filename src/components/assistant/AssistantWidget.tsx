@@ -447,7 +447,7 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
       <div
         id="casa-assistant-panel"
         style={panelStyle}
-        className="pointer-events-auto absolute inset-x-2 bottom-2 flex min-h-[520px] max-h-[calc(100svh-0.75rem)] h-[calc(100svh-0.75rem)] flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[min(86vh,680px)] sm:max-h-[86vh] sm:min-h-[560px] sm:w-[min(96vw,460px)]"
+        className="pointer-events-auto absolute inset-x-2 bottom-2 flex min-h-[min(520px,calc(100svh-0.75rem))] max-h-[calc(100svh-0.75rem)] h-[calc(100svh-0.75rem)] flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[min(86svh,680px)] sm:max-h-[86svh] sm:min-h-[min(560px,86svh)] sm:w-[min(96vw,460px)]"
       >
       {/*
         THREE stacked layers became one, and it is the same one every other panel

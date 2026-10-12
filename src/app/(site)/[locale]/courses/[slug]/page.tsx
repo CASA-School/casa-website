@@ -543,113 +543,16 @@ export default async function CourseDetailPage({
     instances: bookableInstances,
   });
 
-  return (
-    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(courseSchema) }} />
-
-      {/*
-        CASA Gruppen takes the HOMEPAGE hero, not the course-detail one.
-
-        The shared course hero puts a bordered "Course info" card on the right —
-        lessons/week, level range, lead time. Those are a learner's facts, and
-        this reader is an organiser buying a trip for other people, so the panel
-        both said the wrong things and made the one genuinely distinct product on
-        the site look like another catalogue row.
-
-        THE PICTURE (Ina's idea, 2026-10-09): the Bremen Town Musicians, drawn in
-        code on the night hero like the income ring, the street, the staircase
-        and the telc seals. The four packages are named after them, and the
-        monument stacks them as the packages stack: Esel at the bottom, then
-        Hund, Katze, Hahn. Each animal is labelled with its package and opens
-        it. Same composition as HeroAPhotoLed (HeroSurface + HeroLede) — one
-        eyebrow, one headline, one sentence, one button — with the drawing where
-        the photograph of a CASA group at the monument was.
-      */}
-      {isGroupQuote ? (
-        <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
-          <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
-            <HeroLede
-              eyebrow="CASA Gruppen"
-              title={say(locale, 'Mit der ganzen Klasse nach Bremen', 'Bring the whole class to Bremen')}
-              description={
-                say(locale, 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchst du bei uns im Komplettpaket. Du bringst die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.', 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.')
-              }
-              ctas={[
-                {
-                  label: say(locale, 'Gruppenangebot anfragen', 'Request a group quote'),
-                  href: '/contact?topic=group-booking',
-                  kind: 'primary',
-                },
-              ]}
-              className="lg:py-6"
-            />
-            <BremenMusiciansHero
-              label={
-                say(locale, 'Die Bremer Stadtmusikanten, nach denen unsere vier Gruppenpakete heißen: der Esel unten, darauf Hund, Katze und Hahn.', 'The Bremen Town Musicians, after whom our four group packages are named: the donkey at the bottom, then the dog, the cat and the rooster.')
-              }
-              packages={GRUPPEN_PACKAGES_BY_STACK.map((item) => ({
-                slug: item.slug,
-                animal: pick(locale, item.animal),
-                descriptor: pick(locale, item.descriptor),
-                voice: pick(locale, MUSICIAN_VOICES[item.slug]),
-              }))}
-            />
-          </div>
-        </HeroSurface>
-      ) : (
-      <HeroCUtilityRail
-        eyebrow={t('coursePage.eyebrow')}
-        title={cms.data('Course types', detail.course.name)}
-        description={narrative?.promise || t('coursePage.leadFallback')}
-        breadcrumbs={breadcrumbs}
-        infoTitle={t('coursePage.info.title')}
-        infoItems={infoItems}
-        /*
-          The hero card no longer repeats `contactLine` on quote-only formats —
-          the decision rail below names that person properly, with an avatar and
-          an address, so saying it here too was the same fact twice on one page.
-          A quoted format still needs its own line, because "confirmed during
-          registration" is false where there is nothing to register for.
-        */
-        notes={
-          interestCourse
-            ? t('coursePage.info.noteInterest')
-            : archetype.cta === 'request-quote'
-            ? say(locale, 'Umfang und Preis bestätigen wir im Angebot.', 'We confirm the scope and the price in our quote.')
-            : t('coursePage.info.note')
-        }
-        ctas={[primaryDecisionCta, secondaryDecisionCta]}
-        photo={{
-          ...coursePhoto,
-          caption: coursePhoto.caption,
-        }}
-        photoWide={courseHeroPhoto === coursePhoto ? undefined : { ...courseHeroPhoto, caption: courseHeroPhoto.caption }}
-        themeClassName="hero-theme-courses"
-      />
-      )}
-
-      <section className="py-16 md:py-20">
-        <Container className="space-y-12 md:space-y-14">
-          <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-            {/*
-              `space-y-16 md:space-y-24`, up from 12/14.
-
-              Measured on /courses/intensive-german: Learning goals, Course
-              dates and Costs and conditions sat 56px apart — three h2-led
-              sections, each with its own hairline and its own internal rhythm,
-              separated by less than the gap between two paragraphs of the FAQ.
-              They read as one continuous run rather than as three answers to
-              three different questions. The page's bands elsewhere sit 128–192px
-              apart (py-16 to py-24 each side); 64/96px is the same scale applied
-              inside a column that shares the frame with a sticky rail.
-
-              `min-w-0`: below xl this is the grid's only, implicit, column, and a
-              grid item's min-width defaults to its content. The testimonial
-              carousel's track is three full-width slides long, so the column
-              grew to ~554px and every phone scrolled sideways.
-            */}
-            <div className="min-w-0 space-y-16 md:space-y-24">
-              {archetype.sections.map((sectionKey) => {
+  /*
+   * Testimonials and related courses take the full frame below the two-column
+   * part: next to nothing (the rail ends long before them) they squeezed three
+   * quotes into ~210px columns and left the right third of the page empty
+   * (2026-10-12).
+   */
+  const WIDE_SECTIONS = new Set<string>(['testimonials', 'related-courses']);
+  const mainSections = archetype.sections.filter((key) => !WIDE_SECTIONS.has(key));
+  const wideSections = archetype.sections.filter((key) => WIDE_SECTIONS.has(key));
+  const renderSection = (sectionKey: (typeof archetype.sections)[number]) => {
                 switch (sectionKey) {
                 case 'module-catalogue':
                   return <SpecialCourseCatalogue key={sectionKey} locale={locale} />;
@@ -853,7 +756,115 @@ export default async function CourseDetailPage({
                 default:
                   return null;
                 }
-              })}
+              };
+
+  return (
+    <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(courseSchema) }} />
+
+      {/*
+        CASA Gruppen takes the HOMEPAGE hero, not the course-detail one.
+
+        The shared course hero puts a bordered "Course info" card on the right —
+        lessons/week, level range, lead time. Those are a learner's facts, and
+        this reader is an organiser buying a trip for other people, so the panel
+        both said the wrong things and made the one genuinely distinct product on
+        the site look like another catalogue row.
+
+        THE PICTURE (Ina's idea, 2026-10-09): the Bremen Town Musicians, drawn in
+        code on the night hero like the income ring, the street, the staircase
+        and the telc seals. The four packages are named after them, and the
+        monument stacks them as the packages stack: Esel at the bottom, then
+        Hund, Katze, Hahn. Each animal is labelled with its package and opens
+        it. Same composition as HeroAPhotoLed (HeroSurface + HeroLede) — one
+        eyebrow, one headline, one sentence, one button — with the drawing where
+        the photograph of a CASA group at the monument was.
+      */}
+      {isGroupQuote ? (
+        <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
+          <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
+            <HeroLede
+              eyebrow="CASA Gruppen"
+              title={say(locale, 'Mit der ganzen Klasse nach Bremen', 'Bring the whole class to Bremen')}
+              description={
+                say(locale, 'Unterricht, Gastfamilie, Mittagessen in der Kantine und Nachmittagsprogramm buchst du bei uns im Komplettpaket. Du bringst die Gruppe mit, und ab der Ankunft kümmern wir uns um alles.', 'You book the lessons, the host family, lunch in the canteen and the afternoon programme with us in one go. You bring the group, and from the moment you arrive we take care of everything.')
+              }
+              ctas={[
+                {
+                  label: say(locale, 'Gruppenangebot anfragen', 'Request a group quote'),
+                  href: '/contact?topic=group-booking',
+                  kind: 'primary',
+                },
+              ]}
+              className="lg:py-6"
+            />
+            <BremenMusiciansHero
+              label={
+                say(locale, 'Die Bremer Stadtmusikanten, nach denen unsere vier Gruppenpakete heißen: der Esel unten, darauf Hund, Katze und Hahn.', 'The Bremen Town Musicians, after whom our four group packages are named: the donkey at the bottom, then the dog, the cat and the rooster.')
+              }
+              packages={GRUPPEN_PACKAGES_BY_STACK.map((item) => ({
+                slug: item.slug,
+                animal: pick(locale, item.animal),
+                descriptor: pick(locale, item.descriptor),
+                voice: pick(locale, MUSICIAN_VOICES[item.slug]),
+              }))}
+            />
+          </div>
+        </HeroSurface>
+      ) : (
+      <HeroCUtilityRail
+        eyebrow={t('coursePage.eyebrow')}
+        title={cms.data('Course types', detail.course.name)}
+        description={narrative?.promise || t('coursePage.leadFallback')}
+        breadcrumbs={breadcrumbs}
+        infoTitle={t('coursePage.info.title')}
+        infoItems={infoItems}
+        /*
+          The hero card no longer repeats `contactLine` on quote-only formats —
+          the decision rail below names that person properly, with an avatar and
+          an address, so saying it here too was the same fact twice on one page.
+          A quoted format still needs its own line, because "confirmed during
+          registration" is false where there is nothing to register for.
+        */
+        notes={
+          interestCourse
+            ? t('coursePage.info.noteInterest')
+            : archetype.cta === 'request-quote'
+            ? say(locale, 'Umfang und Preis bestätigen wir im Angebot.', 'We confirm the scope and the price in our quote.')
+            : t('coursePage.info.note')
+        }
+        ctas={[primaryDecisionCta, secondaryDecisionCta]}
+        photo={{
+          ...coursePhoto,
+          caption: coursePhoto.caption,
+        }}
+        photoWide={courseHeroPhoto === coursePhoto ? undefined : { ...courseHeroPhoto, caption: courseHeroPhoto.caption }}
+        themeClassName="hero-theme-courses"
+      />
+      )}
+
+      <section className="py-16 md:py-20">
+        <Container className="space-y-12 md:space-y-14">
+          <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+            {/*
+              `space-y-16 md:space-y-24`, up from 12/14.
+
+              Measured on /courses/intensive-german: Learning goals, Course
+              dates and Costs and conditions sat 56px apart — three h2-led
+              sections, each with its own hairline and its own internal rhythm,
+              separated by less than the gap between two paragraphs of the FAQ.
+              They read as one continuous run rather than as three answers to
+              three different questions. The page's bands elsewhere sit 128–192px
+              apart (py-16 to py-24 each side); 64/96px is the same scale applied
+              inside a column that shares the frame with a sticky rail.
+
+              `min-w-0`: below xl this is the grid's only, implicit, column, and a
+              grid item's min-width defaults to its content. The testimonial
+              carousel's track is three full-width slides long, so the column
+              grew to ~554px and every phone scrolled sideways.
+            */}
+            <div className="min-w-0 space-y-16 md:space-y-24">
+              {mainSections.map(renderSection)}
             </div>
 
             <DecisionRail
@@ -887,6 +898,8 @@ export default async function CourseDetailPage({
               contact={courseContactKey ? getCasaContact(courseContactKey, locale) : null}
             />
           </div>
+
+          {wideSections.length > 0 ? <div className="space-y-16 md:space-y-24">{wideSections.map(renderSection)}</div> : null}
         </Container>
       </section>
       {interestCourse ? <InterestDialog course={interestCourse} locale={locale} /> : null}

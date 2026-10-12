@@ -161,7 +161,8 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
             <p className="shrink-0 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
               {t.contents}
             </p>
-            <ol className="flex flex-wrap gap-x-7 gap-y-2">
+            {/* One column on a phone, two on a tablet, one row from xl: flex-wrap left one item alone on a line. */}
+            <ol className="grid gap-x-7 gap-y-2 sm:grid-cols-2 xl:grid-flow-col xl:auto-cols-fr xl:grid-cols-none">
               {contents.map((item, index) => (
                 <li key={item.id} className="flex items-baseline gap-2">
                   <span className="text-xs font-semibold tabular-nums text-[var(--casa-muted)]">
@@ -169,7 +170,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
                   </span>
                   <a
                     href={`#${item.id}`}
-                    className="text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
+                    className="tap-target text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline"
                   >
                     {item.label}
                   </a>
@@ -208,7 +209,7 @@ export function ResourceGuidePage({ data, locale }: { data: ResourceGuideData; l
               <span className="w-9 shrink-0 text-2xl font-bold leading-none tabular-nums text-[var(--casa-accent-text)]">
                 {String(index + 1).padStart(2, '0')}
               </span>
-              <div>
+              <div className="min-w-0">
                 <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{step.title}</h3>
                 <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{step.text}</p>
                 {step.action ? (

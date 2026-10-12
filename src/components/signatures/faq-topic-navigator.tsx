@@ -37,7 +37,8 @@ export function FaqTopicNavigator({ title, description, topics, items, searchPla
   }, [activeTopic, allTopic, items, query]);
 
   return (
-    <section className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7">
+    // The panel measure (76rem), like the sections below it: at 1920 the list ran 1540px wide, its arrows far from the questions.
+    <section className="casa-editorial-measure rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-7">
       <h2 className="mt-2 text-3xl font-bold text-[var(--casa-ink)]">{title}</h2>
       <p className="mt-2 text-sm text-[var(--casa-muted)] md:text-base">{description}</p>
 

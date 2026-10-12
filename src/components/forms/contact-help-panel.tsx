@@ -55,7 +55,7 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
           <Phone className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
           <a
             href={`tel:${phone.replace(/\s+/g, '')}`}
-            className="font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+            className="tap-target font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
           >
             {phone}
           </a>
@@ -65,7 +65,7 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
             <Mail className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
             <a
               href={email.href}
-              className="min-w-0 break-words font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+              className="min-w-0 break-words tap-target font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
             >
               {email.label}
             </a>
@@ -85,7 +85,7 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
               href={footerConfig.contact.mapsHref}
               target="_blank"
               rel="noreferrer"
-              className="mt-1.5 inline-flex items-center gap-1.5 font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+              className="tap-target mt-1.5 inline-flex items-center gap-1.5 tap-target font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
             >
               {say(locale, 'Route planen', 'Get directions')}
               <ArrowRight className="size-3.5" aria-hidden />
@@ -99,9 +99,9 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
             <p className="font-semibold text-white">{say(locale, 'Bürozeiten', 'Office hours')}</p>
             <dl className="mt-1.5 space-y-1 text-white/85">
               {officeHours(locale).map((row) => (
-                <div key={row.days} className="flex flex-wrap justify-between gap-x-4">
+                <div key={row.days} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4">
                   <dt>{row.days}</dt>
-                  <dd className="tabular-nums">{row.time}</dd>
+                  <dd className="whitespace-nowrap text-right tabular-nums">{row.time}</dd>
                 </div>
               ))}
             </dl>

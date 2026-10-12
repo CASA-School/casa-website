@@ -22,7 +22,7 @@ import type { ContentLocale } from '@/lib/content/types';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 const SELECT_CLASS_NAME =
-  'h-11 w-full rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] px-3 text-sm shadow-none outline-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
+  'casa-native-select h-11 w-full rounded-lg border border-[color:var(--casa-sand)] bg-[var(--casa-surface-wash)] pl-3 pr-10 text-sm shadow-none outline-none transition-all duration-200 focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-4 focus-visible:ring-[var(--casa-blue)]/10 focus-visible:ring-offset-0 focus-visible:outline-none';
 
 const initialState: CasaCalculatorInput = {
   currentLevel: 'A1.1',
@@ -250,7 +250,8 @@ function SegmentedControl<T extends string>({
   return (
     <fieldset className="space-y-2" disabled={disabled}>
       <legend className="text-sm font-semibold text-[var(--casa-ink)]">{label}</legend>
-      <div className="grid gap-2 sm:grid-cols-3">
+      {/* As many columns as there are options: two options in three columns read as a missing third. */}
+      <div className="grid gap-2 sm:grid-flow-col sm:auto-cols-fr">
         {options.map((option) => {
           const selected = option.value === value;
 
@@ -513,7 +514,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                 value={booksOverrideInput}
                 onChange={(event) => setBooksOverrideInput(event.target.value)}
                 placeholder={copy.booksPlaceholder}
-                className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                className="casa-number-plain h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
               />
             </div>
           ) : null}
@@ -561,7 +562,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                   min={0}
                   value={formState.accommodationWeeks}
                   onChange={(event) => updateNumericField('accommodationWeeks', event.target.value)}
-                  className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                  className="casa-number-plain h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
                 />
               </div>
               <div className="space-y-2">
@@ -572,7 +573,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
                   min={0}
                   value={formState.holidayWeeks}
                   onChange={(event) => updateNumericField('holidayWeeks', event.target.value)}
-                  className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+                  className="casa-number-plain h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
                 />
               </div>
               <ToggleLine
@@ -592,7 +593,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
               min={0}
               value={formState.specialCourseCount}
               onChange={(event) => updateNumericField('specialCourseCount', event.target.value)}
-              className="h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
+              className="casa-number-plain h-11 bg-[var(--casa-surface-wash)] border-[color:var(--casa-sand)] focus-visible:bg-white focus-visible:border-[var(--casa-blue)] focus-visible:ring-[var(--casa-blue)]/20"
             />
           </div>
         </FieldCard>

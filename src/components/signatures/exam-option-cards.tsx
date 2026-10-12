@@ -39,14 +39,14 @@ export function ExamOptionCards({ eyebrow, title, description, items, linkLabel 
         <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{description}</p>
       </div>
 
-      <ul className="mt-10 grid gap-6 md:grid-cols-2">
+      <ul className="mt-10 grid gap-6 lg:grid-cols-2">
         {items.map((item) => {
           const level = levelKeyFromLabel(item.level);
 
           return (
             <li key={item.anchorId} id={item.anchorId} className="scroll-mt-28">
               {/* One link, stretched over the card, so the card reads as one item. */}
-              <article className="group relative flex h-full flex-col rounded-2xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition-shadow hover:shadow-[var(--shadow-card)] md:p-8">
+              <article className="@container group relative flex h-full flex-col rounded-2xl bg-white p-5 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition-shadow hover:shadow-[var(--shadow-card)] sm:p-6 md:p-8">
                 <div className="flex items-center gap-4">
                   <span
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-base font-bold"
@@ -65,9 +65,11 @@ export function ExamOptionCards({ eyebrow, title, description, items, linkLabel 
 
                 <dl className="mt-6 border-t border-[color:var(--casa-sand)]">
                   {item.facts.map((fact) => (
-                    <div key={fact.label} className="flex items-baseline justify-between gap-6 border-b border-[color:var(--casa-sand)] py-3">
-                      <dt className="text-sm text-[var(--casa-muted)]">{fact.label}</dt>
-                      <dd className="text-right text-sm font-semibold text-[var(--casa-ink)]">
+                    /* Label beside value where the card is wide, above it where it is not:
+                       side by side on a phone, "Nächster Termin" and the deadline both broke. */
+                    <div key={fact.label} className="flex flex-col gap-0.5 border-b border-[color:var(--casa-sand)] py-3 @[24rem]:flex-row @[24rem]:items-baseline @[24rem]:justify-between @[24rem]:gap-6">
+                      <dt className="text-sm text-[var(--casa-muted)] @[24rem]:shrink-0">{fact.label}</dt>
+                      <dd className="min-w-0 text-sm font-semibold text-[var(--casa-ink)] @[24rem]:text-right">
                         {fact.value}
                         {fact.note ? <span className="block text-xs font-normal text-[var(--casa-muted)]">{fact.note}</span> : null}
                       </dd>

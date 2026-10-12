@@ -400,7 +400,7 @@ export default async function BecomeHostFamilyPage() {
           {/* Inside the gutter, not replacing it: Container's padding-inline comes
               from CSS, so px-9 on it would override the 40px gutter rather than
               add to it. */}
-          <div className="px-6 md:px-9">
+          <div className="sm:px-6 md:px-9">
           <CourseFormatRows
             tone="light"
             maxOutcomes={5}

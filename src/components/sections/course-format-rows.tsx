@@ -76,21 +76,23 @@ export function CourseFormatRows({
   const isDark = tone === 'dark';
 
   return (
-    <div className={cn('mx-auto max-w-[85rem] space-y-12 md:space-y-20', className)}>
+    <div className={cn('mx-auto space-y-12 md:space-y-20', className)}>
       {rows.map((row, index) => (
         <div
           key={row.id}
           id={row.id}
-          className="grid scroll-mt-28 items-center gap-8 md:scroll-mt-32 md:grid-cols-2 md:gap-14"
+          className="grid scroll-mt-28 gap-8 md:scroll-mt-32 lg:grid-cols-2 lg:items-center lg:gap-14"
         >
           {/*
-            `md:order-2` only. On phones the DOM order stands for every row —
+            Side by side from `lg` (2026-10-12): at 768 two columns left the copy
+            ~280px and the photo floating in a hole beside it.
+            `lg:order-2` only. On phones the DOM order stands for every row —
             copy first, photograph second — so the stack never alternates. An
             alternating stack on a narrow screen reads as inconsistent rather
             than as rhythm, because the pairing that justifies the flip is not
             visible at that width.
           */}
-          <div className={cn(index % 2 === 1 && 'md:order-2')}>
+          <div className={cn('min-w-0', index % 2 === 1 && 'lg:order-2')}>
             {row.meta ? (
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {row.meta}
@@ -172,15 +174,16 @@ export function CourseFormatRows({
 
           <div
             className={cn(
-              'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl',
-              index % 2 === 1 && 'md:order-1'
+              // Wider when it runs the full width of a tablet, so it does not fill the screen.
+              'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl md:aspect-[16/9] lg:aspect-[4/3]',
+              index % 2 === 1 && 'lg:order-1'
             )}
           >
             <Image
               src={row.media.src}
               alt={row.media.alt}
               fill
-              sizes="(min-width: 1440px) 652px, (min-width: 1024px) calc((100vw - 136px) / 2), (min-width: 768px) calc((100vw - 120px) / 2), calc(100vw - 40px)"
+              sizes="(min-width: 1440px) 652px, (min-width: 1024px) calc((100vw - 136px) / 2), calc(100vw - 40px)"
               className="object-cover"
             />
           </div>

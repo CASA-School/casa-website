@@ -80,7 +80,7 @@ export function KlettLevelTests({ locale, className }: KlettLevelTestsProps) {
                 href={test.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--casa-accent-text)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 rounded-sm"
+                className="tap-target mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--casa-accent-text)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 rounded-sm"
               >
                 {copy.start(test.level)}
                 <ExternalLink className="h-4 w-4" aria-hidden />
