@@ -736,8 +736,8 @@ export function AccommodationStreet({ options, label, className }: Accommodation
         // drawing fades out at both ends instead of stopping at an edge. Where the
         // drawing is narrow but a caption shows (sm, and lg beside the lede), the
         // figure gains a band of sky above it to hold the caption.
-        // Shape per breakpoint as --ar, width capped by the hero's viewport rule (HeroSurface) at that shape, so the drawing never pushes the hero past the screen and its overlays stay aligned.
-        'relative text-white [--ar:3/2] sm:[--ar:4/3] md:[--ar:3/2] lg:[--ar:4/3] xl:[--ar:3/2] mx-auto aspect-[var(--ar)] w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
+        // Shape per breakpoint as --ar. Stacked under the text (below lg) it takes the full width (2026-10-12: capped by height it shrank to 57% of a phone); beside the text its width is capped by the hero's viewport rule (HeroSurface), so it never pushes the hero past the screen.
+        'relative text-white [--ar:3/2] sm:[--ar:4/3] md:[--ar:3/2] lg:[--ar:4/3] xl:[--ar:3/2] mx-auto aspect-[var(--ar)] w-full lg:w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
         className
       )}
       data-active={active ?? undefined}

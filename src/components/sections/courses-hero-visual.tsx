@@ -170,8 +170,8 @@ export function CoursesHeroVisual({ steps, rest, current, label, className }: Co
         styles.panel,
         // No box of its own: the stair stands on the night hero's ground. A band of
         // sky above the drawing holds the caption on phones and narrow columns.
-        // Shape per breakpoint as --ar, width capped by the hero's viewport rule (HeroSurface) at that shape, so the drawing never pushes the hero past the screen and its overlays stay aligned.
-        'relative text-white [--ar:1] sm:[--ar:3/2] lg:[--ar:4/3] mx-auto aspect-[var(--ar)] w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
+        // Shape per breakpoint as --ar. Stacked under the text (below lg) it takes the full width (2026-10-12: capped by height it shrank to 57% of a phone); beside the text its width is capped by the hero's viewport rule (HeroSurface), so it never pushes the hero past the screen.
+        'relative text-white [--ar:1] sm:[--ar:3/2] lg:[--ar:4/3] mx-auto aspect-[var(--ar)] w-full lg:w-[min(100%,calc(var(--hero-media-max-h)*var(--ar)))]',
         className
       )}
       data-active={shown ?? undefined}

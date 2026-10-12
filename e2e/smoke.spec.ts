@@ -31,7 +31,10 @@ test('homepage decision cards guide visitors to in-page sections', async ({ page
   for (const check of inPageChecks) {
     await page.goto('/en');
     const card = decisionSection.locator(`[data-casa-persona="${check.persona}"]`);
-    await card.getByRole('link', { name: /choose this path/i }).click();
+    const link = card.getByRole('link', { name: /choose this path/i });
+    // Mid-screen: at the bottom edge of a phone the "new website" notice sits over it.
+    await link.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+    await link.click();
     await expect(page).toHaveURL(new RegExp(`${check.hash}$`));
 
     const targetTop = await page.locator(check.target).evaluate((element) => Math.round(element.getBoundingClientRect().top));
