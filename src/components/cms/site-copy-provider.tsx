@@ -14,9 +14,19 @@ import type { FactValues } from '@/lib/cms/facts';
  * Without a provider — a test, the workspace — every text is its default.
  */
 
-type SiteCopy = { say: Say; pick: Pick; pickTree: PickTree; withFacts: WithFacts; intl: IntlFor };
+type SiteCopy = {
+  say: Say;
+  pick: Pick;
+  pickTree: PickTree;
+  withFacts: WithFacts;
+  intl: IntlFor;
+  /** The language the page speaks: its own, or in the editor's preview the previewed one. */
+  language: string;
+  /** True in the website editor's preview of a prepared language. */
+  previewing: boolean;
+};
 
-const defaults = resolvers(new Map(), false);
+const defaults: SiteCopy = { ...resolvers(new Map(), false), language: 'de', previewing: false };
 const SiteCopyContext = createContext<SiteCopy>(defaults);
 
 export function SiteCopyProvider({
@@ -38,13 +48,16 @@ export function SiteCopyProvider({
   children: ReactNode;
 }) {
   const copy = useMemo(
-    () =>
-      resolvers(
+    (): SiteCopy => ({
+      ...resolvers(
         new Map(Object.entries(values).map(([key, value]) => [`${key}|${locale}`, value])),
         editing,
         () => facts,
         display
       ),
+      language: display ?? locale,
+      previewing: Boolean(display),
+    }),
     [values, editing, locale, facts, display]
   );
   return <SiteCopyContext.Provider value={copy}>{children}</SiteCopyContext.Provider>;

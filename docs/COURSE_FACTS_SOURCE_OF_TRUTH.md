@@ -49,7 +49,7 @@ is the one place the live site quotes clock hours, and it says 30–40 hours per
 
 | Course | Weekly | Duration | Price | Levels | Source |
 | --- | --- | --- | --- | --- | --- |
-| Intensive German | 20 UE | 8–9 weeks per level | **€520 / 4 weeks**, €940 / 8 weeks | A1–C1 | `/en/language-courses/` |
+| Intensive German | 20 UE | 8 weeks per level (Rahman, 2026-10-12: the standard; one summer course a year runs 9 weeks, which the site does not state) | **€520 / 4 weeks**, €940 / 8 weeks | A1–C1 | `/en/language-courses/` |
 | Evening German | 4 UE (2 × 90 min) | ~3.5 months ≈ half a level | €476 + textbook | A1.1–C1.2 in halves | `/sprachkurse/deutsch-am-abend/` |
 | Special Courses | 2 UE (1 × 90 min) | 12 weeks | €192 | varies by module, B1+ typical | `/en/language-courses/special-courses-german/` |
 | Bildungszeit | 40 clock hours (two intensive courses run in parallel) | blocks of 1–9 weeks | €280 / 1 week, €520 / 2 weeks | from B1 | `/en/language-courses/educational-leave/` |
@@ -160,7 +160,7 @@ NEU 24.25") and is consistent with the placement tests CASA links to. Confirm wi
 which they hand out; if it is the split editions, every ISBN in this table changes.
 
 **B1+ duration — confirmed by Rahman (project owner) 2026-08-13, not published on
-casa-bremen.de.** About 2 months (8–9 weeks), the same order as a full level, despite billing at
+casa-bremen.de.** About 2 months (8 weeks, as the site says for every level since 2026-10-12), the same order as a full level, despite billing at
 the half-level rate — CASA apparently runs it as two internal parts (B1+.1 / B1+.2), which is
 intentionally not modelled as separate tabs here. Tracked in
 `level-progression-timeline.tsx` as `WEEKS_FOR_BRIDGE_STAFF_CONFIRMED`, kept as a distinct

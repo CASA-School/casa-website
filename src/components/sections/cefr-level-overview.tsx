@@ -43,7 +43,7 @@ export function CefrLevelOverview({ locale, className }: { locale: ContentLocale
       {/* Under the bars from lg: each band beneath its own levels. */}
       <div className="mt-3 hidden grid-cols-6 gap-4 lg:grid">
         {BAND_ORDER.map((band) => (
-          <div key={band} className={cn(BAND_SPAN[band], 'border-t-2 border-[color:var(--casa-sand)] pt-2.5')}>
+          <div key={band} className={cn(BAND_SPAN[band], 'border-t-2 border-[color:var(--casa-sand)] pt-2.5 text-center')}>
             <p className="text-sm font-semibold leading-snug text-[var(--casa-ink)]">{pick(locale, CEFR_BANDS[band])}</p>
             <p className="mt-0.5 text-xs text-[var(--casa-muted)]">{CEFR_BANDS[band].levels}</p>
           </div>
@@ -51,7 +51,7 @@ export function CefrLevelOverview({ locale, className }: { locale: ContentLocale
       </div>
 
       {/* Below lg "Sprachverwendung" is wider than C1's column: a short legend instead. */}
-      <dl className="mt-5 space-y-2 lg:hidden">
+      <dl className="mx-auto mt-5 w-fit space-y-2 lg:hidden">
         {BAND_ORDER.map((band) => (
           <div key={band} className="flex gap-3 text-sm">
             <dt className="w-16 shrink-0 font-semibold tabular-nums text-[var(--casa-ink)]">{CEFR_BANDS[band].levels}</dt>

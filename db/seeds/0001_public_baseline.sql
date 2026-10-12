@@ -34,7 +34,7 @@ INSERT INTO course_types (
   is_active
 )
 VALUES
-  -- 20 UE/week, 8-9 weeks per level, 520 EUR / 4 weeks and 940 EUR / 8 weeks.
+  -- 20 UE/week, 8 weeks per level, 520 EUR / 4 weeks and 940 EUR / 8 weeks.
   ('10000000-0000-4000-8000-000000000001', 'intensive-german', 'Intensive German',    'intensive',        'A1', 'C1', 20, 520, 'EUR', 'from',       true,  true),
   -- 2 x 90 min/week = 4 UE. 476 EUR per trimester (Herbst) plus textbook.
   ('10000000-0000-4000-8000-000000000002', 'evening-german',   'German in the Evening','evening',         'A1', 'C1',  4, 476, 'EUR', 'fixed',      false, true),

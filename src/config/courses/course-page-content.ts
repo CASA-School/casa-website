@@ -65,7 +65,7 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
       audience: {
         title: say(locale, 'In einem Jahr von A1 bis C1', 'From A1 to C1 in a year'),
         bullets: [
-          say(locale, 'Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.', 'With {course.intensive-german.lessons} lessons a week, you complete a whole level in about 8 to 9 weeks.'),
+          say(locale, 'Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.', 'With {course.intensive-german.lessons} lessons a week, you complete a whole level in 8 weeks.'),
           // The afternoon course is four days, not five. The facts doc calls this
           // "the single easiest fact on this page to mis-copy".
           say(locale, 'Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.', 'You study in the morning or in the afternoon. The afternoon course runs from Monday to Thursday.'),

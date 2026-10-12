@@ -63,36 +63,36 @@ export default async function LevelsPage() {
         breadcrumbs={breadcrumbs}
       />
 
+      {/*
+        Centred (Rahman, 2026-10-12): the heading and the bars on the page's axis, as
+        the homepage's bands are (BandHeading), rather than a left column with the
+        right half of the screen empty beside it.
+      */}
       <section className="py-16 md:py-24" aria-labelledby="levels-overview">
         <Container>
-          {/* The heading at reading width, the bars under it at full width: beside it,
-              the C band's name had one narrow column to fit in. */}
-          <div>
-            <div className="max-w-[46rem]">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                {say(locale, 'Gemeinsamer Europäischer Referenzrahmen', 'Common European Framework of Reference')}
-              </p>
-              <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
-              <h2 id="levels-overview" className="mt-3 text-balance text-2xl font-bold leading-tight sm:text-3xl">
-                {say(locale, 'Sechs Stufen in drei Bereichen', 'Six levels in three bands')}
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                {say(
-                  locale,
-                  'Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.',
-                  'We keep strictly to the Common European Framework of Reference for Languages (CEFR). It describes what you can understand and say at each level. B1+ is an extra step of our intensive course, between B1 and B2.'
-                )}
-              </p>
-              <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">
-                {say(
-                  locale,
-                  'Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.',
-                  'On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level usually takes 8–9 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.'
-                )}
-              </p>
-            </div>
-            <CefrLevelOverview locale={locale} className="mt-12 max-w-5xl" />
+          <div className="mx-auto max-w-[46rem] text-center">
+            <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
+              {say(locale, 'Gemeinsamer Europäischer Referenzrahmen', 'Common European Framework of Reference')}
+            </p>
+            <h2 id="levels-overview" className="mt-4 text-balance text-3xl font-bold leading-tight md:text-4xl">
+              {say(locale, 'Sechs Stufen in drei Bereichen', 'Six levels in three bands')}
+            </h2>
+            <p className="mx-auto mt-5 max-w-measure text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
+              {say(
+                locale,
+                'Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.',
+                'We keep strictly to the Common European Framework of Reference for Languages (CEFR). It describes what you can understand and say at each level. B1+ is an extra step of our intensive course, between B1 and B2.'
+              )}
+            </p>
+            <p className="mx-auto mt-3 max-w-measure text-pretty text-base leading-relaxed text-[var(--casa-muted)]">
+              {say(
+                locale,
+                'Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.',
+                'On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level takes 8 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.'
+              )}
+            </p>
           </div>
+          <CefrLevelOverview locale={locale} className="mx-auto mt-12 max-w-5xl" />
         </Container>
       </section>
 

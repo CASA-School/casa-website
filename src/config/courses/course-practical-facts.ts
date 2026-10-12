@@ -99,8 +99,8 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     ],
     conditions: [
       {
-        en: 'Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 to 9 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.',
-        de: 'Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.',
+        en: 'Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.',
+        de: 'Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.',
       },
       {
         en: 'Courses run in the morning from Monday to Friday, 09:00–12:30, or in the afternoon from Monday to Thursday, 13:00–17:30. So the afternoon course has four days of lessons a week.',

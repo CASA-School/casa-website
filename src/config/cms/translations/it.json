@@ -2143,6 +2143,10 @@
     "de": "Diese Seite konnte gerade nicht geladen werden. Bitte versuch es noch einmal. Wenn der Fehler bleibt, erreichst du uns über die Kontaktseite.",
     "text": "Non è stato possibile caricare questa pagina. Riprova. Se l’errore persiste, puoi contattarci tramite la pagina dei contatti."
   },
+  "t.diese-seite-wurde-automatisch.1vxacy0": {
+    "de": "Diese Seite wurde automatisch aus dem Deutschen übersetzt. Im Zweifel gilt die deutsche Fassung.",
+    "text": "Questa pagina è stata tradotta automaticamente dal tedesco. In caso di dubbio, fa fede la versione tedesca."
+  },
   "t.diesen-weg-waehlen.jq4f4l": {
     "de": "Diesen Weg wählen",
     "text": "Scegli questo percorso"
@@ -2874,10 +2878,6 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "Asino, cane, gatto, gallo – e la tua strada personale verso Brema"
-  },
-  "t.etwa-wochen.zc1ikx": {
-    "de": "etwa {weeks} Wochen",
-    "text": "circa {weeks} settimane"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3759,17 +3759,17 @@
     "de": "Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.",
     "text": "Nel primo colloquio scopriamo cosa deve imparare il team e quali conoscenze linguistiche ha già."
   },
-  "t.im-intensivkurs-etwa-8.1d0af46": {
-    "de": "Im Intensivkurs etwa 8–9 Wochen",
-    "text": "Nel corso intensivo circa 8–9 settimane"
+  "t.im-intensivkurs-8-wochen.12qzs64": {
+    "de": "Im Intensivkurs 8 Wochen",
+    "text": "Nel corso intensivo 8 settimane"
   },
-  "t.im-intensivkurs-hast-du.zt3kvv": {
-    "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
-    "text": "Nel corso intensivo hai {course.intensive-german.lessons} lezioni da 45 minuti a settimana. Un livello completo dura di solito 8–9 settimane, e lo stesso vale per il B1+. Nel corso serale mezzo livello dura circa un trimestre."
+  "t.im-intensivkurs-hast-du.1n5lebh": {
+    "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
+    "text": "Nel corso intensivo hai {course.intensive-german.lessons} lezioni da 45 minuti a settimana. Un livello completo dura 8 settimane, e lo stesso vale per il B1+. Nel corso serale mezzo livello dura circa un trimestre."
   },
-  "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
-    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-    "text": "Nel corso intensivo, con {course.intensive-german.lessons} lezioni a settimana, un livello completo dura da 8 a 9 settimane circa. Nel corso serale completi mezzo livello in circa 3,5 mesi, cioè circa 1,5 livelli all’anno."
+  "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
+    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+    "text": "Nel corso intensivo, con {course.intensive-german.lessons} lezioni a settimana, un livello completo dura 8 settimane. Nel corso serale completi mezzo livello in circa 3,5 mesi, cioè circa 1,5 livelli all’anno."
   },
   "t.im-intensivkurs.136g3x5": {
     "de": "Im Intensivkurs",
@@ -4839,6 +4839,10 @@
     "de": "Manches lässt sich am besten im Gespräch klären. Erzähl uns, was dich beschäftigt. Wir nehmen uns gern Zeit für dich.",
     "text": "Alcune cose si chiariscono meglio parlandone. Raccontaci cosa hai in mente. Ci prendiamo volentieri del tempo per te."
   },
+  "t.maschinelle-uebersetzung.12lzozs": {
+    "de": "Maschinelle Übersetzung",
+    "text": "Traduzione automatica"
+  },
   "t.matratze.1l7m6s5": {
     "de": "Matratze",
     "text": "Materasso"
@@ -5051,9 +5055,9 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "Con il telc Deutsch C1 Hochschule dimostri che il tuo tedesco è sufficiente per studiare all’università. Molte università di lingua tedesca richiedono questo certificato per l’ammissione."
   },
-  "t.mit-unterrichtseinheiten-pro-woc.5evtnr": {
-    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in etwa 8 bis 9 Wochen.",
-    "text": "Con {course.intensive-german.lessons} lezioni a settimana completi un intero livello in circa 8 o 9 settimane."
+  "t.mit-unterrichtseinheiten-pro-woc.1s1nce4": {
+    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.",
+    "text": "Con {course.intensive-german.lessons} lezioni a settimana completi un intero livello in 8 settimane."
   },
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
@@ -6147,9 +6151,9 @@
     "de": "Sechs Jahrhunderte europäische Kunst, mit im Unterricht vorbereiteten Aufgaben.",
     "text": "Sei secoli di arte europea, con attività preparate a lezione."
   },
-  "t.sechs-niveaustufen-von-a1.b0g0kk": {
-    "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
-    "text": "Sei livelli, dall’A1 al C1, ognuno di circa 8–9 settimane nel corso intensivo."
+  "t.sechs-niveaustufen-von-a1.1lv86gk": {
+    "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je 8 Wochen.",
+    "text": "Sei livelli, dall’A1 al C1, ognuno di 8 settimane nel corso intensivo."
   },
   "t.sechs-stufen-in-drei.1buauf": {
     "de": "Sechs Stufen in drei Bereichen",
@@ -6967,9 +6971,9 @@
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
     "text": "I nostri corsi intensivi si svolgono in piccoli gruppi internazionali da 10 a 15 partecipanti. Anche i corsi serali e i corsi speciali sono in piccoli gruppi. Così resta più tempo per parlare, e gli insegnanti possono darti un feedback personale e correggere i tuoi elaborati scritti."
   },
-  "t.unsere-intensivkurse-umfassen-un.gb0gni": {
-    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 bis 9 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-    "text": "I nostri corsi intensivi prevedono {course.intensive-german.lessons} lezioni da 45 minuti a settimana. Un livello completo dura da 8 a 9 settimane. Così in un anno percorri i livelli dall’A1 al C1 e costruisci una base solida per studiare all’università o per un lavoro qualificato in Germania."
+  "t.unsere-intensivkurse-umfassen-un.1mvpco1": {
+    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+    "text": "I nostri corsi intensivi prevedono {course.intensive-german.lessons} lezioni da 45 minuti a settimana. Un livello completo dura 8 settimane. Così in un anno percorri i livelli dall’A1 al C1 e costruisci una base solida per studiare all’università o per un lavoro qualificato in Germania."
   },
   "t.unsere-kooperationspartner.4fwxyo": {
     "de": "Unsere Kooperationspartner",
@@ -8279,6 +8283,10 @@
     "de": "Woche",
     "text": "settimana"
   },
+  "t.wochen.15mnhxd": {
+    "de": "{weeks} Wochen",
+    "text": "{weeks} settimane"
+  },
   "t.wochen.1h4xfqj": {
     "de": "Wochen",
     "text": "settimane"
@@ -8466,6 +8474,10 @@
   "t.zum-ratgeber-leben-in.9uel6k": {
     "de": "Zum Ratgeber „Leben in Deutschland“",
     "text": "Vai alla guida «Vivere in Germania»"
+  },
+  "t.zur-deutschen-fassung.1esgk92": {
+    "de": "Zur deutschen Fassung",
+    "text": "Vai alla versione tedesca"
   },
   "t.zur-kursanmeldung.pofxnf": {
     "de": "Zur Kursanmeldung",

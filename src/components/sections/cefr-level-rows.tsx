@@ -51,7 +51,7 @@ export function CefrLevelRows({ locale }: { locale: ContentLocale }) {
                 </div>
                 <div>
                   <dt className="text-[var(--casa-muted)]">{say(locale, 'Im Intensivkurs', 'On the intensive course')}</dt>
-                  <dd className="mt-0.5 font-semibold text-[var(--casa-ink)]">{say(locale, 'etwa {weeks} Wochen', 'about {weeks} weeks', { weeks: level.weeks })}</dd>
+                  <dd className="mt-0.5 font-semibold text-[var(--casa-ink)]">{say(locale, '{weeks} Wochen', '{weeks} weeks', { weeks: level.weeks })}</dd>
                 </div>
               </dl>
 

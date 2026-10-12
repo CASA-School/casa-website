@@ -394,7 +394,8 @@ export default async function CoursesPage({
    *   (getCourseLevelGoals, the „Lernziele nach Niveaustufen" section), the short
    *   version a card holds. The full „what you can do" text per level stays on
    *   the placement page's level overview.
-   * - `fact`: a whole level takes about 8–9 weeks in the intensive course
+   * - `fact`: a whole level takes 8 weeks in the intensive course (one summer course a
+   *   year runs 9; the site says 8, Rahman 2026-10-12)
    *   (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, verified), and B1+ just as long,
    *   a whole term taught with Kontext (staff-confirmed 2026-08-13 and
    *   2026-10-07; level-progression-timeline.tsx says the same in public).
@@ -408,7 +409,7 @@ export default async function CoursesPage({
   const staircaseSteps: CoursesStaircaseStep[] = CEFR_LADDER.map((step) => ({
     level: step,
     focus: levelGoals.find((goal) => goal.level === step)?.focus ?? '',
-    fact: say(locale, 'Im Intensivkurs etwa 8–9 Wochen', 'About 8–9 weeks in the intensive course'),
+    fact: say(locale, 'Im Intensivkurs 8 Wochen', '8 weeks in the intensive course'),
     href: step === 'B1+' ? getCoursePath('intensive-german') : `/courses?level=${encodeURIComponent(step)}#formats`,
     cta:
       step === 'B1+'
@@ -454,7 +455,7 @@ export default async function CoursesPage({
             rest={{
               title: say(locale, 'Stufe für Stufe', 'Step by step'),
               text:
-                say(locale, 'Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.', 'Six levels from A1 to C1, each about 8–9 weeks in the intensive course.'),
+                say(locale, 'Sechs Niveaustufen von A1 bis C1, im Intensivkurs je 8 Wochen.', 'Six levels from A1 to C1, each 8 weeks in the intensive course.'),
             }}
             steps={staircaseSteps}
             current={selectedLevel || undefined}
@@ -605,7 +606,7 @@ export default async function CoursesPage({
               {
                 title: say(locale, 'Wie lange ein Niveau dauert', 'How long a level takes'),
                 body:
-                  say(locale, 'Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.', 'In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes about 8–9 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.'),
+                  say(locale, 'Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.', 'In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes 8 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.'),
               },
               {
                 title: say(locale, 'Prüfungsvorbereitung ist ein eigener Kurs', 'Exam preparation is a separate course'),

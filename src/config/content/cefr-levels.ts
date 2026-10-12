@@ -28,7 +28,7 @@ export type CefrLevel = {
   anchor: string;
   band: CefrBand;
   textbook: 'netzwerk' | 'kontext';
-  /** Weeks in the intensive course: 8–9 for every level, B1+ too (staff-confirmed 2026-08-13). */
+  /** Weeks in the intensive course: 8 for every level, B1+ too. One summer course a year runs 9; the site says 8 (Rahman, 2026-10-12). */
   weeks: string;
   /** B1+: a step of the intensive course, not a CEFR level of its own. */
   isBridge?: boolean;
@@ -56,7 +56,7 @@ export const CEFR_LEVELS: readonly CefrLevel[] = [
     anchor: 'a1',
     band: 'basic',
     textbook: 'netzwerk',
-    weeks: '8–9',
+    weeks: '8',
     summary: {
       de: 'Du verstehst und verwendest vertraute Alltagsausdrücke und ganz einfache Sätze, stellst dich vor und stellst und beantwortest einfache Fragen zur Person.',
       en: 'You understand and use familiar everyday expressions and very simple sentences, introduce yourself and ask and answer simple questions about people.',
@@ -76,7 +76,7 @@ export const CEFR_LEVELS: readonly CefrLevel[] = [
     anchor: 'a2',
     band: 'basic',
     textbook: 'netzwerk',
-    weeks: '8–9',
+    weeks: '8',
     summary: {
       de: 'Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.',
       en: 'You make yourself understood in simple everyday situations and describe your background, your education and your surroundings in simple words.',
@@ -96,7 +96,7 @@ export const CEFR_LEVELS: readonly CefrLevel[] = [
     anchor: 'b1',
     band: 'independent',
     textbook: 'netzwerk',
-    weeks: '8–9',
+    weeks: '8',
     summary: {
       de: 'Du verstehst das Wichtigste zu vertrauten Themen, erzählst von Erfahrungen, Träumen und Zielen und begründest kurz deine Ansichten.',
       en: 'You understand the main points on familiar topics, talk about your experiences, dreams and goals and briefly give reasons for your views.',
@@ -116,7 +116,7 @@ export const CEFR_LEVELS: readonly CefrLevel[] = [
     anchor: 'b1-plus',
     band: 'independent',
     textbook: 'kontext',
-    weeks: '8–9',
+    weeks: '8',
     isBridge: true,
     summary: {
       de: 'Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus, übst das freie Sprechen und Schreiben und wirst sicherer. Ab hier lernst du mit Kontext.',
@@ -137,7 +137,7 @@ export const CEFR_LEVELS: readonly CefrLevel[] = [
     anchor: 'b2',
     band: 'independent',
     textbook: 'kontext',
-    weeks: '8–9',
+    weeks: '8',
     summary: {
       de: 'Du verstehst komplexe Texte und Fachdiskussionen in deinem Gebiet und unterhältst dich spontan und fließend, klar und ausführlich zu vielen Themen.',
       en: 'You understand complex texts and specialist discussions in your field and talk spontaneously and fluently, clearly and in detail, on many subjects.',
@@ -157,7 +157,7 @@ export const CEFR_LEVELS: readonly CefrLevel[] = [
     anchor: 'c1',
     band: 'proficient',
     textbook: 'kontext',
-    weeks: '8–9',
+    weeks: '8',
     summary: {
       de: 'Du verstehst anspruchsvolle, längere Texte, auch zwischen den Zeilen, und drückst dich spontan, fließend und flexibel aus, im Beruf wie im Studium.',
       en: 'You understand demanding, longer texts, including what is implied, and express yourself spontaneously, fluently and flexibly at work and at university.',
