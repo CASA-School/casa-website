@@ -24,6 +24,7 @@ export const PAGES = [
   ['courses', '/sprachkurse'],
   ['intensive', '/sprachkurse/deutsch-intensiv'],
   ['groups', '/sprachkurse/deutsch-fuer-gruppen'],
+  ['levels', '/sprachkurse/niveaustufen'],
   ['special', '/sprachkurse/deutsch-spezialkurse'],
   ['exams', '/pruefungszentrum'],
   ['telc-b2', '/pruefungszentrum/telc-deutsch-b2'],

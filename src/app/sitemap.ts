@@ -17,6 +17,7 @@ import { toAbsoluteUrl } from '@/lib/seo';
 const STATIC_ROUTES: Array<{ path: string; priority: number; lastModified?: Date }> = [
   { path: '/', priority: 1 },
   { path: '/courses', priority: 0.9 },
+  { path: '/courses/levels', priority: 0.6 },
   { path: '/exams', priority: 0.8 },
   { path: '/accommodation', priority: 0.8 },
   { path: '/accommodation/become-host', priority: 0.5 },

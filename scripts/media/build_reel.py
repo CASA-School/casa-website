@@ -48,6 +48,9 @@ from retouch import MEDICAL_WRITING, clean_background
 
 REPO = Path(__file__).resolve().parents[2]
 POOL = Path.home() / 'Archive/CASA/website-cleanup-2026-09-16/editorial-2026'
+# The old casa-bremen.de page „Niveaustufen": its header and one picture per level,
+# saved at their largest size from the site on 2026-10-12 (SOURCES.txt has the URLs).
+LEVELS_POOL = Path.home() / 'Archive/CASA/old-site-niveaustufen-2026-10-12'
 OUT = REPO / 'public/media/casa'
 
 # THE WARM EDITORIAL GRADE (2026-10-08). Rahman: the photos should have warm,
@@ -477,6 +480,65 @@ SLIDES = [
         'source': POOL / '061_IMG_0254.JPG',
         'box': (0, 0, 2560, 1680),
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((0.965, 1.0, 1.045)),
+    },
+    # THE NIVEAUSTUFEN SET (2026-10-12): the old site's page, rebuilt. Stock
+    # pictures, not classroom photos: one picture per level, from crawling (A1)
+    # to running up the stairs (C1), and the header's sequin lettering. They come
+    # bright and saturated, and their own light differs a lot (A1 is a white
+    # studio background, B1 a deep blue sky), so each keeps a tone close to its
+    # own and all share the warm white balance; chroma is taken down where the
+    # colour shouts. The whole frame, nothing cropped from the level pictures.
+    # Grass, water, sky and sequins are JPEG at full colour resolution: WebP's
+    # halved colour channels smeared them past what --verify accepts.
+    {
+        # Slot 95, the levels page's hero: the sequin "A" and the painted ground.
+        'out': 'levels-hero.jpg',
+        'source': LEVELS_POOL / 'niveaustufen-header.jpg',
+        'box': (300, 0, 1140, 760),
+        'tone': (24, 68, 92), 'chroma': 0.95, 'wb': warm((1.0, 1.0, 1.0)), 'jpeg_quality': 92, 'jpeg_subsampling': 0,
+    },
+    {
+        # Slot 96, A1: a baby crawling, on a white studio ground.
+        'out': 'level-a1.webp',
+        'source': LEVELS_POOL / 'niveaustufen-a1.jpg',
+        'box': (0, 0, 1317, 876),
+        # A lighter warmth: the full shift turned the white ground yellow.
+        'tone': (34, 100, 100), 'chroma': 0.95, 'wb': (1.0, 1.0, 0.965),
+    },
+    {
+        # Slot 97, A2: a boy in a swim ring.
+        'out': 'level-a2.jpg',
+        'source': LEVELS_POOL / 'niveaustufen-a2.jpg',
+        'box': (0, 0, 1440, 960),
+        'tone': (14, 88, 96), 'chroma': 0.9, 'wb': (1.03, 1.0, 0.94), 'jpeg_quality': 92, 'jpeg_subsampling': 0,
+    },
+    {
+        # Slot 98, B1: a girl leaping over the grass, deep blue sky.
+        'out': 'level-b1.jpg',
+        'source': LEVELS_POOL / 'niveaustufen-b1.jpg',
+        'box': (0, 0, 1440, 959),
+        'tone': (12, 47, 62), 'chroma': 0.82, 'wb': warm((1.0, 1.0, 1.0)), 'jpeg_quality': 92, 'jpeg_subsampling': 0,
+    },
+    {
+        # Slot 99, B1+: a runner at the start line.
+        'out': 'level-b1plus.webp',
+        'source': LEVELS_POOL / 'niveaustufen-b1plus.jpg',
+        'box': (0, 0, 1440, 960),
+        'tone': (16, 66, 90), 'chroma': 1.0, 'wb': warm((1.0, 1.0, 1.0)),
+    },
+    {
+        # Slot 100, B2: runners crossing the finish line.
+        'out': 'level-b2.webp',
+        'source': LEVELS_POOL / 'niveaustufen-b2.jpg',
+        'box': (0, 0, 1022, 681),
+        'tone': (10, 36, 80), 'chroma': 0.85, 'wb': warm((1.0, 1.0, 1.0)),
+    },
+    {
+        # Slot 101, C1: a runner taking the stairs by the sea.
+        'out': 'level-c1.jpg',
+        'source': LEVELS_POOL / 'niveaustufen-c1.jpg',
+        'box': (0, 0, 1280, 851),
+        'tone': (18, 63, 90), 'chroma': 0.9, 'wb': warm((1.0, 1.0, 1.0)), 'jpeg_quality': 92, 'jpeg_subsampling': 0,
     },
 ]
 

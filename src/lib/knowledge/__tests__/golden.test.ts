@@ -8,7 +8,7 @@ import { searchPublicContent } from '@/lib/search/public-search';
 import golden from './golden-questions.json';
 
 /**
- * 120 questions visitors ask, in German and English, typed carefully and
+ * 124 questions visitors ask, in German and English, typed carefully and
  * carelessly, each with the pages that answer it and the facts a right answer
  * contains (written 2026-10-12 against the site's content). This measures the
  * structured half of the index — FAQ, catalogue, CLARA's passages — the part

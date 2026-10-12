@@ -66,6 +66,8 @@ export const routes: readonly RouteDefinition[] = [
   { internal: '/partners', de: '/ueber-uns/kooperationspartner' },
 
   { internal: '/courses', de: '/sprachkurse' },
+  // The old site's address, kept (2026-10-12): what each level means.
+  { internal: '/courses/levels', de: '/sprachkurse/niveaustufen' },
   { internal: '/courses/[slug]', de: '/sprachkurse/[slug]', params: { slug: COURSE_SLUGS_DE } },
   { internal: '/exams', de: '/pruefungszentrum' },
   { internal: '/exams/[code]', de: '/pruefungszentrum/[code]', params: { code: EXAM_CODES_DE } },

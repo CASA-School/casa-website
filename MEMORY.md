@@ -2505,3 +2505,25 @@ old-browser notice shows instead. Rules: `docs/RESPONSIVE_AND_BROWSERS.md`.
 **Open.** The exams pen photograph is soft in the source; the decision card repeats at the foot
 of detail pages below `xl` (it carries the contact person); "reden – aufeinander" can start a
 line with the dash (a copy change would need the six translations re-run).
+
+## 47. The levels page is back (2026-10-12)
+
+Rahman: the old site's „Niveaustufen" page (casa-bremen.de/sprachkurse/niveaustufen) had no
+counterpart; bring it back with its pictures, in the new design, make it the source of the level
+lines on the course pages with a read-more link, and list it under Ressourcen in the navbar.
+
+- `/sprachkurse/niveaustufen` (`/en/courses/levels`, internal `/courses/levels`): hero with the old
+  header's sequin lettering, the six levels as rising bars in the CEFR colour ramp (each jumps to
+  its section) with the three CEFR bands, each level in full with its picture, textbook and time
+  in the intensive course, and a warm placement panel. Old `niveaustufen.php` addresses and
+  `/en/registration/language-levels` redirect there; `/sprachkurse/niveaustufen` no longer goes to
+  the placement test.
+- `src/config/content/cefr-levels.ts` is the one source: band, textbook, weeks, a one-line
+  `summary` and the full `description` per level. The intensive, evening and Bildungszeit pages'
+  „Lernziele nach Niveaustufen" rows use the summaries (the course overview's staircase with
+  them) and end in „Mehr zu den Niveaustufen"; groups, medical, special and in-company keep their
+  own course lines. The placement page's level overview shows the summary and „Mehr zur Stufe …".
+- Pictures: slots 95–101, the old site's stock set (crawling → stairs), recipes in
+  `build_reel.py` with each image's own tone and the warm white balance; grass, water and sky
+  are full-colour JPEG so `--verify` holds. Originals in `~/Archive/CASA/old-site-niveaustufen-2026-10-12`.
+- Navbar: Ressourcen › Niveaustufen. Search and CLARA index each level (golden set 124).

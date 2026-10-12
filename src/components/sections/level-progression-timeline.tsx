@@ -2,124 +2,26 @@
 
 import { CasaImage as Image } from '@/components/ui/casa-image';
 import { useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 
 import { levelTokens, type LevelKey } from '@/config/brand/tokens';
+import { CEFR_LEVELS, levelHref } from '@/config/content/cefr-levels';
+import { Link } from '@/i18n/navigation';
 import { klettTextbookByLevelId, seriesAccent } from '@/config/content/klett-textbooks';
 import { cn } from '@/lib/utils';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
-type Level = {
-  id: LevelKey;
-  label: string;
-  /** Weeks in the intensive format. See the two sourcing constants below. */
-  weeks: string;
-  /** B1+ is a single half-level step, not a full CEFR level. */
-  isBridge?: boolean;
-  description: { en: string; de: string };
-};
-
-/**
- * Verified: a full CEFR level takes 8-9 weeks in the intensive format at
- * 20 UE/week (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md:52; src/app/courses/page.tsx:114).
- * The figure is uniform across A1-C1 — nothing in the repo says higher levels
- * take longer, and the pricing engine treats every full level as 8 weeks
- * (src/config/calculator/pricing.ts:44). Per-level lesson totals are not
- * published anywhere, so this states the weekly RATE instead of a total.
- *
- * This is the SITE-VERIFIED figure for full levels (A1-C1). B1+ carries its
- * own constant — see WEEKS_FOR_BRIDGE_STAFF_CONFIRMED below — because it is
- * not a full level.
- */
-const WEEKS_PER_LEVEL = '8-9';
-
-/**
- * B1+ duration — staff-confirmed, tracked separately from WEEKS_PER_LEVEL.
- *
- * casa-bremen.de does not publish a B1+ duration. Rahman (project owner, in
- * direct contact with CASA) confirmed 2026-08-13 that B1+ runs about two months,
- * the same order as a full level, despite billing at the half-level rate (see
- * CASA_LEVEL_GROUPS in pricing.ts). It is one step of the intensive course,
- * between B1.2 and B2.1, taught with Kontext B1+; the registration offers it as
- * "B1+ · 8 Wochen" (src/lib/registration/levels.ts).
- *
- * The card used to add "Angabe der Schule, nicht auf casa-bremen.de
- * veröffentlicht" under the duration. That was a note about where the number
- * came from, and on CASA's own site it read as an internal remark; it lives
- * here and in docs/COURSE_FACTS_SOURCE_OF_TRUTH.md now (2026-10-07).
- */
-const WEEKS_FOR_BRIDGE_STAFF_CONFIRMED = '8-9';
-
 /*
- * The German descriptions are the old casa-bremen.de page „Niveaustufen“
- * (/sprachkurse/niveaustufen, which now redirects here): what a learner can do
- * on each level, after the CEFR's global scale, already in „du“. Brought back
- * 2026-10-07 in the site's plain voice; the English says the same, written
- * afresh in plain British English rather than quoting the CEFR's own wording.
+ * The levels and what each one means come from config/content/cefr-levels.ts,
+ * the source the levels page (/sprachkurse/niveaustufen) shows in full. This
+ * overview holds each level's short version and links to its section there
+ * (2026-10-12); until then it carried the old page's whole text itself.
+ *
+ * Weeks in the intensive format: 8–9 for a full level (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md),
+ * and for B1+ just as long, which casa-bremen.de does not publish and Rahman
+ * confirmed with CASA on 2026-08-13 (the registration offers "B1+ · 8 Wochen").
  */
-const LEVELS: Level[] = [
-  {
-    id: 'a1',
-    label: 'A1',
-    weeks: WEEKS_PER_LEVEL,
-    description: {
-      en: 'You understand familiar, everyday expressions and very simple sentences, and you can use them yourself to say what you need in daily life. You can introduce yourself and others and ask people questions about themselves, for example where they live, who they know or what they have. You can also answer questions like these yourself. You can communicate in a simple way if the person you are talking to speaks slowly and clearly and is willing to help you.',
-      de: 'Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.',
-    },
-  },
-  {
-    id: 'a2',
-    label: 'A2',
-    weeks: WEEKS_PER_LEVEL,
-    description: {
-      en: 'You understand sentences and frequently used expressions on topics that concern you directly, for example you and your family, shopping, work or your local area. You can make yourself understood in simple, everyday situations, as long as the exchange is straightforward and about familiar things. In simple words, you can describe your background and education, your surroundings and the things you need at the moment.',
-      de: 'Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.',
-    },
-  },
-  {
-    id: 'b1',
-    label: 'B1',
-    weeks: WEEKS_PER_LEVEL,
-    description: {
-      en: 'You understand the main points when clear standard German is used and the subject is familiar, such as work, school or free time. You can deal with most situations you are likely to come across when travelling in German-speaking countries. You can talk about familiar topics and your interests in simple, connected sentences. You can tell people about experiences and events, describe your dreams, hopes and goals, and briefly explain your plans and views or give reasons for them.',
-      de: 'Du verstehst die Hauptpunkte, wenn klare Standardsprache verwendet wird und es um vertraute Dinge aus Arbeit, Schule oder Freizeit geht. Die meisten Situationen, die dir auf Reisen in deutschsprachigen Ländern begegnen, kannst du bewältigen. Über vertraute Themen und deine Interessen kannst du dich einfach und zusammenhängend äußern. Du kannst von Erfahrungen und Ereignissen erzählen, Träume, Hoffnungen und Ziele beschreiben und deine Pläne und Ansichten kurz begründen oder erklären.',
-    },
-  },
-  {
-    // Not a CEFR level of its own: B1+ is a single step of the intensive course
-    // (one entry in CASA_LEVEL_SEQUENCE, src/config/calculator/pricing.ts:25),
-    // and it is where the textbook switches from Netzwerk neu to Kontext
-    // (pricing.ts:98). Both languages say who it is for, as the old
-    // casa-bremen.de page did, and that the course moves on to Kontext here.
-    id: 'b1plus',
-    label: 'B1+',
-    weeks: WEEKS_FOR_BRIDGE_STAFF_CONFIRMED,
-    isBridge: true,
-    description: {
-      en: 'You understand the most important information when clear standard German is spoken and the subject is familiar, such as work, school, free time or travel. You can talk in connected sentences about familiar topics and your interests, describe experiences, dreams, hopes and goals, and give explanations and reasons. But you’d still like to work on grammar and sentence structure, practise useful phrases, build your vocabulary and feel more confident. If so, B1+ is the right level for you. Here you build on the vocabulary, grammar and phrases from B1 and practise speaking and writing freely. This gives you a solid foundation for B2. From B1+ onwards, the course uses the Kontext textbook.',
-      de: 'Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.',
-    },
-  },
-  {
-    id: 'b2',
-    label: 'B2',
-    weeks: WEEKS_PER_LEVEL,
-    description: {
-      en: 'You understand the main content of complex texts on concrete and abstract subjects, and in your own field you can follow specialist discussions too. You can communicate so spontaneously and fluently that an ordinary conversation with native speakers takes no great effort on either side. You can express yourself clearly and in detail on many different subjects, explain your point of view on a current issue and set out the pros and cons of different options.',
-      de: 'Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.',
-    },
-  },
-  {
-    id: 'c1',
-    label: 'C1',
-    weeks: WEEKS_PER_LEVEL,
-    description: {
-      en: 'You understand many demanding, longer texts and can also read between the lines. You express yourself spontaneously and fluently, and you rarely have to stop and search for words. You use the language effectively and flexibly in social and working life, in vocational training and at university. You express yourself on complex subjects clearly, in detail and in a well-structured way, linking your ideas with suitable language.',
-      de: 'Du verstehst viele anspruchsvolle, längere Texte und erfasst auch, was zwischen den Zeilen steht. Du drückst dich spontan und fließend aus, ohne oft erkennbar nach Worten suchen zu müssen. Im gesellschaftlichen und beruflichen Leben, in der Ausbildung und im Studium setzt du die Sprache wirksam und flexibel ein. Zu komplexen Sachverhalten äußerst du dich klar, gut gegliedert und ausführlich und verknüpfst deine Gedanken dabei mit passenden sprachlichen Mitteln.',
-    },
-  },
-];
-
+const LEVELS = CEFR_LEVELS;
 
 /**
  * Shows which Klett textbook a level is taught from. Renders the licensed cover
@@ -298,8 +200,15 @@ export function LevelProgressionTimeline({ locale = 'en', className }: Props) {
             ) : null}
           </div>
           <p className="text-sm leading-relaxed text-[var(--casa-ink)]">
-            {pick(locale, activeLevel.description)}
+            {pick(locale, activeLevel.summary)}
           </p>
+          <Link
+            href={levelHref(activeLevel.label)}
+            className="tap-target group inline-flex items-center gap-1.5 self-start text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+          >
+            {say(locale, 'Mehr zur Stufe {level}', 'More about {level}', { level: activeLevel.label })}
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+          </Link>
         </div>
 
         {/* Stats */}

@@ -3,6 +3,7 @@ import 'server-only';
 import COPY_CATALOG from '@/config/cms/copy-catalog.json';
 import { curatedPassages } from '@/lib/assistant/tools/search-public-kb';
 import { fillFacts, type FactValues } from '@/lib/cms/facts';
+import { CEFR_BANDS, CEFR_LEVELS, LEVELS_PATH } from '@/config/content/cefr-levels';
 import { coursePracticalFacts } from '@/config/courses/course-practical-facts';
 import { getCoursePath } from '@/lib/content/course-routes';
 import { getCourseFinderData, getExamCatalog, getFaq, getNewsList } from '@/lib/content/repository';
@@ -22,6 +23,7 @@ const say = (locale: KnowledgeLocale, de: string, en: string) => (locale === 'de
 const PAGE_TITLES: Record<string, { de: string; en: string }> = {
   '/': { de: 'Startseite', en: 'Home' },
   '/courses': { de: 'Sprachkurse', en: 'Courses' },
+  '/courses/levels': { de: 'Niveaustufen', en: 'Language levels' },
   '/exams': { de: 'Prüfungen', en: 'Exams' },
   '/accommodation': { de: 'Unterkunft', en: 'Accommodation' },
   '/accommodation/become-host': { de: 'Gastfamilie werden', en: 'Become a host family' },
@@ -137,6 +139,21 @@ export async function structuredDocs(locale: KnowledgeLocale, facts: FactValues)
     if (practical.conditions.length) {
       docs.push({ ...base, id: `practical:${locale}:${course.slug}:conditions`, heading: say(locale, 'So läuft der Kurs', 'How the course runs'), text: fill(practical.conditions.map((condition) => condition[locale]).join(' ')) });
     }
+  }
+
+  // Each level, linked to its section on the levels page.
+  for (const level of CEFR_LEVELS) {
+    docs.push({
+      id: `level:${locale}:${level.id}`,
+      locale,
+      type: 'page',
+      url: `${LEVELS_PATH}#${level.anchor}`,
+      page: say(locale, 'Niveaustufen', 'Language levels'),
+      heading: `${level.label} · ${CEFR_BANDS[level.band][locale]}`,
+      text: level.description[locale],
+      keywords: [level.label, say(locale, 'Niveau', 'level'), 'GER', 'CEFR'],
+      boost: 1.1,
+    });
   }
 
   for (const item of exams.items) {

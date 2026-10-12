@@ -911,6 +911,10 @@
     "de": "Bei uns kannst du die Prüfungen telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. Für die Niveaus A1 bis B1 bieten wir leider keine Prüfungen an. Das Ergebnis und das Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir informieren alle Teilnehmenden, sobald sie bei uns eingegangen sind.",
     "text": "Da noi puoi sostenere gli esami telc Deutsch B2 e telc Deutsch C1 Hochschule. Purtroppo non offriamo esami per i livelli da A1 a B1. Il risultato e il certificato sono disponibili circa 6 settimane dopo l’esame. Appena ci arrivano, informiamo tutti i partecipanti."
   },
+  "t.bei-uns-laufen-fortlaufend.6yhjpf": {
+    "de": "Bei uns laufen fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1. Hier siehst du, was du auf jeder Stufe kannst.",
+    "text": "Da noi si tengono continuamente corsi ai livelli A1, A2, B1, B1+, B2 e C1. Qui vedi cosa sai fare a ogni livello."
+  },
   "t.bei-uns-lernst-du.1o2gpuc": {
     "de": "Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.",
     "text": "Da noi impari in piccoli gruppi e ti indichiamo il passo successivo."
@@ -1230,6 +1234,10 @@
   "t.buchhaltung.fiaocz": {
     "de": "Buchhaltung",
     "text": "Contabilità"
+  },
+  "t.buchstaben-aus-goldenen-paillett.my7ec0": {
+    "de": "Buchstaben aus goldenen Pailletten auf einer bemalten Leinwand",
+    "text": "Lettere di paillettes dorate su una tela dipinta"
   },
   "t.buero-kontaktieren.19ubqhj": {
     "de": "Büro kontaktieren",
@@ -2055,6 +2063,10 @@
     "de": "Die Niveaustufen bei CASA als Treppe, von A1 bis C1. Jede Stufe führt zu den passenden Kursen.",
     "text": "I livelli di CASA come una scala, da A1 a C1. Ogni gradino porta ai corsi corrispondenti."
   },
+  "t.die-niveaustufen-von-a1.1sk5zcn": {
+    "de": "Die Niveaustufen von A1 bis C1",
+    "text": "I livelli dall’A1 al C1"
+  },
   "t.die-pakete.indizy": {
     "de": "Die Pakete",
     "text": "I pacchetti"
@@ -2207,9 +2219,9 @@
     "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
     "text": "Lavori a stretto contatto con gli insegnanti e con il coordinamento."
   },
-  "t.du-baust-wortschatz-grammatik.kie2so": {
-    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.",
-    "text": "Arricchisci lessico, grammatica ed espressioni del B1 e ti eserciti a parlare e scrivere liberamente. Da qui in poi impari con il libro di testo Kontext."
+  "t.du-baust-wortschatz-grammatik.mvn6u6": {
+    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus, übst das freie Sprechen und Schreiben und wirst sicherer. Ab hier lernst du mit Kontext.",
+    "text": "Arricchisci lessico, grammatica ed espressioni del B1, ti eserciti a parlare e scrivere liberamente e acquisti sicurezza. Da qui in poi impari con Kontext."
   },
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
@@ -2279,21 +2291,9 @@
     "de": "Du hast eine Frage oder schon einen Plan? Schreib uns. Wir helfen dir gern weiter.",
     "text": "Hai una domanda o già un progetto? Scrivici. Ti aiutiamo volentieri."
   },
-  "t.du-kannst-deine-meinung.1d3iikb": {
-    "de": "Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.",
-    "text": "Sai esprimere la tua opinione, capire testi più lunghi e fare presentazioni."
-  },
-  "t.du-kannst-deine-meinung.1xja4wo": {
-    "de": "Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.",
-    "text": "Sai motivare la tua opinione e sostenere conversazioni più lunghe sul lavoro."
-  },
   "t.du-kannst-dich-entweder.i88v94": {
     "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.",
     "text": "Puoi iscriverti con il nostro modulo online oppure di persona in segreteria. Prima fai un test di livello e inviaci il risultato, così possiamo inserirti nel gruppo giusto."
-  },
-  "t.du-kannst-dich-vorstellen.uukfum": {
-    "de": "Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.",
-    "text": "Sai presentarti, fare domande semplici e sostenere conversazioni quotidiane."
   },
   "t.du-kannst-ein-modul.x5kfg5": {
     "de": "Du kannst ein Modul einzeln belegen oder neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.",
@@ -2303,17 +2303,13 @@
     "de": "Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.",
     "text": "Puoi prenotare da una a nove settimane e iniziare qualsiasi lunedì."
   },
-  "t.du-kannst-ueber-deine.wxzyen": {
-    "de": "Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.",
-    "text": "Sai raccontare le tue esperienze e scrivere messaggi semplici."
-  },
   "t.du-kannst-uns-gern.1ly90q8": {
     "de": "Du kannst uns gern eine Initiativbewerbung schicken. Wir melden uns bei dir, sobald eine passende Stelle frei wird.",
     "text": "Puoi inviarci una candidatura spontanea. Ti contatteremo appena si libera una posizione adatta."
   },
-  "t.du-kommst-in-alltagssituationen.1ijx71k": {
-    "de": "Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.",
-    "text": "Te la cavi nelle situazioni quotidiane e scrivi brevi resoconti."
+  "t.du-kennst-dein-niveau.9un8tq": {
+    "de": "Du kennst dein Niveau noch nicht?",
+    "text": "Non conosci ancora il tuo livello?"
   },
   "t.du-kommunizierst-klar-und.1jpxwa6": {
     "de": "Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.",
@@ -2347,10 +2343,6 @@
     "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
     "text": "Studi al mattino o al pomeriggio. Il corso pomeridiano si tiene dal lunedì al giovedì."
   },
-  "t.du-liest-anspruchsvolle-texte.o1gomg": {
-    "de": "Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.",
-    "text": "Leggi testi complessi e ti esprimi con flessibilità sul lavoro."
-  },
   "t.du-moechtest-in-deutschland.1b4asxf": {
     "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
     "text": "Vuoi studiare in Germania? Questa guida ti aiuta a pianificare tutto, dalla scelta degli studi al corso di lingua fino all’arrivo."
@@ -2371,17 +2363,9 @@
     "de": "Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.",
     "text": "Dovresti aver concluso con successo un corso C1, perché il lessico, le espressioni e la grammatica del C1 non fanno parte del corso. In alternativa puoi fare un test di livello da noi, a scuola."
   },
-  "t.du-sprichst-fliessend-und.4qeqfb": {
-    "de": "Du sprichst fließend und spontan und kannst akademische Texte analysieren.",
-    "text": "Parli in modo fluente e spontaneo e sai analizzare testi accademici."
-  },
   "t.du-sprichst-mehr-und.ack6nb": {
     "de": "Du sprichst mehr und wirst im Alltag sicherer.",
     "text": "Parli di più e acquisti sicurezza nella vita quotidiana."
-  },
-  "t.du-sprichst-spontan-und.c900im": {
-    "de": "Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.",
-    "text": "Parli in modo spontaneo e flessibile e sai lavorare con testi complessi."
   },
   "t.du-stehst-auf-der.141t38r": {
     "de": "Du stehst auf der Liste",
@@ -2415,9 +2399,17 @@
     "de": "Du übst gezielt Grammatik, Schreiben oder Sprechen.",
     "text": "Ti eserciti in modo mirato su grammatica, scrittura o conversazione."
   },
-  "t.du-verstehst-das-wichtigste.1drp1it": {
-    "de": "Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.",
-    "text": "Capisci i punti principali su argomenti familiari e sai motivare la tua opinione."
+  "t.du-verstaendigst-dich-in.1gzvx9i": {
+    "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
+    "text": "Riesci a comunicare in semplici situazioni quotidiane e descrivi con parole semplici la tua provenienza, la tua formazione e l’ambiente che ti circonda."
+  },
+  "t.du-verstehst-anspruchsvolle-laen.1s0qlda": {
+    "de": "Du verstehst anspruchsvolle, längere Texte, auch zwischen den Zeilen, und drückst dich spontan, fließend und flexibel aus, im Beruf wie im Studium.",
+    "text": "Capisci testi lunghi e complessi, anche ciò che si legge tra le righe, e ti esprimi in modo spontaneo, scorrevole e flessibile, sia nel lavoro sia negli studi."
+  },
+  "t.du-verstehst-das-wichtigste.o06fb2": {
+    "de": "Du verstehst das Wichtigste zu vertrauten Themen, erzählst von Erfahrungen, Träumen und Zielen und begründest kurz deine Ansichten.",
+    "text": "Capisci i punti essenziali su argomenti familiari, racconti esperienze, sogni e obiettivi e motivi brevemente le tue opinioni."
   },
   "t.du-verstehst-die-hauptinhalte.9gzpz1": {
     "de": "Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.",
@@ -2431,21 +2423,17 @@
     "de": "Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.",
     "text": "Capisci le informazioni principali quando si parla una lingua standard chiara e si tratta di cose familiari, come il lavoro, la scuola, il tempo libero o i viaggi. Sai esprimerti in modo coerente su argomenti familiari e sui tuoi interessi, parlare di esperienze, sogni, speranze e obiettivi e dare spiegazioni e motivazioni. Però vuoi ancora lavorare sulle strutture e sulla costruzione della frase, esercitarti con le espressioni utili, ampliare il tuo lessico e acquistare sicurezza. Allora il B1+ è il livello giusto per te. Qui arricchisci lessico, grammatica ed espressioni del B1 e ti eserciti a parlare e scrivere liberamente. Così costruisci una base solida per il B2. Dal B1+ il corso usa il libro di testo Kontext."
   },
-  "t.du-verstehst-einfache-saetze.u1to26": {
-    "de": "Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.",
-    "text": "Capisci frasi semplici e impari il lessico di base per la vita quotidiana."
-  },
-  "t.du-verstehst-komplexe-argumente.cqrg22": {
-    "de": "Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.",
-    "text": "Capisci argomentazioni complesse e sai partecipare a discussioni tecniche."
-  },
-  "t.du-verstehst-komplexe-texte.gg00qq": {
-    "de": "Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.",
-    "text": "Capisci testi complessi e sostieni conversazioni spontanee sul lavoro."
+  "t.du-verstehst-komplexe-texte.1rbrrkb": {
+    "de": "Du verstehst komplexe Texte und Fachdiskussionen in deinem Gebiet und unterhältst dich spontan und fließend, klar und ausführlich zu vielen Themen.",
+    "text": "Capisci testi complessi e discussioni tecniche nel tuo campo e conversi in modo spontaneo e scorrevole, chiaro e dettagliato, su molti argomenti."
   },
   "t.du-verstehst-saetze-und.12defvx": {
     "de": "Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.",
     "text": "Capisci frasi ed espressioni di uso frequente su argomenti che ti riguardano direttamente, per esempio informazioni su di te e sulla tua famiglia, gli acquisti, il lavoro o l’ambiente in cui vivi. Riesci a comunicare in situazioni semplici e quotidiane, quando si tratta di uno scambio semplice e diretto su cose familiari. Con parole semplici sai descrivere la tua provenienza e la tua formazione, l’ambiente che ti circonda e le cose di cui hai bisogno in quel momento."
+  },
+  "t.du-verstehst-und-verwendest.4wl73h": {
+    "de": "Du verstehst und verwendest vertraute Alltagsausdrücke und ganz einfache Sätze, stellst dich vor und stellst und beantwortest einfache Fragen zur Person.",
+    "text": "Capisci e usi espressioni familiari di tutti i giorni e frasi molto semplici, ti presenti, fai semplici domande personali e rispondi a quelle degli altri."
   },
   "t.du-verstehst-vertraute-alltaegli.ngwyvd": {
     "de": "Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.",
@@ -2495,6 +2483,10 @@
     "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
     "text": "Un corso serale dura circa 3½ mesi. In questo periodo completi mezzo livello, per esempio A1.2 o B2.1. In un anno riesci così a completare circa 1½ livelli."
   },
+  "t.ein-baby-krabbelt-und.acgqmh": {
+    "de": "Ein Baby krabbelt und schaut neugierig nach oben",
+    "text": "Un bebè gattona e guarda in su con curiosità"
+  },
   "t.ein-deutschkurs-bei-casa.2u5cuy": {
     "de": "Ein Deutschkurs bei CASA in Bremen.",
     "text": "Un corso di tedesco presso CASA a Brema."
@@ -2530,6 +2522,14 @@
   "t.ein-halbes-niveau-in.ax0vri": {
     "de": "Ein halbes Niveau in etwa 3,5 Monaten",
     "text": "Mezzo livello in circa 3,5 mesi"
+  },
+  "t.ein-junge-schwimmt-mit.11evmv": {
+    "de": "Ein Junge schwimmt mit einem blauen Schwimmring im Wasser",
+    "text": "Un bambino nuota in acqua con un salvagente blu"
+  },
+  "t.ein-maedchen-springt-ueber.1yqmh9a": {
+    "de": "Ein Mädchen springt über eine Wiese, darüber blauer Himmel",
+    "text": "Una bambina salta in un prato, sotto un cielo azzurro"
   },
   "t.ein-modul-laeuft-an.fwp2vw": {
     "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu {course.special-courses.price-per-evening} pro Abend.",
@@ -2695,6 +2695,14 @@
     "de": "Eine Hand schreibt mit einem Stift auf Papier",
     "text": "Una mano scrive con una penna su un foglio"
   },
+  "t.eine-junge-frau-kniet.mn4sk6": {
+    "de": "Eine junge Frau kniet in Startposition auf einer Straße",
+    "text": "Una giovane donna è inginocchiata in posizione di partenza su una strada"
+  },
+  "t.eine-laeuferin-nimmt-am.zntjqk": {
+    "de": "Eine Läuferin nimmt am Meer die Treppe hinauf",
+    "text": "Una podista sale le scale in riva al mare"
+  },
   "t.eine-lehrerin-am-bildschirm.1xgfl68": {
     "de": "Eine Lehrerin am Bildschirm mit ihrer Klasse",
     "text": "Un’insegnante allo schermo con la sua classe"
@@ -2803,6 +2811,10 @@
     "de": "Einzelne Lernende oder Gruppen",
     "text": "Singoli studenti o gruppi"
   },
+  "t.elementare-sprachverwendung.17h254x": {
+    "de": "Elementare Sprachverwendung",
+    "text": "Utente base"
+  },
   "t.empfohlen.x9gqd6": {
     "de": "Empfohlen",
     "text": "In evidenza"
@@ -2862,6 +2874,10 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "Asino, cane, gatto, gallo – e la tua strada personale verso Brema"
+  },
+  "t.etwa-wochen.zc1ikx": {
+    "de": "etwa {weeks} Wochen",
+    "text": "circa {weeks} settimane"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3367,6 +3383,10 @@
     "de": "Gemeinsame Nutzung in der WG",
     "text": "In comune con i coinquilini"
   },
+  "t.gemeinsamer-europaeischer-refere.ypd010": {
+    "de": "Gemeinsamer Europäischer Referenzrahmen",
+    "text": "Quadro comune europeo di riferimento"
+  },
   "t.gemeinschaft.1sz6tmb": {
     "de": "Gemeinschaft",
     "text": "Comunità"
@@ -3750,6 +3770,10 @@
   "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
     "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
     "text": "Nel corso intensivo, con {course.intensive-german.lessons} lezioni a settimana, un livello completo dura da 8 a 9 settimane circa. Nel corso serale completi mezzo livello in circa 3,5 mesi, cioè circa 1,5 livelli all’anno."
+  },
+  "t.im-intensivkurs.136g3x5": {
+    "de": "Im Intensivkurs",
+    "text": "Nel corso intensivo"
   },
   "t.im-klinikalltag-ist-es.taud3v": {
     "de": "Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal, dazu das Hörverstehen und die schriftliche Dokumentation im Beruf.",
@@ -4347,6 +4371,10 @@
     "de": "Kompakte Tagesblöcke nach Absprache",
     "text": "Blocchi compatti di giorno, da concordare"
   },
+  "t.kompetente-sprachverwendung.1n1x676": {
+    "de": "Kompetente Sprachverwendung",
+    "text": "Utente avanzato"
+  },
   "t.konstanter-fortschritt-schafft-s.1wwngq": {
     "de": "Konstanter Fortschritt schafft Sicherheit für Studium und Beruf.",
     "text": "Progressi costanti danno sicurezza per lo studio e il lavoro."
@@ -4615,6 +4643,10 @@
     "de": "Kursweg",
     "text": "Percorso"
   },
+  "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
+    "de": "Läuferinnen laufen jubelnd durch das Zielband",
+    "text": "Alcune podiste tagliano esultanti il nastro del traguardo"
+  },
   "t.laeuft-bereits.qmroe8": {
     "de": "läuft bereits",
     "text": "già in corso"
@@ -4626,6 +4658,10 @@
   "t.langfristiger-fortschritt.xvw54l": {
     "de": "Langfristiger Fortschritt",
     "text": "Progressi a lungo termine"
+  },
+  "t.lass-dich-gern-von.x9wxts": {
+    "de": "Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
+    "text": "Saremo felici di consigliarti. Una buona base di partenza sono i nostri test di livello online gratuiti. Se non parli ancora per niente il tedesco, non ti serve alcun test e cominci semplicemente dall’A1."
   },
   "t.lass-dich-zuerst-beraten.8uix9j": {
     "de": "Lass dich zuerst beraten",
@@ -4694,6 +4730,10 @@
   "t.lehrwerk-netzwerk-neu.17hkji": {
     "de": "Lehrwerk Netzwerk neu",
     "text": "Libro di testo Netzwerk neu"
+  },
+  "t.lehrwerk.1oj28xk": {
+    "de": "Lehrwerk",
+    "text": "Libro di testo"
   },
   "t.leitung.1srtrnz": {
     "de": "Leitung",
@@ -4863,6 +4903,10 @@
     "de": "Mehr Sprechsicherheit",
     "text": "Parlare con più sicurezza"
   },
+  "t.mehr-zu-den-niveaustufen.1wk02ex": {
+    "de": "Mehr zu den Niveaustufen",
+    "text": "Più informazioni sui livelli"
+  },
   "t.mehr-zu-telc-deutsch.xiaprp": {
     "de": "Mehr zu telc Deutsch B2",
     "text": "Più informazioni sul telc Deutsch B2"
@@ -4870,6 +4914,10 @@
   "t.mehr-zur-pruefung.185bh7": {
     "de": "Mehr zur Prüfung",
     "text": "Più informazioni sull’esame"
+  },
+  "t.mehr-zur-stufe.162idne": {
+    "de": "Mehr zur Stufe {level}",
+    "text": "Più informazioni sul livello {level}"
   },
   "t.mehrere-moeglich.1o2k99k": {
     "de": "Mehrere möglich",
@@ -5346,6 +5394,10 @@
   "t.niveauschritte.1cng3m1": {
     "de": "Niveauschritte",
     "text": "Passaggi di livello"
+  },
+  "t.niveaustufen.16jh7p8": {
+    "de": "Niveaustufen",
+    "text": "Livelli"
   },
   "t.niveaustufen.8erybc": {
     "de": "Niveaustufen",
@@ -6099,6 +6151,10 @@
     "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
     "text": "Sei livelli, dall’A1 al C1, ognuno di circa 8–9 settimane nel corso intensivo."
   },
+  "t.sechs-stufen-in-drei.1buauf": {
+    "de": "Sechs Stufen in drei Bereichen",
+    "text": "Sei livelli in tre fasce"
+  },
   "t.sechs.1eiph2a": {
     "de": "Sechs",
     "text": "Sei"
@@ -6154,6 +6210,10 @@
   "t.selbst-zusammenstellen.mvc58b": {
     "de": "Selbst zusammenstellen",
     "text": "Crea il tuo programma"
+  },
+  "t.selbststaendige-sprachverwendung.m7p0gc": {
+    "de": "Selbstständige Sprachverwendung",
+    "text": "Utente autonomo"
   },
   "t.selbstverpflegung.ll03me": {
     "de": "Selbstverpflegung",
@@ -7315,6 +7375,10 @@
     "de": "Vollverpflegung",
     "text": "Pensione completa"
   },
+  "t.von-a1-bis-c1.1lsfam3": {
+    "de": "Von A1 bis C1, Stufe für Stufe",
+    "text": "Dall’A1 al C1, livello dopo livello"
+  },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
     "text": "Dalla richiesta alla partenza hai sempre la stessa persona di riferimento."
@@ -7578,6 +7642,10 @@
   "t.was-dir-ein-tandem.15zg4yw": {
     "de": "Was dir ein Tandem bringt",
     "text": "Cosa ti dà un tandem"
+  },
+  "t.was-du-auf-jeder.1qusc0s": {
+    "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
+    "text": "Cosa sai fare a ogni livello, dall’A1 al C1."
   },
   "t.was-du-auf-jeder.6gi060": {
     "de": "Was du auf jeder Stufe kannst",
@@ -8067,6 +8135,10 @@
     "de": "Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.",
     "text": "Ti contattiamo via e-mail o per telefono con le date. A quel punto ti iscrivi in modo definitivo."
   },
+  "t.wir-orientieren-uns-streng.1r8mfh1": {
+    "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
+    "text": "Seguiamo rigorosamente il Quadro comune europeo di riferimento per le lingue (QCER). Descrive cosa riesci a capire e a dire a ogni livello. Il B1+ è un livello a sé del nostro corso intensivo, tra il B1 e il B2."
+  },
   "t.wir-planen-den-unterricht.119fu4": {
     "de": "Wir planen den Unterricht gemeinsam mit der Firma.",
     "text": "Progettiamo le lezioni insieme all’azienda."
@@ -8371,6 +8443,10 @@
     "de": "Zum Einstufungstest",
     "text": "Vai al test di livello"
   },
+  "t.zum-einstufungstest.1c834ug": {
+    "de": "Zum Einstufungstest",
+    "text": "Vai al test di livello"
+  },
   "t.zum-intensivkurs.zzp7ph": {
     "de": "Zum Intensivkurs",
     "text": "Vai al corso intensivo"
@@ -8506,6 +8582,10 @@
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",
     "text": "Seconda metà di luglio"
+  },
+  "t.zwischenstufe-im-intensivkurs-zw.10lxrtl": {
+    "de": "Zwischenstufe im Intensivkurs, zwischen B1 und B2",
+    "text": "Livello ponte del corso intensivo, tra il B1 e il B2"
   },
   "t.zwischenstufe.1hqvqds": {
     "de": "Zwischenstufe",

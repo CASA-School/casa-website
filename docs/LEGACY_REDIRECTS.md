@@ -71,7 +71,7 @@ These old pages have no true counterpart here; the map sends them to the closest
 | --- | --- | --- |
 | `/gallerie`, `/en/gallery`, the old school galleries | About (`/ueber-uns/casa-leitbild`, `/en/about`) | No gallery on the new site |
 | `/ueber-uns/tandem`, the Sprachtandem news item, the old tandem pages | `/ueber-uns/casa-leitbild#tandem` | The language-exchange section; the TANDEM school network is on the Gemeinnützigkeit page |
-| `/sprachkurse/niveaustufen`, `/en/registration/language-levels` | Placement test | The old page explained the CEFR levels; the placement test is where a learner finds theirs |
+| `/en/registration/language-levels`, the old `niveaustufen.php` pages | The levels page | Since 2026-10-12 `/sprachkurse/niveaustufen` is a page of the new site again (what each level means), so its old addresses lead there; until then they went to the placement test |
 | `/de/kulturprogramm/…` (2011–23 trip pages) | German for groups | The culture programme is now part of group courses |
 | Superintensive courses (webEdition) | Bildungszeit | The closest current format |
 | TestDaF pages | The exam centre | The new site has no TestDaF offer |

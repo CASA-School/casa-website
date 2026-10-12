@@ -210,6 +210,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -400,6 +401,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -468,6 +470,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -727,6 +730,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -775,6 +779,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -887,6 +892,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1027,6 +1033,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1243,6 +1250,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1294,6 +1302,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1316,6 +1325,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1338,6 +1348,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1360,6 +1371,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1451,6 +1463,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1681,6 +1694,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1855,6 +1869,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -1877,6 +1892,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -2195,6 +2211,16 @@
    "/"
   ]
  },
+ "t.bei-uns-laufen-fortlaufend.6yhjpf": {
+  "de": "Bei uns laufen fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1. Hier siehst du, was du auf jeder Stufe kannst.",
+  "en": "Our courses run continuously at levels A1, A2, B1, B1+, B2 and C1. Here you can see what you can do at each level.",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
+  ]
+ },
  "t.bei-uns-lernst-du.1o2gpuc": {
   "de": "Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.",
   "en": "You learn in small groups with us, and we show you the next step.",
@@ -2209,6 +2235,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -2249,6 +2276,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -2393,6 +2421,7 @@
   "de": "Beratung anfragen",
   "en": "Get advice",
   "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx",
    "src/app/(site)/[locale]/search/page.tsx",
    "src/app/(site)/[locale]/team/page.tsx",
    "src/components/layout/mobile-nav.tsx",
@@ -2446,6 +2475,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -2584,6 +2614,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -3068,6 +3099,16 @@
    "/accommodation/[type]",
    "/courses/[slug]",
    "/exams/[code]"
+  ]
+ },
+ "t.buchstaben-aus-goldenen-paillett.my7ec0": {
+  "de": "Buchstaben aus goldenen Pailletten auf einer bemalten Leinwand",
+  "en": "Letters of gold sequins on a painted canvas",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
   ]
  },
  "t.buero-kontaktieren.19ubqhj": {
@@ -4141,6 +4182,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -4183,6 +4225,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -4365,6 +4408,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -4387,6 +4431,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -4507,6 +4552,7 @@
    "/contact",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5064,6 +5110,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5136,6 +5183,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5264,6 +5312,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5298,6 +5347,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5572,6 +5622,29 @@
    "/courses"
   ]
  },
+ "t.die-niveaustufen-von-a1.1sk5zcn": {
+  "de": "Die Niveaustufen von A1 bis C1",
+  "en": "The levels from A1 to C1",
+  "files": [
+   "src/components/sections/cefr-level-overview.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.die-pakete.indizy": {
   "de": "Die Pakete",
   "en": "The packages",
@@ -5680,6 +5753,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5796,6 +5870,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5828,6 +5903,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -5922,6 +5998,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6037,16 +6114,27 @@
    "/careers/[slug]"
   ]
  },
- "t.du-baust-wortschatz-grammatik.kie2so": {
-  "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.",
-  "en": "You build on the vocabulary, grammar and phrases from B1 and practise speaking and writing freely. From here on you learn with the Kontext textbook.",
+ "t.du-baust-wortschatz-grammatik.mvn6u6": {
+  "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus, übst das freie Sprechen und Schreiben und wirst sicherer. Ab hier lernst du mit Kontext.",
+  "en": "You build on the vocabulary, grammar and phrases from B1, practise speaking and writing freely and grow more confident. From here you learn with Kontext.",
   "files": [
-   "src/config/courses/course-profiles.ts"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
    "/courses",
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.du-bekommst-alle-einzelheiten.on1csu": {
@@ -6177,6 +6265,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6239,30 +6328,6 @@
    "/contact"
   ]
  },
- "t.du-kannst-deine-meinung.1d3iikb": {
-  "de": "Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.",
-  "en": "You can give your opinion, understand longer texts and give presentations.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-kannst-deine-meinung.1xja4wo": {
-  "de": "Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.",
-  "en": "You can give reasons for your opinions and hold longer conversations at work.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.du-kannst-dich-entweder.i88v94": {
   "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.",
   "en": "You can register either through our online form or in person at our office. Please take a placement test first and send us the result, so that we can put you in the right group.",
@@ -6271,18 +6336,6 @@
   ],
   "pages": [
    "/"
-  ]
- },
- "t.du-kannst-dich-vorstellen.uukfum": {
-  "de": "Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.",
-  "en": "You can introduce yourself, ask simple questions and hold everyday conversations.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
   ]
  },
  "t.du-kannst-ein-modul.x5kfg5": {
@@ -6306,18 +6359,6 @@
    "/courses/[slug]"
   ]
  },
- "t.du-kannst-ueber-deine.wxzyen": {
-  "de": "Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.",
-  "en": "You can talk about your experiences and write simple messages.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.du-kannst-uns-gern.1ly90q8": {
   "de": "Du kannst uns gern eine Initiativbewerbung schicken. Wir melden uns bei dir, sobald eine passende Stelle frei wird.",
   "en": "You are welcome to send us a speculative application. We’ll get in touch as soon as a suitable position comes up.",
@@ -6328,16 +6369,14 @@
    "/careers"
   ]
  },
- "t.du-kommst-in-alltagssituationen.1ijx71k": {
-  "de": "Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.",
-  "en": "You can manage in everyday situations and write short reports.",
+ "t.du-kennst-dein-niveau.9un8tq": {
+  "de": "Du kennst dein Niveau noch nicht?",
+  "en": "Not sure of your level yet?",
   "files": [
-   "src/config/courses/course-profiles.ts"
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
   ],
   "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
+   "/courses/levels"
   ]
  },
  "t.du-kommunizierst-klar-und.1jpxwa6": {
@@ -6413,18 +6452,6 @@
    "/courses/[slug]"
   ]
  },
- "t.du-liest-anspruchsvolle-texte.o1gomg": {
-  "de": "Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.",
-  "en": "You read demanding texts and express yourself flexibly at work.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.du-moechtest-in-deutschland.1b4asxf": {
   "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
   "en": "Would you like to study in Germany? This guide helps you plan, from choosing what to study and taking a language course to arriving here.",
@@ -6477,18 +6504,6 @@
    "/exams/[code]"
   ]
  },
- "t.du-sprichst-fliessend-und.4qeqfb": {
-  "de": "Du sprichst fließend und spontan und kannst akademische Texte analysieren.",
-  "en": "You speak fluently and spontaneously and can analyse academic texts.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.du-sprichst-mehr-und.ack6nb": {
   "de": "Du sprichst mehr und wirst im Alltag sicherer.",
   "en": "You speak more and feel more confident in everyday life.",
@@ -6497,18 +6512,6 @@
   ],
   "pages": [
    "/about"
-  ]
- },
- "t.du-sprichst-spontan-und.c900im": {
-  "de": "Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.",
-  "en": "You speak spontaneously and flexibly and can work with demanding texts.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
   ]
  },
  "t.du-stehst-auf-der.141t38r": {
@@ -6585,23 +6588,11 @@
    "/courses/[slug]"
   ]
  },
- "t.du-verstehst-das-wichtigste.1drp1it": {
-  "de": "Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.",
-  "en": "You understand the main points on familiar topics and can give reasons for your opinion.",
+ "t.du-verstaendigst-dich-in.1gzvx9i": {
+  "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
+  "en": "You make yourself understood in simple everyday situations and describe your background, your education and your surroundings in simple words.",
   "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-verstehst-die-hauptinhalte.9gzpz1": {
-  "de": "Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.",
-  "en": "You understand the main content of complex texts on concrete and abstract subjects, and in your own field you can follow specialist discussions too. You can communicate so spontaneously and fluently that an ordinary conversation with native speakers takes no great effort on either side. You can express yourself clearly and in detail on many different subjects, explain your point of view on a current issue and set out the pros and cons of different options.",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
@@ -6611,6 +6602,76 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.du-verstehst-anspruchsvolle-laen.1s0qlda": {
+  "de": "Du verstehst anspruchsvolle, längere Texte, auch zwischen den Zeilen, und drückst dich spontan, fließend und flexibel aus, im Beruf wie im Studium.",
+  "en": "You understand demanding, longer texts, including what is implied, and express yourself spontaneously, fluently and flexibly at work and at university.",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.du-verstehst-das-wichtigste.o06fb2": {
+  "de": "Du verstehst das Wichtigste zu vertrauten Themen, erzählst von Erfahrungen, Träumen und Zielen und begründest kurz deine Ansichten.",
+  "en": "You understand the main points on familiar topics, talk about your experiences, dreams and goals and briefly give reasons for your views.",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.du-verstehst-die-hauptinhalte.9gzpz1": {
+  "de": "Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.",
+  "en": "You understand the main content of complex texts on concrete and abstract subjects, and in your own field you can follow specialist discussions too. You can communicate so spontaneously and fluently that an ordinary conversation with native speakers takes no great effort on either side. You can express yourself clearly and in detail on many different subjects, explain your point of view on a current issue and set out the pros and cons of different options.",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6623,7 +6684,7 @@
   "de": "Du verstehst die Hauptpunkte, wenn klare Standardsprache verwendet wird und es um vertraute Dinge aus Arbeit, Schule oder Freizeit geht. Die meisten Situationen, die dir auf Reisen in deutschsprachigen Ländern begegnen, kannst du bewältigen. Über vertraute Themen und deine Interessen kannst du dich einfach und zusammenhängend äußern. Du kannst von Erfahrungen und Ereignissen erzählen, Träume, Hoffnungen und Ziele beschreiben und deine Pläne und Ansichten kurz begründen oder erklären.",
   "en": "You understand the main points when clear standard German is used and the subject is familiar, such as work, school or free time. You can deal with most situations you are likely to come across when travelling in German-speaking countries. You can talk about familiar topics and your interests in simple, connected sentences. You can tell people about experiences and events, describe your dreams, hopes and goals, and briefly explain your plans and views or give reasons for them.",
   "files": [
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
@@ -6633,6 +6694,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6645,7 +6707,7 @@
   "de": "Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.",
   "en": "You understand the most important information when clear standard German is spoken and the subject is familiar, such as work, school, free time or travel. You can talk in connected sentences about familiar topics and your interests, describe experiences, dreams, hopes and goals, and give explanations and reasons. But you’d still like to work on grammar and sentence structure, practise useful phrases, build your vocabulary and feel more confident. If so, B1+ is the right level for you. Here you build on the vocabulary, grammar and phrases from B1 and practise speaking and writing freely. This gives you a solid foundation for B2. From B1+ onwards, the course uses the Kontext textbook.",
   "files": [
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
@@ -6655,6 +6717,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6663,47 +6726,11 @@
    "/team"
   ]
  },
- "t.du-verstehst-einfache-saetze.u1to26": {
-  "de": "Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.",
-  "en": "You understand simple sentences and learn the basic vocabulary for everyday life.",
+ "t.du-verstehst-komplexe-texte.1rbrrkb": {
+  "de": "Du verstehst komplexe Texte und Fachdiskussionen in deinem Gebiet und unterhältst dich spontan und fließend, klar und ausführlich zu vielen Themen.",
+  "en": "You understand complex texts and specialist discussions in your field and talk spontaneously and fluently, clearly and in detail, on many subjects.",
   "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-verstehst-komplexe-argumente.cqrg22": {
-  "de": "Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.",
-  "en": "You understand complex arguments and can take part in specialist discussions.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-verstehst-komplexe-texte.gg00qq": {
-  "de": "Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.",
-  "en": "You understand complex texts and can hold spontaneous conversations at work.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-verstehst-saetze-und.12defvx": {
-  "de": "Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.",
-  "en": "You understand sentences and frequently used expressions on topics that concern you directly, for example you and your family, shopping, work or your local area. You can make yourself understood in simple, everyday situations, as long as the exchange is straightforward and about familiar things. In simple words, you can describe your background and education, your surroundings and the things you need at the moment.",
-  "files": [
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
@@ -6713,6 +6740,53 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.du-verstehst-saetze-und.12defvx": {
+  "de": "Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.",
+  "en": "You understand sentences and frequently used expressions on topics that concern you directly, for example you and your family, shopping, work or your local area. You can make yourself understood in simple, everyday situations, as long as the exchange is straightforward and about familiar things. In simple words, you can describe your background and education, your surroundings and the things you need at the moment.",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.du-verstehst-und-verwendest.4wl73h": {
+  "de": "Du verstehst und verwendest vertraute Alltagsausdrücke und ganz einfache Sätze, stellst dich vor und stellst und beantwortest einfache Fragen zur Person.",
+  "en": "You understand and use familiar everyday expressions and very simple sentences, introduce yourself and ask and answer simple questions about people.",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6725,7 +6799,7 @@
   "de": "Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.",
   "en": "You understand familiar, everyday expressions and very simple sentences, and you can use them yourself to say what you need in daily life. You can introduce yourself and others and ask people questions about themselves, for example where they live, who they know or what they have. You can also answer questions like these yourself. You can communicate in a simple way if the person you are talking to speaks slowly and clearly and is willing to help you.",
   "files": [
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
@@ -6735,6 +6809,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6747,7 +6822,7 @@
   "de": "Du verstehst viele anspruchsvolle, längere Texte und erfasst auch, was zwischen den Zeilen steht. Du drückst dich spontan und fließend aus, ohne oft erkennbar nach Worten suchen zu müssen. Im gesellschaftlichen und beruflichen Leben, in der Ausbildung und im Studium setzt du die Sprache wirksam und flexibel ein. Zu komplexen Sachverhalten äußerst du dich klar, gut gegliedert und ausführlich und verknüpfst deine Gedanken dabei mit passenden sprachlichen Mitteln.",
   "en": "You understand many demanding, longer texts and can also read between the lines. You express yourself spontaneously and fluently, and you rarely have to stop and search for words. You use the language effectively and flexibly in social and working life, in vocational training and at university. You express yourself on complex subjects clearly, in detail and in a well-structured way, linking your ideas with suitable language.",
   "files": [
-   "src/components/sections/level-progression-timeline.tsx"
+   "src/config/content/cefr-levels.ts"
   ],
   "pages": [
    "/",
@@ -6757,6 +6832,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -6866,6 +6942,29 @@
    "/courses/[slug]"
   ]
  },
+ "t.ein-baby-krabbelt-und.acgqmh": {
+  "de": "Ein Baby krabbelt und schaut neugierig nach oben",
+  "en": "A baby crawling and looking up with curiosity",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.ein-deutschkurs-bei-casa.2u5cuy": {
   "de": "Ein Deutschkurs bei CASA in Bremen.",
   "en": "A German course at CASA in Bremen.",
@@ -6966,6 +7065,52 @@
   ],
   "pages": [
    "/courses"
+  ]
+ },
+ "t.ein-junge-schwimmt-mit.11evmv": {
+  "de": "Ein Junge schwimmt mit einem blauen Schwimmring im Wasser",
+  "en": "A boy swimming in a blue swim ring",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.ein-maedchen-springt-ueber.1yqmh9a": {
+  "de": "Ein Mädchen springt über eine Wiese, darüber blauer Himmel",
+  "en": "A girl leaping across a meadow under a blue sky",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.ein-modul-laeuft-an.fwp2vw": {
@@ -7496,6 +7641,52 @@
    "/team"
   ]
  },
+ "t.eine-junge-frau-kniet.mn4sk6": {
+  "de": "Eine junge Frau kniet in Startposition auf einer Straße",
+  "en": "A young woman crouched at the start on a road",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.eine-laeuferin-nimmt-am.zntjqk": {
+  "de": "Eine Läuferin nimmt am Meer die Treppe hinauf",
+  "en": "A runner taking the stairs by the sea",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.eine-lehrerin-am-bildschirm.1xgfl68": {
   "de": "Eine Lehrerin am Bildschirm mit ihrer Klasse",
   "en": "A teacher at the screen with her class",
@@ -7796,9 +7987,11 @@
   "de": "Einstufung",
   "en": "Placement test",
   "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx",
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
   "pages": [
+   "/courses/levels",
    "/placement-test"
   ]
  },
@@ -7834,6 +8027,29 @@
    "/accommodation/become-host"
   ]
  },
+ "t.elementare-sprachverwendung.17h254x": {
+  "de": "Elementare Sprachverwendung",
+  "en": "Basic user",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.empfohlen.x9gqd6": {
   "de": "Empfohlen",
   "en": "Featured",
@@ -7858,6 +8074,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -8016,6 +8233,29 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.etwa-wochen.zc1ikx": {
+  "de": "etwa {weeks} Wochen",
+  "en": "about {weeks} weeks",
+  "files": [
+   "src/components/sections/cefr-level-rows.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.etwas-geld-als-reserve.9klh2n": {
@@ -8184,6 +8424,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -8701,6 +8942,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -9250,6 +9492,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -9345,6 +9588,16 @@
   ],
   "pages": [
    "/accommodation/[type]"
+  ]
+ },
+ "t.gemeinsamer-europaeischer-refere.ypd010": {
+  "de": "Gemeinsamer Europäischer Referenzrahmen",
+  "en": "Common European Framework of Reference",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
   ]
  },
  "t.gemeinschaft.1sz6tmb": {
@@ -10285,6 +10538,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -10369,6 +10623,7 @@
   "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort in der Regel 8–9 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
   "en": "On the intensive course, you have {course.intensive-german.lessons} lessons of 45 minutes a week, and a whole level usually takes 8–9 weeks. B1+ takes just as long. On the evening course, half a level takes about one trimester.",
   "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx",
    "src/components/sections/level-progression-timeline.tsx"
   ],
   "pages": [
@@ -10379,6 +10634,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -10395,6 +10651,29 @@
   ],
   "pages": [
    "/courses"
+  ]
+ },
+ "t.im-intensivkurs.136g3x5": {
+  "de": "Im Intensivkurs",
+  "en": "On the intensive course",
+  "files": [
+   "src/components/sections/cefr-level-rows.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.im-klinikalltag-ist-es.taud3v": {
@@ -10550,6 +10829,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -10866,6 +11146,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -10898,6 +11179,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -11016,6 +11298,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -11642,6 +11925,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -12046,6 +12330,29 @@
   ],
   "pages": [
    "/courses"
+  ]
+ },
+ "t.kompetente-sprachverwendung.1n1x676": {
+  "de": "Kompetente Sprachverwendung",
+  "en": "Proficient user",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.konstanter-fortschritt-schafft-s.1wwngq": {
@@ -12621,10 +12928,24 @@
   "de": "Kurse für {step} ansehen",
   "en": "See courses for {step}",
   "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
+   "src/app/(site)/[locale]/courses/page.tsx",
+   "src/components/sections/cefr-level-rows.tsx"
   ],
   "pages": [
-   "/courses"
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.kurse-fuer.1l80hix": {
@@ -12666,6 +12987,7 @@
   "en": "Courses",
   "files": [
    "src/app/(site)/[locale]/contact/page.tsx",
+   "src/app/(site)/[locale]/courses/levels/page.tsx",
    "src/app/(site)/[locale]/courses/page.tsx",
    "src/app/(site)/[locale]/faq/page.tsx",
    "src/app/(site)/[locale]/search/page.tsx",
@@ -12804,6 +13126,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -12856,6 +13179,29 @@
    "/calculator"
   ]
  },
+ "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
+  "de": "Läuferinnen laufen jubelnd durch das Zielband",
+  "en": "Runners cheering as they break the finishing tape",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.laeuft-bereits.qmroe8": {
   "de": "läuft bereits",
   "en": "under way",
@@ -12884,6 +13230,16 @@
   ],
   "pages": []
  },
+ "t.lass-dich-gern-von.x9wxts": {
+  "de": "Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
+  "en": "We are happy to advise you. Our free online placement tests are a good place to start. If you don’t speak any German yet, you don’t need a test and simply start with A1.",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
+  ]
+ },
  "t.lass-dich-zuerst-beraten.8uix9j": {
   "de": "Lass dich zuerst beraten",
   "en": "Get advice first",
@@ -12908,6 +13264,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -13089,6 +13446,29 @@
    "/exams",
    "/exams/[code]",
    "/faq",
+   "/team"
+  ]
+ },
+ "t.lehrwerk.1oj28xk": {
+  "de": "Lehrwerk",
+  "en": "Textbook",
+  "files": [
+   "src/components/sections/cefr-level-rows.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
    "/team"
   ]
  },
@@ -13440,6 +13820,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -13508,6 +13889,22 @@
   ],
   "pages": []
  },
+ "t.mehr-zu-den-niveaustufen.1wk02ex": {
+  "de": "Mehr zu den Niveaustufen",
+  "en": "More about the levels",
+  "files": [
+   "src/components/signatures/course-level-goals.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.mehr-zu-telc-deutsch.xiaprp": {
   "de": "Mehr zu telc Deutsch B2",
   "en": "More about telc Deutsch B2",
@@ -13526,6 +13923,29 @@
   ],
   "pages": [
    "/exams"
+  ]
+ },
+ "t.mehr-zur-stufe.162idne": {
+  "de": "Mehr zur Stufe {level}",
+  "en": "More about {level}",
+  "files": [
+   "src/components/sections/level-progression-timeline.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.mehrere-moeglich.1o2k99k": {
@@ -13625,6 +14045,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -14360,6 +14781,7 @@
    "/careers/[slug]",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -14433,6 +14855,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -14455,6 +14878,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -14695,6 +15119,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -14757,6 +15182,7 @@
   "de": "Niveaustufen",
   "en": "Levels",
   "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx",
    "src/components/sections/level-progression-timeline.tsx"
   ],
   "pages": [
@@ -14767,6 +15193,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -14919,6 +15346,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -15407,6 +15835,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -16044,6 +16473,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -16487,6 +16917,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -16755,6 +17186,16 @@
    "/courses"
   ]
  },
+ "t.sechs-stufen-in-drei.1buauf": {
+  "de": "Sechs Stufen in drei Bereichen",
+  "en": "Six levels in three bands",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
+  ]
+ },
  "t.sechs.1eiph2a": {
   "de": "Sechs",
   "en": "Six",
@@ -16878,6 +17319,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -16904,6 +17346,29 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.selbststaendige-sprachverwendung.m7p0gc": {
+  "de": "Selbstständige Sprachverwendung",
+  "en": "Independent user",
+  "files": [
+   "src/config/content/cefr-levels.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.selbstverpflegung.ll03me": {
@@ -17168,6 +17633,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17535,6 +18001,7 @@
    "src/app/(site)/[locale]/careers/[slug]/page.tsx",
    "src/app/(site)/[locale]/careers/page.tsx",
    "src/app/(site)/[locale]/contact/page.tsx",
+   "src/app/(site)/[locale]/courses/levels/page.tsx",
    "src/app/(site)/[locale]/courses/page.tsx",
    "src/app/(site)/[locale]/exams/[code]/page.tsx",
    "src/app/(site)/[locale]/exams/page.tsx",
@@ -17557,6 +18024,7 @@
    "/careers/[slug]",
    "/contact",
    "/courses",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17587,6 +18055,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17619,6 +18088,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17641,6 +18111,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17903,6 +18374,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17925,6 +18397,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -17987,6 +18460,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18037,6 +18511,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18341,6 +18816,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18363,6 +18839,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18385,6 +18862,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18407,6 +18885,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18506,6 +18985,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18558,6 +19038,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18664,6 +19145,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -18834,6 +19316,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -19039,6 +19522,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -19991,6 +20475,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20023,6 +20508,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20212,6 +20698,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.von-a1-bis-c1.1lsfam3": {
+  "de": "Von A1 bis C1, Stufe für Stufe",
+  "en": "From A1 to C1, step by step",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
   ]
  },
  "t.von-der-anfrage-bis.10fxaxv": {
@@ -20484,6 +20980,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20506,6 +21003,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20565,6 +21063,7 @@
    "/contact",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20627,6 +21126,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20719,6 +21219,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -20989,6 +21490,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -21336,6 +21838,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -21510,6 +22013,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -21967,6 +22471,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -22283,6 +22788,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.wir-orientieren-uns-streng.1r8mfh1": {
+  "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
+  "en": "We keep strictly to the Common European Framework of Reference for Languages (CEFR). It describes what you can understand and say at each level. B1+ is an extra step of our intensive course, between B1 and B2.",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
+  ]
+ },
  "t.wir-pruefen-deine-anmeldung.13aus0z": {
   "de": "Wir prüfen deine Anmeldung",
   "en": "We check your registration",
@@ -22548,6 +23063,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -22580,6 +23096,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -22642,6 +23159,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -22693,6 +23211,7 @@
    "/calculator",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -22839,6 +23358,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",
@@ -23103,14 +23623,38 @@
    "/courses"
   ]
  },
+ "t.zum-einstufungstest.1c834ug": {
+  "de": "Zum Einstufungstest",
+  "en": "Go to the placement test",
+  "files": [
+   "src/app/(site)/[locale]/courses/levels/page.tsx"
+  ],
+  "pages": [
+   "/courses/levels"
+  ]
+ },
  "t.zum-intensivkurs.zzp7ph": {
   "de": "Zum Intensivkurs",
   "en": "See the intensive course",
   "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
+   "src/app/(site)/[locale]/courses/page.tsx",
+   "src/components/sections/cefr-level-rows.tsx"
   ],
   "pages": [
-   "/courses"
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.zum-kontaktformular.vbqktg": {
@@ -23526,6 +24070,29 @@
    "/contact"
   ]
  },
+ "t.zwischenstufe-im-intensivkurs-zw.10lxrtl": {
+  "de": "Zwischenstufe im Intensivkurs, zwischen B1 und B2",
+  "en": "An in-between step of the intensive course, between B1 and B2",
+  "files": [
+   "src/components/sections/cefr-level-rows.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.zwischenstufe.1hqvqds": {
   "de": "Zwischenstufe",
   "en": "In-between level",
@@ -23540,6 +24107,7 @@
    "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
+   "/courses/levels",
    "/exams",
    "/exams/[code]",
    "/faq",

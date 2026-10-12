@@ -1,4 +1,6 @@
+import { TextCta } from '@/components/ui/text-cta';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
+import { LEVELS_PATH } from '@/config/content/cefr-levels';
 import { cn } from '@/lib/utils';
 import { say } from '@/lib/cms/copy';
 
@@ -182,6 +184,16 @@ export function CourseLevelGoals({
             </ul>
           </div>
         ))}
+      </div>
+
+      {/*
+        The levels page says in full what each level means; this section holds
+        the short version, so one quiet link under the ladder leads there
+        (2026-10-12). One link for the section, not one per row: six repeated
+        "more" links read as noise.
+      */}
+      <div className="mt-6">
+        <TextCta href={LEVELS_PATH}>{say(locale, 'Mehr zu den Niveaustufen', 'More about the levels')}</TextCta>
       </div>
 
       {/*

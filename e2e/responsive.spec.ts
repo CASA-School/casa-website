@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
  * every page at 24 sizes; this keeps the worst three from coming back.
  */
 
-const PAGES = ['/', '/sprachkurse', '/sprachkurse/deutsch-intensiv', '/unterkunft', '/kontakt', '/anmeldung/anmeldeformular', '/kostenrechner', '/ratgeber/studieren-in-deutschland', '/en/courses'];
+const PAGES = ['/', '/sprachkurse', '/sprachkurse/deutsch-intensiv', '/sprachkurse/niveaustufen', '/unterkunft', '/kontakt', '/anmeldung/anmeldeformular', '/kostenrechner', '/ratgeber/studieren-in-deutschland', '/en/courses'];
 
 const SIZES = [
   { name: 'phone 320', width: 320, height: 568, touch: true },

@@ -171,6 +171,7 @@
     "query": "Was bedeutet B1+ und wie lange dauert diese Stufe?",
     "kind": "question",
     "expect": [
+      "/courses/levels",
       "/courses/intensive-german",
       "/courses"
     ],
@@ -186,6 +187,7 @@
     "query": "Welche Niveaustufen kann ich bei euch lernen?",
     "kind": "question",
     "expect": [
+      "/courses/levels",
       "/courses",
       "/placement-test",
       "/courses/intensive-german"
@@ -1607,5 +1609,49 @@
     ],
     "facts": [],
     "topic": "careers"
+  },
+  {
+    "id": "level-a2-meaning-de",
+    "locale": "de",
+    "query": "Was kann ich auf dem Niveau A2?",
+    "kind": "question",
+    "expect": [
+      "/courses/levels"
+    ],
+    "facts": [],
+    "topic": "levels"
+  },
+  {
+    "id": "level-b2-meaning-en",
+    "locale": "en",
+    "query": "What does level B2 mean?",
+    "kind": "question",
+    "expect": [
+      "/courses/levels"
+    ],
+    "facts": [],
+    "topic": "levels"
+  },
+  {
+    "id": "search-niveaustufen-de",
+    "locale": "de",
+    "query": "niveaustufen",
+    "kind": "search",
+    "expect": [
+      "/courses/levels"
+    ],
+    "facts": [],
+    "topic": "levels"
+  },
+  {
+    "id": "search-cefr-levels-en",
+    "locale": "en",
+    "query": "cefr levels explained",
+    "kind": "search",
+    "expect": [
+      "/courses/levels"
+    ],
+    "facts": [],
+    "topic": "levels"
   }
 ]

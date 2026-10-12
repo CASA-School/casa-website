@@ -911,6 +911,10 @@
     "de": "Bei uns kannst du die Prüfungen telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen. Für die Niveaus A1 bis B1 bieten wir leider keine Prüfungen an. Das Ergebnis und das Zertifikat liegen etwa 6 Wochen nach der Prüfung vor. Wir informieren alle Teilnehmenden, sobald sie bei uns eingegangen sind.",
     "text": "يمكنك لدينا أداء امتحانَي telc Deutsch B2 و telc Deutsch C1 Hochschule. وللأسف لا نقدّم امتحانات للمستويات من A1 إلى B1. وتصدر النتيجة والشهادة بعد نحو 6 أسابيع من الامتحان، ونُبلغ جميع المشاركين فور وصولهما إلينا."
   },
+  "t.bei-uns-laufen-fortlaufend.6yhjpf": {
+    "de": "Bei uns laufen fortlaufend Kurse auf den Niveaustufen A1, A2, B1, B1+, B2 und C1. Hier siehst du, was du auf jeder Stufe kannst.",
+    "text": "تُعقد لدينا باستمرار دورات في المستويات A1 و A2 و B1 و B1+ و B2 و C1. وهنا يمكنك أن ترى ما تستطيع فعله في كل مستوى."
+  },
   "t.bei-uns-lernst-du.1o2gpuc": {
     "de": "Bei uns lernst du in kleinen Gruppen, und wir zeigen dir den nächsten Schritt.",
     "text": "تتعلّم لدينا في مجموعات صغيرة، ونوضّح لك الخطوة التالية."
@@ -1230,6 +1234,10 @@
   "t.buchhaltung.fiaocz": {
     "de": "Buchhaltung",
     "text": "المحاسبة"
+  },
+  "t.buchstaben-aus-goldenen-paillett.my7ec0": {
+    "de": "Buchstaben aus goldenen Pailletten auf einer bemalten Leinwand",
+    "text": "حروف مصنوعة من الترتر الذهبي على لوحة قماشية مرسومة"
   },
   "t.buero-kontaktieren.19ubqhj": {
     "de": "Büro kontaktieren",
@@ -2055,6 +2063,10 @@
     "de": "Die Niveaustufen bei CASA als Treppe, von A1 bis C1. Jede Stufe führt zu den passenden Kursen.",
     "text": "المستويات في CASA على شكل درج، من A1 إلى C1. وكل درجة تقود إلى الدورات المناسبة لها."
   },
+  "t.die-niveaustufen-von-a1.1sk5zcn": {
+    "de": "Die Niveaustufen von A1 bis C1",
+    "text": "المستويات من A1 إلى C1"
+  },
   "t.die-pakete.indizy": {
     "de": "Die Pakete",
     "text": "الباقات"
@@ -2207,9 +2219,9 @@
     "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
     "text": "تعمل بشكل وثيق مع المعلمين وفريق التنسيق."
   },
-  "t.du-baust-wortschatz-grammatik.kie2so": {
-    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. Ab hier lernst du mit dem Lehrwerk Kontext.",
-    "text": "توسّع المفردات والقواعد والتعابير التي تعلّمتها في المستوى B1، وتتدرّب على التحدث والكتابة بحرية. ومن هنا تتعلّم بالكتاب الدراسي Kontext."
+  "t.du-baust-wortschatz-grammatik.mvn6u6": {
+    "de": "Du baust Wortschatz, Grammatik und Redemittel aus der B1 aus, übst das freie Sprechen und Schreiben und wirst sicherer. Ab hier lernst du mit Kontext.",
+    "text": "توسّع المفردات والقواعد والتعابير التي تعلّمتها في المستوى B1، وتتدرّب على التحدث والكتابة بحرية، وتزداد ثقةً. ومن هنا تتعلّم بالكتاب الدراسي Kontext."
   },
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
@@ -2279,21 +2291,9 @@
     "de": "Du hast eine Frage oder schon einen Plan? Schreib uns. Wir helfen dir gern weiter.",
     "text": "هل لديك سؤال أو خطة بالفعل؟ راسلنا، ويسعدنا أن نساعدك."
   },
-  "t.du-kannst-deine-meinung.1d3iikb": {
-    "de": "Du kannst deine Meinung sagen, längere Texte verstehen und Präsentationen halten.",
-    "text": "تستطيع التعبير عن رأيك، وفهم نصوص أطول، وتقديم عروض."
-  },
-  "t.du-kannst-deine-meinung.1xja4wo": {
-    "de": "Du kannst deine Meinung begründen und längere Gespräche im Beruf führen.",
-    "text": "تستطيع تعليل رأيك وإجراء محادثات أطول في العمل."
-  },
   "t.du-kannst-dich-entweder.i88v94": {
     "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.",
     "text": "يمكنك التسجيل إما عبر نموذجنا الإلكتروني أو في مكتبنا. ويُرجى أن تُجري قبل ذلك اختبار تحديد المستوى وترسل إلينا النتيجة، حتى نضعك في المجموعة المناسبة."
-  },
-  "t.du-kannst-dich-vorstellen.uukfum": {
-    "de": "Du kannst dich vorstellen, einfache Fragen stellen und Alltagsgespräche führen.",
-    "text": "تستطيع تقديم نفسك وطرح أسئلة بسيطة وإجراء محادثات يومية."
   },
   "t.du-kannst-ein-modul.x5kfg5": {
     "de": "Du kannst ein Modul einzeln belegen oder neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.",
@@ -2303,17 +2303,13 @@
     "de": "Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.",
     "text": "يمكنك الحجز لمدة من أسبوع إلى تسعة أسابيع، والالتحاق في أي يوم اثنين."
   },
-  "t.du-kannst-ueber-deine.wxzyen": {
-    "de": "Du kannst über deine Erfahrungen berichten und einfache Mitteilungen schreiben.",
-    "text": "تستطيع الحديث عن تجاربك وكتابة رسائل بسيطة."
-  },
   "t.du-kannst-uns-gern.1ly90q8": {
     "de": "Du kannst uns gern eine Initiativbewerbung schicken. Wir melden uns bei dir, sobald eine passende Stelle frei wird.",
     "text": "يسعدنا أن ترسل إلينا طلب توظيف بمبادرة منك. وسنتواصل معك فور توفّر وظيفة مناسبة."
   },
-  "t.du-kommst-in-alltagssituationen.1ijx71k": {
-    "de": "Du kommst in Alltagssituationen zurecht und schreibst kurze Berichte.",
-    "text": "تتدبّر أمورك في مواقف الحياة اليومية، وتكتب تقارير قصيرة."
+  "t.du-kennst-dein-niveau.9un8tq": {
+    "de": "Du kennst dein Niveau noch nicht?",
+    "text": "ألا تعرف مستواك بعد؟"
   },
   "t.du-kommunizierst-klar-und.1jpxwa6": {
     "de": "Du kommunizierst klar und verständlich mit Menschen aus vielen Ländern.",
@@ -2347,10 +2343,6 @@
     "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
     "text": "تتعلّم صباحًا أو بعد الظهر. وتُعقد دورة بعد الظهر من الاثنين إلى الخميس."
   },
-  "t.du-liest-anspruchsvolle-texte.o1gomg": {
-    "de": "Du liest anspruchsvolle Texte und drückst dich im Beruf flexibel aus.",
-    "text": "تقرأ نصوصًا صعبة وتعبّر عن نفسك بمرونة في العمل."
-  },
   "t.du-moechtest-in-deutschland.1b4asxf": {
     "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
     "text": "هل تريد الدراسة في ألمانيا؟ يساعدك هذا الدليل في التخطيط، من اختيار التخصص مرورًا بدورة اللغة وحتى الوصول."
@@ -2371,17 +2363,9 @@
     "de": "Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.",
     "text": "يُفترض أن تكون قد أنهيت بنجاح دورة في المستوى C1، لأن مفردات المستوى C1 وتعابيره وقواعده ليست من محتوى الدورة. ويمكنك بدلًا من ذلك إجراء اختبار تحديد المستوى لدينا في المدرسة."
   },
-  "t.du-sprichst-fliessend-und.4qeqfb": {
-    "de": "Du sprichst fließend und spontan und kannst akademische Texte analysieren.",
-    "text": "تتحدث بطلاقة وعفوية، وتستطيع تحليل النصوص الأكاديمية."
-  },
   "t.du-sprichst-mehr-und.ack6nb": {
     "de": "Du sprichst mehr und wirst im Alltag sicherer.",
     "text": "تتحدث أكثر وتزداد ثقتك في الحياة اليومية."
-  },
-  "t.du-sprichst-spontan-und.c900im": {
-    "de": "Du sprichst spontan und flexibel und kannst anspruchsvolle Texte verarbeiten.",
-    "text": "تتحدث بعفوية ومرونة، وتستطيع التعامل مع النصوص الصعبة."
   },
   "t.du-stehst-auf-der.141t38r": {
     "de": "Du stehst auf der Liste",
@@ -2415,9 +2399,17 @@
     "de": "Du übst gezielt Grammatik, Schreiben oder Sprechen.",
     "text": "تتدرّب بتركيز على القواعد أو الكتابة أو المحادثة."
   },
-  "t.du-verstehst-das-wichtigste.1drp1it": {
-    "de": "Du verstehst das Wichtigste bei vertrauten Themen und kannst deine Meinung begründen.",
-    "text": "تفهم أهم النقاط في الموضوعات المألوفة، وتستطيع تعليل رأيك."
+  "t.du-verstaendigst-dich-in.1gzvx9i": {
+    "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
+    "text": "تتفاهم في المواقف اليومية البسيطة، وتصف بكلمات بسيطة أصلك وتعليمك ومحيطك."
+  },
+  "t.du-verstehst-anspruchsvolle-laen.1s0qlda": {
+    "de": "Du verstehst anspruchsvolle, längere Texte, auch zwischen den Zeilen, und drückst dich spontan, fließend und flexibel aus, im Beruf wie im Studium.",
+    "text": "تفهم النصوص الطويلة الصعبة، بما في ذلك ما بين السطور، وتعبّر عن نفسك بعفوية وطلاقة ومرونة، في العمل كما في الدراسة الجامعية."
+  },
+  "t.du-verstehst-das-wichtigste.o06fb2": {
+    "de": "Du verstehst das Wichtigste zu vertrauten Themen, erzählst von Erfahrungen, Träumen und Zielen und begründest kurz deine Ansichten.",
+    "text": "تفهم النقاط الأساسية في الموضوعات المألوفة، وتتحدث عن تجاربك وأحلامك وأهدافك، وتعلّل آراءك باختصار."
   },
   "t.du-verstehst-die-hauptinhalte.9gzpz1": {
     "de": "Du verstehst die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen und in deinem eigenen Fachgebiet auch Fachdiskussionen. Du kannst dich so spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlerinnen und Muttersprachlern für beide Seiten ohne größere Anstrengung möglich ist. Zu vielen verschiedenen Themen kannst du dich klar und ausführlich äußern, deinen Standpunkt zu einer aktuellen Frage erklären und die Vor- und Nachteile verschiedener Möglichkeiten nennen.",
@@ -2431,21 +2423,17 @@
     "de": "Du verstehst die wichtigsten Informationen, wenn klare Standardsprache gesprochen wird und es um vertraute Dinge aus Arbeit, Schule, Freizeit oder Reisen geht. Du kannst dich zusammenhängend über vertraute Themen und deine Interessen äußern, über Erfahrungen, Träume, Hoffnungen und Ziele sprechen und Erklärungen und Begründungen geben. Du möchtest aber noch an Strukturen und Satzbau arbeiten, Redemittel üben, deinen Wortschatz ausbauen und sicherer werden. Dann ist die B1+ die richtige Stufe für dich. Hier baust du Wortschatz, Grammatik und Redemittel aus der B1 aus und übst das freie Sprechen und Schreiben. So schaffst du dir eine solide Grundlage für die B2. Ab der B1+ arbeitet der Kurs mit dem Lehrwerk Kontext.",
     "text": "تفهم أهم المعلومات عندما يُتحدَّث بلغة معيارية واضحة عن أمور مألوفة من العمل أو المدرسة أو أوقات الفراغ أو السفر. وتستطيع التعبير بترابط عن الموضوعات المألوفة واهتماماتك، والحديث عن تجاربك وأحلامك وآمالك وأهدافك، وتقديم الشروح والتعليلات. لكنك تريد أن تعمل أكثر على التراكيب وبناء الجملة، وأن تتدرّب على التعابير، وأن توسّع مفرداتك وتزداد ثقة. عندئذٍ يكون المستوى B1+ هو المستوى المناسب لك. فيه توسّع المفردات والقواعد والتعابير التي تعلّمتها في المستوى B1، وتتدرّب على التحدث والكتابة بحرية. وهكذا تبني أساسًا متينًا للمستوى B2. وبدءًا من المستوى B1+ تعمل الدورة بالكتاب الدراسي Kontext."
   },
-  "t.du-verstehst-einfache-saetze.u1to26": {
-    "de": "Du verstehst einfache Sätze und lernst den Grundwortschatz für den Alltag.",
-    "text": "تفهم الجمل البسيطة، وتتعلّم المفردات الأساسية للحياة اليومية."
-  },
-  "t.du-verstehst-komplexe-argumente.cqrg22": {
-    "de": "Du verstehst komplexe Argumente und kannst an Fachdiskussionen teilnehmen.",
-    "text": "تفهم الحجج المعقدة، وتستطيع المشاركة في النقاشات المتخصصة."
-  },
-  "t.du-verstehst-komplexe-texte.gg00qq": {
-    "de": "Du verstehst komplexe Texte und führst im Beruf spontan Gespräche.",
-    "text": "تفهم النصوص المعقدة، وتُجري المحادثات في العمل بعفوية."
+  "t.du-verstehst-komplexe-texte.1rbrrkb": {
+    "de": "Du verstehst komplexe Texte und Fachdiskussionen in deinem Gebiet und unterhältst dich spontan und fließend, klar und ausführlich zu vielen Themen.",
+    "text": "تفهم النصوص المعقدة والنقاشات المتخصصة في مجالك، وتتحدث بعفوية وطلاقة، وبوضوح وتفصيل، في موضوعات كثيرة."
   },
   "t.du-verstehst-saetze-und.12defvx": {
     "de": "Du verstehst Sätze und häufig gebrauchte Ausdrücke zu Themen, die dich direkt betreffen, zum Beispiel zu dir und deiner Familie, zum Einkaufen, zur Arbeit oder zu deiner näheren Umgebung. In einfachen, alltäglichen Situationen kannst du dich verständigen, wenn es um einen einfachen und direkten Austausch über vertraute Dinge geht. Mit einfachen Worten kannst du deine Herkunft und Ausbildung, deine Umgebung und Dinge beschreiben, die du gerade brauchst.",
     "text": "تفهم الجمل والتعابير الشائعة في موضوعات تخصّك مباشرةً، مثل معلومات عنك وعن عائلتك، والتسوّق، والعمل، ومحيطك القريب. وتستطيع التفاهم في المواقف اليومية البسيطة، عندما يتعلق الأمر بتبادل بسيط ومباشر حول أمور مألوفة. وبكلمات بسيطة تستطيع وصف أصلك وتعليمك ومحيطك والأشياء التي تحتاجها الآن."
+  },
+  "t.du-verstehst-und-verwendest.4wl73h": {
+    "de": "Du verstehst und verwendest vertraute Alltagsausdrücke und ganz einfache Sätze, stellst dich vor und stellst und beantwortest einfache Fragen zur Person.",
+    "text": "تفهم التعابير اليومية المألوفة والجمل البسيطة جدًا وتستخدمها، وتعرّف بنفسك، وتطرح أسئلة بسيطة عن المعلومات الشخصية وتجيب عنها."
   },
   "t.du-verstehst-vertraute-alltaegli.ngwyvd": {
     "de": "Du verstehst vertraute, alltägliche Ausdrücke und ganz einfache Sätze und kannst sie selbst verwenden, um zu sagen, was du im Alltag brauchst. Du kannst dich und andere vorstellen und anderen Fragen zu ihrer Person stellen, zum Beispiel, wo sie wohnen, wen sie kennen oder was sie haben. Auf solche Fragen kannst du auch selbst antworten. Du kannst dich auf einfache Art verständigen, wenn dein Gegenüber langsam und deutlich spricht und bereit ist, dir zu helfen.",
@@ -2495,6 +2483,10 @@
     "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
     "text": "تستمر الدورة المسائية نحو 3½ أشهر. وخلال هذه المدة تُنهي نصف مستوى، مثل A1.2 أو B2.1. وهكذا تُنجز في السنة نحو 1½ مستوى."
   },
+  "t.ein-baby-krabbelt-und.acgqmh": {
+    "de": "Ein Baby krabbelt und schaut neugierig nach oben",
+    "text": "رضيع يحبو وينظر إلى الأعلى بفضول"
+  },
   "t.ein-deutschkurs-bei-casa.2u5cuy": {
     "de": "Ein Deutschkurs bei CASA in Bremen.",
     "text": "دورة لتعلّم الألمانية لدى CASA في بريمن."
@@ -2530,6 +2522,14 @@
   "t.ein-halbes-niveau-in.ax0vri": {
     "de": "Ein halbes Niveau in etwa 3,5 Monaten",
     "text": "نصف مستوى في نحو 3,5 أشهر"
+  },
+  "t.ein-junge-schwimmt-mit.11evmv": {
+    "de": "Ein Junge schwimmt mit einem blauen Schwimmring im Wasser",
+    "text": "صبي يسبح في الماء بطوق سباحة أزرق"
+  },
+  "t.ein-maedchen-springt-ueber.1yqmh9a": {
+    "de": "Ein Mädchen springt über eine Wiese, darüber blauer Himmel",
+    "text": "فتاة تقفز في مرج تحت سماء زرقاء"
   },
   "t.ein-modul-laeuft-an.fwp2vw": {
     "de": "Ein Modul läuft an einem Abend pro Woche, jeweils 90 Minuten, meist an 12 Abenden. Beginnt ein Modul später, hat es weniger Abende, zu {course.special-courses.price-per-evening} pro Abend.",
@@ -2695,6 +2695,14 @@
     "de": "Eine Hand schreibt mit einem Stift auf Papier",
     "text": "يد تكتب بقلم على ورقة"
   },
+  "t.eine-junge-frau-kniet.mn4sk6": {
+    "de": "Eine junge Frau kniet in Startposition auf einer Straße",
+    "text": "شابة تجثو في وضعية الانطلاق على طريق"
+  },
+  "t.eine-laeuferin-nimmt-am.zntjqk": {
+    "de": "Eine Läuferin nimmt am Meer die Treppe hinauf",
+    "text": "عدّاءة تصعد الدرج عند البحر"
+  },
   "t.eine-lehrerin-am-bildschirm.1xgfl68": {
     "de": "Eine Lehrerin am Bildschirm mit ihrer Klasse",
     "text": "معلمة أمام الشاشة مع صفّها"
@@ -2803,6 +2811,10 @@
     "de": "Einzelne Lernende oder Gruppen",
     "text": "متعلمون أفراد أو مجموعات"
   },
+  "t.elementare-sprachverwendung.17h254x": {
+    "de": "Elementare Sprachverwendung",
+    "text": "الاستخدام الأساسي للغة"
+  },
   "t.empfohlen.x9gqd6": {
     "de": "Empfohlen",
     "text": "موصى به"
@@ -2862,6 +2874,10 @@
   "t.esel-hund-katze-hahn.1v12ywe": {
     "de": "Esel, Hund, Katze, Hahn – und dein ganz eigener Weg nach Bremen",
     "text": "الحمار والكلب والقطة والديك، وطريقك الخاص إلى بريمن"
+  },
+  "t.etwa-wochen.zc1ikx": {
+    "de": "etwa {weeks} Wochen",
+    "text": "نحو {weeks} أسابيع"
   },
   "t.etwas-geld-als-reserve.9klh2n": {
     "de": "Etwas Geld als Reserve hilft dir bei ersten Anschaffungen und unerwarteten Ausgaben in den ersten Wochen.",
@@ -3367,6 +3383,10 @@
     "de": "Gemeinsame Nutzung in der WG",
     "text": "مشترك مع زملاء السكن"
   },
+  "t.gemeinsamer-europaeischer-refere.ypd010": {
+    "de": "Gemeinsamer Europäischer Referenzrahmen",
+    "text": "الإطار الأوروبي المرجعي العام للغات"
+  },
   "t.gemeinschaft.1sz6tmb": {
     "de": "Gemeinschaft",
     "text": "المجتمع"
@@ -3750,6 +3770,10 @@
   "t.im-intensivkurs-mit-unterrichtse.vt2f56": {
     "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe etwa 8 bis 9 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
     "text": "في الدورة المكثفة، بواقع {course.intensive-german.lessons} حصة دراسية في الأسبوع، يستغرق المستوى الكامل نحو 8 إلى 9 أسابيع. وفي الدورة المسائية تُنجز نصف مستوى في نحو 3,5 أشهر، أي قرابة 1,5 مستوى في السنة."
+  },
+  "t.im-intensivkurs.136g3x5": {
+    "de": "Im Intensivkurs",
+    "text": "في الدورة المكثفة"
   },
   "t.im-klinikalltag-ist-es.taud3v": {
     "de": "Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal, dazu das Hörverstehen und die schriftliche Dokumentation im Beruf.",
@@ -4347,6 +4371,10 @@
     "de": "Kompakte Tagesblöcke nach Absprache",
     "text": "فترات نهارية مركّزة حسب الاتفاق"
   },
+  "t.kompetente-sprachverwendung.1n1x676": {
+    "de": "Kompetente Sprachverwendung",
+    "text": "الاستخدام المتقن للغة"
+  },
   "t.konstanter-fortschritt-schafft-s.1wwngq": {
     "de": "Konstanter Fortschritt schafft Sicherheit für Studium und Beruf.",
     "text": "التقدّم المنتظم يمنحك الثقة في الدراسة والعمل."
@@ -4615,6 +4643,10 @@
     "de": "Kursweg",
     "text": "مسار الدورات"
   },
+  "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
+    "de": "Läuferinnen laufen jubelnd durch das Zielband",
+    "text": "عدّاءات يقطعن شريط خط النهاية وهن يهتفن فرحًا"
+  },
   "t.laeuft-bereits.qmroe8": {
     "de": "läuft bereits",
     "text": "جارية حاليًا"
@@ -4626,6 +4658,10 @@
   "t.langfristiger-fortschritt.xvw54l": {
     "de": "Langfristiger Fortschritt",
     "text": "تقدّم على المدى الطويل"
+  },
+  "t.lass-dich-gern-von.x9wxts": {
+    "de": "Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
+    "text": "يسعدنا أن نقدّم لك الاستشارة. وتُعدّ اختباراتنا المجانية لتحديد المستوى عبر الإنترنت أساسًا جيدًا لذلك. وإن كنت لا تعرف شيئًا من الألمانية بعد، فلا تحتاج إلى اختبار، بل تبدأ ببساطة من المستوى A1."
   },
   "t.lass-dich-zuerst-beraten.8uix9j": {
     "de": "Lass dich zuerst beraten",
@@ -4694,6 +4730,10 @@
   "t.lehrwerk-netzwerk-neu.17hkji": {
     "de": "Lehrwerk Netzwerk neu",
     "text": "الكتاب الدراسي Netzwerk neu"
+  },
+  "t.lehrwerk.1oj28xk": {
+    "de": "Lehrwerk",
+    "text": "الكتاب الدراسي"
   },
   "t.leitung.1srtrnz": {
     "de": "Leitung",
@@ -4863,6 +4903,10 @@
     "de": "Mehr Sprechsicherheit",
     "text": "ثقة أكبر عند الكلام"
   },
+  "t.mehr-zu-den-niveaustufen.1wk02ex": {
+    "de": "Mehr zu den Niveaustufen",
+    "text": "المزيد عن المستويات"
+  },
   "t.mehr-zu-telc-deutsch.xiaprp": {
     "de": "Mehr zu telc Deutsch B2",
     "text": "المزيد عن telc Deutsch B2"
@@ -4870,6 +4914,10 @@
   "t.mehr-zur-pruefung.185bh7": {
     "de": "Mehr zur Prüfung",
     "text": "المزيد عن الامتحان"
+  },
+  "t.mehr-zur-stufe.162idne": {
+    "de": "Mehr zur Stufe {level}",
+    "text": "المزيد عن المستوى {level}"
   },
   "t.mehrere-moeglich.1o2k99k": {
     "de": "Mehrere möglich",
@@ -5346,6 +5394,10 @@
   "t.niveauschritte.1cng3m1": {
     "de": "Niveauschritte",
     "text": "خطوات المستويات"
+  },
+  "t.niveaustufen.16jh7p8": {
+    "de": "Niveaustufen",
+    "text": "المستويات"
   },
   "t.niveaustufen.8erybc": {
     "de": "Niveaustufen",
@@ -6099,6 +6151,10 @@
     "de": "Sechs Niveaustufen von A1 bis C1, im Intensivkurs je etwa 8–9 Wochen.",
     "text": "ستة مستويات من A1 إلى C1، يستغرق كلٌّ منها في الدورة المكثفة نحو 8–9 أسابيع."
   },
+  "t.sechs-stufen-in-drei.1buauf": {
+    "de": "Sechs Stufen in drei Bereichen",
+    "text": "ستة مستويات في ثلاث فئات"
+  },
   "t.sechs.1eiph2a": {
     "de": "Sechs",
     "text": "ستة"
@@ -6154,6 +6210,10 @@
   "t.selbst-zusammenstellen.mvc58b": {
     "de": "Selbst zusammenstellen",
     "text": "صمّم برنامجك بنفسك"
+  },
+  "t.selbststaendige-sprachverwendung.m7p0gc": {
+    "de": "Selbstständige Sprachverwendung",
+    "text": "الاستخدام المستقل للغة"
   },
   "t.selbstverpflegung.ll03me": {
     "de": "Selbstverpflegung",
@@ -7315,6 +7375,10 @@
     "de": "Vollverpflegung",
     "text": "جميع الوجبات"
   },
+  "t.von-a1-bis-c1.1lsfam3": {
+    "de": "Von A1 bis C1, Stufe für Stufe",
+    "text": "من A1 إلى C1، مستوى بعد مستوى"
+  },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
     "text": "من الاستفسار حتى المغادرة، لديك شخص واحد ثابت تتواصل معه."
@@ -7578,6 +7642,10 @@
   "t.was-dir-ein-tandem.15zg4yw": {
     "de": "Was dir ein Tandem bringt",
     "text": "ما يقدّمه لك التبادل اللغوي"
+  },
+  "t.was-du-auf-jeder.1qusc0s": {
+    "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
+    "text": "ما تستطيع فعله في كل مستوى، من A1 إلى C1."
   },
   "t.was-du-auf-jeder.6gi060": {
     "de": "Was du auf jeder Stufe kannst",
@@ -8067,6 +8135,10 @@
     "de": "Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.",
     "text": "نتواصل معك بالبريد الإلكتروني أو بالهاتف لإبلاغك بالمواعيد، ثم تسجّل تسجيلًا نهائيًا."
   },
+  "t.wir-orientieren-uns-streng.1r8mfh1": {
+    "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
+    "text": "نلتزم التزامًا صارمًا بالإطار الأوروبي المرجعي العام للغات، الذي يصف ما تستطيع فهمه وقوله في كل مستوى. أما المستوى B1+ فهو مستوى قائم بذاته في دورتنا المكثفة، يقع بين B1 و B2."
+  },
   "t.wir-planen-den-unterricht.119fu4": {
     "de": "Wir planen den Unterricht gemeinsam mit der Firma.",
     "text": "نخطّط للدروس بالتعاون مع الشركة."
@@ -8371,6 +8443,10 @@
     "de": "Zum Einstufungstest",
     "text": "إلى اختبار تحديد المستوى"
   },
+  "t.zum-einstufungstest.1c834ug": {
+    "de": "Zum Einstufungstest",
+    "text": "إلى اختبار تحديد المستوى"
+  },
   "t.zum-intensivkurs.zzp7ph": {
     "de": "Zum Intensivkurs",
     "text": "إلى الدورة المكثفة"
@@ -8506,6 +8582,10 @@
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",
     "text": "النصف الثاني من يوليو"
+  },
+  "t.zwischenstufe-im-intensivkurs-zw.10lxrtl": {
+    "de": "Zwischenstufe im Intensivkurs, zwischen B1 und B2",
+    "text": "مستوى وسيط في الدورة المكثفة، بين B1 و B2"
   },
   "t.zwischenstufe.1hqvqds": {
     "de": "Zwischenstufe",

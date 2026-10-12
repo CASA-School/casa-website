@@ -64,7 +64,7 @@ npm run cms:translations  # the six prepared languages: status, `-- todo`, `-- m
 npm run placement:port  # re-ports the placement item bank from its source markdown
 npm run qa:responsive -- chromium|webkit|firefox  # every page at 24 sizes against `next start -p 3018` (docs/RESPONSIVE_AND_BROWSERS.md)
 npm run qa:shots -- chromium  # full-page screenshots of 15 key pages for a visual review
-npm run qa:clara     # the 120 golden questions against a running server: search and CLARA scores (docs/CLARA_AND_SEARCH.md)
+npm run qa:clara     # the 124 golden questions against a running server: search and CLARA scores (docs/CLARA_AND_SEARCH.md)
 ```
 
 `E2E_PORT=3017 npm run test:e2e` runs Playwright on its own port. Use it:
@@ -402,7 +402,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/DEPENDENCY_SECURITY_2026-08-16.md` | **Read before touching dependencies.** Advisory triage and resolution, why the CI audit gate is production-scope only, and the `ws` / `next-intl` reachability findings |
 | `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md` | Token comparison with the CASA student app and what should converge |
 | `docs/RESPONSIVE_AND_BROWSERS.md` | **Read before changing layout.** Supported browsers (Safari 16.4, Chrome/Edge 111, Firefox 128; no IE), the 24 sizes, the audit and screenshot scripts, and the rules that keep phones, foldables, tablets and large screens right |
-| `docs/CLARA_AND_SEARCH.md` | **Read before touching CLARA or the search.** The knowledge index of the live site, quick answers from live values, CLARA's turn, the switched-off AI mode, the 120 golden questions and how to measure |
+| `docs/CLARA_AND_SEARCH.md` | **Read before touching CLARA or the search.** The knowledge index of the live site, quick answers from live values, CLARA's turn, the switched-off AI mode, the 124 golden questions and how to measure |
 | `docs/TRANSLATIONS.md` | **Read when the German changes.** The site is kept translated into tr, ar, es, it, ru, uk (prepared, not routed): the run, the brief, the glossary |
 | `docs/VOICE_AND_TONE.md` | How the public site writes in German (du) and British English |
 | `docs/TEAM_UPDATE_2026-06-23.md` | Team-facing status, demo flow, open decisions |
