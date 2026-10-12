@@ -38,7 +38,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
               {item.href && !isCurrent ? (
                 <Link
                   href={item.href}
-                  className="rounded-lg px-1 py-0.5 transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+                  className="tap-target rounded-lg px-1 py-0.5 transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
                 >
                   {item.label}
                 </Link>

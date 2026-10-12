@@ -517,11 +517,13 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
             announces "1 of 6". Website feedback joins them as a full-width
             seventh only when the new-website notice sent the visitor here.
           */}
-          <fieldset id="topic" tabIndex={-1} className={cn(formFieldGroupClassName, 'min-w-0 sm:col-span-2')}>
+          <fieldset id="topic" tabIndex={-1} className={cn(formFieldGroupClassName, '@container min-w-0 sm:col-span-2')}>
             <legend className={cn(formLabelClassName, 'mb-2')}>
               {copy.topicLabel}<RequiredMark />
             </legend>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            {/* Columns by the fieldset's own width, not the screen's: beside the sidebar, or in a phone's
+                card, a screen-wide `grid-cols-2` left „Firmenunterricht" 55px and broke it letter by letter. */}
+            <div className="grid grid-cols-1 gap-2.5 @[26rem]:grid-cols-2 @[40rem]:grid-cols-3">
               {topicOptions.map((option) => {
                 const look = topicLook[option.key] ?? fallbackTopicLook;
                 const TopicIcon = look.icon;
@@ -531,8 +533,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                   <label
                     key={option.key}
                     className={cn(
-                      'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 py-2.5 text-sm font-semibold leading-snug text-[var(--casa-ink)] transition-[border-color,background-color,box-shadow] duration-150',
-                      look.wide && 'col-span-2 sm:col-span-3',
+                      'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white py-2.5 pl-3 pr-8 text-sm font-semibold leading-snug text-[var(--casa-ink)] transition-[border-color,background-color,box-shadow] duration-150',
+                      look.wide && 'col-span-full',
                       'has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--casa-blue)]/20',
                       checked
                         ? 'border-[var(--casa-accent-text)] bg-[var(--casa-blue-tint)]/45 shadow-[inset_0_0_0_1px_var(--casa-accent-text)]'
@@ -556,8 +558,8 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                     <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses[look.meaning].circle)}>
                       <TopicIcon className="size-[1.125rem]" aria-hidden />
                     </span>
-                    <span className="min-w-0 hyphens-auto">{option.label}</span>
-                    {checked ? <CheckCircle2 className="ml-auto size-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden /> : null}
+                    <span className="min-w-0">{option.label}</span>
+                    {checked ? <CheckCircle2 className="absolute right-2.5 top-2.5 size-4 text-[var(--casa-accent-text)]" aria-hidden /> : null}
                   </label>
                 );
               })}

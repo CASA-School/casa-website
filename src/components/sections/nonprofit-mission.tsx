@@ -42,7 +42,7 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
           <p className="mt-2 text-sm leading-relaxed text-[var(--casa-muted)]">
             {say(locale, 'Mit diesen Organisationen arbeiten wir in Bremen und darüber hinaus zusammen.', 'These are the organisations we work with, in Bremen and beyond.')}
           </p>
-          <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label={say(locale, 'Kooperationspartner', 'Cooperation partners')}>
+          <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 max-sm:[&>li:last-child:nth-child(odd)]:col-span-2" aria-label={say(locale, 'Kooperationspartner', 'Cooperation partners')}>
             {partners.map((partner) => (
               <li key={partner.id}>
                 <PartnerLogoTile partner={partner} size="sm" />
@@ -51,7 +51,7 @@ export function NonprofitMission({ locale }: { locale: ContentLocale }) {
           </ul>
           <Link
             href="/partners"
-            className="mt-6 inline-flex items-center gap-2 rounded-sm text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"
+            className="tap-target mt-6 inline-flex items-center gap-2 rounded-sm text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"
           >
             {say(locale, 'Alle Kooperationspartner ansehen', 'See all cooperation partners')}
             <ArrowRight className="size-4" aria-hidden />

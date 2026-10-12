@@ -33,13 +33,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const externalLinkClass =
-  'inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]';
+  'tap-target inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 transition-colors hover:text-[var(--casa-accent-text-hover)] hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]';
 
 function ExternalLink({ href, children, locale }: { href: string; children: React.ReactNode; locale: ContentLocale }) {
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className={externalLinkClass}>
       {children}
-      <span aria-hidden="true">↗</span>
+      <ArrowRight aria-hidden="true" className="inline size-3.5 -rotate-45 align-[-0.1em]" />
       <span className="sr-only">{say(locale, '(öffnet in einem neuen Tab)', '(opens in a new tab)')}</span>
     </a>
   );
@@ -150,7 +150,7 @@ export default async function PartnersPage() {
                   >
                     <Image src={school.logo} alt={school.name} width={240} height={100} className="h-16 w-full object-contain" sizes="(min-width: 1024px) 240px, 40vw" />
                     <span className="mt-3 text-sm font-semibold text-[var(--casa-ink)]">
-                      {school.name}{'\u00a0'}<span aria-hidden="true">↗</span>
+                      {school.name}{'\u00a0'}<ArrowRight aria-hidden="true" className="inline size-3.5 -rotate-45 align-[-0.1em]" />
                     </span>
                     <span className="mt-0.5 text-xs text-[var(--casa-muted)]">
                       {pick(locale, school.city)} · {pick(locale, school.country)}
@@ -167,7 +167,7 @@ export default async function PartnersPage() {
             </p>
             <Link
               href="/contact?topic=other"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"
+              className="tap-target inline-flex items-center gap-2 text-sm font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--casa-blue)]"
             >
               {say(locale, 'Schreib uns', 'Get in touch')}
               <ArrowRight className="size-4" aria-hidden />

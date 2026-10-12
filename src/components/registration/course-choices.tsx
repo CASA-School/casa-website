@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react';
 import {
+  ArrowRight,
   Briefcase,
   Calendar,
   CalendarDays,
@@ -337,12 +338,13 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
 
   return (
     <div className="space-y-6">
-      <fieldset id={`course-${index}-type`} tabIndex={-1} className={cn(formFieldGroupClassName, 'outline-none')}>
+      <fieldset id={`course-${index}-type`} tabIndex={-1} className={cn(formFieldGroupClassName, '@container outline-none')}>
         <legend className={cn(formLabelClassName, 'mb-2')}>
           {index === 0 ? t('Which course?', 'Welcher Kurs?') : t('Which other course?', 'Welcher weitere Kurs?')}
           <RequiredMark />
         </legend>
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        {/* By the form column's width: three options in two screen-based columns left Bildungszeit alone. */}
+        <div className="grid gap-2.5 @[36rem]:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]">
           {catalog.courseTypes.map((type) => (
             <ChoiceChip
               key={type.id}
@@ -383,9 +385,10 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
               own test is in development, see src/lib/placement/availability.ts).
               A new tab, because the wizard keeps no draft.
             */}
-            <Link href="/placement-test" target="_blank" rel="noopener" className={cn(linkClassName, 'text-sm')}>
+            <Link href="/placement-test" target="_blank" rel="noopener" className={cn(linkClassName, 'tap-target text-sm')}>
               {t('Free placement test', 'Kostenloser Einstufungstest')}
-              <span aria-hidden="true">{' '}↗</span>
+              {/* An icon, not the ↗ character: Firefox drew it from another font, smaller and heavier. */}
+              <ArrowRight aria-hidden="true" className="ml-1 inline size-3.5 -rotate-45 align-[-0.1em]" />
               <span className="sr-only">{t(' (opens in a new tab)', ' (öffnet in einem neuen Tab)')}</span>
             </Link>
           </div>

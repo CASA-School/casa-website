@@ -62,9 +62,11 @@ export function AccommodationArrivalChecklist({
         </Button>
       </div>
 
+      {/* The headings are the display face's h3 (globals.css), not 12px capitals: an
+          uppercase h3 came out as small grey serif capitals. The boxes are drawn to print. */}
       <div className="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 md:divide-x md:divide-[color:var(--casa-sand)]">
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+          <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">
             {neighborhoodTitle}
           </h3>
           <ul className="mt-4 space-y-3">
@@ -78,7 +80,7 @@ export function AccommodationArrivalChecklist({
         </div>
 
         <div className="md:pl-10">
-          <h3 className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
+          <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">
             {checklistTitle}
           </h3>
           <ul className="mt-4 space-y-3">
@@ -86,7 +88,7 @@ export function AccommodationArrivalChecklist({
               <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)]">
                 <span
                   aria-hidden
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded-lg border border-[color:var(--casa-sand)] bg-white"
+                  className="mt-[0.2rem] size-4 shrink-0 rounded-[0.25rem] border-[1.5px] border-[color:var(--casa-ink)]/45 bg-white"
                 />
                 <span>{item}</span>
               </li>

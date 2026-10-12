@@ -4231,6 +4231,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.dein-browser-ist-zu.9y8zt7": {
+  "de": "Dein Browser ist zu alt für diese Website, deshalb wird manches falsch angezeigt. Bitte aktualisiere ihn oder nutze Chrome, Edge, Firefox oder Safari.",
+  "en": "Your browser is too old for this website, so parts of it will look wrong. Please update it, or use Chrome, Edge, Firefox or Safari.",
+  "files": [
+   "src/components/layout/old-browser-notice.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
+ },
  "t.dein-gast-kann-ein.d6vqs": {
   "de": "Dein Gast kann ein Bad nutzen und in der Küche Mahlzeiten zubereiten.",
   "en": "Your guest can use a bathroom and cook meals in the kitchen.",
@@ -15766,8 +15776,7 @@
   "en": "Exam",
   "files": [
    "src/app/(site)/[locale]/search/page.tsx",
-   "src/components/layout/header-search-popover.tsx",
-   "src/components/layout/navbar.tsx"
+   "src/components/layout/header-search-popover.tsx"
   ],
   "pages": [
    "*"

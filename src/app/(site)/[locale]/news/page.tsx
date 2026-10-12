@@ -172,7 +172,7 @@ export default async function NewsPage() {
       */}
       <section className="pb-8 pt-12 md:pb-10 md:pt-16">
         <Container>
-          <div className="mx-auto max-w-[85rem]">
+          <div className="mx-auto">
             <div className="flex flex-wrap items-end justify-between gap-4 pb-3">
               <h1 className="text-5xl font-bold leading-none tracking-tight text-[var(--casa-red)] sm:text-6xl lg:text-7xl">
                 NewsFlash
@@ -210,7 +210,7 @@ export default async function NewsPage() {
         part of the sheet.
       */}
       <Container>
-        <div className="mx-auto max-w-[85rem] overflow-hidden rounded-lg">
+        <div className="mx-auto overflow-hidden rounded-lg">
           <NewsFlashTicker
             items={newsFlashIssue.ticker.map((entry) => localizedText(entry, locale))}
             label={copy.tickerLabel}
@@ -220,7 +220,7 @@ export default async function NewsPage() {
 
       <section className="py-12 md:py-16">
         <Container>
-          <div className="mx-auto grid max-w-[85rem] grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="mx-auto grid grid-cols-1 gap-5 lg:grid-cols-3">
             {/*
               SCHLAGZEILEN — the tall tinted column that opens the printed sheet.
 

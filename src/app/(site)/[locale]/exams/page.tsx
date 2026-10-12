@@ -246,8 +246,10 @@ export default async function ExamsPage() {
 
       <section className="py-16 md:py-20 border-t border-[color:var(--casa-sand)]/40">
         <Container>
+          {/* The measure of the bands above it, so the page keeps one left edge. */}
           <ProofBand
             locale={locale}
+            className="casa-editorial-measure"
             title={say(locale, 'Vertrauen und Standards', 'Trust and standards')}
             credibilityLine={
               say(locale, 'Wir arbeiten mit anerkannten Partnern zusammen und haben langjährige Erfahrung mit Prüfungen.', 'We work with recognised partners and have many years of experience with exams.')

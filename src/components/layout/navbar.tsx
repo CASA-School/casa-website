@@ -96,10 +96,11 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
    * Both labels are rendered and one is hidden by breakpoint rather than swapped
    * in JS, so there is no layout shift on hydration and no locale-dependent
    * measurement at runtime.
+   *
+   * One verb in both contexts: "Prüfung" alone, on the exam pages, read as a
+   * noun beside nothing and did not say what the button does (2026-10-12).
    */
-  const registerTextShort = isExamContext
-    ? (say(contentLocale, 'Prüfung', 'Exam'))
-    : (say(contentLocale, 'Anmelden', 'Register'));
+  const registerTextShort = say(contentLocale, 'Anmelden', 'Register');
 
   const isActivePath = useCallback((href?: string) => {
     if (!href) {
@@ -392,7 +393,9 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
       >
         <Link href="/" aria-label="Go to CASA homepage" className="flex shrink-0 items-center focus-visible:outline-none">
           <Logo
-            className={cn('w-auto transition-[height] duration-300 ease-out motion-reduce:transition-none', compact ? 'h-10' : 'h-12')}
+            // Below 380px (the smallest phones, a folded phone's cover screen) the logo and the three
+            // round buttons do not fit at 48px: the page scrolled sideways by 19px at 320.
+            className={cn('w-auto transition-[height] duration-300 ease-out motion-reduce:transition-none', compact ? 'h-10' : 'h-12 max-[379px]:h-10')}
             variant={night ? 'onDark' : 'default'}
             preload
           />
@@ -648,7 +651,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
           </ul>
         </nav>
 
-        <div className="flex items-center justify-self-end gap-2">
+        <div className="flex items-center justify-self-end gap-2 max-[379px]:gap-1.5">
           <HeaderSearchPopover locale={contentLocale} isActive={isActivePath('/search')} />
 
           {mounted ? (

@@ -162,7 +162,7 @@ export function NewSiteNotice({ contentLocale }: { contentLocale: ContentLocale 
           <Link
             href={`/contact?topic=${NEW_SITE_NOTICE.feedbackTopic}`}
             onClick={closeForThisVisit}
-            className="group mt-3 inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
+            className="tap-target group mt-3 inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
           >
             {text.link}
             <ArrowRight className="size-4 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />

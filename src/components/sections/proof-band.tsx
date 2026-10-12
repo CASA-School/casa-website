@@ -56,7 +56,7 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
       treatment, and changing it once changes it everywhere. `className` still
       composes for anything genuinely page-specific.
     */
-    <section data-reveal="true" className={cn('mx-auto max-w-[85rem] rounded-3xl bg-[var(--casa-ink-deep)] px-6 py-7 text-white md:px-8 md:py-8', className)}>
+    <section data-reveal="true" className={cn('mx-auto rounded-3xl bg-[var(--casa-ink-deep)] px-6 py-7 text-white md:px-8 md:py-8', className)}>
       <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-amber)]">{displayTitle}</p>
       <p className="mt-2 max-w-measure text-sm text-white/80 md:text-sm">{displayCredibilityLine}</p>
 
@@ -95,18 +95,19 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
  */
 const logoTileClassName = 'flex h-20 w-full items-center justify-center rounded-xl bg-white px-3 sm:h-24 xl:h-28 xl:px-5';
 const logoImageClassName = 'h-14 w-full object-contain sm:h-16 xl:h-20';
-const logoSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 170px, (min-width: 640px) 200px, 160px';
+const logoSizes = '(min-width: 1280px) 220px, (min-width: 768px) 170px, (min-width: 640px) 200px, 160px';
 
 export function AccreditationLogoList({ locale, className }: { locale: ContentLocale; className?: string }) {
   return (
     /*
       Flex, centred, not a grid: five tiles in a 2- or 3-column grid left the
       last one alone at the left edge beside an empty cell on phones and
-      tablets. Centred, the short last row reads as intended.
+      tablets. Centred, the short last row reads as intended. All five in one
+      row from `md` (a 768 tablet has room for them; 3 + 2 looked unfinished).
     */
     <ul className={cn('flex flex-wrap justify-center gap-3 lg:gap-4', className)} aria-label={say(locale, 'Qualität und Partnerschaften', 'Quality and partnerships')}>
       {accreditationLogos.slice(0, 5).map((logo) => (
-        <li key={logo.id} className="basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-4rem)/5)]">
+        <li key={logo.id} className="basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-1.5rem)/3)] md:basis-[calc((100%-3rem)/5)] lg:basis-[calc((100%-4rem)/5)]">
           {/* A mark without a website is a plain tile, not a link to "#". */}
           {logo.href ? (
             <Link

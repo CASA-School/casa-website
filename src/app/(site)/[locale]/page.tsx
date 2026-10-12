@@ -405,7 +405,7 @@ export default async function HomePage() {
 
       <section className="py-16 md:py-24" data-track-section="persona-pathways">
         <Container>
-          <div className="mx-auto grid max-w-[85rem] gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+          <div className="mx-auto grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {say(locale, 'Startpunkt wählen', 'Start here')}
@@ -485,7 +485,7 @@ export default async function HomePage() {
       */}
       <section className="overflow-x-clip py-16 md:py-24" data-track-section="more-formats">
         <Container>
-          <div className="mx-auto max-w-[85rem]">
+          <div className="mx-auto">
             <div className="max-w-[42rem]">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {say(locale, 'Deutsch für besondere Ziele', 'German for specific goals')}
@@ -580,7 +580,7 @@ export default async function HomePage() {
 
       <section className="py-16 md:py-24" data-track-section="why-casa">
         <Container>
-          <div className="mx-auto max-w-[85rem]">
+          <div className="mx-auto">
             <EditorialSplit
               eyebrow={say(locale, 'Warum CASA', 'Why CASA')}
               title={
@@ -715,7 +715,7 @@ export default async function HomePage() {
           data-track-section="exam-preparation-pathways"
         >
           <Container>
-            <div className="mx-auto grid max-w-[85rem] gap-8 lg:grid-cols-[0.78fr_minmax(0,1.22fr)] lg:items-end">
+            <div className="mx-auto grid gap-8 lg:grid-cols-[0.78fr_minmax(0,1.22fr)] lg:items-end">
               <div className="max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
                   {say(locale, 'Zertifikat geplant?', 'Need a certificate?')}
@@ -787,7 +787,7 @@ export default async function HomePage() {
         data-track-section="housing-and-life"
       >
         <Container>
-          <div className="mx-auto grid max-w-[85rem] gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+          <div className="mx-auto grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
             <div className="relative overflow-hidden rounded-xl bg-[var(--casa-ink-deep)] shadow-[var(--shadow-modal)]">
               <div className="relative aspect-[4/3]">
                 <Image
@@ -856,7 +856,7 @@ export default async function HomePage() {
             tandem as a light-blue card (blue = exchange, src/config/brand/meaning.ts).
             It was three columns of text; the texts are the same programmes.
           */}
-          <div className="mx-auto mt-10 grid max-w-[85rem] gap-5 md:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
+          <div className="mx-auto mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
             {lifeTiles.map((tile) => (
               <figure
                 key={tile.id}
@@ -900,7 +900,7 @@ export default async function HomePage() {
 
       <section className="py-16 md:py-24" data-track-section="proof-and-outcomes">
         <Container>
-          <div className="mx-auto max-w-[85rem]">
+          <div className="mx-auto">
           <TestimonialGrid
             title={
               say(locale, 'Das sagen unsere Teilnehmenden', 'In our students’ words')

@@ -51,13 +51,13 @@ export function ProcessSteps({
       ~215px the removed `rail` layout left it, which is the difference between
       one line per step title and two.
     */
-    <ol className="mt-8 grid gap-7 md:grid-cols-3">
+    <ol className="mt-8 grid gap-7 @[44rem]:grid-cols-3">
       {steps.map((item) => (
         <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
           <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
             {item.step}
           </span>
-          <h3 className="text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
+          <h3 className="min-w-0 text-base font-semibold text-[var(--casa-ink)]">{item.title}</h3>
           <p className="mt-2 text-base leading-relaxed text-[var(--casa-muted)]">{item.description}</p>
         </li>
       ))}
@@ -80,7 +80,9 @@ export function ProcessSteps({
           every page. A `plain` variant existed and /exams used it; on the one light
           ground it left that page's steps with no surface at all.
         */
-        'casa-editorial-measure rounded-3xl bg-[var(--casa-warm-panel)] px-6 py-8 md:px-9 md:py-10',
+        // A container: three across only where the band itself is wide enough, not
+        // where the screen is (in a page's main column at 768 each step had ~180px).
+        '@container casa-editorial-measure rounded-3xl bg-[var(--casa-warm-panel)] px-5 py-8 sm:px-6 md:px-9 md:py-10',
         className
       )}>
       {/*

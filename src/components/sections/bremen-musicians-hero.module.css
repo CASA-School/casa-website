@@ -209,6 +209,16 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* On a phone a label is one 16px line: its touch area reaches 6px above and below
+   and 8px to the sides, short of the next animal's label. */
+@media (pointer: coarse) {
+  .label::before {
+    content: '';
+    position: absolute;
+    inset: -6px -8px;
+  }
+}
+
 .labelName {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 700;
@@ -220,7 +230,7 @@
 .labelDesc {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-weight: 500;
-  font-size: clamp(0.66rem, 0.42rem + 1.15cqw, 0.88rem);
+  font-size: clamp(0.75rem, 0.42rem + 1.15cqw, 0.88rem);
   line-height: 1.25;
   color: rgb(255 255 255 / 0.72);
   transition: color 0.3s ease;
@@ -706,5 +716,24 @@
   100% {
     opacity: 0;
     transform: translateY(-12px);
+  }
+}
+
+
+/*
+ * A phone on its side (under 500px tall, below 1024px wide) has room for the
+ * hero's heading and button, not this drawing as a 110px strip with its labels
+ * piled up: it steps aside there, as the hero photographs do (2026-10-12).
+ */
+@media (max-height: 31.25rem) and (max-width: 63.99rem) {
+  .panel {
+    display: none;
+  }
+}
+
+/* Below about 420px the four packages' sub-lines collide („2 Wochen plus Hamburg" over „Esel"): the names stay. */
+@container (max-width: 26rem) {
+  .labelDesc {
+    display: none;
   }
 }

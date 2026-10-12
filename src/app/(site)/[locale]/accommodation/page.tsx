@@ -155,7 +155,8 @@ export default async function AccommodationPage() {
       */}
       <section className="py-20 md:py-32">
         <Container>
-          <div className="px-6 md:px-9">
+          {/* The text inside the warm panels' padding, from `sm`; on a phone the gutter is enough. */}
+          <div className="sm:px-6 md:px-9">
             <BandHeading
               tone="light"
               eyebrow={say(locale, 'Wohnmöglichkeiten', 'Accommodation options')}
@@ -336,7 +337,7 @@ export default async function AccommodationPage() {
       */}
       <section className="py-16 md:py-24">
         <Container>
-          <div className="flex flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between md:px-9">
+          <div className="flex flex-col gap-6 sm:px-6 md:flex-row md:items-center md:justify-between md:px-9">
             <div className="max-w-measure">
               <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
                 {say(locale, 'Gastgeben', 'Hosting')}

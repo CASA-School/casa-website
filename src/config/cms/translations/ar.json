@@ -1595,6 +1595,10 @@
     "de": "Dein Beruf (optional)",
     "text": "مهنتك (اختياري)"
   },
+  "t.dein-browser-ist-zu.9y8zt7": {
+    "de": "Dein Browser ist zu alt für diese Website, deshalb wird manches falsch angezeigt. Bitte aktualisiere ihn oder nutze Chrome, Edge, Firefox oder Safari.",
+    "text": "متصفحك قديم جدًا بالنسبة إلى هذا الموقع، لذلك يظهر بعض المحتوى بشكل غير صحيح. يُرجى تحديثه أو استخدام Chrome أو Edge أو Firefox أو Safari."
+  },
   "t.dein-gast-kann-ein.d6vqs": {
     "de": "Dein Gast kann ein Bad nutzen und in der Küche Mahlzeiten zubereiten.",
     "text": "يستطيع ضيفك استخدام حمّام وتحضير وجباته في المطبخ."

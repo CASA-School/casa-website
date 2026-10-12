@@ -16,7 +16,7 @@ export function Timeline({ items, className, dataTestId }: TimelineProps) {
   return (
     <ol className={cn('relative space-y-5', className)} data-testid={dataTestId}>
       {items.map((item, index) => (
-        <li key={`${item.label}-${item.title}`} className="relative rounded-xl border border-[color:var(--casa-sand)]/80 bg-white p-5 shadow-[var(--shadow-soft)]">
+        <li key={`${item.label}-${item.title}`} className="relative rounded-xl border border-[color:var(--casa-sand)]/80 bg-white p-4 shadow-[var(--shadow-soft)] sm:p-5">
           {index < items.length - 1 ? <span className="absolute left-7 top-full h-5 w-px bg-[var(--casa-sand)]" aria-hidden="true" /> : null}
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{item.label}</p>
           <h3 className="mt-2 text-lg font-bold text-[var(--casa-ink)]">{item.title}</h3>

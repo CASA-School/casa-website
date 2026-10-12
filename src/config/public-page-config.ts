@@ -526,6 +526,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
     caption: { de: 'Das CASA-Team', en: 'The CASA team' },
     aspectRatio: '3 / 2',
+    // The faces sit in the upper 60%: a wider crop (tablet portrait) keeps them.
+    objectPosition: '50% 30%',
   },
   /*
    * THE HOMEPAGE'S "WIR HÖREN ZU" (slot 56): the teacher with smiling learners.

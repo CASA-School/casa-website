@@ -108,7 +108,8 @@ export function DateTiles({ id, name, legend, groups, value, onChange, locale, e
                   {group.meta ? <span className="text-[var(--casa-muted)]">{group.meta}</span> : null}
                 </p>
               ) : null}
-              <div className="flex flex-wrap gap-2">
+              {/* Tiles stretch to fill the row instead of leaving a ragged gap on the right. */}
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-2">
                 {group.tiles.map((tile) => {
                   const parts = dateTileParts(tile.date, locale);
                   const checked = tile.id === value;
@@ -131,7 +132,7 @@ export function DateTiles({ id, name, legend, groups, value, onChange, locale, e
                       </span>
                       <span aria-hidden="true" className="text-xs font-medium text-[var(--casa-muted)]">{parts.monthYear}</span>
                       {tile.note ? (
-                        <span aria-hidden="true" className="mt-1 text-[0.6875rem] font-semibold leading-none text-[var(--casa-accent-text)]">{tile.note}</span>
+                        <span aria-hidden="true" className="mt-1 text-xs font-semibold leading-none text-[var(--casa-accent-text)]">{tile.note}</span>
                       ) : null}
                     </label>
                   );

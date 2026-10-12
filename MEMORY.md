@@ -2480,3 +2480,28 @@ screen edits names and addresses, unlinks Microsoft, and adds the office team on
 person with website access and no password. Minimum password length 8 (FileMaker
 passwords). The Entra app registration is scripted (infra/azure/entra-workspace-app.sh) and
 **not created**: it changes CASA's tenant and waits for Rahman.
+
+## 46. Every screen size, three browser engines (2026-10-12)
+
+Rahman: people open the site "on laptops with different screen sizes, on tablet portrait and
+landscape, on phone portrait and landscape … folding phones or on bigger screens", in "chrome,
+safari, mozila or internet explorer", and it should "slowly become pixel perfect".
+
+**Measured.** `npm run qa:responsive -- chromium|webkit|firefox` loads every sitemap page in both
+languages at 24 sizes (320 to 3440, foldables 344×882 and 882×1104, landscape phones) against
+`next start -p 3018`; `npm run qa:shots` takes the screenshots three review agents went through.
+The first run: every page scrolled sideways at 320px, iOS-zooming form fields, links too small
+for a finger, German compounds out of their boxes. Now 0 sideways scroll in all three engines,
+0 text spill, 0 text below 12px, 0 small fields. `e2e/responsive.spec.ts` guards the main pages.
+
+**Changed.** Container queries for bands that sit in different widths (steps, exam timeline,
+exam cards, contact topics, course types); photo/text rows side by side from `lg`; the detail
+heroes' button before their photo on a phone; tables stack under 480px; hero media hidden on
+landscape phones and capped by screen height; `.tap-target` hit areas; 16px fields on touch;
+hyphenation only below 360px; lining figures in headings; one left edge per page (the 85rem caps
+removed). IE is unsupported (Tailwind 4's floor is Safari 16.4 / Chrome 111 / Firefox 128): an
+old-browser notice shows instead. Rules: `docs/RESPONSIVE_AND_BROWSERS.md`.
+
+**Open.** The exams pen photograph is soft in the source; the decision card repeats at the foot
+of detail pages below `xl` (it carries the contact person); "reden – aufeinander" can start a
+line with the dash (a copy change would need the six translations re-run).

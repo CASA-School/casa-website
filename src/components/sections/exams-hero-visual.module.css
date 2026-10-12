@@ -383,3 +383,15 @@
     scale: 1.07;
   }
 }
+
+
+/*
+ * A phone on its side (under 500px tall, below 1024px wide) has room for the
+ * hero's heading and button, not this drawing as a 110px strip with its labels
+ * piled up: it steps aside there, as the hero photographs do (2026-10-12).
+ */
+@media (max-height: 31.25rem) and (max-width: 63.99rem) {
+  .panel {
+    display: none;
+  }
+}

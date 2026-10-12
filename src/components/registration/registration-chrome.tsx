@@ -19,17 +19,19 @@ export function RegistrationTabs({ current, locale }: RegistrationTabsProps) {
 
   return (
     <nav aria-label={say(locale, 'Art der Anmeldung', 'Type of registration')}>
-      <ul className="inline-flex max-w-full rounded-xl bg-[var(--casa-surface-subtle)] p-1">
+      {/* Full width on a phone, each tab as wide as its label: side by side where both fit (390), and
+          „Prüfungsanmeldung" wraps inside its tab where they do not (320), instead of pushing the page sideways. */}
+      <ul className="flex w-full rounded-xl bg-[var(--casa-surface-subtle)] p-1 sm:inline-flex sm:w-auto">
         {tabs.map((tab) => {
           const active = tab.key === current;
 
           return (
-            <li key={tab.key}>
+            <li key={tab.key} className="min-w-0 flex-auto sm:flex-none">
               <Link
                 href={tab.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'block rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40',
+                  'block h-full rounded-lg px-2.5 py-2 text-center text-sm font-semibold hyphens-auto transition-colors sm:px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40',
                   active
                     ? 'bg-white text-[var(--casa-ink)] shadow-[var(--shadow-soft)]'
                     : 'text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
@@ -84,7 +86,8 @@ export function RegistrationStepper({ steps, step, locale }: RegistrationStepper
                 {complete ? <Check className="size-3.5" aria-hidden /> : number}
               </span>
               <div className="min-w-0">
-                <p className={cn('truncate text-sm font-semibold', active || complete ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
+                {/* Below 380px a step is ~70px wide: only the current step names itself, the others keep their number. */}
+                <p className={cn('truncate text-sm font-semibold', active || complete ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]', !active && 'max-[379px]:sr-only')}>
                   {item.title}
                   {complete ? <span className="sr-only">{say(locale, ' (erledigt)', ' (done)')}</span> : null}
                 </p>
