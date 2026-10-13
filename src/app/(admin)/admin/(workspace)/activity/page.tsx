@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { activityHref, describeActivity, recentActivity } from '@/lib/admin/activity';
+import { activityHref, describeActivity, recentActivity, type ActivityEntry } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
 import { getInboundByDay, getOverviewCounts, getRecentInbound } from '@/lib/admin/overview';
 import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
@@ -141,12 +141,12 @@ export default async function ActivityPage() {
               bleed
             >
               <ul className="divide-y divide-ws-line-soft">
-                {dayEntries.map((entry) => {
+                {runsOf(dayEntries).map(({ entry, count, earliest }) => {
                   const href = activityHref(entry);
-                  const time = new Date(entry.createdAt).toLocaleTimeString('en-GB', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  });
+                  const clock = (at: Date | string) =>
+                    new Date(at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                  const time = clock(entry.createdAt);
+                  const from = clock(earliest);
 
                   const line = (
                     <span className="flex items-baseline gap-3 px-4 py-2.5 text-sm">
@@ -158,6 +158,11 @@ export default async function ActivityPage() {
                           {entry.staffName ?? 'Someone'}
                         </span>{' '}
                         {describeActivity(entry)}
+                        {count > 1 ? (
+                          <span className="ml-2 text-xs text-[var(--casa-text-subtle)]">
+                            {count} times{from !== time ? `, from ${from}` : ''}
+                          </span>
+                        ) : null}
                       </span>
                     </span>
                   );
@@ -181,6 +186,24 @@ export default async function ActivityPage() {
       )}
     </>
   );
+}
+
+/**
+ * The same thing done again and again in a row — a week saved four times in
+ * Kursplanung — is one line with how often, not four: the newest, counted.
+ */
+function runsOf(entries: readonly ActivityEntry[]) {
+  const runs: { entry: ActivityEntry; count: number; earliest: Date | string }[] = [];
+  const same = (a: ActivityEntry, b: ActivityEntry) =>
+    a.staffName === b.staffName && a.entity === b.entity && a.entityId === b.entityId && describeActivity(a) === describeActivity(b);
+  for (const entry of entries) {
+    const last = runs[runs.length - 1];
+    if (last && same(last.entry, entry)) {
+      last.count += 1;
+      last.earliest = entry.createdAt;
+    } else runs.push({ entry, count: 1, earliest: entry.createdAt });
+  }
+  return runs;
 }
 
 const INBOUND_LABELS: Record<string, string> = {

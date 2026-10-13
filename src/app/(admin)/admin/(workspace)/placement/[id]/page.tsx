@@ -24,12 +24,12 @@ import { listPeople } from '@/lib/admin/people';
 import { getPlacementAttempt } from '@/lib/admin/placement';
 import {
   CONFIDENCE_COPY,
-  INTAKE_LABELS,
   REVIEW_REASON_COPY,
   SKILL_LABELS,
 } from '@/lib/admin/placement-copy';
 import { BAND_SEQUENCE } from '@/config/placement/policy';
 import type { PlacementSkill } from '@/lib/placement/types';
+import { backgroundItems, humanise } from './background';
 
 /**
  * One placement attempt, and the form that records a teacher's decision.
@@ -73,11 +73,7 @@ export default async function PlacementAttemptPage({
   ]);
 
   const decision = attempt.decision;
-  const intakeEntries = attempt.intake
-    ? Object.entries(attempt.intake).filter(
-        ([, value]) => value !== null && value !== undefined && value !== ''
-      )
-    : [];
+  const background = backgroundItems(attempt.intake);
 
   const confidenceTint = (
     { high: 'green', medium: 'ink', low: 'sun' } as const
@@ -165,7 +161,7 @@ export default async function PlacementAttemptPage({
                   sub: relativeDays(attempt.createdAt),
                 },
                 { label: 'Responses so far', icon: Icon.book, tint: 'red', value: attempt.responseCount },
-                { label: 'Current stage', icon: Icon.check, tint: 'blue', value: attempt.status.replace(/_/g, ' ') },
+                { label: 'Current stage', icon: Icon.check, tint: 'blue', value: humanise(attempt.status) },
                 {
                   label: 'Screener pointed at',
                   icon: Icon.placement,
@@ -253,19 +249,14 @@ export default async function PlacementAttemptPage({
             </>
           ) : null}
 
-          {intakeEntries.length > 0 ? (
+          {background.length > 0 ? (
             <Card
               title="Background"
               description="Self-reported, unscored."
               icon={Icon.person}
               tint="green"
             >
-              <DetailList
-                items={intakeEntries.map(([key, value]) => ({
-                  label: INTAKE_LABELS[key] ?? key,
-                  value: typeof value === 'string' ? value : JSON.stringify(value),
-                }))}
-              />
+              <DetailList items={background} />
             </Card>
           ) : null}
 

@@ -181,13 +181,13 @@ export async function getAttentionItems(): Promise<AttentionItem[]> {
 
   const deadlines = await query<{
     id: string;
-    code: string;
+    name: string;
     registration_deadline: Date;
     registrations: string;
     capacity: number;
   }>(
     `SELECT s.id,
-            e.code,
+            e.name,
             s.registration_deadline,
             s.capacity,
             (SELECT count(*) FROM exam_registrations r
@@ -208,8 +208,8 @@ export async function getAttentionItems(): Promise<AttentionItem[]> {
 
     items.push({
       kind: 'exam-deadline',
-      title: `${session.code} entries close`,
-      detail: `${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`} · ${session.registrations} of ${session.capacity} registered`,
+      title: session.name,
+      detail: `Registration closes ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`} · ${session.registrations} of ${session.capacity} registered`,
       href: '/admin/catalogue/exams',
     });
   }

@@ -22,6 +22,8 @@ import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { getCourseRegistration } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
+import { courseNameResolver } from '../../course-names';
+import { formatRange, parseOptionLabel } from '../../option-label';
 
 const SALUTATIONS: Record<string, string> = {
   mr: 'Mr',
@@ -39,9 +41,11 @@ const ACCOMMODATION: Record<string, string> = {
  * One course registration.
  *
  * The record's head carries what decides the next step — when it came in, the
- * level, whether a room or visa support is needed, who has it — and the cards
- * under it hold the rest in the order the work happens: what they registered
- * for, who they are, and what they asked CASA to arrange beyond a seat.
+ * dates, the level, whether a room or visa support is needed — and the cards
+ * under it hold the rest: who they are, and what they asked CASA to arrange
+ * beyond a seat. Who has it is the rail's, where it is changed. The dated
+ * option is read out of its stored label (`../../option-label.ts`) and shown
+ * as written when it does not parse.
  */
 export default async function CourseRegistrationPage({
   params,
@@ -58,12 +62,13 @@ export default async function CourseRegistrationPage({
   const canBook = canAccess(user, 'bookings', 'edit') && Boolean(registration.personId);
   const offer = canBook ? await bookingOffer() : null;
 
-  const [notes, activity, staff, flags, person] = await Promise.all([
+  const [notes, activity, staff, flags, person, courseName] = await Promise.all([
     listNotes('course_registration', registration.id),
     activityFor('course_registration', registration.id),
     listAssignableStaff(),
     listFlags('course_registration', registration.id),
     registration.personId ? getPersonSummary(registration.personId) : null,
+    courseNameResolver(),
   ]);
   const [candidates, confirmed] = person
     ? await Promise.all([
@@ -80,6 +85,8 @@ export default async function CourseRegistrationPage({
   const needsSomething = Boolean(registration.allergies) || Boolean(registration.notes);
   const declared = registration.declaredLevelCode ?? registration.declaredLevelRaw;
   const fullName = `${registration.firstName} ${registration.lastName}`;
+  const course = courseName(registration.courseTypeLabel, registration.courseTypeId);
+  const option = parseOptionLabel(registration.courseInstanceLabel);
 
   return (
     <>
@@ -87,7 +94,7 @@ export default async function CourseRegistrationPage({
         backHref="/admin/registrations/course"
         backLabel="All course registrations"
         title={fullName}
-        subtitle={registration.courseTypeLabel ?? undefined}
+        subtitle={course ?? undefined}
         status={<Badge tone={STATUS_TONES[registration.status]}>{STATUS_LABELS[registration.status]}</Badge>}
         actions={
           <>
@@ -110,7 +117,7 @@ export default async function CourseRegistrationPage({
               </FormDialog>
             ) : null}
             <ButtonLink href={`mailto:${registration.email}?subject=${encodeURIComponent(
-                `CASA registration — ${registration.courseTypeLabel ?? 'your course'}`
+                `CASA registration — ${course ?? 'your course'}`
               )}`}>Reply by email</ButtonLink>
           </>
         }
@@ -123,8 +130,19 @@ export default async function CourseRegistrationPage({
             sub: relativeDays(registration.submittedAt),
           },
           {
+            label: 'Dates',
+            icon: Icon.calendar,
+            tint: 'blue',
+            value: option?.start
+              ? formatRange(option.start, option.end)
+              : option?.toBeArranged
+                ? 'To be arranged'
+                : (option?.raw ?? null),
+            sub: [option?.days, option?.time].filter(Boolean).join(' · ') || undefined,
+          },
+          {
             // A confirmed level outranks the learner's own claim; the claim
-            // stays on the Course card below when both exist.
+            // stays on the Applicant card below when both exist.
             label: 'Level',
             icon: Icon.book,
             tint: 'red',
@@ -153,40 +171,11 @@ export default async function CourseRegistrationPage({
             tint: registration.visaRequired ? 'sun' : 'ink',
             value: registration.visaRequired ? 'Needed' : 'Not needed',
           },
-          {
-            label: 'Owner',
-            icon: Icon.person,
-            tint: registration.assignedTo ? 'green' : 'ink',
-            value: staff.find((member) => member.id === registration.assignedTo)?.name ?? 'Nobody yet',
-          },
         ]}
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          <Card title="Course" icon={Icon.catalogue} tint="red" footer={<p className="text-xs text-[var(--casa-text-subtle)]">Reference <code className="font-mono">{registration.requestId}</code></p>}>
-            <DetailList
-              items={[
-                { label: 'Option chosen', value: registration.courseInstanceLabel, wide: true },
-                ...(confirmed && declared
-                  ? [
-                      {
-                        label: 'Declared level',
-                        value: (
-                          <span className="flex items-center gap-2">
-                            {declared}
-                            {!registration.declaredLevelCode ? (
-                              <Badge tone="warning">unrecognised</Badge>
-                            ) : null}
-                          </span>
-                        ),
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-          </Card>
-
           <Card title="Applicant" icon={Icon.person} tint="ink">
             <DetailList
               items={[
@@ -230,6 +219,21 @@ export default async function CourseRegistrationPage({
                   label: 'Registered in',
                   value: registration.locale === 'de' ? 'German' : 'English',
                 },
+                ...(confirmed && declared
+                  ? [
+                      {
+                        label: 'Declared level',
+                        value: (
+                          <span className="flex items-center gap-2">
+                            {declared}
+                            {!registration.declaredLevelCode ? (
+                              <Badge tone="warning">unrecognised</Badge>
+                            ) : null}
+                          </span>
+                        ),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </Card>

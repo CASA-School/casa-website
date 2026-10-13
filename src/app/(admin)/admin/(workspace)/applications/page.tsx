@@ -14,6 +14,7 @@ import { listApplications } from '@/lib/admin/careers';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { formatFileSize } from '@/lib/admin/format';
+import { fileKind } from './file-kind';
 
 /**
  * The career application queue.
@@ -90,14 +91,11 @@ export default async function ApplicationsPage({
                     {item.email}
                   </span>
                 </Cell>
-                <Cell>
-                  <span className="block max-w-[14rem] truncate text-sm">
-                    {item.positionTitle}
-                  </span>
+                <Cell className="w-full max-w-0">
+                  <span className="line-clamp-2 min-w-48 text-sm">{item.positionTitle}</span>
                 </Cell>
-                <Cell className="text-xs text-[var(--casa-text-subtle)]">
-                  <span className="block max-w-[10rem] truncate">{item.cvFileName}</span>
-                  <span className="block">{formatFileSize(item.cvFileSize)}</span>
+                <Cell className="text-sm whitespace-nowrap text-[var(--casa-text-subtle)]">
+                  {[fileKind(item.cvFileName), formatFileSize(item.cvFileSize)].filter(Boolean).join(' · ')}
                 </Cell>
                 <Cell className="text-sm text-[var(--casa-text-subtle)]">
                   {item.assigneeName ?? '—'}

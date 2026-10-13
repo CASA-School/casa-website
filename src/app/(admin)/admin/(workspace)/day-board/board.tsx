@@ -76,7 +76,9 @@ export function DayBoard({
         </TaskGroup>
       ) : null}
 
-      {open.length === 0 && done.length === 0 ? (
+      {open.length === 0 && done.length === 0 && overdue.length > 0 ? (
+        <p className="border-t border-ws-line-soft px-4 py-3 text-sm text-[var(--casa-text-subtle)]">Nothing new for this day.</p>
+      ) : open.length === 0 && done.length === 0 ? (
         <div className="px-4 py-10 text-center">
           <p className="text-sm font-extrabold text-[var(--casa-ink)]">
             Nothing written down for this day

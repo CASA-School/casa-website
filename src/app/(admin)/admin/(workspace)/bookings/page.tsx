@@ -169,10 +169,12 @@ export default async function BookingsPage({
                     {money(b.paid, b.currency)}
                   </Cell>
                   <Cell align="right">
+                    {/* Colour only where something is owed either way; a
+                        settled booking is a plain number. */}
                     <span
                       className={cn(
                         'inline-flex rounded-lg px-2 py-0.5 text-sm font-extrabold',
-                        balance > 0 ? TINTS.sun : balance < 0 ? TINTS.red : TINTS.green
+                        balance > 0 ? TINTS.sun : balance < 0 ? TINTS.red : 'text-[var(--casa-text-subtle)]'
                       )}
                     >
                       {money(balance, b.currency)}

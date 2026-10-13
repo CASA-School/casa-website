@@ -153,7 +153,12 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
             ) : null}
           </div>
 
-          <PriceCards list={selected} subjects={subjects} canEdit={canEdit} />
+          <PriceCards
+            list={selected}
+            previous={status === 'future' ? (lists[lists.indexOf(selected) - 1] ?? null) : null}
+            subjects={subjects}
+            canEdit={canEdit}
+          />
         </>
       )}
     </>
@@ -164,7 +169,8 @@ type Subjects = Awaited<ReturnType<typeof priceListSubjects>>;
 
 type Row = { slot: Slot; label: ReactNode; sub?: string; units?: readonly PriceUnit[] };
 
-function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Subjects; canEdit: boolean }) {
+/** `previous`: the list a coming one takes over from, so a changed price shows what it was. */
+function PriceCards({ list, previous, subjects, canEdit }: { list: PriceList; previous: PriceList | null; subjects: Subjects; canEdit: boolean }) {
   const intensive = subjects.courses.find((c) => c.slug === INTENSIVE);
   const others = subjects.courses.filter((c) => c.slug !== INTENSIVE);
   const levelled = subjects.books.filter((b) => b.level);
@@ -178,6 +184,7 @@ function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Su
           icon={Icon.catalogue}
           tint="red"
           list={list}
+          previous={previous}
           canEdit={canEdit}
           rows={[
             ...WEEKS.map((w) => ({ slot: { kind: 'course', slug: INTENSIVE, weeks: w } as Slot, label: weeksLabel(w) })),
@@ -193,6 +200,7 @@ function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Su
             icon={Icon.calendar}
             tint="red"
             list={list}
+            previous={previous}
             canEdit={canEdit}
             rows={others.map((c) => ({ slot: { kind: 'course', slug: c.slug, weeks: null } as Slot, label: c.name, units: ['lesson', 'week', 'item'] as const }))}
           />
@@ -203,6 +211,7 @@ function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Su
           icon={Icon.rooms}
           tint="blue"
           list={list}
+          previous={previous}
           canEdit={canEdit}
           rows={[
             ...RENT_WEEKS.map((w) => ({ slot: { kind: 'rent', weeks: w } as Slot, label: weeksLabel(w) })),
@@ -215,6 +224,7 @@ function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Su
           icon={Icon.money}
           tint="ink"
           list={list}
+          previous={previous}
           canEdit={canEdit}
           rows={FEES.map((fee) => ({ slot: { kind: 'fee', fee } as Slot, label: FEE_LABEL[fee].name, sub: FEE_LABEL[fee].sub }))}
         />
@@ -225,6 +235,7 @@ function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Su
             icon={Icon.placement}
             tint="sun"
             list={list}
+            previous={previous}
             canEdit={canEdit}
             rows={subjects.exams.flatMap((e) => [
               { slot: { kind: 'exam', code: e.code, parts: 2 } as Slot, label: e.name, sub: 'Both parts' },
@@ -240,6 +251,7 @@ function PriceCards({ list, subjects, canEdit }: { list: PriceList; subjects: Su
           icon={Icon.book}
           tint="red"
           list={list}
+          previous={previous}
           canEdit={canEdit}
           columns={2}
           rows={[...levelled, ...otherBooks].map((b) => ({
@@ -263,6 +275,7 @@ function PriceCard({
   icon,
   tint,
   list,
+  previous,
   rows,
   canEdit,
   columns = 1,
@@ -271,11 +284,12 @@ function PriceCard({
   icon: ReactNode;
   tint: Tint;
   list: PriceList;
+  previous: PriceList | null;
   rows: Row[];
   canEdit: boolean;
   columns?: 1 | 2;
 }) {
-  const shown = rows.map((row) => ({ row, price: priceAt(list, row.slot) }));
+  const shown = rows.map((row) => ({ row, price: priceAt(list, row.slot), was: previous ? (priceAt(previous, row.slot)?.amount ?? null) : undefined }));
   return (
     <Card
       title={title}
@@ -322,7 +336,7 @@ function PriceCard({
       <div className={columns === 2 ? 'grid lg:grid-cols-2 lg:divide-x lg:divide-ws-line-soft' : ''}>
         {(columns === 2 ? [shown.slice(0, Math.ceil(shown.length / 2)), shown.slice(Math.ceil(shown.length / 2))] : [shown]).map((part, i) => (
           <Table key={i} head={['', { label: 'Price', align: 'right' }]}>
-            {part.map(({ row, price }) => (
+            {part.map(({ row, price, was }) => (
               <TableRow key={slotKey(row.slot)}>
                 <Cell className="text-sm">
                   <span className="font-semibold text-[var(--casa-ink)]">{row.label}</span>
@@ -334,6 +348,9 @@ function PriceCard({
                   ) : null}
                 </Cell>
                 <Cell align="right" className="text-sm whitespace-nowrap tabular-nums">
+                  {was !== undefined && was !== (price?.amount ?? null) ? (
+                    <span className="mr-2 text-xs text-[var(--casa-text-subtle)] line-through">{was == null ? 'new' : money(was)}</span>
+                  ) : null}
                   {price ? (
                     <>
                       <span className="font-semibold">{money(price.amount)}</span>

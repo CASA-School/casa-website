@@ -67,7 +67,7 @@ export default async function FlagsPage({
                 </Cell>
                 <Cell className="text-sm text-[var(--casa-text-subtle)]">
                   {typeof flag.detail?.raw === 'string' ? (
-                    <span className="font-mono text-xs">“{flag.detail.raw}”</span>
+                    <span>“{flag.detail.raw}”</span>
                   ) : Array.isArray(flag.detail?.candidates) ? (
                     `${flag.detail.candidates.length} possible ${flag.detail.candidates.length === 1 ? 'match' : 'matches'}`
                   ) : (

@@ -11,6 +11,7 @@ import {
   voidPaymentAction,
 } from '../actions';
 import { ChargeForm, EditBookingForm, ExtendBookingForm, PaymentForm } from '../booking-forms';
+import { RecordFoot } from '../record-foot';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import {
@@ -77,10 +78,12 @@ function LedgerLine({
  *
  * The head carries what the booking is: the course, the dates, the stay, who
  * pays and what is still open, with the status and the visa beside the name.
- * Left: the periods (the dates, and the cohort each one sits in), the cost
- * lines and the payments, each a ledger with its own add button in the header,
- * its total in the foot and its own confirmation on removal. Right: the
- * record's own fields, the notes and the history. Everything a staff member
+ * Left: the periods when there are several (one period is the head's dates),
+ * the cost lines and the payments, each a ledger with its own add button in
+ * the header, its total in the foot and its own confirmation on removal.
+ * Right: the record's own fields, the notes — the booking's own among them —
+ * and the history. Cancelling and deleting sit at the foot of the page, quiet,
+ * away from the routine actions in the head. Everything a staff member
  * changes here is a dialog or a confirmed action; nothing is edited inline.
  */
 export default async function BookingPage({
@@ -125,6 +128,52 @@ export default async function BookingPage({
       : null;
   const stay = booking.accommodation;
   const removesCharges = canFull && open;
+  // The record's own fields, those that have a value: when it was booked is
+  // in the head, so a booking with nothing else has no card for it.
+  const recordFields = [
+    booking.cancelledAt
+      ? {
+          label: 'Cancelled',
+          value: (
+            <span>
+              <DateText value={booking.cancelledAt} />
+              {booking.cancelReason ? ` · ${booking.cancelReason}` : ''}
+            </span>
+          ),
+        }
+      : null,
+    booking.sourceRegistrationId
+      ? {
+          label: 'From registration',
+          value: (
+            <Link
+              href={`/admin/registrations/course/${booking.sourceRegistrationId}`}
+              className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+            >
+              Open
+            </Link>
+          ),
+        }
+      : null,
+    stay && stay.from
+      ? {
+          label: 'Stay',
+          wide: true,
+          value: (
+            <>
+              <DateText value={stay.from} /> – <DateText value={stay.to} />
+            </>
+          ),
+        }
+      : null,
+  ].filter((item) => item !== null);
+  const single = booking.periods.length === 1 ? booking.periods[0] : null;
+  // A cohort's label is its title, or "Course · 31.08.26 – 23.10.26" built
+  // from the course and dates the head already shows; only a title is news.
+  const singleCohortTitle =
+    single?.cohortLabel && !/\d{2}\.\d{2}\.\d{2} – \d{2}\.\d{2}\.\d{2}$/.test(single.cohortLabel)
+      ? single.cohortLabel
+      : null;
 
   return (
     <>
@@ -133,12 +182,18 @@ export default async function BookingPage({
         backLabel="All bookings"
         title={booking.personName}
         subtitle={
-          <Link
-            href={`/admin/people/${booking.personId}`}
-            className="inline-flex items-center gap-1 font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-          >
-            Student page {Icon.chevronRight}
-          </Link>
+          <span className="flex flex-wrap items-center gap-x-2">
+            <span>
+              Booked <DateText value={booking.createdAt} />
+            </span>
+            <span aria-hidden="true">·</span>
+            <Link
+              href={`/admin/people/${booking.personId}`}
+              className="inline-flex items-center gap-1 font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+            >
+              Student page {Icon.chevronRight}
+            </Link>
+          </span>
         }
         status={
           <>
@@ -160,36 +215,16 @@ export default async function BookingPage({
                 <EditBookingForm booking={booking} courseTypes={courseTypes} />
               </FormDialog>
             ) : null}
-            {canFull && open ? (
-              <form action={cancelBookingAction}>
-                <input type="hidden" name="bookingId" value={booking.id} />
-                <ConfirmSubmit
-                  title={`Cancel ${booking.personName}'s booking?`}
-                  description="The place is released. Cost lines and payments stay on the record so the refund can be worked out. This cannot be undone."
-                  confirmLabel="Cancel booking"
-                  variant="danger"
-                  size="md"
-                >
-                  Cancel booking
-                </ConfirmSubmit>
-              </form>
-            ) : null}
-            {canFull ? (
-              <form action={deleteBookingAction}>
-                <input type="hidden" name="bookingId" value={booking.id} />
-                <ConfirmSubmit
-                  title="Delete this booking?"
-                  description="Only possible while no payment has been recorded. The booking disappears from every list."
-                  size="md"
-                >
-                  Delete
-                </ConfirmSubmit>
-              </form>
-            ) : null}
           </>
         }
         facts={[
-          { label: 'Course', icon: Icon.catalogue, tint: 'red', value: booking.courseTypeName },
+          {
+            label: 'Course',
+            icon: Icon.catalogue,
+            tint: 'red',
+            value: booking.courseTypeName,
+            sub: singleCohortTitle ?? undefined,
+          },
           {
             label: 'Dates',
             icon: Icon.calendar,
@@ -203,6 +238,9 @@ export default async function BookingPage({
             sub: [
               weeks ? `${weeks} ${weeks === 1 ? 'week' : 'weeks'}` : null,
               booking.periods.length > 1 ? `${booking.periods.length} periods` : null,
+              // One period has no card of its own (it would repeat these
+              // dates), so a missing cohort is said here.
+              single && !single.courseInstanceId ? 'No cohort yet' : null,
             ]
               .filter(Boolean)
               .join(' · '),
@@ -242,43 +280,45 @@ export default async function BookingPage({
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          <Card title="Dates" icon={Icon.calendar} tint="blue">
-            <ul className="-my-1.5 divide-y divide-ws-line-soft">
-              {booking.periods.map((p) => (
-                <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
-                  <span className="min-w-0 text-sm">
-                    <span className="flex items-center gap-2 font-semibold">
-                      <DateText value={p.startDate} /> – <DateText value={p.endDate} />
-                      {p.kind === 'extension' ? <Badge tone="quiet">Extension</Badge> : null}
+          {booking.periods.length > 1 ? (
+            <Card title="Periods" icon={Icon.calendar} tint="blue">
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {booking.periods.map((p) => (
+                  <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
+                    <span className="min-w-0 text-sm">
+                      <span className="flex items-center gap-2 font-semibold">
+                        <DateText value={p.startDate} /> – <DateText value={p.endDate} />
+                        {p.kind === 'extension' ? <Badge tone="quiet">Extension</Badge> : null}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
+                        {p.courseInstanceId ? (
+                          <Link href="/admin/catalogue" className="hover:underline">
+                            {p.cohortLabel}
+                          </Link>
+                        ) : (
+                          <Badge tone="warning">No cohort yet</Badge>
+                        )}
+                      </span>
                     </span>
-                    <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                      {p.courseInstanceId ? (
-                        <Link href="/admin/catalogue" className="hover:underline">
-                          {p.cohortLabel}
-                        </Link>
-                      ) : (
-                        <Badge tone="warning">No cohort yet</Badge>
-                      )}
-                    </span>
-                  </span>
-                  {canFull && booking.periods.length > 1 ? (
-                    <form action={removePeriodAction}>
-                      <input type="hidden" name="bookingId" value={booking.id} />
-                      <input type="hidden" name="periodId" value={p.id} />
-                      <ConfirmSubmit
-                        title="Remove these dates?"
-                        description="The period is removed from the booking."
-                        confirmLabel="Remove"
-                        variant="ghost"
-                      >
-                        Remove
-                      </ConfirmSubmit>
-                    </form>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </Card>
+                    {canFull && booking.periods.length > 1 ? (
+                      <form action={removePeriodAction}>
+                        <input type="hidden" name="bookingId" value={booking.id} />
+                        <input type="hidden" name="periodId" value={p.id} />
+                        <ConfirmSubmit
+                          title="Remove these dates?"
+                          description="The period is removed from the booking."
+                          confirmLabel="Remove"
+                          variant="ghost"
+                        >
+                          Remove
+                        </ConfirmSubmit>
+                      </form>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
 
           <Card
             title="Cost"
@@ -339,9 +379,10 @@ export default async function BookingPage({
                       }
                     >
                       <span className="block text-sm font-semibold">{c.description}</span>
-                      <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                        {CHARGE_KIND_LABELS[c.kind]}
-                      </span>
+                      {/* The kind only when the line's own text does not already say it. */}
+                      {CHARGE_KIND_LABELS[c.kind] !== c.description ? (
+                        <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">{CHARGE_KIND_LABELS[c.kind]}</span>
+                      ) : null}
                     </LedgerLine>
                   </li>
                 ))}
@@ -429,48 +470,11 @@ export default async function BookingPage({
         </div>
 
         <div className="space-y-4">
-          <Card title="Booking" icon={Icon.bookings} tint="ink">
-            <DetailList
-              items={[
-                booking.cancelledAt
-                  ? {
-                      label: 'Cancelled',
-                      value: (
-                        <span>
-                          <DateText value={booking.cancelledAt} />
-                          {booking.cancelReason ? ` · ${booking.cancelReason}` : ''}
-                        </span>
-                      ),
-                    }
-                  : { label: 'Created', value: <DateText value={booking.createdAt} /> },
-                booking.sourceRegistrationId
-                  ? {
-                      label: 'From registration',
-                      value: (
-                        <Link
-                          href={`/admin/registrations/course/${booking.sourceRegistrationId}`}
-                          className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                        >
-                          Open
-                        </Link>
-                      ),
-                    }
-                  : { label: 'From registration', value: null },
-                stay && stay.from
-                  ? {
-                      label: 'Stay',
-                      wide: true,
-                      value: (
-                        <>
-                          <DateText value={stay.from} /> – <DateText value={stay.to} />
-                        </>
-                      ),
-                    }
-                  : null,
-                { label: 'Notes', value: booking.notes, wide: true },
-              ].filter((item) => item !== null)}
-            />
-          </Card>
+          {recordFields.length > 0 ? (
+            <Card title="Booking" icon={Icon.bookings} tint="ink">
+              <DetailList items={recordFields} />
+            </Card>
+          ) : null}
 
           <Card title="Notes" icon={Icon.note} tint="sun">
             {canEdit ? (
@@ -489,10 +493,20 @@ export default async function BookingPage({
                 </Button>
               </form>
             ) : null}
-            {notes.length > 0 ? (
+            {notes.length > 0 || booking.notes ? (
               <ul
                 className={cn('space-y-3', canEdit ? 'mt-4 border-t border-ws-line-soft pt-4' : '')}
               >
+                {/* The booking's own note, written in Edit: kept with the
+                    others rather than as a second "Notes" in the card above. */}
+                {booking.notes ? (
+                  <li className="rounded-xl bg-[#fffbea] px-3 py-2.5">
+                    <p className="text-sm leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">
+                      {booking.notes}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">On the booking</p>
+                  </li>
+                ) : null}
                 {notes.map((note) => (
                   <li key={note.id} className="rounded-xl bg-[#fffbea] px-3 py-2.5">
                     <p className="text-sm leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">
@@ -531,6 +545,32 @@ export default async function BookingPage({
           ) : null}
         </div>
       </div>
+
+      {canFull ? (
+        <RecordFoot>
+          {open ? (
+            <form action={cancelBookingAction}>
+              <input type="hidden" name="bookingId" value={booking.id} />
+              <ConfirmSubmit
+                title={`Cancel ${booking.personName}'s booking?`}
+                description="The place is released. Cost lines and payments stay on the record so the refund can be worked out. This cannot be undone."
+                confirmLabel="Cancel booking"
+              >
+                Cancel booking
+              </ConfirmSubmit>
+            </form>
+          ) : null}
+          <form action={deleteBookingAction}>
+            <input type="hidden" name="bookingId" value={booking.id} />
+            <ConfirmSubmit
+              title="Delete this booking?"
+              description="Only possible while no payment has been recorded. The booking disappears from every list."
+            >
+              Delete booking
+            </ConfirmSubmit>
+          </form>
+        </RecordFoot>
+      ) : null}
     </>
   );
 }

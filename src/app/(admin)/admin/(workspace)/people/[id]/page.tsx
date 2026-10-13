@@ -7,6 +7,9 @@ import { deletePersonAction } from '../actions';
 import { PersonForm } from '../person-form';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { createBookingFromWizardAction } from '../../bookings/actions';
+import { RecordFoot } from '../../bookings/record-foot';
+import { courseNameResolver } from '../../registrations/course-names';
+import { optionLine } from '../../registrations/option-label';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { bookingOffer } from '@/lib/admin/booking-offer';
 import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, personBookings } from '@/lib/admin/bookings';
@@ -55,6 +58,14 @@ const KINDS: Record<TimelineItem['kind'], { label: string; icon: ReactNode; tint
   review: { label: 'Placement', icon: Icon.placement, tint: 'red' },
 };
 
+/** How the record came to be, in a few words; nothing for a demo seed. */
+function origin(createdBy: string, label: string): string | null {
+  if (createdBy === 'demo-seed') return null;
+  if (createdBy === 'public-site') return 'Came through the website';
+  if (createdBy.startsWith('migration-')) return 'Imported';
+  return `Added by ${label}`;
+}
+
 /**
  * One person, and everything that has ever come in under their name.
  *
@@ -98,7 +109,7 @@ export default async function PersonPage({
   const canBook = canAccess(user, 'bookings', 'edit');
   const seesBookings = canAccess(user, 'bookings');
   const canOffer = canAccess(user, 'offers', 'edit');
-  const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer, offers] =
+  const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer, offers, courseName] =
     await Promise.all([
       personTimeline(person.id),
       latestConfirmedLevel(person.id),
@@ -109,6 +120,7 @@ export default async function PersonPage({
       seesBookings ? personBookings(person.id) : Promise.resolve([]),
       canBook ? bookingOffer() : Promise.resolve(null),
       canOffer ? offersFor({ personId: person.id }) : Promise.resolve([]),
+      courseNameResolver(),
     ]);
 
   const title = [SALUTATIONS[person.salutation ?? ''] ?? '', person.displayName]
@@ -120,10 +132,22 @@ export default async function PersonPage({
   const more = (n: number) => (n > 1 ? `+${n - 1} more` : undefined);
   const openFlags = flags.filter((f) => !f.resolvedAt);
   const manyChannels = person.emails.length > 1 || person.phones.length > 1;
+  // "Added by" is in the head already; the card keeps the decisions after it.
+  const decisions = activity.filter((entry) => entry.action !== 'person_created');
   // The side column holds only what this person has; without any of it the
   // record's lists take the full width rather than leaving an empty gutter.
   const hasSide =
-    openFlags.length > 0 || manyChannels || fileMakerLinks.length > 0 || activity.length > 0;
+    openFlags.length > 0 || manyChannels || fileMakerLinks.length > 0 || decisions.length > 0;
+  const canDelete = canAccess(user, 'people', 'full');
+  // A registration's course and dates as the queues show them, not as the
+  // public form stored them.
+  const history = timeline.map((item) =>
+    item.kind === 'course'
+      ? { ...item, title: courseName(item.title) ?? item.title, detail: optionLine(item.detail, 'course') }
+      : item.kind === 'exam'
+        ? { ...item, detail: optionLine(item.detail, 'exam') }
+        : item
+  );
 
   return (
     <>
@@ -135,10 +159,17 @@ export default async function PersonPage({
           person.id !== id
             ? 'Opened from a linked record'
             : `In touch since ${person.createdAt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`,
-          `Added by ${person.createdByLabel}`,
-        ].join(' · ')}
+          origin(person.createdBy, person.createdByLabel),
+        ]
+          .filter(Boolean)
+          .join(' · ')}
         actions={
           <>
+            {canEdit ? (
+              <FormDialog trigger="Edit" title={person.displayName}>
+                <PersonForm person={person} countries={countries} />
+              </FormDialog>
+            ) : null}
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog
@@ -155,23 +186,6 @@ export default async function PersonPage({
                   action={createBookingFromWizardAction}
                 />
               </FormDialog>
-            ) : null}
-            {canEdit ? (
-              <FormDialog trigger="Edit" title={person.displayName}>
-                <PersonForm person={person} countries={countries} />
-              </FormDialog>
-            ) : null}
-            {canAccess(user, 'people', 'full') ? (
-              <form action={deletePersonAction}>
-                <input type="hidden" name="personId" value={person.id} />
-                <ConfirmSubmit
-                  title={`Delete ${person.displayName}?`}
-                  description="The person disappears from every list. Their registrations and enquiries stay in the queues. An owner can restore the record."
-                  size="md"
-                >
-                  Delete
-                </ConfirmSubmit>
-              </form>
             ) : null}
           </>
         }
@@ -193,17 +207,24 @@ export default async function PersonPage({
             href: phone ? `tel:${phone.number}` : undefined,
           },
           {
+            // With the date of birth under it, as the person panel on every
+            // queue record shows them: five columns cut the address short.
             label: 'Nationality',
             icon: Icon.globe,
             tint: 'sun',
             value: person.nationalityName ?? person.nationalityRaw,
-            sub: !person.nationalityName && person.nationalityRaw ? 'Not recognised' : undefined,
-          },
-          {
-            label: 'Born',
-            icon: Icon.calendar,
-            tint: 'blue',
-            value: person.birthDate ? <BirthDate value={person.birthDate} /> : null,
+            sub:
+              person.birthDate || (!person.nationalityName && person.nationalityRaw) ? (
+                <>
+                  {!person.nationalityName && person.nationalityRaw ? 'Not recognised' : null}
+                  {!person.nationalityName && person.nationalityRaw && person.birthDate ? ' · ' : null}
+                  {person.birthDate ? (
+                    <>
+                      Born <BirthDate value={person.birthDate} />
+                    </>
+                  ) : null}
+                </>
+              ) : undefined,
           },
           {
             label: 'Level',
@@ -238,70 +259,64 @@ export default async function PersonPage({
         )}
       >
         <div className="space-y-4">
-          {seesBookings ? (
+          {seesBookings && bookings.length > 0 ? (
             <Card title="Bookings" icon={Icon.bookings} tint="red">
-              {bookings.length === 0 ? (
-                <p className="text-sm text-[var(--casa-text-subtle)]">No bookings.</p>
-              ) : (
-                <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                  {bookings.map((b) => {
-                    const balance = b.charged - b.paid;
-                    return (
-                      <li key={b.id}>
-                        <Link
-                          href={`/admin/bookings/${b.id}`}
-                          className="-mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ws-sunk"
-                        >
-                          <span className="min-w-0 text-sm">
-                            <span className="flex items-center gap-2 font-semibold">
-                              {b.courseTypeName ?? 'Booking'}
-                              <Badge tone={BOOKING_STATUS_TONES[b.status]}>
-                                {BOOKING_STATUS_LABELS[b.status]}
-                              </Badge>
-                            </span>
-                            <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                              {b.startDate ? (
-                                <>
-                                  <DateText value={b.startDate} /> – <DateText value={b.endDate} />
-                                </>
-                              ) : (
-                                'No dates'
-                              )}
-                            </span>
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {bookings.map((b) => {
+                  const balance = b.charged - b.paid;
+                  return (
+                    <li key={b.id}>
+                      <Link
+                        href={`/admin/bookings/${b.id}`}
+                        className="-mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ws-sunk"
+                      >
+                        <span className="min-w-0 text-sm">
+                          <span className="flex items-center gap-2 font-semibold">
+                            {b.courseTypeName ?? 'Booking'}
+                            <Badge tone={BOOKING_STATUS_TONES[b.status]}>
+                              {BOOKING_STATUS_LABELS[b.status]}
+                            </Badge>
                           </span>
-                          <span className="shrink-0 text-right">
-                            <span
-                              className={cn(
-                                'block text-sm font-extrabold tabular-nums',
-                                balance > 0
-                                  ? 'text-[var(--casa-warning-text)]'
-                                  : 'text-[var(--casa-success-text)]'
-                              )}
-                            >
-                              {new Intl.NumberFormat('de-DE', {
-                                style: 'currency',
-                                currency: b.currency,
-                              }).format(balance)}
-                            </span>
-                            <span className="block text-xs text-[var(--casa-text-subtle)]">
-                              {balance > 0 ? 'open' : 'paid'}
-                            </span>
+                          <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
+                            {b.startDate ? (
+                              <>
+                                <DateText value={b.startDate} /> – <DateText value={b.endDate} />
+                              </>
+                            ) : (
+                              'No dates'
+                            )}
                           </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+                        </span>
+                        <span className="shrink-0 text-right">
+                          <span
+                            className={cn(
+                              'block text-sm font-extrabold tabular-nums',
+                              balance > 0
+                                ? 'text-[var(--casa-warning-text)]'
+                                : 'text-[var(--casa-success-text)]'
+                            )}
+                          >
+                            {new Intl.NumberFormat('de-DE', {
+                              style: 'currency',
+                              currency: b.currency,
+                            }).format(balance)}
+                          </span>
+                          <span className="block text-xs text-[var(--casa-text-subtle)]">
+                            {balance > 0 ? 'open' : 'paid'}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </Card>
           ) : null}
 
-          <Card title="History" icon={Icon.clock} tint="blue">
-            {timeline.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">Nothing yet.</p>
-            ) : (
+          {history.length > 0 ? (
+            <Card title="History" icon={Icon.clock} tint="blue">
               <ol className="-my-1.5 divide-y divide-ws-line-soft">
-                {timeline.map((item) => {
+                {history.map((item) => {
                   const kind = KINDS[item.kind];
                   return (
                     <li key={`${item.kind}-${item.id}`}>
@@ -331,8 +346,8 @@ export default async function PersonPage({
                   );
                 })}
               </ol>
-            )}
-          </Card>
+            </Card>
+          ) : null}
 
           {person.linkedDuplicates.length > 0 ? (
             <Card title="Linked records" icon={Icon.people} tint="ink">
@@ -440,10 +455,10 @@ export default async function PersonPage({
               </Card>
             ) : null}
 
-            {activity.length > 0 ? (
+            {decisions.length > 0 ? (
               <Card title="Identity decisions" icon={Icon.check} tint="green">
                 <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
-                  {activity.map((entry) => (
+                  {decisions.map((entry) => (
                     <li key={entry.id} className="relative flex gap-3 text-xs">
                       <span
                         aria-hidden="true"
@@ -463,6 +478,20 @@ export default async function PersonPage({
           </div>
         ) : null}
       </div>
+
+      {canDelete ? (
+        <RecordFoot>
+          <form action={deletePersonAction}>
+            <input type="hidden" name="personId" value={person.id} />
+            <ConfirmSubmit
+              title={`Delete ${person.displayName}?`}
+              description="The person disappears from every list. Their registrations and enquiries stay in the queues. An owner can restore the record."
+            >
+              Delete person
+            </ConfirmSubmit>
+          </form>
+        </RecordFoot>
+      ) : null}
     </>
   );
 }

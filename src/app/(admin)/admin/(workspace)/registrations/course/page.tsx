@@ -6,6 +6,8 @@ import { EmptyState, PageHeader } from '@/components/admin/ui';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
 import { listCourseRegistrations } from '@/lib/admin/registrations';
+import { courseNameResolver } from '../course-names';
+import { optionLine } from '../option-label';
 
 export default async function CourseRegistrationsPage({
   searchParams,
@@ -17,7 +19,7 @@ export default async function CourseRegistrationsPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, courseCounts, examCounts] = await Promise.all([
+  const [{ items, total }, courseCounts, examCounts, courseName] = await Promise.all([
     listCourseRegistrations({
       status: filter,
       search,
@@ -26,7 +28,15 @@ export default async function CourseRegistrationsPage({
     }),
     queueStatusCounts('course_registration'),
     queueStatusCounts('exam_registration'),
+    courseNameResolver(),
   ]);
+
+  // Every row the same way: the course as staff call it, then its start and time.
+  const rows = items.map((item) => ({
+    ...item,
+    productLabel: courseName(item.productLabel) ?? item.productLabel,
+    optionLabel: optionLine(item.optionLabel, 'course'),
+  }));
 
   const open = (counts: typeof courseCounts) =>
     counts.byStatus.new + counts.byStatus.in_progress + counts.byStatus.waiting;
@@ -59,7 +69,7 @@ export default async function CourseRegistrationsPage({
         />
       ) : (
         <RegistrationTable
-          items={items}
+          items={rows}
           basePath="/admin/registrations/course"
           detailColumn="Declared level"
         />

@@ -10,7 +10,7 @@ import { loadPriceLists } from '../prices/repo';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
 import { hasProblems, offerChecks } from './checks';
-import { courseTitle, teachingWeeks, termLessons } from './course';
+import { courseSpan, courseTitle, slotLabel, teachingWeeks, termLessons } from './course';
 import { OFFER_TEXT_DEFAULTS, offerLetter, type OfferTexts } from './document';
 import { newManualKey } from './draft-ops';
 import { buildLines, computeTotals } from './engine';
@@ -142,6 +142,8 @@ export type OfferListItem = {
   recipientName: string;
   arrival: string | null;
   departure: string | null;
+  /** A learner's course: its first and last day and when it meets. */
+  course: { start: string | null; end: string | null; slot: string } | null;
   participants: number | null;
   escorts: number;
   perParticipant: number | null;
@@ -215,6 +217,10 @@ export async function listOffers({ filter, q }: { filter: OfferListFilter; q?: s
       recipientName: r.recipient_name,
       arrival: dateOrNull(r.arrival),
       departure: dateOrNull(r.departure),
+      course:
+        r.kind === 'individual' && stay.choices.course
+          ? { ...courseSpan(stay.choices.course), slot: slotLabel(stay.choices.course.slot, 'en') }
+          : null,
       participants: r.participants,
       escorts: r.escorts,
       perParticipant: p,

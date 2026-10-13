@@ -99,8 +99,15 @@ export default async function OffersPage({
                   </span>
                   <span style={{ minWidth: 0 }}>
                     <span className={ui.listSub} style={{ color: 'var(--o-ink2)' }}>
-                      {o.arrival && o.departure ? formatDateRange(o.arrival, o.departure, 'de') : o.kind === 'group' ? 'No dates yet' : 'Courses'}
+                      {o.arrival && o.departure
+                        ? formatDateRange(o.arrival, o.departure, 'de')
+                        : o.course?.start && o.course.end
+                          ? formatDateRange(o.course.start, o.course.end, 'de')
+                          : o.kind === 'group' || o.course
+                            ? 'No dates yet'
+                            : 'Lines from the price list'}
                     </span>
+                    {o.course?.slot ? <span className={ui.listSub}>{o.course.slot}</span> : null}
                     {o.kind === 'group' && o.participants ? (
                       <span className={ui.listSub}>
                         {o.participants} participants{o.escorts ? ` · ${o.escorts} ${o.escorts === 1 ? 'escort' : 'escorts'}` : ''}

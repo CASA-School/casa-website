@@ -12,6 +12,7 @@ import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { getExamRegistration, registrationTypeLabel } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
+import { formatDay, parseOptionLabel } from '../../option-label';
 
 const SALUTATIONS: Record<string, string> = {
   mr: 'Mr',
@@ -23,7 +24,9 @@ const SALUTATIONS: Record<string, string> = {
 /**
  * One exam registration.
  *
- * The head carries the sitting, the parts and who has it; under it, the
+ * The head carries the sitting and the parts (who has it is the rail's, where
+ * it is changed, and the address is on the Candidate card, as on a course
+ * registration); under it, the
  * official-name confirmation gets the first card and a warning of its own. A
  * telc certificate is printed from the name on the entry, and a mismatch with
  * the candidate's ID is discovered on exam day, after the fee is paid and the
@@ -58,6 +61,7 @@ export default async function ExamRegistrationPage({
     : [];
 
   const fullName = `${registration.firstName} ${registration.lastName}`;
+  const sitting = parseOptionLabel(registration.examSessionLabel);
 
   return (
     <>
@@ -80,25 +84,18 @@ export default async function ExamRegistrationPage({
             value: <DateText value={registration.submittedAt} />,
             sub: relativeDays(registration.submittedAt),
           },
-          { label: 'Sitting', icon: Icon.calendar, tint: 'blue', value: registration.examSessionLabel },
+          {
+            label: 'Sitting',
+            icon: Icon.calendar,
+            tint: 'blue',
+            value: sitting?.start ? formatDay(sitting.start, true) : (sitting?.raw ?? null),
+            sub: sitting?.start ? [sitting.time, sitting.location].filter(Boolean).join(' · ') || undefined : undefined,
+          },
           {
             label: 'Parts',
             icon: Icon.book,
             tint: 'red',
             value: registrationTypeLabel(registration.registrationType),
-          },
-          {
-            label: 'Email',
-            icon: Icon.mail,
-            tint: 'ink',
-            value: registration.email,
-            href: `mailto:${registration.email}`,
-          },
-          {
-            label: 'Owner',
-            icon: Icon.person,
-            tint: registration.assignedTo ? 'green' : 'ink',
-            value: staff.find((member) => member.id === registration.assignedTo)?.name ?? 'Nobody yet',
           },
         ]}
       />
@@ -128,12 +125,23 @@ export default async function ExamRegistrationPage({
             ) : null}
           </Card>
 
-          <Card title="Candidate" icon={Icon.person} tint="ink" footer={<p className="text-xs text-[var(--casa-text-subtle)]">Reference <code className="font-mono">{registration.requestId}</code></p>}>
+          <Card title="Candidate" icon={Icon.person} tint="ink">
             <DetailList
               items={[
                 {
                   label: 'Salutation',
                   value: SALUTATIONS[registration.salutation] ?? registration.salutation,
+                },
+                {
+                  label: 'Email',
+                  value: (
+                    <a
+                      href={`mailto:${registration.email}`}
+                      className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                    >
+                      {registration.email}
+                    </a>
+                  ),
                 },
                 {
                   label: 'Phone',

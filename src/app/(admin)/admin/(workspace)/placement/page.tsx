@@ -1,12 +1,10 @@
 import Link from 'next/link';
 
-import { Pagination } from '@/components/admin/pagination';
 import { Icon } from '@/components/admin/icons';
 import {
-  Badge,
+  ButtonLink,
   Card,
   Cell,
-  DateText,
   EmptyState,
   IconChip,
   PageHeader,
@@ -14,8 +12,12 @@ import {
   TableRow,
 } from '@/components/admin/ui';
 import { cn } from '@/lib/utils';
-import { clampPage, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
-import { listPlacementAttempts, type PlacementFilter } from '@/lib/admin/placement';
+import { firstParam } from '@/lib/admin/paging';
+import {
+  listPlacementAttempts,
+  type PlacementFilter,
+  type PlacementListItem,
+} from '@/lib/admin/placement';
 import { CONFIDENCE_COPY } from '@/lib/admin/placement-copy';
 import { RELEASE_MODE } from '@/config/placement/policy';
 
@@ -32,6 +34,13 @@ import { RELEASE_MODE } from '@/config/placement/policy';
  * mode, so a teacher reading this screen has to know that the number in the
  * "recommended" column is a hypothesis from an unreviewed instrument — not a
  * measurement they are being asked to rubber-stamp.
+ *
+ * The list says only what the tab does not: on "Awaiting a teacher" every row
+ * needs a teacher, so there is no decision column; a fully answered test is
+ * the normal case, so only a partial one is noted. Rows are grouped by the day
+ * they came in, and the first view holds the latest few — `?show=all` lists
+ * every attempt in the tab. An attempt carries no name until a teacher
+ * attaches a person to the decision, so the rows have nothing to name.
  */
 const FILTERS: readonly { key: PlacementFilter; label: string }[] = [
   { key: 'needs_review', label: 'Awaiting a teacher' },
@@ -40,23 +49,85 @@ const FILTERS: readonly { key: PlacementFilter; label: string }[] = [
   { key: 'all', label: 'Everything' },
 ];
 
+/** The first view: enough to work from without a 2,000px page. */
+const FIRST_VIEW = 25;
+/** "Show all" is still bounded, so a mistyped link cannot ask for a million rows. */
+const SHOW_ALL_LIMIT = 5000;
+
+const ZONE = 'Europe/Berlin';
+const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
+const timeOfDay = new Intl.DateTimeFormat('en-GB', { timeZone: ZONE, hour: '2-digit', minute: '2-digit' });
+
+/** "Today", "Yesterday", or "Thu 08 Oct" (with the year when it is not this one). */
+function dayLabel(key: string, now: Date): string {
+  const today = dayKey.format(now);
+  const yesterday = dayKey.format(new Date(now.getTime() - 86_400_000));
+  if (key === today) return 'Today';
+  if (key === yesterday) return 'Yesterday';
+  const [year, month, day] = key.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  return date.toLocaleDateString('en-GB', {
+    timeZone: 'UTC',
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    ...(year === Number(today.slice(0, 4)) ? {} : { year: 'numeric' }),
+  });
+}
+
+const STAGE_LABELS: Record<string, string> = {
+  in_progress: 'In progress',
+  submitted: 'Submitted',
+  abandoned: 'Abandoned',
+};
+
 export default async function PlacementPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const raw = Array.isArray(params.filter) ? params.filter[0] : params.filter;
+  const raw = firstParam(params.filter);
   const filter: PlacementFilter = FILTERS.some((f) => f.key === raw)
     ? (raw as PlacementFilter)
     : 'needs_review';
-  const page = clampPage(params.page);
+  const showAll = firstParam(params.show) === 'all';
 
   const { items, total } = await listPlacementAttempts({
     filter,
-    limit: PAGE_SIZE,
-    offset: offsetFor(page),
+    limit: showAll ? SHOW_ALL_LIMIT : FIRST_VIEW,
+    offset: 0,
   });
+
+  const now = new Date();
+  const days: { key: string; items: PlacementListItem[] }[] = [];
+  for (const item of items) {
+    const key = dayKey.format(item.submittedAt ?? item.createdAt);
+    const last = days[days.length - 1];
+    if (last && last.key === key) last.items.push(item);
+    else days.push({ key, items: [item] });
+  }
+
+  const testing = filter === 'in_progress';
+  const decisionHead =
+    filter === 'confirmed' ? 'Confirmed' : filter === 'all' ? 'Decision' : null;
+  // Still testing: nothing is scored yet, so the row is when it started and in which language.
+  const columns = testing
+    ? ['Started', 'Language']
+    : [
+        'Recommended',
+        'Confidence',
+        ...(decisionHead ? [decisionHead] : []),
+        'Language',
+        { label: 'Submitted', align: 'right' as const },
+      ];
+  const hrefFor = (key: PlacementFilter, all = false) => {
+    const query = new URLSearchParams();
+    if (key !== 'needs_review') query.set('filter', key);
+    if (all) query.set('show', 'all');
+    const qs = query.toString();
+    return qs ? `/admin/placement?${qs}` : '/admin/placement';
+  };
 
   return (
     <>
@@ -80,11 +151,7 @@ export default async function PlacementPage({
           return (
             <Link
               key={option.key}
-              href={
-                option.key === 'needs_review'
-                  ? '/admin/placement'
-                  : `/admin/placement?filter=${option.key}`
-              }
+              href={hrefFor(option.key)}
               aria-current={isActive ? 'true' : undefined}
               className={cn(
                 'inline-flex h-[30px] shrink-0 items-center rounded-lg px-3 text-[0.8rem] font-bold whitespace-nowrap transition-colors',
@@ -114,84 +181,139 @@ export default async function PlacementPage({
           }
         />
       ) : (
-        <Card bleed>
-          <Table
-            head={[
-              'Recommended',
-              'Confidence',
-              'Answered',
-              'Decision',
-              'Language',
-              { label: 'Submitted', align: 'right' },
-            ]}
-          >
-            {items.map((item) => (
-              <TableRow key={item.id} interactive>
-                <Cell href={`/admin/placement/${item.id}`} className="font-semibold">
-                  {item.recommendedBand ? (
-                    <span className="font-extrabold">{item.recommendedBand}</span>
-                  ) : (
-                    <span className="text-sm font-normal text-[var(--casa-text-subtle)]">
-                      not scored yet
-                    </span>
-                  )}
-                </Cell>
-                <Cell className="text-sm">
-                  {item.confidence ? (
-                    <Badge
-                      tone={
-                        item.confidence === 'high'
-                          ? 'positive'
-                          : item.confidence === 'medium'
-                            ? 'neutral'
-                            : 'warning'
-                      }
-                    >
-                      {CONFIDENCE_COPY[item.confidence as keyof typeof CONFIDENCE_COPY] ??
-                        item.confidence}
-                    </Badge>
-                  ) : (
-                    <span className="text-[var(--casa-text-subtle)]">—</span>
-                  )}
-                </Cell>
-                <Cell className="text-sm">
-                  {item.answeredShare === null ? (
-                    <span className="text-[var(--casa-text-subtle)]">—</span>
-                  ) : (
-                    `${Math.round(item.answeredShare * 100)}%`
-                  )}
-                </Cell>
-                <Cell className="text-sm">
-                  {item.confirmedLevel ? (
-                    <span>
-                      <Badge tone="positive">{item.confirmedLevel}</Badge>
-                      {item.reviewerName ? (
-                        <span className="mt-1 block text-xs text-[var(--casa-text-subtle)]">
-                          {item.reviewerName}
-                        </span>
-                      ) : null}
-                    </span>
-                  ) : item.needsReview ? (
-                    <Badge tone="accent">Needs a teacher</Badge>
-                  ) : item.recommendedBand ? (
-                    <Badge tone="neutral">Unconfirmed</Badge>
-                  ) : (
-                    <span className="text-[var(--casa-text-subtle)]">in progress</span>
-                  )}
-                </Cell>
-                <Cell className="text-sm text-[var(--casa-text-subtle)]">
-                  {item.locale === 'de' ? 'German' : 'English'}
-                </Cell>
-                <Cell align="right" className="text-xs text-[var(--casa-text-subtle)]">
-                  <DateText value={item.submittedAt ?? item.createdAt} compact />
-                </Cell>
-              </TableRow>
-            ))}
+        <Card
+          bleed
+          footer={
+            total > items.length || showAll ? (
+              <div className="flex items-center justify-between gap-4 text-xs">
+                <p className="font-semibold text-[var(--casa-text-subtle)] tabular-nums">
+                  {total > items.length
+                    ? `Latest ${items.length} of ${total}`
+                    : `All ${total}`}
+                </p>
+                {showAll ? (
+                  total > FIRST_VIEW ? (
+                    <ButtonLink href={hrefFor(filter)} size="sm">
+                      Show latest {FIRST_VIEW}
+                    </ButtonLink>
+                  ) : null
+                ) : (
+                  <ButtonLink href={hrefFor(filter, true)} size="sm">
+                    Show all {total}
+                  </ButtonLink>
+                )}
+              </div>
+            ) : undefined
+          }
+        >
+          <Table head={columns}>
+            {days.flatMap((day) => [
+              <tr key={day.key} className="bg-white">
+                <th
+                  scope="colgroup"
+                  colSpan={columns.length}
+                  className="px-4 pt-5 pb-2 text-left text-xs font-extrabold text-[var(--casa-ink)]"
+                >
+                  {dayLabel(day.key, now)}
+                </th>
+              </tr>,
+              ...day.items.map((item) => (
+                <AttemptRow key={item.id} item={item} testing={testing} decision={decisionHead} />
+              )),
+            ])}
           </Table>
         </Card>
       )}
-
-      <Pagination basePath="/admin/placement" page={page} total={total} params={params} />
     </>
+  );
+}
+
+const CONFIDENCE_TONE: Record<string, string> = {
+  high: 'text-[var(--casa-text-subtle)]',
+  medium: 'text-[var(--casa-ink)]',
+  low: 'font-semibold text-[var(--casa-warning-text)]',
+};
+
+function AttemptRow({
+  item,
+  testing,
+  decision,
+}: {
+  item: PlacementListItem;
+  testing: boolean;
+  decision: 'Confirmed' | 'Decision' | null;
+}) {
+  const href = `/admin/placement/${item.id}`;
+  const partial = item.answeredShare !== null && item.answeredShare < 1;
+  const at = item.submittedAt ?? item.createdAt;
+  const time = <time dateTime={at.toISOString()}>{timeOfDay.format(at)}</time>;
+
+  if (testing) {
+    return (
+      <TableRow interactive>
+        <Cell href={href} className="w-40 text-sm font-semibold tabular-nums">
+          {time}
+          {item.status !== 'in_progress' ? (
+            <span className="ml-2 text-xs font-normal text-[var(--casa-text-subtle)]">
+              {STAGE_LABELS[item.status] ?? item.status}
+            </span>
+          ) : null}
+        </Cell>
+        <Cell className="text-sm text-[var(--casa-text-subtle)]">
+          {item.locale === 'de' ? 'German' : 'English'}
+        </Cell>
+      </TableRow>
+    );
+  }
+
+  return (
+    <TableRow interactive>
+      <Cell href={href} className="font-extrabold">
+        {item.recommendedBand ?? (
+          <span className="text-sm font-normal text-[var(--casa-text-subtle)]">Not scored yet</span>
+        )}
+      </Cell>
+
+      <Cell className="text-sm">
+        {item.confidence ? (
+          <span className={CONFIDENCE_TONE[item.confidence]}>
+            {CONFIDENCE_COPY[item.confidence as keyof typeof CONFIDENCE_COPY] ?? item.confidence}
+          </span>
+        ) : (
+          <span className="text-[var(--casa-text-subtle)]">—</span>
+        )}
+        {partial ? (
+          <span className="ml-2 text-xs text-[var(--casa-warning-text)]">
+            {Math.round((item.answeredShare ?? 0) * 100)}% answered
+          </span>
+        ) : null}
+      </Cell>
+
+      {decision ? (
+        <Cell className="text-sm">
+          {item.confirmedLevel ? (
+            <span>
+              <span className="font-bold">{item.confirmedLevel}</span>
+              {item.reviewerName ? (
+                <span className="text-xs text-[var(--casa-text-subtle)]"> · {item.reviewerName}</span>
+              ) : null}
+            </span>
+          ) : item.needsReview ? (
+            <span className="font-semibold text-[var(--casa-ink)]">Needs a teacher</span>
+          ) : item.recommendedBand ? (
+            <span className="text-[var(--casa-text-subtle)]">Unconfirmed</span>
+          ) : (
+            <span className="text-[var(--casa-text-subtle)]">In progress</span>
+          )}
+        </Cell>
+      ) : null}
+
+      <Cell className="text-sm text-[var(--casa-text-subtle)]">
+        {item.locale === 'de' ? 'German' : 'English'}
+      </Cell>
+      <Cell align="right" className="text-xs text-[var(--casa-text-subtle)] tabular-nums">
+        {time}
+      </Cell>
+    </TableRow>
   );
 }

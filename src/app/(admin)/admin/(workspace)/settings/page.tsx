@@ -154,7 +154,7 @@ export default async function SettingsPage() {
                   label: 'Release mode',
                   value: (
                     <Badge tone={RELEASE_MODE === 'live' ? 'positive' : 'warning'}>
-                      {RELEASE_MODE}
+                      {RELEASE_MODE.charAt(0).toUpperCase() + RELEASE_MODE.slice(1)}
                     </Badge>
                   ),
                 },

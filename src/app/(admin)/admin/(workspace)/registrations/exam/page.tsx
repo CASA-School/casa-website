@@ -6,6 +6,7 @@ import { EmptyState, PageHeader } from '@/components/admin/ui';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
 import { listExamRegistrations } from '@/lib/admin/registrations';
+import { optionLine } from '../option-label';
 
 export default async function ExamRegistrationsPage({
   searchParams,
@@ -27,6 +28,9 @@ export default async function ExamRegistrationsPage({
     queueStatusCounts('course_registration'),
     queueStatusCounts('exam_registration'),
   ]);
+
+  // The sitting's date and time, formatted the same on every row.
+  const rows = items.map((item) => ({ ...item, optionLabel: optionLine(item.optionLabel, 'exam') }));
 
   const open = (counts: typeof examCounts) =>
     counts.byStatus.new + counts.byStatus.in_progress + counts.byStatus.waiting;
@@ -59,9 +63,9 @@ export default async function ExamRegistrationsPage({
         />
       ) : (
         <RegistrationTable
-          items={items}
+          items={rows}
           basePath="/admin/registrations/exam"
-          detailColumn="Sitting"
+          detailColumn="Parts"
         />
       )}
 

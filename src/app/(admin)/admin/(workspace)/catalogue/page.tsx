@@ -1,15 +1,10 @@
 import Link from 'next/link';
 
-import { assignRoomAction } from '../settings/rooms/actions';
 import {
   Badge,
-  Button,
   Card,
   Cell,
-  DateText,
-  Meter,
   PageHeader,
-  Select,
   Table,
   TableRow,
 } from '@/components/admin/ui';
@@ -18,10 +13,23 @@ import {
   listCourseTypes,
   listUpcomingCourseInstances,
   SESSION_LABELS,
+  type CourseInstanceSummary,
 } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
-import { listBookableRooms } from '@/lib/admin/rooms';
+import { listBookableRooms, type Room } from '@/lib/admin/rooms';
 import { CohortForm } from './cohort-form';
+import {
+  groupRuns,
+  MonthCell,
+  monthEdge,
+  monthKey,
+  monthLabel,
+  OpenTable,
+  SeatLine,
+  sentenceCase,
+  shortDate,
+} from './list-parts';
+import { RoomPicker } from './room-picker';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { query } from '@/lib/admin/db';
@@ -38,6 +46,11 @@ import { query } from '@/lib/admin/db';
  *
  * What the workspace adds is the one thing the source of truth cannot hold:
  * how many people have actually registered for the cohort starting in ten days.
+ *
+ * The cohorts read as a calendar: the month they start in a column of its
+ * own, one line each, and only what differs from the normal case is marked — a cohort that
+ * is full or nearly full, a status other than scheduled, a room too small.
+ * The room is a value that opens the rooms as choices, not a select per row.
  */
 export default async function CataloguePage({
   searchParams,
@@ -57,6 +70,15 @@ export default async function CataloguePage({
         )
       : Promise.resolve([]),
   ]);
+
+  // Same-day cohorts in a fixed order, so a row does not swap places after its room changes.
+  const ordered = [...instances].sort(
+    (a, b) =>
+      new Date(a.startDate).getTime() - new Date(b.startDate).getTime() ||
+      a.courseTypeName.localeCompare(b.courseTypeName) ||
+      a.id.localeCompare(b.id)
+  );
+  const months = groupRuns(ordered, (instance) => monthKey(instance.startDate));
 
   return (
     <>
@@ -86,118 +108,33 @@ export default async function CataloguePage({
       ) : null}
 
       <div className="space-y-4">
-        <Card title="Upcoming cohorts" icon={Icon.calendar} tint="blue" bleed>
+        <Card title="Upcoming cohorts" icon={Icon.calendar} tint="blue" bleed overflow="visible">
           {instances.length === 0 ? (
             <p className="px-4 py-6 text-sm text-[var(--casa-text-subtle)]">No cohorts scheduled.</p>
           ) : (
-            <Table
+            <OpenTable
+              className="pb-1"
               head={[
-                'Course',
-                'Runs',
-                'Room',
-                { label: 'Booked', align: 'right' },
-                'Seats',
-                { label: 'Status', align: 'right' },
+                { label: 'Month', className: 'w-24' },
+                { label: 'Course' },
+                { label: 'Runs' },
+                { label: 'Room', className: 'w-56' },
+                { label: 'Seats', className: 'w-60' },
               ]}
             >
-              {instances.map((instance) => {
-                const full =
-                  instance.capacity > 0 && instance.registrationCount >= instance.capacity;
-                const nearlyFull =
-                  instance.capacity > 0 &&
-                  !full &&
-                  instance.registrationCount / instance.capacity >= 0.8;
-
-                return (
-                  <TableRow key={instance.id}>
-                    <Cell className="font-semibold">
-                      <span className="block">{instance.title ?? instance.courseTypeName}</span>
-                      <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
-                        {[
-                          instance.levelCode,
-                          instance.session ? SESSION_LABELS[instance.session] : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ') || instance.courseTypeName}
-                      </span>
-                    </Cell>
-                    <Cell className="text-sm whitespace-nowrap text-[var(--casa-muted)]">
-                      <DateText value={instance.startDate} /> –{' '}
-                      <DateText value={instance.endDate} />
-                    </Cell>
-                    <Cell className="text-sm">
-                      {plans ? (
-                        <form action={assignRoomAction} className="flex items-center gap-1.5">
-                          <input type="hidden" name="courseInstanceId" value={instance.id} />
-                          <Select
-                            name="roomId"
-                            defaultValue={instance.room?.id ?? ''}
-                            aria-label={`Room for ${instance.courseTypeName}`}
-                            className="h-8 w-auto py-0 text-xs"
-                          >
-                            <option value="">No room</option>
-                            {rooms.map((room) => (
-                              <option key={room.id} value={room.id}>
-                                {room.nickname ? `${room.name} · ${room.nickname}` : room.name}
-                                {room.capacity !== null ? ` (${room.capacity})` : ''}
-                              </option>
-                            ))}
-                          </Select>
-                          <Button type="submit" variant="ghost" size="sm">
-                            Set
-                          </Button>
-                        </form>
-                      ) : instance.room ? (
-                        <Link
-                          href={`/admin/settings/rooms/${instance.room.id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {instance.room.nickname ?? instance.room.name}
-                        </Link>
-                      ) : (
-                        <span className="text-[var(--casa-text-subtle)]">
-                          {instance.location ?? '—'}
-                        </span>
-                      )}
-                      {instance.room?.capacity !== null &&
-                      instance.room?.capacity !== undefined &&
-                      instance.capacity > instance.room.capacity ? (
-                        <Badge tone="warning" className="mt-1">
-                          Over room capacity
-                        </Badge>
-                      ) : null}
-                    </Cell>
-                    <Cell align="right" className="text-sm font-semibold">
-                      {instance.bookingCount || '—'}
-                    </Cell>
-                    <Cell className="w-40">
-                      <span className="mb-1.5 block text-sm">
-                        {instance.registrationCount}
-                        <span className="text-[var(--casa-text-subtle)]">
-                          {' / '}
-                          {instance.capacity || '?'}
-                        </span>
-                      </span>
-                      <Meter
-                        value={instance.registrationCount}
-                        max={instance.capacity || instance.registrationCount || 1}
-                        label={`${instance.registrationCount} of ${instance.capacity} seats taken`}
-                        tone={full || nearlyFull ? 'warning' : 'accent'}
-                      />
-                    </Cell>
-                    <Cell align="right">
-                      {full ? (
-                        <Badge tone="warning">Full</Badge>
-                      ) : nearlyFull ? (
-                        <Badge tone="warning">Nearly full</Badge>
-                      ) : (
-                        <Badge tone="quiet">{instance.status}</Badge>
-                      )}
-                    </Cell>
-                  </TableRow>
-                );
-              })}
-            </Table>
+              {months.flatMap((month) =>
+                month.items.map((instance, index) => (
+                  <CohortRow
+                    key={instance.id}
+                    instance={instance}
+                    rooms={rooms}
+                    plans={plans}
+                    month={index === 0 ? monthLabel(month.key) : null}
+                    lastOfMonth={index === month.items.length - 1}
+                  />
+                ))
+              )}
+            </OpenTable>
           )}
         </Card>
 
@@ -212,37 +149,165 @@ export default async function CataloguePage({
               { label: 'Registrations', align: 'right' },
             ]}
           >
-            {types.map((type) => (
-              <TableRow key={type.id}>
-                <Cell className="font-semibold">
-                  <span className="block">{type.name}</span>
-                  <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
-                    {type.upcomingCount} upcoming of {type.instanceCount}
-                    {!type.isActive ? ' · not published' : ''}
-                  </span>
-                </Cell>
-                <Cell className="text-sm">{type.levelRange ?? '—'}</Cell>
-                <Cell className="text-sm text-[var(--casa-text-subtle)]">{type.format ?? '—'}</Cell>
-                <Cell align="right" className="text-sm">
-                  {type.lessonsPerWeek || '—'}
-                </Cell>
-                <Cell align="right" className="text-sm">
-                  {type.defaultPrice > 0
-                    ? new Intl.NumberFormat('de-DE', {
+            {types.map((type) => {
+              const sub = [
+                type.upcomingCount > 0
+                  ? `${type.upcomingCount} upcoming ${type.upcomingCount === 1 ? 'cohort' : 'cohorts'}`
+                  : null,
+                type.isActive ? null : 'Not published',
+              ]
+                .filter(Boolean)
+                .join(' · ');
+              return (
+                <TableRow key={type.id}>
+                  <Cell className="font-semibold">
+                    <span className="block">{type.name}</span>
+                    {sub ? (
+                      <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
+                        {sub}
+                      </span>
+                    ) : null}
+                  </Cell>
+                  <Cell className="text-sm">{type.levelRange ?? '—'}</Cell>
+                  <Cell className="text-sm">
+                    {type.format ? (
+                      sentenceCase(type.format)
+                    ) : (
+                      <span className="text-[var(--casa-text-subtle)]">—</span>
+                    )}
+                  </Cell>
+                  <Cell align="right" className="text-sm">
+                    {type.lessonsPerWeek || <span className="text-[var(--casa-text-subtle)]">—</span>}
+                  </Cell>
+                  <Cell align="right" className="text-sm">
+                    {type.defaultPrice > 0 ? (
+                      new Intl.NumberFormat('de-DE', {
                         style: 'currency',
                         currency: type.currency,
                         maximumFractionDigits: 0,
                       }).format(type.defaultPrice)
-                    : 'on request'}
-                </Cell>
-                <Cell align="right" className="text-sm font-semibold">
-                  {type.registrationCount}
-                </Cell>
-              </TableRow>
-            ))}
+                    ) : (
+                      <span className="text-[var(--casa-text-subtle)]">On request</span>
+                    )}
+                  </Cell>
+                  <Cell
+                    align="right"
+                    className={
+                      type.registrationCount > 0
+                        ? 'text-sm font-semibold'
+                        : 'text-sm text-[var(--casa-text-subtle)]'
+                    }
+                  >
+                    {type.registrationCount}
+                  </Cell>
+                </TableRow>
+              );
+            })}
           </Table>
         </Card>
       </div>
     </>
+  );
+}
+
+const STATUS_LABELS: Record<string, { label: string; tone: 'quiet' | 'neutral' | 'danger' }> = {
+  cancelled: { label: 'Cancelled', tone: 'danger' },
+  draft: { label: 'Draft', tone: 'quiet' },
+};
+
+/** One cohort: what it is, when, where, and how full. */
+function CohortRow({
+  instance,
+  rooms,
+  plans,
+  month,
+  lastOfMonth,
+}: {
+  instance: CourseInstanceSummary;
+  rooms: Room[];
+  plans: boolean;
+  /** The month's label on its first row, null on the rest. */
+  month: string | null;
+  lastOfMonth: boolean;
+}) {
+  const full = instance.capacity > 0 && instance.registrationCount >= instance.capacity;
+  const nearlyFull =
+    instance.capacity > 0 && !full && instance.registrationCount / instance.capacity >= 0.8;
+  const overRoom =
+    instance.room?.capacity !== null &&
+    instance.room?.capacity !== undefined &&
+    instance.capacity > instance.room.capacity;
+
+  // The subtitle carries only what the course name does not already say.
+  const sub = [
+    instance.title && instance.title !== instance.courseTypeName ? instance.title : null,
+    instance.levelCode,
+    instance.session ? SESSION_LABELS[instance.session] : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const status =
+    instance.status === 'scheduled'
+      ? null
+      : (STATUS_LABELS[instance.status] ?? { label: sentenceCase(instance.status), tone: 'neutral' });
+
+  const endYear = new Date(instance.endDate).getFullYear() !== new Date(instance.startDate).getFullYear();
+
+  return (
+    <tr className={monthEdge(lastOfMonth)} data-cohort={instance.id}>
+      <MonthCell label={month} />
+      <td className="px-4 py-2.5 align-middle">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-[var(--casa-ink)]">
+          {instance.courseTypeName}
+          {status ? <Badge tone={status.tone}>{status.label}</Badge> : null}
+        </span>
+        {sub ? <span className="block text-xs text-[var(--casa-text-subtle)]">{sub}</span> : null}
+      </td>
+      <td className="px-4 py-2.5 align-middle text-sm whitespace-nowrap text-[var(--casa-muted)]">
+        {shortDate(instance.startDate)} – {shortDate(instance.endDate, { year: endYear })}
+      </td>
+      <td className="px-4 py-2 align-middle">
+        {plans ? (
+          <RoomPicker instance={instance} rooms={rooms} />
+        ) : instance.room ? (
+          <Link
+            href={`/admin/settings/rooms/${instance.room.id}`}
+            className="text-sm font-medium text-[var(--casa-ink)] hover:underline"
+          >
+            {instance.room.nickname ?? instance.room.name}
+          </Link>
+        ) : (
+          <span className="text-sm text-[var(--casa-text-subtle)]">{instance.location ?? 'No room'}</span>
+        )}
+        {overRoom ? (
+          <span className="mt-0.5 block text-xs font-semibold text-[var(--casa-warning-text)]">
+            Over room capacity
+          </span>
+        ) : null}
+      </td>
+      <td className="px-4 py-2.5 align-middle">
+        <SeatLine
+          taken={instance.registrationCount}
+          capacity={instance.capacity}
+          label={`${instance.registrationCount} of ${instance.capacity} seats taken`}
+          warn={full || nearlyFull}
+          note={
+            full || nearlyFull || instance.bookingCount > 0 ? (
+              <>
+                {instance.bookingCount > 0 ? (
+                  <span className="text-[var(--casa-text-subtle)]">{instance.bookingCount} booked</span>
+                ) : null}
+                {full || nearlyFull ? (
+                  <span className="ml-2 font-semibold text-[var(--casa-warning-text)]">
+                    {full ? 'Full' : 'Nearly full'}
+                  </span>
+                ) : null}
+              </>
+            ) : null
+          }
+        />
+      </td>
+    </tr>
   );
 }

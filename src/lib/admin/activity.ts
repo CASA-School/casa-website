@@ -249,8 +249,26 @@ export function describeActivity(entry: ActivityEntry): string {
       return 'reopened an offer to revise it';
     case 'offer_deleted':
       return 'deleted an offer';
-    case 'offer_standard_text_changed':
+    case 'letter_standard_text_changed':
       return `changed the standard ${entry.detail?.part === 'closing' ? 'closing' : 'opening'} of ${entry.detail?.language === 'de' ? 'German' : 'English'} offers`;
+    case 'week.saved':
+      return `planned the ${shiftWord(entry.detail?.shift)} week from ${listName(entry.detail?.weekStart)} in Kursplanung`;
+    case 'month.created':
+      return 'set up a new month in Kursplanung';
+    case 'pairs.filled':
+      return `filled the ${shiftWord(entry.detail?.shift)} teacher pairs in Kursplanung`;
+    case 'rules.saved':
+      return 'changed a teacher’s availability in Kursplanung';
+    case 'group.added':
+      return 'added a group in Kursplanung';
+    case 'group.saved':
+      return 'changed a group in Kursplanung';
+    case 'group.removed':
+      return 'removed a group in Kursplanung';
+    case 'task_updated':
+      return 'changed a task on the day board';
+    case 'task_deleted':
+      return 'took a task off the day board';
     case 'prices_changed': {
       const n = Array.isArray(entry.detail?.changes) ? entry.detail.changes.length : 0;
       return `changed ${n === 1 ? 'a price' : `${n} prices`} in the price list from ${listName(entry.detail?.list)}`;
@@ -323,3 +341,6 @@ const listName = (value: unknown) =>
   typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
     ? new Date(`${value}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
     : 'a date';
+
+const shiftWord = (value: unknown) => (value === 'afternoon' ? 'afternoon' : value === 'morning' ? 'morning' : 'course');
+

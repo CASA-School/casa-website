@@ -20,11 +20,29 @@ import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 const KIND_LABEL = { general: 'Enquiry', group: 'Group enquiry', company: 'Company enquiry' } as const;
 
 /**
+ * Where an enquiry came from, when that says something. The contact page is
+ * where every enquiry comes from, and a demo seed is plumbing; the interest
+ * list (German for Medical's popup) is worth knowing.
+ */
+const SOURCE_LABEL: Record<string, string | null> = {
+  'contact-page': null,
+  'demo-seed': null,
+  'interest-list': 'Interest list',
+};
+
+const sourceLabel = (source: string | null | undefined) => {
+  if (!source) return null;
+  if (source in SOURCE_LABEL) return SOURCE_LABEL[source];
+  const words = source.replace(/[-_]+/g, ' ').trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : null;
+};
+
+/**
  * One enquiry.
  *
- * The record's head with its facts — who wrote, when, in which language, who
- * has it — then two columns: the record on the left, the work done to it on
- * the right. The split is the same on every queue detail screen, which is
+ * The record's head with its facts — when, what kind, the address, in which
+ * language — then two columns: the record on the left, the work done to it on
+ * the right, where who has it is shown and changed. The split is the same on every queue detail screen, which is
  * what makes them feel like one product rather than screens that happen to
  * share a sidebar.
  *
@@ -59,6 +77,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
     : [];
 
   const fullName = [enquiry.firstName, enquiry.lastName].filter(Boolean).join(' ');
+  const cameFrom = sourceLabel(enquiry.source);
 
   const brief = enquiry.organiserBrief
     ? Object.entries(enquiry.organiserBrief).filter(
@@ -82,15 +101,15 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         }
         facts={[
           { label: 'Received', icon: Icon.clock, tint: 'blue', value: <DateText value={enquiry.submittedAt} />, sub: relativeDays(enquiry.submittedAt) },
-          { label: 'Kind', icon: Icon.enquiries, tint: enquiry.kind === 'general' ? 'ink' : 'sun', value: KIND_LABEL[enquiry.kind] },
+          {
+            label: 'Kind',
+            icon: Icon.enquiries,
+            tint: enquiry.kind === 'general' ? 'ink' : 'sun',
+            value: KIND_LABEL[enquiry.kind],
+            sub: cameFrom ? `From the ${cameFrom.toLowerCase()}` : undefined,
+          },
           { label: 'Email', icon: Icon.mail, tint: 'ink', value: enquiry.email, href: `mailto:${enquiry.email}` },
           { label: 'Wrote in', icon: Icon.globe, tint: 'sun', value: enquiry.locale === 'de' ? 'German' : 'English' },
-          {
-            label: 'Owner',
-            icon: Icon.person,
-            tint: enquiry.assignedTo ? 'green' : 'ink',
-            value: staff.find((member) => member.id === enquiry.assignedTo)?.name ?? 'Nobody yet',
-          },
         ]}
       />
 
@@ -106,18 +125,6 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
             <p className="max-w-prose text-base leading-relaxed whitespace-pre-line">
               {enquiry.message}
             </p>
-          </Card>
-
-          <Card title="Contact" icon={Icon.person} tint="ink" footer={<p className="text-xs text-[var(--casa-text-subtle)]">Reference <code className="font-mono">{enquiry.requestId}</code></p>}>
-            <DetailList
-              items={[
-                {
-                  label: 'Name',
-                  value: fullName || <span className="italic">not given</span>,
-                },
-                { label: 'Came from', value: enquiry.source },
-              ]}
-            />
           </Card>
 
           {brief.length > 0 ? (
@@ -150,12 +157,6 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           />
         </div>
       </div>
-
-      {enquiry.userAgent ? (
-        <p className="mt-6 text-xs text-[var(--casa-text-subtle)]">
-          Submitted from <span className="font-mono">{enquiry.userAgent}</span>
-        </p>
-      ) : null}
     </>
   );
 }

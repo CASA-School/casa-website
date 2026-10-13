@@ -577,6 +577,14 @@ the browser's own bottom-left furniture, and it vanished when the rail
 collapsed — so signing out required expanding the rail first. The rail is now
 navigation and nothing else, at every width.
 
+**Search sits in the middle of the bar** (2026-10-13, `command-search.tsx`):
+⌘K, Ctrl K or "/" from anywhere, a name, an email address or an offer number,
+and Enter opens the record. It searches students, enquiries, course and exam
+registrations, offers, bookings and job applications — each only for a
+colleague who holds that module (`src/lib/admin/search.ts`, behind
+`search/actions.ts`, which asks for `overview` like every screen). Five results a
+kind, newest first. Nobody has to know which list a person is in.
+
 **There are no counts in the rail.** The numbers beside Enquiries, Registrations
 and Placement were queue backlogs, not notifications, and a permanent number
 next to a label reads as nagging. A notification system is planned; when it has
@@ -644,9 +652,26 @@ The rules, each of which came from a real defect on a real screen.
    above a search box, advertises a problem the team may not have — there is
    one open record flag in the database, a demonym. Flags show on the record
    they belong to and as one quiet line on the register.
-5. **No raw identifier as a field.** A 36-character uuid labelled "Reference"
-   with the same weight as the course name is confusing information. Keep it,
-   but in a card footer.
+5. **No raw identifier, and no raw value, on a screen** (tightened 2026-10-13).
+   A uuid is not shown at all, not even in a card footer. A machine value
+   gets its label: an exam is "telc Deutsch C1 Hochschule", not
+   `telc_c1_hochschule`; a placement background answer reads "Some courses",
+   not `some_courses`; an activity is a sentence, not `week.saved`.
+6. **Say a thing once.** A record's facts bar does not repeat what the rail
+   changes (owner and status live in the Status card); a card does not repeat
+   the facts bar (a booking's dates); a list does not repeat what its tab
+   already says (no "Needs a teacher" badge on every row of *Awaiting a
+   teacher*); a badge marks the exception, not the normal case (no "Bookable"
+   on every room, no "scheduled" on every cohort); the same thing done again
+   and again in a row is one line in Activity, with how often.
+7. **Destructive actions do not shout.** A record's header holds its one
+   primary action and a few quiet ones; Delete and Cancel sit at the foot of
+   the page as quiet buttons, and only their confirmation is red.
+8. **A list reads by time.** Cohorts group by month, placement attempts by day
+   (the latest 25, then *Show all*); an inbox row is the topic with its
+   message under it. A list never carries a grid of inputs: a cohort's room is
+   text that opens a small panel, and a colleague's access is a dialog per
+   person (Team), not a matrix of selects.
 
 ## Copy on screens — labels, not explanations
 

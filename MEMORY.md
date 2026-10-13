@@ -2624,3 +2624,13 @@ one-minute cache. Without a database the site shows `pricing.ts`, which a test k
 2026 list. Proven on the running site: the deposit set to 600 on the screen showed on
 /en/accommodation/host at once, and back.
 
+Eighth pass: **an interface round** (Rahman: "elegant, beautiful and intelligent for our team first").
+Every screen screenshotted at 1360px and reviewed; three agents in parallel, each owning its own
+screens, and the shared parts done here. Team is a list with one dialog per person (access grouped
+like the rail, the role default marked) instead of a matrix of selects; Courses groups cohorts by
+month with the room as text that opens a panel; Placement groups by day, 25 at a time; inbox rows
+read topic-over-message; record pages say each thing once and keep Delete and Cancel quiet at the
+foot; machine values got labels (Today's exam names, placement background, Activity sentences, with
+repeats collapsed). New: search in the top bar (⌘K / "/") across every record the colleague may
+open. docs/ADMIN_WORKSPACE.md §Design standards 5–8.
+

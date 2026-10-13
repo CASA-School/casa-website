@@ -36,14 +36,13 @@ export default async function RoomPage({
         title={room.nickname ? `${room.name} · ${room.nickname}` : room.name}
         subtitle={ROOM_KIND_LABELS[room.kind]}
         status={
-          <>
-            {room.isActive ? null : <Badge tone="quiet">Inactive</Badge>}
-            {room.isBookable ? (
-              <Badge tone="positive">Bookable</Badge>
-            ) : (
-              <Badge tone="neutral">Not bookable</Badge>
-            )}
-          </>
+          !room.isActive ? (
+            <Badge tone="quiet">Inactive</Badge>
+          ) : room.isBookable ? (
+            <Badge tone="positive">Bookable</Badge>
+          ) : (
+            <Badge tone="quiet">Not bookable</Badge>
+          )
         }
         actions={
           <>
@@ -79,7 +78,10 @@ export default async function RoomPage({
             icon: Icon.people,
             tint: 'green',
             value: room.capacity ?? '—',
-            sub: room.capacityMax ? `${room.capacityMax} at most` : undefined,
+            sub:
+              room.capacityMax && room.capacityMax !== room.capacity
+                ? `${room.capacityMax} at most`
+                : undefined,
           },
           {
             label: 'Cohorts',

@@ -90,7 +90,7 @@ export default async function TodayPage({
               {' · '}
             </>
           ) : null}
-          {summarise({ isToday, openToday, totalWaiting, events: events.length })}
+          {summarise({ isToday, openToday, overdue: board.overdue.length, totalWaiting, events: events.length })}
         </p>
       </header>
 
@@ -266,17 +266,22 @@ const EVENT_GROUPS: readonly { kind: DayEvent['kind']; label: string }[] = [
 function summarise({
   isToday,
   openToday,
+  overdue,
   totalWaiting,
   events,
 }: {
   isToday: boolean;
   openToday: number;
+  overdue: number;
   totalWaiting: number;
   events: number;
 }): string {
   const parts: string[] = [];
   if (openToday > 0) {
     parts.push(`${openToday} ${openToday === 1 ? 'task' : 'tasks'} on the board`);
+  }
+  if (overdue > 0) {
+    parts.push(`${overdue} still open from earlier`);
   }
   if (events > 0) {
     parts.push(`${events} ${events === 1 ? 'thing' : 'things'} in the calendar`);

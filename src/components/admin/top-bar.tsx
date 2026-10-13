@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { CommandSearch } from './command-search';
 import { Icon } from './icons';
 import { Avatar, roleLabel } from './shell';
 import { SidebarToggle } from './sidebar-toggle';
@@ -17,6 +18,9 @@ import type { StaffUser } from '@/lib/admin/auth';
  * down there, it collided with the browser's own bottom-left furniture, and it
  * vanished when the rail collapsed — so signing out required expanding the rail
  * first. The rail is now navigation and nothing else.
+ *
+ * SEARCH sits in the middle (⌘K, Ctrl K or "/"): one box for every record the
+ * colleague may open, so nobody has to know which list a person is in.
  *
  * NO NOTIFICATION BELL YET, deliberately. There is nothing behind it: the
  * counts that used to sit in the rail were queue backlogs, not notifications,
@@ -53,7 +57,9 @@ export function TopBar({
         </span>
       </Link>
 
-      <span className="flex-1" />
+      <span className="flex flex-1 justify-center px-2">
+        <CommandSearch />
+      </span>
 
       <Link
         href="/"

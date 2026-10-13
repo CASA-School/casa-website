@@ -9,12 +9,14 @@ import { formatFileSize } from '@/lib/admin/format';
 import { listNotes } from '@/lib/admin/notes';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { listAssignableStaff } from '@/lib/admin/staff';
+import { fileKind } from '../file-kind';
 
 /**
  * One application.
  *
  * The record's head names the CV and carries the download; the cover letter
- * and the candidate's links sit under it, the rail beside them.
+ * and the candidate's links sit under it, the rail beside them — who has the
+ * application is the rail's, where it is changed, not a fact in the head.
  *
  * The CV is a download, not an inline preview. Rendering an arbitrary uploaded
  * PDF inside the workspace means either an iframe pointed at attacker-supplied
@@ -87,16 +89,12 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
             tint: application.hasStoredFile ? 'ink' : 'sun',
             value: application.cvFileName,
             sub: application.hasStoredFile
-              ? `${formatFileSize(application.cvFileSize)}${application.cvMimeType ? ` · ${application.cvMimeType}` : ''}`
+              ? [fileKind(application.cvFileName, application.cvMimeType), formatFileSize(application.cvFileSize)]
+                  .filter(Boolean)
+                  .join(' · ')
               : 'No file stored',
           },
           { label: 'Wrote in', icon: Icon.globe, tint: 'sun', value: application.locale === 'de' ? 'German' : 'English' },
-          {
-            label: 'Owner',
-            icon: Icon.person,
-            tint: application.assignedTo ? 'green' : 'ink',
-            value: staff.find((member) => member.id === application.assignedTo)?.name ?? 'Nobody yet',
-          },
         ]}
       />
 

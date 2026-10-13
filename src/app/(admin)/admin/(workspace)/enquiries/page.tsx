@@ -25,7 +25,9 @@ import { Pagination } from '@/components/admin/pagination';
  * The message excerpt is in the table on purpose. Every other column is
  * metadata; the message is the only thing that tells you whether this is a
  * two-line reply or a twenty-minute call, and hiding it behind a click makes
- * triaging twelve enquiries twelve navigations.
+ * triaging twelve enquiries twelve navigations. It sits under the topic, as in
+ * an inbox, so the topic gets the width to be read whole rather than two
+ * narrow columns each cutting their text mid-word.
  */
 export default async function EnquiriesPage({
   searchParams,
@@ -78,8 +80,7 @@ export default async function EnquiriesPage({
           <Table
             head={[
               'Name',
-              'Topic',
-              'Message',
+              'Enquiry',
               'Owner',
               'Status',
               { label: 'Received', align: 'right' },
@@ -95,16 +96,20 @@ export default async function EnquiriesPage({
                     {item.email}
                   </span>
                 </Cell>
-                <Cell>
-                  <span className="block max-w-[10rem] truncate text-sm">{item.topic}</span>
-                  {item.kind !== 'general' ? (
-                    <Badge tone="neutral" className="mt-1">
-                      {item.kind === 'group' ? 'Group brief' : 'Company brief'}
-                    </Badge>
-                  ) : null}
-                </Cell>
-                <Cell className="text-[var(--casa-muted)]">
-                  <span className="block max-w-[18rem] truncate text-sm">{item.message}</span>
+                {/* `w-full max-w-0`: the column takes the width the others leave,
+                    and its text is cut at the edge rather than widening the table. */}
+                <Cell className="w-full max-w-0">
+                  <span className="flex min-w-60 items-center gap-2">
+                    <span className="min-w-0 truncate text-sm font-semibold">{item.topic}</span>
+                    {item.kind !== 'general' ? (
+                      <Badge tone="neutral">
+                        {item.kind === 'group' ? 'Group brief' : 'Company brief'}
+                      </Badge>
+                    ) : null}
+                  </span>
+                  <span className="mt-0.5 block min-w-60 truncate text-sm text-[var(--casa-text-subtle)]">
+                    {item.message}
+                  </span>
                 </Cell>
                 <Cell className="text-sm text-[var(--casa-text-subtle)]">
                   {item.assigneeName ?? '—'}
