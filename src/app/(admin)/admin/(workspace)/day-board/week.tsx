@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils';
  * The week at a glance — what FileMaker's home calendar gave the team before
  * they opened any day: seven days side by side, each with what it holds.
  * Learners starting, moving in and out, courses starting and ending, exams,
- * birthdays, teachers away, tasks open — and first, in amber and red, what the
- * teaching plan still lacks that day (FileMaker lit VacantTeacher and
- * ConflictTeacher orange). A day with nothing is an empty column.
+ * birthdays, colleagues and teachers away, tasks open — and first, in amber
+ * and red, what the day still lacks: lessons that need a teacher, plan
+ * conflicts (FileMaker lit VacantTeacher and ConflictTeacher orange), office
+ * hours nobody covers at reception. A day with nothing is an empty column.
  *
  * Each day is a link that opens it below, so the week is also how a day is
  * chosen: `?date=YYYY-MM-DD`, today without a parameter, back works, a URL can
@@ -25,6 +26,7 @@ type Fact = { key: keyof DayFacts; one: string; many: string; dot: string; text?
 const FACTS: readonly Fact[] = [
   { key: 'conflicts', one: 'plan conflict', many: 'plan conflicts', dot: 'bg-[#dc2626]', text: 'text-[#b91c1c]' },
   { key: 'unplanned', one: 'needs a teacher', many: 'need a teacher', dot: 'bg-[#d97706]', text: 'text-[#9a5b00]' },
+  { key: 'receptionGaps', one: 'reception gap', many: 'reception gaps', dot: 'bg-[#d97706]', text: 'text-[#9a5b00]' },
   { key: 'firstDays', one: 'first day', many: 'first days', dot: 'bg-[#16a34a]' },
   { key: 'movingIn', one: 'moving in', many: 'moving in', dot: 'bg-[var(--casa-blue)]' },
   { key: 'movingOut', one: 'moving out', many: 'moving out', dot: 'bg-[var(--casa-blue)]' },
@@ -32,6 +34,7 @@ const FACTS: readonly Fact[] = [
   { key: 'exams', one: 'exam', many: 'exams', dot: 'bg-[#dc2626]' },
   { key: 'coursesEnd', one: 'course ends', many: 'courses end', dot: 'bg-[#dc2626]' },
   { key: 'birthdays', one: 'birthday', many: 'birthdays', dot: 'bg-[#16a34a]' },
+  { key: 'staffAway', one: 'colleague away', many: 'colleagues away', dot: 'bg-[#64748b]' },
   { key: 'away', one: 'teacher away', many: 'teachers away', dot: 'bg-[#64748b]' },
   { key: 'tasks', one: 'task', many: 'tasks', dot: 'bg-[#64748b]' },
 ];

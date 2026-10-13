@@ -30,12 +30,15 @@ export function DayBoard({
   overdue,
   staff,
   canWrite,
+  away,
 }: {
   date: string;
   today: readonly DayTask[];
   overdue: readonly DayTask[];
   staff: readonly { id: string; name: string }[];
   canWrite: boolean;
+  /** Colleagues away that day (the rota): their tasks show it. */
+  away?: ReadonlySet<string>;
 }) {
   const open = today.filter((t) => !t.doneAt);
   const done = today.filter((t) => t.doneAt);
@@ -70,6 +73,7 @@ export function DayBoard({
               date={date}
               staff={staff}
               canWrite={canWrite}
+              away={away}
               showDate
             />
           ))}
@@ -94,6 +98,7 @@ export function DayBoard({
                     date={date}
                     staff={staff}
                     canWrite={canWrite}
+                    away={away}
                   />
                 ))}
               </TaskGroup>
@@ -109,6 +114,7 @@ export function DayBoard({
                   date={date}
                   staff={staff}
                   canWrite={canWrite}
+                  away={away}
                 />
               ))}
             </TaskGroup>
@@ -154,12 +160,14 @@ function TaskRow({
   date,
   staff,
   canWrite,
+  away,
   showDate = false,
 }: {
   task: DayTask;
   date: string;
   staff: readonly { id: string; name: string }[];
   canWrite: boolean;
+  away?: ReadonlySet<string>;
   showDate?: boolean;
 }) {
   const finished = Boolean(task.doneAt);
@@ -242,7 +250,7 @@ function TaskRow({
         ) : null}
         {/* A fixed place for the initials, so the dates line up with or without them. */}
         <span className="flex w-6 justify-center">
-          <Owner name={task.assigneeName} />
+          <Owner name={task.assigneeName} away={!!task.assigneeName && !task.doneAt && !!away?.has(task.assigneeName)} />
         </span>
       </span>
 

@@ -264,6 +264,9 @@ export type DayFacts = {
   /** Lessons nobody is planned for, and conflicts in the plan — Kursplanung's, filled in by Today. */
   unplanned: number;
   conflicts: number;
+  /** The office team from the rota: colleagues away, and stretches of the office hours nobody covers — filled in by Today. */
+  staffAway: number;
+  receptionGaps: number;
   tasks: number;
 };
 
@@ -309,6 +312,8 @@ export async function weekFacts(from: string, to: string, { teaching }: { teachi
         away: Number(r.away),
         unplanned: 0,
         conflicts: 0,
+        staffAway: 0,
+        receptionGaps: 0,
         tasks: Number(r.tasks),
       },
     ])

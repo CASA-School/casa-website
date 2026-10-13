@@ -194,13 +194,17 @@ export function Status({ tone, children }: { tone: DotTone; children: ReactNode 
   );
 }
 
-/** Who has it: the colleague's initials, the name for a screen reader and on hover. */
-export function Owner({ name }: { name: string | null | undefined }) {
+/**
+ * Who has it: the colleague's initials, the name for a screen reader and on
+ * hover. `away` (from the rota) rings them in amber: the work of someone who is
+ * not in today is work someone else should pick up.
+ */
+export function Owner({ name, away = false }: { name: string | null | undefined; away?: boolean }) {
   if (!name) return null;
   return (
-    <span className="inline-flex">
+    <span className={cn('inline-flex rounded-full', away && 'ring-2 ring-[#f59e0b] ring-offset-1 ring-offset-white')} title={away ? `${name} · away` : name}>
       <Avatar name={name} staff size="sm" />
-      <span className="sr-only">{name}</span>
+      <span className="sr-only">{away ? `${name}, away` : name}</span>
     </span>
   );
 }
@@ -218,11 +222,12 @@ export function euros(value: number): string {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
-/** "11–24 Apr 2027", "26 Oct 2026 – 30 Apr 2027"; the year once, and only when it is not this one. */
+/** "14 Oct", "11–24 Apr 2027", "26 Oct 2026 – 30 Apr 2027"; the year once, and only when it is not this one. */
 export function dayRange(from: string, to: string, thisYear = new Date().getFullYear()): string {
   const [ay, am, ad] = from.split('-').map(Number);
   const [by, bm, bd] = to.split('-').map(Number);
   const year = (y: number) => (y === thisYear ? '' : ` ${y}`);
+  if (from === to) return `${ad} ${MONTHS[am - 1]}${year(ay)}`;
   if (ay === by && am === bm) return `${ad}–${bd} ${MONTHS[bm - 1]}${year(by)}`;
   if (ay === by) return `${ad} ${MONTHS[am - 1]} – ${bd} ${MONTHS[bm - 1]}${year(by)}`;
   return `${ad} ${MONTHS[am - 1]} ${ay} – ${bd} ${MONTHS[bm - 1]} ${by}`;

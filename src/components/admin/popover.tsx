@@ -19,6 +19,7 @@ export function Popover({
   trigger,
   children,
   width = 300,
+  align = 'left',
   disabled,
 }: {
   /** The panel's heading, and the trigger's accessible name. */
@@ -26,6 +27,8 @@ export function Popover({
   trigger: ReactNode;
   children: ReactNode;
   width?: number;
+  /** Which edge the panel lines up with: `right` for a value near the right of the screen. */
+  align?: 'left' | 'right';
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -77,7 +80,9 @@ export function Popover({
           style={{ width }}
           onSubmitCapture={() => setTimeout(() => setOpen(false), 0)}
           className={cn(
-            'absolute left-0 z-40 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]',
+            'absolute z-40 max-w-[calc(100vw-2rem)]',
+            align === 'right' ? 'right-0' : 'left-0',
+            'overflow-hidden rounded-xl bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]',
             up ? 'bottom-[calc(100%+6px)]' : 'top-[calc(100%+6px)]'
           )}
         >

@@ -11,6 +11,8 @@ import { dayBoard, dayEvents, weekFacts, type DayEvent } from '@/lib/admin/day-b
 import { requireModule } from '@/lib/admin/guard';
 import { teachingOn, type TeachingDay } from '@/lib/admin/kursplanung/day';
 import { getAttentionItems, getOverviewCounts, getWaiting } from '@/lib/admin/overview';
+import { officeDay, rotaSpan, type OfficeDay } from '@/lib/admin/rota';
+import { ABSENCE_LABELS, officeHoursOn } from '@/lib/admin/rota-rules';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
 /**
@@ -20,9 +22,12 @@ import { listAssignableStaff } from '@/lib/admin/staff';
  * the team has opened every morning for years: the week first, each day with
  * what it holds (who starts, moves in, has a birthday, which teacher is away),
  * and the chosen day's detail by name, with the plan's problems lit up only
- * when there is one. Then who is waiting for an answer from us — by name, the
- * longest wait first, because a person is what a colleague acts on and a
- * count is not — and what we wrote down to do.
+ * when there is one. Beside it, who is in the office (the rota): at the desk
+ * when, who is away, the hours nobody covers. Then who is waiting for an
+ * answer from us — by name, the longest wait first, because a person is what
+ * a colleague acts on and a count is not — and what we wrote down to do. The
+ * work of a colleague who is away today wears an amber ring, so someone else
+ * picks it up: the connection FileMaker's separate columns never made.
  *
  * What is deliberately NOT here: a wall of numbers (the queues' totals are one
  * quiet line under the waiting list), a yellow band for what is late (its date
@@ -51,7 +56,8 @@ export default async function TodayPage({
   const weekday = ![0, 6].includes(new Date(`${date}T00:00:00`).getDay());
   // Teachers and the plan are Kursplanung's, which only management holds.
   const teaching = holds('kursplanung');
-  const [counts, waiting, attention, events, board, facts, teachingWeek, staff] = await Promise.all([
+  const rota = holds('rota');
+  const [counts, waiting, attention, events, board, facts, teachingWeek, rotaWeek, staff] = await Promise.all([
     getOverviewCounts(),
     getWaiting(holds),
     getAttentionItems(),
@@ -59,6 +65,7 @@ export default async function TodayPage({
     dayBoard(date),
     weekFacts(monday, sunday, { teaching }),
     teaching ? teachingOn(weekdaysOf(monday)) : Promise.resolve(null),
+    rota ? rotaSpan(monday, sunday) : Promise.resolve(null),
     canWrite ? listAssignableStaff() : Promise.resolve([]),
   ]);
   // The plan's gaps and conflicts join the week's facts; the chosen day's teaching shows below it.
@@ -66,6 +73,19 @@ export default async function TodayPage({
     const f = facts.get(day);
     if (f) Object.assign(f, { unplanned: t.open, conflicts: t.conflicts });
   }
+  // The rota: who is away and which office hours nobody covers, day by day —
+  // gaps only once the week has shifts, so a week nobody planned is not five alarms.
+  const rotaPlanned = !!rotaWeek?.shifts.some((s) => s.onDate >= monday && s.onDate <= sunday);
+  for (const [day, f] of facts) {
+    if (!rotaWeek) break;
+    const o = officeDay(day, rotaWeek.shifts, rotaWeek.absences);
+    // On a closed day nobody is missed: no one away, no gap.
+    const open = officeHoursOn(day) !== null;
+    Object.assign(f, { staffAway: open ? o.away.length : 0, receptionGaps: open && rotaPlanned ? o.gaps.length : 0 });
+  }
+  const office = rotaWeek ? officeDay(date, rotaWeek.shifts, rotaWeek.absences) : null;
+  const awayOn = (day: string) => new Set(rotaWeek ? officeDay(day, [], rotaWeek.absences).away.map((a) => a.staffName) : []);
+  const awayToday = awayOn(today);
   const teachingDay = weekday ? teachingWeek?.get(date) : undefined;
   const teachingNews = teachingDay && (teachingDay.away.length > 0 || teachingDay.open > 0 || teachingDay.conflicts > 0) ? teachingDay : null;
 
@@ -139,7 +159,7 @@ export default async function TodayPage({
                           <RecordName name={item.name || 'No name'} about={item.about} />
                         </span>
                         <span className="flex w-6 shrink-0 justify-center">
-                          <Owner name={item.owner} />
+                          <Owner name={item.owner} away={!!item.owner && awayToday.has(item.owner)} />
                         </span>
                         <span className="shrink-0 text-right text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)] sm:w-24">
                           <Received at={item.since} status="new" />
@@ -152,10 +172,20 @@ export default async function TodayPage({
             </Card>
           ) : null}
 
-          <DayBoard date={date} today={board.today} overdue={board.overdue} staff={staff} canWrite={canWrite} />
+          <DayBoard date={date} today={board.today} overdue={board.overdue} staff={staff} canWrite={canWrite} away={awayOn(date)} />
         </div>
 
         <div className="space-y-5">
+          {office ? (
+            <InTheOffice
+              day={office}
+              open={weekday}
+              planned={rotaPlanned}
+              showReason={canAccess(user, 'rota', 'edit')}
+              date={date}
+              href={`/admin/rota${monday === mondayOf(today) ? '' : `?week=${monday}`}`}
+            />
+          ) : null}
           <Card title={isToday ? 'At CASA today' : 'At CASA that day'} icon={Icon.calendar} tint="blue" bleed>
             {events.length === 0 && !teachingNews ? (
               <p className="px-5 py-5 text-sm text-[var(--casa-text-subtle)]">Nothing on the calendar.</p>
@@ -227,6 +257,93 @@ function DayTile({ on }: { on: Date }) {
       </span>
       <span className="py-1 text-[0.95rem] leading-none font-bold text-[var(--casa-ink)] tabular-nums">{on.getDate()}</span>
     </span>
+  );
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+const shortDay = (iso: string) => `${Number(iso.slice(8, 10))} ${MONTHS[Number(iso.slice(5, 7)) - 1]}`;
+
+/**
+ * Who is in the office on the chosen day — FileMaker's "Shift | Reception"
+ * and its absences, worked out: first what is wrong (office hours nobody
+ * covers at the desk, a shift planned for someone who is away), then who is
+ * at the desk when, then who is away and until when. An absence's reason
+ * only for whoever plans the rota; everyone else reads "Away".
+ */
+function InTheOffice({
+  day,
+  open,
+  planned,
+  showReason,
+  date,
+  href,
+}: {
+  day: OfficeDay;
+  open: boolean;
+  planned: boolean;
+  showReason: boolean;
+  date: string;
+  href: string;
+}) {
+  const clashing = new Set(day.clashes.map((s) => s.staffUserId));
+  const present = day.shifts.filter((s) => !clashing.has(s.staffUserId));
+  return (
+    <Card
+      title="In the office"
+      icon={Icon.team}
+      tint="green"
+      bleed
+      actions={
+        <Link href={href} className="text-xs font-semibold text-[var(--casa-accent-text)] hover:underline">
+          Rota
+        </Link>
+      }
+    >
+      {!open ? (
+        <p className="px-5 py-5 text-sm text-[var(--casa-text-subtle)]">The office is closed.</p>
+      ) : !planned && day.away.length === 0 ? (
+        <p className="px-5 py-5 text-sm text-[var(--casa-text-subtle)]">No rota for this week yet.</p>
+      ) : (
+        <ul className="divide-y divide-ws-line-soft text-sm">
+          {planned
+            ? day.gaps.map((g) => (
+                <li key={g.from} className="px-5 py-2.5 font-semibold text-[#9a5b00] tabular-nums">
+                  Nobody at the desk {g.from}–{g.to}
+                </li>
+              ))
+            : null}
+          {day.clashes.map((s) => (
+            <li key={s.id} className="px-5 py-2.5 font-semibold text-[#b91c1c]">
+              {s.staffName} has a shift but is away
+            </li>
+          ))}
+          {present.map((s) => (
+            <li key={s.id} className="flex items-center gap-3 px-5 py-2.5">
+              <Owner name={s.staffName} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold text-[var(--casa-ink)]">{s.staffName}</span>
+                {s.note ? <span className="block truncate text-xs text-[var(--casa-muted)]">{s.note}</span> : null}
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-[#2b3546] tabular-nums">
+                {s.startsAt}–{s.endsAt}
+              </span>
+            </li>
+          ))}
+          {day.away.map((a) => (
+            <li key={a.id} className="flex items-center gap-3 px-5 py-2.5">
+              <span className="opacity-60">
+                <Owner name={a.staffName} />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[var(--casa-muted)]">{a.staffName}</span>
+              <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">
+                {showReason ? ABSENCE_LABELS[a.reason] : 'Away'}
+                {a.toDate > date ? ` until ${shortDay(a.toDate)}` : ''}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 

@@ -387,8 +387,8 @@ password — or uses **Sign in with Microsoft**.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, bookings, offers, rooms, catalogue, kursplanung, website,
-activity, team, settings. For each
+applications, people, bookings, offers, rooms, catalogue, kursplanung, rota,
+website, activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -401,7 +401,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers and Team |
+| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings and Rota; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -521,8 +521,8 @@ queues". The new one is calm, and leads with people, not counts:
   holds Kursplanung. Each day is a link that chooses it:
   `?date=YYYY-MM-DD`; today has no parameter. On a phone the seven days keep
   their dots and numbers and the chosen day's words are below.
-- FileMaker blocks with no data model yet, so not here: reception shifts,
-  administration absences, OfficeTalk messages, arrival transfers.
+- FileMaker blocks with no data model yet, so not here: OfficeTalk messages,
+  arrival transfers (the airport and station shortcuts).
 - **Waiting for an answer** (today only, `getWaiting` in `overview.ts`): the
   people CASA owes an answer, by name, the longest wait first — a new enquiry,
   registration or job application, and a sent offer gone quiet (ten days, or
@@ -536,6 +536,19 @@ queues". The new one is calm, and leads with people, not counts:
   amber; nothing rolls it forward, because a task that moves by itself is a
   task nobody notices they have missed. Area headings show only when there is
   more than one group; whose it is shows as a colleague's initials.
+- **In the office** (module `rota`, everyone at `view`) — the chosen day
+  from the rota, worked out: first what is wrong (office hours nobody covers at
+  the desk, a shift planned for someone who is away), then who is at the desk
+  when with the shift's note, then who is away and until when ("Away", or the
+  reason for whoever plans the rota). "The office is closed" at the weekend,
+  "No rota for this week yet" until someone plans one. The week above it
+  counts colleagues away and reception gaps per open day — gaps only once the
+  week has any shift, so an unplanned week is not five alarms.
+- **The work of someone away wears an amber ring.** An enquiry, registration
+  or offer waiting for an answer whose owner is away today, and a task on the
+  chosen day whose assignee is away, show the initials ringed in amber with
+  "away" on hover — someone else picks it up. FileMaker kept the absences and
+  the work in separate columns and never connected them.
 - **At CASA today** — the chosen day by name: first days, moving in and
   out, courses starting and ending, exam sittings, birthdays (with the age),
   and for Kursplanung holders the day's teaching — who is away and why, what
@@ -566,6 +579,40 @@ dressed as a feature. A forgotten password is reset by an owner or admin on the
 Team screen, and an owner's from the shell (`npm run admin:password`).
 
 ---
+
+### Rota — who is in the office, and who is away (2026-10-13)
+
+`/admin/rota`, module `rota` (migration 0025, `src/lib/admin/rota.ts`, the
+rules in `rota-rules.ts`). FileMaker's home calendar carried "Shift |
+Reception" (each colleague's hours at the desk, with a note: "14–16:30
+Seminar") and the administration's absences with a code (TU, kr, AÜ, uU);
+Rahman asked for both on 2026-10-13. Teachers' absences stay Kursplanung's
+(`teacher_absences`).
+
+- **The week**: a colleague a row (active workspace accounts — the office
+  team signs in, and an account is who work is assigned to), Monday to Friday
+  a column. A cell is the shift, set in a small panel (from, to in quarter
+  hours, a note) or cleared; "On leave" when the colleague is away; a shift
+  on a day its colleague is away is struck through in red.
+- **Reception** under the week: per day "Covered", or the stretches of the
+  office hours nobody covers ("15:30–19:00 open"). The office hours are the
+  ones the public site states (Mon–Thu 08:30–19:00, Fri 08:30–13:00;
+  `OFFICE_HOURS`, and a test fails if the footer says otherwise). A gap under
+  a quarter hour is a handover, not an empty desk. Nothing shows until the
+  week has a shift.
+- **Copy last week** plans a week in one click — the rota repeats more than
+  it changes — and leaves out a day someone is away and anyone whose account
+  is closed; a day that already has a shift keeps it.
+- **Absences**: a span (from, until), a reason (on leave, sick, time off,
+  training, unpaid leave, away) and a note; recorded and changed in a dialog,
+  removed with a confirmation.
+
+Who may: everyone `view` (who is at the desk, who is away), planning `edit`
+(given per person on the Team screen), removing an absence `full`. **An
+absence's reason is personal data** — "sick" above all — so it and its note
+show only at `edit`: everyone else, on the Rota and on Today, reads "Away". Activity says
+"recorded an absence on the rota", never the reason. No retention period is
+set yet (see Open items).
 
 ## Progressive disclosure
 
@@ -967,6 +1014,13 @@ Seeded: the 36 book prices, the four exam fees recovered from the script, the
 50 € enrolment fee. Course and accommodation prices are deliberately empty —
 CASA enters them once, per period (`docs/CATALOGUE_AND_PRICING.md` §5 lists
 the decisions).
+
+### 0025 — the rota
+
+`staff_shifts` (a colleague, a day, from and to, a note; one a person a day)
+and `staff_absences` (a colleague, from and until, a reason, a note). Both
+hang off `staff_users`, so a shift and an absence belong to the same account
+work is assigned to. §Rota has the screen and who may see an absence's reason.
 
 ### 0014 — Kursplanung
 

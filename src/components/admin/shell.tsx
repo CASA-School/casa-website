@@ -189,6 +189,7 @@ export function WorkspaceShell({
               hrefs={[
                 '/admin/applications',
                 '/admin/kursplanung',
+                '/admin/rota',
                 '/admin/website',
                 '/admin/activity',
                 '/admin/team',
@@ -211,6 +212,12 @@ export function WorkspaceShell({
                   ]}
                 >
                   Kursplanung
+                </NavLink>
+              ) : null}
+              {/* Who is at the office desk when, and who is away. Everyone sees it; planning is per person. */}
+              {canAccess(user, 'rota') ? (
+                <NavLink href="/admin/rota" icon={Icon.clock} title="Rota">
+                  Rota
                 </NavLink>
               ) : null}
               {/* What the public site says. Opens the editor full screen, outside the shell. */}

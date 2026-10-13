@@ -2675,3 +2675,14 @@ birthdays, teachers away, tasks), and first, in amber and red, the teaching plan
 conflicts — the board's own `analysePlan`, Kursplanung holders only — with the day's names and
 *Open the plan* in "At CASA today". The plain date strip (`day-nav.tsx`) is gone. Not built, no data
 model: reception shifts, administration absences, OfficeTalk, arrival transfers.
+
+Thirteenth pass: **the rota, and a control room that connects things.** Rahman: build the reception
+shifts and the staff absences — "this filemaker style control-room is a bit important … not
+everything like filemaker but better logic and intelligence". Migration 0025 (`staff_shifts`,
+`staff_absences`), module `rota` (everyone `view`, planning `edit`, an absence's reason only at
+`edit` — sick is personal data), `/admin/rota`: a week of colleagues × weekdays, a shift set in a
+small panel, reception coverage per day against the public site's office hours ("15:30–19:00 open",
+guarded by a test against the footer), copy last week, absences. Today gains **In the office**
+(gaps, a shift planned for someone away, who is at the desk, who is away until when), the week counts
+colleagues away and reception gaps, and the work of someone away today — a waiting enquiry, a task —
+wears an amber ring so someone else picks it up. docs/ADMIN_WORKSPACE.md §Rota, §Today.

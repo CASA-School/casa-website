@@ -85,6 +85,7 @@ const routes = [
   '/admin/applications',
   application && `/admin/applications/${application}`,
   '/admin/activity',
+  '/admin/rota',
   '/admin/team',
   '/admin/settings',
   '/admin/settings/setup',

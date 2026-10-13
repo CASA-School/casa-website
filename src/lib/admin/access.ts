@@ -32,6 +32,7 @@ export const MODULES = [
   'prices',
   'catalogue',
   'kursplanung',
+  'rota',
   'website',
   'activity',
   'team',
@@ -65,6 +66,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   prices: 'Prices',
   catalogue: 'Courses & exams',
   kursplanung: 'Kursplanung',
+  rota: 'Rota',
   website: 'Website',
   activity: 'Activity',
   team: 'Team',
@@ -84,6 +86,7 @@ export const MODULE_HREFS: Record<WorkspaceModule, string> = {
   prices: '/admin/settings/prices',
   catalogue: '/admin/catalogue',
   kursplanung: '/admin/kursplanung',
+  rota: '/admin/rota',
   website: '/admin/website',
   activity: '/admin/activity',
   team: '/admin/team',
@@ -119,6 +122,9 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * and management's: owners and administrators hold it, and a colleague in
  * finance is given it on the Team screen (`edit` changes prices and prepares
  * next year's list, `full` also deletes a list that has not started).
+ * `rota` is `view` for staff: everyone sees who is at the desk and who is
+ * away, but an absence's reason, and planning the week, is whoever is given
+ * `edit` on the Team screen (an absence's reason is personal data).
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',
@@ -142,7 +148,7 @@ const ROLE_DEFAULTS: Record<StaffRole, Access> = {
   // Overview is `edit` for everyone: it carries the shared day board, which
   // the whole administration team writes on. Settings stays read-only —
   // the vocabularies are the super admin's, the prices finance's (`prices`).
-  staff: { ...fill('edit', STAFF_MODULES), overview: 'edit', settings: 'view' },
+  staff: { ...fill('edit', STAFF_MODULES), overview: 'edit', settings: 'view', rota: 'view' },
 };
 
 export const isModule = (value: string): value is WorkspaceModule =>
