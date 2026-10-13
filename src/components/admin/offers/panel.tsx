@@ -39,7 +39,9 @@ export function ClickPanel({
   className,
   openClassName,
   wide,
+  dates,
   block,
+  triggerId,
 }: {
   label: string;
   subtitle?: string;
@@ -52,7 +54,11 @@ export function ClickPanel({
   className: string;
   openClassName?: string;
   wide?: boolean;
+  /** Wide enough for two months of a calendar. */
+  dates?: boolean;
   block?: boolean;
+  /** So something else — a check that names the problem — can open it. */
+  triggerId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
@@ -71,11 +77,18 @@ export function ClickPanel({
 
   return (
     <div ref={wrap} className={ui.anchor} style={{ display: block ? 'block' : 'inline-block' }}>
-      <button type="button" className={`${className} ${open && openClassName ? openClassName : ''}`} aria-expanded={open} aria-label={`${label}: change`} onClick={toggle}>
+      <button
+        type="button"
+        id={triggerId}
+        className={`${className} ${open && openClassName ? openClassName : ''}`}
+        aria-expanded={open}
+        aria-label={`${label}: change`}
+        onClick={toggle}
+      >
         {children}
       </button>
       {open ? (
-        <div className={`${ui.pop} ${wide ? ui.popWide : ''} ${up ? ui.popUp : ''}`} role="dialog" aria-label={label}>
+        <div className={`${ui.pop} ${wide ? ui.popWide : ''} ${dates ? ui.popDates : ''} ${up ? ui.popUp : ''}`} role="dialog" aria-label={label}>
           <div className={ui.popHead}>
             {icon}
             <span style={{ flex: 1, minWidth: 0 }}>

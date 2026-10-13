@@ -171,9 +171,16 @@ export function InlinePanel({
   width?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [up, setUp] = useState(false);
   const wrap = useRef<HTMLSpanElement>(null);
   useOutside(wrap, open, () => setOpen(false));
   if (disabled) return <>{children}</>;
+  // Near the foot of the window the panel opens upwards, not off the screen.
+  const toggle = () => {
+    const box = wrap.current?.getBoundingClientRect();
+    if (!open && box) setUp(window.innerHeight - box.bottom < 420 && box.top > window.innerHeight - box.bottom);
+    setOpen((v) => !v);
+  };
   return (
     <span ref={wrap} className={`${ui.inlineWrap} ${block ? ui.inlineBlock : ''}`}>
       <span
@@ -183,18 +190,18 @@ export function InlinePanel({
         aria-label={`Change ${label.toLowerCase()}`}
         aria-expanded={open}
         data-label={label}
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            setOpen((v) => !v);
+            toggle();
           }
         }}
       >
         {children}
       </span>
       {open ? (
-        <span className={ui.panel} style={{ width }} role="dialog" aria-label={label}>
+        <span className={`${ui.panel} ${up ? ui.panelUp : ''}`} style={{ width }} role="dialog" aria-label={label}>
           <span className={ui.panelHead}>
             <span>{label}</span>
             <button type="button" className={ui.barDone} onClick={() => setOpen(false)}>

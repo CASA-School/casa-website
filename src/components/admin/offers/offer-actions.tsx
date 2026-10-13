@@ -10,7 +10,7 @@ import type { OfferStatus } from '@/lib/admin/offers/types';
 import ui from './offers.module.css';
 import { MoreMenu } from './panel';
 
-const panel = `${ui.tokens} max-w-lg rounded-2xl p-6 sm:rounded-2xl`;
+const panel = `${ui.tokens} max-w-lg rounded-3xl p-6 sm:rounded-3xl`;
 
 /**
  * The toolbar's right side: the one thing to do next as the primary button —

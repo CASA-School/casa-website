@@ -24,6 +24,7 @@ import {
   type WizardStart,
 } from '@/lib/admin/offers/wizard';
 
+import { DateField, DateRange } from './date-picker';
 import { Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { ICONS, type Tint } from './icons';
@@ -351,6 +352,7 @@ export function NewOffer({
 
               {step === 'group' ? (
                 <GroupStep
+                  today={today}
                   pkg={pkg}
                   weeks={weeks}
                   arrival={arrival}
@@ -401,19 +403,17 @@ export function NewOffer({
                   <div className={ui.row2}>
                     <div className={ui.fld}>
                       <label htmlFor="wz-valid">Valid until</label>
-                      <input id="wz-valid" type="date" className={ui.fi} value={validUntil} min={today} onChange={(e) => setValidUntil(e.target.value || addDays(today, VALID_FOR_DAYS))} />
-                      <div className={ui.inline}>
-                        {[14, 28, 42].map((days) => (
-                          <button key={days} type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={() => setValidUntil(addDays(today, days))}>
-                            {days / 7} weeks
-                          </button>
-                        ))}
-                        {arrival && addDays(arrival, -42) > today ? (
-                          <button type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={() => setValidUntil(addDays(arrival, -42))}>
-                            6 weeks before arrival
-                          </button>
-                        ) : null}
-                      </div>
+                      <DateField
+                        id="wz-valid"
+                        value={validUntil}
+                        today={today}
+                        min={today}
+                        onChange={(v) => setValidUntil(v ?? addDays(today, VALID_FOR_DAYS))}
+                        quick={[
+                          ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
+                          ...(arrival && addDays(arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(arrival, -42) }] : []),
+                        ]}
+                      />
                     </div>
                     <div className={ui.fld}>
                       <label htmlFor="wz-owner">Signed by</label>
@@ -1113,6 +1113,7 @@ function OfferStep({
 // ------------------------------------------------------------ 3 · the group
 
 function GroupStep({
+  today,
   pkg,
   weeks,
   arrival,
@@ -1124,6 +1125,7 @@ function GroupStep({
   setEscorts,
   note,
 }: {
+  today: string;
   pkg: PackageChoice;
   weeks: number;
   arrival: string | null;
@@ -1142,28 +1144,12 @@ function GroupStep({
       <h2 className={ui.wzQ}>The group</h2>
       <p>When they come and how many they are. Both can wait until the group knows.</p>
       {note ? <span className={ui.guess}>{note}</span> : null}
-      <div className={ui.row2}>
-        <div className={ui.fld}>
-          <label htmlFor="wz-arrival">Arrival</label>
-          <input
-            id="wz-arrival"
-            type="date"
-            className={ui.fi}
-            value={arrival ?? ''}
-            onChange={(e) => {
-              const a = e.target.value || null;
-              setDates(a, a ? addDays(a, length * 7 - 1) : departure);
-            }}
-          />
-        </div>
-        <div className={ui.fld}>
-          <label htmlFor="wz-departure">Departure</label>
-          <input id="wz-departure" type="date" className={ui.fi} value={departure ?? ''} min={arrival ?? undefined} onChange={(e) => setDates(arrival, e.target.value || null)} />
-        </div>
+      <div className={ui.wzDates}>
+        <DateRange from={arrival} to={departure} today={today} suggestEnd={(a) => addDays(a, length * 7 - 1)} onChange={setDates} />
       </div>
       <div className={ui.note}>
         {stay
-          ? `${stay.nights} nights · priced as ${stay.weeks} ${stay.weeks === 1 ? 'week' : 'weeks'}${packageWeeks(pkg) && stay.weeks !== packageWeeks(pkg) ? ` — ${PACKAGE_NAME[pkg]} is ${packageWeeks(pkg)}` : ''}`
+          ? `Priced as ${stay.weeks} ${stay.weeks === 1 ? 'week' : 'weeks'}${packageWeeks(pkg) && stay.weeks !== packageWeeks(pkg) ? ` — ${PACKAGE_NAME[pkg]} is ${packageWeeks(pkg)}` : ''}.`
           : `The departure follows from the arrival: ${length} ${length === 1 ? 'week' : 'weeks'}, Sunday to Saturday.`}
       </div>
       <div className={ui.row2}>

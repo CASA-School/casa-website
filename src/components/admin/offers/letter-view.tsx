@@ -17,6 +17,7 @@ import { OFFER_STATUS_LABELS, overrideKey, type OfferLanguage } from '@/lib/admi
 
 import { saveStandardTextAction } from '@/app/(admin)/admin/(editor)/offers/actions';
 
+import { InlineDatePicker } from './date-picker';
 import { Seg } from './fields';
 import { OfferFrame } from './frame';
 import ui from './letter-view.module.css';
@@ -152,42 +153,19 @@ export function LetterView({
           validity: () => (
             <InlinePanel
               label="Valid until"
-              width={300}
-              panel={(close) => (
-                <>
-                  <input
-                    aria-label="Valid until"
-                    type="date"
-                    className={ed.dateIn}
-                    value={draft.validUntil ?? ''}
-                    onChange={(e) => update({ validUntil: e.target.value || null })}
-                  />
-                  <span className={ed.quick}>
-                    {[14, 28, 42].map((days) => (
-                      <button
-                        key={days}
-                        type="button"
-                        onClick={() => {
-                          update({ validUntil: addDays(today, days) });
-                          close();
-                        }}
-                      >
-                        {days / 7} weeks
-                      </button>
-                    ))}
-                    {draft.arrival ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          update({ validUntil: addDays(draft.arrival!, -42) });
-                          close();
-                        }}
-                      >
-                        6 weeks before arrival
-                      </button>
-                    ) : null}
-                  </span>
-                </>
+              width={316}
+              panel={() => (
+                <InlineDatePicker
+                  ariaLabel="Valid until"
+                  value={draft.validUntil}
+                  today={today}
+                  min={today}
+                  onChange={(v) => update({ validUntil: v })}
+                  quick={[
+                    ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
+                    ...(draft.arrival && addDays(draft.arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(draft.arrival, -42) }] : []),
+                  ]}
+                />
               )}
             >
               {validity ? (

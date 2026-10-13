@@ -65,6 +65,17 @@ direction Rahman chose, and the rules that follow from it:
    night, extra lessons), lines from the price list, typed lines and reductions; taking a block out
    of a fixed package rebuilds it as Esel; and *Own offer* is a group offer with no package at all.
 
+8. **The workspace's own scale, and a real date picker** (fourth pass: "the datepicker fields — and
+   also improve the border radius and the framing further"). Radii follow UI_SYSTEM.md's three tiers
+   — 4px controls, 6px tiles and panels, 8px cards — where the first passes had drifted to 10–20px,
+   and the colours are the workspace's `--ws-*` tokens, so Offers sits beside the website editor. The
+   head's facts are a framed bar of five cells (dates, group, language, valid until, signed by), each
+   with its label, value and a line under it. A check names what to fix and opens its panel. The
+   price card has no logo stripe (content cards never carry it). Dates are typed or picked in
+   `date-picker.tsx` — "11.4.27", "11 April", "+14" work; the field shows the weekday, because
+   groups arrive on a Sunday; a stay is one two-month calendar where the arrival proposes the
+   departure from the package's length, with 1–4 weeks to pick from.
+
 The rest of the workspace is to follow this style once Offers is accepted (Rahman, 2026-10-13).
 
 ## What FileMaker does (read live, read-only, 2026-10-13)
@@ -239,6 +250,8 @@ src/components/admin/offers/
   offer-page.tsx        the offer: head, built on, included, extras; price, checks, letter, history
   letter-view.tsx       the letter tab: in-place editing, standard texts, versions, send
   new-offer.tsx         the wizard
+  date-picker.tsx       DateInput, Calendar, DateField, InlineDatePicker, DateRange — no browser
+                        date inputs anywhere in Offers (arithmetic in src/lib/admin/calendar.ts)
   panel.tsx · fields.tsx · icons.tsx · offer-actions.tsx · use-offer-draft.ts
 src/components/admin/letters/   the sheet, printing and in-place editing every letter uses
 src/lib/admin/offers/

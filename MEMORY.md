@@ -2578,3 +2578,9 @@ lessons, reductions), the package price typed over, a block left out rebuilds it
 letter as sent is a row of `letters`, read back through a schema check — the Letter tab had crashed
 on a copy stored before a field existed. Offers are the first kind; confirmations and visa letters
 are the next ones Rahman named.
+
+Fourth pass: the radii were 10–20px, far off UI_SYSTEM.md's 4/6/8 tiers — now on them, with the
+`--ws-*` colours; the head's facts became a framed bar of cells; checks open the panel that fixes
+them; the price card lost the logo stripe (content cards never carry it); and the browser's date
+inputs were replaced by a typeable field with the weekday and a one- or two-month calendar
+(`date-picker.tsx`, `src/lib/admin/calendar.ts`) — the component the rest of the workspace can use.

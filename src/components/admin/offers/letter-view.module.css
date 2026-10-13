@@ -5,22 +5,22 @@
  * of what the letter is — its language, how it shows the prices, its texts,
  * the versions sent. The column goes under the page on a narrow screen.
  */
-.canvas { flex: 1; width: 100%; max-width: 1240px; margin: 0 auto; padding: 22px 24px 96px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
+.canvas { flex: 1; width: 100%; max-width: 1260px; margin: 0 auto; padding: 20px 24px 96px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 .canvasSolo { grid-template-columns: minmax(0, 1fr); }
 .paper { width: 100%; max-width: 860px; justify-self: center; }
-.side { position: sticky; top: 82px; display: flex; flex-direction: column; gap: 14px; }
-.notice { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--o-line); font-size: 12.5px; font-weight: 700; color: var(--o-mute); }
+.side { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; }
+.notice { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px 14px; border-radius: var(--r-card, 6px); background: #fff; border: 1px solid var(--o-line); font-size: 12.5px; font-weight: 700; color: var(--o-mute); }
 .noticeWarn { background: #fff8ec; border-color: #f3dcae; color: #7a4a00; }
 .group { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
 .group + .group { border-top: 1px solid var(--o-line); }
 .group > span { font-size: 12px; font-weight: 700; color: var(--o-mute); }
 .textRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 700; }
-.state { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+.state { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--r-control, 4px); font-size: 11.5px; font-weight: 700; }
 .stateStandard { background: #e7f6ec; color: #137a3c; }
 .stateChanged { background: #fff4dc; color: #8a5300; }
 .tip { padding: 12px 16px; font-size: 12.5px; color: var(--o-mute); font-weight: 600; border-top: 1px solid var(--o-line); }
 .versions { display: flex; flex-direction: column; padding: 6px; }
-.version { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--o-ink); text-decoration: none; }
+.version { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: var(--r-control, 4px); font-size: 13px; font-weight: 700; color: var(--o-ink); text-decoration: none; }
 .version span { font-size: 12px; color: var(--o-mute); font-weight: 600; }
 .version:hover { background: var(--o-hover); }
 .versionOn, .versionOn:hover { background: var(--o-blue-tint); color: var(--o-blue-ink); }

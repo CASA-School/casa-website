@@ -14,7 +14,7 @@ import { addLine, moveLineTo, removeLine, resetLine, setChoices, setLinePrice, s
 import { activitiesOf, activityAllowance, extrasOf, isFixedPackage, measure, packageWeeks, pricedWeeks } from '@/lib/admin/offers/engine';
 import { GROUP_EXTRAS, REDUCTION, isCredit, type ExtraPreset } from '@/lib/admin/offers/extras';
 import type { EditorOptions, OfferRecord, PriceListItem, StandardTexts } from '@/lib/admin/offers/repo';
-import { addDays } from '@/lib/admin/offers/stay';
+import { addDays, daysBetween } from '@/lib/admin/offers/stay';
 import {
   ESCORT_PRICING_LABELS,
   OFFER_STATUS_LABELS,
@@ -28,6 +28,7 @@ import {
   type StayChoices,
 } from '@/lib/admin/offers/types';
 
+import { DateRange, InlineDatePicker } from './date-picker';
 import { NumberInput, Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { Chip, ICONS, type Tint } from './icons';
@@ -50,6 +51,8 @@ const PACKAGE_COLOUR: Record<PackageChoice, [string, string]> = {
   esel: ['var(--c-ink)', 'var(--c-ink-tint)'],
   own: ['var(--o-line-firm)', '#f6f8fb'],
 };
+const ESCORT_SHORT: Record<EscortPricing, string> = { paid: 'paying', free: 'free', shared: 'shared' };
+const PACKAGE_LABEL: Record<PackageChoice, string> = { hahn: 'Hahn', katze: 'Katze', hund: 'Hund', esel: 'Esel', own: 'An own offer' };
 const ACTIVITY_TINT: Record<GruppenActivity['category'], Tint> = { city: 'blue', culture: 'red', science: 'sun', sport: 'ink', daytrip: 'ink' };
 const CATEGORY_LABEL: Record<GruppenActivity['category'], string> = {
   city: 'In the city',
@@ -210,6 +213,31 @@ export function OfferPage({
 
 // ----------------------------------------------------------------- head
 
+/** The ids the checks open: a problem in the list opens the panel that fixes it. */
+const FIX: Record<string, string> = {
+  recipient: 'fix-recipient',
+  participants: 'fix-group',
+  escorts: 'fix-group',
+  dates: 'fix-dates',
+  package: 'fix-dates',
+  validity: 'fix-validity',
+  programme: 'fix-programme',
+};
+
+/** One cell of the head's bar: what it is, its value, a line under it. */
+function Spec({ tint, icon, label, value, sub, warn }: { tint: Tint; icon: ReactNode; label: string; value: ReactNode; sub: ReactNode; warn?: boolean }) {
+  return (
+    <>
+      <span className={ui.specLabel}>
+        <Chip tint={tint} icon={icon} />
+        {label}
+      </span>
+      <span className={`${ui.specValue} ${warn ? ui.factWarn : ''}`}>{value}</span>
+      <span className={ui.specSub}>{sub}</span>
+    </>
+  );
+}
+
 function Head({
   draft,
   update,
@@ -230,6 +258,8 @@ function Head({
   const c = draft.stay.choices;
   const fixedWeeks = packageWeeks(c.package);
   const owner = options.staff.find((s) => s.id === draft.ownerId)?.name;
+  const validIn = draft.validUntil ? daysBetween(today, draft.validUntil) : null;
+  const panel = { className: ui.spec, openClassName: ui.specOpen, disabled: !editable, block: true };
 
   return (
     <section className={ui.hero}>
@@ -252,6 +282,7 @@ function Head({
               subtitle="Who the letter is addressed to"
               icon={<Chip tint="ink" icon={ICONS.people} big />}
               className={ui.editable}
+              triggerId={FIX.recipient}
               disabled={!editable}
               body={() => <RecipientFields draft={draft} update={update} countries={options.countries} />}
             >
@@ -262,37 +293,25 @@ function Head({
         <span className={`${ui.pill} ${ui[`pill_${status}`]}`}>{OFFER_STATUS_LABELS[status]}</span>
       </div>
 
-      <div className={ui.facts}>
+      <div className={`${ui.specs} ${group ? '' : ui.specs3}`}>
         {group ? (
           <ClickPanel
+            {...panel}
             label="Dates"
-            subtitle={fixedWeeks ? `The package is ${fixedWeeks} ${fixedWeeks === 1 ? 'week' : 'weeks'}` : 'The offer takes the length of the stay'}
+            subtitle={fixedWeeks ? `${PACKAGE_LABEL[c.package]} is ${fixedWeeks} ${fixedWeeks === 1 ? 'week' : 'weeks'}, Sunday to Saturday` : 'The offer takes the length of the stay'}
             icon={<Chip tint="blue" icon={ICONS.calendar} big />}
-            className={ui.fact}
-            openClassName={ui.factOpen}
-            disabled={!editable}
+            triggerId={FIX.dates}
+            dates
             body={() => (
               <>
-                <div className={ui.row2}>
-                  <div className={ui.fld}>
-                    <label htmlFor="d-arrival">Arrival</label>
-                    <input
-                      id="d-arrival"
-                      type="date"
-                      className={ui.fi}
-                      value={draft.arrival ?? ''}
-                      onChange={(e) => {
-                        const arrival = e.target.value || null;
-                        const length = fixedWeeks ?? c.weeks;
-                        update((d) => ({ ...d, arrival, departure: arrival && !d.departure ? addDays(arrival, length * 7 - 1) : d.departure }));
-                      }}
-                    />
-                  </div>
-                  <div className={ui.fld}>
-                    <label htmlFor="d-departure">Departure</label>
-                    <input id="d-departure" type="date" className={ui.fi} value={draft.departure ?? ''} min={draft.arrival ?? undefined} onChange={(e) => update({ departure: e.target.value || null })} />
-                  </div>
-                </div>
+                <DateRange
+                  from={draft.arrival}
+                  to={draft.departure}
+                  today={today}
+                  compact
+                  suggestEnd={(a) => addDays(a, (fixedWeeks ?? c.weeks) * 7 - 1)}
+                  onChange={(arrival, departure) => update({ arrival, departure })}
+                />
                 {!fromDates && !fixedWeeks ? (
                   <div className={ui.fld}>
                     <span>Weeks, until there are dates</span>
@@ -302,25 +321,23 @@ function Head({
               </>
             )}
           >
-            <Chip tint="blue" icon={ICONS.calendar} />
-            {fromDates && draft.arrival && draft.departure ? (
-              `${formatDateRange(draft.arrival, draft.departure, 'en')} · ${nights} nights`
-            ) : (
-              <>
-                {weeks} {weeks === 1 ? 'week' : 'weeks'} <span className={ui.factMuted}>· no dates yet</span>
-              </>
-            )}
+            <Spec
+              tint="blue"
+              icon={ICONS.calendar}
+              label="Dates"
+              value={fromDates && draft.arrival && draft.departure ? formatDateRange(draft.arrival, draft.departure, 'en') : `${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}
+              sub={fromDates ? `${nights} nights · ${weeks} ${weeks === 1 ? 'week' : 'weeks'}` : 'No dates yet'}
+            />
           </ClickPanel>
         ) : null}
 
         {group ? (
           <ClickPanel
+            {...panel}
             label="The group"
             subtitle="Participants and the teachers who come with them"
             icon={<Chip tint="red" icon={ICONS.people} big />}
-            className={ui.fact}
-            openClassName={ui.factOpen}
-            disabled={!editable}
+            triggerId={FIX.participants}
             wide
             body={() => (
               <>
@@ -356,23 +373,22 @@ function Head({
               </>
             )}
           >
-            <Chip tint="red" icon={ICONS.people} />
-            {draft.participants ? `${draft.participants} participants` : <span className={ui.factWarn}>Participants?</span>}
-            {draft.escorts > 0 ? (
-              <span className={ui.factMuted}>
-                · {draft.escorts} {draft.escorts === 1 ? 'escort' : 'escorts'}
-              </span>
-            ) : null}
+            <Spec
+              tint="red"
+              icon={ICONS.people}
+              label="The group"
+              warn={!draft.participants}
+              value={draft.participants ? `${draft.participants} participants` : 'Participants?'}
+              sub={draft.escorts ? `${draft.escorts} ${draft.escorts === 1 ? 'escort' : 'escorts'}, ${ESCORT_SHORT[c.escortPricing]}` : 'No escorts'}
+            />
           </ClickPanel>
         ) : null}
 
         <ClickPanel
+          {...panel}
           label="Language"
           subtitle="Of the letter"
           icon={<Chip tint="sun" icon={ICONS.language} big />}
-          className={ui.fact}
-          openClassName={ui.factOpen}
-          disabled={!editable}
           body={(close) => (
             <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
               {(['de', 'en'] as const).map((l) => (
@@ -392,70 +408,66 @@ function Head({
             </div>
           )}
         >
-          <Chip tint="sun" icon={ICONS.language} />
-          {draft.language === 'de' ? 'Deutsch' : 'English'}
+          <Spec tint="sun" icon={ICONS.language} label="Language" value={draft.language === 'de' ? 'Deutsch' : 'English'} sub="Of the letter" />
         </ClickPanel>
 
         <ClickPanel
+          {...panel}
           label="Valid until"
           subtitle="The date the letter gives"
           icon={<Chip tint="ink" icon={ICONS.hourglass} big />}
-          className={ui.fact}
-          openClassName={ui.factOpen}
-          disabled={!editable}
-          body={(close) => (
-            <>
-              <input aria-label="Valid until" type="date" className={ui.fi} value={draft.validUntil ?? ''} onChange={(e) => update({ validUntil: e.target.value || null })} />
-              <div className={ui.inline}>
-                {[14, 28, 42].map((days) => (
-                  <button
-                    key={days}
-                    type="button"
-                    className={`${ui.btn} ${ui.btnSm}`}
-                    onClick={() => {
-                      update({ validUntil: addDays(today, days) });
-                      close();
-                    }}
-                  >
-                    In {days / 7} weeks
-                  </button>
-                ))}
-              </div>
-            </>
+          triggerId={FIX.validity}
+          body={() => (
+            <InlineDatePicker
+              ariaLabel="Valid until"
+              value={draft.validUntil}
+              today={today}
+              min={today}
+              onChange={(v) => update({ validUntil: v })}
+              quick={[
+                ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
+                ...(draft.arrival && addDays(draft.arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(draft.arrival, -42) }] : []),
+              ]}
+            />
           )}
         >
-          <Chip tint="ink" icon={ICONS.hourglass} />
-          {draft.validUntil ? `Valid until ${formatLetterDate(draft.validUntil, 'en')}` : <span className={ui.factWarn}>No validity</span>}
+          <Spec
+            tint="ink"
+            icon={ICONS.hourglass}
+            label="Valid until"
+            warn={validIn == null || validIn < 0}
+            value={draft.validUntil ? formatLetterDate(draft.validUntil, 'en') : 'No date'}
+            sub={validIn == null ? 'The letter gives none' : validIn < 0 ? 'Passed' : validIn === 0 ? 'Today' : `In ${validIn} ${validIn === 1 ? 'day' : 'days'}`}
+          />
         </ClickPanel>
 
         <ClickPanel
+          {...panel}
           label="Signed by"
           subtitle="Whose name is under the letter"
           icon={<Chip tint="ink" icon={ICONS.pen} big />}
-          className={ui.fact}
-          openClassName={ui.factOpen}
-          disabled={!editable}
           body={(close) => (
-            <select
-              aria-label="Signed by"
-              className={ui.fi}
-              value={draft.ownerId ?? ''}
-              onChange={(e) => {
-                update({ ownerId: e.target.value || null });
-                close();
-              }}
-            >
-              <option value="">—</option>
-              {options.staff.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
+            <div className={ui.radioList}>
+              {options.staff.map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  className={`${ui.radio} ${st.id === draft.ownerId ? ui.radioOn : ''}`}
+                  onClick={() => {
+                    update({ ownerId: st.id });
+                    close();
+                  }}
+                >
+                  <i />
+                  <span>
+                    <b>{st.name}</b>
+                  </span>
+                </button>
               ))}
-            </select>
+            </div>
           )}
         >
-          <Chip tint="ink" icon={ICONS.pen} />
-          {owner ?? <span className={ui.factWarn}>Not signed</span>}
+          <Spec tint="ink" icon={ICONS.pen} label="Signed by" warn={!owner} value={owner ?? 'Nobody'} sub="Under the letter" />
         </ClickPanel>
       </div>
     </section>
@@ -718,6 +730,7 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
               openClassName={ui.incOpen}
               disabled={!editable}
               wide={s.key === 'programme' && !fixed}
+              triggerId={s.key === 'programme' && !fixed ? FIX.programme : undefined}
               body={() => <ServiceBody service={s} draft={draft} update={update} fixed={fixed} on={on} participantLine={fixed ? null : p} escortLine={escortCol ? e : null} />}
               foot={fixed ? toEsel : undefined}
             >
@@ -1254,7 +1267,7 @@ function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
   return (
     <section className={ui.card} aria-label="Checks">
       {problems.length ? (
-        <div className={ui.cardHead} style={{ background: '#fff8ec', borderRadius: '16px 16px 0 0' }}>
+        <div className={`${ui.cardHead} ${ui.cardHeadWarn}`}>
           <h2>
             <span className={`${ui.checkMark} ${ui.tint_sun}`}>!</span>
             Before it can go
@@ -1262,25 +1275,42 @@ function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
           <span className={ui.count}>{problems.length}</span>
         </div>
       ) : (
-        <div className={ui.checksOk} style={{ borderBottom: hints.length ? '1px solid var(--o-line)' : 0 }}>
+        <div className={`${ui.checksOk} ${hints.length ? ui.checksOkRule : ''}`}>
           <span className={`${ui.checkMark} ${ui.tint_green}`}>✓</span>
           Ready to send
         </div>
       )}
       {problems.length || hints.length ? (
         <div className={ui.checkList}>
-          {problems.map((c, i) => (
-            <div key={`p${i}`} className={ui.check}>
-              <i className={ui.dotProblem} />
-              {c.message}
-            </div>
-          ))}
-          {hints.map((c, i) => (
-            <div key={`h${i}`} className={`${ui.check} ${ui.checkHint}`}>
-              <i className={ui.dotHint} />
-              {c.message}
-            </div>
-          ))}
+          {[...problems, ...hints].map((c, i) => {
+            const fix = FIX[c.field];
+            const body = (
+              <>
+                <i className={c.level === 'problem' ? ui.dotProblem : ui.dotHint} />
+                <span>{c.message}</span>
+                {fix ? <span className={ui.checkGo}>→</span> : null}
+              </>
+            );
+            const className = `${ui.check} ${c.level === 'hint' ? ui.checkHint : ''}`;
+            return fix ? (
+              <button
+                key={i}
+                type="button"
+                className={`${className} ${ui.checkFix}`}
+                onClick={() => {
+                  const target = document.getElementById(fix);
+                  target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                  target?.click();
+                }}
+              >
+                {body}
+              </button>
+            ) : (
+              <div key={i} className={className}>
+                {body}
+              </div>
+            );
+          })}
         </div>
       ) : null}
     </section>

@@ -1,0 +1,72 @@
+/*
+ * The workspace's date picker (date-picker.tsx).
+ *
+ * A field you can type a date into, shown with its weekday; a month calendar
+ * beside or under it — two months for a stay, so a fortnight that crosses a
+ * month is seen at once. CASA's radius scale: 4px for the field and the days,
+ * 6px for the calendar's own box.
+ */
+.field { position: relative; display: flex; align-items: center; min-width: 0; }
+.field svg { position: absolute; left: 11px; width: 16px; height: 16px; color: var(--ws-text-subtle, #667085); pointer-events: none; }
+.input { width: 100%; height: 40px; padding: 0 12px 0 35px; border-radius: 4px; border: 1px solid var(--ws-line, #dbe2ec); background: #fff; font: inherit; font-size: 14px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; transition: border-color 0.12s, box-shadow 0.12s; }
+.input:hover { border-color: var(--ws-line-firm, #c3ccda); }
+.input:focus { outline: none; border-color: #0a84c6; box-shadow: 0 0 0 3px #e3f4fc; }
+.input::placeholder { color: #98a3b3; font-weight: 500; }
+.input[aria-invalid='true'] { border-color: #c81e1e; box-shadow: 0 0 0 3px #fdecec; }
+.toggle { position: absolute; right: 4px; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: #667085; cursor: pointer; }
+.toggle:hover { background: var(--ws-sunk, #f0f4f9); color: #111827; }
+.toggle svg { position: static; width: 16px; height: 16px; }
+.withToggle .input { padding-right: 40px; }
+
+.pop { position: absolute; z-index: 45; top: calc(100% + 8px); left: 0; padding: 14px; background: #fff; border-radius: 6px; box-shadow: 0 24px 56px -22px rgba(15, 23, 42, 0.42), 0 0 0 1px rgba(15, 23, 42, 0.08); animation: pop 140ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.popUp { top: auto; bottom: calc(100% + 8px); }
+
+.cal { --cell: 36px; position: relative; display: inline-flex; flex-direction: column; gap: 10px; user-select: none; }
+.compact { --cell: 33px; }
+.months { display: flex; gap: 22px; }
+.month { display: flex; flex-direction: column; gap: 6px; }
+.title { height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 800; color: #111827; }
+.nav { position: absolute; top: 0; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: #46536a; font-size: 18px; line-height: 1; cursor: pointer; }
+.nav:hover { background: var(--ws-sunk, #f0f4f9); color: #111827; }
+.prev { left: 0; }
+.next { right: 0; }
+.grid { display: flex; flex-direction: column; gap: 2px; }
+.row { display: grid; grid-template-columns: repeat(7, var(--cell)); }
+.wd { height: 24px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #98a3b3; }
+.blank { height: var(--cell); }
+.day { position: relative; height: var(--cell); border: 0; border-radius: 4px; background: transparent; font: inherit; font-size: 13px; font-weight: 600; color: #1f2937; font-variant-numeric: tabular-nums; cursor: pointer; }
+.day:hover { background: var(--ws-sunk, #f0f4f9); }
+.day:focus-visible { outline: 2px solid #0a84c6; outline-offset: -2px; }
+.weekend { color: #667085; }
+.today::after { content: ''; position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: #0a84c6; }
+.inRange { background: #e3f4fc; border-radius: 0; color: #065f8c; }
+.inRange:hover { background: #d3edf9; }
+.preview { background: #f0f7fc; border-radius: 0; }
+.start, .end, .selected, .start:hover, .end:hover, .selected:hover { background: #111827; color: #fff; }
+.start { border-radius: 4px 0 0 4px; }
+.end { border-radius: 0 4px 4px 0; }
+.start.end, .selected { border-radius: 4px; }
+.start.today::after, .end.today::after, .selected.today::after { background: #fff; }
+.day:disabled { color: #c3ccda; cursor: default; background: transparent; }
+
+.foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--ws-line-soft, #e9eef4); }
+.foot > span { font-size: 12.5px; font-weight: 600; color: #667085; margin-right: auto; }
+.chip { height: 28px; padding: 0 10px; border-radius: 4px; border: 1px solid var(--ws-line, #dbe2ec); background: #fff; font: inherit; font-size: 12.5px; font-weight: 700; color: #1f2937; cursor: pointer; white-space: nowrap; }
+.chip:hover { border-color: #0a84c6; color: #075985; }
+.chipOn, .chipOn:hover { background: #111827; border-color: #111827; color: #fff; }
+
+.range { display: flex; flex-direction: column; gap: 12px; }
+.range > .cal { align-self: flex-start; }
+.ends { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ends label { display: block; font-size: 12px; font-weight: 700; color: #667085; margin-bottom: 6px; }
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pop { animation: none; }
+}
+@media (max-width: 640px) {
+  .months > :nth-child(2) { display: none; }
+}
