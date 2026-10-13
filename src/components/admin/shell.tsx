@@ -230,13 +230,15 @@ export function WorkspaceShell({
                 </NavLink>
               ) : null}
               {/* Rooms, the type lists and the price list all live here: they
-                  are defined once and then left alone for a season. */}
+                  are defined once and then left alone for a season. The price
+                  list is finance's and management's (module `prices`). */}
               <NavLink
                 href="/admin/settings"
                 title="Settings"
                 icon={Icon.settings}
                 items={[
-                  { href: '/admin/settings/setup', label: 'Types & prices' },
+                  ...(canAccess(user, 'prices') ? [{ href: '/admin/settings/prices', label: 'Prices' }] : []),
+                  { href: '/admin/settings/setup', label: 'Lists' },
                   ...(canAccess(user, 'rooms')
                     ? [{ href: '/admin/settings/rooms', label: 'Rooms' }]
                     : []),

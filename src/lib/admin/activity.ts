@@ -251,6 +251,14 @@ export function describeActivity(entry: ActivityEntry): string {
       return 'deleted an offer';
     case 'offer_standard_text_changed':
       return `changed the standard ${entry.detail?.part === 'closing' ? 'closing' : 'opening'} of ${entry.detail?.language === 'de' ? 'German' : 'English'} offers`;
+    case 'prices_changed': {
+      const n = Array.isArray(entry.detail?.changes) ? entry.detail.changes.length : 0;
+      return `changed ${n === 1 ? 'a price' : `${n} prices`} in the price list from ${listName(entry.detail?.list)}`;
+    }
+    case 'price_list_prepared':
+      return `prepared the price list from ${listName(entry.detail?.list)}`;
+    case 'price_list_deleted':
+      return `deleted the price list from ${listName(entry.detail?.list)}`;
     case 'website_published':
       return `published ${texts(entry)} on the website`;
     case 'website_scheduled':
@@ -309,3 +317,9 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   return null;
 }
+
+/** "1 January 2027", the way a price list is named. */
+const listName = (value: unknown) =>
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+    : 'a date';

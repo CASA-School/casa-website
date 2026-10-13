@@ -245,16 +245,18 @@ course at a glance — time of day, dates, weeks, lessons, and the school's clos
 is its level and dates. The title becomes "Intensivkurs B2 komplett", or "Intensivkurs B2 bis C1"; the
 validity a week before the course starts, at most four weeks.
 
-**The rules, and where they come from.** The prices are the website's published ones
-(`src/config/calculator/pricing.ts`); the rules are SchoolMan's own booking scripts, read from the DDR
-on 2026-10-13, and they match FileMaker's 2026 offers to the cent (37614: 50 + 940 + 2 × 23,99;
-37627: Bücher 4 × 26,99 for B2 and C1, Miete Unterkunft 1160 for 8 weeks).
+**The rules, and where they come from.** Every amount comes from the price list in force on its
+day (Settings → Prices; docs/CATALOGUE_AND_PRICING.md §Price lists): the course on its first day,
+the room on arrival. The choice keeps the amounts it was made with; *Change the course* prices it
+again. The rules are SchoolMan's own booking scripts, read from the DDR on 2026-10-13, and they match
+FileMaker's 2026 offers to the cent (37614: 50 + 940 + 2 × 23,99; 37627: Bücher 4 × 26,99 for B2 and
+C1, Miete Unterkunft 1160 for 8 weeks).
 
 | What | Rule | FileMaker |
 | --- | --- | --- |
 | Intensive | whole level (8 weeks) 940 €, half level 520 € | ShortTerm table: 4 weeks 520, 8 weeks 940; LongTerm 117,50 € a week = the same |
-| Evening | per term, 378 € spring, 476 € autumn | 7 € a lesson × the term's lessons (54 / 68) |
-| Special | 192 € | 8 € a lesson × 24 |
+| Evening | 7 € a lesson × the term's lessons (54 → 378 €, 56 → 392 €, 68 → 476 €) | the same |
+| Special | 8 € a lesson × the term's lessons | the same (24 → 192 €) |
 | Books | each half level's books, parts 1 and 2 | one "Bücher" line per standard book of the whole CEFR level |
 | Enrolment fee | 50 €, once per learner, ever: none if a booking went ahead or one was charged the fee (`studiedBeforeSql`) | the same, by a text search for "1" in the earlier lines' types — so an exam or discount line also suppressed it |
 | Rent | whole weeks, Sunday to Saturday; 200 / 340 / 460 € for 1–3 weeks, 580 € for 4, 145 € each further week | `WriteAccommodationPrice`, 2026 |
@@ -268,8 +270,8 @@ accommodation without dates (a problem), nights beyond whole weeks.
 Not yet: agency commission (FileMaker: the agency's percentage or 20 % per commissionable line), a
 down payment and payment date (FileMaker's confirmation: today + 7 days, or the course start), an
 offer for two learners at once (FileMaker's 37627 is quantity 2), meals with a host family (FileMaker
-prices none — "Preis muss händisch berechnet werden"), Bildungszeit's weekly price (the catalogue's
-"from" price stands until it is typed over).
+prices none — "Preis muss händisch berechnet werden"), Bildungszeit's price (none in the price list;
+the catalogue's "from" price stands until it is typed over).
 
 ## Working with it
 

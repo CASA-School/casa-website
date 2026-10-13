@@ -47,6 +47,8 @@ export const CourseSchema = z.object({
         termId: z.string().uuid().nullable(),
         start: isoDay.nullable(),
         end: isoDay.nullable(),
+        lessons: z.number().int().min(1).max(2000).nullable().default(null),
+        price: money.nullable().default(null),
       })
     )
     .max(12),
@@ -55,7 +57,9 @@ export const CourseSchema = z.object({
   accommodation: z.object({ kind: z.enum(['host_family', 'shared_flat']), from: isoDay.nullable(), to: isoDay.nullable() }).nullable(),
   firstStay: z.boolean().default(true),
   exam: z.object({ code: z.string().regex(/^[a-z0-9_]{2,40}$/), name: z.string().max(120), date: isoDay.nullable(), fee: money.nullable() }).nullable().default(null),
-  listPrice: money.nullable(),
+  prices: z
+    .object({ enrolment: money.nullable(), rent: money.nullable(), placement: money.nullable(), deposit: money.nullable() })
+    .default({ enrolment: null, rent: null, placement: null, deposit: null }),
 });
 
 const ChoicesSchema = z.object({

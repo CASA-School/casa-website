@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { Icon } from '@/components/admin/icons';
 import { roleLabel } from '@/components/admin/shell';
 import { Badge, Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import { getStaffUser } from '@/lib/admin/auth';
 import { formDeliveryConfig } from '@/lib/notifications/forms.server';
 import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/config/placement/policy';
@@ -172,22 +173,30 @@ export default async function SettingsPage() {
           </Card>
 
           <Card title="Setup" icon={Icon.catalogue} tint="ink" bleed>
-            <Link
-              href="/admin/settings/setup"
-              className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#f6f9fc]"
-            >
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold text-[var(--casa-ink)]">
-                  Types &amp; prices
-                </span>
-                <span className="block text-xs text-[var(--casa-text-subtle)]">
-                  Prices, and the lists used everywhere else
-                </span>
-              </span>
-              <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
-                {Icon.chevronRight}
-              </span>
-            </Link>
+            <ul className="divide-y divide-ws-line-soft">
+              {[
+                ...(canAccess(user, 'prices')
+                  ? [{ href: '/admin/settings/prices', label: 'Prices', sub: 'Courses, accommodation, fees, books and exams, by year' }]
+                  : []),
+                { href: '/admin/settings/setup', label: 'Lists', sub: 'The types used everywhere else' },
+                ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: 'Rooms', sub: 'Classrooms and their capacity' }] : []),
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#f6f9fc]"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">{item.label}</span>
+                      <span className="block text-xs text-[var(--casa-text-subtle)]">{item.sub}</span>
+                    </span>
+                    <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
+                      {Icon.chevronRight}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </Card>
         </div>
       </div>

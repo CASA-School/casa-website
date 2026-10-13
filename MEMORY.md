@@ -2604,3 +2604,14 @@ AppleScript, read-only); they match to the cent. FileMaker's own defects were no
 enrolment fee found by a text search for "1", extra nights computed and never charged. A learner's
 offer can no longer be a group offer (it could, from a typed name). docs/OFFERS.md §A learner's course.
 
+Sixth pass, the same day: **Prices** (Rahman: a section to update the prices, for finance and
+management only, changing about once a year, starting from FileMaker's). Settings → Prices, module
+`prices` (owner/admin by role, finance per person on the Team screen). A price list is the `rates`
+rows sharing a `valid_from`; the screen shows the list in force, prepares next year's as a copy from
+1 January, edits a list that has not ended, deletes one that has not started. The 2026 list came from
+SchoolMan's booking scripts (seed 0007, imported once via `data_imports`); evening terms carry
+FileMaker's lesson counts (migration 0023), which priced Tuesday/Thursday spring 2027 right (392 €,
+not 378 €). Offers, the offers' price-list items and bookings now read the list in force on each
+thing's own day. The generic rate editor under Types & prices is gone (that screen is Lists now).
+The public site still shows `src/config/calculator/pricing.ts`.
+

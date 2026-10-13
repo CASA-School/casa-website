@@ -88,7 +88,7 @@ const routes = [
   '/admin/team',
   '/admin/settings',
   '/admin/settings/setup',
-  '/admin/settings/setup?tab=types',
+  '/admin/settings/prices',
 ].filter(Boolean);
 
 const token = randomBytes(32).toString('base64url');

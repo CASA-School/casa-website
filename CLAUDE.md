@@ -189,7 +189,7 @@ src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
 src/lib/cms      the website editor's content layer: catalog, overlay, slot tags, preview, AI
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0022_letters.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0023_price_lists.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -301,9 +301,13 @@ regression test in `src/lib/__tests__/dates.test.ts`.
 **Types are tables, prices are rates.** Every vocabulary (course type, level,
 accommodation type, catering, room type, charge type, material) is a table with
 a stable `code` and its `filemaker_id`. Every price is a row in `rates` with a
-unit and a validity period, resolved by `applicable_rate()`; a cost line still
-stores the agreed `amount`. Never type a price into a column or a condition
-into code. See `docs/CATALOGUE_AND_PRICING.md`.
+unit and a validity period; the rows sharing a `valid_from` are a **price
+list**, kept on Settings → Prices by finance and management (module `prices`)
+and prepared once a year. The workspace reads prices through
+`src/lib/admin/prices` (course tuition and rent are week tables
+`applicable_rate()` does not read); a cost line still stores the agreed
+`amount`. Never type a price into a column or a condition into code. See
+`docs/CATALOGUE_AND_PRICING.md` §Price lists.
 
 **Progressive disclosure, especially in forms — and never a "More / Less"
 toggle.** Ask for the fields that make a record valid and useful; reveal the

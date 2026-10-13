@@ -153,6 +153,56 @@ raw-plus-typed rule from `docs/FILEMAKER_LESSONS.md` §2 applied to money.
 
 ---
 
+## Price lists (2026-10-13)
+
+A **price list** is the rows of `rates` that share a `valid_from`. The newest
+list stays open; every older one closes the day before the next starts
+(`valid_to`, kept in step by the repository). Prices change about once a year,
+so the Prices screen (Settings → Prices, module `prices`: finance and
+management) works in whole lists: it shows the list in force, **prepares** next
+year's as a copy valid from 1 January, changes prices in a list that has not
+ended, and deletes a list that has not started. A list that has ended is
+history and cannot be changed.
+
+The screen and every price reader go through `src/lib/admin/prices`:
+`price-list.ts` (pure: the lists from the rows, the list in force on a day,
+tariffs) and `repo.ts` (read, save, prepare, delete, each logged to the
+activity trail). A course or a stay is priced by a **tariff** — an exact price
+for a number of weeks (rows with `min_quantity = max_quantity`) and a rate for
+everything else (per week, per lesson, or one price):
+
+| Area | Rows | 2026, from SchoolMan |
+| --- | --- | --- |
+| Intensive course | `course_type`, 1–10 weeks, and a `week` rate | 145 / 280 / 405 / 520 / 625 / 730 / 835 / 940 / 1057,50 / 1175 €, then 117,50 € a week |
+| Evening course, special courses | `course_type`, `lesson` | 7 € and 8 € a lesson, times the term's lessons |
+| Rent | `charge_type` `accommodation_rent`, 1–3 weeks, and a `week` rate | 200 / 340 / 460 €, then 145 € a week (580 € for four) |
+| Fees | `charge_type` `enrolment_fee`, `accommodation_placement_fee`, `deposit` | 50 €, 50 €, 580 € |
+| Exams | `exam_type`, `parts` 2 and 1 | telc B2 190 / 160 €, C1 Hochschule 210 / 185 € |
+| Books | `material` | the 36 from 0004 |
+
+The course, rent and fee rows came with `db/seeds/0007_price_list_2026_from_filemaker.sql`
+(from `WriteCoursePriceInternationalAirport_Booking`,
+`WriteCoursePriceCentralStation_Booking`, `WriteAccommodationPrice`), imported
+**once**: the seed records itself in `data_imports` (migration 0023), so a
+release never brings back a price CASA has changed or removed. Every later
+price is entered on the screen.
+
+A term carries its **lessons** (`course_instances.lessons`, 0023) where
+FileMaker counted them from its class dates — the 2027 winter evening term is
+54 lessons on Monday and Wednesday and 56 on Tuesday and Thursday, 378 € and
+392 €; without a count, the class days outside the school's closures are
+counted. An offer and a booking price each thing from the list in force on its
+own day (the course on its first day, the room on arrival), and keep the
+amounts they were made with. `applicable_rate()` still resolves the enrolment
+fee, books and exams; course tuition and rent go through the tariff, which it
+does not read.
+
+Not yet in the list: Bildungszeit (no rule in SchoolMan; the catalogue's "from"
+price stands), exam preparation courses (13 € a lesson in SchoolMan, no course
+type here), meals and room types (SchoolMan prices only a single room without
+meals). **The public website still shows its own published figures**
+(`src/config/calculator/pricing.ts`); reading this list there is the next step.
+
 ## 4. What was deliberately not ported
 
 - **`PlatformReference` (24 rows).** FileMaker's `_ID_Platform` is
@@ -165,20 +215,23 @@ raw-plus-typed rule from `docs/FILEMAKER_LESSONS.md` §2 applied to money.
 - **Prices as literal values.** Only the ones actually recoverable are seeded
   (`db/seeds/0004_rates_from_filemaker.sql`): the 36 book prices, the four
   exam fees from the script, and the 50 € enrolment fee. Course and
-  accommodation prices are left empty **on purpose** — there is no defensible
-  single value to import, and inventing one would put a wrong number in front
-  of a paying customer.
+  accommodation prices were left empty at first, because the per-booking
+  amounts in `CostDetailSample` give no single value; on 2026-10-13 the rules
+  were found in SchoolMan's booking scripts instead, and seed 0007 brings
+  them (§Price lists).
 
 ---
 
 ## 5. What CASA has to decide
 
-1. **The course price list.** Per course type, per week, with duration bands
-   and a validity date. `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` has the
-   published figures; the operational ones (agency, corporate, group) are in
-   the coordinator's workbook and need confirming.
-2. **The accommodation price list.** Per accommodation type × room type ×
-   catering, per week or night, plus deposit and placement fee.
+1. **The course price list.** The 2026 list is SchoolMan's own (§Price
+   lists); Bildungszeit and exam preparation have no price there, and the
+   operational ones (agency, corporate, group) are in the coordinator's
+   workbook and need confirming.
+2. **The accommodation price list.** SchoolMan prices every type alike and only
+   a single room without meals; a different price for the CASA flat, a double
+   room or meals would be rows of their own. The deposit: 580 € in the script
+   and on the site, but 50 € key deposit plus 560 € in the flat contract.
 3. **VAT.** `charge_types` carries the rate FileMaker's `_ID_VatReference`
    implied (19% or 7%); those need checking against what CASA actually
    invoices. Course tuition by a recognised school is usually exempt.

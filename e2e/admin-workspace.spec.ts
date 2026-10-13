@@ -31,6 +31,7 @@ const GUARDED_PATHS = [
   '/admin/activity',
   '/admin/team',
   '/admin/settings',
+  '/admin/settings/prices',
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
   '/admin/kursplanung/lehrkraefte',

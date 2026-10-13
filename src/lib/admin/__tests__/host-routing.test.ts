@@ -317,6 +317,7 @@ describe('workspace auth gate', () => {
       ['people', '(workspace)/people'],
       ['bookings', '(workspace)/bookings'],
       ['rooms', '(workspace)/settings/rooms'],
+      ['prices', '(workspace)/settings/prices'],
       ['catalogue', '(workspace)/catalogue'],
       ['activity', '(workspace)/activity'],
       ['team', '(workspace)/team'],

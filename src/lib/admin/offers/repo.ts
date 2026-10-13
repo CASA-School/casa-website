@@ -5,10 +5,12 @@ import type { PoolClient } from 'pg';
 import type { StaffUser } from '../auth';
 import { query, queryFirst, withTransaction } from '../db';
 import { issueLetter, lettersForOffer, saveStandardText, standardTexts, type LetterListItem } from '../letters/repo';
+import { coursePrice } from '../prices/price-list';
+import { loadPriceLists } from '../prices/repo';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
 import { hasProblems, offerChecks } from './checks';
-import { courseTitle } from './course';
+import { courseTitle, teachingWeeks, termLessons } from './course';
 import { OFFER_TEXT_DEFAULTS, offerLetter, type OfferTexts } from './document';
 import { newManualKey } from './draft-ops';
 import { buildLines, computeTotals } from './engine';
@@ -791,24 +793,22 @@ const ddmmyy = (d: Date) => toDateInputValue(d).split('-').reverse().join('.');
  * booking from, so an offer and the booking that follows it agree.
  */
 export async function priceListOptions(): Promise<PriceListItem[]> {
-  const [courses, fee, books, exams] = await Promise.all([
+  const [courses, fee, books, exams, prices] = await Promise.all([
     query<{
       name: string;
       name_de: string | null;
+      slug: string;
       level_code: string | null;
       start_date: Date;
       end_date: Date;
-      rate_amount: string | null;
-      rate_unit: string | null;
+      lessons_per_week: number;
+      schedule: { days?: string[]; time?: string } | null;
+      lessons: number | null;
       default_price: string;
     }>(
-      `SELECT t.name, t.name_de, i.level_code, i.start_date, i.end_date,
-              rt.amount AS rate_amount, rt.unit::text AS rate_unit, t.default_price
+      `SELECT t.name, t.name_de, t.slug, i.level_code, i.start_date, i.end_date, t.lessons_per_week, i.schedule, i.lessons, t.default_price
          FROM course_instances i
          JOIN course_types t ON t.id = i.course_type_id
-         LEFT JOIN rates rt ON rt.id = applicable_rate(
-           'course_type'::rate_scope, i.start_date, i.course_type_id, NULL, NULL, NULL, NULL,
-           NULL, NULL, i.level_code, i.session, NULL, NULL)
         WHERE i.start_date >= current_date AND i.status <> 'cancelled' AND t.slug <> 'german-for-groups'
         ORDER BY i.start_date, t.name LIMIT 60`
     ),
@@ -825,14 +825,18 @@ export async function priceListOptions(): Promise<PriceListItem[]> {
               (SELECT amount FROM rates WHERE id = applicable_rate('exam_type', current_date, p_exam_type_id => e.id, p_parts => 1::smallint)) AS one
          FROM exam_types e WHERE e.is_active ORDER BY e.name`
     ),
+    loadPriceLists(),
   ]);
 
   const items: PriceListItem[] = [];
   for (const c of courses) {
-    const weeks = Math.max(1, Math.round((c.end_date.getTime() - c.start_date.getTime()) / 86_400_000 / 7));
-    const rate = c.rate_amount == null ? null : Number(c.rate_amount);
+    const startDate = toDateInputValue(c.start_date);
+    const endDate = toDateInputValue(c.end_date);
+    const weeks = teachingWeeks(startDate, endDate);
+    const slot = Array.isArray(c.schedule?.days) && typeof c.schedule?.time === 'string' ? { days: c.schedule.days, time: c.schedule.time } : null;
+    const lessons = termLessons({ startDate, endDate, slot, lessons: c.lessons }, c.lessons_per_week);
     const published = Number(c.default_price);
-    const amount = rate != null ? (c.rate_unit === 'week' || c.rate_unit === 'person_week' ? rate * weeks : rate) : published > 0 ? published : null;
+    const amount = coursePrice(prices, c.slug, startDate, { weeks, lessons })?.amount ?? (published > 0 ? published : null);
     const span = `${ddmmyy(c.start_date)}–${ddmmyy(c.end_date)}`;
     const level = c.level_code ? ` ${c.level_code}` : '';
     items.push({

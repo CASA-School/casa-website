@@ -401,7 +401,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms, Kursplanung, Website, Offers and Team |
+| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -472,7 +472,7 @@ staff accounts (add, deactivate with confirmation).
 | --- | --- |
 | **Inbox** | Enquiries, Registrations (→ Courses, Exams) — what the public site sent, waiting to be worked |
 | **School** | Students (→ Placement tests), Bookings, Offers, Courses, Exams — the records the school keeps. Offers opens full screen (docs/OFFERS.md) |
-| **Management** | Applications, Activity, Team, Settings (→ Types & prices, Rooms) |
+| **Management** | Applications, Activity, Team, Settings (→ Prices, Lists, Rooms) |
 
 Nine top-level items, and the placements are the argument:
 
@@ -824,12 +824,22 @@ signed up for" is not a question a live join can answer.
 ### Setup lives under Settings, not in the navigation
 
 The vocabularies and the price list are values CASA fixes once and leaves for a
-season, so they are **`/admin/settings/setup`** — a nested item under Settings
-at the bottom of the sidebar, with two tabs (Prices, Lists). Reading it needs
-`settings`, which everyone has; changing a price needs `settings` at `full`,
-because every future booking is priced from those rows. A price is **ended**
-(`valid_to = today`) rather than deleted, and deleting is refused once a
-booking has been priced from it.
+season, so they are nested items under Settings at the bottom of the sidebar:
+**Prices** (`/admin/settings/prices`), **Lists** (`/admin/settings/setup`) and
+**Rooms**. Lists needs `settings`, which everyone has.
+
+**Prices** is its own module, `prices` (2026-10-13), because the price list is
+finance's and management's: owners and administrators hold it by role, staff
+do not, and a colleague in finance is given it on the Team screen — `edit`
+changes prices and prepares next year's list, `full` also deletes a list that
+has not started. It shows one price list at a time, the one in force first, in
+CASA's own areas (the intensive course's weeks, the other courses, rent, fees,
+exams, books), each with an Edit that opens its prices in one dialog. **Prepare
+2027** copies the list in force into one valid from 1 January; its prices are
+changed where they change, and it takes over on its date. A list that has
+ended is read only. Offers and bookings are priced from the list in force on
+the day each thing starts; what they were made with stays theirs.
+docs/CATALOGUE_AND_PRICING.md §Price lists has the model.
 
 Adding a new *kind* of list is a migration, deliberately: the vocabulary is
 schema, and a screen that invents entity types is how FileMaker grew to 231

@@ -10,12 +10,12 @@ import {
   courseLines,
   examsAfter,
   extraNights,
+  fromPrice,
   levelLabel,
   slotKey,
   slotLabel,
   slotsOf,
   stayAround,
-  stepPrice,
   type AccommodationChoice,
   type CourseCatalogue,
   type CourseChoice,
@@ -99,6 +99,7 @@ export function CoursePicker({
             firstStay: next.firstStay,
             exams: catalogue.exams,
             exam: next.exam,
+            prices: catalogue.prices,
           })
         : null;
     // A path that no longer leads to the exam drops it.
@@ -121,8 +122,7 @@ export function CoursePicker({
         <div className={ui.courseTiles} role="radiogroup" aria-label="Course">
           {catalogue.courses.map((c) => {
             const on = c.slug === slug;
-            const next = c.terms[0];
-            const from = stepPrice(c, { level: c.levels.length ? 'A1' : '', weeks: 4, complete: false, termId: null, start: next?.startDate ?? null, end: null });
+            const from = fromPrice(c, catalogue.prices);
             return (
               <button
                 key={c.slug}

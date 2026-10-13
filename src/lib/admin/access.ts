@@ -29,6 +29,7 @@ export const MODULES = [
   'bookings',
   'offers',
   'rooms',
+  'prices',
   'catalogue',
   'kursplanung',
   'website',
@@ -61,6 +62,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   bookings: 'Bookings',
   offers: 'Offers',
   rooms: 'Rooms',
+  prices: 'Prices',
   catalogue: 'Courses & exams',
   kursplanung: 'Kursplanung',
   website: 'Website',
@@ -79,6 +81,7 @@ export const MODULE_HREFS: Record<WorkspaceModule, string> = {
   bookings: '/admin/bookings',
   offers: '/admin/offers',
   rooms: '/admin/settings/rooms',
+  prices: '/admin/settings/prices',
   catalogue: '/admin/catalogue',
   kursplanung: '/admin/kursplanung',
   website: '/admin/website',
@@ -112,7 +115,10 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * `offers` is absent for the same reason: offers are made by the people who
  * make them — the group coordinator, and whoever answers learners and
  * companies — so the module is opened per person (`edit` writes and sends,
- * `full` also deletes).
+ * `full` also deletes). `prices` is absent because the price list is finance's
+ * and management's: owners and administrators hold it, and a colleague in
+ * finance is given it on the Team screen (`edit` changes prices and prepares
+ * next year's list, `full` also deletes a list that has not started).
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',
@@ -135,7 +141,7 @@ const ROLE_DEFAULTS: Record<StaffRole, Access> = {
   admin: fill('full'),
   // Overview is `edit` for everyone: it carries the shared day board, which
   // the whole administration team writes on. Settings stays read-only —
-  // prices and vocabularies are the super admin's.
+  // the vocabularies are the super admin's, the prices finance's (`prices`).
   staff: { ...fill('edit', STAFF_MODULES), overview: 'edit', settings: 'view' },
 };
 

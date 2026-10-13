@@ -5,24 +5,21 @@
  * dates and its time of day, the books, the enrolment fee on a first
  * registration, and the accommodation if they need it (docs/OFFERS.md §A
  * learner's course). The choice is kept on the offer (`stay.choices.course`)
- * with the cohort dates and times copied in, so the offer reads the same after
- * the catalogue moves on; the prices come from the same published figures the
- * website shows (src/config/calculator/pricing.ts, checked against
- * casa-bremen.de in docs/COURSE_FACTS_SOURCE_OF_TRUTH.md), the books' from
- * the price list.
+ * with the cohort dates, times and prices copied in, so the offer reads the
+ * same after the catalogue or the price list moves on.
  *
- *   Intensive — a whole level (8 weeks, both halves) €940, a half level or
- *               B1+ €520 (B1+ runs a whole term at the half-level rate).
- *   Evening   — per term: €378 from January, €476 from August.
- *   Special   — €192 a module.
- *   Others    — the catalogue's own price, to be typed over where it is a
- *               "from" price.
- *   Accommodation — whole weeks, Sunday to Saturday: €580 for four weeks,
- *               €145 each further week, €200 / €340 / €460 for one to three
- *               weeks; on a learner's first stay the €50 placement fee and
- *               the €580 refundable deposit.
- *   Exam      — a telc exam after a path that ends at its level, at the
- *               price list's rate for the full exam on that date.
+ * Every amount comes from the price list in force on its day (Settings →
+ * Prices, src/lib/admin/prices): the course on its first day, the room on
+ * arrival, the exam on its date.
+ *
+ *   Intensive — the price for the level's weeks: a whole level 8 weeks, a
+ *               half level or B1+ 4 weeks.
+ *   Evening, special courses — per lesson, times the term's lessons.
+ *   Others    — the list's rate, else the catalogue's own price.
+ *   Accommodation — whole weeks, Sunday to Saturday, at the rent for that
+ *               many weeks; on a learner's first stay the placement fee and
+ *               the refundable deposit.
+ *   Exam      — a telc exam after a path that ends at its level.
  *
  * These are the lines FileMaker's own learner offers carry (CostDetailSample,
  * 2026: Einschreibegebühr 50, Kurspreis 940, Bücher 2 × 23,99, Miete
@@ -32,19 +29,11 @@
  * learner, ever). docs/OFFERS.md §A learner's course.
  */
 
-import {
-  ACCOMMODATION_FEES,
-  ACCOMMODATION_SHORT_STAY,
-  CASA_LEVEL_SEQUENCE,
-  ENROLLMENT_FEE,
-  EVENING_TRIMESTER_PRICES,
-  INTENSIVE_FULL_LEVEL_8_WEEKS,
-  INTENSIVE_HALF_LEVEL_4_WEEKS,
-  SPECIAL_COURSE_DEFAULT_PRICE,
-} from '@/config/calculator/pricing';
-
-import { SCHOOL_CLOSURES } from '@/config/school-closures';
+import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
+import { SCHOOL_CLOSURES, isSchoolClosed } from '@/config/school-closures';
 import { buildLevelPath } from '@/lib/registration/level-path';
+
+import { coursePrice, feePrice, listOn, rentPrice, type PriceList } from '../prices/price-list';
 
 import { addDays, daysBetween } from './stay';
 import type { OfferLanguage } from './types';
@@ -65,6 +54,10 @@ export type CourseStep = {
   /** Null when no term is planned yet: CASA plans it with the learner. */
   start: string | null;
   end: string | null;
+  /** The lessons it teaches; null: its weeks times the lessons a week. */
+  lessons: number | null;
+  /** From the price list in force on its first day. */
+  price: number | null;
 };
 
 export type CourseBook = { key: string; title: string; price: number | null };
@@ -88,9 +81,11 @@ export type CourseChoice = {
   /** The learner's first stay with CASA: the placement fee and the deposit are due. */
   firstStay: boolean;
   exam: CourseExam | null;
-  /** The catalogue's price, for a course without a published one. */
-  listPrice: number | null;
+  /** The fees and the rent, from the price list when the choice was made. */
+  prices: CoursePrices;
 };
+
+export type CoursePrices = { enrolment: number | null; rent: number | null; placement: number | null; deposit: number | null };
 
 /** What CASA knows of the learner: decides the enrolment fee, and the placement fee and deposit. */
 export type LearnerHistory = { studiedBefore: boolean; stayedBefore: boolean };
@@ -148,9 +143,6 @@ function day(iso: string, language: OfferLanguage) {
   return `${d} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]} ${y}`;
 }
 
-const BASE = ACCOMMODATION_FEES.base4Weeks;
-const WEEK = ACCOMMODATION_FEES.perAdditionalWeek;
-
 const WORDS = {
   de: {
     complete: 'komplett',
@@ -160,8 +152,6 @@ const WORDS = {
     book: (title: string) => `Lehrbuch ${title}`,
     enrolment: 'Einschreibegebühr (einmalig bei der ersten Anmeldung)',
     accommodation: { host_family: 'Unterkunft in einer Gastfamilie', shared_flat: 'Zimmer in der CASA-WG' },
-    rent: (weeks: number) =>
-      weeks > 4 ? `${BASE} € für 4 Wochen, ${weeks - 4} × ${WEEK} € für jede weitere Woche` : weeks === 4 ? `${BASE} € für 4 Wochen` : '',
     placement: 'Vermittlungsgebühr Unterkunft (einmalig)',
     deposit: 'Kaution Unterkunft (rückerstattbar)',
     closed: (label: string, range: string) => `unterrichtsfrei ${range} (${label})`,
@@ -175,7 +165,6 @@ const WORDS = {
     book: (title: string) => `Textbook ${title}`,
     enrolment: 'Enrolment fee (once, on a first registration)',
     accommodation: { host_family: 'Host family', shared_flat: 'Room in the CASA shared flat' },
-    rent: (weeks: number) => (weeks > 4 ? `€${BASE} for 4 weeks, ${weeks - 4} × €${WEEK} for each further week` : weeks === 4 ? `€${BASE} for 4 weeks` : ''),
     placement: 'Accommodation placement fee (once)',
     deposit: 'Accommodation deposit (refundable)',
     closed: (label: string, range: string) => `no lessons ${range} (${label})`,
@@ -204,19 +193,40 @@ export function halvesOf(step: Pick<CourseStep, 'level' | 'complete'>): string[]
   return step.complete ? [`${step.level}.1`, `${step.level}.2`] : step.level ? [step.level] : [];
 }
 
-// ------------------------------------------------------------------ prices
+// ------------------------------------------------------------------ time
 
-export function stepPrice(choice: Pick<CourseChoice, 'slug' | 'listPrice'>, step: CourseStep): number | null {
-  switch (choice.slug) {
-    case 'intensive-german':
-      return step.complete ? INTENSIVE_FULL_LEVEL_8_WEEKS : INTENSIVE_HALF_LEVEL_4_WEEKS;
-    case 'evening-german':
-      return EVENING_TRIMESTER_PRICES[step.start && Number(step.start.slice(5, 7)) >= 8 ? 'autumn' : 'spring'];
-    case 'special-courses':
-      return SPECIAL_COURSE_DEFAULT_PRICE;
-    default:
-      return choice.listPrice;
+/**
+ * The weeks a term teaches: its calendar weeks, less the ones the school is
+ * closed all week (Easter 2026 takes 30.03.–03.04. out of the spring term).
+ */
+export function teachingWeeks(start: string, end: string): number {
+  let weeks = 0;
+  const monday = addDays(start, -((new Date(`${start}T00:00:00Z`).getUTCDay() + 6) % 7));
+  for (let week = monday; week <= end; week = addDays(week, 7)) {
+    for (let i = 0; i < 5; i++) {
+      const d = addDays(week, i);
+      if (d >= start && d <= end && !isSchoolClosed(d)) {
+        weeks++;
+        break;
+      }
+    }
   }
+  return Math.max(1, weeks);
+}
+
+/**
+ * A term's lessons: what FileMaker counted (`course_instances.lessons`), else
+ * its class days outside the school's closures times the lessons a day.
+ */
+export function termLessons(term: Pick<CatalogueTerm, 'startDate' | 'endDate' | 'slot' | 'lessons'>, lessonsPerWeek: number): number {
+  if (term.lessons) return term.lessons;
+  const days = term.slot?.days.length ? term.slot.days : null;
+  if (!days) return teachingWeeks(term.startDate, term.endDate) * lessonsPerWeek;
+  let count = 0;
+  for (let d = term.startDate; d <= term.endDate; d = addDays(d, 1)) {
+    if (days.includes(ORDER[(new Date(`${d}T00:00:00Z`).getUTCDay() + 6) % 7]) && !isSchoolClosed(d)) count++;
+  }
+  return Math.round((count * lessonsPerWeek) / days.length);
 }
 
 const stayDays = (a: AccommodationChoice | null) => (a?.from && a.to && a.to >= a.from ? daysBetween(a.from, a.to) + 1 : 0);
@@ -237,13 +247,6 @@ export function extraNights(a: AccommodationChoice | null): number {
   return days > 7 ? days - accommodationWeeks(a) * 7 : 0;
 }
 
-/** €200 / €340 / €460 for one to three weeks, €580 for four, €145 each week after. */
-export function rent(weeks: number): number {
-  if (weeks <= 0) return 0;
-  if (weeks < 4) return ACCOMMODATION_SHORT_STAY[weeks - 1];
-  return ACCOMMODATION_FEES.base4Weeks + (weeks - 4) * ACCOMMODATION_FEES.perAdditionalWeek;
-}
-
 /**
  * A stay around the course: arrive the day before it starts, leave on the
  * Saturday after it ends.
@@ -260,14 +263,15 @@ export function stayAround(steps: readonly CourseStep[]): { from: string | null;
 /** The whole course: first day, last day, weeks, lessons. */
 export function courseSpan(choice: Pick<CourseChoice, 'steps' | 'lessonsPerWeek'>) {
   const dated = choice.steps.filter((s) => s.start && s.end);
-  const weeks = choice.steps.reduce((sum, s) => sum + s.weeks, 0);
   return {
     start: dated[0]?.start ?? null,
     end: dated[dated.length - 1]?.end ?? null,
-    weeks,
-    lessons: weeks * choice.lessonsPerWeek,
+    weeks: choice.steps.reduce((sum, s) => sum + s.weeks, 0),
+    lessons: choice.steps.reduce((sum, s) => sum + stepLessons(s, choice.lessonsPerWeek), 0),
   };
 }
+
+const stepLessons = (step: Pick<CourseStep, 'weeks' | 'lessons'>, lessonsPerWeek: number) => step.lessons ?? step.weeks * lessonsPerWeek;
 
 // ------------------------------------------------------------------ lines
 
@@ -285,32 +289,27 @@ export function courseLines(choice: CourseChoice, language: OfferLanguage): Cour
   // The time of day is in the heading above the lines (courseFacts); each line is its level and its dates.
   const out: CourseLine[] = choice.steps.map((step, i) => {
     const when = step.start && step.end ? range(step.start, step.end, language) : w.noDate;
-    const amount = [w.weeks(step.weeks), choice.lessonsPerWeek ? w.lessons(step.weeks * choice.lessonsPerWeek) : ''].filter(Boolean).join(', ');
+    const lessons = stepLessons(step, choice.lessonsPerWeek);
+    const amount = [w.weeks(step.weeks), lessons ? w.lessons(lessons) : ''].filter(Boolean).join(', ');
     return {
       key: `course:${i}`,
       chargeType: 'tuition',
       description: [`${name}${step.level ? ` ${levelLabel(step, language)}` : ''}`, `${when} (${amount})`].join(' · '),
-      unitAmount: stepPrice(choice, step),
+      unitAmount: step.price,
     };
   });
   for (const book of choice.books) {
     out.push({ key: `book:${book.key}`, chargeType: 'books', description: w.book(book.title), unitAmount: book.price });
   }
-  if (choice.newStudent) out.push({ key: 'enrolment', chargeType: 'enrolment_fee', description: w.enrolment, unitAmount: ENROLLMENT_FEE });
+  if (choice.newStudent) out.push({ key: 'enrolment', chargeType: 'enrolment_fee', description: w.enrolment, unitAmount: choice.prices.enrolment });
   const a = choice.accommodation;
   const weeks = accommodationWeeks(a);
   if (a) {
     const when = a.from && a.to ? `${range(a.from, a.to, language)}, ${w.weeks(weeks)}` : w.noDate;
-    const basis = weeks ? w.rent(weeks) : '';
-    out.push({
-      key: 'accommodation',
-      chargeType: 'accommodation_rent',
-      description: `${w.accommodation[a.kind]} · ${when}${basis ? ` (${basis})` : ''}`,
-      unitAmount: weeks ? rent(weeks) : null,
-    });
+    out.push({ key: 'accommodation', chargeType: 'accommodation_rent', description: `${w.accommodation[a.kind]} · ${when}`, unitAmount: choice.prices.rent });
     if (choice.firstStay) {
-      out.push({ key: 'placement', chargeType: 'accommodation_placement_fee', description: w.placement, unitAmount: ACCOMMODATION_FEES.commissionFee });
-      out.push({ key: 'deposit', chargeType: 'deposit', description: w.deposit, unitAmount: ACCOMMODATION_FEES.deposit });
+      out.push({ key: 'placement', chargeType: 'accommodation_placement_fee', description: w.placement, unitAmount: choice.prices.placement });
+      out.push({ key: 'deposit', chargeType: 'deposit', description: w.deposit, unitAmount: choice.prices.deposit });
     }
   }
   if (choice.exam) out.push({ key: 'exam', chargeType: 'exam_fee', description: w.exam(choice.exam.name, choice.exam.date), unitAmount: choice.exam.fee });
@@ -350,8 +349,8 @@ export function closuresIn(choice: Pick<CourseChoice, 'steps' | 'lessonsPerWeek'
 
 // ------------------------------------------------------------- the catalogue
 
-/** A planned term of a course, as the catalogue lists it. */
-export type CatalogueTerm = { id: string; startDate: string; endDate: string; slot: CourseSlot | null };
+/** A planned term of a course, as the catalogue lists it; `lessons` as FileMaker counted them, when it did. */
+export type CatalogueTerm = { id: string; startDate: string; endDate: string; slot: CourseSlot | null; lessons: number | null };
 
 export type CatalogueCourse = {
   slug: string;
@@ -363,12 +362,12 @@ export type CatalogueCourse = {
   terms: CatalogueTerm[];
 };
 
-export type CatalogueBook = { key: string; title: string; level: string; part: number | null; price: number | null };
+export type CatalogueBook = { key: string; title: string; level: string; part: number | null };
 
 /** A telc exam CASA holds, with its dates still to come and the fee on each. */
 export type CatalogueExam = { code: string; name: string; level: string; sessions: { date: string; fee: number | null }[] };
 
-export type CourseCatalogue = { courses: CatalogueCourse[]; books: CatalogueBook[]; exams: CatalogueExam[] };
+export type CourseCatalogue = { courses: CatalogueCourse[]; books: CatalogueBook[]; exams: CatalogueExam[]; prices: PriceList[] };
 
 export const slotKey = (slot: CourseSlot | null) => (slot ? `${slot.days.join(',')}|${slot.time}` : '');
 
@@ -386,7 +385,16 @@ export function slotsOf(course: CatalogueCourse): { key: string; slot: CourseSlo
 
 const sessionRank = (slot: CourseSlot | null) => ({ morning: 0, afternoon: 1, evening: 2 } as const)[sessionOf(slot) ?? 'evening'];
 
-const termWeeks = (term: CatalogueTerm) => Math.max(1, Math.round((daysBetween(term.startDate, term.endDate) + 1) / 7));
+/** What a course costs from: four weeks of the intensive course, the next term of any other. */
+export function fromPrice(course: CatalogueCourse, prices: readonly PriceList[]): number | null {
+  const next = course.terms[0];
+  if (!next) return null;
+  const q =
+    course.slug === 'intensive-german'
+      ? { weeks: 4, lessons: 4 * course.lessonsPerWeek }
+      : { weeks: teachingWeeks(next.startDate, next.endDate), lessons: termLessons(next, course.lessonsPerWeek) };
+  return coursePrice(prices, course.slug, next.startDate, q)?.amount ?? course.listPrice;
+}
 
 /**
  * The exams a course leads to: the ones at the level its last step finishes
@@ -410,7 +418,9 @@ export function examsAfter(choice: Pick<CourseChoice, 'steps'>, exams: readonly 
  * where to go on to. The intensive course climbs level by level through the
  * terms that follow (src/lib/registration/level-path.ts, the public
  * registration's own path), in the same time of day; every other course is
- * the term it is. The books are the price list's for each half level taught.
+ * the term it is. The books are each half level's. Every amount is the price
+ * list's in force on its day; a course the list has no price for keeps the
+ * catalogue's own.
  */
 export function buildCourse(input: {
   course: CatalogueCourse;
@@ -424,28 +434,47 @@ export function buildCourse(input: {
   firstStay?: boolean;
   exams?: readonly CatalogueExam[];
   exam?: CourseExam | null;
+  prices: readonly PriceList[];
 }): CourseChoice | null {
   const { course } = input;
   const term = course.terms.find((t) => t.id === input.termId);
   if (!term || (course.levels.length > 0 && !input.level)) return null;
   const sameSlot = course.terms.filter((t) => slotKey(t.slot) === slotKey(term.slot));
 
-  let steps: CourseStep[];
+  type Unpriced = Omit<CourseStep, 'price'>;
+  let unpriced: Unpriced[];
   if (course.slug === 'intensive-german' && input.level) {
-    steps = buildLevelPath({ slug: course.slug, value: input.level, option: term, options: sameSlot, availableLevels: course.levels, pathTo: input.pathTo, locale: 'de' }).map(
-      (step) => ({ level: step.level, weeks: step.weeks, complete: step.complete, termId: step.option?.id ?? null, start: step.start, end: step.end })
+    unpriced = buildLevelPath({ slug: course.slug, value: input.level, option: term, options: sameSlot, availableLevels: course.levels, pathTo: input.pathTo, locale: 'de' }).map(
+      (step) => ({ level: step.level, weeks: step.weeks, complete: step.complete, termId: step.option?.id ?? null, start: step.start, end: step.end, lessons: null })
     );
   } else {
-    steps = [{ level: input.level, weeks: termWeeks(term), complete: false, termId: term.id, start: term.startDate, end: term.endDate }];
+    const weeks = teachingWeeks(term.startDate, term.endDate);
+    const lessons = termLessons(term, course.lessonsPerWeek);
+    unpriced = [{ level: input.level, weeks, complete: false, termId: term.id, start: term.startDate, end: term.endDate, lessons: lessons === weeks * course.lessonsPerWeek ? null : lessons }];
   }
-  if (!steps.length) return null;
+  if (!unpriced.length) return null;
+  const steps: CourseStep[] = unpriced.map((step) => ({
+    ...step,
+    price: coursePrice(input.prices, course.slug, step.start, { weeks: step.weeks, lessons: stepLessons(step, course.lessonsPerWeek) })?.amount ?? course.listPrice,
+  }));
+  const start = steps.find((s) => s.start)?.start ?? null;
+  const list = listOn(input.prices, start);
 
   const halves = new Set(steps.flatMap(halvesOf));
   const books = input.withBooks
     ? input.books
         .filter((b) => halves.has(b.level) && (b.part === 1 || b.part === 2))
-        .map((b) => ({ key: b.key, title: b.title, price: b.price }))
+        .map((b) => ({ key: b.key, title: b.title, price: list?.books[b.key]?.amount ?? null }))
     : [];
+
+  const a = input.accommodation;
+  const arrival = a?.from ?? start;
+  const prices: CoursePrices = {
+    enrolment: feePrice(input.prices, start, 'enrolment_fee')?.amount ?? null,
+    rent: rentPrice(input.prices, arrival, accommodationWeeks(a))?.amount ?? null,
+    placement: feePrice(input.prices, arrival, 'accommodation_placement_fee')?.amount ?? null,
+    deposit: feePrice(input.prices, arrival, 'deposit')?.amount ?? null,
+  };
 
   // An exam stays only while the path still leads to it, on a date it still offers.
   const fits = input.exam ? examsAfter({ steps }, input.exams ?? []).find((e) => e.code === input.exam!.code) : null;
@@ -462,6 +491,6 @@ export function buildCourse(input: {
     accommodation: input.accommodation,
     firstStay: input.firstStay ?? true,
     exam,
-    listPrice: course.listPrice,
+    prices,
   };
 }

@@ -47,9 +47,8 @@ const sameRect = (a: Rect | null, b: Rect) =>
   Boolean(a) && Math.abs(a!.x - b.x) < 0.5 && Math.abs(a!.y - b.y) < 0.5 && Math.abs(a!.width - b.width) < 0.5 && Math.abs(a!.height - b.height) < 0.5;
 
 const DATA_SCREENS: Record<string, { label: string; href: string }> = {
-  Prices: { label: 'Types & prices', href: '/admin/settings/setup' },
   'Course dates': { label: 'Courses', href: '/admin/catalogue' },
-  'Course types': { label: 'Types & prices', href: '/admin/settings/setup' },
+  'Course types': { label: 'Lists', href: '/admin/settings/setup' },
 };
 
 export function WebsiteEditor({

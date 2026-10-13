@@ -27,7 +27,7 @@ export default async function Page({
     editorOptions(),
     priceListOptions(),
     offerTexts(),
-    individual ? courseCatalogue() : Promise.resolve({ courses: [], books: [], exams: [] }),
+    individual ? courseCatalogue() : Promise.resolve({ courses: [], books: [], exams: [], prices: [] }),
     individual && record.meta.personId ? learnerHistory(record.meta.personId) : Promise.resolve(null),
   ]);
 

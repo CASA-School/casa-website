@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { query } from '../db';
+import { loadPriceLists } from '../prices/repo';
 import { toDateInputValue } from '@/lib/dates';
 
 import { levelsBetween, type CourseCatalogue, type CourseSlot, type LearnerHistory } from './course';
@@ -8,9 +9,9 @@ import { levelsBetween, type CourseCatalogue, type CourseSlot, type LearnerHisto
 /**
  * What a learner can be offered, from the workspace's own catalogue: every
  * course CASA sells at a price (not the ones quoted on request), its levels,
- * its terms still to come with their days and times, and the books on the
- * price list for each half level. Read once per screen; the offer keeps a
- * copy of what was picked (docs/OFFERS.md §A learner's course).
+ * its terms still to come with their days, times and lessons, the books for
+ * each half level, the exams, and the price lists. Read once per screen; the
+ * offer keeps a copy of what was picked (docs/OFFERS.md §A learner's course).
  */
 
 const ORDER = ['intensive-german', 'evening-german', 'bildungszeit', 'special-courses', 'medical-german'];
@@ -22,18 +23,17 @@ function slotFrom(schedule: unknown): CourseSlot | null {
 }
 
 export async function courseCatalogue(): Promise<CourseCatalogue> {
-  const [types, terms, books, exams] = await Promise.all([
+  const [types, terms, books, exams, prices] = await Promise.all([
     query<{ id: string; slug: string; name: string; name_de: string | null; lessons_per_week: number; level_min: string | null; level_max: string | null; default_price: string }>(
       `SELECT id, slug, name, name_de, lessons_per_week, level_min, level_max, default_price
          FROM course_types WHERE is_active AND pricing_mode <> 'on_request'`
     ),
-    query<{ id: string; course_type_id: string; start_date: Date; end_date: Date; schedule: unknown }>(
-      `SELECT id, course_type_id, start_date, end_date, schedule FROM course_instances
+    query<{ id: string; course_type_id: string; start_date: Date; end_date: Date; schedule: unknown; lessons: number | null }>(
+      `SELECT id, course_type_id, start_date, end_date, schedule, lessons FROM course_instances
         WHERE start_date >= current_date AND status <> 'cancelled' ORDER BY start_date`
     ),
-    query<{ id: string; title: string; level_code: string; part: number | null; price: string | null }>(
-      `SELECT m.id, m.title, m.level_code, m.part,
-              (SELECT amount FROM rates WHERE id = applicable_rate('material', current_date, p_material_id => m.id)) AS price
+    query<{ id: string; title: string; level_code: string; part: number | null }>(
+      `SELECT m.id, m.title, m.level_code, m.part
          FROM materials m WHERE m.is_active AND m.level_code IS NOT NULL ORDER BY m.level_code, m.part NULLS LAST`
     ),
     // The full exam (both parts) at the rate for its date; a session's own fee wins.
@@ -47,6 +47,7 @@ export async function courseCatalogue(): Promise<CourseCatalogue> {
         WHERE t.is_active AND t.level IS NOT NULL AND s.starts_at > now() AND s.status <> 'cancelled'
         ORDER BY s.starts_at`
     ),
+    loadPriceLists(),
   ]);
 
   const courses = types
@@ -58,18 +59,25 @@ export async function courseCatalogue(): Promise<CourseCatalogue> {
       listPrice: Number(t.default_price) > 0 ? Number(t.default_price) : null,
       terms: terms
         .filter((term) => term.course_type_id === t.id)
-        .map((term) => ({ id: term.id, startDate: toDateInputValue(term.start_date), endDate: toDateInputValue(term.end_date), slot: slotFrom(term.schedule) })),
+        .map((term) => ({
+          id: term.id,
+          startDate: toDateInputValue(term.start_date),
+          endDate: toDateInputValue(term.end_date),
+          slot: slotFrom(term.schedule),
+          lessons: term.lessons,
+        })),
     }))
     .filter((c) => c.terms.length > 0)
     .sort((a, b) => (ORDER.indexOf(a.slug) + 1 || 99) - (ORDER.indexOf(b.slug) + 1 || 99) || a.name.en.localeCompare(b.name.en));
 
   return {
     courses,
-    books: books.map((b) => ({ key: b.id, title: b.title, level: b.level_code, part: b.part, price: b.price == null ? null : Number(b.price) })),
+    books: books.map((b) => ({ key: b.id, title: b.title, level: b.level_code, part: b.part })),
     exams: [...new Set(exams.map((e) => e.code))].map((code) => {
       const rows = exams.filter((e) => e.code === code);
       return { code, name: rows[0].name, level: rows[0].level, sessions: rows.map((e) => ({ date: e.day, fee: e.fee == null ? null : Number(e.fee) })) };
     }),
+    prices,
   };
 }
 
