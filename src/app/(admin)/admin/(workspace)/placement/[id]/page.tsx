@@ -178,7 +178,6 @@ export default async function PlacementAttemptPage({
             <>
               <Card
                 title="Skill profile"
-                description="Per skill, on what they attempted."
                 icon={Icon.book}
                 tint="red"
               >
@@ -438,7 +437,7 @@ export default async function PlacementAttemptPage({
             </Card>
           ) : null}
 
-          <Card title="Notes" description="Only staff see these." icon={Icon.note} tint="sun">
+          <Card title="Notes" icon={Icon.note} tint="sun">
             <PlacementNotes attemptId={attempt.id} notes={notes} />
           </Card>
 

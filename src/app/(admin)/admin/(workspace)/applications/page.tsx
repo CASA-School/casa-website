@@ -46,7 +46,7 @@ export default async function ApplicationsPage({
 
   return (
     <>
-      <PageHeader title="Applications" description="Applications for open positions." />
+      <PageHeader title="Applications" />
 
       <QueueToolbar
         basePath="/admin/applications"

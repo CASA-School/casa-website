@@ -84,7 +84,6 @@ export default async function CataloguePage({
     <>
       <PageHeader
         title="Courses"
-        description="What CASA publishes, and who has registered for each date."
         actions={
           plans ? (
             <FormDialog

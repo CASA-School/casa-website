@@ -60,7 +60,6 @@ export default async function PeoplePage({
     <>
       <PageHeader
         title="Students"
-        description="Everyone who has enquired, registered or sat a placement."
         actions={
           canEdit ? (
             <FormDialog trigger="Add person" title="Add a person" triggerVariant="primary">

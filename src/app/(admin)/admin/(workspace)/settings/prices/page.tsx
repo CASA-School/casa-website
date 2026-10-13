@@ -45,10 +45,10 @@ const longDate = (iso: string) =>
 const weeksLabel = (n: number) => (n === 1 ? '1 week' : `${n} weeks`);
 
 const UNIT_LABEL: Record<PriceUnit, string> = { lesson: 'per lesson', week: 'per week', item: 'per course' };
-const FEE_LABEL: Record<FeeCode, { name: string; sub: string }> = {
-  enrolment_fee: { name: 'Enrolment fee', sub: 'Once per learner' },
-  accommodation_placement_fee: { name: 'Placement fee', sub: 'On a first stay' },
-  deposit: { name: 'Deposit', sub: 'On a first stay, refundable' },
+const FEE_LABEL: Record<FeeCode, string> = {
+  enrolment_fee: 'Enrolment fee',
+  accommodation_placement_fee: 'Placement fee',
+  deposit: 'Deposit',
 };
 
 const STATUS_WORD: Record<PriceListStatus, (l: PriceList) => string> = {
@@ -77,7 +77,7 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
         title="Prices"
         actions={
           canPrepare ? (
-            <FormDialog trigger={`Prepare ${nextStart.slice(0, 4)}`} title={`Price list from ${nextStart.slice(0, 4)}`} description="A copy of the prices in force, to change where they change." triggerVariant="primary">
+            <FormDialog trigger={`Prepare ${nextStart.slice(0, 4)}`} title={`Price list from ${nextStart.slice(0, 4)}`} triggerVariant="primary">
               <form action={preparePriceListAction} className="space-y-4">
                 <Field label="In force from" htmlFor="prices-from">
                   <DateFormField id="prices-from" name="validFrom" defaultValue={nextStart} min={today} required />
@@ -126,7 +126,7 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
       ) : null}
 
       {!selected ? (
-        <EmptyState title="No price list yet" description="Prices arrive with the database's seeds." />
+        <EmptyState title="No price list yet" />
       ) : (
         <>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-ws-line bg-white px-4 py-3">
@@ -226,7 +226,7 @@ function PriceCards({ list, previous, subjects, canEdit }: { list: PriceList; pr
           list={list}
           previous={previous}
           canEdit={canEdit}
-          rows={FEES.map((fee) => ({ slot: { kind: 'fee', fee } as Slot, label: FEE_LABEL[fee].name, sub: FEE_LABEL[fee].sub }))}
+          rows={FEES.map((fee) => ({ slot: { kind: 'fee', fee } as Slot, label: FEE_LABEL[fee] }))}
         />
 
         {subjects.exams.length ? (

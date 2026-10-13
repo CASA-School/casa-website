@@ -51,7 +51,7 @@ export default async function EnquiriesPage({
 
   return (
     <>
-      <PageHeader title="Enquiries" description="Everything sent through the contact form." />
+      <PageHeader title="Enquiries" />
 
       <QueueToolbar
         basePath="/admin/enquiries"

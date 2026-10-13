@@ -38,7 +38,6 @@ export default async function FlagsPage({
         backHref="/admin/people"
         backLabel="Students"
         title={filter ? FLAG_LABELS[filter] : 'Everything flagged'}
-        description="Values that could not be matched, and records that may be someone already on file."
         actions={
           filter ? (
             <ButtonLink href="/admin/people/flags">Every kind</ButtonLink>

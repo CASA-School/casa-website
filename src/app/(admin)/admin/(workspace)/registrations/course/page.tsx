@@ -43,7 +43,7 @@ export default async function CourseRegistrationsPage({
 
   return (
     <>
-      <PageHeader title="Registrations" description="Course registrations from the public site." />
+      <PageHeader title="Registrations" />
 
       <RegistrationTabs
         active="course"

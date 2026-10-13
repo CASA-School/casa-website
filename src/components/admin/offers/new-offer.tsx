@@ -304,7 +304,6 @@ export function NewOffer({
         <div className={ui.wzCard}>
           <nav className={ui.wzRail} aria-label="Steps">
             <h1>New offer</h1>
-            <p>Nothing is saved until you create it.</p>
             <ol className={ui.wzSteps}>
               {steps.map((s, i) => {
                 const done = i < index;
@@ -402,7 +401,6 @@ export function NewOffer({
               {step === 'letter' ? (
                 <>
                   <h2 className={ui.wzQ}>The letter</h2>
-                  <p>What the offer is called, in which language it is written, how long it holds.</p>
                   <div className={ui.fld}>
                     <span>Language</span>
                     <div className={ui.inline}>
@@ -588,7 +586,6 @@ function RecipientStep({
   return (
     <>
       <h2 className={ui.wzQ}>Who is it for?</h2>
-      <p>A school, an agency, a company, a learner — or an address someone wrote from.</p>
       <div className={ui.searchBox}>
         {ICONS.search}
         <input
@@ -1070,22 +1067,16 @@ function OfferStep({
   return (
     <>
       <h2 className={ui.wzQ}>What is it?</h2>
-      <p>
-        {kind === 'group'
-          ? 'A group stay on one of the packages — adjusted later on the offer, or built without one.'
-          : 'The course, when it starts and at which level — then what comes with it.'}
-      </p>
       {isOrganisation(recipient) ? (
         <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
           {(
             [
-              ['group', 'A group stay', 'Course, host families, programme — a package'],
-              ['individual', 'A course', 'For one learner, with books and a room'],
+              ['group', 'A group stay'],
+              ['individual', 'A course'],
             ] as const
-          ).map(([k, b, s]) => (
+          ).map(([k, b]) => (
             <button key={k} type="button" aria-pressed={kind === k} className={`${ui.choiceCard} ${kind === k ? ui.choiceOn : ''}`} onClick={() => setKind(k)}>
               <b>{b}</b>
-              <span>{s}</span>
             </button>
           ))}
         </div>
@@ -1239,7 +1230,6 @@ function GroupStep({
   return (
     <>
       <h2 className={ui.wzQ}>The group</h2>
-      <p>When they come and how many they are. Both can wait until the group knows.</p>
       {note ? <span className={ui.guess}>{note}</span> : null}
       <div className={ui.wzDates}>
         <DateRange from={arrival} to={departure} today={today} suggestEnd={(a) => addDays(a, length * 7 - 1)} onChange={setDates} />

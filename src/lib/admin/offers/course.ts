@@ -385,17 +385,6 @@ export function slotsOf(course: CatalogueCourse): { key: string; slot: CourseSlo
 
 const sessionRank = (slot: CourseSlot | null) => ({ morning: 0, afternoon: 1, evening: 2 } as const)[sessionOf(slot) ?? 'evening'];
 
-/** What a course costs from: four weeks of the intensive course, the next term of any other. */
-export function fromPrice(course: CatalogueCourse, prices: readonly PriceList[]): number | null {
-  const next = course.terms[0];
-  if (!next) return null;
-  const q =
-    course.slug === 'intensive-german'
-      ? { weeks: 4, lessons: 4 * course.lessonsPerWeek }
-      : { weeks: teachingWeeks(next.startDate, next.endDate), lessons: termLessons(next, course.lessonsPerWeek) };
-  return coursePrice(prices, course.slug, next.startDate, q)?.amount ?? course.listPrice;
-}
-
 /**
  * The exams a course leads to: the ones at the level its last step finishes
  * (B2, or B2.2), with their dates from the course's last week on. A path that

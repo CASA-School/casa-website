@@ -36,7 +36,6 @@ export default async function ExamCataloguePage() {
     <>
       <PageHeader
         title="Exams"
-        description="The telc sittings CASA has scheduled, and who has registered for each."
       />
 
       {sessions.length === 0 ? (

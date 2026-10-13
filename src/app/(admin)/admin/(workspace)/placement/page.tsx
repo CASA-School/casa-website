@@ -131,7 +131,7 @@ export default async function PlacementPage({
 
   return (
     <>
-      <PageHeader title="Placement" description="Course recommendations from CASA's own test, for a teacher to confirm." />
+      <PageHeader title="Placement" />
 
       <div className="mb-4 flex items-start gap-3 rounded-3xl border border-ws-line bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
         <IconChip icon={Icon.attention} tint="sun" />

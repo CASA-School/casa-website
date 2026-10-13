@@ -97,7 +97,7 @@ export function RecordRail({
         </div>
       </Card>
 
-      <Card title="Notes" description="Only staff see these." icon={Icon.note} tint="sun">
+      <Card title="Notes" icon={Icon.note} tint="sun">
         <form action={addNoteAction} className="space-y-2">
           <input type="hidden" name="entity" value={noteEntity ?? entity} />
           <input type="hidden" name="entityId" value={id} />

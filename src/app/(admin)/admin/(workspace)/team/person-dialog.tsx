@@ -38,10 +38,10 @@ import { cn } from '@/lib/utils';
  * role), and deactivating goes through `ConfirmSubmit`.
  */
 
-const ROLES: readonly { value: StaffRole; label: string; line: string }[] = [
-  { value: 'staff', label: 'Staff', line: 'Works the queues' },
-  { value: 'admin', label: 'Administrator', line: 'Also manages accounts' },
-  { value: 'owner', label: 'Owner', line: 'Can grant the owner role' },
+const ROLES: readonly { value: StaffRole; label: string }[] = [
+  { value: 'staff', label: 'Staff' },
+  { value: 'admin', label: 'Administrator' },
+  { value: 'owner', label: 'Owner' },
 ];
 
 const label = 'text-xs font-bold text-[var(--casa-muted)]';
@@ -237,26 +237,17 @@ function RoleChoice({
               aria-current="true"
               className="flex items-center justify-between gap-3 rounded-lg bg-[#e3f4fc] px-2.5 py-2 text-sm font-semibold text-[#075985]"
             >
-              <RoleText label={role.label} line={role.line} />
+              <span>{role.label}</span>
               <span aria-hidden="true">✓</span>
             </div>
           ) : (
             <PopoverChoice key={role.value} name="role" value={role.value} current={false}>
-              <RoleText label={role.label} line={role.line} />
+              {role.label}
             </PopoverChoice>
           )
         )}
       </Popover>
     </form>
-  );
-}
-
-function RoleText({ label: name, line }: { label: string; line: string }) {
-  return (
-    <span className="block">
-      <span className="block">{name}</span>
-      <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">{line}</span>
-    </span>
   );
 }
 

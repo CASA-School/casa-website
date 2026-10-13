@@ -64,7 +64,6 @@ export default async function TeamPage({
     <>
       <PageHeader
         title="Team"
-        description="Who can sign in to the workspace, and what they may do here."
         actions={
           <>
             <FormDialog trigger="Add the office team" title="Add the office team">
@@ -111,12 +110,12 @@ export default async function TeamPage({
                 </Field>
                 <Field label="Role" htmlFor="new-role">
                   <Select id="new-role" name="role" defaultValue="staff">
-                    <option value="staff">Staff — works the queues</option>
-                    <option value="admin">Administrator — also manages accounts</option>
-                    {isOwner ? <option value="owner">Owner — can grant the owner role</option> : null}
+                    <option value="staff">Staff</option>
+                    <option value="admin">Administrator</option>
+                    {isOwner ? <option value="owner">Owner</option> : null}
                   </Select>
                 </Field>
-                <Field label="Website editor" hint="Staff accounts" htmlFor="new-website">
+                <Field label="Website editor" htmlFor="new-website">
                   <Select id="new-website" name="website" defaultValue="none">
                     <option value="none">No access</option>
                     <option value="view">View</option>

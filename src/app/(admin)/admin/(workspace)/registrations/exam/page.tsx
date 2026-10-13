@@ -37,7 +37,7 @@ export default async function ExamRegistrationsPage({
 
   return (
     <>
-      <PageHeader title="Registrations" description="telc exam registrations from the public site." />
+      <PageHeader title="Registrations" />
 
       <RegistrationTabs
         active="exam"

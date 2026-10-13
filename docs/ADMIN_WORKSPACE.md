@@ -672,6 +672,16 @@ The rules, each of which came from a real defect on a real screen.
    message under it. A list never carries a grid of inputs: a cohort's room is
    text that opens a small panel, and a colleague's access is a dialog per
    person (Team), not a matrix of selects.
+9. **No subtext the team already knows** (Rahman, 2026-10-13). A choice is
+   its name: "Intensive German", "Afternoons", "26 Oct 2026", "B2 complete" —
+   not "20 lessons a week · from 520 €", "Mon–Thu 13:00–17:30", "until 18 Dec",
+   "· 8 weeks". No page subtitle under a page title, no card description, no
+   panel subtitle that restates its label ("Of the letter", "Only staff see
+   these"). A line under something stays only when it carries what the
+   colleague cannot see or know otherwise: which books, why the enrolment fee
+   applies, how many days an offer still holds, a confirmation's consequence,
+   an input's format. The letter to a learner still states hours and dates in
+   full — that is for the learner, not the team.
 
 ## Copy on screens — labels, not explanations
 

@@ -68,7 +68,6 @@ export default async function BookingsPage({
     <>
       <PageHeader
         title="Bookings"
-        description="Who is booked on what, and what is still owed."
       />
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">

@@ -44,7 +44,6 @@ export default async function PlanningPage({
         title="Rooms"
         backHref="/admin/settings"
         backLabel="Settings"
-        description="Where courses run, and how many learners each room holds."
         actions={
           canAccess(user, 'rooms', 'edit') ? (
             <FormDialog trigger="Add room" title="Add a room" triggerVariant="primary">

@@ -230,20 +230,23 @@ test.describe('offers', () => {
     await expect(page.getByRole('radio', { name: /Katze/ })).toHaveCount(0);
     await expect(page.getByRole('radio', { name: /^Intensive German/ })).toHaveAttribute('aria-checked', 'true');
     await page.locator('[class*="termGrid"] button').first().click();
-    await page.getByRole('button', { name: 'B2 complete · 8 weeks' }).click();
+    await page.getByRole('button', { name: 'B2 complete', exact: true }).click();
     const onOffer = page.locator('[class*="lineList"]');
     await expect(onOffer).toContainText('940,00 €');
     await expect(onOffer).toContainText('Kontext B2.1');
     await expect(onOffer).toContainText('First registration at CASA');
     await page.getByRole('checkbox', { name: /^Accommodation/ }).check();
-    await expect(onOffer).toContainText('Rent, the placement fee and the refundable deposit');
+    // Rent for the course's whole weeks, the placement fee and the deposit of a first stay.
+    await expect(onOffer.getByRole('checkbox', { name: /^Accommodation/ })).toBeChecked();
+    await expect(onOffer).toContainText(/Accommodation\s*1\.\d{3},00\s€/);
 
     await next.click();
     await expect(page.getByLabel('Title on the letter')).toHaveValue('Intensivkurs B2 komplett');
     await page.getByRole('button', { name: 'Create offer' }).click();
     await expect(page).toHaveURL(/\/admin\/offers\/[0-9a-f-]{36}$/);
     await expect(page.getByRole('heading', { name: 'Intensive German B2 complete', level: 2 })).toBeVisible();
-    await expect(page.getByText('Mornings, Mon–Fri 09:00–12:30')).toBeVisible();
+    // The team sees the time of day; the letter gives the learner the hours.
+    await expect(page.locator('[class*="courseFacts"]')).toContainText('Mornings');
 
     await page.getByRole('link', { name: 'Letter', exact: true }).click();
     await expect(page).toHaveURL(/\/letter$/);

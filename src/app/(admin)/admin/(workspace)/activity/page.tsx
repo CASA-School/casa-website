@@ -64,7 +64,6 @@ export default async function ActivityPage() {
     <>
       <PageHeader
         title="Activity"
-        description="Who changed what, and when."
       />
 
       <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
@@ -121,7 +120,6 @@ export default async function ActivityPage() {
       {entries.length === 0 ? (
         <EmptyState
           title="Nothing has been worked yet"
-          description="Status changes, owners and notes appear here."
         />
       ) : (
         <div className="space-y-4">

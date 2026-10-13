@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { DateRange } from '@/components/admin/date-picker';
+import { DateField } from '@/components/admin/date-picker';
 import { formatDay } from '@/lib/admin/calendar';
 import { formatMoney } from '@/lib/admin/letters/format';
 import {
@@ -10,7 +10,6 @@ import {
   courseLines,
   examsAfter,
   extraNights,
-  fromPrice,
   levelLabel,
   slotKey,
   slotLabel,
@@ -122,7 +121,6 @@ export function CoursePicker({
         <div className={ui.courseTiles} role="radiogroup" aria-label="Course">
           {catalogue.courses.map((c) => {
             const on = c.slug === slug;
-            const from = fromPrice(c, catalogue.prices);
             return (
               <button
                 key={c.slug}
@@ -141,10 +139,6 @@ export function CoursePicker({
                 }}
               >
                 <b>{c.name.en}</b>
-                <span>
-                  {c.lessonsPerWeek ? `${c.lessonsPerWeek} lessons a week · ` : ''}
-                  {from != null ? `from ${eur(from)}` : 'price on request'}
-                </span>
               </button>
             );
           })}
@@ -168,13 +162,10 @@ export function CoursePicker({
                 }}
               >
                 <b>{slotLabel(s.slot, 'en').split(', ')[0]}</b>
-                <span>{slotLabel(s.slot, 'en').split(', ')[1] ?? ''}</span>
               </button>
             ))}
           </div>
         </div>
-      ) : course && slotGroup?.slot ? (
-        <div className={ui.fieldNote}>{slotLabel(slotGroup.slot, 'en')}</div>
       ) : null}
 
       {course ? (
@@ -193,7 +184,6 @@ export function CoursePicker({
                 }}
               >
                 <b>{short(t.startDate)}</b>
-                <span>until {short(t.endDate)}</span>
               </button>
             ))}
           </div>
@@ -218,7 +208,7 @@ export function CoursePicker({
                       build({ level: c.value, pathTo: '' });
                     }}
                   >
-                    {c.label}
+                    {c.label.split(' · ')[0]}
                   </button>
                 ))}
               </div>
@@ -261,7 +251,7 @@ export function CoursePicker({
                     {step.level ? ` ${levelLabel(step, 'en')}` : ''}
                   </b>
                   <small>
-                    {step.start && step.end ? `${short(step.start)} – ${short(step.end)}` : 'Dates by arrangement'} · {step.weeks} weeks
+                    {step.start && step.end ? `${short(step.start)} – ${short(step.end)}` : 'Dates by arrangement'}
                   </small>
                 </span>
                 <em>{eur(lines[i]?.unitAmount ?? null)}</em>
@@ -315,7 +305,6 @@ export function CoursePicker({
                   />{' '}
                   Accommodation
                 </b>
-                <small>{accommodation ? (firstStay ? 'Rent, the placement fee and the refundable deposit' : 'Rent') : 'Not needed'}</small>
               </span>
               <em>
                 {accommodation
@@ -328,10 +317,10 @@ export function CoursePicker({
                 <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
                   {(
                     [
-                      ['host_family', 'Host family', 'A room with a Bremen family'],
-                      ['shared_flat', 'CASA shared flat', 'A room in CASA’s own flat'],
+                      ['host_family', 'Host family'],
+                      ['shared_flat', 'CASA shared flat'],
                     ] as const
-                  ).map(([kind, b, sub]) => (
+                  ).map(([kind, b]) => (
                     <button
                       key={kind}
                       type="button"
@@ -344,24 +333,34 @@ export function CoursePicker({
                       }}
                     >
                       <b>{b}</b>
-                      <span>{sub}</span>
                     </button>
                   ))}
                 </div>
-                <DateRange
-                  from={accommodation.from}
-                  to={accommodation.to}
-                  months={2}
-                  compact
-                  onChange={(from, to) => {
-                    const next = { ...accommodation, from, to };
-                    setAccommodation(next);
-                    build({ accommodation: next });
-                  }}
-                />
+                <div className={ui.row2}>
+                  {(
+                    [
+                      ['from', 'Arrival'],
+                      ['to', 'Departure'],
+                    ] as const
+                  ).map(([end, label]) => (
+                    <div key={end} className={ui.fld}>
+                      <span>{label}</span>
+                      <DateField
+                        ariaLabel={label}
+                        value={accommodation[end]}
+                        min={end === 'to' ? accommodation.from : null}
+                        onChange={(day) => {
+                          const next = { ...accommodation, [end]: day };
+                          setAccommodation(next);
+                          build({ accommodation: next });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
                 {extraNights(accommodation) ? (
                   <div className={ui.fieldNote}>
-                    {extraNights(accommodation)} {extraNights(accommodation) === 1 ? 'night' : 'nights'} beyond whole weeks — the rent counts Sunday to Saturday; add extra nights as a line on the offer.
+                    {extraNights(accommodation)} {extraNights(accommodation) === 1 ? 'night' : 'nights'} beyond whole weeks, not in the rent
                   </div>
                 ) : null}
                 <label className={ui.toggleLine}>
@@ -374,7 +373,7 @@ export function CoursePicker({
                     }}
                   />
                   <span>
-                    First stay with CASA <small>{history?.stayedBefore ? '· has stayed before' : '· placement fee and deposit'}</small>
+                    First stay with CASA {history?.stayedBefore ? <small>· has stayed before</small> : null}
                   </span>
                 </label>
               </div>
@@ -398,7 +397,6 @@ export function CoursePicker({
                         />{' '}
                         {e.name}
                       </b>
-                      <small>{on && exam?.date ? `Exam on ${formatDay(exam.date)}` : 'At the end of the course'}</small>
                     </span>
                     <em>{on ? eur(exam?.fee ?? null) : '—'}</em>
                   </label>

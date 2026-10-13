@@ -68,7 +68,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Connections, website email and the placement engine." />
+      <PageHeader title="Settings" />
 
       {/*
        * The deployment's connections in the wide column, the facts that are
@@ -104,7 +104,6 @@ export default async function SettingsPage() {
 
           <Card
             title="Integrations"
-            description="Legacy webhooks, used in live mode without Microsoft email."
             icon={Icon.external}
             tint="ink"
             bleed
@@ -176,20 +175,17 @@ export default async function SettingsPage() {
             <ul className="divide-y divide-ws-line-soft">
               {[
                 ...(canAccess(user, 'prices')
-                  ? [{ href: '/admin/settings/prices', label: 'Prices', sub: 'Courses, accommodation, fees, books and exams, by year' }]
+                  ? [{ href: '/admin/settings/prices', label: 'Prices' }]
                   : []),
-                { href: '/admin/settings/setup', label: 'Lists', sub: 'The types used everywhere else' },
-                ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: 'Rooms', sub: 'Classrooms and their capacity' }] : []),
+                { href: '/admin/settings/setup', label: 'Lists' },
+                ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: 'Rooms' }] : []),
               ].map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#f6f9fc]"
                   >
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">{item.label}</span>
-                      <span className="block text-xs text-[var(--casa-text-subtle)]">{item.sub}</span>
-                    </span>
+                    <span className="min-w-0 text-sm font-semibold text-[var(--casa-ink)]">{item.label}</span>
                     <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
                       {Icon.chevronRight}
                     </span>

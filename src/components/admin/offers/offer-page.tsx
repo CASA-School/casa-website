@@ -54,7 +54,6 @@ const PACKAGE_COLOUR: Record<PackageChoice, [string, string]> = {
   own: ['var(--o-line-firm)', '#f6f8fb'],
 };
 const ESCORT_SHORT: Record<EscortPricing, string> = { paid: 'paying', free: 'free', shared: 'shared' };
-const PACKAGE_LABEL: Record<PackageChoice, string> = { hahn: 'Hahn', katze: 'Katze', hund: 'Hund', esel: 'Esel', own: 'An own offer' };
 const ACTIVITY_TINT: Record<GruppenActivity['category'], Tint> = { city: 'blue', culture: 'red', science: 'sun', sport: 'ink', daytrip: 'ink' };
 const CATEGORY_LABEL: Record<GruppenActivity['category'], string> = {
   city: 'In the city',
@@ -288,7 +287,6 @@ function Head({
           <div className={ui.subtitle}>
             <ClickPanel
               label="Recipient"
-              subtitle="Who the letter is addressed to"
               icon={<Chip tint="ink" icon={ICONS.people} big />}
               className={ui.editable}
               triggerId={FIX.recipient}
@@ -307,7 +305,6 @@ function Head({
           <ClickPanel
             {...panel}
             label="Dates"
-            subtitle={fixedWeeks ? `${PACKAGE_LABEL[c.package]} is ${fixedWeeks} ${fixedWeeks === 1 ? 'week' : 'weeks'}, Sunday to Saturday` : 'The offer takes the length of the stay'}
             icon={<Chip tint="blue" icon={ICONS.calendar} big />}
             triggerId={FIX.dates}
             dates
@@ -344,7 +341,6 @@ function Head({
           <ClickPanel
             {...panel}
             label="The group"
-            subtitle="Participants and the teachers who come with them"
             icon={<Chip tint="red" icon={ICONS.people} big />}
             triggerId={FIX.participants}
             wide
@@ -396,7 +392,6 @@ function Head({
         <ClickPanel
           {...panel}
           label="Language"
-          subtitle="Of the letter"
           icon={<Chip tint="sun" icon={ICONS.language} big />}
           body={(close) => (
             <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -417,13 +412,12 @@ function Head({
             </div>
           )}
         >
-          <Spec tint="sun" icon={ICONS.language} label="Language" value={draft.language === 'de' ? 'Deutsch' : 'English'} sub="Of the letter" />
+          <Spec tint="sun" icon={ICONS.language} label="Language" value={draft.language === 'de' ? 'Deutsch' : 'English'} sub={null} />
         </ClickPanel>
 
         <ClickPanel
           {...panel}
           label="Valid until"
-          subtitle="The date the letter gives"
           icon={<Chip tint="ink" icon={ICONS.hourglass} big />}
           triggerId={FIX.validity}
           body={() => (
@@ -453,7 +447,6 @@ function Head({
         <ClickPanel
           {...panel}
           label="Signed by"
-          subtitle="Whose name is under the letter"
           icon={<Chip tint="ink" icon={ICONS.pen} big />}
           body={(close) => (
             <div className={ui.radioList}>
@@ -476,7 +469,7 @@ function Head({
             </div>
           )}
         >
-          <Spec tint="ink" icon={ICONS.pen} label="Signed by" warn={!owner} value={owner ?? 'Nobody'} sub="Under the letter" />
+          <Spec tint="ink" icon={ICONS.pen} label="Signed by" warn={!owner} value={owner ?? 'Nobody'} sub={null} />
         </ClickPanel>
       </div>
     </section>
@@ -658,7 +651,6 @@ function CourseCard({
     <ClickPanel
       wide
       label={course ? 'Change the course' : 'Choose the course'}
-      subtitle="Course, time of day, start, level — and what comes with it"
       icon={<Chip tint="red" icon={ICONS.book} big />}
       className={`${ui.btn} ${ui.btnSm}`}
       triggerId={FIX.course}
@@ -686,17 +678,12 @@ function CourseCard({
           {course.slot ? (
             <span>
               {ICONS.clock}
-              {slotLabel(course.slot, 'en')}
+              {slotLabel(course.slot, 'en').split(', ')[0]}
             </span>
           ) : null}
           <span>
             {ICONS.calendar}
             {span.start && span.end ? formatDateRange(span.start, span.end, 'en') : 'Dates by arrangement'}
-          </span>
-          <span>
-            {ICONS.book}
-            {span.weeks} {span.weeks === 1 ? 'week' : 'weeks'}
-            {span.lessons ? ` · ${span.lessons} lessons` : ''}
           </span>
         </div>
       ) : null}
@@ -710,7 +697,6 @@ function CourseCard({
                 key={l.key}
                 block
                 label={look.name}
-                subtitle="The price on this offer"
                 icon={<Chip tint={look.tint} icon={look.icon} big />}
                 className={ui.inc}
                 openClassName={ui.incOpen}
@@ -819,7 +805,6 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
           <ClickPanel
             block
             label={pkg ? `${pkg.animal.en} package` : pkgLine.description}
-            subtitle="One price per person for the whole package"
             icon={<Chip tint={PACKAGE_TINT[c.package]} icon={ICONS.package} big />}
             className={`${ui.inc} ${two}`}
             openClassName={ui.incOpen}
@@ -1082,7 +1067,6 @@ function Extras({
             block
             wide
             label="More afternoons"
-            subtitle={own ? 'From the activities of the groups page' : 'On top of what the package includes'}
             icon={<Chip tint="sun" icon={ICONS.star} big />}
             className={`${ui.inc} ${two}`}
             openClassName={ui.incOpen}
@@ -1179,7 +1163,6 @@ function TypedRow({
     <ClickPanel
       block
       label={line.description || 'New line'}
-      subtitle={credit ? 'Taken off the price' : 'A line of your own'}
       icon={<Chip tint={tint} icon={icon} big />}
       className={`${ui.inc} ${two}`}
       openClassName={ui.incOpen}
