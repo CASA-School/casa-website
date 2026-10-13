@@ -8,7 +8,7 @@ import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
 import { hasProblems, offerChecks } from './checks';
 import { DEFAULT_TEXT, type OfferLetter } from './document';
-import { buildLines, computeTotals, measure, EMPTY_RATE_CARD, type GroupRateCard, type Rate } from './engine';
+import { buildLines, computeTotals } from './engine';
 import { choicesFromBrief, participantsFromBrief } from './from-enquiry';
 import { normaliseStay } from './schema';
 import { addDays } from './stay';
@@ -236,54 +236,6 @@ export async function offerCounts(): Promise<Record<OfferListFilter, number>> {
   return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, Number(v)])) as Record<OfferListFilter, number>;
 }
 
-// ------------------------------------------------------------ rate card
-
-type RateJson = { id: string; amount: string | number; unit: Rate['unit'] } | null;
-const asRate = (r: RateJson): Rate | null => (r ? { id: r.id, amount: Number(r.amount), unit: r.unit } : null);
-
-/**
- * The group rates one stay needs, resolved by `applicable_rate()` for its
- * arrival date (today while it has none). Variant rates only: none of these
- * is ever an individual learner's price (db/seeds/0007).
- */
-export async function loadGroupRateCard(draft: OfferDraft, db: Pick<PoolClient, 'query'> | null = null): Promise<GroupRateCard> {
-  if (draft.kind !== 'group') return EMPTY_RATE_CARD;
-  const { weeks } = measure(draft);
-  const c = draft.stay.choices;
-  const r = (args: string) => `(SELECT json_build_object('id', id, 'amount', amount, 'unit', unit) FROM rates WHERE id = applicable_rate(${args}))`;
-  const sql = `SELECT
-      ${r(`'course_type', $1::date, p_course_type_id => (SELECT id FROM course_types WHERE slug = 'german-for-groups')`)} AS tuition,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'teaching_material', p_variant => 'group'`)} AS materials,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'administrative_charge', p_variant => 'group'`)} AS handling,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'catering', p_variant => 'canteen'`)} AS canteen,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'culture_programme', p_variant => $5`)} AS culture,
-      ${r(`'accommodation', $1::date, p_accommodation_type_code => 'with_germans', p_catering_code => 'half_board', p_room_type_code => $3, p_quantity => $2, p_variant => 'group'`)} AS room,
-      ${r(`'accommodation', $1::date, p_accommodation_type_code => 'with_germans', p_catering_code => 'half_board', p_room_type_code => $4, p_quantity => $2, p_variant => 'group'`)} AS escort_room,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'travel_ticket', p_variant => 'student-week'`)} AS sw,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'travel_ticket', p_variant => 'student-month'`)} AS sm,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'travel_ticket', p_variant => 'adult-week'`)} AS aw,
-      ${r(`'charge_type', $1::date, p_charge_type_code => 'travel_ticket', p_variant => 'adult-month'`)} AS am`;
-  const params = [draft.arrival ?? today(), weeks, c.room, c.escortRoom, c.culture === 'none' ? null : c.culture];
-  type Row = Record<'tuition' | 'materials' | 'handling' | 'canteen' | 'culture' | 'room' | 'escort_room' | 'sw' | 'sm' | 'aw' | 'am', RateJson>;
-  const row = db ? (await db.query<Row>(sql, params)).rows[0] : await queryFirst<Row>(sql, params);
-  if (!row) return EMPTY_RATE_CARD;
-  return {
-    tuition: asRate(row.tuition),
-    materials: asRate(row.materials),
-    handling: asRate(row.handling),
-    canteen: asRate(row.canteen),
-    culture: asRate(row.culture),
-    room: asRate(row.room),
-    escortRoom: asRate(row.escort_room),
-    tickets: {
-      'student-week': asRate(row.sw),
-      'student-month': asRate(row.sm),
-      'adult-week': asRate(row.aw),
-      'adult-month': asRate(row.am),
-    },
-  };
-}
-
 // ------------------------------------------------------------ one offer
 
 export type OfferMeta = {
@@ -340,10 +292,13 @@ function metaFromRow(r: OfferRow): OfferMeta {
   };
 }
 
-/** Lines, totals and checks for a draft, priced now. */
-export async function priceDraft(draft: OfferDraft, db: Pick<PoolClient, 'query'> | null = null) {
-  const card = await loadGroupRateCard(draft, db);
-  const lines = buildLines(draft, card);
+/**
+ * Lines, totals and checks for a draft. Group prices come from the packages of
+ * the groups page (src/config/gruppen/packages.ts), so pricing needs no query;
+ * an individual offer's lines were priced from `rates` when they were added.
+ */
+export function priceDraft(draft: OfferDraft) {
+  const lines = buildLines(draft);
   const totals = computeTotals(draft, lines);
   const checks = offerChecks(draft, lines, today());
   return { lines, totals, checks };
@@ -360,7 +315,7 @@ export async function getOffer(id: string): Promise<OfferRecord | null> {
   let totals: OfferTotals;
   let checks: OfferCheck[];
   if (row.status === 'draft') {
-    ({ lines, totals, checks } = await priceDraft(draft));
+    ({ lines, totals, checks } = priceDraft(draft));
   } else {
     lines = await storedLines(id);
     totals = computeTotals(draft, lines);
@@ -428,8 +383,9 @@ async function storedLines(offerId: string): Promise<OfferLine[]> {
     amount: string | null;
     list_unit_amount: string | null;
     rate_id: string | null;
+    included: boolean;
   }>(
-    `SELECT key, audience, charge_type_code, description, quantity, unit, unit_amount, amount, list_unit_amount, rate_id
+    `SELECT key, audience, charge_type_code, description, quantity, unit, unit_amount, amount, list_unit_amount, rate_id, included
        FROM offer_lines WHERE offer_id = $1 ORDER BY position`,
     [offerId]
   );
@@ -447,6 +403,7 @@ async function storedLines(offerId: string): Promise<OfferLine[]> {
     rateId: r.rate_id,
     manual: r.key.startsWith('manual:'),
     customText: false,
+    included: r.included,
   }));
 }
 
@@ -469,9 +426,9 @@ async function writeLines(client: PoolClient, offerId: string, lines: OfferLine[
     position += 1;
     await client.query(
       `INSERT INTO offer_lines (offer_id, position, audience, key, charge_type_code, description, quantity, unit,
-                                unit_amount, amount, list_unit_amount, rate_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-      [offerId, position, l.audience, l.key, l.chargeType, l.description, l.quantity, l.unit, l.unitAmount, l.amount, l.listUnitAmount, l.rateId]
+                                unit_amount, amount, list_unit_amount, rate_id, included)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      [offerId, position, l.audience, l.key, l.chargeType, l.description, l.quantity, l.unit, l.unitAmount, l.amount, l.listUnitAmount, l.rateId, l.included]
     );
   }
 }
@@ -530,7 +487,7 @@ export async function saveOffer(id: string, draft: OfferDraft, baseRevision: num
     if (current.revision !== baseRevision) {
       return { ok: false, stale: true, error: 'A colleague has changed this offer in the meantime.' };
     }
-    const priced = await priceDraft(draft, client);
+    const priced = priceDraft(draft);
     await client.query(
       `UPDATE offers SET ${DRAFT_COLUMNS}, revision = revision + 1, updated_by = $25 WHERE id = $1`,
       [id, ...draftParams(draft), actor.id]
@@ -677,7 +634,7 @@ export async function createOffer(input: NewOffer, actor: StaffUser): Promise<st
       [year, seq, input.personId, input.enquiryId, actor.id]
     );
     const id = rows[0].id;
-    const priced = await priceDraft(draft, client);
+    const priced = priceDraft(draft);
     await client.query(`UPDATE offers SET ${DRAFT_COLUMNS} WHERE id = $1`, [id, ...draftParams(draft)]);
     await writeLines(client, id, priced.lines);
     return id;
@@ -697,7 +654,7 @@ export async function duplicateOffer(id: string, actor: StaffUser): Promise<stri
       [year, seq, row.person_id, row.enquiry_id, id, actor.id]
     );
     const newId = rows[0].id;
-    const priced = await priceDraft(draft, client);
+    const priced = priceDraft(draft);
     await client.query(`UPDATE offers SET ${DRAFT_COLUMNS} WHERE id = $1`, [newId, ...draftParams(draft)]);
     await writeLines(client, newId, priced.lines);
     return newId;
@@ -722,7 +679,7 @@ export async function markSent(id: string, actor: StaffUser, letterFor: (draft: 
     if (!row) return { ok: false, error: 'This offer no longer exists.' };
     if (row.status !== 'draft') return { ok: false, error: 'This offer has already been sent.' };
     const draft = draftFromRow(row);
-    const priced = await priceDraft(draft, client);
+    const priced = priceDraft(draft);
     if (hasProblems(priced.checks)) {
       return { ok: false, error: priced.checks.filter((c) => c.level === 'problem').map((c) => c.message).join(' · ') };
     }

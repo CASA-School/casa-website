@@ -137,7 +137,7 @@ export function Stepper({
 }) {
   const clamp = (n: number) => Math.min(max, Math.max(min, n));
   return (
-    <span className={ui.stepper}>
+    <span className={ui.stepper2}>
       <button type="button" aria-label={`${label}: one less`} disabled={disabled || (value ?? min) <= min} onClick={() => onChange(clamp((value ?? min) - 1))}>
         −
       </button>

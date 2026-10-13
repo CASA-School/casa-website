@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { LetterView } from '@/components/admin/offers/letter-view';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { editorOptions, getOffer, getSentLetter, loadGroupRateCard, standardTexts } from '@/lib/admin/offers/repo';
+import { editorOptions, getOffer, getSentLetter, standardTexts } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
 
 /**
@@ -32,9 +32,8 @@ export default async function OfferLetterPage({
         : record.meta.status === 'draft'
           ? null
           : record.meta.version;
-  const [options, card, texts, sentLetter] = await Promise.all([
+  const [options, texts, sentLetter] = await Promise.all([
     editorOptions(),
-    loadGroupRateCard(record.draft),
     standardTexts(),
     shownVersion ? getSentLetter(id, shownVersion) : Promise.resolve(null),
   ]);
@@ -43,7 +42,6 @@ export default async function OfferLetterPage({
     <LetterView
       key={`${id}:${record.meta.revision}:${shownVersion ?? 'draft'}`}
       record={record}
-      card={card}
       options={options}
       texts={texts}
       sentLetter={sentLetter}

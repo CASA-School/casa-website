@@ -8,7 +8,7 @@
  * said how long they were valid.
  */
 
-import { measure } from './engine';
+import { activitiesOf, activityAllowance, measure, packageWeeks } from './engine';
 import type { OfferCheck, OfferDraft, OfferLine } from './types';
 
 const eur = (n: number) => `${n.toFixed(2).replace(/\.00$/, '')} €`;
@@ -24,8 +24,13 @@ export function offerChecks(draft: OfferDraft, lines: OfferLine[], today: string
 
   if (draft.kind === 'group') {
     if (!draft.participants) problem('participants', 'Number of participants missing');
-    const { weeks, courseWeeks } = measure(draft);
-    if (draft.stay.choices.course && courseWeeks > weeks) problem('course', `Course of ${courseWeeks} weeks in a stay of ${weeks}`);
+    const { weeks, fromDates } = measure(draft);
+    const sold = packageWeeks(draft.stay.choices.package);
+    if (sold != null && fromDates && weeks !== sold) hint('package', `The package is ${sold} ${sold === 1 ? 'week' : 'weeks'}, the dates ${weeks}`);
+    if (draft.stay.choices.package === 'esel' && weeks > 4) problem('package', 'Esel is priced up to four weeks');
+    if (draft.stay.choices.package === 'esel' && activitiesOf(draft.stay.choices).length > activityAllowance(weeks)) {
+      hint('programme', `More than five activities a week`);
+    }
     if (draft.escorts > 0 && draft.stay.choices.escortPricing === 'shared' && !draft.participants) {
       problem('escorts', 'Escort costs shared, but no participants to share them');
     }
@@ -36,6 +41,7 @@ export function offerChecks(draft: OfferDraft, lines: OfferLine[], today: string
   for (const line of lines) {
     const who = line.audience === 'escort' ? ' (escort)' : '';
     if (!line.description.trim()) problem('lines', `A line without text${who}`);
+    if (line.included) continue;
     if (line.unitAmount == null) problem('lines', `No price for “${line.description}”${who}`);
     else if (line.listUnitAmount != null && line.unitAmount !== line.listUnitAmount) {
       hint('lines', `“${line.description}”${who}: ${eur(line.unitAmount)} instead of ${eur(line.listUnitAmount)}`);

@@ -68,7 +68,7 @@ test.describe('offers', () => {
   const saved = (page: Page) => expect(page.getByText('Saved', { exact: true })).toBeVisible({ timeout: 10_000 });
   const done = (page: Page) => page.getByRole('button', { name: 'Done' }).click();
 
-  test('an offer is built on one page, written on the letter, and frozen when sent', async ({ page }) => {
+  test('a package offer prices itself, saves itself, is written on the letter and frozen when sent', async ({ page }) => {
     await newGroupOffer(page);
     const main = page.locator('main');
 
@@ -76,24 +76,30 @@ test.describe('offers', () => {
     await page.getByLabel('Arrival').fill('2027-04-11');
     await page.getByLabel('Departure').fill('2027-04-24');
     await done(page);
-    await page.getByRole('button', { name: 'Group: change' }).click();
+    await page.getByRole('button', { name: 'The group: change' }).click();
     const participants = page.getByLabel('Participants', { exact: true });
     await participants.fill('12');
     await participants.blur();
     await done(page);
     await saved(page);
 
-    // Two weeks from the group price list: 290 + 20 + 450 + 120 + 50 + 120 + 30.
-    await expect(main).toContainText('1.080,00 €');
-    await expect(main).toContainText('12.960,00 €');
+    // Katze, the default package: 1,130 € a person, as on the groups page.
+    await expect(page.getByRole('radio', { name: /Katze/ })).toHaveAttribute('aria-checked', 'true');
+    await expect(main).toContainText('1.130,00 €');
+    await expect(main).toContainText('13.560,00 €');
 
-    // A price typed over the list price is kept and shown as a change.
-    await page.getByText('German course', { exact: true }).click();
-    const price = page.getByRole('textbox', { name: /^Price per person: German course/ });
-    await price.fill('140');
+    // Esel prices the same stay block by block, from the same sheet.
+    await page.getByRole('radio', { name: /Esel/ }).click();
+    await expect(main).toContainText('1.044,00 €');
+    await page.getByRole('radio', { name: /Katze/ }).click();
+
+    // A price typed over the package price is kept and shown as a change.
+    await page.getByRole('button', { name: 'Katze package: change' }).click();
+    const price = page.getByRole('textbox', { name: /^Price per participant/ });
+    await price.fill('1100');
     await price.blur();
     await done(page);
-    await expect(page.getByLabel('Checks')).toContainText('instead of 145 €');
+    await expect(page.getByLabel('Checks')).toContainText('1100 € instead of 1130 €');
     await saved(page);
 
     await page.getByRole('button', { name: 'Recipient: change' }).click();
@@ -103,14 +109,15 @@ test.describe('offers', () => {
 
     await page.reload();
     await expect(main).toContainText('12 participants');
-    await expect(main).toContainText('1.070,00 €');
+    await expect(main).toContainText('13.200,00 €');
 
     // The letter is the other tab, written where it stands.
     await page.getByRole('link', { name: 'Letter' }).click();
     await expect(page).toHaveURL(/\/letter$/);
     const letter = page.locator('article').first();
+    await expect(letter).toContainText('Katze package · 2 weeks of exploring');
     await expect(letter).toContainText('Total for the group (12 participants)');
-    await expect(letter).toContainText('€12,840.00');
+    await expect(letter).toContainText('€13,200.00');
 
     await page.getByRole('button', { name: 'Change title' }).click();
     await page.getByRole('textbox', { name: 'Title' }).fill('German and culture in Bremen');
@@ -155,7 +162,7 @@ test.describe('offers', () => {
     const id = page.url().split('/').pop()!;
     await client.query(`UPDATE offers SET revision = revision + 1, participants = 30 WHERE id = $1`, [id]);
 
-    await page.getByRole('button', { name: 'Group: change' }).click();
+    await page.getByRole('button', { name: 'The group: change' }).click();
     const participants = page.getByLabel('Participants', { exact: true });
     await participants.fill('8');
     await participants.blur();

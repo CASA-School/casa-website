@@ -95,6 +95,7 @@ const WORDS = {
     perEscort: 'Gesamt pro Begleitperson',
     total: 'Gesamt',
     included: 'Im Preis enthalten',
+    includedWord: 'inklusive',
     groupTotal: (p: number, e: number, paid: boolean) =>
       `Gesamtpreis für die Gruppe (${p} Teilnehmende${paid && e ? `, ${e} ${e === 1 ? 'Begleitperson' : 'Begleitpersonen'}` : ''})`,
     free: (e: number) =>
@@ -123,6 +124,7 @@ const WORDS = {
     perEscort: 'Total per escort',
     total: 'Total',
     included: 'Included in the price',
+    includedWord: 'included',
     groupTotal: (p: number, e: number, paid: boolean) =>
       `Total for the group (${p} participants${paid && e ? `, ${e} ${e === 1 ? 'escort' : 'escorts'}` : ''})`,
     free: (e: number) => (e === 1 ? 'The escort takes part free of charge.' : `The ${e} escorts take part free of charge.`),
@@ -219,7 +221,7 @@ export function buildLetter(draft: OfferDraft, lines: OfferLine[], totals: Offer
 
   const toLetter = (l: OfferLine): LetterLine => ({
     text: l.description,
-    amount: pkg ? null : money(l.amount),
+    amount: pkg ? null : l.included ? w.includedWord : money(l.amount),
     ref: { audience: l.audience, key: l.key },
   });
   const participantLines = lines.filter((l) => l.audience === 'participant');

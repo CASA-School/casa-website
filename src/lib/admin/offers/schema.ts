@@ -23,20 +23,19 @@ const money = z.number().finite().min(-100_000).max(1_000_000);
 /* Strict: what a save may contain. Nothing is coerced — a write either is an
    offer or is refused, so a bad field can never quietly become a default or
    take every typed line with it. */
-const ChoicesSchema = z.object({
-  weeks: z.number().int().min(1).max(52),
+const ModulesSchema = z.object({
   course: z.boolean(),
-  lessonsPerWeek: z.number().int().min(1).max(60),
-  courseWeeks: z.number().int().min(1).max(52).nullable(),
-  accommodation: z.boolean(),
-  room: z.enum(['double', 'single']),
-  escortRoom: z.enum(['double', 'single']),
-  canteen: z.boolean(),
-  transit: z.boolean(),
-  fare: z.enum(['student', 'adult']),
-  culture: z.enum(['none', 'small', 'medium', 'large']),
   materials: z.boolean(),
-  handling: z.boolean(),
+  accommodation: z.boolean(),
+  lunch: z.boolean(),
+  transport: z.boolean(),
+});
+
+const ChoicesSchema = z.object({
+  package: z.enum(['hahn', 'katze', 'hund', 'esel']),
+  weeks: z.number().int().min(1).max(52),
+  modules: ModulesSchema,
+  activities: z.array(z.string().regex(/^[a-z-]{2,40}$/)).max(40),
   escortPricing: z.enum(['paid', 'free', 'shared']),
 });
 
@@ -64,19 +63,10 @@ const StaySchema = z.object({
    existed opens with that choice's default; a line that no longer parses is
    left out of the editor rather than failing the whole offer. */
 const StoredChoices = z.object({
+  package: ChoicesSchema.shape.package.catch(DEFAULT_STAY.package),
   weeks: ChoicesSchema.shape.weeks.catch(DEFAULT_STAY.weeks),
-  course: ChoicesSchema.shape.course.catch(DEFAULT_STAY.course),
-  lessonsPerWeek: ChoicesSchema.shape.lessonsPerWeek.catch(DEFAULT_STAY.lessonsPerWeek),
-  courseWeeks: ChoicesSchema.shape.courseWeeks.catch(DEFAULT_STAY.courseWeeks),
-  accommodation: ChoicesSchema.shape.accommodation.catch(DEFAULT_STAY.accommodation),
-  room: ChoicesSchema.shape.room.catch(DEFAULT_STAY.room),
-  escortRoom: ChoicesSchema.shape.escortRoom.catch(DEFAULT_STAY.escortRoom),
-  canteen: ChoicesSchema.shape.canteen.catch(DEFAULT_STAY.canteen),
-  transit: ChoicesSchema.shape.transit.catch(DEFAULT_STAY.transit),
-  fare: ChoicesSchema.shape.fare.catch(DEFAULT_STAY.fare),
-  culture: ChoicesSchema.shape.culture.catch(DEFAULT_STAY.culture),
-  materials: ChoicesSchema.shape.materials.catch(DEFAULT_STAY.materials),
-  handling: ChoicesSchema.shape.handling.catch(DEFAULT_STAY.handling),
+  modules: ModulesSchema.catch(DEFAULT_STAY.modules),
+  activities: ChoicesSchema.shape.activities.catch(DEFAULT_STAY.activities),
   escortPricing: ChoicesSchema.shape.escortPricing.catch(DEFAULT_STAY.escortPricing),
 });
 

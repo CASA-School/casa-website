@@ -14,7 +14,6 @@ import {
   findRecipients,
   deleteOffer,
   duplicateOffer,
-  loadGroupRateCard,
   markSent,
   reviseOffer,
   saveOffer,
@@ -23,7 +22,6 @@ import {
 } from '@/lib/admin/offers/repo';
 import { parseOfferDraft } from '@/lib/admin/offers/schema';
 import { ORGANISATION_KINDS } from '@/lib/admin/offers/types';
-import type { GroupRateCard } from '@/lib/admin/offers/engine';
 
 /**
  * The offers module's writes. Every one asks `requireModule('offers', …)`
@@ -66,14 +64,12 @@ export async function createOfferAction(formData: FormData) {
   redirect(`/admin/offers/${id}`);
 }
 
-export type SaveOfferResult =
-  | { ok: true; revision: number; card: GroupRateCard }
-  | { ok: false; error: string; stale?: boolean };
+export type SaveOfferResult = { ok: true; revision: number } | { ok: false; error: string; stale?: boolean };
 
 /**
- * The editor's autosave: the whole draft, conditional on the revision it was
- * edited from. Returns the rates the draft now needs, so the editor computes
- * the same lines the server stored.
+ * The autosave: the whole draft, conditional on the revision it was edited
+ * from. The server recomputes the lines with the same pure engine the page
+ * uses, so what is stored is what was on screen.
  */
 export async function saveOfferAction(id: string, baseRevision: number, draft: unknown): Promise<SaveOfferResult> {
   const actor = await requireModule('offers', 'edit');
@@ -82,8 +78,7 @@ export async function saveOfferAction(id: string, baseRevision: number, draft: u
   if (!parsed.ok) return { ok: false, error: parsed.error };
   const result = await saveOffer(id, parsed.draft, baseRevision, actor);
   if (!result.ok) return result;
-  const card = await loadGroupRateCard(parsed.draft);
-  return { ok: true, revision: result.revision, card };
+  return { ok: true, revision: result.revision };
 }
 
 function offerId(formData: FormData): string {

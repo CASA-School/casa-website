@@ -3,7 +3,7 @@
 `/admin/offers` · module `offers` · full screen, like the website editor · branch `admin` (2026-10-13)
 
 Read this before touching `src/app/(admin)/admin/(editor)/offers`, `src/components/admin/offers`,
-`src/lib/admin/offers`, migration 0021 or `db/seeds/0007_group_offer_rates.sql`.
+`src/lib/admin/offers`, migration 0021 or the group packages in `src/config/gruppen/packages.ts`.
 
 ---
 
@@ -42,6 +42,15 @@ direction Rahman chose, and the rules that follow from it:
    students and group enquiries still waiting for an offer, with "New organisation" / "One learner"
    for a name nobody has had an offer before. Arrow keys and Enter work.
 
+5. **Colour that says something** (second pass, the same day: "it is a white page now… add a bit
+   colour so it distinguishes"). A tinted head holds the facts as chips with coloured icons; the four
+   packages are cards in the four CASA colours (Hahn yellow, Katze blue, Hund red, Esel ink); every
+   included row has an icon in its meaning colour — red the course and materials, blue the host
+   family and lunch, ink the transport, yellow the programme, whose activities are chips coloured by
+   kind; the price sits on a dark card with the tricolour edge. Panels have a head (icon, name, one
+   line), filled fields with € inside price inputs, choice cards instead of radio rows, and a foot
+   with *Done*. "Not like FileMaker" — keep improving this direction.
+
 The rest of the workspace is to follow this style once Offers is accepted (Rahman, 2026-10-13).
 
 ## What FileMaker does (read live, read-only, 2026-10-13)
@@ -69,7 +78,7 @@ shared with pre-bookings and groups.
 | --- | --- | --- |
 | The letter is a copy, edited by hand | Offer 37602: lines total 1,560 €, the letter sent says 1,370 € with lines the offer lacks | The letter is computed from the offer; only opening, note and closing are free text |
 | German and English disagree | "Verwaltungsgebühr" typed over fee type *Transfer* prints "Transfer" in English; "Vermittlungsgebühr Praktikum" prints "Placement fee accommodation" | One description per line, written in the offer's language; the fee type is accounting, not text |
-| Every price typed | 431 (label, price, unit) combinations; "Kurspreis" per week at 140, 145, 150, 160, 300 | Group prices come from `rates` (seed 0007); a typed price is kept and shown as a change |
+| Every price typed | 431 (label, price, unit) combinations; "Kurspreis" per week at 140, 145, 150, 160, 300 | Group prices come from the packages the groups page sells; a typed price is kept and shown as a change |
 | No group | Escorts get a second offer ("1 Woche Lehrkraft Begleitung"), their costs are spread by hand ("Umlage begleitende Lehrkraft 2 × 60"), the group size never enters the offer | Participants and escorts are on the offer; escorts pay, are free, or are shared — computed |
 | Header checkboxes drive nothing | 37629: "Halbpension" and "Vollpension" both ticked, the line says "Hotel with breakfast" | The stay's choices *are* the lines |
 | No total stored | `TotalAmount` empty on 396 of 396 | Lines store their amount; the sent version stores the whole document |
@@ -81,10 +90,11 @@ shared with pre-bookings and groups.
 | Deleting lines can delete offers | `EraseCostDetailSample_Offer` runs *Delete All Records* after an unchecked GTRR (not reproduced live) | Lines are rows of their offer, replaced in one transaction |
 | VAT | Offers never mention VAT; the footer cites "§ 5 Abs. 1 Nr. 9 KStG und § 3 Nr. 6" as VAT exemption — corporate and trade tax provisions | No tax wording until CASA's tax adviser gives it (open question 1) |
 
-The group price model existed only in Ina's workbook `Preiskalkulation_Gruppen.xlsx`
-(`docs/GROUP_PRICING_AND_SPECIAL_COURSES.md`); FileMaker received the numbers she typed. Her offers
-match it: 145 a week for the course, 450 for two weeks in a double room with half board, 60 a week
-for the canteen, 25 for a weekly ticket, 30 handling.
+The group price model existed only outside FileMaker: first Ina's workbook
+`Preiskalkulation_Gruppen.xlsx` (2026-08-12), then — the current product — her
+`Gruppenpakete_Stadtmusikanten.docx` and `Gruppenreise Esel_Auswahl.xlsx` (2026-08-26), which the
+groups page sells as four packages (`src/config/gruppen/packages.ts`). FileMaker received the numbers
+she typed.
 
 ## The model (migration 0021)
 
@@ -95,34 +105,34 @@ for the canteen, 25 for a weekly ticket, 30 handling.
 | `offer_lines` | one priced line | `audience` participant/escort, `key` (`tuition`, `accommodation`… or `manual:…`), `charge_type_code` (FK), `description`, `quantity`, `unit`, `unit_amount`, `amount`, `list_unit_amount` (what the price list said), `rate_id` |
 | `offer_versions` | the document as it was sent | the letter, the lines, the totals and the draft, frozen. Editing an offer later never changes what the recipient has |
 
-**`rates.variant`** — which version of a priced thing: `student-week` / `adult-month` tickets,
-`small` / `medium` / `large` culture programmes, the `group` price of a room, `canteen` lunch.
-`applicable_rate()` matches it exactly (`IS NOT DISTINCT FROM`), so a lookup without a variant — every
-booking — never sees a group price. The function was dropped and re-created with the new last
-parameter; positional callers are unchanged. Settings → Types & prices shows and sets it.
-
-**Seed 0007** puts Ina's workbook into `rates`, valid from 2026-01-01, editable in Settings. Its three
-defects do not carry over: materials are added, a monthly ticket covers four weeks, the room follows
-the stay's length. Nothing beyond four weeks of accommodation is priced; such a line shows "No price"
-until somebody types one.
+Lines carry `included` (0021): a part of a package, printed as "inklusive" / "included" without an
+amount. Two charge types were added: `group_package` and `escort_share`.
 
 ## How an offer is computed (`src/lib/admin/offers`, pure, tested)
 
-- **Length.** Dates give nights and weeks (`ceil(nights / 7)`: 13 nights are two weeks — CASA's
-  "1 week (7 days/6 nights)"); without dates the typed weeks count. Course weeks default to the stay.
-- **Participants' lines.** Course (`person_week` × course weeks), materials once, host family for the
-  stay (band by weeks), canteen lunch (× course weeks), transport, culture (× weeks), handling once.
-- **Escorts' lines.** No course, no materials; their own room type (single by default), an adult
-  ticket, the same canteen, culture and handling.
-- **Tickets.** The cheapest mix of weekly and monthly tickets for the stay: two weeks are two weekly
-  tickets (50), three or four one monthly (75), five one of each.
-- **Escorts are paid three ways.** *Pay their own* — a second block on the letter, in the group total.
-  *Free of charge* — a sentence on the letter; what they cost CASA shows in the editor. *Shared by the
-  group* — a line "Share of the escorts' costs" per participant, the escorts' total spread over the
-  participants and **rounded up to the euro**, so the group always covers them.
-- **Typed prices.** A price typed over a computed line is kept by the line's key (`participant:tuition`)
-  and survives every change to the stay; the quantity always follows the stay. The editor marks it and
-  shows the list price; a check lists it as a hint ("140 € instead of 145 €"); ↺ returns to the list.
+Group offers price from the groups page's own figures, so an offer and the website never disagree
+(`engine.test.ts` checks Esel against `calculateEselQuote` from `src/lib/gruppen/quote.ts`).
+
+- **The package.** *Hahn* (1 week, 595 €), *Katze* (2 weeks, 1,130 €), *Hund* (2 weeks plus Hamburg,
+  1,300 €) are fixed: one line with the package price per person, then what it includes — course
+  (20 lessons a week), host family with breakfast and dinner, canteen lunch, the transport ticket,
+  materials and the package's afternoons by name — as included lines without amounts. *Esel* is
+  built: each block (course, materials, host family, lunch, transport) at the Esel sheet's price for
+  the stay's weeks (1–4; beyond four nothing is priced and sending is stopped), and the afternoons
+  chosen from the sixteen activities, five a week at most (a hint beyond that). Choosing Esel after a
+  fixed package starts from that package's blocks and afternoons — "Change it as Esel".
+- **Length.** Dates give nights and weeks (`ceil(nights / 7)`: 13 nights are two weeks). A fixed
+  package is priced for its own weeks; when the dates disagree, a hint says so. Without dates, a fixed
+  package takes its own length and Esel the weeks typed.
+- **Escorts.** No course, no materials; host family, lunch, transport and the afternoons at the same
+  block prices. *Pay their own* — a second block on the letter, in the group total. *Free of charge* —
+  a sentence on the letter; what they cost CASA shows on the page. *Shared by the group* — a line
+  "Share of the escorts' costs" per participant, rounded up to the euro.
+- **Typed prices.** A price typed over a computed line is kept by the line's key and survives every
+  change to the stay; it is marked and the list price shown, a check lists it as a hint, and *Use it*
+  returns to the list price.
+- **Individual offers** are lines from the price list (courses at their cohort's rate, the enrolment
+  fee, books, exams) or typed lines.
 - **Totals.** Per participant, per escort, and the group: participants × per person (+ paying escorts).
 
 ## The letter (`document.ts`, `components/admin/offers/letter.tsx`)
@@ -200,10 +210,13 @@ admin:check` loads the list, the start, an offer and its letter.
    catering. The tax adviser should say what an offer must state. (`charge_types.vat_rate` for
    accommodation, catering and books also looks swapped against FileMaker's own fee table — 19/7/19
    in seed 0003 against 7/19/7 — to be settled in the same conversation.)
-2. **Ina's workbook corrections** (materials added, monthly ticket per four weeks, room by stay length)
-   and a price for stays beyond four weeks.
-3. **Escorts.** Is there a free-place rule (one free escort per 10 or 15 participants)? Is rounding the
-   shared amount up to the euro right?
+2. **The package premium.** Rebuilt from Esel's blocks, Katze costs 1,044 € against its 1,130 €
+   package price (Hahn 542 / 595, Hund 1,117 / 1,300), and the margin is not the same for the three
+   (`src/config/gruppen/packages.ts` has the open note). The offer shows both — the package price,
+   and Esel when someone switches.
+3. **Escorts.** Is there a free-place rule (one free escort per 10 or 15 participants)? Do escorts of a
+   fixed package pay the block prices (as built) or something else? Is rounding the shared amount up
+   to the euro right? Single rooms for escorts have no price in the sheet.
 4. **Payment and cancellation terms** on the letter — a standard paragraph, or a link to the AGB?
 5. **du for public bodies.** The Jobcenter and companies get du like everyone (the house rule); the
    opening and closing can be rewritten per offer.

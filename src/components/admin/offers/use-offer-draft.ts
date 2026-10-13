@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { offerChecks } from '@/lib/admin/offers/checks';
-import { buildLines, computeTotals, type GroupRateCard } from '@/lib/admin/offers/engine';
+import { buildLines, computeTotals } from '@/lib/admin/offers/engine';
 import type { OfferCheck, OfferDraft, OfferLine, OfferStatus, OfferTotals } from '@/lib/admin/offers/types';
 
 import { saveOfferAction } from '@/app/(admin)/admin/(editor)/offers/actions';
@@ -14,8 +14,8 @@ export type SaveState = 'saved' | 'dirty' | 'saving' | 'error' | 'stale';
  * One offer's draft, saving itself — the builder and the letter both hold it.
  *
  * The draft is the only state: lines, totals and checks are computed from it
- * with the same pure functions the server uses, against the rates the server
- * last resolved, so the screen answers as fast as one types. The save — 0.7 s
+ * with the same pure functions the server uses, so the screen answers as fast
+ * as one types. The save — 0.7 s
  * after the last change — names the revision it started from; a colleague's
  * save in between is refused and the screen offers a reload (Kursplanung's
  * rule), never overwritten.
@@ -24,7 +24,6 @@ export function useOfferDraft({
   id,
   status,
   initialDraft,
-  initialCard,
   initialRevision,
   storedLines,
   editable,
@@ -33,14 +32,12 @@ export function useOfferDraft({
   id: string;
   status: OfferStatus;
   initialDraft: OfferDraft;
-  initialCard: GroupRateCard;
   initialRevision: number;
   storedLines: OfferLine[];
   editable: boolean;
   today: string;
 }) {
   const [draft, setDraft] = useState(initialDraft);
-  const [card, setCard] = useState(initialCard);
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -64,7 +61,6 @@ export function useOfferDraft({
       const result = await saveOfferAction(id, revision.current, next);
       if (result.ok) {
         revision.current = result.revision;
-        setCard(result.card);
         setSaveError(null);
         setSaveState(pending.current ? 'dirty' : 'saved');
       } else if (result.stale) {
@@ -117,7 +113,7 @@ export function useOfferDraft({
     };
   }, [flush]);
 
-  const lines = useMemo(() => (status === 'draft' ? buildLines(draft, card) : storedLines), [draft, card, status, storedLines]);
+  const lines = useMemo(() => (status === 'draft' ? buildLines(draft) : storedLines), [draft, status, storedLines]);
   const totals: OfferTotals = useMemo(() => computeTotals(draft, lines), [draft, lines]);
   const checks: OfferCheck[] = useMemo(() => (status === 'draft' ? offerChecks(draft, lines, today) : []), [draft, lines, today, status]);
 

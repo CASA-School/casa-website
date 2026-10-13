@@ -2,11 +2,12 @@
  * A group enquiry's brief, read as the start of an offer. Pure.
  *
  * The public groups form stores machine tokens (`half-board-plus-canteen`,
- * `14-17`) precisely so a brief can be handed to the price model without a
- * translation layer (src/lib/validation/contact.ts). This is that hand-over.
- * Whatever the organiser left as "undecided" keeps the builder's default; the
- * free-text preferred dates stay text, shown beside the dates rather than
- * guessed into them.
+ * `not-needed`) so a brief can be handed on without a translation layer
+ * (src/lib/validation/contact.ts). This is that hand-over, onto the packages
+ * of the groups page: a group that takes everything for one week is Hahn, for
+ * two weeks Katze; a group that leaves a block out, or stays longer, builds its
+ * own — Esel, with those blocks switched off. The free-text preferred dates stay
+ * text, shown beside the dates rather than guessed into them.
  */
 
 import { DEFAULT_STAY, type StayChoices } from './types';
@@ -21,34 +22,16 @@ const num = (brief: Brief, key: string) => {
 };
 
 export function choicesFromBrief(brief: Brief): StayChoices {
-  const c: StayChoices = { ...DEFAULT_STAY };
-  const weeks = num(brief, 'durationWeeks');
-  if (weeks) c.weeks = Math.min(weeks, 52);
-  const lessons = num(brief, 'weeklyLessons');
-  if (lessons) c.lessonsPerWeek = Math.min(lessons, 60);
-
-  const accommodation = str(brief, 'accommodation');
-  if (accommodation === 'not-needed') c.accommodation = false;
-  if (accommodation === 'double' || accommodation === 'single') c.room = accommodation;
-
-  const meals = str(brief, 'meals');
-  if (meals === 'half-board' || meals === 'not-needed') c.canteen = false;
-  if (meals === 'half-board-plus-canteen') c.canteen = true;
-
-  const transport = str(brief, 'transport');
-  if (transport === 'not-needed') c.transit = false;
-  if (transport === 'weekly' || transport === 'monthly') c.transit = true;
-
-  const culture = str(brief, 'cultureProgramme');
-  if (culture === 'not-needed') c.culture = 'none';
-  if (culture === 'small' || culture === 'medium' || culture === 'large') c.culture = culture;
-
-  // A pupil's ticket is for pupils. An older or mixed group travels on the
-  // adult fare, which never under-charges.
-  const age = str(brief, 'ageBand');
-  if (age) c.fare = age === 'under-14' || age === '14-17' ? 'student' : 'adult';
-
-  return c;
+  const weeks = Math.min(num(brief, 'durationWeeks') ?? DEFAULT_STAY.weeks, 52);
+  const modules = {
+    ...DEFAULT_STAY.modules,
+    accommodation: str(brief, 'accommodation') !== 'not-needed',
+    lunch: str(brief, 'meals') !== 'not-needed' && str(brief, 'meals') !== 'half-board',
+    transport: str(brief, 'transport') !== 'not-needed',
+  };
+  const everything = modules.accommodation && modules.lunch && modules.transport;
+  const pkg = everything && weeks === 1 ? 'hahn' : everything && weeks === 2 ? 'katze' : 'esel';
+  return { ...DEFAULT_STAY, package: pkg, weeks, modules };
 }
 
 export function participantsFromBrief(brief: Brief): number | null {

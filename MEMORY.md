@@ -2549,12 +2549,18 @@ the letter a hand-edited text that drifts from the offer (37602: 1,560 € in th
 letter), German and English labels that disagree, escorts as second offers, no status, no validity,
 Ina's group offers signed "– Buchhaltung –". docs/OFFERS.md has the measurements and the model.
 
-Built: migration 0021 (organisations, offers, offer_lines, offer_versions, offer_texts, and
-`rates.variant` with `applicable_rate()` re-created), seed 0007 (Ina's workbook as group rates), a pure
-engine (dates → nights/weeks, cheapest ticket mix, escorts paid/free/shared, typed prices kept by key),
-checks before sending, the letter as a view of the offer (du), frozen versions, standard texts.
+Built: migration 0021 (organisations, offers, offer_lines with `included`, offer_versions, offer_texts),
+a pure engine on the groups page's four packages (`src/config/gruppen/packages.ts`: Hahn, Katze, Hund
+fixed with their price and what they include; Esel built from the Esel sheet's blocks and the sixteen
+activities — checked against the site's own `calculateEselQuote`), escorts paid/free/shared and
+rounded up, typed prices kept by key, checks before sending, the letter as a view of the offer (du),
+frozen versions, standard texts. A first version priced groups from the older 2026-08-12 workbook via
+`rates.variant`; it was dropped the same day, because the packages are the current product.
 
-Design: two versions were rejected the same day as cluttered. Rahman chose a focused page like the
-website editor — full screen, plain values, a click opens a small panel, Offer | Letter tabs, the
-letter edited on the page, "Who is it for?" to start. The rest of the workspace follows this style
+Design: two versions were rejected the same day as cluttered, then a FileMaker-like mock-up was
+stopped ("not like FileMaker, keep improving it"). Rahman chose a focused page like the website
+editor — full screen, plain values, a click opens a small panel, Offer | Letter tabs, the letter
+edited on the page, "Who is it for?" to start — and then asked for colour: a tinted head with fact
+chips, the packages as cards in the four CASA colours, meaning colours per included row, a dark price
+card, panels with a head and a foot, filled fields. The rest of the workspace follows this style
 next. Not merged, not deployed.

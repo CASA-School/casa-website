@@ -1,61 +1,38 @@
 /**
  * The offer's lines and totals, computed. Pure: no database, no clock.
  *
- * FileMaker types every price into every offer (171 variants of "Kurspreis"),
- * gives the escort a second offer of their own, and spreads the escort's costs
- * over the students by hand. Here a group stay is described once — dates or
- * weeks, participants, escorts, the choices — and every line follows from it
- * and from the rates valid on the arrival date. A price typed over a computed
- * line is kept by the line's key and shown as changed; the quantity always
- * follows the stay, so a longer stay cannot keep a short stay's numbers
- * (the workbook's third defect).
+ * A group offer is one of the four packages the groups page sells
+ * (src/config/gruppen/packages.ts — Ina's `Gruppenpakete_Stadtmusikanten.docx`
+ * and `Gruppenreise Esel_Auswahl.xlsx`), priced from the same figures, so the
+ * offer and the website never disagree:
  *
- * The repository resolves the rates (`GroupRateCard`); this module decides
- * what is on the offer and what it costs.
+ *   Hahn, Katze, Hund — fixed: one package price per person, and what it
+ *                       includes listed without amounts.
+ *   Esel              — built: each block (course, materials, host family,
+ *                       canteen, transport) priced for the stay's length, and
+ *                       the afternoons chosen from the sixteen activities.
+ *
+ * Escorts take no course and no materials; their stay is priced from the same
+ * blocks. A price typed over a computed line is kept by the line's key and
+ * shown as changed; the quantity and the text always follow the stay.
+ * FileMaker types every price into every offer (171 variants of "Kurspreis").
  */
+
+import { GRUPPEN_MODULES, MAX_ACTIVITIES_PER_WEEK, TEACHING_UNITS_PER_WEEK, getGruppenPackage, activityById, type GruppenModuleId, type GruppenWeeks } from '@/config/gruppen/packages';
 
 import { stayLength } from './stay';
 import {
   overrideKey,
   type Audience,
-  type Fare,
   type ManualLine,
+  type ModuleKey,
   type OfferKind,
   type OfferLanguage,
   type OfferLine,
   type OfferTotals,
+  type PackageSlug,
   type StayState,
 } from './types';
-
-export type RateUnit = 'item' | 'week' | 'lesson' | 'night' | 'month' | 'person_week';
-export type Rate = { id: string; amount: number; unit: RateUnit };
-
-export type TicketVariant = `${Fare}-${'week' | 'month'}`;
-
-/** The rates one group stay needs, already resolved for its date and length. */
-export type GroupRateCard = {
-  tuition: Rate | null;
-  materials: Rate | null;
-  handling: Rate | null;
-  canteen: Rate | null;
-  /** For the chosen size of programme. */
-  culture: Rate | null;
-  /** For the participants' room and the stay's length. */
-  room: Rate | null;
-  escortRoom: Rate | null;
-  tickets: Record<TicketVariant, Rate | null>;
-};
-
-export const EMPTY_RATE_CARD: GroupRateCard = {
-  tuition: null,
-  materials: null,
-  handling: null,
-  canteen: null,
-  culture: null,
-  room: null,
-  escortRoom: null,
-  tickets: { 'student-week': null, 'student-month': null, 'adult-week': null, 'adult-month': null },
-};
 
 export type StayInput = {
   kind: OfferKind;
@@ -67,16 +44,34 @@ export type StayInput = {
   stay: StayState;
 };
 
-export type Measure = { nights: number; weeks: number; courseWeeks: number; fromDates: boolean };
+export type Measure = { nights: number; weeks: number; fromDates: boolean };
 
-/** Nights and weeks from the dates, or from the weeks typed when there are none. */
+/** The weeks a package is sold for; null for Esel, which takes the stay's. */
+export function packageWeeks(slug: PackageSlug): number | null {
+  return getGruppenPackage(slug)?.weeks ?? null;
+}
+
+/**
+ * Nights and weeks. Dates decide when there are both; otherwise a fixed
+ * package's own length, or the weeks typed for Esel. A week is up to seven
+ * nights — CASA's "1 week (7 days/6 nights)" — so 13 nights are two weeks.
+ */
 export function measure(input: Pick<StayInput, 'arrival' | 'departure' | 'stay'>): Measure {
   const fromDates = stayLength(input.arrival, input.departure);
-  const weeks = fromDates?.weeks ?? Math.max(1, Math.round(input.stay.choices.weeks));
-  const nights = fromDates?.nights ?? weeks * 7 - 1;
-  const typed = input.stay.choices.courseWeeks;
-  const courseWeeks = typed != null && typed > 0 ? Math.round(typed) : weeks;
-  return { nights, weeks, courseWeeks, fromDates: fromDates != null };
+  if (fromDates) return { ...fromDates, fromDates: true };
+  const weeks = packageWeeks(input.stay.choices.package) ?? Math.max(1, Math.round(input.stay.choices.weeks));
+  return { nights: weeks * 7 - 1, weeks, fromDates: false };
+}
+
+/** The weeks the package is priced for: a fixed package's own, Esel's stay. */
+export function pricedWeeks(input: Pick<StayInput, 'arrival' | 'departure' | 'stay'>): number {
+  return packageWeeks(input.stay.choices.package) ?? measure(input).weeks;
+}
+
+/** The afternoons of the offer: a fixed package's own, or Esel's choice. */
+export function activitiesOf(choices: StayState['choices']): string[] {
+  const pkg = getGruppenPackage(choices.package);
+  return choices.package === 'esel' ? choices.activities.filter((id) => activityById.has(id as never)) : (pkg?.activities ?? []);
 }
 
 // ------------------------------------------------------------------ texts
@@ -85,66 +80,27 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 const TEXT = {
   de: {
-    tuition: (w: number, l: number) => `Deutschkurs: ${plural(w, 'Woche', 'Wochen')}, ${l} UE pro Woche`,
-    room: (room: string, nights: number) =>
-      `Unterkunft in Gastfamilien, ${room === 'single' ? 'Einzelzimmer' : 'Doppelzimmer'}, Halbpension (${plural(nights, 'Nacht', 'Nächte')})`,
-    canteen: 'Mittagessen in der Kantine an Kurstagen',
-    tickets: (month: number, week: number) =>
-      `Fahrkarte ÖPNV: ${[
-        month ? plural(month, 'Monatsticket', 'Monatstickets') : '',
-        week ? plural(week, 'Wochenticket', 'Wochentickets') : '',
-      ]
-        .filter(Boolean)
-        .join(' und ')}`,
-    culture: 'Kulturprogramm',
+    package: (animal: string, descriptor: string) => `Paket ${animal} · ${descriptor}`,
+    course: (w: number) => `Deutsch-Intensivkurs, ${plural(w, 'Woche', 'Wochen')}, ${w * TEACHING_UNITS_PER_WEEK} UE (Mo–Fr 09:00–12:30)`,
     materials: 'Lehrmaterial',
-    handling: 'Verwaltungskosten',
+    accommodation: (nights: number) => `Unterkunft in Gastfamilien, Doppelzimmer, Frühstück und Abendessen (${plural(nights, 'Nacht', 'Nächte')})`,
+    lunch: 'Mittagessen in der Kantine an Unterrichtstagen',
+    transport: 'ÖPNV-Ticket Bremen für den ganzen Aufenthalt',
+    programme: (names: string[]) => `Kulturprogramm: ${names.join(', ')}`,
     share: (escorts: number) =>
       escorts === 1 ? 'Anteil an den Kosten der Begleitperson' : 'Anteil an den Kosten der Begleitpersonen',
   },
   en: {
-    tuition: (w: number, l: number) => `German course: ${plural(w, 'week', 'weeks')}, ${l} lessons a week`,
-    room: (room: string, nights: number) =>
-      `Host family, ${room === 'single' ? 'single' : 'double'} room, half board (${plural(nights, 'night', 'nights')})`,
-    canteen: 'Lunch at a nearby canteen on course days',
-    tickets: (month: number, week: number) =>
-      `Public transport: ${[
-        month ? plural(month, 'monthly ticket', 'monthly tickets') : '',
-        week ? plural(week, 'weekly ticket', 'weekly tickets') : '',
-      ]
-        .filter(Boolean)
-        .join(' and ')}`,
-    culture: 'Cultural programme',
-    materials: 'Learning material',
-    handling: 'Handling fee',
+    package: (animal: string, descriptor: string) => `${animal} package · ${descriptor}`,
+    course: (w: number) => `Intensive German course, ${plural(w, 'week', 'weeks')}, ${w * TEACHING_UNITS_PER_WEEK} lessons (Mon–Fri 09:00–12:30)`,
+    materials: 'Course materials',
+    accommodation: (nights: number) => `Host family, double room, breakfast and dinner (${plural(nights, 'night', 'nights')})`,
+    lunch: 'Lunch at the canteen on school days',
+    transport: 'Bremen public transport ticket for the whole stay',
+    programme: (names: string[]) => `Culture programme: ${names.join(', ')}`,
     share: (escorts: number) => (escorts === 1 ? "Share of the escort's costs" : "Share of the escorts' costs"),
   },
 } as const;
-
-// ----------------------------------------------------------- transit mix
-
-export type TicketMix = { monthly: number; weekly: number; total: number };
-
-/**
- * The cheapest set of tickets that covers `weeks`. A monthly ticket covers
- * four weeks: for two weeks two weekly tickets (50) beat a monthly one (75),
- * for four weeks the monthly one wins, for five it is one of each. The
- * workbook charged a monthly ticket per week (its second defect).
- */
-export function cheapestTickets(weeks: number, weekly: number | null, monthly: number | null): TicketMix | null {
-  if (weeks <= 0 || (weekly == null && monthly == null)) return null;
-  let best: TicketMix | null = null;
-  const maxMonthly = monthly == null ? 0 : Math.ceil(weeks / 4);
-  for (let m = 0; m <= maxMonthly; m += 1) {
-    const rest = Math.max(0, weeks - 4 * m);
-    if (rest > 0 && weekly == null) continue;
-    const total = m * (monthly ?? 0) + rest * (weekly ?? 0);
-    if (!best || total < best.total || (total === best.total && m + rest < best.monthly + best.weekly)) {
-      best = { monthly: m, weekly: rest, total };
-    }
-  }
-  return best;
-}
 
 // ----------------------------------------------------------------- lines
 
@@ -152,134 +108,97 @@ type Computed = Omit<OfferLine, 'amount' | 'manual' | 'customText'>;
 
 const money = (n: number) => Math.round(n * 100) / 100;
 
-function quantityFor(unit: RateUnit, weeks: number, nights: number, lessons: number): number {
-  switch (unit) {
-    case 'week':
-    case 'person_week':
-      return weeks;
-    case 'night':
-      return nights;
-    case 'lesson':
-      return lessons;
-    case 'month':
-      return Math.ceil(weeks / 4);
-    default:
-      return 1;
-  }
+const MODULE_OF: Record<Exclude<ModuleKey, 'course'> | 'course', GruppenModuleId> = {
+  course: 'language-class',
+  materials: 'teaching-material',
+  accommodation: 'accommodation',
+  lunch: 'lunch',
+  transport: 'transport',
+};
+
+const CHARGE_OF: Record<ModuleKey | 'programme', string> = {
+  course: 'tuition',
+  materials: 'teaching_material',
+  accommodation: 'accommodation_rent',
+  lunch: 'catering',
+  transport: 'travel_ticket',
+  programme: 'culture_programme',
+};
+
+/** A block's price for the whole stay; none beyond the four weeks the sheet prices. */
+function modulePrice(key: ModuleKey, weeks: number): number | null {
+  const m = GRUPPEN_MODULES.find((x) => x.id === MODULE_OF[key]);
+  if (!m || weeks < 1 || weeks > 4) return null;
+  return m.priceByWeeks[weeks as GruppenWeeks];
 }
 
-function fromRate(
-  base: Omit<Computed, 'quantity' | 'unit' | 'unitAmount' | 'listUnitAmount' | 'rateId'>,
-  rate: Rate | null,
-  weeks: number,
-  nights: number,
-  lessons: number,
-  fallbackUnit: RateUnit
-): Computed {
-  const unit = rate?.unit ?? fallbackUnit;
+function line(audience: Audience, key: string, chargeType: string, description: string, unitAmount: number | null, included = false): Computed {
   return {
-    ...base,
-    quantity: quantityFor(unit, weeks, nights, lessons),
-    unit: unit === 'person_week' ? 'week' : unit,
-    unitAmount: rate?.amount ?? null,
-    listUnitAmount: rate?.amount ?? null,
-    rateId: rate?.id ?? null,
-  };
-}
-
-function ticketLine(audience: Audience, fare: Fare, weeks: number, card: GroupRateCard, language: OfferLanguage): Computed {
-  const weekly = card.tickets[`${fare}-week`];
-  const monthly = card.tickets[`${fare}-month`];
-  const mix = cheapestTickets(weeks, weekly?.amount ?? null, monthly?.amount ?? null);
-  return {
-    key: 'transit',
+    key,
     audience,
-    chargeType: 'travel_ticket',
-    description: TEXT[language].tickets(mix?.monthly ?? 0, mix?.weekly ?? weeks),
+    chargeType,
+    description,
     quantity: 1,
     unit: 'item',
-    unitAmount: mix ? money(mix.total) : null,
-    listUnitAmount: mix ? money(mix.total) : null,
-    rateId: (mix && mix.weekly > 0 ? weekly?.id : monthly?.id) ?? null,
+    unitAmount: included ? 0 : unitAmount,
+    listUnitAmount: included ? 0 : unitAmount,
+    rateId: null,
+    included,
   };
 }
 
-/** The lines the builder computes for a group, before anything typed over them. */
-export function computedLines(input: StayInput, card: GroupRateCard): Computed[] {
+/** The lines a group offer computes, before anything typed over them. */
+export function computedLines(input: StayInput): Computed[] {
   if (input.kind !== 'group') return [];
-  const { choices } = input.stay;
   const t = TEXT[input.language];
-  const { nights, weeks, courseWeeks } = measure(input);
-  const lessons = courseWeeks * choices.lessonsPerWeek;
+  const { choices } = input.stay;
+  const { nights } = measure(input);
+  const weeks = pricedWeeks(input);
+  const pkg = getGruppenPackage(choices.package);
+  const activities = activitiesOf(choices);
+  const names = activities.map((id) => activityById.get(id as never)?.name ?? id);
+  const programmePrice = activities.reduce((s, id) => s + (activityById.get(id as never)?.price ?? 0), 0);
   const out: Computed[] = [];
 
-  const add = (audience: Audience) => {
-    const isEscort = audience === 'escort';
-    if (!isEscort && choices.course) {
-      out.push(
-        fromRate(
-          { key: 'tuition', audience, chargeType: 'tuition', description: t.tuition(courseWeeks, choices.lessonsPerWeek) },
-          card.tuition,
-          courseWeeks,
-          nights,
-          lessons,
-          'person_week'
-        )
-      );
-      if (choices.materials) {
-        out.push(fromRate({ key: 'materials', audience, chargeType: 'teaching_material', description: t.materials }, card.materials, weeks, nights, lessons, 'item'));
-      }
-    }
-    if (choices.accommodation) {
-      const room = isEscort ? choices.escortRoom : choices.room;
-      out.push(
-        fromRate(
-          { key: 'accommodation', audience, chargeType: 'accommodation_rent', description: t.room(room, nights) },
-          isEscort ? card.escortRoom : card.room,
-          weeks,
-          nights,
-          lessons,
-          'item'
-        )
-      );
-    }
-    if (choices.canteen) {
-      out.push(fromRate({ key: 'canteen', audience, chargeType: 'catering', description: t.canteen }, card.canteen, courseWeeks, nights, lessons, 'person_week'));
-    }
-    if (choices.transit) {
-      out.push(ticketLine(audience, isEscort ? 'adult' : choices.fare, weeks, card, input.language));
-    }
-    if (choices.culture !== 'none') {
-      out.push(fromRate({ key: 'culture', audience, chargeType: 'culture_programme', description: t.culture }, card.culture, weeks, nights, lessons, 'person_week'));
-    }
-    if (choices.handling) {
-      out.push(fromRate({ key: 'handling', audience, chargeType: 'administrative_charge', description: t.handling }, card.handling, weeks, nights, lessons, 'item'));
-    }
-  };
+  if (pkg && choices.package !== 'esel') {
+    // A fixed package: its price, and what it includes without amounts.
+    out.push(line('participant', 'package', 'group_package', t.package(pkg.animal[input.language], pkg.descriptor[input.language]), pkg.priceFrom));
+    out.push(line('participant', 'inc:course', 'tuition', t.course(weeks), null, true));
+    out.push(line('participant', 'inc:accommodation', 'accommodation_rent', t.accommodation(nights), null, true));
+    out.push(line('participant', 'inc:lunch', 'catering', t.lunch, null, true));
+    out.push(line('participant', 'inc:transport', 'travel_ticket', t.transport, null, true));
+    out.push(line('participant', 'inc:materials', 'teaching_material', t.materials, null, true));
+    if (names.length) out.push(line('participant', 'inc:programme', 'culture_programme', t.programme(names), null, true));
+  } else {
+    const m = choices.modules;
+    if (m.course) out.push(line('participant', 'course', CHARGE_OF.course, t.course(weeks), modulePrice('course', weeks)));
+    if (m.materials) out.push(line('participant', 'materials', CHARGE_OF.materials, t.materials, modulePrice('materials', weeks)));
+    if (m.accommodation) out.push(line('participant', 'accommodation', CHARGE_OF.accommodation, t.accommodation(nights), modulePrice('accommodation', weeks)));
+    if (m.lunch) out.push(line('participant', 'lunch', CHARGE_OF.lunch, t.lunch, modulePrice('lunch', weeks)));
+    if (m.transport) out.push(line('participant', 'transport', CHARGE_OF.transport, t.transport, modulePrice('transport', weeks)));
+    if (names.length) out.push(line('participant', 'programme', CHARGE_OF.programme, t.programme(names), programmePrice));
+  }
 
-  add('participant');
-  if (input.escorts > 0) add('escort');
+  // Escorts: the stay, the meals, the ticket and the afternoons; no course.
+  if (input.escorts > 0) {
+    const fixed = choices.package !== 'esel';
+    const m = choices.modules;
+    if (fixed || m.accommodation) out.push(line('escort', 'accommodation', CHARGE_OF.accommodation, t.accommodation(nights), modulePrice('accommodation', weeks)));
+    if (fixed || m.lunch) out.push(line('escort', 'lunch', CHARGE_OF.lunch, t.lunch, modulePrice('lunch', weeks)));
+    if (fixed || m.transport) out.push(line('escort', 'transport', CHARGE_OF.transport, t.transport, modulePrice('transport', weeks)));
+    if (names.length) out.push(line('escort', 'programme', CHARGE_OF.programme, t.programme(names), programmePrice));
+  }
   return out;
 }
 
-function finish(line: Computed, manual: boolean, customText: boolean): OfferLine {
-  const amount = line.unitAmount == null ? null : money(line.quantity * line.unitAmount);
-  return { ...line, amount, manual, customText };
+function finish(l: Computed, manual: boolean, customText: boolean): OfferLine {
+  const amount = l.unitAmount == null ? null : money(l.quantity * l.unitAmount);
+  return { ...l, amount, manual, customText };
 }
 
 function manualLine(m: ManualLine): OfferLine {
   return finish(
-    {
-      key: m.key,
-      audience: m.audience,
-      chargeType: m.chargeType,
-      description: m.description,
-      quantity: m.quantity,
-      unit: 'item',
-      unitAmount: m.unitAmount,
-      listUnitAmount: null,
-      rateId: null,
-    },
+    { key: m.key, audience: m.audience, chargeType: m.chargeType, description: m.description, quantity: m.quantity, unit: 'item', unitAmount: m.unitAmount, listUnitAmount: null, rateId: null, included: false },
     true,
     false
   );
@@ -290,18 +209,15 @@ const sum = (lines: OfferLine[]) => money(lines.reduce((s, l) => s + (l.amount ?
 /**
  * Every line of the offer: computed ones with what was typed over them, the
  * typed lines, and — when the group carries its escorts — the participants'
- * share of them, computed last from the escorts' final lines.
+ * share of them, computed last from the escorts' final lines and rounded up to
+ * the euro, so the group always covers them.
  */
-export function buildLines(input: StayInput, card: GroupRateCard): OfferLine[] {
+export function buildLines(input: StayInput): OfferLine[] {
   const { overrides, manual, choices } = input.stay;
-  const lines = computedLines(input, card).map((line) => {
-    const o = overrides[overrideKey(line.audience, line.key)];
+  const lines = computedLines(input).map((l) => {
+    const o = overrides[overrideKey(l.audience, l.key)];
     return finish(
-      {
-        ...line,
-        unitAmount: o?.unitAmount ?? line.unitAmount,
-        description: o?.description?.trim() ? o.description : line.description,
-      },
+      { ...l, unitAmount: l.included ? 0 : (o?.unitAmount ?? l.unitAmount), description: o?.description?.trim() ? o.description : l.description },
       false,
       Boolean(o?.description?.trim())
     );
@@ -327,6 +243,7 @@ export function buildLines(input: StayInput, card: GroupRateCard): OfferLine[] {
           unitAmount: o?.unitAmount ?? share,
           listUnitAmount: share,
           rateId: null,
+          included: false,
         },
         false,
         Boolean(o?.description?.trim())
@@ -347,11 +264,10 @@ export function computeTotals(input: Pick<StayInput, 'kind' | 'participants' | '
   const pricing = input.stay.choices.escortPricing;
   const perEscort = input.escorts > 0 && e.length ? sum(e) : null;
   const share = p.find((l) => l.key === 'escort_share')?.amount ?? null;
-  const participants = input.participants;
   const groupTotal =
-    participants == null || perParticipant == null
+    input.participants == null || perParticipant == null
       ? null
-      : money(participants * perParticipant + (pricing === 'paid' && perEscort != null ? input.escorts * perEscort : 0));
+      : money(input.participants * perParticipant + (pricing === 'paid' && perEscort != null ? input.escorts * perEscort : 0));
   return {
     perParticipant,
     perEscort,
@@ -360,3 +276,6 @@ export function computeTotals(input: Pick<StayInput, 'kind' | 'participants' | '
     carriedByCasa: pricing === 'free' && perEscort != null ? money(input.escorts * perEscort) : null,
   };
 }
+
+/** How many afternoons Esel allows: five a week (the Esel sheet, row 11). */
+export const activityAllowance = (weeks: number) => weeks * MAX_ACTIVITIES_PER_WEEK;

@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react';
 import { hasProblems } from '@/lib/admin/offers/checks';
 import { buildLetter, type OfferLetter } from '@/lib/admin/offers/document';
 import { setLineText } from '@/lib/admin/offers/draft-ops';
-import type { GroupRateCard } from '@/lib/admin/offers/engine';
 import type { EditorOptions, OfferRecord, StandardTexts } from '@/lib/admin/offers/repo';
 import { addDays } from '@/lib/admin/offers/stay';
 import { OFFER_STATUS_LABELS, overrideKey, type OfferLanguage } from '@/lib/admin/offers/types';
@@ -38,7 +37,6 @@ const JOBCENTER_NOTE =
  */
 export function LetterView({
   record,
-  card,
   options,
   texts: initialTexts,
   sentLetter,
@@ -50,7 +48,6 @@ export function LetterView({
   notice,
 }: {
   record: OfferRecord;
-  card: GroupRateCard;
   options: EditorOptions;
   texts: StandardTexts;
   sentLetter: OfferLetter | null;
@@ -67,7 +64,6 @@ export function LetterView({
     id: meta.id,
     status: meta.status,
     initialDraft: record.draft,
-    initialCard: card,
     initialRevision: meta.revision,
     storedLines: record.lines,
     editable: canWrite && meta.status === 'draft',

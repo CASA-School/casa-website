@@ -23,15 +23,13 @@
 --     ("Umlage begleitende Lehrkraft 2 × 60"), and nothing knows how many
 --     people the group has or what it costs in total.
 --   * Every price is typed. "Kurspreis" alone has 171 variants. The stored
---     `TotalAmount` is empty on all 396 offers.
+--     `TotalAmount` is empty on all 396 offers. Group offers now price from the
+--     four packages the groups page sells (src/config/gruppen/packages.ts).
 --   * No status, no validity, no follow-up: whether an offer was accepted is
 --     not recorded anywhere.
 --
 -- WHAT THIS ADDS
 --
---   rates.variant   which version of a priced thing: a student or an adult
---                   ticket, a culture programme's size, the group price of a
---                   room. Group offers price from `rates` like everything else.
 --   organisations   the schools, agencies, companies and public bodies CASA
 --                   makes offers to, so "earlier offers to Vivimondo" is a query.
 --   offers          one per offer, with the group (participants, escorts,
@@ -44,70 +42,15 @@
 --                   uses them until somebody changes its text on the letter;
 --                   "Save as standard" changes them for every offer after.
 
--- ---------------------------------------------------------- rates.variant
-
-ALTER TABLE rates ADD COLUMN IF NOT EXISTS variant text;
-
-COMMENT ON COLUMN rates.variant IS
-  'Which version of the priced thing: student/adult (tickets), small/medium/large (culture), group (room, materials, fees for group offers). Matched exactly: a lookup without a variant never gets a variant rate.';
-
-/* Same function, one more narrowing condition. The old signature is dropped
-   first: CREATE OR REPLACE with a different argument list adds an overload,
-   and two applicable_rate()s would make every positional call ambiguous. */
-DROP FUNCTION IF EXISTS applicable_rate(
-  rate_scope, date, uuid, uuid, uuid, text, text, text, text, text, text, numeric, smallint
-);
-
-CREATE OR REPLACE FUNCTION applicable_rate(
-  p_scope rate_scope,
-  p_on date,
-  p_course_type_id uuid DEFAULT NULL,
-  p_exam_type_id uuid DEFAULT NULL,
-  p_material_id uuid DEFAULT NULL,
-  p_accommodation_type_code text DEFAULT NULL,
-  p_catering_code text DEFAULT NULL,
-  p_room_type_code text DEFAULT NULL,
-  p_charge_type_code text DEFAULT NULL,
-  p_level_code text DEFAULT NULL,
-  p_day_time_code text DEFAULT NULL,
-  p_quantity numeric DEFAULT NULL,
-  p_parts smallint DEFAULT NULL,
-  p_variant text DEFAULT NULL
-) RETURNS uuid
-LANGUAGE sql STABLE AS $$
-  SELECT r.id
-    FROM rates r
-   WHERE r.scope = p_scope
-     AND r.valid_from <= p_on
-     AND (r.valid_to IS NULL OR r.valid_to >= p_on)
-     AND (p_course_type_id IS NULL OR r.course_type_id IS NULL OR r.course_type_id = p_course_type_id)
-     AND (p_exam_type_id IS NULL OR r.exam_type_id IS NULL OR r.exam_type_id = p_exam_type_id)
-     AND (p_material_id IS NULL OR r.material_id IS NULL OR r.material_id = p_material_id)
-     AND (p_accommodation_type_code IS NULL OR r.accommodation_type_code IS NULL OR r.accommodation_type_code = p_accommodation_type_code)
-     AND (r.catering_code IS NULL OR r.catering_code = p_catering_code)
-     AND (r.room_type_code IS NULL OR r.room_type_code = p_room_type_code)
-     AND (p_charge_type_code IS NULL OR r.charge_type_code IS NULL OR r.charge_type_code = p_charge_type_code)
-     AND (r.level_code IS NULL OR r.level_code = p_level_code)
-     AND (r.day_time_code IS NULL OR r.day_time_code = p_day_time_code)
-     AND (r.parts IS NULL OR r.parts = p_parts)
-     AND r.variant IS NOT DISTINCT FROM p_variant
-     AND (p_quantity IS NULL OR (
-           (r.min_quantity IS NULL OR p_quantity >= r.min_quantity)
-       AND (r.max_quantity IS NULL OR p_quantity <= r.max_quantity)))
-   ORDER BY (r.level_code IS NOT NULL) DESC,
-            (r.day_time_code IS NOT NULL) DESC,
-            (r.parts IS NOT NULL) DESC,
-            (r.min_quantity IS NOT NULL OR r.max_quantity IS NOT NULL) DESC,
-            (r.catering_code IS NOT NULL) DESC,
-            (r.room_type_code IS NOT NULL) DESC,
-            r.valid_from DESC
-   LIMIT 1;
-$$;
-
 -- The escorts' costs spread over the participants: FileMaker's typed
 -- "Umlage begleitende Lehrkraft", now a line the offer computes.
 INSERT INTO charge_types (code, category_code, name_en, name_de, short_de, is_credit, is_commissionable, vat_rate, is_active, position)
 VALUES ('escort_share', 'other', 'Share of the escorts'' costs', 'Anteil Begleitpersonen', 'Umlage', false, false, 0, true, 330)
+ON CONFLICT (code) DO NOTHING;
+
+-- A group package (Hahn, Katze, Hund): one price for what it includes.
+INSERT INTO charge_types (code, category_code, name_en, name_de, short_de, is_credit, is_commissionable, vat_rate, is_active, position)
+VALUES ('group_package', 'course', 'Group package', 'Gruppenpaket', 'Paket', false, false, 0, true, 335)
 ON CONFLICT (code) DO NOTHING;
 
 -- ---------------------------------------------------------- organisations
@@ -239,6 +182,8 @@ CREATE TABLE IF NOT EXISTS offer_lines (
   /* What the price list said, so a changed price shows as changed. */
   list_unit_amount numeric(10,2),
   rate_id uuid REFERENCES rates (id) ON DELETE SET NULL,
+  /* Part of a package: listed on the letter as included, without an amount. */
+  included boolean NOT NULL DEFAULT false,
   CONSTRAINT offer_lines_audience_check CHECK (audience IN ('participant', 'escort')),
   CONSTRAINT offer_lines_key_unique UNIQUE (offer_id, audience, key)
 );
