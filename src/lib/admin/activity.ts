@@ -233,6 +233,24 @@ export function describeActivity(entry: ActivityEntry): string {
       return `changed ${String(entry.detail?.email ?? 'an account')} to ${String(
         entry.detail?.to ?? 'a new role'
       )}`;
+    case 'offer_created':
+      return 'created an offer';
+    case 'offer_duplicated':
+      return 'made an offer from an earlier one';
+    case 'offer_sent':
+      return 'sent an offer';
+    case 'offer_accepted':
+      return 'recorded an offer as accepted';
+    case 'offer_declined':
+      return 'recorded an offer as declined';
+    case 'offer_withdrawn':
+      return 'withdrew an offer';
+    case 'offer_revised':
+      return 'reopened an offer to revise it';
+    case 'offer_deleted':
+      return 'deleted an offer';
+    case 'offer_standard_text_changed':
+      return `changed the standard ${entry.detail?.part === 'closing' ? 'closing' : 'opening'} of ${entry.detail?.language === 'de' ? 'German' : 'English'} offers`;
     case 'website_published':
       return `published ${texts(entry)} on the website`;
     case 'website_scheduled':
@@ -279,6 +297,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'booking' && entry.entityId) {
     return `/admin/bookings/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'offer' && entry.entityId && entry.action !== 'offer_deleted') {
+    return `/admin/offers/${entry.entityId}`;
   }
 
   if (entry.entity === 'website_release') {

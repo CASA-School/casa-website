@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { createRate, deleteRate, endRate, type NewRate } from '@/lib/admin/configuration';
+import { RATE_VARIANT_LABELS } from '@/lib/admin/configuration-labels';
 import { requireModule } from '@/lib/admin/guard';
 
 /**
@@ -61,6 +62,14 @@ function count(formData: FormData, field: string, max: number): number | null {
   return n;
 }
 
+/** Only a variant the vocabulary knows: a typo would make a rate nobody finds. */
+function variantOf(formData: FormData): string | null {
+  const v = String(formData.get('variant') ?? '').trim();
+  if (v === '') return null;
+  if (!(v in RATE_VARIANT_LABELS)) throw new Error('Invalid variant');
+  return v;
+}
+
 export async function createRateAction(formData: FormData): Promise<void> {
   const actor = await requireModule('settings', 'full');
 
@@ -104,6 +113,7 @@ export async function createRateAction(formData: FormData): Promise<void> {
       cateringCode: optionalCode(formData, 'cateringCode'),
       roomTypeCode: optionalCode(formData, 'roomTypeCode'),
       parts: count(formData, 'parts', 2),
+      variant: variantOf(formData),
       minQuantity: min,
       maxQuantity: max,
       amount,

@@ -2311,6 +2311,28 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   --pz-sh2: 0 12px 40px -12px rgba(17, 24, 39, 0.25), 0 2px 6px rgba(17, 24, 39, 0.06);
 }
 
+/*
+ * Printing an offer (docs/OFFERS.md). The editor renders the letter a second
+ * time into a `[data-offer-print]` element on the body; on paper that element
+ * is the whole document. The first page carries its margins inside the sheet,
+ * a second page — rare for an offer — gets them from the page box.
+ */
+@media print {
+  body:has(> [data-offer-print]) > :not([data-offer-print]) {
+    display: none !important;
+  }
+  body:has(> [data-offer-print]) {
+    background: #fff !important;
+  }
+}
+@page offer {
+  size: A4;
+  margin: 18mm 0 16mm;
+}
+@page offer:first {
+  margin: 0 0 16mm;
+}
+
 /* The ground's grain (--casa-grain): only on the page's own `main`, under every
    band, card and photograph. Print stays plain. */
 main.bg-\[var\(--casa-canvas\)\] {

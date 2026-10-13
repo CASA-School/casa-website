@@ -2538,3 +2538,23 @@ in Klett's form; send the result to online@), then placement in person (hours, w
 „Noch gar keine Deutschkenntnisse?" and „Was die Stufen bedeuten" (→ the levels page). The level
 overview that closed the page, and `klett-textbooks.ts` that only it read, are gone: the levels page
 tells it. The smoke test now checks that the A1 test is on the first screen.
+
+## 49. Offers, and a branch for the admin side (2026-10-13)
+
+Rahman asked for a branch for admin.casa-bremen.de and for offers rebuilt from FileMaker. The branch
+is `admin`, in its own worktree at `~/Downloads/CASA-admin` (the public site stays in `~/Downloads/CASA`).
+
+FileMaker's offers were read live and from the DDR (read-only): 396 offers, prices typed every time,
+the letter a hand-edited text that drifts from the offer (37602: 1,560 € in the lines, 1,370 € in the
+letter), German and English labels that disagree, escorts as second offers, no status, no validity,
+Ina's group offers signed "– Buchhaltung –". docs/OFFERS.md has the measurements and the model.
+
+Built: migration 0021 (organisations, offers, offer_lines, offer_versions, offer_texts, and
+`rates.variant` with `applicable_rate()` re-created), seed 0007 (Ina's workbook as group rates), a pure
+engine (dates → nights/weeks, cheapest ticket mix, escorts paid/free/shared, typed prices kept by key),
+checks before sending, the letter as a view of the offer (du), frozen versions, standard texts.
+
+Design: two versions were rejected the same day as cluttered. Rahman chose a focused page like the
+website editor — full screen, plain values, a click opens a small panel, Offer | Letter tabs, the
+letter edited on the page, "Who is it for?" to start. The rest of the workspace follows this style
+next. Not merged, not deployed.

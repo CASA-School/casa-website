@@ -1,0 +1,188 @@
+/*
+ * The offer letter: an A4 sheet, the same markup on screen and on paper.
+ *
+ * Every measure is in container units (cqw) of the sheet's own width, so the
+ * preview is the printed page at any size — 1cqw is 2.1mm on A4. Type is set
+ * at 9.5pt (1.6cqw) with DIN 5008's left margin of 25mm (11.9cqw), so a group
+ * offer with its escorts and the group total stays on one page.
+ */
+
+.frame {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.sheet {
+  box-sizing: border-box;
+  position: relative;
+  background: #fff;
+  color: #1f2430;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 1.6cqw;
+  line-height: 1.4;
+  padding: 6.2cqw 9.5cqw 0 11.9cqw;
+  min-height: 141.4cqw;
+  display: flex;
+  flex-direction: column;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.screen {
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 18px 48px -20px rgba(17, 24, 39, 0.28);
+}
+
+/* The logo stripe (.casa-logo-stripe): CASA speaking, as on its emails. */
+.stripe {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0.55cqw;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4cqw;
+  min-height: 18cqw;
+}
+
+.logo {
+  width: 26cqw;
+  height: auto;
+  flex: none;
+}
+
+.address {
+  padding-top: 7.5cqw;
+  min-width: 0;
+}
+.returnAddress {
+  font-size: 1.25cqw;
+  color: #6b7280;
+  border-bottom: 0.12cqw solid #d6dae1;
+  padding-bottom: 0.6cqw;
+  margin-bottom: 1.6cqw;
+  white-space: nowrap;
+}
+.recipient div { white-space: pre-wrap; }
+
+.date {
+  text-align: right;
+  margin: 1cqw 0 3cqw;
+}
+
+.subject {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.82cqw;
+  line-height: 1.35;
+  margin: 0 0 2.6cqw;
+  letter-spacing: -0.005em;
+}
+
+.para {
+  margin: 0 0 1.8cqw;
+  white-space: pre-wrap;
+}
+
+.heading {
+  margin: 0.8cqw 0 0.3cqw;
+  font-weight: 800;
+}
+.facts {
+  color: #4b5563;
+  margin: 0 0 2cqw;
+}
+
+.block { margin: 0 0 2.2cqw; break-inside: avoid; }
+.blockHead {
+  font-size: 1.3cqw;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 0.8cqw;
+}
+.rows {
+  border-top: 0.14cqw solid #1f2430;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4cqw;
+  padding: 0.45cqw 0;
+  border-bottom: 0.1cqw solid #e5e7eb;
+}
+.rowText { min-width: 0; flex: 1; }
+.row > span:last-child,
+.total span:last-child,
+.group span:last-child {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.muted { color: #9aa1ad; }
+.total {
+  display: flex;
+  justify-content: space-between;
+  gap: 4cqw;
+  padding: 0.9cqw 0 0;
+  font-weight: 800;
+}
+.group {
+  display: flex;
+  justify-content: space-between;
+  gap: 4cqw;
+  padding: 1.1cqw 1.6cqw;
+  margin: 0 0 2.2cqw;
+  background: #f4f6f9;
+  border-radius: 0.8cqw;
+  font-weight: 700;
+}
+.validity { font-weight: 700; }
+
+.signature { margin: 2.2cqw 0 0; }
+.signature div:first-child { margin-bottom: 2.6cqw; }
+.signature div + div { font-weight: 700; }
+.signature div:last-child { font-weight: 400; color: #4b5563; }
+
+.spacer { flex: 1; min-height: 4cqw; }
+
+.footer {
+  margin: 0 -9.5cqw 0 -11.9cqw;
+  padding: 1.8cqw 9.5cqw 3.2cqw 11.9cqw;
+  border-top: 0.12cqw solid #e5e7eb;
+  font-size: 1.08cqw;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.empty {
+  color: #9aa1ad;
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ print */
+
+.printRoot { display: none; }
+
+@media print {
+  /* The page box and hiding the workspace are in globals.css: a CSS module
+     may not style `body`, and `@page offer` is named, not scoped. */
+  .printRoot {
+    display: block;
+    width: 210mm;
+    page: offer;
+  }
+  /* 297mm less the first page's 16mm bottom margin, less a millimetre of
+     rounding, so a one-page offer is exactly one page. */
+  .printRoot .sheet {
+    min-height: 280mm;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .printRoot .footer {
+    break-inside: avoid;
+  }
+}

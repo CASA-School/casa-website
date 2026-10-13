@@ -27,6 +27,7 @@ export const MODULES = [
   'applications',
   'people',
   'bookings',
+  'offers',
   'rooms',
   'catalogue',
   'kursplanung',
@@ -58,6 +59,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   applications: 'Applications',
   people: 'People',
   bookings: 'Bookings',
+  offers: 'Offers',
   rooms: 'Rooms',
   catalogue: 'Courses & exams',
   kursplanung: 'Kursplanung',
@@ -75,6 +77,7 @@ export const MODULE_HREFS: Record<WorkspaceModule, string> = {
   applications: '/admin/applications',
   people: '/admin/people',
   bookings: '/admin/bookings',
+  offers: '/admin/offers',
   rooms: '/admin/settings/rooms',
   catalogue: '/admin/catalogue',
   kursplanung: '/admin/kursplanung',
@@ -106,6 +109,10 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * decision; the board is opened per person, like Applications. `website` is
  * absent too: what the public site says is opened per person on the Team
  * screen — `edit` drafts and asks for approval, `full` also publishes.
+ * `offers` is absent for the same reason: offers are made by the people who
+ * make them — the group coordinator, and whoever answers learners and
+ * companies — so the module is opened per person (`edit` writes and sends,
+ * `full` also deletes).
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',

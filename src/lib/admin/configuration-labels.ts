@@ -24,3 +24,20 @@ export const RATE_UNIT_LABELS: Record<string, string> = {
   month: 'per month',
   person_week: 'per person / week',
 };
+
+/**
+ * `rates.variant` (0021): which version of a priced thing. The group price
+ * list for offers uses these (db/seeds/0007); a rate with a variant is only
+ * found by a lookup that names it, so none is ever a learner's own price.
+ */
+export const RATE_VARIANT_LABELS: Record<string, string> = {
+  group: 'Groups',
+  canteen: 'Canteen',
+  small: 'Small programme',
+  medium: 'Medium programme',
+  large: 'Large programme',
+  'student-week': 'Pupils, weekly',
+  'student-month': 'Pupils, monthly',
+  'adult-week': 'Adults, weekly',
+  'adult-month': 'Adults, monthly',
+};

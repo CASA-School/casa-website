@@ -95,6 +95,14 @@ export const Icon = {
     </svg>
   ),
   /** Stacked cards — the catalogue of what CASA sells. */
+  /** A page with a folded corner and two lines — an offer. */
+  offers: (
+    <svg {...box}>
+      <path d="M4 1.75h5.25L12 4.5v8.85a.9.9 0 0 1-.9.9H4.9a.9.9 0 0 1-.9-.9V2.65a.9.9 0 0 1 .9-.9Z" />
+      <path d="M9 1.75V4.75h3" />
+      <path d="M6 8h4M6 10.75h4" />
+    </svg>
+  ),
   catalogue: (
     <svg {...box}>
       <rect x="2" y="4.75" width="12" height="8.5" rx="1.3" />

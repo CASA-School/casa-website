@@ -1,0 +1,211 @@
+# Offers — the offers module
+
+`/admin/offers` · module `offers` · full screen, like the website editor · branch `admin` (2026-10-13)
+
+Read this before touching `src/app/(admin)/admin/(editor)/offers`, `src/components/admin/offers`,
+`src/lib/admin/offers`, migration 0021 or `db/seeds/0007_group_offer_rates.sql`.
+
+---
+
+## The job
+
+CASA makes offers (Angebote) to groups — Ina is the group coordinator and writes most of them — and
+to everyone else who asks what something would cost: a learner who needs a figure for a visa or the
+Jobcenter, a company, an agency. The offer is a letter with prices; the answer decides whether a
+group comes. Until now this lived in FileMaker. The module replaces it, does the arithmetic FileMaker
+left to people, and records what happened to every offer.
+
+**Who may use it:** owners and admins by role; everyone else per person on the Team screen
+(`staff` has `none` by default). `edit` writes, sends and records answers; `full` also deletes.
+
+## Design (Rahman, 2026-10-13)
+
+Two attempts were rejected the same day — a form of stacked cards, then a builder of switches and
+steppers with a summary rail — as cluttered, "messy", "not a good experience for staff". The
+direction Rahman chose, and the rules that follow from it:
+
+1. **A focused tool, not a dashboard page.** Offers run full screen like the website editor
+   (`(editor)` route group): one slim white toolbar — the way back, the offer's name and number, the
+   two tabs **Offer | Letter**, the save state, "⋯" and the one primary action — and a white page with
+   one centred column. No sidebar, no cards, no grey bands; hairlines separate.
+2. **Plain values; a click changes one.** The offer page shows text — "11–24 April 2027 · 13 nights",
+   "18 participants · 2 escorts, shared by the group", "Host family · double room · half board ·
+   450 €". A click opens a small panel beside it with the few controls for that one thing; Escape or a
+   click elsewhere closes it, and the change is already saved. Only what the offer includes is listed;
+   everything else is behind **+ Add**.
+3. **The letter is its own tab and is written on the page.** Opening, closing, title, line texts, the
+   validity date, the signature and the recipient are changed where they stand (the website editor's
+   click-to-edit). The opening and closing are **standard texts** (`offer_texts`): a letter shows
+   "Standard text" until somebody changes it for this offer ("Only this offer"), and **Save as
+   standard** makes the change the text every new offer starts with (`full`).
+4. **A new offer starts with one question:** "Who is it for?" — one search over earlier recipients,
+   students and group enquiries still waiting for an offer, with "New organisation" / "One learner"
+   for a name nobody has had an offer before. Arrow keys and Enter work.
+
+The rest of the workspace is to follow this style once Offers is accepted (Rahman, 2026-10-13).
+
+## What FileMaker does (read live, read-only, 2026-10-13)
+
+Sources: the live `SchoolMan.fmp12` through AppleScript (396 offers, 1,771 lines, 214 letters) and the
+SchoolMan DDR of 2026-07-06. The full analysis — every field, formula, relationship, script listing and
+the verbatim letter texts — is
+`~/Tasks/10-active/work/casa-google-business-audit/output/filemaker_offers_analysis_2026-10-13.md`.
+
+**The shape.** One `Offer` row; its prices are lines in `CostDetailSample` (fee type from the
+34-row `CostDetailReference`, a German label typed over it, `Unit × CostGrossUnit`); the button
+`MakeOffer_De/_En` runs `WriteOfferLetter.Parameter_Offer`, which writes the lines as **text** into a
+new `Letter` record. The team then edits that text by hand and emails it as `Bremen.pdf`. `Offer` has
+53 optional `_ID_*` links and no field saying who the offer is for; it has no status, no validity,
+no version and no owner. `DateOffer` is not offer lines: it is a generic "requested period" table
+shared with pre-bookings and groups.
+
+**Who makes them** (since 2022): Alissa 108, Meike 79, **Ina 57**, Werner 56, Natàlia 53. By kind:
+187 for individual learners (from the pre-booking), 96 for companies and the Jobcenter, 54 for groups
+(45 by Ina, median 6 lines), 21 for agencies, 17 from bookings.
+
+**Measured defects, each of which the module removes:**
+
+| FileMaker | Evidence | Here |
+| --- | --- | --- |
+| The letter is a copy, edited by hand | Offer 37602: lines total 1,560 €, the letter sent says 1,370 € with lines the offer lacks | The letter is computed from the offer; only opening, note and closing are free text |
+| German and English disagree | "Verwaltungsgebühr" typed over fee type *Transfer* prints "Transfer" in English; "Vermittlungsgebühr Praktikum" prints "Placement fee accommodation" | One description per line, written in the offer's language; the fee type is accounting, not text |
+| Every price typed | 431 (label, price, unit) combinations; "Kurspreis" per week at 140, 145, 150, 160, 300 | Group prices come from `rates` (seed 0007); a typed price is kept and shown as a change |
+| No group | Escorts get a second offer ("1 Woche Lehrkraft Begleitung"), their costs are spread by hand ("Umlage begleitende Lehrkraft 2 × 60"), the group size never enters the offer | Participants and escorts are on the offer; escorts pay, are free, or are shared — computed |
+| Header checkboxes drive nothing | 37629: "Halbpension" and "Vollpension" both ticked, the line says "Hotel with breakfast" | The stay's choices *are* the lines |
+| No total stored | `TotalAmount` empty on 396 of 396 | Lines store their amount; the sent version stores the whole document |
+| Number = record id + **print** year | Reprinting a 2025 offer prints "\| 2026" | `2026-014`, fixed at creation, per-year sequence |
+| Wrong signature | Ina's group offers are signed "– Buchhaltung –" (`$$_Account_Function` set without its parameter) | Signed by the offer's owner, with the school's name |
+| Wrong level | Group and company offers print "Niveau: " and nothing (read via the pre-booking's course) | No level field on the letter; the title says what it is |
+| Empty offers go out | 37622 was sent three times with no lines | A check stops sending: no lines, a line without a price, no participants, no title, validity passed |
+| No status, no follow-up | Whether an offer was accepted is recorded nowhere; 10 of 396 led to an invoice | Draft → Sent → Accepted / Declined / Withdrawn; "Follow up" after 10 days, "Expired" past validity |
+| Deleting lines can delete offers | `EraseCostDetailSample_Offer` runs *Delete All Records* after an unchecked GTRR (not reproduced live) | Lines are rows of their offer, replaced in one transaction |
+| VAT | Offers never mention VAT; the footer cites "§ 5 Abs. 1 Nr. 9 KStG und § 3 Nr. 6" as VAT exemption — corporate and trade tax provisions | No tax wording until CASA's tax adviser gives it (open question 1) |
+
+The group price model existed only in Ina's workbook `Preiskalkulation_Gruppen.xlsx`
+(`docs/GROUP_PRICING_AND_SPECIAL_COURSES.md`); FileMaker received the numbers she typed. Her offers
+match it: 145 a week for the course, 450 for two weeks in a double room with half board, 60 a week
+for the canteen, 25 for a weekly ticket, 30 handling.
+
+## The model (migration 0021)
+
+| Table | One row is | Notes |
+| --- | --- | --- |
+| `organisations` | a school, agency, company or public body CASA makes offers to | name, kind, address, country, the usual contact, language. Created when a new name is typed in *New offer*; its address and contact are updated from the offer each time one is sent |
+| `offers` | one offer | `year`+`seq` (the number), `kind` group/individual, `status`, `language`, `presentation` itemised/package, the recipient as addressed (a copy), the group (dates, participants, escorts), `stay` jsonb (the builder's choices, prices typed over computed lines, typed lines), opening/note/closing, `valid_until`, `owner_id`, `revision` (for conflict checks), `version` (times sent), sent/decided by and when, `copied_from`, soft delete |
+| `offer_lines` | one priced line | `audience` participant/escort, `key` (`tuition`, `accommodation`… or `manual:…`), `charge_type_code` (FK), `description`, `quantity`, `unit`, `unit_amount`, `amount`, `list_unit_amount` (what the price list said), `rate_id` |
+| `offer_versions` | the document as it was sent | the letter, the lines, the totals and the draft, frozen. Editing an offer later never changes what the recipient has |
+
+**`rates.variant`** — which version of a priced thing: `student-week` / `adult-month` tickets,
+`small` / `medium` / `large` culture programmes, the `group` price of a room, `canteen` lunch.
+`applicable_rate()` matches it exactly (`IS NOT DISTINCT FROM`), so a lookup without a variant — every
+booking — never sees a group price. The function was dropped and re-created with the new last
+parameter; positional callers are unchanged. Settings → Types & prices shows and sets it.
+
+**Seed 0007** puts Ina's workbook into `rates`, valid from 2026-01-01, editable in Settings. Its three
+defects do not carry over: materials are added, a monthly ticket covers four weeks, the room follows
+the stay's length. Nothing beyond four weeks of accommodation is priced; such a line shows "No price"
+until somebody types one.
+
+## How an offer is computed (`src/lib/admin/offers`, pure, tested)
+
+- **Length.** Dates give nights and weeks (`ceil(nights / 7)`: 13 nights are two weeks — CASA's
+  "1 week (7 days/6 nights)"); without dates the typed weeks count. Course weeks default to the stay.
+- **Participants' lines.** Course (`person_week` × course weeks), materials once, host family for the
+  stay (band by weeks), canteen lunch (× course weeks), transport, culture (× weeks), handling once.
+- **Escorts' lines.** No course, no materials; their own room type (single by default), an adult
+  ticket, the same canteen, culture and handling.
+- **Tickets.** The cheapest mix of weekly and monthly tickets for the stay: two weeks are two weekly
+  tickets (50), three or four one monthly (75), five one of each.
+- **Escorts are paid three ways.** *Pay their own* — a second block on the letter, in the group total.
+  *Free of charge* — a sentence on the letter; what they cost CASA shows in the editor. *Shared by the
+  group* — a line "Share of the escorts' costs" per participant, the escorts' total spread over the
+  participants and **rounded up to the euro**, so the group always covers them.
+- **Typed prices.** A price typed over a computed line is kept by the line's key (`participant:tuition`)
+  and survives every change to the stay; the quantity always follows the stay. The editor marks it and
+  shows the list price; a check lists it as a hint ("140 € instead of 145 €"); ↺ returns to the list.
+- **Totals.** Per participant, per escort, and the group: participants × per person (+ paying escorts).
+
+## The letter (`document.ts`, `components/admin/offers/letter.tsx`)
+
+One function builds the letter; the editor's preview, the print and the frozen copy are its output.
+German addresses the reader with **du** (`docs/VOICE_AND_TONE.md`); opening and closing have defaults
+in both languages and are editable per offer; the note has a *Jobcenter note* snippet (FileMaker's
+Jobcenter letter, rewritten in du). Subject: `Angebot Nr. 2026-014 · Titel` (`· 2. Fassung` from the
+second version on). Then the group and its facts (dates, nights, participants, escorts), the price
+blocks, the escort sentence, the group total, the validity, the closing, the owner's name and the
+school. *One price per person* lists what is included without amounts (FileMaker's unused Pauschal).
+
+The letterhead is the Impressum's facts plus the bank line every FileMaker letter carries. The page is
+A4 in container units, so the preview is the print; **Print / PDF** prints only the letter (a second
+render on `<body>`, `[data-offer-print]`, hidden on screen; `@page offer` in `globals.css`). A full
+group offer with escorts and the group total fits one page.
+
+## Working with it
+
+- **Where offers start.** **New offer** → "Who is it for?" (an earlier recipient lends its address and
+  contact; a group enquiry its organiser brief: size, weeks, lessons, room, meals, ticket, culture,
+  pupils' or adult fare; a student the learner); **Make an offer** on an enquiry or a student's page;
+  **Duplicate** (⋯) for a variant or next year's offer.
+- **Saving.** Both tabs save themselves 0.7 s after the last change. A save names the revision it
+  started from; a colleague's save in between is refused and the page offers a reload (Kursplanung's
+  rule). Moving between the tabs saves first.
+- **Sending.** *Send …* is enabled when no check reports a problem (the problems are listed under the
+  totals). The workspace sends no email of its own, so the dialog is the three steps: save the PDF,
+  write the email (a `mailto:` with subject and greeting), mark as sent — which freezes the version and
+  updates the organisation.
+- **Answers.** *Accepted* (primary once sent) and *Not accepted …* (⋯: declined by them, or withdrawn
+  by us) with a note. *Revise* (⋯) reopens any offer as a draft; the versions already sent stay.
+- **The list.** Open (drafts and sent) first; per person and group totals; *Follow up* on an offer
+  sent ten days ago without an answer, *Expired* past its validity.
+
+## Code map
+
+```
+src/app/(admin)/admin/(editor)/offers/
+  layout.tsx            requireModule('offers') — the (editor) gate is the session
+  actions.ts            every write; each asks requireModule first (edit; delete and standard texts full)
+  page.tsx              the list
+  new/page.tsx          "Who is it for?"
+  [id]/page.tsx         the offer
+  [id]/letter/page.tsx  the letter (?version=N: a version as sent)
+src/components/admin/offers/
+  frame.tsx             the toolbar and the Offer | Letter tabs
+  offer-page.tsx        the offer: properties, included, totals, checks, history
+  letter-view.tsx       the letter tab: in-place editing, standard texts, send
+  letter.tsx            the A4 sheet (preview, print, sent versions) with editable slots
+  new-offer.tsx · panel.tsx · inline-edit.tsx · fields.tsx · offer-actions.tsx · print.tsx
+  use-offer-draft.ts    the draft, autosave and conflict check shared by both tabs
+src/lib/admin/offers/   types, stay, engine, checks, document, schema, draft-ops, from-enquiry, repo
+```
+
+Audit: `staff_activity`, entity `offer` — created, duplicated, sent, accepted, declined, withdrawn,
+revised, deleted (not every autosave).
+
+## Testing
+
+`src/lib/admin/offers/__tests__/` — the engine (Ina's offer 37630 reproduced to the euro once her
+course price is typed; the workbook example with its missing materials fee; tickets; escorts three
+ways), the letter (du, numbering, facts, package, languages, no "Buchhaltung", no tax line), the
+checks, the enquiry hand-over, the write schema (strict) and the read-back (lenient).
+`e2e/offers.spec.ts` (needs `DATABASE_URL` and an owner; `E2E_PORT=3017 npx playwright test
+e2e/offers.spec.ts`): an offer started from "Who is it for?" prices itself, saves, survives a reload,
+keeps a typed price, has its title changed on the letter and is frozen when sent; an opening changed
+on the letter becomes the standard; a colleague's save in between is not overwritten. `npm run
+admin:check` loads the list, the start, an offer and its letter.
+
+## Open questions for CASA
+
+1. **VAT wording.** Offers print no tax line. FileMaker's footer cites corporate- and trade-tax
+   provisions as a VAT exemption, and its invoices back-calculate 7 % / 19 % on accommodation and
+   catering. The tax adviser should say what an offer must state. (`charge_types.vat_rate` for
+   accommodation, catering and books also looks swapped against FileMaker's own fee table — 19/7/19
+   in seed 0003 against 7/19/7 — to be settled in the same conversation.)
+2. **Ina's workbook corrections** (materials added, monthly ticket per four weeks, room by stay length)
+   and a price for stays beyond four weeks.
+3. **Escorts.** Is there a free-place rule (one free escort per 10 or 15 participants)? Is rounding the
+   shared amount up to the euro right?
+4. **Payment and cancellation terms** on the letter — a standard paragraph, or a link to the AGB?
+5. **du for public bodies.** The Jobcenter and companies get du like everyone (the house rule); the
+   opening and closing can be rewritten per offer.
+6. **Next:** an accepted group offer becoming the group's bookings; sending from the workspace through
+   Microsoft Graph from the owner's mailbox; optional lines; agency commission.

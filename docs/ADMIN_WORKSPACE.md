@@ -387,8 +387,8 @@ password — or uses **Sign in with Microsoft**.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, bookings, rooms, catalogue, kursplanung, activity, team,
-settings. For each
+applications, people, bookings, offers, rooms, catalogue, kursplanung, website,
+activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -401,7 +401,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms, Kursplanung and Team |
+| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings; `none` on Applications, Rooms, Kursplanung, Website, Offers and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -471,7 +471,7 @@ staff accounts (add, deactivate with confirmation).
 | Group | Holds |
 | --- | --- |
 | **Inbox** | Enquiries, Registrations (→ Courses, Exams) — what the public site sent, waiting to be worked |
-| **School** | Students (→ Placement tests), Bookings, Courses, Exams — the records the school keeps |
+| **School** | Students (→ Placement tests), Bookings, Offers, Courses, Exams — the records the school keeps. Offers opens full screen (docs/OFFERS.md) |
 | **Management** | Applications, Activity, Team, Settings (→ Types & prices, Rooms) |
 
 Nine top-level items, and the placements are the argument:

@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -50,6 +50,7 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application]
     firstId(`SELECT id FROM rooms LIMIT 1`),
     firstId(`SELECT id FROM placement_attempts ORDER BY created_at DESC LIMIT 1`),
     firstId(`SELECT id FROM career_applications ORDER BY created_at DESC LIMIT 1`),
+    firstId(`SELECT id FROM offers WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 1`),
   ]);
 
 const routes = [
@@ -72,6 +73,11 @@ const routes = [
   '/admin/bookings',
   '/admin/bookings?filter=all',
   booking && `/admin/bookings/${booking}`,
+  '/admin/offers',
+  '/admin/offers?filter=all',
+  '/admin/offers/new',
+  offer && `/admin/offers/${offer}`,
+  offer && `/admin/offers/${offer}/letter`,
   '/admin/catalogue',
   '/admin/catalogue/exams',
   '/admin/settings/rooms',

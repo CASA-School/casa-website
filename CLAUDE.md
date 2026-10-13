@@ -20,6 +20,11 @@ shell) has its own rules and history: **read `docs/KURSPLANUNG.md` before touchi
 The website editor at `/admin/website` (module `website`, full screen) lets staff
 change the public site's text on the real page: **read `docs/WEBSITE_EDITOR.md`
 before touching it or adding an editable page.**
+Offers at `/admin/offers` (module `offers`, full screen like the editor) are the
+offers CASA makes to groups, learners and companies, priced from `rates`, written
+on the letter itself: **read `docs/OFFERS.md` before touching it.** Its design —
+a focused page of plain values, a click changes one — is the direction the rest
+of the workspace is to follow (Rahman, 2026-10-13).
 
 The workspace is NOT the old portal. The previous role-based student/teacher
 portal was removed and is not coming back — do not reintroduce learner-facing
@@ -179,7 +184,7 @@ src/lib/admin    workspace db pool, auth, passwords, queues, per-domain reads
 src/i18n         languages, the URL map, Link/useRouter/usePathname for the site
 src/messages     translation messages
 src/lib/cms      the website editor's content layer: catalog, overlay, slot tags, preview, AI
-db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0020_staff_sign_in_names_and_microsoft.sql)
+db/migrations    SQL-first schema (0001_public_site_schema.sql ... 0021_offers.sql)
 db/seeds         baseline public data — applied to real databases, so no fake people
 scripts/admin    seed-staff.mjs (first account), seed-demo.mjs (demo records)
 docker-compose.yml  local Postgres
@@ -387,6 +392,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
 | `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
 | `docs/WEBSITE_EDITOR.md` | **Read before touching the website editor or making a page editable.** Content source maps, the catalog, drafts/releases/approval/scheduling, presence, languages, writing help |
+| `docs/OFFERS.md` | **Read before touching `/admin/offers`.** FileMaker's offers measured (396 offers, the bugs), the model, the group price list in `rates`, the engine, the letter and its standard texts, the design direction |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |

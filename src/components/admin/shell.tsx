@@ -125,11 +125,12 @@ export function WorkspaceShell({
 
             {canAccess(user, 'people') ||
             canAccess(user, 'bookings') ||
+            canAccess(user, 'offers') ||
             canAccess(user, 'catalogue') ? (
               <NavGroup
                 id="school"
                 label="School"
-                hrefs={['/admin/people', '/admin/placement', '/admin/bookings', '/admin/catalogue']}
+                hrefs={['/admin/people', '/admin/placement', '/admin/bookings', '/admin/offers', '/admin/catalogue']}
               >
                 {/*
                   Placement is nested under Students, not a queue of its own. A
@@ -160,6 +161,13 @@ export function WorkspaceShell({
                 {canAccess(user, 'bookings') ? (
                   <NavLink href="/admin/bookings" icon={Icon.bookings} title="Bookings">
                     Bookings
+                  </NavLink>
+                ) : null}
+                {/* Offers sit beside Bookings: an accepted offer is the
+                    booking that has not happened yet. Opened per person. */}
+                {canAccess(user, 'offers') ? (
+                  <NavLink href="/admin/offers" icon={Icon.offers} title="Offers">
+                    Offers
                   </NavLink>
                 ) : null}
                 {/* Courses and exams are two areas of work, not one screen with

@@ -1,11 +1,15 @@
 import { notFound } from 'next/navigation';
 
+import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { getEnquiry } from '@/lib/admin/enquiries';
 import { listFlags } from '@/lib/admin/flags';
+import { requireModule } from '@/lib/admin/guard';
+import { offersFor } from '@/lib/admin/offers/repo';
 import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { listAssignableStaff } from '@/lib/admin/staff';
@@ -26,19 +30,21 @@ import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labe
  * this is where it goes.
  */
 export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const [{ id }, user] = await Promise.all([params, requireModule('enquiries')]);
   const enquiry = await getEnquiry(id);
 
   if (!enquiry) {
     notFound();
   }
 
-  const [notes, activity, staff, flags, person] = await Promise.all([
+  const canOffer = canAccess(user, 'offers', 'edit');
+  const [notes, activity, staff, flags, person, offers] = await Promise.all([
     listNotes('enquiry', enquiry.id),
     activityFor('enquiry', enquiry.id),
     listAssignableStaff(),
     listFlags('enquiry', enquiry.id),
     enquiry.personId ? getPersonSummary(enquiry.personId) : null,
+    canOffer ? offersFor({ enquiryId: enquiry.id }) : [],
   ]);
   const candidates = person
     ? await findDuplicateCandidates({
@@ -64,12 +70,22 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         title={fullName || enquiry.email}
         description={enquiry.topic}
         actions={
+          <span className="inline-flex flex-wrap items-center gap-2">
+            {canOffer ? (
+              <MakeOffer
+                kind={enquiry.kind === 'group' ? 'group' : 'individual'}
+                language={enquiry.locale === 'de' ? 'de' : 'en'}
+                enquiryId={enquiry.id}
+                existing={offers}
+              />
+            ) : null}
           <a
             href={`mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}`}
             className="inline-flex h-9 items-center rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
           >
             Reply by email
           </a>
+          </span>
         }
       />
 

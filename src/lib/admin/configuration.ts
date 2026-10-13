@@ -104,6 +104,8 @@ export type RateRow = {
   isCurrent: boolean;
 };
 
+import { RATE_VARIANT_LABELS } from './configuration-labels';
+
 export { RATE_SCOPE_LABELS, RATE_UNIT_LABELS } from './configuration-labels';
 
 export async function listRates(scope?: string): Promise<RateRow[]> {
@@ -116,6 +118,7 @@ export async function listRates(scope?: string): Promise<RateRow[]> {
     catering: string | null;
     room_type: string | null;
     parts: number | null;
+    variant: string | null;
     min_quantity: string | null;
     max_quantity: string | null;
     amount: string;
@@ -130,7 +133,7 @@ export async function listRates(scope?: string): Promise<RateRow[]> {
     `SELECT r.id, r.scope::text AS scope,
             coalesce(ct.name, et.name, m.title, at.name_en, cht.name_en) AS target,
             r.level_code, dt.name_en AS day_time, co.name_en AS catering,
-            art.name_en AS room_type, r.parts, r.min_quantity, r.max_quantity,
+            art.name_en AS room_type, r.parts, r.variant, r.min_quantity, r.max_quantity,
             r.amount, r.unit::text AS unit, r.currency, r.vat_rate,
             r.valid_from, r.valid_to, r.note,
             (r.valid_from <= current_date AND (r.valid_to IS NULL OR r.valid_to >= current_date)) AS is_current
@@ -155,10 +158,11 @@ export async function listRates(scope?: string): Promise<RateRow[]> {
     if (r.catering) conditions.push(r.catering);
     if (r.room_type) conditions.push(r.room_type);
     if (r.parts) conditions.push(r.parts === 1 ? 'one part' : 'both parts');
+    if (r.variant) conditions.push((RATE_VARIANT_LABELS[r.variant] ?? r.variant).toLowerCase());
     if (r.min_quantity || r.max_quantity) {
       const lo = r.min_quantity ? Number(r.min_quantity) : null;
       const hi = r.max_quantity ? Number(r.max_quantity) : null;
-      conditions.push(lo && hi ? `${lo}–${hi}` : lo ? `${lo}+` : `up to ${hi}`);
+      conditions.push(lo && hi ? (lo === hi ? `${lo}` : `${lo}–${hi}`) : lo ? `${lo}+` : `up to ${hi}`);
     }
     return {
       id: r.id,
@@ -251,6 +255,7 @@ export type NewRate = {
   cateringCode: string | null;
   roomTypeCode: string | null;
   parts: number | null;
+  variant: string | null;
   minQuantity: number | null;
   maxQuantity: number | null;
   amount: number;
@@ -267,9 +272,9 @@ export async function createRate(input: NewRate, actor: StaffUser): Promise<stri
     `INSERT INTO rates (scope, course_type_id, exam_type_id, material_id, accommodation_type_code,
                         charge_type_code, level_code, day_time_code, catering_code, room_type_code,
                         parts, min_quantity, max_quantity, amount, unit, currency, vat_rate,
-                        valid_from, valid_to, note, created_by)
+                        valid_from, valid_to, note, created_by, variant)
      VALUES ($1::rate_scope, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::rate_unit,
-             $16, $17, $18::date, $19::date, $20, $21)
+             $16, $17, $18::date, $19::date, $20, $21, $22)
      RETURNING id`,
     [
       input.scope,
@@ -292,7 +297,7 @@ export async function createRate(input: NewRate, actor: StaffUser): Promise<stri
       input.validFrom,
       input.validTo,
       input.note,
-    ].concat([actor.id]) as unknown[]
+    ].concat([actor.id, input.variant]) as unknown[]
   );
   if (!row) throw new Error('Rate was not created');
   await logActivity({

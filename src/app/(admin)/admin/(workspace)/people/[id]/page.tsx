@@ -12,6 +12,7 @@ import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, personBookings } from '@/l
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { Icon } from '@/components/admin/icons';
+import { MakeOffer } from '@/components/admin/make-offer';
 import {
   Badge,
   BirthDate,
@@ -22,6 +23,7 @@ import {
   PageHeader,
 } from '@/components/admin/ui';
 import { activityFor, describeActivity } from '@/lib/admin/activity';
+import { offersFor } from '@/lib/admin/offers/repo';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import {
@@ -84,7 +86,8 @@ export default async function PersonPage({
   const canEdit = canAccess(user, 'people', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit');
   const seesBookings = canAccess(user, 'bookings');
-  const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer] =
+  const canOffer = canAccess(user, 'offers', 'edit');
+  const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer, offers] =
     await Promise.all([
       personTimeline(person.id),
       latestConfirmedLevel(person.id),
@@ -94,6 +97,7 @@ export default async function PersonPage({
       canEdit ? listCountries() : Promise.resolve([]),
       seesBookings ? personBookings(person.id) : Promise.resolve([]),
       canBook ? bookingOffer() : Promise.resolve(null),
+      canOffer ? offersFor({ personId: person.id }) : Promise.resolve([]),
     ]);
 
   const title = [SALUTATIONS[person.salutation ?? ''] ?? '', person.displayName]
@@ -114,6 +118,7 @@ export default async function PersonPage({
         }
         actions={
           <div className="flex items-center gap-2">
+            {canOffer ? <MakeOffer kind="individual" language="de" personId={person.id} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog
                 trigger="New booking"

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { Button, Field, Input, Select } from '@/components/admin/ui';
-import { RATE_UNIT_LABELS } from '@/lib/admin/configuration-labels';
+import { RATE_UNIT_LABELS, RATE_VARIANT_LABELS } from '@/lib/admin/configuration-labels';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { createRateAction } from './actions';
 import { todayInputValue } from '@/lib/dates';
@@ -224,6 +224,18 @@ export function RateForm({ targets }: { targets: Targets }) {
               </Select>
             </Field>
           </div>
+        ) : null}
+        {scope === 'charge_type' || scope === 'accommodation' ? (
+          <Field label="Version" hint="for group offers" htmlFor="rate-variant">
+            <Select id="rate-variant" name="variant" defaultValue="">
+              <option value="">Any</option>
+              {Object.entries(RATE_VARIANT_LABELS).map(([code, label]) => (
+                <option key={code} value={code}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
         ) : null}
         {scope === 'exam_type' ? (
           <Field label="Parts sat" hint="any" htmlFor="rate-parts">

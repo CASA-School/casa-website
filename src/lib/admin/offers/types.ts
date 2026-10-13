@@ -1,0 +1,164 @@
+/**
+ * The offers module's vocabulary (docs/OFFERS.md).
+ *
+ * Shapes and constants only, with no database import, so the editor (a client
+ * component) and the server share one definition of an offer.
+ */
+
+export const OFFER_STATUSES = ['draft', 'sent', 'accepted', 'declined', 'withdrawn'] as const;
+export type OfferStatus = (typeof OFFER_STATUSES)[number];
+
+export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
+  draft: 'Draft',
+  sent: 'Sent',
+  accepted: 'Accepted',
+  declined: 'Declined',
+  withdrawn: 'Withdrawn',
+};
+
+export type OfferKind = 'group' | 'individual';
+
+export type OfferLanguage = 'de' | 'en';
+export type Presentation = 'itemised' | 'package';
+export type Salutation = 'ms' | 'mr' | 'none';
+export type Audience = 'participant' | 'escort';
+
+export const ORGANISATION_KINDS = ['school', 'agency', 'company', 'public_body', 'other'] as const;
+export type OrganisationKind = (typeof ORGANISATION_KINDS)[number];
+
+/** How the escorts' own costs are paid. */
+export type EscortPricing = 'paid' | 'free' | 'shared';
+export const ESCORT_PRICING_LABELS: Record<EscortPricing, string> = {
+  paid: 'Pay their own',
+  free: 'Free of charge',
+  shared: 'Shared by the group',
+};
+
+export type CultureTier = 'none' | 'small' | 'medium' | 'large';
+export type Fare = 'student' | 'adult';
+export type Room = 'double' | 'single';
+
+/**
+ * The builder's choices for a group stay. Stored as `offers.stay` together
+ * with the overrides, and read back through `normaliseStay`, so an offer saved
+ * before a field existed still opens.
+ */
+export type StayChoices = {
+  /** The stay's length while it has no dates; with dates, the dates decide. */
+  weeks: number;
+  /** Some groups come without a course: a homestay with a programme. */
+  course: boolean;
+  lessonsPerWeek: number;
+  /** Null: as many course weeks as the stay has. */
+  courseWeeks: number | null;
+  accommodation: boolean;
+  room: Room;
+  escortRoom: Room;
+  canteen: boolean;
+  transit: boolean;
+  /** The participants' fare. Escorts always travel on an adult ticket. */
+  fare: Fare;
+  culture: CultureTier;
+  materials: boolean;
+  handling: boolean;
+  escortPricing: EscortPricing;
+};
+
+export const DEFAULT_STAY: StayChoices = {
+  weeks: 1,
+  course: true,
+  lessonsPerWeek: 20,
+  courseWeeks: null,
+  accommodation: true,
+  room: 'double',
+  escortRoom: 'single',
+  canteen: true,
+  transit: true,
+  fare: 'student',
+  culture: 'medium',
+  materials: true,
+  handling: true,
+  escortPricing: 'paid',
+};
+
+/** A price or a text typed over a computed line, kept by the line's key. */
+export type LineOverride = { unitAmount?: number; description?: string };
+
+/** A line somebody typed: anything the builder does not compute. */
+export type ManualLine = {
+  key: string;
+  audience: Audience;
+  chargeType: string;
+  description: string;
+  quantity: number;
+  unitAmount: number | null;
+};
+
+export type OfferLine = {
+  key: string;
+  audience: Audience;
+  chargeType: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitAmount: number | null;
+  amount: number | null;
+  /** What the price list says; null for a typed line or when no rate exists. */
+  listUnitAmount: number | null;
+  rateId: string | null;
+  manual: boolean;
+  /** The description was typed over the computed one. */
+  customText: boolean;
+};
+
+export type StayState = {
+  choices: StayChoices;
+  overrides: Record<string, LineOverride>;
+  manual: ManualLine[];
+};
+
+/** Everything the editor edits. The server recomputes the lines from it. */
+export type OfferDraft = {
+  kind: OfferKind;
+  language: OfferLanguage;
+  presentation: Presentation;
+  title: string;
+  groupName: string;
+  organisationId: string | null;
+  recipientName: string;
+  contactSalutation: Salutation;
+  contactFirstName: string;
+  contactLastName: string;
+  contactEmail: string;
+  address: string;
+  countryCode: string | null;
+  arrival: string | null;
+  departure: string | null;
+  participants: number | null;
+  escorts: number;
+  stay: StayState;
+  intro: string | null;
+  closing: string | null;
+  note: string | null;
+  validUntil: string | null;
+  ownerId: string | null;
+};
+
+export type OfferTotals = {
+  perParticipant: number | null;
+  perEscort: number | null;
+  /** The participants' share of the escorts' costs, already in perParticipant. */
+  escortShare: number | null;
+  groupTotal: number | null;
+  /** What free escorts cost CASA. */
+  carriedByCasa: number | null;
+};
+
+export type CheckLevel = 'problem' | 'hint';
+export type OfferCheck = { level: CheckLevel; field: string; message: string };
+
+export const overrideKey = (audience: Audience, key: string) => `${audience}:${key}`;
+
+export function formatOfferNumber(year: number, seq: number): string {
+  return `${year}-${String(seq).padStart(3, '0')}`;
+}
