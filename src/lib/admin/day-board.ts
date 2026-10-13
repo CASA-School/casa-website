@@ -158,12 +158,14 @@ export async function deleteDayTask(id: string, actor: StaffUser): Promise<void>
 }
 
 /**
- * What is actually happening on a day: courses starting and ending, exam
- * sittings, and bookings whose first day this is. Read from the records the
- * team already keeps, so the day panel is never a separate thing to maintain.
+ * What is actually happening on a day, by name: learners whose first day it
+ * is, who moves into or out of their room, courses starting and ending, exam
+ * sittings, and the birthdays of learners at the school that day — the day
+ * row of FileMaker's home calendar (SingleDayCalendar_Overview), read from the
+ * records the team already keeps, so it is never a separate thing to maintain.
  */
 export type DayEvent = {
-  kind: 'course_start' | 'course_end' | 'exam' | 'arrival';
+  kind: 'course_start' | 'course_end' | 'exam' | 'arrival' | 'move_in' | 'move_out' | 'birthday';
   title: string;
   detail: string | null;
   count: number;
@@ -216,6 +218,26 @@ export async function dayEvents(date: string): Promise<DayEvent[]> {
        LEFT JOIN course_types ct ON ct.id = b.course_type_id
       WHERE bp.start_date = $1::date AND bp.kind = 'initial'
         AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+     UNION ALL
+     SELECT CASE WHEN b.accommodation_from = $1::date THEN 'move_in' ELSE 'move_out' END,
+            trim(p.first_name || ' ' || coalesce(p.last_name, '')),
+            coalesce(at.name_en, ''), '1',
+            '/admin/bookings/' || b.id::text
+       FROM bookings b
+       JOIN people p ON p.id = b.person_id
+       LEFT JOIN accommodation_types at ON at.code = b.accommodation_type_code
+      WHERE (b.accommodation_from = $1::date OR b.accommodation_to = $1::date)
+        AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+     UNION ALL
+     SELECT 'birthday', trim(p.first_name || ' ' || coalesce(p.last_name, '')),
+            'turns ' || (extract(year FROM $1::date) - extract(year FROM p.birth_date))::int::text, '1',
+            '/admin/people/' || p.id::text
+       FROM people p
+      WHERE p.deleted_at IS NULL AND p.birth_date IS NOT NULL
+        AND to_char(p.birth_date, 'MM-DD') = to_char($1::date, 'MM-DD')
+        AND EXISTS (SELECT 1 FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
+                     WHERE b.person_id = p.id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+                       AND bp.start_date <= $1::date AND bp.end_date >= $1::date)
      ORDER BY 1, 2`,
     [date]
   );
@@ -228,14 +250,67 @@ export async function dayEvents(date: string): Promise<DayEvent[]> {
   }));
 }
 
-/** Open-task counts for a span of days, for the date strip. */
-export async function openTaskCountsByDate(from: string, to: string): Promise<Map<string, number>> {
-  const rows = await query<{ on_date: string; n: string }>(
-    `SELECT to_char(on_date, 'YYYY-MM-DD') AS on_date, count(*) AS n
-       FROM day_tasks
-      WHERE on_date BETWEEN $1::date AND $2::date AND done_at IS NULL
-      GROUP BY on_date`,
+/** What a day of the week holds, counted: the week at a glance on Today. */
+export type DayFacts = {
+  firstDays: number;
+  movingIn: number;
+  movingOut: number;
+  coursesStart: number;
+  coursesEnd: number;
+  exams: number;
+  birthdays: number;
+  /** Teachers away (teacher_absences); read only for a colleague who holds Kursplanung. */
+  away: number;
+  /** Lessons nobody is planned for, and conflicts in the plan — Kursplanung's, filled in by Today. */
+  unplanned: number;
+  conflicts: number;
+  tasks: number;
+};
+
+/**
+ * The week, day by day, in one query — FileMaker's home calendar showed the
+ * team the week's shape (how many start, who has a birthday, who is away)
+ * before they opened any day, and Today does the same.
+ */
+export async function weekFacts(from: string, to: string, { teaching }: { teaching: boolean }): Promise<Map<string, DayFacts>> {
+  const rows = await query<Record<'day' | 'first_days' | 'move_in' | 'move_out' | 'course_start' | 'course_end' | 'exams' | 'birthdays' | 'away' | 'tasks', string>>(
+    `SELECT to_char(g.d, 'YYYY-MM-DD') AS day,
+            (SELECT count(*) FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
+              WHERE bp.start_date = g.d AND bp.kind = 'initial' AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS first_days,
+            (SELECT count(*) FROM bookings b
+              WHERE b.accommodation_from = g.d AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS move_in,
+            (SELECT count(*) FROM bookings b
+              WHERE b.accommodation_to = g.d AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS move_out,
+            (SELECT count(*) FROM course_instances i WHERE i.start_date = g.d AND i.status <> 'cancelled') AS course_start,
+            (SELECT count(*) FROM course_instances i WHERE i.end_date = g.d AND i.status <> 'cancelled') AS course_end,
+            (SELECT count(*) FROM exam_sessions s WHERE s.starts_at::date = g.d AND s.status <> 'cancelled') AS exams,
+            (SELECT count(*) FROM people p
+              WHERE p.deleted_at IS NULL AND p.birth_date IS NOT NULL
+                AND to_char(p.birth_date, 'MM-DD') = to_char(g.d, 'MM-DD')
+                AND EXISTS (SELECT 1 FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
+                             WHERE b.person_id = p.id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+                               AND bp.start_date <= g.d AND bp.end_date >= g.d)) AS birthdays,
+            ${teaching ? '(SELECT count(*) FROM teacher_absences a WHERE a.on_date = g.d)' : '0'} AS away,
+            (SELECT count(*) FROM day_tasks t WHERE t.on_date = g.d AND t.done_at IS NULL) AS tasks
+       FROM (SELECT generate_series($1::date, $2::date, interval '1 day')::date AS d) AS g`,
     [from, to]
   );
-  return new Map(rows.map((r) => [r.on_date, Number(r.n)]));
+  return new Map(
+    rows.map((r) => [
+      r.day,
+      {
+        firstDays: Number(r.first_days),
+        movingIn: Number(r.move_in),
+        movingOut: Number(r.move_out),
+        coursesStart: Number(r.course_start),
+        coursesEnd: Number(r.course_end),
+        exams: Number(r.exams),
+        birthdays: Number(r.birthdays),
+        away: Number(r.away),
+        unplanned: 0,
+        conflicts: 0,
+        tasks: Number(r.tasks),
+      },
+    ])
+  );
 }

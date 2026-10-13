@@ -1,25 +1,28 @@
 import Link from 'next/link';
 
 import { DayBoard } from './day-board/board';
-import { DayNav } from './day-board/day-nav';
+import { mondayOf, WeekAtCasa } from './day-board/week';
 import { Icon } from '@/components/admin/icons';
 import { Owner, RecordName } from '@/components/admin/list';
 import { Received } from '@/components/admin/queue-toolbar';
 import { Card } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { dayBoard, dayEvents, openTaskCountsByDate, type DayEvent } from '@/lib/admin/day-board';
+import { dayBoard, dayEvents, weekFacts, type DayEvent } from '@/lib/admin/day-board';
 import { requireModule } from '@/lib/admin/guard';
+import { teachingOn, type TeachingDay } from '@/lib/admin/kursplanung/day';
 import { getAttentionItems, getOverviewCounts, getWaiting } from '@/lib/admin/overview';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
 /**
  * Today — the workspace's home, the screen the team opens every morning.
  *
- * It answers the day's questions in the order they get asked, and nothing
- * else. Who is waiting for an answer from us — by name, the longest wait first,
- * because a person is what a colleague acts on and a count is not. What we
- * wrote down to do. What is happening at the school today, and what is coming
- * with a date on it. The day is chosen in the head, a calendar's row of dates.
+ * It learns from FileMaker's home calendar (SingleDayCalendar_Overview), which
+ * the team has opened every morning for years: the week first, each day with
+ * what it holds (who starts, moves in, has a birthday, which teacher is away),
+ * and the chosen day's detail by name, with the plan's problems lit up only
+ * when there is one. Then who is waiting for an answer from us — by name, the
+ * longest wait first, because a person is what a colleague acts on and a
+ * count is not — and what we wrote down to do.
  *
  * What is deliberately NOT here: a wall of numbers (the queues' totals are one
  * quiet line under the waiting list), a yellow band for what is late (its date
@@ -43,16 +46,28 @@ export default async function TodayPage({
   const holds = (module: Parameters<typeof canAccess>[1]) => canAccess(user, module);
   const isToday = date === today;
 
-  const week = weekBounds(date);
-  const [counts, waiting, attention, events, board, openCounts, staff] = await Promise.all([
+  const monday = mondayOf(date);
+  const sunday = toIso(new Date(new Date(`${monday}T00:00:00`).getTime() + 6 * 86_400_000));
+  const weekday = ![0, 6].includes(new Date(`${date}T00:00:00`).getDay());
+  // Teachers and the plan are Kursplanung's, which only management holds.
+  const teaching = holds('kursplanung');
+  const [counts, waiting, attention, events, board, facts, teachingWeek, staff] = await Promise.all([
     getOverviewCounts(),
     getWaiting(holds),
     getAttentionItems(),
     dayEvents(date),
     dayBoard(date),
-    openTaskCountsByDate(week.from, week.to),
+    weekFacts(monday, sunday, { teaching }),
+    teaching ? teachingOn(weekdaysOf(monday)) : Promise.resolve(null),
     canWrite ? listAssignableStaff() : Promise.resolve([]),
   ]);
+  // The plan's gaps and conflicts join the week's facts; the chosen day's teaching shows below it.
+  for (const [day, t] of teachingWeek ?? []) {
+    const f = facts.get(day);
+    if (f) Object.assign(f, { unplanned: t.open, conflicts: t.conflicts });
+  }
+  const teachingDay = weekday ? teachingWeek?.get(date) : undefined;
+  const teachingNews = teachingDay && (teachingDay.away.length > 0 || teachingDay.open > 0 || teachingDay.conflicts > 0) ? teachingDay : null;
 
   const hour = now.getHours();
   const greeting = hour < 11 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
@@ -70,17 +85,18 @@ export default async function TodayPage({
 
   return (
     <div>
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="min-w-0">
-          <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">
-            {isToday ? `${greeting}${firstName ? `, ${firstName}` : ''}` : longDate}
-          </h1>
-          <p className="mt-1 text-sm font-medium text-[var(--casa-muted)]">
-            {isToday ? longDate : selected < now ? 'An earlier day' : 'A day ahead'}
-          </p>
-        </div>
-        <DayNav date={date} today={today} openCounts={openCounts} />
+      <header className="mb-5">
+        <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">
+          {isToday ? `${greeting}${firstName ? `, ${firstName}` : ''}` : longDate}
+        </h1>
+        <p className="mt-1 text-sm font-medium text-[var(--casa-muted)]">
+          {isToday ? longDate : selected < now ? 'An earlier day' : 'A day ahead'}
+        </p>
       </header>
+
+      <div className="mb-5">
+        <WeekAtCasa date={date} today={today} facts={facts} />
+      </div>
 
       {params.error ? (
         <p
@@ -141,7 +157,7 @@ export default async function TodayPage({
 
         <div className="space-y-5">
           <Card title={isToday ? 'At CASA today' : 'At CASA that day'} icon={Icon.calendar} tint="blue" bleed>
-            {events.length === 0 ? (
+            {events.length === 0 && !teachingNews ? (
               <p className="px-5 py-5 text-sm text-[var(--casa-text-subtle)]">Nothing on the calendar.</p>
             ) : (
               EVENT_GROUPS.map(({ kind, label }) => {
@@ -176,6 +192,7 @@ export default async function TodayPage({
                 );
               })
             )}
+            {teachingNews ? <Teaching day={teachingNews} /> : null}
           </Card>
 
           {isToday && attention.length > 0 ? (
@@ -214,21 +231,65 @@ function DayTile({ on }: { on: Date }) {
 }
 
 const EVENT_GROUPS: readonly { kind: DayEvent['kind']; label: string }[] = [
-  { kind: 'course_start', label: 'Courses starting' },
   { kind: 'arrival', label: 'First day' },
+  { kind: 'move_in', label: 'Moving in' },
+  { kind: 'move_out', label: 'Moving out' },
+  { kind: 'course_start', label: 'Courses starting' },
   { kind: 'exam', label: 'Exams' },
   { kind: 'course_end', label: 'Courses ending' },
+  { kind: 'birthday', label: 'Birthdays' },
 ];
+
+/** The board stores an absence's reason in German, as the planners write it. */
+const AWAY: Record<string, string> = {
+  Urlaub: 'On leave',
+  Krank: 'Sick',
+  Fortbildung: 'Training',
+  Freistellung: 'Released',
+  Elternzeit: 'Parental leave',
+  Sonstiges: 'Away',
+};
+
+/**
+ * The day's teaching, for a colleague who holds Kursplanung: who is away and
+ * why, and — only when there is one — what the plan still lacks, with the way
+ * into the board. FileMaker lit "VacantTeacher" and "ConflictTeacher" orange
+ * on such a day; here it is one line each, in amber and red.
+ */
+function Teaching({ day }: { day: TeachingDay }) {
+  return (
+    <section className="border-t border-ws-line-soft">
+      <h3 className="flex items-center justify-between gap-2 border-b border-ws-line-soft bg-[#f8fafc] px-5 pt-3 pb-2 text-xs font-bold text-[var(--casa-muted)]">
+        <span>Teaching</span>
+        <Link href={`/admin/kursplanung?month=${day.month}`} className="font-semibold text-[var(--casa-accent-text)] hover:underline">
+          Open the plan
+        </Link>
+      </h3>
+      <ul className="divide-y divide-ws-line-soft text-sm">
+        {day.open > 0 ? (
+          <li className="px-5 py-2.5 font-semibold text-[#9a5b00]">
+            {day.open} {day.open === 1 ? 'lesson has' : 'lessons have'} no teacher
+          </li>
+        ) : null}
+        {day.conflicts > 0 ? (
+          <li className="px-5 py-2.5 font-semibold text-[#b91c1c]">
+            {day.conflicts} {day.conflicts === 1 ? 'conflict' : 'conflicts'} in the plan
+          </li>
+        ) : null}
+        {day.away.map((teacher) => (
+          <li key={teacher.name} className="flex items-center justify-between gap-3 px-5 py-2.5">
+            <span className="font-semibold text-[var(--casa-ink)]">{teacher.name}</span>
+            <span className="text-xs text-[var(--casa-muted)]">{AWAY[teacher.reason] ?? teacher.reason}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 const toIso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-/** Monday to Sunday of the week containing `date`, for the strip's dots. */
-function weekBounds(date: string): { from: string; to: string } {
-  const d = new Date(`${date}T00:00:00`);
-  const monday = new Date(d);
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-  const sunday = new Date(monday);
-  sunday.setDate(sunday.getDate() + 6);
-  return { from: toIso(monday), to: toIso(sunday) };
-}
+/** Monday to Friday of the week that starts on `monday`: the days a course is taught. */
+const weekdaysOf = (monday: string) =>
+  Array.from({ length: 5 }, (_, i) => toIso(new Date(new Date(`${monday}T00:00:00`).getTime() + i * 86_400_000)));

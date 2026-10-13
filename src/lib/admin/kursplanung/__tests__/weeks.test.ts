@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isoWeek, monthLabel, monthStart, planningWeeks, weekStartOf, weekdayOf } from '../weeks';
+import { isoWeek, monthLabel, monthStart, planMonthOf, planningWeeks, weekStartOf, weekdayOf } from '../weeks';
 
 describe('planning weeks', () => {
   it('starts a month on the Monday the sheet uses', () => {
@@ -43,5 +43,24 @@ describe('planning weeks', () => {
     expect(weekdayOf('2026-10-03')).toBeNull();
     expect(weekStartOf('2026-10-01')).toBe('2026-09-28');
     expect(monthLabel('2026-10')).toBe('Oktober 2026');
+  });
+});
+
+describe('the planning month of a day', () => {
+  it('is the month whose weeks hold it, so the last days of a month can belong to the next', () => {
+    // September 2026's weeks start on Monday 31 August (the 1st is a Tuesday).
+    expect(planMonthOf('2026-08-31')).toBe('2026-09');
+    expect(planMonthOf('2026-09-15')).toBe('2026-09');
+    // August's start on Monday 3 August (the 1st is a Saturday): 1 and 2 August are July's.
+    expect(planMonthOf('2026-08-02')).toBe('2026-07');
+    // Across the year: 1 January 2027 is a Friday, so its week starts in December 2026 and is January's.
+    expect(planMonthOf('2026-12-28')).toBe('2027-01');
+    expect(planMonthOf('2027-01-01')).toBe('2027-01');
+  });
+
+  it('agrees with the weeks the board shows for that month', () => {
+    for (const day of ['2026-08-31', '2026-10-30', '2027-03-01']) {
+      expect(planningWeeks(planMonthOf(day)).some((w) => w.days.includes(day))).toBe(true);
+    }
   });
 });

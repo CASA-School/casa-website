@@ -79,6 +79,21 @@ export function planningWeeks(month: string): PlanningWeek[] {
   return weeks;
 }
 
+/**
+ * The planning month whose weeks hold `date`. A month's planning weeks start
+ * on the Monday of the week of its 1st (the next Monday when the 1st is on a
+ * weekend), so the last days of a month can belong to the next one.
+ */
+export function planMonthOf(date: string): string {
+  const monday = weekStartOf(date);
+  const month = date.slice(0, 7);
+  if (monday < monthStart(month)) {
+    const [y, m] = month.split('-').map(Number);
+    return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+  }
+  return monday >= monthStart(nextMonth(month)) ? nextMonth(month) : month;
+}
+
 /** `Mo`…`Fr` for a date, or null on a weekend. */
 export function weekdayOf(date: string): Weekday | null {
   const dow = parseIso(date).getUTCDay();

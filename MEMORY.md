@@ -2666,3 +2666,12 @@ first, across enquiries, registrations, applications and offers gone quiet (`get
 queue totals one quiet line under it; **Tasks** as a calm checklist (from earlier first, its date
 amber, initials for whose it is); **At CASA today** and **Coming up** with calendar-leaf dates.
 `StatBand` is gone. docs/ADMIN_WORKSPACE.md §Today.
+
+Twelfth pass: **learning from FileMaker's home.** Rahman showed `SingleDayCalendar_Overview`, the
+week-of-day-rows the team opens at login ("a lot of building blocks and shortcuts … learn from this
+a little"). Today now opens on **the week at a glance**: seven days side by side, each with what it
+holds as a dot and a count (first days, moving in/out, courses starting/ending, exams, learners'
+birthdays, teachers away, tasks), and first, in amber and red, the teaching plan's gaps and
+conflicts — the board's own `analysePlan`, Kursplanung holders only — with the day's names and
+*Open the plan* in "At CASA today". The plain date strip (`day-nav.tsx`) is gone. Not built, no data
+model: reception shifts, administration absences, OfficeTalk, arrival transfers.

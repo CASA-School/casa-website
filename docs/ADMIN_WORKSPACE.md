@@ -507,10 +507,22 @@ backlog numbers (126 placement reviews in gold), a yellow "Still open from
 earlier" band over half the board, and "140 records are waiting across the
 queues". The new one is calm, and leads with people, not counts:
 
-- The head: the greeting and the date, and beside them the week as a
-  calendar's row of dates — Monday first, the chosen day ink, today's date
-  blue, a quiet dot on a day with unfinished tasks. Links, not a picker:
-  `?date=YYYY-MM-DD`; today has no parameter.
+- The head: the greeting and the date.
+- **The week at a glance** (`day-board/week.tsx`, `weekFacts`), learned from
+  FileMaker's home, `SingleDayCalendar_Overview` — a week of day rows the team
+  has opened every morning for years, each with its first days, birthdays,
+  absences and room and teacher conflicts lit orange. Here: seven days side by
+  side, each with what it holds as a dot and a count — first days, moving in
+  and out, courses starting and ending, exams, birthdays of learners at the
+  school, teachers away, tasks open — and first, in amber and red, what the
+  teaching plan still lacks that day (lessons that need a teacher, plan
+  conflicts; `teachingOn` runs the board's own `analysePlan`, so Today and the
+  board never disagree). The plan and the absences only for a colleague who
+  holds Kursplanung. Each day is a link that chooses it:
+  `?date=YYYY-MM-DD`; today has no parameter. On a phone the seven days keep
+  their dots and numbers and the chosen day's words are below.
+- FileMaker blocks with no data model yet, so not here: reception shifts,
+  administration absences, OfficeTalk messages, arrival transfers.
 - **Waiting for an answer** (today only, `getWaiting` in `overview.ts`): the
   people CASA owes an answer, by name, the longest wait first — a new enquiry,
   registration or job application, and a sent offer gone quiet (ten days, or
@@ -524,8 +536,10 @@ queues". The new one is calm, and leads with people, not counts:
   amber; nothing rolls it forward, because a task that moves by itself is a
   task nobody notices they have missed. Area headings show only when there is
   more than one group; whose it is shows as a colleague's initials.
-- **At CASA today** — courses starting and ending, exam sittings and first
-  days, read from the records the team already keeps.
+- **At CASA today** — the chosen day by name: first days, moving in and
+  out, courses starting and ending, exam sittings, birthdays (with the age),
+  and for Kursplanung holders the day's teaching — who is away and why, what
+  the plan lacks, and *Open the plan*.
 - **Coming up** (today only) — cohorts starting in the next three weeks and
   exam entries closing in the next two, each with its day as a calendar leaf.
 
