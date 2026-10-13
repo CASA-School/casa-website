@@ -494,70 +494,68 @@ Nine top-level items, and the placements are the argument:
 - The register is labelled **Students**, the word the team uses, and the screen
   says the same. A rail label and a page title that disagree is a bug.
 
-### Today — the daily surface
+### Today — the control room, and the day
 
-`/admin` is a day, not a summary. The team opens it every morning, and
-FileMaker's home screen (`SingleDayCalendar_Overview`) is the same idea, which
-is why they recognise it.
+**`/admin` is the control room: FileMaker's `SingleDayCalendar_Overview`,
+rebuilt** (Rahman, 2026-10-13: "this filemaker style control-room is a bit
+important to have, we don't need to have everything like filemaker but better
+logic and intelligence that helps the staff to do their work"; an earlier
+modern dashboard missed the point — "you are not understanding it properly").
+Studied from the live layout: a week of day rows, each a control panel.
+`control-room.ts` reads the week in one round; `control/launch.tsx` and
+`control/day-row.tsx` draw it.
 
-**Rebuilt 2026-10-13** (Rahman, on the old one: "look how ugly this looks, do
-you think people would like to come to this type of dashboard when they log
-in?"). The old screen led with a full-width week strip, a band of four big
-backlog numbers (126 placement reviews in gold), a yellow "Still open from
-earlier" band over half the board, and "140 records are waiting across the
-queues". The new one is calm, and leads with people, not counts:
+Kept from FileMaker, because hands and eyes know it:
 
-- The head: the greeting and the date.
-- **The week at a glance** (`day-board/week.tsx`, `weekFacts`), learned from
-  FileMaker's home, `SingleDayCalendar_Overview` — a week of day rows the team
-  has opened every morning for years, each with its first days, birthdays,
-  absences and room and teacher conflicts lit orange. Here: seven days side by
-  side, each with what it holds as a dot and a count — first days, moving in
-  and out, courses starting and ending, exams, birthdays of learners at the
-  school, teachers away, tasks open — and first, in amber and red, what the
-  teaching plan still lacks that day (lessons that need a teacher, plan
-  conflicts; `teachingOn` runs the board's own `analysePlan`, so Today and the
-  board never disagree). The plan and the absences only for a colleague who
-  holds Kursplanung. Each day is a link that chooses it:
-  `?date=YYYY-MM-DD`; today has no parameter. On a phone the seven days keep
-  their dots and numbers and the chosen day's words are below.
-- FileMaker blocks with no data model yet, so not here: OfficeTalk messages,
-  arrival transfers (the airport and station shortcuts).
-- **Waiting for an answer** (today only, `getWaiting` in `overview.ts`): the
-  people CASA owes an answer, by name, the longest wait first — a new enquiry,
-  registration or job application, and a sent offer gone quiet (ten days, or
-  past its validity). Each row is the list design: initials, name, what it is
-  and about, whose it is, how long ago (amber after two days). Only the modules
-  the colleague holds. The queues' totals are one quiet line of links under it.
-- **Tasks** (`day_tasks`, migration 0012). Anyone with `overview` at `edit`
-  — which is everyone — writes what needs doing, optionally assigns it and
-  files it under an area. Ticking it records who ticked it. An unfinished task
-  **stays on its own date** and appears first under "From earlier", its date in
-  amber; nothing rolls it forward, because a task that moves by itself is a
-  task nobody notices they have missed. Area headings show only when there is
-  more than one group; whose it is shows as a colleague's initials.
-- **In the office** (module `rota`, everyone at `view`) — the chosen day
-  from the rota, worked out: first what is wrong (office hours nobody covers at
-  the desk, a shift planned for someone who is away), then who is at the desk
-  when with the shift's note, then who is away and until when ("Away", or the
-  reason for whoever plans the rota). "The office is closed" at the weekend,
-  "No rota for this week yet" until someone plans one. The week above it
-  counts colleagues away and reception gaps per open day — gaps only once the
-  week has any shift, so an unplanned week is not five alarms.
-- **The work of someone away wears an amber ring.** An enquiry, registration
-  or offer waiting for an answer whose owner is away today, and a task on the
-  chosen day whose assignee is away, show the initials ringed in amber with
-  "away" on hover — someone else picks it up. FileMaker kept the absences and
-  the work in separate columns and never connected them.
-- **At CASA today** — the chosen day by name: first days, moving in and
-  out, courses starting and ending, exam sittings, birthdays (with the age),
-  and for Kursplanung holders the day's teaching — who is away and why, what
-  the plan lacks, and *Open the plan*.
-- **Coming up** (today only) — cohorts starting in the next three weeks and
-  exam entries closing in the next two, each with its day as a calendar leaf.
+- **The week runs Sunday to Saturday**, a row a day, a thick navy line between
+  days — Sunday is when people move in (FileMaker's FirstDayAcco), Monday when
+  they start (FirstDayStudent). The date is `12.10.26` with its weekday, red at
+  the weekend; today's head is cream and underlined. `?week=YYYY-MM-DD` (any
+  day of the week); this week without it.
+- **The red-brown bar** with « ‹ › » (four weeks, one week) and the week's
+  span, and under it **the launch rows**: pale yellow cells for the daily
+  destinations, each with what is new in it (enquiries and registrations
+  nobody has opened, offers to follow up, placement tests awaiting a teacher),
+  grey cells for the other areas. Only the areas the colleague holds.
+- Per day: the **first-day box** (first day, moving in, moving out, the
+  names in a panel); the **keys** in FileMaker's columns — the day's work
+  (Tasks | n, Messages, Rota, Day), something new (+ Task, + Absence, + Offer,
+  + Message — FileMaker's green plus), its rooms (Rooms, Classes | n with
+  each cohort's room, Exam | n, Clash | n) and, for Kursplanung holders, its
+  teaching (Teachers, Timetable, Conflicts | n, Vacant | n); **Reception**
+  (FileMaker's "Shift | Reception": who is at the desk when, with the note);
+  **Away · office** and **Away · teaching** numbered, with FileMaker's codes
+  (TU leave in blue, kr sick on yellow, AÜ, Fb, uU).
 
-Colour means **state**, never category: amber is the one warm thing (a wait
-gone long, a task from an earlier day), and a finished task recedes.
+Better than FileMaker:
+
+- A key says whether there is something behind it — bold and underlined when
+  there is (FileMaker's own mark), amber when it needs a look, orange with red
+  text when a plan contradicts itself, quiet when there is nothing.
+- **What is wrong with a day is said in words** at the end of its head: a
+  room booked twice at the same time (worked out from the cohorts' rooms and
+  times), plan conflicts and lessons that need a teacher (`teachingOn`, the
+  board's own `analysePlan`), office hours nobody covers at the desk,
+  someone on shift who is away, tasks left from earlier.
+- A weekend is one line, unless someone moves in or starts.
+- The launch row carries the areas once for the week, so a day row carries only
+  that day's keys.
+- An absence's code shows only to whoever plans the rota; everyone else sees
+  "–" (an absence's reason is personal data).
+- **Building blocks still to come stand in their place, quiet** (a dashed
+  cell or key, not a link): Messages (FileMaker's OfficeTalk), Transfers (its
+  airport and station shortcuts), Agencies, Companies, Internships. They are
+  built one at a time and then light up where the team already expects them.
+
+**`/admin/day` is one day in detail**, opened by its date (or the Day key):
+who is waiting for an answer (today only, `getWaiting`: the people CASA owes
+an answer, by name, the longest wait first), the day's **tasks** to tick (an
+unfinished task stays on its own date and shows under "From earlier" with its
+date in amber — nothing rolls it forward), **In the office** from the rota,
+**At CASA today** by name, and **Coming up**. The work of a colleague who is
+away wears an amber ring on their initials, so someone else picks it up.
+`?date=YYYY-MM-DD`; today without it. A task written in the control room
+returns there (`from=week`); one written on the day stays on the day.
 
 The fortnight trend and the newest inbound records moved to **Activity**. Both
 look backwards, and a daily screen that also carries last week's chart is a
@@ -756,6 +754,21 @@ The rules, each of which came from a real defect on a real screen.
    applies, how many days an offer still holds, a confirmation's consequence,
    an input's format. The letter to a learner still states hours and dates in
    full — that is for the learner, not the team.
+
+### FileMaker's colours (2026-10-13)
+
+Rahman: "adapt to color a little towards filemaker so staff don't feel too
+strange with the colors". Sampled from SchoolMan's home calendar and kept as
+tokens in `.casa-workspace` (`globals.css`, `--fm-*`): navy `#1f3e6c` for
+structure, red-brown `#b5431d` for the control room's bar, pale yellow
+`#fffcb4` for a daily destination, cream `#fefbea` for today, link blue
+`#3477a1`, red `#9c1f14` for a weekend and a conflict, orange `#ef9872` for a
+clash in a plan, sun `#f8d355` for someone off sick, green `#59b038` for a
+"new" plus. The control room uses them as FileMaker does. The rest of the
+workspace takes them a little: its primary action and a colleague's initials
+are navy (`--casa-ink-deep` is FileMaker's navy inside the workspace; text
+stays near-black), and "you are here" in the rail is the pale yellow cell
+with a navy edge. The public site is untouched.
 
 ## Lists
 

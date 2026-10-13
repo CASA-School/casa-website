@@ -2686,3 +2686,15 @@ guarded by a test against the footer), copy last week, absences. Today gains **I
 (gaps, a shift planned for someone away, who is at the desk, who is away until when), the week counts
 colleagues away and reception gaps, and the work of someone away today — a waiting enquiry, a task —
 wears an amber ring so someone else picks it up. docs/ADMIN_WORKSPACE.md §Rota, §Today.
+
+Fourteenth pass: **the control room, properly.** Rahman: "build it properly dude, also adapt to
+color a little towards filemaker … you are not understanding it properly". Studied the live
+`SingleDayCalendar_Overview` (read-only screenshot, colours sampled) and rebuilt it: `/admin` is a
+week of day rows Sunday–Saturday with navy lines, the red-brown bar with « ‹ › », pale-yellow and
+grey launch rows (counts of what is new), per day the first-day box, the day's keys in FileMaker's
+columns (work · new · rooms · teaching) lit when there is something behind them, Reception, Away ·
+office and Away · teaching with TU/kr codes, and what is wrong with the day in words (room booked
+twice, plan conflicts, lessons without a teacher, desk uncovered, on shift but away, tasks from
+earlier). Placeholders stand where blocks will come (Messages, Transfers, Agencies, Companies,
+Internships). The previous Today detail is `/admin/day`. Workspace colours moved a little towards
+FileMaker: navy primary and initials, pale-yellow active rail item (`--fm-*` tokens).

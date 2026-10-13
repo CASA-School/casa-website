@@ -927,11 +927,38 @@ h3 {
   /* 8.4:1 on --ws-panel. Muted enough to recede, never so muted it fails AA. */
   --ws-on-panel-muted: #9aa8bc;
 
-  /* CASA's sun, used once and only once per screen: the marker on the nav item
-     you are standing on. It is the school's signature colour and the only
-     saturated warm note in the workspace, which is exactly what makes "you are
-     here" register before the label is read. */
-  --ws-marker: var(--casa-sun);
+  /* The marker on the nav item you are standing on: FileMaker's navy edge on
+     its pale yellow cell (below), so "you are here" reads as it did there. */
+  --ws-marker: var(--fm-navy);
+
+  /*
+   * FILEMAKER'S COLOURS (2026-10-13, Rahman: "adapt to color a little towards
+   * filemaker so staff don't feel too strange"). Sampled from SchoolMan's home
+   * calendar, the screen the team has opened every morning for years. The
+   * control room on Today uses them as FileMaker does — navy for structure,
+   * pale yellow for the daily destinations, blue for a link, red for a weekend
+   * and a conflict, orange for a clash in a plan, sun yellow for someone off
+   * sick — and the rest of the workspace takes the navy for its primary
+   * actions and the pale yellow for "you are here" in the rail.
+   */
+  --fm-navy: #1f3e6c;
+  --fm-navy-hover: #183358;
+  --fm-bar: #b5431d;
+  --fm-yellow: #fffcb4;
+  --fm-cream: #fefbea;
+  --fm-blue: #3477a1;
+  --fm-sky: #c8ecfb;
+  --fm-red: #9c1f14;
+  --fm-orange: #ef9872;
+  --fm-sick: #f8d355;
+  --fm-green: #59b038;
+  --fm-grey: #e6e6e6;
+  --fm-grey-light: #f3f3f3;
+  --fm-grey-line: #d6d6d6;
+
+  /* The workspace's primary action and its ink chips: FileMaker's navy, not black. */
+  --casa-ink-deep: var(--fm-navy);
+  --casa-ink-deep-hover: var(--fm-navy-hover);
 
   font-size: 0.9375rem;
   line-height: 1.55;

@@ -11,17 +11,21 @@ export function AbsenceForm({
   week,
   absence,
   firstDay,
+  from,
 }: {
   staff: readonly RotaColleague[];
   week: string;
   absence?: StaffAbsence;
   /** The day a new absence starts on unless changed: the first day of the week on screen. */
   firstDay: string;
+  /** `week` when recorded in the control room, which it then returns to. */
+  from?: 'week';
 }) {
-  const key = absence?.id ?? 'new';
+  const key = absence?.id ?? `new-${firstDay}`;
   return (
     <form action={saveAbsenceAction} className="space-y-3">
       <input type="hidden" name="week" value={week} />
+      {from ? <input type="hidden" name="from" value={from} /> : null}
       {absence ? <input type="hidden" name="id" value={absence.id} /> : null}
       <Field label="Colleague" htmlFor={`absence-${key}-who`}>
         <Select id={`absence-${key}-who`} name="staffUserId" required defaultValue={absence?.staffUserId ?? ''}>

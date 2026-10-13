@@ -59,12 +59,11 @@ export function NavLink({
           'group relative flex items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-[0.45rem] text-sm whitespace-nowrap transition-colors',
           'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
           active
-            ? 'bg-ws-sunk font-bold text-[var(--casa-ink)]'
+            ? 'bg-[var(--fm-yellow)] font-bold text-[var(--fm-navy)]'
             : 'font-medium text-[var(--casa-muted)] hover:bg-ws-sunk/70 hover:text-[var(--casa-ink)]'
         )}
       >
-        {/* CASA's sun, and the only saturated warm note in the rail. One accent,
-            used once, so "you are here" registers before the label is read. */}
+        {/* "You are here": FileMaker's pale yellow cell with a navy edge. */}
         <span
           aria-hidden="true"
           className={cn(
@@ -76,7 +75,7 @@ export function NavLink({
           aria-hidden="true"
           className={cn(
             'shrink-0 transition-colors',
-            active ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-text-subtle)] group-hover:text-[var(--casa-ink)]'
+            active ? 'text-[var(--fm-navy)]' : 'text-[var(--casa-text-subtle)] group-hover:text-[var(--casa-ink)]'
           )}
         >
           {icon}
@@ -124,7 +123,7 @@ export function NavLink({
                     'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[0.8rem] transition-colors',
                     'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
                     current
-                      ? 'bg-ws-sunk/70 font-bold text-[var(--casa-ink)]'
+                      ? 'bg-[var(--fm-yellow)]/70 font-bold text-[var(--fm-navy)]'
                       : 'font-medium text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
                   )}
                 >

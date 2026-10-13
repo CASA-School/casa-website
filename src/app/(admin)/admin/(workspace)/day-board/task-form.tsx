@@ -17,10 +17,13 @@ export function TaskForm({
   date,
   task,
   staff,
+  from,
 }: {
   date: string;
   task?: DayTask;
   staff: readonly { id: string; name: string }[];
+  /** `week` when written in the control room, which it then returns to. */
+  from?: 'week';
 }) {
   const editing = Boolean(task);
   const onDate = task ? toDateInputValue(task.onDate) : date;
@@ -28,6 +31,7 @@ export function TaskForm({
   return (
     <form action={editing ? updateDayTaskAction : createDayTaskAction} className="space-y-3">
       {task ? <input type="hidden" name="taskId" value={task.id} /> : null}
+      {from ? <input type="hidden" name="from" value={from} /> : null}
 
       <Field label="What needs doing" htmlFor="task-title">
         <Input

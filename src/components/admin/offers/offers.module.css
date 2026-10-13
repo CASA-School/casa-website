@@ -20,7 +20,9 @@
   --r-control: var(--casa-radius-control, 4px);
   --r-card: var(--casa-radius-card, 6px);
   --r-feature: var(--casa-radius-feature, 8px);
-  --o-ink: var(--casa-ink-deep, #111827);
+  /* Text stays near-black; the workspace's navy (FileMaker's) is for the primary action. */
+  --o-ink: #111827;
+  --o-primary: var(--casa-ink-deep, #1f3e6c);
   --o-ink2: #2b3546;
   --o-mute: #5f6b7d;
   --o-faint: #98a3b3;
@@ -75,8 +77,8 @@
 .btnSm { height: 30px; padding: 0 10px; font-size: 12.5px; }
 .ghost { display: inline-flex; align-items: center; justify-content: center; height: 36px; min-width: 36px; padding: 0 10px; border-radius: var(--r-control); border: 0; background: transparent; color: var(--o-mute); font-weight: 700; font-size: 13px; }
 .ghost:hover { background: var(--o-sunk); color: var(--o-ink); }
-.primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 15px; border-radius: var(--r-control); border: 0; background: var(--o-ink); color: #fff; font-weight: 700; font-size: 13.5px; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2); }
-.primary:hover { background: #1f2b3c; }
+.primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 15px; border-radius: var(--r-control); border: 0; background: var(--o-primary); color: #fff; font-weight: 700; font-size: 13.5px; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2); }
+.primary:hover { background: var(--casa-ink-deep-hover, #183358); }
 .primary:disabled { background: #c9d1dc; box-shadow: none; cursor: not-allowed; }
 .link { border: 0; background: none; padding: 0; color: var(--o-blue); font-weight: 700; font-size: inherit; text-decoration: none; }
 .link:hover { text-decoration: underline; }

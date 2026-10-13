@@ -24,20 +24,21 @@ const NOTE = z
 
 const fields = (formData: FormData) => Object.fromEntries(formData.entries());
 
-/** Back to the week that was being planned. */
-function back(week: unknown, message?: { ok?: string; error?: string }): never {
+/** Back to the week that was being planned — on the Rota, or in the control room when written there (`from=week`). */
+function back(week: unknown, message?: { ok?: string; error?: string }, from?: unknown): never {
   const params = new URLSearchParams();
   if (typeof week === 'string' && DATE.safeParse(week).success) params.set('week', week);
   if (message?.ok) params.set('ok', message.ok);
   if (message?.error) params.set('error', message.error);
   const query = params.toString();
-  redirect(`/admin/rota${query ? `?${query}` : ''}`);
+  redirect(`${from === 'week' ? '/admin' : '/admin/rota'}${query ? `?${query}` : ''}`);
 }
 
-const done = (week: unknown, message?: { ok?: string; error?: string }): never => {
+const done = (week: unknown, message?: { ok?: string; error?: string }, from?: unknown): never => {
   revalidatePath('/admin/rota');
   revalidatePath('/admin');
-  back(week, message);
+  revalidatePath('/admin/day');
+  back(week, message, from);
 };
 
 const SHIFT = z
@@ -83,10 +84,14 @@ const ABSENCE = z
 export async function saveAbsenceAction(formData: FormData): Promise<void> {
   const actor = await requireModule('rota', 'edit');
   const parsed = ABSENCE.safeParse(fields(formData));
-  if (!parsed.success) back(formData.get('week'), { error: parsed.error.issues[0]?.message ?? 'That absence could not be saved.' });
-  const { id, note, ...rest } = parsed.data;
-  await saveAbsence({ ...rest, id: id || null, note: note ?? null }, actor);
-  done(formData.get('week'));
+  if (!parsed.success)
+    back(formData.get('week'), { error: parsed.error.issues[0]?.message ?? 'That absence could not be saved.' }, formData.get('from'));
+  const a = parsed.data;
+  await saveAbsence(
+    { id: a.id || null, staffUserId: a.staffUserId, fromDate: a.fromDate, toDate: a.toDate, reason: a.reason, note: a.note ?? null },
+    actor
+  );
+  done(formData.get('week'), undefined, formData.get('from'));
 }
 
 export async function deleteAbsenceAction(formData: FormData): Promise<void> {

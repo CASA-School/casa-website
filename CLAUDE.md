@@ -251,6 +251,13 @@ the site shows is one entry of the workspace's price list in force (`src/lib/con
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
 
+**The workspace opens on a control room** (`/admin`), FileMaker's home calendar rebuilt: a
+week of day rows (Sunday to Saturday), launch rows of areas, per-day keys that say whether
+there is something behind them, reception and absences, and what is wrong with a day in
+words; a date opens `/admin/day`. Its colours, and a little of the rest of the workspace's,
+are FileMaker's (`--fm-*` in `globals.css`): navy primary, pale yellow "you are here".
+`docs/ADMIN_WORKSPACE.md` §Today and §FileMaker's colours.
+
 **Workspace design standards.** A section is one white block and the canvas
 between sections separates them — a card header is white with a rule, never a
 grey band the same value as the page. A field title is a label (12px sentence

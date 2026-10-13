@@ -25,14 +25,20 @@ import { todayInputValue } from '@/lib/dates';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-/** Back to the day the task belongs to; Today is the workspace's home. */
-function back(date: string, error?: string): never {
+/**
+ * Back to where the task was written: the control room's week (a form there
+ * carries `from=week`), or the day it belongs to.
+ */
+type From = 'week' | 'day';
+function back(date: string, from: From, error?: string): never {
   const params = new URLSearchParams();
-  if (DATE.test(date) && date !== todayInputValue()) params.set('date', date);
+  if (DATE.test(date) && date !== todayInputValue()) params.set(from === 'week' ? 'week' : 'date', date);
   if (error) params.set('error', error);
   const query = params.toString();
-  redirect(`/admin${query ? `?${query}` : ''}`);
+  redirect(`${from === 'week' ? '/admin' : '/admin/day'}${query ? `?${query}` : ''}`);
 }
+
+const readFrom = (formData: FormData): From => (formData.get('from') === 'week' ? 'week' : 'day');
 
 function readDate(formData: FormData, field = 'onDate'): string {
   const value = String(formData.get(field) ?? '');
@@ -64,9 +70,10 @@ function readDetail(formData: FormData): string | null {
 
 export async function createDayTaskAction(formData: FormData): Promise<void> {
   const actor = await requireModule('overview', 'edit');
+  const from = readFrom(formData);
   const onDate = readDate(formData);
   const title = readTitle(formData);
-  if (title.length === 0) back(onDate, 'Give the task a title.');
+  if (title.length === 0) back(onDate, from, 'Give the task a title.');
 
   await createDayTask(
     {
@@ -79,25 +86,29 @@ export async function createDayTaskAction(formData: FormData): Promise<void> {
     actor
   );
   revalidatePath('/admin');
-  back(onDate);
+  revalidatePath('/admin/day');
+  back(onDate, from);
 }
 
 export async function toggleDayTaskAction(formData: FormData): Promise<void> {
   const actor = await requireModule('overview', 'edit');
+  const from = readFrom(formData);
   const id = String(formData.get('taskId') ?? '');
   if (!UUID.test(id)) throw new Error('Invalid taskId');
   await setDayTaskDone(id, formData.get('done') === 'true', actor);
   revalidatePath('/admin');
-  back(readDate(formData, 'date'));
+  revalidatePath('/admin/day');
+  back(readDate(formData, 'date'), from);
 }
 
 export async function updateDayTaskAction(formData: FormData): Promise<void> {
   const actor = await requireModule('overview', 'edit');
+  const from = readFrom(formData);
   const id = String(formData.get('taskId') ?? '');
   if (!UUID.test(id)) throw new Error('Invalid taskId');
   const onDate = readDate(formData);
   const title = readTitle(formData);
-  if (title.length === 0) back(onDate, 'Give the task a title.');
+  if (title.length === 0) back(onDate, from, 'Give the task a title.');
 
   await updateDayTask(
     id,
@@ -111,16 +122,19 @@ export async function updateDayTaskAction(formData: FormData): Promise<void> {
     actor
   );
   revalidatePath('/admin');
-  back(onDate);
+  revalidatePath('/admin/day');
+  back(onDate, from);
 }
 
 export async function deleteDayTaskAction(formData: FormData): Promise<void> {
   const actor = await requireModule('overview', 'edit');
+  const from = readFrom(formData);
   const id = String(formData.get('taskId') ?? '');
   if (!UUID.test(id)) throw new Error('Invalid taskId');
   const date = readDate(formData, 'date');
-  if (formData.get('confirmed') !== '1') back(date);
+  if (formData.get('confirmed') !== '1') back(date, from);
   await deleteDayTask(id, actor);
   revalidatePath('/admin');
-  back(date);
+  revalidatePath('/admin/day');
+  back(date, from);
 }

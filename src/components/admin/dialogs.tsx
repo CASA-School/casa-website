@@ -38,6 +38,7 @@ export function FormDialog({
   width = 'md',
   defaultOpen = false,
   titleClassName,
+  triggerClassName,
 }: {
   trigger: ReactNode;
   title: string;
@@ -51,13 +52,21 @@ export function FormDialog({
   defaultOpen?: boolean;
   /** For a module with its own type — the dialog is portalled out of the module's scope. */
   titleClassName?: string;
+  /** For a trigger that is not a button but a key — the control room's. */
+  triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button type="button" variant={triggerVariant} size={size} onClick={() => setOpen(true)}>
-        {trigger}
-      </Button>
+      {triggerClassName ? (
+        <button type="button" className={triggerClassName} onClick={() => setOpen(true)}>
+          {trigger}
+        </button>
+      ) : (
+        <Button type="button" variant={triggerVariant} size={size} onClick={() => setOpen(true)}>
+          {trigger}
+        </Button>
+      )}
       <DialogContent className={panel(width)} closeLabel="Close">
         <DialogTitle className={titleClassName ? `text-lg font-extrabold ${titleClassName}` : 'text-lg font-extrabold'}>{title}</DialogTitle>
         {description ? (
