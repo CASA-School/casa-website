@@ -58,16 +58,14 @@ export function RegistrationTable({
               ) : null}
             </Cell>
             <Cell className="text-sm">
-              {item.detailNote ? (
-                <span>{item.detailNote}</span>
-              ) : (
-                <span className="text-[var(--casa-text-subtle)]">—</span>
-              )}
-              {item.accommodationRequired ? (
-                <Badge tone="neutral" className="mt-1">
-                  Room needed
-                </Badge>
-              ) : null}
+              <span className="flex flex-wrap items-center gap-2">
+                {item.detailNote ? (
+                  <span>{item.detailNote}</span>
+                ) : (
+                  <span className="text-[var(--casa-text-subtle)]">—</span>
+                )}
+                {item.accommodationRequired ? <Badge tone="neutral">Room needed</Badge> : null}
+              </span>
             </Cell>
             <Cell className="text-sm text-[var(--casa-text-subtle)]">
               {item.assigneeName ?? '—'}

@@ -41,7 +41,7 @@ export function PersonPanel({
   const linked = person && person.canonicalId !== person.id;
 
   return (
-    <Card title="Person" description={linked ? 'Linked to an existing person.' : undefined}>
+    <Card title="Person" description={linked ? 'Linked to an existing person.' : undefined} icon={Icon.person} tint="green">
       {person ? (
         <Link
           href={`/admin/people/${person.canonicalId}`}

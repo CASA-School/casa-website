@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { Icon } from '@/components/admin/icons';
 import { InboundChart } from '@/components/admin/inbound-chart';
 import {
   Badge,
@@ -62,20 +63,14 @@ export default async function ActivityPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Administration"
         title="Activity"
-        description="Every status change, assignment, note and placement decision, against the name of whoever made it."
+        description="Who changed what, and when."
       />
 
-      <div className="mb-5 grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
-        <Card title="Just arrived" bleed>
+      <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <Card title="Just arrived" icon={Icon.enquiries} tint="ink" bleed>
           {recent.length === 0 ? (
-            <div className="px-5 py-4">
-              <EmptyState
-                title="Nothing has come in yet"
-                description="Enquiries, registrations, placement attempts and job applications from the public site all land here."
-              />
-            </div>
+            <p className="px-4 py-4 text-sm text-[var(--casa-text-subtle)]">Nothing has come in yet.</p>
           ) : (
             <Table head={['Name', 'What', 'Status', { label: 'Received', align: 'right' }]}>
               {recent.map((item) => {
@@ -103,34 +98,42 @@ export default async function ActivityPage() {
           )}
         </Card>
 
-        <Card title="Inbound, last fortnight">
+        <Card
+          title="Inbound, last fortnight"
+          icon={Icon.overview}
+          tint="blue"
+          footer={
+            <p className="text-xs text-[var(--casa-text-subtle)]">
+              <span className="font-semibold text-[var(--casa-ink)]">
+                {counts.inboundThisWeek} this week
+              </span>
+              {' · '}
+              {weekDelta === 0
+                ? 'level with the week before'
+                : `${Math.abs(weekDelta)} ${weekDelta > 0 ? 'more' : 'fewer'} than the week before`}
+            </p>
+          }
+        >
           <InboundChart days={inbound} />
-          <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs text-[var(--casa-text-subtle)]">
-            <span className="font-semibold text-[var(--casa-ink)]">
-              {counts.inboundThisWeek} this week
-            </span>
-            {' · '}
-            {weekDelta === 0
-              ? 'level with the week before'
-              : `${Math.abs(weekDelta)} ${weekDelta > 0 ? 'more' : 'fewer'} than the week before`}
-          </p>
         </Card>
       </div>
 
       {entries.length === 0 ? (
         <EmptyState
           title="Nothing has been worked yet"
-          description="The trail starts the first time someone changes a status, takes ownership of a record or writes a note."
+          description="Status changes, owners and notes appear here."
         />
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {[...byDay.entries()].map(([day, dayEntries]) => (
             <Card
               key={day}
+              icon={Icon.calendar}
+              tint="blue"
               title={
                 <span className="flex items-baseline gap-2">
                   <DateText value={new Date(day)} />
-                  <span className="font-[family-name:var(--font-sans)] text-xs font-normal text-[var(--casa-text-subtle)]">
+                  <span className="text-xs font-semibold text-[var(--casa-text-subtle)]">
                     {dayEntries.length} {dayEntries.length === 1 ? 'change' : 'changes'}
                   </span>
                 </span>
@@ -146,8 +149,8 @@ export default async function ActivityPage() {
                   });
 
                   const line = (
-                    <span className="flex items-baseline gap-3 px-5 py-2.5 text-sm">
-                      <span className="w-11 shrink-0 text-xs text-[var(--casa-text-subtle)]">
+                    <span className="flex items-baseline gap-3 px-4 py-2.5 text-sm">
+                      <span className="w-11 shrink-0 text-xs text-[var(--casa-text-subtle)] tabular-nums">
                         {time}
                       </span>
                       <span className="min-w-0 flex-1 text-[var(--casa-muted)]">
@@ -162,7 +165,7 @@ export default async function ActivityPage() {
                   return (
                     <li key={entry.id}>
                       {href ? (
-                        <Link href={href} className="block transition-colors hover:bg-ws-sunk/70">
+                        <Link href={href} className="block transition-colors hover:bg-[#f6f9fc]">
                           {line}
                         </Link>
                       ) : (

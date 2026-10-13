@@ -79,8 +79,9 @@ export function OptionalSection({
       >
         <div className="overflow-hidden">
           <div className="border-t border-ws-line-soft pt-4">
-            <p className="mb-3 text-xs font-medium text-[var(--casa-muted)]">{heading}</p>
-            <div className={visible ? '' : 'invisible'} aria-hidden={!visible}>
+            <p className="mb-3 text-[0.8rem] font-extrabold text-[var(--casa-ink)]">{heading}</p>
+            {/* The step's own rhythm, so a form can hand it fields as siblings. */}
+            <div className={cn('space-y-3', visible ? '' : 'invisible')} aria-hidden={!visible}>
               {children}
             </div>
           </div>

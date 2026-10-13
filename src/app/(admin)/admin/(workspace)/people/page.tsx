@@ -13,12 +13,14 @@ import {
   PageHeader,
   Table,
   TableRow,
+  TINTS,
 } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { listCountries, listPeople } from '@/lib/admin/people';
+import { cn } from '@/lib/utils';
 import { PersonForm } from './person-form';
 
 /**
@@ -30,9 +32,9 @@ import { PersonForm } from './person-form';
  * of the same people with nothing connecting them (docs/FILEMAKER_LESSONS.md
  * §1) — and the reason every queue detail screen now points here.
  *
- * The band across the top is the open-flag count by kind. Flags are cleared
- * on the record they belong to, not here: the register tells you WHAT needs a
- * look, the record tells you what you are looking at.
+ * Beside the search, the open-flag count by kind, each a link to that work
+ * list. Flags are cleared on the record they belong to, not here: the register
+ * tells you WHAT needs a look, the record tells you what you are looking at.
  */
 export default async function PeoplePage({
   searchParams,
@@ -57,7 +59,6 @@ export default async function PeoplePage({
   return (
     <>
       <PageHeader
-        eyebrow="School"
         title="Students"
         description="Everyone who has enquired, registered or sat a placement."
         actions={
@@ -78,30 +79,44 @@ export default async function PeoplePage({
         </p>
       ) : null}
 
-      {flagEntries.length > 0 ? (
-        <p className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--casa-text-subtle)]">
-          {flagEntries.map(([code, n]) => (
-            <Link
-              key={code}
-              href={`/admin/people/flags?code=${code}`}
-              className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[var(--casa-ink)]"
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <form method="get" action="/admin/people" className="flex w-full gap-2 sm:w-auto">
+          <div className="relative flex-1 sm:w-72">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--casa-text-subtle)]"
             >
-              <span className="text-[var(--casa-warning-text)]">{Icon.flag}</span>
-              {n} {FLAG_LABELS[code].toLowerCase()}
-            </Link>
-          ))}
-        </p>
-      ) : null}
+              {Icon.search}
+            </span>
+            <Input
+              type="search"
+              name="q"
+              defaultValue={search ?? ''}
+              placeholder="Name or email"
+              aria-label="Search people"
+              className="pl-9"
+            />
+          </div>
+        </form>
 
-      <form method="get" action="/admin/people" className="mb-4 flex max-w-md gap-2">
-        <Input
-          type="search"
-          name="q"
-          defaultValue={search ?? ''}
-          placeholder="Name or email"
-          aria-label="Search people"
-        />
-      </form>
+        {flagEntries.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {flagEntries.map(([code, n]) => (
+              <Link
+                key={code}
+                href={`/admin/people/flags?code=${code}`}
+                className={cn(
+                  'inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-bold transition-opacity hover:opacity-80',
+                  TINTS.sun
+                )}
+              >
+                {Icon.flag}
+                {n} {FLAG_LABELS[code].toLowerCase()}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+      </div>
 
       {items.length === 0 ? (
         <EmptyState

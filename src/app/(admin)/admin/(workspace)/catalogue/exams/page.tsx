@@ -9,6 +9,7 @@ import {
   Table,
   TableRow,
 } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
 import { listUpcomingExamSessions } from '@/lib/admin/catalogue';
 
 /**
@@ -25,18 +26,14 @@ export default async function ExamCataloguePage() {
   return (
     <>
       <PageHeader
-        eyebrow="School"
         title="Exams"
-        description="telc sittings CASA has scheduled, and how many candidates have registered for each."
+        description="The telc sittings CASA has scheduled, and who has registered for each."
       />
 
       {sessions.length === 0 ? (
-        <EmptyState
-          title="No exam sittings scheduled"
-          description="Sittings come from the exam_sessions table. Until they are entered, the public exam pages have no dates to publish and this screen has nothing to plan against."
-        />
+        <EmptyState title="No exam sittings scheduled" description="Nothing is dated yet." />
       ) : (
-        <Card bleed>
+        <Card title="Upcoming sittings" icon={Icon.calendar} tint="blue" bleed>
           <Table
             head={[
               'Exam',
@@ -62,11 +59,12 @@ export default async function ExamCataloguePage() {
               return (
                 <TableRow key={session.id}>
                   <Cell className="font-semibold">
-                    <span className="block">{session.examCode}</span>
-                    <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
-                      {session.examName}
-                      {session.level ? ` · ${session.level}` : ''}
-                    </span>
+                    <span className="block">{session.examName}</span>
+                    {session.level ? (
+                      <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
+                        {session.level}
+                      </span>
+                    ) : null}
                   </Cell>
                   <Cell className="text-sm text-[var(--casa-muted)]">
                     <DateText value={session.startsAt} withTime />

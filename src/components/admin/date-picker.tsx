@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 
 import { addMonths, formatDay, isoParts, monthGrid, monthTitle, parseTypedDate, weekday, WEEKDAYS } from '@/lib/admin/calendar';
 import { addDays, daysBetween } from '@/lib/admin/offers/stay';
+import { todayInputValue } from '@/lib/dates';
 
 import s from './date-picker.module.css';
 
@@ -16,7 +17,12 @@ import s from './date-picker.module.css';
  * arrow keys, Page Up/Down and Enter working on it. `DateField` is the two
  * together, the calendar in a small panel; `DateRange` is an arrival and a
  * departure on one two-month calendar, with the stay's nights and its usual
- * lengths to pick from. All pure arithmetic is in src/lib/admin/calendar.ts.
+ * lengths to pick from. `DateFormField` is a `DateField` inside a server-action
+ * form, under the field's `name`. All pure arithmetic is in
+ * src/lib/admin/calendar.ts.
+ *
+ * `today` is optional: a calendar that only opens after a click reads the
+ * clock in the browser, where "today" is the colleague's own.
  */
 
 const CALENDAR_ICON = (
@@ -49,7 +55,7 @@ export function DateInput({
   id?: string;
   value: string | null;
   onCommit: (iso: string | null) => void;
-  today: string;
+  today?: string;
   min?: string | null;
   max?: string | null;
   placeholder?: string;
@@ -69,7 +75,7 @@ export function DateInput({
       if (value) onCommit(null);
       return;
     }
-    const parsed = parseTypedDate(typed, today);
+    const parsed = parseTypedDate(typed, today ?? todayInputValue());
     if (parsed && inBounds(parsed, min, max)) {
       setInvalid(false);
       if (parsed !== value) onCommit(parsed);
@@ -121,13 +127,14 @@ type Single = { mode: 'single'; value: string | null; onPick: (iso: string) => v
 type Range = { mode: 'range'; from: string | null; to: string | null; onPick: (iso: string) => void; picking: 'start' | 'end' };
 
 export function Calendar({
-  today,
+  today: givenToday,
   min,
   max,
   months = 1,
   compact,
   ...pick
-}: (Single | Range) & { today: string; min?: string | null; max?: string | null; months?: 1 | 2; compact?: boolean }) {
+}: (Single | Range) & { today?: string; min?: string | null; max?: string | null; months?: 1 | 2; compact?: boolean }) {
+  const today = givenToday ?? todayInputValue();
   const anchor = (pick.mode === 'single' ? pick.value : pick.from) ?? (min && min > today ? min : today);
   const [view, setView] = useState(() => {
     const { y, m } = isoParts(anchor);
@@ -308,7 +315,7 @@ export function DateField({
   id?: string;
   value: string | null;
   onChange: (iso: string | null) => void;
-  today: string;
+  today?: string;
   min?: string | null;
   max?: string | null;
   quick?: QuickDate[];
@@ -469,6 +476,66 @@ export function DateRange({
             })
           : null}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------- in a form
+
+/**
+ * A date inside a server-action form: the field and its calendar, posting
+ * `YYYY-MM-DD` under `name`. `required` is kept by a 1px field under the
+ * input, so the browser's own "fill this in" points at the date. A change is
+ * announced like a typed one, so `OptionalSection` and anything else listening
+ * to the form sees it.
+ */
+export function DateFormField({
+  id,
+  name,
+  defaultValue,
+  required,
+  min,
+  max,
+  quick,
+  onChange,
+}: {
+  id?: string;
+  name: string;
+  defaultValue?: string | null;
+  required?: boolean;
+  min?: string | null;
+  max?: string | null;
+  quick?: QuickDate[];
+  onChange?: (iso: string | null) => void;
+}) {
+  const [value, setValue] = useState<string | null>(defaultValue || null);
+  const field = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    field.current?.dispatchEvent(new Event('change', { bubbles: true }));
+  }, [value]);
+  return (
+    <div style={{ position: 'relative' }}>
+      <DateField
+        id={id}
+        value={value}
+        min={min}
+        max={max}
+        quick={quick}
+        onChange={(v) => {
+          setValue(v);
+          onChange?.(v);
+        }}
+      />
+      <input
+        ref={field}
+        name={name}
+        value={value ?? ''}
+        required={required}
+        onChange={() => {}}
+        tabIndex={-1}
+        aria-hidden
+        style={{ position: 'absolute', left: 12, bottom: 0, width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+      />
     </div>
   );
 }

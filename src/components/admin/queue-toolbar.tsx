@@ -52,7 +52,7 @@ export function QueueToolbar({
 
   return (
     <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <div className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
+      <div className="flex max-w-full gap-0.5 overflow-x-auto rounded-xl border border-ws-line bg-white p-1 [scrollbar-width:none]">
         {FILTER_ORDER.filter(
           // A state nobody has used is noise. `open` and `all` always show.
           (filter) => filter === 'open' || filter === 'all' || (counts[filter] ?? 0) > 0
@@ -66,16 +66,16 @@ export function QueueToolbar({
               href={hrefFor(filter)}
               aria-current={isActive ? 'true' : undefined}
               className={cn(
-                'inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors',
+                'inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.8rem] font-bold whitespace-nowrap transition-colors',
                 'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
                 isActive
                   ? 'bg-[var(--casa-ink-deep)] text-white'
-                  : 'border border-ws-line bg-white text-[var(--casa-text-subtle)] hover:border-ws-line-firm hover:text-[var(--casa-ink)]'
+                  : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
               )}
             >
               {FILTER_LABELS[filter]}
               {typeof count === 'number' ? (
-                <span className={isActive ? 'text-white/70' : 'text-[var(--casa-text-subtle)]'}>
+                <span className={cn('text-xs font-semibold', isActive ? 'text-white/65' : 'text-[var(--casa-text-subtle)]')}>
                   {count}
                 </span>
               ) : null}

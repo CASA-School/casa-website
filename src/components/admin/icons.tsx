@@ -210,6 +210,48 @@ export const Icon = {
       <path d="m5.5 8.25 1.75 1.75L10.75 6.5" />
     </svg>
   ),
+  /** A clock — when things happened. */
+  clock: (
+    <svg {...box}>
+      <circle cx="8" cy="8" r="5.75" />
+      <path d="M8 4.75V8l2.25 1.5" />
+    </svg>
+  ),
+  /** A closed envelope — an address to write to. */
+  mail: (
+    <svg {...box}>
+      <rect x="2" y="3.5" width="12" height="9" rx="1.4" />
+      <path d="m2.5 4.5 5.5 4 5.5-4" />
+    </svg>
+  ),
+  /** One person. */
+  person: (
+    <svg {...box}>
+      <circle cx="8" cy="5.5" r="2.6" />
+      <path d="M3 14a5 5 0 0 1 10 0" />
+    </svg>
+  ),
+  /** A coin with the euro — money owed or paid. */
+  money: (
+    <svg {...box}>
+      <circle cx="8" cy="8" r="5.75" />
+      <path d="M10 5.6a2.6 2.6 0 1 0 0 4.8M4.9 7.2h3.6M4.9 8.8h3.6" />
+    </svg>
+  ),
+  /** A globe — a language, a country. */
+  globe: (
+    <svg {...box}>
+      <circle cx="8" cy="8" r="5.75" />
+      <path d="M2.25 8h11.5M8 2.25c1.6 1.6 2.4 3.6 2.4 5.75S9.6 12.15 8 13.75C6.4 12.15 5.6 10.15 5.6 8S6.4 3.85 8 2.25Z" />
+    </svg>
+  ),
+  /** An open book — a course, a level. */
+  book: (
+    <svg {...box}>
+      <path d="M2.5 3.6c1.8-.8 3.7-.8 5.5 0v9.4c-1.8-.8-3.7-.8-5.5 0z" />
+      <path d="M8 3.6c1.8-.8 3.7-.8 5.5 0v9.4c-1.8-.8-3.7-.8-5.5 0" />
+    </svg>
+  ),
 } as const;
 
 export type IconName = keyof typeof Icon;

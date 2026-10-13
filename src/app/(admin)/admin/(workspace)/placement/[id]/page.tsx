@@ -12,7 +12,7 @@ import {
   Field,
   Input,
   Meter,
-  PageHeader,
+  RecordHeader,
   Select,
   Textarea,
   relativeDays,
@@ -79,95 +79,112 @@ export default async function PlacementAttemptPage({
       )
     : [];
 
+  const confidenceTint = (
+    { high: 'green', medium: 'ink', low: 'sun' } as const
+  )[decision?.confidence ?? 'medium'];
+
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/placement"
         backLabel="All placement attempts"
-        eyebrow="Placement attempt"
         title={decision ? `Recommended ${decision.band}` : 'Not scored yet'}
-        description={
+        subtitle={
           decision
-            ? 'A recommendation from a pilot instrument. Confirm the level a learner should actually start in.'
-            : 'This attempt has not been submitted, so the engine has produced nothing to review.'
+            ? `Pilot recommendation · policy version ${decision.policyVersion} · ${decision.releaseMode} mode`
+            : 'Not submitted yet, so there is nothing to review'
+        }
+        status={
+          attempt.confirmedLevel ? (
+            <Badge tone="positive">Confirmed {attempt.confirmedLevel}</Badge>
+          ) : attempt.needsReview ? (
+            <Badge tone="accent">Needs a teacher</Badge>
+          ) : decision ? (
+            <Badge tone="neutral">Unconfirmed</Badge>
+          ) : (
+            <Badge tone="quiet">In progress</Badge>
+          )
+        }
+        facts={
+          decision
+            ? [
+                {
+                  label: 'Submitted',
+                  icon: Icon.clock,
+                  tint: 'blue',
+                  value: <DateText value={attempt.submittedAt ?? attempt.createdAt} />,
+                  sub: relativeDays(attempt.submittedAt ?? attempt.createdAt),
+                },
+                {
+                  label: 'Confidence',
+                  icon: Icon.placement,
+                  tint: confidenceTint,
+                  value: CONFIDENCE_COPY[decision.confidence],
+                  sub: `${(decision.confidenceScore * 100).toFixed(0)} of 100`,
+                },
+                {
+                  label: 'Test answered',
+                  icon: Icon.book,
+                  tint: 'red',
+                  value: `${Math.round(decision.answeredShare * 100)}%`,
+                  // The response count is only shown when there is one.
+                  // "92% · 0 responses" is a contradiction on its face, and it
+                  // happens legitimately: the share is computed by the engine
+                  // at finalisation, while the rows can be absent for an
+                  // attempt migrated in or scored in fallback mode.
+                  sub:
+                    attempt.responseCount > 0
+                      ? `${attempt.responseCount} responses`
+                      : 'of the items served',
+                },
+                {
+                  label: 'Spoken check',
+                  icon: Icon.people,
+                  tint: decision.speakingRequired ? 'sun' : 'ink',
+                  value: decision.speakingRequired ? 'Required' : 'Not required',
+                  sub: decision.speakingRequired
+                    ? attempt.speakingCheckDone
+                      ? 'Done'
+                      : 'From B1+, not done yet'
+                    : 'At this band',
+                },
+                {
+                  label: 'Presentable as settled',
+                  icon: Icon.check,
+                  tint: decision.autoConfirmable ? 'green' : 'sun',
+                  value: decision.autoConfirmable ? 'Yes' : 'No',
+                  sub: decision.autoConfirmable ? 'Under policy' : 'A teacher must decide',
+                },
+              ]
+            : [
+                {
+                  label: 'Started',
+                  icon: Icon.clock,
+                  tint: 'blue',
+                  value: <DateText value={attempt.createdAt} withTime />,
+                  sub: relativeDays(attempt.createdAt),
+                },
+                { label: 'Responses so far', icon: Icon.book, tint: 'red', value: attempt.responseCount },
+                { label: 'Current stage', icon: Icon.check, tint: 'blue', value: attempt.status.replace(/_/g, ' ') },
+                {
+                  label: 'Screener pointed at',
+                  icon: Icon.placement,
+                  tint: 'red',
+                  value: attempt.routerTargetLevel,
+                },
+              ]
         }
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-4">
           {decision ? (
             <>
-              <Card title="What the engine concluded">
-                <DetailList
-                  items={[
-                    {
-                      label: 'Recommended band',
-                      value: (
-                        <span className="font-[family-name:var(--font-display)] text-xl">
-                          {decision.band}
-                        </span>
-                      ),
-                    },
-                    {
-                      label: 'Confidence',
-                      value: (
-                        <span className="flex items-center gap-2">
-                          <Badge
-                            tone={
-                              decision.confidence === 'high'
-                                ? 'positive'
-                                : decision.confidence === 'medium'
-                                  ? 'neutral'
-                                  : 'warning'
-                            }
-                          >
-                            {CONFIDENCE_COPY[decision.confidence]}
-                          </Badge>
-                          <span className="text-xs text-[var(--casa-text-subtle)]">
-                            {(decision.confidenceScore * 100).toFixed(0)} of 100
-                          </span>
-                        </span>
-                      ),
-                    },
-                    {
-                      label: 'Test answered',
-                      // The response count is only shown when there is one.
-                      // "92% · 0 responses" is a contradiction on its face, and
-                      // it happens legitimately: the share is computed by the
-                      // engine at finalisation, while the rows can be absent
-                      // for an attempt migrated in or scored in fallback mode.
-                      value:
-                        attempt.responseCount > 0
-                          ? `${Math.round(decision.answeredShare * 100)}% · ${attempt.responseCount} responses`
-                          : `${Math.round(decision.answeredShare * 100)}% of the items served`,
-                    },
-                    {
-                      label: 'Presentable as settled',
-                      value: decision.autoConfirmable ? (
-                        'Yes, under policy'
-                      ) : (
-                        <Badge tone="warning">No — a teacher must decide</Badge>
-                      ),
-                    },
-                    {
-                      label: 'Spoken check',
-                      value: decision.speakingRequired ? (
-                        <Badge tone="warning">Required from B1+</Badge>
-                      ) : (
-                        'Not required at this band'
-                      ),
-                    },
-                    {
-                      label: 'Cut scores',
-                      value: `Policy version ${decision.policyVersion} · ${decision.releaseMode} mode`,
-                    },
-                  ]}
-                />
-              </Card>
-
               <Card
                 title="Skill profile"
-                description="How they did on what they attempted, per skill. Not a percentage of the whole test."
+                description="Per skill, on what they attempted."
+                icon={Icon.book}
+                tint="red"
               >
                 <ul className="space-y-3.5">
                   {decision.skillProfile.map((entry) => (
@@ -200,10 +217,7 @@ export default async function PlacementAttemptPage({
               </Card>
 
               {decision.reviewReasons.length > 0 ? (
-                <Card
-                  title="Why this needs a person"
-                  description="Flagged by the engine itself, in the order it decided them."
-                >
+                <Card title="Review reasons" icon={Icon.attention} tint="sun">
                   <ul className="space-y-2.5">
                     {decision.reviewReasons.map((reason) => (
                       <li key={reason} className="flex gap-2.5 text-sm">
@@ -223,10 +237,7 @@ export default async function PlacementAttemptPage({
               ) : null}
 
               {decision.rationale.length > 0 ? (
-                <Card
-                  title="How it got there"
-                  description="The engine's own trail, ordered as the decisions were taken."
-                >
+                <Card title="Rationale" icon={Icon.placement} tint="ink">
                   <ol className="space-y-2 text-sm leading-relaxed text-[var(--casa-muted)]">
                     {decision.rationale.map((line, index) => (
                       <li key={index} className="flex gap-2.5">
@@ -240,29 +251,14 @@ export default async function PlacementAttemptPage({
                 </Card>
               ) : null}
             </>
-          ) : (
-            <Card title="Attempt in progress">
-              <DetailList
-                items={[
-                  {
-                    label: 'Started',
-                    value: <DateText value={attempt.createdAt} withTime />,
-                  },
-                  { label: 'Responses so far', value: attempt.responseCount },
-                  { label: 'Current stage', value: attempt.status },
-                  {
-                    label: 'Screener pointed at',
-                    value: attempt.routerTargetLevel,
-                  },
-                ]}
-              />
-            </Card>
-          )}
+          ) : null}
 
           {intakeEntries.length > 0 ? (
             <Card
-              title="What the learner told us"
-              description="Self-reported at the start and deliberately unscored. Context for a surprising result, never a reason for one."
+              title="Background"
+              description="Self-reported, unscored."
+              icon={Icon.person}
+              tint="green"
             >
               <DetailList
                 items={intakeEntries.map(([key, value]) => ({
@@ -276,7 +272,9 @@ export default async function PlacementAttemptPage({
           {attempt.writing.length > 0 ? (
             <Card
               title="Writing"
-              description="Their own words, unscored by the engine. The best single signal a teacher has here."
+              description="Their own words, unscored."
+              icon={Icon.note}
+              tint="blue"
             >
               <div className="space-y-5">
                 {attempt.writing.map((submission) => (
@@ -285,7 +283,7 @@ export default async function PlacementAttemptPage({
                       Prompt <code className="font-mono">{submission.promptId}</code> ·{' '}
                       {submission.wordCount} words · {relativeDays(submission.submittedAt)}
                     </p>
-                    <p className="max-w-prose rounded-lg border border-ws-line-soft bg-ws-sunk px-4 py-3 text-base leading-relaxed whitespace-pre-line">
+                    <p className="max-w-prose rounded-xl border border-ws-line-soft bg-ws-sunk px-4 py-3 text-base leading-relaxed whitespace-pre-line">
                       {submission.text}
                     </p>
                   </div>
@@ -295,18 +293,15 @@ export default async function PlacementAttemptPage({
           ) : null}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <Card
             title={attempt.confirmedLevel ? 'Confirmed level' : 'Confirm the level'}
-            description={
-              attempt.confirmedLevel
-                ? undefined
-                : 'What should this learner actually start in? You may disagree with the recommendation.'
-            }
+            icon={Icon.check}
+            tint={attempt.confirmedLevel ? 'green' : 'red'}
           >
             {attempt.confirmedLevel ? (
-              <div className="mb-4 rounded-lg border border-ws-line-soft bg-ws-sunk px-4 py-3">
-                <p className="font-[family-name:var(--font-display)] text-2xl leading-none">
+              <div className="mb-4 rounded-xl border border-ws-line-soft bg-ws-sunk px-4 py-3">
+                <p className="text-2xl leading-none font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">
                   {attempt.confirmedLevel}
                 </p>
                 <p className="mt-2 text-xs text-[var(--casa-text-subtle)]">
@@ -324,10 +319,9 @@ export default async function PlacementAttemptPage({
             {query.error === 'note' ? (
               <p
                 role="alert"
-                className="mb-3 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-3.5 py-2.5 text-sm text-[var(--casa-danger-text)]"
+                className="mb-3 rounded-xl border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-3.5 py-2.5 text-sm text-[var(--casa-danger-text)]"
               >
-                You chose a different level from the recommendation. Say why — a disagreement is the
-                only evidence CASA has for whether the pilot cut scores are right.
+                You chose a different level from the recommendation. Say why in the note.
               </p>
             ) : null}
 
@@ -368,7 +362,7 @@ export default async function PlacementAttemptPage({
                   type="checkbox"
                   name="speakingCheckDone"
                   defaultChecked={attempt.speakingCheckDone}
-                  className="mt-0.5 size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                  className="mt-0.5 size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
                 />
                 <span className="leading-snug">
                   I have had a spoken conversation with this learner
@@ -387,7 +381,7 @@ export default async function PlacementAttemptPage({
           </Card>
 
           {attempt.confirmedLevel ? (
-            <Card title="Person">
+            <Card title="Person" icon={Icon.person} tint="green">
               {attempt.reviewPerson ? (
                 <div className="flex items-center justify-between gap-3">
                   <Link
@@ -453,24 +447,30 @@ export default async function PlacementAttemptPage({
             </Card>
           ) : null}
 
-          <Card title="Notes">
+          <Card title="Notes" description="Only staff see these." icon={Icon.note} tint="sun">
             <PlacementNotes attemptId={attempt.id} notes={notes} />
           </Card>
 
           {activity.length > 0 ? (
-            <Card title="History">
-              <ol className="space-y-2.5 text-xs">
+            <Card title="History" icon={Icon.clock} tint="ink">
+              <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
                 {activity.map((entry) => (
-                  <li key={entry.id} className="text-[var(--casa-text-subtle)]">
-                    <span className="font-semibold text-[var(--casa-ink)]">
-                      {entry.staffName ?? 'Someone'}
-                    </span>{' '}
-                    {entry.action === 'placement_confirmed'
-                      ? `confirmed ${String(entry.detail?.level ?? 'a level')}${
-                          entry.detail?.agreed === false ? ', against the recommendation' : ''
-                        }`
-                      : entry.action.replace(/_/g, ' ')}{' '}
-                    · {relativeDays(entry.createdAt)}
+                  <li key={entry.id} className="relative flex gap-3 text-xs">
+                    <span
+                      aria-hidden="true"
+                      className="relative mt-1 h-[9px] w-[9px] shrink-0 rounded-full border-2 border-white bg-ws-line-firm"
+                    />
+                    <span className="text-[var(--casa-text-subtle)]">
+                      <span className="font-bold text-[var(--casa-ink)]">
+                        {entry.staffName ?? 'Someone'}
+                      </span>{' '}
+                      {entry.action === 'placement_confirmed'
+                        ? `confirmed ${String(entry.detail?.level ?? 'a level')}${
+                            entry.detail?.agreed === false ? ', against the recommendation' : ''
+                          }`
+                        : entry.action.replace(/_/g, ' ')}{' '}
+                      · {relativeDays(entry.createdAt)}
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -515,8 +515,10 @@ function PlacementNotes({
       {notes.length > 0 ? (
         <ul className="mt-4 space-y-3 border-t border-ws-line-soft pt-4">
           {notes.map((note) => (
-            <li key={note.id}>
-              <p className="text-sm leading-relaxed whitespace-pre-line">{note.body}</p>
+            <li key={note.id} className="rounded-xl bg-[#fffbea] px-3 py-2.5">
+              <p className="text-sm leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">
+                {note.body}
+              </p>
               <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">
                 {note.authorName ?? 'A former colleague'} · {relativeDays(note.createdAt)}
               </p>

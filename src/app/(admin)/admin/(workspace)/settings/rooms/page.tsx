@@ -1,4 +1,5 @@
 import { FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
@@ -36,7 +37,6 @@ export default async function PlanningPage({
   return (
     <>
       <PageHeader
-        eyebrow="Settings"
         title="Rooms"
         backHref="/admin/settings"
         backLabel="Settings"
@@ -53,13 +53,13 @@ export default async function PlanningPage({
       {error ? (
         <p
           role="alert"
-          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
+          className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
         >
           {error}
         </p>
       ) : null}
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         {locations
           .filter((l) => (byLocation.get(l.id)?.length ?? 0) > 0)
           .map((location) => {
@@ -70,6 +70,8 @@ export default async function PlanningPage({
               <Card
                 key={location.id}
                 title={location.name}
+                icon={Icon.rooms}
+                tint="ink"
                 description={
                   location.kind === 'online'
                     ? 'Online'

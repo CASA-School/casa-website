@@ -610,7 +610,19 @@ pre-paint script writes an attribute the server render does not have.
 
 ## Design standards
 
-Four rules, each of which came from a real defect on a real screen.
+**The look is the offers module's (2026-10-13).** Rahman asked for the whole
+workspace to be restyled the way Offers was built (docs/OFFERS.md §Design):
+white framed cards on the canvas, headings in the sans at 800, an icon chip in
+a meaning colour on a card's header (red the course and level, blue dates,
+stay and status, yellow notes and the programme, green a person or money in,
+ink the rest), and records that open with a framed head — `RecordHeader` in
+`ui.tsx` — whose bar of facts holds the four or five things a colleague looks
+for first. A value that changes is shown as a value and changed in a small
+panel (`popover.tsx`: status and owner in the record rail), and every date is
+typed or picked in the workspace's own field (`date-picker.tsx`), never the
+browser's. The sidebar is white, like the toolbars of the editor and Offers.
+
+The rules, each of which came from a real defect on a real screen.
 
 1. **A section is one white block; the canvas between sections separates
    them.** A card's header is white with a rule under it. It used to be
@@ -623,8 +635,9 @@ Four rules, each of which came from a real defect on a real screen.
 2. **A field title is a label, not an eyebrow.** `DetailList`, `StatBand` and a
    `Table`'s column heads are 12px sentence case in `--casa-muted`. They were 10.4px bold
    uppercase with letter-spacing — decoration doing a functional job, slower
-   to read and, beside a value and a badge, genuinely hard to parse. Uppercase
-   eyebrows survive only in `PageHeader`, one per screen.
+   to read and, beside a value and a badge, genuinely hard to parse. There are
+   no uppercase eyebrows left: a page's title says where you are, and the way
+   back above it says where from.
 3. **One primary button per screen.** Two dark buttons in a header make the
    consequential action and the routine one look equally weighty.
 4. **Plumbing does not get a badge.** A counter in the rail, or a titled card
@@ -742,27 +755,32 @@ a whole working day needs three things the marketing site does not:
    horizontal scrolling on a laptop.
 
 Everything else is inherited, including the contrast discipline: accents still
-resolve through `--casa-accent-text`, so they are AA on both the ink sidebar
-and the white cards.
+resolve through `--casa-accent-text`, so they are AA on the white rail and the
+white cards (the sign-in page's ink panel flips them, `.casa-workspace-panel`).
 
 ### Conventions
 
 - **CASA's sun (`#ffd500`) is used once per screen**, as the marker on the nav
   item you are standing on. One accent, used once, so "you are here" registers
   before the label is read.
-- **Playfair Display for titles at 16px and up; Plus Jakarta Sans for
-  everything else and every numeral.** Playfair's hairlines thin out below
-  ~20px, and it has no tabular figures worth the name. Numerals in the
+- **The sans for everything, headings at 800** (2026-10-13; it was Playfair
+  for titles at 16px and up). The website editor, Kursplanung and Offers were
+  already set that way, and the queues read as a different product beside
+  them. `globals.css` sets it for `.casa-workspace-shell` and the dialogs
+  (`.casa-ws-dialog`), over the public site's serif headings. Numerals in the
   workspace are tabular by default (`globals.css`), because every list here is
   a column of counts and dates read downwards.
 - **Radius follows the three-tier scale** in `src/config/brand/tokens.ts` — 4px
-  controls, 6px cards, 8px shells. No fourth value.
+  controls (`rounded-lg`), 6px tiles and panels inside a card (`rounded-xl`),
+  8px cards on the canvas and dialogs (`rounded-3xl`). No fourth value.
 - **Every primitive in `src/components/admin/ui.tsx` is a server component.**
   No hooks, no handlers. Every mutation is a plain `<form>` posting to a server
   action, so a screen keeps working when a chunk fails to load — and the
   interactions here (filter, set a status, write a note) genuinely are form
-  submissions. `nav-link.tsx` is the one client component, because "am I the
-  current page?" needs the pathname.
+  submissions. The client pieces are the rail's links (`nav-link.tsx`, which
+  needs the pathname), `popover.tsx` — which only opens and closes a panel of
+  server-rendered forms whose choices are submit buttons, so the action gets
+  what a select would have sent — and `date-picker.tsx`.
 - **Icons are drawn in `src/components/admin/icons.tsx`**, on a 16-unit grid at
   1.5px. `lucide-react`'s are 24-unit at 2px and sit visually heavier than the
   labels beside them.

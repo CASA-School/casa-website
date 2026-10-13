@@ -7,6 +7,7 @@ import { RATE_UNIT_LABELS } from '@/lib/admin/configuration-labels';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { createRateAction } from './actions';
 import { todayInputValue } from '@/lib/dates';
+import { DateFormField } from '@/components/admin/date-picker';
 
 type Targets = {
   courseTypes: { id: string; name: string }[];
@@ -152,20 +153,14 @@ export function RateForm({ targets }: { targets: Targets }) {
           </Select>
         </Field>
         <Field label="From" htmlFor="rate-from">
-          <Input
-            id="rate-from"
-            name="validFrom"
-            type="date"
-            required
-            defaultValue={todayInputValue()}
-          />
+          <DateFormField id="rate-from" name="validFrom" required defaultValue={todayInputValue()} />
         </Field>
       </div>
 
       <OptionalSection requires={['amount', 'validFrom']} heading="Conditions and validity">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Until" hint="empty = open" htmlFor="rate-to">
-            <Input id="rate-to" name="validTo" type="date" />
+            <DateFormField id="rate-to" name="validTo" />
           </Field>
           <Field label="VAT %" htmlFor="rate-vat">
             <Input

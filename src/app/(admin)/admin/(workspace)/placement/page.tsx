@@ -1,12 +1,14 @@
 import Link from 'next/link';
 
 import { Pagination } from '@/components/admin/pagination';
+import { Icon } from '@/components/admin/icons';
 import {
   Badge,
   Card,
   Cell,
   DateText,
   EmptyState,
+  IconChip,
   PageHeader,
   Table,
   TableRow,
@@ -58,25 +60,20 @@ export default async function PlacementPage({
 
   return (
     <>
-      <PageHeader
-        eyebrow="Einstufungstest"
-        title="Placement"
-        description="CASA's own placement test produces a course recommendation. A teacher confirms the level; the test never does."
-      />
+      <PageHeader title="Placement" description="Course recommendations from CASA's own test, for a teacher to confirm." />
 
-      <div className="mb-5 rounded-xl border border-[var(--casa-warning-text)]/28 bg-[var(--casa-warm-soft)] px-5 py-4">
-        <p className="text-[0.65rem] font-bold tracking-eyebrow uppercase text-[var(--casa-warning-text)]">
-          Pilot instrument · {RELEASE_MODE} mode
-        </p>
-        <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[var(--casa-ink)]">
-          Every item in the bank is awaiting review by two qualified DaF
-          reviewers, and the cut scores are pilot hypotheses. Read a
-          recommendation as evidence to weigh, not a result to approve — and
-          never describe one to a learner as a pass, a fail, or a certificate.
+      <div className="mb-4 flex items-start gap-3 rounded-3xl border border-ws-line bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+        <IconChip icon={Icon.attention} tint="sun" />
+        <p className="text-sm leading-relaxed text-[var(--casa-ink)]">
+          <span className="font-extrabold">Pilot test · {RELEASE_MODE} mode.</span>{' '}
+          <span className="text-[var(--casa-text-subtle)]">
+            Items unreviewed, cut scores provisional. A recommendation is evidence to weigh — never a
+            pass, a fail or a certificate.
+          </span>
         </p>
       </div>
 
-      <div className="-mx-1 mb-5 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
+      <div className="mb-5 flex max-w-full w-fit gap-0.5 overflow-x-auto rounded-xl border border-ws-line bg-white p-1 [scrollbar-width:none]">
         {FILTERS.map((option) => {
           const isActive = option.key === filter;
 
@@ -90,11 +87,11 @@ export default async function PlacementPage({
               }
               aria-current={isActive ? 'true' : undefined}
               className={cn(
-                'inline-flex shrink-0 items-center rounded-lg px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors',
+                'inline-flex h-[30px] shrink-0 items-center rounded-lg px-3 text-[0.8rem] font-bold whitespace-nowrap transition-colors',
                 'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
                 isActive
                   ? 'bg-[var(--casa-ink-deep)] text-white'
-                  : 'border border-ws-line bg-white text-[var(--casa-text-subtle)] hover:border-ws-line-firm hover:text-[var(--casa-ink)]'
+                  : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
               )}
             >
               {option.label}
@@ -132,9 +129,7 @@ export default async function PlacementPage({
               <TableRow key={item.id} interactive>
                 <Cell href={`/admin/placement/${item.id}`} className="font-semibold">
                   {item.recommendedBand ? (
-                    <span className="font-[family-name:var(--font-display)] text-base">
-                      {item.recommendedBand}
-                    </span>
+                    <span className="font-extrabold">{item.recommendedBand}</span>
                   ) : (
                     <span className="text-sm font-normal text-[var(--casa-text-subtle)]">
                       not scored yet

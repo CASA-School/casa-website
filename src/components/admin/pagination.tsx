@@ -51,9 +51,9 @@ export function Pagination({
   return (
     <nav
       aria-label="Pagination"
-      className="mt-5 flex items-center justify-between gap-4 text-xs"
+      className="mt-4 flex items-center justify-between gap-4 text-xs"
     >
-      <p className="text-[var(--casa-text-subtle)]">
+      <p className="font-semibold text-[var(--casa-text-subtle)] tabular-nums">
         {first}–{last} of {total}
       </p>
 
@@ -61,7 +61,7 @@ export function Pagination({
         {page > 1 ? (
           <Link
             href={hrefFor(page - 1)}
-            className="rounded-lg border border-ws-line bg-white px-3 py-1.5 font-semibold transition-colors hover:border-ws-line-firm"
+            className="inline-flex h-8 items-center rounded-lg border border-ws-line-firm bg-white px-3 font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
           >
             Previous
           </Link>
@@ -69,7 +69,7 @@ export function Pagination({
         {page < pages ? (
           <Link
             href={hrefFor(page + 1)}
-            className="rounded-lg border border-ws-line bg-white px-3 py-1.5 font-semibold transition-colors hover:border-ws-line-firm"
+            className="inline-flex h-8 items-center rounded-lg border border-ws-line-firm bg-white px-3 font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
           >
             Next
           </Link>

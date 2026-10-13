@@ -2,11 +2,13 @@ import { notFound } from 'next/navigation';
 
 import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
-import { Badge, BirthDate, Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { listFlags } from '@/lib/admin/flags';
 import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
+import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { getExamRegistration, registrationTypeLabel } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
@@ -21,9 +23,10 @@ const SALUTATIONS: Record<string, string> = {
 /**
  * One exam registration.
  *
- * The official-name confirmation gets a card and a warning of its own. A telc
- * certificate is printed from the name on the entry, and a mismatch with the
- * candidate's ID is discovered on exam day, after the fee is paid and the
+ * The head carries the sitting, the parts and who has it; under it, the
+ * official-name confirmation gets the first card and a warning of its own. A
+ * telc certificate is printed from the name on the entry, and a mismatch with
+ * the candidate's ID is discovered on exam day, after the fee is paid and the
  * sitting is full — the single most expensive error this queue can pass on.
  */
 export default async function ExamRegistrationPage({
@@ -54,51 +57,62 @@ export default async function ExamRegistrationPage({
       })
     : [];
 
+  const fullName = `${registration.firstName} ${registration.lastName}`;
+
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/registrations/exam"
         backLabel="All exam registrations"
-        eyebrow="Exam registration"
-        title={`${registration.firstName} ${registration.lastName}`}
-        description={registration.examTypeLabel ?? undefined}
+        title={fullName}
+        subtitle={registration.examTypeLabel ?? undefined}
+        status={<Badge tone={STATUS_TONES[registration.status]}>{STATUS_LABELS[registration.status]}</Badge>}
         actions={
-          <a
-            href={`mailto:${registration.email}?subject=${encodeURIComponent(
+          <ButtonLink href={`mailto:${registration.email}?subject=${encodeURIComponent(
               `CASA exam registration — ${registration.examTypeLabel ?? 'your exam'}`
-            )}`}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
-          >
-            Reply by email
-          </a>
+            )}`} variant="primary">Reply by email</ButtonLink>
         }
+        facts={[
+          {
+            label: 'Received',
+            icon: Icon.clock,
+            tint: 'blue',
+            value: <DateText value={registration.submittedAt} />,
+            sub: relativeDays(registration.submittedAt),
+          },
+          { label: 'Sitting', icon: Icon.calendar, tint: 'blue', value: registration.examSessionLabel },
+          {
+            label: 'Parts',
+            icon: Icon.book,
+            tint: 'red',
+            value: registrationTypeLabel(registration.registrationType),
+          },
+          {
+            label: 'Email',
+            icon: Icon.mail,
+            tint: 'ink',
+            value: registration.email,
+            href: `mailto:${registration.email}`,
+          },
+          {
+            label: 'Owner',
+            icon: Icon.person,
+            tint: registration.assignedTo ? 'green' : 'ink',
+            value: staff.find((member) => member.id === registration.assignedTo)?.name ?? 'Nobody yet',
+          },
+        ]}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
-          <Card title="Registered for">
-            <DetailList
-              items={[
-                { label: 'Exam', value: registration.examTypeLabel },
-                { label: 'Sitting', value: registration.examSessionLabel },
-                {
-                  label: 'Parts',
-                  value: registrationTypeLabel(registration.registrationType),
-                },
-                {
-                  label: 'Reference',
-                  value: <code className="font-mono text-xs">{registration.requestId}</code>,
-                },
-              ]}
-            />
-          </Card>
-
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-4">
           <Card
             title="Name on the certificate"
-            description="The certificate is printed from this. Check it against photo ID before filing the entry."
+            description="Check against photo ID."
+            icon={registration.officialNameConfirmed ? Icon.check : Icon.attention}
+            tint={registration.officialNameConfirmed ? 'green' : 'sun'}
           >
-            <p className="font-[family-name:var(--font-display)] text-2xl leading-tight">
-              {registration.firstName} {registration.lastName}
+            <p className="text-2xl leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">
+              {fullName}
             </p>
             <p className="mt-3">
               {registration.officialNameConfirmed ? (
@@ -108,31 +122,18 @@ export default async function ExamRegistrationPage({
               )}
             </p>
             {!registration.officialNameConfirmed ? (
-              <p className="mt-3 text-xs leading-relaxed text-[var(--casa-danger-text)]">
-                The public form requires this confirmation, so an unconfirmed entry means the record
-                predates that requirement or was created another way. Confirm by phone before the
-                entry is filed.
+              <p className="mt-2 text-xs text-[var(--casa-danger-text)]">
+                Confirm by phone before the entry is filed.
               </p>
             ) : null}
           </Card>
 
-          <Card title="Candidate">
+          <Card title="Candidate" icon={Icon.person} tint="ink" footer={<p className="text-xs text-[var(--casa-text-subtle)]">Reference <code className="font-mono">{registration.requestId}</code></p>}>
             <DetailList
               items={[
                 {
                   label: 'Salutation',
                   value: SALUTATIONS[registration.salutation] ?? registration.salutation,
-                },
-                {
-                  label: 'Email',
-                  value: (
-                    <a
-                      href={`mailto:${registration.email}`}
-                      className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                    >
-                      {registration.email}
-                    </a>
-                  ),
                 },
                 {
                   label: 'Phone',
@@ -164,7 +165,7 @@ export default async function ExamRegistrationPage({
           </Card>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <PersonPanel
             person={person}
             candidates={candidates}

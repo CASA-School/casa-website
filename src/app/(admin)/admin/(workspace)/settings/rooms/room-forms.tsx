@@ -6,12 +6,12 @@ import { OptionalSection } from '@/components/admin/optional-section';
 /**
  * The two room forms, rendered inside dialogs.
  *
- * Progressive disclosure: creating asks for location and name; the rest sits
- * under "More". Editing shows everything, because someone who opened Edit on a
- * specific room has already chosen to go deeper.
+ * Progressive disclosure: creating asks for location and name; the details
+ * open once both hold a value. Editing shows everything, because someone who
+ * opened Edit on a specific room has already chosen to go deeper.
  */
 
-const checkbox = 'size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]';
+const checkbox = 'size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]';
 
 export function CreateRoomForm({ locations }: { locations: Location[] }) {
   return (

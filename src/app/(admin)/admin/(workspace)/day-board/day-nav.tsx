@@ -12,6 +12,10 @@ import { cn } from '@/lib/utils';
  *
  * Links, not a date picker: every day of the week is one click, the browser
  * back button works, and a URL can be pasted to a colleague.
+ *
+ * One framed white bar, segmented like the offers list's filters: the arrows,
+ * the seven days and the way back to today are all controls of the same kind,
+ * so they sit in one frame rather than as nine separate boxes on the canvas.
  */
 export function DayNav({
   date,
@@ -46,10 +50,13 @@ export function DayNav({
   };
 
   return (
-    <nav aria-label="Choose a day" className="flex items-center gap-2">
+    <nav
+      aria-label="Choose a day"
+      className="flex items-center gap-0.5 rounded-xl border border-ws-line bg-white p-1 shadow-[0_1px_2px_rgba(15,23,42,0.05)]"
+    >
       <Arrow href={shift(-1)} label="Previous week" direction="left" />
 
-      <ol className="flex flex-1 gap-1 overflow-x-auto [scrollbar-width:none]">
+      <ol className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto [scrollbar-width:none]">
         {days.map((d) => {
           const iso = toIso(d);
           const isSelected = iso === date;
@@ -58,39 +65,39 @@ export function DayNav({
           const weekend = d.getDay() === 0 || d.getDay() === 6;
 
           return (
-            <li key={iso} className="flex-1">
+            <li key={iso} className="min-w-16 flex-1">
               <Link
                 href={href(d)}
                 aria-current={isSelected ? 'date' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-0.5 rounded-lg border px-2 py-2 transition-colors',
+                  'relative flex h-11 items-center justify-center gap-1.5 rounded-lg px-2 transition-colors',
                   'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
                   isSelected
-                    ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
+                    ? 'bg-[var(--casa-ink-deep)] text-white'
                     : weekend
-                      ? 'border-ws-line bg-ws-sunk text-[var(--casa-text-subtle)] hover:border-ws-line-firm'
-                      : 'border-ws-line bg-white text-[var(--casa-ink)] hover:border-[var(--casa-blue)]/45'
+                      ? 'bg-[#f8fafc] text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
+                      : 'text-[var(--casa-ink)] hover:bg-ws-sunk',
+                  isToday && !isSelected ? 'ring-1 ring-ws-line-firm ring-inset' : undefined
                 )}
               >
                 <span
                   className={cn(
-                    'text-[0.65rem] font-semibold uppercase',
+                    'text-xs font-semibold',
                     isSelected ? 'text-white/70' : 'text-[var(--casa-text-subtle)]'
                   )}
                 >
                   {d.toLocaleDateString('en-GB', { weekday: 'short' })}
                 </span>
-                <span className="text-sm font-semibold tabular-nums">{d.getDate()}</span>
-                <span aria-hidden="true" className="flex h-1.5 items-center">
-                  {openTasks > 0 ? (
-                    <span
-                      className={cn(
-                        'size-1.5 rounded-full',
-                        isSelected ? 'bg-white/80' : 'bg-[var(--casa-warning-text)]'
-                      )}
-                    />
-                  ) : null}
-                </span>
+                <span className="text-[0.95rem] font-extrabold tabular-nums">{d.getDate()}</span>
+                {openTasks > 0 ? (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'absolute top-1.5 right-1.5 size-1.5 rounded-full',
+                      isSelected ? 'bg-white/80' : 'bg-[var(--casa-warning-text)]'
+                    )}
+                  />
+                ) : null}
                 {isToday && !isSelected ? <span className="sr-only">Today</span> : null}
               </Link>
             </li>
@@ -101,12 +108,15 @@ export function DayNav({
       <Arrow href={shift(1)} label="Next week" direction="right" />
 
       {date !== today ? (
-        <Link
-          href="/admin"
-          className="ml-1 shrink-0 rounded-lg border border-ws-line-firm bg-white px-3 py-2 text-xs font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45"
-        >
-          Today
-        </Link>
+        <>
+          <span aria-hidden="true" className="mx-1 h-6 w-px shrink-0 bg-ws-line" />
+          <Link
+            href="/admin"
+            className="flex h-11 shrink-0 items-center rounded-lg px-3.5 text-[0.8rem] font-bold text-[var(--casa-ink)] transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+          >
+            Today
+          </Link>
+        </>
       ) : null}
     </nav>
   );
@@ -125,7 +135,7 @@ function Arrow({
     <Link
       href={href}
       aria-label={label}
-      className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-ws-line bg-white text-[var(--casa-text-subtle)] transition-colors hover:border-ws-line-firm hover:text-[var(--casa-ink)]"
+      className="flex h-11 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--casa-text-subtle)] transition-colors outline-none hover:bg-ws-sunk hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
     >
       <svg
         viewBox="0 0 16 16"

@@ -28,7 +28,7 @@ import {
   type StayChoices,
 } from '@/lib/admin/offers/types';
 
-import { DateRange, InlineDatePicker } from './date-picker';
+import { DateRange, InlineDatePicker } from '@/components/admin/date-picker';
 import { NumberInput, Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { Chip, ICONS, type Tint } from './icons';

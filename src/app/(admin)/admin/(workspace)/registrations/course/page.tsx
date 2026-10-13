@@ -33,11 +33,7 @@ export default async function CourseRegistrationsPage({
 
   return (
     <>
-      <PageHeader
-        eyebrow="Queue"
-        title="Registrations"
-        description="Learners who completed the public registration wizard. Nothing here is a confirmed seat until staff say so."
-      />
+      <PageHeader title="Registrations" description="Course registrations from the public site." />
 
       <RegistrationTabs
         active="course"

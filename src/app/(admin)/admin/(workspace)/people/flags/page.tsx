@@ -1,15 +1,5 @@
-import Link from 'next/link';
-
-import {
-  Badge,
-  Card,
-  Cell,
-  DateText,
-  EmptyState,
-  PageHeader,
-  Table,
-  TableRow,
-} from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Badge, ButtonLink, Card, Cell, DateText, EmptyState, IconChip, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, listOpenFlags, type FlagCode } from '@/lib/admin/flags';
 
 const ENTITY_LABELS: Record<string, string> = {
@@ -47,19 +37,14 @@ export default async function FlagsPage({
       <PageHeader
         backHref="/admin/people"
         backLabel="Students"
-        eyebrow="Needs a look"
         title={filter ? FLAG_LABELS[filter] : 'Everything flagged'}
-        description="Records with a value that could not be matched, or that may belong to someone already on file."
+        description="Values that could not be matched, and records that may be someone already on file."
+        actions={
+          filter ? (
+            <ButtonLink href="/admin/people/flags">Every kind</ButtonLink>
+          ) : null
+        }
       />
-
-      {filter ? (
-        <p className="mb-4 text-sm text-[var(--casa-text-subtle)]">
-          Showing one kind.{' '}
-          <Link href="/admin/people/flags" className="font-medium text-[var(--casa-accent-text)]">
-            Show every kind
-          </Link>
-        </p>
-      ) : null}
 
       {flags.length === 0 ? (
         <EmptyState title="Nothing needs a look" description="All flags have been cleared." />
@@ -71,7 +56,10 @@ export default async function FlagsPage({
             {flags.map((flag) => (
               <TableRow key={flag.id} interactive>
                 <Cell href={flag.href} className="font-semibold">
-                  {FLAG_LABELS[flag.code]}
+                  <span className="flex items-center gap-2.5">
+                    <IconChip icon={Icon.flag} tint="sun" />
+                    {FLAG_LABELS[flag.code]}
+                  </span>
                 </Cell>
                 <Cell className="text-sm">{flag.subject}</Cell>
                 <Cell>

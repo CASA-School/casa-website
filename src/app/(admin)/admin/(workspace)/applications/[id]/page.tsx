@@ -2,15 +2,19 @@ import { notFound } from 'next/navigation';
 
 import { Icon } from '@/components/admin/icons';
 import { RecordRail } from '@/components/admin/record-rail';
-import { Badge, Card, DateText, DetailList, PageHeader } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { getApplication } from '@/lib/admin/careers';
 import { formatFileSize } from '@/lib/admin/format';
 import { listNotes } from '@/lib/admin/notes';
+import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
 /**
  * One application.
+ *
+ * The record's head names the CV and carries the download; the cover letter
+ * and the candidate's links sit under it, the rail beside them.
  *
  * The CV is a download, not an inline preview. Rendering an arbitrary uploaded
  * PDF inside the workspace means either an iframe pointed at attacker-supplied
@@ -34,57 +38,79 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
 
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/applications"
         backLabel="All applications"
-        eyebrow="Application"
         title={`${application.firstName} ${application.lastName}`}
-        description={application.positionTitle}
+        subtitle={application.positionTitle}
+        status={
+          <>
+            <Badge tone={STATUS_TONES[application.status]}>{STATUS_LABELS[application.status]}</Badge>
+            {/* Still carrying the status the public form wrote: setting one in
+                the rail is what puts it in the pipeline. */}
+            {application.rawStatus === 'submitted' ? <Badge tone="quiet">Untouched</Badge> : null}
+          </>
+        }
         actions={
           <>
             {application.hasStoredFile ? (
-              <a
-                href={`/admin/applications/${application.id}/cv`}
-                className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
-              >
+              <ButtonLink href={`/admin/applications/${application.id}/cv`} variant="primary" plain>
                 <span aria-hidden="true">{Icon.download}</span>
                 Download CV
-              </a>
+              </ButtonLink>
             ) : null}
-            <a
-              href={`mailto:${application.email}?subject=${encodeURIComponent(
+            <ButtonLink href={`mailto:${application.email}?subject=${encodeURIComponent(
                 `Your application — ${application.positionTitle}`
-              )}`}
-              className="inline-flex h-9 items-center rounded-lg border border-ws-line-firm bg-white px-4 text-sm font-semibold transition-colors hover:border-[var(--casa-blue)]/45"
-            >
-              Reply by email
-            </a>
+              )}`}>Reply by email</ButtonLink>
           </>
         }
+        facts={[
+          {
+            label: 'Applied',
+            icon: Icon.clock,
+            tint: 'blue',
+            value: <DateText value={application.createdAt} />,
+            sub: relativeDays(application.createdAt),
+          },
+          {
+            label: 'Email',
+            icon: Icon.mail,
+            tint: 'ink',
+            value: application.email,
+            href: `mailto:${application.email}`,
+          },
+          {
+            // Not a fact link: those are Next links, which prefetch, and the
+            // CV route is a file download. The header's button is the way in.
+            label: 'CV',
+            icon: Icon.download,
+            tint: application.hasStoredFile ? 'ink' : 'sun',
+            value: application.cvFileName,
+            sub: application.hasStoredFile
+              ? `${formatFileSize(application.cvFileSize)}${application.cvMimeType ? ` · ${application.cvMimeType}` : ''}`
+              : 'No file stored',
+          },
+          { label: 'Wrote in', icon: Icon.globe, tint: 'sun', value: application.locale === 'de' ? 'German' : 'English' },
+          {
+            label: 'Owner',
+            icon: Icon.person,
+            tint: application.assignedTo ? 'green' : 'ink',
+            value: staff.find((member) => member.id === application.assignedTo)?.name ?? 'Nobody yet',
+          },
+        ]}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
-          <Card title="Cover letter">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-4">
+          <Card title="Cover letter" icon={Icon.note} tint="blue">
             <p className="max-w-prose text-base leading-relaxed whitespace-pre-line">
               {application.coverLetter}
             </p>
           </Card>
 
-          <Card title="Candidate">
+          <Card title="Candidate" icon={Icon.person} tint="ink">
             <DetailList
               items={[
-                {
-                  label: 'Email',
-                  value: (
-                    <a
-                      href={`mailto:${application.email}`}
-                      className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                    >
-                      {application.email}
-                    </a>
-                  ),
-                },
                 {
                   label: 'Phone',
                   value: application.phone ? (
@@ -107,48 +133,9 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
                     </a>
                   ) : null,
                 },
-                { label: 'Applied for', value: application.positionTitle },
-                {
-                  label: 'Applied in',
-                  value: application.locale === 'de' ? 'German' : 'English',
-                },
-                { label: 'Applied', value: <DateText value={application.createdAt} withTime /> },
               ]}
             />
           </Card>
-
-          <Card title="CV">
-            {application.hasStoredFile ? (
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{application.cvFileName}</p>
-                  <p className="mt-0.5 text-xs text-[var(--casa-text-subtle)]">
-                    {formatFileSize(application.cvFileSize)}
-                    {application.cvMimeType ? ` · ${application.cvMimeType}` : ''}
-                  </p>
-                </div>
-                <a
-                  href={`/admin/applications/${application.id}/cv`}
-                  className="inline-flex h-8 shrink-0 items-center gap-2 rounded-lg border border-ws-line-firm bg-white px-3 text-xs font-semibold transition-colors hover:border-[var(--casa-blue)]/45"
-                >
-                  <span aria-hidden="true">{Icon.download}</span>
-                  Download
-                </a>
-              </div>
-            ) : (
-              <p className="text-sm text-[var(--casa-text-subtle)]">
-                The application names <span className="font-medium">{application.cvFileName}</span>{' '}
-                but no file is stored against it. Ask the candidate to send it directly.
-              </p>
-            )}
-          </Card>
-
-          {application.rawStatus === 'submitted' ? (
-            <p className="text-xs text-[var(--casa-text-subtle)]">
-              <Badge tone="quiet">Untouched</Badge> Still carrying the status the public form wrote.
-              Setting a status here is what puts it in the pipeline.
-            </p>
-          ) : null}
         </div>
 
         <RecordRail

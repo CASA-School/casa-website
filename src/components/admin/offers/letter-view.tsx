@@ -17,7 +17,7 @@ import { OFFER_STATUS_LABELS, overrideKey, type OfferLanguage } from '@/lib/admi
 
 import { saveStandardTextAction } from '@/app/(admin)/admin/(editor)/offers/actions';
 
-import { InlineDatePicker } from './date-picker';
+import { InlineDatePicker } from '@/components/admin/date-picker';
 import { Seg } from './fields';
 import { OfferFrame } from './frame';
 import ui from './letter-view.module.css';

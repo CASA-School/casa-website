@@ -8,7 +8,8 @@ import { canAccess } from '@/lib/admin/access';
 import { bookingOffer } from '@/lib/admin/booking-offer';
 import { requireModule } from '@/lib/admin/guard';
 import { RecordRail } from '@/components/admin/record-rail';
-import { Badge, BirthDate, Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { listFlags } from '@/lib/admin/flags';
 import { listNotes } from '@/lib/admin/notes';
@@ -17,6 +18,7 @@ import {
   getPersonSummary,
   latestConfirmedLevel,
 } from '@/lib/admin/people';
+import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { getCourseRegistration } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
@@ -36,10 +38,10 @@ const ACCOMMODATION: Record<string, string> = {
 /**
  * One course registration.
  *
- * Grouped into three cards, in the order the work happens: who they are, what
- * they registered for, and what they need from CASA beyond a seat. That last
- * group — visa, accommodation, allergies — is the one that generates work for
- * other people, so it is a card of its own rather than six more rows.
+ * The record's head carries what decides the next step — when it came in, the
+ * level, whether a room or visa support is needed, who has it — and the cards
+ * under it hold the rest in the order the work happens: what they registered
+ * for, who they are, and what they asked CASA to arrange beyond a seat.
  */
 export default async function CourseRegistrationPage({
   params,
@@ -75,32 +77,30 @@ export default async function CourseRegistrationPage({
       ])
     : [[], null];
 
-  const needsSomething =
-    registration.visaRequired ||
-    registration.accommodationRequired ||
-    Boolean(registration.allergies) ||
-    Boolean(registration.notes);
+  const needsSomething = Boolean(registration.allergies) || Boolean(registration.notes);
+  const declared = registration.declaredLevelCode ?? registration.declaredLevelRaw;
+  const fullName = `${registration.firstName} ${registration.lastName}`;
 
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/registrations/course"
         backLabel="All course registrations"
-        eyebrow="Course registration"
-        title={`${registration.firstName} ${registration.lastName}`}
-        description={registration.courseTypeLabel ?? undefined}
+        title={fullName}
+        subtitle={registration.courseTypeLabel ?? undefined}
+        status={<Badge tone={STATUS_TONES[registration.status]}>{STATUS_LABELS[registration.status]}</Badge>}
         actions={
-          <div className="flex items-center gap-2">
+          <>
             {canBook && offer && registration.personId ? (
               <FormDialog
                 trigger="Create booking"
-                title={`Book ${registration.firstName} ${registration.lastName}`}
+                title={`Book ${fullName}`}
                 triggerVariant="primary"
                 width="lg"
               >
                 <BookingWizard
                   personId={registration.personId}
-                  personName={`${registration.firstName} ${registration.lastName}`}
+                  personName={fullName}
                   offer={offer}
                   preselectedCohortId={registration.courseInstanceId}
                   sourceRegistrationId={registration.id}
@@ -109,71 +109,90 @@ export default async function CourseRegistrationPage({
                 />
               </FormDialog>
             ) : null}
-            <a
-              href={`mailto:${registration.email}?subject=${encodeURIComponent(
+            <ButtonLink href={`mailto:${registration.email}?subject=${encodeURIComponent(
                 `CASA registration — ${registration.courseTypeLabel ?? 'your course'}`
-              )}`}
-              className="inline-flex h-9 items-center rounded-lg border border-ws-line-firm bg-white px-4 text-sm font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
-            >
-              Reply by email
-            </a>
-          </div>
+              )}`}>Reply by email</ButtonLink>
+          </>
         }
+        facts={[
+          {
+            label: 'Received',
+            icon: Icon.clock,
+            tint: 'blue',
+            value: <DateText value={registration.submittedAt} />,
+            sub: relativeDays(registration.submittedAt),
+          },
+          {
+            // A confirmed level outranks the learner's own claim; the claim
+            // stays on the Course card below when both exist.
+            label: 'Level',
+            icon: Icon.book,
+            tint: 'red',
+            value: confirmed?.level ?? declared,
+            sub: confirmed
+              ? `Placement · ${confirmed.reviewerName ?? 'a former colleague'}`
+              : declared
+                ? registration.declaredLevelCode
+                  ? 'Self-declared'
+                  : 'Self-declared · unrecognised'
+                : undefined,
+          },
+          {
+            label: 'Accommodation',
+            icon: Icon.rooms,
+            tint: registration.accommodationRequired ? 'blue' : 'ink',
+            value: registration.accommodationRequired
+              ? registration.accommodationType
+                ? (ACCOMMODATION[registration.accommodationType] ?? registration.accommodationType)
+                : 'Needed'
+              : 'Not needed',
+          },
+          {
+            label: 'Visa support',
+            icon: Icon.globe,
+            tint: registration.visaRequired ? 'sun' : 'ink',
+            value: registration.visaRequired ? 'Needed' : 'Not needed',
+          },
+          {
+            label: 'Owner',
+            icon: Icon.person,
+            tint: registration.assignedTo ? 'green' : 'ink',
+            value: staff.find((member) => member.id === registration.assignedTo)?.name ?? 'Nobody yet',
+          },
+        ]}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
-          <Card
-            title="Registered for"
-            footer={
-              <p className="text-xs text-[var(--casa-text-subtle)]">
-                Submission reference <code className="font-mono">{registration.requestId}</code>
-              </p>
-            }
-          >
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-4">
+          <Card title="Course" icon={Icon.catalogue} tint="red" footer={<p className="text-xs text-[var(--casa-text-subtle)]">Reference <code className="font-mono">{registration.requestId}</code></p>}>
             <DetailList
               items={[
-                { label: 'Course', value: registration.courseTypeLabel },
-                {
-                  label: 'Option chosen',
-                  value: registration.courseInstanceLabel,
-                },
-                {
-                  label: 'Declared level',
-                  value: registration.declaredLevelRaw ? (
-                    <span className="flex items-center gap-2">
-                      {registration.declaredLevelCode ?? registration.declaredLevelRaw}
-                      <Badge tone="quiet">self-declared</Badge>
-                      {!registration.declaredLevelCode ? (
-                        <Badge tone="warning">unrecognised</Badge>
-                      ) : null}
-                    </span>
-                  ) : null,
-                },
-                {
-                  label: 'Confirmed level',
-                  value: confirmed ? (
-                    <span className="flex items-center gap-2">
-                      {confirmed.level}
-                      <Badge tone="positive">placement</Badge>
-                      <span className="text-xs text-[var(--casa-text-subtle)]">
-                        {confirmed.reviewerName ?? 'A former colleague'}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="text-[var(--casa-text-subtle)]">—</span>
-                  ),
-                },
+                { label: 'Option chosen', value: registration.courseInstanceLabel, wide: true },
+                ...(confirmed && declared
+                  ? [
+                      {
+                        label: 'Declared level',
+                        value: (
+                          <span className="flex items-center gap-2">
+                            {declared}
+                            {!registration.declaredLevelCode ? (
+                              <Badge tone="warning">unrecognised</Badge>
+                            ) : null}
+                          </span>
+                        ),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </Card>
 
-          <Card title="Applicant">
+          <Card title="Applicant" icon={Icon.person} tint="ink">
             <DetailList
               items={[
                 {
                   label: 'Name',
-                  value: `${SALUTATIONS[registration.salutation] ?? registration.salutation} ${registration.firstName} ${registration.lastName}`,
+                  value: `${SALUTATIONS[registration.salutation] ?? registration.salutation} ${fullName}`,
                 },
                 {
                   label: 'Email',
@@ -216,34 +235,9 @@ export default async function CourseRegistrationPage({
           </Card>
 
           {needsSomething ? (
-            <Card
-              title="Needs arranging"
-              description="Everything here creates work outside the classroom."
-            >
+            <Card title="Needs arranging" icon={Icon.attention} tint="sun">
               <DetailList
                 items={[
-                  {
-                    label: 'Visa support',
-                    value: registration.visaRequired ? (
-                      <Badge tone="warning">Needed</Badge>
-                    ) : (
-                      'Not needed'
-                    ),
-                  },
-                  {
-                    label: 'Accommodation',
-                    value: registration.accommodationRequired ? (
-                      <span className="flex items-center gap-2">
-                        <Badge tone="warning">Needed</Badge>
-                        {registration.accommodationType
-                          ? (ACCOMMODATION[registration.accommodationType] ??
-                            registration.accommodationType)
-                          : null}
-                      </span>
-                    ) : (
-                      'Not needed'
-                    ),
-                  },
                   { label: 'Allergies', value: registration.allergies },
                   {
                     label: 'Their notes',
@@ -256,7 +250,7 @@ export default async function CourseRegistrationPage({
           ) : null}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <PersonPanel
             person={person}
             candidates={candidates}

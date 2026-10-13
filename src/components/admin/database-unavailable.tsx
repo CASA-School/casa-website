@@ -1,3 +1,6 @@
+import { Icon } from './icons';
+import { IconChip } from './ui';
+
 /**
  * What the workspace shows when `DATABASE_URL` is unset.
  *
@@ -10,22 +13,19 @@
 export function DatabaseUnavailable() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-ws-canvas px-6 py-16">
-      <div className="w-full max-w-md rounded-xl border border-ws-line bg-white p-7 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_28px_-20px_rgba(15,23,42,0.18)]">
-        <p className="text-[0.65rem] font-bold tracking-eyebrow uppercase text-[var(--casa-warning-text)]">
-          Not connected
-        </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-2xl leading-tight">
-          The workspace has no database
-        </h1>
+      <div className="w-full max-w-md rounded-3xl border border-ws-line bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+        <div className="flex items-center gap-3">
+          <IconChip icon={Icon.attention} tint="sun" size="md" />
+          <h1 className="text-xl leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">
+            The workspace has no database
+          </h1>
+        </div>
         <p className="mt-3 text-sm leading-relaxed text-[var(--casa-text-subtle)]">
-          Every screen here reads and writes real records, so it will not run
-          against fixtures — an empty queue would look the same as a quiet
-          morning. Nothing has been lost; the workspace simply cannot show you
-          anything until it is connected.
+          Every screen here reads and writes real records, so nothing shows until it is connected.
         </p>
-        <div className="mt-5 rounded-lg border border-ws-line bg-ws-sunk px-4 py-3">
-          <p className="text-xs font-semibold">To start it locally</p>
-          <pre className="mt-2 overflow-x-auto text-xs leading-relaxed text-[var(--casa-muted)]">
+        <div className="mt-5 rounded-xl border border-ws-line bg-[#f8fafc] px-4 py-3">
+          <p className="text-xs font-bold text-[var(--casa-muted)]">To start it locally</p>
+          <pre className="mt-2 overflow-x-auto text-xs leading-relaxed text-[var(--casa-ink)]">
             <code>{'npm run db:up\nnpm run db:migrate\nnpm run admin:seed'}</code>
           </pre>
         </div>

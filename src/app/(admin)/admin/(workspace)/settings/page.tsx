@@ -34,144 +34,162 @@ export default async function SettingsPage() {
       label: 'Contact form fan-out',
       variable: 'CONTACT_WEBHOOK_URL',
       configured: hasEnv('CONTACT_WEBHOOK_URL'),
-      note: 'Enquiries are stored in the workspace either way.',
     },
     {
       label: 'Group and company briefs',
       variable: 'GROUP_INQUIRY_WEBHOOK_URL',
       configured: hasEnv('GROUP_INQUIRY_WEBHOOK_URL'),
-      note: 'Falls back to the contact webhook when unset.',
     },
     {
       label: 'Course registrations',
       variable: 'COURSE_REGISTRATION_WEBHOOK_URL',
       configured: hasEnv('COURSE_REGISTRATION_WEBHOOK_URL'),
-      note: 'Registrations are stored in the workspace either way.',
     },
     {
       label: 'Exam registrations',
       variable: 'EXAM_REGISTRATION_WEBHOOK_URL',
       configured: hasEnv('EXAM_REGISTRATION_WEBHOOK_URL'),
-      note: 'Registrations are stored in the workspace either way.',
     },
     {
       label: 'Career applications',
       variable: 'CAREERS_APPLICATION_WEBHOOK_URL',
       configured: hasEnv('CAREERS_APPLICATION_WEBHOOK_URL'),
-      note: 'The CV itself is only ever stored in the database.',
     },
     {
       label: 'Placement result hand-off',
       variable: 'PLACEMENT_RESULT_WEBHOOK_URL',
       configured: hasEnv('PLACEMENT_RESULT_WEBHOOK_URL'),
-      note: 'Predates the workspace. Placement review now happens here.',
     },
   ];
 
+  const microsoftMail =
+    hasEnv('FORM_MAIL_FROM') && hasEnv('IDENTITY_ENDPOINT') && hasEnv('IDENTITY_HEADER');
+
   return (
     <>
-      <PageHeader
-        eyebrow="Administration"
-        title="Settings"
-        description="What this deployment is connected to, and what the placement engine is currently doing."
-      />
+      <PageHeader title="Settings" description="Connections, website email and the placement engine." />
 
-      <div className="space-y-5">
-        <Card title="Your account">
-          <DetailList
-            items={[
-              { label: 'Name', value: user.name },
-              { label: 'Email', value: user.email },
-              { label: 'Role', value: <Badge tone="neutral">{roleLabel(user.role)}</Badge> },
-            ]}
-          />
-          <p className="mt-4 border-t border-ws-line-soft pt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-            Passwords are set by an owner or administrator from the Team screen.
-          </p>
-        </Card>
+      {/*
+       * The deployment's connections in the wide column, the facts that are
+       * read at a glance — who you are, the placement engine, the way into
+       * setup — in the narrow one, the record screens' split.
+       */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-4">
+          <Card title="Website email" icon={Icon.mail} tint="blue">
+            <DetailList
+              items={[
+                {
+                  label: 'Delivery mode',
+                  value: delivery.test ? (
+                    <span className="flex flex-wrap items-center gap-2">
+                      <Badge tone="warning">Testing</Badge>
+                      Every form goes to admin@casa-bremen.de
+                    </span>
+                  ) : (
+                    <span className="flex flex-wrap items-center gap-2">
+                      <Badge tone="positive">Live</Badge>
+                      Recipients are set per form
+                    </span>
+                  ),
+                },
+                {
+                  label: 'Microsoft 365',
+                  value: microsoftMail ? 'Configured' : 'Sender connection not configured',
+                },
+              ]}
+            />
+          </Card>
 
-        <Card title="Website email">
-          <DetailList items={[
-            { label: 'Delivery mode', value: delivery.test ? 'Testing — all forms go to admin@casa-bremen.de' : 'Live — recipients are configured per form' },
-            { label: 'Microsoft 365', value: hasEnv('FORM_MAIL_FROM') && hasEnv('IDENTITY_ENDPOINT') && hasEnv('IDENTITY_HEADER') ? 'Configured — verify mailbox permission and actual delivery' : 'Sender connection not configured' },
-          ]} />
-          <p className="mt-3 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-            In test mode, legacy webhooks are off, and confirmations meant for the sender go to admin@casa-bremen.de instead.
-            Saved requests remain in the workspace if a notification fails. Check these queues regularly.
-          </p>
-        </Card>
-
-        <Card
-          title="Integrations"
-          description="Optional legacy webhooks, used only in live mode when Microsoft email is not configured and a form recipient is set."
-        >
-          <ul className="divide-y divide-ws-line-soft">
-            {integrations.map((integration) => (
-              <li
-                key={integration.variable}
-                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5"
-              >
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold">{integration.label}</span>
-                  <span className="block text-xs text-[var(--casa-text-subtle)]">
-                    <code className="font-mono">{integration.variable}</code> · {integration.note}
+          <Card
+            title="Integrations"
+            description="Legacy webhooks, used in live mode without Microsoft email."
+            icon={Icon.external}
+            tint="ink"
+            bleed
+          >
+            <ul className="divide-y divide-ws-line-soft">
+              {integrations.map((integration) => (
+                <li
+                  key={integration.variable}
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-[var(--casa-ink)]">
+                      {integration.label}
+                    </span>
+                    <code className="block font-mono text-xs text-[var(--casa-text-subtle)]">
+                      {integration.variable}
+                    </code>
                   </span>
-                </span>
-                <Badge tone={integration.configured ? 'positive' : 'quiet'}>
-                  {integration.configured ? (delivery.test ? 'Bypassed for testing' : 'Configured') : 'Not configured'}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </Card>
+                  <Badge tone={integration.configured ? 'positive' : 'quiet'}>
+                    {integration.configured
+                      ? delivery.test
+                        ? 'Bypassed for testing'
+                        : 'Configured'
+                      : 'Not configured'}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </div>
 
-        <Card title="Placement engine">
-          <DetailList
-            items={[
-              {
-                label: 'Release mode',
-                value: (
-                  <span className="flex items-center gap-2">
+        <div className="space-y-4">
+          <Card title="Your account" icon={Icon.person} tint="green">
+            <DetailList
+              items={[
+                { label: 'Name', value: user.name },
+                { label: 'Role', value: <Badge tone="neutral">{roleLabel(user.role)}</Badge> },
+                { label: 'Email', value: user.email, wide: true },
+              ]}
+            />
+          </Card>
+
+          <Card title="Placement engine" icon={Icon.placement} tint="red">
+            <DetailList
+              items={[
+                {
+                  label: 'Release mode',
+                  value: (
                     <Badge tone={RELEASE_MODE === 'live' ? 'positive' : 'warning'}>
                       {RELEASE_MODE}
                     </Badge>
-                  </span>
-                ),
-              },
-              { label: 'Cut score version', value: `Policy version ${POLICY_VERSION}` },
-              {
-                label: 'Listening',
-                value: LISTENING_AUDIO_AVAILABLE ? (
-                  'Measured'
-                ) : (
-                  <span className="flex items-center gap-2">
+                  ),
+                },
+                { label: 'Cut score version', value: `Policy version ${POLICY_VERSION}` },
+                {
+                  label: 'Listening',
+                  value: LISTENING_AUDIO_AVAILABLE ? (
+                    'Measured'
+                  ) : (
                     <Badge tone="warning">Not measured</Badge>
-                  </span>
-                ),
-              },
-              {
-                label: 'Item bank',
-                value: (
-                  <span className="flex items-center gap-2">
-                    <Badge tone="warning">Pilot, unreviewed</Badge>
-                  </span>
-                ),
-              },
-            ]}
-          />
-        </Card>
-        <Card
-          title="Setup"
-          description="Prices, and the lists the workspace offers everywhere else."
-        >
-          <Link
-            href="/admin/settings/setup"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--casa-accent-text)] transition-colors hover:text-[var(--casa-accent-text-hover)]"
-          >
-            Open setup
-            <span aria-hidden="true">{Icon.chevronRight}</span>
-          </Link>
-        </Card>
+                  ),
+                },
+                { label: 'Item bank', value: <Badge tone="warning">Pilot, unreviewed</Badge> },
+              ]}
+            />
+          </Card>
+
+          <Card title="Setup" icon={Icon.catalogue} tint="ink" bleed>
+            <Link
+              href="/admin/settings/setup"
+              className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#f6f9fc]"
+            >
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-[var(--casa-ink)]">
+                  Types &amp; prices
+                </span>
+                <span className="block text-xs text-[var(--casa-text-subtle)]">
+                  Prices, and the lists used everywhere else
+                </span>
+              </span>
+              <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
+                {Icon.chevronRight}
+              </span>
+            </Link>
+          </Card>
+        </div>
       </div>
     </>
   );

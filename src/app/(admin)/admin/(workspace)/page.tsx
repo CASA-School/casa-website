@@ -63,17 +63,9 @@ export default async function TodayPage({
   const openToday = board.today.filter((t) => !t.doneAt).length;
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-sm text-[var(--casa-text-subtle)]">
-          {selected.toLocaleDateString('en-GB', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })}
-        </p>
-        <h1 className="mt-1.5 font-[family-name:var(--font-display)] text-4xl leading-[1.06] tracking-[-0.02em]">
+    <div className="space-y-4">
+      <header className="mb-5">
+        <h1 className="text-[1.625rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">
           {isToday ? (
             <>
               {greeting}
@@ -83,7 +75,21 @@ export default async function TodayPage({
             selected.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
           )}
         </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-[var(--casa-text-subtle)]">
+        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[var(--casa-text-subtle)]">
+          {/* The greeting does not say which day it is; another day's title does. */}
+          {isToday ? (
+            <>
+              <span className="font-semibold text-[var(--casa-muted)]">
+                {selected.toLocaleDateString('en-GB', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </span>
+              {' · '}
+            </>
+          ) : null}
           {summarise({ isToday, openToday, totalWaiting, events: events.length })}
         </p>
       </header>
@@ -137,7 +143,7 @@ export default async function TodayPage({
         ]}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <DayBoard
           date={date}
           today={board.today}
@@ -146,74 +152,82 @@ export default async function TodayPage({
           canWrite={canWrite}
         />
 
-        <div className="space-y-5">
-          <Card title={isToday ? 'Happening today' : 'Happening that day'}>
+        <div className="space-y-4">
+          <Card
+            title={isToday ? 'Happening today' : 'Happening that day'}
+            icon={Icon.calendar}
+            tint="blue"
+            bleed
+          >
             {events.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">
+              <p className="px-4 py-4 text-sm text-[var(--casa-text-subtle)]">
                 No courses, exams or arrivals on this day.
               </p>
             ) : (
-              <div className="space-y-4">
-                {EVENT_GROUPS.map(({ kind, label }) => {
-                  const rows = events.filter((e) => e.kind === kind);
-                  if (rows.length === 0) return null;
-                  return (
-                    <section key={kind}>
-                      <h3 className="mb-1.5 flex items-baseline gap-2 text-xs font-semibold text-[var(--casa-ink)]">
-                        {label}
-                        <span className="font-normal text-[var(--casa-text-subtle)]">
-                          {rows.length}
-                        </span>
-                      </h3>
-                      <ul className="space-y-1">
-                        {rows.map((event, index) => (
-                          <li key={`${kind}-${index}`}>
-                            <Link
-                              href={event.href}
-                              className="-mx-1.5 flex items-baseline justify-between gap-3 rounded-lg px-1.5 py-1 transition-colors hover:bg-ws-sunk"
-                            >
-                              <span className="min-w-0">
-                                <span className="block truncate text-sm">{event.title}</span>
-                                {event.detail ? (
-                                  <span className="block truncate text-xs text-[var(--casa-text-subtle)]">
-                                    {event.detail}
-                                  </span>
-                                ) : null}
+              EVENT_GROUPS.map(({ kind, label }) => {
+                const rows = events.filter((e) => e.kind === kind);
+                if (rows.length === 0) return null;
+                return (
+                  <section key={kind} className="border-b border-ws-line-soft last:border-b-0">
+                    <h3 className="flex items-center gap-2 border-b border-ws-line-soft bg-[#f8fafc] px-4 py-2 text-xs font-bold text-[var(--casa-ink)]">
+                      {label}
+                      <span className="font-semibold opacity-60">{rows.length}</span>
+                    </h3>
+                    <ul className="divide-y divide-ws-line-soft">
+                      {rows.map((event, index) => (
+                        <li key={`${kind}-${index}`}>
+                          <Link
+                            href={event.href}
+                            className="flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-[#f6f9fc]"
+                          >
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold text-[var(--casa-ink)]">
+                                {event.title}
                               </span>
-                              {kind !== 'arrival' && event.count > 0 ? (
-                                <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">
-                                  {event.count} {event.count === 1 ? 'learner' : 'learners'}
+                              {event.detail ? (
+                                <span className="block truncate text-xs text-[var(--casa-text-subtle)]">
+                                  {event.detail}
                                 </span>
                               ) : null}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  );
-                })}
-              </div>
+                            </span>
+                            {kind !== 'arrival' && event.count > 0 ? (
+                              <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">
+                                {event.count} {event.count === 1 ? 'learner' : 'learners'}
+                              </span>
+                            ) : null}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })
             )}
           </Card>
 
           <Card
             title="Coming up"
+            icon={Icon.clock}
+            tint="sun"
+            bleed
             actions={
               attention.length > 0 ? <Badge tone="warning">{attention.length}</Badge> : undefined
             }
           >
             {attention.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">Nothing with a deadline.</p>
+              <p className="px-4 py-4 text-sm text-[var(--casa-text-subtle)]">Nothing with a deadline.</p>
             ) : (
-              <ul className="space-y-1">
+              <ul className="divide-y divide-ws-line-soft">
                 {attention.map((item, index) => (
                   <li key={`${item.kind}-${index}`}>
                     <Link
                       href={item.href}
-                      className="-mx-1.5 flex items-baseline justify-between gap-3 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-ws-sunk"
+                      className="block px-4 py-2.5 transition-colors hover:bg-[#f6f9fc]"
                     >
-                      <span className="min-w-0 truncate text-sm">{item.title}</span>
-                      <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">
+                      <span className="block truncate text-sm font-semibold text-[var(--casa-ink)]">
+                        {item.title}
+                      </span>
+                      <span className="block truncate text-xs text-[var(--casa-text-subtle)]">
                         {item.detail}
                       </span>
                     </Link>
@@ -224,13 +238,15 @@ export default async function TodayPage({
           </Card>
 
           {counts.applicationsOpen > 0 && canAccess(user, 'applications') ? (
-            <Card title="Job applications">
+            <Card title="Job applications" icon={Icon.applications} tint="ink" bleed>
               <Link
                 href="/admin/applications"
-                className="flex items-center justify-between gap-3 text-sm font-semibold text-[var(--casa-accent-text)] transition-colors hover:text-[var(--casa-accent-text-hover)]"
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-[var(--casa-ink)] transition-colors hover:bg-[#f6f9fc]"
               >
                 {counts.applicationsOpen} open in the pipeline
-                <span aria-hidden="true">{Icon.chevronRight}</span>
+                <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
+                  {Icon.chevronRight}
+                </span>
               </Link>
             </Card>
           ) : null}

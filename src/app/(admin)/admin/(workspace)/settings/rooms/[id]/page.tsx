@@ -1,14 +1,21 @@
 import { notFound } from 'next/navigation';
 
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
-import { Badge, Card, DateText, DetailList, PageHeader } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Badge, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { floorLabel, getRoom, roomCohorts, ROOM_KIND_LABELS } from '@/lib/admin/rooms';
 import { deleteRoomAction } from '../actions';
 import { EditRoomForm } from '../room-forms';
 
-/** One room: what it is, what runs in it, and the form that changes it. */
+/**
+ * One room: what it is, what runs in it, and the form that changes it.
+ *
+ * The record's head carries what a colleague looks a room up for — where it
+ * is, how many it seats, whether courses can be booked into it — so the
+ * columns under it are what runs there and the room's remaining details.
+ */
 export default async function RoomPage({
   params,
   searchParams,
@@ -23,14 +30,23 @@ export default async function RoomPage({
 
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/settings/rooms"
         backLabel="All rooms"
-        eyebrow={room.locationName}
         title={room.nickname ? `${room.name} · ${room.nickname}` : room.name}
-        description={`${ROOM_KIND_LABELS[room.kind]} · ${floorLabel(room.floor)}`}
+        subtitle={ROOM_KIND_LABELS[room.kind]}
+        status={
+          <>
+            {room.isActive ? null : <Badge tone="quiet">Inactive</Badge>}
+            {room.isBookable ? (
+              <Badge tone="positive">Bookable</Badge>
+            ) : (
+              <Badge tone="neutral">Not bookable</Badge>
+            )}
+          </>
+        }
         actions={
-          <div className="flex items-center gap-2">
+          <>
             {canAccess(user, 'rooms', 'edit') ? (
               <FormDialog trigger="Edit" title={room.name}>
                 <EditRoomForm room={room} />
@@ -48,14 +64,36 @@ export default async function RoomPage({
                 </ConfirmSubmit>
               </form>
             ) : null}
-          </div>
+          </>
         }
+        facts={[
+          {
+            label: 'Location',
+            icon: Icon.rooms,
+            tint: 'ink',
+            value: room.locationName,
+            sub: floorLabel(room.floor),
+          },
+          {
+            label: 'Capacity',
+            icon: Icon.people,
+            tint: 'green',
+            value: room.capacity ?? '—',
+            sub: room.capacityMax ? `${room.capacityMax} at most` : undefined,
+          },
+          {
+            label: 'Cohorts',
+            icon: Icon.calendar,
+            tint: 'blue',
+            value: cohorts.length === 0 ? 'None planned' : `${cohorts.length} planned`,
+          },
+        ]}
       />
 
       {query.error ? (
         <p
           role="alert"
-          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
+          className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
         >
           {query.error}
         </p>
@@ -63,75 +101,46 @@ export default async function RoomPage({
       {query.ok ? (
         <p
           role="status"
-          className="mb-5 rounded-lg border border-[var(--casa-success-text)]/30 bg-[var(--casa-success-surface)]/8 px-4 py-3 text-sm text-[var(--casa-success-text)]"
+          className="mb-4 rounded-lg border border-[var(--casa-success-text)]/30 bg-[var(--casa-success-surface)]/8 px-4 py-3 text-sm text-[var(--casa-success-text)]"
         >
           Saved.
         </p>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
-          <Card title="Cohorts">
-            {cohorts.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">No cohorts planned here.</p>
-            ) : (
-              <ul className="divide-y divide-ws-line-soft">
-                {cohorts.map((c) => {
-                  const over = room.capacity !== null && c.capacity > room.capacity;
-                  return (
-                    <li key={c.id} className="flex items-center justify-between gap-3 py-2.5">
-                      <span className="min-w-0 text-sm">
-                        <span className="block font-medium">{c.courseTypeName}</span>
-                        <span className="block text-xs text-[var(--casa-text-subtle)]">
-                          <DateText value={c.startDate} /> — <DateText value={c.endDate} />
-                        </span>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <Card title="Cohorts" icon={Icon.catalogue} tint="red" bleed>
+          {cohorts.length === 0 ? (
+            <p className="px-4 py-4 text-sm text-[var(--casa-text-subtle)]">No cohorts planned here.</p>
+          ) : (
+            <ul className="divide-y divide-ws-line-soft">
+              {cohorts.map((c) => {
+                const over = room.capacity !== null && c.capacity > room.capacity;
+                return (
+                  <li key={c.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-semibold text-[var(--casa-ink)]">{c.courseTypeName}</span>
+                      <span className="block text-xs text-[var(--casa-text-subtle)]">
+                        <DateText value={c.startDate} /> — <DateText value={c.endDate} />
                       </span>
-                      <span className="flex items-center gap-2 text-sm">
-                        {c.registrationCount} / {c.capacity}
-                        {over ? <Badge tone="warning">Over room capacity</Badge> : null}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </Card>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2 text-sm tabular-nums">
+                      {over ? <Badge tone="warning">Over room capacity</Badge> : null}
+                      {c.registrationCount} / {c.capacity}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
 
-          <Card title="Details">
-            <DetailList
-              items={[
-                { label: 'Location', value: room.locationName },
-                { label: 'Floor', value: floorLabel(room.floor) },
-                { label: 'Zone', value: room.zone },
-                { label: 'Colour', value: room.colour },
-                { label: 'Short name', value: room.shortName },
-              ]}
-            />
-          </Card>
-        </div>
-
-        <Card title="Status">
+        <Card title="Details" icon={Icon.note} tint="sun">
           <DetailList
             items={[
-              {
-                label: 'Bookable',
-                value: room.isBookable ? (
-                  <Badge tone="positive">Yes</Badge>
-                ) : (
-                  <Badge tone="neutral">No</Badge>
-                ),
-              },
-              {
-                label: 'Active',
-                value: room.isActive ? (
-                  <Badge tone="positive">Yes</Badge>
-                ) : (
-                  <Badge tone="quiet">No</Badge>
-                ),
-              },
-              { label: 'Capacity', value: room.capacity ?? '—' },
-              { label: 'Maximum', value: room.capacityMax ?? '—' },
-              { label: 'Notes', value: room.notes },
+              { label: 'Zone', value: room.zone },
+              { label: 'Colour', value: room.colour },
+              { label: 'Short name', value: room.shortName },
+              { label: 'Notes', value: room.notes, wide: true },
             ]}
           />
         </Card>

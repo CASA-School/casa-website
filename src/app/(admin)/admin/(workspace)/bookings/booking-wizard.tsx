@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
-import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Button, Field, Input, Select, Textarea, TINTS } from '@/components/admin/ui';
 import {
   levelBand,
   levelSiblings,
@@ -12,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dates';
 import { OptionalSection } from '@/components/admin/optional-section';
+import { DateField } from '@/components/admin/date-picker';
 
 /**
  * The booking wizard.
@@ -120,31 +122,46 @@ export function BookingWizard({
 
   return (
     <div className="space-y-5">
-      <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-        {visible.map((s, i) => (
-          <li key={s.key} className="flex items-center gap-2">
-            {i > 0 ? (
-              <span aria-hidden="true" className="text-ws-line-firm">
-                /
-              </span>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => (i <= index ? setStep(s.key) : undefined)}
-              disabled={i > index}
-              className={cn(
-                'rounded-md px-1.5 py-0.5 font-semibold transition-colors',
-                s.key === step
-                  ? 'bg-[var(--casa-ink-deep)] text-white'
-                  : i < index
-                    ? 'text-[var(--casa-accent-text)] hover:bg-ws-sunk'
-                    : 'text-[var(--casa-text-subtle)]'
-              )}
-            >
-              {s.label}
-            </button>
-          </li>
-        ))}
+      <ol className="flex flex-wrap items-center gap-1 border-b border-ws-line-soft pb-3">
+        {visible.map((s, i) => {
+          const current = s.key === step;
+          const done = i < index;
+          return (
+            <li key={s.key} className="flex items-center gap-1">
+              {i > 0 ? <span aria-hidden="true" className="h-px w-3 bg-ws-line-firm" /> : null}
+              <button
+                type="button"
+                onClick={() => (i <= index ? setStep(s.key) : undefined)}
+                disabled={i > index}
+                aria-current={current ? 'step' : undefined}
+                className={cn(
+                  'inline-flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs font-bold transition-colors',
+                  'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
+                  current
+                    ? 'text-[var(--casa-ink)]'
+                    : done
+                      ? 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
+                      : 'text-[var(--casa-text-subtle)]'
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'grid h-5 w-5 place-items-center rounded-full text-[0.68rem] font-extrabold [&_svg]:h-3 [&_svg]:w-3',
+                    current
+                      ? 'bg-[var(--casa-ink-deep)] text-white'
+                      : done
+                        ? TINTS.green
+                        : 'bg-white text-[var(--casa-muted)] ring-[1.5px] ring-ws-line-firm ring-inset'
+                  )}
+                >
+                  {done ? Icon.check : i + 1}
+                </span>
+                {s.label}
+              </button>
+            </li>
+          );
+        })}
       </ol>
 
       {step === 'what' ? (
@@ -319,7 +336,7 @@ export function BookingWizard({
                 </div>
 
                 {wantsBooks && books.length > 0 ? (
-                  <ul className="mt-2 divide-y divide-ws-line-soft rounded-lg border border-ws-line">
+                  <ul className="mt-2 divide-y divide-ws-line-soft rounded-xl border border-ws-line">
                     {books.map((b) => (
                       <li key={b.id} className="px-3 py-2">
                         <label className="flex min-w-0 items-center gap-2.5 text-sm">
@@ -332,7 +349,7 @@ export function BookingWizard({
                               else next.add(b.id);
                               setExcludedBooks(next);
                             }}
-                            className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                            className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
                           />
                           <span className="min-w-0 truncate">{b.title}</span>
                         </label>
@@ -420,19 +437,18 @@ export function BookingWizard({
                     </Select>
                   </Field>
                   <Field label="From" htmlFor="acc-from">
-                    <Input
+                    <DateField
                       id="acc-from"
-                      type="date"
-                      value={accFrom}
-                      onChange={(e) => setAccFrom(e.target.value)}
+                      value={accFrom || null}
+                      onChange={(v) => setAccFrom(v ?? '')}
                     />
                   </Field>
                   <Field label="Until" htmlFor="acc-to">
-                    <Input
+                    <DateField
                       id="acc-to"
-                      type="date"
-                      value={accTo}
-                      onChange={(e) => setAccTo(e.target.value)}
+                      value={accTo || null}
+                      min={accFrom || null}
+                      onChange={(v) => setAccTo(v ?? '')}
                     />
                   </Field>
                 </div>
@@ -488,7 +504,7 @@ export function BookingWizard({
           <input type="hidden" name="cateringCode" value={wantsAccommodation ? catering : ''} />
           <input type="hidden" name="accommodationFrom" value={wantsAccommodation ? accFrom : ''} />
           <input type="hidden" name="accommodationTo" value={wantsAccommodation ? accTo : ''} />
-          <dl className="divide-y divide-ws-line-soft rounded-lg border border-ws-line">
+          <dl className="divide-y divide-ws-line-soft rounded-xl border border-ws-line">
             {summaryRows({
               kind,
               cohort,
@@ -535,7 +551,7 @@ export function BookingWizard({
                 type="checkbox"
                 checked={includeFee}
                 onChange={(e) => setIncludeFee(e.target.checked)}
-                className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
               />
               Charge the enrolment fee
             </label>
@@ -543,7 +559,7 @@ export function BookingWizard({
               <input
                 type="checkbox"
                 name="visaRequired"
-                className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
               />
               Visa required
             </label>
@@ -573,26 +589,27 @@ export function BookingWizard({
   );
 }
 
-function Question({ children, small = false }: { children: React.ReactNode; small?: boolean }) {
+function Question({ children, small = false }: { children: ReactNode; small?: boolean }) {
   return small ? (
-    <h4 className="text-xs font-semibold text-[var(--casa-muted)]">{children}</h4>
+    <h4 className="text-xs font-bold text-[var(--casa-muted)]">{children}</h4>
   ) : (
-    <h3 className="font-[family-name:var(--font-display)] text-lg leading-snug">{children}</h3>
+    <h3 className="text-lg leading-snug font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">
+      {children}
+    </h3>
   );
 }
 
+/** A choice card, the offers wizard's: a tile that takes an ink edge when chosen. */
 function Choice({
   selected,
   onSelect,
   title,
-  trailing,
   children,
 }: {
   selected: boolean;
   onSelect: () => void;
   title: string;
-  trailing?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <button
@@ -600,24 +617,21 @@ function Choice({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        'flex w-full items-start justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left transition-colors',
+        'flex w-full items-start gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors',
         'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
         selected
-          ? 'border-[var(--casa-blue)] bg-[var(--casa-blue)]/6'
-          : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45 hover:bg-ws-sunk/60'
+          ? 'border-[var(--casa-ink)] bg-[#edf0f5] shadow-[0_0_0_1px_var(--casa-ink)]'
+          : 'border-ws-line bg-white hover:border-ws-line-firm'
       )}
     >
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-[var(--casa-ink)]">{title}</span>
+        <span className="block text-sm font-bold text-[var(--casa-ink)]">{title}</span>
         {children ? (
-          <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">{children}</span>
+          <span className="mt-0.5 block text-xs font-medium text-[var(--casa-text-subtle)]">
+            {children}
+          </span>
         ) : null}
       </span>
-      {trailing ? (
-        <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--casa-ink)]">
-          {trailing}
-        </span>
-      ) : null}
     </button>
   );
 }

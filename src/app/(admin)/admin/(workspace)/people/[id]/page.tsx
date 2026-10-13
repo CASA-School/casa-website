@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { ReactNode } from 'react';
 
 import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction } from '../actions';
@@ -20,7 +21,10 @@ import {
   Card,
   DateText,
   DetailList,
-  PageHeader,
+  IconChip,
+  RecordHeader,
+  relativeDays,
+  type Tint,
 } from '@/components/admin/ui';
 import { activityFor, describeActivity } from '@/lib/admin/activity';
 import { offersFor } from '@/lib/admin/offers/repo';
@@ -33,8 +37,8 @@ import {
   personTimeline,
   type TimelineItem,
 } from '@/lib/admin/people';
-import { relativeDays } from '@/components/admin/ui';
 import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
+import { cn } from '@/lib/utils';
 
 const SALUTATIONS: Record<string, string> = {
   mr: 'Mr',
@@ -43,17 +47,24 @@ const SALUTATIONS: Record<string, string> = {
   neutral: '',
 };
 
-const KIND_LABELS: Record<TimelineItem['kind'], string> = {
-  enquiry: 'Enquiry',
-  course: 'Course registration',
-  exam: 'Exam registration',
-  review: 'Placement',
+/** What each kind of history entry is, and its meaning colour. */
+const KINDS: Record<TimelineItem['kind'], { label: string; icon: ReactNode; tint: Tint }> = {
+  enquiry: { label: 'Enquiry', icon: Icon.enquiries, tint: 'ink' },
+  course: { label: 'Course registration', icon: Icon.registrations, tint: 'red' },
+  exam: { label: 'Exam registration', icon: Icon.registrations, tint: 'blue' },
+  review: { label: 'Placement', icon: Icon.placement, tint: 'red' },
 };
 
 /**
  * One person, and everything that has ever come in under their name.
  *
- * The timeline is the point of the screen. A registration on its own says
+ * The head carries the five things a colleague looks for first — how to reach
+ * them, where they are from, when they were born, the level a teacher
+ * confirmed — so the cards below are the record's lists: bookings and the
+ * history on the left, what still needs a look and the identity decisions on
+ * the right.
+ *
+ * The history is the point of the screen. A registration on its own says
  * "someone wants a B1 course"; the same registration under a person who
  * enquired twice, sat a placement and was confirmed A2.2 by a teacher says
  * something quite different, and staff should not have to search four queues
@@ -61,9 +72,9 @@ const KIND_LABELS: Record<TimelineItem['kind'], string> = {
  *
  * If this row was linked INTO another, the page redirects its reader to the
  * survivor by rendering the survivor: `getPerson` follows `merged_into`. The
- * rows that were linked into THIS one are listed at the bottom, each with an
- * undo, because a wrong link is the one identity mistake that must stay cheap
- * to reverse.
+ * rows that were linked into THIS one are listed under the history, each with
+ * an undo, because a wrong link is the one identity mistake that must stay
+ * cheap to reverse.
  */
 export default async function PersonPage({
   params,
@@ -104,20 +115,30 @@ export default async function PersonPage({
     .filter(Boolean)
     .join(' ');
 
+  const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
+  const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
+  const more = (n: number) => (n > 1 ? `+${n - 1} more` : undefined);
+  const openFlags = flags.filter((f) => !f.resolvedAt);
+  const manyChannels = person.emails.length > 1 || person.phones.length > 1;
+  // The side column holds only what this person has; without any of it the
+  // record's lists take the full width rather than leaving an empty gutter.
+  const hasSide =
+    openFlags.length > 0 || manyChannels || fileMakerLinks.length > 0 || activity.length > 0;
+
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/people"
         backLabel="All students"
-        eyebrow="Student"
         title={title}
-        description={
+        subtitle={[
           person.id !== id
-            ? 'Opened from a linked record.'
-            : `In touch since ${person.createdAt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}.`
-        }
+            ? 'Opened from a linked record'
+            : `In touch since ${person.createdAt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`,
+          `Added by ${person.createdByLabel}`,
+        ].join(' · ')}
         actions={
-          <div className="flex items-center gap-2">
+          <>
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog
@@ -152,110 +173,174 @@ export default async function PersonPage({
                 </ConfirmSubmit>
               </form>
             ) : null}
-          </div>
+          </>
         }
+        facts={[
+          {
+            label: 'Email',
+            icon: Icon.mail,
+            tint: 'ink',
+            value: email?.address,
+            sub: more(person.emails.length),
+            href: email ? `mailto:${email.address}` : undefined,
+          },
+          {
+            label: 'Phone',
+            icon: Icon.person,
+            tint: 'green',
+            value: phone?.number,
+            sub: more(person.phones.length),
+            href: phone ? `tel:${phone.number}` : undefined,
+          },
+          {
+            label: 'Nationality',
+            icon: Icon.globe,
+            tint: 'sun',
+            value: person.nationalityName ?? person.nationalityRaw,
+            sub: !person.nationalityName && person.nationalityRaw ? 'Not recognised' : undefined,
+          },
+          {
+            label: 'Born',
+            icon: Icon.calendar,
+            tint: 'blue',
+            value: person.birthDate ? <BirthDate value={person.birthDate} /> : null,
+          },
+          {
+            label: 'Level',
+            icon: Icon.placement,
+            tint: 'red',
+            value: confirmed?.level,
+            sub: confirmed ? (
+              <>
+                {confirmed.reviewerName ?? 'A former colleague'} ·{' '}
+                <DateText value={confirmed.decidedAt} />
+              </>
+            ) : (
+              'Not confirmed yet'
+            ),
+          },
+        ]}
       />
 
       {error ? (
         <p
           role="alert"
-          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
+          className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
         >
           {error}
         </p>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
+      <div
+        className={cn(
+          'grid gap-4 lg:items-start',
+          hasSide ? 'lg:grid-cols-[minmax(0,1fr)_340px]' : undefined
+        )}
+      >
+        <div className="space-y-4">
           {seesBookings ? (
-            <Card title="Bookings">
+            <Card title="Bookings" icon={Icon.bookings} tint="red">
               {bookings.length === 0 ? (
                 <p className="text-sm text-[var(--casa-text-subtle)]">No bookings.</p>
               ) : (
-                <ul className="divide-y divide-ws-line-soft">
-                  {bookings.map((b) => (
-                    <li key={b.id}>
-                      <Link
-                        href={`/admin/bookings/${b.id}`}
-                        className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-ws-sunk"
-                      >
-                        <span className="min-w-0 text-sm">
-                          <span className="flex items-center gap-2 font-medium">
-                            {b.courseTypeName ?? 'Booking'}
-                            <Badge tone={BOOKING_STATUS_TONES[b.status]}>
-                              {BOOKING_STATUS_LABELS[b.status]}
-                            </Badge>
-                          </span>
-                          <span className="block text-xs text-[var(--casa-text-subtle)]">
-                            {b.startDate ? (
-                              <>
-                                <DateText value={b.startDate} /> – <DateText value={b.endDate} />
-                              </>
-                            ) : (
-                              'No dates'
-                            )}
-                          </span>
-                        </span>
-                        <span
-                          className={`text-sm font-semibold tabular-nums ${b.charged - b.paid > 0 ? 'text-[var(--casa-warning-text)]' : 'text-[var(--casa-success-text)]'}`}
+                <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                  {bookings.map((b) => {
+                    const balance = b.charged - b.paid;
+                    return (
+                      <li key={b.id}>
+                        <Link
+                          href={`/admin/bookings/${b.id}`}
+                          className="-mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ws-sunk"
                         >
-                          {new Intl.NumberFormat('de-DE', {
-                            style: 'currency',
-                            currency: b.currency,
-                          }).format(b.charged - b.paid)}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
+                          <span className="min-w-0 text-sm">
+                            <span className="flex items-center gap-2 font-semibold">
+                              {b.courseTypeName ?? 'Booking'}
+                              <Badge tone={BOOKING_STATUS_TONES[b.status]}>
+                                {BOOKING_STATUS_LABELS[b.status]}
+                              </Badge>
+                            </span>
+                            <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
+                              {b.startDate ? (
+                                <>
+                                  <DateText value={b.startDate} /> – <DateText value={b.endDate} />
+                                </>
+                              ) : (
+                                'No dates'
+                              )}
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-right">
+                            <span
+                              className={cn(
+                                'block text-sm font-extrabold tabular-nums',
+                                balance > 0
+                                  ? 'text-[var(--casa-warning-text)]'
+                                  : 'text-[var(--casa-success-text)]'
+                              )}
+                            >
+                              {new Intl.NumberFormat('de-DE', {
+                                style: 'currency',
+                                currency: b.currency,
+                              }).format(balance)}
+                            </span>
+                            <span className="block text-xs text-[var(--casa-text-subtle)]">
+                              {balance > 0 ? 'open' : 'paid'}
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </Card>
           ) : null}
 
-          <Card title="History">
+          <Card title="History" icon={Icon.clock} tint="blue">
             {timeline.length === 0 ? (
               <p className="text-sm text-[var(--casa-text-subtle)]">Nothing yet.</p>
             ) : (
-              <ol className="divide-y divide-ws-line-soft">
-                {timeline.map((item) => (
-                  <li key={`${item.kind}-${item.id}`}>
-                    <Link
-                      href={item.href}
-                      className="group -mx-2 flex items-start justify-between gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-ws-sunk"
-                    >
-                      <span className="min-w-0">
-                        <span className="flex flex-wrap items-center gap-2">
-                          <Badge tone="quiet">{KIND_LABELS[item.kind]}</Badge>
-                          <span className="text-sm font-semibold">{item.title}</span>
-                          {item.status ? (
-                            <Badge tone={STATUS_TONES[normaliseStatus(item.status)]}>
-                              {STATUS_LABELS[normaliseStatus(item.status)]}
-                            </Badge>
-                          ) : null}
-                        </span>
-                        {item.detail ? (
-                          <span className="mt-1 block truncate text-sm text-[var(--casa-text-subtle)]">
-                            {item.detail}
+              <ol className="-my-1.5 divide-y divide-ws-line-soft">
+                {timeline.map((item) => {
+                  const kind = KINDS[item.kind];
+                  return (
+                    <li key={`${item.kind}-${item.id}`}>
+                      <Link
+                        href={item.href}
+                        className="group -mx-2 flex items-start gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-ws-sunk"
+                      >
+                        <IconChip icon={kind.icon} tint={kind.tint} />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-semibold">{item.title}</span>
+                            {item.status ? (
+                              <Badge tone={STATUS_TONES[normaliseStatus(item.status)]}>
+                                {STATUS_LABELS[normaliseStatus(item.status)]}
+                              </Badge>
+                            ) : null}
                           </span>
-                        ) : null}
-                      </span>
-                      <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">
-                        <DateText value={item.at} compact />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                          <span className="mt-0.5 block truncate text-xs text-[var(--casa-text-subtle)]">
+                            {[kind.label, item.detail].filter(Boolean).join(' · ')}
+                          </span>
+                        </span>
+                        <span className="shrink-0 pt-0.5 text-xs text-[var(--casa-text-subtle)]">
+                          <DateText value={item.at} compact />
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ol>
             )}
           </Card>
 
           {person.linkedDuplicates.length > 0 ? (
-            <Card title="Linked records">
-              <ul className="divide-y divide-ws-line-soft">
+            <Card title="Linked records" icon={Icon.people} tint="ink">
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
                 {person.linkedDuplicates.map((dup) => (
                   <li key={dup.id} className="flex items-center justify-between gap-3 py-2.5">
                     <span className="min-w-0 text-sm">
-                      <span className="block font-medium">{dup.displayName}</span>
+                      <span className="block font-semibold">{dup.displayName}</span>
                       <span className="block text-xs text-[var(--casa-text-subtle)]">
                         Created <DateText value={dup.createdAt} /> · {dup.createdBy}
                       </span>
@@ -274,137 +359,109 @@ export default async function PersonPage({
           ) : null}
         </div>
 
-        <div className="space-y-5">
-          <Card title="Details">
-            <DetailList
-              items={[
-                {
-                  label: 'Email',
-                  value:
-                    person.emails.length > 0 ? (
-                      <ul className="space-y-1">
-                        {person.emails.map((e) => (
-                          <li key={e.address}>
-                            <a
-                              href={`mailto:${e.address}`}
-                              className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                            >
-                              {e.address}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null,
-                },
-                {
-                  label: 'Phone',
-                  value:
-                    person.phones.length > 0 ? (
-                      <ul className="space-y-1">
-                        {person.phones.map((p) => (
-                          <li key={p.number}>
-                            <a href={`tel:${p.number}`} className="font-medium">
-                              {p.number}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null,
-                },
-                {
-                  label: 'Nationality',
-                  value:
-                    person.nationalityName ??
-                    (person.nationalityRaw ? (
-                      <span className="flex items-center gap-2">
-                        {person.nationalityRaw}
-                        <Badge tone="warning">unrecognised</Badge>
-                      </span>
-                    ) : null),
-                },
-                {
-                  label: 'Date of birth',
-                  value: <BirthDate value={person.birthDate} />,
-                },
-                {
-                  label: 'Confirmed level',
-                  value: confirmed ? (
-                    <span className="flex items-center gap-2">
-                      <span className="font-[family-name:var(--font-display)] text-lg leading-none">
-                        {confirmed.level}
-                      </span>
-                      <span className="text-xs text-[var(--casa-text-subtle)]">
-                        {confirmed.reviewerName ?? 'A former colleague'} ·{' '}
-                        <DateText value={confirmed.decidedAt} />
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="text-[var(--casa-text-subtle)]">—</span>
-                  ),
-                },
-                { label: 'Added by', value: person.createdByLabel },
-              ]}
-            />
-          </Card>
-
-          {flags.filter((f) => !f.resolvedAt).length > 0 ? (
-            <Card title="Needs a look">
-              <ul className="space-y-2 text-sm">
-                {flags
-                  .filter((f) => !f.resolvedAt)
-                  .map((f) => (
-                    <li key={f.id} className="flex items-center gap-2">
+        {hasSide ? (
+          <div className="space-y-4">
+            {openFlags.length > 0 ? (
+              <Card title="Needs a look" icon={Icon.flag} tint="sun">
+                <ul className="space-y-2">
+                  {openFlags.map((f) => (
+                    <li
+                      key={f.id}
+                      className="flex items-center gap-2 rounded-xl bg-[#fffbea] px-3 py-2 text-sm font-semibold"
+                    >
                       <span className="text-[var(--casa-warning-text)]">{Icon.flag}</span>
                       {FLAG_LABELS[f.code]}
                     </li>
                   ))}
-              </ul>
-            </Card>
-          ) : null}
+                </ul>
+              </Card>
+            ) : null}
 
-          {fileMakerLinks.length > 0 ? (
-            <Card title="In FileMaker">
-              <ul className="space-y-1.5 text-sm">
-                {fileMakerLinks.map((link) => (
-                  <li key={link.id} className="flex items-center justify-between gap-2">
-                    <span>
-                      {link.sourceLayout}{' '}
-                      <span className="font-mono text-xs text-[var(--casa-text-subtle)]">
-                        {link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}
+            {manyChannels ? (
+              <Card title="Contact" icon={Icon.mail} tint="ink">
+                <DetailList
+                  items={[
+                    {
+                      label: 'Email',
+                      wide: true,
+                      value: (
+                        <ul className="space-y-1">
+                          {person.emails.map((e) => (
+                            <li key={e.address}>
+                              <a
+                                href={`mailto:${e.address}`}
+                                className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                              >
+                                {e.address}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                    {
+                      label: 'Phone',
+                      wide: true,
+                      value:
+                        person.phones.length > 0 ? (
+                          <ul className="space-y-1">
+                            {person.phones.map((p) => (
+                              <li key={p.number}>
+                                <a href={`tel:${p.number}`} className="font-medium">
+                                  {p.number}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null,
+                    },
+                  ]}
+                />
+              </Card>
+            ) : null}
+
+            {fileMakerLinks.length > 0 ? (
+              <Card title="In FileMaker" icon={Icon.external} tint="ink">
+                <ul className="space-y-1.5 text-sm">
+                  {fileMakerLinks.map((link) => (
+                    <li key={link.id} className="flex items-center justify-between gap-2">
+                      <span>
+                        {link.sourceLayout}{' '}
+                        <span className="font-mono text-xs text-[var(--casa-text-subtle)]">
+                          {link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}
+                        </span>
                       </span>
-                    </span>
-                    <span className="text-xs text-[var(--casa-text-subtle)]">
-                      <DateText value={link.linkedAt} compact />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ) : null}
+                      <span className="text-xs text-[var(--casa-text-subtle)]">
+                        <DateText value={link.linkedAt} compact />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : null}
 
-          {activity.length > 0 ? (
-            <Card title="Identity decisions">
-              <ol className="space-y-2.5">
-                {activity.map((entry) => (
-                  <li key={entry.id} className="flex gap-2.5 text-xs">
-                    <span
-                      aria-hidden="true"
-                      className="mt-0.5 shrink-0 text-[var(--casa-text-subtle)]"
-                    >
-                      {Icon.check}
-                    </span>
-                    <span className="text-[var(--casa-text-subtle)]">
-                      <span className="font-semibold text-[var(--casa-ink)]">
-                        {entry.staffName ?? 'Someone'}
-                      </span>{' '}
-                      {describeActivity(entry)} · {relativeDays(entry.createdAt)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </Card>
-          ) : null}
-        </div>
+            {activity.length > 0 ? (
+              <Card title="Identity decisions" icon={Icon.check} tint="green">
+                <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
+                  {activity.map((entry) => (
+                    <li key={entry.id} className="relative flex gap-3 text-xs">
+                      <span
+                        aria-hidden="true"
+                        className="relative mt-1 h-[9px] w-[9px] shrink-0 rounded-full border-2 border-white bg-ws-line-firm"
+                      />
+                      <span className="text-[var(--casa-text-subtle)]">
+                        <span className="font-bold text-[var(--casa-ink)]">
+                          {entry.staffName ?? 'Someone'}
+                        </span>{' '}
+                        {describeActivity(entry)} · {relativeDays(entry.createdAt)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </>
   );

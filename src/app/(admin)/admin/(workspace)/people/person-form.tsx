@@ -3,6 +3,7 @@ import type { Country, PersonDetail } from '@/lib/admin/people';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { createPersonAction, updatePersonAction } from './actions';
 import { toDateInputValue, todayInputValue } from '@/lib/dates';
+import { DateFormField } from '@/components/admin/date-picker';
 
 const SALUTATIONS = [
   ['', '—'],
@@ -16,8 +17,9 @@ const SALUTATIONS = [
  * One form for creating and editing a person, rendered inside a dialog.
  *
  * Progressive disclosure: a new person needs a name and a way to reach them;
- * salutation, date of birth, nationality and phone sit under "More". When
- * editing, everything is shown — the person opened Edit to go deeper.
+ * salutation, date of birth, nationality and phone appear once a first name
+ * and an email are in (`OptionalSection`). When editing, everything is shown —
+ * the person opened Edit to go deeper.
  */
 export function PersonForm({ person, countries }: { person?: PersonDetail; countries: Country[] }) {
   const editing = Boolean(person);
@@ -39,10 +41,9 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
         </Select>
       </Field>
       <Field label="Date of birth" htmlFor="person-birth">
-        <Input
+        <DateFormField
           id="person-birth"
           name="birthDate"
-          type="date"
           max={todayInputValue()}
           defaultValue={toDateInputValue(person?.birthDate)}
         />

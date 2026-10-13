@@ -24,6 +24,7 @@ import {
   relativeDays,
 } from '@/components/admin/ui';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { roleLabel } from '@/components/admin/shell';
 import { ADJUSTABLE, LEVEL_LABELS, LEVELS, MODULE_LABELS, resolveAccess } from '@/lib/admin/access';
 import { canDeleteStaff } from '@/lib/admin/auth';
@@ -60,7 +61,6 @@ export default async function TeamPage({
   return (
     <>
       <PageHeader
-        eyebrow="Administration"
         title="Team"
         description="Who can sign in to the workspace, and what they may do here."
       />
@@ -83,8 +83,8 @@ export default async function TeamPage({
         </p>
       ) : null}
 
-      <div className="space-y-5">
-        <Card title="Accounts" bleed>
+      <div className="space-y-4">
+        <Card title="Accounts" icon={Icon.team} tint="green" bleed>
           <Table head={['Name', 'Role', 'Last seen', 'Sessions', { label: '', align: 'right' }]}>
             {staff.map((account) => (
               <TableRow key={account.id}>
@@ -116,7 +116,7 @@ export default async function TeamPage({
                         name="role"
                         defaultValue={account.role}
                         aria-label={`Role for ${account.name}`}
-                        className="w-auto py-1 text-xs"
+                        className="h-8 w-auto py-0 text-xs"
                       >
                         <option value="staff">Staff</option>
                         <option value="admin">Administrator</option>
@@ -205,7 +205,7 @@ export default async function TeamPage({
           </Table>
         </Card>
 
-        <Card title="Access" bleed>
+        <Card title="Access" icon={Icon.settings} tint="ink" bleed>
           <Table
             head={[
               'Account',
@@ -220,7 +220,7 @@ export default async function TeamPage({
                 const fixed = account.id === user.id || account.role !== 'staff';
                 return (
                   <TableRow key={account.id}>
-                    <Cell className="font-semibold">
+                    <Cell className="font-semibold whitespace-nowrap">
                       <span className="block">{account.name}</span>
                       <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
                         {roleLabel(account.role)}
@@ -228,17 +228,17 @@ export default async function TeamPage({
                     </Cell>
                     {ADJUSTABLE.map((m) =>
                       fixed ? (
-                        <Cell key={m} className="text-sm text-[var(--casa-text-subtle)]">
+                        <Cell key={m} className="px-2 text-sm text-[var(--casa-text-subtle)]">
                           {LEVEL_LABELS[access[m]]}
                         </Cell>
                       ) : (
-                        <Cell key={m}>
+                        <Cell key={m} className="px-2">
                           <Select
                             form={`access-${account.id}`}
                             name={`level:${m}`}
                             defaultValue={access[m]}
                             aria-label={`${MODULE_LABELS[m]} for ${account.name}`}
-                            className="w-auto py-1 text-xs"
+                            className="h-8 w-auto py-0 pr-7 pl-2.5 text-xs"
                           >
                             {LEVELS.map((level) => (
                               <option key={level} value={level}>
@@ -266,12 +266,14 @@ export default async function TeamPage({
           </Table>
         </Card>
 
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <Card
             title="Add an account"
             description="Give them the password in person or by phone, not by email."
+            icon={Icon.person}
+            tint="green"
           >
-            <form action={createStaffAction} className="space-y-3">
+            <form action={createStaffAction} className="grid gap-3 sm:grid-cols-2">
               <Field label="Name" htmlFor="new-name">
                 <Input id="new-name" name="name" required placeholder="Full name" />
               </Field>
@@ -316,12 +318,14 @@ export default async function TeamPage({
                   autoComplete="new-password"
                 />
               </Field>
-              <Button type="submit">Create account</Button>
+              <div className="sm:col-span-2">
+                <Button type="submit">Create account</Button>
+              </div>
             </form>
           </Card>
 
-          <div className="space-y-5">
-            <Card title="Add the office team">
+          <div className="space-y-4">
+            <Card title="Add the office team" icon={Icon.team} tint="green">
               <form action={createStaffBatchAction} className="space-y-3">
                 <Field label="Colleagues" hint="One per line: full name, Outlook address" htmlFor="batch-people">
                   <Textarea
@@ -349,6 +353,8 @@ export default async function TeamPage({
             <Card
               title="Set someone's password"
               description="Closes every session that account has open."
+              icon={Icon.settings}
+              tint="ink"
             >
               <form action={resetPasswordAction} className="space-y-3">
                 <Field label="Account" htmlFor="reset-account">
@@ -384,27 +390,24 @@ export default async function TeamPage({
               </form>
             </Card>
 
-            <Card title="What the roles mean">
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="font-semibold">Staff</dt>
-                  <dd className="text-[var(--casa-text-subtle)]">
-                    Works every queue: reads records, sets statuses, takes ownership, writes notes,
-                    confirms placements.
+            <Card title="Roles" icon={Icon.book} tint="ink" bleed>
+              <dl className="divide-y divide-ws-line-soft text-sm">
+                <div className="px-4 py-2.5">
+                  <dt className="font-semibold text-[var(--casa-ink)]">Staff</dt>
+                  <dd className="text-xs text-[var(--casa-text-subtle)]">
+                    Works the queues: statuses, owners, notes, placements.
                   </dd>
                 </div>
-                <div>
-                  <dt className="font-semibold">Administrator</dt>
-                  <dd className="text-[var(--casa-text-subtle)]">
-                    Everything above, plus this screen — creating accounts, changing roles, setting
-                    passwords, deactivating people.
+                <div className="px-4 py-2.5">
+                  <dt className="font-semibold text-[var(--casa-ink)]">Administrator</dt>
+                  <dd className="text-xs text-[var(--casa-text-subtle)]">
+                    Also this screen: accounts, roles, passwords.
                   </dd>
                 </div>
-                <div>
-                  <dt className="font-semibold">Owner</dt>
-                  <dd className="text-[var(--casa-text-subtle)]">
-                    Everything above, plus granting the owner role. CASA cannot be left with no
-                    active owner — the workspace refuses the change that would do it.
+                <div className="px-4 py-2.5">
+                  <dt className="font-semibold text-[var(--casa-ink)]">Owner</dt>
+                  <dd className="text-xs text-[var(--casa-text-subtle)]">
+                    Also grants the owner role.
                   </dd>
                 </div>
               </dl>

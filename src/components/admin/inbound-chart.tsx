@@ -37,19 +37,19 @@ export function InboundChart({ days }: { days: readonly { day: Date; count: numb
               {entry.count === 0 ? (
                 // A zero day gets a hairline on the baseline rather than
                 // nothing, so the fortnight still reads as fourteen days.
-                <div className="h-px w-full rounded-full bg-ws-line-firm" />
+                <div className="h-px w-full bg-ws-line-firm" />
               ) : (
                 <div
                   className={
                     isToday
-                      ? 'w-full rounded-t-sm bg-[var(--casa-ink-deep)]'
-                      : 'w-full rounded-t-sm bg-[var(--casa-blue)]/55'
+                      ? 'w-full rounded-t-lg bg-[var(--casa-ink-deep)]'
+                      : 'w-full rounded-t-lg bg-[var(--casa-blue)]/55'
                   }
                   style={{ height: `${Math.max(share * 100, 6)}%` }}
                 />
               )}
             </div>
-            <span className="text-[0.6rem] text-[var(--casa-text-subtle)]">
+            <span className="text-[0.65rem] font-semibold text-[var(--casa-text-subtle)]">
               {new Date(entry.day).toLocaleDateString('en-GB', { weekday: 'narrow' })}
             </span>
           </div>

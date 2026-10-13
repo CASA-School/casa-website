@@ -33,11 +33,7 @@ export default async function ExamRegistrationsPage({
 
   return (
     <>
-      <PageHeader
-        eyebrow="Queue"
-        title="Registrations"
-        description="telc candidates who registered through the public site. Check the declared official name against ID before the entry is filed."
-      />
+      <PageHeader title="Registrations" description="telc exam registrations from the public site." />
 
       <RegistrationTabs
         active="exam"

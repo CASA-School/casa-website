@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import {
   BOOKING_STATUS_LABELS,
@@ -11,6 +13,7 @@ import {
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { toDateInputValue } from '@/lib/dates';
+import { DateFormField } from '@/components/admin/date-picker';
 import {
   addChargeAction,
   extendBookingAction,
@@ -21,16 +24,16 @@ import {
 /**
  * The booking forms, rendered inside dialogs.
  *
- * Progressive disclosure throughout: a new booking asks for the cohort and
- * the dates; payer, status, visa, notes and the enrolment fee wait under
- * "More". The cohort picker carries its dates and catalogue price as data
- * attributes so a browser without JavaScript still posts a complete form —
- * the dates are simply typed.
+ * A booking itself is created by the wizard (`booking-wizard.tsx`); these
+ * change one that exists. Progressive disclosure throughout: an extension asks
+ * for the cohort and the dates, and its cost line appears once both dates are
+ * in; a payment asks for the amount, the method and what it is for, with the
+ * date and the reference under it. A form without JavaScript shows every field.
  */
 
-const More = ({ children }: { children: React.ReactNode }) => (
-  <OptionalSection requires={['startDate', 'endDate']} heading="Cost line">
-    <div className="mt-3 space-y-3">{children}</div>
+const More = ({ heading, children }: { heading: string; children: ReactNode }) => (
+  <OptionalSection requires={['startDate', 'endDate']} heading={heading}>
+    <div className="space-y-3">{children}</div>
   </OptionalSection>
 );
 
@@ -90,7 +93,7 @@ export function EditBookingForm({
           type="checkbox"
           name="visaRequired"
           defaultChecked={booking.visaRequired}
-          className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+          className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
         />
         Visa required
       </label>
@@ -129,19 +132,18 @@ export function ExtendBookingForm({
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="From" htmlFor="extend-start">
-          <Input
+          <DateFormField
             id="extend-start"
             name="startDate"
-            type="date"
             required
             defaultValue={toDateInputValue(next)}
           />
         </Field>
         <Field label="To" htmlFor="extend-end">
-          <Input id="extend-end" name="endDate" type="date" required />
+          <DateFormField id="extend-end" name="endDate" required />
         </Field>
       </div>
-      <More>
+      <More heading="Cost line">
         <div className="grid grid-cols-[1fr_auto] gap-3">
           <Field label="Cost line" htmlFor="extend-tuition-label">
             <Input
@@ -238,13 +240,12 @@ export function PaymentForm({ bookingId, balance }: { bookingId: string; balance
           defaultValue="Course price"
         />
       </Field>
-      <More>
+      <More heading="Date and reference">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Received on" htmlFor="pay-date">
-            <Input
+            <DateFormField
               id="pay-date"
               name="receivedAt"
-              type="date"
               defaultValue={toDateInputValue(new Date())}
               required
             />

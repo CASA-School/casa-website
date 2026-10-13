@@ -4,13 +4,14 @@ import { AREA_LABELS } from './areas';
 import { createDayTaskAction, updateDayTaskAction } from './actions';
 import { toDateInputValue } from '@/lib/dates';
 import { OptionalSection } from '@/components/admin/optional-section';
+import { DateFormField } from '@/components/admin/date-picker';
 
 /**
  * One form for writing a task and for editing it, shown in a dialog.
  *
  * Progressive: a task needs a sentence and nothing else. The area, the day and
- * whose it is sit under "More", because most tasks are written for today, for
- * whoever picks them up.
+ * whose it is open under "Where it belongs" once the sentence is written,
+ * because most tasks are written for today, for whoever picks them up.
  */
 export function TaskForm({
   date,
@@ -52,7 +53,7 @@ export function TaskForm({
             </Select>
           </Field>
           <Field label="Day" htmlFor="task-date">
-            <Input id="task-date" name="onDate" type="date" defaultValue={onDate} required />
+            <DateFormField id="task-date" name="onDate" defaultValue={onDate} required />
           </Field>
         </div>
         <Field label="Who is doing it" hint="anyone, if left open" htmlFor="task-assignee">

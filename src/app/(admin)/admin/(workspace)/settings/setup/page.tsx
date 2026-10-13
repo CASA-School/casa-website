@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import {
   Badge,
   Card,
@@ -10,6 +12,7 @@ import {
   PageHeader,
   Table,
   TableRow,
+  type Tint,
 } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { listRates, rateTargets, vocabularySummaries } from '@/lib/admin/configuration';
@@ -57,9 +60,7 @@ export default async function SetupPage({
       <PageHeader
         backHref="/admin/settings"
         backLabel="Settings"
-        eyebrow="Settings"
         title="Types & prices"
-        description="Set once, and left alone for a season."
         actions={
           active === 'prices' && canEdit && targets ? (
             <FormDialog trigger="Add price" title="Add a price" triggerVariant="primary">
@@ -69,7 +70,7 @@ export default async function SetupPage({
         }
       />
 
-      <div className="mb-5 inline-flex gap-1 rounded-xl border border-ws-line bg-white p-1">
+      <div className="mb-4 inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-1">
         {[
           { key: 'prices', label: 'Prices', href: '/admin/settings/setup?tab=prices' },
           { key: 'types', label: 'Lists', href: '/admin/settings/setup?tab=types' },
@@ -80,11 +81,11 @@ export default async function SetupPage({
             href={t.href}
             aria-current={t.key === active ? 'page' : undefined}
             className={cn(
-              'rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-colors',
+              'inline-flex h-[30px] items-center rounded-lg px-3.5 text-[0.8rem] font-bold transition-colors',
               'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
               t.key === active
                 ? 'bg-[var(--casa-ink-deep)] text-white'
-                : 'text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]'
+                : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
             )}
           >
             {t.label}
@@ -95,7 +96,7 @@ export default async function SetupPage({
       {error ? (
         <p
           role="alert"
-          className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
+          className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
         >
           {error}
         </p>
@@ -108,12 +109,18 @@ export default async function SetupPage({
             description={canEdit ? 'Add the first one.' : 'An administrator sets these.'}
           />
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {Object.keys(RATE_SCOPE_LABELS).map((s) => {
               const group = rates.filter((r) => r.scope === s);
               if (group.length === 0) return null;
               return (
-                <Card key={s} title={RATE_SCOPE_LABELS[s]} bleed>
+                <Card
+                  key={s}
+                  title={RATE_SCOPE_LABELS[s]}
+                  icon={SCOPE_ICONS[s]?.icon ?? Icon.money}
+                  tint={SCOPE_ICONS[s]?.tint ?? 'ink'}
+                  bleed
+                >
                   <Table
                     head={[
                       'For',
@@ -193,7 +200,7 @@ export default async function SetupPage({
           </div>
         )
       ) : (
-        <Card bleed>
+        <Card title="Lists" icon={Icon.catalogue} tint="ink" bleed>
           <Table
             head={[
               'List',
@@ -224,3 +231,12 @@ export default async function SetupPage({
     </>
   );
 }
+
+/** Each price group's subject, in the offer's meaning colours: red the teaching, blue the stay. */
+const SCOPE_ICONS: Record<string, { icon: ReactNode; tint: Tint }> = {
+  course_type: { icon: Icon.catalogue, tint: 'red' },
+  exam_type: { icon: Icon.placement, tint: 'red' },
+  accommodation: { icon: Icon.rooms, tint: 'blue' },
+  material: { icon: Icon.book, tint: 'red' },
+  charge_type: { icon: Icon.money, tint: 'ink' },
+};

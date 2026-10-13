@@ -24,7 +24,7 @@ import {
   type WizardStart,
 } from '@/lib/admin/offers/wizard';
 
-import { DateField, DateRange } from './date-picker';
+import { DateField, DateRange } from '@/components/admin/date-picker';
 import { Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { ICONS, type Tint } from './icons';

@@ -1,9 +1,6 @@
-import Link from 'next/link';
-
 import type { OfferStatus } from '@/lib/admin/offers/types';
 
-const secondary =
-  'inline-flex h-9 shrink-0 items-center rounded-lg border border-ws-line-firm bg-white px-4 text-sm font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]';
+import { ButtonLink } from './ui';
 
 /**
  * "Make an offer" on a record an offer starts from — an enquiry, a learner —
@@ -22,13 +19,9 @@ export function MakeOffer({
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       {latest ? (
-        <Link href={`/admin/offers/${latest.id}`} className={secondary}>
-          Offer {latest.number}
-        </Link>
+        <ButtonLink href={`/admin/offers/${latest.id}`}>Offer {latest.number}</ButtonLink>
       ) : null}
-      <Link href={href} className={secondary}>
-        {latest ? 'New offer' : 'Make an offer'}
-      </Link>
+      <ButtonLink href={href}>{latest ? 'New offer' : 'Make an offer'}</ButtonLink>
     </span>
   );
 }

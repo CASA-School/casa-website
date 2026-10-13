@@ -2584,3 +2584,12 @@ Fourth pass: the radii were 10–20px, far off UI_SYSTEM.md's 4/6/8 tiers — no
 them; the price card lost the logo stripe (content cards never carry it); and the browser's date
 inputs were replaced by a typeable field with the weekday and a one- or two-month calendar
 (`date-picker.tsx`, `src/lib/admin/calendar.ts`) — the component the rest of the workspace can use.
+
+Then the whole workspace, the same day ("restyle the rest of the dashboard the same way"): a white
+sidebar, the sans at 800 for every heading (it was Playfair), no uppercase eyebrows, cards on the
+4/6/8 scale with an icon chip in a meaning colour, `RecordHeader` with a facts bar on every record
+(enquiry, registrations, placement, application, student, booking, room), status and owner changed
+in a small panel (`popover.tsx`) instead of a select and Save, `ButtonLink` for links dressed as
+buttons, and the date picker in every form. The shared layer was done first; three agents moved the
+screens onto it in parallel, each owning its own files. Kursplanung and the website editor keep their
+own look; only Kursplanung's rail turned white. docs/ADMIN_WORKSPACE.md §Design standards.

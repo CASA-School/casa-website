@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { Icon } from '@/components/admin/icons';
 import { Pagination } from '@/components/admin/pagination';
 import {
   Badge,
@@ -11,6 +12,7 @@ import {
   PageHeader,
   Table,
   TableRow,
+  TINTS,
 } from '@/components/admin/ui';
 import {
   BOOKING_STATUS_LABELS,
@@ -41,7 +43,8 @@ const money = (n: number, currency: string) =>
  *
  * A booking is created from a person or a registration, never from here — the
  * list is where you find one. Tabs split by time and state; the balance column
- * is what the team looks at first.
+ * is what the team looks at first, so it is the one coloured value in a row:
+ * yellow while something is open, green once it is paid.
  */
 export default async function BookingsPage({
   searchParams,
@@ -64,30 +67,30 @@ export default async function BookingsPage({
   return (
     <>
       <PageHeader
-        eyebrow="School"
         title="Bookings"
         description="Who is booked on what, and what is still owed."
       />
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex gap-1 rounded-xl border border-ws-line bg-white p-1">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex max-w-full gap-0.5 overflow-x-auto rounded-xl border border-ws-line bg-white p-1 [scrollbar-width:none]">
           {FILTERS.map((f) => (
             <Link
               key={f.key}
               href={`/admin/bookings?filter=${f.key}${search ? `&q=${encodeURIComponent(search)}` : ''}`}
               aria-current={f.key === filter ? 'page' : undefined}
               className={cn(
-                'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors',
+                'inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.8rem] font-bold whitespace-nowrap transition-colors',
+                'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
                 f.key === filter
                   ? 'bg-[var(--casa-ink-deep)] text-white'
-                  : 'text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]'
+                  : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
               )}
             >
               {f.label}
               <span
                 className={cn(
-                  'text-xs',
-                  f.key === filter ? 'text-white/70' : 'text-[var(--casa-text-subtle)]'
+                  'text-xs font-semibold',
+                  f.key === filter ? 'text-white/65' : 'text-[var(--casa-text-subtle)]'
                 )}
               >
                 {counts[f.key]}
@@ -95,15 +98,24 @@ export default async function BookingsPage({
             </Link>
           ))}
         </div>
-        <form method="get" action="/admin/bookings" className="flex w-full max-w-xs gap-2">
+        <form method="get" action="/admin/bookings" className="flex w-full gap-2 sm:w-auto">
           <input type="hidden" name="filter" value={filter} />
-          <Input
-            type="search"
-            name="q"
-            defaultValue={search ?? ''}
-            placeholder="Name or course"
-            aria-label="Search bookings"
-          />
+          <div className="relative flex-1 sm:w-64">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--casa-text-subtle)]"
+            >
+              {Icon.search}
+            </span>
+            <Input
+              type="search"
+              name="q"
+              defaultValue={search ?? ''}
+              placeholder="Name or course"
+              aria-label="Search bookings"
+              className="pl-9"
+            />
+          </div>
         </form>
       </div>
 
@@ -156,18 +168,15 @@ export default async function BookingsPage({
                   <Cell align="right" className="text-sm">
                     {money(b.paid, b.currency)}
                   </Cell>
-                  <Cell
-                    align="right"
-                    className={cn(
-                      'text-sm font-semibold',
-                      balance > 0
-                        ? 'text-[var(--casa-warning-text)]'
-                        : balance < 0
-                          ? 'text-[var(--casa-danger-text)]'
-                          : 'text-[var(--casa-success-text)]'
-                    )}
-                  >
-                    {money(balance, b.currency)}
+                  <Cell align="right">
+                    <span
+                      className={cn(
+                        'inline-flex rounded-lg px-2 py-0.5 text-sm font-extrabold',
+                        balance > 0 ? TINTS.sun : balance < 0 ? TINTS.red : TINTS.green
+                      )}
+                    >
+                      {money(balance, b.currency)}
+                    </span>
                   </Cell>
                 </TableRow>
               );

@@ -45,11 +45,7 @@ export default async function ApplicationsPage({
 
   return (
     <>
-      <PageHeader
-        eyebrow="Queue"
-        title="Applications"
-        description="Applications for open positions, with the CV the candidate uploaded."
-      />
+      <PageHeader title="Applications" description="Applications for open positions." />
 
       <QueueToolbar
         basePath="/admin/applications"

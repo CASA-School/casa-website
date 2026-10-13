@@ -37,13 +37,13 @@ export function TopBar({
   const today = new Date();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-ws-line bg-white/92 px-4 backdrop-blur-sm lg:px-6">
+    <header className="sticky top-0 z-30 flex h-[60px] shrink-0 items-center gap-3 border-b border-ws-line bg-white px-4 lg:px-6">
       {collapsible ? <SidebarToggle /> : null}
 
       <Link
         href="/admin"
         title="The day view"
-        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[var(--casa-muted)] transition-colors hover:bg-ws-sunk hover:text-[var(--casa-ink)]"
+        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-[var(--casa-muted)] transition-colors hover:bg-ws-sunk hover:text-[var(--casa-ink)]"
       >
         <span aria-hidden="true" className="shrink-0 text-[var(--casa-text-subtle)]">
           {Icon.calendar}

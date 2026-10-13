@@ -51,9 +51,9 @@ export function WorkspaceShell({
   const focus = variant === 'focus';
 
   return (
-    <div className={cn('flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
-      <aside className="casa-workspace-panel w-full shrink-0 self-start border-b border-ws-panel-line bg-ws-panel text-ws-on-panel lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-r lg:border-b-0 lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
-        <div className="flex h-full flex-col gap-7 overflow-x-hidden overflow-y-auto px-4 py-4 lg:py-6">
+    <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
+      <aside className="casa-workspace-rail w-full shrink-0 self-start border-b border-ws-line bg-white text-[var(--casa-ink)] lg:sticky lg:top-0 lg:h-dvh lg:w-60 lg:border-r lg:border-b-0 lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
+        <div className="flex h-full flex-col gap-5 overflow-x-hidden overflow-y-auto px-3 py-4 lg:py-5">
           {/*
             The logo carries the CASA wordmark itself, so nothing here sets the
             name in type beside it — two "CASA"s in two different typefaces is
@@ -71,13 +71,10 @@ export function WorkspaceShell({
           <Link
             href="/admin"
             data-nav-label
-            className="block rounded-lg px-1.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[var(--ws-marker)]/70"
+            className="block rounded-lg px-2.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
           >
-            <Logo className="h-[1.35rem] w-auto" variant="white" crop="mark" />
-            <span
-              data-nav-label
-              className="mt-2 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted"
-            >
+            <Logo className="h-[1.3rem] w-auto" crop="mark" />
+            <span data-nav-label className="mt-1.5 block text-xs font-semibold text-[var(--casa-text-subtle)]">
               Workspace
             </span>
           </Link>
@@ -175,7 +172,7 @@ export function WorkspaceShell({
                     catalogue table and almost nothing else. */}
                 {canAccess(user, 'catalogue') ? (
                   <>
-                    <NavLink href="/admin/catalogue" icon={Icon.catalogue} title="Courses">
+                    <NavLink href="/admin/catalogue" icon={Icon.catalogue} title="Courses" exact>
                       Courses
                     </NavLink>
                     <NavLink href="/admin/catalogue/exams" icon={Icon.placement} title="Exams">
@@ -257,7 +254,7 @@ export function WorkspaceShell({
         <main
           className={cn(
             'flex-1 bg-ws-canvas',
-            focus ? 'px-4 py-5 lg:px-6 lg:py-6' : 'px-5 py-7 lg:px-10 lg:py-10'
+            focus ? 'px-4 py-5 lg:px-6 lg:py-6' : 'px-4 py-5 sm:px-6 lg:px-8 lg:py-7'
           )}
         >
           {/* 1180px, not the public site's wider shells. A workspace table read

@@ -7,7 +7,6 @@ import {
   Card,
   Cell,
   DateText,
-  EmptyState,
   Meter,
   PageHeader,
   Select,
@@ -24,6 +23,7 @@ import { requireModule } from '@/lib/admin/guard';
 import { listBookableRooms } from '@/lib/admin/rooms';
 import { CohortForm } from './cohort-form';
 import { FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { query } from '@/lib/admin/db';
 
 /**
@@ -61,9 +61,8 @@ export default async function CataloguePage({
   return (
     <>
       <PageHeader
-        eyebrow="School"
         title="Courses"
-        description="What CASA publishes, and how many people have registered against each dated option."
+        description="What CASA publishes, and who has registered for each date."
         actions={
           plans ? (
             <FormDialog
@@ -86,14 +85,21 @@ export default async function CataloguePage({
         </p>
       ) : null}
 
-      <div className="space-y-5">
-        <Card title="Upcoming cohorts" bleed>
+      <div className="space-y-4">
+        <Card title="Upcoming cohorts" icon={Icon.calendar} tint="blue" bleed>
           {instances.length === 0 ? (
-            <div className="px-5 py-4">
-              <EmptyState title="No cohorts scheduled" description="Nothing is dated yet." />
-            </div>
+            <p className="px-4 py-6 text-sm text-[var(--casa-text-subtle)]">No cohorts scheduled.</p>
           ) : (
-            <Table head={['Course', 'Runs', 'Room', 'Seats', { label: 'Status', align: 'right' }]}>
+            <Table
+              head={[
+                'Course',
+                'Runs',
+                'Room',
+                { label: 'Booked', align: 'right' },
+                'Seats',
+                { label: 'Status', align: 'right' },
+              ]}
+            >
               {instances.map((instance) => {
                 const full =
                   instance.capacity > 0 && instance.registrationCount >= instance.capacity;
@@ -115,8 +121,8 @@ export default async function CataloguePage({
                           .join(' · ') || instance.courseTypeName}
                       </span>
                     </Cell>
-                    <Cell className="text-sm text-[var(--casa-muted)]">
-                      <DateText value={instance.startDate} /> —{' '}
+                    <Cell className="text-sm whitespace-nowrap text-[var(--casa-muted)]">
+                      <DateText value={instance.startDate} /> –{' '}
                       <DateText value={instance.endDate} />
                     </Cell>
                     <Cell className="text-sm">
@@ -127,7 +133,7 @@ export default async function CataloguePage({
                             name="roomId"
                             defaultValue={instance.room?.id ?? ''}
                             aria-label={`Room for ${instance.courseTypeName}`}
-                            className="w-auto py-1 text-xs"
+                            className="h-8 w-auto py-0 text-xs"
                           >
                             <option value="">No room</option>
                             {rooms.map((room) => (
@@ -161,7 +167,9 @@ export default async function CataloguePage({
                         </Badge>
                       ) : null}
                     </Cell>
-                    <Cell className="text-sm font-semibold">{instance.bookingCount || '—'}</Cell>
+                    <Cell align="right" className="text-sm font-semibold">
+                      {instance.bookingCount || '—'}
+                    </Cell>
                     <Cell className="w-40">
                       <span className="mb-1.5 block text-sm">
                         {instance.registrationCount}
@@ -193,7 +201,7 @@ export default async function CataloguePage({
           )}
         </Card>
 
-        <Card title="Course types" bleed>
+        <Card title="Course types" icon={Icon.catalogue} tint="red" bleed>
           <Table
             head={[
               'Course',

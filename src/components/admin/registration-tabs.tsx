@@ -23,7 +23,7 @@ export function RegistrationTabs({
   ];
 
   return (
-    <div className="mb-5 inline-flex gap-1 rounded-xl border border-ws-line bg-white p-1">
+    <div className="mb-4 inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-1">
       {tabs.map((tab) => {
         const isActive = tab.key === active;
 
@@ -33,11 +33,11 @@ export function RegistrationTabs({
             href={tab.href}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-colors',
+              'inline-flex h-[30px] items-center gap-2 rounded-lg px-3.5 text-[0.8rem] font-bold transition-colors',
               'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
               isActive
                 ? 'bg-[var(--casa-ink-deep)] text-white'
-                : 'text-[var(--casa-text-subtle)] hover:text-[var(--casa-ink)]'
+                : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
             )}
           >
             {tab.label}

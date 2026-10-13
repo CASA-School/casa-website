@@ -4,12 +4,15 @@ import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import type { Room } from '@/lib/admin/rooms';
 import { createCohortAction } from '../settings/rooms/actions';
 import { OptionalSection } from '@/components/admin/optional-section';
+import { DateFormField } from '@/components/admin/date-picker';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 /**
  * Schedule a cohort. Course, dates and capacity first; level, session, days,
- * time, room and title under "More" — the Course screen's fields, in two steps.
+ * time, room and title appear once the course and both dates are in — the
+ * Course screen's fields, in two steps. The days are checkboxes drawn as
+ * toggles, so a glance shows the week and the form still posts `days` per day.
  */
 export function CohortForm({
   courseTypes,
@@ -22,26 +25,20 @@ export function CohortForm({
 }) {
   return (
     <form action={createCohortAction} className="space-y-3">
-      <Field label="Course" htmlFor="cohort-type">
-        <Select id="cohort-type" name="courseTypeId" required defaultValue="">
-          <option value="" disabled>
-            Choose
-          </option>
-          {courseTypes
-            .filter((t) => t.isActive)
-            .map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-        </Select>
-      </Field>
-      <div className="grid grid-cols-3 gap-3">
-        <Field label="Start" htmlFor="cohort-start">
-          <Input id="cohort-start" name="startDate" type="date" required />
-        </Field>
-        <Field label="End" htmlFor="cohort-end">
-          <Input id="cohort-end" name="endDate" type="date" required />
+      <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
+        <Field label="Course" htmlFor="cohort-type">
+          <Select id="cohort-type" name="courseTypeId" required defaultValue="">
+            <option value="" disabled>
+              Choose
+            </option>
+            {courseTypes
+              .filter((t) => t.isActive)
+              .map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+          </Select>
         </Field>
         <Field label="Seats" htmlFor="cohort-capacity">
           <Input
@@ -52,6 +49,14 @@ export function CohortForm({
             max={500}
             defaultValue={12}
           />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Start" htmlFor="cohort-start">
+          <DateFormField id="cohort-start" name="startDate" required />
+        </Field>
+        <Field label="End" htmlFor="cohort-end">
+          <DateFormField id="cohort-end" name="endDate" required />
         </Field>
       </div>
 
@@ -81,23 +86,26 @@ export function CohortForm({
             </Select>
           </Field>
         </div>
-        <div>
-          <p className="mb-1.5 text-xs font-semibold text-[var(--casa-ink)]">Days</p>
-          <div className="flex flex-wrap gap-3">
+        <fieldset>
+          <legend className="mb-1.5 text-xs font-bold text-[var(--casa-muted)]">Days</legend>
+          <div className="flex flex-wrap gap-1">
             {DAYS.map((d) => (
-              <label key={d} className="flex items-center gap-1.5 text-sm">
+              <label
+                key={d}
+                className="inline-flex h-9 min-w-12 cursor-pointer items-center justify-center rounded-lg border border-ws-line bg-white px-3 text-sm font-semibold transition-colors hover:border-ws-line-firm has-[:checked]:border-[var(--casa-ink-deep)] has-[:checked]:bg-[var(--casa-ink-deep)] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--casa-blue)]/30"
+              >
                 <input
                   type="checkbox"
                   name="days"
                   value={d}
                   defaultChecked={d !== 'Sat' && d !== 'Sun'}
-                  className="size-4 rounded-sm border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                  className="sr-only"
                 />
                 {d}
               </label>
             ))}
           </div>
-        </div>
+        </fieldset>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Time" htmlFor="cohort-time">
             <Input id="cohort-time" name="time" placeholder="09:00-12:30" maxLength={40} />

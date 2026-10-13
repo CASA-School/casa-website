@@ -962,30 +962,30 @@ h3 {
  * hidden and the stored preference is left alone.
  */
 @media (min-width: 64rem) {
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail {
     width: 4.25rem;
   }
 
-  .casa-workspace-panel [data-nav-label] {
+  .casa-workspace-rail [data-nav-label] {
     transition: opacity 120ms ease-out;
   }
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel [data-nav-label] {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-nav-label] {
     opacity: 0;
     pointer-events: none;
   }
 
   /* No icon to stand in for these, so they are removed — but a beat after the
      width finishes, not before it starts. */
-  .casa-workspace-panel [data-nav-children],
-  .casa-workspace-panel [data-nav-group-label] {
+  .casa-workspace-rail [data-nav-children],
+  .casa-workspace-rail [data-nav-group-label] {
     transition:
       opacity 100ms ease-out,
       max-height 200ms ease-out 100ms;
     max-height: 40rem;
     overflow: hidden;
   }
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel [data-nav-children],
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel [data-nav-group-label] {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-nav-children],
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-nav-group-label] {
     opacity: 0;
     max-height: 0;
     margin: 0;
@@ -997,42 +997,42 @@ h3 {
   /* Every row centres on its icon. The label is still in the flow at zero
      opacity, so it is pinned out of the way rather than left to push the icon
      off-centre. */
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav a {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail nav a {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
   }
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav a > [data-nav-label] {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail nav a > [data-nav-label] {
     position: absolute;
     left: 100%;
     width: 0;
   }
 
   /* The "you are here" marker keeps its place against the rail's left edge. */
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav a > span:first-child {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail nav a > span:first-child {
     left: -0.75rem;
   }
 
   /* The logo is hidden with the labels, so the rail should not keep its gap. */
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel > div {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail > div {
     gap: 1rem;
   }
 
   /* Group headings are gone, so a hairline keeps the grouping legible — and
      the spacing between groups stays even, which is most of what "smooth"
      means once the animation has finished. */
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-panel nav > div + div {
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail nav > div + div {
     margin-top: 0.5rem;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--ws-panel-line);
+    border-top: 1px solid var(--ws-line);
   }
 }
 
-/* The sidebar is a dark surface, so the accent and subtle text tokens have to
-   flip the same way the public site's dark bands do. Declared here rather than
-   relying on the `.bg-[var(--casa-ink-deep)]` selectors above, because the
-   panel paints `--ws-panel` and would otherwise keep the light-surface tokens
-   and fail contrast. */
+/* A dark workspace panel (the sign-in page's) flips the accent and subtle text
+   tokens the same way the public site's dark bands do. Declared here rather
+   than relying on the `.bg-[var(--casa-ink-deep)]` selectors above, because
+   the panel paints `--ws-panel` and would otherwise keep the light-surface
+   tokens and fail contrast. The shell's own rail is white (`.casa-workspace-rail`). */
 .casa-workspace-panel {
   --casa-accent-text: var(--casa-accent-on-dark);
   --casa-accent-text-hover: var(--casa-accent-on-dark-hover);
@@ -2283,6 +2283,18 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
  * to the body and sets its own title face (FormDialog `titleClassName`).
  */
 .casa-workspace-focus :is(h1, h2, h3) {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  letter-spacing: normal;
+}
+
+/*
+ * The whole workspace shell now reads that way too (2026-10-13, after the
+ * offers module): headings in the sans at 800, as in the website editor,
+ * Kursplanung and Offers. Scoped to the shell and to its dialogs, which are
+ * portalled to the body (`casa-ws-dialog` on FormDialog and ConfirmSubmit);
+ * the website editor and the sign-in page keep their own type.
+ */
+:is(.casa-workspace-shell, .casa-ws-dialog) :is(h1, h2, h3) {
   font-family: var(--font-sans), system-ui, sans-serif;
   letter-spacing: normal;
 }

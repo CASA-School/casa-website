@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { changeOwnPasswordAction } from './actions';
+import { Icon } from '@/components/admin/icons';
 import { Button, Card, DateText, DetailList, Field, Input, PageHeader } from '@/components/admin/ui';
 import { roleLabel } from '@/components/admin/shell';
 import { requireModule } from '@/lib/admin/guard';
@@ -49,8 +50,8 @@ export default async function AccountPage({
         </p>
       ) : null}
 
-      <div className="space-y-5">
-        <Card title="Details">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <Card title="Details" icon={Icon.person} tint="green">
           <DetailList
             items={[
               { label: 'Name', value: user.name },
@@ -75,8 +76,8 @@ export default async function AccountPage({
           />
         </Card>
 
-        <Card title={hasPassword ? 'Change password' : 'Set a password'}>
-          <form action={changeOwnPasswordAction} className="max-w-sm space-y-3">
+        <Card title={hasPassword ? 'Change password' : 'Set a password'} icon={Icon.settings} tint="ink">
+          <form action={changeOwnPasswordAction} className="space-y-3">
             {hasPassword ? (
               <Field label="Current password" htmlFor="current-password">
                 <Input id="current-password" name="current" type="password" required autoComplete="current-password" />

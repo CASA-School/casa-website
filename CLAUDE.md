@@ -25,7 +25,8 @@ offers CASA makes to groups, learners and companies — groups priced from the f
 packages of the groups page, the rest from `rates` — written on the letter itself:
 **read `docs/OFFERS.md` before touching it.** Its design —
 framed cards on the canvas, plain values, a click changes one, a wizard to start —
-is the direction the rest of the workspace is to follow (Rahman, 2026-10-13).
+is now the whole workspace's (Rahman, 2026-10-13): `RecordHeader`, `Card` with an
+icon chip, `Popover`, `DateFormField` (docs/ADMIN_WORKSPACE.md §Design standards).
 Every letter the workspace sends (offers first; confirmations and visa letters
 next) is a row of `letters` built by one sheet: **read `docs/LETTERS.md` before
 adding a kind of letter.**

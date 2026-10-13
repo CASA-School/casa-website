@@ -49,11 +49,7 @@ export default async function EnquiriesPage({
 
   return (
     <>
-      <PageHeader
-        eyebrow="Queue"
-        title="Enquiries"
-        description="Everything sent through the contact form, including the structured brief that group and company enquiries carry."
-      />
+      <PageHeader title="Enquiries" description="Everything sent through the contact form." />
 
       <QueueToolbar
         basePath="/admin/enquiries"

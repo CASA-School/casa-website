@@ -26,7 +26,7 @@ import {
  */
 
 const panel = (width: 'md' | 'lg') =>
-  `${width === 'lg' ? 'max-w-2xl' : 'max-w-lg'} rounded-2xl p-6 sm:rounded-2xl`;
+  `casa-ws-dialog ${width === 'lg' ? 'max-w-2xl' : 'max-w-lg'} rounded-3xl p-6 sm:rounded-3xl`;
 
 export function FormDialog({
   trigger,
@@ -59,7 +59,7 @@ export function FormDialog({
         {trigger}
       </Button>
       <DialogContent className={panel(width)} closeLabel="Close">
-        <DialogTitle className={titleClassName ? `text-lg ${titleClassName}` : 'text-lg'}>{title}</DialogTitle>
+        <DialogTitle className={titleClassName ? `text-lg font-extrabold ${titleClassName}` : 'text-lg font-extrabold'}>{title}</DialogTitle>
         {description ? (
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
         ) : (
@@ -105,7 +105,7 @@ export function ConfirmSubmit({
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className={panel('md')} showCloseButton={false}>
-          <DialogTitle className="text-lg">{title}</DialogTitle>
+          <DialogTitle className="text-lg font-extrabold">{title}</DialogTitle>
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
           <div className="mt-5 flex justify-end gap-2">
             <DialogClose asChild>

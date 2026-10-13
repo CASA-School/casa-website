@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
-import { Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Badge, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { getEnquiry } from '@/lib/admin/enquiries';
@@ -14,14 +15,18 @@ import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labels';
+import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
+
+const KIND_LABEL = { general: 'Enquiry', group: 'Group enquiry', company: 'Company enquiry' } as const;
 
 /**
  * One enquiry.
  *
- * Two columns: the record on the left, the work done to it on the right. The
- * split is the same on all four queue detail screens, which is what makes them
- * feel like one product rather than four screens that happen to share a
- * sidebar.
+ * The record's head with its facts — who wrote, when, in which language, who
+ * has it — then two columns: the record on the left, the work done to it on
+ * the right. The split is the same on every queue detail screen, which is
+ * what makes them feel like one product rather than screens that happen to
+ * share a sidebar.
  *
  * The reply button is a `mailto:`, not a compose box. CASA has no outbound mail
  * infrastructure wired to this workspace, and a reply form that silently went
@@ -63,30 +68,35 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader
+      <RecordHeader
         backHref="/admin/enquiries"
         backLabel="All enquiries"
-        eyebrow={enquiry.kind === 'general' ? 'Enquiry' : `${enquiry.kind} enquiry`}
         title={fullName || enquiry.email}
-        description={enquiry.topic}
+        subtitle={enquiry.topic}
+        status={<Badge tone={STATUS_TONES[enquiry.status]}>{STATUS_LABELS[enquiry.status]}</Badge>}
         actions={
-          <span className="inline-flex flex-wrap items-center gap-2">
-            {canOffer ? (
-              <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} />
-            ) : null}
-          <a
-            href={`mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}`}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--casa-ink-deep)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
-          >
-            Reply by email
-          </a>
-          </span>
+          <>
+            {canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
+            <ButtonLink href={`mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}`} variant="primary">Reply by email</ButtonLink>
+          </>
         }
+        facts={[
+          { label: 'Received', icon: Icon.clock, tint: 'blue', value: <DateText value={enquiry.submittedAt} />, sub: relativeDays(enquiry.submittedAt) },
+          { label: 'Kind', icon: Icon.enquiries, tint: enquiry.kind === 'general' ? 'ink' : 'sun', value: KIND_LABEL[enquiry.kind] },
+          { label: 'Email', icon: Icon.mail, tint: 'ink', value: enquiry.email, href: `mailto:${enquiry.email}` },
+          { label: 'Wrote in', icon: Icon.globe, tint: 'sun', value: enquiry.locale === 'de' ? 'German' : 'English' },
+          {
+            label: 'Owner',
+            icon: Icon.person,
+            tint: enquiry.assignedTo ? 'green' : 'ink',
+            value: staff.find((member) => member.id === enquiry.assignedTo)?.name ?? 'Nobody yet',
+          },
+        ]}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <div className="space-y-5">
-          <Card title="Message">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-4">
+          <Card title="Message" icon={Icon.note} tint="blue">
             {/*
              * `whitespace-pre-line`, and the one place in the workspace that
              * uses the public site's 17px reading size. This is the only
@@ -98,43 +108,20 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
             </p>
           </Card>
 
-          <Card title="Contact">
+          <Card title="Contact" icon={Icon.person} tint="ink" footer={<p className="text-xs text-[var(--casa-text-subtle)]">Reference <code className="font-mono">{enquiry.requestId}</code></p>}>
             <DetailList
               items={[
                 {
                   label: 'Name',
                   value: fullName || <span className="italic">not given</span>,
                 },
-                {
-                  label: 'Email',
-                  value: (
-                    <a
-                      href={`mailto:${enquiry.email}`}
-                      className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                    >
-                      {enquiry.email}
-                    </a>
-                  ),
-                },
-                { label: 'Topic', value: enquiry.topic },
-                {
-                  label: 'Wrote in',
-                  value: enquiry.locale === 'de' ? 'German' : 'English',
-                },
                 { label: 'Came from', value: enquiry.source },
-                {
-                  label: 'Reference',
-                  value: <code className="font-mono text-xs">{enquiry.requestId}</code>,
-                },
               ]}
             />
           </Card>
 
           {brief.length > 0 ? (
-            <Card
-              title="Organiser brief"
-              description="Collected by the public form. An estimate request, never a quotation — the binding offer still comes from CASA."
-            >
+            <Card title="Organiser brief" icon={Icon.people} tint="sun">
               <DetailList
                 items={brief.map(([key, value]) => ({
                   label: ORGANISER_BRIEF_LABELS[key] ?? key,
@@ -145,7 +132,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           ) : null}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <PersonPanel
             person={person}
             candidates={candidates}
