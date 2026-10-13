@@ -231,8 +231,11 @@ the books, remember the enrolment fee, price the room — the course picker does
 2. **Time of day** — the intensive course's morning and afternoon groups, each with its days and
    hours from the term's schedule ("Mornings, Mon–Fri 09:00–12:30", "Afternoons, Mon–Thu 13:00–17:30").
 3. **Starting** — the upcoming terms at that time of day.
-4. **Level** — "B2 complete · 8 weeks" or a half level, then **And on to**: a path climbs level by level
+4. **Level** — "B2 complete" or a half level, then **And on to**: a path climbs level by level
    through the following terms at the same time of day (`buildLevelPath`, the public registration's own).
+   B1+ is a level like the others, whole or in its halves B1+.1 and B1+.2 (migration 0024, FileMaker's
+   LevelStepReference 7 and 8), each half with its Kontext book; the public form still offers it as one
+   step, 'B1+'.
 5. **On the offer** — the lines with their prices as it goes: each level, the books (each half level's
    own, from the price list), the enrolment fee, accommodation (host family or the CASA flat, from the
    Sunday before to the Saturday after, adjustable; first stay or not), and the telc exam when the path

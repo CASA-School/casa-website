@@ -73,7 +73,7 @@ export type BookingOffer = {
  * `B1+` has no sibling — it is a level in its own right.
  */
 export function levelSiblings(code: string): string[] {
-  const match = /^([A-C][12])\.([12])$/.exec(code);
+  const match = /^([A-C][12]\+?)\.([12])$/.exec(code);
   if (!match) return [code];
   return [`${match[1]}.1`, `${match[1]}.2`];
 }

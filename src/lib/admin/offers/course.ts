@@ -32,6 +32,7 @@
 import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import { SCHOOL_CLOSURES, isSchoolClosed } from '@/config/school-closures';
 import { buildLevelPath } from '@/lib/registration/level-path';
+import { levelOf } from '@/lib/registration/levels';
 
 import { coursePrice, feePrice, listOn, rentPrice, type PriceList } from '../prices/price-list';
 
@@ -44,7 +45,7 @@ export type Session = 'morning' | 'afternoon' | 'evening';
 export type CourseSlot = { days: string[]; time: string };
 
 export type CourseStep = {
-  /** 'B2' for a whole level, 'B2.1' or 'B1+' for one step, '' for a course without levels. */
+  /** 'B2' or 'B1+' for a whole level, 'B2.1' or 'B1+.1' for a half, '' for a course without levels. */
   level: string;
   /** Weeks of teaching. */
   weeks: number;
@@ -179,16 +180,23 @@ export function levelLabel(step: Pick<CourseStep, 'level' | 'complete'>, languag
 
 // ------------------------------------------------------------------ levels
 
-/** CASA's steps between a course's lowest and highest level: A1–C1 is A1.1 … C1.2, B1+ included. */
+/**
+ * The half levels the workspace books, in order: the public sequence with B1+
+ * in its two halves, B1+.1 and B1+.2, as the school runs it (migration 0024).
+ */
+const STEPS: readonly string[] = CASA_LEVEL_SEQUENCE.flatMap((step) => (step === 'B1+' ? ['B1+.1', 'B1+.2'] : [step]));
+
+/** CASA's steps between a course's lowest and highest level: A1–C1 is A1.1 … C1.2, B1+.1 and B1+.2 included. */
 export function levelsBetween(min: string | null, max: string | null): string[] {
-  const all = [...CASA_LEVEL_SEQUENCE] as string[];
-  const from = min ? all.findIndex((l) => l.startsWith(min)) : 0;
-  const lastOf = max ? all.map((l, i) => (l.startsWith(max) ? i : -1)).filter((i) => i >= 0).pop() : all.length - 1;
+  const all = [...STEPS];
+  const isOf = (step: string, level: string) => step === level || levelOf(step) === level;
+  const from = min ? all.findIndex((l) => isOf(l, min)) : 0;
+  const lastOf = max ? all.map((l, i) => (isOf(l, max) ? i : -1)).filter((i) => i >= 0).pop() : all.length - 1;
   if (from < 0 || lastOf == null || lastOf < from) return [];
   return all.slice(from, lastOf + 1);
 }
 
-/** The half levels a step teaches, whose books it needs: 'B2' is B2.1 and B2.2; 'B1+' is itself. */
+/** The half levels a step teaches, whose books it needs: 'B2' is B2.1 and B2.2, 'B1+' is B1+.1 and B1+.2. */
 export function halvesOf(step: Pick<CourseStep, 'level' | 'complete'>): string[] {
   return step.complete ? [`${step.level}.1`, `${step.level}.2`] : step.level ? [step.level] : [];
 }

@@ -2634,3 +2634,11 @@ foot; machine values got labels (Today's exam names, placement background, Activ
 repeats collapsed). New: search in the top bar (⌘K / "/") across every record the colleague may
 open. docs/ADMIN_WORKSPACE.md §Design standards 5–8.
 
+Ninth pass: **no subtext the team knows, and B1+ in halves.** Rahman, on the course picker: lesson
+counts, "from" prices and hours under each choice are clutter for staff — a choice is its name. Page
+subtitles, card and panel descriptions went with them (design standard 9). Then: "B1+ also has two
+parts, B1+.1 and B1+.2". Migration 0024 adds them to `levels` (FileMaker's step ids 7 and 8) and moves
+the Kontext B1+1/B1+2 books onto them; the workspace's offers and bookings book the halves or the
+whole B1+; the public form keeps the single 'B1+' as decided on 2026-08-13. Open: the price of a whole
+B1+ — the price list gives 8 weeks 940 €, the 2026-08-13 note says it bills at the half-level rate.
+

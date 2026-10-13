@@ -16,7 +16,7 @@
  * learner's course from it too, over its own cohorts. Client-safe.
  */
 import type { ContentLocale, CourseRegistrationOption } from '@/lib/content/types';
-import { describeBookedLevel, levelChoiceGroups } from './levels';
+import { describeBookedLevel, levelChoiceGroups, levelOf } from './levels';
 
 /** A term as the path needs it: its dates. A registration option, or a workspace cohort. */
 export type PathTerm = { startDate: string; endDate: string };
@@ -53,7 +53,7 @@ function pathRungs(slug: string | undefined, availableLevels: readonly string[])
 /** The rungs a learner can continue to after `value`: after 'A2' or 'A2.2', ['B1', 'B1+', 'B2', 'C1']. */
 export function continuationLevels(slug: string | undefined, value: string, availableLevels: readonly string[]): string[] {
   const rungs = pathRungs(slug, availableLevels);
-  const index = rungs.indexOf(value === 'B1+' ? value : value.slice(0, 2));
+  const index = rungs.indexOf(rungs.includes(value) ? value : levelOf(value));
   return index >= 0 ? rungs.slice(index + 1) : [];
 }
 
@@ -74,7 +74,7 @@ export function buildLevelPath<T extends PathTerm = CourseRegistrationOption>(in
   const targets = input.pathTo ? continuationLevels(slug, input.value, availableLevels) : [];
   const stop = targets.indexOf(input.pathTo);
   // Going on past a first half means finishing its level.
-  const value = stop >= 0 && /\.1$/.test(input.value) ? input.value.slice(0, 2) : input.value;
+  const value = stop >= 0 && /\.1$/.test(input.value) ? levelOf(input.value) : input.value;
   const first = describeBookedLevel(slug, value, availableLevels, locale);
   if (!first) return [];
 

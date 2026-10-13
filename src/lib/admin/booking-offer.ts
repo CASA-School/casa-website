@@ -90,7 +90,10 @@ export async function bookingOffer(): Promise<BookingOffer> {
            FROM exam_types e WHERE e.is_active ORDER BY e.name`
       ),
       query<{ code: string; cefr: string | null }>(
-        `SELECT code, cefr FROM levels ORDER BY sort_order`
+        // The half levels: a whole level's own code (B1+, which the public form names) is left out where its halves exist.
+        `SELECT code, cefr FROM levels l
+          WHERE NOT EXISTS (SELECT 1 FROM levels h WHERE h.code LIKE l.code || '.%')
+          ORDER BY sort_order`
       ),
       query<{
         id: string;

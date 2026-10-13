@@ -17,11 +17,16 @@ import type { ContentLocale } from '@/lib/content/types';
 const SOLD_BY_LEVEL = new Set(['intensive-german']);
 
 /*
- * B1+ is one step between B1.2 and B2.1, taught with Kontext, but it runs a
- * whole term: about two months, like a full level (Rahman, 2026-08-13; see
- * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md). A half level runs four weeks.
+ * B1+ is the level between B1 and B2, taught with Kontext: a whole term, about
+ * two months like any level (Rahman, 2026-08-13; see
+ * docs/COURSE_FACTS_SOURCE_OF_TRUTH.md). The public form offers it as one step,
+ * 'B1+'; the workspace books its two halves too, B1+.1 and B1+.2 (2026-10-13),
+ * like every other level. A half level runs four weeks.
  */
 const FULL_TERM_STEPS = new Set(['B1+']);
+
+/** The level a code belongs to: 'B2.1' → 'B2', 'B1+.2' → 'B1+', 'B1+' → 'B1+'. */
+export const levelOf = (code: string) => (code.includes('.') ? code.slice(0, code.lastIndexOf('.')) : code);
 const weeksOf = (value: string, whole: boolean) => (whole || FULL_TERM_STEPS.has(value) ? 8 : 4);
 
 export type LevelChoice = {
@@ -58,8 +63,8 @@ export function levelChoiceGroups(
   const groups = new Map<string, string[]>();
 
   for (const half of availableLevels) {
-    // 'B1+' belongs with B1.
-    const level = half.slice(0, 2);
+    // B1+.1 and B1+.2 are their own level; a lone 'B1+' (the public form) sits with B1.
+    const level = half.includes('.') ? levelOf(half) : half.slice(0, 2);
     groups.set(level, [...(groups.get(level) ?? []), half]);
   }
 

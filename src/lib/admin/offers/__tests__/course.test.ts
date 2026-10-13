@@ -59,6 +59,8 @@ const books: CatalogueBook[] = [
   { key: 'c11', title: 'Kontext C1.1', level: 'C1.1', part: 1 },
   { key: 'c12', title: 'Kontext C1.2', level: 'C1.2', part: 2 },
   { key: 'a11', title: 'Netzwerk neu A1.1', level: 'A1.1', part: 1 },
+  { key: 'bp1', title: 'Kontext B1+1', level: 'B1+.1', part: 1 },
+  { key: 'bp2', title: 'Kontext B1+2', level: 'B1+.2', part: 2 },
 ];
 
 /** The 2026 list as seed 0007 and 0004 bring it, and a 2027 list where only the 8-week intensive price changed. */
@@ -163,6 +165,20 @@ describe('a learner’s course', () => {
       'Vormittags, Mo–Fr 09:00–12:30 · 26.10.2026–26.02.2027 · 16 Wochen · 320 UE · unterrichtsfrei 21.12.2026–01.01.2027 (Weihnachten)'
     );
     expect(closuresIn(b2())).toEqual([]);
+  });
+});
+
+describe('B1+', () => {
+  it('is booked in its two halves, B1+.1 and B1+.2, or whole, each with its own Kontext book', () => {
+    expect(intensive.levels).toEqual(expect.arrayContaining(['B1.2', 'B1+.1', 'B1+.2', 'B2.1']));
+    expect(intensive.levels).not.toContain('B1+');
+    const half = b2({ level: 'B1+.1', newStudent: false });
+    expect(half.steps.map((s) => [s.level, s.weeks, s.price])).toEqual([['B1+.1', 4, 520]]);
+    expect(half.books.map((b) => b.title)).toEqual(['Kontext B1+1']);
+    const whole = b2({ level: 'B1+', newStudent: false });
+    expect(whole.steps.map((s) => [s.level, s.weeks, s.price])).toEqual([['B1+', 8, 940]]);
+    expect(whole.books.map((b) => b.title)).toEqual(['Kontext B1+1', 'Kontext B1+2']);
+    expect(courseTitle(whole, 'de')).toBe('Intensivkurs B1+ komplett');
   });
 });
 

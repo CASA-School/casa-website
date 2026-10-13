@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { CourseRegistrationOption } from '@/lib/content/types';
 import { buildLevelPath, continuationLevels, pathWeeks } from '../level-path';
+import { levelChoiceGroups } from '../levels';
 
 const LEVELS = ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2', 'B1+', 'B2.1', 'B2.2', 'C1.1', 'C1.2'];
 
@@ -59,5 +60,32 @@ describe('a learning path through the levels', () => {
     // A format without B1+ climbs straight from B1 to B2.
     expect(continuationLevels('intensive-german', 'A2', LEVELS.filter((level) => level !== 'B1+'))).toEqual(['B1', 'B2', 'C1']);
     expect(continuationLevels('evening-german', 'A2.1', LEVELS)).toEqual([]);
+  });
+});
+
+describe('B1+ in its two halves, as the workspace books it', () => {
+  const HALVES = LEVELS.flatMap((level) => (level === 'B1+' ? ['B1+.1', 'B1+.2'] : [level]));
+  const halvesPath = (value: string, pathTo: string) =>
+    buildLevelPath({ slug: 'intensive-german', value, option: terms[0], options: terms, availableLevels: HALVES, pathTo, locale: 'en' });
+
+  it('is a level of its own, the whole term or either half', () => {
+    const b1plus = levelChoiceGroups('intensive-german', HALVES, 'en').find((group) => group.level === 'B1+');
+    expect(b1plus?.choices.map((choice) => choice.label)).toEqual(['B1+ complete · 8 weeks', 'B1+.1 · 4 weeks', 'B1+.2 · 4 weeks']);
+    expect(levelChoiceGroups('intensive-german', HALVES, 'en').find((group) => group.level === 'B1')?.choices.map((c) => c.value)).toEqual(['B1', 'B1.1', 'B1.2']);
+  });
+
+  it('sits between B1 and B2 on a path, whole', () => {
+    expect(continuationLevels('intensive-german', 'B1', HALVES)).toEqual(['B1+', 'B2', 'C1']);
+    expect(continuationLevels('intensive-german', 'B1+.1', HALVES)).toEqual(['B2', 'C1']);
+    const steps = halvesPath('B1', 'B2');
+    expect(steps.map((step) => [step.level, step.startCode, step.weeks])).toEqual([
+      ['B1', 'B1.1', 8],
+      ['B1+', 'B1+.1', 8],
+      ['B2', 'B2.1', 8],
+    ]);
+  });
+
+  it('finishes B1+ when a path starts at its first half', () => {
+    expect(halvesPath('B1+.1', 'B2').map((step) => step.level)).toEqual(['B1+', 'B2']);
   });
 });

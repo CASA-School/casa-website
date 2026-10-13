@@ -190,7 +190,7 @@ UPDATE levels SET cefr_band = 'A2', colour_hex = '#519AFF' WHERE code = 'A2.1';
 UPDATE levels SET cefr_band = 'A2', colour_hex = '#519AFF' WHERE code = 'A2.2';
 UPDATE levels SET cefr_band = 'B1', colour_hex = '#00BAFB' WHERE code = 'B1.1';
 UPDATE levels SET cefr_band = 'B1', colour_hex = '#00BAFB' WHERE code = 'B1.2';
-UPDATE levels SET cefr_band = 'B1', colour_hex = '#DDEF52' WHERE code = 'B1+';
+UPDATE levels SET cefr_band = 'B1', colour_hex = '#DDEF52' WHERE code IN ('B1+', 'B1+.1', 'B1+.2');
 UPDATE levels SET cefr_band = 'B2', colour_hex = '#FFFBAA' WHERE code = 'B2.1';
 UPDATE levels SET cefr_band = 'B2', colour_hex = '#FFFBAA' WHERE code = 'B2.2';
 UPDATE levels SET cefr_band = 'C1', colour_hex = '#FFD131' WHERE code = 'C1.1';
@@ -234,13 +234,13 @@ INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
 VALUES ('Grammatik aktiv A1-B1', '978-3-06-122964-1', (SELECT code FROM levels WHERE code = NULL), NULL, true, 80)
 ON CONFLICT (title, isbn) DO UPDATE SET level_code = EXCLUDED.level_code, part = EXCLUDED.part, is_active = EXCLUDED.is_active;
 INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
-VALUES ('B1+ LAB Teil 1 Hybrid', '978-3-12-605023-4', (SELECT code FROM levels WHERE code = 'B1+'), 1, false, 145)
+VALUES ('B1+ LAB Teil 1 Hybrid', '978-3-12-605023-4', (SELECT code FROM levels WHERE code = 'B1+.1'), 1, false, 145)
 ON CONFLICT (title, isbn) DO UPDATE SET level_code = EXCLUDED.level_code, part = EXCLUDED.part, is_active = EXCLUDED.is_active;
 INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
-VALUES ('B1+ LAB Teil 2 Hybrid', '978-3-12-605033-3', (SELECT code FROM levels WHERE code = 'B1+'), 2, false, 146)
+VALUES ('B1+ LAB Teil 2 Hybrid', '978-3-12-605033-3', (SELECT code FROM levels WHERE code = 'B1+.2'), 2, false, 146)
 ON CONFLICT (title, isbn) DO UPDATE SET level_code = EXCLUDED.level_code, part = EXCLUDED.part, is_active = EXCLUDED.is_active;
 INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
-VALUES ('Kontext B1+1', '978-3-12-605407-2', (SELECT code FROM levels WHERE code = 'B1+'), 1, true, 147)
+VALUES ('Kontext B1+1', '978-3-12-605407-2', (SELECT code FROM levels WHERE code = 'B1+.1'), 1, true, 147)
 ON CONFLICT (title, isbn) DO UPDATE SET level_code = EXCLUDED.level_code, part = EXCLUDED.part, is_active = EXCLUDED.is_active;
 INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
 VALUES ('Netzwerk neu A2.1', '978-3-12-607286-1', (SELECT code FROM levels WHERE code = 'A2.1'), 1, true, 148)
@@ -261,7 +261,7 @@ INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
 VALUES ('Netzwerk neu B1.2', '978-3-12-607291-5', (SELECT code FROM levels WHERE code = 'B1.2'), 2, true, 153)
 ON CONFLICT (title, isbn) DO UPDATE SET level_code = EXCLUDED.level_code, part = EXCLUDED.part, is_active = EXCLUDED.is_active;
 INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
-VALUES ('Kontext B1+2', '978-3-12-605408-9', (SELECT code FROM levels WHERE code = 'B1+'), 2, true, 154)
+VALUES ('Kontext B1+2', '978-3-12-605408-9', (SELECT code FROM levels WHERE code = 'B1+.2'), 2, true, 154)
 ON CONFLICT (title, isbn) DO UPDATE SET level_code = EXCLUDED.level_code, part = EXCLUDED.part, is_active = EXCLUDED.is_active;
 INSERT INTO materials (title, isbn, level_code, part, is_active, filemaker_id)
 VALUES ('Kontext B2.1', '978-3-12-605411-9', (SELECT code FROM levels WHERE code = 'B2.1'), 1, true, 155)
