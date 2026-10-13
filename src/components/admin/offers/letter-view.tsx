@@ -3,8 +3,13 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+import { InlinePanel, InlineText } from '@/components/admin/letters/inline-edit';
+import ed from '@/components/admin/letters/letter-edit.module.css';
+import { LetterSheet, type LetterSlots } from '@/components/admin/letters/letter-sheet';
+import { PrintCopy, printLetter } from '@/components/admin/letters/print';
+import type { Letter } from '@/lib/admin/letters/types';
 import { hasProblems } from '@/lib/admin/offers/checks';
-import { buildLetter, type OfferLetter } from '@/lib/admin/offers/document';
+import { lineRef, offerLetter, validityParts } from '@/lib/admin/offers/document';
 import { setLineText } from '@/lib/admin/offers/draft-ops';
 import type { EditorOptions, OfferRecord, StandardTexts } from '@/lib/admin/offers/repo';
 import { addDays } from '@/lib/admin/offers/stay';
@@ -14,26 +19,26 @@ import { saveStandardTextAction } from '@/app/(admin)/admin/(editor)/offers/acti
 
 import { Seg } from './fields';
 import { OfferFrame } from './frame';
-import { InlinePanel, InlineText } from './inline-edit';
-import { LetterSheet, type LetterSlots } from './letter';
 import ui from './letter-view.module.css';
 import { OfferToolbarActions } from './offer-actions';
 import { RecipientFields } from './offer-page';
 import o from './offers.module.css';
-import { PrintCopy, printOffer } from './print';
 import { saveLabel, useOfferDraft } from './use-offer-draft';
 
 const JOBCENTER_NOTE =
   'Bitte beachte: Der hier genannte Kurs ist heute die nächste Möglichkeit, bei uns einen Intensivkurs zu beginnen. Wir starten jeden Monat einen neuen Kurs (die Termine findest du auf unserer Website). Bei einem späteren Start kann der Unterricht vormittags statt nachmittags stattfinden. Einen festen Platz können wir dir zusagen, sobald uns deine Anmeldung und die Kostenübernahme des Jobcenters vorliegen – oder deine Anmeldung und deine Zahlung.';
 
+const day = (d: Date | string) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
 /**
- * The letter, on its own screen — the website editor's frame around one page.
+ * The letter, on its own screen — the website editor's frame around one page,
+ * with what the letter is beside it.
  *
  * Everything on the page that is words is changed where it stands: click the
  * opening and type. The opening and closing are CASA's standard texts until
  * somebody changes them for this offer; "Save as standard" makes the change
  * the text every new offer starts with. What is numbers — the lines, the
- * prices, the group — is the builder's, one click back.
+ * prices, the group — is the offer's, one tab back.
  */
 export function LetterView({
   record,
@@ -50,7 +55,7 @@ export function LetterView({
   record: OfferRecord;
   options: EditorOptions;
   texts: StandardTexts;
-  sentLetter: OfferLetter | null;
+  sentLetter: Letter | null;
   shownVersion: number | null;
   today: string;
   canWrite: boolean;
@@ -80,12 +85,15 @@ export function LetterView({
   }, [options.countries, draft.countryCode, lang]);
   const signatureName = options.staff.find((s) => s.id === draft.ownerId)?.name ?? null;
 
+  // A draft's letter is the next version; an offer that has gone out is the version it went out as.
+  const version = meta.status === 'draft' ? meta.version + 1 : meta.version;
   const live = useMemo(
-    () => buildLetter(draft, lines, totals, { number: meta.number, version: meta.version + 1, date: today, countryName, signatureName, standard }),
-    [draft, lines, totals, meta.number, meta.version, today, countryName, signatureName, standard]
+    () => offerLetter(draft, lines, totals, { number: meta.number, version, date: today, countryName, signatureName, standard }),
+    [draft, lines, totals, meta.number, version, today, countryName, signatureName, standard]
   );
   const letter = sentLetter ?? live;
   const showsSent = Boolean(sentLetter);
+  const writing = editable && !showsSent;
 
   const saveStandard = async (part: 'intro' | 'closing', body: string) => {
     const result = await saveStandardTextAction({ language: lang, part, body });
@@ -94,37 +102,31 @@ export function LetterView({
     update({ [part]: null });
   };
 
-  const slots: LetterSlots = !editable || showsSent
+  const recipientPanel = () => (
+    <div className={o.tokens} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <RecipientFields draft={draft} update={update} countries={options.countries} />
+    </div>
+  );
+  const validity = validityParts(lang, draft.validUntil);
+
+  const slots: LetterSlots = !writing
     ? {}
     : {
         recipient: (part) => (
-          <InlinePanel label="Recipient" block width={400} panel={() => <div className={`${o.tokens} ${o.panelBody}`}><RecipientFields draft={draft} update={update} countries={options.countries} /></div>}>
+          <InlinePanel label="Recipient" block width={400} panel={recipientPanel}>
             {part}
           </InlinePanel>
         ),
         salutation: (part) => (
-          <InlinePanel label="Recipient" width={400} panel={() => <div className={`${o.tokens} ${o.panelBody}`}><RecipientFields draft={draft} update={update} countries={options.countries} /></div>}>
+          <InlinePanel label="Recipient" width={400} panel={recipientPanel}>
             {part}
           </InlinePanel>
         ),
         title: () => <InlineText label="Title" value={draft.title} placeholder="Title" onChange={(v) => update({ title: v })} />,
-        intro: () => (
-          <InlineText
-            multiline
-            label="Opening"
-            value={draft.intro ?? standard.intro}
-            state={draft.intro == null ? 'standard' : 'changed'}
-            onChange={(v) => update({ intro: v === standard.intro ? null : v })}
-            onUseStandard={() => update({ intro: null })}
-            onSaveStandard={canSetStandard && draft.intro ? () => saveStandard('intro', draft.intro!) : undefined}
-          />
-        ),
-        lineText: (line) => {
-          if (!line.ref) return line.text;
-          const ref = line.ref;
-          const target = lines.find((l) => l.key === ref.key && l.audience === ref.audience);
-          if (!target) return line.text;
-          const custom = !target.manual && Boolean(draft.stay.overrides[overrideKey(ref.audience, ref.key)]?.description);
+        row: (row) => {
+          const target = row.ref ? lines.find((l) => lineRef(l) === row.ref) : undefined;
+          if (!target) return row.text;
+          const custom = !target.manual && Boolean(draft.stay.overrides[overrideKey(target.audience, target.key)]?.description);
           return (
             <InlineText
               label="Line"
@@ -135,61 +137,72 @@ export function LetterView({
             />
           );
         },
-        validity: () => (
-          <InlinePanel
-            label="Valid until"
-            width={300}
-            panel={(close) => (
-              <>
-                <input
-                  aria-label="Valid until"
-                  type="date"
-                  className={ui.dateIn}
-                  value={draft.validUntil ?? ''}
-                  onChange={(e) => update({ validUntil: e.target.value || null })}
-                />
-                <span className={ui.quick}>
-                  {[14, 28, 42].map((days) => (
-                    <button
-                      key={days}
-                      type="button"
-                      onClick={() => {
-                        update({ validUntil: addDays(today, days) });
-                        close();
-                      }}
-                    >
-                      {days / 7} weeks
-                    </button>
-                  ))}
-                  {draft.arrival ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        update({ validUntil: addDays(draft.arrival!, -42) });
-                        close();
-                      }}
-                    >
-                      6 weeks before arrival
-                    </button>
-                  ) : null}
-                </span>
-              </>
-            )}
-          >
-            {letter.validityParts ? (
-              <>
-                {letter.validityParts.before}
-                <u style={{ textDecorationColor: 'rgba(10,132,198,.5)', textUnderlineOffset: '0.2em' }}>{letter.validityParts.date}</u>
-                {letter.validityParts.after}
-              </>
-            ) : (
-              <span className={ui.placeholder}>{lang === 'de' ? 'Gültig bis …' : 'Valid until …'}</span>
-            )}
-          </InlinePanel>
-        ),
-        note: (note) =>
-          note || addingNote ? (
-            <div style={{ margin: '0 0 1.8cqw' }}>
+        text: {
+          intro: () => (
+            <InlineText
+              multiline
+              label="Opening"
+              value={draft.intro ?? standard.intro}
+              state={draft.intro == null ? 'standard' : 'changed'}
+              onChange={(v) => update({ intro: v === standard.intro ? null : v })}
+              onUseStandard={() => update({ intro: null })}
+              onSaveStandard={canSetStandard && draft.intro ? () => saveStandard('intro', draft.intro!) : undefined}
+            />
+          ),
+          validity: () => (
+            <InlinePanel
+              label="Valid until"
+              width={300}
+              panel={(close) => (
+                <>
+                  <input
+                    aria-label="Valid until"
+                    type="date"
+                    className={ed.dateIn}
+                    value={draft.validUntil ?? ''}
+                    onChange={(e) => update({ validUntil: e.target.value || null })}
+                  />
+                  <span className={ed.quick}>
+                    {[14, 28, 42].map((days) => (
+                      <button
+                        key={days}
+                        type="button"
+                        onClick={() => {
+                          update({ validUntil: addDays(today, days) });
+                          close();
+                        }}
+                      >
+                        {days / 7} weeks
+                      </button>
+                    ))}
+                    {draft.arrival ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          update({ validUntil: addDays(draft.arrival!, -42) });
+                          close();
+                        }}
+                      >
+                        6 weeks before arrival
+                      </button>
+                    ) : null}
+                  </span>
+                </>
+              )}
+            >
+              {validity ? (
+                <>
+                  {validity.before}
+                  <u style={{ textDecorationColor: 'rgba(10,132,198,.5)', textUnderlineOffset: '0.2em' }}>{validity.date}</u>
+                  {validity.after}
+                </>
+              ) : (
+                <span className={ed.placeholder}>{lang === 'de' ? 'Gültig bis …' : 'Valid until …'}</span>
+              )}
+            </InlinePanel>
+          ),
+          note: (note) =>
+            note || addingNote ? (
               <InlineText
                 multiline
                 startOpen={addingNote}
@@ -204,14 +217,14 @@ export function LetterView({
                 tools={
                   <>
                     {lang === 'de' && !draft.note ? (
-                      <button type="button" className={ui.barBtn} onClick={() => update({ note: JOBCENTER_NOTE })}>
+                      <button type="button" className={ed.barBtn} onClick={() => update({ note: JOBCENTER_NOTE })}>
                         Jobcenter text
                       </button>
                     ) : null}
                     {draft.note ? (
                       <button
                         type="button"
-                        className={ui.barBtn}
+                        className={ed.barBtn}
                         onClick={() => {
                           update({ note: null });
                           setAddingNote(false);
@@ -223,34 +236,34 @@ export function LetterView({
                   </>
                 }
               />
-            </div>
-          ) : (
-            <button type="button" className={ui.addNote} onClick={() => setAddingNote(true)}>
-              + {lang === 'de' ? 'Hinweis' : 'Note'}
-            </button>
+            ) : (
+              <button type="button" className={ed.addNote} onClick={() => setAddingNote(true)}>
+                + {lang === 'de' ? 'Hinweis' : 'Note'}
+              </button>
+            ),
+          closing: () => (
+            <InlineText
+              multiline
+              label="Closing"
+              value={draft.closing ?? standard.closing}
+              state={draft.closing == null ? 'standard' : 'changed'}
+              onChange={(v) => update({ closing: v === standard.closing ? null : v })}
+              onUseStandard={() => update({ closing: null })}
+              onSaveStandard={canSetStandard && draft.closing ? () => saveStandard('closing', draft.closing!) : undefined}
+            />
           ),
-        closing: () => (
-          <InlineText
-            multiline
-            label="Closing"
-            value={draft.closing ?? standard.closing}
-            state={draft.closing == null ? 'standard' : 'changed'}
-            onChange={(v) => update({ closing: v === standard.closing ? null : v })}
-            onUseStandard={() => update({ closing: null })}
-            onSaveStandard={canSetStandard && draft.closing ? () => saveStandard('closing', draft.closing!) : undefined}
-          />
-        ),
+        },
         signatureName: (name) => (
           <InlinePanel
             label="Signed by"
             width={280}
             panel={(close) => (
-              <span className={ui.choices}>
+              <span className={ed.choices}>
                 {options.staff.map((s) => (
                   <button
                     key={s.id}
                     type="button"
-                    className={`${ui.choice} ${s.id === draft.ownerId ? ui.choiceOn : ''}`}
+                    className={`${ed.choice} ${s.id === draft.ownerId ? ed.choiceOn : ''}`}
                     onClick={() => {
                       update({ ownerId: s.id });
                       close();
@@ -263,20 +276,19 @@ export function LetterView({
               </span>
             )}
           >
-            {name ?? <span className={ui.placeholder}>{lang === 'de' ? 'Unterschrift' : 'Signature'}</span>}
+            {name ?? <span className={ed.placeholder}>{lang === 'de' ? 'Unterschrift' : 'Signature'}</span>}
           </InlinePanel>
         ),
       };
 
   const name = draft.groupName || draft.recipientName || meta.number;
-  const print = () => printOffer(`${lang === 'de' ? 'Angebot' : 'Offer'} ${meta.number} ${name}`);
+  const print = () => printLetter(`${lang === 'de' ? 'Angebot' : 'Offer'} ${meta.number} ${name}`);
   const status = saveLabel(od.saveState, od.saveError, editable);
   const problems = checks.filter((c) => c.level === 'problem').map((c) => c.message);
-  const writing = editable && !showsSent;
+  const missingCopy = shownVersion != null && !sentLetter;
 
   return (
     <OfferFrame
-      canvas
       back={{ href: '/admin/offers', label: 'Offers', before: od.flush }}
       title={name}
       subtitle={`${meta.number} · ${OFFER_STATUS_LABELS[meta.status]}`}
@@ -310,57 +322,106 @@ export function LetterView({
         </>
       }
     >
-      <div className={ui.canvas}>
-        {od.saveState === 'stale' ? (
-          <div className={o.banner} style={{ maxWidth: 820, margin: '0 auto 14px' }}>
-            A colleague has changed this offer in the meantime. The last change is not saved.
-            <span style={{ flex: 1 }} />
-            <button type="button" className={`${o.btn} ${o.btnSm}`} onClick={() => window.location.reload()}>
-              Reload
-            </button>
-          </div>
-        ) : null}
-        {writing ? (
-          <div className={ui.tools}>
-            <Seg<OfferLanguage>
-              label="Language"
-              value={lang}
-              options={[
-                ['de', 'Deutsch'],
-                ['en', 'English'],
-              ]}
-              onChange={(v) => update({ language: v })}
-            />
-            <Seg
-              label="Prices on the letter"
-              value={draft.presentation}
-              options={[
-                ['itemised', 'Every line priced'],
-                ['package', 'One price per person'],
-              ]}
-              onChange={(v) => update({ presentation: v })}
-            />
-          </div>
-        ) : null}
-        {showsSent && shownVersion ? (
-          <div className={ui.versionNote}>
-            <span>
-              As sent{meta.version > 1 ? ` · version ${shownVersion} of ${meta.version}` : ''}
-            </span>
-            {record.versions
-              .filter((v) => v.version !== shownVersion)
-              .map((v) => (
-                <Link key={v.version} href={`/admin/offers/${meta.id}/letter?version=${v.version}`}>
-                  Version {v.version}
-                </Link>
-              ))}
-            {meta.status === 'draft' ? <Link href={`/admin/offers/${meta.id}/letter`}>The current draft</Link> : null}
-          </div>
-        ) : null}
+      <div className={`${ui.canvas} ${writing || record.letters.length ? '' : ui.canvasSolo}`}>
         <div className={ui.paper}>
+          {od.saveState === 'stale' ? (
+            <div className={o.banner} style={{ marginBottom: 12 }}>
+              A colleague has changed this offer in the meantime. The last change is not saved.
+              <span style={{ flex: 1 }} />
+              <button type="button" className={`${o.btn} ${o.btnSm}`} onClick={() => window.location.reload()}>
+                Reload
+              </button>
+            </div>
+          ) : null}
+          {showsSent && shownVersion ? (
+            <div className={ui.notice}>
+              As sent{meta.version > 1 ? ` · version ${shownVersion} of ${meta.version}` : ''}
+              {record.letters.find((l) => l.version === shownVersion) ? ` · ${day(record.letters.find((l) => l.version === shownVersion)!.sentAt)}` : ''}
+            </div>
+          ) : null}
+          {missingCopy ? <div className={`${ui.notice} ${ui.noticeWarn}`}>The copy of this version is not available. This is the offer as it stands.</div> : null}
           <LetterSheet letter={letter} slots={slots} />
         </div>
-        {writing ? <div className={ui.hint}>Click any text on the letter to change it</div> : null}
+
+        {writing || record.letters.length ? (
+          <aside className={ui.side} aria-label="The letter">
+            {writing ? (
+              <section className={o.card}>
+                <div className={o.cardHead}>
+                  <h2>Letter</h2>
+                </div>
+                <div className={ui.group}>
+                  <span>Language</span>
+                  <Seg<OfferLanguage>
+                    label="Language"
+                    value={lang}
+                    options={[
+                      ['de', 'Deutsch'],
+                      ['en', 'English'],
+                    ]}
+                    onChange={(v) => update({ language: v })}
+                  />
+                </div>
+                <div className={ui.group}>
+                  <span>Prices</span>
+                  <Seg
+                    label="Prices on the letter"
+                    value={draft.presentation}
+                    options={[
+                      ['itemised', 'Every line'],
+                      ['package', 'One price per person'],
+                    ]}
+                    onChange={(v) => update({ presentation: v })}
+                  />
+                </div>
+                <div className={ui.group}>
+                  <span>Texts</span>
+                  {(['intro', 'closing'] as const).map((part) => {
+                    const own = draft[part] != null;
+                    return (
+                      <div key={part} className={ui.textRow}>
+                        {part === 'intro' ? 'Opening' : 'Closing'}
+                        {own ? (
+                          <button type="button" className={`${ui.state} ${ui.stateChanged}`} style={{ border: 0 }} onClick={() => update({ [part]: null })} title="Use the standard text">
+                            Only this letter · use the standard
+                          </button>
+                        ) : (
+                          <span className={`${ui.state} ${ui.stateStandard}`}>Standard text</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className={ui.tip}>Click any text on the letter to change it.</div>
+              </section>
+            ) : null}
+
+            {record.letters.length ? (
+              <section className={o.card}>
+                <div className={o.cardHead}>
+                  <h2>Sent</h2>
+                  <span className={o.count}>{record.letters.length}</span>
+                </div>
+                <div className={ui.versions}>
+                  {meta.status === 'draft' ? (
+                    <Link href={`/admin/offers/${meta.id}/letter`} className={`${ui.version} ${!showsSent ? ui.versionOn : ''}`}>
+                      The current draft
+                    </Link>
+                  ) : null}
+                  {record.letters.map((l) => (
+                    <Link key={l.id} href={`/admin/offers/${meta.id}/letter?version=${l.version}`} className={`${ui.version} ${shownVersion === l.version ? ui.versionOn : ''}`}>
+                      Version {l.version}
+                      <span>
+                        {day(l.sentAt)}
+                        {l.sentByName ? ` · ${l.sentByName}` : ''}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </aside>
+        ) : null}
       </div>
       <PrintCopy letter={letter} />
     </OfferFrame>

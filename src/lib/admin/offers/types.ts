@@ -37,6 +37,13 @@ export const ESCORT_PRICING_LABELS: Record<EscortPricing, string> = {
 /** The four group packages of the groups page (src/config/gruppen/packages.ts). */
 export type PackageSlug = 'hahn' | 'katze' | 'hund' | 'esel';
 
+/**
+ * What a group offer is built on: one of the four packages, or `own` — no
+ * package, only the lines put on it (a group that wants the course alone, a
+ * programme the packages do not have).
+ */
+export type PackageChoice = PackageSlug | 'own';
+
 /** The building blocks of Esel, the package a group puts together itself. */
 export type ModuleKey = 'course' | 'materials' | 'accommodation' | 'lunch' | 'transport';
 
@@ -46,13 +53,15 @@ export type ModuleKey = 'course' | 'materials' | 'accommodation' | 'lunch' | 'tr
  * field existed still opens.
  */
 export type StayChoices = {
-  package: PackageSlug;
+  package: PackageChoice;
   /** Esel's length while it has no dates; Hahn, Katze and Hund have their own. */
   weeks: number;
   /** Esel only: which blocks the group takes. */
   modules: Record<ModuleKey, boolean>;
   /** Esel only: the afternoons chosen (activity ids of the groups page). */
   activities: string[];
+  /** Afternoons on top of what a package includes (Hahn, Katze, Hund, own). */
+  extras: string[];
   escortPricing: EscortPricing;
 };
 
@@ -61,6 +70,7 @@ export const DEFAULT_STAY: StayChoices = {
   weeks: 2,
   modules: { course: true, materials: true, accommodation: true, lunch: true, transport: true },
   activities: [],
+  extras: [],
   escortPricing: 'paid',
 };
 

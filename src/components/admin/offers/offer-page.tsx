@@ -1,13 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { GRUPPEN_ACTIVITIES, GRUPPEN_PACKAGES_BY_STACK, activityById, fullBoardBaseTotal, type GruppenActivity } from '@/config/gruppen/packages';
+import { LetterSheet } from '@/components/admin/letters/letter-sheet';
+import { PrintCopy, printLetter } from '@/components/admin/letters/print';
+import { formatDateRange, formatLetterDate, formatMoney } from '@/lib/admin/letters/format';
 import { hasProblems } from '@/lib/admin/offers/checks';
-import { buildLetter, formatDateRange, formatLetterDate, formatMoney } from '@/lib/admin/offers/document';
+import { offerLetter } from '@/lib/admin/offers/document';
 import { addLine, moveLineTo, removeLine, resetLine, setChoices, setLinePrice, setLineQuantity, setLineText } from '@/lib/admin/offers/draft-ops';
-import { activitiesOf, activityAllowance, measure, packageWeeks, pricedWeeks } from '@/lib/admin/offers/engine';
+import { activitiesOf, activityAllowance, extrasOf, isFixedPackage, measure, packageWeeks, pricedWeeks } from '@/lib/admin/offers/engine';
+import { GROUP_EXTRAS, REDUCTION, isCredit, type ExtraPreset } from '@/lib/admin/offers/extras';
 import type { EditorOptions, OfferRecord, PriceListItem, StandardTexts } from '@/lib/admin/offers/repo';
 import { addDays } from '@/lib/admin/offers/stay';
 import {
@@ -19,16 +24,16 @@ import {
   type OfferDraft,
   type OfferLine,
   type OfferTotals,
-  type PackageSlug,
+  type PackageChoice,
   type StayChoices,
 } from '@/lib/admin/offers/types';
 
 import { NumberInput, Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
+import { Chip, ICONS, type Tint } from './icons';
 import { OfferToolbarActions } from './offer-actions';
 import ui from './offers.module.css';
 import { ClickPanel } from './panel';
-import { PrintCopy, printOffer } from './print';
 import { saveLabel, useOfferDraft } from './use-offer-draft';
 
 const eur = (n: number | null) => (n == null ? '—' : formatMoney(n, 'de'));
@@ -36,41 +41,14 @@ const day = (d: Date | string) => new Date(d).toLocaleDateString('de-DE', { day:
 
 type Update = (change: Partial<OfferDraft> | ((d: OfferDraft) => OfferDraft)) => void;
 type Countries = EditorOptions['countries'];
-type Tint = 'red' | 'blue' | 'sun' | 'ink';
 
-// ------------------------------------------------------------------ icons
-
-const svg = (d: ReactNode) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    {d}
-  </svg>
-);
-const ICONS = {
-  calendar: svg(<><rect x="2.5" y="3.5" width="11" height="10" rx="2" /><path d="M2.5 7h11M5.5 2v3M10.5 2v3" /></>),
-  people: svg(<><circle cx="6" cy="5.5" r="2.3" /><path d="M2 13.5a4 4 0 0 1 8 0" /><path d="M11 4a2 2 0 0 1 0 4M12 13.5a3.5 3.5 0 0 0-1.6-2.9" /></>),
-  language: svg(<><path d="M2.5 4h7M6 2.5V4M4 4c.5 2.5 2.2 4.4 4.5 5.5M8 4c-.6 2.6-2.4 4.6-5 5.8" /><path d="M9 14l2.5-6 2.5 6M9.8 12h3.4" /></>),
-  hourglass: svg(<><path d="M4 2h8M4 14h8M5 2c0 3 6 3 6 6s-6 3-6 6M11 2c0 3-6 3-6 6s6 3 6 6" /></>),
-  pen: svg(<><path d="M10.5 2.5l3 3-8 8H2.5v-3z" /></>),
-  book: svg(<><path d="M3 3.5c1.7-.8 3.4-.8 5 0v10c-1.6-.8-3.3-.8-5 0z" /><path d="M8 3.5c1.6-.8 3.3-.8 5 0v10c-1.7-.8-3.4-.8-5 0" /></>),
-  layers: svg(<><path d="M8 2l6 3-6 3-6-3z" /><path d="M2 8l6 3 6-3M2 11l6 3 6-3" /></>),
-  house: svg(<><path d="M2.5 7.5L8 3l5.5 4.5V13a.8.8 0 0 1-.8.8H3.3a.8.8 0 0 1-.8-.8z" /><path d="M6.5 13.8V10h3v3.8" /></>),
-  cup: svg(<><path d="M3 5h8v4a4 4 0 0 1-8 0z" /><path d="M11 6h1a1.5 1.5 0 0 1 0 3h-1M5 2v1.5M7 2v1.5M9 2v1.5" /></>),
-  tram: svg(<><rect x="3.5" y="3" width="9" height="8.5" rx="2" /><path d="M3.5 8h9M6 13.5l-1 1.2M10 13.5l1 1.2M6.5 1.5h3" /></>),
-  star: svg(<><path d="M8 2l1.8 3.8 4.2.5-3.1 2.9.8 4.1L8 11.3l-3.7 2 .8-4.1L2 6.3l4.2-.5z" /></>),
-  package: svg(<><path d="M2.5 5L8 2.5 13.5 5v6L8 13.5 2.5 11z" /><path d="M2.5 5L8 7.5 13.5 5M8 7.5v6" /></>),
-  plus: svg(<><path d="M8 3v10M3 8h10" /></>),
-  share: svg(<><circle cx="4" cy="8" r="1.8" /><circle cx="12" cy="4" r="1.8" /><circle cx="12" cy="12" r="1.8" /><path d="M5.6 7.1l4.8-2.3M5.6 8.9l4.8 2.3" /></>),
-};
-const Chip = ({ tint, icon, big }: { tint: Tint; icon: ReactNode; big?: boolean }) => (
-  <span className={`${big ? ui.incIcon : ui.factIcon} ${ui[`tint_${tint}`]}`}>{icon}</span>
-);
-
-const PACKAGE_TINT: Record<PackageSlug, Tint> = { hahn: 'sun', katze: 'blue', hund: 'red', esel: 'ink' };
-const PACKAGE_COLOUR: Record<PackageSlug, [string, string]> = {
+const PACKAGE_TINT: Record<PackageChoice, Tint> = { hahn: 'sun', katze: 'blue', hund: 'red', esel: 'ink', own: 'ink' };
+const PACKAGE_COLOUR: Record<PackageChoice, [string, string]> = {
   hahn: ['var(--c-sun)', 'var(--c-sun-tint)'],
   katze: ['var(--c-blue)', 'var(--c-blue-tint)'],
   hund: ['var(--c-red)', 'var(--c-red-tint)'],
   esel: ['var(--c-ink)', 'var(--c-ink-tint)'],
+  own: ['var(--o-line-firm)', '#f6f8fb'],
 };
 const ACTIVITY_TINT: Record<GruppenActivity['category'], Tint> = { city: 'blue', culture: 'red', science: 'sun', sport: 'ink', daytrip: 'ink' };
 const CATEGORY_LABEL: Record<GruppenActivity['category'], string> = {
@@ -82,19 +60,19 @@ const CATEGORY_LABEL: Record<GruppenActivity['category'], string> = {
 };
 const ALL_MODULES: StayChoices['modules'] = { course: true, materials: true, accommodation: true, lunch: true, transport: true };
 
-/** Esel built from what a package holds — the way to change a fixed package. */
+/** Esel built from what a package holds — the way to take something out of a fixed package. */
 const asEsel = (d: OfferDraft): OfferDraft => {
   const from = d.stay.choices;
   if (from.package === 'esel') return d;
-  return setChoices(d, { package: 'esel', weeks: packageWeeks(from.package) ?? from.weeks, modules: ALL_MODULES, activities: activitiesOf(from) });
+  const weeks = from.package === 'own' ? from.weeks : (packageWeeks(from.package) ?? from.weeks);
+  return setChoices(d, { package: 'esel', weeks, modules: ALL_MODULES, activities: [...activitiesOf(from), ...extrasOf(from)], extras: [] });
 };
 
 /**
- * The offer: who it is for, which package, what it includes, what it costs.
- * A tinted head with the facts, the four packages in the four CASA colours, a
- * card of what is included — red the course, blue the stay, yellow the
- * programme — and the price on a dark card. A click on anything opens a small
- * panel to change it. docs/OFFERS.md §Design.
+ * The offer: who it is for, what it is built on, what it includes, what is on
+ * top, and what it all comes to. Framed cards on the workspace canvas — the
+ * offer on the left, its price, its checks, its letter and its history on the
+ * right. A click on anything opens a panel to change it. docs/OFFERS.md §Design.
  */
 export function OfferPage({
   record,
@@ -116,6 +94,7 @@ export function OfferPage({
   notice: { ok?: string; error?: string };
 }) {
   const { meta } = record;
+  const router = useRouter();
   const od = useOfferDraft({
     id: meta.id,
     status: meta.status,
@@ -128,17 +107,22 @@ export function OfferPage({
   const { draft, update, lines, totals, checks, editable } = od;
   const lang = draft.language;
   const name = draft.groupName || draft.recipientName || meta.number;
+  const group = draft.kind === 'group';
+  const pkg = draft.stay.choices.package;
 
   const countryName = options.countries.find((c) => c.code === draft.countryCode)?.[lang] ?? null;
   const signatureName = options.staff.find((s) => s.id === draft.ownerId)?.name ?? null;
   const letter = useMemo(
-    () => buildLetter(draft, lines, totals, { number: meta.number, version: meta.version + 1, date: today, countryName, signatureName, standard: texts[lang] }),
+    () => offerLetter(draft, lines, totals, { number: meta.number, version: meta.version + 1, date: today, countryName, signatureName, standard: texts[lang] }),
     [draft, lines, totals, meta.number, meta.version, today, countryName, signatureName, texts, lang]
   );
-  const print = () => printOffer(`${lang === 'de' ? 'Angebot' : 'Offer'} ${meta.number} ${name}`);
+  const print = () => printLetter(`${lang === 'de' ? 'Angebot' : 'Offer'} ${meta.number} ${name}`);
+  const openLetter = async () => {
+    await od.flush();
+    router.push(`/admin/offers/${meta.id}/letter`);
+  };
 
   const problems = checks.filter((c) => c.level === 'problem');
-  const hints = checks.filter((c) => c.level === 'hint');
   const status = saveLabel(od.saveState, od.saveError, editable);
 
   return (
@@ -170,9 +154,9 @@ export function OfferPage({
         </>
       }
     >
-      <main className={ui.page} style={{ maxWidth: 880 }}>
+      <main className={ui.page}>
         {od.saveState === 'stale' ? (
-          <div className={ui.banner}>
+          <div className={ui.banner} style={{ marginBottom: 16 }}>
             A colleague has changed this offer in the meantime. The last change is not saved.
             <span style={{ flex: 1 }} />
             <button type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={() => window.location.reload()}>
@@ -181,44 +165,43 @@ export function OfferPage({
           </div>
         ) : null}
 
-        <Head draft={draft} update={update} editable={editable} options={options} today={today} status={meta.status} />
+        <div className={ui.layout}>
+          <div className={ui.main}>
+            <Head draft={draft} update={update} editable={editable} options={options} today={today} status={meta.status} />
+            {group ? <Packages draft={draft} update={update} editable={editable} /> : null}
+            {group && pkg !== 'own' ? <Included draft={draft} update={update} editable={editable} lines={lines} /> : null}
+            <Extras draft={draft} update={update} editable={editable} lines={lines} priceList={priceList} chargeTypes={options.chargeTypes} />
+          </div>
 
-        {draft.kind === 'group' ? <Packages draft={draft} update={update} editable={editable} /> : null}
-
-        <Included draft={draft} update={update} editable={editable} lines={lines} priceList={priceList} chargeTypes={options.chargeTypes} />
-
-        <PriceCard draft={draft} totals={totals} />
-
-        {meta.status === 'draft' ? (
-          problems.length ? (
-            <div className={`${ui.callout} ${ui.calloutWarn}`} aria-label="Checks">
-              {problems.map((c, i) => (
-                <div key={`p${i}`} className={ui.check}>
-                  <i className={ui.dotProblem} />
-                  {c.message}
+          <aside className={ui.aside} aria-label="Summary">
+            <PriceCard draft={draft} totals={totals} />
+            {meta.status === 'draft' ? <ChecksCard checks={checks} /> : null}
+            <section className={ui.card} aria-label="Letter">
+              <a
+                href={`/admin/offers/${meta.id}/letter`}
+                className={ui.thumb}
+                aria-label="Open the letter"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void openLetter();
+                }}
+              >
+                <div>
+                  <LetterSheet letter={letter} variant="thumb" />
                 </div>
-              ))}
-              {hints.map((c, i) => (
-                <div key={`h${i}`} className={`${ui.check} ${ui.checkHint}`}>
-                  <i className={ui.dotHint} />
-                  {c.message}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={`${ui.callout} ${ui.calloutOk}`} aria-label="Checks">
-              <span className={ui.factIcon} style={{ background: '#fff', color: 'var(--o-green)' }}>
-                ✓
-              </span>
-              <span style={{ flex: 1 }}>
-                Ready to send
-                {hints.length ? <span className={ui.calloutHints}>{hints.map((c) => c.message).join(' · ')}</span> : null}
-              </span>
-            </div>
-          )
-        ) : null}
-
-        <History record={record} />
+              </a>
+              <div className={ui.thumbFoot}>
+                <span>
+                  {lang === 'de' ? 'Deutsch' : 'English'} · {draft.presentation === 'package' ? 'one price per person' : 'every line priced'}
+                </span>
+                <button type="button" className={ui.link} onClick={() => void openLetter()}>
+                  Open the letter →
+                </button>
+              </div>
+            </section>
+            <History record={record} />
+          </aside>
+        </div>
       </main>
       <PrintCopy letter={letter} />
     </OfferFrame>
@@ -249,8 +232,8 @@ function Head({
   const owner = options.staff.find((s) => s.id === draft.ownerId)?.name;
 
   return (
-    <section className={ui.head2}>
-      <div className={ui.headTop}>
+    <section className={ui.hero}>
+      <div className={ui.heroTop}>
         <div>
           {editable ? (
             <input
@@ -283,7 +266,7 @@ function Head({
         {group ? (
           <ClickPanel
             label="Dates"
-            subtitle={fixedWeeks ? `The package is ${fixedWeeks} ${fixedWeeks === 1 ? 'week' : 'weeks'}` : 'Esel takes the length of the stay'}
+            subtitle={fixedWeeks ? `The package is ${fixedWeeks} ${fixedWeeks === 1 ? 'week' : 'weeks'}` : 'The offer takes the length of the stay'}
             icon={<Chip tint="blue" icon={ICONS.calendar} big />}
             className={ui.fact}
             openClassName={ui.factOpen}
@@ -293,17 +276,27 @@ function Head({
                 <div className={ui.row2}>
                   <div className={ui.fld}>
                     <label htmlFor="d-arrival">Arrival</label>
-                    <input id="d-arrival" aria-label="Arrival" type="date" className={ui.fi} value={draft.arrival ?? ''} onChange={(e) => update({ arrival: e.target.value || null })} />
+                    <input
+                      id="d-arrival"
+                      type="date"
+                      className={ui.fi}
+                      value={draft.arrival ?? ''}
+                      onChange={(e) => {
+                        const arrival = e.target.value || null;
+                        const length = fixedWeeks ?? c.weeks;
+                        update((d) => ({ ...d, arrival, departure: arrival && !d.departure ? addDays(arrival, length * 7 - 1) : d.departure }));
+                      }}
+                    />
                   </div>
                   <div className={ui.fld}>
                     <label htmlFor="d-departure">Departure</label>
-                    <input id="d-departure" aria-label="Departure" type="date" className={ui.fi} value={draft.departure ?? ''} min={draft.arrival ?? undefined} onChange={(e) => update({ departure: e.target.value || null })} />
+                    <input id="d-departure" type="date" className={ui.fi} value={draft.departure ?? ''} min={draft.arrival ?? undefined} onChange={(e) => update({ departure: e.target.value || null })} />
                   </div>
                 </div>
-                {!fromDates && c.package === 'esel' ? (
+                {!fromDates && !fixedWeeks ? (
                   <div className={ui.fld}>
                     <span>Weeks, until there are dates</span>
-                    <Stepper label="Weeks" value={c.weeks} min={1} max={4} onChange={(v) => update((d) => setChoices(d, { weeks: v ?? 1 }))} />
+                    <Stepper label="Weeks" value={c.weeks} min={1} max={c.package === 'esel' ? 4 : 52} onChange={(v) => update((d) => setChoices(d, { weeks: v ?? 1 }))} />
                   </div>
                 ) : null}
               </>
@@ -472,7 +465,7 @@ function Head({
 function RecipientSummary({ draft, countries }: { draft: OfferDraft; countries: Countries }) {
   const contact = [draft.contactFirstName, draft.contactLastName].filter(Boolean).join(' ');
   const town = draft.address.split('\n').filter(Boolean).pop();
-  const country = countries.find((c) => c.code === draft.countryCode)?.de;
+  const country = countries.find((c) => c.code === draft.countryCode)?.en;
   const parts = [draft.recipientName, contact, draft.contactEmail, [town, country].filter(Boolean).join(', ')].filter(Boolean);
   return (
     <span>
@@ -486,7 +479,7 @@ export function RecipientFields({ draft, update, countries }: { draft: OfferDraf
   return (
     <>
       <div className={ui.fld}>
-        <label htmlFor="r-name">{draft.kind === 'group' ? 'Organisation' : 'Name'}</label>
+        <label htmlFor="r-name">{draft.kind === 'group' || draft.organisationId ? 'Organisation' : 'Name'}</label>
         <input id="r-name" className={ui.fi} value={draft.recipientName} onChange={(e) => update({ recipientName: e.target.value })} />
       </div>
       <div className={ui.fld}>
@@ -526,7 +519,7 @@ export function RecipientFields({ draft, update, countries }: { draft: OfferDraf
           <option value="">—</option>
           {countries.map((c) => (
             <option key={c.code} value={c.code}>
-              {c.de}
+              {c.en}
             </option>
           ))}
         </select>
@@ -537,51 +530,65 @@ export function RecipientFields({ draft, update, countries }: { draft: OfferDraf
 
 // ------------------------------------------------------------- packages
 
+const OWN = { name: 'Own offer', desc: 'No package: only what you put on it' };
+
 function Packages({ draft, update, editable }: { draft: OfferDraft; update: Update; editable: boolean }) {
   const current = draft.stay.choices.package;
-  const choose = (slug: PackageSlug) => update((d) => (slug === 'esel' ? asEsel(d) : setChoices(d, { package: slug })));
+  const choose = (choice: PackageChoice) => update((d) => (choice === 'esel' ? asEsel(d) : setChoices(d, { package: choice })));
+  const tiles: { choice: PackageChoice; name: string; desc: string; price: ReactNode }[] = [
+    ...GRUPPEN_PACKAGES_BY_STACK.map((p) => ({
+      choice: p.slug as PackageChoice,
+      name: p.animal.en,
+      desc: p.descriptor.en,
+      price:
+        p.priceFrom != null ? (
+          <>
+            {eur(p.priceFrom)} <small>per person</small>
+          </>
+        ) : (
+          <>
+            <small>from</small> {eur(fullBoardBaseTotal(1))} <small>· 1–4 weeks</small>
+          </>
+        ),
+    })),
+    { choice: 'own', name: OWN.name, desc: OWN.desc, price: <small>Lines of your choice</small> },
+  ];
 
   return (
-    <>
-      <div className={ui.sectionTitle}>
-        <h2>Package</h2>
-        <span>As on the groups page</span>
+    <section className={ui.card}>
+      <div className={ui.cardHead}>
+        <h2>
+          <Chip tint={PACKAGE_TINT[current]} icon={ICONS.package} />
+          Built on
+        </h2>
+        <span>The packages of the groups page, or none</span>
       </div>
-      <div className={ui.pkgs} role="radiogroup" aria-label="Package">
-        {GRUPPEN_PACKAGES_BY_STACK.map((p) => {
-          const slug = p.slug as PackageSlug;
-          const on = current === slug;
-          const [colour, tint] = PACKAGE_COLOUR[slug];
-          return (
-            <button
-              key={slug}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              disabled={!editable}
-              className={`${ui.pkg} ${on ? ui.pkgOn : ''}`}
-              style={{ ['--pkg' as string]: colour, ['--pkg-tint' as string]: tint }}
-              onClick={() => choose(slug)}
-            >
-              {on ? <span className={ui.pkgCheck}>✓</span> : null}
-              <span className={ui.pkgName}>{p.animal.en}</span>
-              <span className={ui.pkgDesc}>{p.descriptor.en}</span>
-              <span className={ui.pkgPrice}>
-                {p.priceFrom != null ? (
-                  <>
-                    {eur(p.priceFrom)} <small>per person</small>
-                  </>
-                ) : (
-                  <>
-                    <small>from</small> {eur(fullBoardBaseTotal(1))} <small>· 1–4 weeks</small>
-                  </>
-                )}
-              </span>
-            </button>
-          );
-        })}
+      <div className={ui.cardBody}>
+        <div className={ui.pkgs} role="radiogroup" aria-label="Package">
+          {tiles.map((t) => {
+            const on = current === t.choice;
+            const [colour, tint] = PACKAGE_COLOUR[t.choice];
+            return (
+              <button
+                key={t.choice}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                disabled={!editable}
+                className={`${ui.pkg} ${on ? ui.pkgOn : ''} ${t.choice === 'own' ? ui.pkgOwn : ''}`}
+                style={{ ['--pkg' as string]: colour, ['--pkg-tint' as string]: tint }}
+                onClick={() => choose(t.choice)}
+              >
+                {on ? <span className={ui.pkgCheck}>✓</span> : null}
+                <span className={ui.pkgName}>{t.name}</span>
+                <span className={ui.pkgDesc}>{t.desc}</span>
+                <span className={ui.pkgPrice}>{t.price}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </>
+    </section>
   );
 }
 
@@ -601,25 +608,36 @@ const NO_ESCORT: ServiceKey[] = ['course', 'materials'];
 
 type AmountCell = (l: OfferLine | null, on?: boolean) => ReactNode;
 
-function Included({
-  draft,
-  update,
-  editable,
-  lines,
-  priceList,
-  chargeTypes,
-}: {
-  draft: OfferDraft;
-  update: Update;
-  editable: boolean;
-  lines: OfferLine[];
-  priceList: PriceListItem[];
-  chargeTypes: EditorOptions['chargeTypes'];
-}) {
-  const group = draft.kind === 'group';
+const amountCell: AmountCell = (l, on = true) =>
+  !on ? (
+    <span className={ui.incOffTag}>Not included</span>
+  ) : !l ? (
+    <span className={ui.incNone}>—</span>
+  ) : l.included ? (
+    <span className={ui.incIncl}>Included</span>
+  ) : l.amount == null ? (
+    <span className={ui.amountMissing}>No price</span>
+  ) : (
+    <span className={`${ui.incAmt} ${l.amount < 0 ? ui.incCredit : ''}`}>
+      {l.listUnitAmount != null && l.unitAmount !== l.listUnitAmount ? <i className={ui.changed} title="Changed from the price list" /> : null}
+      {l.amount < 0 ? `− ${eur(-l.amount)}` : eur(l.amount)}
+    </span>
+  );
+
+function ColumnHead({ group, escorts }: { group: boolean; escorts: boolean }) {
+  return (
+    <div className={`${ui.incHead} ${escorts ? ui.two : ''}`}>
+      <span />
+      <span>{group ? 'Per participant' : 'Amount'}</span>
+      {escorts ? <span>Per escort</span> : null}
+    </div>
+  );
+}
+
+function Included({ draft, update, editable, lines }: { draft: OfferDraft; update: Update; editable: boolean; lines: OfferLine[] }) {
   const c = draft.stay.choices;
-  const fixed = group && c.package !== 'esel';
-  const escortCol = group && draft.escorts > 0;
+  const fixed = isFixedPackage(c.package);
+  const escortCol = draft.escorts > 0;
   const two = escortCol ? ui.two : '';
   const { nights } = measure(draft);
   const weeks = pricedWeeks(draft);
@@ -627,8 +645,6 @@ function Included({
   const activities = activitiesOf(c);
   const pkgLine = find('package');
   const pkg = GRUPPEN_PACKAGES_BY_STACK.find((p) => p.slug === c.package);
-  const share = find('escort_share');
-  const typed = lines.filter((l) => l.manual);
 
   const detail: Record<ServiceKey, string> = {
     course: `${weeks * 20} lessons · Mon–Fri 09:00–12:30`,
@@ -638,36 +654,23 @@ function Included({
     transport: 'Trams and buses for the whole stay',
     programme: activities.length ? `${activities.length} ${activities.length === 1 ? 'afternoon' : 'afternoons'}` : 'No activities chosen',
   };
-
-  const amount: AmountCell = (l, on = true) =>
-    !on ? (
-      <span className={ui.incOffTag}>Not included</span>
-    ) : !l ? (
-      <span className={ui.incNone}>—</span>
-    ) : l.included ? (
-      <span className={ui.incIncl}>Included</span>
-    ) : l.amount == null ? (
-      <span className={ui.amountMissing}>No price</span>
-    ) : (
-      <span className={ui.incAmt}>
-        {l.listUnitAmount != null && l.unitAmount !== l.listUnitAmount ? <i className={ui.changed} title="Changed from the price list" /> : null}
-        {eur(l.amount)}
-      </span>
-    );
+  const toEsel = () => (
+    <button type="button" className={ui.link} onClick={() => update(asEsel)}>
+      Leave something out: build it from blocks (Esel)
+    </button>
+  );
 
   return (
-    <>
-      <div className={ui.sectionTitle}>
-        <h2>{group ? 'Included' : 'Prices'}</h2>
-        <span>{group ? (fixed ? 'Everything the package includes' : 'The blocks the group takes') : 'From the price list'}</span>
+    <section className={ui.card}>
+      <div className={ui.cardHead}>
+        <h2>
+          <Chip tint="blue" icon={ICONS.house} />
+          Included
+        </h2>
+        <span>{fixed ? `Everything ${pkg?.animal.en ?? 'the package'} includes` : 'The blocks the group takes'}</span>
       </div>
-      <div className={ui.incCard}>
-        <div className={`${ui.incHead} ${two}`}>
-          <span />
-          <span>{group ? 'Per participant' : 'Amount'}</span>
-          {escortCol ? <span>Per escort</span> : null}
-        </div>
-
+      <ColumnHead group escorts={escortCol} />
+      <div className={ui.rows}>
         {fixed && pkgLine ? (
           <ClickPanel
             block
@@ -677,124 +680,115 @@ function Included({
             className={`${ui.inc} ${two}`}
             openClassName={ui.incOpen}
             disabled={!editable}
-            body={() => <MoneyField label="Price per participant" line={pkgLine} update={update} />}
+            body={() => (
+              <>
+                <MoneyField label="Price per participant" line={pkgLine} update={update} />
+                <div className={ui.fieldNote}>A price agreed with the group replaces the package price on the letter.</div>
+              </>
+            )}
+            foot={toEsel}
           >
             <span className={ui.incMain}>
               <Chip tint={PACKAGE_TINT[c.package]} icon={ICONS.package} big />
               <span className={ui.incText}>
-                <span className={ui.incName} style={{ display: 'block' }}>
-                  {pkg ? `${pkg.animal.en} · ${pkg.descriptor.en}` : pkgLine.description}
-                </span>
-                <span className={ui.incDetail} style={{ display: 'block' }}>
+                <span className={ui.incName}>{pkg ? `${pkg.animal.en} · ${pkg.descriptor.en}` : pkgLine.description}</span>
+                <span className={ui.incDetail}>
                   The package price · everything below, for {weeks} {weeks === 1 ? 'week' : 'weeks'}
                 </span>
               </span>
             </span>
-            {amount(pkgLine)}
+            {amountCell(pkgLine)}
             {escortCol ? <span className={ui.incNone}>—</span> : null}
           </ClickPanel>
         ) : null}
 
-        {group
-          ? SERVICES.map((s) => {
-              if (s.key === 'programme' && fixed && !activities.length) return null;
-              const on = s.key === 'programme' ? true : fixed || c.modules[s.key];
-              const p = fixed ? find(`inc:${s.key}`) : find(s.key);
-              const e = NO_ESCORT.includes(s.key) ? null : find(s.key, 'escort');
-              return (
-                <ClickPanel
-                  key={s.key}
-                  block
-                  label={s.name}
-                  subtitle={fixed ? 'Part of the package' : on ? detail[s.key] : 'Not in this offer'}
-                  icon={<Chip tint={s.tint} icon={s.icon} big />}
-                  className={`${ui.inc} ${two} ${on ? '' : ui.incOff}`}
-                  openClassName={ui.incOpen}
-                  disabled={!editable}
-                  wide={s.key === 'programme' && !fixed}
-                  body={() => <ServiceBody service={s} draft={draft} update={update} fixed={fixed} on={on} participantLine={fixed ? null : p} escortLine={escortCol ? e : null} />}
-                  foot={
-                    fixed
-                      ? () => (
-                          <button type="button" className={ui.link} onClick={() => update(asEsel)}>
-                            Change it as Esel
-                          </button>
-                        )
-                      : undefined
-                  }
-                >
-                  <span className={ui.incMain}>
-                    <Chip tint={s.tint} icon={s.icon} big />
-                    <span className={ui.incText}>
-                      <span className={ui.incName} style={{ display: 'block' }}>
-                        {s.name}
-                      </span>
-                      <span className={ui.incDetail} style={{ display: 'block' }}>
-                        {detail[s.key]}
-                      </span>
-                      {s.key === 'programme' && activities.length ? (
-                        <span className={ui.chips}>
-                          {activities.map((id) => {
-                            const a = activityById.get(id as never);
-                            return a ? (
-                              <span key={id} className={`${ui.chip} ${ui[`tint_${ACTIVITY_TINT[a.category]}`]}`}>
-                                {a.name}
-                              </span>
-                            ) : null;
-                          })}
-                        </span>
-                      ) : null}
-                    </span>
-                  </span>
-                  {s.key === 'programme' && !activities.length ? <span className={ui.incOffTag}>Choose</span> : amount(p, on)}
-                  {escortCol ? amount(e, on) : null}
-                </ClickPanel>
-              );
-            })
-          : null}
-
-        {share ? (
-          <ClickPanel
-            block
-            label="Share of the escorts"
-            subtitle={`Their costs over ${draft.participants} participants, rounded up`}
-            icon={<Chip tint="ink" icon={ICONS.share} big />}
-            className={`${ui.inc} ${two}`}
-            openClassName={ui.incOpen}
-            disabled={!editable}
-            body={() => <MoneyField label="Per participant" line={share} update={update} />}
-          >
-            <span className={ui.incMain}>
-              <Chip tint="ink" icon={ICONS.share} big />
-              <span className={ui.incText}>
-                <span className={ui.incName} style={{ display: 'block' }}>
-                  Share of the escorts
-                </span>
-                <span className={ui.incDetail} style={{ display: 'block' }}>
-                  {draft.escorts} {draft.escorts === 1 ? 'escort' : 'escorts'} over {draft.participants} participants
+        {SERVICES.map((s) => {
+          if (s.key === 'programme' && fixed && !activities.length) return null;
+          const on = s.key === 'programme' ? true : fixed || c.modules[s.key];
+          const p = fixed ? find(`inc:${s.key}`) : find(s.key);
+          const e = NO_ESCORT.includes(s.key) ? null : find(s.key, 'escort');
+          return (
+            <ClickPanel
+              key={s.key}
+              block
+              label={s.name}
+              subtitle={fixed ? `Part of ${pkg?.animal.en ?? 'the package'}` : on ? detail[s.key] : 'Not in this offer'}
+              icon={<Chip tint={s.tint} icon={s.icon} big />}
+              className={`${ui.inc} ${two} ${on ? '' : ui.incOff}`}
+              openClassName={ui.incOpen}
+              disabled={!editable}
+              wide={s.key === 'programme' && !fixed}
+              body={() => <ServiceBody service={s} draft={draft} update={update} fixed={fixed} on={on} participantLine={fixed ? null : p} escortLine={escortCol ? e : null} />}
+              foot={fixed ? toEsel : undefined}
+            >
+              <span className={ui.incMain}>
+                <Chip tint={s.tint} icon={s.icon} big />
+                <span className={ui.incText}>
+                  <span className={ui.incName}>{s.name}</span>
+                  <span className={ui.incDetail}>{detail[s.key]}</span>
+                  {s.key === 'programme' && activities.length ? <ActivityChips ids={activities} /> : null}
                 </span>
               </span>
-            </span>
-            {amount(share)}
-            {escortCol ? <span className={ui.incNone}>—</span> : null}
-          </ClickPanel>
-        ) : null}
-
-        {typed.map((l) => (
-          <TypedRow key={l.key} line={l} draft={draft} update={update} editable={editable} two={two} escortCol={escortCol} chargeTypes={chargeTypes} amount={amount} />
-        ))}
-
-        {!group && typed.length === 0 ? <div className={ui.note} style={{ padding: '22px 18px' }}>No lines yet</div> : null}
-
-        {editable ? (
-          <div className={ui.incFoot}>
-            <AddMenu priceList={priceList} update={update} />
-          </div>
-        ) : null}
+              {s.key === 'programme' && !activities.length ? <span className={ui.incOffTag}>Choose</span> : amountCell(p, on)}
+              {escortCol ? amountCell(e, on) : null}
+            </ClickPanel>
+          );
+        })}
       </div>
+    </section>
+  );
+}
+
+function ActivityChips({ ids }: { ids: string[] }) {
+  return (
+    <span className={ui.chips}>
+      {ids.map((id) => {
+        const a = activityById.get(id as never);
+        return a ? (
+          <span key={id} className={`${ui.chip} ${ui[`tint_${ACTIVITY_TINT[a.category]}`]}`}>
+            {a.name}
+          </span>
+        ) : null;
+      })}
+    </span>
+  );
+}
+
+/** The sixteen activities by category, to choose from; `taken` ones are already in the package. */
+function ActivityPicker({ chosen, taken = [], onToggle, note }: { chosen: string[]; taken?: string[]; onToggle: (id: string) => void; note: ReactNode }) {
+  const on = new Set(chosen);
+  const off = new Set(taken);
+  return (
+    <>
+      <div className={ui.fieldNote}>{note}</div>
+      {(['city', 'culture', 'science', 'sport', 'daytrip'] as const).map((cat) => (
+        <div key={cat} className={ui.actGroup}>
+          <span>{CATEGORY_LABEL[cat]}</span>
+          <div className={ui.acts}>
+            {GRUPPEN_ACTIVITIES.filter((a) => a.category === cat).map((a) => {
+              const isOn = on.has(a.id) || off.has(a.id);
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  aria-pressed={isOn}
+                  disabled={off.has(a.id)}
+                  title={off.has(a.id) ? 'In the package already' : undefined}
+                  className={`${ui.act} ${isOn ? `${ui.actOn} ${ui[`tint_${ACTIVITY_TINT[a.category]}`]}` : ''}`}
+                  onClick={() => onToggle(a.id)}
+                >
+                  {a.name} <small>{off.has(a.id) ? 'included' : eur(a.price)}</small>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </>
   );
 }
+
+const toggleIn = (list: string[], id: string) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
 
 function ServiceBody({
   service,
@@ -816,56 +810,23 @@ function ServiceBody({
   const c = draft.stay.choices;
   const weeks = pricedWeeks(draft);
   if (service.key === 'programme') {
-    const chosen = new Set(activitiesOf(c));
     if (fixed) {
       return (
         <>
-          <div className={ui.acts}>
-            {[...chosen].map((id) => {
-              const a = activityById.get(id as never);
-              return a ? (
-                <span key={id} className={`${ui.act} ${ui.actOn} ${ui[`tint_${ACTIVITY_TINT[a.category]}`]}`}>
-                  {a.name}
-                </span>
-              ) : null;
-            })}
-          </div>
+          <ActivityChips ids={activitiesOf(c)} />
+          <div className={ui.fieldNote}>More afternoons go under Extras, on top of the package.</div>
           {escortLine ? <MoneyField label="Price per escort" line={escortLine} update={update} /> : null}
         </>
       );
     }
-    const toggle = (id: string) =>
-      update((d) => {
-        const list = d.stay.choices.activities;
-        return setChoices(d, { activities: list.includes(id) ? list.filter((x) => x !== id) : [...list, id] });
-      });
-    const categories = ['city', 'culture', 'science', 'sport', 'daytrip'] as const;
+    const chosen = activitiesOf(c);
     return (
       <>
-        <div className={ui.fieldNote}>
-          {chosen.size} chosen · up to {activityAllowance(weeks)} for {weeks} {weeks === 1 ? 'week' : 'weeks'}
-        </div>
-        {categories.map((cat) => (
-          <div key={cat} className={ui.actGroup}>
-            <span>{CATEGORY_LABEL[cat]}</span>
-            <div className={ui.acts}>
-              {GRUPPEN_ACTIVITIES.filter((a) => a.category === cat).map((a) => {
-                const isOn = chosen.has(a.id);
-                return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    aria-pressed={isOn}
-                    className={`${ui.act} ${isOn ? `${ui.actOn} ${ui[`tint_${ACTIVITY_TINT[a.category]}`]}` : ''}`}
-                    onClick={() => toggle(a.id)}
-                  >
-                    {a.name} <small>{eur(a.price)}</small>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+        <ActivityPicker
+          chosen={chosen}
+          onToggle={(id) => update((d) => setChoices(d, { activities: toggleIn(d.stay.choices.activities, id) }))}
+          note={`${chosen.length} chosen · up to ${activityAllowance(weeks)} for ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}
+        />
         {escortLine ? <MoneyField label="Price per escort" line={escortLine} update={update} /> : null}
       </>
     );
@@ -923,32 +884,158 @@ function MoneyField({ label, line, update }: { label: string; line: OfferLine; u
   );
 }
 
+// --------------------------------------------------------------- extras
+
+/**
+ * What is on top: more afternoons than the package has, the share of the
+ * escorts' costs, and every line put on by hand — a transfer, a single room,
+ * a reduction. For an own offer and for one learner, this is the whole offer.
+ */
+function Extras({
+  draft,
+  update,
+  editable,
+  lines,
+  priceList,
+  chargeTypes,
+}: {
+  draft: OfferDraft;
+  update: Update;
+  editable: boolean;
+  lines: OfferLine[];
+  priceList: PriceListItem[];
+  chargeTypes: EditorOptions['chargeTypes'];
+}) {
+  const group = draft.kind === 'group';
+  const c = draft.stay.choices;
+  const escortCol = group && draft.escorts > 0;
+  const two = escortCol ? ui.two : '';
+  const find = (key: string, audience: Audience = 'participant') => lines.find((l) => l.key === key && l.audience === audience) ?? null;
+  const extras = extrasOf(c);
+  const share = find('escort_share');
+  const typed = lines.filter((l) => l.manual);
+  const afternoons = group && c.package !== 'esel';
+  const own = group && c.package === 'own';
+
+  const title = !group ? 'Prices' : own ? 'On the offer' : 'Extras';
+  const sub = !group ? 'From the price list, or typed' : own ? 'Everything this offer is made of' : `On top of ${c.package === 'esel' ? 'the blocks' : 'the package'}`;
+  const nothing = !extras.length && !share && !typed.length && !afternoons;
+
+  return (
+    <section className={ui.card}>
+      <div className={ui.cardHead}>
+        <h2>
+          <Chip tint="sun" icon={ICONS.sparkle} />
+          {title}
+        </h2>
+        <span>{sub}</span>
+      </div>
+      {nothing ? null : <ColumnHead group={group} escorts={escortCol} />}
+      <div className={ui.rows}>
+        {afternoons ? (
+          <ClickPanel
+            block
+            wide
+            label="More afternoons"
+            subtitle={own ? 'From the activities of the groups page' : 'On top of what the package includes'}
+            icon={<Chip tint="sun" icon={ICONS.star} big />}
+            className={`${ui.inc} ${two}`}
+            openClassName={ui.incOpen}
+            disabled={!editable}
+            body={() => {
+              const extraLine = find('extras', 'escort');
+              return (
+                <>
+                  <ActivityPicker
+                    chosen={extras}
+                    taken={activitiesOf(c)}
+                    onToggle={(id) => update((d) => setChoices(d, { extras: toggleIn(extrasOf(d.stay.choices), id) }))}
+                    note={extras.length ? `${extras.length} chosen, priced per person` : 'Priced per person, as on the groups page'}
+                  />
+                  {extraLine ? <MoneyField label="Price per escort" line={extraLine} update={update} /> : null}
+                </>
+              );
+            }}
+          >
+            <span className={ui.incMain}>
+              <Chip tint="sun" icon={ICONS.star} big />
+              <span className={ui.incText}>
+                <span className={ui.incName}>More afternoons</span>
+                <span className={ui.incDetail}>{extras.length ? `${extras.length} on top` : 'An excursion, a day trip, a visit the package does not have'}</span>
+                {extras.length ? <ActivityChips ids={extras} /> : null}
+              </span>
+            </span>
+            {extras.length ? amountCell(find('extras')) : <span className={ui.incOffTag}>Add</span>}
+            {escortCol ? (extras.length ? amountCell(find('extras', 'escort')) : <span className={ui.incNone}>—</span>) : null}
+          </ClickPanel>
+        ) : null}
+
+        {typed.map((l) => (
+          <TypedRow key={l.key} line={l} update={update} editable={editable} two={two} escortCol={escortCol} chargeTypes={chargeTypes} />
+        ))}
+
+        {share ? (
+          <ClickPanel
+            block
+            label="Share of the escorts"
+            subtitle={`Their costs over ${draft.participants} participants, rounded up`}
+            icon={<Chip tint="ink" icon={ICONS.share} big />}
+            className={`${ui.inc} ${two}`}
+            openClassName={ui.incOpen}
+            disabled={!editable}
+            body={() => <MoneyField label="Per participant" line={share} update={update} />}
+          >
+            <span className={ui.incMain}>
+              <Chip tint="ink" icon={ICONS.share} big />
+              <span className={ui.incText}>
+                <span className={ui.incName}>Share of the escorts</span>
+                <span className={ui.incDetail}>
+                  {draft.escorts} {draft.escorts === 1 ? 'escort' : 'escorts'} over {draft.participants} participants
+                </span>
+              </span>
+            </span>
+            {amountCell(share)}
+            {escortCol ? <span className={ui.incNone}>—</span> : null}
+          </ClickPanel>
+        ) : null}
+
+        {nothing ? <div className={ui.empty}>{own ? 'Nothing on this offer yet' : 'No lines yet'}</div> : null}
+      </div>
+      {editable ? (
+        <div className={ui.cardFoot}>
+          <AddMenu priceList={priceList} update={update} group={group} />
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function TypedRow({
   line,
-  draft,
   update,
   editable,
   two,
   escortCol,
   chargeTypes,
-  amount,
 }: {
   line: OfferLine;
-  draft: OfferDraft;
   update: Update;
   editable: boolean;
   two: string;
   escortCol: boolean;
   chargeTypes: EditorOptions['chargeTypes'];
-  amount: AmountCell;
 }) {
-  const manual = draft.stay.manual.find((m) => m.key === line.key);
+  const credit = isCredit(line.chargeType);
+  const setPrice = (v: number | null) => update((d) => setLinePrice(d, line, v == null ? null : credit ? -Math.abs(v) : v));
+  const shown = line.unitAmount == null ? null : credit ? Math.abs(line.unitAmount) : line.unitAmount;
+  const icon = credit ? ICONS.minus : ICONS.plus;
+  const tint: Tint = credit ? 'green' : 'ink';
   return (
     <ClickPanel
       block
       label={line.description || 'New line'}
-      subtitle="A line of your own"
-      icon={<Chip tint="ink" icon={ICONS.plus} big />}
+      subtitle={credit ? 'Taken off the price' : 'A line of your own'}
+      icon={<Chip tint={tint} icon={icon} big />}
       className={`${ui.inc} ${two}`}
       openClassName={ui.incOpen}
       disabled={!editable}
@@ -964,9 +1051,9 @@ function TypedRow({
               <NumberInput id={`q-${line.key}`} className={ui.fi} value={line.quantity} onCommit={(q) => update((d) => setLineQuantity(d, line.key, q ?? 1))} />
             </div>
             <div className={ui.fld}>
-              <label htmlFor={`p-${line.key}`}>Price</label>
+              <label htmlFor={`p-${line.key}`}>{credit ? 'Taken off, per person' : 'Price'}</label>
               <span className={ui.money}>
-                <NumberInput id={`p-${line.key}`} className={ui.fi} value={line.unitAmount} placeholder="0" onCommit={(v) => update((d) => setLinePrice(d, line, v))} />
+                <NumberInput id={`p-${line.key}`} className={ui.fi} value={shown} placeholder="0" onCommit={setPrice} />
               </span>
             </div>
           </div>
@@ -975,7 +1062,7 @@ function TypedRow({
             <select
               id={`k-${line.key}`}
               className={ui.fi}
-              value={manual?.chargeType ?? 'additional_costs'}
+              value={line.chargeType}
               onChange={(e) => update((d) => ({ ...d, stay: { ...d.stay, manual: d.stay.manual.map((m) => (m.key === line.key ? { ...m, chargeType: e.target.value } : m)) } }))}
             >
               {chargeTypes.map((t) => (
@@ -1016,23 +1103,21 @@ function TypedRow({
       )}
     >
       <span className={ui.incMain}>
-        <Chip tint="ink" icon={ICONS.plus} big />
+        <Chip tint={tint} icon={icon} big />
         <span className={ui.incText}>
-          <span className={ui.incName} style={{ display: 'block' }}>
-            {line.description || <span className={ui.placeholder}>New line</span>}
-          </span>
-          <span className={ui.incDetail} style={{ display: 'block' }}>
-            {line.quantity !== 1 ? `${line.quantity} × ${eur(line.unitAmount)}` : 'Own line'}
+          <span className={ui.incName}>{line.description || <span className={ui.placeholder}>New line</span>}</span>
+          <span className={ui.incDetail}>
+            {line.quantity !== 1 ? `${line.quantity} × ${eur(shown)}` : credit ? 'Reduction' : line.unitAmount == null ? 'Type the price' : 'Own line'}
           </span>
         </span>
       </span>
-      {line.audience === 'participant' ? amount(line) : <span className={ui.incNone}>—</span>}
-      {escortCol ? line.audience === 'escort' ? amount(line) : <span className={ui.incNone}>—</span> : null}
+      {line.audience === 'participant' ? amountCell(line) : <span className={ui.incNone}>—</span>}
+      {escortCol ? line.audience === 'escort' ? amountCell(line) : <span className={ui.incNone}>—</span> : null}
     </ClickPanel>
   );
 }
 
-function AddMenu({ priceList, update }: { priceList: PriceListItem[]; update: Update }) {
+function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; update: Update; group: boolean }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -1047,14 +1132,29 @@ function AddMenu({ priceList, update }: { priceList: PriceListItem[]; update: Up
     (acc[item.group] ??= []).push(item);
     return acc;
   }, {});
+  const addPreset = (p: ExtraPreset) => {
+    update((d) => addLine(d, { audience: 'participant', chargeType: p.chargeType, description: d.language === 'de' ? p.de : p.en, quantity: 1, unitAmount: null }));
+    setOpen(false);
+  };
 
   return (
-    <div ref={wrap} className={ui.menuWrap} style={{ display: 'inline-block' }}>
-      <button type="button" className={ui.add} style={{ margin: 0 }} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        + Add a line
+    <div ref={wrap} className={ui.menuWrap}>
+      <button type="button" className={ui.add} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        + Add {group ? 'an extra' : 'a line'}
       </button>
       {open ? (
-        <div className={ui.menu} role="menu" style={{ left: 0, right: 'auto', top: 'auto', bottom: 'calc(100% + 6px)', width: 320 }}>
+        <div className={ui.menu} role="menu" style={{ left: 0, right: 'auto', top: 'auto', bottom: 'calc(100% + 6px)', width: 330 }}>
+          {group ? (
+            <>
+              <div className={ui.menuHead}>Often asked for</div>
+              {GROUP_EXTRAS.map((p) => (
+                <button key={p.label} type="button" role="menuitem" className={ui.menuItem} onClick={() => addPreset(p)}>
+                  {p.label}
+                </button>
+              ))}
+              <div className={ui.menuRule} />
+            </>
+          ) : null}
           <div style={{ padding: '4px 4px 6px' }}>
             <select
               aria-label="From the price list"
@@ -1080,6 +1180,9 @@ function AddMenu({ priceList, update }: { priceList: PriceListItem[]; update: Up
               ))}
             </select>
           </div>
+          <button type="button" role="menuitem" className={ui.menuItem} onClick={() => addPreset(REDUCTION)}>
+            A reduction
+          </button>
           <button
             type="button"
             role="menuitem"
@@ -1089,7 +1192,7 @@ function AddMenu({ priceList, update }: { priceList: PriceListItem[]; update: Up
               setOpen(false);
             }}
           >
-            Own line
+            A line of your own
           </button>
         </div>
       ) : null}
@@ -1097,106 +1200,166 @@ function AddMenu({ priceList, update }: { priceList: PriceListItem[]; update: Up
   );
 }
 
-// ---------------------------------------------------------------- price
+// ---------------------------------------------------------------- aside
 
 function PriceCard({ draft, totals }: { draft: OfferDraft; totals: OfferTotals }) {
   const pricing = draft.stay.choices.escortPricing;
   if (draft.kind !== 'group') {
     return (
-      <div className={ui.priceCard} style={{ gridTemplateColumns: '1fr' }}>
-        <div className={ui.pcMain}>
-          <div className={ui.pcKey}>Total</div>
-          <div className={ui.pcVal}>{eur(totals.perParticipant)}</div>
-        </div>
-      </div>
+      <section className={ui.price} aria-label="Price">
+        <div className={ui.priceKey}>Total</div>
+        <div className={ui.priceBig}>{eur(totals.perParticipant)}</div>
+      </section>
     );
   }
   return (
-    <div className={ui.priceCard}>
-      <div className={ui.pcMain}>
-        <div className={ui.pcKey}>Per participant</div>
-        <div className={ui.pcVal}>{eur(totals.perParticipant)}</div>
-        {totals.escortShare != null ? <div className={ui.pcSub}>incl. {eur(totals.escortShare)} for the escorts</div> : null}
-      </div>
-      <div>
-        <div className={ui.pcKey}>Per escort</div>
-        <div className={ui.pcVal}>{draft.escorts === 0 ? '—' : pricing === 'paid' ? eur(totals.perEscort) : pricing === 'free' ? 'Free' : 'Shared'}</div>
-        <div className={ui.pcSub}>
-          {draft.escorts === 0
-            ? 'No escorts'
-            : pricing === 'free'
-              ? `CASA carries ${eur(totals.carriedByCasa)}`
-              : pricing === 'shared'
-                ? `${eur(totals.perEscort)} each, in the price`
-                : `${draft.escorts} ${draft.escorts === 1 ? 'escort' : 'escorts'}`}
+    <section className={ui.price} aria-label="Price">
+      <div className={ui.priceKey}>Per participant</div>
+      <div className={ui.priceBig}>{eur(totals.perParticipant)}</div>
+      {totals.escortShare != null ? <div className={ui.priceSub}>incl. {eur(totals.escortShare)} for the escorts</div> : null}
+      <div className={ui.priceRows}>
+        <div className={ui.priceRow}>
+          <span>
+            Per escort
+            <small>
+              {draft.escorts === 0
+                ? 'No escorts'
+                : pricing === 'free'
+                  ? `Free · CASA carries ${eur(totals.carriedByCasa)}`
+                  : pricing === 'shared'
+                    ? 'Shared by the group'
+                    : `${draft.escorts} ${draft.escorts === 1 ? 'escort' : 'escorts'}`}
+            </small>
+          </span>
+          <b>{draft.escorts === 0 ? '—' : eur(totals.perEscort)}</b>
+        </div>
+        <div className={ui.priceRow}>
+          <span>
+            The group
+            <small>
+              {draft.participants ? `${draft.participants} × ${eur(totals.perParticipant)}` : 'Participants missing'}
+              {pricing === 'paid' && draft.escorts && totals.perEscort != null ? ` + ${draft.escorts} × ${eur(totals.perEscort)}` : ''}
+            </small>
+          </span>
+          <b>{eur(totals.groupTotal)}</b>
         </div>
       </div>
-      <div>
-        <div className={ui.pcKey}>The group</div>
-        <div className={ui.pcVal}>{eur(totals.groupTotal)}</div>
-        <div className={ui.pcSub}>
-          {draft.participants ? `${draft.participants} × ${eur(totals.perParticipant)}` : 'Participants missing'}
-          {pricing === 'paid' && draft.escorts && totals.perEscort != null ? ` + ${draft.escorts} × ${eur(totals.perEscort)}` : ''}
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }
 
-// -------------------------------------------------------------- history
+function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
+  const problems = checks.filter((c) => c.level === 'problem');
+  const hints = checks.filter((c) => c.level === 'hint');
+  return (
+    <section className={ui.card} aria-label="Checks">
+      {problems.length ? (
+        <div className={ui.cardHead} style={{ background: '#fff8ec', borderRadius: '16px 16px 0 0' }}>
+          <h2>
+            <span className={`${ui.checkMark} ${ui.tint_sun}`}>!</span>
+            Before it can go
+          </h2>
+          <span className={ui.count}>{problems.length}</span>
+        </div>
+      ) : (
+        <div className={ui.checksOk} style={{ borderBottom: hints.length ? '1px solid var(--o-line)' : 0 }}>
+          <span className={`${ui.checkMark} ${ui.tint_green}`}>✓</span>
+          Ready to send
+        </div>
+      )}
+      {problems.length || hints.length ? (
+        <div className={ui.checkList}>
+          {problems.map((c, i) => (
+            <div key={`p${i}`} className={ui.check}>
+              <i className={ui.dotProblem} />
+              {c.message}
+            </div>
+          ))}
+          {hints.map((c, i) => (
+            <div key={`h${i}`} className={`${ui.check} ${ui.checkHint}`}>
+              <i className={ui.dotHint} />
+              {c.message}
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 function History({ record }: { record: OfferRecord }) {
   const { meta } = record;
   return (
-    <div className={ui.history}>
-      <div className={ui.historyRow}>
-        <span>
-          Created {day(meta.createdAt)}
-          {meta.createdByName ? ` by ${meta.createdByName}` : ''}
-        </span>
-        {meta.enquiryId ? (
-          <span>
-            · from <Link href={`/admin/enquiries/${meta.enquiryId}`}>an enquiry</Link>
-          </span>
+    <section className={ui.card} aria-label="History">
+      <div className={ui.cardHead}>
+        <h2>History</h2>
+      </div>
+      <div className={ui.timeline}>
+        {meta.decidedAt ? (
+          <div className={`${ui.event} ${meta.status === 'accepted' ? ui.eventGood : ''}`}>
+            <i />
+            <div>
+              <b>{OFFER_STATUS_LABELS[meta.status]}</b>
+              <span>
+                {day(meta.decidedAt)}
+                {meta.decidedByName ? ` · ${meta.decidedByName}` : ''}
+                {meta.decisionNote ? ` · ${meta.decisionNote}` : ''}
+              </span>
+            </div>
+          </div>
         ) : null}
-        {meta.personId ? (
-          <span>
-            · for <Link href={`/admin/people/${meta.personId}`}>a student</Link>
-          </span>
-        ) : null}
-        {meta.copiedFrom ? (
-          <span>
-            · copy of <Link href={`/admin/offers/${meta.copiedFrom}`}>an earlier offer</Link>
-          </span>
+        {record.letters.map((l) => (
+          <div key={l.id} className={`${ui.event} ${ui.eventOn}`}>
+            <i />
+            <div>
+              <Link href={`/admin/offers/${meta.id}/letter?version=${l.version}`}>Version {l.version} sent</Link>
+              <span>
+                {day(l.sentAt)}
+                {l.sentByName ? ` · ${l.sentByName}` : ''}
+              </span>
+            </div>
+          </div>
+        ))}
+        <div className={ui.event}>
+          <i />
+          <div>
+            <b>Created</b>
+            <span>
+              {day(meta.createdAt)}
+              {meta.createdByName ? ` · ${meta.createdByName}` : ''}
+            </span>
+            {meta.enquiryId ? (
+              <span>
+                From <Link href={`/admin/enquiries/${meta.enquiryId}`}>an enquiry</Link>
+              </span>
+            ) : null}
+            {meta.personId ? (
+              <span>
+                For <Link href={`/admin/people/${meta.personId}`}>a learner</Link>
+              </span>
+            ) : null}
+            {meta.copiedFrom ? (
+              <span>
+                Repeats <Link href={`/admin/offers/${meta.copiedFrom}`}>an earlier offer</Link>
+              </span>
+            ) : null}
+          </div>
+        </div>
+        {record.related.length ? (
+          <div className={ui.event}>
+            <i />
+            <div>
+              <b>Earlier offers to {record.draft.recipientName}</b>
+              {record.related.map((r) => (
+                <span key={r.id}>
+                  <Link href={`/admin/offers/${r.id}`}>{r.number}</Link> · {OFFER_STATUS_LABELS[r.status].toLowerCase()}
+                  {r.perParticipant != null ? ` · ${eur(r.perParticipant)}` : ''}
+                </span>
+              ))}
+            </div>
+          </div>
         ) : null}
       </div>
-      {record.versions.length ? (
-        <div className={ui.historyRow}>
-          {record.versions.map((v) => (
-            <span key={v.version}>
-              <Link href={`/admin/offers/${meta.id}/letter?version=${v.version}`}>Version {v.version}</Link> sent {day(v.sentAt)}
-              {v.sentByName ? ` by ${v.sentByName}` : ''}
-            </span>
-          ))}
-          {meta.decidedAt ? (
-            <span>
-              · {OFFER_STATUS_LABELS[meta.status].toLowerCase()} {day(meta.decidedAt)}
-              {meta.decisionNote ? `: ${meta.decisionNote}` : ''}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-      {record.related.length ? (
-        <div className={ui.historyRow}>
-          <span>Earlier offers to {record.draft.recipientName}:</span>
-          {record.related.map((r) => (
-            <Link key={r.id} href={`/admin/offers/${r.id}`}>
-              {r.number}
-              {r.perParticipant != null ? ` (${eur(r.perParticipant)})` : ''}
-            </Link>
-          ))}
-        </div>
-      ) : null}
-    </div>
+    </section>
   );
 }

@@ -4,6 +4,7 @@
 
 Read this before touching `src/app/(admin)/admin/(editor)/offers`, `src/components/admin/offers`,
 `src/lib/admin/offers`, migration 0021 or the group packages in `src/config/gruppen/packages.ts`.
+The letter an offer is sent as is a CASA letter like any other: `docs/LETTERS.md`.
 
 ---
 
@@ -26,8 +27,7 @@ direction Rahman chose, and the rules that follow from it:
 
 1. **A focused tool, not a dashboard page.** Offers run full screen like the website editor
    (`(editor)` route group): one slim white toolbar — the way back, the offer's name and number, the
-   two tabs **Offer | Letter**, the save state, "⋯" and the one primary action — and a white page with
-   one centred column. No sidebar, no cards, no grey bands; hairlines separate.
+   two tabs **Offer | Letter**, the save state, "⋯" and the one primary action. No workspace sidebar.
 2. **Plain values; a click changes one.** The offer page shows text — "11–24 April 2027 · 13 nights",
    "18 participants · 2 escorts, shared by the group", "Host family · double room · half board ·
    450 €". A click opens a small panel beside it with the few controls for that one thing; Escape or a
@@ -35,12 +35,13 @@ direction Rahman chose, and the rules that follow from it:
    everything else is behind **+ Add**.
 3. **The letter is its own tab and is written on the page.** Opening, closing, title, line texts, the
    validity date, the signature and the recipient are changed where they stand (the website editor's
-   click-to-edit). The opening and closing are **standard texts** (`offer_texts`): a letter shows
-   "Standard text" until somebody changes it for this offer ("Only this offer"), and **Save as
-   standard** makes the change the text every new offer starts with (`full`).
-4. **A new offer starts with one question:** "Who is it for?" — one search over earlier recipients,
-   students and group enquiries still waiting for an offer, with "New organisation" / "One learner"
-   for a name nobody has had an offer before. Arrow keys and Enter work.
+   click-to-edit). The opening and closing are **standard texts** (`letter_texts`, kind `offer`): a
+   letter shows "Standard text" until somebody changes it for this offer ("Only this letter"), and
+   **Save as standard** makes the change the text every new offer starts with (`full`).
+4. **A new offer is a wizard** (third pass: "the new offer creation should be more like an elegant
+   wizard … it should become more smart"): four steps in one framed card — *Who it is for*, *What it
+   is*, *The group*, *The letter* — with the steps and what was chosen in a rail on the left, and
+   nothing written until **Create offer**. See §New offer.
 
 5. **Colour that says something** (second pass, the same day: "it is a white page now… add a bit
    colour so it distinguishes"). A tinted head holds the facts as chips with coloured icons; the four
@@ -50,6 +51,19 @@ direction Rahman chose, and the rules that follow from it:
    kind; the price sits on a dark card with the tricolour edge. Panels have a head (icon, name, one
    line), filled fields with € inside price inputs, choice cards instead of radio rows, and a foot
    with *Done*. "Not like FileMaker" — keep improving this direction.
+
+6. **Framed, not floating** (third pass: "we need more framing of the interface, cleaner framing, we
+   have so much white space"). The offer stands on the workspace's cool canvas in white cards — the
+   head, *Built on*, *Included*, *Extras* — in a main column, and beside it a sticky column of what
+   the offer comes to: the price on its dark card, the checks (*Ready to send* or *Before it can go*),
+   a live miniature of the letter that opens the Letter tab, and the history. The letter tab puts the
+   page on the canvas with a column beside it (language, prices, which texts are standard, the
+   versions sent). The list is one framed table. Below 1,120 px the column goes under the cards.
+7. **A package is a start, not a limit** ("the offer is also not only the four packages … what if a
+   group wants something extra"). The package price can be typed over; *Extras* holds more afternoons
+   from the sixteen activities, often-asked extras (airport transfer, single room supplement, extra
+   night, extra lessons), lines from the price list, typed lines and reductions; taking a block out
+   of a fixed package rebuilds it as Esel; and *Own offer* is a group offer with no package at all.
 
 The rest of the workspace is to follow this style once Offers is accepted (Rahman, 2026-10-13).
 
@@ -100,10 +114,14 @@ she typed.
 
 | Table | One row is | Notes |
 | --- | --- | --- |
-| `organisations` | a school, agency, company or public body CASA makes offers to | name, kind, address, country, the usual contact, language. Created when a new name is typed in *New offer*; its address and contact are updated from the offer each time one is sent |
+| `organisations` | a school, agency, company or public body CASA makes offers to | name, kind, address, country, language. Created by the wizard for a name CASA does not have; its address is updated from the offer each time one is sent |
+| `organisation_contacts` | a person CASA writes to there | salutation, names, email (unique per organisation), `last_written_at`. A school's organiser changes from year to year and an agency has several, so they are rows, not columns; they are contacts of an organisation, not learners, so not rows of `people`. The one sent to is added or brought up to date when an offer goes out |
 | `offers` | one offer | `year`+`seq` (the number), `kind` group/individual, `status`, `language`, `presentation` itemised/package, the recipient as addressed (a copy), the group (dates, participants, escorts), `stay` jsonb (the builder's choices, prices typed over computed lines, typed lines), opening/note/closing, `valid_until`, `owner_id`, `revision` (for conflict checks), `version` (times sent), sent/decided by and when, `copied_from`, soft delete |
 | `offer_lines` | one priced line | `audience` participant/escort, `key` (`tuition`, `accommodation`… or `manual:…`), `charge_type_code` (FK), `description`, `quantity`, `unit`, `unit_amount`, `amount`, `list_unit_amount` (what the price list said), `rate_id` |
-| `offer_versions` | the document as it was sent | the letter, the lines, the totals and the draft, frozen. Editing an offer later never changes what the recipient has |
+
+What was sent is not an offers table: every version of the letter is a row of `letters` (migration
+0022, `docs/LETTERS.md`) with the draft, lines and totals it was built from, and the standard texts
+are `letter_texts` rows of kind `offer`. Editing an offer later never changes what the recipient has.
 
 Lines carry `included` (0021): a part of a package, printed as "inklusive" / "included" without an
 amount. Two charge types were added: `group_package` and `escort_share`.
@@ -120,7 +138,17 @@ Group offers price from the groups page's own figures, so an offer and the websi
   built: each block (course, materials, host family, lunch, transport) at the Esel sheet's price for
   the stay's weeks (1–4; beyond four nothing is priced and sending is stopped), and the afternoons
   chosen from the sixteen activities, five a week at most (a hint beyond that). Choosing Esel after a
-  fixed package starts from that package's blocks and afternoons — "Change it as Esel".
+  fixed package starts from that package's blocks and afternoons — "Leave something out: build it
+  from blocks (Esel)" — because the sheet has no price for "Katze without the host family".
+- **Own offer.** A group offer with no package: nothing is computed, the offer is what is put on it
+  in *Extras* (a group that wants the course alone, a programme the packages do not have). Its weeks
+  come from the dates, or are typed.
+- **Extras.** *More afternoons* — activities the package does not include, priced per person from the
+  same list, for participants and escorts (`extras` in the stay; Esel chooses all its afternoons
+  itself, so it has none). Anything the sheets have no price for is a typed line: the presets
+  (`extras.ts`: airport transfer, single room supplement, extra night, extra lessons) arrive without
+  a price, and the offer cannot be sent until one is typed. A *reduction* (`discount`) is typed as a
+  positive amount and stored as a negative one; it shows in green with a minus.
 - **Length.** Dates give nights and weeks (`ceil(nights / 7)`: 13 nights are two weeks). A fixed
   package is priced for its own weeks; when the dates disagree, a hint says so. Without dates, a fixed
   package takes its own length and Esel the weeks typed.
@@ -135,9 +163,10 @@ Group offers price from the groups page's own figures, so an offer and the websi
   fee, books, exams) or typed lines.
 - **Totals.** Per participant, per escort, and the group: participants × per person (+ paying escorts).
 
-## The letter (`document.ts`, `components/admin/offers/letter.tsx`)
+## The letter (`document.ts` → `docs/LETTERS.md`)
 
-One function builds the letter; the editor's preview, the print and the frozen copy are its output.
+`offerLetter()` builds the letter in the shape every CASA letter has (`src/lib/admin/letters`); the
+letter tab, the miniature beside the offer, the print and the copy kept in `letters` are its output.
 German addresses the reader with **du** (`docs/VOICE_AND_TONE.md`); opening and closing have defaults
 in both languages and are editable per offer; the note has a *Jobcenter note* snippet (FileMaker's
 Jobcenter letter, rewritten in du). Subject: `Angebot Nr. 2026-014 · Titel` (`· 2. Fassung` from the
@@ -147,22 +176,48 @@ school. *One price per person* lists what is included without amounts (FileMaker
 
 The letterhead is the Impressum's facts plus the bank line every FileMaker letter carries. The page is
 A4 in container units, so the preview is the print; **Print / PDF** prints only the letter (a second
-render on `<body>`, `[data-offer-print]`, hidden on screen; `@page offer` in `globals.css`). A full
+render on `<body>`, `[data-letter-print]`, hidden on screen; `@page letter` in `globals.css`). A full
 group offer with escorts and the group total fits one page.
+
+## New offer (the wizard)
+
+`/admin/offers/new`, and `?enquiry=` / `?person=` / `?organisation=` when **Make an offer** is pressed
+on a record — the wizard then starts at step 2 with the recipient filled in.
+
+1. **Who it is for.** One search over the group and company enquiries still waiting for an offer,
+   organisations (by name, or a contact's name or address) and learners (by name or address), with
+   chips for Schools · Agencies · Companies · Public bodies · Learners; arrow keys and Enter work.
+   An organisation shows its contacts to choose from, or *Someone else*. Nobody found → **Add "…" as
+   new**, and the wizard reads what was typed (`recipient-guess.ts`): the kind from the name
+   ("Liceo …" a school, "… Viaggi srl" an agency, "Jobcenter …" a public body, two plain words a
+   learner), from an address the person's name and the country (`.it` → Italy; open mail services
+   say nothing). While the new one is typed, **CASA may have them already** lists organisations with
+   the same name written another way ("Vivimondo S.r.l." = "vivimondo srl"), the same mail domain or
+   address, and learners with the same address or name — *Use this* takes the existing one. A new
+   learner whose address CASA has is that learner, checked again on the server.
+2. **What it is.** For an organisation: *A group stay* or *Courses*. A group picks one of the five
+   tiles (the four packages and *Own offer*); a school that came before gets **Like last time** — its
+   last offer's package, group, extras and prices, with new dates. Courses are picked from the price
+   list (upcoming courses at their rate, the enrolment fee, books, exams).
+3. **The group.** Arrival and departure (the departure follows from the arrival and the package's
+   length, Sunday to Saturday), participants, escorts; an enquiry's preferred dates are shown.
+4. **The letter.** The language (from the enquiry, else the country: German for DE/AT/CH/LI, English
+   for the rest; English to an organisation without a country, German to a learner), the offer's
+   name ("Vivimondo 2027"), the title, valid until (4 weeks; 2/6 weeks; 6 weeks before arrival), who
+   signs — and a summary. **Create offer** finds or creates the recipient and makes the offer in one
+   transaction (`createOffer`), then opens it.
 
 ## Working with it
 
-- **Where offers start.** **New offer** → "Who is it for?" (an earlier recipient lends its address and
-  contact; a group enquiry its organiser brief: size, weeks, lessons, room, meals, ticket, culture,
-  pupils' or adult fare; a student the learner); **Make an offer** on an enquiry or a student's page;
-  **Duplicate** (⋯) for a variant or next year's offer.
+- **Where offers start.** **New offer**, or **Make an offer** on an enquiry or a learner's page (both
+  open the wizard); **Duplicate** (⋯) for a variant or next year's offer.
 - **Saving.** Both tabs save themselves 0.7 s after the last change. A save names the revision it
   started from; a colleague's save in between is refused and the page offers a reload (Kursplanung's
   rule). Moving between the tabs saves first.
 - **Sending.** *Send …* is enabled when no check reports a problem (the problems are listed under the
   totals). The workspace sends no email of its own, so the dialog is the three steps: save the PDF,
-  write the email (a `mailto:` with subject and greeting), mark as sent — which freezes the version and
-  updates the organisation.
+  write the email (a `mailto:` with subject and greeting), mark as sent — which keeps the letter in
+  `letters`, updates the organisation's address and adds or refreshes the contact it went to.
 - **Answers.** *Accepted* (primary once sent) and *Not accepted …* (⋯: declined by them, or withdrawn
   by us) with a note. *Revise* (⋯) reopens any offer as a draft; the versions already sent stay.
 - **The list.** Open (drafts and sent) first; per person and group totals; *Follow up* on an offer
@@ -173,19 +228,25 @@ group offer with escorts and the group total fits one page.
 ```
 src/app/(admin)/admin/(editor)/offers/
   layout.tsx            requireModule('offers') — the (editor) gate is the session
-  actions.ts            every write; each asks requireModule first (edit; delete and standard texts full)
+  actions.ts            every write and every wizard lookup; each asks requireModule first
+                        (edit; delete and standard texts full)
   page.tsx              the list
-  new/page.tsx          "Who is it for?"
+  new/page.tsx          the wizard (?enquiry= · ?person= · ?organisation=)
   [id]/page.tsx         the offer
   [id]/letter/page.tsx  the letter (?version=N: a version as sent)
 src/components/admin/offers/
   frame.tsx             the toolbar and the Offer | Letter tabs
-  offer-page.tsx        the offer: properties, included, totals, checks, history
-  letter-view.tsx       the letter tab: in-place editing, standard texts, send
-  letter.tsx            the A4 sheet (preview, print, sent versions) with editable slots
-  new-offer.tsx · panel.tsx · inline-edit.tsx · fields.tsx · offer-actions.tsx · print.tsx
-  use-offer-draft.ts    the draft, autosave and conflict check shared by both tabs
-src/lib/admin/offers/   types, stay, engine, checks, document, schema, draft-ops, from-enquiry, repo
+  offer-page.tsx        the offer: head, built on, included, extras; price, checks, letter, history
+  letter-view.tsx       the letter tab: in-place editing, standard texts, versions, send
+  new-offer.tsx         the wizard
+  panel.tsx · fields.tsx · icons.tsx · offer-actions.tsx · use-offer-draft.ts
+src/components/admin/letters/   the sheet, printing and in-place editing every letter uses
+src/lib/admin/offers/
+  types · stay · engine · extras · checks · document · schema · draft-ops · from-enquiry
+  recipient-guess       what the wizard reads from what is typed (pure)
+  wizard                the wizard's input schema and shapes (pure)
+  recipients            search, matches, the start from a record, finding or creating the recipient
+  repo                  offers: list, read, create, save, send, answer
 ```
 
 Audit: `staff_activity`, entity `offer` — created, duplicated, sent, accepted, declined, withdrawn,
@@ -197,11 +258,15 @@ revised, deleted (not every autosave).
 course price is typed; the workbook example with its missing materials fee; tickets; escorts three
 ways), the letter (du, numbering, facts, package, languages, no "Buchhaltung", no tax line), the
 checks, the enquiry hand-over, the write schema (strict) and the read-back (lenient).
+`recipient-guess.test.ts` covers the kind, name, country and language guesses and the name matching;
+the engine tests cover extras, reductions and the own offer; `document.test.ts` checks that a sent
+letter is read back whole and that a copy in another shape is refused.
 `e2e/offers.spec.ts` (needs `DATABASE_URL` and an owner; `E2E_PORT=3017 npx playwright test
-e2e/offers.spec.ts`): an offer started from "Who is it for?" prices itself, saves, survives a reload,
-keeps a typed price, has its title changed on the letter and is frozen when sent; an opening changed
-on the letter becomes the standard; a colleague's save in between is not overwritten. `npm run
-admin:check` loads the list, the start, an offer and its letter.
+e2e/offers.spec.ts`): an offer made through the wizard for a new school prices itself, saves, survives
+a reload, keeps a typed price, has its title changed on the letter and is kept in `letters` when sent;
+a package takes an extra afternoon, a transfer and a reduction, and the letter shows them; an opening
+changed on the letter becomes the standard; a colleague's save in between is not overwritten.
+`npm run admin:check` loads the list, the wizard, an offer and its letter.
 
 ## Open questions for CASA
 
@@ -220,5 +285,8 @@ admin:check` loads the list, the start, an offer and its letter.
 4. **Payment and cancellation terms** on the letter — a standard paragraph, or a link to the AGB?
 5. **du for public bodies.** The Jobcenter and companies get du like everyone (the house rule); the
    opening and closing can be rewritten per offer.
-6. **Next:** an accepted group offer becoming the group's bookings; sending from the workspace through
+6. **Prices for the usual extras.** Airport transfer, single room supplement, extra night and extra
+   lessons have no price in the groups sheets, so each is typed per offer. If they are standard
+   prices, they belong in `rates` and the preset can carry them.
+7. **Next:** an accepted group offer becoming the group's bookings; sending from the workspace through
    Microsoft Graph from the owner's mailbox; optional lines; agency commission.

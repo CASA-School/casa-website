@@ -2549,7 +2549,7 @@ the letter a hand-edited text that drifts from the offer (37602: 1,560 € in th
 letter), German and English labels that disagree, escorts as second offers, no status, no validity,
 Ina's group offers signed "– Buchhaltung –". docs/OFFERS.md has the measurements and the model.
 
-Built: migration 0021 (organisations, offers, offer_lines with `included`, offer_versions, offer_texts),
+Built: migration 0021 (organisations, offers, offer_lines with `included`; letters moved to 0022 later the same day),
 a pure engine on the groups page's four packages (`src/config/gruppen/packages.ts`: Hahn, Katze, Hund
 fixed with their price and what they include; Esel built from the Esel sheet's blocks and the sixteen
 activities — checked against the site's own `calculateEselQuote`), escorts paid/free/shared and
@@ -2564,3 +2564,17 @@ edited on the page, "Who is it for?" to start — and then asked for colour: a t
 chips, the packages as cards in the four CASA colours, meaning colours per included row, a dark price
 card, panels with a head and a foot, filled fields. The rest of the workspace follows this style
 next. Not merged, not deployed.
+
+Third pass, the same day. **Framing:** "so much white space" — the offer now stands on the canvas in
+white cards with a sticky column beside it (price, checks, a live miniature of the letter, history);
+the letter tab and the list are framed the same way. **A wizard** for a new offer: who it is for →
+what it is → the group → the letter, finding the recipient among enquiries, organisations (and their
+contacts, migration 0021 `organisation_contacts`) and learners, or creating them, with the kind,
+name, country and language read from what is typed and a warning when CASA already has them;
+"Like last time" repeats a school's last offer; "Make an offer" on a record opens it prefilled.
+**Packages are a start:** extras on top (more afternoons, transfer, single room, extra night,
+lessons, reductions), the package price typed over, a block left out rebuilds it as Esel, and an
+*Own offer* has no package. **Letters are their own layer** (migration 0022, docs/LETTERS.md): every
+letter as sent is a row of `letters`, read back through a schema check — the Letter tab had crashed
+on a copy stored before a field existed. Offers are the first kind; confirmations and visa letters
+are the next ones Rahman named.

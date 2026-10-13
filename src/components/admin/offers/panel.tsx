@@ -55,19 +55,27 @@ export function ClickPanel({
   block?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [up, setUp] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const close = () => setOpen(false);
   useDismiss(open, close, wrap);
 
   if (disabled) return block ? <div className={className}>{children}</div> : <span className={className}>{children}</span>;
 
+  // Near the foot of the window, the panel opens upwards instead of off the screen.
+  const toggle = () => {
+    const box = wrap.current?.getBoundingClientRect();
+    if (!open && box) setUp(window.innerHeight - box.bottom < 380 && box.top > window.innerHeight - box.bottom);
+    setOpen((v) => !v);
+  };
+
   return (
     <div ref={wrap} className={ui.anchor} style={{ display: block ? 'block' : 'inline-block' }}>
-      <button type="button" className={`${className} ${open && openClassName ? openClassName : ''}`} aria-expanded={open} aria-label={`${label}: change`} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className={`${className} ${open && openClassName ? openClassName : ''}`} aria-expanded={open} aria-label={`${label}: change`} onClick={toggle}>
         {children}
       </button>
       {open ? (
-        <div className={`${ui.pop} ${wide ? ui.popWide : ''}`} role="dialog" aria-label={label}>
+        <div className={`${ui.pop} ${wide ? ui.popWide : ''} ${up ? ui.popUp : ''}`} role="dialog" aria-label={label}>
           <div className={ui.popHead}>
             {icon}
             <span style={{ flex: 1, minWidth: 0 }}>

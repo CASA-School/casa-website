@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { OfferPage } from '@/components/admin/offers/offer-page';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { editorOptions, getOffer, priceListOptions, standardTexts } from '@/lib/admin/offers/repo';
+import { editorOptions, getOffer, offerTexts, priceListOptions } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
 
 /**
@@ -21,7 +21,7 @@ export default async function Page({
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const record = await getOffer(id);
   if (!record) notFound();
-  const [options, priceList, texts] = await Promise.all([editorOptions(), priceListOptions(), standardTexts()]);
+  const [options, priceList, texts] = await Promise.all([editorOptions(), priceListOptions(), offerTexts()]);
 
   return (
     <OfferPage

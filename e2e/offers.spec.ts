@@ -37,7 +37,7 @@ test.describe('offers', () => {
        VALUES ($1, $2, now() + interval '10 minutes', 'e2e:offers')`,
       [rows[0].id, tokenHash]
     );
-    texts = (await client.query(`SELECT language, part, body FROM offer_texts`)).rows;
+    texts = (await client.query(`SELECT language, part, body FROM letter_texts WHERE kind = 'offer'`)).rows;
     started = (await client.query<{ t: Date }>(`SELECT now() AS t`)).rows[0].t;
   });
 
@@ -45,11 +45,14 @@ test.describe('offers', () => {
     if (!client) return;
     const { rows } = await client.query<{ id: string }>(`SELECT id FROM offers WHERE created_at >= $1`, [started]);
     const ids = rows.map((r) => r.id);
-    await client.query(`DELETE FROM staff_activity WHERE (entity = 'offer' AND entity_id = ANY($1::uuid[])) OR (entity = 'offer_text' AND created_at >= $2)`, [ids, started]);
+    await client.query(`DELETE FROM staff_activity WHERE (entity = 'offer' AND entity_id = ANY($1::uuid[])) OR (entity = 'letter_text' AND created_at >= $2)`, [ids, started]);
+    await client.query(`DELETE FROM letters WHERE offer_id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM offers WHERE id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM organisations WHERE name = $1 AND created_at >= $2`, [ORGANISATION, started]);
-    await client.query(`DELETE FROM offer_texts`);
-    for (const t of texts) await client.query(`INSERT INTO offer_texts (language, part, body) VALUES ($1, $2, $3)`, [t.language, t.part, t.body]);
+    await client.query(`DELETE FROM letter_texts WHERE kind = 'offer'`);
+    for (const t of texts) {
+      await client.query(`INSERT INTO letter_texts (kind, language, part, body) VALUES ('offer', $1, $2, $3)`, [t.language, t.part, t.body]);
+    }
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });
@@ -58,10 +61,19 @@ test.describe('offers', () => {
     await context.addCookies([{ name: 'casa_workspace_session', value: token, url: baseURL! }]);
   });
 
+  /** Through the wizard: a school nobody has had an offer before, on the default package. */
   async function newGroupOffer(page: Page) {
     await page.goto('/admin/offers/new');
     await page.getByLabel('Who the offer is for').fill(ORGANISATION);
-    await page.getByRole('button', { name: /New organisation · a group offer/ }).click();
+    await page.getByRole('button', { name: /as new/ }).click();
+    // "Istituto …" reads as a school.
+    await expect(page.getByRole('radio', { name: 'School' })).toHaveAttribute('aria-checked', 'true');
+    const next = page.getByRole('button', { name: 'Continue' });
+    await next.click();
+    await expect(page.getByRole('radio', { name: /Katze/ })).toHaveAttribute('aria-checked', 'true');
+    await next.click();
+    await next.click();
+    await page.getByRole('button', { name: 'Create offer' }).click();
     await expect(page).toHaveURL(/\/admin\/offers\/[0-9a-f-]{36}$/);
   }
 
@@ -112,7 +124,7 @@ test.describe('offers', () => {
     await expect(main).toContainText('13.200,00 €');
 
     // The letter is the other tab, written where it stands.
-    await page.getByRole('link', { name: 'Letter' }).click();
+    await page.getByRole('link', { name: 'Letter', exact: true }).click();
     await expect(page).toHaveURL(/\/letter$/);
     const letter = page.locator('article').first();
     await expect(letter).toContainText('Katze package · 2 weeks of exploring');
@@ -132,13 +144,50 @@ test.describe('offers', () => {
 
     const id = page.url().split('/').pop()!.split('?')[0];
     const { rows } = await client.query<{ status: string; versions: string; subject: string }>(
-      `SELECT o.status, (SELECT count(*) FROM offer_versions WHERE offer_id = o.id) AS versions,
-              (SELECT document->'letter'->>'subject' FROM offer_versions WHERE offer_id = o.id) AS subject
+      `SELECT o.status, (SELECT count(*) FROM letters WHERE offer_id = o.id) AS versions,
+              (SELECT subject FROM letters WHERE offer_id = o.id) AS subject
          FROM offers o WHERE o.id = $1`,
       [id]
     );
     expect(rows[0]).toMatchObject({ status: 'sent', versions: '1' });
     expect(rows[0].subject).toContain('German and culture in Bremen');
+  });
+
+  test('a package takes what the group wants on top: an afternoon, a transfer, a reduction', async ({ page }) => {
+    await newGroupOffer(page);
+    const main = page.locator('main');
+    await page.getByRole('radio', { name: /Hahn/ }).click();
+    await expect(main).toContainText('595,00 €');
+
+    await page.getByRole('button', { name: 'More afternoons: change' }).click();
+    await page.getByRole('button', { name: /Hafenrundfahrt/ }).click();
+    await done(page);
+    await expect(main).toContainText('622,00 €');
+
+    await page.getByRole('button', { name: '+ Add an extra' }).click();
+    await page.getByRole('menuitem', { name: 'Airport transfer' }).click();
+    await page.getByRole('button', { name: /^Airport transfer.*: change$/ }).click();
+    const price = page.getByRole('textbox', { name: 'Price', exact: true });
+    await price.fill('35');
+    await price.blur();
+    await done(page);
+    await expect(main).toContainText('657,00 €');
+
+    await page.getByRole('button', { name: '+ Add an extra' }).click();
+    await page.getByRole('menuitem', { name: 'A reduction' }).click();
+    await page.getByRole('button', { name: 'Reduction: change' }).click();
+    const less = page.getByRole('textbox', { name: 'Taken off, per person' });
+    await less.fill('20');
+    await less.blur();
+    await done(page);
+    await expect(main).toContainText('637,00 €');
+    await saved(page);
+
+    await page.getByRole('link', { name: 'Letter', exact: true }).click();
+    const letter = page.locator('article').first();
+    await expect(letter).toContainText('Additional programme: Hafenrundfahrt');
+    await expect(letter).toContainText('Airport transfer (both ways)');
+    await expect(letter).toContainText('€637.00');
   });
 
   test('an opening changed on the letter becomes the standard for every offer', async ({ page }) => {
@@ -147,13 +196,16 @@ test.describe('offers', () => {
     await page.getByRole('button', { name: 'Change opening' }).click();
     const opening = page.getByRole('textbox', { name: 'Opening' });
     await opening.fill('Thank you for thinking of CASA for your group. Here is what we suggest:');
-    await expect(page.getByText('Only this offer')).toBeVisible();
+    const bar = page.getByRole('toolbar', { name: 'Opening' });
+    await expect(bar.getByText('Only this letter', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Save as standard' }).click();
     // The text is the standard now, so this offer follows it again.
-    await expect(page.getByText('Standard text', { exact: true })).toBeVisible();
-    await expect(page.getByText('Only this offer')).toHaveCount(0);
+    await expect(bar.getByText('Standard text', { exact: true })).toBeVisible();
+    await expect(page.getByText('Only this letter', { exact: true })).toHaveCount(0);
 
-    const { rows } = await client.query<{ body: string }>(`SELECT body FROM offer_texts WHERE language = 'en' AND part = 'intro'`);
+    const { rows } = await client.query<{ body: string }>(
+      `SELECT body FROM letter_texts WHERE kind = 'offer' AND language = 'en' AND part = 'intro'`
+    );
     expect(rows[0]?.body).toBe('Thank you for thinking of CASA for your group. Here is what we suggest:');
   });
 

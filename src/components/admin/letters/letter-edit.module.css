@@ -1,0 +1,52 @@
+/*
+ * Editing a letter where it stands, the website editor's way (docs/LETTERS.md).
+ *
+ * Text on the page shows a soft blue outline under the pointer and turns into
+ * the same text, editable, on a click — with a small bar under it. The bars and
+ * panels set their own type (14px), because the page around them is sized in
+ * container units.
+ */
+.editable { border-radius: 3px; cursor: text; transition: background 0.12s, box-shadow 0.12s; }
+.editable:hover, .editableOpen { background: rgba(10, 132, 198, 0.07); box-shadow: 0 0 0 0.35em rgba(10, 132, 198, 0.07), 0 0.12em 0 0 rgba(10, 132, 198, 0.55); }
+.editable:focus-visible { outline: 2px solid #0a84c6; outline-offset: 2px; }
+.editableBlock { display: block; }
+.placeholder { color: #98a3b3; font-style: italic; }
+
+.inlineWrap { position: relative; display: inline; }
+.inlineBlock { display: block; }
+.inlineArea { display: inline-block; vertical-align: top; width: 100%; min-width: 12em; font: inherit; color: inherit; line-height: inherit; letter-spacing: inherit; border: 0; padding: 0.15em 0.3em; margin: -0.15em -0.3em; background: #fff; border-radius: 4px; box-shadow: 0 0 0 2px #0a84c6, 0 0 0 6px #e3f4fc; resize: none; overflow: hidden; field-sizing: content; }
+.inlineBlock .inlineArea { display: block; width: calc(100% + 0.6em); }
+.inlineArea:focus { outline: none; }
+
+.bar { position: absolute; z-index: 40; top: calc(100% + 12px); left: -6px; display: flex; align-items: center; gap: 4px; padding: 5px; background: #fff; border-radius: 12px; box-shadow: 0 28px 70px -24px rgba(15, 23, 42, 0.42), 0 0 0 1px rgba(15, 23, 42, 0.07); font-family: var(--font-sans), system-ui, sans-serif; font-size: 12.5px; font-weight: 600; line-height: 1.2; white-space: nowrap; color: #111827; animation: pop 150ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.barLabel { padding: 0 8px; color: #5f6b7d; }
+.barBtn { height: 30px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #111827; font-weight: 700; font-size: 12.5px; }
+.barBtn:hover { background: #f0f4f9; }
+.barBtn:disabled { color: #5f6b7d; cursor: default; background: transparent; }
+.barDone { height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: #111827; color: #fff; font-weight: 700; font-size: 12.5px; }
+.chipStandard, .chipChanged { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+.chipStandard { background: #e7f6ec; color: #137a3c; }
+.chipChanged { background: #fff4dc; color: #8a5300; }
+
+.panel { position: absolute; z-index: 40; top: calc(100% + 12px); left: -8px; display: block; padding: 16px; background: #fff; border-radius: 16px; box-shadow: 0 28px 70px -24px rgba(15, 23, 42, 0.42), 0 0 0 1px rgba(15, 23, 42, 0.07); font-family: var(--font-sans), system-ui, sans-serif; font-size: 14px; font-weight: 400; line-height: 1.45; color: #111827; text-align: left; white-space: normal; cursor: default; animation: pop 150ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.panelHead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; font-weight: 800; font-size: 14px; }
+.choices { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.choice { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 36px; padding: 0 10px; border: 0; border-radius: 9px; background: transparent; text-align: left; font-weight: 600; color: #111827; }
+.choice:hover { background: #f0f4f9; }
+.choiceOn { background: #e3f4fc; color: #075985; }
+.quick { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.quick button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid #dbe2ec; background: #fff; font-weight: 700; font-size: 12.5px; color: #111827; }
+.quick button:hover { border-color: #c3ccda; }
+.dateIn { width: 100%; height: 40px; margin-top: 10px; border: 1px solid #dbe2ec; border-radius: 10px; padding: 0 12px; font: inherit; font-size: 14px; }
+.dateIn:focus { outline: none; border-color: #0a84c6; }
+
+.addNote { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 0.4em 0.8em; border: 1px dashed #c3ccda; border-radius: 6px; background: transparent; color: #5f6b7d; font-family: var(--font-sans), system-ui, sans-serif; font-size: 12.5px; font-weight: 700; }
+.addNote:hover { border-color: #0a84c6; color: #0a84c6; background: rgba(10, 132, 198, 0.04); }
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar, .panel { animation: none; }
+}

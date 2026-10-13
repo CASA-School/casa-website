@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
-import ui from './letter-view.module.css';
+import ui from './letter-edit.module.css';
 
 /**
  * Editing on the letter itself, the website editor's way: a text shows a soft
@@ -125,7 +125,7 @@ export function InlineText({
       />
       <span className={ui.bar} role="toolbar" aria-label={label}>
         <span className={ui.barLabel}>{label}</span>
-        {state ? <span className={state === 'standard' ? ui.chipStandard : ui.chipChanged}>{state === 'standard' ? 'Standard text' : 'Only this offer'}</span> : null}
+        {state ? <span className={state === 'standard' ? ui.chipStandard : ui.chipChanged}>{state === 'standard' ? 'Standard text' : 'Only this letter'}</span> : null}
         {tools}
         {state === 'changed' && onUseStandard ? (
           <button type="button" className={ui.barBtn} onClick={onUseStandard}>

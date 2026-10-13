@@ -11,6 +11,14 @@
  *   Esel              — built: each block (course, materials, host family,
  *                       canteen, transport) priced for the stay's length, and
  *                       the afternoons chosen from the sixteen activities.
+ *   own               — no package: only the lines put on it.
+ *
+ * A package is not the end of it. Afternoons on top of what a package
+ * includes are priced from the same activity list (`extras`); anything else a
+ * group wants — a transfer, a single room, an extra night, a reduction — is a
+ * typed line, and a package price can be typed over. A package that loses a
+ * block becomes Esel, priced block by block, because the sheet has no price
+ * for "Katze without the host family".
  *
  * Escorts take no course and no materials; their stay is priced from the same
  * blocks. A price typed over a computed line is kept by the line's key and
@@ -30,7 +38,7 @@ import {
   type OfferLanguage,
   type OfferLine,
   type OfferTotals,
-  type PackageSlug,
+  type PackageChoice,
   type StayState,
 } from './types';
 
@@ -46,10 +54,13 @@ export type StayInput = {
 
 export type Measure = { nights: number; weeks: number; fromDates: boolean };
 
-/** The weeks a package is sold for; null for Esel, which takes the stay's. */
-export function packageWeeks(slug: PackageSlug): number | null {
-  return getGruppenPackage(slug)?.weeks ?? null;
+/** The weeks a package is sold for; null for Esel and an own offer, which take the stay's. */
+export function packageWeeks(choice: PackageChoice): number | null {
+  return choice === 'own' ? null : (getGruppenPackage(choice)?.weeks ?? null);
 }
+
+/** Hahn, Katze and Hund: one price for what they include. */
+export const isFixedPackage = (choice: PackageChoice) => choice !== 'esel' && choice !== 'own';
 
 /**
  * Nights and weeks. Dates decide when there are both; otherwise a fixed
@@ -68,10 +79,18 @@ export function pricedWeeks(input: Pick<StayInput, 'arrival' | 'departure' | 'st
   return packageWeeks(input.stay.choices.package) ?? measure(input).weeks;
 }
 
-/** The afternoons of the offer: a fixed package's own, or Esel's choice. */
+/** The afternoons a package brings: a fixed package's own, or Esel's choice. */
 export function activitiesOf(choices: StayState['choices']): string[] {
-  const pkg = getGruppenPackage(choices.package);
-  return choices.package === 'esel' ? choices.activities.filter((id) => activityById.has(id as never)) : (pkg?.activities ?? []);
+  if (choices.package === 'own') return [];
+  if (choices.package === 'esel') return choices.activities.filter((id) => activityById.has(id as never));
+  return getGruppenPackage(choices.package)?.activities ?? [];
+}
+
+/** Afternoons on top of the package. Esel chooses all of its own, so it has none. */
+export function extrasOf(choices: StayState['choices']): string[] {
+  if (choices.package === 'esel') return [];
+  const included = new Set(activitiesOf(choices));
+  return [...new Set(choices.extras)].filter((id) => activityById.has(id as never) && !included.has(id));
 }
 
 // ------------------------------------------------------------------ texts
@@ -87,6 +106,7 @@ const TEXT = {
     lunch: 'Mittagessen in der Kantine an Unterrichtstagen',
     transport: 'ÖPNV-Ticket Bremen für den ganzen Aufenthalt',
     programme: (names: string[]) => `Kulturprogramm: ${names.join(', ')}`,
+    extras: (names: string[]) => `Zusätzliches Programm: ${names.join(', ')}`,
     share: (escorts: number) =>
       escorts === 1 ? 'Anteil an den Kosten der Begleitperson' : 'Anteil an den Kosten der Begleitpersonen',
   },
@@ -98,6 +118,7 @@ const TEXT = {
     lunch: 'Lunch at the canteen on school days',
     transport: 'Bremen public transport ticket for the whole stay',
     programme: (names: string[]) => `Culture programme: ${names.join(', ')}`,
+    extras: (names: string[]) => `Additional programme: ${names.join(', ')}`,
     share: (escorts: number) => (escorts === 1 ? "Share of the escort's costs" : "Share of the escorts' costs"),
   },
 } as const;
@@ -154,13 +175,16 @@ export function computedLines(input: StayInput): Computed[] {
   const { choices } = input.stay;
   const { nights } = measure(input);
   const weeks = pricedWeeks(input);
-  const pkg = getGruppenPackage(choices.package);
+  const fixed = isFixedPackage(choices.package);
+  const esel = choices.package === 'esel';
+  const pkg = fixed ? getGruppenPackage(choices.package) : undefined;
+  const nameOf = (id: string) => activityById.get(id as never)?.name ?? id;
+  const priceOf = (ids: string[]) => ids.reduce((s, id) => s + (activityById.get(id as never)?.price ?? 0), 0);
   const activities = activitiesOf(choices);
-  const names = activities.map((id) => activityById.get(id as never)?.name ?? id);
-  const programmePrice = activities.reduce((s, id) => s + (activityById.get(id as never)?.price ?? 0), 0);
+  const extras = extrasOf(choices);
   const out: Computed[] = [];
 
-  if (pkg && choices.package !== 'esel') {
+  if (pkg) {
     // A fixed package: its price, and what it includes without amounts.
     out.push(line('participant', 'package', 'group_package', t.package(pkg.animal[input.language], pkg.descriptor[input.language]), pkg.priceFrom));
     out.push(line('participant', 'inc:course', 'tuition', t.course(weeks), null, true));
@@ -168,25 +192,26 @@ export function computedLines(input: StayInput): Computed[] {
     out.push(line('participant', 'inc:lunch', 'catering', t.lunch, null, true));
     out.push(line('participant', 'inc:transport', 'travel_ticket', t.transport, null, true));
     out.push(line('participant', 'inc:materials', 'teaching_material', t.materials, null, true));
-    if (names.length) out.push(line('participant', 'inc:programme', 'culture_programme', t.programme(names), null, true));
-  } else {
+    if (activities.length) out.push(line('participant', 'inc:programme', 'culture_programme', t.programme(activities.map(nameOf)), null, true));
+  } else if (esel) {
     const m = choices.modules;
     if (m.course) out.push(line('participant', 'course', CHARGE_OF.course, t.course(weeks), modulePrice('course', weeks)));
     if (m.materials) out.push(line('participant', 'materials', CHARGE_OF.materials, t.materials, modulePrice('materials', weeks)));
     if (m.accommodation) out.push(line('participant', 'accommodation', CHARGE_OF.accommodation, t.accommodation(nights), modulePrice('accommodation', weeks)));
     if (m.lunch) out.push(line('participant', 'lunch', CHARGE_OF.lunch, t.lunch, modulePrice('lunch', weeks)));
     if (m.transport) out.push(line('participant', 'transport', CHARGE_OF.transport, t.transport, modulePrice('transport', weeks)));
-    if (names.length) out.push(line('participant', 'programme', CHARGE_OF.programme, t.programme(names), programmePrice));
+    if (activities.length) out.push(line('participant', 'programme', CHARGE_OF.programme, t.programme(activities.map(nameOf)), priceOf(activities)));
   }
+  if (extras.length) out.push(line('participant', 'extras', CHARGE_OF.programme, t.extras(extras.map(nameOf)), priceOf(extras)));
 
   // Escorts: the stay, the meals, the ticket and the afternoons; no course.
   if (input.escorts > 0) {
-    const fixed = choices.package !== 'esel';
     const m = choices.modules;
-    if (fixed || m.accommodation) out.push(line('escort', 'accommodation', CHARGE_OF.accommodation, t.accommodation(nights), modulePrice('accommodation', weeks)));
-    if (fixed || m.lunch) out.push(line('escort', 'lunch', CHARGE_OF.lunch, t.lunch, modulePrice('lunch', weeks)));
-    if (fixed || m.transport) out.push(line('escort', 'transport', CHARGE_OF.transport, t.transport, modulePrice('transport', weeks)));
-    if (names.length) out.push(line('escort', 'programme', CHARGE_OF.programme, t.programme(names), programmePrice));
+    if (fixed || (esel && m.accommodation)) out.push(line('escort', 'accommodation', CHARGE_OF.accommodation, t.accommodation(nights), modulePrice('accommodation', weeks)));
+    if (fixed || (esel && m.lunch)) out.push(line('escort', 'lunch', CHARGE_OF.lunch, t.lunch, modulePrice('lunch', weeks)));
+    if (fixed || (esel && m.transport)) out.push(line('escort', 'transport', CHARGE_OF.transport, t.transport, modulePrice('transport', weeks)));
+    if (activities.length) out.push(line('escort', 'programme', CHARGE_OF.programme, t.programme(activities.map(nameOf)), priceOf(activities)));
+    if (extras.length) out.push(line('escort', 'extras', CHARGE_OF.programme, t.extras(extras.map(nameOf)), priceOf(extras)));
   }
   return out;
 }

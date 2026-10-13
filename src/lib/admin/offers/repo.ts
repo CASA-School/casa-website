@@ -4,12 +4,14 @@ import type { PoolClient } from 'pg';
 
 import type { StaffUser } from '../auth';
 import { query, queryFirst, withTransaction } from '../db';
+import { issueLetter, lettersForOffer, saveStandardText, standardTexts, type LetterListItem } from '../letters/repo';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
 import { hasProblems, offerChecks } from './checks';
-import { DEFAULT_TEXT, type OfferLetter } from './document';
+import { OFFER_TEXT_DEFAULTS, offerLetter, type OfferTexts } from './document';
+import { newManualKey } from './draft-ops';
 import { buildLines, computeTotals } from './engine';
-import { choicesFromBrief, participantsFromBrief } from './from-enquiry';
+import { resolveRecipient, upsertContact } from './recipients';
 import { normaliseStay } from './schema';
 import { addDays } from './stay';
 import {
@@ -22,18 +24,19 @@ import {
   type OfferLine,
   type OfferStatus,
   type OfferTotals,
-  type OrganisationKind,
   type Salutation,
   type StayState,
 } from './types';
+import { DEFAULT_TITLE, VALID_FOR_DAYS, type NewOfferInput } from './wizard';
 
 /**
  * Offers in the database. docs/OFFERS.md has the model.
  *
- * Every save recomputes the lines on the server from the draft and the rates
- * valid on the arrival date, and replaces the stored lines in the same
+ * Every save recomputes the lines on the server from the draft with the same
+ * pure engine the page uses, and replaces the stored lines in the same
  * transaction; the client never sends an amount it computed itself, only the
- * prices typed over the computed ones.
+ * prices typed over the computed ones. Sending writes the letter to `letters`
+ * (docs/LETTERS.md) in the transaction that marks the offer as sent.
  */
 
 // ------------------------------------------------------------------ reads
@@ -121,7 +124,6 @@ const OFFER_SELECT = `
     LEFT JOIN staff_users sb ON sb.id = o.sent_by
     LEFT JOIN staff_users db ON db.id = o.decided_by`;
 
-/** Today, unless an offer that has gone out keeps the day it went. */
 const today = () => todayInputValue();
 
 export type OfferListFilter = 'open' | 'draft' | 'sent' | 'accepted' | 'declined' | 'all';
@@ -257,7 +259,6 @@ export type OfferMeta = {
   decisionNote: string | null;
 };
 
-export type OfferVersionItem = { version: number; sentAt: Date; sentByName: string | null };
 export type RelatedOffer = { id: string; number: string; title: string; status: OfferStatus; createdAt: Date; perParticipant: number | null };
 
 export type OfferRecord = {
@@ -266,7 +267,8 @@ export type OfferRecord = {
   lines: OfferLine[];
   totals: OfferTotals;
   checks: OfferCheck[];
-  versions: OfferVersionItem[];
+  /** The letters sent, the latest first. */
+  letters: LetterListItem[];
   related: RelatedOffer[];
   enquiryBrief: { preferredDates: string | null; message: string | null } | null;
 };
@@ -309,8 +311,8 @@ export async function getOffer(id: string): Promise<OfferRecord | null> {
   if (!row) return null;
   const draft = draftFromRow(row);
 
-  // A draft is priced live, so a price list change shows at once. An offer
-  // that has gone out shows the lines it went out with.
+  // A draft is priced live, so a price change shows at once. An offer that
+  // has gone out shows the lines it went out with.
   let lines: OfferLine[];
   let totals: OfferTotals;
   let checks: OfferCheck[];
@@ -322,13 +324,8 @@ export async function getOffer(id: string): Promise<OfferRecord | null> {
     checks = [];
   }
 
-  const [versions, related, enquiry] = await Promise.all([
-    query<{ version: number; sent_at: Date; sent_by_name: string | null }>(
-      `SELECT v.version, v.sent_at, s.name AS sent_by_name
-         FROM offer_versions v LEFT JOIN staff_users s ON s.id = v.sent_by
-        WHERE v.offer_id = $1 ORDER BY v.version DESC`,
-      [id]
-    ),
+  const [letters, related, enquiry] = await Promise.all([
+    lettersForOffer(id),
     row.organisation_id
       ? query<{ id: string; year: number; seq: number; title: string; status: OfferStatus; created_at: Date; p_sum: string | null }>(
           `SELECT o.id, o.year, o.seq, o.title, o.status, o.created_at,
@@ -353,7 +350,7 @@ export async function getOffer(id: string): Promise<OfferRecord | null> {
     lines,
     totals,
     checks,
-    versions: versions.map((v) => ({ version: v.version, sentAt: v.sent_at, sentByName: v.sent_by_name })),
+    letters,
     related: related.map((o) => ({
       id: o.id,
       number: formatOfferNumber(o.year, o.seq),
@@ -497,141 +494,86 @@ export async function saveOffer(id: string, draft: OfferDraft, baseRevision: num
   });
 }
 
-export type NewOffer = {
-  kind: OfferKind;
-  language: OfferLanguage;
-  recipientName: string;
-  organisationId: string | null;
-  organisationKind: OrganisationKind | null;
-  enquiryId: string | null;
-  personId: string | null;
-};
-
-const DEFAULT_TITLE = {
-  group: { de: 'Deutschkurs in Bremen', en: 'German course in Bremen' },
-  individual: { de: 'Deutschkurs', en: 'German course' },
-} as const;
-
-/** How long a new offer is valid. */
-export const VALID_FOR_DAYS = 28;
-
-export async function createOffer(input: NewOffer, actor: StaffUser): Promise<string> {
+/**
+ * A new offer from the wizard: its recipient found or created, filled from the
+ * enquiry it answers and from the earlier offer it repeats, numbered, priced
+ * and stored — one transaction, so a failed step leaves nothing behind.
+ */
+export async function createOffer(input: NewOfferInput, actor: StaffUser): Promise<string> {
   return withTransaction(async (client) => {
+    const to = await resolveRecipient(client, input.recipient, input.language, actor);
+
+    let stay: StayState = { choices: { ...DEFAULT_STAY }, overrides: {}, manual: [] };
+    let presentation: OfferDraft['presentation'] = 'itemised';
+    let participants: number | null = null;
+    let escorts = 0;
+    let basedOn: string | null = null;
+    if (input.basedOn) {
+      const { rows } = await client.query<{ id: string; stay: unknown; presentation: OfferDraft['presentation']; participants: number | null; escorts: number }>(
+        `SELECT id, stay, presentation, participants, escorts FROM offers WHERE id = $1 AND deleted_at IS NULL`,
+        [input.basedOn]
+      );
+      if (rows[0]) {
+        basedOn = rows[0].id;
+        stay = normaliseStay(rows[0].stay);
+        presentation = rows[0].presentation;
+        participants = rows[0].participants;
+        escorts = rows[0].escorts;
+      }
+    }
+    if (input.kind === 'group' && input.group) {
+      stay = { ...stay, choices: { ...stay.choices, package: input.group.package, weeks: input.group.weeks } };
+      participants = input.group.participants ?? participants;
+      escorts = input.group.escorts;
+    }
+    if (input.lines.length) {
+      stay = {
+        ...stay,
+        manual: [
+          ...stay.manual,
+          ...input.lines.map((l) => ({
+            key: newManualKey(),
+            audience: 'participant' as const,
+            chargeType: l.chargeType,
+            description: input.language === 'de' ? l.de : l.en,
+            quantity: 1,
+            unitAmount: l.unitAmount,
+          })),
+        ],
+      };
+    }
+
     const draft: OfferDraft = {
       kind: input.kind,
       language: input.language,
-      presentation: 'itemised',
-      title: DEFAULT_TITLE[input.kind][input.language],
-      groupName: '',
-      organisationId: null,
-      recipientName: input.recipientName.trim(),
-      contactSalutation: 'none',
-      contactFirstName: '',
-      contactLastName: '',
-      contactEmail: '',
-      address: '',
-      countryCode: null,
-      arrival: null,
-      departure: null,
-      participants: null,
-      escorts: 0,
-      stay: { choices: { ...DEFAULT_STAY }, overrides: {}, manual: [] },
+      presentation,
+      title: input.title || DEFAULT_TITLE[input.kind][input.language],
+      groupName: input.groupName,
+      organisationId: to.organisationId,
+      recipientName: to.name,
+      contactSalutation: to.salutation,
+      contactFirstName: to.firstName,
+      contactLastName: to.lastName,
+      contactEmail: to.email,
+      address: to.address,
+      countryCode: to.countryCode,
+      arrival: input.group?.arrival ?? null,
+      departure: input.group?.departure ?? null,
+      participants: input.kind === 'group' ? participants : null,
+      escorts: input.kind === 'group' ? escorts : 0,
+      stay,
       intro: null,
       closing: null,
       note: null,
-      validUntil: addDays(today(), VALID_FOR_DAYS),
-      ownerId: actor.id,
+      validUntil: input.validUntil ?? addDays(today(), VALID_FOR_DAYS),
+      ownerId: input.ownerId ?? actor.id,
     };
-
-    // From an enquiry: the organiser, their brief, their language.
-    if (input.enquiryId) {
-      const { rows } = await client.query<{
-        first_name: string;
-        last_name: string | null;
-        email: string;
-        locale: string;
-        organiser_brief: Record<string, unknown> | null;
-      }>(`SELECT first_name, last_name, email, locale, organiser_brief FROM enquiries WHERE id = $1`, [input.enquiryId]);
-      const e = rows[0];
-      if (e) {
-        draft.contactFirstName = e.first_name;
-        draft.contactLastName = e.last_name ?? '';
-        draft.contactEmail = e.email;
-        const org = typeof e.organiser_brief?.organisationName === 'string' ? (e.organiser_brief.organisationName as string) : '';
-        if (!draft.recipientName) draft.recipientName = org || [e.first_name, e.last_name].filter(Boolean).join(' ');
-        if (input.kind === 'group') {
-          draft.stay.choices = choicesFromBrief(e.organiser_brief);
-          draft.participants = participantsFromBrief(e.organiser_brief);
-        }
-      }
-    }
-
-    // For a learner: their name and their address.
-    if (input.personId) {
-      const { rows } = await client.query<{ salutation: string | null; first_name: string; last_name: string | null; email: string | null }>(
-        `SELECT p.salutation, p.first_name, p.last_name,
-                (SELECT address FROM emails WHERE person_id = p.id ORDER BY created_at DESC LIMIT 1) AS email
-           FROM people p WHERE p.id = canonical_person_id($1)`,
-        [input.personId]
-      );
-      const p = rows[0];
-      if (p) {
-        draft.contactSalutation = p.salutation === 'ms' || p.salutation === 'mr' ? p.salutation : 'none';
-        draft.contactFirstName = p.first_name;
-        draft.contactLastName = p.last_name ?? '';
-        draft.contactEmail = p.email ?? '';
-        if (!draft.recipientName) draft.recipientName = [p.first_name, p.last_name].filter(Boolean).join(' ');
-      }
-    }
-
-    // An organisation picked from the list lends its contact and address; a
-    // new name becomes an organisation, so its next offer finds this one.
-    if (input.organisationId) {
-      const { rows } = await client.query<{
-        name: string;
-        address: string | null;
-        country_code: string | null;
-        contact_salutation: Salutation;
-        contact_first_name: string | null;
-        contact_last_name: string | null;
-        contact_email: string | null;
-        language: OfferLanguage;
-      }>(`SELECT * FROM organisations WHERE id = $1`, [input.organisationId]);
-      const o = rows[0];
-      if (o) {
-        draft.organisationId = input.organisationId;
-        draft.recipientName = o.name;
-        draft.address = o.address ?? '';
-        draft.countryCode = o.country_code?.trim() ?? null;
-        if (!draft.contactEmail) {
-          draft.contactSalutation = o.contact_salutation;
-          draft.contactFirstName = o.contact_first_name ?? '';
-          draft.contactLastName = o.contact_last_name ?? '';
-          draft.contactEmail = o.contact_email ?? '';
-        }
-      }
-    } else if (input.kind === 'group' && draft.recipientName) {
-      const { rows } = await client.query<{ id: string }>(
-        `INSERT INTO organisations (name, kind, language, contact_first_name, contact_last_name, contact_email, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-        [
-          draft.recipientName,
-          input.organisationKind ?? 'other',
-          draft.language,
-          draft.contactFirstName || null,
-          draft.contactLastName || null,
-          draft.contactEmail || null,
-          actor.id,
-        ]
-      );
-      draft.organisationId = rows[0].id;
-    }
 
     const { year, seq } = await nextNumber(client);
     const { rows } = await client.query<{ id: string }>(
-      `INSERT INTO offers (year, seq, person_id, enquiry_id, created_by, updated_by)
-       VALUES ($1, $2, $3, $4, $5, $5) RETURNING id`,
-      [year, seq, input.personId, input.enquiryId, actor.id]
+      `INSERT INTO offers (year, seq, person_id, enquiry_id, copied_from, created_by, updated_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id`,
+      [year, seq, to.personId, input.enquiryId, basedOn, actor.id]
     );
     const id = rows[0].id;
     const priced = priceDraft(draft);
@@ -661,20 +603,25 @@ export async function duplicateOffer(id: string, actor: StaffUser): Promise<stri
   });
 }
 
-export type SendResult = { ok: true; letter: OfferLetter } | { ok: false; error: string };
+// ------------------------------------------------------------- sending
+
+export type SendResult = { ok: true } | { ok: false; error: string };
+
+async function nameOf(client: PoolClient, sql: string, value: string): Promise<string | null> {
+  const { rows } = await client.query<{ name: string }>(sql, [value]);
+  return rows[0]?.name ?? null;
+}
 
 /**
- * The offer goes out: its letter is frozen as a version, the status moves to
- * sent, and the organisation learns the address and contact it was sent to.
- * Refused while a check reports a problem — that is what kept FileMaker's
- * empty offer 37622 from being stopped.
+ * The offer goes out: its letter is kept in `letters` as it is now, the status
+ * moves to sent, and the organisation learns the address and the contact it
+ * was sent to. Refused while a check reports a problem — that is what kept
+ * FileMaker's empty offer 37622 from being stopped.
  */
-export async function markSent(id: string, actor: StaffUser, letterFor: (draft: OfferDraft, lines: OfferLine[], totals: OfferTotals, number: string, version: number, countryName: string | null, signatureName: string | null) => OfferLetter): Promise<SendResult> {
+export async function markSent(id: string, actor: StaffUser): Promise<SendResult> {
+  const texts = await offerTexts();
   return withTransaction(async (client) => {
-    const { rows } = await client.query<OfferRow>(
-      `${OFFER_SELECT} WHERE o.id = $1 AND o.deleted_at IS NULL FOR UPDATE OF o`,
-      [id]
-    );
+    const { rows } = await client.query<OfferRow>(`${OFFER_SELECT} WHERE o.id = $1 AND o.deleted_at IS NULL FOR UPDATE OF o`, [id]);
     const row = rows[0];
     if (!row) return { ok: false, error: 'This offer no longer exists.' };
     if (row.status !== 'draft') return { ok: false, error: 'This offer has already been sent.' };
@@ -684,21 +631,33 @@ export async function markSent(id: string, actor: StaffUser, letterFor: (draft: 
       return { ok: false, error: priced.checks.filter((c) => c.level === 'problem').map((c) => c.message).join(' · ') };
     }
     const version = row.version + 1;
-    const country = draft.countryCode
-      ? (await client.query<{ name: string }>(
-          `SELECT ${draft.language === 'de' ? 'name_de' : 'name_en'} AS name FROM countries WHERE code = $1`,
-          [draft.countryCode]
-        )).rows[0]?.name ?? null
+    const countryName = draft.countryCode
+      ? await nameOf(client, `SELECT ${draft.language === 'de' ? 'name_de' : 'name_en'} AS name FROM countries WHERE code = $1`, draft.countryCode)
       : null;
-    const signer = draft.ownerId
-      ? (await client.query<{ name: string }>(`SELECT name FROM staff_users WHERE id = $1`, [draft.ownerId])).rows[0]?.name ?? actor.name
-      : actor.name;
-    const letter = letterFor(draft, priced.lines, priced.totals, formatOfferNumber(row.year, row.seq), version, country, signer);
+    const signatureName = draft.ownerId ? ((await nameOf(client, `SELECT name FROM staff_users WHERE id = $1`, draft.ownerId)) ?? actor.name) : actor.name;
+    const letter = offerLetter(draft, priced.lines, priced.totals, {
+      number: formatOfferNumber(row.year, row.seq),
+      version,
+      date: today(),
+      countryName,
+      signatureName,
+      standard: texts[draft.language],
+    });
 
     await writeLines(client, id, priced.lines);
-    await client.query(
-      `INSERT INTO offer_versions (offer_id, version, document, sent_by) VALUES ($1, $2, $3, $4)`,
-      [id, version, JSON.stringify({ letter, lines: priced.lines, totals: priced.totals, draft }), actor.id]
+    await issueLetter(
+      client,
+      {
+        letter,
+        about: { offerId: id },
+        version,
+        organisationId: draft.organisationId,
+        personId: row.person_id,
+        recipientName: draft.recipientName,
+        email: draft.contactEmail,
+        source: { draft, lines: priced.lines, totals: priced.totals },
+      },
+      actor
     );
     await client.query(
       `UPDATE offers SET status = 'sent', version = $2, sent_at = now(), sent_by = $3,
@@ -709,33 +668,20 @@ export async function markSent(id: string, actor: StaffUser, letterFor: (draft: 
     );
     if (draft.organisationId) {
       await client.query(
-        `UPDATE organisations
-            SET name = $2, address = $3, country_code = $4, contact_salutation = $5,
-                contact_first_name = $6, contact_last_name = $7, contact_email = $8, language = $9
-          WHERE id = $1`,
-        [
-          draft.organisationId,
-          draft.recipientName,
-          draft.address || null,
-          draft.countryCode,
-          draft.contactSalutation,
-          draft.contactFirstName || null,
-          draft.contactLastName || null,
-          draft.contactEmail || null,
-          draft.language,
-        ]
+        `UPDATE organisations SET name = $2, address = $3, country_code = $4, language = $5 WHERE id = $1`,
+        [draft.organisationId, draft.recipientName, draft.address || null, draft.countryCode, draft.language]
       );
+      if (draft.contactFirstName || draft.contactLastName || draft.contactEmail) {
+        await upsertContact(
+          client,
+          draft.organisationId,
+          { salutation: draft.contactSalutation, firstName: draft.contactFirstName, lastName: draft.contactLastName, email: draft.contactEmail },
+          actor
+        );
+      }
     }
-    return { ok: true, letter };
+    return { ok: true };
   });
-}
-
-export async function getSentLetter(id: string, version: number): Promise<OfferLetter | null> {
-  const row = await queryFirst<{ document: { letter: OfferLetter } }>(
-    `SELECT document FROM offer_versions WHERE offer_id = $1 AND version = $2`,
-    [id, version]
-  );
-  return row?.document.letter ?? null;
 }
 
 export type Decision = 'accepted' | 'declined' | 'withdrawn';
@@ -783,125 +729,24 @@ export async function offersFor(where: { enquiryId?: string; personId?: string }
   return rows.map((r) => ({ id: r.id, number: formatOfferNumber(r.year, r.seq), status: r.status }));
 }
 
-// ------------------------------------------------------- who it is for
-
-export type RecipientResult =
-  | { type: 'organisation'; id: string; name: string; detail: string; language: OfferLanguage }
-  | { type: 'student'; id: string; name: string; detail: string }
-  | { type: 'enquiry'; id: string; name: string; detail: string; kind: 'group' | 'company' | 'general'; language: OfferLanguage };
-
-const KIND_WORD: Record<string, string> = { school: 'School', agency: 'Agency', company: 'Company', public_body: 'Public body', other: 'Organisation' };
-
-/**
- * The start of a new offer: who it is for. Earlier recipients, students and
- * group enquiries, matched on what is typed; with nothing typed, the group
- * enquiries still waiting for an offer and the latest recipients.
- */
-export async function findRecipients(q: string): Promise<RecipientResult[]> {
-  const term = q.trim().toLowerCase();
-  const like = `%${term}%`;
-  const [orgs, students, enquiries] = await Promise.all([
-    query<{ id: string; name: string; kind: string; language: OfferLanguage; offers: string; last: Date | null }>(
-      `SELECT g.id, g.name, g.kind, g.language,
-              (SELECT count(*) FROM offers o WHERE o.organisation_id = g.id AND o.deleted_at IS NULL) AS offers,
-              (SELECT max(o.created_at) FROM offers o WHERE o.organisation_id = g.id AND o.deleted_at IS NULL) AS last
-         FROM organisations g
-        WHERE $1 = '' OR lower(g.name) LIKE $2
-        ORDER BY last DESC NULLS LAST, lower(g.name) LIMIT $3`,
-      [term, like, term ? 6 : 4]
-    ),
-    term.length >= 2
-      ? query<{ id: string; first_name: string; last_name: string | null; email: string | null }>(
-          `SELECT p.id, p.first_name, p.last_name,
-                  (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY created_at DESC LIMIT 1) AS email
-             FROM people p
-            WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
-              AND (lower(p.first_name || ' ' || coalesce(p.last_name, '')) LIKE $1
-                   OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = p.id AND lower(e.address) LIKE $1))
-            ORDER BY lower(p.last_name), lower(p.first_name) LIMIT 6`,
-          [like]
-        )
-      : Promise.resolve([]),
-    query<{ id: string; kind: 'group' | 'company' | 'general'; locale: string; first_name: string; last_name: string | null; brief: Record<string, unknown> | null; submitted_at: Date }>(
-      `SELECT e.id, e.kind, e.locale, e.first_name, e.last_name, e.organiser_brief AS brief, e.submitted_at
-         FROM enquiries e
-        WHERE e.kind IN ('group', 'company')
-          AND NOT EXISTS (SELECT 1 FROM offers o WHERE o.enquiry_id = e.id AND o.deleted_at IS NULL)
-          AND ($1 = '' OR lower(coalesce(e.organiser_brief->>'organisationName', '') || ' ' || e.first_name || ' ' || coalesce(e.last_name, '') || ' ' || e.email) LIKE $2)
-        ORDER BY e.submitted_at DESC LIMIT 5`,
-      [term, like]
-    ),
-  ]);
-
-  const day = (d: Date) => toDateInputValue(d).split('-').reverse().join('.');
-  return [
-    ...enquiries.map((e) => {
-      const org = typeof e.brief?.organisationName === 'string' ? (e.brief.organisationName as string) : '';
-      const size = e.brief?.groupSize ? `${e.brief.groupSize} people` : '';
-      const when = typeof e.brief?.preferredDates === 'string' ? (e.brief.preferredDates as string) : '';
-      return {
-        type: 'enquiry' as const,
-        id: e.id,
-        name: org || [e.first_name, e.last_name].filter(Boolean).join(' '),
-        detail: [e.kind === 'company' ? 'Company enquiry' : 'Group enquiry', day(e.submitted_at), size, when].filter(Boolean).join(' · '),
-        kind: e.kind,
-        language: (e.locale === 'de' ? 'de' : 'en') as OfferLanguage,
-      };
-    }),
-    ...orgs.map((o) => ({
-      type: 'organisation' as const,
-      id: o.id,
-      name: o.name,
-      detail: [KIND_WORD[o.kind] ?? 'Organisation', Number(o.offers) === 1 ? '1 offer' : `${o.offers} offers`, o.last ? `last ${day(o.last)}` : ''].filter(Boolean).join(' · '),
-      language: o.language,
-    })),
-    ...students.map((p) => ({
-      type: 'student' as const,
-      id: p.id,
-      name: [p.first_name, p.last_name].filter(Boolean).join(' '),
-      detail: ['Student', p.email].filter(Boolean).join(' · '),
-    })),
-  ];
-}
-
 // ------------------------------------------------------- standard texts
 
-export type StandardTexts = Record<OfferLanguage, { intro: string; closing: string }>;
+export type StandardTexts = Record<OfferLanguage, OfferTexts>;
 
-/** The letter's standard opening and closing, per language: CASA's own, else the written defaults. */
-export async function standardTexts(): Promise<StandardTexts> {
-  const rows = await query<{ language: OfferLanguage; part: 'intro' | 'closing'; body: string }>(
-    `SELECT language, part, body FROM offer_texts`
-  );
-  const out: StandardTexts = {
-    de: { ...DEFAULT_TEXT.de },
-    en: { ...DEFAULT_TEXT.en },
+/** The offer letter's opening and closing per language: CASA's own, else the written defaults. */
+export async function offerTexts(): Promise<StandardTexts> {
+  const t = await standardTexts('offer', OFFER_TEXT_DEFAULTS);
+  return {
+    de: { intro: t.de.intro, closing: t.de.closing },
+    en: { intro: t.en.intro, closing: t.en.closing },
   };
-  for (const r of rows) out[r.language][r.part] = r.body;
-  return out;
 }
 
-export async function saveStandardText(language: OfferLanguage, part: 'intro' | 'closing', body: string, actor: StaffUser) {
-  await query(
-    `INSERT INTO offer_texts (language, part, body, updated_by) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (language, part) DO UPDATE SET body = EXCLUDED.body, updated_by = EXCLUDED.updated_by,
-                                                updated_at = timezone('utc', now())`,
-    [language, part, body, actor.id]
-  );
+export async function saveOfferText(language: OfferLanguage, part: keyof OfferTexts, body: string, actor: StaffUser) {
+  await saveStandardText('offer', language, part, body, actor);
 }
 
 // ------------------------------------------------------------ options
-
-export type OrganisationOption = { id: string; name: string; kind: OrganisationKind; offers: number };
-
-export async function listOrganisations(): Promise<OrganisationOption[]> {
-  const rows = await query<{ id: string; name: string; kind: OrganisationKind; offers: string }>(
-    `SELECT g.id, g.name, g.kind,
-            (SELECT count(*) FROM offers o WHERE o.organisation_id = g.id AND o.deleted_at IS NULL) AS offers
-       FROM organisations g ORDER BY lower(g.name)`
-  );
-  return rows.map((r) => ({ id: r.id, name: r.name, kind: r.kind, offers: Number(r.offers) }));
-}
 
 export type EditorOptions = {
   staff: { id: string; name: string }[];
@@ -1013,4 +858,3 @@ export async function priceListOptions(): Promise<PriceListItem[]> {
   return items;
 }
 
-export type { StayState };

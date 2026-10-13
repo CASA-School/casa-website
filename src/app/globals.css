@@ -2312,24 +2312,24 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 }
 
 /*
- * Printing an offer (docs/OFFERS.md). The editor renders the letter a second
- * time into a `[data-offer-print]` element on the body; on paper that element
- * is the whole document. The first page carries its margins inside the sheet,
- * a second page — rare for an offer — gets them from the page box.
+ * Printing a letter (docs/LETTERS.md). A letter view renders the letter a
+ * second time into a `[data-letter-print]` element on the body; on paper that
+ * element is the whole document. The first page carries its margins inside
+ * the sheet, a second page — rare for a letter — gets them from the page box.
  */
 @media print {
-  body:has(> [data-offer-print]) > :not([data-offer-print]) {
+  body:has(> [data-letter-print]) > :not([data-letter-print]) {
     display: none !important;
   }
-  body:has(> [data-offer-print]) {
+  body:has(> [data-letter-print]) {
     background: #fff !important;
   }
 }
-@page offer {
+@page letter {
   size: A4;
   margin: 18mm 0 16mm;
 }
-@page offer:first {
+@page letter:first {
   margin: 0 0 16mm;
 }
 

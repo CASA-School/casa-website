@@ -32,15 +32,19 @@
 --
 --   organisations   the schools, agencies, companies and public bodies CASA
 --                   makes offers to, so "earlier offers to Vivimondo" is a query.
+--   organisation_contacts
+--                   the people CASA writes to there. A school's organiser
+--                   changes from one year to the next; an agency has several.
+--                   They are contacts of an organisation, not learners, so
+--                   they are not rows of `people`.
 --   offers          one per offer, with the group (participants, escorts,
 --                   dates) and the builder's choices; a status and a validity.
 --   offer_lines     the priced lines, each with a fee type (so both languages
 --                   and the accounting category come from one place), the
 --                   list price it was computed from, and the agreed price.
---   offer_versions  the document exactly as it was sent, frozen.
---   offer_texts     the standard opening and closing, per language. An offer
---                   uses them until somebody changes its text on the letter;
---                   "Save as standard" changes them for every offer after.
+--
+-- The letter an offer is sent as, and its standard texts, are letters like any
+-- other CASA writes: 0022_letters.sql.
 
 -- The escorts' costs spread over the participants: FileMaker's typed
 -- "Umlage begleitende Lehrkraft", now a line the offer computes.
@@ -62,18 +66,13 @@ CREATE TABLE IF NOT EXISTS organisations (
   /* Postal address without the name: street, then postcode and town. */
   address text,
   country_code text REFERENCES countries (code) ON DELETE SET NULL,
-  /* The person CASA usually writes to there. */
-  contact_salutation text NOT NULL DEFAULT 'none',
-  contact_first_name text,
-  contact_last_name text,
-  contact_email text,
+  /* The language CASA writes to them in. */
   language text NOT NULL DEFAULT 'en',
   created_by uuid REFERENCES staff_users (id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
   updated_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
   CONSTRAINT organisations_kind_check
     CHECK (kind IN ('school', 'agency', 'company', 'public_body', 'other')),
-  CONSTRAINT organisations_salutation_check CHECK (contact_salutation IN ('ms', 'mr', 'none')),
   CONSTRAINT organisations_language_check CHECK (language IN ('de', 'en'))
 );
 CREATE INDEX IF NOT EXISTS organisations_name_idx ON organisations (lower(name));
@@ -81,6 +80,28 @@ CREATE INDEX IF NOT EXISTS organisations_name_idx ON organisations (lower(name))
 DROP TRIGGER IF EXISTS organisations_set_updated_at ON organisations;
 CREATE TRIGGER organisations_set_updated_at
   BEFORE UPDATE ON organisations FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+/* One row per person CASA writes to at an organisation, found again by their
+   address. `last_written_at` puts the one written to last at the top. */
+CREATE TABLE IF NOT EXISTS organisation_contacts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organisation_id uuid NOT NULL REFERENCES organisations (id) ON DELETE CASCADE,
+  salutation text NOT NULL DEFAULT 'none',
+  first_name text,
+  last_name text,
+  email text,
+  created_by uuid REFERENCES staff_users (id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
+  last_written_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
+  CONSTRAINT organisation_contacts_salutation_check CHECK (salutation IN ('ms', 'mr', 'none')),
+  CONSTRAINT organisation_contacts_named_check CHECK (coalesce(first_name, last_name, email) IS NOT NULL)
+);
+CREATE INDEX IF NOT EXISTS organisation_contacts_organisation_idx
+  ON organisation_contacts (organisation_id, last_written_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS organisation_contacts_email_key
+  ON organisation_contacts (organisation_id, lower(email)) WHERE email IS NOT NULL;
+CREATE INDEX IF NOT EXISTS organisation_contacts_email_idx
+  ON organisation_contacts (lower(email)) WHERE email IS NOT NULL;
 
 -- ------------------------------------------------------------------ offers
 
@@ -188,28 +209,3 @@ CREATE TABLE IF NOT EXISTS offer_lines (
   CONSTRAINT offer_lines_key_unique UNIQUE (offer_id, audience, key)
 );
 CREATE INDEX IF NOT EXISTS offer_lines_offer_idx ON offer_lines (offer_id, position);
-
-/* The document exactly as it went out. Editing an offer afterwards never
-   changes what the recipient was sent. */
-CREATE TABLE IF NOT EXISTS offer_versions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  offer_id uuid NOT NULL REFERENCES offers (id) ON DELETE CASCADE,
-  version integer NOT NULL,
-  document jsonb NOT NULL,
-  sent_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
-  sent_by uuid REFERENCES staff_users (id) ON DELETE SET NULL,
-  CONSTRAINT offer_versions_unique UNIQUE (offer_id, version)
-);
-
-/* The standard texts of the letter. No row means the text written in
-   src/lib/admin/offers/document.ts (DEFAULT_TEXT). */
-CREATE TABLE IF NOT EXISTS offer_texts (
-  language text NOT NULL,
-  part text NOT NULL,
-  body text NOT NULL,
-  updated_by uuid REFERENCES staff_users (id) ON DELETE SET NULL,
-  updated_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
-  PRIMARY KEY (language, part),
-  CONSTRAINT offer_texts_language_check CHECK (language IN ('de', 'en')),
-  CONSTRAINT offer_texts_part_check CHECK (part IN ('intro', 'closing'))
-);

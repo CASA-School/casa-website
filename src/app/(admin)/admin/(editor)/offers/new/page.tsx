@@ -1,14 +1,39 @@
 import { NewOffer } from '@/components/admin/offers/new-offer';
 import { requireModule } from '@/lib/admin/guard';
-import { findRecipients } from '@/lib/admin/offers/repo';
+import { findRecipients, wizardStart } from '@/lib/admin/offers/recipients';
+import { editorOptions, priceListOptions } from '@/lib/admin/offers/repo';
+import { todayInputValue } from '@/lib/dates';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const id = (v: string | undefined) => (v && UUID.test(v) ? v : undefined);
 
 /**
- * A new offer starts with one question: who is it for. An organisation that
- * had offers before brings its address and contact; a group enquiry brings
- * the group; a student brings the learner. docs/OFFERS.md.
+ * A new offer: the wizard. Opened from an enquiry (`?enquiry=`), a learner
+ * (`?person=`) or an organisation (`?organisation=`), it starts with that
+ * recipient filled in. docs/OFFERS.md §New offer.
  */
-export default async function NewOfferPage() {
-  await requireModule('offers', 'edit');
-  const suggestions = await findRecipients('');
-  return <NewOffer suggestions={suggestions} />;
+export default async function NewOfferPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ enquiry?: string; person?: string; organisation?: string }>;
+}) {
+  const [actor, sp] = await Promise.all([requireModule('offers', 'edit'), searchParams]);
+  const from = { enquiryId: id(sp.enquiry), personId: id(sp.person), organisationId: id(sp.organisation) };
+  const [start, suggestions, priceList, options] = await Promise.all([
+    from.enquiryId || from.personId || from.organisationId ? wizardStart(from) : Promise.resolve(null),
+    findRecipients('', 'all'),
+    priceListOptions(),
+    editorOptions(),
+  ]);
+  return (
+    <NewOffer
+      start={start}
+      suggestions={suggestions}
+      priceList={priceList}
+      staff={options.staff}
+      countries={options.countries}
+      me={actor.id}
+      today={todayInputValue()}
+    />
+  );
 }

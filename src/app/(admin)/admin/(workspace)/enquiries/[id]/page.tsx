@@ -72,12 +72,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         actions={
           <span className="inline-flex flex-wrap items-center gap-2">
             {canOffer ? (
-              <MakeOffer
-                kind={enquiry.kind === 'group' ? 'group' : 'individual'}
-                language={enquiry.locale === 'de' ? 'de' : 'en'}
-                enquiryId={enquiry.id}
-                existing={offers}
-              />
+              <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} />
             ) : null}
           <a
             href={`mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}`}

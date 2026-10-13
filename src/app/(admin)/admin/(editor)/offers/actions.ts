@@ -5,23 +5,12 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { logActivity } from '@/lib/admin/activity';
-import { todayInputValue } from '@/lib/dates';
 import { requireModule } from '@/lib/admin/guard';
-import { buildLetter } from '@/lib/admin/offers/document';
-import {
-  createOffer,
-  decideOffer,
-  findRecipients,
-  deleteOffer,
-  duplicateOffer,
-  markSent,
-  reviseOffer,
-  saveOffer,
-  saveStandardText,
-  standardTexts,
-} from '@/lib/admin/offers/repo';
+import { findRecipients, matchRecipients, wizardStart } from '@/lib/admin/offers/recipients';
+import { createOffer, decideOffer, deleteOffer, duplicateOffer, markSent, reviseOffer, saveOffer, saveOfferText } from '@/lib/admin/offers/repo';
 import { parseOfferDraft } from '@/lib/admin/offers/schema';
 import { ORGANISATION_KINDS } from '@/lib/admin/offers/types';
+import { NewOfferSchema } from '@/lib/admin/offers/wizard';
 
 /**
  * The offers module's writes. Every one asks `requireModule('offers', …)`
@@ -31,37 +20,24 @@ import { ORGANISATION_KINDS } from '@/lib/admin/offers/types';
  */
 
 const uuid = z.string().uuid();
-const optionalUuid = z
-  .string()
-  .optional()
-  .transform((v) => (v && v.trim() ? v.trim() : null))
-  .pipe(uuid.nullable());
+export type CreateOfferResult = { ok: true; id: string } | { ok: false; error: string };
 
-const NewOfferSchema = z.object({
-  kind: z.enum(['group', 'individual']),
-  language: z.enum(['de', 'en']),
-  recipientName: z.string().max(200).default(''),
-  organisationId: optionalUuid,
-  organisationKind: z.enum(ORGANISATION_KINDS).optional().nullable(),
-  enquiryId: optionalUuid,
-  personId: optionalUuid,
-});
-
-export async function createOfferAction(formData: FormData) {
+/**
+ * The wizard's one write: the recipient found or created, the offer made and
+ * filled (docs/OFFERS.md §New offer). The client opens the offer it returns.
+ */
+export async function createOfferAction(input: unknown): Promise<CreateOfferResult> {
   const actor = await requireModule('offers', 'edit');
-  const parsed = NewOfferSchema.safeParse({
-    kind: formData.get('kind'),
-    language: formData.get('language') ?? 'de',
-    recipientName: formData.get('recipientName') ?? '',
-    organisationId: formData.get('organisationId') ?? '',
-    organisationKind: formData.get('organisationKind') || null,
-    enquiryId: formData.get('enquiryId') ?? '',
-    personId: formData.get('personId') ?? '',
-  });
-  if (!parsed.success) redirect('/admin/offers?error=The+offer+could+not+be+created');
-  const id = await createOffer({ ...parsed.data, organisationKind: parsed.data.organisationKind ?? null }, actor);
-  await logActivity({ actor, entity: 'offer', entityId: id, action: 'offer_created' });
-  redirect(`/admin/offers/${id}`);
+  const parsed = NewOfferSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'The offer could not be created.' };
+  try {
+    const id = await createOffer(parsed.data, actor);
+    await logActivity({ actor, entity: 'offer', entityId: id, action: 'offer_created' });
+    revalidatePath('/admin/offers');
+    return { ok: true, id };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error && error.message.endsWith('.') ? error.message : 'The offer could not be created.' };
+  }
 }
 
 export type SaveOfferResult = { ok: true; revision: number } | { ok: false; error: string; stale?: boolean };
@@ -90,17 +66,7 @@ function offerId(formData: FormData): string {
 export async function sendOfferAction(formData: FormData) {
   const actor = await requireModule('offers', 'edit');
   const id = offerId(formData);
-  const texts = await standardTexts();
-  const result = await markSent(id, actor, (draft, lines, totals, number, version, countryName, signatureName) =>
-    buildLetter(draft, lines, totals, {
-      number,
-      version,
-      date: todayInputValue(),
-      countryName,
-      signatureName,
-      standard: texts[draft.language],
-    })
-  );
+  const result = await markSent(id, actor);
   if (!result.ok) redirect(`/admin/offers/${id}/letter?error=${encodeURIComponent(result.error)}`);
   await logActivity({ actor, entity: 'offer', entityId: id, action: 'offer_sent' });
   revalidatePath(`/admin/offers/${id}`);
@@ -168,13 +134,36 @@ export async function saveStandardTextAction(input: unknown): Promise<{ ok: bool
   const actor = await requireModule('offers', 'full');
   const parsed = StandardTextSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: 'The text could not be saved.' };
-  await saveStandardText(parsed.data.language, parsed.data.part, parsed.data.body, actor);
-  await logActivity({ actor, entity: 'offer_text', entityId: null, action: 'offer_standard_text_changed', detail: { language: parsed.data.language, part: parsed.data.part } });
+  await saveOfferText(parsed.data.language, parsed.data.part, parsed.data.body, actor);
+  await logActivity({ actor, entity: 'letter_text', entityId: null, action: 'letter_standard_text_changed', detail: { kind: 'offer', language: parsed.data.language, part: parsed.data.part } });
   return { ok: true };
 }
 
-/** Who a new offer is for: earlier recipients, students, group enquiries. */
-export async function findRecipientsAction(q: unknown) {
+const FILTERS = ['all', 'person', ...ORGANISATION_KINDS] as const;
+
+/** The wizard's search: enquiries waiting, organisations and their contacts, learners. */
+export async function findRecipientsAction(q: unknown, filter: unknown) {
   await requireModule('offers', 'edit');
-  return findRecipients(typeof q === 'string' ? q.slice(0, 80) : '');
+  const f = z.enum(FILTERS).catch('all').parse(filter);
+  return findRecipients(typeof q === 'string' ? q.slice(0, 80) : '', f);
+}
+
+/**
+ * A recipient picked in the wizard — an enquiry, an organisation, a learner —
+ * with what the next steps can use: the contacts, the last offer, the brief.
+ */
+export async function pickRecipientAction(input: unknown) {
+  await requireModule('offers', 'edit');
+  const parsed = z
+    .object({ enquiryId: uuid.optional(), personId: uuid.optional(), organisationId: uuid.optional() })
+    .refine((v) => [v.enquiryId, v.personId, v.organisationId].filter(Boolean).length === 1)
+    .safeParse(input);
+  return parsed.success ? wizardStart(parsed.data) : null;
+}
+
+/** Before a new recipient is made: who CASA already has that it may be. */
+export async function matchRecipientsAction(input: unknown) {
+  await requireModule('offers', 'edit');
+  const parsed = z.object({ name: z.string().max(200), email: z.string().max(200) }).safeParse(input);
+  return parsed.success ? matchRecipients(parsed.data) : [];
 }

@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation';
 import { LetterView } from '@/components/admin/offers/letter-view';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { editorOptions, getOffer, getSentLetter, standardTexts } from '@/lib/admin/offers/repo';
+import { sentOfferLetter } from '@/lib/admin/letters/repo';
+import { editorOptions, getOffer, offerTexts } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
 
 /**
  * The offer's letter, full screen. A draft is written on the page itself; an
  * offer that has gone out shows the letter exactly as it was sent
- * (`offer_versions`), `?version=N` an earlier one. docs/OFFERS.md.
+ * (`letters`), `?version=N` an earlier one. docs/LETTERS.md.
  */
 export default async function OfferLetterPage({
   params,
@@ -34,8 +35,8 @@ export default async function OfferLetterPage({
           : record.meta.version;
   const [options, texts, sentLetter] = await Promise.all([
     editorOptions(),
-    standardTexts(),
-    shownVersion ? getSentLetter(id, shownVersion) : Promise.resolve(null),
+    offerTexts(),
+    shownVersion ? sentOfferLetter(id, shownVersion) : Promise.resolve(null),
   ]);
 
   return (
@@ -45,7 +46,7 @@ export default async function OfferLetterPage({
       options={options}
       texts={texts}
       sentLetter={sentLetter}
-      shownVersion={sentLetter ? shownVersion : null}
+      shownVersion={shownVersion}
       today={todayInputValue()}
       canWrite={canAccess(user, 'offers', 'edit')}
       canDelete={canAccess(user, 'offers', 'full')}

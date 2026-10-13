@@ -18,7 +18,6 @@ export function OfferFrame({
   tabs,
   right,
   children,
-  canvas,
 }: {
   back: { href: string; label: string; before?: () => Promise<void> };
   title: string;
@@ -26,8 +25,6 @@ export function OfferFrame({
   tabs?: { id: string; active: 'offer' | 'letter'; before?: () => Promise<void> };
   right?: ReactNode;
   children: ReactNode;
-  /** The letter sits on the workspace's grey, like a page on a desk. */
-  canvas?: boolean;
 }) {
   const router = useRouter();
   const go = async (href: string, before?: () => Promise<void>) => {
@@ -35,7 +32,7 @@ export function OfferFrame({
     router.push(href);
   };
   return (
-    <div className={`${ui.app} ${ui.tokens}`} style={canvas ? { background: 'var(--ws-canvas, #e8edf4)' } : undefined}>
+    <div className={`${ui.app} ${ui.tokens}`}>
       <header className={ui.bar}>
         <div className={ui.barLeft}>
           {back.before ? (

@@ -116,6 +116,45 @@ describe('Esel, built by the group', () => {
   });
 });
 
+describe('adjusting a package', () => {
+  it('prices afternoons on top of a package, for participants and escorts, and never one the package has', () => {
+    const i = input({ package: 'hahn', extras: ['hafenrundfahrt', 'universum', 'daytrip-luebeck'] }, { departure: '2027-04-17', escorts: 1 });
+    const lines = buildLines(i);
+    // Universum is part of Hahn already.
+    expect(lines.find((l) => l.key === 'extras' && l.audience === 'participant')).toMatchObject({
+      description: 'Additional programme: Hafenrundfahrt, Daytrip Lübeck',
+      amount: 27 + 70,
+      included: false,
+    });
+    expect(lines.find((l) => l.key === 'extras' && l.audience === 'escort')?.amount).toBe(27 + 70);
+    expect(computeTotals(i, lines).perParticipant).toBe(595 + 97);
+  });
+
+  it('has no extras for Esel, which chooses all of its afternoons itself', () => {
+    expect(buildLines(input({ package: 'esel', modules: ALL, extras: ['hafenrundfahrt'] })).some((l) => l.key === 'extras')).toBe(false);
+  });
+
+  it('adds what the sheets have no price for as typed lines, and takes a reduction off', () => {
+    const i = input({ package: 'katze' });
+    i.stay.manual = [
+      { key: 'manual:room', audience: 'participant', chargeType: 'accommodation_rent', description: 'Single room supplement', quantity: 1, unitAmount: 120 },
+      { key: 'manual:less', audience: 'participant', chargeType: 'discount', description: 'Reduction', quantity: 1, unitAmount: -50 },
+    ];
+    expect(computeTotals(i, buildLines(i)).perParticipant).toBe(1130 + 120 - 50);
+  });
+});
+
+describe('an own offer: a group without a package', () => {
+  it('computes nothing; what is on it is what was put on it', () => {
+    const i = input({ package: 'own', weeks: 3, extras: ['stadtfuehrung'] }, { arrival: null, departure: null, escorts: 2 });
+    i.stay.manual = [{ key: 'manual:course', audience: 'participant', chargeType: 'tuition', description: 'Fachsprachkurs Pflege, 3 Wochen', quantity: 1, unitAmount: 690 }];
+    const lines = buildLines(i);
+    expect(lines.map((l) => `${l.audience}:${l.key}`)).toEqual(['participant:extras', 'participant:manual:course', 'escort:extras']);
+    expect(measure(i)).toEqual({ nights: 20, weeks: 3, fromDates: false });
+    expect(computeTotals(i, lines)).toMatchObject({ perParticipant: 5 + 690, perEscort: 5 });
+  });
+});
+
 describe('escorts', () => {
   const katze = (escortPricing: StayChoices['escortPricing'], escorts = 2) => input({ package: 'katze', escortPricing }, { escorts });
   const escortTotal = 450 + 120 + 50 + (3 + 7 + 12 + 3 + 10 + 14 + 30 + 25);

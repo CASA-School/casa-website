@@ -1,5 +1,5 @@
 /*
- * The offer letter: an A4 sheet, the same markup on screen and on paper.
+ * A CASA letter: an A4 sheet, the same markup on screen and on paper.
  *
  * Every measure is in container units (cqw) of the sheet's own width, so the
  * preview is the printed page at any size — 1cqw is 2.1mm on A4. Type is set
@@ -122,7 +122,6 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.muted { color: #9aa1ad; }
 .total {
   display: flex;
   justify-content: space-between;
@@ -140,7 +139,7 @@
   border-radius: 0.8cqw;
   font-weight: 700;
 }
-.validity { font-weight: 700; }
+.strong { font-weight: 700; }
 
 .signature { margin: 2.2cqw 0 0; }
 .signature div:first-child { margin-bottom: 2.6cqw; }
@@ -169,11 +168,11 @@
 
 @media print {
   /* The page box and hiding the workspace are in globals.css: a CSS module
-     may not style `body`, and `@page offer` is named, not scoped. */
+     may not style `body`, and `@page letter` is named, not scoped. */
   .printRoot {
     display: block;
     width: 210mm;
-    page: offer;
+    page: letter;
   }
   /* 297mm less the first page's 16mm bottom margin, less a millimetre of
      rounding, so a one-page offer is exactly one page. */

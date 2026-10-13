@@ -4,7 +4,7 @@ import { OfferFrame } from '@/components/admin/offers/frame';
 import ui from '@/components/admin/offers/offers.module.css';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { formatDateRange, formatMoney } from '@/lib/admin/offers/document';
+import { formatDateRange, formatMoney } from '@/lib/admin/letters/format';
 import { listOffers, offerCounts, OFFER_FILTERS, type OfferListFilter } from '@/lib/admin/offers/repo';
 import { OFFER_STATUS_LABELS } from '@/lib/admin/offers/types';
 
@@ -51,7 +51,7 @@ export default async function OffersPage({
         ) : null
       }
     >
-      <main className={`${ui.page} ${ui.pageWide}`}>
+      <main className={ui.page}>
         <div className={ui.listHead}>
           <div style={{ flex: 1 }}>
             <h1 className={ui.pageTitle}>Offers</h1>
@@ -62,7 +62,7 @@ export default async function OffersPage({
           </div>
           <form action="/admin/offers" role="search">
             {filter !== 'open' ? <input type="hidden" name="filter" value={filter} /> : null}
-            <input name="q" defaultValue={q} placeholder="Search" aria-label="Search offers" className={`${ui.input} ${ui.search}`} />
+            <input name="q" defaultValue={q} placeholder="Search" aria-label="Search offers" className={ui.search} />
           </form>
         </div>
 
@@ -74,50 +74,54 @@ export default async function OffersPage({
           ))}
         </nav>
 
-        {offers.length === 0 ? (
-          <div className={ui.emptyList}>
-            <b>{q ? 'Nothing found' : filter === 'open' ? 'Nothing open' : 'No offers here'}</b>
-            {q ? `No offer matches “${q}”.` : null}
-          </div>
-        ) : (
-          <div className={ui.rows} style={{ marginTop: 6 }}>
-            {offers.map((o) => (
-              <Link key={o.id} href={`/admin/offers/${o.id}`} className={ui.listRow}>
-                <span className={ui.listNo}>{o.number}</span>
-                <span style={{ minWidth: 0 }}>
-                  <span className={ui.listTitle} style={{ display: 'block' }}>
-                    {o.groupName || o.recipientName || 'Untitled'}
+        <section className={ui.card} style={{ marginTop: 14 }}>
+          {offers.length === 0 ? (
+            <div className={ui.emptyList}>
+              <b>{q ? 'Nothing found' : filter === 'open' ? 'Nothing open' : 'No offers here'}</b>
+              {q ? `No offer matches “${q}”.` : null}
+            </div>
+          ) : (
+            <>
+              <div className={ui.listCols}>
+                <span>No.</span>
+                <span>Offer</span>
+                <span>Dates and group</span>
+                <span style={{ textAlign: 'right' }}>Per person</span>
+                <span style={{ textAlign: 'right' }}>Total</span>
+                <span>Status</span>
+              </div>
+              {offers.map((o) => (
+                <Link key={o.id} href={`/admin/offers/${o.id}`} className={ui.listRow}>
+                  <span className={ui.listNo}>{o.number}</span>
+                  <span style={{ minWidth: 0 }}>
+                    <span className={ui.listTitle}>{o.groupName || o.recipientName || 'Untitled'}</span>
+                    <span className={ui.listSub}>{[o.groupName ? o.recipientName : null, o.title].filter(Boolean).join(' · ')}</span>
                   </span>
-                  <span className={ui.listSub} style={{ display: 'block' }}>
-                    {[o.groupName ? o.recipientName : null, o.title].filter(Boolean).join(' · ')}
-                  </span>
-                </span>
-                <span style={{ minWidth: 0 }}>
-                  <span className={ui.listSub} style={{ display: 'block', color: 'var(--o-ink2)' }}>
-                    {o.arrival && o.departure ? formatDateRange(o.arrival, o.departure, 'de') : o.kind === 'group' ? 'No dates yet' : '—'}
-                  </span>
-                  {o.kind === 'group' && o.participants ? (
-                    <span className={ui.listSub} style={{ display: 'block' }}>
-                      {o.participants} participants{o.escorts ? ` · ${o.escorts} ${o.escorts === 1 ? 'escort' : 'escorts'}` : ''}
+                  <span style={{ minWidth: 0 }}>
+                    <span className={ui.listSub} style={{ color: 'var(--o-ink2)' }}>
+                      {o.arrival && o.departure ? formatDateRange(o.arrival, o.departure, 'de') : o.kind === 'group' ? 'No dates yet' : 'Courses'}
                     </span>
-                  ) : null}
-                </span>
-                <span className={ui.listMoney}>{o.kind === 'group' ? eur(o.perParticipant) : ''}</span>
-                <span className={ui.listMoney}>{eur(o.groupTotal)}</span>
-                <span className={ui.listStatus}>
-                  <span className={`${ui.pill} ${ui[`pill_${o.status}`]}`}>{OFFER_STATUS_LABELS[o.status]}</span>
-                  {o.followUp ? (
-                    <span className={o.followUp === 'expired' ? ui.expired : ui.chase}>{o.followUp === 'expired' ? 'Expired' : 'Follow up'}</span>
-                  ) : (
-                    <span className={ui.listSub}>
-                      {o.sentAt ? `Sent ${short(o.sentAt)}` : `${o.ownerName ?? ''} · ${short(o.updatedAt)}`}
-                    </span>
-                  )}
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
+                    {o.kind === 'group' && o.participants ? (
+                      <span className={ui.listSub}>
+                        {o.participants} participants{o.escorts ? ` · ${o.escorts} ${o.escorts === 1 ? 'escort' : 'escorts'}` : ''}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className={ui.listMoney}>{o.kind === 'group' ? eur(o.perParticipant) : ''}</span>
+                  <span className={ui.listMoney}>{eur(o.groupTotal)}</span>
+                  <span className={ui.listStatus}>
+                    <span className={`${ui.pill} ${ui[`pill_${o.status}`]}`}>{OFFER_STATUS_LABELS[o.status]}</span>
+                    {o.followUp ? (
+                      <span className={o.followUp === 'expired' ? ui.expired : ui.chase}>{o.followUp === 'expired' ? 'Expired' : 'Follow up'}</span>
+                    ) : (
+                      <span className={ui.listSub}>{o.sentAt ? `Sent ${short(o.sentAt)}` : `${o.ownerName ?? ''} · ${short(o.updatedAt)}`}</span>
+                    )}
+                  </span>
+                </Link>
+              ))}
+            </>
+          )}
+        </section>
       </main>
     </OfferFrame>
   );

@@ -32,10 +32,11 @@ const ModulesSchema = z.object({
 });
 
 const ChoicesSchema = z.object({
-  package: z.enum(['hahn', 'katze', 'hund', 'esel']),
+  package: z.enum(['hahn', 'katze', 'hund', 'esel', 'own']),
   weeks: z.number().int().min(1).max(52),
   modules: ModulesSchema,
   activities: z.array(z.string().regex(/^[a-z-]{2,40}$/)).max(40),
+  extras: z.array(z.string().regex(/^[a-z-]{2,40}$/)).max(40),
   escortPricing: z.enum(['paid', 'free', 'shared']),
 });
 
@@ -67,6 +68,7 @@ const StoredChoices = z.object({
   weeks: ChoicesSchema.shape.weeks.catch(DEFAULT_STAY.weeks),
   modules: ModulesSchema.catch(DEFAULT_STAY.modules),
   activities: ChoicesSchema.shape.activities.catch(DEFAULT_STAY.activities),
+  extras: ChoicesSchema.shape.extras.catch(DEFAULT_STAY.extras),
   escortPricing: ChoicesSchema.shape.escortPricing.catch(DEFAULT_STAY.escortPricing),
 });
 

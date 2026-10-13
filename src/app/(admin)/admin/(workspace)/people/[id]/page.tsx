@@ -118,7 +118,7 @@ export default async function PersonPage({
         }
         actions={
           <div className="flex items-center gap-2">
-            {canOffer ? <MakeOffer kind="individual" language="de" personId={person.id} existing={offers} /> : null}
+            {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog
                 trigger="New booking"

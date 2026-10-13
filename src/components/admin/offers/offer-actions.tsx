@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 
 import { decideOfferAction, deleteOfferAction, duplicateOfferAction, reviseOfferAction, sendOfferAction } from '@/app/(admin)/admin/(editor)/offers/actions';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import type { OfferLetter } from '@/lib/admin/offers/document';
+import { subjectLine, type Letter } from '@/lib/admin/letters/types';
 import type { OfferStatus } from '@/lib/admin/offers/types';
 
 import ui from './offers.module.css';
@@ -83,14 +83,14 @@ export function OfferToolbarActions({
   );
 }
 
-function mailto(email: string, letter: OfferLetter) {
+function mailto(email: string, letter: Letter) {
   const body =
     letter.language === 'de'
       ? `${letter.salutation}\n\nim Anhang findest du unser Angebot.\n\n${letter.signOff}\n${letter.signature.join('\n')}`
       : `${letter.salutation}\n\nPlease find our offer attached.\n\n${letter.signOff}\n${letter.signature.join('\n')}`;
   // The address goes in as it is: it passed the email check, and an encoded
   // `@` is something not every mail client reads back.
-  return `mailto:${email.trim()}?subject=${encodeURIComponent(letter.subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${email.trim()}?subject=${encodeURIComponent(subjectLine(letter))}&body=${encodeURIComponent(body)}`;
 }
 
 /**
@@ -113,7 +113,7 @@ export function SendButton({
   busy: boolean;
   problems: string[];
   email: string;
-  letter: OfferLetter;
+  letter: Letter;
   onPrint: () => void;
   onBeforeSend: () => Promise<void>;
 }) {
@@ -135,7 +135,7 @@ export function SendButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className={panel} closeLabel="Close">
           <DialogTitle className={ui.dlgTitle}>Send the offer</DialogTitle>
-          <DialogDescription className="mt-1 text-sm">{letter.subject}</DialogDescription>
+          <DialogDescription className="mt-1 text-sm">{subjectLine(letter)}</DialogDescription>
           <form action={sendOfferAction} className={ui.form} style={{ marginTop: 18 }}>
             <input type="hidden" name="id" value={id} />
             <ol className={ui.steps}>
