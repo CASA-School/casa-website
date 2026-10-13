@@ -23,7 +23,9 @@ import { cn } from '@/lib/utils';
  */
 
 const isCurrent = (pathname: string, href: string) =>
-  href === '/admin' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  href === '/admin'
+    ? pathname === href || pathname === '/admin/day'
+    : pathname === href || pathname.startsWith(`${href}/`);
 
 export function NavLink({
   href,
@@ -56,18 +58,18 @@ export function NavLink({
           active && !items?.some((i) => isCurrent(pathname, i.href)) ? 'page' : undefined
         }
         className={cn(
-          'group relative flex items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-[0.45rem] text-sm whitespace-nowrap transition-colors',
-          'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
+          'group relative flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[0.84rem] whitespace-nowrap transition-colors lg:overflow-hidden',
+          'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
           active
-            ? 'bg-[var(--fm-yellow)] font-bold text-[var(--fm-navy)]'
-            : 'font-medium text-[var(--casa-muted)] hover:bg-ws-sunk/70 hover:text-[var(--casa-ink)]'
+            ? 'bg-white/[0.11] font-semibold text-white'
+            : 'font-medium text-white/70 hover:bg-white/[0.06] hover:text-white'
         )}
       >
-        {/* "You are here": FileMaker's pale yellow cell with a navy edge. */}
+        {/* "You are here": one fine mark in FileMaker's pale yellow, at the sidebar's edge. */}
         <span
           aria-hidden="true"
           className={cn(
-            'absolute top-1/2 -left-2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-ws-marker transition-opacity',
+            'absolute top-1/2 left-0 hidden h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--fm-yellow)] transition-opacity lg:block',
             active ? 'opacity-100' : 'opacity-0'
           )}
         />
@@ -75,7 +77,7 @@ export function NavLink({
           aria-hidden="true"
           className={cn(
             'shrink-0 transition-colors',
-            active ? 'text-[var(--fm-navy)]' : 'text-[var(--casa-text-subtle)] group-hover:text-[var(--casa-ink)]'
+            active ? 'text-white' : 'text-white/45 group-hover:text-white/80'
           )}
         >
           {icon}
@@ -88,7 +90,7 @@ export function NavLink({
             aria-hidden="true"
             data-nav-label
             className={cn(
-              'hidden text-[var(--casa-text-subtle)] transition-transform lg:inline',
+              'hidden text-white/35 transition-transform lg:inline',
               branchOpen ? 'rotate-90' : ''
             )}
           >
@@ -110,7 +112,7 @@ export function NavLink({
       {items && items.length > 0 && branchOpen ? (
         <ul
           data-nav-children
-          className="mt-0.5 mb-1 hidden space-y-0.5 border-l border-ws-line pl-3 ml-[1.15rem] lg:block"
+          className="mt-0.5 mb-1 ml-[1.15rem] hidden space-y-0.5 border-l border-white/12 pl-3 lg:block"
         >
           {items.map((item) => {
             const current = isCurrent(pathname, item.href);
@@ -120,11 +122,9 @@ export function NavLink({
                   href={item.href}
                   aria-current={current ? 'page' : undefined}
                   className={cn(
-                    'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[0.8rem] transition-colors',
-                    'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
-                    current
-                      ? 'bg-[var(--fm-yellow)]/70 font-bold text-[var(--fm-navy)]'
-                      : 'font-medium text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
+                    'flex h-7 items-center gap-2 rounded-md px-2.5 text-[0.8rem] transition-colors',
+                    'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+                    current ? 'bg-white/[0.08] font-semibold text-white' : 'font-medium text-white/55 hover:text-white'
                   )}
                 >
                   <span data-nav-label className="min-w-0 flex-1">
@@ -206,13 +206,13 @@ export function NavGroup({
         aria-expanded={open}
         aria-controls={`nav-group-${id}`}
         data-nav-group-label
-        className="mt-4 mb-1 hidden w-full items-center justify-between rounded-lg px-2.5 py-1 text-xs font-bold text-[var(--casa-text-subtle)] transition-colors hover:text-[var(--casa-ink)] lg:flex"
+        className="group/label mt-5 mb-1 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.72rem] font-semibold text-white/40 transition-colors hover:text-white/75 lg:flex"
       >
         {label}
         <svg
           viewBox="0 0 16 16"
           aria-hidden="true"
-          className={cn('h-2.5 w-2.5 transition-transform', open ? '' : '-rotate-90')}
+          className={cn('h-2.5 w-2.5 opacity-0 transition group-hover/label:opacity-100', open ? '' : '-rotate-90 opacity-100')}
           fill="none"
           stroke="currentColor"
           strokeWidth={1.8}

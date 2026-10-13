@@ -2698,3 +2698,11 @@ twice, plan conflicts, lessons without a teacher, desk uncovered, on shift but a
 earlier). Placeholders stand where blocks will come (Messages, Transfers, Agencies, Companies,
 Internships). The previous Today detail is `/admin/day`. Workspace colours moved a little towards
 FileMaker: navy primary and initials, pale-yellow active rail item (`--fm-*` tokens).
+
+Fifteenth pass: **a professional frame.** Rahman, on the white sidebar with the big logo and
+"Workspace" under it (and the pale-yellow active item from the pass before): "do you think
+professional saas dashboards sidebar looks like this … this is very bad". The sidebar is now a deep
+navy frame (`--ws-rail`): the on-dark CASA logo cropped to its top row with no caption, search (⌘K)
+under it, quiet navigation (white text, a soft fill and one fine pale-yellow mark for the current
+page), and at its foot the person, the website and sign-out. The top bar is gone on a desktop; on a
+phone the sidebar is a navy band. Collapsed: icons, search icon, avatar and sign-out.

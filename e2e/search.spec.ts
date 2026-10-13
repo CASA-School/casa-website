@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import pg from 'pg';
 
 /**
- * The workspace search (⌘K in the top bar, src/lib/admin/search.ts): a name
+ * The workspace search (⌘K, at the top of the sidebar, src/lib/admin/search.ts): a name
  * finds the student, an offer number the offer, and Enter opens it. Runs only
  * with a database and an owner account, who holds every module; the session is
  * opened the way `scripts/admin/check-routes.mjs` does it.

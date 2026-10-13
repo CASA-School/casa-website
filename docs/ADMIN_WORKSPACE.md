@@ -568,7 +568,7 @@ Deactivating revokes access on the spot (every live session is closed) and
 keeps the history readable. There is no delete button.
 
 Every colleague changes their own password on **Your account** — their name in
-the top bar opens it (`/admin/account`, 2026-10-10): current password, new one
+the foot of the sidebar opens it (`/admin/account`, 2026-10-10): current password, new one
 twice; the session in use stays open and every other one is closed. An account
 with no password yet sets its first one there without the current field. There
 is no emailed reset link: it would need outbound email the workspace does not
@@ -638,35 +638,42 @@ uncontrolled — any form can use it by naming its required inputs. The server
 snapshot is open, so a render without JavaScript shows every field.
 `alwaysOpen` is for editing and for a final review step.
 
-## The top bar, and a rail that is only navigation
+## The sidebar is the frame (2026-10-13)
 
-A sticky 56px bar runs across the top of every screen (`top-bar.tsx`). It holds
-what is true everywhere and nothing about the page beneath: the control that
-folds the rail, today's date as a way back to the day view, the way back to the
-website, and who is signed in with their sign-out. Identity moved here from the
-foot of the sidebar because it was the only thing down there, it collided with
-the browser's own bottom-left furniture, and it vanished when the rail
-collapsed — so signing out required expanding the rail first. The rail is now
-navigation and nothing else, at every width.
+Rahman, on the white sidebar with the large logo and "Workspace" under it, and
+the pale-yellow active item: "do you think professional saas dashboards
+sidebar looks like this … this is very bad". The frame is now what every
+professional tool looks like (`shell.tsx`):
 
-**Search sits in the middle of the bar** (2026-10-13, `command-search.tsx`):
-⌘K, Ctrl K or "/" from anywhere, a name, an email address or an offer number,
-and Enter opens the record. It searches students, enquiries, course and exam
-registrations, offers, bookings and job applications — each only for a
-colleague who holds that module (`src/lib/admin/search.ts`, behind
-`search/actions.ts`, which asks for `overview` like every screen). Five results a
-kind, newest first. Nobody has to know which list a person is in.
+- **A deep navy sidebar** (`--ws-rail`, a step deeper than FileMaker's navy,
+  which the team knows), so the white pages read as the lit work area and the
+  frame recedes. Text white at 70%, icons at 45%, section labels at 40% in
+  sentence case; the current page a soft white fill with one fine mark in
+  FileMaker's pale yellow at its edge.
+- **The head:** the CASA logo in its on-dark version (white lettering, the
+  red sail and the sun kept), cropped to its top row — no caption under it —
+  and the collapse toggle beside it.
+- **Search under the logo** (`command-search.tsx`, ⌘K, Ctrl K or "/"): a name,
+  an email address or an offer number, and Enter opens the record — students,
+  enquiries, registrations, offers, bookings and job applications, each only for
+  a colleague who holds that module (`src/lib/admin/search.ts`), five a kind.
+- **The foot:** who is signed in (their name opens Your account), the way to
+  the website, and sign-out — visible collapsed too, as the avatar and the
+  sign-out icon.
+- **No top bar on a desktop.** Everything it held lives in the sidebar, and
+  the page gets the height. On a phone the sidebar is a navy band at the top:
+  the logo, search and the account, then the destinations as a scroller.
 
-**There are no counts in the rail.** The numbers beside Enquiries, Registrations
-and Placement were queue backlogs, not notifications, and a permanent number
-next to a label reads as nagging. A notification system is planned; when it has
-a real source — something happened, to a record you own, since you last looked
-— it belongs in the top bar, to the left of the date. Until then there is no
-bell, because a bell that opens an empty panel teaches people to ignore it.
+**There are no counts in the sidebar.** The numbers beside Enquiries,
+Registrations and Placement were queue backlogs, not notifications, and a
+permanent number next to a label reads as nagging (the control room's launch
+row carries what is new, once). When a notification system has a real source
+— something happened, to a record you own, since you last looked — it belongs
+at the foot of the sidebar, beside the person. Until then there is no bell.
 
 ### Collapsing
 
-`SidebarToggle` (in the top bar) writes `data-workspace-nav` on the root element
+`SidebarToggle` (in the sidebar's head) writes `data-workspace-nav` on the root element
 and the folding is CSS in `globals.css`; `src/app/(admin)/layout.tsx` applies
 the stored value before first paint, so a colleague who works collapsed never
 watches the rail fold itself. The rail's links and groups know nothing about
@@ -681,8 +688,9 @@ shrinking rail instead of wrapping under its icon. Only things with no icon to
 fall back on — group headings, nested lists — are removed, and those go a beat
 *after* the width settles. Collapsed, the rail is 4.25rem of centred icons with
 hairlines where the group headings were, and every link carries its label as a
-tooltip. The wordmark hides too: nearly six times as wide as tall, at icon width
-it would be a sliver of the letter C, and CASA has no separate emblem.
+tooltip. The logo hides too (`data-rail-hide`): nearly six times as wide as
+tall, at icon width it would be a sliver of the letter C, and CASA has no
+separate emblem; search keeps its icon, the foot the avatar and sign-out.
 
 Desktop only: on a phone the rail is already a scrolling strip.
 `suppressHydrationWarning` on `<html>` is required and deliberate — the

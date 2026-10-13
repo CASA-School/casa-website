@@ -1,40 +1,39 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { CommandSearch } from './command-search';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
-import { TopBar } from './top-bar';
+import { SidebarToggle } from './sidebar-toggle';
 import { Logo } from '@/components/ui/logo';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
 import { cn } from '@/lib/utils';
 
 /**
- * The workspace frame.
+ * The workspace frame: a navy sidebar and the page.
  *
- * WHY A PERSISTENT SIDEBAR AND NOT A TOP BAR
+ * THE SIDEBAR IS THE PRODUCT'S FRAME, as in every professional tool people
+ * already use (2026-10-13, Rahman, on the white one with the big logo and
+ * "Workspace" under it: "do you think professional saas dashboards sidebar
+ * looks like this"). Deep navy — FileMaker's structural colour, which the team
+ * knows, on the surface every modern product darkens — so the white pages read
+ * as the lit work area and the frame recedes. From the top: the CASA logo in
+ * its on-dark version (no caption), search (⌘K), the navigation in its groups,
+ * and at the foot who is signed in, the way to the website and sign-out. There
+ * is no top bar on a desktop: everything it held lives in the sidebar, and the
+ * page gets the height.
  *
- * The workspace has nine destinations and staff move between them constantly —
- * an enquiry becomes a registration, a registration sends you to the cohort it
- * belongs to. A top bar with nine items either wraps or turns into a "More"
- * menu, and either way it costs a click and a guess on every hop. A rail costs
- * neither. What the rail does NOT carry is anything that is not navigation:
- * identity, sign-out and the collapse control live in the sticky top bar
- * (`top-bar.tsx`), and there are no queue counts beside the labels — those
- * were backlogs dressed as notifications, and a number that never goes away
- * reads as nagging.
+ * Navigation and nothing it does not need: no queue counts beside the labels
+ * (backlogs, not notifications), one fine marker for "you are here".
  *
- * On desktop the rail collapses to a column of icons (`SidebarToggle`, CSS in
- * globals.css). On a phone it becomes a horizontal scroller at the top. Not a
- * hamburger: a drawer needs client JavaScript, a focus trap and an escape key,
- * and the whole nav is a dozen short labels that fit in a swipe.
+ * On desktop the sidebar collapses to icons (`SidebarToggle`, CSS in
+ * globals.css). On a phone it is a navy band at the top: the logo, search and
+ * the account, then the destinations as a horizontal scroller.
  *
- * FOCUS MODE (`variant="focus"`) is the same shell at a different density,
- * for the one module that is a board rather than a queue: the rail is fixed at
- * icon width (the collapsed rules in globals.css also match
- * `.casa-workspace-focus`), the top bar loses its toggle, and the main column
- * drops the 1180px measure. Same gate, same tokens, same way back — what
- * changes is only how much room the content gets.
+ * FOCUS MODE (`variant="focus"`) is the same frame at a different density, for
+ * the one module that is a board rather than a queue: the sidebar is fixed at
+ * icon width and the page drops the 1180px measure.
  */
 
 export function WorkspaceShell({
@@ -52,36 +51,36 @@ export function WorkspaceShell({
 
   return (
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
-      <aside className="casa-workspace-rail w-full shrink-0 self-start border-b border-ws-line bg-white text-[var(--casa-ink)] lg:sticky lg:top-0 lg:h-dvh lg:w-60 lg:border-r lg:border-b-0 lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
-        <div className="flex h-full flex-col gap-5 overflow-x-hidden overflow-y-auto px-3 py-4 lg:py-5">
-          {/*
-            The logo carries the CASA wordmark itself, so nothing here sets the
-            name in type beside it — two "CASA"s in two different typefaces is
-            what made the first version of this look wrong. "Workspace" sits
-            under the mark as an eyebrow, naming which CASA product this is.
-
-            `crop="mark"` drops the "Internationale Sprachschule" line, which
-            at this width would render about four pixels tall.
-          */}
-          {/*
-            Hidden when the rail is collapsed: the wordmark is nearly six times
-            as wide as it is tall, so at icon width it would be a sliver of the
-            letter C, and CASA has no separate emblem to put there instead.
-          */}
-          <Link
-            href="/admin"
-            data-nav-label
-            className="block rounded-lg px-2.5 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
-          >
-            <Logo className="h-[1.3rem] w-auto" crop="mark" />
-            <span data-nav-label className="mt-1.5 block text-xs font-semibold text-[var(--casa-text-subtle)]">
-              Workspace
+      <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[var(--ws-rail)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
+        <div className="flex h-full flex-col overflow-x-hidden">
+          <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4 lg:h-16">
+            <Link
+              href="/admin"
+              data-rail-hide
+              aria-label="CASA — Today"
+              className="block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            >
+              {/* The flyer artwork with white lettering, cropped to its top row: the subtitle would be four pixels tall here. */}
+              <span className="block h-[23px] w-[128px] overflow-hidden">
+                <Logo variant="onDark" className="h-auto w-[128px]" />
+              </span>
+            </Link>
+            <span className="flex items-center gap-1 lg:hidden">
+              <CommandSearch variant="rail-icon" />
+              <Link href="/admin/account" title="Your account" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                <Avatar name={user.name} size={28} tone="rail" />
+              </Link>
             </span>
-          </Link>
+            {focus ? null : <SidebarToggle />}
+          </div>
+
+          <div className="hidden px-3 pb-3 lg:block">
+            <CommandSearch variant="rail" />
+          </div>
 
           <nav
             aria-label="Workspace"
-            className="-mx-1 flex snap-x gap-1 overflow-x-auto px-1 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0"
+            className="flex snap-x gap-1 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-0.5 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-4"
           >
             <NavLink href="/admin" icon={Icon.calendar} title="Today">
               Today
@@ -255,15 +254,50 @@ export function WorkspaceShell({
               </NavLink>
             </NavGroup>
           </nav>
+
+          {/* Who is signed in, the way to the website, and out. */}
+          <div className="hidden shrink-0 border-t border-white/10 p-2.5 lg:block">
+            <div data-rail-foot className="flex items-center gap-1">
+              <Link
+                href="/admin/account"
+                title="Your account"
+                className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors outline-none hover:bg-white/[0.07] focus-visible:ring-2 focus-visible:ring-white/40"
+              >
+                <Avatar name={user.name} size={30} tone="rail" />
+                <span data-nav-label className="min-w-0">
+                  <span className="block truncate text-[0.84rem] leading-tight font-semibold text-white">{user.name}</span>
+                  <span className="block text-[0.7rem] leading-tight text-white/50">{roleLabel(user.role)}</span>
+                </span>
+              </Link>
+              <Link
+                href="/"
+                title="The website"
+                aria-label="The website"
+                data-rail-hide
+                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
+              >
+                {Icon.website}
+              </Link>
+              <form action={signOutAction}>
+                <button
+                  type="submit"
+                  title="Sign out"
+                  aria-label="Sign out"
+                  className="flex size-8 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
+                >
+                  {Icon.signOut}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar user={user} signOutAction={signOutAction} collapsible={!focus} />
         <main
           className={cn(
             'flex-1 bg-ws-canvas',
-            focus ? 'px-4 py-5 lg:px-6 lg:py-6' : 'px-4 py-5 sm:px-6 lg:px-8 lg:py-7'
+            focus ? 'px-4 py-5 lg:px-6 lg:py-6' : 'px-4 py-5 sm:px-6 lg:px-9 lg:py-8'
           )}
         >
           {/* 1180px, not the public site's wider shells. A workspace table read
@@ -293,10 +327,9 @@ export const roleLabel = (role: StaffRole) => ROLE_LABELS[role];
  * with one of them would do exactly that, on the account menu of the person
  * looking at it.
  *
- * Painted in the rail's dark ink: it sits on the white top bar now, and the
- * translucent-white version it used to be was invisible there.
+ * `rail` on the navy sidebar (a lighter navy disc), `ink` on a white page.
  */
-export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 34, tone = 'ink' }: { name: string; size?: number; tone?: 'ink' | 'rail' }) {
   const initials = name
     .trim()
     .split(/\s+/)
@@ -309,7 +342,10 @@ export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
     <span
       aria-hidden="true"
       style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }}
-      className="flex shrink-0 items-center justify-center rounded-full bg-ws-panel font-bold text-ws-on-panel"
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-full font-bold',
+        tone === 'rail' ? 'bg-[#2e5288] text-white ring-1 ring-white/15' : 'bg-ws-panel text-ws-on-panel'
+      )}
     >
       {initials}
     </span>

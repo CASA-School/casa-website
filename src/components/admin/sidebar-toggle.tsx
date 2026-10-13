@@ -14,9 +14,8 @@ import { cn } from '@/lib/utils';
  * components care about a piece of chrome. A data attribute and descendant
  * selectors let them stay ignorant.
  *
- * It sits in the top bar rather than at the foot of the rail, which is where
- * every dashboard people already use puts it, and which means it does not
- * disappear along with the rail it controls.
+ * It sits in the sidebar's head, beside the logo, and stays there when the
+ * sidebar is folded to icons — the one thing in the head that does.
  *
  * `src/app/(admin)/layout.tsx` sets the attribute before first paint from the
  * same localStorage key, so a colleague who works collapsed does not watch the
@@ -61,9 +60,9 @@ export function SidebarToggle() {
       aria-label={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}
       title={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}
       className={cn(
-        'hidden size-8 items-center justify-center rounded-lg text-[var(--casa-text-subtle)]',
-        'transition-colors hover:bg-ws-sunk hover:text-[var(--casa-ink)]',
-        'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 lg:flex'
+        'hidden size-8 shrink-0 items-center justify-center rounded-lg text-white/50',
+        'transition-colors hover:bg-white/[0.07] hover:text-white',
+        'outline-none focus-visible:ring-2 focus-visible:ring-white/40 lg:flex'
       )}
     >
       <svg

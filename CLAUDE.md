@@ -270,8 +270,9 @@ defined once and left for a season; they live under Settings, not the main
 rail. A nav label and the page title it opens must say the same word.
 
 **No counts in the rail, and no fake notifications.** Queue backlogs are not
-notifications. The sticky top bar holds identity, the date and the collapse
-control; a notification bell goes there only once a real source exists. `docs/ADMIN_WORKSPACE.md` §Design standards has the
+notifications. The sidebar is a navy frame (logo, search, navigation, and at its foot
+the person and sign-out); there is no top bar on a desktop, and a notification bell
+goes at the sidebar's foot only once a real source exists. `docs/ADMIN_WORKSPACE.md` §Design standards has the
 measurements and the defect each rule came from.
 
 **Workspace screens: labels, not explanations.** The staff workspace must stay
@@ -491,7 +492,7 @@ is still valid.
   named privacy owner at CASA.
 - **No outbound email from the workspace.** Every "Reply" button is a `mailto:`,
   and there is no emailed password reset: each colleague changes their own on
-  Your account (their name in the top bar), an owner or admin resets a forgotten
+  Your account (their name at the foot of the sidebar), an owner or admin resets a forgotten
   one on the Team screen, and `npm run admin:password` is the owner's way back in.
 - **Microsoft sign-in is registered (2026-10-10).** The workspace signs colleagues
   in by full name or Outlook address (migration 0020) and offers "Sign in with

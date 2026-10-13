@@ -956,6 +956,9 @@ h3 {
   --fm-grey-light: #f3f3f3;
   --fm-grey-line: #d6d6d6;
 
+  /* The sidebar: a deeper navy than FileMaker's, so the white pages read as the work area. */
+  --ws-rail: #12284a;
+
   /* The workspace's primary action and its ink chips: FileMaker's navy, not black. */
   --casa-ink-deep: var(--fm-navy);
   --casa-ink-deep-hover: var(--fm-navy-hover);
@@ -1037,12 +1040,29 @@ h3 {
 
   /* The "you are here" marker keeps its place against the rail's left edge. */
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail nav a > span:first-child {
-    left: -0.75rem;
+    left: 0;
   }
 
-  /* The logo is hidden with the labels, so the rail should not keep its gap. */
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail > div {
-    gap: 1rem;
+  /* Collapsed, the head keeps only the toggle, search only its icon, the foot the person and sign-out. */
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-hide] {
+    display: none;
+  }
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-head] {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-search] {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-foot] {
+    flex-direction: column;
+  }
+  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-foot] > a:first-child {
+    flex: none;
+    justify-content: center;
   }
 
   /* Group headings are gone, so a hairline keeps the grouping legible — and
@@ -1051,7 +1071,7 @@ h3 {
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail nav > div + div {
     margin-top: 0.5rem;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--ws-line);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
   }
 }
 
@@ -1059,7 +1079,7 @@ h3 {
    tokens the same way the public site's dark bands do. Declared here rather
    than relying on the `.bg-[var(--casa-ink-deep)]` selectors above, because
    the panel paints `--ws-panel` and would otherwise keep the light-surface
-   tokens and fail contrast. The shell's own rail is white (`.casa-workspace-rail`). */
+   tokens and fail contrast. The shell's own rail is navy (`--ws-rail`) and sets its colours itself. */
 .casa-workspace-panel {
   --casa-accent-text: var(--casa-accent-on-dark);
   --casa-accent-text-hover: var(--casa-accent-on-dark-hover);

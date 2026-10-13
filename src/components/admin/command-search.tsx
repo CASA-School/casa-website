@@ -21,11 +21,13 @@ const GROUPS: { kind: SearchKind; label: string }[] = [
 ];
 
 /**
- * Search, in the top bar: ⌘K (Ctrl K) or "/" from anywhere, a name, an address
- * or an offer number, and Enter opens the record. One box for the whole
- * workspace instead of knowing which list a person is in (src/lib/admin/search.ts).
+ * Search, at the top of the sidebar: ⌘K (Ctrl K) or "/" from anywhere, a name,
+ * an address or an offer number, and Enter opens the record. One box for the
+ * whole workspace instead of knowing which list a person is in
+ * (src/lib/admin/search.ts). `rail` is the field in the sidebar, `rail-icon`
+ * the magnifier in its phone band.
  */
-export function CommandSearch() {
+export function CommandSearch({ variant = 'rail' }: { variant?: 'rail' | 'rail-icon' }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
@@ -78,24 +80,35 @@ export function CommandSearch() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="hidden h-9 w-full max-w-[340px] items-center gap-2.5 rounded-xl border border-ws-line bg-ws-sunk/60 px-3 text-left text-sm text-[var(--casa-text-subtle)] transition-colors hover:border-ws-line-firm hover:bg-white md:flex"
-      >
-        <span aria-hidden="true">{Icon.search}</span>
-        <span className="flex-1 truncate">Search students, enquiries, offers</span>
-        <kbd className="rounded-md border border-ws-line bg-white px-1.5 font-sans text-[0.68rem] font-semibold text-[var(--casa-muted)]">⌘K</kbd>
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        title="Search"
-        aria-label="Search"
-        className="flex size-8 items-center justify-center rounded-lg text-[var(--casa-text-subtle)] transition-colors hover:bg-ws-sunk hover:text-[var(--casa-ink)] md:hidden"
-      >
-        {Icon.search}
-      </button>
+      {variant === 'rail' ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          data-rail-search
+          title="Search"
+          className="flex h-9 w-full items-center gap-2.5 rounded-lg bg-white/[0.07] px-2.5 text-left text-[0.82rem] text-white/55 ring-1 ring-white/10 transition-colors outline-none ring-inset hover:bg-white/[0.1] hover:text-white/80 focus-visible:ring-2 focus-visible:ring-white/40"
+        >
+          <span aria-hidden="true" className="shrink-0 [&_svg]:h-4 [&_svg]:w-4">
+            {Icon.search}
+          </span>
+          <span data-rail-hide className="flex-1 truncate">
+            Search
+          </span>
+          <kbd data-rail-hide className="rounded bg-white/10 px-1.5 font-sans text-[0.66rem] font-semibold text-white/60">
+            ⌘K
+          </kbd>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          title="Search"
+          aria-label="Search"
+          className="flex size-8 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white"
+        >
+          {Icon.search}
+        </button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="casa-ws-dialog max-w-xl gap-0 overflow-hidden rounded-3xl p-0 sm:mt-[8vh] sm:self-start" showCloseButton={false}>
