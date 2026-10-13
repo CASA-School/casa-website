@@ -16,6 +16,7 @@ import { EXAM_SEO } from '@/config/seo-pages';
 import { createPublicMetadata } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
 import { bremenDate } from '@/lib/appointments/schedule';
 import { intl, pickTree, say } from '@/lib/cms/copy';
@@ -57,6 +58,7 @@ export async function generateMetadata({ params }: ExamDetailPageProps): Promise
 
 export default async function ExamDetailPage({ params, searchParams }: ExamDetailPageProps) {
   const locale = await getContentLocale();
+  const prices = await publishedPrices();
   const { code } = await params;
   const { session } = searchParams ? await searchParams : { session: undefined };
   const rhythm = getLayoutRhythm('exam-detail');
@@ -108,9 +110,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
           : undefined,
     },
     { label: levelLabel, value: detail.examType.level || '-' },
-    { label: say(locale, 'Prüfungsgebühr', 'Exam fee'), value: getExamFees(detail.examType.code, locale).full },
-    { label: say(locale, 'Vorbereitung', 'Preparation'), value: getExamFees(detail.examType.code, locale).prep },
-    { label: say(locale, 'Teilprüfung', 'Partial exam'), value: getExamFees(detail.examType.code, locale).partial },
+    { label: say(locale, 'Prüfungsgebühr', 'Exam fee'), value: getExamFees(detail.examType.code, locale, prices).full },
+    { label: say(locale, 'Vorbereitung', 'Preparation'), value: getExamFees(detail.examType.code, locale, prices).prep },
+    { label: say(locale, 'Teilprüfung', 'Partial exam'), value: getExamFees(detail.examType.code, locale, prices).partial },
     /*
       NO LOCATION ROW. It read "CASA Bremen Exam Center", which is the same
       building for every exam CASA runs — a constant cannot inform a choice, and

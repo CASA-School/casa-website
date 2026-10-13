@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
 import { CasaCostPathwayCalculator } from '@/components/calculator/casa-cost-pathway-calculator';
+import { calculatorPricing } from '@/lib/content/published-prices';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { Container } from '@/components/ui/container';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -46,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CalculatorPage() {
-  const locale = await getContentLocale();
+  const [locale, prices] = await Promise.all([getContentLocale(), publishedPrices()]);
   const copy = pickTree(locale, pageCopy);
 
   return (
@@ -78,7 +80,7 @@ export default async function CalculatorPage() {
             {copy.intro}
           </p>
         </section>
-        <CasaCostPathwayCalculator locale={locale} />
+        <CasaCostPathwayCalculator locale={locale} pricing={calculatorPricing(prices)} />
       </Container>
     </main>
   );

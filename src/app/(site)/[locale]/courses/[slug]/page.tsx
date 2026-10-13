@@ -7,6 +7,7 @@ import { CoursePracticalDetails } from '@/components/courses/course-practical-de
 import { CourseTermTable } from '@/components/courses/course-term-table';
 import type { CourseTermGroup } from '@/components/courses/course-term-table';
 import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { HeroCUtilityRail } from '@/components/heroes';
 import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { BremenMusiciansHero } from '@/components/sections/bremen-musicians-hero';
@@ -85,6 +86,7 @@ export default async function CourseDetailPage({
   searchParams: Promise<{ instance?: string }>;
 }) {
   const locale = await getContentLocale();
+  const prices = await publishedPrices();
   const { slug } = await params;
   const { instance } = await searchParams;
   const canonicalSlug = getCanonicalCourseRouteSlug(slug);
@@ -555,7 +557,7 @@ export default async function CourseDetailPage({
   const renderSection = (sectionKey: (typeof archetype.sections)[number]) => {
                 switch (sectionKey) {
                 case 'module-catalogue':
-                  return <SpecialCourseCatalogue key={sectionKey} locale={locale} />;
+                  return <SpecialCourseCatalogue key={sectionKey} locale={locale} pricePerEvening={prices.specialPerEvening} />;
 
                 case 'group-packages':
                   // Firmenunterricht shares this archetype and has no packages.

@@ -200,8 +200,33 @@ does not read.
 Not yet in the list: Bildungszeit (no rule in SchoolMan; the catalogue's "from"
 price stands), exam preparation courses (13 € a lesson in SchoolMan, no course
 type here), meals and room types (SchoolMan prices only a single room without
-meals). **The public website still shows its own published figures**
-(`src/config/calculator/pricing.ts`); reading this list there is the next step.
+meals).
+
+### What the website shows (2026-10-13)
+
+The list is far bigger than what the public site publishes. The site shows a
+dozen figures, each one entry of the list in force today
+(`src/lib/content/published-prices.ts`, `PUBLISHED_SLOTS`; marked **On the
+website** on the Prices screen):
+
+| On the site | From the list |
+| --- | --- |
+| Intensive, 4 and 8 weeks; "from" on the course pages | the intensive course's 4 and 8 weeks |
+| Evening, "from" | the cheapest evening term still to come (its lessons × the rate) |
+| Special courses, an evening and a module | the per-lesson rate × 2, × 24 |
+| Enrolment fee, rent for 4 weeks, each further week, placement fee, deposit | the fees and the rent |
+| telc B2 and C1 Hochschule, full and one part | the exams |
+| The calculator's book range | the cheapest and dearest course book |
+
+They reach every place a price is shown: the live values in texts (`facts.ts`),
+the course and exam rows (`repository.ts`), the exam pages
+(`exam-fees.ts`), the accommodation pages (`accommodation-costs.ts`), the
+special-course modules, the calculator and `llms.txt`. The server reads them
+once a minute (`published-prices.server.ts`); a save on the Prices screen
+clears that at once, and next year's list takes over on its date by itself.
+Without a database the site shows `src/config/calculator/pricing.ts`, which
+equals the 2026 list (a test holds the two together); the preparation courses
+are only there.
 
 ## 4. What was deliberately not ported
 

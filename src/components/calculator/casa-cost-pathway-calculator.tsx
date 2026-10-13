@@ -5,6 +5,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import {
   CASA_CALCULATOR_PRICING,
   CASA_LEVEL_SEQUENCE,
+  type CasaCalculatorPricing,
   type CasaLevel,
 } from '@/config/calculator/pricing';
 import { Button } from '@/components/ui/button';
@@ -213,7 +214,7 @@ function parseNullableNumber(value: string) {
 function formatCurrency(value: number, locale: ContentLocale) {
   return new Intl.NumberFormat(locale === 'de' ? 'de-DE' : 'en-US', {
     style: 'currency',
-    currency: CASA_CALCULATOR_PRICING.currency,
+    currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -311,7 +312,8 @@ function ToggleLine({
   );
 }
 
-export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentLocale }) {
+/** `pricing` is the price list in force as the website publishes it; the published figures without one. */
+export function CasaCostPathwayCalculator({ locale = 'en', pricing = CASA_CALCULATOR_PRICING }: { locale?: ContentLocale; pricing?: CasaCalculatorPricing }) {
   const { pickTree } = useSiteCopy();
   const copy = pickTree(locale, calculatorCopy);
   const [formState, setFormState] = useState<CasaCalculatorInput>(initialState);
@@ -328,7 +330,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
     [booksOverrideInput, formState]
   );
 
-  const result = useMemo(() => calculateCasaCostPathway(derivedInput), [derivedInput]);
+  const result = useMemo(() => calculateCasaCostPathway(derivedInput, pricing), [derivedInput, pricing]);
 
   function updateField<K extends keyof CasaCalculatorInput>(
     key: K,
@@ -490,7 +492,7 @@ export function CasaCostPathwayCalculator({ locale = 'en' }: { locale?: ContentL
               id="include-enrollment-fee"
               checked={formState.includeEnrollmentFee}
               onCheckedChange={(checked) => updateField('includeEnrollmentFee', checked)}
-              label={`${copy.enrollment} (${formatCurrency(CASA_CALCULATOR_PRICING.enrollmentFee, locale)})`}
+              label={`${copy.enrollment} (${formatCurrency(pricing.enrollmentFee, locale)})`}
               meta={copy.enrollmentMeta}
             />
             <ToggleLine

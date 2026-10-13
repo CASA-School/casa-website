@@ -1,16 +1,14 @@
 import type { ContentLocale } from '@/lib/content/types';
+import { DEFAULT_PUBLISHED_PRICES, type PublishedPrices } from '@/lib/content/published-prices';
 import { pick, say } from '@/lib/cms/copy';
 
 /**
- * Exam and preparation fees, per docs/COURSE_FACTS_SOURCE_OF_TRUTH.md.
+ * Exam and preparation fees, as the price list in force publishes them
+ * (published-prices.ts); the published figures without a database.
  *
- * /exams and each exam's own page both read them here, so a fee changes in one
- * place. German pages write "190 €", English ones "€190" (brief 2026-10-02).
+ * /exams and each exam's own page both read them here. German pages write
+ * "190 €", English ones "€190" (brief 2026-10-02).
  */
-const EXAM_FEES: Record<string, { full: number; partial: number; prep: number }> = {
-  telc_b2: { full: 190, partial: 160, prep: 260 },
-  telc_c1_hochschule: { full: 210, partial: 185, prep: 520 },
-};
 
 /** How the preparation course runs: B2 on Monday and Wednesday evenings, C1 as a four-week block. */
 const PREP_RHYTHM: Record<string, Record<ContentLocale, string>> = {
@@ -18,8 +16,9 @@ const PREP_RHYTHM: Record<string, Record<ContentLocale, string>> = {
   telc_c1_hochschule: { de: '4 Wochen', en: '4 weeks' },
 };
 
-export function getExamFees(code: string, locale: ContentLocale) {
-  const fees = EXAM_FEES[code];
+export function getExamFees(code: string, locale: ContentLocale, prices: PublishedPrices = DEFAULT_PUBLISHED_PRICES) {
+  const listed = prices.exams[code as keyof PublishedPrices['exams']];
+  const fees = listed ? { full: listed.full, partial: listed.part, prep: listed.prep } : undefined;
 
   if (!fees) {
     return {

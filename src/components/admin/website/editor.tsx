@@ -46,10 +46,8 @@ const DEVICE_WIDTH = { desktop: '100%', tablet: '820px', phone: '390px' } as con
 const sameRect = (a: Rect | null, b: Rect) =>
   Boolean(a) && Math.abs(a!.x - b.x) < 0.5 && Math.abs(a!.y - b.y) < 0.5 && Math.abs(a!.width - b.width) < 0.5 && Math.abs(a!.height - b.height) < 0.5;
 
-const DATA_SCREENS: Record<string, { label: string; href: string }> = {
-  'Course dates': { label: 'Courses', href: '/admin/catalogue' },
-  'Course types': { label: 'Lists', href: '/admin/settings/setup' },
-};
+/** Where a live value is kept, by its source — only the screens this colleague may open. */
+export type DataScreens = Record<string, { label: string; href: string }>;
 
 export function WebsiteEditor({
   user,
@@ -61,6 +59,7 @@ export function WebsiteEditor({
   initialPath,
   aiEnabled,
   facts,
+  dataScreens,
 }: {
   user: { name: string; initials: string };
   level: Level;
@@ -71,6 +70,7 @@ export function WebsiteEditor({
   initialPath: string;
   aiEnabled: boolean;
   facts: EditorFacts;
+  dataScreens: DataScreens;
 }) {
   const [src, setSrc] = useState(() => previewBase + encodeURIComponent(initialPath));
   const [loading, setLoading] = useState(true);
@@ -528,7 +528,7 @@ export function WebsiteEditor({
             lockedBy={presence.find((other) => other.key === selectedSlot.key) ?? null}
             aiEnabled={aiEnabled}
             facts={facts}
-            dataScreens={DATA_SCREENS}
+            dataScreens={dataScreens}
             onPreview={(locale, value) => locale === lang && post({ type: 'cms:preview', key: selectedSlot.key, value })}
             onSaved={(slot) => {
               if (slot) setSlots((previous) => ({ ...previous, [slot.key]: slot }));
@@ -540,7 +540,7 @@ export function WebsiteEditor({
         ) : null}
 
         {selection && isDataKey(selection.key) && anchor ? (
-          <DataCard source={dataSource(selection.key)} text={selection.text} anchor={anchor} bounds={layout.canvas} onClose={() => setSelection(null)} />
+          <DataCard source={dataSource(selection.key)} screens={dataScreens} text={selection.text} anchor={anchor} bounds={layout.canvas} onClose={() => setSelection(null)} />
         ) : null}
 
         {panel === 'history' ? (
@@ -613,18 +613,20 @@ export function WebsiteEditor({
 
 function DataCard({
   source,
+  screens,
   text,
   anchor,
   bounds,
   onClose,
 }: {
   source: string;
+  screens: DataScreens;
   text: string;
   anchor: Rect;
   bounds: { width: number; height: number };
   onClose: () => void;
 }) {
-  const screen = DATA_SCREENS[source];
+  const screen = screens[source];
   const width = 320;
   const left = Math.max(12, Math.min(anchor.x + anchor.width / 2 - width / 2, bounds.width - width - 12));
   const below = bounds.height - (anchor.y + anchor.height) > 200;

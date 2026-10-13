@@ -3,7 +3,8 @@ import 'server-only';
 import { prepareCopy } from '@/lib/cms/content.server';
 import { fillFacts } from '@/lib/cms/facts';
 import { footerConfig } from '@/config/footer';
-import { accommodationCosts } from '@/config/content/accommodation-costs';
+import { accommodationCostsFor } from '@/config/content/accommodation-costs';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { coursePracticalFacts } from '@/config/courses/course-practical-facts';
 import { isCourseTermBookable, bremenToday } from '@/lib/content/bookability';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
@@ -43,7 +44,12 @@ export async function buildLlmsTxt({ full }: { full: boolean }) {
   const today = bremenToday();
   // The published texts and the live values (prices, lessons) the pages show.
   const { facts } = await prepareCopy('en');
-  const [courses, exams, faq] = await Promise.all([getCourses('en'), getExamCatalog('en'), full ? getFaq('en') : Promise.resolve([])]);
+  const [courses, exams, faq, prices] = await Promise.all([
+    getCourses('en'),
+    getExamCatalog('en'),
+    full ? getFaq('en') : Promise.resolve([]),
+    publishedPrices(),
+  ]);
   const details = await Promise.all(courses.map((course) => getCourseDetail(course.slug, 'en')));
 
   const lines: string[] = [
@@ -102,7 +108,7 @@ export async function buildLlmsTxt({ full }: { full: boolean }) {
     `- **CASA shared flats** (${links('/accommodation/flat')}): a room of your own in a flat shared with other learners, during an intensive course.`,
     `- **Host families** (${links('/accommodation/host')}): living with a family in Bremen, speaking German every day.`,
     `- **Become a host family** (${links('/accommodation/become-host')}): for people in Bremen who would like to host a learner.`,
-    `- Prices, the same for both: ${accommodationCosts.map((cost) => `${cost.label.en.toLowerCase()} €${cost.amount}`).join(', ')}. Overview: ${links('/accommodation')}`,
+    `- Prices, the same for both: ${accommodationCostsFor(prices).map((cost) => `${cost.label.en.toLowerCase()} €${cost.amount}`).join(', ')}. Overview: ${links('/accommodation')}`,
     '',
     '## Registration, placement and contact',
     '',

@@ -1,9 +1,9 @@
-import { ACCOMMODATION_FEES } from '@/config/calculator/pricing';
 import type { ContentLocale } from '@/lib/content/types';
+import { DEFAULT_PUBLISHED_PRICES, type PublishedPrices } from '@/lib/content/published-prices';
 import { pick, say } from '@/lib/cms/copy';
 
-/** Same published rates for both accommodation options. Amounts remain tied
- * to the calculator; the refundable deposit is identified separately. */
+/** Same published rates for both accommodation options, from the price list in
+ * force (published-prices.ts); the refundable deposit is identified separately. */
 export type AccommodationCost = {
   label: { en: string; de: string };
   amount: number;
@@ -14,10 +14,10 @@ export type AccommodationCost = {
 // German pages write the amount first: "580 €" (go-live brief 2026-10-01).
 const eur = (value: number, locale: ContentLocale = 'en') => (say(locale, '{value} €', '€{value}', { value }));
 
-export const accommodationCosts: AccommodationCost[] = [
+export const accommodationCostsFor = (p: PublishedPrices = DEFAULT_PUBLISHED_PRICES): AccommodationCost[] => [
   {
     label: { en: 'Rent for 4 weeks', de: 'Miete für 4 Wochen' },
-    amount: ACCOMMODATION_FEES.base4Weeks,
+    amount: p.rent4Weeks,
     note: {
       en: 'Your room for the first four weeks.',
       de: 'Dein Zimmer für die ersten vier Wochen.',
@@ -25,7 +25,7 @@ export const accommodationCosts: AccommodationCost[] = [
   },
   {
     label: { en: 'Each additional week', de: 'Jede weitere Woche' },
-    amount: ACCOMMODATION_FEES.perAdditionalWeek,
+    amount: p.rentExtraWeek,
     note: {
       en: 'If you stay longer than four weeks.',
       de: 'Wenn du länger als vier Wochen bleibst.',
@@ -33,7 +33,7 @@ export const accommodationCosts: AccommodationCost[] = [
   },
   {
     label: { en: 'One-off booking fee', de: 'Einmalige Vermittlungsgebühr' },
-    amount: ACCOMMODATION_FEES.commissionFee,
+    amount: p.placementFee,
     note: {
       en: 'For arranging your accommodation.',
       de: 'Für die Vermittlung deiner Unterkunft.',
@@ -41,7 +41,7 @@ export const accommodationCosts: AccommodationCost[] = [
   },
   {
     label: { en: 'Refundable deposit', de: 'Rückerstattbare Kaution' },
-    amount: ACCOMMODATION_FEES.deposit,
+    amount: p.deposit,
     refundable: true,
     note: {
       en: 'You get the deposit back after you leave, as long as the accommodation and keys are in the same condition as when you received them.',
@@ -50,8 +50,8 @@ export const accommodationCosts: AccommodationCost[] = [
   },
 ];
 
-export function localizeAccommodationCosts(locale: ContentLocale) {
-  return accommodationCosts.map((cost) => ({
+export function localizeAccommodationCosts(locale: ContentLocale, prices: PublishedPrices = DEFAULT_PUBLISHED_PRICES) {
+  return accommodationCostsFor(prices).map((cost) => ({
     label: pick(locale, cost.label),
     amount: eur(cost.amount, locale),
     note: (cost.note ? pick(locale, cost.note) : undefined),
@@ -59,22 +59,8 @@ export function localizeAccommodationCosts(locale: ContentLocale) {
   }));
 }
 
-/**
- * The one-line version, for a facts rail or a summary row.
- *
- * Deliberately leads with the two figures that decide affordability and leaves
- * the placement fee and deposit to the full table — a rail row is not the place
- * to itemise four charges.
- */
-export function accommodationPriceSummary(locale: ContentLocale) {
-  const base = eur(ACCOMMODATION_FEES.base4Weeks, locale);
-  const week = eur(ACCOMMODATION_FEES.perAdditionalWeek, locale);
-
-  return say(locale, '{base} für 4 Wochen, danach {week} pro Woche', '{base} for 4 weeks, then {week} a week', { base, week });
-}
-
 /** A separate condition, not an unexplained second meaning of the weekly rent. */
-export function accommodationHolidayNote(locale: ContentLocale) {
-  const amount = eur(ACCOMMODATION_FEES.perAdditionalWeek, locale);
+export function accommodationHolidayNote(locale: ContentLocale, prices: PublishedPrices = DEFAULT_PUBLISHED_PRICES) {
+  const amount = eur(prices.rentExtraWeek, locale);
   return say(locale, 'Wenn du über Weihnachten oder Ostern bleibst, zahlst du für die Wochen, in denen die Schule geschlossen ist, eine zusätzliche Unterkunftsgebühr von {amount} pro Woche.', 'If you stay over Christmas or Easter, you pay an additional accommodation charge of {amount} a week for the weeks when the school is closed.', { amount });
 }

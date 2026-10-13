@@ -245,7 +245,9 @@ through `say(locale, 'Deutsch', 'English')`**, `pick` or `pickTree` (`src/lib/cm
 `npm run cms:extract` refreshes the editor's catalog (a test fails without it). That is what
 makes a text editable in the website editor; docs/WEBSITE_EDITOR.md has the rest. **A price, a
 lesson count or a date in copy is a live value**, `{course.intensive-german.lessons}`, filled
-from the database each render (`src/lib/cms/facts.server.ts`), never a typed number. Keep new work
+from the database each render (`src/lib/cms/facts.server.ts`), never a typed number. Every price
+the site shows is one entry of the workspace's price list in force (`src/lib/content/published-prices.ts`);
+`src/config/calculator/pricing.ts` holds the figures a site without a database shows. Keep new work
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
 

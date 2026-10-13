@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { SPECIAL_COURSE_CONSTANTS } from '@/config/courses/special-course-modules';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { getCourseFinderData, getCourseRegistrationCatalog, getExamCatalog } from '@/lib/content/repository';
 import type { ContentLocale } from '@/lib/content/types';
 
@@ -18,8 +18,9 @@ import {
 
 /**
  * The live values (facts.ts), read from where each fact is kept: course types
- * and terms from the database (the in-repo fixtures without one), exam days and
- * fees, the price list. Formatted for the page's language.
+ * and terms from the database (the in-repo fixtures without one), exam days,
+ * and the prices from the price list in force (published-prices.server.ts).
+ * Formatted for the page's language.
  *
  * A prepared language (translation-locales.ts), previewed in the editor, reads
  * the English data and writes each value its own way: „desde 378 €", „от 378 €".
@@ -57,10 +58,11 @@ async function build(locale: string): Promise<Facts> {
     if (value) values[def.id] = value;
   };
 
-  const [finder, catalog, exams] = await Promise.all([
+  const [finder, catalog, exams, published] = await Promise.all([
     getCourseFinderData(data),
     getCourseRegistrationCatalog(data),
     getExamCatalog(data),
+    publishedPrices(),
   ]);
 
   for (const course of finder.courses) {
@@ -97,7 +99,9 @@ async function build(locale: string): Promise<Facts> {
     const upcoming = item.sessions
       .filter((session) => new Date(session.starts_at).getTime() > now)
       .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)))[0];
-    const fee = Number(upcoming?.fee_override ?? item.examType.default_fee);
+    // A session's own fee, else the price list's full exam, else the exam type's.
+    const listed = published.exams[item.examType.code as keyof typeof published.exams]?.full;
+    const fee = Number(upcoming?.fee_override ?? listed ?? item.examType.default_fee);
     add({ id: `${id}.fee`, group, label: 'Exam fee', source: 'Prices' }, Number.isFinite(fee) && fee > 0 ? formatEuro(fee, locale) : null);
     add({ id: `${id}.next-date`, group, label: 'Next exam day', source: 'Exam dates' }, upcoming ? formatDay(String(upcoming.starts_at), locale) : null);
     add(
@@ -106,12 +110,8 @@ async function build(locale: string): Promise<Facts> {
     );
   }
 
-  const prices = priceListFacts(locale);
+  const prices = priceListFacts(locale, published);
   for (const def of PRICE_LIST_DEFS) add(def, prices[def.id]);
-  add(
-    { id: 'course.special-courses.price-per-evening', group: COURSE_GROUPS['special-courses'], label: 'Price per evening', source: 'Prices' },
-    formatEuro(SPECIAL_COURSE_CONSTANTS.pricePerSessionEur, locale)
-  );
 
   return { defs, values };
 }

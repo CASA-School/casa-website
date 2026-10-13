@@ -1,11 +1,4 @@
-import {
-  ACCOMMODATION_FEES,
-  ENROLLMENT_FEE,
-  EXAM_FEES,
-  INTENSIVE_FULL_LEVEL_8_WEEKS,
-  INTENSIVE_HALF_LEVEL_4_WEEKS,
-  SPECIAL_COURSE_DEFAULT_PRICE,
-} from '@/config/calculator/pricing';
+import { DEFAULT_PUBLISHED_PRICES, type PublishedPrices } from '@/lib/content/published-prices';
 
 /**
  * Live values: facts a text may name instead of stating.
@@ -126,33 +119,42 @@ const EXAM_GROUPS: Record<string, string> = {
   telc_c1_hochschule: 'telc Deutsch C1 Hochschule',
 };
 
-/** The price list (config/calculator/pricing.ts): known without a database, so also in tests. */
-const PRICE_LIST: { def: FactDef; amount: number }[] = [
-  { def: { id: 'course.intensive-german.price-4-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 4 weeks', source: 'Prices' }, amount: INTENSIVE_HALF_LEVEL_4_WEEKS },
-  { def: { id: 'course.intensive-german.price-8-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 8 weeks', source: 'Prices' }, amount: INTENSIVE_FULL_LEVEL_8_WEEKS },
-  { def: { id: 'course.special-courses.price-per-module', group: COURSE_GROUPS['special-courses'], label: 'Price of a module', source: 'Prices' }, amount: SPECIAL_COURSE_DEFAULT_PRICE },
-  { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: 'Enrolment fee', source: 'Prices' }, amount: ENROLLMENT_FEE },
-  { def: { id: 'exam.telc_b2.preparation-price', group: EXAM_GROUPS.telc_b2, label: 'Preparation course', source: 'Prices' }, amount: EXAM_FEES.telcB2.prep },
-  { def: { id: 'exam.telc_b2.part-fee', group: EXAM_GROUPS.telc_b2, label: 'Fee for one part', source: 'Prices' }, amount: EXAM_FEES.telcB2.examPartial },
-  { def: { id: 'exam.telc_c1_hochschule.preparation-price', group: EXAM_GROUPS.telc_c1_hochschule, label: 'Preparation course', source: 'Prices' }, amount: EXAM_FEES.telcC1.prep },
-  { def: { id: 'exam.telc_c1_hochschule.part-fee', group: EXAM_GROUPS.telc_c1_hochschule, label: 'Fee for one part', source: 'Prices' }, amount: EXAM_FEES.telcC1.examPartial },
-  { def: { id: 'accommodation.rent-4-weeks', group: 'Unterkunft', label: 'Rent for 4 weeks', source: 'Prices' }, amount: ACCOMMODATION_FEES.base4Weeks },
-  { def: { id: 'accommodation.extra-week', group: 'Unterkunft', label: 'Each further week', source: 'Prices' }, amount: ACCOMMODATION_FEES.perAdditionalWeek },
-  { def: { id: 'accommodation.booking-fee', group: 'Unterkunft', label: 'Booking fee', source: 'Prices' }, amount: ACCOMMODATION_FEES.commissionFee },
-  { def: { id: 'accommodation.deposit', group: 'Unterkunft', label: 'Deposit', source: 'Prices' }, amount: ACCOMMODATION_FEES.deposit },
-];
+/**
+ * The prices a text can name: the price list in force (the Prices screen), as
+ * the website publishes it (src/lib/content/published-prices.ts) — the
+ * published figures without a database, so also in tests.
+ */
+function priceList(p: PublishedPrices): { def: FactDef; amount: number }[] {
+  const b2 = EXAM_GROUPS.telc_b2;
+  const c1 = EXAM_GROUPS.telc_c1_hochschule;
+  return [
+    { def: { id: 'course.intensive-german.price-4-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 4 weeks', source: 'Prices' }, amount: p.intensive4Weeks },
+    { def: { id: 'course.intensive-german.price-8-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 8 weeks', source: 'Prices' }, amount: p.intensive8Weeks },
+    { def: { id: 'course.special-courses.price-per-module', group: COURSE_GROUPS['special-courses'], label: 'Price of a module', source: 'Prices' }, amount: p.specialModule },
+    { def: { id: 'course.special-courses.price-per-evening', group: COURSE_GROUPS['special-courses'], label: 'Price per evening', source: 'Prices' }, amount: p.specialPerEvening },
+    { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: 'Enrolment fee', source: 'Prices' }, amount: p.enrolmentFee },
+    { def: { id: 'exam.telc_b2.preparation-price', group: b2, label: 'Preparation course', source: 'Prices' }, amount: p.exams.telc_b2.prep },
+    { def: { id: 'exam.telc_b2.part-fee', group: b2, label: 'Fee for one part', source: 'Prices' }, amount: p.exams.telc_b2.part },
+    { def: { id: 'exam.telc_c1_hochschule.preparation-price', group: c1, label: 'Preparation course', source: 'Prices' }, amount: p.exams.telc_c1_hochschule.prep },
+    { def: { id: 'exam.telc_c1_hochschule.part-fee', group: c1, label: 'Fee for one part', source: 'Prices' }, amount: p.exams.telc_c1_hochschule.part },
+    { def: { id: 'accommodation.rent-4-weeks', group: 'Unterkunft', label: 'Rent for 4 weeks', source: 'Prices' }, amount: p.rent4Weeks },
+    { def: { id: 'accommodation.extra-week', group: 'Unterkunft', label: 'Each further week', source: 'Prices' }, amount: p.rentExtraWeek },
+    { def: { id: 'accommodation.booking-fee', group: 'Unterkunft', label: 'Booking fee', source: 'Prices' }, amount: p.placementFee },
+    { def: { id: 'accommodation.deposit', group: 'Unterkunft', label: 'Deposit', source: 'Prices' }, amount: p.deposit },
+  ];
+}
 
-export const PRICE_LIST_DEFS: FactDef[] = PRICE_LIST.map((entry) => entry.def);
+export const PRICE_LIST_DEFS: FactDef[] = priceList(DEFAULT_PUBLISHED_PRICES).map((entry) => entry.def);
 
 const priceListCache = new Map<string, FactValues>();
 
-export function priceListFacts(locale: string): FactValues {
-  let values = priceListCache.get(locale);
-  if (!values) {
-    values = Object.fromEntries(PRICE_LIST.map(({ def, amount }) => [def.id, formatEuro(amount, locale)]));
-    priceListCache.set(locale, values);
-  }
-  return values;
+/** The price list's live values for a language; the published figures unless the prices in force are passed. */
+export function priceListFacts(locale: string, prices: PublishedPrices = DEFAULT_PUBLISHED_PRICES): FactValues {
+  const values = () => Object.fromEntries(priceList(prices).map(({ def, amount }) => [def.id, formatEuro(amount, locale)]));
+  if (prices !== DEFAULT_PUBLISHED_PRICES) return values();
+  let cached = priceListCache.get(locale);
+  if (!cached) priceListCache.set(locale, (cached = values()));
+  return cached;
 }
 
 export const examGroup = (code: string, name: string) => EXAM_GROUPS[code] ?? name;

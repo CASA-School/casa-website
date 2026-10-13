@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requireModule } from '@/lib/admin/guard';
+import { forgetPublishedPrices } from '@/lib/content/published-prices.server';
 import { PRICE_UNITS, parseAmount, parseSlot, type PriceUnit } from '@/lib/admin/prices/price-list';
 import { deletePriceList, preparePriceList, savePrices, type PriceChange } from '@/lib/admin/prices/repo';
 import { todayInputValue } from '@/lib/dates';
@@ -25,6 +26,7 @@ function listOf(formData: FormData, field = 'list'): string {
 }
 
 const done = () => {
+  forgetPublishedPrices();
   revalidatePath(BACK);
   revalidatePath('/admin/offers', 'layout');
   revalidatePath('/admin/bookings', 'layout');

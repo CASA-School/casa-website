@@ -8,9 +8,11 @@
  *   - Flyer Intensivkurse NEU 24.25.docx
  *   - ENG_Level_Developmentplan_2026.docx (dated 05.12.2025)
  *
- * NOTE: This file is intentionally CMS-forward — a future admin dashboard
- * will replace these constants with database-driven values. Until then,
- * all price references across the site must import from here.
+ * With a database, the website shows the price list in force instead (Settings
+ * → Prices in the workspace; src/lib/content/published-prices.ts maps it onto
+ * these figures). These are what a site without a database shows, and the
+ * figures the list does not hold (the preparation courses). A price changes on
+ * the Prices screen; change it here too, so the two modes agree.
  */
 
 // ---------------------------------------------------------------------------
@@ -170,10 +172,10 @@ export const ACCOMMODATION_FEES = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Legacy aggregate export — kept for backward-compat with cost-calculator.ts
+// The calculator's prices without a database
 // ---------------------------------------------------------------------------
 
-export const CASA_CALCULATOR_PRICING = {
+export const CASA_CALCULATOR_PRICING: CasaCalculatorPricing = {
   currency: 'EUR',
   enrollmentFee: ENROLLMENT_FEE,
   intensive: {
@@ -191,6 +193,24 @@ export const CASA_CALCULATOR_PRICING = {
   },
   exams: EXAM_FEES,
   accommodation: ACCOMMODATION_FEES,
-} as const;
+};
 
-export type CasaCalculatorPricing = typeof CASA_CALCULATOR_PRICING;
+type ExamFees = { prep: number; examFull: number; examPartial: number };
+
+/** The calculator's prices: these figures without a database, the price list in force with one (src/lib/content/published-prices.ts). */
+export type CasaCalculatorPricing = {
+  currency: string;
+  enrollmentFee: number;
+  intensive: { halfLevel4Weeks: number; fullLevel8Weeks: number; bookRangePerBook: readonly [number, number] };
+  evening: { halfLevelTrimester: number; textbookStrategy: 'reuseIntensiveRange' | 'overrideOnly'; textbookRangePerBook: readonly [number, number] };
+  specialCourse: { unitPrice: number };
+  exams: { telcB2: ExamFees; telcC1: ExamFees };
+  accommodation: {
+    base4Weeks: number;
+    perAdditionalWeek: number;
+    commissionFee: number;
+    deposit: number;
+    holidaySurchargeHostFamilyPerWeek: number;
+    holidaySurchargeSharedFlatPerWeek: number;
+  };
+};

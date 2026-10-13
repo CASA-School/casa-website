@@ -8,6 +8,7 @@ import { skillTokens } from '@/config/brand/tokens';
 import {
   SPECIAL_COURSE_TERM_LABEL,
   SPECIAL_COURSE_TERM_LABEL_EN,
+  SPECIAL_COURSE_CONSTANTS,
   specialCourseModules,
   type SpecialCourseModule,
 } from '@/config/courses/special-course-modules';
@@ -46,10 +47,13 @@ function formatDateRange(start: string, end: string, tag: string) {
 type Props = {
   locale: ContentLocale;
   className?: string;
+  /** One evening at the price list in force (published-prices.ts); a module costs its evenings. */
+  pricePerEvening?: number;
 };
 
-export function SpecialCourseCatalogue({ locale, className }: Props) {
+export function SpecialCourseCatalogue({ locale, className, pricePerEvening = SPECIAL_COURSE_CONSTANTS.pricePerSessionEur }: Props) {
   const { pick, pickTree } = useSiteCopy();
+
   const [level, setLevel] = useState<string | null>(null);
   const [weekday, setWeekday] = useState<string | null>(null);
 
@@ -185,7 +189,7 @@ export function SpecialCourseCatalogue({ locale, className }: Props) {
                 {column.modules.map((courseModule) => (
                   <li key={courseModule.id}>
                     <ModuleCard
-                      courseModule={courseModule}
+                      courseModule={{ ...courseModule, priceEur: courseModule.sessions * pricePerEvening }}
                       locale={locale}
                       readMoreLabel={copy.readMore}
                     />

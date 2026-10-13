@@ -7,6 +7,7 @@ import nightHero from '@/components/sections/night-hero.module.css';
 import { ExamOptionCards, type ExamOption } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
 import { getExamFees } from '@/config/content/exam-fees';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
@@ -48,9 +49,10 @@ export default async function ExamsPage() {
   const rhythm = getLayoutRhythm('exams-index');
   const pageConfig = getPublicPageConfig('exams', locale);
 
-  const [catalog, candidateStory] = await Promise.all([
+  const [catalog, candidateStory, prices] = await Promise.all([
     getExamCatalog(locale),
     Promise.resolve(getSocialProofById('fatameh-evening', locale)),
+    publishedPrices(),
   ]);
   // Fatameh is the only CASA learner who writes about sitting an exam.
   const leadStory = candidateStory;
@@ -59,7 +61,7 @@ export default async function ExamsPage() {
     // getExamCatalog holds only sittings still open for registration, so
     // the first one is the next date a candidate can still book.
     const nextSession = item.sessions[0];
-    const fees = getExamFees(item.examType.code, locale);
+    const fees = getExamFees(item.examType.code, locale, prices);
 
     return {
       anchorId: item.examType.code === 'telc_c1_hochschule' ? 'c1' : item.examType.code === 'telc_b2' ? 'b2' : item.anchorId,

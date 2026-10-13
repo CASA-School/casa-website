@@ -8735,16 +8735,6 @@
    "/courses"
   ]
  },
- "t.fuer-4-wochen-danach.519euc": {
-  "de": "{base} für 4 Wochen, danach {week} pro Woche",
-  "en": "{base} for 4 weeks, then {week} a week",
-  "files": [
-   "src/config/content/accommodation-costs.ts"
-  ],
-  "pages": [
-   "/accommodation/[type]"
-  ]
- },
  "t.fuer-aerztinnen-aerzte-und.19b1qfj": {
   "de": "Für Ärztinnen, Ärzte und medizinische Fachkräfte, die sich sprachlich auf die Arbeit in Deutschland vorbereiten.",
   "en": "For doctors and healthcare professionals preparing their German for work in Germany.",

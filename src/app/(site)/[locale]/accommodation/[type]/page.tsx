@@ -6,6 +6,7 @@ import { HeroCUtilityRail } from '@/components/heroes';
 import { ComparisonModule, DecisionRail, EditorialSplit, ProcessSteps } from '@/components/sections';
 import { AccommodationArrivalChecklist } from '@/components/signatures';
 import { accommodationHolidayNote, localizeAccommodationCosts } from '@/config/content/accommodation-costs';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import { checkInSummary } from '@/config/content/accommodation-checkin-form';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -52,6 +53,7 @@ export async function generateMetadata({ params }: AccommodationDetailPageProps)
 
 export default async function AccommodationDetailPage({ params }: AccommodationDetailPageProps) {
   const locale = await getContentLocale();
+  const prices = await publishedPrices();
   const { type } = await params;
 
   if (!validTypes.includes(type as AccommodationTypeKey)) {
@@ -191,9 +193,9 @@ export default async function AccommodationDetailPage({ params }: AccommodationD
                 <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">
                   {say(locale, 'In der CASA-WG und bei einer Gastfamilie zahlst du dieselben Preise.', 'You pay the same in a CASA shared flat as with a host family.')}
                 </p>
-                <FeeStrip figures={localizeAccommodationCosts(locale)} className="mt-6" />
+                <FeeStrip figures={localizeAccommodationCosts(locale, prices)} className="mt-6" />
                 <p className="mt-4 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">
-                  {accommodationHolidayNote(locale)}
+                  {accommodationHolidayNote(locale, prices)}
                 </p>
               </section>
 

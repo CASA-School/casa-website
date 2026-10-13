@@ -12,6 +12,8 @@ import { culturalProgramsByLocale } from '@/config/content/cultural-programs';
 import { teamSpotlightsByLocale } from '@/config/content/team-spotlights';
 import { listMockRows } from '@/lib/mock/store';
 import { toDateInputValue } from '@/lib/dates';
+import { DEFAULT_PUBLISHED_PRICES, publishedCourseFrom, type PublishedPrices } from '@/lib/content/published-prices';
+import { publishedPrices } from '@/lib/content/published-prices.server';
 import {
   bremenToday,
   isCourseTermBookable,
@@ -184,19 +186,29 @@ function filterPublicCourseTypes(courses: CourseTypeRow[]) {
   return courses.filter((course) => !hiddenPublicCourseSlugs.has(course.slug));
 }
 
-function applyPublicCourseDisplayNames(courses: CourseTypeRow[], locale: ContentLocale) {
+/**
+ * The public name, and the "from" price the price list in force gives a course
+ * it prices (published-prices.ts): the intensive course's four weeks, the
+ * cheapest evening term, a special-course module. Every other course keeps its
+ * catalogue price.
+ */
+function applyPublicCourseDisplayNames(courses: CourseTypeRow[], locale: ContentLocale, prices: PublishedPrices = DEFAULT_PUBLISHED_PRICES) {
   return courses.map((course) => ({
     ...course,
     name: pick(locale, publicCourseDisplayNames[course.slug]) || course.name,
+    default_price: publishedCourseFrom(prices, course.slug) ?? course.default_price,
   }));
 }
 
-function applyPublicCourseDisplayName(course: CourseTypeRow, locale: ContentLocale) {
-  return applyPublicCourseDisplayNames([course], locale)[0];
+function applyPublicCourseDisplayName(course: CourseTypeRow, locale: ContentLocale, prices: PublishedPrices) {
+  return applyPublicCourseDisplayNames([course], locale, prices)[0];
 }
 
-function filterPublicExamTypes(examTypes: ExamTypeRow[]) {
-  return examTypes.filter((examType) => publicExamCodes.has(examType.code));
+/** The exams the site lists, each at the price list's fee for the full exam. */
+function filterPublicExamTypes(examTypes: ExamTypeRow[], prices: PublishedPrices = DEFAULT_PUBLISHED_PRICES) {
+  return examTypes
+    .filter((examType) => publicExamCodes.has(examType.code))
+    .map((examType) => ({ ...examType, default_fee: prices.exams[examType.code as keyof PublishedPrices['exams']]?.full ?? examType.default_fee }));
 }
 
 function filterSessionsByType<T extends { exam_type_id: string }>(sessions: T[], examTypes: ExamTypeRow[]) {
@@ -614,7 +626,7 @@ export async function getCourses(locale: ContentLocale): Promise<CourseWithNarra
     agree without either of them restating the sequence.
   */
   courses = sortByPublicCourseOrder(courses);
-  courses = applyPublicCourseDisplayNames(courses, locale);
+  courses = applyPublicCourseDisplayNames(courses, locale, await publishedPrices());
 
   return attachCourseNarratives(courses, locale);
 }
@@ -784,7 +796,7 @@ export async function getCourseDetail(slug: string, locale: ContentLocale): Prom
     return null;
   }
 
-  course = applyPublicCourseDisplayName(course, locale);
+  course = applyPublicCourseDisplayName(course, locale, await publishedPrices());
 
   if (instances.length === 0) {
     // Finished terms stay in: the term table shows them dimmed, and the page
@@ -936,7 +948,7 @@ export async function getCourseRegistrationCatalog(
   // dropdown is the third place a visitor meets this list, and it should not be
   // the one place that disagrees.
   courseTypes = sortByPublicCourseOrder(courseTypes);
-  courseTypes = applyPublicCourseDisplayNames(courseTypes, locale);
+  courseTypes = applyPublicCourseDisplayNames(courseTypes, locale, await publishedPrices());
 
   if (selectedCourseTypeId && !courseTypes.some((courseType) => courseType.id === selectedCourseTypeId)) {
     selectedCourseTypeId = undefined;
@@ -959,7 +971,7 @@ export async function getCourseRegistrationCatalog(
       .sort((a, b) => a.start_date.localeCompare(b.start_date));
 
     if (fallbackPublicCourseTypes.length > 0 && fallbackPublicInstances.length > 0) {
-      courseTypes = applyPublicCourseDisplayNames(fallbackPublicCourseTypes, locale);
+      courseTypes = applyPublicCourseDisplayNames(fallbackPublicCourseTypes, locale, await publishedPrices());
       instances = fallbackPublicInstances;
       selectedCourseTypeId = undefined;
       selectedOptionId = undefined;
@@ -1123,9 +1135,10 @@ export async function getExamRegistrationCatalog(
     examTypes = [...fallbackExamTypes].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  examTypes = filterPublicExamTypes(examTypes);
+  const prices = await publishedPrices();
+  examTypes = filterPublicExamTypes(examTypes, prices);
   if (examTypes.length === 0) {
-    examTypes = filterPublicExamTypes([...fallbackExamTypes].sort((a, b) => a.name.localeCompare(b.name)));
+    examTypes = filterPublicExamTypes([...fallbackExamTypes].sort((a, b) => a.name.localeCompare(b.name)), prices);
   }
 
   if (sessions.length === 0) {
@@ -1136,7 +1149,7 @@ export async function getExamRegistrationCatalog(
   sessions = filterSessionsByType(sessions, examTypes);
 
   if (sessions.length === 0) {
-    const fallbackPublicExamTypes = filterPublicExamTypes([...fallbackExamTypes].sort((a, b) => a.name.localeCompare(b.name)));
+    const fallbackPublicExamTypes = filterPublicExamTypes([...fallbackExamTypes].sort((a, b) => a.name.localeCompare(b.name)), prices);
     const fallbackPublicSessions = filterSessionsByType(
       bookableSittings(fallbackExamSessions)
         .sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
@@ -1275,9 +1288,10 @@ export async function getExamCatalog(locale: ContentLocale): Promise<ExamCatalog
     examTypes = [...fallbackExamTypes];
   }
 
-  examTypes = filterPublicExamTypes(examTypes);
+  const prices = await publishedPrices();
+  examTypes = filterPublicExamTypes(examTypes, prices);
   if (examTypes.length === 0) {
-    examTypes = filterPublicExamTypes([...fallbackExamTypes]);
+    examTypes = filterPublicExamTypes([...fallbackExamTypes], prices);
   }
 
   /*

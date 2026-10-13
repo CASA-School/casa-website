@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { WebsiteEditor } from '@/components/admin/website/editor';
 import { DEFAULT_EDITOR_PATH, EDITOR_PAGES } from '@/config/cms/editor-pages';
+import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { aiEnabled } from '@/lib/cms/ai.server';
 import { initialsOf } from '@/lib/cms/editor-types';
@@ -24,6 +25,12 @@ export default async function WebsiteEditorPage({ searchParams }: { searchParams
   const [user, params] = await Promise.all([requireModule('website'), searchParams]);
   const [origin, de, en] = await Promise.all([publicSiteOrigin(), loadFacts('de'), loadFacts('en')]);
   const token = createPreviewToken(user.id);
+  // Where each live value is changed, for the colleagues who may change it there.
+  const dataScreens = {
+    ...(canAccess(user, 'catalogue') ? { 'Course dates': { label: 'Courses', href: '/admin/catalogue' } } : {}),
+    'Course types': { label: 'Lists', href: '/admin/settings/setup' },
+    ...(canAccess(user, 'prices') ? { Prices: { label: 'Prices', href: '/admin/settings/prices' } } : {}),
+  };
 
   return (
     <WebsiteEditor
@@ -36,6 +43,7 @@ export default async function WebsiteEditorPage({ searchParams }: { searchParams
       initialPath={safePreviewPath(params.path ?? DEFAULT_EDITOR_PATH)}
       aiEnabled={aiEnabled()}
       facts={{ defs: de.defs, values: { de: de.values, en: en.values } }}
+      dataScreens={dataScreens}
     />
   );
 }

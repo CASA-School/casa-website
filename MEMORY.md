@@ -2615,3 +2615,12 @@ not 378 €). Offers, the offers' price-list items and bookings now read the lis
 thing's own day. The generic rate editor under Types & prices is gone (that screen is Lists now).
 The public site still shows `src/config/calculator/pricing.ts`.
 
+Seventh pass: **the website reads the price list** (Rahman: "do that — but the price list will be much
+bigger than what we show on the site"). `src/lib/content/published-prices.ts` names the dozen figures
+the site publishes, each one entry of the list in force; every place the site shows a price reads them
+(live values, course and exam rows, exam and accommodation pages, special modules, calculator,
+llms.txt). The Prices screen marks those entries "On the website", and a save clears the site's
+one-minute cache. Without a database the site shows `pricing.ts`, which a test keeps equal to the
+2026 list. Proven on the running site: the deposit set to 600 on the screen showed on
+/en/accommodation/host at once, and back.
+

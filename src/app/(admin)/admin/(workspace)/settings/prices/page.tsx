@@ -21,6 +21,7 @@ import {
   type Slot,
 } from '@/lib/admin/prices/price-list';
 import { loadPriceLists, priceListSubjects } from '@/lib/admin/prices/repo';
+import { PUBLISHED_SLOTS } from '@/lib/content/published-prices';
 import { todayInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 import { deletePriceListAction, preparePriceListAction, savePricesAction } from './actions';
@@ -326,6 +327,11 @@ function PriceCard({
                 <Cell className="text-sm">
                   <span className="font-semibold text-[var(--casa-ink)]">{row.label}</span>
                   {row.sub ? <span className="ml-2 text-xs text-[var(--casa-text-subtle)]">{row.sub}</span> : null}
+                  {PUBLISHED_SLOTS.includes(slotKey(row.slot)) ? (
+                    <Badge tone="neutral" className="ml-2 align-middle">
+                      On the website
+                    </Badge>
+                  ) : null}
                 </Cell>
                 <Cell align="right" className="text-sm whitespace-nowrap tabular-nums">
                   {price ? (
