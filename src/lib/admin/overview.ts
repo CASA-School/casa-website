@@ -1,4 +1,6 @@
+import type { WorkspaceModule } from './access';
 import { query, queryFirst } from './db';
+import { FOLLOW_UP_AFTER_DAYS } from './offers/repo';
 
 /**
  * The one query behind the overview screen.
@@ -128,18 +130,19 @@ export async function getInboundByDay(days = 14): Promise<InboundDay[]> {
 }
 
 export type AttentionItem = {
-  kind: 'cohort' | 'exam-deadline' | 'stale-enquiry';
+  kind: 'cohort' | 'exam-deadline';
   title: string;
   detail: string;
+  /** The day it happens: the cohort's first day, the sitting's entry deadline. */
+  on: Date;
   href: string;
 };
 
 /**
- * The short list of things with a clock on them.
- *
- * Three sources, each chosen because it becomes irreversible: a cohort that
- * starts, an exam entry deadline that closes, and an enquiry that has gone
- * unanswered long enough that the person has probably written to someone else.
+ * What is coming, with a day on it: a cohort that starts and an exam whose
+ * entries close — both irreversible once the day passes. Soonest first. An
+ * enquiry nobody has answered is not here but at the top of Today, in
+ * "Waiting for an answer" (`getWaiting`).
  */
 export async function getAttentionItems(): Promise<AttentionItem[]> {
   const items: AttentionItem[] = [];
@@ -174,7 +177,8 @@ export async function getAttentionItems(): Promise<AttentionItem[]> {
     items.push({
       kind: 'cohort',
       title: cohort.name,
-      detail: `${days === 0 ? 'Starts today' : days === 1 ? 'Starts tomorrow' : `Starts in ${days} days`} · ${cohort.registrations} of ${cohort.capacity} seats`,
+      detail: `${days === 0 ? 'Starts today' : days === 1 ? 'Starts tomorrow' : 'Starts'} · ${cohort.registrations} of ${cohort.capacity} seats`,
+      on: cohort.start_date,
       href: '/admin/catalogue',
     });
   }
@@ -209,33 +213,13 @@ export async function getAttentionItems(): Promise<AttentionItem[]> {
     items.push({
       kind: 'exam-deadline',
       title: session.name,
-      detail: `Registration closes ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`} · ${session.registrations} of ${session.capacity} registered`,
+      detail: `Entries close${days === 0 ? ' today' : days === 1 ? ' tomorrow' : ''} · ${session.registrations} of ${session.capacity} registered`,
+      on: session.registration_deadline,
       href: '/admin/catalogue/exams',
     });
   }
 
-  const stale = await query<{ id: string; first_name: string; last_name: string | null; age: string }>(
-    `SELECT id,
-            first_name,
-            last_name,
-            extract(day from now() - submitted_at)::int::text AS age
-       FROM enquiries
-      WHERE status = 'new'
-        AND submitted_at < now() - interval '3 days'
-      ORDER BY submitted_at ASC
-      LIMIT 4`
-  );
-
-  for (const enquiry of stale) {
-    items.push({
-      kind: 'stale-enquiry',
-      title: [enquiry.first_name, enquiry.last_name].filter(Boolean).join(' '),
-      detail: `Unanswered for ${enquiry.age} days`,
-      href: `/admin/enquiries/${enquiry.id}`,
-    });
-  }
-
-  return items;
+  return items.sort((a, b) => a.on.getTime() - b.on.getTime());
 }
 
 export type RecentInbound = {
@@ -323,4 +307,77 @@ export async function getRecentInbound(
     at: row.at,
     href: `${hrefFor[row.kind]}/${row.id}`,
   }));
+}
+
+export type WaitingItem = {
+  key: string;
+  name: string;
+  /** What it is and what about: "Enquiry · Intensive course starting in October". */
+  about: string;
+  /** Since when they have been waiting. */
+  since: Date;
+  owner: string | null;
+  href: string;
+};
+
+/**
+ * Who is waiting for CASA to answer — the first thing on Today. A new
+ * enquiry, registration or job application nobody has opened, and a sent offer
+ * gone quiet (no answer for ten days, or past its validity) — oldest first,
+ * since the longest wait is the one closest to writing to another school.
+ * Only the modules the colleague holds are read.
+ */
+export async function getWaiting(
+  holds: (module: WorkspaceModule) => boolean,
+  limit = 6
+): Promise<{ items: WaitingItem[]; total: number }> {
+  const parts: string[] = [];
+  if (holds('enquiries')) {
+    parts.push(`SELECT 'enquiry:' || e.id AS key, concat_ws(' ', e.first_name, e.last_name) AS name,
+                       concat_ws(' · ', 'Enquiry', nullif(e.topic, '')) AS about, e.submitted_at AS since,
+                       u.name AS owner, '/admin/enquiries/' || e.id AS href
+                  FROM enquiries e LEFT JOIN staff_users u ON u.id = e.assigned_to
+                 WHERE e.status = 'new'`);
+  }
+  if (holds('registrations')) {
+    parts.push(`SELECT 'course:' || r.id, concat_ws(' ', r.first_name, r.last_name),
+                       concat_ws(' · ', 'Course registration', nullif(r.course_type_label, '')), r.submitted_at,
+                       u.name, '/admin/registrations/course/' || r.id
+                  FROM course_registrations r LEFT JOIN staff_users u ON u.id = r.assigned_to
+                 WHERE r.status = 'new'`);
+    parts.push(`SELECT 'exam:' || r.id, concat_ws(' ', r.first_name, r.last_name),
+                       concat_ws(' · ', 'Exam registration', nullif(r.exam_type_label, '')), r.submitted_at,
+                       u.name, '/admin/registrations/exam/' || r.id
+                  FROM exam_registrations r LEFT JOIN staff_users u ON u.id = r.assigned_to
+                 WHERE r.status = 'new'`);
+  }
+  if (holds('applications')) {
+    parts.push(`SELECT 'application:' || a.id, concat_ws(' ', a.first_name, a.last_name),
+                       concat_ws(' · ', 'Job application', nullif(a.position_title, '')), a.created_at,
+                       u.name, '/admin/applications/' || a.id
+                  FROM career_applications a LEFT JOIN staff_users u ON u.id = a.assigned_to
+                 WHERE a.status IN ('submitted', 'new')`);
+  }
+  if (holds('offers')) {
+    parts.push(`SELECT 'offer:' || o.id, coalesce(nullif(o.group_name, ''), o.recipient_name),
+                       'Offer ' || o.year || '-' || lpad(o.seq::text, 3, '0') || ' · '
+                         || CASE WHEN o.valid_until < current_date THEN 'expired' ELSE 'no answer yet' END,
+                       o.sent_at, u.name, '/admin/offers/' || o.id
+                  FROM offers o LEFT JOIN staff_users u ON u.id = o.owner_id
+                 WHERE o.deleted_at IS NULL AND o.status = 'sent'
+                   AND (o.valid_until < current_date OR o.sent_at::date <= current_date - ${FOLLOW_UP_AFTER_DAYS})`);
+  }
+  if (parts.length === 0) return { items: [], total: 0 };
+
+  const rows = await query<{ key: string; name: string; about: string; since: Date; owner: string | null; href: string; total: string }>(
+    `SELECT w.*, count(*) OVER () AS total
+       FROM (${parts.join('\n UNION ALL\n')}) AS w (key, name, about, since, owner, href)
+      ORDER BY w.since ASC
+      LIMIT $1`,
+    [limit]
+  );
+  return {
+    items: rows.map((r) => ({ key: r.key, name: r.name, about: r.about, since: r.since, owner: r.owner, href: r.href })),
+    total: Number(rows[0]?.total ?? 0),
+  };
 }

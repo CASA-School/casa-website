@@ -254,7 +254,7 @@ structural refactor.
 **Workspace design standards.** A section is one white block and the canvas
 between sections separates them — a card header is white with a rule, never a
 grey band the same value as the page. A field title is a label (12px sentence
-case), not an uppercase eyebrow — in `DetailList`, `StatBand` and table column
+case), not an uppercase eyebrow — in `DetailList` and table column
 heads. One primary button per screen. Never show a raw uuid as a field, and
 never give plumbing a badge in the rail.
 

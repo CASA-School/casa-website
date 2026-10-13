@@ -2656,3 +2656,13 @@ and what it is about (`RecordName`), one kind of fact per column, open queues gr
 colleagues as ink initials (`Owner`), empty cells instead of dashes, secondary columns hidden on a
 phone. Offers was rebuilt as the reference; every other list followed (inbox, school, management,
 settings). docs/ADMIN_WORKSPACE.md §Lists, rules 10–14.
+
+Eleventh pass: **Today, rebuilt to be opened gladly.** Rahman: "look how ugly this looks, do you
+think people would like to come to this type of dashboard when they log in?" Gone: the full-width
+week strip, the band of four backlog numbers, the yellow "Still open from earlier" band, the queue
+plumbing in the subtitle. Now: the greeting and the date with the week as a small row of dates
+beside them; **Waiting for an answer** — the people CASA owes a reply, by name, the longest wait
+first, across enquiries, registrations, applications and offers gone quiet (`getWaiting`), the
+queue totals one quiet line under it; **Tasks** as a calm checklist (from earlier first, its date
+amber, initials for whose it is); **At CASA today** and **Coming up** with calendar-leaf dates.
+`StatBand` is gone. docs/ADMIN_WORKSPACE.md §Today.

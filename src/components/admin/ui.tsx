@@ -38,8 +38,8 @@ import { cn } from '@/lib/utils';
  *    a card is a table header or a toolbar (`--ws-sunk`), which then reads
  *    unambiguously as a sub-level rather than as the page showing through.
  *
- * 2. A FIELD TITLE IS A LABEL, NOT AN EYEBROW. Field names in `DetailList`,
- *    `StatBand` and a `Table`'s column heads are 12px sentence case in
+ * 2. A FIELD TITLE IS A LABEL, NOT AN EYEBROW. Field names in `DetailList` and
+ *    a `Table`'s column heads are 12px sentence case in
  *    `--casa-muted`. They used to be
  *    10.4px bold uppercase with letter-spacing — a decorative treatment doing
  *    a functional job, which is slower to read and, next to a value and a
@@ -423,68 +423,6 @@ export function RecordHeader({
         ) : null}
       </section>
     </header>
-  );
-}
-
-/**
- * The stat band.
- *
- * `gap-px` over a line-coloured background, rather than a border on each tile.
- * Four bordered tiles side by side put two 1px lines at every internal join,
- * which renders as a 2px seam that is visibly heavier than the outer edge —
- * the classic dashboard tell. One shared background showing through a 1px gap
- * gives every division exactly the same weight.
- */
-export function StatBand({
-  items,
-}: {
-  items: readonly {
-    label: string;
-    value: string | number;
-    hint?: string;
-    href?: string;
-    /** True when the number is a backlog: it earns colour only when non-zero. */
-    alert?: boolean;
-  }[];
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-ws-line bg-ws-line-soft shadow-[0_1px_2px_rgba(15,23,42,0.05)] lg:grid-cols-4">
-      {items.map((item) => {
-        const alerting = item.alert && Number(item.value) > 0;
-
-        const body = (
-          <>
-            <p className="text-xs font-bold text-[var(--casa-muted)]">{item.label}</p>
-            <p
-              data-slot="stat-value"
-              className={cn(
-                'mt-2 text-[1.75rem] leading-none font-extrabold tracking-[-0.02em]',
-                alerting ? 'text-[var(--casa-warning-text)]' : 'text-[var(--casa-ink)]'
-              )}
-            >
-              {item.value}
-            </p>
-            {item.hint ? (
-              <p className="mt-1.5 text-xs text-[var(--casa-text-subtle)]">{item.hint}</p>
-            ) : null}
-          </>
-        );
-
-        return item.href ? (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="group bg-white px-5 py-4 transition-colors hover:bg-[#f6f9fc]"
-          >
-            {body}
-          </Link>
-        ) : (
-          <div key={item.label} className="bg-white px-5 py-4">
-            {body}
-          </div>
-        );
-      })}
-    </div>
   );
 }
 

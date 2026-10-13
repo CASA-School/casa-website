@@ -500,24 +500,37 @@ Nine top-level items, and the placements are the argument:
 FileMaker's home screen (`SingleDayCalendar_Overview`) is the same idea, which
 is why they recognise it.
 
-- A **week strip** of seven days, Monday first, with a dot on any day that has
-  unfinished tasks. Links, not a picker: every day is one click, back works,
-  and a URL can be pasted to a colleague. `?date=YYYY-MM-DD`; today has no
-  parameter.
-- **Waiting on us** — the four queue counts, plus open tasks for the day.
-- **The day board** (`day_tasks`, migration 0012). Anyone with `overview` at
-  `edit` — which is everyone — writes what needs doing, optionally assigns it
-  and files it under an area. Ticking it records who ticked it. An unfinished
-  task **stays on its own date** and appears under "Still open from earlier";
-  nothing rolls it forward, because a task that moves by itself is a task
-  nobody notices they have missed.
-- **Happening today** — courses starting and ending, exam sittings and first
-  days, read from the records the team already keeps.
-- **Coming up** — the deadline items.
+**Rebuilt 2026-10-13** (Rahman, on the old one: "look how ugly this looks, do
+you think people would like to come to this type of dashboard when they log
+in?"). The old screen led with a full-width week strip, a band of four big
+backlog numbers (126 placement reviews in gold), a yellow "Still open from
+earlier" band over half the board, and "140 records are waiting across the
+queues". The new one is calm, and leads with people, not counts:
 
-Colour on the board means **state**, never category: the overdue block is the
-only warm thing on the screen and a finished task recedes. The area is a word,
-because six categorical hues on a screen read every morning is noise.
+- The head: the greeting and the date, and beside them the week as a
+  calendar's row of dates — Monday first, the chosen day ink, today's date
+  blue, a quiet dot on a day with unfinished tasks. Links, not a picker:
+  `?date=YYYY-MM-DD`; today has no parameter.
+- **Waiting for an answer** (today only, `getWaiting` in `overview.ts`): the
+  people CASA owes an answer, by name, the longest wait first — a new enquiry,
+  registration or job application, and a sent offer gone quiet (ten days, or
+  past its validity). Each row is the list design: initials, name, what it is
+  and about, whose it is, how long ago (amber after two days). Only the modules
+  the colleague holds. The queues' totals are one quiet line of links under it.
+- **Tasks** (`day_tasks`, migration 0012). Anyone with `overview` at `edit`
+  — which is everyone — writes what needs doing, optionally assigns it and
+  files it under an area. Ticking it records who ticked it. An unfinished task
+  **stays on its own date** and appears first under "From earlier", its date in
+  amber; nothing rolls it forward, because a task that moves by itself is a
+  task nobody notices they have missed. Area headings show only when there is
+  more than one group; whose it is shows as a colleague's initials.
+- **At CASA today** — courses starting and ending, exam sittings and first
+  days, read from the records the team already keeps.
+- **Coming up** (today only) — cohorts starting in the next three weeks and
+  exam entries closing in the next two, each with its day as a calendar leaf.
+
+Colour means **state**, never category: amber is the one warm thing (a wait
+gone long, a task from an earlier day), and a finished task recedes.
 
 The fortnight trend and the newest inbound records moved to **Activity**. Both
 look backwards, and a daily screen that also carries last week's chart is a
@@ -640,7 +653,7 @@ The rules, each of which came from a real defect on a real screen.
    → `--ws-sunk` 0.90 → `--ws-canvas` 0.84 in relative luminance, roughly
    1.08:1 a step, and `--ws-sunk` appears only *inside* a card (table headers,
    toolbars, a card footer) where it reads as a sub-level.
-2. **A field title is a label, not an eyebrow.** `DetailList`, `StatBand` and a
+2. **A field title is a label, not an eyebrow.** `DetailList` and a
    `Table`'s column heads are 12px sentence case in `--casa-muted`. They were 10.4px bold
    uppercase with letter-spacing — decoration doing a functional job, slower
    to read and, beside a value and a badge, genuinely hard to parse. There are

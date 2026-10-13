@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { Badge, Card, DateText } from '@/components/admin/ui';
+import { Owner } from '@/components/admin/list';
+import { Card, DateText } from '@/components/admin/ui';
 import type { DayTask } from '@/lib/admin/day-board';
 import { cn } from '@/lib/utils';
 import { AREA_LABELS, AREA_ORDER } from './areas';
@@ -10,18 +11,15 @@ import { deleteDayTaskAction, toggleDayTaskAction } from './actions';
 import { TaskForm } from './task-form';
 
 /**
- * The day board.
+ * The day's tasks, a checklist.
  *
- * Colour here means STATE, never category: an unfinished task from an earlier
- * day is the only warm thing on the screen, and a finished one recedes. The
- * area is a word, not a hue — six categorical colours on a screen staff read
- * every morning is the "confusing contrast" the workspace is trying to avoid.
- *
- * The card's body runs edge to edge, like a table: each group is a light band
- * with its name and count, and each task a row under it — the tick, what needs
- * doing, and on the right whose it is. Edit and Delete take that right-hand
- * place while the row is hovered or focused, so twenty tasks do not carry forty
- * buttons.
+ * Calm on purpose: it is the first thing the team reads in the morning. A task
+ * left from an earlier day comes first, under "From earlier", and its date is
+ * the one warm thing — amber text, not a yellow band over the card. The area
+ * is a word, not a hue, and the groups show only when there is more than one.
+ * On the right, whose it is, as a colleague's initials; nobody's is nothing.
+ * Edit and Delete take that place while the row is hovered or focused, so
+ * twenty tasks do not carry forty buttons.
  *
  * Ticking a task is a form submission, so the board works with no JavaScript
  * and the name of whoever ticked it is recorded either way.
@@ -41,19 +39,21 @@ export function DayBoard({
 }) {
   const open = today.filter((t) => !t.doneAt);
   const done = today.filter((t) => t.doneAt);
+  // Groups earn their headings only when there is more than one of them.
+  const grouped = (overdue.length > 0 ? 1 : 0) + new Set(open.map((t) => t.area)).size + (done.length > 0 ? 1 : 0) > 1;
 
   return (
     <Card
-      title="The day board"
+      title="Tasks"
       icon={Icon.check}
-      tint="green"
+      tint="ink"
       bleed
       actions={
         canWrite ? (
           <FormDialog
             trigger="Add a task"
             title="Add to the day"
-            triggerVariant="primary"
+            triggerVariant="secondary"
             size="sm"
           >
             <TaskForm date={date} staff={staff} />
@@ -62,7 +62,7 @@ export function DayBoard({
       }
     >
       {overdue.length > 0 ? (
-        <TaskGroup label="Still open from earlier" count={overdue.length} tone="warm">
+        <TaskGroup label="From earlier" count={overdue.length} tone="warm">
           {overdue.map((task) => (
             <TaskRow
               key={task.id}
@@ -76,26 +76,17 @@ export function DayBoard({
         </TaskGroup>
       ) : null}
 
-      {open.length === 0 && done.length === 0 && overdue.length > 0 ? (
-        <p className="border-t border-ws-line-soft px-4 py-3 text-sm text-[var(--casa-text-subtle)]">Nothing new for this day.</p>
-      ) : open.length === 0 && done.length === 0 ? (
-        <div className="px-4 py-10 text-center">
-          <p className="text-sm font-extrabold text-[var(--casa-ink)]">
-            Nothing written down for this day
-          </p>
-          <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">
-            {canWrite
-              ? 'Add what needs doing and the whole team sees it.'
-              : 'The team has not added anything.'}
-          </p>
-        </div>
+      {open.length === 0 && done.length === 0 ? (
+        overdue.length > 0 ? null : (
+          <p className="px-5 py-8 text-center text-sm text-[var(--casa-text-subtle)]">Nothing on the list for this day.</p>
+        )
       ) : (
         <>
           {AREA_ORDER.map((area) => {
             const rows = open.filter((t) => t.area === area);
             if (rows.length === 0) return null;
             return (
-              <TaskGroup key={area} label={AREA_LABELS[area]} count={rows.length}>
+              <TaskGroup key={area} label={grouped ? AREA_LABELS[area] : ''} count={rows.length}>
                 {rows.map((task) => (
                   <TaskRow
                     key={task.id}
@@ -110,7 +101,7 @@ export function DayBoard({
           })}
 
           {done.length > 0 ? (
-            <TaskGroup label="Finished today" count={done.length} tone="quiet">
+            <TaskGroup label="Done" count={done.length} tone="quiet">
               {done.map((task) => (
                 <TaskRow
                   key={task.id}
@@ -129,9 +120,9 @@ export function DayBoard({
 }
 
 const GROUP_TONES = {
-  plain: { band: 'bg-[#f8fafc] text-[var(--casa-ink)]', body: '' },
-  warm: { band: 'bg-[#fff7cc] text-[#6b5600]', body: 'bg-[#fffdf3]' },
-  quiet: { band: 'bg-[#f8fafc] text-[var(--casa-text-subtle)]', body: '' },
+  plain: 'text-[var(--casa-muted)]',
+  warm: 'text-[#9a5b00]',
+  quiet: 'text-[var(--casa-text-subtle)]',
 } as const;
 
 function TaskGroup({
@@ -146,21 +137,13 @@ function TaskGroup({
   children: ReactNode;
 }) {
   return (
-    <section className={cn('border-b border-ws-line-soft last:border-b-0', GROUP_TONES[tone].body)}>
-      <h3
-        className={cn(
-          'flex items-center gap-2 border-b border-ws-line-soft px-4 py-2 text-xs font-bold',
-          GROUP_TONES[tone].band
-        )}
-      >
-        {tone === 'warm' ? (
-          <span aria-hidden="true" className="[&_svg]:size-3.5">
-            {Icon.attention}
-          </span>
-        ) : null}
-        {label}
-        <span className="font-semibold opacity-60">{count}</span>
-      </h3>
+    <section className="border-b border-ws-line-soft last:border-b-0">
+      {label ? (
+        <h3 className={cn('flex items-center gap-1.5 border-b border-ws-line-soft bg-[#f8fafc] px-5 pt-3 pb-2 text-xs font-bold', GROUP_TONES[tone])}>
+          {label}
+          <span className="font-semibold opacity-60">{count}</span>
+        </h3>
+      ) : null}
       <ul className="divide-y divide-ws-line-soft">{children}</ul>
     </section>
   );
@@ -182,7 +165,7 @@ function TaskRow({
   const finished = Boolean(task.doneAt);
 
   return (
-    <li className="group/row relative flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[#0f172a]/[0.025]">
+    <li className="group/row relative flex items-start gap-3 px-5 py-3.5 transition-colors hover:bg-[#f7f9fc]">
       {canWrite ? (
         <form action={toggleDayTaskAction} className="shrink-0 pt-px">
           <input type="hidden" name="taskId" value={task.id} />
@@ -248,25 +231,18 @@ function TaskRow({
        */}
       <span
         className={cn(
-          'flex min-w-[7.5rem] shrink-0 items-center justify-end gap-2 pt-px text-xs transition-opacity',
+          'flex min-w-[7.5rem] shrink-0 items-center justify-end gap-3 text-xs transition-opacity',
           canWrite ? 'group-focus-within/row:opacity-0 group-hover/row:opacity-0' : undefined
         )}
       >
         {showDate ? (
-          <Badge tone="warning">
+          <span className="font-semibold text-[#9a5b00]">
             <DateText value={task.onDate} compact />
-          </Badge>
+          </span>
         ) : null}
-        <span
-          className={cn(
-            'inline-flex items-center gap-1 whitespace-nowrap [&_svg]:size-3.5',
-            task.assigneeName
-              ? 'font-semibold text-[var(--casa-muted)]'
-              : 'text-[var(--casa-text-subtle)]'
-          )}
-        >
-          {Icon.person}
-          {task.assigneeName ?? 'Anyone'}
+        {/* A fixed place for the initials, so the dates line up with or without them. */}
+        <span className="flex w-6 justify-center">
+          <Owner name={task.assigneeName} />
         </span>
       </span>
 
