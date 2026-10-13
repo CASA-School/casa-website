@@ -28,6 +28,7 @@
 
 import { GRUPPEN_MODULES, MAX_ACTIVITIES_PER_WEEK, TEACHING_UNITS_PER_WEEK, getGruppenPackage, activityById, type GruppenModuleId, type GruppenWeeks } from '@/config/gruppen/packages';
 
+import { courseLines } from './course';
 import { stayLength } from './stay';
 import {
   overrideKey,
@@ -168,9 +169,12 @@ function line(audience: Audience, key: string, chargeType: string, description: 
   };
 }
 
-/** The lines a group offer computes, before anything typed over them. */
+/** The lines an offer computes, before anything typed over them: a group's stay, or a learner's course. */
 export function computedLines(input: StayInput): Computed[] {
-  if (input.kind !== 'group') return [];
+  if (input.kind !== 'group') {
+    const course = input.stay.choices.course;
+    return course ? courseLines(course, input.language).map((l) => line('participant', l.key, l.chargeType, l.description, l.unitAmount)) : [];
+  }
   const t = TEXT[input.language];
   const { choices } = input.stay;
   const { nights } = measure(input);

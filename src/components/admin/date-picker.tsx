@@ -406,7 +406,7 @@ export function DateRange({
   from: string | null;
   to: string | null;
   onChange: (from: string | null, to: string | null) => void;
-  today: string;
+  today?: string;
   suggestEnd?: (from: string) => string | null;
   months?: 1 | 2;
   compact?: boolean;

@@ -1,3 +1,5 @@
+import type { CourseChoice } from './course';
+
 /**
  * The offers module's vocabulary (docs/OFFERS.md).
  *
@@ -63,6 +65,8 @@ export type StayChoices = {
   /** Afternoons on top of what a package includes (Hahn, Katze, Hund, own). */
   extras: string[];
   escortPricing: EscortPricing;
+  /** A learner's course: an individual offer built from the catalogue (course.ts). */
+  course: CourseChoice | null;
 };
 
 export const DEFAULT_STAY: StayChoices = {
@@ -72,6 +76,7 @@ export const DEFAULT_STAY: StayChoices = {
   activities: [],
   extras: [],
   escortPricing: 'paid',
+  course: null,
 };
 
 /** A price or a text typed over a computed line, kept by the line's key. */

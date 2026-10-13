@@ -8,6 +8,7 @@
  * said how long they were valid.
  */
 
+import { courseSpan, extraNights } from './course';
 import { activitiesOf, activityAllowance, measure, packageWeeks } from './engine';
 import type { OfferCheck, OfferDraft, OfferLine } from './types';
 
@@ -35,6 +36,17 @@ export function offerChecks(draft: OfferDraft, lines: OfferLine[], today: string
       problem('escorts', 'Escort costs shared, but no participants to share them');
     }
     if (Boolean(draft.arrival) !== Boolean(draft.departure)) hint('dates', 'Only one of the two dates');
+  }
+
+  const course = draft.kind === 'individual' ? draft.stay.choices.course : null;
+  if (course) {
+    const { start } = courseSpan(course);
+    if (course.steps.some((s) => !s.start)) hint('course', 'A level without a planned term');
+    if (start && start < today) hint('course', 'The course has already started');
+    if (start && draft.validUntil && draft.validUntil > start) hint('validity', 'Valid until after the course starts');
+    if (course.accommodation && !(course.accommodation.from && course.accommodation.to)) problem('course', 'Accommodation without dates');
+    const extra = extraNights(course.accommodation);
+    if (extra) hint('course', `${extra} ${extra === 1 ? 'night' : 'nights'} of the stay beyond whole weeks, not priced`);
   }
 
   if (lines.length === 0) problem('lines', 'No prices on the offer');

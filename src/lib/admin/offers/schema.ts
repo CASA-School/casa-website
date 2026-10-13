@@ -31,6 +31,33 @@ const ModulesSchema = z.object({
   transport: z.boolean(),
 });
 
+const isoDay = z.string().refine((v) => isIsoDate(v), 'Not a date');
+
+export const CourseSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9-]{2,60}$/),
+  name: z.object({ de: z.string().max(120), en: z.string().max(120) }),
+  lessonsPerWeek: z.number().int().min(0).max(60),
+  slot: z.object({ days: z.array(z.string().regex(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/)).max(7), time: z.string().regex(/^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/) }).nullable(),
+  steps: z
+    .array(
+      z.object({
+        level: z.string().max(10),
+        weeks: z.number().int().min(0).max(60),
+        complete: z.boolean(),
+        termId: z.string().uuid().nullable(),
+        start: isoDay.nullable(),
+        end: isoDay.nullable(),
+      })
+    )
+    .max(12),
+  books: z.array(z.object({ key: z.string().min(1).max(60), title: z.string().max(200), price: money.nullable() })).max(24),
+  newStudent: z.boolean(),
+  accommodation: z.object({ kind: z.enum(['host_family', 'shared_flat']), from: isoDay.nullable(), to: isoDay.nullable() }).nullable(),
+  firstStay: z.boolean().default(true),
+  exam: z.object({ code: z.string().regex(/^[a-z0-9_]{2,40}$/), name: z.string().max(120), date: isoDay.nullable(), fee: money.nullable() }).nullable().default(null),
+  listPrice: money.nullable(),
+});
+
 const ChoicesSchema = z.object({
   package: z.enum(['hahn', 'katze', 'hund', 'esel', 'own']),
   weeks: z.number().int().min(1).max(52),
@@ -38,6 +65,7 @@ const ChoicesSchema = z.object({
   activities: z.array(z.string().regex(/^[a-z-]{2,40}$/)).max(40),
   extras: z.array(z.string().regex(/^[a-z-]{2,40}$/)).max(40),
   escortPricing: z.enum(['paid', 'free', 'shared']),
+  course: CourseSchema.nullable(),
 });
 
 const OverrideSchema = z.object({
@@ -69,6 +97,7 @@ const StoredChoices = z.object({
   modules: ModulesSchema.catch(DEFAULT_STAY.modules),
   activities: ChoicesSchema.shape.activities.catch(DEFAULT_STAY.activities),
   extras: ChoicesSchema.shape.extras.catch(DEFAULT_STAY.extras),
+  course: CourseSchema.nullable().catch(null),
   escortPricing: ChoicesSchema.shape.escortPricing.catch(DEFAULT_STAY.escortPricing),
 });
 

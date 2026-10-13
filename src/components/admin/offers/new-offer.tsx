@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createOfferAction, findRecipientsAction, matchRecipientsAction, pickRecipientAction } from '@/app/(admin)/admin/(editor)/offers/actions';
 import { GRUPPEN_PACKAGES_BY_STACK, fullBoardBaseTotal } from '@/config/gruppen/packages';
 import { formatDateRange, formatLetterDate, formatMoney } from '@/lib/admin/letters/format';
+import { courseFacts, courseLines, courseSpan, courseTitle, type CourseCatalogue, type CourseChoice, type LearnerHistory } from '@/lib/admin/offers/course';
 import { packageWeeks } from '@/lib/admin/offers/engine';
 import { countryFromEmail, guessKind, languageFor, nameFromEmail, offerName, type RecipientKind } from '@/lib/admin/offers/recipient-guess';
 import type { EditorOptions, PriceListItem } from '@/lib/admin/offers/repo';
@@ -25,6 +26,7 @@ import {
 } from '@/lib/admin/offers/wizard';
 
 import { DateField, DateRange } from '@/components/admin/date-picker';
+import { CoursePicker } from './course-picker';
 import { Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { ICONS, type Tint } from './icons';
@@ -123,6 +125,7 @@ export function NewOffer({
   start,
   suggestions,
   priceList,
+  catalogue,
   staff,
   countries,
   me,
@@ -131,6 +134,7 @@ export function NewOffer({
   start: WizardStart | null;
   suggestions: RecipientHit[];
   priceList: PriceListItem[];
+  catalogue: CourseCatalogue;
   staff: EditorOptions['staff'];
   countries: EditorOptions['countries'];
   me: string;
@@ -141,7 +145,7 @@ export function NewOffer({
   const [recipient, setRecipient] = useState<Recipient | null>(() => recipientFromStart(start));
   const [enquiryId, setEnquiryId] = useState(start?.enquiryId ?? null);
   const [enquiryNote, setEnquiryNote] = useState(start?.enquiryNote ?? null);
-  const [kind, setKind] = useState<'group' | 'individual'>(start?.kind ?? 'group');
+  const [kindChoice, setKind] = useState<'group' | 'individual'>(start?.kind ?? 'group');
   const [pkg, setPkg] = useState<PackageChoice>(start?.group?.package ?? 'katze');
   const [weeks, setWeeks] = useState(start?.group?.weeks ?? 2);
   const [basedOn, setBasedOn] = useState<string | null>(null);
@@ -150,16 +154,19 @@ export function NewOffer({
   const [participants, setParticipants] = useState<number | null>(start?.group?.participants ?? null);
   const [escorts, setEscorts] = useState(0);
   const [picked, setPicked] = useState<number[]>([]);
+  const [course, setCourse] = useState<CourseChoice | null>(null);
   /** The language: a colleague's choice, else what the record says (an enquiry's), else the recipient's country's. */
   const [languageChoice, setLanguageChoice] = useState<OfferLanguage | null>(null);
   const [suggestedLanguage, setSuggestedLanguage] = useState<OfferLanguage | null>(start?.language ?? null);
   const [groupName, setGroupName] = useState<string | null>(null);
   const [title, setTitle] = useState<string | null>(null);
-  const [validUntil, setValidUntil] = useState(addDays(today, VALID_FOR_DAYS));
+  const [validChoice, setValidChoice] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string>(me);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // A learner's offer is a course; only an organisation chooses between a group stay and courses.
+  const kind = recipient?.type === 'person' || recipient?.type === 'new-person' ? 'individual' : kindChoice;
   const group = kind === 'group';
   const country = recipientCountry(recipient);
   // Without a country: English to an organisation (groups come from abroad), German to a learner.
@@ -169,7 +176,12 @@ export function NewOffer({
     {
       id: 'offer',
       title: 'What it is',
-      summary: recipient && step !== 'recipient' ? (group ? `${PACKAGE_NAME[pkg]}${packageWeeks(pkg) ? '' : ` · ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}` : picked.length ? `${picked.length} from the price list` : 'Courses') : null,
+      summary:
+        recipient && step !== 'recipient'
+          ? group
+            ? `${PACKAGE_NAME[pkg]}${packageWeeks(pkg) ? '' : ` · ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}`
+            : [course ? courseTitle(course, 'en') : null, picked.length ? `${picked.length} from the price list` : null].filter(Boolean).join(' · ') || 'A course'
+          : null,
     },
     ...(group
       ? [
@@ -214,7 +226,20 @@ export function NewOffer({
 
   const name = recipientName(recipient);
   const defaultGroupName = offerName(name, arrival);
-  const defaultTitle = DEFAULT_TITLE[kind][language];
+  const defaultTitle = !group && course ? courseTitle(course, language) : DEFAULT_TITLE[kind][language];
+  // An offer for a course holds until a week before it starts, at most the usual four weeks, at least three days.
+  const courseStart = !group && course ? courseSpan(course).start : null;
+  const weekBefore = courseStart ? addDays(courseStart, -7) : null;
+  const usual = addDays(today, VALID_FOR_DAYS);
+  const validUntil = validChoice ?? (weekBefore && weekBefore < usual ? (weekBefore > addDays(today, 3) ? weekBefore : addDays(today, 3)) : usual);
+  const courseTotal = !group && course ? courseLines(course, language).reduce((sum, l) => sum + (l.unitAmount ?? 0), 0) : null;
+  // A learner who has studied or stayed before pays no enrolment fee, no placement fee and no deposit; someone new pays them; for an organisation nobody can tell.
+  const history: LearnerHistory | null =
+    recipient?.type === 'person'
+      ? { studiedBefore: recipient.person.studiedBefore, stayedBefore: recipient.person.stayedBefore }
+      : recipient?.type === 'new-person'
+        ? { studiedBefore: false, stayedBefore: false }
+        : null;
 
   const go = (to: StepId) => {
     setError(null);
@@ -254,6 +279,7 @@ export function NewOffer({
       basedOn,
       kind,
       group: group ? { package: pkg, weeks: packageWeeks(pkg) ?? weeks, arrival, departure, participants, escorts } : null,
+      course: group ? null : course,
       lines: group ? [] : picked.map((i) => priceList[i]).filter(Boolean).map((p) => ({ chargeType: p.chargeType, de: p.de, en: p.en, unitAmount: p.unitAmount })),
       language,
       groupName: groupName ?? (group ? defaultGroupName : ''),
@@ -347,6 +373,10 @@ export function NewOffer({
                   priceList={priceList}
                   picked={picked}
                   setPicked={setPicked}
+                  catalogue={catalogue}
+                  course={course}
+                  setCourse={setCourse}
+                  history={history}
                 />
               ) : null}
 
@@ -408,10 +438,11 @@ export function NewOffer({
                         value={validUntil}
                         today={today}
                         min={today}
-                        onChange={(v) => setValidUntil(v ?? addDays(today, VALID_FOR_DAYS))}
+                        onChange={setValidChoice}
                         quick={[
                           ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
-                          ...(arrival && addDays(arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(arrival, -42) }] : []),
+                          ...(group && arrival && addDays(arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(arrival, -42) }] : []),
+                          ...(weekBefore && weekBefore > today ? [{ label: 'A week before the course', value: weekBefore }] : []),
                         ]}
                       />
                     </div>
@@ -436,10 +467,16 @@ export function NewOffer({
                     <dd>
                       {group
                         ? `${PACKAGE_NAME[pkg]}${basedOn ? ' · like last time' : ''}`
-                        : picked.length
-                          ? picked.map((i) => priceList[i]?.label).filter(Boolean).join(', ')
-                          : 'Lines added on the offer'}
+                        : [course ? courseTitle(course, 'en') : null, ...picked.map((i) => priceList[i]?.label)].filter(Boolean).join(', ') || 'Lines added on the offer'}
                     </dd>
+                    {course && !group ? (
+                      <>
+                        <dt>Course</dt>
+                        <dd>{courseFacts(course, 'en')}</dd>
+                        <dt>Total</dt>
+                        <dd>{eur((courseTotal ?? 0) + picked.reduce((sum, i) => sum + (priceList[i]?.unitAmount ?? 0), 0))}</dd>
+                      </>
+                    ) : null}
                     {group ? (
                       <>
                         <dt>Group</dt>
@@ -666,6 +703,22 @@ function ChosenRecipient({
         </button>
       </div>
 
+      {recipient.type === 'person' ? (
+        <dl className={ui.summary}>
+          <dt>Email</dt>
+          <dd>{recipient.person.email ?? '—'}</dd>
+          <dt>Phone</dt>
+          <dd>{recipient.person.phone ?? '—'}</dd>
+          <dt>Nationality</dt>
+          <dd>{countries.find((c) => c.code === recipient.person.countryCode)?.en ?? '—'}</dd>
+          <dt>At CASA</dt>
+          <dd>
+            {recipient.person.bookings
+              ? `${recipient.person.bookings === 1 ? '1 booking' : `${recipient.person.bookings} bookings`}${recipient.person.studiedBefore ? ' · no enrolment fee' : ''}${recipient.person.stayedBefore ? ' · has stayed with CASA' : ''}`
+              : 'First time — enrolment fee due'}
+          </dd>
+        </dl>
+      ) : null}
       {recipient.type === 'organisation' ? <ContactChoice recipient={recipient} setRecipient={setRecipient} /> : null}
       {isNew ? <NewRecipientForm recipient={recipient} setRecipient={setRecipient} countries={countries} onUse={onUse} /> : null}
     </>
@@ -940,7 +993,7 @@ function NewRecipientForm({
                   onUse(
                     m.type === 'organisation'
                       ? { type: 'organisation', id: m.id, name: m.name, kind: 'other', detail: '', language: 'en', countryCode: null }
-                      : { type: 'person', id: m.id, name: m.name, detail: '', salutation: 'none', firstName: '', lastName: '', email: null, countryCode: null }
+                      : { type: 'person', id: m.id, name: m.name, detail: '', salutation: 'none', firstName: '', lastName: '', email: null, countryCode: null, phone: null, bookings: 0, studiedBefore: false, stayedBefore: false }
                   )
                 }
               >
@@ -969,6 +1022,10 @@ function OfferStep({
   priceList,
   picked,
   setPicked,
+  catalogue,
+  course,
+  setCourse,
+  history,
 }: {
   recipient: Recipient | null;
   kind: 'group' | 'individual';
@@ -982,14 +1039,15 @@ function OfferStep({
   priceList: PriceListItem[];
   picked: number[];
   setPicked: (p: number[]) => void;
+  catalogue: CourseCatalogue;
+  course: CourseChoice | null;
+  setCourse: (c: CourseChoice | null) => void;
+  history: LearnerHistory | null;
 }) {
   const org = recipient?.type === 'organisation' ? recipient.org : null;
   const last = org?.lastOffer ?? null;
-  const [q, setQ] = useState('');
-  const shown = useMemo(
-    () => priceList.map((item, i) => ({ item, i })).filter(({ item }) => !q.trim() || item.label.toLowerCase().includes(q.trim().toLowerCase())),
-    [priceList, q]
-  );
+  // A learner's offer is a course; the price list is for what is not one (an exam, a fee, books alone).
+  const [from, setFrom] = useState<'course' | 'list'>(picked.length && !course ? 'list' : 'course');
   const tiles: { choice: PackageChoice; name: string; desc: string; price: ReactNode }[] = [
     ...GRUPPEN_PACKAGES_BY_STACK.map((p) => ({
       choice: p.slug as PackageChoice,
@@ -1012,13 +1070,17 @@ function OfferStep({
   return (
     <>
       <h2 className={ui.wzQ}>What is it?</h2>
-      <p>{kind === 'group' ? 'A group stay on one of the packages — adjusted later on the offer, or built without one.' : 'Courses, fees, books or exams from the price list.'}</p>
+      <p>
+        {kind === 'group'
+          ? 'A group stay on one of the packages — adjusted later on the offer, or built without one.'
+          : 'The course, when it starts and at which level — then what comes with it.'}
+      </p>
       {isOrganisation(recipient) ? (
         <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
           {(
             [
               ['group', 'A group stay', 'Course, host families, programme — a package'],
-              ['individual', 'Courses', 'For one learner or a few, from the price list'],
+              ['individual', 'A course', 'For one learner, with books and a room'],
             ] as const
           ).map(([k, b, s]) => (
             <button key={k} type="button" aria-pressed={kind === k} className={`${ui.choiceCard} ${kind === k ? ui.choiceOn : ''}`} onClick={() => setKind(k)}>
@@ -1077,35 +1139,70 @@ function OfferStep({
         </>
       ) : (
         <>
-          <div className={ui.searchBox}>
-            {ICONS.search}
-            <input value={q} placeholder="Find a course, a fee, a book, an exam" aria-label="Find in the price list" onChange={(e) => setQ(e.target.value)} />
-          </div>
-          <div className={ui.courseList} role="group" aria-label="Price list">
-            {shown.length ? (
-              shown.map(({ item, i }) => {
-                const on = picked.includes(i);
-                return (
-                  <button key={i} type="button" aria-pressed={on} className={`${ui.course} ${on ? ui.courseOn : ''}`} onClick={() => setPicked(on ? picked.filter((x) => x !== i) : [...picked, i])}>
-                    <i>{on ? '✓' : ''}</i>
-                    <span>
-                      {item.label} <span className={ui.note}>· {item.group}</span>
-                    </span>
-                    <small>{item.unitAmount != null ? eur(item.unitAmount) : 'no price'}</small>
-                  </button>
-                );
-              })
-            ) : (
-              <div className={ui.empty}>Nothing matches</div>
-            )}
-          </div>
-          <div className={ui.note}>
-            {picked.length
-              ? `${picked.length} chosen · ${eur(picked.reduce((s, i) => s + (priceList[i]?.unitAmount ?? 0), 0))}`
-              : 'Nothing chosen: lines can also be added on the offer.'}
-          </div>
+          <Seg<'course' | 'list'>
+            label="What it is"
+            value={from}
+            options={[
+              ['course', 'A course'],
+              ['list', picked.length ? `From the price list · ${picked.length}` : 'From the price list'],
+            ]}
+            onChange={setFrom}
+          />
+          {from === 'course' ? (
+            <CoursePicker catalogue={catalogue} value={course} onChange={setCourse} history={history} />
+          ) : (
+            <PriceListPicker priceList={priceList} picked={picked} setPicked={setPicked} />
+          )}
         </>
       )}
+    </>
+  );
+}
+
+/** What is not a course — an exam, a fee, books alone — from the price list. */
+function PriceListPicker({
+  priceList,
+  picked,
+  setPicked,
+}: {
+  priceList: PriceListItem[];
+  picked: number[];
+  setPicked: (p: number[]) => void;
+}) {
+  const [q, setQ] = useState('');
+  const shown = useMemo(
+    () => priceList.map((item, i) => ({ item, i })).filter(({ item }) => !q.trim() || item.label.toLowerCase().includes(q.trim().toLowerCase())),
+    [priceList, q]
+  );
+  return (
+    <>
+      <div className={ui.searchBox}>
+        {ICONS.search}
+        <input value={q} placeholder="Find a course, a fee, a book, an exam" aria-label="Find in the price list" onChange={(e) => setQ(e.target.value)} />
+      </div>
+      <div className={ui.courseList} role="group" aria-label="Price list">
+        {shown.length ? (
+          shown.map(({ item, i }) => {
+            const on = picked.includes(i);
+            return (
+              <button key={i} type="button" aria-pressed={on} className={`${ui.course} ${on ? ui.courseOn : ''}`} onClick={() => setPicked(on ? picked.filter((x) => x !== i) : [...picked, i])}>
+                <i>{on ? '✓' : ''}</i>
+                <span>
+                  {item.label} <span className={ui.note}>· {item.group}</span>
+                </span>
+                <small>{item.unitAmount != null ? eur(item.unitAmount) : 'no price'}</small>
+              </button>
+            );
+          })
+        ) : (
+          <div className={ui.empty}>Nothing matches</div>
+        )}
+      </div>
+      <div className={ui.note}>
+        {picked.length
+          ? `${picked.length} chosen · ${eur(picked.reduce((s, i) => s + (priceList[i]?.unitAmount ?? 0), 0))}`
+          : 'Nothing chosen: lines can also be added on the offer.'}
+      </div>
     </>
   );
 }

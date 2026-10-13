@@ -169,6 +169,13 @@ export const ACCOMMODATION_FEES = {
   holidaySurchargeSharedFlatPerWeek: 145,
 } as const;
 
+/**
+ * A stay shorter than four weeks: 1, 2 and 3 weeks. Not published on the
+ * website; the figures SchoolMan's `WriteAccommodationPrice` charges in 2026.
+ * From four weeks the published rate applies.
+ */
+export const ACCOMMODATION_SHORT_STAY = [200, 340, 460] as const;
+
 // ---------------------------------------------------------------------------
 // Legacy aggregate export — kept for backward-compat with cost-calculator.ts
 // ---------------------------------------------------------------------------

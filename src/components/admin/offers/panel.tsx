@@ -62,16 +62,20 @@ export function ClickPanel({
 }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
+  const [end, setEnd] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const close = () => setOpen(false);
   useDismiss(open, close, wrap);
 
   if (disabled) return block ? <div className={className}>{children}</div> : <span className={className}>{children}</span>;
 
-  // Near the foot of the window, the panel opens upwards instead of off the screen.
+  // Near the foot of the window the panel opens upwards, and near its right edge it hangs leftwards, instead of off the screen.
   const toggle = () => {
     const box = wrap.current?.getBoundingClientRect();
-    if (!open && box) setUp(window.innerHeight - box.bottom < 380 && box.top > window.innerHeight - box.bottom);
+    if (!open && box) {
+      setUp(window.innerHeight - box.bottom < 380 && box.top > window.innerHeight - box.bottom);
+      setEnd(box.left + (wide ? 540 : 400) > window.innerWidth - 16 && box.right > (wide ? 540 : 400));
+    }
     setOpen((v) => !v);
   };
 
@@ -88,7 +92,7 @@ export function ClickPanel({
         {children}
       </button>
       {open ? (
-        <div className={`${ui.pop} ${wide ? ui.popWide : ''} ${dates ? ui.popDates : ''} ${up ? ui.popUp : ''}`} role="dialog" aria-label={label}>
+        <div className={`${ui.pop} ${wide ? ui.popWide : ''} ${dates ? ui.popDates : ''} ${up ? ui.popUp : ''} ${end ? ui.popEnd : ''}`} role="dialog" aria-label={label}>
           <div className={ui.popHead}>
             {icon}
             <span style={{ flex: 1, minWidth: 0 }}>

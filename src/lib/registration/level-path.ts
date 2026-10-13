@@ -12,12 +12,16 @@
  * list yet is a step without a date, which CASA plans with the learner.
  *
  * The wizard shows the path from here and the route stores it from here, so
- * what the learner saw is what staff receive. Client-safe.
+ * what the learner saw is what staff receive; the workspace's offers build a
+ * learner's course from it too, over its own cohorts. Client-safe.
  */
 import type { ContentLocale, CourseRegistrationOption } from '@/lib/content/types';
 import { describeBookedLevel, levelChoiceGroups } from './levels';
 
-export type PathStep = {
+/** A term as the path needs it: its dates. A registration option, or a workspace cohort. */
+export type PathTerm = { startDate: string; endDate: string };
+
+export type PathStep<T extends PathTerm = CourseRegistrationOption> = {
   /** 'B1' for a whole level, 'A2.2' or 'B1+' for a four-week block. */
   level: string;
   label: string;
@@ -26,7 +30,7 @@ export type PathStep = {
   /** Weeks of teaching: eight for a whole level or B1+, four for a half level. */
   weeks: number;
   /** The term; null when the catalogue lists none yet. */
-  option: CourseRegistrationOption | null;
+  option: T | null;
   start: string | null;
   end: string | null;
 };
@@ -54,18 +58,18 @@ export function continuationLevels(slug: string | undefined, value: string, avai
 }
 
 /** The learner's level, then each rung up to `pathTo` (whole levels, and B1+), each in the first term after the last. */
-export function buildLevelPath(input: {
+export function buildLevelPath<T extends PathTerm = CourseRegistrationOption>(input: {
   slug: string | undefined;
   /** The level chosen: 'A2', 'A2.1', 'B1+'. */
   value: string;
-  option: CourseRegistrationOption;
+  option: T;
   /** The format's terms. */
-  options: readonly CourseRegistrationOption[];
+  options: readonly T[];
   availableLevels: readonly string[];
   /** A rung from `continuationLevels` (a whole level or B1+), or '' for this level alone. */
   pathTo: string;
   locale: ContentLocale;
-}): PathStep[] {
+}): PathStep<T>[] {
   const { slug, option, availableLevels, locale } = input;
   const targets = input.pathTo ? continuationLevels(slug, input.value, availableLevels) : [];
   const stop = targets.indexOf(input.pathTo);
@@ -75,9 +79,9 @@ export function buildLevelPath(input: {
   if (!first) return [];
 
   // A step of eight weeks fills its term; a half level ends after four weeks.
-  const endIn = (term: CourseRegistrationOption, weeks: number) => (weeks >= 8 ? term.endDate : addDays(term.startDate, 25));
+  const endIn = (term: T, weeks: number) => (weeks >= 8 ? term.endDate : addDays(term.startDate, 25));
   const firstEnd = endIn(option, first.weeks);
-  const steps: PathStep[] = [{ level: value, label: first.label, startCode: first.startCode, complete: first.complete, weeks: first.weeks, option, start: option.startDate, end: firstEnd }];
+  const steps: PathStep<T>[] = [{ level: value, label: first.label, startCode: first.startCode, complete: first.complete, weeks: first.weeks, option, start: option.startDate, end: firstEnd }];
   if (stop < 0) return steps;
 
   const terms = [...input.options].sort((a, b) => a.startDate.localeCompare(b.startDate));
@@ -85,7 +89,7 @@ export function buildLevelPath(input: {
   for (const level of targets.slice(0, stop + 1)) {
     const booked = describeBookedLevel(slug, level, availableLevels, locale);
     if (!booked) break;
-    const term: CourseRegistrationOption | null = previousEnd ? terms.find((candidate) => candidate.startDate > previousEnd!) ?? null : null;
+    const term: T | null = previousEnd ? terms.find((candidate) => candidate.startDate > previousEnd!) ?? null : null;
     const end: string | null = term ? endIn(term, booked.weeks) : null;
     steps.push({ level, label: booked.label, startCode: booked.startCode, complete: booked.complete, weeks: booked.weeks, option: term, start: term?.startDate ?? null, end });
     previousEnd = end;
@@ -94,4 +98,4 @@ export function buildLevelPath(input: {
 }
 
 /** Weeks of teaching in a path. */
-export const pathWeeks = (steps: readonly PathStep[]) => steps.reduce((total, step) => total + step.weeks, 0);
+export const pathWeeks = (steps: readonly PathStep<PathTerm>[]) => steps.reduce((total, step) => total + step.weeks, 0);

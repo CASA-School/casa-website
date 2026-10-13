@@ -9,6 +9,7 @@ import { LetterSheet } from '@/components/admin/letters/letter-sheet';
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
 import { formatDateRange, formatLetterDate, formatMoney } from '@/lib/admin/letters/format';
 import { hasProblems } from '@/lib/admin/offers/checks';
+import { courseSpan, courseTitle, levelLabel, slotLabel, type CourseCatalogue, type CourseChoice, type LearnerHistory } from '@/lib/admin/offers/course';
 import { offerLetter } from '@/lib/admin/offers/document';
 import { addLine, moveLineTo, removeLine, resetLine, setChoices, setLinePrice, setLineQuantity, setLineText } from '@/lib/admin/offers/draft-ops';
 import { activitiesOf, activityAllowance, extrasOf, isFixedPackage, measure, packageWeeks, pricedWeeks } from '@/lib/admin/offers/engine';
@@ -29,6 +30,7 @@ import {
 } from '@/lib/admin/offers/types';
 
 import { DateRange, InlineDatePicker } from '@/components/admin/date-picker';
+import { CoursePicker } from './course-picker';
 import { NumberInput, Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { Chip, ICONS, type Tint } from './icons';
@@ -81,6 +83,8 @@ export function OfferPage({
   record,
   options,
   priceList,
+  catalogue,
+  history,
   texts,
   today,
   canWrite,
@@ -90,6 +94,9 @@ export function OfferPage({
   record: OfferRecord;
   options: EditorOptions;
   priceList: PriceListItem[];
+  catalogue: CourseCatalogue;
+  /** What CASA knows of the learner from their bookings; null for an organisation. */
+  history: LearnerHistory | null;
   texts: StandardTexts;
   today: string;
   canWrite: boolean;
@@ -173,6 +180,7 @@ export function OfferPage({
             <Head draft={draft} update={update} editable={editable} options={options} today={today} status={meta.status} />
             {group ? <Packages draft={draft} update={update} editable={editable} /> : null}
             {group && pkg !== 'own' ? <Included draft={draft} update={update} editable={editable} lines={lines} /> : null}
+            {group ? null : <CourseCard draft={draft} update={update} editable={editable} lines={lines} catalogue={catalogue} history={history} />}
             <Extras draft={draft} update={update} editable={editable} lines={lines} priceList={priceList} chargeTypes={options.chargeTypes} />
           </div>
 
@@ -222,6 +230,7 @@ const FIX: Record<string, string> = {
   package: 'fix-dates',
   validity: 'fix-validity',
   programme: 'fix-programme',
+  course: 'fix-course',
 };
 
 /** One cell of the head's bar: what it is, its value, a line under it. */
@@ -478,7 +487,7 @@ function RecipientSummary({ draft, countries }: { draft: OfferDraft; countries: 
   const contact = [draft.contactFirstName, draft.contactLastName].filter(Boolean).join(' ');
   const town = draft.address.split('\n').filter(Boolean).pop();
   const country = countries.find((c) => c.code === draft.countryCode)?.en;
-  const parts = [draft.recipientName, contact, draft.contactEmail, [town, country].filter(Boolean).join(', ')].filter(Boolean);
+  const parts = [draft.recipientName, contact === draft.recipientName ? '' : contact, draft.contactEmail, [town, country].filter(Boolean).join(', ')].filter(Boolean);
   return (
     <span>
       {parts.join(' · ') || <span className={ui.placeholder}>Who is it for?</span>}
@@ -599,6 +608,129 @@ function Packages({ draft, update, editable }: { draft: OfferDraft; update: Upda
             );
           })}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------- course
+
+/** What each line of a learner's course is, in the workspace's words; the letter's own text sits under it. */
+function courseRowName(l: OfferLine, course: CourseChoice): { name: string; tint: Tint; icon: ReactNode } {
+  if (l.key.startsWith('course:')) {
+    const step = course.steps[Number(l.key.slice(7))];
+    return { name: `${course.name.en}${step?.level ? ` ${levelLabel(step, 'en')}` : ''}`, tint: 'red', icon: ICONS.book };
+  }
+  if (l.key.startsWith('book:')) return { name: 'Textbook', tint: 'red', icon: ICONS.layers };
+  if (l.key === 'enrolment') return { name: 'Enrolment fee', tint: 'ink', icon: ICONS.people };
+  if (l.key === 'accommodation') return { name: course.accommodation?.kind === 'shared_flat' ? 'CASA shared flat' : 'Host family', tint: 'blue', icon: ICONS.house };
+  if (l.key === 'placement') return { name: 'Placement fee', tint: 'blue', icon: ICONS.house };
+  if (l.key === 'deposit') return { name: 'Deposit', tint: 'blue', icon: ICONS.house };
+  return { name: course.exam?.name ?? 'Exam', tint: 'sun', icon: ICONS.star };
+}
+
+/**
+ * A learner's course: what they take, when and at what time of day, with
+ * everything it brings — books, the enrolment fee on a first registration, a
+ * room, the exam. Each line opens its price; the course itself is changed in
+ * one panel, the same picker the new-offer wizard uses. docs/OFFERS.md
+ * §A learner's course.
+ */
+function CourseCard({
+  draft,
+  update,
+  editable,
+  lines,
+  catalogue,
+  history,
+}: {
+  draft: OfferDraft;
+  update: Update;
+  editable: boolean;
+  lines: OfferLine[];
+  catalogue: CourseCatalogue;
+  history: LearnerHistory | null;
+}) {
+  const course = draft.stay.choices.course;
+  const rows = course ? lines.filter((l) => !l.manual && l.audience === 'participant') : [];
+  const span = course ? courseSpan(course) : null;
+  const change = (
+    <ClickPanel
+      wide
+      label={course ? 'Change the course' : 'Choose the course'}
+      subtitle="Course, time of day, start, level — and what comes with it"
+      icon={<Chip tint="red" icon={ICONS.book} big />}
+      className={`${ui.btn} ${ui.btnSm}`}
+      triggerId={FIX.course}
+      disabled={!editable}
+      body={() => (
+        <CoursePicker catalogue={catalogue} value={course} onChange={(next) => update((d) => setChoices(d, { course: next }))} history={history} />
+      )}
+    >
+      {course ? 'Change' : 'Choose a course'}
+    </ClickPanel>
+  );
+
+  return (
+    <section className={ui.card}>
+      <div className={ui.cardHead}>
+        <h2>
+          <Chip tint="red" icon={ICONS.book} />
+          {course ? courseTitle(course, 'en') : 'Course'}
+        </h2>
+        {course ? null : <span>Which course, from when, at which level</span>}
+        {editable ? change : null}
+      </div>
+      {course && span ? (
+        <div className={ui.courseFacts}>
+          {course.slot ? (
+            <span>
+              {ICONS.clock}
+              {slotLabel(course.slot, 'en')}
+            </span>
+          ) : null}
+          <span>
+            {ICONS.calendar}
+            {span.start && span.end ? formatDateRange(span.start, span.end, 'en') : 'Dates by arrangement'}
+          </span>
+          <span>
+            {ICONS.book}
+            {span.weeks} {span.weeks === 1 ? 'week' : 'weeks'}
+            {span.lessons ? ` · ${span.lessons} lessons` : ''}
+          </span>
+        </div>
+      ) : null}
+      {rows.length ? <ColumnHead group={false} escorts={false} /> : null}
+      <div className={ui.rows}>
+        {course ? (
+          rows.map((l) => {
+            const look = courseRowName(l, course);
+            return (
+              <ClickPanel
+                key={l.key}
+                block
+                label={look.name}
+                subtitle="The price on this offer"
+                icon={<Chip tint={look.tint} icon={look.icon} big />}
+                className={ui.inc}
+                openClassName={ui.incOpen}
+                disabled={!editable}
+                body={() => <MoneyField label="Price" line={l} update={update} />}
+              >
+                <span className={ui.incMain}>
+                  <Chip tint={look.tint} icon={look.icon} big />
+                  <span className={ui.incText}>
+                    <span className={ui.incName}>{look.name}</span>
+                    <span className={ui.incDetail}>{l.description}</span>
+                  </span>
+                </span>
+                {amountCell(l)}
+              </ClickPanel>
+            );
+          })
+        ) : (
+          <div className={ui.empty}>No course on this offer — choose one, or put lines on below</div>
+        )}
       </div>
     </section>
   );
@@ -930,8 +1062,8 @@ function Extras({
   const afternoons = group && c.package !== 'esel';
   const own = group && c.package === 'own';
 
-  const title = !group ? 'Prices' : own ? 'On the offer' : 'Extras';
-  const sub = !group ? 'From the price list, or typed' : own ? 'Everything this offer is made of' : `On top of ${c.package === 'esel' ? 'the blocks' : 'the package'}`;
+  const title = !group ? (c.course ? 'Also on the offer' : 'On the offer') : own ? 'On the offer' : 'Extras';
+  const sub = !group ? 'From the price list, or typed — a transfer, a reduction' : own ? 'Everything this offer is made of' : `On top of ${c.package === 'esel' ? 'the blocks' : 'the package'}`;
   const nothing = !extras.length && !share && !typed.length && !afternoons;
 
   return (

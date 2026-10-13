@@ -7,6 +7,7 @@ import { query, queryFirst } from '../db';
 import { normalizeEmail } from '../normalize';
 import { toDateInputValue } from '@/lib/dates';
 
+import { stayedBeforeSql, studiedBeforeSql } from './course-catalogue';
 import { choicesFromBrief, participantsFromBrief } from './from-enquiry';
 import { comparableName, countryFromEmail, guessKind, languageFor, organisationDomain, sameName } from './recipient-guess';
 import { normaliseStay } from './schema';
@@ -86,10 +87,12 @@ export async function findRecipients(q: string, filter: RecipientFilter = 'all')
           [term, like, orgKind, term ? 8 : 5]
         ),
     (filter === 'all' && term.length >= 2) || filter === 'person'
-      ? query<{ id: string; salutation: string | null; first_name: string; last_name: string | null; nationality_code: string | null; email: string | null; bookings: string }>(
+      ? query<PersonRow>(
           `SELECT p.id, p.salutation::text AS salutation, p.first_name, p.last_name, p.nationality_code,
                   (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at DESC LIMIT 1) AS email,
-                  (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings
+                  (SELECT number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at DESC LIMIT 1) AS phone,
+                  (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings,
+                  ${studiedBeforeSql('p.id')} AS studied, ${stayedBeforeSql('p.id')} AS stayed
              FROM people p
             WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
               AND ($1 = '' OR lower(p.first_name || ' ' || coalesce(p.last_name, '')) LIKE $2
@@ -129,7 +132,20 @@ export async function findRecipients(q: string, filter: RecipientFilter = 'all')
   ];
 }
 
-function personHit(p: { id: string; salutation: string | null; first_name: string; last_name: string | null; nationality_code: string | null; email: string | null; bookings?: string }): PersonHit {
+type PersonRow = {
+  id: string;
+  salutation: string | null;
+  first_name: string;
+  last_name: string | null;
+  nationality_code: string | null;
+  email: string | null;
+  phone: string | null;
+  bookings: string;
+  studied: boolean;
+  stayed: boolean;
+};
+
+function personHit(p: PersonRow): PersonHit {
   const bookings = Number(p.bookings ?? 0);
   return {
     type: 'person',
@@ -141,6 +157,10 @@ function personHit(p: { id: string; salutation: string | null; first_name: strin
     lastName: p.last_name ?? '',
     email: p.email,
     countryCode: trimCode(p.nationality_code),
+    phone: p.phone,
+    bookings,
+    studiedBefore: Boolean(p.studied),
+    stayedBefore: Boolean(p.stayed),
   };
 }
 
@@ -259,10 +279,12 @@ export async function matchRecipients({ name, email }: { name: string; email: st
 // ---------------------------------------------------- opened from a record
 
 async function personById(id: string): Promise<PersonHit | null> {
-  const p = await queryFirst<{ id: string; salutation: string | null; first_name: string; last_name: string | null; nationality_code: string | null; email: string | null; bookings: string }>(
+  const p = await queryFirst<PersonRow>(
     `SELECT p.id, p.salutation::text AS salutation, p.first_name, p.last_name, p.nationality_code,
             (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at DESC LIMIT 1) AS email,
-            (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings
+            (SELECT number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at DESC LIMIT 1) AS phone,
+            (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings,
+            ${studiedBeforeSql('p.id')} AS studied, ${stayedBeforeSql('p.id')} AS stayed
        FROM people p WHERE p.id = canonical_person_id($1) AND p.deleted_at IS NULL`,
     [id]
   );

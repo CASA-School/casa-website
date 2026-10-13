@@ -2593,3 +2593,14 @@ in a small panel (`popover.tsx`) instead of a select and Save, `ButtonLink` for 
 buttons, and the date picker in every form. The shared layer was done first; three agents moved the
 screens onto it in parallel, each owning its own files. Kursplanung and the website editor keep their
 own look; only Kursplanung's rail turned white. docs/ADMIN_WORKSPACE.md §Design standards.
+
+Fifth pass, the same day: **a learner's course** (Rahman: the learner first, then the course with its
+upcoming dates, "B2 complete", the full price with books and the Einschreibegebühr for someone new,
+accommodation only when needed, morning or afternoon and the times on the letter). One course picker
+(`course-picker.tsx`) in the wizard and on the offer: course → time of day → term → level → and on to
+→ the lines with books, enrolment fee, room (first stay: placement fee and deposit) and the telc exam.
+The rules were read from SchoolMan's booking scripts (DDR, an agent) and its 2026 offers (live,
+AppleScript, read-only); they match to the cent. FileMaker's own defects were not ported: the
+enrolment fee found by a text search for "1", extra nights computed and never charged. A learner's
+offer can no longer be a group offer (it could, from a typed name). docs/OFFERS.md §A learner's course.
+

@@ -1,5 +1,6 @@
 import { NewOffer } from '@/components/admin/offers/new-offer';
 import { requireModule } from '@/lib/admin/guard';
+import { courseCatalogue } from '@/lib/admin/offers/course-catalogue';
 import { findRecipients, wizardStart } from '@/lib/admin/offers/recipients';
 import { editorOptions, priceListOptions } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
@@ -19,17 +20,19 @@ export default async function NewOfferPage({
 }) {
   const [actor, sp] = await Promise.all([requireModule('offers', 'edit'), searchParams]);
   const from = { enquiryId: id(sp.enquiry), personId: id(sp.person), organisationId: id(sp.organisation) };
-  const [start, suggestions, priceList, options] = await Promise.all([
+  const [start, suggestions, priceList, options, catalogue] = await Promise.all([
     from.enquiryId || from.personId || from.organisationId ? wizardStart(from) : Promise.resolve(null),
     findRecipients('', 'all'),
     priceListOptions(),
     editorOptions(),
+    courseCatalogue(),
   ]);
   return (
     <NewOffer
       start={start}
       suggestions={suggestions}
       priceList={priceList}
+      catalogue={catalogue}
       staff={options.staff}
       countries={options.countries}
       me={actor.id}

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { CourseSchema } from './schema';
 import { isIsoDate } from './stay';
 import { ORGANISATION_KINDS, type OfferLanguage, type OrganisationKind, type PackageChoice, type Salutation } from './types';
 
@@ -84,7 +85,9 @@ export const NewOfferSchema = z
         escorts: z.number().int().min(0).max(200),
       })
       .nullable(),
-    /** What an individual offer starts with, from the price list. */
+    /** A learner's course, built in the wizard from the catalogue (course.ts). */
+    course: CourseSchema.nullable(),
+    /** What an individual offer starts with besides, from the price list. */
     lines: z.array(LineSchema).max(10),
     language: z.enum(['de', 'en']),
     groupName: name(120),
@@ -95,6 +98,10 @@ export const NewOfferSchema = z
   .refine((d) => !d.group?.arrival || !d.group.departure || d.group.departure > d.group.arrival, {
     message: 'Departure must be after arrival',
     path: ['group', 'departure'],
+  })
+  .refine((d) => d.kind === 'individual' || (d.recipient.type !== 'person' && d.recipient.type !== 'new-person'), {
+    message: 'An offer to a learner is for a course',
+    path: ['kind'],
   });
 
 export type NewOfferInput = z.infer<typeof NewOfferSchema>;
@@ -133,6 +140,12 @@ export type PersonHit = {
   lastName: string;
   email: string | null;
   countryCode: string | null;
+  phone: string | null;
+  bookings: number;
+  /** Has studied at CASA before: no enrolment fee (course-catalogue.ts says how it is decided). */
+  studiedBefore: boolean;
+  /** Has stayed in accommodation CASA arranged: no placement fee and deposit. */
+  stayedBefore: boolean;
 };
 
 export type EnquiryHit = {

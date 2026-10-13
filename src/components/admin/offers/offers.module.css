@@ -100,7 +100,7 @@
 .card { background: #fff; border: 1px solid var(--o-line); border-radius: var(--r-feature); box-shadow: var(--o-card); }
 .cardHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 50px; padding: 10px 16px; border-bottom: 1px solid var(--o-line); border-radius: var(--r-feature) var(--r-feature) 0 0; }
 .cardHead h2 { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; }
-.cardHead > span { font-size: 12.5px; color: var(--o-mute); font-weight: 600; text-align: right; }
+.cardHead > span { margin-left: auto; font-size: 12.5px; color: var(--o-mute); font-weight: 600; text-align: right; }
 .cardHeadWarn { background: #fffaf0; }
 .cardBody { padding: 14px 16px 16px; }
 .cardFoot { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--o-rule); background: var(--o-head); border-radius: 0 0 var(--r-feature) var(--r-feature); }
@@ -244,6 +244,8 @@
 .popWide { width: 540px; }
 .popDates { width: auto; min-width: 400px; }
 .popUp { top: auto; bottom: calc(100% + 10px); }
+.popEnd { left: auto; right: -6px; }
+.popEnd::before { left: auto; right: 26px; }
 .popUp::before { top: auto; bottom: -5px; box-shadow: 1px 1px 0 0 rgba(15, 23, 42, 0.08); }
 .popHead { display: flex; align-items: center; gap: 12px; padding: 14px 16px 12px; border-bottom: 1px solid var(--o-rule); }
 .popHead b { display: block; font-size: 14.5px; font-weight: 800; }
@@ -422,6 +424,38 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .course span { flex: 1; min-width: 0; font-weight: 600; }
 .course small { color: var(--o-mute); font-weight: 700; font-variant-numeric: tabular-nums; }
 
+/* ------------------------------------------------------ a learner's course */
+.picker { display: flex; flex-direction: column; gap: 18px; }
+.courseTiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.termGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 6px; }
+.term { display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; border-radius: var(--r-card); border: 1px solid var(--o-line); background: #fff; text-align: left; color: inherit; }
+.term:hover { border-color: var(--o-line-firm); }
+.term b { font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.term span { font-size: 12px; color: var(--o-mute); font-weight: 600; }
+.termOn, .termOn:hover { border-color: var(--o-ink); box-shadow: 0 0 0 1px var(--o-ink); background: var(--c-blue-tint); }
+.levelRows { display: flex; flex-direction: column; gap: 6px; }
+.lineList { display: flex; flex-direction: column; border: 1px solid var(--o-line); border-radius: var(--r-card); overflow: hidden; }
+.lineRow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 14px; border-top: 1px solid var(--o-rule); background: #fff; cursor: default; }
+label.lineRow { cursor: pointer; }
+.lineList > :first-child { border-top: 0; }
+.lineRow > span { display: flex; flex-direction: column; min-width: 0; }
+.lineRow b { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; }
+.lineRow b input { width: 15px; height: 15px; accent-color: var(--o-ink); }
+.lineRow small { font-size: 12px; color: var(--o-mute); font-weight: 500; }
+.lineRow em { font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lineDetail { display: flex; flex-direction: column; gap: 12px; padding: 12px 14px 14px; border-top: 1px solid var(--o-rule); background: #fafbfd; }
+/* A learner's course at a glance: when it meets, from when to when, how much. */
+.courseFacts { display: flex; flex-wrap: wrap; gap: 6px 22px; padding: 11px 16px; border-bottom: 1px solid var(--o-line); background: #fbfcfe; font-size: 13px; font-weight: 650; color: var(--o-ink); }
+.courseFacts > span { display: inline-flex; align-items: center; gap: 7px; }
+.courseFacts svg { width: 15px; height: 15px; color: var(--o-mute); flex: none; }
+.toggleLine { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 650; cursor: pointer; }
+.toggleLine input { width: 15px; height: 15px; accent-color: var(--o-ink); }
+.toggleLine small { font-size: 12px; font-weight: 500; color: var(--o-mute); }
+.lineGroup { display: flex; flex-direction: column; border-top: 1px solid var(--o-rule); }
+.lineGroup > .lineRow { border-top: 0; }
+.lineTotal { background: var(--o-head); }
+.lineTotal b, .lineTotal em { font-size: 14.5px; }
+
 /* ------------------------------------------------------------- dialogs */
 .dlgTitle { font-family: var(--font-sans), system-ui, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: normal; }
 .form { display: flex; flex-direction: column; gap: 14px; color: var(--o-ink); font-size: 14px; }
@@ -456,6 +490,9 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
   .wzCard { grid-template-columns: 1fr; }
   .wzRail { border-right: 0; border-bottom: 1px solid var(--o-line); border-radius: var(--r-feature) var(--r-feature) 0 0; }
   .wzSteps { flex-direction: row; overflow-x: auto; }
+  .wzSteps > li { flex: none; }
+  .wzStep { grid-template-columns: 28px auto; align-items: center; }
+  .wzStep b { margin-top: 0; white-space: nowrap; }
   .wzStep small { display: none; }
   .wzFoot { border-radius: 0 0 var(--r-feature) var(--r-feature); }
 }
@@ -472,4 +509,8 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
   .listRow > :nth-child(1), .listRow > :nth-child(3), .listRow > :nth-child(4) { display: none; }
   .wzBody { padding: 22px 18px; }
   .row3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  /* On a phone the rail shows where you are; the other steps are their numbers. */
+  .wzStep:not(.wzStepOn) .wzStepText { display: none; }
 }

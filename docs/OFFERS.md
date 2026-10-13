@@ -206,10 +206,12 @@ on a record — the wizard then starts at step 2 with the recipient filled in.
    the same name written another way ("Vivimondo S.r.l." = "vivimondo srl"), the same mail domain or
    address, and learners with the same address or name — *Use this* takes the existing one. A new
    learner whose address CASA has is that learner, checked again on the server.
-2. **What it is.** For an organisation: *A group stay* or *Courses*. A group picks one of the five
-   tiles (the four packages and *Own offer*); a school that came before gets **Like last time** — its
-   last offer's package, group, extras and prices, with new dates. Courses are picked from the price
-   list (upcoming courses at their rate, the enrolment fee, books, exams).
+2. **What it is.** For an organisation: *A group stay* or *A course*; for a learner always a course
+   (the server refuses a group offer to a person). A group picks one of the five tiles (the four
+   packages and *Own offer*); a school that came before gets **Like last time** — its last offer's
+   package, group, extras and prices, with new dates. A course is built in the course picker (§A
+   learner's course); *From the price list* stays for what is not a course — an exam alone, a fee.
+   A learner's card shows their email, phone, nationality and bookings at CASA (people carry no postal address yet).
 3. **The group.** Arrival and departure (the departure follows from the arrival and the package's
    length, Sunday to Saturday), participants, escorts; an enquiry's preferred dates are shown.
 4. **The letter.** The language (from the enquiry, else the country: German for DE/AT/CH/LI, English
@@ -217,6 +219,57 @@ on a record — the wizard then starts at step 2 with the recipient filled in.
    name ("Vivimondo 2027"), the title, valid until (4 weeks; 2/6 weeks; 6 weeks before arrival), who
    signs — and a summary. **Create offer** finds or creates the recipient and makes the offer in one
    transaction (`createOffer`), then opens it.
+
+## A learner's course (2026-10-13)
+
+What FileMaker's colleagues do by hand — find the learner, pick the course, look up the dates, add
+the books, remember the enrolment fee, price the room — the course picker does in one place
+(`course-picker.tsx`, the same component in the wizard and in *Change the course* on the offer):
+
+1. **Course** — every course with a price and terms still to come (`course-catalogue.ts`): intensive,
+   evening, Bildungszeit, special courses. Courses quoted on request do not appear.
+2. **Time of day** — the intensive course's morning and afternoon groups, each with its days and
+   hours from the term's schedule ("Mornings, Mon–Fri 09:00–12:30", "Afternoons, Mon–Thu 13:00–17:30").
+3. **Starting** — the upcoming terms at that time of day.
+4. **Level** — "B2 complete · 8 weeks" or a half level, then **And on to**: a path climbs level by level
+   through the following terms at the same time of day (`buildLevelPath`, the public registration's own).
+5. **On the offer** — the lines with their prices as it goes: each level, the books (each half level's
+   own, from the price list), the enrolment fee, accommodation (host family or the CASA flat, from the
+   Sunday before to the Saturday after, adjustable; first stay or not), and the telc exam when the path
+   ends at its level, on one of its next dates.
+
+The choice is kept on the offer (`stay.choices.course`, with the dates and times copied in), and
+`courseLines` makes its lines; each can be typed over like any line. The letter's heading says the
+course at a glance — time of day, dates, weeks, lessons, and the school's closures inside it
+("unterrichtsfrei 21.12.2026–01.01.2027 (Weihnachten)", `src/config/school-closures.ts`); each line
+is its level and dates. The title becomes "Intensivkurs B2 komplett", or "Intensivkurs B2 bis C1"; the
+validity a week before the course starts, at most four weeks.
+
+**The rules, and where they come from.** The prices are the website's published ones
+(`src/config/calculator/pricing.ts`); the rules are SchoolMan's own booking scripts, read from the DDR
+on 2026-10-13, and they match FileMaker's 2026 offers to the cent (37614: 50 + 940 + 2 × 23,99;
+37627: Bücher 4 × 26,99 for B2 and C1, Miete Unterkunft 1160 for 8 weeks).
+
+| What | Rule | FileMaker |
+| --- | --- | --- |
+| Intensive | whole level (8 weeks) 940 €, half level 520 € | ShortTerm table: 4 weeks 520, 8 weeks 940; LongTerm 117,50 € a week = the same |
+| Evening | per term, 378 € spring, 476 € autumn | 7 € a lesson × the term's lessons (54 / 68) |
+| Special | 192 € | 8 € a lesson × 24 |
+| Books | each half level's books, parts 1 and 2 | one "Bücher" line per standard book of the whole CEFR level |
+| Enrolment fee | 50 €, once per learner, ever: none if a booking went ahead or one was charged the fee (`studiedBeforeSql`) | the same, by a text search for "1" in the earlier lines' types — so an exam or discount line also suppressed it |
+| Rent | whole weeks, Sunday to Saturday; 200 / 340 / 460 € for 1–3 weeks, 580 € for 4, 145 € each further week | `WriteAccommodationPrice`, 2026 |
+| Extra nights | a check names them; added as a line | computed, never charged |
+| First stay | placement fee 50 € and refundable deposit 580 € (`stayedBeforeSql`) | the same (Deponat, Vermittlung Unterkunft) |
+| Exam | telc B2 190 €, C1 Hochschule 210 €, the full exam's rate on its date | `SetPrice_Exam_NationalAirport` |
+
+Checks: a level without a planned term, a course already started, valid until after the start,
+accommodation without dates (a problem), nights beyond whole weeks.
+
+Not yet: agency commission (FileMaker: the agency's percentage or 20 % per commissionable line), a
+down payment and payment date (FileMaker's confirmation: today + 7 days, or the course start), an
+offer for two learners at once (FileMaker's 37627 is quantity 2), meals with a host family (FileMaker
+prices none — "Preis muss händisch berechnet werden"), Bildungszeit's weekly price (the catalogue's
+"from" price stands until it is typed over).
 
 ## Working with it
 
@@ -250,6 +303,7 @@ src/components/admin/offers/
   offer-page.tsx        the offer: head, built on, included, extras; price, checks, letter, history
   letter-view.tsx       the letter tab: in-place editing, standard texts, versions, send
   new-offer.tsx         the wizard
+  course-picker.tsx     a learner's course, in the wizard and on the offer
   date-picker.tsx       DateInput, Calendar, DateField, InlineDatePicker, DateRange — no browser
                         date inputs anywhere in Offers (arithmetic in src/lib/admin/calendar.ts)
   panel.tsx · fields.tsx · icons.tsx · offer-actions.tsx · use-offer-draft.ts
@@ -258,6 +312,8 @@ src/lib/admin/offers/
   types · stay · engine · extras · checks · document · schema · draft-ops · from-enquiry
   recipient-guess       what the wizard reads from what is typed (pure)
   wizard                the wizard's input schema and shapes (pure)
+  course                a learner's course: prices, lines, title, facts, path, rent, exam (pure)
+  course-catalogue      courses, terms, books and exams to offer; what CASA knows of a learner
   recipients            search, matches, the start from a record, finding or creating the recipient
   repo                  offers: list, read, create, save, send, answer
 ```
@@ -278,7 +334,9 @@ letter is read back whole and that a copy in another shape is refused.
 e2e/offers.spec.ts`): an offer made through the wizard for a new school prices itself, saves, survives
 a reload, keeps a typed price, has its title changed on the letter and is kept in `letters` when sent;
 a package takes an extra afternoon, a transfer and a reduction, and the letter shows them; an opening
-changed on the letter becomes the standard; a colleague's save in between is not overwritten.
+changed on the letter becomes the standard; a learner's B2 course with books, the enrolment fee and a
+room reaches the letter with its time of day; a colleague's save in between is not overwritten.
+`course.test.ts` covers the course rules against FileMaker's figures.
 `npm run admin:check` loads the list, the wizard, an offer and its letter.
 
 ## Open questions for CASA
@@ -301,5 +359,9 @@ changed on the letter becomes the standard; a colleague's save in between is not
 6. **Prices for the usual extras.** Airport transfer, single room supplement, extra night and extra
    lessons have no price in the groups sheets, so each is typed per offer. If they are standard
    prices, they belong in `rates` and the preset can carry them.
-7. **Next:** an accepted group offer becoming the group's bookings; sending from the workspace through
+7. **The deposit.** The site and FileMaker's script charge 580 €; FileMaker's flat contract text says a
+   50 € key deposit plus 560 €. Which is right for the CASA flat?
+8. **Short stays.** 200 / 340 / 460 € for one to three weeks are SchoolMan's 2026 figures and are not on
+   the website; confirm them.
+9. **Next:** an accepted group offer becoming the group's bookings; sending from the workspace through
    Microsoft Graph from the owner's mailbox; optional lines; agency commission.

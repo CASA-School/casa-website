@@ -8,6 +8,7 @@ import { issueLetter, lettersForOffer, saveStandardText, standardTexts, type Let
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
 import { hasProblems, offerChecks } from './checks';
+import { courseTitle } from './course';
 import { OFFER_TEXT_DEFAULTS, offerLetter, type OfferTexts } from './document';
 import { newManualKey } from './draft-ops';
 import { buildLines, computeTotals } from './engine';
@@ -526,6 +527,9 @@ export async function createOffer(input: NewOfferInput, actor: StaffUser): Promi
       participants = input.group.participants ?? participants;
       escorts = input.group.escorts;
     }
+    if (input.kind === 'individual' && input.course) {
+      stay = { ...stay, choices: { ...stay.choices, course: input.course } };
+    }
     if (input.lines.length) {
       stay = {
         ...stay,
@@ -547,7 +551,7 @@ export async function createOffer(input: NewOfferInput, actor: StaffUser): Promi
       kind: input.kind,
       language: input.language,
       presentation,
-      title: input.title || DEFAULT_TITLE[input.kind][input.language],
+      title: input.title || (input.kind === 'individual' && input.course ? courseTitle(input.course, input.language) : DEFAULT_TITLE[input.kind][input.language]),
       groupName: input.groupName,
       organisationId: to.organisationId,
       recipientName: to.name,

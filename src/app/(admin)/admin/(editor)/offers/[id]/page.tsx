@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { OfferPage } from '@/components/admin/offers/offer-page';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
+import { courseCatalogue, learnerHistory } from '@/lib/admin/offers/course-catalogue';
 import { editorOptions, getOffer, offerTexts, priceListOptions } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
 
@@ -21,7 +22,14 @@ export default async function Page({
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const record = await getOffer(id);
   if (!record) notFound();
-  const [options, priceList, texts] = await Promise.all([editorOptions(), priceListOptions(), offerTexts()]);
+  const individual = record.draft.kind === 'individual';
+  const [options, priceList, texts, catalogue, history] = await Promise.all([
+    editorOptions(),
+    priceListOptions(),
+    offerTexts(),
+    individual ? courseCatalogue() : Promise.resolve({ courses: [], books: [], exams: [] }),
+    individual && record.meta.personId ? learnerHistory(record.meta.personId) : Promise.resolve(null),
+  ]);
 
   return (
     <OfferPage
@@ -29,6 +37,8 @@ export default async function Page({
       record={record}
       options={options}
       priceList={priceList}
+      catalogue={catalogue}
+      history={history}
       texts={texts}
       today={todayInputValue()}
       canWrite={canAccess(user, 'offers', 'edit')}

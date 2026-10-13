@@ -14,6 +14,7 @@ export const ICONS = {
   people: svg(<><circle cx="6" cy="5.5" r="2.3" /><path d="M2 13.5a4 4 0 0 1 8 0" /><path d="M11 4a2 2 0 0 1 0 4M12 13.5a3.5 3.5 0 0 0-1.6-2.9" /></>),
   person: svg(<><circle cx="8" cy="5.5" r="2.6" /><path d="M3 14a5 5 0 0 1 10 0" /></>),
   language: svg(<><path d="M2.5 4h7M6 2.5V4M4 4c.5 2.5 2.2 4.4 4.5 5.5M8 4c-.6 2.6-2.4 4.6-5 5.8" /><path d="M9 14l2.5-6 2.5 6M9.8 12h3.4" /></>),
+  clock: svg(<><circle cx="8" cy="8" r="5.5" /><path d="M8 5v3.2l2.2 1.4" /></>),
   hourglass: svg(<><path d="M4 2h8M4 14h8M5 2c0 3 6 3 6 6s-6 3-6 6M11 2c0 3-6 3-6 6s6 3 6 6" /></>),
   pen: svg(<><path d="M10.5 2.5l3 3-8 8H2.5v-3z" /></>),
   book: svg(<><path d="M3 3.5c1.7-.8 3.4-.8 5 0v10c-1.6-.8-3.3-.8-5 0z" /><path d="M8 3.5c1.6-.8 3.3-.8 5 0v10c-1.7-.8-3.4-.8-5 0" /></>),

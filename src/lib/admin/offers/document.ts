@@ -16,6 +16,7 @@
 import { formatDateRange, formatLetterDate, formatMoney, letterhead, recipientLines, salutation } from '../letters/format';
 import { LETTER_SCHEMA, type Letter, type LetterPart, type LetterRow } from '../letters/types';
 
+import { courseFacts } from './course';
 import { measure } from './engine';
 import type { OfferDraft, OfferLanguage, OfferLine, OfferTotals } from './types';
 
@@ -132,6 +133,7 @@ export function offerLetter(draft: OfferDraft, lines: OfferLine[], totals: Offer
 
   const heading = [draft.groupName.trim(), draft.title.trim()].filter(Boolean).join(' · ');
   const { nights, weeks, fromDates } = measure(draft);
+  const course = group ? null : draft.stay.choices.course;
   const facts = group
     ? [
         fromDates && draft.arrival && draft.departure ? `${formatDateRange(draft.arrival, draft.departure, lang)} · ${w.nights(nights)}` : w.weeks(weeks),
@@ -139,7 +141,9 @@ export function offerLetter(draft: OfferDraft, lines: OfferLine[], totals: Offer
       ]
         .filter(Boolean)
         .join(' · ')
-    : '';
+    : course
+      ? courseFacts(course, lang)
+      : '';
   if (heading) body.push({ type: 'heading', text: heading, detail: facts || null });
 
   body.push({

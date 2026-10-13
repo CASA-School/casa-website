@@ -13,6 +13,7 @@ import pg from 'pg';
  */
 const DATABASE_URL = process.env.DATABASE_URL;
 const ORGANISATION = 'Istituto Pacinotti Venezia';
+const LEARNER = { first: 'Lena', last: 'Probelernerin' };
 
 test.describe('offers', () => {
   test.skip(!DATABASE_URL, 'needs DATABASE_URL and an owner account');
@@ -49,6 +50,14 @@ test.describe('offers', () => {
     await client.query(`DELETE FROM letters WHERE offer_id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM offers WHERE id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM organisations WHERE name = $1 AND created_at >= $2`, [ORGANISATION, started]);
+    const people = await client.query<{ id: string }>(`SELECT id FROM people WHERE first_name = $1 AND last_name = $2 AND created_at >= $3`, [
+      LEARNER.first,
+      LEARNER.last,
+      started,
+    ]);
+    const personIds = people.rows.map((r) => r.id);
+    await client.query(`DELETE FROM staff_activity WHERE entity = 'person' AND entity_id = ANY($1::uuid[])`, [personIds]);
+    await client.query(`DELETE FROM people WHERE id = ANY($1::uuid[])`, [personIds]);
     await client.query(`DELETE FROM letter_texts WHERE kind = 'offer'`);
     for (const t of texts) {
       await client.query(`INSERT INTO letter_texts (kind, language, part, body) VALUES ('offer', $1, $2, $3)`, [t.language, t.part, t.body]);
@@ -207,6 +216,42 @@ test.describe('offers', () => {
       `SELECT body FROM letter_texts WHERE kind = 'offer' AND language = 'en' AND part = 'intro'`
     );
     expect(rows[0]?.body).toBe('Thank you for thinking of CASA for your group. Here is what we suggest:');
+  });
+
+  test('a learner’s course: the level, its books, the enrolment fee, a room — and the time of day on the letter', async ({ page }) => {
+    await page.goto('/admin/offers/new');
+    await page.getByRole('radio', { name: 'Learners' }).click();
+    await page.getByLabel('Who the offer is for').fill(`${LEARNER.first} ${LEARNER.last}`);
+    await page.getByRole('button', { name: /as new/ }).click();
+    const next = page.getByRole('button', { name: 'Continue' });
+    await next.click();
+
+    // A learner's offer is a course: no packages, the intensive course first, the next morning term.
+    await expect(page.getByRole('radio', { name: /Katze/ })).toHaveCount(0);
+    await expect(page.getByRole('radio', { name: /^Intensive German/ })).toHaveAttribute('aria-checked', 'true');
+    await page.locator('[class*="termGrid"] button').first().click();
+    await page.getByRole('button', { name: 'B2 complete · 8 weeks' }).click();
+    const onOffer = page.locator('[class*="lineList"]');
+    await expect(onOffer).toContainText('940,00 €');
+    await expect(onOffer).toContainText('Kontext B2.1');
+    await expect(onOffer).toContainText('First registration at CASA');
+    await page.getByRole('checkbox', { name: /^Accommodation/ }).check();
+    await expect(onOffer).toContainText('Rent, the placement fee and the refundable deposit');
+
+    await next.click();
+    await expect(page.getByLabel('Title on the letter')).toHaveValue('Intensivkurs B2 komplett');
+    await page.getByRole('button', { name: 'Create offer' }).click();
+    await expect(page).toHaveURL(/\/admin\/offers\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole('heading', { name: 'Intensive German B2 complete', level: 2 })).toBeVisible();
+    await expect(page.getByText('Mornings, Mon–Fri 09:00–12:30')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Letter', exact: true }).click();
+    await expect(page).toHaveURL(/\/letter$/);
+    const letter = page.locator('article').first();
+    await expect(letter).toContainText('Intensivkurs B2 komplett');
+    await expect(letter).toContainText('Vormittags, Mo–Fr 09:00–12:30');
+    await expect(letter).toContainText('Einschreibegebühr');
+    await expect(letter).toContainText('Kaution Unterkunft (rückerstattbar)');
   });
 
   test("a colleague's save in between is not overwritten", async ({ page }) => {
