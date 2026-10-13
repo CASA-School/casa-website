@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
 import { DateFormField } from '@/components/admin/date-picker';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { Badge, Button, Card, Cell, EmptyState, Field, Input, PageHeader, Select, Table, TableRow, type Tint } from '@/components/admin/ui';
+import { Status } from '@/components/admin/list';
+import { Button, Card, Cell, EmptyState, Field, Input, PageHeader, Select, TableRow, type Tint } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import {
@@ -16,7 +17,6 @@ import {
   slotKey,
   type FeeCode,
   type PriceList,
-  type PriceListStatus,
   type PriceUnit,
   type Slot,
 } from '@/lib/admin/prices/price-list';
@@ -49,12 +49,6 @@ const FEE_LABEL: Record<FeeCode, string> = {
   enrolment_fee: 'Enrolment fee',
   accommodation_placement_fee: 'Placement fee',
   deposit: 'Deposit',
-};
-
-const STATUS_WORD: Record<PriceListStatus, (l: PriceList) => string> = {
-  current: () => 'In force',
-  future: (l) => `From ${longDate(l.validFrom)}`,
-  past: (l) => `Until ${l.validTo ? longDate(l.validTo) : ''}`,
 };
 
 export default async function PricesPage({ searchParams }: { searchParams: Promise<{ list?: string; error?: string; saved?: string }> }) {
@@ -91,29 +85,6 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
         }
       />
 
-      {lists.length > 1 ? (
-        <nav aria-label="Price lists" className="mb-4 inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-1">
-          {lists.map((l) => {
-            const on = l.validFrom === selected?.validFrom;
-            return (
-              <Link
-                key={l.validFrom}
-                href={`/admin/settings/prices?list=${l.validFrom}`}
-                aria-current={on ? 'page' : undefined}
-                className={cn(
-                  'inline-flex h-[30px] items-center gap-2 rounded-lg px-3.5 text-[0.8rem] font-bold transition-colors',
-                  'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
-                  on ? 'bg-[var(--casa-ink-deep)] text-white' : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
-                )}
-              >
-                {l.validFrom.endsWith('-01-01') ? l.validFrom.slice(0, 4) : longDate(l.validFrom)}
-                <span className={cn('font-semibold', on ? 'text-white/70' : 'text-[var(--casa-text-subtle)]')}>{STATUS_WORD[listStatus(l, today)](l)}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      ) : null}
-
       {sp.error ? (
         <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
           {sp.error}
@@ -129,23 +100,49 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
         <EmptyState title="No price list yet" />
       ) : (
         <>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-ws-line bg-white px-4 py-3">
-            <span className="flex flex-wrap items-center gap-2.5 text-sm">
-              <Badge tone={status === 'current' ? 'positive' : status === 'future' ? 'warning' : 'quiet'}>
-                {status === 'current' ? 'In force' : status === 'future' ? 'Not yet in force' : 'Ended'}
-              </Badge>
-              <span className="font-semibold text-[var(--casa-ink)]">
-                {status === 'future' ? `Takes effect on ${longDate(selected.validFrom)}` : `From ${longDate(selected.validFrom)}`}
-                {selected.validTo ? ` until ${longDate(selected.validTo)}` : ''}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-3xl border border-ws-line bg-white px-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-6 gap-y-1">
+              {lists.length > 1 ? (
+                <nav aria-label="Price lists" className="-mb-px flex max-w-full gap-5 overflow-x-auto [scrollbar-width:none]">
+                  {lists.map((l) => {
+                    const on = l.validFrom === selected.validFrom;
+                    return (
+                      <Link
+                        key={l.validFrom}
+                        href={`/admin/settings/prices?list=${l.validFrom}`}
+                        aria-current={on ? 'page' : undefined}
+                        className={cn(
+                          'inline-flex h-12 shrink-0 items-center border-b-2 text-[0.84rem] font-semibold whitespace-nowrap transition-colors outline-none',
+                          'focus-visible:text-[var(--casa-ink)] focus-visible:underline',
+                          on
+                            ? 'border-[var(--casa-ink-deep)] text-[var(--casa-ink)]'
+                            : 'border-transparent text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
+                        )}
+                      >
+                        {l.validFrom.endsWith('-01-01') ? l.validFrom.slice(0, 4) : longDate(l.validFrom)}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              ) : null}
+              <span className="flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1 py-2">
+                <Status tone={status === 'current' ? 'positive' : status === 'future' ? 'warning' : 'quiet'}>
+                  {status === 'current' ? 'In force' : status === 'future' ? 'Not yet in force' : 'Ended'}
+                </Status>
+                <span className="text-[0.84rem] text-[var(--casa-muted)]">
+                  {status === 'future' ? `Takes effect on ${longDate(selected.validFrom)}` : `From ${longDate(selected.validFrom)}`}
+                  {selected.validTo ? ` until ${longDate(selected.validTo)}` : ''}
+                </span>
               </span>
-            </span>
+            </div>
             {canDelete ? (
-              <form action={deletePriceListAction}>
+              <form action={deletePriceListAction} className="py-2">
                 <input type="hidden" name="list" value={selected.validFrom} />
                 <ConfirmSubmit
                   title="Delete this price list?"
                   description={`The prices from ${longDate(selected.validFrom)} are removed, and the list before them stays in force.`}
                   confirmLabel="Delete the list"
+                  variant="ghost"
                 >
                   Delete
                 </ConfirmSubmit>
@@ -335,36 +332,43 @@ function PriceCard({
     >
       <div className={columns === 2 ? 'grid lg:grid-cols-2 lg:divide-x lg:divide-ws-line-soft' : ''}>
         {(columns === 2 ? [shown.slice(0, Math.ceil(shown.length / 2)), shown.slice(Math.ceil(shown.length / 2))] : [shown]).map((part, i) => (
-          <Table key={i} head={['', { label: 'Price', align: 'right' }]}>
-            {part.map(({ row, price, was }) => (
-              <TableRow key={slotKey(row.slot)}>
-                <Cell className="text-sm">
-                  <span className="font-semibold text-[var(--casa-ink)]">{row.label}</span>
-                  {row.sub ? <span className="ml-2 text-xs text-[var(--casa-text-subtle)]">{row.sub}</span> : null}
-                  {PUBLISHED_SLOTS.includes(slotKey(row.slot)) ? (
-                    <Badge tone="neutral" className="ml-2 align-middle">
-                      On the website
-                    </Badge>
-                  ) : null}
-                </Cell>
-                <Cell align="right" className="text-sm whitespace-nowrap tabular-nums">
-                  {was !== undefined && was !== (price?.amount ?? null) ? (
-                    <span className="mr-2 text-xs text-[var(--casa-text-subtle)] line-through">{was == null ? 'new' : money(was)}</span>
-                  ) : null}
-                  {price ? (
-                    <>
-                      <span className="font-semibold">{money(price.amount)}</span>
-                      {price.unit && row.units ? <span className="ml-1.5 text-xs text-[var(--casa-text-subtle)]">{UNIT_LABEL[price.unit]}</span> : null}
-                    </>
-                  ) : (
-                    <span className="text-[var(--casa-text-subtle)]">—</span>
-                  )}
-                </Cell>
-              </TableRow>
-            ))}
-          </Table>
+          // A label and its price: the card's title names the column, so the table has no head row.
+          <table key={i} className={cn('w-full border-collapse text-sm', i > 0 && 'border-t border-ws-line-soft lg:border-t-0')}>
+            <tbody className="divide-y divide-ws-line-soft">
+              {part.map(({ row, price, was }) => (
+                <TableRow key={slotKey(row.slot)}>
+                  <Cell className="py-3 text-[0.875rem] text-[var(--casa-ink)]">
+                    {row.label}
+                    {row.sub ? <span className="ml-2 text-xs whitespace-nowrap text-[var(--casa-text-subtle)]">{row.sub}</span> : null}
+                    {PUBLISHED_SLOTS.includes(slotKey(row.slot)) ? <OnTheWebsite /> : null}
+                  </Cell>
+                  <Cell align="right" className="py-3 text-[0.875rem] whitespace-nowrap tabular-nums">
+                    {was !== undefined && was !== (price?.amount ?? null) ? (
+                      <span className="mr-2 text-xs text-[var(--casa-text-subtle)] line-through">{was == null ? 'new' : money(was)}</span>
+                    ) : null}
+                    {price ? (
+                      <>
+                        <span className="font-semibold">{money(price.amount)}</span>
+                        {price.unit && row.units ? <span className="ml-1.5 text-xs text-[var(--casa-text-subtle)]">{UNIT_LABEL[price.unit]}</span> : null}
+                      </>
+                    ) : null}
+                  </Cell>
+                </TableRow>
+              ))}
+            </tbody>
+          </table>
         ))}
       </div>
     </Card>
+  );
+}
+
+/** A price the public site shows: a small globe, the rail's sign for the website, named on hover and for a screen reader. */
+function OnTheWebsite() {
+  return (
+    <span title="On the website" className="ml-2 inline-flex translate-y-[2px] text-[var(--casa-text-subtle)] [&_svg]:h-3.5 [&_svg]:w-3.5">
+      <span aria-hidden="true">{Icon.website}</span>
+      <span className="sr-only">On the website</span>
+    </span>
   );
 }

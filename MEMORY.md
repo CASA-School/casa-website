@@ -2646,3 +2646,13 @@ billed at the half-level rate) is superseded; the calculator's full A1.1→C1.2 
 Only the placement test keeps B1+ as one band (`PLACEMENT_BANDS`), its result a recommendation a
 teacher confirms.
 
+
+Tenth pass: **one list design.** Rahman, on the Offers list: one column for dates and group sizes,
+a status with a name and a date under it, two price columns of dashes — "this list interface all
+over is so basic and bad". `src/components/admin/list.tsx` is the design: a list is one white card
+with its views and search across the top (`ListBar`, Enter submits), rows that read initials, name
+and what it is about (`RecordName`), one kind of fact per column, open queues grouped by what to do
+(`ListGroup`: follow up / sent / drafts; new / in progress / waiting) so no row repeats a status,
+colleagues as ink initials (`Owner`), empty cells instead of dashes, secondary columns hidden on a
+phone. Offers was rebuilt as the reference; every other list followed (inbox, school, management,
+settings). docs/ADMIN_WORKSPACE.md §Lists, rules 10–14.

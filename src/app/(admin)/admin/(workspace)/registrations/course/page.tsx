@@ -1,13 +1,22 @@
+import { ListEmpty } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import { parseFilter, QueueToolbar } from '@/components/admin/queue-toolbar';
+import { parseFilter, QueueToolbar, queueEmptyTitle } from '@/components/admin/queue-toolbar';
 import { RegistrationTable } from '@/components/admin/registration-table';
 import { RegistrationTabs } from '@/components/admin/registration-tabs';
-import { EmptyState, PageHeader } from '@/components/admin/ui';
+import { Card, PageHeader } from '@/components/admin/ui';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
 import { listCourseRegistrations } from '@/lib/admin/registrations';
 import { courseNameResolver } from '../course-names';
-import { optionLine } from '../option-label';
+import { formatDay, parseOptionLabel } from '../option-label';
+
+/** "Intensive German · Starts 26 Oct": the course as staff call it, and when it starts. */
+function courseAbout(course: string, option: string | null): string {
+  const parsed = parseOptionLabel(option);
+  if (!parsed) return course;
+  if (parsed.toBeArranged) return `${course} · Date to be arranged`;
+  return `${course} · ${parsed.start ? `Starts ${formatDay(parsed.start)}` : parsed.raw}`;
+}
 
 export default async function CourseRegistrationsPage({
   searchParams,
@@ -31,11 +40,10 @@ export default async function CourseRegistrationsPage({
     courseNameResolver(),
   ]);
 
-  // Every row the same way: the course as staff call it, then its start and time.
   const rows = items.map((item) => ({
     ...item,
-    productLabel: courseName(item.productLabel) ?? item.productLabel,
-    optionLabel: optionLine(item.optionLabel, 'course'),
+    about: courseAbout(courseName(item.productLabel) ?? item.productLabel, item.optionLabel),
+    flag: item.accommodationRequired ? 'Room needed' : null,
   }));
 
   const open = (counts: typeof courseCounts) =>
@@ -43,44 +51,28 @@ export default async function CourseRegistrationsPage({
 
   return (
     <>
-      <PageHeader title="Registrations" />
-
-      <RegistrationTabs
-        active="course"
-        counts={{ course: open(courseCounts), exam: open(examCounts) }}
+      <PageHeader
+        title="Registrations"
+        actions={<RegistrationTabs active="course" counts={{ course: open(courseCounts), exam: open(examCounts) }} />}
       />
 
-      <QueueToolbar
-        basePath="/admin/registrations/course"
-        active={filter}
-        counts={{ ...courseCounts.byStatus, open: open(courseCounts), all: courseCounts.total }}
-        search={search}
-        searchPlaceholder="Name, email or course"
-      />
-
-      {items.length === 0 ? (
-        <EmptyState
-          title={search ? 'Nothing matches that search' : 'No course registrations open'}
-          description={
-            search
-              ? 'Try a shorter term, or switch the filter to Everything.'
-              : 'A completed registration on the public site appears here immediately.'
-          }
-        />
-      ) : (
-        <RegistrationTable
-          items={rows}
+      <Card bleed>
+        <QueueToolbar
           basePath="/admin/registrations/course"
-          detailColumn="Declared level"
+          active={filter}
+          counts={{ ...courseCounts.byStatus, open: open(courseCounts), all: courseCounts.total }}
+          search={search}
+          searchPlaceholder="Name, email or course"
         />
-      )}
 
-      <Pagination
-        basePath="/admin/registrations/course"
-        page={page}
-        total={total}
-        params={params}
-      />
+        {items.length === 0 ? (
+          <ListEmpty title={queueEmptyTitle(filter, search)} />
+        ) : (
+          <RegistrationTable items={rows} basePath="/admin/registrations/course" filter={filter} level />
+        )}
+      </Card>
+
+      <Pagination basePath="/admin/registrations/course" page={page} total={total} params={params} />
     </>
   );
 }

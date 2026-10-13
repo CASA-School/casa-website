@@ -2,29 +2,59 @@ import Link from 'next/link';
 
 import { OfferFrame } from '@/components/admin/offers/frame';
 import ui from '@/components/admin/offers/offers.module.css';
+import { dayRange, euros, ListBar, ListEmpty, ListGroup, Owner, RecordName } from '@/components/admin/list';
+import { Card, Cell, relativeDays, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { formatDateRange, formatMoney } from '@/lib/admin/letters/format';
-import { listOffers, offerCounts, OFFER_FILTERS, type OfferListFilter } from '@/lib/admin/offers/repo';
-import { OFFER_STATUS_LABELS } from '@/lib/admin/offers/types';
+import { listOffers, offerCounts, OFFER_FILTERS, type OfferListFilter, type OfferListItem } from '@/lib/admin/offers/repo';
 
 /**
- * Offers — what is being written, what is out, what came back. Open first:
- * drafts and offers sent without an answer. A sent offer quiet for ten days
- * says "Follow up", one past its validity "Expired" — FileMaker kept neither.
+ * Offers — what is being written, what is out, what came back. Open first,
+ * grouped by what to do: a sent offer quiet for ten days or past its validity
+ * to follow up, then the sent ones waiting, then the drafts. The group is the
+ * status, so no row repeats it (docs/ADMIN_WORKSPACE.md §Lists).
  */
 
-const FILTER_LABELS: Record<OfferListFilter, string> = {
-  open: 'Open',
-  draft: 'Drafts',
-  sent: 'Sent',
-  accepted: 'Accepted',
-  declined: 'Declined',
-  all: 'All',
-};
+const FILTER_LABELS: Record<OfferListFilter, string> = { open: 'Open', accepted: 'Accepted', declined: 'Declined', all: 'All' };
 
-const eur = (n: number | null) => (n == null ? '—' : formatMoney(n, 'de'));
-const short = (d: Date) => d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
+const STAGES = [
+  { key: 'follow', label: 'Follow up', has: (o: OfferListItem) => o.followUp !== null },
+  { key: 'sent', label: 'Sent', has: (o: OfferListItem) => o.status === 'sent' && !o.followUp },
+  { key: 'draft', label: 'Drafts', has: (o: OfferListItem) => o.status === 'draft' },
+  { key: 'accepted', label: 'Accepted', has: (o: OfferListItem) => o.status === 'accepted' },
+  { key: 'declined', label: 'Declined', has: (o: OfferListItem) => o.status === 'declined' || o.status === 'withdrawn' },
+] as const;
+
+const plural = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`;
+
+/** Who it is for, under the name: the school behind a group's name and its size, or a learner's course. */
+function about(o: OfferListItem): string {
+  if (o.kind === 'individual') return o.course?.label ?? '';
+  return [
+    o.groupName ? o.recipientName : null,
+    o.participants ? plural(o.participants, 'participant') : 'Group',
+    o.escorts ? plural(o.escorts, 'escort') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+function when(o: OfferListItem): string {
+  const from = o.arrival ?? o.course?.start;
+  const to = o.departure ?? o.course?.end;
+  return from && to ? dayRange(from, to) : '';
+}
+
+/** The latest that happened to it, said as a sentence: sent when, expired, or last changed. */
+function latest(o: OfferListItem) {
+  if (o.followUp === 'expired') return <span className="font-semibold text-[#b91c1c]">Expired</span>;
+  if (o.sentAt) {
+    const sent = `Sent ${relativeDays(o.sentAt)}`;
+    return o.followUp === 'chase' ? <span className="font-semibold text-[#9a5b00]">{sent}</span> : sent;
+  }
+  const changed = relativeDays(o.updatedAt);
+  return changed.charAt(0).toUpperCase() + changed.slice(1);
+}
 
 export default async function OffersPage({
   searchParams,
@@ -37,7 +67,12 @@ export default async function OffersPage({
   const [offers, counts] = await Promise.all([listOffers({ filter, q }), offerCounts()]);
   const canWrite = canAccess(user, 'offers', 'edit');
   const href = (f: OfferListFilter) => `/admin/offers${f === 'open' ? '' : `?filter=${f}`}`;
-  const chase = offers.filter((o) => o.followUp).length;
+
+  // Open and All read in groups by what to do; Accepted and Declined are one group already, named by their tab.
+  const groups =
+    filter === 'open' || filter === 'all'
+      ? STAGES.map((stage) => ({ ...stage, rows: offers.filter(stage.has) })).filter((g) => g.rows.length)
+      : [{ key: filter, label: '', rows: offers }];
 
   return (
     <OfferFrame
@@ -55,80 +90,62 @@ export default async function OffersPage({
         <div className={ui.listHead}>
           <div style={{ flex: 1 }}>
             <h1 className={ui.pageTitle}>Offers</h1>
-            <div className={ui.subtitle}>
-              {counts.open} open{chase ? ` · ${chase} to follow up` : ''}
-              {params.ok === 'deleted' ? ' · The offer was deleted' : ''}
-            </div>
+            {params.ok === 'deleted' ? <div className={ui.subtitle}>The offer was deleted.</div> : null}
           </div>
-          <form action="/admin/offers" role="search">
-            {filter !== 'open' ? <input type="hidden" name="filter" value={filter} /> : null}
-            <input name="q" defaultValue={q} placeholder="Search" aria-label="Search offers" className={ui.search} />
-          </form>
         </div>
 
-        <nav className={ui.filters} aria-label="Which offers">
-          {OFFER_FILTERS.map((f) => (
-            <Link key={f} href={href(f)} aria-current={f === filter ? 'page' : undefined} className={`${ui.filter} ${f === filter ? ui.filterOn : ''}`}>
-              {FILTER_LABELS[f]} <b>{counts[f]}</b>
-            </Link>
-          ))}
-        </nav>
-
-        <section className={ui.card} style={{ marginTop: 14 }}>
+        <Card bleed>
+          <ListBar
+            tabs={OFFER_FILTERS.map((f) => ({ key: f, label: FILTER_LABELS[f], href: href(f), count: counts[f] }))}
+            active={filter}
+            search={{ action: '/admin/offers', value: q, placeholder: 'Name, school or number', keep: { filter: filter === 'open' ? undefined : filter } }}
+          />
           {offers.length === 0 ? (
-            <div className={ui.emptyList}>
-              <b>{q ? 'Nothing found' : filter === 'open' ? 'Nothing open' : 'No offers here'}</b>
+            <ListEmpty title={q ? 'Nothing found' : filter === 'open' ? 'Nothing open' : 'No offers here'}>
               {q ? `No offer matches “${q}”.` : null}
-            </div>
+            </ListEmpty>
           ) : (
-            <>
-              <div className={ui.listCols}>
-                <span>No.</span>
-                <span>Offer</span>
-                <span>Dates and group</span>
-                <span style={{ textAlign: 'right' }}>Per person</span>
-                <span style={{ textAlign: 'right' }}>Total</span>
-                <span>Status</span>
-              </div>
-              {offers.map((o) => (
-                <Link key={o.id} href={`/admin/offers/${o.id}`} className={ui.listRow}>
-                  <span className={ui.listNo}>{o.number}</span>
-                  <span style={{ minWidth: 0 }}>
-                    <span className={ui.listTitle}>{o.groupName || o.recipientName || 'Untitled'}</span>
-                    <span className={ui.listSub}>{[o.groupName ? o.recipientName : null, o.title].filter(Boolean).join(' · ')}</span>
-                  </span>
-                  <span style={{ minWidth: 0 }}>
-                    <span className={ui.listSub} style={{ color: 'var(--o-ink2)' }}>
-                      {o.arrival && o.departure
-                        ? formatDateRange(o.arrival, o.departure, 'de')
-                        : o.course?.start && o.course.end
-                          ? formatDateRange(o.course.start, o.course.end, 'de')
-                          : o.kind === 'group' || o.course
-                            ? 'No dates yet'
-                            : 'Lines from the price list'}
-                    </span>
-                    {o.course?.slot ? <span className={ui.listSub}>{o.course.slot}</span> : null}
-                    {o.kind === 'group' && o.participants ? (
-                      <span className={ui.listSub}>
-                        {o.participants} participants{o.escorts ? ` · ${o.escorts} ${o.escorts === 1 ? 'escort' : 'escorts'}` : ''}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className={ui.listMoney}>{o.kind === 'group' ? eur(o.perParticipant) : ''}</span>
-                  <span className={ui.listMoney}>{eur(o.groupTotal)}</span>
-                  <span className={ui.listStatus}>
-                    <span className={`${ui.pill} ${ui[`pill_${o.status}`]}`}>{OFFER_STATUS_LABELS[o.status]}</span>
-                    {o.followUp ? (
-                      <span className={o.followUp === 'expired' ? ui.expired : ui.chase}>{o.followUp === 'expired' ? 'Expired' : 'Follow up'}</span>
-                    ) : (
-                      <span className={ui.listSub}>{o.sentAt ? `Sent ${short(o.sentAt)}` : `${o.ownerName ?? ''} · ${short(o.updatedAt)}`}</span>
-                    )}
-                  </span>
-                </Link>
-              ))}
-            </>
+            <Table
+              head={[
+                'Offer',
+                { label: 'Dates', className: 'hidden w-[13.5rem] md:table-cell' },
+                { label: 'Amount', align: 'right', className: 'w-[9rem]' },
+                { label: 'Owner', className: 'hidden w-[4.5rem] md:table-cell' },
+                { label: 'Updated', className: 'hidden w-[9.5rem] lg:table-cell' },
+              ]}
+            >
+              {groups.map((group) => [
+                group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={5} /> : null,
+                ...group.rows.map((o) => (
+                  <TableRow key={o.id} interactive>
+                    <Cell href={`/admin/offers/${o.id}`} className="max-w-0">
+                      <RecordName name={o.groupName || o.recipientName || 'Untitled'} reference={o.number} about={about(o)} />
+                    </Cell>
+                    <Cell className="hidden text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums md:table-cell">{when(o)}</Cell>
+                    <Cell align="right" className="whitespace-nowrap tabular-nums">
+                      {o.kind === 'group' ? (
+                        o.perParticipant != null ? (
+                          <>
+                            <span className="font-semibold">{euros(o.perParticipant)}</span>
+                            <span className="ml-1 text-xs text-[var(--casa-text-subtle)]">p. p.</span>
+                          </>
+                        ) : null
+                      ) : o.groupTotal != null ? (
+                        <span className="font-semibold">{euros(o.groupTotal)}</span>
+                      ) : null}
+                    </Cell>
+                    <Cell className="hidden md:table-cell">
+                      <Owner name={o.ownerName} />
+                    </Cell>
+                    <Cell className="hidden text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)] lg:table-cell">
+                      {latest(o)}
+                    </Cell>
+                  </TableRow>
+                )),
+              ])}
+            </Table>
           )}
-        </section>
+        </Card>
       </main>
     </OfferFrame>
   );

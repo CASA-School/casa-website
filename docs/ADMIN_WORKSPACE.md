@@ -683,6 +683,40 @@ The rules, each of which came from a real defect on a real screen.
    an input's format. The letter to a learner still states hours and dates in
    full — that is for the learner, not the team.
 
+## Lists
+
+**One design for every list (Rahman, 2026-10-13: "this list interface all over
+is so basic and bad").** The Offers list showed why: one column held dates *and*
+group sizes, the status column held a badge with a name and a date under it,
+two money columns were half dashes, and the tabs counted zeros. The parts are
+in `src/components/admin/list.tsx`; `Table`, `TableRow` and `Cell` in `ui.tsx`
+are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
+
+10. **A list is one white card.** Its views (tabs, underlined) and its search
+    sit across the top of the card (`ListBar`); the rows follow; an empty view
+    is one calm line inside the same card (`ListEmpty`), so the views stay in
+    reach. Search submits on Enter — no Search button. A tab with nothing in it
+    shows no count; a tab that only repeats a group of another view goes.
+11. **A column holds one kind of thing.** The record — its initials, its name,
+    a quiet reference beside the name, and under it what it is about
+    (`RecordName`) — then when, how much, who has it, how recent. Never a
+    status with a name and a date under it, never dates and group sizes in one
+    column, never two money columns where one says it. Money is one figure, in
+    whole euros when there are no cents (`euros`); dates are a range in short
+    months with the year only when it is not this one (`dayRange`).
+12. **Group by what to do; then the group is the status.** An open queue reads
+    in groups (`ListGroup`): to follow up, sent, drafts; new, in progress,
+    waiting on them. No row repeats its group's word in a status column. Where
+    a status column remains (a list that cannot group), it is a dot and the
+    word (`Status`), not a boxed badge; a badge marks an exception on one row
+    ("Room needed", "Group brief").
+13. **People are initials.** The record's initials are light; a colleague's
+    are ink, small, with the name on hover and for a screen reader (`Owner`),
+    so "who it is about" and "who has it" never read alike.
+14. **An empty value is an empty cell**, not a dash; a row of dashes is noise
+    that hides the one value that is there. Relative time ("Today", "3 days
+    ago") for what happened; the date for what is planned.
+
 ## Copy on screens — labels, not explanations
 
 The product is used daily by staff and must stay presentable. A screen shows

@@ -186,7 +186,9 @@ export async function listCourseRegistrations({
        FROM course_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
        ${where}
-      ORDER BY r.submitted_at DESC
+      ORDER BY CASE r.status::text WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'waiting' THEN 2
+                                   WHEN 'done' THEN 3 WHEN 'declined' THEN 4 ELSE 5 END,
+               r.submitted_at DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
@@ -274,7 +276,9 @@ export async function listExamRegistrations({
        FROM exam_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
        ${where}
-      ORDER BY r.submitted_at DESC
+      ORDER BY CASE r.status::text WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'waiting' THEN 2
+                                   WHEN 'done' THEN 3 WHEN 'declined' THEN 4 ELSE 5 END,
+               r.submitted_at DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );

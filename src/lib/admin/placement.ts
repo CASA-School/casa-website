@@ -165,6 +165,25 @@ export async function listPlacementAttempts({
   return { items: rows.map(toListItem), total: Number(totalRow?.n ?? 0) };
 }
 
+/** How many attempts each view of the list holds, for the counts beside its tabs. */
+export async function placementCounts(): Promise<Record<PlacementFilter, number>> {
+  const row = await queryFirst<{ needs_review: string; confirmed: string; in_progress: string; everything: string }>(
+    `SELECT count(*) FILTER (WHERE a.decision IS NOT NULL AND r.attempt_id IS NULL) AS needs_review,
+            count(*) FILTER (WHERE r.attempt_id IS NOT NULL) AS confirmed,
+            count(*) FILTER (WHERE a.decision IS NULL) AS in_progress,
+            count(*) AS everything
+       FROM placement_attempts a
+       LEFT JOIN placement_reviews r ON r.attempt_id = a.id`
+  );
+
+  return {
+    needs_review: Number(row?.needs_review ?? 0),
+    confirmed: Number(row?.confirmed ?? 0),
+    in_progress: Number(row?.in_progress ?? 0),
+    all: Number(row?.everything ?? 0),
+  };
+}
+
 export async function getPlacementAttempt(id: string): Promise<PlacementAttemptDetail | null> {
   const row = await queryFirst<Row>(`${SELECT} WHERE a.id = $1`, [id]);
 

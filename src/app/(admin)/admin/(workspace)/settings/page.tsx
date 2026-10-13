@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 
 import { Icon } from '@/components/admin/icons';
 import { roleLabel } from '@/components/admin/shell';
-import { Badge, Card, DetailList, PageHeader } from '@/components/admin/ui';
+import { Status } from '@/components/admin/list';
+import { Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { getStaffUser } from '@/lib/admin/auth';
 import { formDeliveryConfig } from '@/lib/notifications/forms.server';
@@ -20,7 +21,8 @@ import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/confi
  *
  * Environment presence is reported as connected / not connected, never as a
  * value. A settings page that echoes a webhook URL puts a credential on a
- * screen in a shared office.
+ * screen in a shared office. The variable's name is a machine value too
+ * (docs/ADMIN_WORKSPACE.md rule 5): it is on the row's hover, not on screen.
  */
 export default async function SettingsPage() {
   const user = await getStaffUser();
@@ -83,13 +85,13 @@ export default async function SettingsPage() {
                 {
                   label: 'Delivery mode',
                   value: delivery.test ? (
-                    <span className="flex flex-wrap items-center gap-2">
-                      <Badge tone="warning">Testing</Badge>
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <Status tone="warning">Testing</Status>
                       Every form goes to admin@casa-bremen.de
                     </span>
                   ) : (
-                    <span className="flex flex-wrap items-center gap-2">
-                      <Badge tone="positive">Live</Badge>
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <Status tone="positive">Live</Status>
                       Recipients are set per form
                     </span>
                   ),
@@ -112,23 +114,19 @@ export default async function SettingsPage() {
               {integrations.map((integration) => (
                 <li
                   key={integration.variable}
-                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3"
+                  title={integration.variable}
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3"
                 >
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-[var(--casa-ink)]">
-                      {integration.label}
-                    </span>
-                    <code className="block font-mono text-xs text-[var(--casa-text-subtle)]">
-                      {integration.variable}
-                    </code>
-                  </span>
-                  <Badge tone={integration.configured ? 'positive' : 'quiet'}>
-                    {integration.configured
-                      ? delivery.test
-                        ? 'Bypassed for testing'
-                        : 'Configured'
-                      : 'Not configured'}
-                  </Badge>
+                  <span className="min-w-0 text-[0.875rem] font-semibold text-[var(--casa-ink)]">{integration.label}</span>
+                  {integration.configured ? (
+                    delivery.test ? (
+                      <Status tone="warning">Bypassed for testing</Status>
+                    ) : (
+                      <Status tone="positive">Connected</Status>
+                    )
+                  ) : (
+                    <Status tone="quiet">Not connected</Status>
+                  )}
                 </li>
               ))}
             </ul>
@@ -140,7 +138,7 @@ export default async function SettingsPage() {
             <DetailList
               items={[
                 { label: 'Name', value: user.name },
-                { label: 'Role', value: <Badge tone="neutral">{roleLabel(user.role)}</Badge> },
+                { label: 'Role', value: roleLabel(user.role) },
                 { label: 'Email', value: user.email, wide: true },
               ]}
             />
@@ -152,21 +150,17 @@ export default async function SettingsPage() {
                 {
                   label: 'Release mode',
                   value: (
-                    <Badge tone={RELEASE_MODE === 'live' ? 'positive' : 'warning'}>
+                    <Status tone={RELEASE_MODE === 'live' ? 'positive' : 'warning'}>
                       {RELEASE_MODE.charAt(0).toUpperCase() + RELEASE_MODE.slice(1)}
-                    </Badge>
+                    </Status>
                   ),
                 },
                 { label: 'Cut score version', value: `Policy version ${POLICY_VERSION}` },
                 {
                   label: 'Listening',
-                  value: LISTENING_AUDIO_AVAILABLE ? (
-                    'Measured'
-                  ) : (
-                    <Badge tone="warning">Not measured</Badge>
-                  ),
+                  value: LISTENING_AUDIO_AVAILABLE ? 'Measured' : <Status tone="warning">Not measured</Status>,
                 },
-                { label: 'Item bank', value: <Badge tone="warning">Pilot, unreviewed</Badge> },
+                { label: 'Item bank', value: <Status tone="warning">Pilot, unreviewed</Status> },
               ]}
             />
           </Card>
@@ -183,7 +177,7 @@ export default async function SettingsPage() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#f6f9fc]"
+                    className="flex items-center justify-between gap-3 px-5 py-3 transition-colors hover:bg-[#f7f9fc]"
                   >
                     <span className="min-w-0 text-sm font-semibold text-[var(--casa-ink)]">{item.label}</span>
                     <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">

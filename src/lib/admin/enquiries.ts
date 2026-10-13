@@ -139,7 +139,9 @@ export async function listEnquiries({
 
   const rows = await query<Row>(
     `${SELECT} ${where}
-     ORDER BY e.submitted_at DESC
+     ORDER BY CASE e.status::text WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'waiting' THEN 2
+                                  WHEN 'done' THEN 3 WHEN 'declined' THEN 4 ELSE 5 END,
+              e.submitted_at DESC
      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );

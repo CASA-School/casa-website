@@ -4,10 +4,10 @@ import type { Room } from '@/lib/admin/rooms';
 import { assignRoomAction } from '../settings/rooms/actions';
 
 /**
- * A cohort's room as a value: the name, or "No room", which opens the rooms
- * as choices. Each choice submits `courseInstanceId` and `roomId` to
- * `assignRoomAction`, exactly what the old select-and-Set form posted; an
- * empty `roomId` clears the room.
+ * A cohort's room as a value: the name, or an empty cell with a quiet "Set
+ * room" on hover, which opens the rooms as choices. Each choice submits
+ * `courseInstanceId` and `roomId` to `assignRoomAction`, exactly what the old
+ * select-and-Set form posted; an empty `roomId` clears the room.
  */
 export function RoomPicker({
   instance,
@@ -37,7 +37,12 @@ export function RoomPicker({
               ) : null}
             </span>
           ) : (
-            <span className="text-[var(--casa-text-subtle)]">No room</span>
+            // An unset room is an empty cell: "No room" on every row was noise
+            // (§Design standards 6). The way to set one appears on the row's hover
+            // or focus, and always where there is no hover.
+            <span className="text-[var(--casa-text-subtle)] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+              Set room
+            </span>
           )}
         </span>
       }

@@ -1,20 +1,17 @@
+import { ListEmpty, ListGroup, Owner, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import { parseFilter, QueueToolbar } from '@/components/admin/queue-toolbar';
 import {
-  Badge,
-  Card,
-  Cell,
-  DateText,
-  EmptyState,
-  PageHeader,
-  Table,
-  TableRow,
-} from '@/components/admin/ui';
+  parseFilter,
+  QUEUE_TAIL_HEAD,
+  QueueToolbar,
+  queueEmptyTitle,
+  queueGroups,
+  Received,
+} from '@/components/admin/queue-toolbar';
+import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { listApplications } from '@/lib/admin/careers';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
-import { queueStatusCounts, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
-import { formatFileSize } from '@/lib/admin/format';
-import { fileKind } from './file-kind';
+import { queueStatusCounts } from '@/lib/admin/queues';
 
 /**
  * The career application queue.
@@ -22,7 +19,8 @@ import { fileKind } from './file-kind';
  * The only queue that already had a table before the workspace existed —
  * `career_applications`, written by the public apply route with the CV stored
  * alongside it. What it never had was a status anyone could set or a person it
- * belonged to.
+ * belonged to. A row is the candidate and, under the name, the position; the
+ * CV is on the record, since every application has one.
  */
 export default async function ApplicationsPage({
   searchParams,
@@ -44,73 +42,53 @@ export default async function ApplicationsPage({
     queueStatusCounts('career_application'),
   ]);
 
+  const groups = queueGroups(items, filter);
+
   return (
     <>
       <PageHeader title="Applications" />
 
-      <QueueToolbar
-        basePath="/admin/applications"
-        active={filter}
-        counts={{
-          ...counts.byStatus,
-          open: counts.byStatus.new + counts.byStatus.in_progress + counts.byStatus.waiting,
-          all: counts.total,
-        }}
-        search={search}
-        searchPlaceholder="Name, email or position"
-      />
-
-      {items.length === 0 ? (
-        <EmptyState
-          title={search ? 'Nothing matches that search' : 'No applications open'}
-          description={
-            search
-              ? 'Try a shorter term, or switch the filter to Everything.'
-              : 'Applications submitted through the careers pages land here with their CV attached.'
-          }
+      <Card bleed>
+        <QueueToolbar
+          basePath="/admin/applications"
+          active={filter}
+          counts={{
+            ...counts.byStatus,
+            open: counts.byStatus.new + counts.byStatus.in_progress + counts.byStatus.waiting,
+            all: counts.total,
+          }}
+          search={search}
+          searchPlaceholder="Name, email or position"
         />
-      ) : (
-        <Card bleed>
-          <Table
-            head={[
-              'Candidate',
-              'Position',
-              'CV',
-              'Owner',
-              'Status',
-              { label: 'Applied', align: 'right' },
-            ]}
-          >
-            {items.map((item) => (
-              <TableRow key={item.id} interactive>
-                <Cell href={`/admin/applications/${item.id}`} className="font-semibold">
-                  <span className="block">
-                    {item.firstName} {item.lastName}
-                  </span>
-                  <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
-                    {item.email}
-                  </span>
-                </Cell>
-                <Cell className="w-full max-w-0">
-                  <span className="line-clamp-2 min-w-48 text-sm">{item.positionTitle}</span>
-                </Cell>
-                <Cell className="text-sm whitespace-nowrap text-[var(--casa-text-subtle)]">
-                  {[fileKind(item.cvFileName), formatFileSize(item.cvFileSize)].filter(Boolean).join(' · ')}
-                </Cell>
-                <Cell className="text-sm text-[var(--casa-text-subtle)]">
-                  {item.assigneeName ?? '—'}
-                </Cell>
-                <Cell>
-                  <Badge tone={STATUS_TONES[item.status]}>{STATUS_LABELS[item.status]}</Badge>
-                </Cell>
-                <Cell align="right" className="text-xs text-[var(--casa-text-subtle)]">
-                  <DateText value={item.createdAt} compact />
-                </Cell>
-              </TableRow>
-            ))}
+
+        {items.length === 0 ? (
+          <ListEmpty title={queueEmptyTitle(filter, search)} />
+        ) : (
+          <Table head={['Application', ...QUEUE_TAIL_HEAD]}>
+            {groups.map((group) => [
+              group.label ? (
+                <ListGroup key={group.key} label={group.label} count={group.rows.length} span={3} />
+              ) : null,
+              ...group.rows.map((item) => (
+                <TableRow key={item.id} interactive>
+                  <Cell href={`/admin/applications/${item.id}`} className="max-w-0">
+                    <RecordName
+                      name={[item.firstName, item.lastName].filter(Boolean).join(' ')}
+                      about={item.positionTitle}
+                    />
+                  </Cell>
+                  <Cell className="hidden md:table-cell">
+                    <Owner name={item.assigneeName} />
+                  </Cell>
+                  <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
+                    <Received at={item.createdAt} status={item.status} />
+                  </Cell>
+                </TableRow>
+              )),
+            ])}
           </Table>
-        </Card>
-      )}
+        )}
+      </Card>
 
       <Pagination basePath="/admin/applications" page={page} total={total} params={params} />
     </>

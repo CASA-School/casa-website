@@ -129,8 +129,8 @@ const OFFER_SELECT = `
 
 const today = () => todayInputValue();
 
-export type OfferListFilter = 'open' | 'draft' | 'sent' | 'accepted' | 'declined' | 'all';
-export const OFFER_FILTERS: readonly OfferListFilter[] = ['open', 'draft', 'sent', 'accepted', 'declined', 'all'];
+export type OfferListFilter = 'open' | 'accepted' | 'declined' | 'all';
+export const OFFER_FILTERS: readonly OfferListFilter[] = ['open', 'accepted', 'declined', 'all'];
 
 export type OfferListItem = {
   id: string;
@@ -142,8 +142,8 @@ export type OfferListItem = {
   recipientName: string;
   arrival: string | null;
   departure: string | null;
-  /** A learner's course: its first and last day and when it meets. */
-  course: { start: string | null; end: string | null; slot: string } | null;
+  /** A learner's course: its first and last day, and "Intensive German B2 to C1 · Mornings". */
+  course: { start: string | null; end: string | null; label: string } | null;
   participants: number | null;
   escorts: number;
   perParticipant: number | null;
@@ -158,8 +158,6 @@ export type OfferListItem = {
 
 const FILTER_SQL: Record<OfferListFilter, string> = {
   open: `o.status IN ('draft', 'sent')`,
-  draft: `o.status = 'draft'`,
-  sent: `o.status = 'sent'`,
   accepted: `o.status = 'accepted'`,
   declined: `o.status IN ('declined', 'withdrawn')`,
   all: 'true',
@@ -219,7 +217,10 @@ export async function listOffers({ filter, q }: { filter: OfferListFilter; q?: s
       departure: dateOrNull(r.departure),
       course:
         r.kind === 'individual' && stay.choices.course
-          ? { ...courseSpan(stay.choices.course), slot: slotLabel(stay.choices.course.slot, 'en') }
+          ? {
+              ...courseSpan(stay.choices.course),
+              label: [courseTitle(stay.choices.course, 'en'), slotLabel(stay.choices.course.slot, 'en').split(', ')[0]].filter(Boolean).join(' · '),
+            }
           : null,
       participants: r.participants,
       escorts: r.escorts,
@@ -237,8 +238,6 @@ export async function listOffers({ filter, q }: { filter: OfferListFilter; q?: s
 export async function offerCounts(): Promise<Record<OfferListFilter, number>> {
   const [r] = await query<Record<OfferListFilter, string>>(
     `SELECT count(*) FILTER (WHERE ${FILTER_SQL.open}) AS open,
-            count(*) FILTER (WHERE ${FILTER_SQL.draft}) AS draft,
-            count(*) FILTER (WHERE ${FILTER_SQL.sent}) AS sent,
             count(*) FILTER (WHERE ${FILTER_SQL.accepted}) AS accepted,
             count(*) FILTER (WHERE ${FILTER_SQL.declined}) AS declined,
             count(*) AS all

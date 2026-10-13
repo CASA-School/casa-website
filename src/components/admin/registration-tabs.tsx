@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 /**
- * Two tabs, above both registration queues.
+ * Course or exam: the product switch beside the Registrations title.
  *
- * A switcher rather than two sidebar entries: they are one job ("someone
- * registered for something") split by product, and two rail items would
- * suggest two unrelated areas of work while pushing the genuinely separate
- * areas further down.
+ * A switch rather than two sidebar areas: they are one job ("someone
+ * registered for something") split by product. It is not a status, so it sits
+ * apart from the views in the list's own bar — a quiet segmented control, not
+ * a second row of pills. The count is what is open in each; zero shows none.
  */
 export function RegistrationTabs({
   active,
@@ -23,7 +23,7 @@ export function RegistrationTabs({
   ];
 
   return (
-    <div className="mb-4 inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-1">
+    <nav aria-label="Registrations" className="inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-0.5">
       {tabs.map((tab) => {
         const isActive = tab.key === active;
 
@@ -33,20 +33,20 @@ export function RegistrationTabs({
             href={tab.href}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'inline-flex h-[30px] items-center gap-2 rounded-lg px-3.5 text-[0.8rem] font-bold transition-colors',
+              'inline-flex h-[26px] items-center gap-1.5 rounded-[0.55rem] px-3 text-[0.8rem] font-semibold transition-colors',
               'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
               isActive
-                ? 'bg-[var(--casa-ink-deep)] text-white'
-                : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
+                ? 'bg-ws-sunk text-[var(--casa-ink)]'
+                : 'text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
             )}
           >
             {tab.label}
-            <span className={isActive ? 'text-white/70' : 'text-[var(--casa-text-subtle)]'}>
-              {counts[tab.key]}
-            </span>
+            {counts[tab.key] ? (
+              <span className="text-xs font-semibold text-[var(--casa-text-subtle)] tabular-nums">{counts[tab.key]}</span>
+            ) : null}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

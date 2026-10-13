@@ -547,24 +547,26 @@ export function EmptyState({
 }
 
 /**
- * A table.
+ * A table, the body of a list (list.tsx has the rest: the bar of views and
+ * search, groups, initials, status).
  *
- * The header on a light band with a rule under it, the offers module's: the
- * band says "these are columns", the rule says where the rows begin. Rows are
- * separated by the soft line, and the card around the table frames it.
+ * The column heads are quiet labels on white with a rule under them: a band
+ * under the list's bar stacked two greys on top of each other. Rows are
+ * separated by the soft line, the first and last columns sit 20px in, and the
+ * card around the table frames it.
  */
 export function Table({
   head,
   children,
 }: {
-  head: readonly (ReactNode | { label: ReactNode; align?: 'left' | 'right' })[];
+  head: readonly (ReactNode | { label: ReactNode; align?: 'left' | 'right'; className?: string })[];
   children: ReactNode;
 }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-ws-line bg-[#f8fafc]">
+          <tr className="border-b border-ws-line-soft">
             {head.map((column, index) => {
               const isSpec = typeof column === 'object' && column !== null && 'label' in column;
               const label = isSpec ? column.label : column;
@@ -575,8 +577,9 @@ export function Table({
                   key={index}
                   scope="col"
                   className={cn(
-                    'px-4 py-2.5 text-xs font-bold whitespace-nowrap text-[var(--casa-muted)]',
-                    align === 'right' ? 'text-right' : 'text-left'
+                    'px-4 py-2.5 text-xs font-medium whitespace-nowrap text-[var(--casa-text-subtle)] first:pl-5 last:pr-5',
+                    align === 'right' ? 'text-right' : 'text-left',
+                    isSpec ? column.className : undefined
                   )}
                 >
                   {label}
@@ -618,7 +621,7 @@ export function TableRow({
     <tr
       className={cn(
         'group bg-white transition-colors',
-        interactive ? 'relative hover:bg-[#f6f9fc]' : undefined
+        interactive ? 'relative hover:bg-[#f7f9fc]' : undefined
       )}
     >
       {children}
@@ -645,7 +648,7 @@ export function Cell({
   return (
     <td
       className={cn(
-        'px-4 py-3 align-middle text-[var(--casa-ink)]',
+        'px-4 py-3.5 align-middle text-[var(--casa-ink)] first:pl-5 last:pr-5',
         align === 'right' ? 'text-right' : 'text-left',
         className
       )}

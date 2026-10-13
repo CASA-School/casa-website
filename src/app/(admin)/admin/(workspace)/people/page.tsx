@@ -2,25 +2,14 @@ import Link from 'next/link';
 
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import {
-  Badge,
-  Card,
-  Cell,
-  DateText,
-  EmptyState,
-  Input,
-  PageHeader,
-  Table,
-  TableRow,
-  TINTS,
-} from '@/components/admin/ui';
+import { Badge, Card, Cell, DateText, PageHeader, relativeDays, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { listCountries, listPeople } from '@/lib/admin/people';
-import { cn } from '@/lib/utils';
 import { PersonForm } from './person-form';
 
 /**
@@ -32,10 +21,17 @@ import { PersonForm } from './person-form';
  * of the same people with nothing connecting them (docs/FILEMAKER_LESSONS.md
  * §1) — and the reason every queue detail screen now points here.
  *
- * Beside the search, the open-flag count by kind, each a link to that work
- * list. Flags are cleared on the record they belong to, not here: the register
- * tells you WHAT needs a look, the record tells you what you are looking at.
+ * A row is the person and, under the name, what they are here for: the course
+ * running now or starting next, otherwise the address they wrote from. Open
+ * flags are one quiet line above the list, each a link to that work list;
+ * they are cleared on the record they belong to, not here (docs/ADMIN_WORKSPACE.md
+ * §Design standards 4, §Lists).
  */
+
+const shortDay = (value: Date) => value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
 export default async function PeoplePage({
   searchParams,
 }: {
@@ -55,6 +51,7 @@ export default async function PeoplePage({
   const error = firstParam(params.error);
 
   const flagEntries = (Object.entries(flagCounts) as [FlagCode, number][]).filter(([, n]) => n > 0);
+  const hide = 'hidden md:table-cell';
 
   return (
     <>
@@ -78,85 +75,72 @@ export default async function PeoplePage({
         </p>
       ) : null}
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <form method="get" action="/admin/people" className="flex w-full gap-2 sm:w-auto">
-          <div className="relative flex-1 sm:w-72">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--casa-text-subtle)]"
+      {flagEntries.length > 0 ? (
+        <p className="-mt-1 mb-3 flex flex-wrap gap-x-5 gap-y-1">
+          {flagEntries.map(([code, n]) => (
+            <Link
+              key={code}
+              href={`/admin/people/flags?code=${code}`}
+              className="inline-flex items-center gap-1.5 text-[0.8rem] font-medium text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-ink)] [&_svg]:h-3.5 [&_svg]:w-3.5"
             >
-              {Icon.search}
-            </span>
-            <Input
-              type="search"
-              name="q"
-              defaultValue={search ?? ''}
-              placeholder="Name or email"
-              aria-label="Search people"
-              className="pl-9"
-            />
-          </div>
-        </form>
-
-        {flagEntries.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2">
-            {flagEntries.map(([code, n]) => (
-              <Link
-                key={code}
-                href={`/admin/people/flags?code=${code}`}
-                className={cn(
-                  'inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-bold transition-opacity hover:opacity-80',
-                  TINTS.sun
-                )}
-              >
+              <span aria-hidden="true" className="text-[#b45309]">
                 {Icon.flag}
-                {n} {FLAG_LABELS[code].toLowerCase()}
-              </Link>
-            ))}
-          </div>
-        ) : null}
-      </div>
+              </span>
+              {n} {FLAG_LABELS[code].toLowerCase()}
+            </Link>
+          ))}
+        </p>
+      ) : null}
 
-      {items.length === 0 ? (
-        <EmptyState
-          title={search ? 'Nobody matches that search' : 'No people yet'}
-          description={search ? 'Try a shorter term.' : 'People appear here as records arrive.'}
-        />
-      ) : (
-        <Card bleed>
+      <Card bleed>
+        <ListBar search={{ action: '/admin/people', value: search, placeholder: 'Name or email' }} />
+        {items.length === 0 ? (
+          <ListEmpty title={search ? 'Nothing found' : 'No students yet'}>
+            {search ? `Nobody matches “${search}”.` : null}
+          </ListEmpty>
+        ) : (
           <Table
-            head={['Name', 'Email', 'Nationality', 'Born', { label: 'Since', align: 'right' }]}
+            head={[
+              'Student',
+              { label: 'Nationality', className: `w-[13rem] ${hide}` },
+              { label: 'Born', className: `w-[9rem] ${hide}` },
+              { label: 'Added', className: 'w-[7.5rem] md:w-[8.5rem]' },
+            ]}
           >
             {items.map((person) => (
               <TableRow key={person.id} interactive>
-                <Cell href={`/admin/people/${person.id}`} className="font-semibold">
-                  {person.displayName}
+                <Cell href={`/admin/people/${person.id}`} className="max-w-0">
+                  <RecordName
+                    name={person.displayName}
+                    about={
+                      person.course
+                        ? person.course.current
+                          ? person.course.name
+                          : `${person.course.name} · from ${shortDay(new Date(person.course.start))}`
+                        : (person.primaryEmail ?? undefined)
+                    }
+                  />
                 </Cell>
-                <Cell className="text-sm text-[var(--casa-text-subtle)]">
-                  {person.primaryEmail ?? '—'}
-                </Cell>
-                <Cell className="text-sm">
+                <Cell className={`text-[0.84rem] text-[#2b3546] ${hide}`}>
                   {person.nationalityName ??
                     (person.nationalityRaw ? (
                       <span className="flex items-center gap-2">
-                        {person.nationalityRaw}
-                        <Badge tone="warning">unrecognised</Badge>
+                        <span className="truncate">{person.nationalityRaw}</span>
+                        <Badge tone="warning">Unrecognised</Badge>
                       </span>
-                    ) : (
-                      <span className="text-[var(--casa-text-subtle)]">—</span>
-                    ))}
+                    ) : null)}
                 </Cell>
-                <Cell className="text-sm">
-                  <DateText value={person.birthDate} />
+                <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] ${hide}`}>
+                  {person.birthDate ? <DateText value={person.birthDate} /> : null}
                 </Cell>
-                <Cell align="right" className="text-xs text-[var(--casa-text-subtle)]">
-                  <DateText value={person.createdAt} compact />
+                <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
+                  {capital(relativeDays(person.createdAt))}
                 </Cell>
               </TableRow>
             ))}
           </Table>
-        </Card>
-      )}
+        )}
+      </Card>
 
       <Pagination basePath="/admin/people" page={page} total={total} params={params} />
     </>

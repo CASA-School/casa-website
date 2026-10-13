@@ -10,8 +10,9 @@ import {
 } from './actions';
 import { ACCESS_GROUPS, moduleLabel } from './access-groups';
 import { PersonTabs } from './person-tabs';
+import { RowDialog } from './row-dialog';
 import { Button, DateText, Field, Input } from '@/components/admin/ui';
-import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { Popover, PopoverChoice } from '@/components/admin/popover';
 import { roleLabel } from '@/components/admin/shell';
 import {
@@ -29,7 +30,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * One person: their access, their details, how they sign in, and — at the
- * foot, on every tab — deactivation.
+ * foot, on every tab — deactivation. Their whole row on Team opens it.
  *
  * Each section is its own form posting to its own action, exactly as the
  * screen's separate cards did; the dialog only gathers them. The rules carry
@@ -147,14 +148,7 @@ export function PersonDialog({
   ];
 
   return (
-    <FormDialog
-      trigger="Edit"
-      title={account.name}
-      description={account.email}
-      triggerVariant="ghost"
-      size="sm"
-      width="lg"
-    >
+    <RowDialog label={`Open ${account.name}`} title={account.name} description={account.email}>
       <PersonTabs label={account.name} tabs={tabs} />
 
       <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
@@ -184,7 +178,7 @@ export function PersonDialog({
           </form>
         )}
       </footer>
-    </FormDialog>
+    </RowDialog>
   );
 }
 

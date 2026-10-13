@@ -1,6 +1,6 @@
 import { FormDialog } from '@/components/admin/dialogs';
-import { Icon } from '@/components/admin/icons';
-import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { ListBar, ListEmpty, ListGroup } from '@/components/admin/list';
+import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { floorLabel, listLocations, listRooms, ROOM_KIND_LABELS, type Room } from '@/lib/admin/rooms';
@@ -15,28 +15,37 @@ import { CreateRoomForm } from './room-forms';
  * picker. Offices and meeting rooms are listed too — they exist in the
  * building and staff look for them here — but only classrooms are bookable.
  *
- * Only the exception is marked: an active room that cannot be booked says so
- * beside its name, and inactive rooms sit under one quiet heading, muted,
- * rather than each carrying a badge.
+ * One list card (docs/ADMIN_WORKSPACE.md §Lists): the rooms in use, grouped by
+ * location with the school's own building first, and the inactive ones in a
+ * view of their own. Only the exception is marked: an active room that cannot
+ * be booked says so beside its name.
  */
-export default async function PlanningPage({
+
+const LOCATION_KINDS: Record<string, string | null> = { site: null, client: 'Client premises', online: 'Online' };
+
+export default async function RoomsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; view?: string }>;
 }) {
   const user = await requireModule('rooms');
-  const [{ error }, rooms, locations] = await Promise.all([
-    searchParams,
-    listRooms(),
-    listLocations(),
-  ]);
+  const [{ error, view: rawView }, rooms, locations] = await Promise.all([searchParams, listRooms(), listLocations()]);
 
-  const byLocation = new Map<string, typeof rooms>();
-  for (const room of rooms) {
-    const list = byLocation.get(room.locationId) ?? [];
-    list.push(room);
-    byLocation.set(room.locationId, list);
-  }
+  const inactiveCount = rooms.filter((r) => !r.isActive).length;
+  const view = rawView === 'inactive' && inactiveCount > 0 ? 'inactive' : 'active';
+  const shown = rooms.filter((r) => (view === 'active' ? r.isActive : !r.isActive));
+
+  // The school's own building first, then client premises and online.
+  const groups = [...locations]
+    .sort((a, b) => Number(a.kind !== 'site') - Number(b.kind !== 'site'))
+    .map((location) => ({
+      key: location.id,
+      label: [location.name, LOCATION_KINDS[location.kind]].filter(Boolean).join(' · '),
+      rows: shown.filter((r) => r.locationId === location.id),
+    }))
+    .filter((g) => g.rows.length > 0);
+
+  const hide = 'hidden md:table-cell';
 
   return (
     <>
@@ -62,99 +71,64 @@ export default async function PlanningPage({
         </p>
       ) : null}
 
-      <div className="space-y-4">
-        {locations
-          .filter((l) => (byLocation.get(l.id)?.length ?? 0) > 0)
-          .map((location) => {
-            const list = byLocation.get(location.id) ?? [];
-            const active = list.filter((r) => r.isActive);
-            const inactive = list.filter((r) => !r.isActive);
-            const bookable = active.filter((r) => r.isBookable);
-            const seats = bookable.reduce((n, r) => n + (r.capacity ?? 0), 0);
-            return (
-              <Card
-                key={location.id}
-                title={location.name}
-                icon={Icon.rooms}
-                tint="ink"
-                description={[
-                  location.kind === 'online'
-                    ? 'Online'
-                    : location.kind === 'client'
-                      ? 'Client premises'
-                      : null,
-                  active.length === 0
-                    ? 'No active rooms'
-                    : location.kind !== 'site'
-                      ? null
-                      : bookable.length === 0
-                        ? 'No bookable rooms'
-                        : `${bookable.length} bookable ${bookable.length === 1 ? 'room' : 'rooms'} · ${seats} seats`,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-                bleed
-              >
-                <Table
-                  head={[
-                    'Room',
-                    'Floor',
-                    'Kind',
-                    { label: 'Capacity', align: 'right' },
-                    { label: 'Cohorts', align: 'right' },
-                  ]}
-                >
-                  {active.map((room) => (
-                    <RoomRow key={room.id} room={room} />
-                  ))}
-                  {active.length > 0 && inactive.length > 0 ? (
-                    <tr className="bg-white">
-                      <th
-                        scope="colgroup"
-                        colSpan={5}
-                        className="px-4 pt-5 pb-2 text-left text-xs font-bold text-[var(--casa-muted)]"
-                      >
-                        Inactive
-                      </th>
-                    </tr>
-                  ) : null}
-                  {inactive.map((room) => (
-                    <RoomRow key={room.id} room={room} muted />
-                  ))}
-                </Table>
-              </Card>
-            );
-          })}
-      </div>
+      <Card bleed>
+        {inactiveCount > 0 ? (
+          <ListBar
+            tabs={[
+              { key: 'active', label: 'In use', href: '/admin/settings/rooms', count: rooms.length - inactiveCount },
+              { key: 'inactive', label: 'Inactive', href: '/admin/settings/rooms?view=inactive', count: inactiveCount },
+            ]}
+            active={view}
+          />
+        ) : null}
+        {groups.length === 0 ? (
+          <ListEmpty title="No rooms yet" />
+        ) : (
+          <Table
+            head={[
+              'Room',
+              { label: 'Floor', className: `w-[10rem] ${hide}` },
+              { label: 'Kind', className: `w-[10rem] ${hide}` },
+              { label: 'Seats', align: 'right', className: 'w-[6.5rem]' },
+              { label: 'Cohorts', align: 'right', className: `w-[6.5rem] ${hide}` },
+            ]}
+          >
+            {groups.map((group) => [
+              <ListGroup key={group.key} label={group.label} count={group.rows.length} span={5} />,
+              ...group.rows.map((room) => <RoomRow key={room.id} room={room} hide={hide} />),
+            ])}
+          </Table>
+        )}
+      </Card>
     </>
   );
 }
 
 /** One room. A nickname is the name staff use, so it sits beside the name, not in a chip. */
-function RoomRow({ room, muted = false }: { room: Room; muted?: boolean }) {
+function RoomRow({ room, hide }: { room: Room; hide: string }) {
   const subtle = 'text-[var(--casa-text-subtle)]';
+  const floor = room.floor === null ? null : floorLabel(room.floor);
   return (
     <TableRow interactive>
-      <Cell
-        href={`/admin/settings/rooms/${room.id}`}
-        className={muted ? `font-medium ${subtle}` : 'font-semibold'}
-      >
-        {room.name}
-        {room.nickname ? <span className={`font-normal ${subtle}`}> · {room.nickname}</span> : null}
-        {!muted && !room.isBookable ? (
-          <span className={`ml-2 text-xs font-normal ${subtle}`}>Not bookable</span>
-        ) : null}
+      <Cell href={`/admin/settings/rooms/${room.id}`} className="max-w-0">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-[0.9rem] font-semibold">
+            {room.name}
+            {room.nickname ? <span className={`font-normal ${subtle}`}> · {room.nickname}</span> : null}
+          </span>
+          {room.isActive && !room.isBookable ? <Badge tone="quiet">Not bookable</Badge> : null}
+        </span>
       </Cell>
-      <Cell className={`text-sm ${subtle}`}>{floorLabel(room.floor)}</Cell>
-      <Cell className={`text-sm ${subtle}`}>{ROOM_KIND_LABELS[room.kind]}</Cell>
-      <Cell align="right" className={muted ? `text-sm tabular-nums ${subtle}` : 'text-sm tabular-nums'}>
-        {room.capacity ?? <span className={subtle}>—</span>}
-        {room.capacityMax && room.capacityMax !== room.capacity ? (
+      <Cell className={`text-[0.84rem] text-[#2b3546] ${hide}`}>{floor}</Cell>
+      <Cell className={`text-[0.84rem] text-[#2b3546] ${hide}`}>{ROOM_KIND_LABELS[room.kind]}</Cell>
+      <Cell align="right" className="text-[0.84rem] whitespace-nowrap tabular-nums">
+        {room.capacity}
+        {room.capacity !== null && room.capacityMax && room.capacityMax !== room.capacity ? (
           <span className={subtle}> / {room.capacityMax}</span>
         ) : null}
       </Cell>
-      <Cell align="right" className="text-sm tabular-nums">
-        {room.upcomingCohorts > 0 ? room.upcomingCohorts : <span className={subtle}>—</span>}
+      <Cell align="right" className={`text-[0.84rem] font-semibold tabular-nums ${hide}`}>
+        {room.upcomingCohorts > 0 ? room.upcomingCohorts : null}
       </Cell>
     </TableRow>
   );

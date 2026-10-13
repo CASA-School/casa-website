@@ -1,12 +1,24 @@
+import { ListEmpty } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import { parseFilter, QueueToolbar } from '@/components/admin/queue-toolbar';
+import { parseFilter, QueueToolbar, queueEmptyTitle } from '@/components/admin/queue-toolbar';
 import { RegistrationTable } from '@/components/admin/registration-table';
 import { RegistrationTabs } from '@/components/admin/registration-tabs';
-import { EmptyState, PageHeader } from '@/components/admin/ui';
+import { Card, PageHeader } from '@/components/admin/ui';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
-import { listExamRegistrations } from '@/lib/admin/registrations';
-import { optionLine } from '../option-label';
+import { listExamRegistrations, registrationTypeLabel } from '@/lib/admin/registrations';
+import { formatDay, parseOptionLabel } from '../option-label';
+
+/** "telc Deutsch B2 · 13 Nov": the exam, and the day of its sitting. */
+function examAbout(exam: string, option: string | null): string {
+  const parsed = parseOptionLabel(option);
+  if (!parsed) return exam;
+  if (parsed.toBeArranged) return `${exam} · Date to be arranged`;
+  return `${exam} · ${parsed.start ? formatDay(parsed.start) : parsed.raw}`;
+}
+
+/** The full exam is the normal case; only a single part is marked on its row. */
+const FULL_EXAM = registrationTypeLabel('full');
 
 export default async function ExamRegistrationsPage({
   searchParams,
@@ -29,45 +41,37 @@ export default async function ExamRegistrationsPage({
     queueStatusCounts('exam_registration'),
   ]);
 
-  // The sitting's date and time, formatted the same on every row.
-  const rows = items.map((item) => ({ ...item, optionLabel: optionLine(item.optionLabel, 'exam') }));
+  const rows = items.map((item) => ({
+    ...item,
+    about: examAbout(item.productLabel, item.optionLabel),
+    flag: item.detailNote && item.detailNote !== FULL_EXAM ? item.detailNote : null,
+  }));
 
   const open = (counts: typeof examCounts) =>
     counts.byStatus.new + counts.byStatus.in_progress + counts.byStatus.waiting;
 
   return (
     <>
-      <PageHeader title="Registrations" />
-
-      <RegistrationTabs
-        active="exam"
-        counts={{ course: open(courseCounts), exam: open(examCounts) }}
+      <PageHeader
+        title="Registrations"
+        actions={<RegistrationTabs active="exam" counts={{ course: open(courseCounts), exam: open(examCounts) }} />}
       />
 
-      <QueueToolbar
-        basePath="/admin/registrations/exam"
-        active={filter}
-        counts={{ ...examCounts.byStatus, open: open(examCounts), all: examCounts.total }}
-        search={search}
-        searchPlaceholder="Name, email or exam"
-      />
-
-      {items.length === 0 ? (
-        <EmptyState
-          title={search ? 'Nothing matches that search' : 'No exam registrations open'}
-          description={
-            search
-              ? 'Try a shorter term, or switch the filter to Everything.'
-              : 'Exam registrations from the public site appear here immediately.'
-          }
-        />
-      ) : (
-        <RegistrationTable
-          items={rows}
+      <Card bleed>
+        <QueueToolbar
           basePath="/admin/registrations/exam"
-          detailColumn="Parts"
+          active={filter}
+          counts={{ ...examCounts.byStatus, open: open(examCounts), all: examCounts.total }}
+          search={search}
+          searchPlaceholder="Name, email or exam"
         />
-      )}
+
+        {items.length === 0 ? (
+          <ListEmpty title={queueEmptyTitle(filter, search)} />
+        ) : (
+          <RegistrationTable items={rows} basePath="/admin/registrations/exam" filter={filter} />
+        )}
+      </Card>
 
       <Pagination basePath="/admin/registrations/exam" page={page} total={total} params={params} />
     </>

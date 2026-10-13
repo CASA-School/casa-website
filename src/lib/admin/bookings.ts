@@ -217,7 +217,7 @@ export async function listBookings({
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY start_date DESC NULLS LAST, b.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };

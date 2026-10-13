@@ -102,7 +102,10 @@ export async function listApplications({
        FROM career_applications a
        LEFT JOIN staff_users u ON u.id = a.assigned_to
        ${where}
-      ORDER BY a.created_at DESC
+      ORDER BY CASE coalesce(a.status, 'new') WHEN 'new' THEN 0 WHEN 'submitted' THEN 0 WHEN 'in_progress' THEN 1
+                             WHEN 'interview' THEN 1 WHEN 'waiting' THEN 2 WHEN 'done' THEN 3
+                             WHEN 'declined' THEN 4 ELSE 5 END,
+               a.created_at DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );

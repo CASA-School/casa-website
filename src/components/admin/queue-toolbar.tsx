@@ -1,26 +1,25 @@
-import Link from 'next/link';
-
-import { cn } from '@/lib/utils';
-import { Icon } from './icons';
-import { Button, Input } from './ui';
+import { ListBar, type ListTab } from './list';
+import { relativeDays } from './ui';
 import { STATUS_LABELS, WORK_STATUSES, type WorkStatus } from '@/lib/admin/queues';
 
 /**
- * Filter chips plus a search box, above every queue.
+ * The parts every inbound queue shares (enquiries, registrations,
+ * applications), in the workspace's one list design (docs/ADMIN_WORKSPACE.md
+ * §Lists): the views and the search across the top of the card, the rows
+ * grouped by status, and when each came in.
  *
- * The filter is a link per state, not a select: the current filter has to be
- * visible without opening anything, the counts belong beside the labels, and a
- * URL that carries the filter means a staff member can bookmark "my open
- * enquiries" and send it to a colleague.
- *
- * "Open" is first and is the default. It is the only view that answers the
- * question staff actually arrive with, and defaulting to "all" would greet
- * someone with two years of closed records.
+ * The filter is a link per view, not a select: the URL carries it (`?status=`,
+ * `?q=`, `page`), so a colleague can bookmark "open enquiries" and send it on.
+ * "Open" is first and the default — the only view that answers the question
+ * staff arrive with. It reads in groups (New, In progress, Waiting on them), so
+ * those three are not tabs of their own: a tab that only repeats a group of
+ * Open goes. The closed states follow when they hold records, then Everything.
  */
 
 export type QueueFilter = WorkStatus | 'open' | 'all';
 
-const FILTER_ORDER: readonly QueueFilter[] = ['open', ...WORK_STATUSES, 'all'];
+/** The states a record is still being worked in — the groups of Open. */
+const OPEN_STATUSES: readonly WorkStatus[] = ['new', 'in_progress', 'waiting'];
 
 const FILTER_LABELS: Record<QueueFilter, string> = {
   open: 'Open',
@@ -37,7 +36,7 @@ export function QueueToolbar({
 }: {
   basePath: string;
   active: QueueFilter;
-  /** Per-status totals, plus `open` and `all`. Missing keys render no count. */
+  /** Per-status totals, plus `open` and `all`. A zero shows no count. */
   counts: Partial<Record<QueueFilter, number>>;
   search?: string;
   searchPlaceholder: string;
@@ -50,63 +49,32 @@ export function QueueToolbar({
     return query ? `${basePath}?${query}` : basePath;
   };
 
+  const filters: QueueFilter[] = [
+    'open',
+    // A bookmarked `?status=new` still shows where it is.
+    ...OPEN_STATUSES.filter((status) => status === active),
+    ...WORK_STATUSES.filter((status) => !OPEN_STATUSES.includes(status) && ((counts[status] ?? 0) > 0 || status === active)),
+    'all',
+  ];
+
+  const tabs: ListTab[] = filters.map((filter) => ({
+    key: filter,
+    label: FILTER_LABELS[filter],
+    href: hrefFor(filter),
+    count: counts[filter],
+  }));
+
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <div className="flex max-w-full gap-0.5 overflow-x-auto rounded-xl border border-ws-line bg-white p-1 [scrollbar-width:none]">
-        {FILTER_ORDER.filter(
-          // A state nobody has used is noise. `open` and `all` always show.
-          (filter) => filter === 'open' || filter === 'all' || (counts[filter] ?? 0) > 0
-        ).map((filter) => {
-          const isActive = filter === active;
-          const count = counts[filter];
-
-          return (
-            <Link
-              key={filter}
-              href={hrefFor(filter)}
-              aria-current={isActive ? 'true' : undefined}
-              className={cn(
-                'inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.8rem] font-bold whitespace-nowrap transition-colors',
-                'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
-                isActive
-                  ? 'bg-[var(--casa-ink-deep)] text-white'
-                  : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
-              )}
-            >
-              {FILTER_LABELS[filter]}
-              {typeof count === 'number' ? (
-                <span className={cn('text-xs font-semibold', isActive ? 'text-white/65' : 'text-[var(--casa-text-subtle)]')}>
-                  {count}
-                </span>
-              ) : null}
-            </Link>
-          );
-        })}
-      </div>
-
-      <form action={basePath} className="flex w-full gap-2 sm:w-auto">
-        {active !== 'open' ? <input type="hidden" name="status" value={active} /> : null}
-        <div className="relative flex-1 sm:w-64">
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--casa-text-subtle)]"
-          >
-            {Icon.search}
-          </span>
-          <Input
-            type="search"
-            name="q"
-            defaultValue={search ?? ''}
-            placeholder={searchPlaceholder}
-            aria-label="Search"
-            className="pl-9"
-          />
-        </div>
-        <Button type="submit" variant="secondary">
-          Search
-        </Button>
-      </form>
-    </div>
+    <ListBar
+      tabs={tabs}
+      active={active}
+      search={{
+        action: basePath,
+        value: search,
+        placeholder: searchPlaceholder,
+        keep: { status: active === 'open' ? undefined : active },
+      }}
+    />
   );
 }
 
@@ -120,4 +88,63 @@ export function parseFilter(raw: string | string[] | undefined): QueueFilter {
   }
 
   return 'open';
+}
+
+/**
+ * A queue's rows in groups by status: Open and Everything read in groups, and
+ * the group is the status, so no row repeats it. A single-status view is one
+ * group its tab already names, so it has no group row.
+ */
+export function queueGroups<T extends { status: WorkStatus }>(
+  items: readonly T[],
+  filter: QueueFilter
+): { key: string; label: string; rows: T[] }[] {
+  if (filter !== 'open' && filter !== 'all') return [{ key: filter, label: '', rows: [...items] }];
+
+  return WORK_STATUSES.map((status) => ({
+    key: status,
+    label: STATUS_LABELS[status],
+    rows: items.filter((item) => item.status === status),
+  })).filter((group) => group.rows.length > 0);
+}
+
+/** A new record older than this has waited too long, and says so. */
+const STALE_AFTER_DAYS = 2;
+
+const daysSince = (value: Date) => {
+  const midnight = (d: Date) => new Date(d).setHours(0, 0, 0, 0);
+  return Math.round((midnight(new Date()) - midnight(value)) / 86_400_000);
+};
+
+/**
+ * When it came in, as relative time ("Today", "3 days ago"). A record still
+ * new after two days shows its age in amber, so what is getting old stands
+ * out without a column of its own.
+ */
+export function Received({ at, status }: { at: Date; status: WorkStatus }) {
+  const said = relativeDays(at);
+  const label = said.charAt(0).toUpperCase() + said.slice(1);
+  const stale = status === 'new' && daysSince(at) > STALE_AFTER_DAYS;
+
+  return (
+    <time
+      dateTime={at.toISOString()}
+      title={at.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Berlin' })}
+      className={stale ? 'font-semibold text-[#9a5b00]' : undefined}
+    >
+      {label}
+    </time>
+  );
+}
+
+/** The column heads every queue ends with: who has it, and when it came in. */
+export const QUEUE_TAIL_HEAD = [
+  { label: 'Owner', className: 'hidden w-[4.5rem] md:table-cell' },
+  { label: 'Received', className: 'w-[8.5rem]' },
+] as const;
+
+/** The empty view's one line. */
+export function queueEmptyTitle(filter: QueueFilter, search?: string): string {
+  if (search) return `Nothing matches “${search}”`;
+  return filter === 'open' ? 'Nothing open' : 'Nothing here';
 }

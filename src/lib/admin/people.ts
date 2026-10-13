@@ -159,7 +159,11 @@ export async function listPeople({
   limit?: number;
   offset?: number;
 }): Promise<{
-  items: (PersonSummary & { primaryEmail: string | null })[];
+  items: (PersonSummary & {
+    primaryEmail: string | null;
+    /** The booking running now or starting next, for the register's line under a name. */
+    course: { name: string; start: Date; current: boolean } | null;
+  })[];
   total: number;
 }> {
   const params: unknown[] = [];
@@ -173,8 +177,30 @@ export async function listPeople({
     `SELECT count(*) AS n FROM people p ${where}`,
     params
   );
-  const rows = await query<Row & { primary_email: string | null }>(
-    `${SELECT.replace('FROM people p', `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email FROM people p`)}
+  // The course under a name: the earliest open booking that has not ended, so
+  // a learner here now shows that course, and one who is coming shows the next.
+  const rows = await query<
+    Row & { primary_email: string | null; course_name: string | null; course_start: Date | null }
+  >(
+    `${SELECT.replace(
+      'FROM people p',
+      `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email,
+         nb.course_name, nb.course_start
+    FROM people p
+    LEFT JOIN LATERAL (
+      SELECT t.name AS course_name, min(bp.start_date) AS course_start
+        FROM bookings b
+        JOIN booking_periods bp ON bp.booking_id = b.id
+        JOIN course_types t ON t.id = b.course_type_id
+       WHERE canonical_person_id(b.person_id) = p.id
+         AND b.deleted_at IS NULL
+         AND b.status IN ('reserved', 'confirmed')
+       GROUP BY b.id, t.name
+      HAVING max(bp.end_date) >= current_date
+       ORDER BY min(bp.start_date)
+       LIMIT 1
+    ) nb ON true`
+    )}
      ${where}
      ORDER BY p.created_at DESC
      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -185,6 +211,14 @@ export async function listPeople({
     items: rows.map((r) => ({
       ...toSummary(r),
       primaryEmail: r.primary_email,
+      course:
+        r.course_name && r.course_start
+          ? {
+              name: r.course_name,
+              start: r.course_start,
+              current: new Date(r.course_start).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0),
+            }
+          : null,
     })),
   };
 }
