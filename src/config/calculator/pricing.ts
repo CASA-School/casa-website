@@ -26,7 +26,8 @@ export const CASA_LEVEL_SEQUENCE = [
   'A2.2',
   'B1.1',
   'B1.2',
-  'B1+',
+  'B1+.1',
+  'B1+.2',
   'B2.1',
   'B2.2',
   'C1.1',
@@ -37,8 +38,9 @@ export type CasaLevel = (typeof CASA_LEVEL_SEQUENCE)[number];
 
 /**
  * The level a half-level belongs to. The sequence above is written in halves,
- * so the level is whatever precedes the dot — which leaves B1+ (no dot) as a
- * level of its own that is only ever sold as a single 4-week step.
+ * so the level is whatever precedes the dot. B1+ is a level like the others,
+ * B1+.1 and B1+.2 (Rahman, 2026-10-13: "B1+ is the same as the other intensive
+ * courses").
  */
 export function casaLevelGroupId(level: CasaLevel) {
   return level.split('.')[0];
@@ -46,11 +48,11 @@ export function casaLevelGroupId(level: CasaLevel) {
 
 /**
  * CASA_LEVEL_SEQUENCE grouped into the levels it is actually sold as:
- * [A1.1 A1.2] [A2.1 A2.2] [B1.1 B1.2] [B1+] [B2.1 B2.2] [C1.1 C1.2].
+ * [A1.1 A1.2] [A2.1 A2.2] [B1.1 B1.2] [B1+.1 B1+.2] [B2.1 B2.2] [C1.1 C1.2].
  *
  * Derived from the sequence rather than hand-written so the two cannot drift.
- * Only a two-member group can be bought as a full 8-week level; a lone half —
- * and B1+, whose group has one member — is a 4-week half level.
+ * Only a two-member group can be bought as a full 8-week level; a lone half is
+ * a 4-week half level.
  */
 export const CASA_LEVEL_GROUPS: readonly (readonly CasaLevel[])[] =
   CASA_LEVEL_SEQUENCE.reduce<CasaLevel[][]>((groups, level) => {

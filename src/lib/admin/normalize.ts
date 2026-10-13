@@ -75,9 +75,10 @@ function displayNames(locale: 'de' | 'en'): Map<string, string> {
 
 const LEVELS = new Set<string>(CASA_LEVEL_SEQUENCE);
 
-/** A CASA level code, or null. Trims and upper-cases; nothing else is tolerated. */
+/** A CASA level code, or null. Trims and upper-cases; nothing else is tolerated, except 'B1+', which is where its first half starts. */
 export function levelCodeFrom(value: string | null | undefined): CasaLevel | null {
   const text = (value ?? '').normalize('NFKC').trim().toUpperCase();
+  if (text === 'B1+') return 'B1+.1';
   return LEVELS.has(text) ? (text as CasaLevel) : null;
 }
 

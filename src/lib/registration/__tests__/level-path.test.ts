@@ -4,7 +4,7 @@ import type { CourseRegistrationOption } from '@/lib/content/types';
 import { buildLevelPath, continuationLevels, pathWeeks } from '../level-path';
 import { levelChoiceGroups } from '../levels';
 
-const LEVELS = ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2', 'B1+', 'B2.1', 'B2.2', 'C1.1', 'C1.2'];
+const LEVELS = ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2', 'B1+.1', 'B1+.2', 'B2.1', 'B2.2', 'C1.1', 'C1.2'];
 
 // The intensive terms the local database lists: monthly starts, eight weeks each.
 const term = (id: string, startDate: string, endDate: string) =>
@@ -30,11 +30,11 @@ describe('a learning path through the levels', () => {
     expect(pathWeeks(steps)).toBe(16);
   });
 
-  it('goes from B1 to B2 through B1+, which runs a whole term', () => {
+  it('goes from B1 to B2 through B1+, a whole level like the others', () => {
     const steps = path('A2', 'B2');
     expect(steps.map((step) => [step.level, step.option?.id])).toEqual([['A2', 'oct'], ['B1', 'jan'], ['B1+', 'mar'], ['B2', 'may']]);
-    expect(steps.map((step) => step.startCode)).toEqual(['A2.1', 'B1.1', 'B1+', 'B2.1']);
-    expect(steps[2]).toMatchObject({ label: 'B1+ · 8 Wochen', weeks: 8, start: '2027-03-01', end: '2027-04-30' });
+    expect(steps.map((step) => step.startCode)).toEqual(['A2.1', 'B1.1', 'B1+.1', 'B2.1']);
+    expect(steps[2]).toMatchObject({ label: 'B1+ komplett · 8 Wochen', weeks: 8, start: '2027-03-01', end: '2027-04-30' });
     expect(pathWeeks(steps)).toBe(32);
   });
 
@@ -58,13 +58,13 @@ describe('a learning path through the levels', () => {
     expect(continuationLevels('intensive-german', 'B1.2', LEVELS)).toEqual(['B1+', 'B2', 'C1']);
     expect(continuationLevels('intensive-german', 'B1+', LEVELS)).toEqual(['B2', 'C1']);
     // A format without B1+ climbs straight from B1 to B2.
-    expect(continuationLevels('intensive-german', 'A2', LEVELS.filter((level) => level !== 'B1+'))).toEqual(['B1', 'B2', 'C1']);
+    expect(continuationLevels('intensive-german', 'A2', LEVELS.filter((level) => !level.startsWith('B1+')))).toEqual(['B1', 'B2', 'C1']);
     expect(continuationLevels('evening-german', 'A2.1', LEVELS)).toEqual([]);
   });
 });
 
-describe('B1+ in its two halves, as the workspace books it', () => {
-  const HALVES = LEVELS.flatMap((level) => (level === 'B1+' ? ['B1+.1', 'B1+.2'] : [level]));
+describe('B1+ in its two halves, like every level', () => {
+  const HALVES = LEVELS;
   const halvesPath = (value: string, pathTo: string) =>
     buildLevelPath({ slug: 'intensive-german', value, option: terms[0], options: terms, availableLevels: HALVES, pathTo, locale: 'en' });
 

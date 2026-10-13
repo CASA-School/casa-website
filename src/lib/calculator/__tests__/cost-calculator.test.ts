@@ -22,8 +22,8 @@ import {
  *   - Accommodation: 580/4wk base, 145/extra-wk, 50 commission, 580 deposit, 145 holiday/wk
  *
  * Intensive tuition is billed per real level, not per pair of steps: a level
- * costs 940 € only when both of its halves are studied. B1+ is a level with a
- * single half, so it always costs 520 € and never pairs with a neighbour.
+ * costs 940 € only when both of its halves are studied. B1+ is a level like the
+ * others, B1+.1 and B1+.2 (Rahman, 2026-10-13).
  *
  * Tests intentionally encode concrete arithmetic so any accidental regression
  * in pricing.ts is caught immediately.
@@ -70,9 +70,9 @@ describe('calculateCasaCostPathway', () => {
     expect(result.breakdown.totalMax).toBe(1460);
   });
 
-  it('never pairs B1+ with a neighbouring half into a full level', () => {
-    // B1.1 → B2.1 studies B1.2, B1+, B2.1 — three halves that each belong to a
-    // different level, so three × 520 = 1560. Pairing by step count gave 1440.
+  it('bills B1+ like any level, and never pairs halves across a level boundary', () => {
+    // B1.1 → B2.1 studies B1.2, B1+.1, B1+.2, B2.1: a lone B1 half (520), the
+    // whole of B1+ (940) and a lone B2 half (520) = 1980.
     const result = calculateCasaCostPathway(
       makeInput({
         currentLevel: 'B1.1',
@@ -82,8 +82,8 @@ describe('calculateCasaCostPathway', () => {
       })
     );
 
-    expect(result.steps).toBe(3);
-    expect(result.breakdown.tuition).toBe(1560);
+    expect(result.steps).toBe(4);
+    expect(result.breakdown.tuition).toBe(1980);
   });
 
   it('bills two lone halves either side of a level boundary separately', () => {
@@ -102,23 +102,24 @@ describe('calculateCasaCostPathway', () => {
     expect(result.breakdown.tuition).toBe(1040);
   });
 
-  it('bills the B1+ bridge on its own as a single half level', () => {
-    const result = calculateCasaCostPathway(
-      makeInput({
-        currentLevel: 'B1.2',
-        targetLevel: 'B1+',
-        includeBooks: false,
-        includeEnrollmentFee: false,
-      })
+  it('bills a half of B1+ as a half level and both halves as a full level', () => {
+    const half = calculateCasaCostPathway(
+      makeInput({ currentLevel: 'B1.2', targetLevel: 'B1+.1', includeBooks: false, includeEnrollmentFee: false })
     );
+    expect(half.steps).toBe(1);
+    expect(half.breakdown.tuition).toBe(520);
 
-    expect(result.steps).toBe(1);
-    expect(result.breakdown.tuition).toBe(520);
+    const whole = calculateCasaCostPathway(
+      makeInput({ currentLevel: 'B1.2', targetLevel: 'B1+.2', includeBooks: false, includeEnrollmentFee: false })
+    );
+    expect(whole.steps).toBe(2);
+    expect(whole.duration).toEqual({ unit: 'weeks', value: 8 });
+    expect(whole.breakdown.tuition).toBe(940);
   });
 
   it('bills the full ladder level by level', () => {
-    // A1.1 → C1.2: lone A1 half (520) + A2 (940) + B1 (940) + B1+ (520)
-    //            + B2 (940) + C1 (940) = 4800
+    // A1.1 → C1.2: lone A1 half (520) + A2 (940) + B1 (940) + B1+ (940)
+    //            + B2 (940) + C1 (940) = 5220
     const result = calculateCasaCostPathway(
       makeInput({
         currentLevel: 'A1.1',
@@ -128,8 +129,8 @@ describe('calculateCasaCostPathway', () => {
       })
     );
 
-    expect(result.steps).toBe(10);
-    expect(result.breakdown.tuition).toBe(4800);
+    expect(result.steps).toBe(11);
+    expect(result.breakdown.tuition).toBe(5220);
   });
 
   it('returns a books range when override is not provided', () => {

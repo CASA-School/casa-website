@@ -5,10 +5,10 @@
  * whole levels, one intensive term each. Rather than adding the terms by hand,
  * the learner picks where to stop ("bis B2") and the path follows: every next
  * level in the first term that starts after the previous one ends, with B1+
- * (a whole term) between B1 and B2, as the intensive course runs. Continuing
- * past a level means finishing it, so a path that starts at its first half
- * (A2.1) starts with the whole level (A2 komplett); one that starts at a second
- * half or at B1+ runs that four-week block first. A term the catalogue does not
+ * between B1 and B2, as the intensive course runs. Continuing past a level
+ * means finishing it, so a path that starts at its first half (A2.1) starts
+ * with the whole level (A2 komplett); one that starts at a second half runs
+ * that four-week block first. A term the catalogue does not
  * list yet is a step without a date, which CASA plans with the learner.
  *
  * The wizard shows the path from here and the route stores it from here, so
@@ -22,12 +22,12 @@ import { describeBookedLevel, levelChoiceGroups, levelOf } from './levels';
 export type PathTerm = { startDate: string; endDate: string };
 
 export type PathStep<T extends PathTerm = CourseRegistrationOption> = {
-  /** 'B1' for a whole level, 'A2.2' or 'B1+' for a four-week block. */
+  /** 'B1' for a whole level, 'A2.2' for a four-week block. */
   level: string;
   label: string;
   startCode: string;
   complete: boolean;
-  /** Weeks of teaching: eight for a whole level or B1+, four for a half level. */
+  /** Weeks of teaching: eight for a whole level, four for a half level. */
   weeks: number;
   /** The term; null when the catalogue lists none yet. */
   option: T | null;
@@ -39,15 +39,13 @@ const dayMs = 24 * 60 * 60 * 1000;
 const addDays = (iso: string, days: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + days * dayMs).toISOString().slice(0, 10);
 
 /*
- * The rungs a path climbs: each whole level, and B1+ after B1. B1+ is part of
- * the intensive course's progression (Rahman, 2026-10-07): a learner going on
- * from B1 to B2 takes it in between, a whole term taught with Kontext.
+ * The rungs a path climbs: each whole level, B1+ among them between B1 and B2
+ * (Rahman, 2026-10-07: a learner going on from B1 to B2 takes it in between).
  */
 function pathRungs(slug: string | undefined, availableLevels: readonly string[]): string[] {
-  const wholes = levelChoiceGroups(slug, availableLevels, 'de')
+  return levelChoiceGroups(slug, availableLevels, 'de')
     .filter((group) => group.choices.some((choice) => choice.value === group.level))
     .map((group) => group.level);
-  return wholes.flatMap((level) => (level === 'B1' && availableLevels.includes('B1+') ? [level, 'B1+'] : [level]));
 }
 
 /** The rungs a learner can continue to after `value`: after 'A2' or 'A2.2', ['B1', 'B1+', 'B2', 'C1']. */
@@ -57,16 +55,16 @@ export function continuationLevels(slug: string | undefined, value: string, avai
   return index >= 0 ? rungs.slice(index + 1) : [];
 }
 
-/** The learner's level, then each rung up to `pathTo` (whole levels, and B1+), each in the first term after the last. */
+/** The learner's level, then each rung up to `pathTo` (whole levels), each in the first term after the last. */
 export function buildLevelPath<T extends PathTerm = CourseRegistrationOption>(input: {
   slug: string | undefined;
-  /** The level chosen: 'A2', 'A2.1', 'B1+'. */
+  /** The level chosen: 'A2', 'A2.1', 'B1+.2'. */
   value: string;
   option: T;
   /** The format's terms. */
   options: readonly T[];
   availableLevels: readonly string[];
-  /** A rung from `continuationLevels` (a whole level or B1+), or '' for this level alone. */
+  /** A rung from `continuationLevels` (a whole level), or '' for this level alone. */
   pathTo: string;
   locale: ContentLocale;
 }): PathStep<T>[] {

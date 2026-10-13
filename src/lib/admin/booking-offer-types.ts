@@ -70,7 +70,7 @@ export type BookingOffer = {
  *
  * A2 is taught as A2.1 then A2.2, and one book covers one half. So "the whole
  * level" means both halves and therefore two books; "this half" means one.
- * `B1+` has no sibling — it is a level in its own right.
+ * B1+ is taught the same way: B1+.1 then B1+.2.
  */
 export function levelSiblings(code: string): string[] {
   const match = /^([A-C][12]\+?)\.([12])$/.exec(code);

@@ -13,7 +13,7 @@
  * arrival, the exam on its date.
  *
  *   Intensive — the price for the level's weeks: a whole level 8 weeks, a
- *               half level or B1+ 4 weeks.
+ *               half level 4 weeks; B1+ like any other (B1+.1, B1+.2).
  *   Evening, special courses — per lesson, times the term's lessons.
  *   Others    — the list's rate, else the catalogue's own price.
  *   Accommodation — whole weeks, Sunday to Saturday, at the rent for that
@@ -180,15 +180,10 @@ export function levelLabel(step: Pick<CourseStep, 'level' | 'complete'>, languag
 
 // ------------------------------------------------------------------ levels
 
-/**
- * The half levels the workspace books, in order: the public sequence with B1+
- * in its two halves, B1+.1 and B1+.2, as the school runs it (migration 0024).
- */
-const STEPS: readonly string[] = CASA_LEVEL_SEQUENCE.flatMap((step) => (step === 'B1+' ? ['B1+.1', 'B1+.2'] : [step]));
 
 /** CASA's steps between a course's lowest and highest level: A1–C1 is A1.1 … C1.2, B1+.1 and B1+.2 included. */
 export function levelsBetween(min: string | null, max: string | null): string[] {
-  const all = [...STEPS];
+  const all = [...CASA_LEVEL_SEQUENCE] as string[];
   const isOf = (step: string, level: string) => step === level || levelOf(step) === level;
   const from = min ? all.findIndex((l) => isOf(l, min)) : 0;
   const lastOf = max ? all.map((l, i) => (isOf(l, max) ? i : -1)).filter((i) => i >= 0).pop() : all.length - 1;

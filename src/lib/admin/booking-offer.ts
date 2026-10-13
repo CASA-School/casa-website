@@ -90,7 +90,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
            FROM exam_types e WHERE e.is_active ORDER BY e.name`
       ),
       query<{ code: string; cefr: string | null }>(
-        // The half levels: a whole level's own code (B1+, which the public form names) is left out where its halves exist.
+        // The half levels: 'B1+', kept for registrations and placements made before B1+ was booked in halves, is left out.
         `SELECT code, cefr FROM levels l
           WHERE NOT EXISTS (SELECT 1 FROM levels h WHERE h.code LIKE l.code || '.%')
           ORDER BY sort_order`

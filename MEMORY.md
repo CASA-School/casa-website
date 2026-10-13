@@ -2639,6 +2639,10 @@ counts, "from" prices and hours under each choice are clutter for staff — a ch
 subtitles, card and panel descriptions went with them (design standard 9). Then: "B1+ also has two
 parts, B1+.1 and B1+.2". Migration 0024 adds them to `levels` (FileMaker's step ids 7 and 8) and moves
 the Kontext B1+1/B1+2 books onto them; the workspace's offers and bookings book the halves or the
-whole B1+; the public form keeps the single 'B1+' as decided on 2026-08-13. Open: the price of a whole
-B1+ — the price list gives 8 weeks 940 €, the 2026-08-13 note says it bills at the half-level rate.
+whole B1+. Then: "B1+ is the same as the other intensive courses" — so it is, everywhere:
+`CASA_LEVEL_SEQUENCE` holds B1+.1 and B1+.2, and the public form, the calculator, offers and bookings
+offer B1+ complete (8 weeks, 940 €) or a half (4 weeks, 520 €). The 2026-08-13 note (one step,
+billed at the half-level rate) is superseded; the calculator's full A1.1→C1.2 ladder is now 5,220 €.
+Only the placement test keeps B1+ as one band (`PLACEMENT_BANDS`), its result a recommendation a
+teacher confirms.
 

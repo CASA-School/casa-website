@@ -25,8 +25,7 @@
  * scored them.
  */
 
-import { CASA_LEVEL_SEQUENCE, type CasaLevel } from '@/config/calculator/pricing';
-import type { PlacementBand, PlacementLevel } from '@/lib/placement/types';
+import { PLACEMENT_BANDS, type PlacementBand, type PlacementLevel } from '@/lib/placement/types';
 
 export const POLICY_VERSION = 1;
 
@@ -244,11 +243,11 @@ export const SPEAKING_REQUIRED_FROM: PlacementBand = 'B1+';
 // ---------------------------------------------------------------------------
 
 /**
- * Band order comes from the calculator's `CASA_LEVEL_SEQUENCE` rather than a
- * second list here, so the test, the cost calculator, and the course pages
- * cannot drift on what "one level up" means.
+ * Band order: the placement test's own eleven bands (lib/placement/types.ts),
+ * where B1+ is one band. Courses book B1+ in two halves (CASA_LEVEL_SEQUENCE);
+ * the test does not, so the two lists differ there and only there.
  */
-export const BAND_SEQUENCE: readonly PlacementBand[] = CASA_LEVEL_SEQUENCE;
+export const BAND_SEQUENCE: readonly PlacementBand[] = PLACEMENT_BANDS;
 
 export function bandIndex(band: PlacementBand): number {
   return BAND_SEQUENCE.indexOf(band);
@@ -276,7 +275,7 @@ export function levelOfBand(band: PlacementBand): PlacementLevel {
 }
 
 /** Asserts at build time that every band maps back to a level. */
-const UNMAPPED_BANDS: readonly CasaLevel[] = BAND_SEQUENCE.filter(
+const UNMAPPED_BANDS: readonly PlacementBand[] = BAND_SEQUENCE.filter(
   (band) => !BANDS_BY_LEVEL[levelOfBand(band)].includes(band)
 );
 if (UNMAPPED_BANDS.length > 0) {

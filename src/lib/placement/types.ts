@@ -12,10 +12,15 @@
  * See docs/PLACEMENT_TEST_IMPLEMENTATION.md §7.
  */
 
-import type { CasaLevel } from '@/config/calculator/pricing';
+/**
+ * The 11 CASA placement bands, in order, e.g. `A1.1`, `B1+`, `C1.2`. The test
+ * places into B1+ as one band (its item bank is written that way); a course
+ * books B1+ in its halves B1+.1 and B1+.2 (CASA_LEVEL_SEQUENCE), and a teacher
+ * confirms where the learner starts.
+ */
+export const PLACEMENT_BANDS = ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2', 'B1+', 'B2.1', 'B2.2', 'C1.1', 'C1.2'] as const;
 
-/** The 11 CASA placement bands, e.g. `A1.1`, `B1+`, `C1.2`. */
-export type PlacementBand = CasaLevel;
+export type PlacementBand = (typeof PLACEMENT_BANDS)[number];
 
 /** The coarse level a band belongs to. Matches the item bank's `level` field. */
 export type PlacementLevel = 'A1' | 'A2' | 'B1' | 'B1_PLUS' | 'B2' | 'C1';

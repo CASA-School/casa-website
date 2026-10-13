@@ -168,6 +168,15 @@ placement page's level overview was removed on 2026-10-12; before, as a distinct
 number did not come from the same rejection of `cost-calculator.ts`'s derived-from-a-price-tier
 4 weeks (see the code comment there for why that number was wrong on its own terms).
 
+**2026-10-13 — B1+ is the same as the other intensive levels (Rahman).** Two halves, B1+.1 and
+B1+.2 (FileMaker's LevelStepReference 7 and 8), each four weeks with its own Kontext book (B1+1,
+B1+2); the whole level is eight weeks. Priced like any level: a half 520 €, the whole 940 €, and
+offered the same way on the registration form („B1+ komplett", „B1+.1", „B1+.2"), in the
+calculator, in offers and in bookings (`CASA_LEVEL_SEQUENCE`, migration 0024). The earlier notes
+below — "billing at the half-level rate", "not modelled as separate tabs", „B1+ · 8 Wochen" as one
+step — are superseded. Only the placement test keeps B1+ as one band; a teacher confirms where the
+learner starts.
+
 **2026-10-07:** confirmed again that B1+ belongs to the intensive course's progression (B1.2 →
 B1+ → B2.1) and is taught with Kontext. The registration now offers it as „B1+ · 8 Wochen" and a
 learning path from B1 to B2 runs through it as a whole term (`src/lib/registration/levels.ts`,
