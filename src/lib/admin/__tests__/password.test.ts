@@ -65,19 +65,22 @@ describe('staff password hashing', () => {
 
 describe('password policy', () => {
   it('asks only for length', () => {
-    expect(describePasswordProblem('x'.repeat(MIN_PASSWORD_LENGTH))).toBeNull();
+    expect(describePasswordProblem('x'.repeat(MIN_PASSWORD_LENGTH), 'en')).toBeNull();
     // No composition rule: a long passphrase of only lowercase letters passes,
     // deliberately (NIST 800-63B).
-    expect(describePasswordProblem('all lowercase and quite long')).toBeNull();
+    expect(describePasswordProblem('all lowercase and quite long', 'en')).toBeNull();
   });
 
   it('rejects anything shorter than the floor', () => {
-    expect(describePasswordProblem('x'.repeat(MIN_PASSWORD_LENGTH - 1))).toContain(
+    expect(describePasswordProblem('x'.repeat(MIN_PASSWORD_LENGTH - 1), 'en')).toContain(
+      String(MIN_PASSWORD_LENGTH)
+    );
+    expect(describePasswordProblem('x'.repeat(MIN_PASSWORD_LENGTH - 1), 'de')).toContain(
       String(MIN_PASSWORD_LENGTH)
     );
   });
 
   it('rejects a password made only of spaces', () => {
-    expect(describePasswordProblem(' '.repeat(MIN_PASSWORD_LENGTH + 4))).not.toBeNull();
+    expect(describePasswordProblem(' '.repeat(MIN_PASSWORD_LENGTH + 4), 'en')).not.toBeNull();
   });
 });

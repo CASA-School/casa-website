@@ -1,6 +1,7 @@
 import { EmptyState } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
@@ -27,10 +28,15 @@ export default async function KursplanungPage({
   const notice = { ok: params.ok, error: params.error };
 
   if (plan.groups.length === 0) {
+    const { t, lang } = await getI18n();
+    const label = monthLabel(month, lang);
     return (
       <div className={ui.module}>
         <Header active="puzzle" month={month} months={months} notice={notice} />
-        <EmptyState title={`Kein Plan für ${monthLabel(month)}`} description="Für diesen Monat sind noch keine Kursgruppen angelegt." />
+        <EmptyState
+          title={t(`Kein Plan für ${label}`, `No plan for ${label}`)}
+          description={t('Für diesen Monat sind noch keine Kursgruppen angelegt.', 'No course groups have been set up for this month yet.')}
+        />
       </div>
     );
   }

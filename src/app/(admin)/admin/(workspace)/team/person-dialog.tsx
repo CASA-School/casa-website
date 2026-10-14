@@ -24,6 +24,7 @@ import {
   type Access,
 } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
+import { pick, translator, type T, type WsLang } from '@/lib/admin/i18n';
 import { MIN_PASSWORD_LENGTH } from '@/lib/admin/password';
 import type { StaffAccount } from '@/lib/admin/staff';
 import { cn } from '@/lib/utils';
@@ -39,11 +40,7 @@ import { cn } from '@/lib/utils';
  * role), and deactivating goes through `ConfirmSubmit`.
  */
 
-const ROLES: readonly { value: StaffRole; label: string }[] = [
-  { value: 'staff', label: 'Staff' },
-  { value: 'admin', label: 'Administrator' },
-  { value: 'owner', label: 'Owner' },
-];
+const ROLES: readonly StaffRole[] = ['staff', 'admin', 'owner'];
 
 const label = 'text-xs font-bold text-[var(--casa-muted)]';
 
@@ -52,51 +49,58 @@ export function PersonDialog({
   viewer,
   canGrantOwner,
   microsoft,
+  lang,
 }: {
   account: StaffAccount;
   viewer: StaffUser;
   canGrantOwner: boolean;
   microsoft: boolean;
+  lang: WsLang;
 }) {
   const self = account.id === viewer.id;
+  const t = translator(lang);
 
   const tabs = [
     {
       id: 'access',
-      label: 'Access',
-      content: <AccessTab account={account} self={self} canGrantOwner={canGrantOwner} />,
+      label: t('Zugriff', 'Access'),
+      content: <AccessTab account={account} self={self} canGrantOwner={canGrantOwner} lang={lang} />,
     },
     {
       id: 'details',
-      label: 'Details',
+      label: t('Angaben', 'Details'),
       content: (
         <form action={updateStaffAction} className="space-y-3">
           <input type="hidden" name="staffUserId" value={account.id} />
-          <Field label="Name" htmlFor={`edit-name-${account.id}`}>
+          <Field label={t('Name', 'Name')} htmlFor={`edit-name-${account.id}`}>
             <Input id={`edit-name-${account.id}`} name="name" required defaultValue={account.name} />
           </Field>
-          <Field label="Signs in as" hint="Their full name, as they will type it" htmlFor={`edit-username-${account.id}`}>
+          <Field
+            label={t('Meldet sich an als', 'Signs in as')}
+            hint={t('Der volle Name, so wie die Person ihn eintippt', 'Their full name, as they will type it')}
+            htmlFor={`edit-username-${account.id}`}
+          >
             <Input id={`edit-username-${account.id}`} name="username" defaultValue={account.username ?? account.name} />
           </Field>
-          <Field label="Outlook address" htmlFor={`edit-email-${account.id}`}>
+          <Field label={t('Outlook-Adresse', 'Outlook address')} htmlFor={`edit-email-${account.id}`}>
             <Input id={`edit-email-${account.id}`} name="email" type="email" required defaultValue={account.email} />
           </Field>
           <div className="pt-1">
-            <Button type="submit">Save</Button>
+            <Button type="submit">{t('Speichern', 'Save')}</Button>
           </div>
         </form>
       ),
     },
     {
       id: 'sign-in',
-      label: 'Sign-in',
+      label: t('Anmeldung', 'Sign-in'),
       content: (
         <div className="space-y-6">
           <form action={resetPasswordAction} className="space-y-3">
             <input type="hidden" name="staffUserId" value={account.id} />
             <Field
-              label={account.hasPassword ? 'New password' : 'Password'}
-              hint={`${MIN_PASSWORD_LENGTH} characters or more`}
+              label={account.hasPassword ? t('Neues Passwort', 'New password') : t('Passwort', 'Password')}
+              hint={t(`Mindestens ${MIN_PASSWORD_LENGTH} Zeichen`, `${MIN_PASSWORD_LENGTH} characters or more`)}
               htmlFor={`password-${account.id}`}
             >
               <Input
@@ -109,7 +113,7 @@ export function PersonDialog({
               />
             </Field>
             <div className="pt-1">
-              <Button type="submit">Set password</Button>
+              <Button type="submit">{t('Passwort setzen', 'Set password')}</Button>
             </div>
           </form>
 
@@ -120,10 +124,10 @@ export function PersonDialog({
                 <p className="mt-1 text-sm text-[var(--casa-ink)]">
                   {account.microsoftLinkedAt ? (
                     <>
-                      Linked <DateText value={account.microsoftLinkedAt} />
+                      {t('Verknüpft', 'Linked')} <DateText value={account.microsoftLinkedAt} />
                     </>
                   ) : (
-                    <span className="text-[var(--casa-text-subtle)]">Not linked</span>
+                    <span className="text-[var(--casa-text-subtle)]">{t('Nicht verknüpft', 'Not linked')}</span>
                   )}
                 </p>
               </div>
@@ -131,12 +135,15 @@ export function PersonDialog({
                 <form action={unlinkMicrosoftAction}>
                   <input type="hidden" name="staffUserId" value={account.id} />
                   <ConfirmSubmit
-                    title={`Unlink Microsoft for ${account.name}?`}
-                    description="They are signed out. Their next Microsoft sign-in under this account's address links it again."
-                    confirmLabel="Unlink"
+                    title={t(`Microsoft für ${account.name} trennen?`, `Unlink Microsoft for ${account.name}?`)}
+                    description={t(
+                      'Die Person wird abgemeldet. Ihre nächste Microsoft-Anmeldung mit der Adresse dieses Kontos verknüpft es wieder.',
+                      "They are signed out. Their next Microsoft sign-in under this account's address links it again."
+                    )}
+                    confirmLabel={t('Trennen', 'Unlink')}
                     variant="secondary"
                   >
-                    Unlink Microsoft
+                    {t('Microsoft trennen', 'Unlink Microsoft')}
                   </ConfirmSubmit>
                 </form>
               ) : null}
@@ -148,14 +155,17 @@ export function PersonDialog({
   ];
 
   return (
-    <RowDialog label={`Open ${account.name}`} title={account.name} description={account.email}>
+    <RowDialog label={t(`${account.name} öffnen`, `Open ${account.name}`)} title={account.name} description={account.email}>
       <PersonTabs label={account.name} tabs={tabs} />
 
       <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
         <p className="text-xs text-[var(--casa-text-subtle)]">
-          Added <DateText value={account.createdAt} />
+          {t('Angelegt', 'Added')} <DateText value={account.createdAt} />
           {account.isActive && account.activeSessions > 0
-            ? ` · ${account.activeSessions} ${account.activeSessions === 1 ? 'session' : 'sessions'} open`
+            ? t(
+                ` · ${account.activeSessions} ${account.activeSessions === 1 ? 'Sitzung' : 'Sitzungen'} offen`,
+                ` · ${account.activeSessions} ${account.activeSessions === 1 ? 'session' : 'sessions'} open`
+              )
             : null}
         </p>
         {self ? null : (
@@ -164,15 +174,18 @@ export function PersonDialog({
             <input type="hidden" name="isActive" value={account.isActive ? 'false' : 'true'} />
             {account.isActive ? (
               <ConfirmSubmit
-                title={`Deactivate ${account.name}?`}
-                description="They are signed out everywhere and can no longer open the workspace. Their name stays on everything they did. You can reactivate them later."
-                confirmLabel="Deactivate"
+                title={t(`${account.name} deaktivieren?`, `Deactivate ${account.name}?`)}
+                description={t(
+                  'Die Person wird überall abgemeldet und kann den Arbeitsbereich nicht mehr öffnen. Ihr Name bleibt an allem, was sie getan hat. Du kannst das Konto später wieder aktivieren.',
+                  'They are signed out everywhere and can no longer open the workspace. Their name stays on everything they did. You can reactivate them later.'
+                )}
+                confirmLabel={t('Deaktivieren', 'Deactivate')}
               >
-                Deactivate
+                {t('Deaktivieren', 'Deactivate')}
               </ConfirmSubmit>
             ) : (
               <Button type="submit" variant="secondary" size="sm">
-                Reactivate
+                {t('Wieder aktivieren', 'Reactivate')}
               </Button>
             )}
           </form>
@@ -197,26 +210,32 @@ function RoleChoice({
   account,
   self,
   canGrantOwner,
+  lang,
 }: {
   account: StaffAccount;
   self: boolean;
   canGrantOwner: boolean;
+  lang: WsLang;
 }) {
   if (self) {
-    return <p className="pt-2 text-sm font-semibold text-[var(--casa-ink)]">{roleLabel(account.role)}</p>;
+    return <p className="pt-2 text-sm font-semibold text-[var(--casa-ink)]">{roleLabel(account.role, lang)}</p>;
   }
 
-  const choices = ROLES.filter((r) => r.value !== 'owner' || canGrantOwner || account.role === 'owner');
+  const t = translator(lang);
+  const choices = ROLES.filter((r) => r !== 'owner' || canGrantOwner || account.role === 'owner').map((value) => ({
+    value,
+    label: roleLabel(value, lang),
+  }));
 
   return (
     <form action={setRoleAction} className="w-56">
       <input type="hidden" name="staffUserId" value={account.id} />
       <Popover
-        label="Role"
+        label={t('Rolle', 'Role')}
         width={288}
         trigger={
           <span className="flex h-9 items-center justify-between gap-3 rounded-lg border border-ws-line px-3 text-sm font-semibold text-[var(--casa-ink)] transition-colors hover:border-ws-line-firm">
-            {roleLabel(account.role)}
+            {roleLabel(account.role, lang)}
             <svg viewBox="0 0 12 8" aria-hidden="true" fill="none" className="h-2 w-3 shrink-0 text-[var(--casa-muted)]">
               <path d="M1.5 1.75 6 6.25l4.5-4.5" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -254,40 +273,55 @@ function AccessTab({
   account,
   self,
   canGrantOwner,
+  lang,
 }: {
   account: StaffAccount;
   self: boolean;
   canGrantOwner: boolean;
+  lang: WsLang;
 }) {
+  const t = translator(lang);
   const access = resolveAccess(account.role, account.moduleExceptions);
   const editable = !self && account.role === 'staff';
-  const role = roleLabel(account.role);
+  const role = roleLabel(account.role, lang);
 
   return (
     <div>
-      <Row name="Role" className="pb-3">
+      <Row name={t('Rolle', 'Role')} className="pb-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <RoleChoice account={account} self={self} canGrantOwner={canGrantOwner} />
+          <RoleChoice account={account} self={self} canGrantOwner={canGrantOwner} lang={lang} />
           {editable ? (
             <p className="text-xs text-[var(--casa-text-subtle)]">
               <span aria-hidden="true" className="mr-1 text-[var(--casa-muted)]">
                 •
               </span>
-              {role} default
+              {t(`Standard für ${role}`, `${role} default`)}
             </p>
           ) : null}
         </div>
       </Row>
       {editable ? (
-        <AccessForm account={account} access={access} role={role} />
+        <AccessForm account={account} access={access} role={role} lang={lang} t={t} />
       ) : (
-        <AccessReadOnly access={access} />
+        <AccessReadOnly access={access} lang={lang} t={t} />
       )}
     </div>
   );
 }
 
-function AccessForm({ account, access, role }: { account: StaffAccount; access: Access; role: string }) {
+function AccessForm({
+  account,
+  access,
+  role,
+  lang,
+  t,
+}: {
+  account: StaffAccount;
+  access: Access;
+  role: string;
+  lang: WsLang;
+  t: T;
+}) {
   const defaults = roleDefault(account.role);
 
   return (
@@ -296,16 +330,16 @@ function AccessForm({ account, access, role }: { account: StaffAccount; access: 
       <input type="hidden" name="role" value={account.role} />
       <div className="divide-y divide-ws-line-soft border-y border-ws-line-soft">
         {ACCESS_GROUPS.map((group) => (
-          <Row key={group.label} name={group.label} className="py-2">
+          <Row key={group.label.en} name={pick(lang, group.label)} className="py-2">
             <div className="space-y-0.5">
               {group.modules.map((module) => (
                 <div
                   key={module}
                   role="radiogroup"
-                  aria-label={moduleLabel(module)}
+                  aria-label={moduleLabel(module, lang)}
                   className="-mx-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg px-2 transition-colors has-[[data-default]:not(:checked)]:bg-[#f2f8fc]"
                 >
-                  <span className="text-sm font-semibold text-[var(--casa-ink)]">{moduleLabel(module)}</span>
+                  <span className="text-sm font-semibold text-[var(--casa-ink)]">{moduleLabel(module, lang)}</span>
                   <span className="grid grid-cols-[5.25rem_repeat(3,4.25rem)] gap-0.5 rounded-xl border border-ws-line bg-white p-0.5">
                     {LEVELS.map((level) => {
                       const isDefault = defaults[module] === level;
@@ -322,13 +356,13 @@ function AccessForm({ account, access, role }: { account: StaffAccount; access: 
                             data-default={isDefault ? '' : undefined}
                             className="sr-only"
                           />
-                          {LEVEL_LABELS[level]}
+                          {pick(lang, LEVEL_LABELS[level])}
                           {isDefault ? (
                             <>
                               <span aria-hidden="true" className="ml-1 opacity-70">
                                 •
                               </span>
-                              <span className="sr-only"> ({role} default)</span>
+                              <span className="sr-only"> ({t(`Standard für ${role}`, `${role} default`)})</span>
                             </>
                           ) : null}
                         </label>
@@ -342,18 +376,18 @@ function AccessForm({ account, access, role }: { account: StaffAccount; access: 
         ))}
       </div>
       <div className="pt-4">
-        <Button type="submit">Save access</Button>
+        <Button type="submit">{t('Zugriff speichern', 'Save access')}</Button>
       </div>
     </form>
   );
 }
 
 /** Owners and administrators hold every module by role; their levels are shown, not edited. */
-function AccessReadOnly({ access }: { access: Access }) {
+function AccessReadOnly({ access, lang, t }: { access: Access; lang: WsLang; t: T }) {
   if (ADJUSTABLE.every((module) => access[module] === 'full')) {
     return (
-      <Row name="Modules" className="border-t border-ws-line-soft pt-3">
-        <p className="pt-2 text-sm font-semibold text-[var(--casa-ink)]">Full, in every module</p>
+      <Row name={t('Module', 'Modules')} className="border-t border-ws-line-soft pt-3">
+        <p className="pt-2 text-sm font-semibold text-[var(--casa-ink)]">{t('Vollzugriff in jedem Modul', 'Full, in every module')}</p>
       </Row>
     );
   }
@@ -361,12 +395,12 @@ function AccessReadOnly({ access }: { access: Access }) {
   return (
     <div className="divide-y divide-ws-line-soft border-y border-ws-line-soft">
       {ACCESS_GROUPS.map((group) => (
-        <Row key={group.label} name={group.label} className="py-2">
+        <Row key={group.label.en} name={pick(lang, group.label)} className="py-2">
           <div className="space-y-1 pt-2">
             {group.modules.map((module) => (
               <div key={module} className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-semibold text-[var(--casa-ink)]">{moduleLabel(module)}</span>
-                <span className="text-[var(--casa-text-subtle)]">{LEVEL_LABELS[access[module]]}</span>
+                <span className="font-semibold text-[var(--casa-ink)]">{moduleLabel(module, lang)}</span>
+                <span className="text-[var(--casa-text-subtle)]">{pick(lang, LEVEL_LABELS[access[module]])}</span>
               </div>
             ))}
           </div>

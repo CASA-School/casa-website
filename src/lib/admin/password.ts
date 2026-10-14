@@ -5,6 +5,8 @@ import {
   type ScryptOptions,
 } from 'node:crypto';
 
+import { translator, type WsLang } from './i18n';
+
 /**
  * `promisify(scrypt)` resolves to the three-argument overload and drops the one
  * that takes options, so the cost parameters below would not type-check through
@@ -151,13 +153,16 @@ export function needsRehash(stored: string): boolean {
  */
 export const MIN_PASSWORD_LENGTH = 8;
 
-export function describePasswordProblem(password: string): string | null {
+/** What is wrong with a new password, in the colleague's language, or null. */
+export function describePasswordProblem(password: string, lang: WsLang): string | null {
+  const t = translator(lang);
+
   if (password.length < MIN_PASSWORD_LENGTH) {
-    return `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
+    return t(`Verwende mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`, `Use at least ${MIN_PASSWORD_LENGTH} characters.`);
   }
 
   if (password.trim().length === 0) {
-    return 'Password cannot be only spaces.';
+    return t('Das Passwort darf nicht nur aus Leerzeichen bestehen.', 'Password cannot be only spaces.');
   }
 
   return null;

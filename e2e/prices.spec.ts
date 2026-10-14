@@ -52,7 +52,11 @@ test.describe('prices', () => {
   });
 
   test.beforeEach(async ({ context, baseURL }) => {
-    await context.addCookies([{ name: 'casa_workspace_session', value: token, url: baseURL! }]);
+    // The workspace speaks German by default; these assertions read its English.
+    await context.addCookies([
+      { name: 'casa_workspace_session', value: token, url: baseURL! },
+      { name: 'casa_ws_lang', value: 'en', url: baseURL! },
+    ]);
   });
 
   test('next year is prepared as a copy, changed on its own, and deleted again', async ({ page }) => {

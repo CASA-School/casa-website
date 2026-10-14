@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react';
 
 import { aiChangeRequestAction, saveDraftsAction } from '@/app/(admin)/admin/(editor)/website/actions';
+import { useWsLang } from '@/components/admin/lang';
+import { pick, type Bilingual } from '@/lib/admin/i18n';
 import type { Proposal } from '@/lib/cms/editor-types';
 import type { CmsLocale } from '@/lib/cms/locales';
 import { cn } from '@/lib/utils';
@@ -20,10 +22,16 @@ import { Diff, I, Modal, Spinner, plural } from './parts';
  * anything typed by hand. Nothing here publishes.
  */
 
-const EXAMPLES = [
-  'Mention on every course page that new intensive courses start every month.',
-  'Shorten the “Good to know” paragraphs on this page, keeping every fact.',
-  'Make the next steps on this page sound warmer.',
+const EXAMPLES: Bilingual[] = [
+  {
+    de: 'Erwähn auf jeder Kursseite, dass jeden Monat neue Intensivkurse beginnen.',
+    en: 'Mention on every course page that new intensive courses start every month.',
+  },
+  {
+    de: 'Kürz die Absätze „Gut zu wissen“ auf dieser Seite, ohne eine Angabe wegzulassen.',
+    en: 'Shorten the “Good to know” paragraphs on this page, keeping every fact.',
+  },
+  { de: 'Lass die nächsten Schritte auf dieser Seite wärmer klingen.', en: 'Make the next steps on this page sound warmer.' },
 ];
 
 export function AskDialog({
@@ -37,6 +45,7 @@ export function AskDialog({
   onClose: () => void;
   onApplied: (count: number) => void;
 }) {
+  const { t, lang } = useWsLang();
   const [instruction, setInstruction] = useState('');
   const [phase, setPhase] = useState<'input' | 'loading' | 'results'>('input');
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -76,23 +85,27 @@ export function AskDialog({
   }
 
   return (
-    <Modal label="Ask for a change" onClose={onClose} width="max-w-[720px]">
+    <Modal label={t('Um eine Änderung bitten', 'Ask for a change')} onClose={onClose} width="max-w-[720px]">
       <header className="flex items-start gap-4 px-7 pt-6 pb-1">
         <span className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--casa-blue-tint)] text-[var(--casa-accent-text)]">
           {I.sparkle}
         </span>
         <div className="flex-1">
-          <h2 className="font-display text-[1.6rem] font-semibold leading-tight text-[var(--casa-ink)]">Ask for a change</h2>
-          <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">Proposals arrive as drafts for you to review</p>
+          <h2 className="font-display text-[1.6rem] font-semibold leading-tight text-[var(--casa-ink)]">
+            {t('Um eine Änderung bitten', 'Ask for a change')}
+          </h2>
+          <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">
+            {t('Die Vorschläge kommen als Entwürfe, die du prüfst', 'Proposals arrive as drafts for you to review')}
+          </p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
+        <button type="button" onClick={onClose} aria-label={t('Schließen', 'Close')} className="grid h-9 w-9 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
           {I.close}
         </button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-7 pt-4 pb-5">
         <label htmlFor="ask-instruction" className="sr-only">
-          What should change?
+          {t('Was soll sich ändern?', 'What should change?')}
         </label>
         <textarea
           id="ask-instruction"
@@ -103,13 +116,16 @@ export function AskDialog({
           }}
           rows={3}
           disabled={phase === 'loading'}
-          placeholder="What should change? For example: the evening course now costs from 378 €, update every text that mentions it."
+          placeholder={t(
+            'Was soll sich ändern? Zum Beispiel: Der Abendkurs kostet jetzt ab 378 €, pass jeden Text an, der das erwähnt.',
+            'What should change? For example: the evening course now costs from 378 €, update every text that mentions it.'
+          )}
           className="block w-full resize-none rounded-xl border border-ws-line-firm px-4 py-3 text-[0.95rem] leading-relaxed outline-none focus:border-[var(--casa-blue)] focus:shadow-[0_0_0_3px_rgba(0,159,227,0.16)] disabled:bg-ws-sunk"
         />
 
         {phase === 'input' ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            {EXAMPLES.map((example) => (
+            {EXAMPLES.map((entry) => pick(lang, entry)).map((example) => (
               <button
                 key={example}
                 type="button"
@@ -125,7 +141,7 @@ export function AskDialog({
         {error ? <p className="mt-3 text-sm font-medium text-[var(--casa-danger-text)]">{error}</p> : null}
 
         {phase === 'loading' ? (
-          <div className={cn('mt-5 space-y-4', styles.fade)} aria-label="Reading the texts">
+          <div className={cn('mt-5 space-y-4', styles.fade)} aria-label={t('Die Texte werden gelesen', 'Reading the texts')}>
             {[0, 1, 2].map((row) => (
               <div key={row} className="space-y-2">
                 <div className={cn('h-3 w-40 rounded', styles.shimmer)} />
@@ -138,7 +154,9 @@ export function AskDialog({
 
         {phase === 'results' ? (
           proposals.length === 0 ? (
-            <p className="mt-6 text-center text-sm text-[var(--casa-text-subtle)]">No text needs to change for this request.</p>
+            <p className="mt-6 text-center text-sm text-[var(--casa-text-subtle)]">
+              {t('Für diese Bitte muss sich kein Text ändern.', 'No text needs to change for this request.')}
+            </p>
           ) : (
             groups.map(([scope, items]) => (
               <section key={scope} className={cn('mt-5', styles.fade)} aria-label={scope}>
@@ -191,7 +209,7 @@ export function AskDialog({
             onClick={() => setPhase('input')}
             className="h-10 rounded-lg px-4 text-sm font-semibold text-[var(--casa-text-subtle)] hover:bg-ws-sunk"
           >
-            Ask again
+            {t('Noch einmal fragen', 'Ask again')}
           </button>
         ) : null}
         {phase === 'results' && proposals.length ? (
@@ -202,7 +220,7 @@ export function AskDialog({
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--casa-ink-deep)] px-5 text-sm font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)] disabled:bg-ws-line-firm"
           >
             {saving ? <Spinner /> : null}
-            Add {plural(chosen.length, 'draft', 'drafts')}
+            {t(`${plural(chosen.length, 'Entwurf', 'Entwürfe')} hinzufügen`, `Add ${plural(chosen.length, 'draft', 'drafts')}`)}
           </button>
         ) : (
           <button
@@ -212,7 +230,7 @@ export function AskDialog({
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--casa-ink-deep)] px-5 text-sm font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)] disabled:bg-ws-line-firm"
           >
             {phase === 'loading' ? <Spinner /> : I.sparkle}
-            Find the texts
+            {t('Texte finden', 'Find the texts')}
           </button>
         )}
       </footer>

@@ -1,3 +1,5 @@
+import { wsLocale, type WsLang } from '@/lib/admin/i18n';
+
 /**
  * A fortnight of inbound volume as bars.
  *
@@ -13,11 +15,11 @@
  * It lives on Activity rather than on Today: a trend is a backward-looking
  * question, and the daily screen answers forward-looking ones.
  */
-export function InboundChart({ days }: { days: readonly { day: Date; count: number }[] }) {
+export function InboundChart({ days, lang }: { days: readonly { day: Date; count: number }[]; lang: WsLang }) {
   const peak = Math.max(4, ...days.map((d) => d.count));
 
   return (
-    <div className="flex h-24 items-end gap-1.5" role="img" aria-label={inboundSummary(days)}>
+    <div className="flex h-24 items-end gap-1.5" role="img" aria-label={inboundSummary(days, lang)}>
       {days.map((entry) => {
         const share = entry.count / peak;
         const isToday = new Date(entry.day).toDateString() === new Date().toDateString();
@@ -50,7 +52,7 @@ export function InboundChart({ days }: { days: readonly { day: Date; count: numb
               )}
             </div>
             <span className="text-[0.65rem] font-semibold text-[var(--casa-text-subtle)]">
-              {new Date(entry.day).toLocaleDateString('en-GB', { weekday: 'narrow' })}
+              {new Date(entry.day).toLocaleDateString(wsLocale(lang), { weekday: 'narrow' })}
             </span>
           </div>
         );
@@ -59,7 +61,9 @@ export function InboundChart({ days }: { days: readonly { day: Date; count: numb
   );
 }
 
-function inboundSummary(days: readonly { day: Date; count: number }[]): string {
+function inboundSummary(days: readonly { day: Date; count: number }[], lang: WsLang): string {
   const total = days.reduce((sum, day) => sum + day.count, 0);
-  return `${total} records received over the last ${days.length} days.`;
+  return lang === 'de'
+    ? `${total} Eingänge in den letzten ${days.length} Tagen.`
+    : `${total} records received over the last ${days.length} days.`;
 }

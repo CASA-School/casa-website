@@ -22,6 +22,8 @@ import {
 } from '@/lib/admin/bookings';
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { requireModule } from '@/lib/admin/guard';
+import { pick, type T } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
  * Bookings module mutations. Creating, editing, extending, adding cost lines
@@ -76,11 +78,12 @@ function fail(path: string, message: string): never {
 }
 const confirmed = (formData: FormData) => formData.get('confirmed') === '1';
 
-function readDates(formData: FormData, back: string): { startDate: string; endDate: string } {
+function readDates(formData: FormData, back: string, t: T): { startDate: string; endDate: string } {
   const startDate = String(formData.get('startDate') ?? '');
   const endDate = String(formData.get('endDate') ?? '');
-  if (!DATE.test(startDate) || !DATE.test(endDate)) fail(back, 'Start and end dates are required.');
-  if (endDate < startDate) fail(back, 'The end date is before the start.');
+  if (!DATE.test(startDate) || !DATE.test(endDate))
+    fail(back, t('Start- und Enddatum sind nötig.', 'Start and end dates are required.'));
+  if (endDate < startDate) fail(back, t('Das Enddatum liegt vor dem Start.', 'The end date is before the start.'));
   return { startDate, endDate };
 }
 
@@ -111,7 +114,8 @@ export async function extendBookingAction(formData: FormData): Promise<void> {
   const actor = await requireModule('bookings', 'edit');
   const bookingId = id(formData, 'bookingId');
   const back = `/admin/bookings/${bookingId}`;
-  const dates = readDates(formData, back);
+  const { t } = await getI18n();
+  const dates = readDates(formData, back, t);
   await extendBooking(
     bookingId,
     { courseInstanceId: optionalId(formData, 'courseInstanceId'), ...dates },
@@ -140,7 +144,7 @@ export async function removePeriodAction(formData: FormData): Promise<void> {
   if (!confirmed(formData)) redirect(back);
   const result = await removePeriod(bookingId, id(formData, 'periodId'), actor);
   revalidatePath('/admin/bookings', 'layout');
-  if (!result.ok) fail(back, result.reason);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   redirect(back);
 }
 
@@ -150,10 +154,11 @@ export async function addChargeAction(formData: FormData): Promise<void> {
   const back = `/admin/bookings/${bookingId}`;
   const kind = String(formData.get('kind') ?? '');
   if (!KINDS.has(kind)) throw new Error('Invalid kind');
+  const { t } = await getI18n();
   const amount = money(formData, 'amount');
-  if (amount === null || amount === 0) fail(back, 'An amount is required.');
+  if (amount === null || amount === 0) fail(back, t('Ein Betrag ist nötig.', 'An amount is required.'));
   const description = text(formData, 'description', 160);
-  if (!description) fail(back, 'Say what the line is for.');
+  if (!description) fail(back, t('Schreib dazu, wofür der Posten ist.', 'Say what the line is for.'));
   await addCharge(bookingId, { kind: kind as ChargeKind, description, amount }, actor);
   revalidatePath('/admin/bookings', 'layout');
   redirect(back);
@@ -173,14 +178,15 @@ export async function recordPaymentAction(formData: FormData): Promise<void> {
   const actor = await requireModule('bookings', 'edit');
   const bookingId = id(formData, 'bookingId');
   const back = `/admin/bookings/${bookingId}`;
+  const { t } = await getI18n();
   const amount = money(formData, 'amount');
-  if (amount === null || amount === 0) fail(back, 'An amount is required.');
+  if (amount === null || amount === 0) fail(back, t('Ein Betrag ist nötig.', 'An amount is required.'));
   const method = String(formData.get('method') ?? '');
   if (!METHODS.has(method)) throw new Error('Invalid method');
   const receivedAt = String(formData.get('receivedAt') ?? '');
-  if (!DATE.test(receivedAt)) fail(back, 'A payment needs a date.');
+  if (!DATE.test(receivedAt)) fail(back, t('Eine Zahlung braucht ein Datum.', 'A payment needs a date.'));
   const subject = text(formData, 'subject', 160);
-  if (!subject) fail(back, 'Say what the payment is for.');
+  if (!subject) fail(back, t('Schreib dazu, wofür die Zahlung ist.', 'Say what the payment is for.'));
   await recordPayment(
     bookingId,
     {
@@ -228,7 +234,7 @@ export async function deleteBookingAction(formData: FormData): Promise<void> {
   if (!confirmed(formData)) redirect(back);
   const result = await deleteBooking(bookingId, actor);
   revalidatePath('/admin', 'layout');
-  if (!result.ok) fail(back, result.reason);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   redirect('/admin/bookings');
 }
 
@@ -248,7 +254,8 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
   const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
 
   const kind = String(formData.get('kind') ?? 'course') === 'exam' ? 'exam' : 'course';
-  const dates = readDates(formData, safeBack);
+  const { t } = await getI18n();
+  const dates = readDates(formData, safeBack, t);
   const status = String(formData.get('status') ?? 'reserved');
   if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
   const payer = String(formData.get('payer') ?? 'self');

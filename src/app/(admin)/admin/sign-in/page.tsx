@@ -4,19 +4,24 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { DatabaseUnavailable } from '@/components/admin/database-unavailable';
+import { LangSwitch } from '@/components/admin/lang-switch';
 import { Button, Field, Input } from '@/components/admin/ui';
 import { Logo } from '@/components/ui/logo';
 import { getStaffUser, pruneExpiredSessions, signIn, writeSessionCookie } from '@/lib/admin/auth';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { microsoftEnabled } from '@/lib/admin/microsoft';
 import { clientAddress } from '@/lib/api/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Sign in · CASA Workspace',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: t('Anmelden · CASA Arbeitsbereich', 'Sign in · CASA Workspace'),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * The sign-in screen.
@@ -46,18 +51,22 @@ export default async function SignInPage({
   }
 
   const params = await searchParams;
+  const { t } = await getI18n();
   const failed = params.error === '1';
   const microsoft = microsoftEnabled();
   // Microsoft has already said who someone is, so these may be specific.
   const microsoftError =
     params.error === 'microsoft-unknown'
-      ? 'Your Microsoft account is not linked to a workspace account. Ask an owner to add your Outlook address on the Team screen.'
+      ? t(
+          'Dein Microsoft-Konto ist mit keinem Konto im Arbeitsbereich verknüpft. Bitte eine Inhaberin oder einen Inhaber, deine Outlook-Adresse unter Team einzutragen.',
+          'Your Microsoft account is not linked to a workspace account. Ask an owner to add your Outlook address on the Team screen.'
+        )
       : params.error === 'microsoft-cancelled'
-        ? 'The Microsoft sign-in was cancelled.'
+        ? t('Die Microsoft-Anmeldung wurde abgebrochen.', 'The Microsoft sign-in was cancelled.')
         : params.error === 'microsoft-off'
-          ? 'Signing in with Microsoft is not switched on yet.'
+          ? t('Die Anmeldung mit Microsoft ist noch nicht eingeschaltet.', 'Signing in with Microsoft is not switched on yet.')
           : params.error === 'microsoft'
-            ? 'The Microsoft sign-in did not go through. Try again.'
+            ? t('Die Microsoft-Anmeldung hat nicht geklappt. Versuch es noch einmal.', 'The Microsoft sign-in did not go through. Try again.')
             : null;
 
   async function attemptSignIn(formData: FormData) {
@@ -112,36 +121,42 @@ export default async function SignInPage({
         <div>
           <Logo className="h-14 w-auto" variant="white" />
           <span className="mt-3 block text-[0.58rem] font-semibold tracking-[0.24em] uppercase text-ws-on-panel-muted">
-            Workspace
+            {t('Arbeitsbereich', 'Workspace')}
           </span>
         </div>
 
         <div className="max-w-md">
           <h1 className="font-[family-name:var(--font-display)] text-4xl leading-[1.06] tracking-[-0.02em]">
-            The desk behind the school.
+            {t('Das Büro hinter der Schule.', 'The desk behind the school.')}
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-ws-on-panel-muted">
-            Enquiries, course and exam registrations, placement recommendations
-            and applications — in one queue, with a status and an owner, instead
-            of four inboxes and a spreadsheet.
+            {t(
+              'Anfragen, Kurs- und Prüfungsanmeldungen, Einstufungsempfehlungen und Bewerbungen — in einer Liste, mit Status und Zuständigkeit, statt in vier Postfächern und einer Tabelle.',
+              'Enquiries, course and exam registrations, placement recommendations and applications — in one queue, with a status and an owner, instead of four inboxes and a spreadsheet.'
+            )}
           </p>
         </div>
 
         <p className="text-xs leading-relaxed text-ws-on-panel-muted">
           CASA — Internationale Sprachschule Bremen gemeinnützige GmbH.
           <br />
-          Staff access only. Every change made here is recorded against your
-          name.
+          {t(
+            'Nur für das Team. Jede Änderung hier wird unter deinem Namen festgehalten.',
+            'Staff access only. Every change made here is recorded against your name.'
+          )}
         </p>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-ws-canvas px-6 py-12 lg:px-14">
+      <div className="relative flex flex-1 items-center justify-center bg-ws-canvas px-6 py-12 lg:px-14">
+        <div className="absolute top-5 right-6 lg:top-8 lg:right-10">
+          <LangSwitch tone="page" />
+        </div>
         <div className="w-full max-w-sm">
           <h2 className="font-[family-name:var(--font-display)] text-2xl leading-tight">
-            Sign in
+            {t('Anmelden', 'Sign in')}
           </h2>
           <p className="mt-2 text-sm text-[var(--casa-text-subtle)]">
-            With your full name or your Outlook address.
+            {t('Mit deinem vollen Namen oder deiner Outlook-Adresse.', 'With your full name or your Outlook address.')}
           </p>
 
           {microsoftError ? (
@@ -166,11 +181,11 @@ export default async function SignInPage({
                   <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
                   <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
                 </svg>
-                Sign in with Microsoft
+                {t('Mit Microsoft anmelden', 'Sign in with Microsoft')}
               </Link>
               <div className="mt-6 flex items-center gap-3 text-xs text-[var(--casa-text-subtle)]">
                 <span className="h-px flex-1 bg-ws-line" />
-                or with your password
+                {t('oder mit deinem Passwort', 'or with your password')}
                 <span className="h-px flex-1 bg-ws-line" />
               </div>
             </>
@@ -182,11 +197,14 @@ export default async function SignInPage({
                 role="alert"
                 className="rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-3.5 py-2.5 text-sm text-[var(--casa-danger-text)]"
               >
-                That name or email and password do not match an active account.
+                {t(
+                  'Name oder E-Mail und Passwort passen zu keinem aktiven Konto.',
+                  'That name or email and password do not match an active account.'
+                )}
               </p>
             ) : null}
 
-            <Field label="Name or email" htmlFor="identifier">
+            <Field label={t('Name oder E-Mail', 'Name or email')} htmlFor="identifier">
               <Input
                 id="identifier"
                 name="identifier"
@@ -196,11 +214,11 @@ export default async function SignInPage({
                 spellCheck={false}
                 required
                 autoFocus
-                placeholder="Vorname Nachname or name@casa-bremen.de"
+                placeholder={t('Vorname Nachname oder name@casa-bremen.de', 'Vorname Nachname or name@casa-bremen.de')}
               />
             </Field>
 
-            <Field label="Password" htmlFor="password">
+            <Field label={t('Passwort', 'Password')} htmlFor="password">
               <Input
                 id="password"
                 name="password"
@@ -211,20 +229,22 @@ export default async function SignInPage({
             </Field>
 
             <Button type="submit" className="w-full">
-              Sign in
+              {t('Anmelden', 'Sign in')}
             </Button>
           </form>
 
           <p className="mt-6 text-xs leading-relaxed text-[var(--casa-text-subtle)]">
-            Forgotten your password? There is no self-service reset yet — ask an
-            owner to set a new one for you from the Team screen.
+            {t(
+              'Passwort vergessen? Selbst zurücksetzen geht noch nicht — bitte eine Inhaberin oder einen Inhaber, dir unter Team ein neues zu setzen.',
+              'Forgotten your password? There is no self-service reset yet — ask an owner to set a new one for you from the Team screen.'
+            )}
           </p>
 
           <Link
             href="/"
             className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--casa-accent-text)] transition-colors hover:text-[var(--casa-accent-text-hover)]"
           >
-            Back to casa-bremen.de
+            {t('Zurück zu casa-bremen.de', 'Back to casa-bremen.de')}
           </Link>
         </div>
       </div>

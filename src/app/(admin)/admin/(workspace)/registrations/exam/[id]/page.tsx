@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Icon } from '@/components/admin/icons';
-import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
+import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { listFlags } from '@/lib/admin/flags';
+import { pick, relativeDays, type Bilingual } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
@@ -14,11 +16,11 @@ import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
 import { formatDay, parseOptionLabel } from '../../option-label';
 
-const SALUTATIONS: Record<string, string> = {
-  mr: 'Mr',
-  ms: 'Ms',
-  mx: 'Mx',
-  neutral: 'No salutation',
+const SALUTATIONS: Record<string, Bilingual> = {
+  mr: { de: 'Herr', en: 'Mr' },
+  ms: { de: 'Frau', en: 'Ms' },
+  mx: { de: 'Mx', en: 'Mx' },
+  neutral: { de: 'Keine Anrede', en: 'No salutation' },
 };
 
 /**
@@ -38,7 +40,7 @@ export default async function ExamRegistrationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const registration = await getExamRegistration(id);
+  const [registration, { t, lang }] = await Promise.all([getExamRegistration(id), getI18n()]);
 
   if (!registration) {
     notFound();
@@ -67,36 +69,36 @@ export default async function ExamRegistrationPage({
     <>
       <RecordHeader
         backHref="/admin/registrations/exam"
-        backLabel="All exam registrations"
+        backLabel={t('Alle Prüfungsanmeldungen', 'All exam registrations')}
         title={fullName}
         avatar={fullName}
         subtitle={registration.examTypeLabel ?? undefined}
-        status={<Badge tone={STATUS_TONES[registration.status]}>{STATUS_LABELS[registration.status]}</Badge>}
+        status={<Badge tone={STATUS_TONES[registration.status]}>{pick(lang, STATUS_LABELS[registration.status])}</Badge>}
         actions={
           <ButtonLink href={`mailto:${registration.email}?subject=${encodeURIComponent(
               `CASA exam registration — ${registration.examTypeLabel ?? 'your exam'}`
-            )}`} variant="primary">Reply by email</ButtonLink>
+            )}`} variant="primary">{t('Per E-Mail antworten', 'Reply by email')}</ButtonLink>
         }
         facts={[
           {
-            label: 'Received',
+            label: t('Eingegangen', 'Received'),
             icon: Icon.clock,
             tint: 'blue',
             value: <DateText value={registration.submittedAt} />,
-            sub: relativeDays(registration.submittedAt),
+            sub: relativeDays(registration.submittedAt, lang),
           },
           {
-            label: 'Sitting',
+            label: t('Prüfungstermin', 'Sitting'),
             icon: Icon.calendar,
             tint: 'blue',
-            value: sitting?.start ? formatDay(sitting.start, true) : (sitting?.raw ?? null),
+            value: sitting?.start ? formatDay(sitting.start, lang, true) : (sitting?.raw ?? null),
             sub: sitting?.start ? [sitting.time, sitting.location].filter(Boolean).join(' · ') || undefined : undefined,
           },
           {
-            label: 'Parts',
+            label: t('Teile', 'Parts'),
             icon: Icon.book,
             tint: 'red',
-            value: registrationTypeLabel(registration.registrationType),
+            value: registrationTypeLabel(registration.registrationType, lang),
           },
         ]}
       />
@@ -104,8 +106,8 @@ export default async function ExamRegistrationPage({
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
           <Card
-            title="Name on the certificate"
-            description="Check against photo ID."
+            title={t('Name auf dem Zertifikat', 'Name on the certificate')}
+            description={t('Mit dem Lichtbildausweis abgleichen.', 'Check against photo ID.')}
             icon={registration.officialNameConfirmed ? Icon.check : Icon.attention}
             tint={registration.officialNameConfirmed ? 'green' : 'sun'}
           >
@@ -114,27 +116,31 @@ export default async function ExamRegistrationPage({
             </p>
             <p className="mt-3">
               {registration.officialNameConfirmed ? (
-                <Badge tone="positive">Candidate confirmed this matches their ID</Badge>
+                <Badge tone="positive">
+                  {t('Von der Person bestätigt: wie im Ausweis', 'Candidate confirmed this matches their ID')}
+                </Badge>
               ) : (
-                <Badge tone="danger">Not confirmed by the candidate</Badge>
+                <Badge tone="danger">{t('Von der Person nicht bestätigt', 'Not confirmed by the candidate')}</Badge>
               )}
             </p>
             {!registration.officialNameConfirmed ? (
               <p className="mt-2 text-xs text-[var(--casa-danger-text)]">
-                Confirm by phone before the entry is filed.
+                {t('Kläre es telefonisch, bevor die Anmeldung weitergegeben wird.', 'Confirm by phone before the entry is filed.')}
               </p>
             ) : null}
           </Card>
 
-          <Card title="Candidate" icon={Icon.person} tint="ink">
+          <Card title={t('Angaben zur Person', 'Candidate')} icon={Icon.person} tint="ink">
             <DetailList
               items={[
                 {
-                  label: 'Salutation',
-                  value: SALUTATIONS[registration.salutation] ?? registration.salutation,
+                  label: t('Anrede', 'Salutation'),
+                  value: SALUTATIONS[registration.salutation]
+                    ? pick(lang, SALUTATIONS[registration.salutation])
+                    : registration.salutation,
                 },
                 {
-                  label: 'Email',
+                  label: t('E-Mail', 'Email'),
                   value: (
                     <a
                       href={`mailto:${registration.email}`}
@@ -145,7 +151,7 @@ export default async function ExamRegistrationPage({
                   ),
                 },
                 {
-                  label: 'Phone',
+                  label: t('Telefon', 'Phone'),
                   value: (
                     <a href={`tel:${registration.phone}`} className="font-medium">
                       {registration.phone}
@@ -153,21 +159,21 @@ export default async function ExamRegistrationPage({
                   ),
                 },
                 {
-                  label: 'Nationality',
+                  label: t('Nationalität', 'Nationality'),
                   value: registration.nationalityName ?? (
                     <span className="flex items-center gap-2">
                       {registration.nationalityRaw}
-                      <Badge tone="warning">unrecognised</Badge>
+                      <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
                     </span>
                   ),
                 },
                 {
-                  label: 'Date of birth',
+                  label: t('Geburtsdatum', 'Date of birth'),
                   value: <BirthDate value={registration.birthDate ?? registration.birthDateRaw} />,
                 },
                 {
-                  label: 'Registered in',
-                  value: registration.locale === 'de' ? 'German' : 'English',
+                  label: t('Angemeldet auf', 'Registered in'),
+                  value: registration.locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'),
                 },
               ]}
             />

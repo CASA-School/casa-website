@@ -1,5 +1,6 @@
 import { query, withTransaction } from './db';
 import type { StaffUser } from './auth';
+import { pick, type Bilingual, type WsLang } from './i18n';
 
 /**
  * The four inbound queues, and the two mutations they all share.
@@ -28,13 +29,14 @@ export const WORK_STATUSES = [
 
 export type WorkStatus = (typeof WORK_STATUSES)[number];
 
-export const STATUS_LABELS: Record<WorkStatus, string> = {
-  new: 'New',
-  in_progress: 'In progress',
-  waiting: 'Waiting on them',
-  done: 'Done',
-  declined: 'Declined',
-  spam: 'Spam',
+/** Read with `pick(lang, STATUS_LABELS[status])` (docs/ADMIN_I18N.md). */
+export const STATUS_LABELS: Record<WorkStatus, Bilingual> = {
+  new: { de: 'Neu', en: 'New' },
+  in_progress: { de: 'In Bearbeitung', en: 'In progress' },
+  waiting: { de: 'Wartet auf Antwort', en: 'Waiting on them' },
+  done: { de: 'Erledigt', en: 'Done' },
+  declined: { de: 'Abgelehnt', en: 'Declined' },
+  spam: { de: 'Spam', en: 'Spam' },
 };
 
 /**
@@ -61,7 +63,8 @@ type EntitySpec = {
   table: string;
   /** Where the record lives in the workspace, for links and redirects. */
   path: string;
-  singular: string;
+  /** "Enquiry" / "Anfrage": read with `queueLabel(entity, lang)`. */
+  singular: Bilingual;
   /**
    * `career_applications.status` predates the workspace and is plain text with
    * its own vocabulary — the public apply route writes 'submitted'. The others
@@ -75,25 +78,25 @@ const ENTITIES: Record<QueueEntity, EntitySpec> = {
   enquiry: {
     table: 'enquiries',
     path: '/admin/enquiries',
-    singular: 'Enquiry',
+    singular: { de: 'Anfrage', en: 'Enquiry' },
     statusColumn: 'enum',
   },
   course_registration: {
     table: 'course_registrations',
     path: '/admin/registrations/course',
-    singular: 'Course registration',
+    singular: { de: 'Kursanmeldung', en: 'Course registration' },
     statusColumn: 'enum',
   },
   exam_registration: {
     table: 'exam_registrations',
     path: '/admin/registrations/exam',
-    singular: 'Exam registration',
+    singular: { de: 'Prüfungsanmeldung', en: 'Exam registration' },
     statusColumn: 'enum',
   },
   career_application: {
     table: 'career_applications',
     path: '/admin/applications',
-    singular: 'Application',
+    singular: { de: 'Bewerbung', en: 'Application' },
     statusColumn: 'text',
   },
 };
@@ -109,7 +112,7 @@ function resolve(entity: QueueEntity): EntitySpec {
 }
 
 export const queuePath = (entity: QueueEntity) => resolve(entity).path;
-export const queueLabel = (entity: QueueEntity) => resolve(entity).singular;
+export const queueLabel = (entity: QueueEntity, lang: WsLang) => pick(lang, resolve(entity).singular);
 
 /**
  * Career applications are the one queue whose incoming status is 'submitted'.
@@ -158,7 +161,7 @@ export async function setQueueStatus({
     );
 
     if (previous.rowCount === 0) {
-      throw new Error(`${spec.singular} ${id} not found`);
+      throw new Error(`${spec.singular.en} ${id} not found`);
     }
 
     const from = normaliseStatus(previous.rows[0].status);
@@ -198,7 +201,7 @@ export async function setQueueAssignee({
     );
 
     if (updated.rowCount === 0) {
-      throw new Error(`${spec.singular} ${id} not found`);
+      throw new Error(`${spec.singular.en} ${id} not found`);
     }
 
     const assignee = staffUserId

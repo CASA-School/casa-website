@@ -1,5 +1,6 @@
 import { query } from './db';
 import type { StaffUser } from './auth';
+import type { Bilingual } from './i18n';
 
 /**
  * Record flags: "this row needs a look, and here is why".
@@ -28,14 +29,15 @@ export type FlagCode =
   | 'cohort_withdrawn'
   | 'period_without_cohort';
 
-export const FLAG_LABELS: Record<FlagCode, string> = {
-  duplicate_candidate: 'May be an existing person',
-  nationality_unmatched: 'Nationality not recognised',
-  level_unmatched: 'Level not recognised',
-  birth_date_unparsed: 'Date of birth not readable',
-  person_unlinked: 'Not linked to a person',
-  cohort_withdrawn: 'Chosen cohort no longer runs',
-  period_without_cohort: 'Booked dates have no cohort yet',
+/** Read with `pick(lang, FLAG_LABELS[code])` (docs/ADMIN_I18N.md). */
+export const FLAG_LABELS: Record<FlagCode, Bilingual> = {
+  duplicate_candidate: { de: 'Möglicherweise eine bestehende Person', en: 'May be an existing person' },
+  nationality_unmatched: { de: 'Nationalität nicht erkannt', en: 'Nationality not recognised' },
+  level_unmatched: { de: 'Niveau nicht erkannt', en: 'Level not recognised' },
+  birth_date_unparsed: { de: 'Geburtsdatum nicht lesbar', en: 'Date of birth not readable' },
+  person_unlinked: { de: 'Mit keiner Person verknüpft', en: 'Not linked to a person' },
+  cohort_withdrawn: { de: 'Gewählter Termin findet nicht mehr statt', en: 'Chosen cohort no longer runs' },
+  period_without_cohort: { de: 'Gebuchter Zeitraum noch ohne Termin', en: 'Booked dates have no cohort yet' },
 };
 
 export type RecordFlag = {
@@ -136,7 +138,7 @@ export async function openFlagsByCode(): Promise<Partial<Record<FlagCode, number
 export type OpenFlag = RecordFlag & {
   /** The record's own screen, where the flag is cleared. */
   href: string;
-  /** Who the record is about, so the list reads as people rather than uuids. */
+  /** Who the record is about, so the list reads as people rather than uuids; empty when unknown. */
   subject: string;
 };
 
@@ -174,6 +176,7 @@ export async function listOpenFlags(code?: FlagCode, limit = 100): Promise<OpenF
   return rows.map((r) => ({
     ...toFlag(r),
     href: `${HREF[r.entity]}/${r.entity_id}`,
-    subject: (r.subject ?? '').trim() || 'Unknown record',
+    // Empty when the record has no name: the list says "Unknown record" in its own language.
+    subject: (r.subject ?? '').trim(),
   }));
 }

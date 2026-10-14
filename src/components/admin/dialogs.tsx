@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode } from 'react';
 
+import { useWsLang } from './lang';
 import { Button } from './ui';
 import {
   Dialog,
@@ -53,12 +54,13 @@ export function FormDialog({
   titleClassName?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const { t } = useWsLang();
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button type="button" variant={triggerVariant} size={size} onClick={() => setOpen(true)}>
         {trigger}
       </Button>
-      <DialogContent className={panel(width)} closeLabel="Close">
+      <DialogContent className={panel(width)} closeLabel={t('Schließen', 'Close')}>
         <DialogTitle className={titleClassName ? `text-lg font-extrabold ${titleClassName}` : 'text-lg font-extrabold'}>{title}</DialogTitle>
         {description ? (
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
@@ -75,7 +77,7 @@ export function ConfirmSubmit({
   children,
   title,
   description,
-  confirmLabel = 'Delete',
+  confirmLabel,
   variant = 'danger',
   size = 'sm',
 }: {
@@ -87,6 +89,7 @@ export function ConfirmSubmit({
   size?: 'sm' | 'md';
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useWsLang();
   const anchor = useRef<HTMLInputElement>(null);
 
   function confirm() {
@@ -110,11 +113,11 @@ export function ConfirmSubmit({
           <div className="mt-5 flex justify-end gap-2">
             <DialogClose asChild>
               <Button type="button" variant="ghost" size="md">
-                Cancel
+                {t('Abbrechen', 'Cancel')}
               </Button>
             </DialogClose>
             <Button type="button" variant={variant} size="md" onClick={confirm}>
-              {confirmLabel}
+              {confirmLabel ?? t('Löschen', 'Delete')}
             </Button>
           </div>
         </DialogContent>

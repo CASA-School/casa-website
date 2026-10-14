@@ -1,5 +1,7 @@
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { levelStyle } from '@/lib/admin/kursplanung/colours';
-import { ABSENCE_REASONS, LEVELS, SHIFT_INFO, SHIFTS, WEEKDAYS, type Absence, type Level, type Teacher } from '@/lib/admin/kursplanung/types';
+import { ABSENCE_LABELS, ABSENCE_REASONS, LEVELS, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, WEEKDAYS, type Absence, type Level, type Teacher } from '@/lib/admin/kursplanung/types';
 import { monthLabel, weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
 import { saveTeacherAction } from './actions';
@@ -22,7 +24,7 @@ function Opt({ type, name, value, checked, label, level }: { type: 'checkbox' | 
   );
 }
 
-export function TeacherForm({
+export async function TeacherForm({
   teacher,
   month,
   weeks,
@@ -35,6 +37,7 @@ export function TeacherForm({
   absences: readonly Absence[];
   returnTo: string;
 }) {
+  const { t, lang } = await getI18n();
   const id = `t-${teacher.id.slice(0, 8)}`;
   return (
     <form action={saveTeacherAction} className={ui.module}>
@@ -43,16 +46,16 @@ export function TeacherForm({
       <input type="hidden" name="returnTo" value={returnTo} />
 
       <div className={ui.sec}>
-        <span className={ui.lbl}>Einsatz</span>
+        <span className={ui.lbl}>{t('Einsatz', 'Work pattern')}</span>
         <div className={ui.row}>
           <div className={ui.f}>
-            <span className={ui.lbl}>Schicht</span>
+            <span className={ui.lbl}>{t('Schicht', 'Shift')}</span>
             <div className={ui.opts}>
-              {SHIFTS.map((s) => <Opt key={s} type="checkbox" name="shifts" value={s} checked={teacher.shifts.includes(s)} label={SHIFT_INFO[s].label} />)}
+              {SHIFTS.map((s) => <Opt key={s} type="checkbox" name="shifts" value={s} checked={teacher.shifts.includes(s)} label={pick(lang, SHIFT_INFO[s].label)} />)}
             </div>
           </div>
           <div className={ui.f}>
-            <span className={ui.lbl}>Tage pro Woche</span>
+            <span className={ui.lbl}>{t('Tage pro Woche', 'Days per week')}</span>
             <div className={ui.opts}>
               {[1, 2, 3, 4, 5].map((n) => <Opt key={n} type="radio" name="daysPerWeek" value={String(n)} checked={teacher.daysPerWeek === n} label={String(n)} />)}
             </div>
@@ -60,31 +63,31 @@ export function TeacherForm({
         </div>
         <div className={ui.row}>
           <div className={ui.f}>
-            <span className={ui.lbl}>Vertrag</span>
+            <span className={ui.lbl}>{t('Vertrag', 'Contract')}</span>
             <div className={ui.opts}>
-              <Opt type="radio" name="contract" value="employed" checked={teacher.contract === 'employed'} label="angestellt" />
-              <Opt type="radio" name="contract" value="freelance" checked={teacher.contract === 'freelance'} label="Honorarkraft" />
+              <Opt type="radio" name="contract" value="employed" checked={teacher.contract === 'employed'} label={t('angestellt', 'Employed')} />
+              <Opt type="radio" name="contract" value="freelance" checked={teacher.contract === 'freelance'} label={t('Honorarkraft', 'Freelance')} />
             </div>
           </div>
         </div>
       </div>
 
       <div className={ui.sec}>
-        <span className={ui.lbl}>Mögliche Wochentage</span>
+        <span className={ui.lbl}>{t('Mögliche Wochentage', 'Possible weekdays')}</span>
         <div className={ui.opts}>
-          {WEEKDAYS.map((d) => <Opt key={d} type="checkbox" name="weekdays" value={d} checked={teacher.weekdays.includes(d)} label={d} />)}
+          {WEEKDAYS.map((d) => <Opt key={d} type="checkbox" name="weekdays" value={d} checked={teacher.weekdays.includes(d)} label={pick(lang, WEEKDAY_LABELS[d])} />)}
         </div>
       </div>
 
       <div className={ui.sec}>
-        <span className={ui.lbl}>Niveaus · bestimmen, wo das Teil passt</span>
+        <span className={ui.lbl}>{t('Niveaus · bestimmen, wo das Teil passt', 'Levels · decide where the piece fits')}</span>
         <div className={ui.opts}>
           {LEVELS.map((L) => <Opt key={L} type="checkbox" name="levels" value={L} checked={teacher.levels.includes(L)} label={L} level={L} />)}
         </div>
       </div>
 
       <div className={ui.sec}>
-        <span className={ui.lbl}>Abwesenheiten {monthLabel(month)}</span>
+        <span className={ui.lbl}>{t('Abwesenheiten', 'Absences')} {monthLabel(month, lang)}</span>
         {weeks.map((w) => {
           const mine = absences.filter((a) => w.days.includes(a.onDate));
           const checked = mine.map((a) => weekdayOf(a.onDate));
@@ -93,11 +96,11 @@ export function TeacherForm({
             <div key={w.start} className={ui.absrow}>
               <span className={ui.kw}>KW {w.kw}<small>{w.label}</small></span>
               <div className={ui.dd}>
-                {WEEKDAYS.map((d) => <Opt key={d} type="checkbox" name={`abs_${w.start}`} value={d} checked={checked.includes(d)} label={d} />)}
+                {WEEKDAYS.map((d) => <Opt key={d} type="checkbox" name={`abs_${w.start}`} value={d} checked={checked.includes(d)} label={pick(lang, WEEKDAY_LABELS[d])} />)}
               </div>
-              <select name={`reason_${w.start}`} defaultValue={reason} className={ui.sel} aria-label={`Grund KW ${w.kw}`}>
+              <select name={`reason_${w.start}`} defaultValue={reason} className={ui.sel} aria-label={t(`Grund KW ${w.kw}`, `Reason KW ${w.kw}`)}>
                 {ABSENCE_REASONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r} value={r}>{pick(lang, ABSENCE_LABELS[r])}</option>
                 ))}
               </select>
             </div>
@@ -108,18 +111,18 @@ export function TeacherForm({
       <div className={ui.sec}>
         <div className={ui.row}>
           <div className={`${ui.f} ${ui.grow}`}>
-            <label className={ui.lbl} htmlFor={`${id}-short`}>Name auf dem Brett</label>
+            <label className={ui.lbl} htmlFor={`${id}-short`}>{t('Name auf dem Brett', 'Name on the board')}</label>
             <input id={`${id}-short`} name="shortName" defaultValue={teacher.shortName} required maxLength={40} className={ui.input} />
           </div>
           <div className={`${ui.f} ${ui.grow}`} style={{ flex: 2 }}>
-            <label className={ui.lbl} htmlFor={`${id}-note`}>Hinweis</label>
-            <input id={`${id}-note`} name="note" defaultValue={teacher.note ?? ''} maxLength={200} placeholder="z. B. ab Oktober freigestellt" className={ui.input} />
+            <label className={ui.lbl} htmlFor={`${id}-note`}>{t('Hinweis', 'Note')}</label>
+            <input id={`${id}-note`} name="note" defaultValue={teacher.note ?? ''} maxLength={200} placeholder={t('z. B. ab Oktober freigestellt', 'e.g. released from duty from October')} className={ui.input} />
           </div>
         </div>
       </div>
 
       <div className={ui.foot}>
-        <button type="submit" className={ui.primary}>Speichern</button>
+        <button type="submit" className={ui.primary}>{t('Speichern', 'Save')}</button>
       </div>
     </form>
   );

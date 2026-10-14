@@ -1,5 +1,6 @@
 'use client';
 
+import { useWsLang } from '@/components/admin/lang';
 import type { CmsLocale } from '@/lib/cms/locales';
 import { cn } from '@/lib/utils';
 
@@ -30,12 +31,13 @@ export function LanguageMenu({
   onPick: (code: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useWsLang();
   return (
     <>
-      <button type="button" aria-label="Close" className="fixed inset-0 z-30 cursor-default" onClick={onClose} />
+      <button type="button" aria-label={t('Schließen', 'Close')} className="fixed inset-0 z-30 cursor-default" onClick={onClose} />
       <div
         role="menu"
-        aria-label="Language"
+        aria-label={t('Sprache', 'Language')}
         className={cn(
           'absolute left-1/2 top-[calc(100%+8px)] z-40 w-[320px] -translate-x-1/2 overflow-hidden rounded-2xl border border-ws-line bg-white p-2 shadow-[0_28px_64px_-24px_rgba(15,23,42,0.38)]',
           styles.pop
@@ -62,7 +64,11 @@ export function LanguageMenu({
                   {locale.label}
                 </span>
                 <span className="block text-xs text-[var(--casa-text-subtle)]">
-                  {locale.source ? 'Source' : locale.routed ? 'On the site' : 'Preview only'}
+                  {locale.source
+                    ? t('Ausgangssprache', 'Source')
+                    : locale.routed
+                      ? t('Auf der Website', 'On the site')
+                      : t('Nur in der Vorschau', 'Preview only')}
                 </span>
               </span>
               {done !== null && done !== undefined ? (

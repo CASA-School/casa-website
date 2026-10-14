@@ -1,18 +1,22 @@
+import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
+
 /**
  * A CV's kind in a word — "PDF", "Word" — rather than its media type: a
  * colleague deciding whether a file opens wants the former, and
  * `application/vnd.openxmlformats-officedocument…` is plumbing.
  */
-const BY_EXTENSION: Record<string, string> = {
+const IMAGE: Bilingual = { de: 'Bild', en: 'Image' };
+
+const BY_EXTENSION: Record<string, string | Bilingual> = {
   pdf: 'PDF',
   doc: 'Word',
   docx: 'Word',
   odt: 'OpenDocument',
   rtf: 'RTF',
   txt: 'Text',
-  jpg: 'Image',
-  jpeg: 'Image',
-  png: 'Image',
+  jpg: IMAGE,
+  jpeg: IMAGE,
+  png: IMAGE,
 };
 
 const BY_TYPE: Record<string, string> = {
@@ -22,10 +26,11 @@ const BY_TYPE: Record<string, string> = {
   'application/vnd.oasis.opendocument.text': 'OpenDocument',
 };
 
-export function fileKind(fileName: string | null | undefined, mimeType?: string | null): string | null {
+export function fileKind(fileName: string | null | undefined, mimeType: string | null | undefined, lang: WsLang): string | null {
   const extension = fileName?.split('.').pop()?.toLowerCase();
-  if (extension && extension !== fileName?.toLowerCase() && BY_EXTENSION[extension]) {
-    return BY_EXTENSION[extension];
+  const kind = extension && extension !== fileName?.toLowerCase() ? BY_EXTENSION[extension] : undefined;
+  if (kind) {
+    return typeof kind === 'string' ? kind : pick(lang, kind);
   }
   return (mimeType && BY_TYPE[mimeType]) || null;
 }

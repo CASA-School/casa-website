@@ -45,6 +45,11 @@ const SIGNED_IN_ONLY = [
 ];
 
 test.describe('workspace access', () => {
+  // The workspace speaks German by default; these assertions read its English.
+  test.beforeEach(async ({ context, baseURL }) => {
+    await context.addCookies([{ name: 'casa_ws_lang', value: 'en', url: baseURL! }]);
+  });
+
   for (const path of GUARDED_PATHS) {
     test(`${path} shows nothing to an anonymous visitor`, async ({ page }) => {
       await page.goto(path);
@@ -114,5 +119,21 @@ test.describe('workspace access', () => {
     // place a crawler could find it.
     await page.goto('/');
     await expect(page.locator('a[href^="/admin"]')).toHaveCount(0);
+  });
+});
+
+test.describe('workspace language', () => {
+  test('German by default, and the switch on the sign-in page changes it', async ({ page }) => {
+    await page.goto('/admin/sign-in');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+
+    const body = await page.locator('body').innerText();
+    test.skip(body.includes('Der Arbeitsbereich hat keine Datenbank'), 'No DATABASE_URL — sign-in is not reachable in this mode.');
+
+    await expect(page.getByRole('button', { name: 'Anmelden' })).toBeVisible();
+    await page.getByRole('link', { name: 'EN', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/sign-in/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
   });
 });

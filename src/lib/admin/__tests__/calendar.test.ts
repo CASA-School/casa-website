@@ -18,7 +18,8 @@ describe('the calendar', () => {
     expect(weekday('2027-04-24')).toBe(5);
     expect(addMonths(2026, 12, 1)).toEqual({ y: 2027, m: 1 });
     expect(addMonths(2027, 1, -1)).toEqual({ y: 2026, m: 12 });
-    expect(formatDay('2027-04-11')).toBe('Sun 11 Apr 2027');
+    expect(formatDay('2027-04-11', 'en')).toBe('Sun 11 Apr 2027');
+    expect(formatDay('2027-04-11', 'de')).toBe('So. 11. Apr. 2027');
   });
 });
 

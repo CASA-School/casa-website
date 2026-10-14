@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition, type ReactNode } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
 import { absenceOn, assignmentKey, courseDays, fit, remainingDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
-import { SHIFT_INFO, SHIFTS, type Assignment, type CourseGroup, type Shift, type Teacher } from '@/lib/admin/kursplanung/types';
+import { SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
 import { weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
@@ -26,7 +28,13 @@ import ui from './ui.module.css';
  * change comes back as stale and is undone here. Undo replays the previous set.
  */
 
-const DAY_LABEL: Record<string, string> = { Mo: 'Montag', Di: 'Dienstag', Mi: 'Mittwoch', Do: 'Donnerstag', Fr: 'Freitag' };
+const DAY_LABEL: Record<Weekday, Bilingual> = {
+  Mo: { de: 'Montag', en: 'Monday' },
+  Di: { de: 'Dienstag', en: 'Tuesday' },
+  Mi: { de: 'Mittwoch', en: 'Wednesday' },
+  Do: { de: 'Donnerstag', en: 'Thursday' },
+  Fr: { de: 'Freitag', en: 'Friday' },
+};
 
 type Drag = { teacherId: string; from: 'tray' } | { teacherId: string; from: 'board'; groupId: string; dates: string[]; weekStart: string };
 type Menu =
@@ -35,8 +43,10 @@ type Menu =
 type Preview = { keys: Set<string>; cls: string } | null;
 type Touched = { shift: Shift; weekStart: string };
 
-const groupLabel = (g: CourseGroup, of: number) => `${g.level}.${g.phase}${of > 1 ? ` · Gruppe ${g.groupIndex}` : ''}`;
-const shortDay = (date: string) => weekdayOf(date) ?? '';
+const groupLabel = (g: CourseGroup, of: number, t: T) => `${g.level}.${g.phase}${of > 1 ? ` · ${t('Gruppe', 'Group')} ${g.groupIndex}` : ''}`;
+/** A date's weekday as the board writes it: `Mo` / `Mon`, or the full name. */
+const shortDay = (date: string, lang: WsLang) => { const d = weekdayOf(date); return d ? pick(lang, WEEKDAY_LABELS[d]) : ''; };
+const dayName = (date: string, lang: WsLang) => { const d = weekdayOf(date); return d ? pick(lang, DAY_LABEL[d]) : ''; };
 const sig = (a: Assignment) => `${a.groupId}|${a.onDate}|${a.teacherId}|${a.isSubstitute}|${a.isTentative}`;
 
 export function Board({
@@ -54,6 +64,8 @@ export function Board({
   notice?: { ok?: string; error?: string };
 }) {
   const router = useRouter();
+  const { t, lang } = useWsLang();
+  const day = (date: string) => shortDay(date, lang);
   const [assignments, setAssignments] = useState<Assignment[]>(() => [...plan.assignments]);
   const [shift, setShift] = useState<Shift>(() => (plan.groups.some((g) => g.shift === 'morning') ? 'morning' : 'afternoon'));
   const [view, setView] = useState<'week' | 'month'>('week');
@@ -97,16 +109,16 @@ export function Board({
   const persist = useCallback(
     (next: Assignment[], touched: readonly Touched[], previous: Assignment[], done: string) => {
       startTransition(async () => {
-        for (const t of touched) {
-          const w = plan.weeks.find((x) => x.start === t.weekStart);
+        for (const tw of touched) {
+          const w = plan.weeks.find((x) => x.start === tw.weekStart);
           if (!w) continue;
           const result = await saveWeekAction({
             month,
-            shift: t.shift,
-            weekStart: t.weekStart,
-            assignments: weekSlice(next, plan.groups, t.shift, w),
-            base: weekSlice(baseRef.current, plan.groups, t.shift, w),
-          }).catch((): SaveWeekResult => ({ ok: false, stale: true, error: 'Speichern fehlgeschlagen.' }));
+            shift: tw.shift,
+            weekStart: tw.weekStart,
+            assignments: weekSlice(next, plan.groups, tw.shift, w),
+            base: weekSlice(baseRef.current, plan.groups, tw.shift, w),
+          }).catch((): SaveWeekResult => ({ ok: false, stale: true, error: t('Speichern fehlgeschlagen.', 'Saving failed.') }));
           if (!result.ok) {
             // Back to the last state the server confirmed. A stale answer — or no
             // answer at all — means the database may differ from this copy, so
@@ -121,7 +133,7 @@ export function Board({
         setStatus({ text: done });
       });
     },
-    [month, plan.groups, plan.weeks]
+    [month, plan.groups, plan.weeks, t]
   );
 
   const touchedWeeks = useCallback(
@@ -145,8 +157,9 @@ export function Board({
     const previous = assignments;
     setUndo((u) => [...u.slice(-39), previous]);
     setAssignments(next);
-    setStatus({ text: 'speichert …' });
-    persist(next, touched ?? touchedWeeks(previous, next), previous, done || `Gespeichert ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`);
+    setStatus({ text: t('speichert …', 'saving …') });
+    const time = new Date().toLocaleTimeString(wsLocale(lang), { hour: '2-digit', minute: '2-digit' });
+    persist(next, touched ?? touchedWeeks(previous, next), previous, done || t(`Gespeichert ${time}`, `Saved ${time}`));
   };
 
   const doUndo = () => {
@@ -155,8 +168,8 @@ export function Board({
     const current = assignments;
     setUndo((u) => u.slice(0, -1));
     setAssignments(previous);
-    setStatus({ text: 'speichert …' });
-    persist(previous, touchedWeeks(current, previous), current, 'Rückgängig gemacht');
+    setStatus({ text: t('speichert …', 'saving …') });
+    persist(previous, touchedWeeks(current, previous), current, t('Rückgängig gemacht', 'Undone'));
   };
 
   /* ------------------------------------------------------------- mutations */
@@ -176,7 +189,7 @@ export function Board({
 
   const doPlace = (teacherId: string, group: CourseGroup, fromDate: string) => {
     const next = place(teacherId, group, fromDate);
-    if (!next) { setStatus({ text: 'Passt hier nicht', bad: true }); return; }
+    if (!next) { setStatus({ text: t('Passt hier nicht', 'Does not fit here'), bad: true }); return; }
     commit(next);
     setMenu(null);
     const w = weekOf(fromDate);
@@ -203,7 +216,7 @@ export function Board({
     const base = copy ? assignments : without(assignments, drag.groupId, drag.dates);
     const template = assignments.find((a) => a.groupId === drag.groupId && a.onDate === drag.dates[0]);
     const next = place(drag.teacherId, group, toDate, base, drag.dates.length);
-    if (!next) { setStatus({ text: 'Passt hier nicht', bad: true }); return; }
+    if (!next) { setStatus({ text: t('Passt hier nicht', 'Does not fit here'), bad: true }); return; }
     if (template?.isTentative) {
       const laid = new Set(span({ ...ctx, assignments: base }, drag.teacherId, group, toDate, drag.dates.length));
       next.forEach((a) => { if (a.groupId === group.id && laid.has(a.onDate)) a.isTentative = true; });
@@ -238,7 +251,7 @@ export function Board({
   const copyWeek = () => {
     const i = plan.weeks.findIndex((w) => w.start === week.start);
     const to = plan.weeks[i + 1];
-    if (!to) { setStatus({ text: 'Letzte Woche', bad: true }); return; }
+    if (!to) { setStatus({ text: t('Letzte Woche', 'Last week of the month'), bad: true }); return; }
     const next = [...assignments];
     let n = 0;
     for (const g of groups) {
@@ -252,7 +265,7 @@ export function Board({
         n++;
       });
     }
-    commit(next, [{ shift, weekStart: to.start }], `${n} Tage in KW ${to.kw} übernommen`);
+    commit(next, [{ shift, weekStart: to.start }], t(`${n} Tage in KW ${to.kw} übernommen`, `${n} ${n === 1 ? 'day' : 'days'} copied to KW ${to.kw}`));
     setWeekStart(to.start);
   };
 
@@ -356,6 +369,9 @@ export function Board({
 
   /* ----------------------------------------------------------------- data */
 
+  const conflicts = (n: number) => (n > 1 ? t(`${n} Konflikte`, `${n} conflicts`) : t(`${n} Konflikt`, `${n} conflict`));
+  const covers = (n: number) => (n > 1 ? t(`${n} Vertretungen`, `${n} covers`) : t(`${n} Vertretung`, `${n} cover`));
+
   const statsFor = (wks: readonly PlanningWeek[]) => {
     let total = 0, filled = 0, subs = 0;
     const issues = analysis.issues.filter((i) => i.shift === shift && wks.some((w) => w.start === i.weekStart));
@@ -427,19 +443,19 @@ export function Board({
     const item = (x: (typeof rows)[number], cls?: string) => (
       <button key={x.t.id} type="button" className={`${styles.mi} ${cls ?? ''}`} onClick={() => doPlace(x.t.id, g, m.date)}>
         <span className="nm">{x.t.shortName}</span>
-        {x.pair ? <span className={styles.tagp}>{g.phase === '1' ? 'Vorschlag' : 'Stamm'}</span> : x.f.ok && !x.f.levelMatch ? <span className={styles.tagp}>{g.level}?</span> : null}
-        <span className="r">{x.r.rest} Tag{x.r.rest === 1 ? '' : 'e'} frei</span>
+        {x.pair ? <span className={styles.tagp}>{g.phase === '1' ? t('Vorschlag', 'Suggested') : t('Stamm', 'Regular')}</span> : x.f.ok && !x.f.levelMatch ? <span className={styles.tagp}>{g.level}?</span> : null}
+        <span className="r">{x.r.rest === 1 ? t(`${x.r.rest} Tag frei`, `${x.r.rest} day free`) : t(`${x.r.rest} Tage frei`, `${x.r.rest} days free`)}</span>
       </button>
     );
     return (
       <div ref={menuRef} className={styles.menu} style={{ left: m.x, top: m.y + 6 }} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.mh}><b>{groupLabel(g, groupsOfLevel(g))}</b><div className="s">{DAY_LABEL[shortDay(m.date)]} · KW {wk.kw} · legt ab hier so viele Tage wie frei</div></div>
-        <input type="search" placeholder="Lehrkraft suchen" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus aria-label="Lehrkraft suchen" />
+        <div className={styles.mh}><b>{groupLabel(g, groupsOfLevel(g), t)}</b><div className="s">{dayName(m.date, lang)} · KW {wk.kw} · {t('legt ab hier so viele Tage wie frei', 'fills as many days from here as are free')}</div></div>
+        <input type="search" placeholder={t('Lehrkraft suchen', 'Search teachers')} value={query} onChange={(e) => setQuery(e.target.value)} autoFocus aria-label={t('Lehrkraft suchen', 'Search teachers')} />
         <div className={styles.list}>
           {ok.map((x) => item(x))}
-          {sub.length ? <><div className={styles.sect}><span className={styles.lbl}>Andere Schicht · Vertretung</span></div>{sub.map((x) => item(x, styles.miSub))}</> : null}
-          {no.length && q ? no.map((x) => <div key={x.t.id} className={`${styles.mi} ${styles.miDis}`}><span className="nm">{x.t.shortName}</span><span className="r">{x.f.ok ? '' : x.f.reason}</span></div>) : null}
-          {no.length && !q ? <div className={styles.fold}>{no.length} nicht verfügbar — Suche zeigt sie mit Grund</div> : null}
+          {sub.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Andere Schicht · Vertretung', 'Other shift · cover')}</span></div>{sub.map((x) => item(x, styles.miSub))}</> : null}
+          {no.length && q ? no.map((x) => <div key={x.t.id} className={`${styles.mi} ${styles.miDis}`}><span className="nm">{x.t.shortName}</span><span className="r">{x.f.ok ? '' : pick(lang, x.f.reason)}</span></div>) : null}
+          {no.length && !q ? <div className={styles.fold}>{t(`${no.length} nicht verfügbar — Suche zeigt sie mit Grund`, `${no.length} not available — search shows them with the reason`)}</div> : null}
         </div>
       </div>
     );
@@ -449,28 +465,28 @@ export function Board({
     const g = groups.find((x) => x.id === m.groupId)!;
     const a = assignments.find((x) => x.groupId === g.id && x.onDate === m.dates[0]);
     if (!a) return null;
-    const t = teacher(a.teacherId);
+    const who = teacher(a.teacherId);
     const wk = weekOf(m.dates[0]);
-    const range = `${shortDay(m.dates[0])}${m.dates.length > 1 ? `–${shortDay(m.dates[m.dates.length - 1])}` : ''}`;
+    const range = `${day(m.dates[0])}${m.dates.length > 1 ? `–${day(m.dates[m.dates.length - 1])}` : ''}`;
     const free = courseDays(g, wk).filter((d) => !assignments.some((x) => x.groupId === g.id && x.onDate === d) && fit(ctx, a.teacherId, g, d).ok);
-    const absent = m.dates.filter((d) => absenceOn(ctx, a.teacherId, d) || (t && !t.weekdays.includes(weekdayOf(d)!)));
+    const absent = m.dates.filter((d) => absenceOn(ctx, a.teacherId, d) || (who && !who.weekdays.includes(weekdayOf(d)!)));
     const row = (title: string, onClick: () => void, cls?: string) => (
       <button key={title} type="button" className={`${styles.mr} ${cls ?? ''}`} onClick={onClick}>{title}</button>
     );
     return (
       <div ref={menuRef} className={styles.menu} style={{ left: m.x, top: m.y + 6 }} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.mh}><b>{t?.fullName}</b><div className="s">{groupLabel(g, groupsOfLevel(g))} · {range} · KW {wk.kw}{a.isSubstitute ? ' · Vertretung' : ''}{a.isTentative ? ' · unbestätigt' : ''}</div></div>
+        <div className={styles.mh}><b>{who?.fullName}</b><div className="s">{groupLabel(g, groupsOfLevel(g), t)} · {range} · KW {wk.kw}{a.isSubstitute ? t(' · Vertretung', ' · cover') : ''}{a.isTentative ? t(' · unbestätigt', ' · unconfirmed') : ''}</div></div>
         <div className={styles.rows}>
-          {absent.length ? row(`Ersatz finden für ${absent.map(shortDay).join(', ')}`, () => { commit(without(assignments, g.id, absent)); setMenu({ kind: 'socket', groupId: g.id, date: absent[0], x: m.x, y: m.y }); }, styles.mrOn) : null}
+          {absent.length ? row(t(`Ersatz finden für ${absent.map(day).join(', ')}`, `Find cover for ${absent.map(day).join(', ')}`), () => { commit(without(assignments, g.id, absent)); setMenu({ kind: 'socket', groupId: g.id, date: absent[0], x: m.x, y: m.y }); }, styles.mrOn) : null}
           {a.isSubstitute
-            ? row('Vertretung aufheben', () => toggleFlag(g.id, m.dates, 'isSubstitute'), styles.mrOn)
-            : row('Als Vertretung markieren', () => toggleFlag(g.id, m.dates, 'isSubstitute'))}
+            ? row(t('Vertretung aufheben', 'Unmark as cover'), () => toggleFlag(g.id, m.dates, 'isSubstitute'), styles.mrOn)
+            : row(t('Als Vertretung markieren', 'Mark as cover'), () => toggleFlag(g.id, m.dates, 'isSubstitute'))}
           {a.isTentative
-            ? row('Bestätigen', () => toggleFlag(g.id, m.dates, 'isTentative'))
-            : row('Als unbestätigt markieren', () => toggleFlag(g.id, m.dates, 'isTentative'))}
-          {free.length ? row(`Auf ${free.map(shortDay).join(', ')} ausdehnen`, () => extendRun(g, a, wk)) : null}
-          {row('Lehrkraft-Details', () => router.push(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${a.teacherId}`))}
-          {row(`Aus KW ${wk.kw} entfernen`, () => removeDates(g.id, m.dates), styles.mrDel)}
+            ? row(t('Bestätigen', 'Confirm'), () => toggleFlag(g.id, m.dates, 'isTentative'))
+            : row(t('Als unbestätigt markieren', 'Mark as unconfirmed'), () => toggleFlag(g.id, m.dates, 'isTentative'))}
+          {free.length ? row(t(`Auf ${free.map(day).join(', ')} ausdehnen`, `Extend to ${free.map(day).join(', ')}`), () => extendRun(g, a, wk)) : null}
+          {row(t('Lehrkraft-Details', 'Teacher details'), () => router.push(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${a.teacherId}`))}
+          {row(t(`Aus KW ${wk.kw} entfernen`, `Remove from KW ${wk.kw}`), () => removeDates(g.id, m.dates), styles.mrDel)}
         </div>
       </div>
     );
@@ -491,13 +507,13 @@ export function Board({
         onDragStart={off ? undefined : (e) => { dragRef.current = { teacherId: x.t.id, from: 'tray' }; e.dataTransfer.effectAllowed = 'move'; markFor(x.t.id); }}
         onDragEnd={off ? undefined : () => { dragRef.current = null; setPreview(null); if (!hand) setMarks(new Map()); }}
         className={`${styles.tp} ${off ? styles.tpOff : ''} ${inHand ? styles.tpHand : ''}`}
-        title={`${x.t.fullName}${off ? '' : ' – anklicken oder ziehen'}`}
+        title={`${x.t.fullName}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
       >
         <span className={styles.tpName}>{x.t.shortName}</span>
-        <span>{inHand ? <span className={styles.handlbl}>in der Hand</span> : null} {flex ? <span className={styles.sh}>V+N</span> : null} {hon ? <span className={styles.sh}>HON</span> : null} <Link href={`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${x.t.id}`} className={styles.more} title="Details: Schicht, Tage, Niveaus, Abwesenheiten" aria-label={`Details zu ${x.t.shortName}`} onClick={(e) => e.stopPropagation()} draggable={false}>···</Link></span>
+        <span>{inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : null} {flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null} {hon ? <span className={styles.sh}>{t('HON', 'FL')}</span> : null} <Link href={`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${x.t.id}`} className={styles.more} title={t('Details: Schicht, Tage, Niveaus, Abwesenheiten', 'Details: shift, days, levels, absences')} aria-label={t(`Details zu ${x.t.shortName}`, `Details for ${x.t.shortName}`)} onClick={(e) => e.stopPropagation()} draggable={false}>···</Link></span>
         <span className={styles.bl}>
           <span className={styles.blocks} aria-hidden="true">{Array.from({ length: x.max }, (_, i) => <i key={i} className={i < x.max - x.rest ? 'u' : ''} />)}</span>
-          <span className={styles.cnt}>{x.awayAll ? 'abwesend' : x.rest > 0 ? `${x.rest} von ${x.max} Tagen frei` : `alle ${x.max} Tage verplant`}</span>
+          <span className={styles.cnt}>{x.awayAll ? t('abwesend', 'absent') : x.rest > 0 ? t(`${x.rest} von ${x.max} Tagen frei`, `${x.rest} of ${x.max} days free`) : t(`alle ${x.max} Tage verplant`, `all ${x.max} days planned`)}</span>
         </span>
         <span className={styles.lvs}>{x.t.levels.map((L) => <i key={L} className={styles.lvChip} style={lvStyle(L)}>{L}</i>)}</span>
       </div>
@@ -514,9 +530,9 @@ export function Board({
             <h2>KW {w.kw} <span style={{ color: 'var(--pz-mute)', fontWeight: 600 }}>· {w.label}</span></h2>
             <span className="txt"><b>{wst.filled}</b> / {wst.total}</span>
             <span className={styles.pills}>
-              {wst.done ? <span className={`${styles.pill} ${styles.pillOk}`}>✓ vollständig</span> : null}
-              {wst.hard ? <span className={`${styles.pill} ${styles.pillBad}`}>{wst.hard} Konflikt{wst.hard > 1 ? 'e' : ''}</span> : null}
-              {wst.subs ? <span className={`${styles.pill} ${styles.pillSub}`}>{wst.subs} Vertretung{wst.subs > 1 ? 'en' : ''}</span> : null}
+              {wst.done ? <span className={`${styles.pill} ${styles.pillOk}`}>{t('✓ vollständig', '✓ complete')}</span> : null}
+              {wst.hard ? <span className={`${styles.pill} ${styles.pillBad}`}>{conflicts(wst.hard)}</span> : null}
+              {wst.subs ? <span className={`${styles.pill} ${styles.pillSub}`}>{covers(wst.subs)}</span> : null}
             </span>
           </button>
         ) : null}
@@ -530,7 +546,7 @@ export function Board({
               <section key={g.id} className={`${styles.col} ${mark === 'can' ? styles.colCan : mark === 'maybe' ? styles.colMaybe : mark === 'no' ? styles.colNo : ''}`} style={lvStyle(g.level)}>
                 <header className={styles.colHead}>
                   <span className={styles.lv}>{g.level}.{g.phase}</span>
-                  <span className={styles.grp} title={`${g.phase === '1' ? 'Vorschlag' : 'Stamm'}: ${pair || '–'}`}>{of > 1 ? `Gruppe ${g.groupIndex} · ` : ''}{g.registrations} TN</span>
+                  <span className={styles.grp} title={`${g.phase === '1' ? t('Vorschlag', 'Suggested') : t('Stamm', 'Regular')}: ${pair || '–'}`}>{of > 1 ? `${t('Gruppe', 'Group')} ${g.groupIndex} · ` : ''}{g.registrations} {t('TN', 'students')}</span>
                 </header>
                 <div className={styles.sockets} style={{ '--rows': gd.length } as React.CSSProperties}>
                   {gd.map((d, i) => {
@@ -547,7 +563,7 @@ export function Board({
                         data-group={g.id}
                         data-week={w.start}
                         data-date={d}
-                        aria-label={`${groupLabel(g, of)} ${DAY_LABEL[shortDay(d)]} KW ${w.kw} offen`}
+                        aria-label={t(`${groupLabel(g, of, t)} ${dayName(d, lang)} KW ${w.kw} offen`, `${groupLabel(g, of, t)} ${dayName(d, lang)} KW ${w.kw} open`)}
                         onClick={(e) => { e.stopPropagation(); if (!canWrite) return; setWeekStart(w.start); if (hand) doPlace(hand, g, d); else { setQuery(''); setMenu({ kind: 'socket', groupId: g.id, date: d, x: e.clientX, y: e.clientY }); } }}
                         onMouseEnter={() => { if (hand) showPreview(g, d); }}
                         onMouseLeave={() => { if (hand) setPreview(null); }}
@@ -555,16 +571,16 @@ export function Board({
                         onDragLeave={() => setPreview(null)}
                         onDrop={(e) => { e.preventDefault(); onDrop(g, d); }}
                       >
-                        {shortDay(d)}
+                        {day(d)}
                       </button>
                     );
                   })}
                   {runsOf(g, gd).map(({ dates, a }) => {
-                    const t = teacher(a.teacherId);
+                    const who = teacher(a.teacherId);
                     const issues = dates.flatMap((d) => analysis.byKey.get(assignmentKey(g.id, d)) ?? []).filter((i) => i.severity !== 'open');
                     const hardIss = issues.filter((i) => i.severity === 'hard');
                     const warnIss = !hardIss.length && issues.some((i) => i.severity === 'warn');
-                    const cap = dates.length > 1 ? `${shortDay(dates[0])}–${shortDay(dates[dates.length - 1])}` : shortDay(dates[0]);
+                    const cap = dates.length > 1 ? `${day(dates[0])}–${day(dates[dates.length - 1])}` : day(dates[0]);
                     return (
                       <div
                         key={dates[0]}
@@ -576,16 +592,16 @@ export function Board({
                         data-row={gd.indexOf(dates[0]) + 1}
                         data-group={g.id}
                         data-week={w.start}
-                        title={`${t?.fullName ?? ''}${issues.length ? `\n${issues.map((i) => `• ${i.text}`).join('\n')}` : ''}`}
+                        title={`${who?.fullName ?? ''}${issues.length ? `\n${issues.map((i) => `• ${pick(lang, i.text)}`).join('\n')}` : ''}`}
                         onClick={(e) => { e.stopPropagation(); if ((e.target as HTMLElement).closest(`.${styles.handle}`)) return; setWeekStart(w.start); setMenu({ kind: 'piece', groupId: g.id, dates, x: e.clientX, y: e.clientY }); }}
                         onKeyDown={(e) => { if (e.key === 'Enter') { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); setWeekStart(w.start); setMenu({ kind: 'piece', groupId: g.id, dates, x: r.left, y: r.bottom }); } }}
                         onDragStart={(e) => { dragRef.current = { teacherId: a.teacherId, from: 'board', groupId: g.id, dates, weekStart: w.start }; e.dataTransfer.effectAllowed = 'move'; markFor(a.teacherId, without(assignments, g.id, dates)); (e.currentTarget as HTMLElement).classList.add(styles.pieceDrag); }}
                         onDragEnd={(e) => { dragRef.current = null; setPreview(null); setMarks(new Map()); (e.currentTarget as HTMLElement).classList.remove(styles.pieceDrag); }}
                       >
-                        <span className={styles.pieceName}>{t?.shortName}{a.isTentative ? '?' : ''}</span>
+                        <span className={styles.pieceName}>{who?.shortName}{a.isTentative ? '?' : ''}</span>
                         <span className={styles.pieceCap}>{cap}</span>
-                        {hardIss.length ? <span className={styles.tag}>{hardIss[0].text}</span> : a.isSubstitute ? <span className={styles.tag}>Vertretung</span> : warnIss ? <span className={styles.tag}>{issues[0].text}</span> : null}
-                        {canWrite ? <span className={styles.handle} title="Ziehen, um Tage zu ändern" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); resizeRef.current = { groupId: g.id, dates, row: null }; }} /> : null}
+                        {hardIss.length ? <span className={styles.tag}>{pick(lang, hardIss[0].text)}</span> : a.isSubstitute ? <span className={styles.tag}>{t('Vertretung', 'Cover')}</span> : warnIss ? <span className={styles.tag}>{pick(lang, issues[0].text)}</span> : null}
+                        {canWrite ? <span className={styles.handle} title={t('Ziehen, um Tage zu ändern', 'Drag to change the days')} onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); resizeRef.current = { groupId: g.id, dates, row: null }; }} /> : null}
                       </div>
                     );
                   })}
@@ -603,16 +619,16 @@ export function Board({
       <div className={ui.top}>
         {header}
         <span className={ui.spacer} />
-        {canWrite ? <><button type="button" className={ui.ghost} disabled={!undo.length} onClick={(e) => { e.stopPropagation(); doUndo(); }}>↶ Rückgängig</button><button type="button" className={ui.ghost} onClick={(e) => { e.stopPropagation(); copyWeek(); }}>Woche übernehmen →</button></> : null}
-        {stale ? <button type="button" className={ui.reload} onClick={(e) => { e.stopPropagation(); router.refresh(); }}>Neu laden</button> : null}
+        {canWrite ? <><button type="button" className={ui.ghost} disabled={!undo.length} onClick={(e) => { e.stopPropagation(); doUndo(); }}>{t('↶ Rückgängig', '↶ Undo')}</button><button type="button" className={ui.ghost} onClick={(e) => { e.stopPropagation(); copyWeek(); }}>{t('Woche übernehmen →', 'Copy week →')}</button></> : null}
+        {stale ? <button type="button" className={ui.reload} onClick={(e) => { e.stopPropagation(); router.refresh(); }}>{t('Neu laden', 'Reload')}</button> : null}
         <span className={`${ui.status} ${status.bad ? ui.statusBad : ''}`}>{status.text}</span>
         {notice?.error ? <span className={`${ui.status} ${ui.statusBad}`}>{notice.error}</span> : notice?.ok ? <span className={`${ui.status} ${ui.statusOk}`}>{notice.ok}</span> : null}
       </div>
       <div className={styles.bar}>
-        <div className={styles.seg}>{SHIFTS.map((s) => <button key={s} type="button" aria-pressed={s === shift} onClick={(e) => { e.stopPropagation(); setShift(s); setHand(null); }}>{SHIFT_INFO[s].label}</button>)}</div>
+        <div className={styles.seg}>{SHIFTS.map((s) => <button key={s} type="button" aria-pressed={s === shift} onClick={(e) => { e.stopPropagation(); setShift(s); setHand(null); }}>{pick(lang, SHIFT_INFO[s].label)}</button>)}</div>
         <div className={`${styles.seg} ${styles.segSoft}`}>
-          <button type="button" aria-pressed={view === 'week'} onClick={(e) => { e.stopPropagation(); setView('week'); }}>Woche</button>
-          <button type="button" aria-pressed={view === 'month'} onClick={(e) => { e.stopPropagation(); setView('month'); }}>Monat</button>
+          <button type="button" aria-pressed={view === 'week'} onClick={(e) => { e.stopPropagation(); setView('week'); }}>{t('Woche', 'Week')}</button>
+          <button type="button" aria-pressed={view === 'month'} onClick={(e) => { e.stopPropagation(); setView('month'); }}>{t('Monat', 'Month')}</button>
         </div>
         {view === 'week' ? (
           <div className={styles.seg}>
@@ -623,12 +639,12 @@ export function Board({
             })}
           </div>
         ) : null}
-        <div className={styles.prog}><span className={styles.progTxt}>{st.filled} <small>/ {st.total} Tage{view === 'month' ? ' im Monat' : ''}</small></span><div className={styles.track}><i className={st.done ? 'done' : ''} style={{ width: `${st.total ? Math.round((st.filled / st.total) * 100) : 0}%` }} /></div></div>
+        <div className={styles.prog}><span className={styles.progTxt}>{st.filled} <small>/ {st.total} {view === 'month' ? t('Tage im Monat', 'days in the month') : t('Tage', 'days')}</small></span><div className={styles.track}><i className={st.done ? 'done' : ''} style={{ width: `${st.total ? Math.round((st.filled / st.total) * 100) : 0}%` }} /></div></div>
         <div className={styles.pills}>
-          {st.done ? <span className={`${styles.pill} ${styles.pillOk}`}>✓ {view === 'month' ? 'Monat' : `KW ${week.kw}`} vollständig</span> : null}
-          {st.hard ? <span className={`${styles.pill} ${styles.pillBad}`}>{st.hard} Konflikt{st.hard > 1 ? 'e' : ''}</span> : null}
-          {st.subs ? <span className={`${styles.pill} ${styles.pillSub}`}>{st.subs} Vertretung{st.subs > 1 ? 'en' : ''}</span> : null}
-          {st.warn ? <span className={styles.pill}>{st.warn} Hinweis{st.warn > 1 ? 'e' : ''}</span> : null}
+          {st.done ? <span className={`${styles.pill} ${styles.pillOk}`}>✓ {view === 'month' ? t('Monat', 'Month') : `KW ${week.kw}`} {t('vollständig', 'complete')}</span> : null}
+          {st.hard ? <span className={`${styles.pill} ${styles.pillBad}`}>{conflicts(st.hard)}</span> : null}
+          {st.subs ? <span className={`${styles.pill} ${styles.pillSub}`}>{covers(st.subs)}</span> : null}
+          {st.warn ? <span className={styles.pill}>{st.warn > 1 ? t(`${st.warn} Hinweise`, `${st.warn} warnings`) : t(`${st.warn} Hinweis`, `${st.warn} warning`)}</span> : null}
         </div>
       </div>
 
@@ -636,9 +652,18 @@ export function Board({
         <div>
           {handInfo ? (
             <div className={styles.handbar}>
-              <span><b>{handInfo.t.shortName}</b> in der Hand · noch {handInfo.rest} {handInfo.rest === 1 ? 'Tag' : 'Tage'} in KW {week.kw}</span>
-              <span className="m">{handInfo.good.length ? `passt in ${handInfo.good.join(', ')}` : 'kein passendes Niveau frei'}{handInfo.maybe.length ? ` · möglich, aber anderes Niveau: ${handInfo.maybe.join(', ')}` : ''} · Fach anklicken zum Ablegen</span>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setHand(null); }}>Loslassen</button>
+              <span>
+                <b>{handInfo.t.shortName}</b>{' '}
+                {handInfo.rest === 1
+                  ? t(`in der Hand · noch ${handInfo.rest} Tag in KW ${week.kw}`, `in hand · ${handInfo.rest} day left in KW ${week.kw}`)
+                  : t(`in der Hand · noch ${handInfo.rest} Tage in KW ${week.kw}`, `in hand · ${handInfo.rest} days left in KW ${week.kw}`)}
+              </span>
+              <span className="m">
+                {handInfo.good.length ? t(`passt in ${handInfo.good.join(', ')}`, `fits ${handInfo.good.join(', ')}`) : t('kein passendes Niveau frei', 'no matching level free')}
+                {handInfo.maybe.length ? t(` · möglich, aber anderes Niveau: ${handInfo.maybe.join(', ')}`, ` · possible, but another level: ${handInfo.maybe.join(', ')}`) : ''}
+                {t(' · Fach anklicken zum Ablegen', ' · click a slot to place it')}
+              </span>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setHand(null); }}>{t('Loslassen', 'Let go')}</button>
             </div>
           ) : null}
           {shown.map((w) => block(w, view === 'month'))}
@@ -646,13 +671,21 @@ export function Board({
 
         <aside className={styles.tray} onClick={(e) => e.stopPropagation()}>
           <section className={styles.card}>
-            <div className={styles.cardHead}><h2>Teile</h2><span className="sub">wer in KW {week.kw} noch Tage frei hat</span><button type="button" className={styles.qm} aria-pressed={help} aria-label="Erklärung" onClick={() => setHelp(!help)}>?</button></div>
-            {help ? <div className={styles.help}>Jede Lehrkraft ist ein Teil. Die Blöcke sind ihre freien Tage in dieser Woche, die Chips die Niveaus, in denen sie unterrichtet.<br />Teil auf ein Fach ziehen – oder Teil antippen (es ist dann „in der Hand“) und ein Fach antippen. Es legt ab dort so viele Tage, wie es frei hat.<br />Spalten mit passendem Niveau leuchten auf, unpassende werden blass. Nochmal antippen oder Esc lässt das Teil wieder los.</div> : null}
-            {tray.avail.length ? tray.avail.map((x) => trayPiece(x, !canWrite)) : <div className={styles.fold}>Niemand aus dieser Schicht hat in KW {week.kw} noch freie Tage.</div>}
-            {tray.other.length ? <><div className={styles.sect}><span className={styles.lbl}>Andere Schicht · als Vertretung</span><span className={styles.n}>{tray.other.length}</span></div>{showOther ? <>{tray.other.map((x) => trayPiece(x, !canWrite))}<button type="button" className={styles.fold} onClick={() => setShowOther(false)}>einklappen</button></> : <button type="button" className={styles.fold} onClick={() => setShowOther(true)}>{tray.other.map((x) => `${x.t.shortName} ${x.rest}`).join(' · ')}</button>}</> : null}
-            {tray.away.length ? <><div className={styles.sect}><span className={styles.lbl}>Abwesend</span></div>{tray.away.map((x) => trayPiece(x, true))}</> : null}
-            {tray.full.length ? <><div className={styles.sect}><span className={styles.lbl}>Verplant</span><span className={styles.n}>{tray.full.length}</span></div>{showFull ? <>{tray.full.map((x) => trayPiece(x, true))}<button type="button" className={styles.fold} onClick={() => setShowFull(false)}>einklappen</button></> : <button type="button" className={styles.fold} onClick={() => setShowFull(true)}>{tray.full.map((x) => x.t.shortName).join(', ')}</button>}</> : null}
-            <div className={styles.legend}><span>Farbe = Niveau</span><span><i style={{ background: 'var(--pz-yellow)' }} />Vertretung</span><span><i style={{ boxShadow: 'inset 0 0 0 2px var(--pz-red)', background: '#fff' }} />Konflikt</span><span><i style={{ border: '1.5px dashed #c5cad3', background: '#fafbfc' }} />offen</span></div>
+            <div className={styles.cardHead}><h2>{t('Teile', 'Pieces')}</h2><span className="sub">{t(`wer in KW ${week.kw} noch Tage frei hat`, `who still has days free in KW ${week.kw}`)}</span><button type="button" className={styles.qm} aria-pressed={help} aria-label={t('Erklärung', 'Explanation')} onClick={() => setHelp(!help)}>?</button></div>
+            {help ? (
+              <div className={styles.help}>
+                {t('Jede Lehrkraft ist ein Teil. Die Blöcke sind ihre freien Tage in dieser Woche, die Chips die Niveaus, in denen sie unterrichtet.', 'Each teacher is a piece. The blocks are their free days this week, the chips the levels they teach.')}
+                <br />
+                {t('Teil auf ein Fach ziehen – oder Teil antippen (es ist dann „in der Hand“) und ein Fach antippen. Es legt ab dort so viele Tage, wie es frei hat.', 'Drag a piece onto a slot – or tap the piece (it is then “in hand”) and tap a slot. It fills as many days from there as it has free.')}
+                <br />
+                {t('Spalten mit passendem Niveau leuchten auf, unpassende werden blass. Nochmal antippen oder Esc lässt das Teil wieder los.', 'Columns with a matching level light up, the others fade. Tap again or press Esc to let the piece go.')}
+              </div>
+            ) : null}
+            {tray.avail.length ? tray.avail.map((x) => trayPiece(x, !canWrite)) : <div className={styles.fold}>{t(`Niemand aus dieser Schicht hat in KW ${week.kw} noch freie Tage.`, `Nobody in this shift has days free in KW ${week.kw}.`)}</div>}
+            {tray.other.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Andere Schicht · als Vertretung', 'Other shift · as cover')}</span><span className={styles.n}>{tray.other.length}</span></div>{showOther ? <>{tray.other.map((x) => trayPiece(x, !canWrite))}<button type="button" className={styles.fold} onClick={() => setShowOther(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowOther(true)}>{tray.other.map((x) => `${x.t.shortName} ${x.rest}`).join(' · ')}</button>}</> : null}
+            {tray.away.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Abwesend', 'Absent')}</span></div>{tray.away.map((x) => trayPiece(x, true))}</> : null}
+            {tray.full.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Verplant', 'Fully planned')}</span><span className={styles.n}>{tray.full.length}</span></div>{showFull ? <>{tray.full.map((x) => trayPiece(x, true))}<button type="button" className={styles.fold} onClick={() => setShowFull(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowFull(true)}>{tray.full.map((x) => x.t.shortName).join(', ')}</button>}</> : null}
+            <div className={styles.legend}><span>{t('Farbe = Niveau', 'Colour = level')}</span><span><i style={{ background: 'var(--pz-yellow)' }} />{t('Vertretung', 'Cover')}</span><span><i style={{ boxShadow: 'inset 0 0 0 2px var(--pz-red)', background: '#fff' }} />{t('Konflikt', 'Conflict')}</span><span><i style={{ border: '1.5px dashed #c5cad3', background: '#fafbfc' }} />{t('offen', 'open')}</span></div>
           </section>
         </aside>
       </div>

@@ -1,5 +1,6 @@
 import { NewOffer } from '@/components/admin/offers/new-offer';
 import { requireModule } from '@/lib/admin/guard';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { courseCatalogue } from '@/lib/admin/offers/course-catalogue';
 import { findRecipients, wizardStart } from '@/lib/admin/offers/recipients';
 import { editorOptions, priceListOptions } from '@/lib/admin/offers/repo';
@@ -19,11 +20,12 @@ export default async function NewOfferPage({
   searchParams: Promise<{ enquiry?: string; person?: string; organisation?: string }>;
 }) {
   const [actor, sp] = await Promise.all([requireModule('offers', 'edit'), searchParams]);
+  const { lang } = await getI18n();
   const from = { enquiryId: id(sp.enquiry), personId: id(sp.person), organisationId: id(sp.organisation) };
   const [start, suggestions, priceList, options, catalogue] = await Promise.all([
-    from.enquiryId || from.personId || from.organisationId ? wizardStart(from) : Promise.resolve(null),
-    findRecipients('', 'all'),
-    priceListOptions(),
+    from.enquiryId || from.personId || from.organisationId ? wizardStart(from, lang) : Promise.resolve(null),
+    findRecipients('', 'all', lang),
+    priceListOptions(lang),
     editorOptions(),
     courseCatalogue(),
   ]);

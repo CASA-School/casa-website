@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { Icon } from '@/components/admin/icons';
 import { InboundChart } from '@/components/admin/inbound-chart';
 import { Avatar, ListEmpty, RecordName, Status } from '@/components/admin/list';
-import { Card, Cell, PageHeader, relativeDays, Table, TableRow } from '@/components/admin/ui';
+import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityHref, describeActivity, recentActivity, type ActivityEntry } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
+import { capitalise, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { getInboundByDay, getOverviewCounts, getRecentInbound } from '@/lib/admin/overview';
 import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { cn } from '@/lib/utils';
@@ -37,6 +39,7 @@ import { cn } from '@/lib/utils';
  */
 export default async function ActivityPage() {
   const user = await requireModule('activity');
+  const { t, lang } = await getI18n();
   const includeApplications = canAccess(user, 'applications');
 
   const [entries, recent, inbound, counts] = await Promise.all([
@@ -58,19 +61,19 @@ export default async function ActivityPage() {
   return (
     <>
       <PageHeader
-        title="Activity"
+        title={t('Aktivität', 'Activity')}
       />
 
       <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        <Card title="Just arrived" icon={Icon.enquiries} tint="ink" bleed>
+        <Card title={t('Gerade eingegangen', 'Just arrived')} icon={Icon.enquiries} tint="ink" bleed>
           {recent.length === 0 ? (
-            <p className="px-5 py-4 text-sm text-[var(--casa-text-subtle)]">Nothing has come in yet.</p>
+            <p className="px-5 py-4 text-sm text-[var(--casa-text-subtle)]">{t('Noch ist nichts eingegangen.', 'Nothing has come in yet.')}</p>
           ) : (
             <Table
               head={[
-                'From',
-                { label: 'Status', className: 'hidden w-[8.5rem] md:table-cell' },
-                { label: 'Received', className: 'w-[7.5rem]' },
+                t('Von', 'From'),
+                { label: t('Status', 'Status'), className: 'hidden w-[8.5rem] md:table-cell' },
+                { label: t('Eingegangen', 'Received'), className: 'w-[7.5rem]' },
               ]}
             >
               {recent.map((item) => {
@@ -79,15 +82,17 @@ export default async function ActivityPage() {
                   <TableRow key={`${item.kind}-${item.id}`} interactive>
                     <Cell href={item.href} className="max-w-0">
                       <RecordName
-                        name={item.name || 'No name given'}
-                        about={[INBOUND_LABELS[item.kind], item.summary].filter(Boolean).join(' · ')}
+                        name={item.name || t('Kein Name angegeben', 'No name given')}
+                        about={[INBOUND_LABELS[item.kind] ? pick(lang, INBOUND_LABELS[item.kind]) : null, item.summary]
+                          .filter(Boolean)
+                          .join(' · ')}
                       />
                     </Cell>
                     <Cell className="hidden md:table-cell">
-                      <Status tone={STATUS_TONES[status]}>{STATUS_LABELS[status]}</Status>
+                      <Status tone={STATUS_TONES[status]}>{pick(lang, STATUS_LABELS[status])}</Status>
                     </Cell>
                     <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
-                      {capitalise(relativeDays(item.at))}
+                      {capitalise(relativeDays(item.at, lang))}
                     </Cell>
                   </TableRow>
                 );
@@ -97,55 +102,61 @@ export default async function ActivityPage() {
         </Card>
 
         <Card
-          title="Inbound, last fortnight"
+          title={t('Eingang, letzte zwei Wochen', 'Inbound, last fortnight')}
           icon={Icon.overview}
           tint="blue"
           footer={
             <p className="text-xs text-[var(--casa-text-subtle)]">
               <span className="font-semibold text-[var(--casa-ink)]">
-                {counts.inboundThisWeek} this week
+                {t(`${counts.inboundThisWeek} diese Woche`, `${counts.inboundThisWeek} this week`)}
               </span>
               {' · '}
               {weekDelta === 0
-                ? 'level with the week before'
-                : `${Math.abs(weekDelta)} ${weekDelta > 0 ? 'more' : 'fewer'} than the week before`}
+                ? t('so viel wie in der Woche davor', 'level with the week before')
+                : t(
+                    `${Math.abs(weekDelta)} ${weekDelta > 0 ? 'mehr' : 'weniger'} als in der Woche davor`,
+                    `${Math.abs(weekDelta)} ${weekDelta > 0 ? 'more' : 'fewer'} than the week before`
+                  )}
             </p>
           }
         >
-          <InboundChart days={inbound} />
+          <InboundChart days={inbound} lang={lang} />
         </Card>
       </div>
 
       <Card bleed>
         {entries.length === 0 ? (
-          <ListEmpty title="Nothing has been worked yet" />
+          <ListEmpty title={t('Noch wurde nichts bearbeitet', 'Nothing has been worked yet')} />
         ) : (
           [...byDay.entries()].map(([day, dayEntries], index) => (
-            <section key={day} aria-label={dayLabel(new Date(day))}>
+            <section key={day} aria-label={dayLabel(new Date(day), lang)}>
               <h2
                 className={cn(
                   'bg-[#f8fafc] px-5 pt-3 pb-2 text-xs font-bold text-[var(--casa-muted)]',
                   index > 0 && 'border-t border-ws-line-soft'
                 )}
               >
-                {dayLabel(new Date(day))}
+                {dayLabel(new Date(day), lang)}
                 <span className="ml-1.5 font-semibold text-[var(--casa-text-subtle)] tabular-nums">{dayEntries.length}</span>
               </h2>
               <ul className="divide-y divide-ws-line-soft border-t border-ws-line-soft">
-                {runsOf(dayEntries).map(({ entry, count, earliest }) => {
+                {runsOf(dayEntries, lang).map(({ entry, count, earliest }) => {
                   const href = activityHref(entry);
-                  const time = clock(entry.createdAt);
-                  const from = clock(earliest);
-                  const who = entry.staffName ?? 'Someone';
+                  const time = clock(entry.createdAt, lang);
+                  const from = clock(earliest, lang);
+                  const who = entry.staffName ?? t('Jemand', 'Someone');
 
                   const line = (
                     <span className="flex items-center gap-3 px-5 py-2.5">
                       <Avatar name={who} staff size="sm" />
                       <span className="min-w-0 flex-1 text-[0.875rem] text-[#2b3546]">
-                        <span className="font-semibold text-[var(--casa-ink)]">{who}</span> {describeActivity(entry)}
+                        <span className="font-semibold text-[var(--casa-ink)]">{who}</span> {describeActivity(entry, lang)}
                         {count > 1 ? (
                           <span className="ml-2 text-xs whitespace-nowrap text-[var(--casa-text-subtle)]">
-                            {count} times{from !== time ? `, from ${from}` : ''}
+                            {t(
+                              `${count}-mal${from !== time ? `, ab ${from}` : ''}`,
+                              `${count} times${from !== time ? `, from ${from}` : ''}`
+                            )}
                           </span>
                         ) : null}
                       </span>
@@ -178,10 +189,13 @@ export default async function ActivityPage() {
  * The same thing done again and again in a row — a week saved four times in
  * Kursplanung — is one line with how often, not four: the newest, counted.
  */
-function runsOf(entries: readonly ActivityEntry[]) {
+function runsOf(entries: readonly ActivityEntry[], lang: WsLang) {
   const runs: { entry: ActivityEntry; count: number; earliest: Date | string }[] = [];
   const same = (a: ActivityEntry, b: ActivityEntry) =>
-    a.staffName === b.staffName && a.entity === b.entity && a.entityId === b.entityId && describeActivity(a) === describeActivity(b);
+    a.staffName === b.staffName &&
+    a.entity === b.entity &&
+    a.entityId === b.entityId &&
+    describeActivity(a, lang) === describeActivity(b, lang);
   for (const entry of entries) {
     const last = runs[runs.length - 1];
     if (last && same(last.entry, entry)) {
@@ -192,16 +206,15 @@ function runsOf(entries: readonly ActivityEntry[]) {
   return runs;
 }
 
-const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+const clock = (at: Date | string, lang: WsLang) =>
+  new Date(at).toLocaleTimeString(wsLocale(lang), { hour: '2-digit', minute: '2-digit' });
 
-const clock = (at: Date | string) => new Date(at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-/** "Today", "Yesterday", "Tue 6 Oct"; the year only when it is not this one. */
-function dayLabel(day: Date): string {
+/** "Today", "Yesterday", "Tue 6 Oct" ("Heute", "Gestern", "Di., 6. Okt."); the year only when it is not this one. */
+function dayLabel(day: Date, lang: WsLang): string {
   const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(day).setHours(0, 0, 0, 0)) / 86_400_000);
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  return day.toLocaleDateString('en-GB', {
+  if (days === 0) return lang === 'de' ? 'Heute' : 'Today';
+  if (days === 1) return lang === 'de' ? 'Gestern' : 'Yesterday';
+  return day.toLocaleDateString(wsLocale(lang), {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -209,9 +222,9 @@ function dayLabel(day: Date): string {
   });
 }
 
-const INBOUND_LABELS: Record<string, string> = {
-  enquiry: 'Enquiry',
-  course: 'Course registration',
-  exam: 'Exam registration',
-  application: 'Job application',
+const INBOUND_LABELS: Record<string, Bilingual> = {
+  enquiry: { de: 'Anfrage', en: 'Enquiry' },
+  course: { de: 'Kursanmeldung', en: 'Course registration' },
+  exam: { de: 'Prüfungsanmeldung', en: 'Exam registration' },
+  application: { de: 'Bewerbung', en: 'Job application' },
 };

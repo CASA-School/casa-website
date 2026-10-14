@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+
 import ui from './offers.module.css';
 
 function useDismiss(open: boolean, close: () => void, wrap: React.RefObject<HTMLElement | null>) {
@@ -60,6 +62,7 @@ export function ClickPanel({
   /** So something else — a check that names the problem — can open it. */
   triggerId?: string;
 }) {
+  const { t } = useWsLang();
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
   const [end, setEnd] = useState(false);
@@ -86,7 +89,7 @@ export function ClickPanel({
         id={triggerId}
         className={`${className} ${open && openClassName ? openClassName : ''}`}
         aria-expanded={open}
-        aria-label={`${label}: change`}
+        aria-label={t(`${label}: ändern`, `${label}: change`)}
         onClick={toggle}
       >
         {children}
@@ -104,7 +107,7 @@ export function ClickPanel({
           <div className={ui.popFoot}>
             <span>{foot ? foot(close) : null}</span>
             <button type="button" className={ui.primary} style={{ height: 34 }} onClick={close}>
-              Done
+              {t('Fertig', 'Done')}
             </button>
           </div>
         </div>
@@ -115,6 +118,7 @@ export function ClickPanel({
 
 /** A small menu of actions, behind "⋯". */
 export function MoreMenu({ items }: { items: { label: string; onSelect: () => void; danger?: boolean; rule?: boolean }[] }) {
+  const { t } = useWsLang();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const close = () => setOpen(false);
@@ -122,7 +126,7 @@ export function MoreMenu({ items }: { items: { label: string; onSelect: () => vo
   if (items.length === 0) return null;
   return (
     <div ref={wrap} className={ui.menuWrap}>
-      <button type="button" className={ui.ghost} aria-label="More" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className={ui.ghost} aria-label={t('Mehr', 'More')} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         ⋯
       </button>
       {open ? (

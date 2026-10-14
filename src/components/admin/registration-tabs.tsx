@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { translator, type WsLang } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -13,17 +14,20 @@ import { cn } from '@/lib/utils';
 export function RegistrationTabs({
   active,
   counts,
+  lang,
 }: {
   active: 'course' | 'exam';
   counts: { course: number; exam: number };
+  lang: WsLang;
 }) {
+  const t = translator(lang);
   const tabs = [
-    { key: 'course' as const, label: 'Course', href: '/admin/registrations/course' },
-    { key: 'exam' as const, label: 'Exam', href: '/admin/registrations/exam' },
+    { key: 'course' as const, label: t('Kurs', 'Course'), href: '/admin/registrations/course' },
+    { key: 'exam' as const, label: t('Prüfung', 'Exam'), href: '/admin/registrations/exam' },
   ];
 
   return (
-    <nav aria-label="Registrations" className="inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-0.5">
+    <nav aria-label={t('Anmeldungen', 'Registrations')} className="inline-flex gap-0.5 rounded-xl border border-ws-line bg-white p-0.5">
       {tabs.map((tab) => {
         const isActive = tab.key === active;
 

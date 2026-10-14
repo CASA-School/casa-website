@@ -15,7 +15,15 @@ import { nativeName } from './locales';
 const API = 'https://api.anthropic.com/v1/messages';
 const DEFAULT_MODEL = 'claude-sonnet-5-5';
 
-export class AiError extends Error {}
+/** A message the website editor shows: German first, as everywhere in the workspace; `message` is the English. */
+export class AiError extends Error {
+  constructor(
+    readonly de: string,
+    en: string
+  ) {
+    super(en);
+  }
+}
 
 export const aiEnabled = (): boolean => Boolean(process.env.ANTHROPIC_API_KEY);
 
@@ -38,7 +46,7 @@ Never promise admission, a visa, a job, exam results or availability.`;
 
 async function complete(task: string, maxTokens = 1200): Promise<string> {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new AiError('Writing help is not switched on.');
+  if (!key) throw new AiError('Die Schreibhilfe ist nicht eingeschaltet.', 'Writing help is not switched on.');
 
   let response: Response;
   try {
@@ -54,9 +62,14 @@ async function complete(task: string, maxTokens = 1200): Promise<string> {
       signal: AbortSignal.timeout(60_000),
     });
   } catch {
-    throw new AiError('The writing help did not answer. Try again.');
+    throw new AiError('Die Schreibhilfe hat nicht geantwortet. Versuch es noch einmal.', 'The writing help did not answer. Try again.');
   }
-  if (!response.ok) throw new AiError(`The writing help did not answer (${response.status}).`);
+  if (!response.ok) {
+    throw new AiError(
+      `Die Schreibhilfe hat nicht geantwortet (${response.status}).`,
+      `The writing help did not answer (${response.status}).`
+    );
+  }
 
   const body = (await response.json()) as { content?: { type: string; text?: string }[] };
   return (body.content ?? [])
@@ -69,11 +82,19 @@ function parseJson<T>(text: string): T {
   const cleaned = text.replace(/```(?:json)?/g, '').trim();
   const start = cleaned.search(/[[{]/);
   const end = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
-  if (start < 0 || end < start) throw new AiError('The writing help answered in a form the editor could not read.');
+  if (start < 0 || end < start) {
+    throw new AiError(
+      'Die Schreibhilfe hat in einer Form geantwortet, die der Editor nicht lesen kann.',
+      'The writing help answered in a form the editor could not read.'
+    );
+  }
   try {
     return JSON.parse(cleaned.slice(start, end + 1)) as T;
   } catch {
-    throw new AiError('The writing help answered in a form the editor could not read.');
+    throw new AiError(
+      'Die Schreibhilfe hat in einer Form geantwortet, die der Editor nicht lesen kann.',
+      'The writing help answered in a form the editor could not read.'
+    );
   }
 }
 
@@ -139,7 +160,7 @@ ${englishName(input.sourceLocale)} text:
 ${input.source}`
   );
   const { text } = parseJson<{ text?: unknown }>(answer);
-  if (typeof text !== 'string' || !text.trim()) throw new AiError('The writing help returned no translation.');
+  if (typeof text !== 'string' || !text.trim()) throw new AiError('Die Schreibhilfe hat keine Übersetzung geliefert.', 'The writing help returned no translation.');
   return text.trim();
 }
 

@@ -44,7 +44,11 @@ test.describe('workspace search', () => {
   });
 
   test.beforeEach(async ({ context, baseURL }) => {
-    await context.addCookies([{ name: 'casa_workspace_session', value: token, url: baseURL! }]);
+    // The workspace speaks German by default; these assertions read its English.
+    await context.addCookies([
+      { name: 'casa_workspace_session', value: token, url: baseURL! },
+      { name: 'casa_ws_lang', value: 'en', url: baseURL! },
+    ]);
   });
 
   test('a name finds the student, an offer number the offer, and Enter opens it', async ({ page }) => {

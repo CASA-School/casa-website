@@ -254,6 +254,10 @@ export type PricedLine = {
  * The one exception is a deliberate override — a colleague changing the course
  * fee on the booking itself — which arrives as `tuitionOverride` and is
  * clamped by the action.
+ *
+ * The descriptions are stored on the cost lines in English, whoever books, so the
+ * data reads one way; the booking page shows a kind's own name in its reader's
+ * language.
  */
 export async function priceSelection(selection: BookingSelection): Promise<PricedLine[]> {
   const on = selection.startDate;

@@ -1,6 +1,7 @@
 import { query, queryFirst } from './db';
 import type { StaffUser } from './auth';
 import { logActivity } from './activity';
+import type { Bilingual, WsLang } from './i18n';
 
 /**
  * Rooms and locations — setup, not daily work.
@@ -44,18 +45,19 @@ export type Room = {
   upcomingCohorts: number;
 };
 
-export const ROOM_KIND_LABELS: Record<RoomKind, string> = {
-  classroom: 'Classroom',
-  office: 'Office',
-  meeting: 'Meeting room',
-  other: 'Other',
+/** Read with `pick(lang, ROOM_KIND_LABELS[kind])` (docs/ADMIN_I18N.md). */
+export const ROOM_KIND_LABELS: Record<RoomKind, Bilingual> = {
+  classroom: { de: 'Unterrichtsraum', en: 'Classroom' },
+  office: { de: 'Büro', en: 'Office' },
+  meeting: { de: 'Besprechungsraum', en: 'Meeting room' },
+  other: { de: 'Sonstiges', en: 'Other' },
 };
 
-export function floorLabel(floor: number | null): string {
+export function floorLabel(floor: number | null, lang: WsLang): string {
   if (floor === null) return '—';
-  if (floor < 0) return 'Cellar';
-  if (floor === 0) return 'Ground floor';
-  return `${floor}. floor`;
+  if (floor < 0) return lang === 'en' ? 'Cellar' : 'Keller';
+  if (floor === 0) return lang === 'en' ? 'Ground floor' : 'Erdgeschoss';
+  return lang === 'en' ? `${floor}. floor` : `${floor}. Etage`;
 }
 
 type RoomRow = {
@@ -258,17 +260,22 @@ export async function createRoom(
   return row.id;
 }
 
+const ROOM_GONE: Bilingual = { de: 'Diesen Raum gibt es nicht mehr.', en: 'That room no longer exists.' };
+
 /** Puts a cohort in a room, or takes it out (null). */
 export async function assignRoom(
   courseInstanceId: string,
   roomId: string | null,
   actor: StaffUser
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   if (roomId) {
     const room = await getRoom(roomId);
-    if (!room) return { ok: false, reason: 'That room no longer exists.' };
+    if (!room) return { ok: false, reason: ROOM_GONE };
     if (!room.isBookable || !room.isActive || room.kind !== 'classroom') {
-      return { ok: false, reason: `${room.name} cannot hold a course.` };
+      return {
+        ok: false,
+        reason: { de: `In ${room.name} kann kein Kurs stattfinden.`, en: `${room.name} cannot hold a course.` },
+      };
     }
   }
   await query(`UPDATE course_instances SET room_id = $2 WHERE id = $1`, [courseInstanceId, roomId]);
@@ -290,11 +297,17 @@ export async function assignRoom(
 export async function deleteRoom(
   id: string,
   actor: StaffUser
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   const room = await getRoom(id);
-  if (!room) return { ok: false, reason: 'That room no longer exists.' };
+  if (!room) return { ok: false, reason: ROOM_GONE };
   if (room.upcomingCohorts > 0) {
-    return { ok: false, reason: `${room.name} still has cohorts planned. Move them first.` };
+    return {
+      ok: false,
+      reason: {
+        de: `In ${room.name} sind noch Termine geplant. Verschiebe sie zuerst.`,
+        en: `${room.name} still has cohorts planned. Move them first.`,
+      },
+    };
   }
   await query(`DELETE FROM filemaker_links WHERE entity = 'room' AND entity_id = $1`, [id]);
   await query(`UPDATE course_instances SET room_id = NULL WHERE room_id = $1`, [id]);

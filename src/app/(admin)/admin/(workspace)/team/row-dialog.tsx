@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
 /**
@@ -23,6 +24,7 @@ export function RowDialog({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useWsLang();
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <button
@@ -32,7 +34,7 @@ export function RowDialog({
       >
         <span className="sr-only">{label}</span>
       </button>
-      <DialogContent className="casa-ws-dialog max-w-2xl rounded-3xl p-6 sm:rounded-3xl" closeLabel="Close">
+      <DialogContent className="casa-ws-dialog max-w-2xl rounded-3xl p-6 sm:rounded-3xl" closeLabel={t('Schließen', 'Close')}>
         <DialogTitle className="text-lg font-extrabold">{title}</DialogTitle>
         {description ? (
           <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>

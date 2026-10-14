@@ -1,3 +1,4 @@
+import { translator, wsLocale, type WsLang } from '@/lib/admin/i18n';
 import { compactDays, compactTime } from '@/lib/registration/term-format';
 
 /**
@@ -33,6 +34,11 @@ const MONTHS: Record<string, number> = {
 
 const GERMAN_DAYS: Record<string, string> = { Mo: 'Mon', Di: 'Tue', Mi: 'Wed', Do: 'Thu', Fr: 'Fri', Sa: 'Sat', So: 'Sun' };
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const IN_GERMAN: Record<string, string> = Object.fromEntries(Object.entries(GERMAN_DAYS).map(([de, en]) => [en, de]));
+
+/** A parsed day list in the workspace's language: "Mon–Fri" stays, or becomes "Mo–Fr". */
+export const localDays = (days: string | null, lang: WsLang): string | null =>
+  days && lang === 'de' ? days.replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/g, (day) => IN_GERMAN[day] ?? day) : days;
 
 const TO_BE_ARRANGED = /termin wird noch festgelegt|date to be arranged|to be confirmed|wird bestätigt/i;
 
@@ -147,10 +153,10 @@ export function parseOptionLabel(label: string | null | undefined): ParsedOption
   };
 }
 
-/** "26 Oct", or "26 Oct 2027" outside the current year; `full` always has the year. */
-export function formatDay(value: Date, full = false): string {
+/** "26 Oct" / "26. Okt.", or with the year outside the current one; `full` always has the year. */
+export function formatDay(value: Date, lang: WsLang, full = false): string {
   const sameYear = value.getUTCFullYear() === new Date().getFullYear();
-  return value.toLocaleDateString('en-GB', {
+  return value.toLocaleDateString(wsLocale(lang), {
     day: 'numeric',
     month: 'short',
     ...(full || !sameYear ? { year: 'numeric' } : {}),
@@ -158,28 +164,30 @@ export function formatDay(value: Date, full = false): string {
   });
 }
 
-/** "26 Oct – 18 Dec 2026": the year once, at the end, when both share it. */
-export function formatRange(start: Date, end: Date | null): string {
-  if (!end || end.getTime() === start.getTime()) return formatDay(start, true);
+/** "26 Oct – 18 Dec 2026" / "26. Okt. – 18. Dez. 2026": the year once, at the end, when both share it. */
+export function formatRange(start: Date, end: Date | null, lang: WsLang): string {
+  if (!end || end.getTime() === start.getTime()) return formatDay(start, lang, true);
   const shared = start.getUTCFullYear() === end.getUTCFullYear();
-  const from = start.toLocaleDateString('en-GB', {
+  const from = start.toLocaleDateString(wsLocale(lang), {
     day: 'numeric',
     month: 'short',
     ...(shared ? {} : { year: 'numeric' }),
     timeZone: 'UTC',
   });
-  return `${from} – ${formatDay(end, true)}`;
+  return `${from} – ${formatDay(end, lang, true)}`;
 }
 
 /**
  * The option on one line for a queue's list: "Starts 26 Oct · 09:00–12:30" for
- * a course, "13 Nov · 09:00–17:00" for an exam sitting.
+ * a course, "13 Nov · 09:00–17:00" for an exam sitting; in German
+ * "Beginn 26. Okt. · 09:00–12:30".
  */
-export function optionLine(label: string | null | undefined, kind: 'course' | 'exam'): string | null {
+export function optionLine(label: string | null | undefined, kind: 'course' | 'exam', lang: WsLang): string | null {
+  const t = translator(lang);
   const parsed = parseOptionLabel(label);
   if (!parsed) return null;
-  if (parsed.toBeArranged) return 'Date to be arranged';
+  if (parsed.toBeArranged) return t('Termin wird noch festgelegt', 'Date to be arranged');
   if (!parsed.start) return parsed.raw;
-  const date = formatDay(parsed.start);
-  return [kind === 'course' ? `Starts ${date}` : date, parsed.time].filter(Boolean).join(' · ');
+  const date = formatDay(parsed.start, lang);
+  return [kind === 'course' ? t(`Beginn ${date}`, `Starts ${date}`) : date, parsed.time].filter(Boolean).join(' · ');
 }

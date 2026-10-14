@@ -1,3 +1,4 @@
+import type { Bilingual } from '@/lib/admin/i18n';
 import { DEFAULT_PUBLISHED_PRICES, type PublishedPrices } from '@/lib/content/published-prices';
 
 /**
@@ -20,8 +21,8 @@ export type FactDef = {
   id: string;
   /** Who it belongs to, as staff call it: „Intensivkurse", „telc Deutsch B2". */
   group: string;
-  /** What it is: "Next start", "Price". */
-  label: string;
+  /** What it is: „Nächster Beginn“ / "Next start". Shown in the website editor only, in the workspace's language. */
+  label: Bilingual;
   source: FactSource;
 };
 
@@ -128,19 +129,19 @@ function priceList(p: PublishedPrices): { def: FactDef; amount: number }[] {
   const b2 = EXAM_GROUPS.telc_b2;
   const c1 = EXAM_GROUPS.telc_c1_hochschule;
   return [
-    { def: { id: 'course.intensive-german.price-4-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 4 weeks', source: 'Prices' }, amount: p.intensive4Weeks },
-    { def: { id: 'course.intensive-german.price-8-weeks', group: COURSE_GROUPS['intensive-german'], label: 'Price for 8 weeks', source: 'Prices' }, amount: p.intensive8Weeks },
-    { def: { id: 'course.special-courses.price-per-module', group: COURSE_GROUPS['special-courses'], label: 'Price of a module', source: 'Prices' }, amount: p.specialModule },
-    { def: { id: 'course.special-courses.price-per-evening', group: COURSE_GROUPS['special-courses'], label: 'Price per evening', source: 'Prices' }, amount: p.specialPerEvening },
-    { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: 'Enrolment fee', source: 'Prices' }, amount: p.enrolmentFee },
-    { def: { id: 'exam.telc_b2.preparation-price', group: b2, label: 'Preparation course', source: 'Prices' }, amount: p.exams.telc_b2.prep },
-    { def: { id: 'exam.telc_b2.part-fee', group: b2, label: 'Fee for one part', source: 'Prices' }, amount: p.exams.telc_b2.part },
-    { def: { id: 'exam.telc_c1_hochschule.preparation-price', group: c1, label: 'Preparation course', source: 'Prices' }, amount: p.exams.telc_c1_hochschule.prep },
-    { def: { id: 'exam.telc_c1_hochschule.part-fee', group: c1, label: 'Fee for one part', source: 'Prices' }, amount: p.exams.telc_c1_hochschule.part },
-    { def: { id: 'accommodation.rent-4-weeks', group: 'Unterkunft', label: 'Rent for 4 weeks', source: 'Prices' }, amount: p.rent4Weeks },
-    { def: { id: 'accommodation.extra-week', group: 'Unterkunft', label: 'Each further week', source: 'Prices' }, amount: p.rentExtraWeek },
-    { def: { id: 'accommodation.booking-fee', group: 'Unterkunft', label: 'Booking fee', source: 'Prices' }, amount: p.placementFee },
-    { def: { id: 'accommodation.deposit', group: 'Unterkunft', label: 'Deposit', source: 'Prices' }, amount: p.deposit },
+    { def: { id: 'course.intensive-german.price-4-weeks', group: COURSE_GROUPS['intensive-german'], label: { de: 'Preis für 4 Wochen', en: 'Price for 4 weeks' }, source: 'Prices' }, amount: p.intensive4Weeks },
+    { def: { id: 'course.intensive-german.price-8-weeks', group: COURSE_GROUPS['intensive-german'], label: { de: 'Preis für 8 Wochen', en: 'Price for 8 weeks' }, source: 'Prices' }, amount: p.intensive8Weeks },
+    { def: { id: 'course.special-courses.price-per-module', group: COURSE_GROUPS['special-courses'], label: { de: 'Preis eines Moduls', en: 'Price of a module' }, source: 'Prices' }, amount: p.specialModule },
+    { def: { id: 'course.special-courses.price-per-evening', group: COURSE_GROUPS['special-courses'], label: { de: 'Preis pro Abend', en: 'Price per evening' }, source: 'Prices' }, amount: p.specialPerEvening },
+    { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: { de: 'Anmeldegebühr', en: 'Enrolment fee' }, source: 'Prices' }, amount: p.enrolmentFee },
+    { def: { id: 'exam.telc_b2.preparation-price', group: b2, label: { de: 'Vorbereitungskurs', en: 'Preparation course' }, source: 'Prices' }, amount: p.exams.telc_b2.prep },
+    { def: { id: 'exam.telc_b2.part-fee', group: b2, label: { de: 'Gebühr für einen Teil', en: 'Fee for one part' }, source: 'Prices' }, amount: p.exams.telc_b2.part },
+    { def: { id: 'exam.telc_c1_hochschule.preparation-price', group: c1, label: { de: 'Vorbereitungskurs', en: 'Preparation course' }, source: 'Prices' }, amount: p.exams.telc_c1_hochschule.prep },
+    { def: { id: 'exam.telc_c1_hochschule.part-fee', group: c1, label: { de: 'Gebühr für einen Teil', en: 'Fee for one part' }, source: 'Prices' }, amount: p.exams.telc_c1_hochschule.part },
+    { def: { id: 'accommodation.rent-4-weeks', group: 'Unterkunft', label: { de: 'Miete für 4 Wochen', en: 'Rent for 4 weeks' }, source: 'Prices' }, amount: p.rent4Weeks },
+    { def: { id: 'accommodation.extra-week', group: 'Unterkunft', label: { de: 'Jede weitere Woche', en: 'Each further week' }, source: 'Prices' }, amount: p.rentExtraWeek },
+    { def: { id: 'accommodation.booking-fee', group: 'Unterkunft', label: { de: 'Vermittlungsgebühr', en: 'Booking fee' }, source: 'Prices' }, amount: p.placementFee },
+    { def: { id: 'accommodation.deposit', group: 'Unterkunft', label: { de: 'Kaution', en: 'Deposit' }, source: 'Prices' }, amount: p.deposit },
   ];
 }
 

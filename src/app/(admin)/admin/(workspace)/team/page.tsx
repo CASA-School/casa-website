@@ -15,13 +15,14 @@ import {
   Table,
   TableRow,
   Textarea,
-  relativeDays,
 } from '@/components/admin/ui';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Avatar, ListGroup } from '@/components/admin/list';
 import { roleLabel } from '@/components/admin/shell';
 import { canDeleteStaff } from '@/lib/admin/auth';
 import { requireModule } from '@/lib/admin/guard';
+import { capitalise, relativeDays, type T } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { microsoftEnabled } from '@/lib/admin/microsoft';
 import { MIN_PASSWORD_LENGTH } from '@/lib/admin/password';
 import { listStaff } from '@/lib/admin/staff';
@@ -59,6 +60,7 @@ export default async function TeamPage({
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
   const user = await requireModule('team');
+  const { t, lang } = await getI18n();
 
   const [params, staff] = await Promise.all([searchParams, listStaff()]);
   const isOwner = canDeleteStaff(user.role);
@@ -66,21 +68,25 @@ export default async function TeamPage({
 
   // Read as a team: by role, then whoever has been deactivated. The group is the role, so no row repeats it.
   const groups = [
-    { key: 'owner', label: 'Owners', rows: staff.filter((a) => a.isActive && a.role === 'owner') },
-    { key: 'admin', label: 'Administrators', rows: staff.filter((a) => a.isActive && a.role === 'admin') },
-    { key: 'staff', label: 'Staff', rows: staff.filter((a) => a.isActive && a.role === 'staff') },
-    { key: 'inactive', label: 'Deactivated', rows: staff.filter((a) => !a.isActive) },
+    { key: 'owner', label: t('Inhaber', 'Owners'), rows: staff.filter((a) => a.isActive && a.role === 'owner') },
+    { key: 'admin', label: t('Administratoren', 'Administrators'), rows: staff.filter((a) => a.isActive && a.role === 'admin') },
+    { key: 'staff', label: t('Mitarbeitende', 'Staff'), rows: staff.filter((a) => a.isActive && a.role === 'staff') },
+    { key: 'inactive', label: t('Deaktiviert', 'Deactivated'), rows: staff.filter((a) => !a.isActive) },
   ].filter((group) => group.rows.length);
 
   return (
     <>
       <PageHeader
-        title="Team"
+        title={t('Team', 'Team')}
         actions={
           <>
-            <FormDialog trigger="Add the office team" title="Add the office team">
+            <FormDialog trigger={t('Büroteam hinzufügen', 'Add the office team')} title={t('Büroteam hinzufügen', 'Add the office team')}>
               <form action={createStaffBatchAction} className="space-y-3">
-                <Field label="Colleagues" hint="One per line: full name, Outlook address" htmlFor="batch-people">
+                <Field
+                  label={t('Personen', 'Colleagues')}
+                  hint={t('Eine pro Zeile: voller Name, Outlook-Adresse', 'One per line: full name, Outlook address')}
+                  htmlFor="batch-people"
+                >
                   <Textarea
                     id="batch-people"
                     name="people"
@@ -89,55 +95,64 @@ export default async function TeamPage({
                     placeholder={'Vorname Nachname, v.nachname@casa-bremen.de\nVorname Nachname, v.nachname@casa-bremen.de'}
                   />
                 </Field>
-                <Field label="Website editor" htmlFor="batch-website">
+                <Field label={t('Website-Editor', 'Website editor')} htmlFor="batch-website">
                   <Select id="batch-website" name="website" defaultValue="edit">
-                    <option value="none">No access</option>
-                    <option value="view">View</option>
-                    <option value="edit">Edit — drafts, sends for approval</option>
-                    <option value="full">Full — also publishes</option>
+                    <WebsiteLevels t={t} />
                   </Select>
                 </Field>
                 <div className="pt-1">
-                  <Button type="submit">Add colleagues</Button>
+                  <Button type="submit">{t('Personen hinzufügen', 'Add colleagues')}</Button>
                 </div>
               </form>
             </FormDialog>
 
             <FormDialog
-              trigger="Add an account"
-              title="Add an account"
-              description="Give them the password in person or by phone, not by email."
+              trigger={t('Konto anlegen', 'Add an account')}
+              title={t('Konto anlegen', 'Add an account')}
+              description={t(
+                'Gib das Passwort persönlich oder am Telefon weiter, nicht per E-Mail.',
+                'Give them the password in person or by phone, not by email.'
+              )}
               triggerVariant="primary"
               width="lg"
             >
               <form action={createStaffAction} className="grid gap-3 sm:grid-cols-2">
-                <Field label="Name" htmlFor="new-name">
-                  <Input id="new-name" name="name" required placeholder="Full name" />
+                <Field label={t('Name', 'Name')} htmlFor="new-name">
+                  <Input id="new-name" name="name" required placeholder={t('Voller Name', 'Full name')} />
                 </Field>
-                <Field label="Signs in as" hint="Leave empty to use the name" htmlFor="new-username">
-                  <Input id="new-username" name="username" placeholder="Full name, as they will type it" />
+                <Field
+                  label={t('Meldet sich an als', 'Signs in as')}
+                  hint={t('Leer lassen, um den Namen zu nehmen', 'Leave empty to use the name')}
+                  htmlFor="new-username"
+                >
+                  <Input
+                    id="new-username"
+                    name="username"
+                    placeholder={t('Voller Name, so wie die Person ihn eintippt', 'Full name, as they will type it')}
+                  />
                 </Field>
-                <Field label="Outlook address" htmlFor="new-email">
+                <Field label={t('Outlook-Adresse', 'Outlook address')} htmlFor="new-email">
                   <Input id="new-email" name="email" type="email" required placeholder="name@casa-bremen.de" />
                 </Field>
-                <Field label="Role" htmlFor="new-role">
+                <Field label={t('Rolle', 'Role')} htmlFor="new-role">
                   <Select id="new-role" name="role" defaultValue="staff">
-                    <option value="staff">Staff</option>
-                    <option value="admin">Administrator</option>
-                    {isOwner ? <option value="owner">Owner</option> : null}
+                    <option value="staff">{roleLabel('staff', lang)}</option>
+                    <option value="admin">{roleLabel('admin', lang)}</option>
+                    {isOwner ? <option value="owner">{roleLabel('owner', lang)}</option> : null}
                   </Select>
                 </Field>
-                <Field label="Website editor" htmlFor="new-website">
+                <Field label={t('Website-Editor', 'Website editor')} htmlFor="new-website">
                   <Select id="new-website" name="website" defaultValue="none">
-                    <option value="none">No access</option>
-                    <option value="view">View</option>
-                    <option value="edit">Edit — drafts, sends for approval</option>
-                    <option value="full">Full — also publishes</option>
+                    <WebsiteLevels t={t} />
                   </Select>
                 </Field>
                 <Field
-                  label="Password"
-                  hint={microsoft ? `Optional · ${MIN_PASSWORD_LENGTH} characters or more` : `${MIN_PASSWORD_LENGTH} characters or more`}
+                  label={t('Passwort', 'Password')}
+                  hint={
+                    microsoft
+                      ? t(`Optional · mindestens ${MIN_PASSWORD_LENGTH} Zeichen`, `Optional · ${MIN_PASSWORD_LENGTH} characters or more`)
+                      : t(`Mindestens ${MIN_PASSWORD_LENGTH} Zeichen`, `${MIN_PASSWORD_LENGTH} characters or more`)
+                  }
                   htmlFor="new-password"
                 >
                   <Input
@@ -150,7 +165,7 @@ export default async function TeamPage({
                   />
                 </Field>
                 <div className="pt-1 sm:col-span-2">
-                  <Button type="submit">Create account</Button>
+                  <Button type="submit">{t('Konto anlegen', 'Create account')}</Button>
                 </div>
               </form>
             </FormDialog>
@@ -179,29 +194,35 @@ export default async function TeamPage({
       <Card bleed>
         <Table
           head={[
-            'Colleague',
-            { label: 'Access', className: 'hidden md:table-cell' },
-            { label: 'Last seen', className: 'w-[7rem] md:w-[9.5rem]' },
+            t('Person', 'Colleague'),
+            { label: t('Zugriff', 'Access'), className: 'hidden md:table-cell' },
+            { label: t('Zuletzt aktiv', 'Last seen'), className: 'w-[7rem] md:w-[9.5rem]' },
           ]}
         >
           {groups.map((group) => [
             <ListGroup key={group.key} label={group.label} count={group.rows.length} span={3} />,
             ...group.rows.map((account) => {
-              const changes = accessChanges(account.role, account.moduleExceptions);
+              const changes = accessChanges(account.role, account.moduleExceptions, lang);
               return (
                 <TableRow key={account.id} interactive>
                   <Cell className="max-w-0">
-                    <PersonDialog account={account} viewer={user} canGrantOwner={isOwner} microsoft={microsoft} />
+                    <PersonDialog account={account} viewer={user} canGrantOwner={isOwner} microsoft={microsoft} lang={lang} />
                     <Colleague
                       name={account.name}
-                      you={account.id === user.id}
+                      you={account.id === user.id ? t('(du)', '(you)') : null}
                       muted={!account.isActive}
-                      flag={account.hasPassword || account.microsoftLinkedAt ? null : <Badge tone="warning">No password yet</Badge>}
+                      flag={
+                        account.hasPassword || account.microsoftLinkedAt ? null : (
+                          <Badge tone="warning">{t('Noch kein Passwort', 'No password yet')}</Badge>
+                        )
+                      }
                       about={[
                         account.email,
-                        account.username && account.username !== account.name ? `signs in as ${account.username}` : null,
+                        account.username && account.username !== account.name
+                          ? t(`meldet sich an als ${account.username}`, `signs in as ${account.username}`)
+                          : null,
                         account.microsoftLinkedAt ? 'Microsoft' : null,
-                        account.isActive ? null : roleLabel(account.role),
+                        account.isActive ? null : roleLabel(account.role, lang),
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -217,9 +238,9 @@ export default async function TeamPage({
                   </Cell>
                   <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
                     {account.lastSeenAt ? (
-                      capitalise(relativeDays(account.lastSeenAt))
+                      capitalise(relativeDays(account.lastSeenAt, lang))
                     ) : (
-                      <span className="text-[var(--casa-text-subtle)]">Never</span>
+                      <span className="text-[var(--casa-text-subtle)]">{t('Nie', 'Never')}</span>
                     )}
                   </Cell>
                 </TableRow>
@@ -231,8 +252,6 @@ export default async function TeamPage({
     </>
   );
 }
-
-const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /**
  * A colleague in the list: their initials in ink (a colleague, not a record —
@@ -247,7 +266,8 @@ function Colleague({
   about,
 }: {
   name: string;
-  you: boolean;
+  /** "(you)" on the viewer's own row, in the page's language. */
+  you: string | null;
   muted: boolean;
   flag: ReactNode;
   about: string;
@@ -262,11 +282,23 @@ function Colleague({
           <span className={cn('max-w-full truncate text-[0.9rem] font-semibold', muted ? 'text-[var(--casa-text-subtle)]' : 'text-[var(--casa-ink)]')}>
             {name}
           </span>
-          {you ? <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">(you)</span> : null}
+          {you ? <span className="shrink-0 text-xs text-[var(--casa-text-subtle)]">{you}</span> : null}
           {flag ? <span className="shrink-0 self-center">{flag}</span> : null}
         </span>
         <span className="mt-0.5 block truncate text-[0.8rem] text-[var(--casa-muted)]">{about}</span>
       </span>
     </span>
+  );
+}
+
+/** The website editor's levels, as the Team forms offer them. */
+function WebsiteLevels({ t }: { t: T }) {
+  return (
+    <>
+      <option value="none">{t('Kein Zugriff', 'No access')}</option>
+      <option value="view">{t('Ansehen', 'View')}</option>
+      <option value="edit">{t('Bearbeiten — Entwürfe, zur Freigabe senden', 'Edit — drafts, sends for approval')}</option>
+      <option value="full">{t('Vollzugriff — veröffentlicht auch', 'Full — also publishes')}</option>
+    </>
   );
 }

@@ -755,6 +755,10 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
 
 ## Copy on screens — labels, not explanations
 
+**In two languages (2026-10-14).** Every label is written in German and English,
+German first; German is the default and each colleague can switch with DE | EN.
+`docs/ADMIN_I18N.md` has the API, the rules and the glossary.
+
 The product is used daily by staff and must stay presentable. A screen shows
 labels, values, badges and controls. It does **not** carry explanatory notes —
 why a value is kept as written, what a declared level is not, which module is

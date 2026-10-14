@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { CourseSchema } from './schema';
+import { CourseSchema, ISSUES } from './schema';
 import { isIsoDate } from './stay';
 import { ORGANISATION_KINDS, type OfferLanguage, type OrganisationKind, type PackageChoice, type Salutation } from './types';
 
@@ -20,12 +20,12 @@ const email = z
   .string()
   .trim()
   .max(200)
-  .refine((v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Not an email address');
+  .refine((v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), ISSUES.email.en);
 const country = z.string().regex(/^[A-Z]{2}$/).nullable();
 const date = z
   .string()
   .nullable()
-  .refine((v) => v == null || isIsoDate(v), 'Not a date');
+  .refine((v) => v == null || isIsoDate(v), ISSUES.date.en);
 
 const ContactSchema = z.object({
   salutation: z.enum(['ms', 'mr', 'none']),
@@ -44,7 +44,7 @@ const RecipientSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('new-organisation'),
-    name: name(200).min(1, 'Name the organisation'),
+    name: name(200).min(1, ISSUES.organisationName.en),
     kind: z.enum(ORGANISATION_KINDS),
     countryCode: country,
     address: z.string().max(400),
@@ -54,7 +54,7 @@ const RecipientSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('new-person'),
     salutation: z.enum(['ms', 'mr', 'none']),
-    firstName: name(120).min(1, 'A first name'),
+    firstName: name(120).min(1, ISSUES.firstName.en),
     lastName: name(120),
     email,
     countryCode: country,
@@ -96,11 +96,11 @@ export const NewOfferSchema = z
     ownerId: uuid.nullable(),
   })
   .refine((d) => !d.group?.arrival || !d.group.departure || d.group.departure > d.group.arrival, {
-    message: 'Departure must be after arrival',
+    message: ISSUES.departure.en,
     path: ['group', 'departure'],
   })
   .refine((d) => d.kind === 'individual' || (d.recipient.type !== 'person' && d.recipient.type !== 'new-person'), {
-    message: 'An offer to a learner is for a course',
+    message: ISSUES.learnerCourse.en,
     path: ['kind'],
   });
 

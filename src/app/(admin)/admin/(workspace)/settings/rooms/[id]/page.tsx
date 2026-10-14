@@ -6,6 +6,8 @@ import { Badge, Card, DateText, DetailList, RecordHeader } from '@/components/ad
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { floorLabel, getRoom, roomCohorts, ROOM_KIND_LABELS } from '@/lib/admin/rooms';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { deleteRoomAction } from '../actions';
 import { EditRoomForm } from '../room-forms';
 
@@ -26,28 +28,28 @@ export default async function RoomPage({
   const [{ id }, query, user] = await Promise.all([params, searchParams, requireModule('rooms')]);
   const room = await getRoom(id);
   if (!room) notFound();
-  const cohorts = await roomCohorts(room.id);
+  const [cohorts, { t, lang }] = await Promise.all([roomCohorts(room.id), getI18n()]);
 
   return (
     <>
       <RecordHeader
         backHref="/admin/settings/rooms"
-        backLabel="All rooms"
+        backLabel={t('Alle Räume', 'All rooms')}
         title={room.nickname ? `${room.name} · ${room.nickname}` : room.name}
-        subtitle={ROOM_KIND_LABELS[room.kind]}
+        subtitle={pick(lang, ROOM_KIND_LABELS[room.kind])}
         status={
           !room.isActive ? (
-            <Badge tone="quiet">Inactive</Badge>
+            <Badge tone="quiet">{t('Inaktiv', 'Inactive')}</Badge>
           ) : room.isBookable ? (
-            <Badge tone="positive">Bookable</Badge>
+            <Badge tone="positive">{t('Buchbar', 'Bookable')}</Badge>
           ) : (
-            <Badge tone="quiet">Not bookable</Badge>
+            <Badge tone="quiet">{t('Nicht buchbar', 'Not bookable')}</Badge>
           )
         }
         actions={
           <>
             {canAccess(user, 'rooms', 'edit') ? (
-              <FormDialog trigger="Edit" title={room.name}>
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={room.name}>
                 <EditRoomForm room={room} />
               </FormDialog>
             ) : null}
@@ -55,11 +57,14 @@ export default async function RoomPage({
               <form action={deleteRoomAction}>
                 <input type="hidden" name="roomId" value={room.id} />
                 <ConfirmSubmit
-                  title={`Delete ${room.name}?`}
-                  description="The room is removed from the list and from every cohort that pointed at it. This cannot be undone."
+                  title={t(`${room.name} löschen?`, `Delete ${room.name}?`)}
+                  description={t(
+                    'Der Raum wird aus der Liste und aus jedem Termin entfernt, der auf ihn verwiesen hat. Das lässt sich nicht rückgängig machen.',
+                    'The room is removed from the list and from every cohort that pointed at it. This cannot be undone.'
+                  )}
                   size="md"
                 >
-                  Delete
+                  {t('Löschen', 'Delete')}
                 </ConfirmSubmit>
               </form>
             ) : null}
@@ -67,27 +72,27 @@ export default async function RoomPage({
         }
         facts={[
           {
-            label: 'Location',
+            label: t('Standort', 'Location'),
             icon: Icon.rooms,
             tint: 'ink',
             value: room.locationName,
-            sub: floorLabel(room.floor),
+            sub: floorLabel(room.floor, lang),
           },
           {
-            label: 'Capacity',
+            label: t('Kapazität', 'Capacity'),
             icon: Icon.people,
             tint: 'green',
             value: room.capacity ?? '—',
             sub:
               room.capacityMax && room.capacityMax !== room.capacity
-                ? `${room.capacityMax} at most`
+                ? t(`höchstens ${room.capacityMax}`, `${room.capacityMax} at most`)
                 : undefined,
           },
           {
-            label: 'Cohorts',
+            label: t('Termine', 'Cohorts'),
             icon: Icon.calendar,
             tint: 'blue',
-            value: cohorts.length === 0 ? 'None planned' : `${cohorts.length} planned`,
+            value: cohorts.length === 0 ? t('Keine geplant', 'None planned') : t(`${cohorts.length} geplant`, `${cohorts.length} planned`),
           },
         ]}
       />
@@ -105,14 +110,14 @@ export default async function RoomPage({
           role="status"
           className="mb-4 rounded-lg border border-[var(--casa-success-text)]/30 bg-[var(--casa-success-surface)]/8 px-4 py-3 text-sm text-[var(--casa-success-text)]"
         >
-          Saved.
+          {t('Gespeichert.', 'Saved.')}
         </p>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        <Card title="Cohorts" icon={Icon.catalogue} tint="red" bleed>
+        <Card title={t('Termine', 'Cohorts')} icon={Icon.catalogue} tint="red" bleed>
           {cohorts.length === 0 ? (
-            <p className="px-4 py-4 text-sm text-[var(--casa-text-subtle)]">No cohorts planned here.</p>
+            <p className="px-4 py-4 text-sm text-[var(--casa-text-subtle)]">{t('Hier sind keine Termine geplant.', 'No cohorts planned here.')}</p>
           ) : (
             <ul className="divide-y divide-ws-line-soft">
               {cohorts.map((c) => {
@@ -126,7 +131,7 @@ export default async function RoomPage({
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-2 text-sm tabular-nums">
-                      {over ? <Badge tone="warning">Over room capacity</Badge> : null}
+                      {over ? <Badge tone="warning">{t('Über der Raumkapazität', 'Over room capacity')}</Badge> : null}
                       {c.registrationCount} / {c.capacity}
                     </span>
                   </li>
@@ -136,13 +141,13 @@ export default async function RoomPage({
           )}
         </Card>
 
-        <Card title="Details" icon={Icon.note} tint="sun">
+        <Card title={t('Details', 'Details')} icon={Icon.note} tint="sun">
           <DetailList
             items={[
-              { label: 'Zone', value: room.zone },
-              { label: 'Colour', value: room.colour },
-              { label: 'Short name', value: room.shortName },
-              { label: 'Notes', value: room.notes, wide: true },
+              { label: t('Zone', 'Zone'), value: room.zone },
+              { label: t('Farbe', 'Colour'), value: room.colour },
+              { label: t('Kurzname', 'Short name'), value: room.shortName },
+              { label: t('Notizen', 'Notes'), value: room.notes, wide: true },
             ]}
           />
         </Card>

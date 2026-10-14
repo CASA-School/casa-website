@@ -2,6 +2,7 @@ import { Popover, PopoverChoice } from '@/components/admin/popover';
 import type { CourseInstanceSummary } from '@/lib/admin/catalogue';
 import type { Room } from '@/lib/admin/rooms';
 import { assignRoomAction } from '../settings/rooms/actions';
+import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
  * A cohort's room as a value: the name, or an empty cell with a quiet "Set
@@ -9,13 +10,14 @@ import { assignRoomAction } from '../settings/rooms/actions';
  * `courseInstanceId` and `roomId` to `assignRoomAction`, exactly what the old
  * select-and-Set form posted; an empty `roomId` clears the room.
  */
-export function RoomPicker({
+export async function RoomPicker({
   instance,
   rooms,
 }: {
   instance: Pick<CourseInstanceSummary, 'id' | 'courseTypeName' | 'room'>;
   rooms: readonly Room[];
 }) {
+  const { t } = await getI18n();
   const current = instance.room;
   // A cohort can sit in a room that is no longer bookable; it stays a choice.
   const choices =
@@ -25,7 +27,7 @@ export function RoomPicker({
 
   return (
     <Popover
-      label={`Room for ${instance.courseTypeName}`}
+      label={t(`Raum für ${instance.courseTypeName}`, `Room for ${instance.courseTypeName}`)}
       width={280}
       trigger={
         <span className="-mx-2 flex min-h-8 items-center px-2 py-1 text-sm">
@@ -41,7 +43,7 @@ export function RoomPicker({
             // (§Design standards 6). The way to set one appears on the row's hover
             // or focus, and always where there is no hover.
             <span className="text-[var(--casa-text-subtle)] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
-              Set room
+              {t('Raum wählen', 'Set room')}
             </span>
           )}
         </span>
@@ -50,7 +52,7 @@ export function RoomPicker({
       <form action={assignRoomAction}>
         <input type="hidden" name="courseInstanceId" value={instance.id} />
         <PopoverChoice name="roomId" value="" current={!current}>
-          No room
+          {t('Kein Raum', 'No room')}
         </PopoverChoice>
         {choices.map((room) => (
           <PopoverChoice key={room.id} name="roomId" value={room.id} current={room.id === current?.id}>
@@ -63,7 +65,7 @@ export function RoomPicker({
               </span>
               {room.capacity !== null ? (
                 <span className="text-xs font-normal whitespace-nowrap text-[var(--casa-text-subtle)] tabular-nums">
-                  {room.capacity} seats
+                  {t(`${room.capacity} Plätze`, `${room.capacity} seats`)}
                 </span>
               ) : null}
             </span>

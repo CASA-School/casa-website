@@ -1,4 +1,5 @@
 import { query, queryFirst } from './db';
+import type { Bilingual } from './i18n';
 
 /**
  * The course and exam catalogue, read with the numbers staff actually need:
@@ -188,11 +189,12 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
   }));
 }
 
-export const SESSION_LABELS = {
-  morning: 'Morning',
-  afternoon: 'Afternoon',
-  evening: 'Evening',
-} as const;
+/** Read with `pick(lang, SESSION_LABELS[session])` (docs/ADMIN_I18N.md). */
+export const SESSION_LABELS: Record<'morning' | 'afternoon' | 'evening', Bilingual> = {
+  morning: { de: 'Vormittag', en: 'Morning' },
+  afternoon: { de: 'Nachmittag', en: 'Afternoon' },
+  evening: { de: 'Abend', en: 'Evening' },
+};
 
 /**
  * Schedules a cohort — what FileMaker's Course screen creates. The schedule

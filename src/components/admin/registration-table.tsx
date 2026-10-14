@@ -1,6 +1,7 @@
 import { ListGroup, Owner, RecordName } from './list';
-import { QUEUE_TAIL_HEAD, queueGroups, Received, type QueueFilter } from './queue-toolbar';
+import { queueGroups, queueTailHead, Received, type QueueFilter } from './queue-toolbar';
 import { Badge, Cell, Table, TableRow } from './ui';
+import { translator, type WsLang } from '@/lib/admin/i18n';
 import type { RegistrationListItem } from '@/lib/admin/registrations';
 
 /**
@@ -13,7 +14,7 @@ import type { RegistrationListItem } from '@/lib/admin/registrations';
  */
 
 export type RegistrationRow = RegistrationListItem & {
-  /** What for and when, under the name: "Intensive German · Starts 26 Oct". */
+  /** What for and when, under the name: "Intensive German · Starts 26 Oct" / "… · Beginn 26. Okt.". */
   about: string;
   /** The exception on this row, if any: "Room needed", "Oral part only". */
   flag?: string | null;
@@ -24,22 +25,25 @@ export function RegistrationTable({
   basePath,
   filter,
   level = false,
+  lang,
 }: {
   items: readonly RegistrationRow[];
   basePath: string;
   filter: QueueFilter;
   /** Course registrations: the learner's declared level, a column of its own. */
   level?: boolean;
+  lang: WsLang;
 }) {
+  const t = translator(lang);
   const head = [
-    'Registration',
-    ...(level ? [{ label: 'Level', className: 'hidden w-[6rem] md:table-cell' }] : []),
-    ...QUEUE_TAIL_HEAD,
+    t('Anmeldung', 'Registration'),
+    ...(level ? [{ label: t('Niveau', 'Level'), className: 'hidden w-[6rem] md:table-cell' }] : []),
+    ...queueTailHead(lang),
   ];
 
   return (
     <Table head={head}>
-      {queueGroups(items, filter).map((group) => [
+      {queueGroups(items, filter, lang).map((group) => [
         group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={head.length} /> : null,
         ...group.rows.map((item) => (
           <TableRow key={item.id} interactive>
@@ -59,7 +63,7 @@ export function RegistrationTable({
               <Owner name={item.assigneeName} />
             </Cell>
             <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
-              <Received at={item.submittedAt} status={item.status} />
+              <Received at={item.submittedAt} status={item.status} lang={lang} />
             </Cell>
           </TableRow>
         )),

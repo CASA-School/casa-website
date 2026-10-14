@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+
 import ui from './letter-edit.module.css';
 
 /**
@@ -67,6 +69,7 @@ export function InlineText({
   onClose?: () => void;
   startOpen?: boolean;
 }) {
+  const { t } = useWsLang();
   const [editing, setEditing] = useState(Boolean(startOpen));
   const [saving, setSaving] = useState<'idle' | 'saving' | 'done'>('idle');
   const wrap = useRef<HTMLSpanElement>(null);
@@ -85,7 +88,7 @@ export function InlineText({
         className={disabled ? undefined : `${ui.editable} ${multiline ? ui.editableBlock : ''}`}
         role={disabled ? undefined : 'button'}
         tabIndex={disabled ? undefined : 0}
-        aria-label={disabled ? undefined : `Change ${label.toLowerCase()}`}
+        aria-label={disabled ? undefined : t(`${label} ändern`, `Change ${label.toLowerCase()}`)}
         data-label={label}
         onClick={disabled ? undefined : () => setEditing(true)}
         onKeyDown={
@@ -125,11 +128,11 @@ export function InlineText({
       />
       <span className={ui.bar} role="toolbar" aria-label={label}>
         <span className={ui.barLabel}>{label}</span>
-        {state ? <span className={state === 'standard' ? ui.chipStandard : ui.chipChanged}>{state === 'standard' ? 'Standard text' : 'Only this letter'}</span> : null}
+        {state ? <span className={state === 'standard' ? ui.chipStandard : ui.chipChanged}>{state === 'standard' ? t('Standardtext', 'Standard text') : t('Nur dieser Brief', 'Only this letter')}</span> : null}
         {tools}
         {state === 'changed' && onUseStandard ? (
           <button type="button" className={ui.barBtn} onClick={onUseStandard}>
-            Use the standard
+            {t('Standard verwenden', 'Use the standard')}
           </button>
         ) : null}
         {state === 'changed' && onSaveStandard ? (
@@ -143,11 +146,15 @@ export function InlineText({
               setSaving('done');
             }}
           >
-            {saving === 'done' ? 'Saved as standard' : saving === 'saving' ? 'Saving …' : 'Save as standard'}
+            {saving === 'done'
+              ? t('Als Standard gespeichert', 'Saved as standard')
+              : saving === 'saving'
+                ? t('Speichert …', 'Saving …')
+                : t('Als Standard speichern', 'Save as standard')}
           </button>
         ) : null}
         <button type="button" className={ui.barDone} onClick={close}>
-          Done
+          {t('Fertig', 'Done')}
         </button>
       </span>
     </span>
@@ -170,6 +177,7 @@ export function InlinePanel({
   block?: boolean;
   width?: number;
 }) {
+  const { t } = useWsLang();
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
   const wrap = useRef<HTMLSpanElement>(null);
@@ -187,7 +195,7 @@ export function InlinePanel({
         className={`${ui.editable} ${block ? ui.editableBlock : ''} ${open ? ui.editableOpen : ''}`}
         role="button"
         tabIndex={0}
-        aria-label={`Change ${label.toLowerCase()}`}
+        aria-label={t(`${label} ändern`, `Change ${label.toLowerCase()}`)}
         aria-expanded={open}
         data-label={label}
         onClick={toggle}
@@ -205,7 +213,7 @@ export function InlinePanel({
           <span className={ui.panelHead}>
             <span>{label}</span>
             <button type="button" className={ui.barDone} onClick={() => setOpen(false)}>
-              Done
+              {t('Fertig', 'Done')}
             </button>
           </span>
           {panel(() => setOpen(false))}

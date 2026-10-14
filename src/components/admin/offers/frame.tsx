@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+
 import ui from './offers.module.css';
 
 /**
@@ -27,6 +29,7 @@ export function OfferFrame({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const { t: tr } = useWsLang();
   const go = async (href: string, before?: () => Promise<void>) => {
     if (before) await before();
     router.push(href);
@@ -52,7 +55,7 @@ export function OfferFrame({
         </div>
         <div className={ui.barCenter}>
           {tabs ? (
-            <nav className={ui.tabs} aria-label="Offer">
+            <nav className={ui.tabs} aria-label={tr('Angebot', 'Offer')}>
               {(['offer', 'letter'] as const).map((t) => {
                 const href = t === 'offer' ? `/admin/offers/${tabs.id}` : `/admin/offers/${tabs.id}/letter`;
                 const on = tabs.active === t;
@@ -67,7 +70,7 @@ export function OfferFrame({
                       if (!on) void go(href, tabs.before);
                     }}
                   >
-                    {t === 'offer' ? 'Offer' : 'Letter'}
+                    {t === 'offer' ? tr('Angebot', 'Offer') : tr('Brief', 'Letter')}
                   </a>
                 );
               })}

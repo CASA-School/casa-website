@@ -2,14 +2,15 @@ import { ListEmpty, ListGroup, Owner, RecordName } from '@/components/admin/list
 import { Pagination } from '@/components/admin/pagination';
 import {
   parseFilter,
-  QUEUE_TAIL_HEAD,
   QueueToolbar,
   queueEmptyTitle,
   queueGroups,
+  queueTailHead,
   Received,
 } from '@/components/admin/queue-toolbar';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { listEnquiries } from '@/lib/admin/enquiries';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
 
@@ -37,7 +38,7 @@ export default async function EnquiriesPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, counts] = await Promise.all([
+  const [{ items, total }, counts, { t, lang }] = await Promise.all([
     listEnquiries({
       status: filter,
       search,
@@ -45,13 +46,14 @@ export default async function EnquiriesPage({
       offset: offsetFor(page),
     }),
     queueStatusCounts('enquiry'),
+    getI18n(),
   ]);
 
-  const groups = queueGroups(items, filter);
+  const groups = queueGroups(items, filter, lang);
 
   return (
     <>
-      <PageHeader title="Enquiries" />
+      <PageHeader title={t('Anfragen', 'Enquiries')} />
 
       <Card bleed>
         <QueueToolbar
@@ -63,13 +65,14 @@ export default async function EnquiriesPage({
             all: counts.total,
           }}
           search={search}
-          searchPlaceholder="Name, email or message"
+          searchPlaceholder={t('Name, E-Mail oder Nachricht', 'Name, email or message')}
+          lang={lang}
         />
 
         {items.length === 0 ? (
-          <ListEmpty title={queueEmptyTitle(filter, search)} />
+          <ListEmpty title={queueEmptyTitle(lang, filter, search)} />
         ) : (
-          <Table head={['Enquiry', ...QUEUE_TAIL_HEAD]}>
+          <Table head={[t('Anfrage', 'Enquiry'), ...queueTailHead(lang)]}>
             {groups.map((group) => [
               group.label ? (
                 <ListGroup key={group.key} label={group.label} count={group.rows.length} span={3} />
@@ -81,7 +84,7 @@ export default async function EnquiriesPage({
                       name={[item.firstName, item.lastName].filter(Boolean).join(' ')}
                       flag={
                         item.kind !== 'general' ? (
-                          <Badge tone="neutral" className="hidden sm:inline-flex">{item.kind === 'group' ? 'Group brief' : 'Company brief'}</Badge>
+                          <Badge tone="neutral" className="hidden sm:inline-flex">{item.kind === 'group' ? t('Gruppenangaben', 'Group brief') : t('Firmenangaben', 'Company brief')}</Badge>
                         ) : null
                       }
                       about={
@@ -96,7 +99,7 @@ export default async function EnquiriesPage({
                     <Owner name={item.assigneeName} />
                   </Cell>
                   <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
-                    <Received at={item.submittedAt} status={item.status} />
+                    <Received at={item.submittedAt} status={item.status} lang={lang} />
                   </Cell>
                 </TableRow>
               )),

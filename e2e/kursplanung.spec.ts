@@ -55,7 +55,11 @@ test.describe('kursplanung', () => {
   });
 
   test.beforeEach(async ({ context, baseURL }) => {
-    await context.addCookies([{ name: 'casa_workspace_session', value: token, url: baseURL! }]);
+    // Kursplanung's assertions read its German, the default; pinned, since an account may have chosen English.
+    await context.addCookies([
+      { name: 'casa_workspace_session', value: token, url: baseURL! },
+      { name: 'casa_ws_lang', value: 'de', url: baseURL! },
+    ]);
   });
 
   test('a placed piece survives a reload and can be taken back', async ({ page }) => {

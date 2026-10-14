@@ -1,6 +1,8 @@
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { vocabularySummaries } from '@/lib/admin/configuration';
 import { requireModule } from '@/lib/admin/guard';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
  * Lists — the types CASA fixes once and leaves alone.
@@ -13,27 +15,28 @@ import { requireModule } from '@/lib/admin/guard';
  */
 export default async function SetupPage() {
   await requireModule('settings');
+  const { t, lang } = await getI18n();
   const vocabularies = await vocabularySummaries();
 
   return (
     <>
-      <PageHeader backHref="/admin/settings" backLabel="Settings" title="Lists" />
+      <PageHeader backHref="/admin/settings" backLabel={t('Einstellungen', 'Settings')} title={t('Listen', 'Lists')} />
 
       <Card bleed>
         <Table
           head={[
-            { label: 'List', className: 'w-[13rem]' },
-            { label: 'Entries', align: 'right', className: 'w-[9rem]' },
-            { label: 'Contains', className: 'hidden md:table-cell' },
+            { label: t('Liste', 'List'), className: 'w-[13rem]' },
+            { label: t('Einträge', 'Entries'), align: 'right', className: 'w-[9rem]' },
+            { label: t('Enthält', 'Contains'), className: 'hidden md:table-cell' },
           ]}
         >
           {vocabularies.map((v) => (
             <TableRow key={v.key}>
-              <Cell className="text-[0.9rem] font-semibold whitespace-nowrap">{v.label}</Cell>
+              <Cell className="text-[0.9rem] font-semibold whitespace-nowrap">{pick(lang, v.label)}</Cell>
               <Cell align="right" className="whitespace-nowrap tabular-nums">
                 <span className="font-semibold">{v.total}</span>
                 {v.active < v.total ? (
-                  <span className="ml-1.5 text-xs text-[var(--casa-text-subtle)]">{v.total - v.active} not in use</span>
+                  <span className="ml-1.5 text-xs text-[var(--casa-text-subtle)]">{t(`${v.total - v.active} nicht in Gebrauch`, `${v.total - v.active} not in use`)}</span>
                 ) : null}
               </Cell>
               <Cell className="hidden max-w-0 text-[0.84rem] text-[var(--casa-muted)] md:table-cell">

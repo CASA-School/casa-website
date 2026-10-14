@@ -6,9 +6,11 @@ import { z } from 'zod';
 
 import { logActivity } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
-import { findRecipients, matchRecipients, wizardStart } from '@/lib/admin/offers/recipients';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
+import { findRecipients, matchRecipients, RecipientGoneError, wizardStart } from '@/lib/admin/offers/recipients';
 import { createOffer, decideOffer, deleteOffer, duplicateOffer, markSent, reviseOffer, saveOffer, saveOfferText } from '@/lib/admin/offers/repo';
-import { parseOfferDraft } from '@/lib/admin/offers/schema';
+import { issueText, parseOfferDraft } from '@/lib/admin/offers/schema';
 import { ORGANISATION_KINDS } from '@/lib/admin/offers/types';
 import { NewOfferSchema } from '@/lib/admin/offers/wizard';
 
@@ -28,15 +30,21 @@ export type CreateOfferResult = { ok: true; id: string } | { ok: false; error: s
  */
 export async function createOfferAction(input: unknown): Promise<CreateOfferResult> {
   const actor = await requireModule('offers', 'edit');
+  const { t, lang } = await getI18n();
+  const failed = t('Das Angebot konnte nicht angelegt werden.', 'The offer could not be created.');
   const parsed = NewOfferSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'The offer could not be created.' };
+  if (!parsed.success) {
+    const message = parsed.error.issues[0]?.message;
+    return { ok: false, error: message ? pick(lang, issueText(message)) : failed };
+  }
   try {
     const id = await createOffer(parsed.data, actor);
     await logActivity({ actor, entity: 'offer', entityId: id, action: 'offer_created' });
     revalidatePath('/admin/offers');
     return { ok: true, id };
   } catch (error) {
-    return { ok: false, error: error instanceof Error && error.message.endsWith('.') ? error.message : 'The offer could not be created.' };
+    if (error instanceof RecipientGoneError) return { ok: false, error: pick(lang, error.text) };
+    return { ok: false, error: error instanceof Error && error.message.endsWith('.') ? error.message : failed };
   }
 }
 
@@ -49,11 +57,12 @@ export type SaveOfferResult = { ok: true; revision: number } | { ok: false; erro
  */
 export async function saveOfferAction(id: string, baseRevision: number, draft: unknown): Promise<SaveOfferResult> {
   const actor = await requireModule('offers', 'edit');
-  if (!uuid.safeParse(id).success || !Number.isInteger(baseRevision)) return { ok: false, error: 'Invalid request' };
+  const { t, lang } = await getI18n();
+  if (!uuid.safeParse(id).success || !Number.isInteger(baseRevision)) return { ok: false, error: t('Ungültige Anfrage', 'Invalid request') };
   const parsed = parseOfferDraft(draft);
-  if (!parsed.ok) return { ok: false, error: parsed.error };
+  if (!parsed.ok) return { ok: false, error: pick(lang, parsed.error) };
   const result = await saveOffer(id, parsed.draft, baseRevision, actor);
-  if (!result.ok) return result;
+  if (!result.ok) return { ok: false, error: pick(lang, result.error), stale: result.stale };
   return { ok: true, revision: result.revision };
 }
 
@@ -65,9 +74,10 @@ function offerId(formData: FormData): string {
 
 export async function sendOfferAction(formData: FormData) {
   const actor = await requireModule('offers', 'edit');
+  const { lang } = await getI18n();
   const id = offerId(formData);
   const result = await markSent(id, actor);
-  if (!result.ok) redirect(`/admin/offers/${id}/letter?error=${encodeURIComponent(result.error)}`);
+  if (!result.ok) redirect(`/admin/offers/${id}/letter?error=${encodeURIComponent(pick(lang, result.error))}`);
   await logActivity({ actor, entity: 'offer', entityId: id, action: 'offer_sent' });
   revalidatePath(`/admin/offers/${id}`);
   redirect(`/admin/offers/${id}?ok=sent`);
@@ -132,8 +142,9 @@ const StandardTextSchema = z.object({
  */
 export async function saveStandardTextAction(input: unknown): Promise<{ ok: boolean; error?: string }> {
   const actor = await requireModule('offers', 'full');
+  const { t } = await getI18n();
   const parsed = StandardTextSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: 'The text could not be saved.' };
+  if (!parsed.success) return { ok: false, error: t('Der Text konnte nicht gespeichert werden.', 'The text could not be saved.') };
   await saveOfferText(parsed.data.language, parsed.data.part, parsed.data.body, actor);
   await logActivity({ actor, entity: 'letter_text', entityId: null, action: 'letter_standard_text_changed', detail: { kind: 'offer', language: parsed.data.language, part: parsed.data.part } });
   return { ok: true };
@@ -144,8 +155,9 @@ const FILTERS = ['all', 'person', ...ORGANISATION_KINDS] as const;
 /** The wizard's search: enquiries waiting, organisations and their contacts, learners. */
 export async function findRecipientsAction(q: unknown, filter: unknown) {
   await requireModule('offers', 'edit');
+  const { lang } = await getI18n();
   const f = z.enum(FILTERS).catch('all').parse(filter);
-  return findRecipients(typeof q === 'string' ? q.slice(0, 80) : '', f);
+  return findRecipients(typeof q === 'string' ? q.slice(0, 80) : '', f, lang);
 }
 
 /**
@@ -154,16 +166,18 @@ export async function findRecipientsAction(q: unknown, filter: unknown) {
  */
 export async function pickRecipientAction(input: unknown) {
   await requireModule('offers', 'edit');
+  const { lang } = await getI18n();
   const parsed = z
     .object({ enquiryId: uuid.optional(), personId: uuid.optional(), organisationId: uuid.optional() })
     .refine((v) => [v.enquiryId, v.personId, v.organisationId].filter(Boolean).length === 1)
     .safeParse(input);
-  return parsed.success ? wizardStart(parsed.data) : null;
+  return parsed.success ? wizardStart(parsed.data, lang) : null;
 }
 
 /** Before a new recipient is made: who CASA already has that it may be. */
 export async function matchRecipientsAction(input: unknown) {
   await requireModule('offers', 'edit');
+  const { lang } = await getI18n();
   const parsed = z.object({ name: z.string().max(200), email: z.string().max(200) }).safeParse(input);
-  return parsed.success ? matchRecipients(parsed.data) : [];
+  return parsed.success ? matchRecipients(parsed.data, lang) : [];
 }

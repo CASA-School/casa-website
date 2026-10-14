@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { getI18n } from '@/lib/admin/i18n.server';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
 import { MonthPicker } from './month-picker';
@@ -19,19 +20,20 @@ import ui from './ui.module.css';
 type Active = 'puzzle' | 'kurse' | 'lehrkraefte';
 type Notice = { ok?: string; error?: string };
 
-export function HeaderStart({ active, month, months }: { active: Active; month: string; months: readonly string[] }) {
-  const labels = Object.fromEntries([...months, month].map((m) => [m, monthLabel(m)]));
+export async function HeaderStart({ active, month, months }: { active: Active; month: string; months: readonly string[] }) {
+  const { t, lang } = await getI18n();
+  const labels = Object.fromEntries([...months, month].map((m) => [m, monthLabel(m, lang)]));
   const q = `?month=${month}`;
   const tabs = [
     { key: 'puzzle' as const, label: 'Puzzle', href: `/admin/kursplanung${q}` },
-    { key: 'kurse' as const, label: 'Kurse', href: `/admin/kursplanung/kurse${q}` },
-    { key: 'lehrkraefte' as const, label: 'Lehrkräfte', href: `/admin/kursplanung/lehrkraefte${q}` },
+    { key: 'kurse' as const, label: t('Kurse', 'Courses'), href: `/admin/kursplanung/kurse${q}` },
+    { key: 'lehrkraefte' as const, label: t('Lehrkräfte', 'Teachers'), href: `/admin/kursplanung/lehrkraefte${q}` },
   ];
   return (
     <>
       <h1 className={ui.h1}>Kursplanung</h1>
       <MonthPicker months={months} month={month} labels={labels} />
-      <nav className={ui.tabs} aria-label="Bereiche">
+      <nav className={ui.tabs} aria-label={t('Bereiche', 'Sections')}>
         {tabs.map((tab) => (
           <Link key={tab.key} href={tab.href} aria-current={tab.key === active ? 'page' : undefined} className={`${ui.tab} ${tab.key === active ? ui.tabOn : ''}`}>
             {tab.label}

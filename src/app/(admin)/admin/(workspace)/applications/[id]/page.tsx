@@ -2,10 +2,12 @@ import { notFound } from 'next/navigation';
 
 import { Icon } from '@/components/admin/icons';
 import { RecordRail } from '@/components/admin/record-rail';
-import { Badge, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { getApplication } from '@/lib/admin/careers';
 import { formatFileSize } from '@/lib/admin/format';
+import { pick, relativeDays } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { listAssignableStaff } from '@/lib/admin/staff';
@@ -26,7 +28,7 @@ import { fileKind } from '../file-kind';
  */
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const application = await getApplication(id);
+  const [application, { t, lang }] = await Promise.all([getApplication(id), getI18n()]);
 
   if (!application) {
     notFound();
@@ -42,16 +44,16 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
     <>
       <RecordHeader
         backHref="/admin/applications"
-        backLabel="All applications"
+        backLabel={t('Alle Bewerbungen', 'All applications')}
         title={`${application.firstName} ${application.lastName}`}
         avatar={`${application.firstName} ${application.lastName}`}
         subtitle={application.positionTitle}
         status={
           <>
-            <Badge tone={STATUS_TONES[application.status]}>{STATUS_LABELS[application.status]}</Badge>
+            <Badge tone={STATUS_TONES[application.status]}>{pick(lang, STATUS_LABELS[application.status])}</Badge>
             {/* Still carrying the status the public form wrote: setting one in
                 the rail is what puts it in the pipeline. */}
-            {application.rawStatus === 'submitted' ? <Badge tone="quiet">Untouched</Badge> : null}
+            {application.rawStatus === 'submitted' ? <Badge tone="quiet">{t('Unbearbeitet', 'Untouched')}</Badge> : null}
           </>
         }
         actions={
@@ -59,24 +61,24 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
             {application.hasStoredFile ? (
               <ButtonLink href={`/admin/applications/${application.id}/cv`} variant="primary" plain>
                 <span aria-hidden="true">{Icon.download}</span>
-                Download CV
+                {t('Lebenslauf herunterladen', 'Download CV')}
               </ButtonLink>
             ) : null}
             <ButtonLink href={`mailto:${application.email}?subject=${encodeURIComponent(
                 `Your application — ${application.positionTitle}`
-              )}`}>Reply by email</ButtonLink>
+              )}`}>{t('Per E-Mail antworten', 'Reply by email')}</ButtonLink>
           </>
         }
         facts={[
           {
-            label: 'Applied',
+            label: t('Beworben', 'Applied'),
             icon: Icon.clock,
             tint: 'blue',
             value: <DateText value={application.createdAt} />,
-            sub: relativeDays(application.createdAt),
+            sub: relativeDays(application.createdAt, lang),
           },
           {
-            label: 'Email',
+            label: t('E-Mail', 'Email'),
             icon: Icon.mail,
             tint: 'ink',
             value: application.email,
@@ -85,33 +87,38 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
           {
             // Not a fact link: those are Next links, which prefetch, and the
             // CV route is a file download. The header's button is the way in.
-            label: 'CV',
+            label: t('Lebenslauf', 'CV'),
             icon: Icon.download,
             tint: application.hasStoredFile ? 'ink' : 'sun',
             value: application.cvFileName,
             sub: application.hasStoredFile
-              ? [fileKind(application.cvFileName, application.cvMimeType), formatFileSize(application.cvFileSize)]
+              ? [fileKind(application.cvFileName, application.cvMimeType, lang), formatFileSize(application.cvFileSize)]
                   .filter(Boolean)
                   .join(' · ')
-              : 'No file stored',
+              : t('Keine Datei gespeichert', 'No file stored'),
           },
-          { label: 'Wrote in', icon: Icon.globe, tint: 'sun', value: application.locale === 'de' ? 'German' : 'English' },
+          {
+            label: t('Geschrieben auf', 'Wrote in'),
+            icon: Icon.globe,
+            tint: 'sun',
+            value: application.locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'),
+          },
         ]}
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          <Card title="Cover letter" icon={Icon.note} tint="blue">
+          <Card title={t('Anschreiben', 'Cover letter')} icon={Icon.note} tint="blue">
             <p className="max-w-prose text-base leading-relaxed whitespace-pre-line">
               {application.coverLetter}
             </p>
           </Card>
 
-          <Card title="Candidate" icon={Icon.person} tint="ink">
+          <Card title={t('Bewerbende Person', 'Candidate')} icon={Icon.person} tint="ink">
             <DetailList
               items={[
                 {
-                  label: 'Phone',
+                  label: t('Telefon', 'Phone'),
                   value: application.phone ? (
                     <a href={`tel:${application.phone}`} className="font-medium">
                       {application.phone}
@@ -127,7 +134,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
                       target="_blank"
                       className="inline-flex items-center gap-1.5 font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
                     >
-                      Profile
+                      {t('Profil', 'Profile')}
                       <span aria-hidden="true">{Icon.external}</span>
                     </a>
                   ) : null,

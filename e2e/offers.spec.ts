@@ -67,7 +67,11 @@ test.describe('offers', () => {
   });
 
   test.beforeEach(async ({ context, baseURL }) => {
-    await context.addCookies([{ name: 'casa_workspace_session', value: token, url: baseURL! }]);
+    // The workspace speaks German by default; these assertions read its English.
+    await context.addCookies([
+      { name: 'casa_workspace_session', value: token, url: baseURL! },
+      { name: 'casa_ws_lang', value: 'en', url: baseURL! },
+    ]);
   });
 
   /** Through the wizard: a school nobody has had an offer before, on the default package. */

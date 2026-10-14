@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import type { Bilingual } from '../i18n';
+
 import { isIsoDate } from './stay';
 import { DEFAULT_STAY, type OfferDraft, type StayState } from './types';
 
@@ -12,11 +14,29 @@ import { DEFAULT_STAY, type OfferDraft, type StayState } from './types';
  * than failing — while `parseOfferDraft` is strict, because it guards a write.
  */
 
+/**
+ * The schemas' own messages in both languages. Zod carries the English, and
+ * `issueText` finds the German for it, so the workspace shows a refused write
+ * in the colleague's language (docs/ADMIN_I18N.md).
+ */
+export const ISSUES = {
+  date: { de: 'Kein Datum', en: 'Not a date' },
+  email: { de: 'Keine E-Mail-Adresse', en: 'Not an email address' },
+  departure: { de: 'Die Abreise muss nach der Anreise liegen', en: 'Departure must be after arrival' },
+  organisationName: { de: 'Gib der Organisation einen Namen', en: 'Name the organisation' },
+  firstName: { de: 'Ein Vorname', en: 'A first name' },
+  learnerCourse: { de: 'Ein Angebot an Lernende ist ein Kurs', en: 'An offer to a learner is for a course' },
+} satisfies Record<string, Bilingual>;
+
+/** A zod message in both languages; one zod writes itself stays as it is. */
+export const issueText = (message: string): Bilingual =>
+  Object.values(ISSUES).find((issue) => issue.en === message) ?? { de: message, en: message };
+
 const isoDate = z
   .string()
   .nullable()
   .transform((v) => (v && v.trim() ? v.trim() : null))
-  .refine((v) => v == null || isIsoDate(v), 'Not a date');
+  .refine((v) => v == null || isIsoDate(v), ISSUES.date.en);
 
 const money = z.number().finite().min(-100_000).max(1_000_000);
 
@@ -31,7 +51,7 @@ const ModulesSchema = z.object({
   transport: z.boolean(),
 });
 
-const isoDay = z.string().refine((v) => isIsoDate(v), 'Not a date');
+const isoDay = z.string().refine((v) => isIsoDate(v), ISSUES.date.en);
 
 export const CourseSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]{2,60}$/),
@@ -147,7 +167,7 @@ export const OfferDraftSchema = z
       .string()
       .max(200)
       .transform((v) => v.trim())
-      .refine((v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Not an email address'),
+      .refine((v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), ISSUES.email.en),
     address: z.string().max(400),
     countryCode: z.string().regex(/^[A-Z]{2}$/).nullable(),
     arrival: isoDate,
@@ -162,13 +182,16 @@ export const OfferDraftSchema = z
     ownerId: z.string().uuid().nullable(),
   })
   .refine((d) => !d.arrival || !d.departure || d.departure > d.arrival, {
-    message: 'Departure must be after arrival',
+    message: ISSUES.departure.en,
     path: ['departure'],
   });
 
-export function parseOfferDraft(value: unknown): { ok: true; draft: OfferDraft } | { ok: false; error: string } {
+export function parseOfferDraft(value: unknown): { ok: true; draft: OfferDraft } | { ok: false; error: Bilingual } {
   const parsed = OfferDraftSchema.safeParse(value);
   if (parsed.success) return { ok: true, draft: parsed.data };
   const issue = parsed.error.issues[0];
-  return { ok: false, error: issue ? `${issue.path.join('.') || 'offer'}: ${issue.message}` : 'Invalid offer' };
+  if (!issue) return { ok: false, error: { de: 'Ungültiges Angebot', en: 'Invalid offer' } };
+  const where = issue.path.join('.');
+  const text = issueText(issue.message);
+  return { ok: false, error: { de: `${where || 'Angebot'}: ${text.de}`, en: `${where || 'offer'}: ${text.en}` } };
 }

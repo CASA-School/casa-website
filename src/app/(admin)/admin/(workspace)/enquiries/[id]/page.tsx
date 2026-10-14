@@ -4,12 +4,14 @@ import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Icon } from '@/components/admin/icons';
-import { Badge, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { getEnquiry } from '@/lib/admin/enquiries';
 import { listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
+import { pick, relativeDays, type Bilingual, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { offersFor } from '@/lib/admin/offers/repo';
 import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
@@ -17,22 +19,29 @@ import { listAssignableStaff } from '@/lib/admin/staff';
 import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labels';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 
-const KIND_LABEL = { general: 'Enquiry', group: 'Group enquiry', company: 'Company enquiry' } as const;
+const KIND_LABEL: Record<'general' | 'group' | 'company', Bilingual> = {
+  general: { de: 'Anfrage', en: 'Enquiry' },
+  group: { de: 'Gruppenanfrage', en: 'Group enquiry' },
+  company: { de: 'Firmenanfrage', en: 'Company enquiry' },
+};
 
 /**
  * Where an enquiry came from, when that says something. The contact page is
  * where every enquiry comes from, and a demo seed is plumbing; the interest
  * list (German for Medical's popup) is worth knowing.
  */
-const SOURCE_LABEL: Record<string, string | null> = {
+const SOURCE_LABEL: Record<string, Bilingual | null> = {
   'contact-page': null,
   'demo-seed': null,
-  'interest-list': 'Interest list',
+  'interest-list': { de: 'Interessentenliste', en: 'Interest list' },
 };
 
-const sourceLabel = (source: string | null | undefined) => {
+const sourceLabel = (source: string | null | undefined, lang: WsLang) => {
   if (!source) return null;
-  if (source in SOURCE_LABEL) return SOURCE_LABEL[source];
+  if (source in SOURCE_LABEL) {
+    const label = SOURCE_LABEL[source];
+    return label ? pick(lang, label) : null;
+  }
   const words = source.replace(/[-_]+/g, ' ').trim();
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : null;
 };
@@ -54,7 +63,7 @@ const sourceLabel = (source: string | null | undefined) => {
  */
 export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
   const [{ id }, user] = await Promise.all([params, requireModule('enquiries')]);
-  const enquiry = await getEnquiry(id);
+  const [enquiry, { t, lang }] = await Promise.all([getEnquiry(id), getI18n()]);
 
   if (!enquiry) {
     notFound();
@@ -77,7 +86,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
     : [];
 
   const fullName = [enquiry.firstName, enquiry.lastName].filter(Boolean).join(' ');
-  const cameFrom = sourceLabel(enquiry.source);
+  const cameFrom = sourceLabel(enquiry.source, lang);
 
   const brief = enquiry.organiserBrief
     ? Object.entries(enquiry.organiserBrief).filter(
@@ -89,34 +98,45 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
     <>
       <RecordHeader
         backHref="/admin/enquiries"
-        backLabel="All enquiries"
+        backLabel={t('Alle Anfragen', 'All enquiries')}
         title={fullName || enquiry.email}
         avatar={fullName || enquiry.email}
         subtitle={enquiry.topic}
-        status={<Badge tone={STATUS_TONES[enquiry.status]}>{STATUS_LABELS[enquiry.status]}</Badge>}
+        status={<Badge tone={STATUS_TONES[enquiry.status]}>{pick(lang, STATUS_LABELS[enquiry.status])}</Badge>}
         actions={
           <>
             {canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
-            <ButtonLink href={`mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}`} variant="primary">Reply by email</ButtonLink>
+            <ButtonLink href={`mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}`} variant="primary">{t('Per E-Mail antworten', 'Reply by email')}</ButtonLink>
           </>
         }
         facts={[
-          { label: 'Received', icon: Icon.clock, tint: 'blue', value: <DateText value={enquiry.submittedAt} />, sub: relativeDays(enquiry.submittedAt) },
           {
-            label: 'Kind',
+            label: t('Eingegangen', 'Received'),
+            icon: Icon.clock,
+            tint: 'blue',
+            value: <DateText value={enquiry.submittedAt} />,
+            sub: relativeDays(enquiry.submittedAt, lang),
+          },
+          {
+            label: t('Art', 'Kind'),
             icon: Icon.enquiries,
             tint: enquiry.kind === 'general' ? 'ink' : 'sun',
-            value: KIND_LABEL[enquiry.kind],
-            sub: cameFrom ? `From the ${cameFrom.toLowerCase()}` : undefined,
+            value: pick(lang, KIND_LABEL[enquiry.kind]),
+            sub: cameFrom ? t(`Quelle: ${cameFrom}`, `From the ${cameFrom.toLowerCase()}`) : undefined,
           },
-          { label: 'Email', icon: Icon.mail, tint: 'ink', value: enquiry.email, href: `mailto:${enquiry.email}` },
-          { label: 'Wrote in', icon: Icon.globe, tint: 'sun', value: enquiry.locale === 'de' ? 'German' : 'English' },
+          { label: t('E-Mail', 'Email'), icon: Icon.mail, tint: 'ink', value: enquiry.email, href: `mailto:${enquiry.email}` },
+          {
+            label: t('Geschrieben auf', 'Wrote in'),
+            icon: Icon.globe,
+            tint: 'sun',
+            value: enquiry.locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'),
+          },
         ]}
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          <Card title="Message" icon={Icon.note} tint="blue">
+          <Card title={t('Nachricht', 'Message')} icon={Icon.note} tint="blue">
             {/*
              * `whitespace-pre-line`, and the one place in the workspace that
              * uses the public site's 17px reading size. This is the only
@@ -129,11 +149,11 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           </Card>
 
           {brief.length > 0 ? (
-            <Card title="Organiser brief" icon={Icon.people} tint="sun">
+            <Card title={t('Angaben der Organisation', 'Organiser brief')} icon={Icon.people} tint="sun">
               <DetailList
                 items={brief.map(([key, value]) => ({
-                  label: ORGANISER_BRIEF_LABELS[key] ?? key,
-                  value: formatBriefValue(value),
+                  label: ORGANISER_BRIEF_LABELS[key] ? pick(lang, ORGANISER_BRIEF_LABELS[key]) : key,
+                  value: formatBriefValue(value, lang),
                 }))}
               />
             </Card>

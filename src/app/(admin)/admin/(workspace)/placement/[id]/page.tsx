@@ -15,10 +15,11 @@ import {
   RecordHeader,
   Select,
   Textarea,
-  relativeDays,
 } from '@/components/admin/ui';
 import { Icon } from '@/components/admin/icons';
 import { activityFor } from '@/lib/admin/activity';
+import { pick, relativeDays, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { listPeople } from '@/lib/admin/people';
 import { getPlacementAttempt } from '@/lib/admin/placement';
@@ -30,6 +31,20 @@ import {
 import { BAND_SEQUENCE } from '@/config/placement/policy';
 import type { PlacementSkill } from '@/lib/placement/types';
 import { backgroundItems, humanise } from './background';
+
+/** Where an attempt stands, by `placement_attempts.status`. */
+const STAGES: Record<string, Bilingual> = {
+  in_progress: { de: 'Läuft noch', en: 'In progress' },
+  submitted: { de: 'Abgeschickt', en: 'Submitted' },
+  abandoned: { de: 'Abgebrochen', en: 'Abandoned' },
+};
+
+/** A history line's verb, in German, for the actions this screen records. English reads the code. */
+const ACTIONS_DE: Record<string, string> = {
+  note_added: 'hat eine Notiz hinzugefügt',
+  review_attached_to_person: 'hat eine Person verknüpft',
+  review_detached_from_person: 'hat die Verknüpfung mit der Person gelöst',
+};
 
 /**
  * One placement attempt, and the form that records a teacher's decision.
@@ -57,7 +72,7 @@ export default async function PlacementAttemptPage({
   searchParams: Promise<{ error?: string; person?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const attempt = await getPlacementAttempt(id);
+  const [attempt, { t, lang }] = await Promise.all([getPlacementAttempt(id), getI18n()]);
 
   if (!attempt) {
     notFound();
@@ -73,7 +88,9 @@ export default async function PlacementAttemptPage({
   ]);
 
   const decision = attempt.decision;
-  const background = backgroundItems(attempt.intake);
+  const background = backgroundItems(attempt.intake, lang);
+  const skillLabel = (skill: string) =>
+    skill in SKILL_LABELS ? pick(lang, SKILL_LABELS[skill as PlacementSkill]) : skill;
 
   const confidenceTint = (
     { high: 'green', medium: 'ink', low: 'sun' } as const
@@ -83,46 +100,54 @@ export default async function PlacementAttemptPage({
     <>
       <RecordHeader
         backHref="/admin/placement"
-        backLabel="All placement attempts"
-        title={decision ? `Recommended ${decision.band}` : 'Not scored yet'}
+        backLabel={t('Alle Einstufungstests', 'All placement attempts')}
+        title={
+          decision ? t(`Empfohlen: ${decision.band}`, `Recommended ${decision.band}`) : t('Noch nicht ausgewertet', 'Not scored yet')
+        }
         subtitle={
           decision
-            ? `Pilot recommendation · policy version ${decision.policyVersion} · ${decision.releaseMode} mode`
-            : 'Not submitted yet, so there is nothing to review'
+            ? t(
+                `Pilot-Empfehlung · Richtlinienversion ${decision.policyVersion} · Modus ${decision.releaseMode}`,
+                `Pilot recommendation · policy version ${decision.policyVersion} · ${decision.releaseMode} mode`
+              )
+            : t('Noch nicht abgeschickt, es gibt also nichts zu prüfen', 'Not submitted yet, so there is nothing to review')
         }
         status={
           attempt.confirmedLevel ? (
-            <Badge tone="positive">Confirmed {attempt.confirmedLevel}</Badge>
+            <Badge tone="positive">{t(`Bestätigt: ${attempt.confirmedLevel}`, `Confirmed ${attempt.confirmedLevel}`)}</Badge>
           ) : attempt.needsReview ? (
-            <Badge tone="accent">Needs a teacher</Badge>
+            <Badge tone="accent">{t('Braucht eine Lehrkraft', 'Needs a teacher')}</Badge>
           ) : decision ? (
-            <Badge tone="neutral">Unconfirmed</Badge>
+            <Badge tone="neutral">{t('Unbestätigt', 'Unconfirmed')}</Badge>
           ) : (
-            <Badge tone="quiet">In progress</Badge>
+            <Badge tone="quiet">{t('Läuft noch', 'In progress')}</Badge>
           )
         }
         facts={
           decision
             ? [
                 {
-                  label: 'Submitted',
+                  label: t('Abgeschickt', 'Submitted'),
                   icon: Icon.clock,
                   tint: 'blue',
                   value: <DateText value={attempt.submittedAt ?? attempt.createdAt} />,
-                  sub: relativeDays(attempt.submittedAt ?? attempt.createdAt),
+                  sub: relativeDays(attempt.submittedAt ?? attempt.createdAt, lang),
                 },
                 {
-                  label: 'Confidence',
+                  label: t('Sicherheit', 'Confidence'),
                   icon: Icon.placement,
                   tint: confidenceTint,
-                  value: CONFIDENCE_COPY[decision.confidence],
-                  sub: `${(decision.confidenceScore * 100).toFixed(0)} of 100`,
+                  value: pick(lang, CONFIDENCE_COPY[decision.confidence]),
+                  sub: t(
+                    `${(decision.confidenceScore * 100).toFixed(0)} von 100`,
+                    `${(decision.confidenceScore * 100).toFixed(0)} of 100`
+                  ),
                 },
                 {
-                  label: 'Test answered',
+                  label: t('Test bearbeitet', 'Test answered'),
                   icon: Icon.book,
                   tint: 'red',
-                  value: `${Math.round(decision.answeredShare * 100)}%`,
+                  value: t(`${Math.round(decision.answeredShare * 100)} %`, `${Math.round(decision.answeredShare * 100)}%`),
                   // The response count is only shown when there is one.
                   // "92% · 0 responses" is a contradiction on its face, and it
                   // happens legitimately: the share is computed by the engine
@@ -130,40 +155,47 @@ export default async function PlacementAttemptPage({
                   // attempt migrated in or scored in fallback mode.
                   sub:
                     attempt.responseCount > 0
-                      ? `${attempt.responseCount} responses`
-                      : 'of the items served',
+                      ? t(`${attempt.responseCount} Antworten`, `${attempt.responseCount} responses`)
+                      : t('der gestellten Aufgaben', 'of the items served'),
                 },
                 {
-                  label: 'Spoken check',
+                  label: t('Gespräch', 'Spoken check'),
                   icon: Icon.people,
                   tint: decision.speakingRequired ? 'sun' : 'ink',
-                  value: decision.speakingRequired ? 'Required' : 'Not required',
+                  value: decision.speakingRequired ? t('Nötig', 'Required') : t('Nicht nötig', 'Not required'),
                   sub: decision.speakingRequired
                     ? attempt.speakingCheckDone
-                      ? 'Done'
-                      : 'From B1+, not done yet'
-                    : 'At this band',
+                      ? t('Erledigt', 'Done')
+                      : t('Ab B1+, noch nicht erledigt', 'From B1+, not done yet')
+                    : t('Auf dieser Stufe', 'At this band'),
                 },
                 {
-                  label: 'Presentable as settled',
+                  label: t('Automatisch bestätigbar', 'Presentable as settled'),
                   icon: Icon.check,
                   tint: decision.autoConfirmable ? 'green' : 'sun',
-                  value: decision.autoConfirmable ? 'Yes' : 'No',
-                  sub: decision.autoConfirmable ? 'Under policy' : 'A teacher must decide',
+                  value: decision.autoConfirmable ? t('Ja', 'Yes') : t('Nein', 'No'),
+                  sub: decision.autoConfirmable
+                    ? t('Laut Richtlinie', 'Under policy')
+                    : t('Eine Lehrkraft muss entscheiden', 'A teacher must decide'),
                 },
               ]
             : [
                 {
-                  label: 'Started',
+                  label: t('Begonnen', 'Started'),
                   icon: Icon.clock,
                   tint: 'blue',
                   value: <DateText value={attempt.createdAt} withTime />,
-                  sub: relativeDays(attempt.createdAt),
+                  sub: relativeDays(attempt.createdAt, lang),
                 },
-                { label: 'Responses so far', icon: Icon.book, tint: 'red', value: attempt.responseCount },
-                { label: 'Current stage', icon: Icon.check, tint: 'blue', value: humanise(attempt.status) },
+                { label: t('Antworten bisher', 'Responses so far'), icon: Icon.book, tint: 'red', value: attempt.responseCount },
                 {
-                  label: 'Screener pointed at',
+                  label: t('Aktueller Stand', 'Current stage'),
+                  icon: Icon.check,
+                  tint: 'blue',
+                  value: STAGES[attempt.status] ? pick(lang, STAGES[attempt.status]) : humanise(attempt.status),
+                },
+                {
+                  label: t('Einstiegsteil zeigte auf', 'Screener pointed at'),
                   icon: Icon.placement,
                   tint: 'red',
                   value: attempt.routerTargetLevel,
@@ -177,7 +209,7 @@ export default async function PlacementAttemptPage({
           {decision ? (
             <>
               <Card
-                title="Skill profile"
+                title={t('Fertigkeiten', 'Skill profile')}
                 icon={Icon.book}
                 tint="red"
               >
@@ -186,23 +218,28 @@ export default async function PlacementAttemptPage({
                     <li key={entry.skill}>
                       <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
                         <span className="font-semibold">
-                          {SKILL_LABELS[entry.skill as PlacementSkill] ?? entry.skill}
+                          {skillLabel(entry.skill)}
                         </span>
                         <span className="text-[var(--casa-text-subtle)]">
                           {entry.credit === null
-                            ? 'not measured'
-                            : `${Math.round(entry.credit * 100)}% over ${entry.itemCount} ${
-                                entry.itemCount === 1 ? 'item' : 'items'
-                              }`}
+                            ? t('nicht gemessen', 'not measured')
+                            : t(
+                                `${Math.round(entry.credit * 100)} % aus ${entry.itemCount} ${
+                                  entry.itemCount === 1 ? 'Aufgabe' : 'Aufgaben'
+                                }`,
+                                `${Math.round(entry.credit * 100)}% over ${entry.itemCount} ${
+                                  entry.itemCount === 1 ? 'item' : 'items'
+                                }`
+                              )}
                         </span>
                       </div>
                       <Meter
                         value={entry.credit ?? 0}
                         max={1}
-                        label={`${SKILL_LABELS[entry.skill as PlacementSkill] ?? entry.skill}: ${
+                        label={`${skillLabel(entry.skill)}: ${
                           entry.credit === null
-                            ? 'not measured'
-                            : `${Math.round(entry.credit * 100)} percent`
+                            ? t('nicht gemessen', 'not measured')
+                            : t(`${Math.round(entry.credit * 100)} Prozent`, `${Math.round(entry.credit * 100)} percent`)
                         }`}
                         tone={entry.credit === null ? 'neutral' : 'accent'}
                       />
@@ -212,7 +249,7 @@ export default async function PlacementAttemptPage({
               </Card>
 
               {decision.reviewReasons.length > 0 ? (
-                <Card title="Review reasons" icon={Icon.attention} tint="sun">
+                <Card title={t('Gründe für eine Durchsicht', 'Review reasons')} icon={Icon.attention} tint="sun">
                   <ul className="space-y-2.5">
                     {decision.reviewReasons.map((reason) => (
                       <li key={reason} className="flex gap-2.5 text-sm">
@@ -223,7 +260,7 @@ export default async function PlacementAttemptPage({
                           {Icon.attention}
                         </span>
                         <span className="leading-relaxed">
-                          {REVIEW_REASON_COPY[reason] ?? reason}
+                          {REVIEW_REASON_COPY[reason] ? pick(lang, REVIEW_REASON_COPY[reason]) : reason}
                         </span>
                       </li>
                     ))}
@@ -232,7 +269,7 @@ export default async function PlacementAttemptPage({
               ) : null}
 
               {decision.rationale.length > 0 ? (
-                <Card title="Rationale" icon={Icon.placement} tint="ink">
+                <Card title={t('Begründung', 'Rationale')} icon={Icon.placement} tint="ink">
                   <ol className="space-y-2 text-sm leading-relaxed text-[var(--casa-muted)]">
                     {decision.rationale.map((line, index) => (
                       <li key={index} className="flex gap-2.5">
@@ -250,8 +287,8 @@ export default async function PlacementAttemptPage({
 
           {background.length > 0 ? (
             <Card
-              title="Background"
-              description="Self-reported, unscored."
+              title={t('Hintergrund', 'Background')}
+              description={t('Selbst angegeben, nicht gewertet.', 'Self-reported, unscored.')}
               icon={Icon.person}
               tint="green"
             >
@@ -261,8 +298,8 @@ export default async function PlacementAttemptPage({
 
           {attempt.writing.length > 0 ? (
             <Card
-              title="Writing"
-              description="Their own words, unscored."
+              title={t('Schreiben', 'Writing')}
+              description={t('In eigenen Worten, nicht gewertet.', 'Their own words, unscored.')}
               icon={Icon.note}
               tint="blue"
             >
@@ -270,8 +307,9 @@ export default async function PlacementAttemptPage({
                 {attempt.writing.map((submission) => (
                   <div key={submission.promptId}>
                     <p className="mb-2 text-xs text-[var(--casa-text-subtle)]">
-                      Prompt <code className="font-mono">{submission.promptId}</code> ·{' '}
-                      {submission.wordCount} words · {relativeDays(submission.submittedAt)}
+                      {t('Aufgabe', 'Prompt')} <code className="font-mono">{submission.promptId}</code> ·{' '}
+                      {t(`${submission.wordCount} Wörter`, `${submission.wordCount} words`)} ·{' '}
+                      {relativeDays(submission.submittedAt, lang)}
                     </p>
                     <p className="max-w-prose rounded-xl border border-ws-line-soft bg-ws-sunk px-4 py-3 text-base leading-relaxed whitespace-pre-line">
                       {submission.text}
@@ -285,7 +323,7 @@ export default async function PlacementAttemptPage({
 
         <div className="space-y-4">
           <Card
-            title={attempt.confirmedLevel ? 'Confirmed level' : 'Confirm the level'}
+            title={attempt.confirmedLevel ? t('Bestätigtes Niveau', 'Confirmed level') : t('Niveau bestätigen', 'Confirm the level')}
             icon={Icon.check}
             tint={attempt.confirmedLevel ? 'green' : 'red'}
           >
@@ -295,7 +333,7 @@ export default async function PlacementAttemptPage({
                   {attempt.confirmedLevel}
                 </p>
                 <p className="mt-2 text-xs text-[var(--casa-text-subtle)]">
-                  {attempt.reviewerName ?? 'A former colleague'} ·{' '}
+                  {attempt.reviewerName ?? t('Ehemaliges Teammitglied', 'A former colleague')} ·{' '}
                   <DateText value={attempt.decidedAt} />
                 </p>
                 {attempt.reviewNote ? (
@@ -311,14 +349,17 @@ export default async function PlacementAttemptPage({
                 role="alert"
                 className="mb-3 rounded-xl border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-3.5 py-2.5 text-sm text-[var(--casa-danger-text)]"
               >
-                You chose a different level from the recommendation. Say why in the note.
+                {t(
+                  'Du hast ein anderes Niveau als empfohlen gewählt. Schreib in der Notiz, warum.',
+                  'You chose a different level from the recommendation. Say why in the note.'
+                )}
               </p>
             ) : null}
 
             <form action={confirmPlacementAction} className="space-y-3">
               <input type="hidden" name="attemptId" value={attempt.id} />
 
-              <Field label="Level they should start in" htmlFor="confirmedLevel">
+              <Field label={t('Niveau, mit dem die Person beginnt', 'Level they should start in')} htmlFor="confirmedLevel">
                 <Select
                   id="confirmedLevel"
                   name="confirmedLevel"
@@ -326,24 +367,28 @@ export default async function PlacementAttemptPage({
                   required
                 >
                   <option value="" disabled>
-                    Choose a level
+                    {t('Niveau wählen', 'Choose a level')}
                   </option>
                   {BAND_SEQUENCE.map((band) => (
                     <option key={band} value={band}>
                       {band}
-                      {band === decision?.band ? ' — recommended' : ''}
+                      {band === decision?.band ? t(' – empfohlen', ' — recommended') : ''}
                     </option>
                   ))}
                 </Select>
               </Field>
 
-              <Field label="Note" hint="required if you disagree" htmlFor="placement-note">
+              <Field
+                label={t('Notiz', 'Note')}
+                hint={t('nötig, wenn du abweichst', 'required if you disagree')}
+                htmlFor="placement-note"
+              >
                 <Textarea
                   id="placement-note"
                   name="note"
                   rows={3}
                   defaultValue={attempt.reviewNote ?? ''}
-                  placeholder="What you saw, and what tipped the decision."
+                  placeholder={t('Was du gesehen hast und was den Ausschlag gegeben hat.', 'What you saw, and what tipped the decision.')}
                 />
               </Field>
 
@@ -355,23 +400,23 @@ export default async function PlacementAttemptPage({
                   className="mt-0.5 size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
                 />
                 <span className="leading-snug">
-                  I have had a spoken conversation with this learner
+                  {t('Ich habe mit dieser Person ein Gespräch geführt', 'I have had a spoken conversation with this learner')}
                   {decision?.speakingRequired ? (
                     <span className="block text-xs text-[var(--casa-warning-text)]">
-                      Required at this band before the placement stands.
+                      {t('Auf dieser Stufe nötig, bevor die Einstufung gilt.', 'Required at this band before the placement stands.')}
                     </span>
                   ) : null}
                 </span>
               </label>
 
               <Button type="submit" className="w-full">
-                {attempt.confirmedLevel ? 'Revise the decision' : 'Confirm level'}
+                {attempt.confirmedLevel ? t('Entscheidung ändern', 'Revise the decision') : t('Niveau bestätigen', 'Confirm level')}
               </Button>
             </form>
           </Card>
 
           {attempt.confirmedLevel ? (
-            <Card title="Person" icon={Icon.person} tint="green">
+            <Card title={t('Person', 'Person')} icon={Icon.person} tint="green">
               {attempt.reviewPerson ? (
                 <div className="flex items-center justify-between gap-3">
                   <Link
@@ -384,7 +429,7 @@ export default async function PlacementAttemptPage({
                     <input type="hidden" name="attemptId" value={attempt.id} />
                     <input type="hidden" name="personId" value="" />
                     <Button type="submit" variant="ghost" size="sm">
-                      Detach
+                      {t('Lösen', 'Detach')}
                     </Button>
                   </form>
                 </div>
@@ -395,16 +440,16 @@ export default async function PlacementAttemptPage({
                       type="search"
                       name="person"
                       defaultValue={personSearch ?? ''}
-                      placeholder="Name or email"
-                      aria-label="Find a person"
+                      placeholder={t('Name oder E-Mail', 'Name or email')}
+                      aria-label={t('Person suchen', 'Find a person')}
                     />
                     <Button type="submit" variant="secondary" size="md">
-                      Find
+                      {t('Suchen', 'Find')}
                     </Button>
                   </form>
                   {personSearch ? (
                     personMatches.length === 0 ? (
-                      <p className="mt-3 text-xs text-[var(--casa-text-subtle)]">No match.</p>
+                      <p className="mt-3 text-xs text-[var(--casa-text-subtle)]">{t('Kein Treffer.', 'No match.')}</p>
                     ) : (
                       <ul className="mt-3 divide-y divide-ws-line-soft">
                         {personMatches.map((match) => (
@@ -424,7 +469,7 @@ export default async function PlacementAttemptPage({
                               <input type="hidden" name="attemptId" value={attempt.id} />
                               <input type="hidden" name="personId" value={match.id} />
                               <Button type="submit" variant="secondary" size="sm">
-                                Attach
+                                {t('Verknüpfen', 'Attach')}
                               </Button>
                             </form>
                           </li>
@@ -437,12 +482,12 @@ export default async function PlacementAttemptPage({
             </Card>
           ) : null}
 
-          <Card title="Notes" icon={Icon.note} tint="sun">
-            <PlacementNotes attemptId={attempt.id} notes={notes} />
+          <Card title={t('Notizen', 'Notes')} icon={Icon.note} tint="sun">
+            <PlacementNotes attemptId={attempt.id} notes={notes} t={t} lang={lang} />
           </Card>
 
           {activity.length > 0 ? (
-            <Card title="History" icon={Icon.clock} tint="ink">
+            <Card title={t('Verlauf', 'History')} icon={Icon.clock} tint="ink">
               <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
                 {activity.map((entry) => (
                   <li key={entry.id} className="relative flex gap-3 text-xs">
@@ -452,14 +497,19 @@ export default async function PlacementAttemptPage({
                     />
                     <span className="text-[var(--casa-text-subtle)]">
                       <span className="font-bold text-[var(--casa-ink)]">
-                        {entry.staffName ?? 'Someone'}
+                        {entry.staffName ?? t('Jemand', 'Someone')}
                       </span>{' '}
                       {entry.action === 'placement_confirmed'
-                        ? `confirmed ${String(entry.detail?.level ?? 'a level')}${
-                            entry.detail?.agreed === false ? ', against the recommendation' : ''
-                          }`
-                        : entry.action.replace(/_/g, ' ')}{' '}
-                      · {relativeDays(entry.createdAt)}
+                        ? t(
+                            `hat ${String(entry.detail?.level ?? 'ein Niveau')} bestätigt${
+                              entry.detail?.agreed === false ? ', entgegen der Empfehlung' : ''
+                            }`,
+                            `confirmed ${String(entry.detail?.level ?? 'a level')}${
+                              entry.detail?.agreed === false ? ', against the recommendation' : ''
+                            }`
+                          )
+                        : t(ACTIONS_DE[entry.action] ?? entry.action.replace(/_/g, ' '), entry.action.replace(/_/g, ' '))}{' '}
+                      · {relativeDays(entry.createdAt, lang)}
                     </span>
                   </li>
                 ))}
@@ -476,6 +526,8 @@ export default async function PlacementAttemptPage({
 function PlacementNotes({
   attemptId,
   notes,
+  t,
+  lang,
 }: {
   attemptId: string;
   notes: readonly {
@@ -484,6 +536,8 @@ function PlacementNotes({
     authorName: string | null;
     createdAt: Date;
   }[];
+  t: T;
+  lang: WsLang;
 }) {
   return (
     <>
@@ -494,11 +548,14 @@ function PlacementNotes({
           name="body"
           rows={3}
           required
-          placeholder="Anything a colleague should know before they teach this learner."
-          aria-label="New note"
+          placeholder={t(
+            'Was das Team wissen sollte, bevor jemand diese Person unterrichtet.',
+            'Anything a colleague should know before they teach this learner.'
+          )}
+          aria-label={t('Neue Notiz', 'New note')}
         />
         <Button type="submit" variant="secondary" size="sm">
-          Add note
+          {t('Notiz hinzufügen', 'Add note')}
         </Button>
       </form>
 
@@ -510,7 +567,7 @@ function PlacementNotes({
                 {note.body}
               </p>
               <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">
-                {note.authorName ?? 'A former colleague'} · {relativeDays(note.createdAt)}
+                {note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague')} · {relativeDays(note.createdAt, lang)}
               </p>
             </li>
           ))}

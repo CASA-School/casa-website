@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
 import { InlinePanel, InlineText } from '@/components/admin/letters/inline-edit';
 import ed from '@/components/admin/letters/letter-edit.module.css';
 import { LetterSheet, type LetterSlots } from '@/components/admin/letters/letter-sheet';
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
+import { pick } from '@/lib/admin/i18n';
 import type { Letter } from '@/lib/admin/letters/types';
 import { hasProblems } from '@/lib/admin/offers/checks';
 import { lineRef, offerLetter, validityParts } from '@/lib/admin/offers/document';
@@ -65,6 +67,8 @@ export function LetterView({
   notice: { ok?: string; error?: string };
 }) {
   const { meta } = record;
+  // `lang` below is the letter's own language, chosen per offer; `t` and `wsLang` are the workspace's.
+  const { t, lang: wsLang } = useWsLang();
   const [texts, setTexts] = useState(initialTexts);
   const od = useOfferDraft({
     id: meta.id,
@@ -99,7 +103,7 @@ export function LetterView({
   const saveStandard = async (part: 'intro' | 'closing', body: string) => {
     const result = await saveStandardTextAction({ language: lang, part, body });
     if (!result.ok) return;
-    setTexts((t) => ({ ...t, [lang]: { ...t[lang], [part]: body } }));
+    setTexts((prev) => ({ ...prev, [lang]: { ...prev[lang], [part]: body } }));
     update({ [part]: null });
   };
 
@@ -114,23 +118,23 @@ export function LetterView({
     ? {}
     : {
         recipient: (part) => (
-          <InlinePanel label="Recipient" block width={400} panel={recipientPanel}>
+          <InlinePanel label={t('Empfänger', 'Recipient')} block width={400} panel={recipientPanel}>
             {part}
           </InlinePanel>
         ),
         salutation: (part) => (
-          <InlinePanel label="Recipient" width={400} panel={recipientPanel}>
+          <InlinePanel label={t('Empfänger', 'Recipient')} width={400} panel={recipientPanel}>
             {part}
           </InlinePanel>
         ),
-        title: () => <InlineText label="Title" value={draft.title} placeholder="Title" onChange={(v) => update({ title: v })} />,
+        title: () => <InlineText label={t('Titel', 'Title')} value={draft.title} placeholder={t('Titel', 'Title')} onChange={(v) => update({ title: v })} />,
         row: (row) => {
           const target = row.ref ? lines.find((l) => lineRef(l) === row.ref) : undefined;
           if (!target) return row.text;
           const custom = !target.manual && Boolean(draft.stay.overrides[overrideKey(target.audience, target.key)]?.description);
           return (
             <InlineText
-              label="Line"
+              label={t('Zeile', 'Line')}
               value={target.description}
               state={target.manual ? undefined : custom ? 'changed' : 'standard'}
               onChange={(v) => update((d) => setLineText(d, target, v))}
@@ -142,7 +146,7 @@ export function LetterView({
           intro: () => (
             <InlineText
               multiline
-              label="Opening"
+              label={t('Einleitung', 'Opening')}
               value={draft.intro ?? standard.intro}
               state={draft.intro == null ? 'standard' : 'changed'}
               onChange={(v) => update({ intro: v === standard.intro ? null : v })}
@@ -152,18 +156,20 @@ export function LetterView({
           ),
           validity: () => (
             <InlinePanel
-              label="Valid until"
+              label={t('Gültig bis', 'Valid until')}
               width={316}
               panel={() => (
                 <InlineDatePicker
-                  ariaLabel="Valid until"
+                  ariaLabel={t('Gültig bis', 'Valid until')}
                   value={draft.validUntil}
                   today={today}
                   min={today}
                   onChange={(v) => update({ validUntil: v })}
                   quick={[
-                    ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
-                    ...(draft.arrival && addDays(draft.arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(draft.arrival, -42) }] : []),
+                    ...[14, 28, 42].map((days) => ({ label: t(`${days / 7} Wochen`, `${days / 7} weeks`), value: addDays(today, days) })),
+                    ...(draft.arrival && addDays(draft.arrival, -42) > today
+                      ? [{ label: t('6 Wochen vor der Anreise', '6 weeks before arrival'), value: addDays(draft.arrival, -42) }]
+                      : []),
                   ]}
                 />
               )}
@@ -184,7 +190,7 @@ export function LetterView({
               <InlineText
                 multiline
                 startOpen={addingNote}
-                label="Note"
+                label={t('Hinweis', 'Note')}
                 value={draft.note ?? ''}
                 placeholder={lang === 'de' ? 'Ein Hinweis zum Angebot' : 'A note about the offer'}
                 onChange={(v) => update({ note: v })}
@@ -196,7 +202,7 @@ export function LetterView({
                   <>
                     {lang === 'de' && !draft.note ? (
                       <button type="button" className={ed.barBtn} onClick={() => update({ note: JOBCENTER_NOTE })}>
-                        Jobcenter text
+                        {t('Jobcenter-Text', 'Jobcenter text')}
                       </button>
                     ) : null}
                     {draft.note ? (
@@ -208,7 +214,7 @@ export function LetterView({
                           setAddingNote(false);
                         }}
                       >
-                        Remove
+                        {t('Entfernen', 'Remove')}
                       </button>
                     ) : null}
                   </>
@@ -222,7 +228,7 @@ export function LetterView({
           closing: () => (
             <InlineText
               multiline
-              label="Closing"
+              label={t('Schluss', 'Closing')}
               value={draft.closing ?? standard.closing}
               state={draft.closing == null ? 'standard' : 'changed'}
               onChange={(v) => update({ closing: v === standard.closing ? null : v })}
@@ -233,7 +239,7 @@ export function LetterView({
         },
         signatureName: (name) => (
           <InlinePanel
-            label="Signed by"
+            label={t('Unterschrieben von', 'Signed by')}
             width={280}
             panel={(close) => (
               <span className={ed.choices}>
@@ -261,22 +267,22 @@ export function LetterView({
 
   const name = draft.groupName || draft.recipientName || meta.number;
   const print = () => printLetter(`${lang === 'de' ? 'Angebot' : 'Offer'} ${meta.number} ${name}`);
-  const status = saveLabel(od.saveState, od.saveError, editable);
-  const problems = checks.filter((c) => c.level === 'problem').map((c) => c.message);
+  const status = saveLabel(od.saveState, od.saveError, editable, t);
+  const problems = checks.filter((c) => c.level === 'problem').map((c) => pick(wsLang, c.message));
   const missingCopy = shownVersion != null && !sentLetter;
 
   return (
     <OfferFrame
-      back={{ href: '/admin/offers', label: 'Offers', before: od.flush }}
+      back={{ href: '/admin/offers', label: t('Angebote', 'Offers'), before: od.flush }}
       title={name}
-      subtitle={`${meta.number} · ${OFFER_STATUS_LABELS[meta.status]}`}
+      subtitle={`${meta.number} · ${pick(wsLang, OFFER_STATUS_LABELS[meta.status])}`}
       tabs={{ id: meta.id, active: 'letter', before: od.flush }}
       right={
         <>
           {status ? <span className={`${o.status} ${od.saveState === 'error' ? o.statusBad : ''}`}>{status}</span> : null}
           {notice.error ? <span className={`${o.status} ${o.statusBad}`}>{notice.error}</span> : null}
           <button type="button" className={o.btn} onClick={print}>
-            Print / PDF
+            {t('Drucken / PDF', 'Print / PDF')}
           </button>
           <OfferToolbarActions
             id={meta.id}
@@ -304,34 +310,45 @@ export function LetterView({
         <div className={ui.paper}>
           {od.saveState === 'stale' ? (
             <div className={o.banner} style={{ marginBottom: 12 }}>
-              A colleague has changed this offer in the meantime. The last change is not saved.
+              {t(
+                'Jemand aus dem Team hat dieses Angebot inzwischen geändert. Die letzte Änderung ist nicht gespeichert.',
+                'A colleague has changed this offer in the meantime. The last change is not saved.'
+              )}
               <span style={{ flex: 1 }} />
               <button type="button" className={`${o.btn} ${o.btnSm}`} onClick={() => window.location.reload()}>
-                Reload
+                {t('Neu laden', 'Reload')}
               </button>
             </div>
           ) : null}
           {showsSent && shownVersion ? (
             <div className={ui.notice}>
-              As sent{meta.version > 1 ? ` · version ${shownVersion} of ${meta.version}` : ''}
+              {t('Wie gesendet', 'As sent')}
+              {meta.version > 1 ? t(` · Fassung ${shownVersion} von ${meta.version}`, ` · version ${shownVersion} of ${meta.version}`) : ''}
               {record.letters.find((l) => l.version === shownVersion) ? ` · ${day(record.letters.find((l) => l.version === shownVersion)!.sentAt)}` : ''}
             </div>
           ) : null}
-          {missingCopy ? <div className={`${ui.notice} ${ui.noticeWarn}`}>The copy of this version is not available. This is the offer as it stands.</div> : null}
+          {missingCopy ? (
+            <div className={`${ui.notice} ${ui.noticeWarn}`}>
+              {t(
+                'Die Kopie dieser Fassung ist nicht verfügbar. Das ist das Angebot, wie es jetzt ist.',
+                'The copy of this version is not available. This is the offer as it stands.'
+              )}
+            </div>
+          ) : null}
           <LetterSheet letter={letter} slots={slots} />
         </div>
 
         {writing || record.letters.length ? (
-          <aside className={ui.side} aria-label="The letter">
+          <aside className={ui.side} aria-label={t('Der Brief', 'The letter')}>
             {writing ? (
               <section className={o.card}>
                 <div className={o.cardHead}>
-                  <h2>Letter</h2>
+                  <h2>{t('Brief', 'Letter')}</h2>
                 </div>
                 <div className={ui.group}>
-                  <span>Language</span>
+                  <span>{t('Sprache', 'Language')}</span>
                   <Seg<OfferLanguage>
-                    label="Language"
+                    label={t('Sprache', 'Language')}
                     value={lang}
                     options={[
                       ['de', 'Deutsch'],
@@ -341,54 +358,60 @@ export function LetterView({
                   />
                 </div>
                 <div className={ui.group}>
-                  <span>Prices</span>
+                  <span>{t('Preise', 'Prices')}</span>
                   <Seg
-                    label="Prices on the letter"
+                    label={t('Preise im Brief', 'Prices on the letter')}
                     value={draft.presentation}
                     options={[
-                      ['itemised', 'Every line'],
-                      ['package', 'One price per person'],
+                      ['itemised', t('Jede Zeile', 'Every line')],
+                      ['package', t('Ein Preis pro Person', 'One price per person')],
                     ]}
                     onChange={(v) => update({ presentation: v })}
                   />
                 </div>
                 <div className={ui.group}>
-                  <span>Texts</span>
+                  <span>{t('Texte', 'Texts')}</span>
                   {(['intro', 'closing'] as const).map((part) => {
                     const own = draft[part] != null;
                     return (
                       <div key={part} className={ui.textRow}>
-                        {part === 'intro' ? 'Opening' : 'Closing'}
+                        {part === 'intro' ? t('Einleitung', 'Opening') : t('Schluss', 'Closing')}
                         {own ? (
-                          <button type="button" className={`${ui.state} ${ui.stateChanged}`} style={{ border: 0 }} onClick={() => update({ [part]: null })} title="Use the standard text">
-                            Only this letter · use the standard
+                          <button
+                            type="button"
+                            className={`${ui.state} ${ui.stateChanged}`}
+                            style={{ border: 0 }}
+                            onClick={() => update({ [part]: null })}
+                            title={t('Standardtext verwenden', 'Use the standard text')}
+                          >
+                            {t('Nur dieser Brief · Standard verwenden', 'Only this letter · use the standard')}
                           </button>
                         ) : (
-                          <span className={`${ui.state} ${ui.stateStandard}`}>Standard text</span>
+                          <span className={`${ui.state} ${ui.stateStandard}`}>{t('Standardtext', 'Standard text')}</span>
                         )}
                       </div>
                     );
                   })}
                 </div>
-                <div className={ui.tip}>Click any text on the letter to change it.</div>
+                <div className={ui.tip}>{t('Klick auf einen Text im Brief, um ihn zu ändern.', 'Click any text on the letter to change it.')}</div>
               </section>
             ) : null}
 
             {record.letters.length ? (
               <section className={o.card}>
                 <div className={o.cardHead}>
-                  <h2>Sent</h2>
+                  <h2>{t('Gesendet', 'Sent')}</h2>
                   <span className={o.count}>{record.letters.length}</span>
                 </div>
                 <div className={ui.versions}>
                   {meta.status === 'draft' ? (
                     <Link href={`/admin/offers/${meta.id}/letter`} className={`${ui.version} ${!showsSent ? ui.versionOn : ''}`}>
-                      The current draft
+                      {t('Der aktuelle Entwurf', 'The current draft')}
                     </Link>
                   ) : null}
                   {record.letters.map((l) => (
                     <Link key={l.id} href={`/admin/offers/${meta.id}/letter?version=${l.version}`} className={`${ui.version} ${shownVersion === l.version ? ui.versionOn : ''}`}>
-                      Version {l.version}
+                      {t(`Fassung ${l.version}`, `Version ${l.version}`)}
                       <span>
                         {day(l.sentAt)}
                         {l.sentByName ? ` · ${l.sentByName}` : ''}

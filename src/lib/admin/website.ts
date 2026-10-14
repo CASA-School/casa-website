@@ -44,7 +44,15 @@ const LIVE_SQL = `
 const id = (key: string, locale: string) => `${key}|${locale}`;
 const iso = (value: Date | string | null) => (value ? new Date(value).toISOString() : null);
 
-export class WebsiteEditError extends Error {}
+/** A refusal the editor shows as it is: German first, as everywhere in the workspace; `message` is the English. */
+export class WebsiteEditError extends Error {
+  constructor(
+    readonly de: string,
+    en: string
+  ) {
+    super(en);
+  }
+}
 
 /** Names slots as they read on the page: a text with a live value shows today's value, not `{…}`. */
 async function slotNamer(): Promise<(slot: CatalogSlot) => string> {
@@ -57,12 +65,12 @@ async function slotNamer(): Promise<(slot: CatalogSlot) => string> {
 
 function knownSlot(key: string): CatalogSlot {
   const slot = slotFor(key);
-  if (!slot) throw new WebsiteEditError('This text is not editable.');
+  if (!slot) throw new WebsiteEditError('Dieser Text lässt sich nicht bearbeiten.', 'This text is not editable.');
   return slot;
 }
 
 function knownLocale(locale: string): string {
-  if (!cmsLocales().some((candidate) => candidate.code === locale)) throw new WebsiteEditError('Unknown language.');
+  if (!cmsLocales().some((candidate) => candidate.code === locale)) throw new WebsiteEditError('Unbekannte Sprache.', 'Unknown language.');
   return locale;
 }
 
@@ -167,14 +175,23 @@ export async function saveDraft(user: StaffUser, key: string, locale: string, va
   const local = (source: string) => placeholders(source).filter((name) => !isFactName(name));
   const required = local(slot.defaults[locale] ?? slot.defaults[SOURCE_LOCALE] ?? '');
   if (local(text).join(',') !== required.join(',')) {
-    throw new WebsiteEditError(`Keep ${required.map((name) => `{${name}}`).join(' ') || 'the text without {…}'} as it is.`);
+    const kept = required.map((name) => `{${name}}`).join(' ');
+    throw new WebsiteEditError(
+      kept ? `Lass ${kept} unverändert im Text.` : 'Lass den Text ohne {…}.',
+      `Keep ${kept || 'the text without {…}'} as it is.`
+    );
   }
   // A live value (facts.ts) may be added or removed, if it is one the site knows.
   const named = factsIn(text);
   if (named.length) {
     const known = new Set((await loadFacts('de')).defs.map((def) => def.id));
     const unknown = named.filter((id) => !known.has(id));
-    if (unknown.length) throw new WebsiteEditError(`There is no live value {${unknown[0]}}. Insert one from the list.`);
+    if (unknown.length) {
+      throw new WebsiteEditError(
+        `Den Live-Wert {${unknown[0]}} gibt es nicht. Füg einen aus der Liste ein.`,
+        `There is no live value {${unknown[0]}}. Insert one from the list.`
+      );
+    }
   }
 
   await query(
@@ -293,7 +310,7 @@ export async function createRelease(
         FOR UPDATE`,
       [items.map((item) => item.key), items.map((item) => item.locale)]
     );
-    if (drafts.length === 0) throw new WebsiteEditError('There is nothing to publish.');
+    if (drafts.length === 0) throw new WebsiteEditError('Es gibt nichts zu veröffentlichen.', 'There is nothing to publish.');
 
     const {
       rows: [release],
@@ -339,7 +356,7 @@ export async function decideRelease(user: StaffUser, releaseId: string, approve:
         WHERE id = $1 AND state = 'pending'`,
       [releaseId, approve ? 'published' : 'rejected', user.id, user.name]
     );
-    if (!rowCount) throw new WebsiteEditError('This request was already decided.');
+    if (!rowCount) throw new WebsiteEditError('Über diese Freigabe wurde schon entschieden.', 'This request was already decided.');
     if (approve) await markTranslations(client, releaseId);
     else await returnToDrafts(client, releaseId);
   });
@@ -353,7 +370,7 @@ export async function undoRelease(user: StaffUser, releaseId: string): Promise<v
         WHERE id = $1 AND state IN ('published', 'scheduled') AND publish_at <= now()`,
       [releaseId, user.id, user.name]
     );
-    if (!rowCount) throw new WebsiteEditError('Only a live release can be undone.');
+    if (!rowCount) throw new WebsiteEditError('Nur eine Veröffentlichung, die live ist, lässt sich rückgängig machen.', 'Only a live release can be undone.');
     // The German it published is gone again, so the translations it left behind are not behind any more.
     await client.query(
       `DELETE FROM website_stale s
@@ -373,7 +390,7 @@ export async function cancelRelease(user: StaffUser, releaseId: string): Promise
         WHERE id = $1 AND (state = 'pending' OR (state = 'scheduled' AND publish_at > now()))`,
       [releaseId, user.id, user.name]
     );
-    if (!rowCount) throw new WebsiteEditError('This release is already live or closed.');
+    if (!rowCount) throw new WebsiteEditError('Diese Veröffentlichung ist schon live oder abgeschlossen.', 'This release is already live or closed.');
     await returnToDrafts(client, releaseId);
   });
 }

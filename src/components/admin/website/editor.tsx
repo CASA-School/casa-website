@@ -10,8 +10,10 @@ import {
   listChangesAction,
   undoReleaseAction,
 } from '@/app/(admin)/admin/(editor)/website/actions';
+import { useWsLang } from '@/components/admin/lang';
 import type { EditorPageGroup } from '@/config/cms/editor-pages';
 import { localizeHref, toInternalPath } from '@/i18n/pathnames';
+import { pick, type Bilingual } from '@/lib/admin/i18n';
 import type { ContentLocale } from '@/lib/content/types';
 import type { ChangeItem, EditorFacts, PresenceEntry, SearchHit, SlotState } from '@/lib/cms/editor-types';
 import type { CmsLocale } from '@/lib/cms/locales';
@@ -23,7 +25,7 @@ import styles from './editor.module.css';
 import { HistoryDrawer } from './history-drawer';
 import { LanguageMenu } from './language-menu';
 import { PagePicker } from './page-picker';
-import { Avatar, I, IconButton, plural } from './parts';
+import { Avatar, I, IconButton, plural, sourceLabel } from './parts';
 import { ReviewDialog } from './review-dialog';
 import { TextPopover } from './text-popover';
 
@@ -42,6 +44,11 @@ type Selection = { key: string; rect: Rect | null; text: string };
 type Toast = { message: string; undo?: string } | null;
 
 const DEVICE_WIDTH = { desktop: '100%', tablet: '820px', phone: '390px' } as const;
+const DEVICE_LABEL: Record<keyof typeof DEVICE_WIDTH, Bilingual> = {
+  desktop: { de: 'Desktop', en: 'Desktop' },
+  tablet: { de: 'Tablet', en: 'Tablet' },
+  phone: { de: 'Smartphone', en: 'Phone' },
+};
 
 const sameRect = (a: Rect | null, b: Rect) =>
   Boolean(a) && Math.abs(a!.x - b.x) < 0.5 && Math.abs(a!.y - b.y) < 0.5 && Math.abs(a!.width - b.width) < 0.5 && Math.abs(a!.height - b.height) < 0.5;
@@ -72,6 +79,8 @@ export function WebsiteEditor({
   facts: EditorFacts;
   dataScreens: DataScreens;
 }) {
+  // The workspace's language, for the editor's own words; `lang` below is the language of the page being edited.
+  const { t, lang: uiLang } = useWsLang();
   const [src, setSrc] = useState(() => previewBase + encodeURIComponent(initialPath));
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState<{ path: string; title: string; lang: string } | null>(null);
@@ -204,7 +213,8 @@ export function WebsiteEditor({
     const out: Record<string, SlotMarker> = {};
     for (const key of keys) {
       if (isDataKey(key)) {
-        out[key] = { label: `From ${dataSource(key)}` };
+        const source = dataSource(key);
+        out[key] = { label: t(`Quelle: ${sourceLabel(source, uiLang)}`, `From ${source}`) };
         continue;
       }
       const slot = slots[key];
@@ -218,7 +228,7 @@ export function WebsiteEditor({
       };
     }
     return out;
-  }, [keys, slots, presence, lang]);
+  }, [keys, slots, presence, lang, t, uiLang]);
 
   const markersJson = JSON.stringify(markers);
   useEffect(() => post({ type: 'cms:markers', markers: JSON.parse(markersJson) as Record<string, SlotMarker> }), [markersJson, post]);
@@ -304,7 +314,7 @@ export function WebsiteEditor({
   async function undo(releaseId: string) {
     const result = await undoReleaseAction({ id: releaseId });
     if (!result.ok) return notify(result.error);
-    notify('Taken back off the site');
+    notify(t('Von der Website genommen', 'Taken back off the site'));
     afterRelease(true);
   }
 
@@ -314,7 +324,7 @@ export function WebsiteEditor({
     return map;
   }, [pages]);
   const internalPath = page ? toInternalPath(page.path).internalPath : null;
-  const pageName = (internalPath && pageNames.get(internalPath)) || page?.title.replace(/\s*\|\s*CASA Bremen\s*$/, '') || 'Loading…';
+  const pageName = (internalPath && pageNames.get(internalPath)) || page?.title.replace(/\s*\|\s*CASA Bremen\s*$/, '') || t('Wird geladen …', 'Loading…');
 
   const draftPaths = useMemo(
     () => new Set(changes.flatMap((change) => (change.path ? [localizeHref(change.path, 'de')] : []))),
@@ -355,7 +365,7 @@ export function WebsiteEditor({
             className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]"
           >
             {I.back}
-            <span className="hidden md:inline">Workspace</span>
+            <span className="hidden md:inline">{t('Arbeitsbereich', 'Workspace')}</span>
           </Link>
           <span aria-hidden className="hidden h-6 w-px bg-ws-line md:block" />
           <button
@@ -396,15 +406,15 @@ export function WebsiteEditor({
           {panel === 'language' ? (
             <LanguageMenu locales={locales} current={workLocale} completion={completion} onPick={pickLanguage} onClose={() => setPanel(null)} />
           ) : null}
-          <div role="radiogroup" aria-label="Preview width" className="inline-flex rounded-lg bg-ws-sunk p-0.5">
+          <div role="radiogroup" aria-label={t('Vorschaubreite', 'Preview width')} className="inline-flex rounded-lg bg-ws-sunk p-0.5">
             {(['desktop', 'tablet', 'phone'] as const).map((option) => (
               <button
                 key={option}
                 type="button"
                 role="radio"
                 aria-checked={device === option}
-                aria-label={option[0].toUpperCase() + option.slice(1)}
-                title={option[0].toUpperCase() + option.slice(1)}
+                aria-label={pick(uiLang, DEVICE_LABEL[option])}
+                title={pick(uiLang, DEVICE_LABEL[option])}
                 onClick={() => setDevice(option)}
                 className={cn(
                   'grid h-8 w-9 place-items-center rounded-md transition-colors',
@@ -426,7 +436,7 @@ export function WebsiteEditor({
                   initials={other.initials}
                   tone={other.path === page?.path ? 'sun' : 'ink'}
                   size={28}
-                  title={`${other.name}${other.path === page?.path ? ' · on this page' : ''}`}
+                  title={`${other.name}${other.path === page?.path ? t(' · auf dieser Seite', ' · on this page') : ''}`}
                 />
               ))}
             </div>
@@ -438,10 +448,10 @@ export function WebsiteEditor({
               className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:bg-[var(--casa-blue-tint)]"
             >
               {I.sparkle}
-              <span className="hidden sm:inline">Ask</span>
+              <span className="hidden sm:inline">{t('Fragen', 'Ask')}</span>
             </button>
           ) : null}
-          <IconButton label="History" active={panel === 'history'} onClick={() => setPanel(panel === 'history' ? null : 'history')}>
+          <IconButton label={t('Verlauf', 'History')} active={panel === 'history'} onClick={() => setPanel(panel === 'history' ? null : 'history')}>
             {I.history}
           </IconButton>
           {canEdit ? (
@@ -459,8 +469,10 @@ export function WebsiteEditor({
                   {reviewCount}
                 </span>
               ) : null}
-              <span className="hidden sm:inline">{level === 'full' ? 'Review & publish' : 'Review & send'}</span>
-              <span className="sm:hidden">Review</span>
+              <span className="hidden sm:inline">
+                {level === 'full' ? t('Prüfen & veröffentlichen', 'Review & publish') : t('Prüfen & senden', 'Review & send')}
+              </span>
+              <span className="sm:hidden">{t('Prüfen', 'Review')}</span>
             </button>
           ) : null}
           <span className="ml-1 hidden sm:block">
@@ -486,7 +498,7 @@ export function WebsiteEditor({
               {changes.length ? (
                 <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--casa-sun-tint)] px-2.5 py-0.5 font-semibold text-[#5c4900]">
                   <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[#d4a800]" />
-                  Draft preview
+                  {t('Entwurfsvorschau', 'Draft preview')}
                 </span>
               ) : null}
             </div>
@@ -495,7 +507,7 @@ export function WebsiteEditor({
               <iframe
                 ref={iframe}
                 src={src}
-                title="Website preview"
+                title={t('Vorschau der Website', 'Website preview')}
                 onLoad={() => setLoading(false)}
                 className="h-full w-full border-0 bg-white"
               />
@@ -511,7 +523,7 @@ export function WebsiteEditor({
             )}
           >
             {I.pointer}
-            Click any text to edit it
+            {t('Klick auf einen Text, um ihn zu bearbeiten', 'Click any text to edit it')}
           </div>
         ) : null}
 
@@ -565,10 +577,10 @@ export function WebsiteEditor({
             {toast.message}
             {toast.undo ? (
               <button type="button" onClick={() => void undo(toast.undo!)} className="h-8 rounded-lg bg-white/10 px-3 text-[0.8rem] font-semibold hover:bg-white/20">
-                Undo
+                {t('Rückgängig', 'Undo')}
               </button>
             ) : null}
-            <button type="button" onClick={() => setToast(null)} aria-label="Dismiss" className="grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10">
+            <button type="button" onClick={() => setToast(null)} aria-label={t('Ausblenden', 'Dismiss')} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10">
               {I.close}
             </button>
           </div>
@@ -602,7 +614,7 @@ export function WebsiteEditor({
           onClose={() => setPanel(null)}
           onApplied={(count) => {
             setPanel(null);
-            notify(`${plural(count, 'draft', 'drafts')} added`);
+            notify(t(`${plural(count, 'Entwurf', 'Entwürfe')} hinzugefügt`, `${plural(count, 'draft', 'drafts')} added`));
             afterRelease(true);
           }}
         />
@@ -626,14 +638,16 @@ function DataCard({
   bounds: { width: number; height: number };
   onClose: () => void;
 }) {
+  const { t, lang } = useWsLang();
   const screen = screens[source];
+  const name = sourceLabel(source, lang);
   const width = 320;
   const left = Math.max(12, Math.min(anchor.x + anchor.width / 2 - width / 2, bounds.width - width - 12));
   const below = bounds.height - (anchor.y + anchor.height) > 200;
   return (
     <div
       role="dialog"
-      aria-label={source}
+      aria-label={name}
       onKeyDown={(event) => event.key === 'Escape' && onClose()}
       className={cn('absolute z-30 rounded-2xl bg-white p-4 shadow-[0_28px_70px_-24px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.07)]', styles.pop)}
       style={below ? { left, top: anchor.y + anchor.height + 12, width } : { left, bottom: bounds.height - anchor.y + 12, width }}
@@ -641,10 +655,10 @@ function DataCard({
       <div className="flex items-start gap-3">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ws-sunk text-[var(--casa-muted)]">{I.data}</span>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-[var(--casa-text-subtle)]">From {source}</p>
+          <p className="text-xs font-semibold text-[var(--casa-text-subtle)]">{t(`Quelle: ${name}`, `From ${source}`)}</p>
           <p className="mt-0.5 truncate text-[0.95rem] font-bold text-[var(--casa-ink)]">{text}</p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="-mt-1 -mr-1 grid h-8 w-8 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
+        <button type="button" onClick={onClose} aria-label={t('Schließen', 'Close')} className="-mt-1 -mr-1 grid h-8 w-8 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
           {I.close}
         </button>
       </div>
@@ -654,7 +668,7 @@ function DataCard({
           target="_blank"
           className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-ws-line-firm text-[0.8rem] font-semibold text-[var(--casa-ink)] hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
         >
-          Open {screen.label}
+          {t(`${screen.label} öffnen`, `Open ${screen.label}`)}
           {I.external}
         </Link>
       ) : null}

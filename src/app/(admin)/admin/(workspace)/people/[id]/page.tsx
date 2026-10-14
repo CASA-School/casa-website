@@ -26,9 +26,10 @@ import {
   DetailList,
   IconChip,
   RecordHeader,
-  relativeDays,
   type Tint,
 } from '@/components/admin/ui';
+import { pick, relativeDays, wsLocale, type Bilingual, type T } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { activityFor, describeActivity } from '@/lib/admin/activity';
 import { offersFor } from '@/lib/admin/offers/repo';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
@@ -43,27 +44,27 @@ import {
 import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { cn } from '@/lib/utils';
 
-const SALUTATIONS: Record<string, string> = {
-  mr: 'Mr',
-  ms: 'Ms',
-  mx: 'Mx',
-  neutral: '',
+const SALUTATIONS: Record<string, Bilingual> = {
+  mr: { de: 'Herr', en: 'Mr' },
+  ms: { de: 'Frau', en: 'Ms' },
+  mx: { de: 'Mx', en: 'Mx' },
+  neutral: { de: '', en: '' },
 };
 
 /** What each kind of history entry is, and its meaning colour. */
-const KINDS: Record<TimelineItem['kind'], { label: string; icon: ReactNode; tint: Tint }> = {
-  enquiry: { label: 'Enquiry', icon: Icon.enquiries, tint: 'ink' },
-  course: { label: 'Course registration', icon: Icon.registrations, tint: 'red' },
-  exam: { label: 'Exam registration', icon: Icon.registrations, tint: 'blue' },
-  review: { label: 'Placement', icon: Icon.placement, tint: 'red' },
+const KINDS: Record<TimelineItem['kind'], { label: Bilingual; icon: ReactNode; tint: Tint }> = {
+  enquiry: { label: { de: 'Anfrage', en: 'Enquiry' }, icon: Icon.enquiries, tint: 'ink' },
+  course: { label: { de: 'Kursanmeldung', en: 'Course registration' }, icon: Icon.registrations, tint: 'red' },
+  exam: { label: { de: 'Prüfungsanmeldung', en: 'Exam registration' }, icon: Icon.registrations, tint: 'blue' },
+  review: { label: { de: 'Einstufung', en: 'Placement' }, icon: Icon.placement, tint: 'red' },
 };
 
 /** How the record came to be, in a few words; nothing for a demo seed. */
-function origin(createdBy: string, label: string): string | null {
+function origin(t: T, createdBy: string, label: string): string | null {
   if (createdBy === 'demo-seed') return null;
-  if (createdBy === 'public-site') return 'Came through the website';
-  if (createdBy.startsWith('migration-')) return 'Imported';
-  return `Added by ${label}`;
+  if (createdBy === 'public-site') return t('Über die Website gekommen', 'Came through the website');
+  if (createdBy.startsWith('migration-')) return t('Importiert', 'Imported');
+  return t(`Angelegt von ${label}`, `Added by ${label}`);
 }
 
 /**
@@ -104,6 +105,7 @@ export default async function PersonPage({
   if (!person) {
     notFound();
   }
+  const { t, lang } = await getI18n();
 
   const canEdit = canAccess(user, 'people', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit');
@@ -111,7 +113,7 @@ export default async function PersonPage({
   const canOffer = canAccess(user, 'offers', 'edit');
   const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer, offers, courseName] =
     await Promise.all([
-      personTimeline(person.id),
+      personTimeline(person.id, lang),
       latestConfirmedLevel(person.id),
       listFlags('person', person.id),
       activityFor('person', person.id),
@@ -123,13 +125,14 @@ export default async function PersonPage({
       courseNameResolver(),
     ]);
 
-  const title = [SALUTATIONS[person.salutation ?? ''] ?? '', person.displayName]
+  const salutation = SALUTATIONS[person.salutation ?? ''];
+  const title = [salutation ? pick(lang, salutation) : '', person.displayName]
     .filter(Boolean)
     .join(' ');
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
   const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
-  const more = (n: number) => (n > 1 ? `+${n - 1} more` : undefined);
+  const more = (n: number) => (n > 1 ? t(`+${n - 1} weitere`, `+${n - 1} more`) : undefined);
   const openFlags = flags.filter((f) => !f.resolvedAt);
   const manyChannels = person.emails.length > 1 || person.phones.length > 1;
   // "Added by" is in the head already; the card keeps the decisions after it.
@@ -143,9 +146,9 @@ export default async function PersonPage({
   // public form stored them.
   const history = timeline.map((item) =>
     item.kind === 'course'
-      ? { ...item, title: courseName(item.title) ?? item.title, detail: optionLine(item.detail, 'course') }
+      ? { ...item, title: courseName(item.title) ?? item.title, detail: optionLine(item.detail, 'course', lang) }
       : item.kind === 'exam'
-        ? { ...item, detail: optionLine(item.detail, 'exam') }
+        ? { ...item, detail: optionLine(item.detail, 'exam', lang) }
         : item
   );
 
@@ -153,29 +156,30 @@ export default async function PersonPage({
     <>
       <RecordHeader
         backHref="/admin/people"
-        backLabel="All students"
+        backLabel={t('Alle Teilnehmenden', 'All students')}
         title={title}
         avatar={person.displayName}
         subtitle={[
           person.id !== id
-            ? 'Opened from a linked record'
-            : `In touch since ${person.createdAt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`,
-          origin(person.createdBy, person.createdByLabel),
+            ? t('Über einen verknüpften Datensatz geöffnet', 'Opened from a linked record')
+            : t('In Kontakt seit', 'In touch since') +
+              ` ${person.createdAt.toLocaleDateString(wsLocale(lang), { month: 'long', year: 'numeric' })}`,
+          origin(t, person.createdBy, pick(lang, person.createdByLabel)),
         ]
           .filter(Boolean)
           .join(' · ')}
         actions={
           <>
             {canEdit ? (
-              <FormDialog trigger="Edit" title={person.displayName}>
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={person.displayName}>
                 <PersonForm person={person} countries={countries} />
               </FormDialog>
             ) : null}
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog
-                trigger="New booking"
-                title={`Book ${person.displayName}`}
+                trigger={t('Neue Buchung', 'New booking')}
+                title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)}
                 triggerVariant="primary"
                 width="lg"
               >
@@ -192,7 +196,7 @@ export default async function PersonPage({
         }
         facts={[
           {
-            label: 'Email',
+            label: t('E-Mail', 'Email'),
             icon: Icon.mail,
             tint: 'ink',
             value: email?.address,
@@ -200,7 +204,7 @@ export default async function PersonPage({
             href: email ? `mailto:${email.address}` : undefined,
           },
           {
-            label: 'Phone',
+            label: t('Telefon', 'Phone'),
             icon: Icon.person,
             tint: 'green',
             value: phone?.number,
@@ -210,35 +214,35 @@ export default async function PersonPage({
           {
             // With the date of birth under it, as the person panel on every
             // queue record shows them: five columns cut the address short.
-            label: 'Nationality',
+            label: t('Nationalität', 'Nationality'),
             icon: Icon.globe,
             tint: 'sun',
             value: person.nationalityName ?? person.nationalityRaw,
             sub:
               person.birthDate || (!person.nationalityName && person.nationalityRaw) ? (
                 <>
-                  {!person.nationalityName && person.nationalityRaw ? 'Not recognised' : null}
+                  {!person.nationalityName && person.nationalityRaw ? t('Nicht erkannt', 'Not recognised') : null}
                   {!person.nationalityName && person.nationalityRaw && person.birthDate ? ' · ' : null}
                   {person.birthDate ? (
                     <>
-                      Born <BirthDate value={person.birthDate} />
+                      {t('Geboren', 'Born')} <BirthDate value={person.birthDate} />
                     </>
                   ) : null}
                 </>
               ) : undefined,
           },
           {
-            label: 'Level',
+            label: t('Niveau', 'Level'),
             icon: Icon.placement,
             tint: 'red',
             value: confirmed?.level,
             sub: confirmed ? (
               <>
-                {confirmed.reviewerName ?? 'A former colleague'} ·{' '}
+                {confirmed.reviewerName ?? t('Ehemaliges Teammitglied', 'A former colleague')} ·{' '}
                 <DateText value={confirmed.decidedAt} />
               </>
             ) : (
-              'Not confirmed yet'
+              t('Noch nicht bestätigt', 'Not confirmed yet')
             ),
           },
         ]}
@@ -261,7 +265,7 @@ export default async function PersonPage({
       >
         <div className="space-y-4">
           {seesBookings && bookings.length > 0 ? (
-            <Card title="Bookings" icon={Icon.bookings} tint="red">
+            <Card title={t('Buchungen', 'Bookings')} icon={Icon.bookings} tint="red">
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
                 {bookings.map((b) => {
                   const balance = b.charged - b.paid;
@@ -273,9 +277,9 @@ export default async function PersonPage({
                       >
                         <span className="min-w-0 text-sm">
                           <span className="flex items-center gap-2 font-semibold">
-                            {b.courseTypeName ?? 'Booking'}
+                            {b.courseTypeName ?? t('Buchung', 'Booking')}
                             <Badge tone={BOOKING_STATUS_TONES[b.status]}>
-                              {BOOKING_STATUS_LABELS[b.status]}
+                              {pick(lang, BOOKING_STATUS_LABELS[b.status])}
                             </Badge>
                           </span>
                           <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
@@ -284,7 +288,7 @@ export default async function PersonPage({
                                 <DateText value={b.startDate} /> – <DateText value={b.endDate} />
                               </>
                             ) : (
-                              'No dates'
+                              t('Keine Daten', 'No dates')
                             )}
                           </span>
                         </span>
@@ -303,7 +307,7 @@ export default async function PersonPage({
                             }).format(balance)}
                           </span>
                           <span className="block text-xs text-[var(--casa-text-subtle)]">
-                            {balance > 0 ? 'open' : 'paid'}
+                            {balance > 0 ? t('offen', 'open') : t('bezahlt', 'paid')}
                           </span>
                         </span>
                       </Link>
@@ -315,7 +319,7 @@ export default async function PersonPage({
           ) : null}
 
           {history.length > 0 ? (
-            <Card title="History" icon={Icon.clock} tint="blue">
+            <Card title={t('Verlauf', 'History')} icon={Icon.clock} tint="blue">
               <ol className="-my-1.5 divide-y divide-ws-line-soft">
                 {history.map((item) => {
                   const kind = KINDS[item.kind];
@@ -331,12 +335,12 @@ export default async function PersonPage({
                             <span className="text-sm font-semibold">{item.title}</span>
                             {item.status ? (
                               <Badge tone={STATUS_TONES[normaliseStatus(item.status)]}>
-                                {STATUS_LABELS[normaliseStatus(item.status)]}
+                                {pick(lang, STATUS_LABELS[normaliseStatus(item.status)])}
                               </Badge>
                             ) : null}
                           </span>
                           <span className="mt-0.5 block truncate text-xs text-[var(--casa-text-subtle)]">
-                            {[kind.label, item.detail].filter(Boolean).join(' · ')}
+                            {[pick(lang, kind.label), item.detail].filter(Boolean).join(' · ')}
                           </span>
                         </span>
                         <span className="shrink-0 pt-0.5 text-xs text-[var(--casa-text-subtle)]">
@@ -351,21 +355,21 @@ export default async function PersonPage({
           ) : null}
 
           {person.linkedDuplicates.length > 0 ? (
-            <Card title="Linked records" icon={Icon.people} tint="ink">
+            <Card title={t('Verknüpfte Datensätze', 'Linked records')} icon={Icon.people} tint="ink">
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
                 {person.linkedDuplicates.map((dup) => (
                   <li key={dup.id} className="flex items-center justify-between gap-3 py-2.5">
                     <span className="min-w-0 text-sm">
                       <span className="block font-semibold">{dup.displayName}</span>
                       <span className="block text-xs text-[var(--casa-text-subtle)]">
-                        Created <DateText value={dup.createdAt} /> · {dup.createdBy}
+                        {t('Angelegt', 'Created')} <DateText value={dup.createdAt} /> · {dup.createdBy}
                       </span>
                     </span>
                     <form action={unlinkPersonAction}>
                       <input type="hidden" name="personId" value={dup.id} />
                       <input type="hidden" name="returnTo" value={`/admin/people/${person.id}`} />
                       <Button type="submit" variant="ghost" size="sm">
-                        Unlink
+                        {t('Trennen', 'Unlink')}
                       </Button>
                     </form>
                   </li>
@@ -378,7 +382,7 @@ export default async function PersonPage({
         {hasSide ? (
           <div className="space-y-4">
             {openFlags.length > 0 ? (
-              <Card title="Needs a look" icon={Icon.flag} tint="sun">
+              <Card title={t('Zu prüfen', 'Needs a look')} icon={Icon.flag} tint="sun">
                 <ul className="space-y-2">
                   {openFlags.map((f) => (
                     <li
@@ -386,7 +390,7 @@ export default async function PersonPage({
                       className="flex items-center gap-2 rounded-xl bg-[#fffbea] px-3 py-2 text-sm font-semibold"
                     >
                       <span className="text-[var(--casa-warning-text)]">{Icon.flag}</span>
-                      {FLAG_LABELS[f.code]}
+                      {pick(lang, FLAG_LABELS[f.code])}
                     </li>
                   ))}
                 </ul>
@@ -394,11 +398,11 @@ export default async function PersonPage({
             ) : null}
 
             {manyChannels ? (
-              <Card title="Contact" icon={Icon.mail} tint="ink">
+              <Card title={t('Kontakt', 'Contact')} icon={Icon.mail} tint="ink">
                 <DetailList
                   items={[
                     {
-                      label: 'Email',
+                      label: t('E-Mail', 'Email'),
                       wide: true,
                       value: (
                         <ul className="space-y-1">
@@ -416,7 +420,7 @@ export default async function PersonPage({
                       ),
                     },
                     {
-                      label: 'Phone',
+                      label: t('Telefon', 'Phone'),
                       wide: true,
                       value:
                         person.phones.length > 0 ? (
@@ -437,7 +441,7 @@ export default async function PersonPage({
             ) : null}
 
             {fileMakerLinks.length > 0 ? (
-              <Card title="In FileMaker" icon={Icon.external} tint="ink">
+              <Card title={t('In FileMaker', 'In FileMaker')} icon={Icon.external} tint="ink">
                 <ul className="space-y-1.5 text-sm">
                   {fileMakerLinks.map((link) => (
                     <li key={link.id} className="flex items-center justify-between gap-2">
@@ -457,7 +461,7 @@ export default async function PersonPage({
             ) : null}
 
             {decisions.length > 0 ? (
-              <Card title="Identity decisions" icon={Icon.check} tint="green">
+              <Card title={t('Entscheidungen zur Identität', 'Identity decisions')} icon={Icon.check} tint="green">
                 <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
                   {decisions.map((entry) => (
                     <li key={entry.id} className="relative flex gap-3 text-xs">
@@ -467,9 +471,9 @@ export default async function PersonPage({
                       />
                       <span className="text-[var(--casa-text-subtle)]">
                         <span className="font-bold text-[var(--casa-ink)]">
-                          {entry.staffName ?? 'Someone'}
+                          {entry.staffName ?? t('Jemand', 'Someone')}
                         </span>{' '}
-                        {describeActivity(entry)} · {relativeDays(entry.createdAt)}
+                        {describeActivity(entry, lang)} · {relativeDays(entry.createdAt, lang)}
                       </span>
                     </li>
                   ))}
@@ -485,10 +489,13 @@ export default async function PersonPage({
           <form action={deletePersonAction}>
             <input type="hidden" name="personId" value={person.id} />
             <ConfirmSubmit
-              title={`Delete ${person.displayName}?`}
-              description="The person disappears from every list. Their registrations and enquiries stay in the queues. An owner can restore the record."
+              title={t(`${person.displayName} löschen?`, `Delete ${person.displayName}?`)}
+              description={t(
+                'Die Person verschwindet aus allen Listen. Ihre Anmeldungen und Anfragen bleiben im Posteingang. Ein Inhaber kann den Datensatz wiederherstellen.',
+                'The person disappears from every list. Their registrations and enquiries stay in the queues. An owner can restore the record.'
+              )}
             >
-              Delete person
+              {t('Person löschen', 'Delete person')}
             </ConfirmSubmit>
           </form>
         </RecordFoot>

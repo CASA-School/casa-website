@@ -11,6 +11,8 @@ import {
   saveDraftAction,
   slotDetailAction,
 } from '@/app/(admin)/admin/(editor)/website/actions';
+import { useWsLang } from '@/components/admin/lang';
+import { pick, wsLocale, type Bilingual } from '@/lib/admin/i18n';
 import { formatBerlin } from '@/lib/cms/berlin-time';
 import { placeholders } from '@/lib/cms/copy-key';
 import {
@@ -59,13 +61,13 @@ const SIE = /\b(Sie|Ihnen|Ihre|Ihren|Ihrem|Ihrer)\b/;
 const valuesOf = (slot: SlotState, locales: readonly CmsLocale[]): Record<string, string> =>
   Object.fromEntries(locales.map((locale) => [locale.code, slot.locales[locale.code]?.value ?? '']));
 
-const RELEASE_LABEL: Record<VersionEntry['state'], string> = {
-  pending: 'Waiting for approval',
-  scheduled: 'Scheduled',
-  published: 'Published',
-  rejected: 'Sent back',
-  undone: 'Undone',
-  cancelled: 'Withdrawn',
+const RELEASE_LABEL: Record<VersionEntry['state'], Bilingual> = {
+  pending: { de: 'Wartet auf Freigabe', en: 'Waiting for approval' },
+  scheduled: { de: 'Geplant', en: 'Scheduled' },
+  published: { de: 'Veröffentlicht', en: 'Published' },
+  rejected: { de: 'Zurückgeschickt', en: 'Sent back' },
+  undone: { de: 'Rückgängig gemacht', en: 'Undone' },
+  cancelled: { de: 'Zurückgezogen', en: 'Withdrawn' },
 };
 
 export function TextPopover({
@@ -102,6 +104,8 @@ export function TextPopover({
   onClose: () => void;
   notify: (message: string) => void;
 }) {
+  // The workspace's language for the popup's own words; the tabs are the languages of the text.
+  const { t, lang } = useWsLang();
   const source = locales.find((locale) => locale.source) ?? locales[0];
   const [tab, setTab] = useState(() => (slot.locales[initialLocale] ? initialLocale : source.code));
   const [working, setWorking] = useState<Record<string, string>>(() => valuesOf(slot, locales));
@@ -298,7 +302,7 @@ export function TextPopover({
     <div
       ref={root}
       role="dialog"
-      aria-label={`Edit ${slot.label}`}
+      aria-label={t(`${slot.label} bearbeiten`, `Edit ${slot.label}`)}
       className={cn('absolute z-30 flex flex-col', styles.pop)}
       style={position}
       onKeyDown={(event) => {
@@ -308,7 +312,7 @@ export function TextPopover({
         }
         if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
           event.preventDefault();
-          void save().then((ok) => ok && notify('Draft saved'));
+          void save().then((ok) => ok && notify(t('Entwurf gespeichert', 'Draft saved')));
         }
       }}
     >
@@ -344,7 +348,7 @@ export function TextPopover({
           <button
             type="button"
             onClick={() => void close()}
-            aria-label="Close"
+            aria-label={t('Schließen', 'Close')}
             className="-mr-2 grid h-8 w-8 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]"
           >
             {saving ? <Spinner /> : I.close}
@@ -354,11 +358,11 @@ export function TextPopover({
         {lockedBy ? (
           <div className="mx-5 mt-3 flex items-center gap-2.5 rounded-xl bg-ws-panel px-3 py-2 text-[0.8rem] font-semibold text-ws-on-panel">
             <Avatar initials={lockedBy.initials} tone="sun" size={24} />
-            {lockedBy.name} is editing this text
+            {t(`${lockedBy.name} bearbeitet diesen Text gerade`, `${lockedBy.name} is editing this text`)}
           </div>
         ) : null}
 
-        <div role="tablist" aria-label="Language" className="mt-3 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none]">
+        <div role="tablist" aria-label={t('Sprache', 'Language')} className="mt-3 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none]">
           {locales.map((locale) => {
             const status = statusOf(locale.code);
             const active = locale.code === tab;
@@ -368,7 +372,7 @@ export function TextPopover({
                 type="button"
                 role="tab"
                 aria-selected={active}
-                title={statusLabel(status)}
+                title={statusLabel(status, lang)}
                 onClick={() => setTab(locale.code)}
                 className={cn(
                   'inline-flex h-8 shrink-0 items-center gap-2 rounded-lg px-2.5 text-[0.8rem] font-semibold transition-colors',
@@ -386,7 +390,7 @@ export function TextPopover({
           {tab !== source.code ? (
             <div className="mb-3 rounded-xl bg-ws-sunk px-3.5 py-3">
               <div className="flex items-center justify-between gap-2 text-[0.7rem] font-semibold text-[var(--casa-text-subtle)]">
-                <span>{source.label} · source</span>
+                <span>{t(`${source.label} · Ausgangstext`, `${source.label} · source`)}</span>
                 {aiEnabled && !readOnly ? (
                   <button
                     type="button"
@@ -394,7 +398,7 @@ export function TextPopover({
                     className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[var(--casa-accent-text)] hover:bg-white"
                   >
                     {I.sparkle}
-                    Translate from {source.label}
+                    {t(`Aus ${source.label} übersetzen`, `Translate from ${source.label}`)}
                   </button>
                 ) : null}
               </div>
@@ -414,7 +418,7 @@ export function TextPopover({
             lang={current.code}
             value={text}
             readOnly={readOnly}
-            placeholder={state?.fallback ? undefined : 'Not written yet'}
+            placeholder={state?.fallback ? undefined : t('Noch nicht geschrieben', 'Not written yet')}
             onChange={(event) => change(event.target.value)}
             rows={slot.kind === 'paragraph' ? 5 : slot.kind === 'lead' || slot.kind === 'card-text' ? 3 : 1}
             className={cn(
@@ -439,7 +443,7 @@ export function TextPopover({
             <span className={cn(meter === 'near' && 'text-[var(--casa-warning-text)]', meter === 'over' && 'text-[var(--casa-danger-text)]')}>
               {shown.length} / {slot.max}
             </span>
-            <span className="text-[var(--casa-text-subtle)]/80">{KIND_LABELS[slot.kind]}</span>
+            <span className="text-[var(--casa-text-subtle)]/80">{pick(lang, KIND_LABELS[slot.kind])}</span>
             {!readOnly && facts.defs.length ? (
               <button
                 type="button"
@@ -451,7 +455,7 @@ export function TextPopover({
                 )}
               >
                 {I.data}
-                Live value
+                {t('Live-Wert', 'Live value')}
               </button>
             ) : null}
           </div>
@@ -462,29 +466,43 @@ export function TextPopover({
           <UsedLiveValues text={text} facts={facts} locale={tab} screens={dataScreens} />
 
           {meter === 'over' ? (
-            <Note tone="danger">Too long for this spot. Shorten it to {slot.max} characters.</Note>
+            <Note tone="danger">
+              {t(`Zu lang für diese Stelle. Kürz ihn auf ${slot.max} Zeichen.`, `Too long for this spot. Shorten it to ${slot.max} characters.`)}
+            </Note>
           ) : null}
           {required.length ? (
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs font-semibold text-[var(--casa-text-subtle)]">
-              Filled in by the page:
+              {t('Von der Seite eingesetzt:', 'Filled in by the page:')}
               {required.map((name) => (
                 <code key={name} className="rounded-md bg-ws-sunk px-1.5 py-0.5 font-mono text-[0.72rem] text-[var(--casa-ink)]">{`{${name}}`}</code>
               ))}
             </div>
           ) : null}
-          {unknownFact ? <Note tone="danger">{`{${unknownFact}}`} is not a live value. Insert one with “Live value”.</Note> : null}
-          {placeholderProblem ? (
+          {unknownFact ? (
             <Note tone="danger">
-              {required.length ? `Keep ${required.map((name) => `{${name}}`).join(' ')} in the text, exactly as written.` : 'Remove the {…}: nothing fills it in here.'}
+              {t(
+                `{${unknownFact}} ist kein Live-Wert. Füg einen über „Live-Wert“ ein.`,
+                `{${unknownFact}} is not a live value. Insert one with “Live value”.`
+              )}
             </Note>
           ) : null}
-          {tab === 'de' && SIE.test(text) ? <Note tone="warn">The website says „du“, not „Sie“.</Note> : null}
+          {placeholderProblem ? (
+            <Note tone="danger">
+              {required.length
+                ? t(
+                    `Lass ${required.map((name) => `{${name}}`).join(' ')} genau so im Text, wie es geschrieben ist.`,
+                    `Keep ${required.map((name) => `{${name}}`).join(' ')} in the text, exactly as written.`
+                  )
+                : t('Entfern das {…}: Hier setzt nichts einen Wert ein.', 'Remove the {…}: nothing fills it in here.')}
+            </Note>
+          ) : null}
+          {tab === 'de' && SIE.test(text) ? <Note tone="warn">{t('Die Website sagt „du“, nicht „Sie“.', 'The website says „du“, not „Sie“.')}</Note> : null}
           {staleNote ? (
             <Note tone="warn">
-              <span className="flex-1">The {source.label} text changed.</span>
+              <span className="flex-1">{t(`Der Text auf ${source.label} hat sich geändert.`, `The ${source.label} text changed.`)}</span>
               {!readOnly ? (
                 <button type="button" onClick={() => void stillRight()} className="font-semibold text-[var(--casa-accent-text)] hover:underline">
-                  Still right
+                  {t('Passt noch', 'Still right')}
                 </button>
               ) : null}
             </Note>
@@ -493,14 +511,14 @@ export function TextPopover({
           {aiEnabled && !readOnly ? (
             <div className="mt-3 flex flex-wrap gap-1.5">
               <AiChip active={ai?.mode === 'shorten'} highlight={meter !== 'ok'} onClick={() => void assist('shorten')}>
-                Shorten
+                {t('Kürzen', 'Shorten')}
               </AiChip>
               <AiChip active={ai?.mode === 'voice'} onClick={() => void assist('voice')}>
-                Check voice
+                {t('Ton prüfen', 'Check voice')}
               </AiChip>
               {tab !== source.code ? (
                 <AiChip active={ai?.mode === 'translate'} onClick={() => void assist('translate')}>
-                  Translate
+                  {t('Übersetzen', 'Translate')}
                 </AiChip>
               ) : null}
             </div>
@@ -509,7 +527,7 @@ export function TextPopover({
           {ai ? (
             <div className={cn('mt-3 rounded-xl border border-ws-line p-3', styles.fade)}>
               {ai.loading ? (
-                <div className="space-y-2" aria-label="Writing">
+                <div className="space-y-2" aria-label={t('Schreibt …', 'Writing')}>
                   <div className={cn('h-3 w-11/12 rounded', styles.shimmer)} />
                   <div className={cn('h-3 w-9/12 rounded', styles.shimmer)} />
                   <div className={cn('h-3 w-10/12 rounded', styles.shimmer)} />
@@ -530,7 +548,7 @@ export function TextPopover({
                   ) : null}
                   {ai.mode === 'voice' && !ai.notes.length && !ai.options.length ? (
                     <p className="flex items-center gap-1.5 text-[0.8rem] font-semibold text-[var(--casa-success-text)]">
-                      {I.check} Reads in CASA&apos;s voice
+                      {I.check} {t('Klingt nach CASA', "Reads in CASA's voice")}
                     </p>
                   ) : null}
                   {ai.options.map((option) => (
@@ -539,7 +557,7 @@ export function TextPopover({
                         {option}
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs font-semibold text-[var(--casa-text-subtle)]">
-                        <span className="tabular-nums">{option.length} characters</span>
+                        <span className="tabular-nums">{t(`${option.length} Zeichen`, `${option.length} characters`)}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -548,7 +566,7 @@ export function TextPopover({
                           }}
                           className="rounded-md px-2 py-1 text-[var(--casa-accent-text)] hover:bg-white"
                         >
-                          Use this
+                          {t('Übernehmen', 'Use this')}
                         </button>
                       </div>
                     </div>
@@ -559,7 +577,7 @@ export function TextPopover({
           ) : null}
 
           {panel === 'history' ? (
-            <section className={cn('mt-4 border-t border-ws-line-soft pt-3', styles.fade)} aria-label="History">
+            <section className={cn('mt-4 border-t border-ws-line-soft pt-3', styles.fade)} aria-label={t('Verlauf', 'History')}>
               {!detail ? (
                 <Spinner className="text-[var(--casa-text-subtle)]" />
               ) : (
@@ -567,9 +585,9 @@ export function TextPopover({
                   {versions.map((version) => (
                     <li key={version.releaseId} className="rounded-lg border border-ws-line-soft px-3 py-2.5">
                       <div className="flex items-center gap-2 text-xs font-semibold">
-                        <span className="flex-1 text-[var(--casa-ink)]">{formatBerlin(version.at)}</span>
+                        <span className="flex-1 text-[var(--casa-ink)]">{formatBerlin(version.at, wsLocale(lang))}</span>
                         <span className={cn('rounded-full px-2 py-0.5', version.live ? 'bg-[#e6f3eb] text-[#0d6a30]' : 'bg-ws-sunk text-[var(--casa-text-subtle)]')}>
-                          {version.live ? 'Live' : RELEASE_LABEL[version.state]}
+                          {version.live ? t('Live', 'Live') : pick(lang, RELEASE_LABEL[version.state])}
                         </span>
                       </div>
                       {version.by ? <div className="mt-0.5 text-xs text-[var(--casa-text-subtle)]">{version.by}</div> : null}
@@ -578,20 +596,20 @@ export function TextPopover({
                       </p>
                       {!readOnly && version.value !== text ? (
                         <button type="button" onClick={() => change(version.value)} className="mt-1.5 text-xs font-semibold text-[var(--casa-accent-text)] hover:underline">
-                          Use this version
+                          {t('Diese Version übernehmen', 'Use this version')}
                         </button>
                       ) : null}
                     </li>
                   ))}
                   {state?.fallback ? (
                     <li className="rounded-lg border border-dashed border-ws-line px-3 py-2.5">
-                      <div className="text-xs font-semibold text-[var(--casa-ink)]">Original text</div>
+                      <div className="text-xs font-semibold text-[var(--casa-ink)]">{t('Originaltext', 'Original text')}</div>
                       <p dir={current.dir} className="mt-1.5 line-clamp-3 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">
                         {state.fallback}
                       </p>
                       {!readOnly && state.fallback !== text ? (
                         <button type="button" onClick={() => change(state.fallback ?? '')} className="mt-1.5 text-xs font-semibold text-[var(--casa-accent-text)] hover:underline">
-                          Use the original
+                          {t('Original übernehmen', 'Use the original')}
                         </button>
                       ) : null}
                     </li>
@@ -602,7 +620,7 @@ export function TextPopover({
           ) : null}
 
           {panel === 'comments' ? (
-            <section className={cn('mt-4 border-t border-ws-line-soft pt-3', styles.fade)} aria-label="Comments">
+            <section className={cn('mt-4 border-t border-ws-line-soft pt-3', styles.fade)} aria-label={t('Kommentare', 'Comments')}>
               {!detail ? (
                 <Spinner className="text-[var(--casa-text-subtle)]" />
               ) : (
@@ -614,14 +632,16 @@ export function TextPopover({
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-2 text-xs">
                             <span className="font-bold text-[var(--casa-ink)]">{entry.author}</span>
-                            <span className="text-[var(--casa-text-subtle)]">{formatBerlin(entry.createdAt)}</span>
+                            <span className="text-[var(--casa-text-subtle)]">{formatBerlin(entry.createdAt, wsLocale(lang))}</span>
                           </div>
                           <p className="mt-0.5 whitespace-pre-line text-[0.85rem] leading-relaxed text-[var(--casa-ink)]">{entry.body}</p>
                           {entry.resolvedAt ? (
-                            <p className="mt-0.5 text-xs text-[var(--casa-text-subtle)]">Resolved by {entry.resolvedBy}</p>
+                            <p className="mt-0.5 text-xs text-[var(--casa-text-subtle)]">
+                              {t(`Erledigt von ${entry.resolvedBy ?? ''}`, `Resolved by ${entry.resolvedBy ?? ''}`)}
+                            </p>
                           ) : canEdit ? (
                             <button type="button" onClick={() => void resolve(entry.id)} className="mt-0.5 text-xs font-semibold text-[var(--casa-accent-text)] hover:underline">
-                              Resolve
+                              {t('Erledigen', 'Resolve')}
                             </button>
                           ) : null}
                         </div>
@@ -631,14 +651,14 @@ export function TextPopover({
                   {canEdit ? (
                     <div className="mt-3 flex items-end gap-2">
                       <label htmlFor="slot-comment" className="sr-only">
-                        Comment
+                        {t('Kommentar', 'Comment')}
                       </label>
                       <textarea
                         id="slot-comment"
                         value={comment}
                         onChange={(event) => setComment(event.target.value)}
                         rows={2}
-                        placeholder="Add a comment for your colleagues"
+                        placeholder={t('Schreib einen Kommentar für dein Team', 'Add a comment for your colleagues')}
                         className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-ws-line-firm px-3 py-2 text-[0.85rem] outline-none focus:border-[var(--casa-blue)] focus:shadow-[0_0_0_3px_rgba(0,159,227,0.16)]"
                       />
                       <button
@@ -647,7 +667,7 @@ export function TextPopover({
                         disabled={!comment.trim()}
                         className="h-10 rounded-lg border border-ws-line-firm bg-white px-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] hover:bg-ws-sunk disabled:opacity-40"
                       >
-                        Comment
+                        {t('Kommentieren', 'Comment')}
                       </button>
                     </div>
                   ) : null}
@@ -660,11 +680,13 @@ export function TextPopover({
         <footer className="flex items-center gap-1 border-t border-ws-line-soft px-3 py-2.5">
           <FooterTab active={panel === 'history'} onClick={() => setPanel(panel === 'history' ? null : 'history')}>
             {I.history}
-            History
+            {t('Verlauf', 'History')}
           </FooterTab>
           <FooterTab active={panel === 'comments'} onClick={() => setPanel(panel === 'comments' ? null : 'comments')}>
             {I.comment}
-            {openComments ? plural(openComments, 'comment', 'comments') : 'Comment'}
+            {openComments
+              ? plural(openComments, t('Kommentar', 'comment'), t('Kommentare', 'comments'))
+              : t('Kommentar', 'Comment')}
           </FooterTab>
           <span className="flex-1" />
           {!readOnly && state?.draft ? (
@@ -673,18 +695,18 @@ export function TextPopover({
               onClick={() => void discard()}
               className="h-9 rounded-lg px-3 text-[0.8rem] font-semibold text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]"
             >
-              Discard draft
+              {t('Entwurf verwerfen', 'Discard draft')}
             </button>
           ) : null}
           {!readOnly ? (
             <button
               type="button"
-              onClick={() => void save().then((ok) => ok && dirty && notify('Draft saved'))}
+              onClick={() => void save().then((ok) => ok && dirty && notify(t('Entwurf gespeichert', 'Draft saved')))}
               disabled={!dirty || saving || placeholderProblem}
               className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--casa-ink-deep)] px-4 text-[0.8rem] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.18)] transition-colors hover:bg-[var(--casa-ink-deep-hover)] disabled:bg-ws-line-firm disabled:shadow-none"
             >
               {saving ? <Spinner className="h-3.5 w-3.5" /> : null}
-              Save draft
+              {t('Entwurf speichern', 'Save draft')}
             </button>
           ) : null}
         </footer>

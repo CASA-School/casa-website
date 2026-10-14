@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requireModule } from '@/lib/admin/guard';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { forgetPublishedPrices } from '@/lib/content/published-prices.server';
 import { PRICE_UNITS, parseAmount, parseSlot, type PriceUnit } from '@/lib/admin/prices/price-list';
 import { deletePriceList, preparePriceList, savePrices, type PriceChange } from '@/lib/admin/prices/repo';
@@ -34,6 +36,7 @@ const done = () => {
 
 export async function savePricesAction(formData: FormData): Promise<void> {
   const actor = await requireModule('prices', 'edit');
+  const { t, lang } = await getI18n();
   const list = listOf(formData);
 
   const changes: PriceChange[] = [];
@@ -43,33 +46,39 @@ export async function savePricesAction(formData: FormData): Promise<void> {
     const slot = parseSlot(key);
     if (!slot) throw new Error('Invalid price');
     const amount = parseAmount(String(value));
-    if (amount === undefined) back(list, { error: `“${String(value).slice(0, 20)}” is not an amount.` });
+    if (amount === undefined)
+      back(list, {
+        error: t(`„${String(value).slice(0, 20)}“ ist kein Betrag.`, `“${String(value).slice(0, 20)}” is not an amount.`),
+      });
     const unit = String(formData.get(`u:${key}`) ?? '');
     changes.push({ slot, amount, unit: (PRICE_UNITS as readonly string[]).includes(unit) ? (unit as PriceUnit) : undefined });
   }
   if (changes.length === 0 || changes.length > 200) throw new Error('Invalid prices');
 
   const result = await savePrices(list, changes, todayInputValue(), actor);
-  if ('error' in result) back(list, { error: result.error });
+  if ('error' in result) back(list, { error: pick(lang, result.error) });
   done();
   back(list, { saved: String(result.changed) });
 }
 
 export async function preparePriceListAction(formData: FormData): Promise<void> {
   const actor = await requireModule('prices', 'edit');
+  const { lang } = await getI18n();
   const validFrom = listOf(formData, 'validFrom');
   const result = await preparePriceList(validFrom, todayInputValue(), actor);
-  if ('error' in result) back(null, { error: result.error });
+  if ('error' in result) back(null, { error: pick(lang, result.error) });
   done();
   back(validFrom, {});
 }
 
 export async function deletePriceListAction(formData: FormData): Promise<void> {
   const actor = await requireModule('prices', 'full');
+  const { t, lang } = await getI18n();
   const list = listOf(formData);
-  if (formData.get('confirmed') !== '1') back(list, { error: 'Deleting a price list needs a confirmation.' });
+  if (formData.get('confirmed') !== '1')
+    back(list, { error: t('Das Löschen einer Preisliste muss bestätigt werden.', 'Deleting a price list needs a confirmation.') });
   const result = await deletePriceList(list, todayInputValue(), actor);
-  if ('error' in result) back(list, { error: result.error });
+  if ('error' in result) back(list, { error: pick(lang, result.error) });
   done();
   back(null, {});
 }

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+import type { T } from '@/lib/admin/i18n';
 import { offerChecks } from '@/lib/admin/offers/checks';
 import { buildLines, computeTotals } from '@/lib/admin/offers/engine';
 import type { OfferCheck, OfferDraft, OfferLine, OfferStatus, OfferTotals } from '@/lib/admin/offers/types';
@@ -37,6 +39,7 @@ export function useOfferDraft({
   editable: boolean;
   today: string;
 }) {
+  const { t } = useWsLang();
   const [draft, setDraft] = useState(initialDraft);
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -72,13 +75,13 @@ export function useOfferDraft({
       }
     } catch {
       pending.current = pending.current ?? next;
-      setSaveError('The connection dropped. The last change is not saved yet.');
+      setSaveError(t('Die Verbindung ist abgebrochen. Die letzte Änderung ist noch nicht gespeichert.', 'The connection dropped. The last change is not saved yet.'));
       setSaveState('error');
     } finally {
       inFlight.current = false;
       if (pending.current && timer.current == null) void flush();
     }
-  }, [id]);
+  }, [id, t]);
 
   const update = useCallback(
     (change: Partial<OfferDraft> | ((d: OfferDraft) => OfferDraft)) => {
@@ -120,10 +123,10 @@ export function useOfferDraft({
   return { draft, update, flush, lines, totals, checks, saveState, saveError, editable };
 }
 
-export function saveLabel(state: SaveState, error: string | null, editable: boolean): string | null {
-  if (state === 'saving') return 'Saving …';
-  if (state === 'dirty') return 'Unsaved';
-  if (state === 'error') return error ?? 'Not saved';
+export function saveLabel(state: SaveState, error: string | null, editable: boolean, t: T): string | null {
+  if (state === 'saving') return t('Speichert …', 'Saving …');
+  if (state === 'dirty') return t('Ungespeichert', 'Unsaved');
+  if (state === 'error') return error ?? t('Nicht gespeichert', 'Not saved');
   if (state === 'stale') return null;
-  return editable ? 'Saved' : null;
+  return editable ? t('Gespeichert', 'Saved') : null;
 }

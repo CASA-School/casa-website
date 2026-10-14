@@ -4,8 +4,10 @@ import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import { Badge, Card, Cell, DateText, PageHeader, relativeDays, Table, TableRow } from '@/components/admin/ui';
+import { Badge, Card, Cell, DateText, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
+import { capitalise, num, pick, relativeDays, wsLocale, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
@@ -28,9 +30,7 @@ import { PersonForm } from './person-form';
  * §Design standards 4, §Lists).
  */
 
-const shortDay = (value: Date) => value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-
-const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+const shortDay = (value: Date, lang: WsLang) => value.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' });
 
 export default async function PeoplePage({
   searchParams,
@@ -42,6 +42,7 @@ export default async function PeoplePage({
   const page = clampPage(params.page);
 
   const user = await requireModule('people');
+  const { t, lang } = await getI18n();
   const canEdit = canAccess(user, 'people', 'edit');
   const [{ items, total }, flagCounts, countries] = await Promise.all([
     listPeople({ search, limit: PAGE_SIZE, offset: offsetFor(page) }),
@@ -56,10 +57,10 @@ export default async function PeoplePage({
   return (
     <>
       <PageHeader
-        title="Students"
+        title={t('Teilnehmende', 'Students')}
         actions={
           canEdit ? (
-            <FormDialog trigger="Add person" title="Add a person" triggerVariant="primary">
+            <FormDialog trigger={t('Person hinzufügen', 'Add person')} title={t('Neue Person', 'Add a person')} triggerVariant="primary">
               <PersonForm countries={countries} />
             </FormDialog>
           ) : null
@@ -86,7 +87,7 @@ export default async function PeoplePage({
               <span aria-hidden="true" className="text-[#b45309]">
                 {Icon.flag}
               </span>
-              {n} {FLAG_LABELS[code].toLowerCase()}
+              {num(lang, n)} {lang === 'en' ? pick(lang, FLAG_LABELS[code]).toLowerCase() : pick(lang, FLAG_LABELS[code])}
             </Link>
           ))}
         </p>
@@ -94,20 +95,24 @@ export default async function PeoplePage({
 
       <Card bleed>
         <ListBar
-          summary={search ? `${total.toLocaleString('en-GB')} found` : `${total.toLocaleString('en-GB')} ${total === 1 ? 'student' : 'students'}`}
-          search={{ action: '/admin/people', value: search, placeholder: 'Name or email' }}
+          summary={
+            search
+              ? t(`${num(lang, total)} gefunden`, `${num(lang, total)} found`)
+              : t(`${num(lang, total)} in der Kartei`, `${num(lang, total)} ${total === 1 ? 'student' : 'students'}`)
+          }
+          search={{ action: '/admin/people', value: search, placeholder: t('Name oder E-Mail', 'Name or email') }}
         />
         {items.length === 0 ? (
-          <ListEmpty title={search ? 'Nothing found' : 'No students yet'}>
-            {search ? `Nobody matches “${search}”.` : null}
+          <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Noch keine Teilnehmenden', 'No students yet')}>
+            {search ? t(`Niemand passt zu „${search}“.`, `Nobody matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
           <Table
             head={[
-              'Student',
-              { label: 'Nationality', className: `w-[13rem] ${hide}` },
-              { label: 'Born', className: `w-[9rem] ${hide}` },
-              { label: 'Added', className: 'w-[7.5rem] md:w-[8.5rem]' },
+              t('Teilnehmende', 'Student'),
+              { label: t('Nationalität', 'Nationality'), className: `w-[13rem] ${hide}` },
+              { label: t('Geboren', 'Born'), className: `w-[9rem] ${hide}` },
+              { label: t('Angelegt', 'Added'), className: 'w-[7.5rem] md:w-[8.5rem]' },
             ]}
           >
             {items.map((person) => (
@@ -119,7 +124,7 @@ export default async function PeoplePage({
                       person.course
                         ? person.course.current
                           ? person.course.name
-                          : `${person.course.name} · from ${shortDay(new Date(person.course.start))}`
+                          : `${person.course.name} · ${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`
                         : (person.primaryEmail ?? undefined)
                     }
                   />
@@ -129,7 +134,7 @@ export default async function PeoplePage({
                     (person.nationalityRaw ? (
                       <span className="flex items-center gap-2">
                         <span className="truncate">{person.nationalityRaw}</span>
-                        <Badge tone="warning">Unrecognised</Badge>
+                        <Badge tone="warning">{t('Nicht erkannt', 'Unrecognised')}</Badge>
                       </span>
                     ) : null)}
                 </Cell>
@@ -137,7 +142,7 @@ export default async function PeoplePage({
                   {person.birthDate ? <DateText value={person.birthDate} /> : null}
                 </Cell>
                 <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
-                  {capital(relativeDays(person.createdAt))}
+                  {capitalise(relativeDays(person.createdAt, lang))}
                 </Cell>
               </TableRow>
             ))}

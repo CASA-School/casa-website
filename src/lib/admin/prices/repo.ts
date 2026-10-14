@@ -4,6 +4,7 @@ import type { PoolClient } from 'pg';
 
 import { logActivity } from '../activity';
 import type { StaffUser } from '../auth';
+import type { Bilingual } from '../i18n';
 import { query, withTransaction } from '../db';
 import { toDateInputValue } from '@/lib/dates';
 
@@ -150,11 +151,12 @@ async function insertRow(client: PoolClient, validFrom: string, validTo: string 
  * is history and is refused. An offer or booking already made keeps the
  * amounts it was made with.
  */
-export async function savePrices(validFrom: string, changes: readonly PriceChange[], today: string, actor: StaffUser): Promise<{ changed: number } | { error: string }> {
+export async function savePrices(validFrom: string, changes: readonly PriceChange[], today: string, actor: StaffUser): Promise<{ changed: number } | { error: Bilingual }> {
   const lists = await loadPriceLists();
   const list = lists.find((l) => l.validFrom === validFrom);
-  if (!list) return { error: 'This price list no longer exists.' };
-  if (listStatus(list, today) === 'past') return { error: 'A price list that has ended cannot be changed.' };
+  if (!list) return { error: { de: 'Diese Preisliste gibt es nicht mehr.', en: 'This price list no longer exists.' } };
+  if (listStatus(list, today) === 'past')
+    return { error: { de: 'Eine abgelaufene Preisliste lässt sich nicht mehr ändern.', en: 'A price list that has ended cannot be changed.' } };
 
   const real = changes.filter((c) => {
     const held = priceAt(list, c.slot);
@@ -203,12 +205,18 @@ async function closeLists(client: PoolClient) {
  * closes the newest the day before. Its prices are then changed where they
  * change; until its date nothing is priced from it.
  */
-export async function preparePriceList(validFrom: string, today: string, actor: StaffUser): Promise<{ ok: true } | { error: string }> {
-  if (validFrom <= today) return { error: 'A new price list starts after today.' };
+export async function preparePriceList(validFrom: string, today: string, actor: StaffUser): Promise<{ ok: true } | { error: Bilingual }> {
+  if (validFrom <= today) return { error: { de: 'Eine neue Preisliste muss nach heute beginnen.', en: 'A new price list starts after today.' } };
   const lists = await loadPriceLists();
   const newest = lists[lists.length - 1];
-  if (!newest) return { error: 'There is no price list to start from.' };
-  if (validFrom <= newest.validFrom) return { error: `A new list starts after ${newest.validFrom}, when the newest one does.` };
+  if (!newest) return { error: { de: 'Es gibt keine Preisliste, von der aus du beginnen kannst.', en: 'There is no price list to start from.' } };
+  if (validFrom <= newest.validFrom)
+    return {
+      error: {
+        de: `Eine neue Liste muss nach dem ${newest.validFrom} beginnen, dem Start der neuesten.`,
+        en: `A new list starts after ${newest.validFrom}, when the newest one does.`,
+      },
+    };
 
   await withTransaction(async (client) => {
     await client.query(
@@ -228,8 +236,8 @@ export async function preparePriceList(validFrom: string, today: string, actor: 
 }
 
 /** A list that has not started yet, removed; the one before it is open again. */
-export async function deletePriceList(validFrom: string, today: string, actor: StaffUser): Promise<{ ok: true } | { error: string }> {
-  if (validFrom <= today) return { error: 'Only a list that has not started yet can be deleted.' };
+export async function deletePriceList(validFrom: string, today: string, actor: StaffUser): Promise<{ ok: true } | { error: Bilingual }> {
+  if (validFrom <= today) return { error: { de: 'Löschen lässt sich nur eine Liste, die noch nicht begonnen hat.', en: 'Only a list that has not started yet can be deleted.' } };
   await withTransaction(async (client) => {
     await client.query(`DELETE FROM rates WHERE valid_from = $1`, [validFrom]);
     await closeLists(client);

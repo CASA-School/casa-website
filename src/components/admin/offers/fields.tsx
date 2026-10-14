@@ -2,6 +2,8 @@
 
 import { useId, useState } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+
 import ui from './offers.module.css';
 
 /**
@@ -135,14 +137,15 @@ export function Stepper({
   disabled?: boolean;
   placeholder?: string;
 }) {
+  const { t } = useWsLang();
   const clamp = (n: number) => Math.min(max, Math.max(min, n));
   return (
     <span className={ui.stepper2}>
-      <button type="button" aria-label={`${label}: one less`} disabled={disabled || (value ?? min) <= min} onClick={() => onChange(clamp((value ?? min) - 1))}>
+      <button type="button" aria-label={t(`${label}: eins weniger`, `${label}: one less`)} disabled={disabled || (value ?? min) <= min} onClick={() => onChange(clamp((value ?? min) - 1))}>
         −
       </button>
       <NumberInput integer ariaLabel={label} value={value} placeholder={placeholder} disabled={disabled} onCommit={(v) => onChange(v == null ? null : clamp(v))} />
-      <button type="button" aria-label={`${label}: one more`} disabled={disabled || (value ?? 0) >= max} onClick={() => onChange(clamp((value ?? min - 1) + 1))}>
+      <button type="button" aria-label={t(`${label}: eins mehr`, `${label}: one more`)} disabled={disabled || (value ?? 0) >= max} onClick={() => onChange(clamp((value ?? min - 1) + 1))}>
         +
       </button>
     </span>

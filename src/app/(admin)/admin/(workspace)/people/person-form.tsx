@@ -4,14 +4,7 @@ import { OptionalSection } from '@/components/admin/optional-section';
 import { createPersonAction, updatePersonAction } from './actions';
 import { toDateInputValue, todayInputValue } from '@/lib/dates';
 import { DateFormField } from '@/components/admin/date-picker';
-
-const SALUTATIONS = [
-  ['', '—'],
-  ['ms', 'Ms'],
-  ['mr', 'Mr'],
-  ['mx', 'Mx'],
-  ['neutral', 'No salutation'],
-] as const;
+import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
  * One form for creating and editing a person, rendered inside a dialog.
@@ -21,7 +14,15 @@ const SALUTATIONS = [
  * and an email are in (`OptionalSection`). When editing, everything is shown —
  * the person opened Edit to go deeper.
  */
-export function PersonForm({ person, countries }: { person?: PersonDetail; countries: Country[] }) {
+export async function PersonForm({ person, countries }: { person?: PersonDetail; countries: Country[] }) {
+  const { t } = await getI18n();
+  const SALUTATIONS = [
+    ['', '—'],
+    ['ms', t('Frau', 'Ms')],
+    ['mr', t('Herr', 'Mr')],
+    ['mx', 'Mx'],
+    ['neutral', t('Keine Anrede', 'No salutation')],
+  ] as const;
   const editing = Boolean(person);
   const primaryEmail =
     person?.emails.find((e) => e.isPrimary)?.address ?? person?.emails[0]?.address ?? '';
@@ -31,7 +32,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
 
   const more = (
     <div className="grid gap-3 sm:grid-cols-2">
-      <Field label="Salutation" htmlFor="person-salutation">
+      <Field label={t('Anrede', 'Salutation')} htmlFor="person-salutation">
         <Select id="person-salutation" name="salutation" defaultValue={person?.salutation ?? ''}>
           {SALUTATIONS.map(([value, label]) => (
             <option key={value} value={value}>
@@ -40,7 +41,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
           ))}
         </Select>
       </Field>
-      <Field label="Date of birth" htmlFor="person-birth">
+      <Field label={t('Geburtsdatum', 'Date of birth')} htmlFor="person-birth">
         <DateFormField
           id="person-birth"
           name="birthDate"
@@ -48,7 +49,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
           defaultValue={toDateInputValue(person?.birthDate)}
         />
       </Field>
-      <Field label="Nationality" htmlFor="person-nationality">
+      <Field label={t('Nationalität', 'Nationality')} htmlFor="person-nationality">
         <Input
           id="person-nationality"
           name="nationality"
@@ -62,7 +63,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
           ))}
         </datalist>
       </Field>
-      <Field label="Phone" htmlFor="person-phone">
+      <Field label={t('Telefon', 'Phone')} htmlFor="person-phone">
         <Input
           id="person-phone"
           name="phone"
@@ -78,7 +79,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
     <form action={editing ? updatePersonAction : createPersonAction} className="space-y-3">
       {person ? <input type="hidden" name="personId" value={person.id} /> : null}
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="First name" htmlFor="person-first">
+        <Field label={t('Vorname', 'First name')} htmlFor="person-first">
           <Input
             id="person-first"
             name="firstName"
@@ -88,7 +89,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
             autoFocus={!editing}
           />
         </Field>
-        <Field label="Last name" htmlFor="person-last">
+        <Field label={t('Nachname', 'Last name')} htmlFor="person-last">
           <Input
             id="person-last"
             name="lastName"
@@ -97,7 +98,7 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
           />
         </Field>
       </div>
-      <Field label="Email" htmlFor="person-email">
+      <Field label={t('E-Mail', 'Email')} htmlFor="person-email">
         <Input
           id="person-email"
           name="email"
@@ -109,14 +110,14 @@ export function PersonForm({ person, countries }: { person?: PersonDetail; count
 
       <OptionalSection
         requires={['firstName', 'email']}
-        heading="A few more details"
+        heading={t('Weitere Angaben', 'A few more details')}
         alwaysOpen={editing}
       >
         {more}
       </OptionalSection>
 
       <div className="flex justify-end pt-1">
-        <Button type="submit">{editing ? 'Save' : 'Add person'}</Button>
+        <Button type="submit">{editing ? t('Speichern', 'Save') : t('Person hinzufügen', 'Add person')}</Button>
       </div>
     </form>
   );

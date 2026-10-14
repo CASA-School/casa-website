@@ -5,11 +5,15 @@ import { Icon } from '@/components/admin/icons';
 import { Button, Card, DateText, DetailList, Field, Input, PageHeader } from '@/components/admin/ui';
 import { roleLabel } from '@/components/admin/shell';
 import { requireModule } from '@/lib/admin/guard';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { microsoftEnabled } from '@/lib/admin/microsoft';
 import { MIN_PASSWORD_LENGTH } from '@/lib/admin/password';
 import { getOwnAccount } from '@/lib/admin/staff';
 
-export const metadata: Metadata = { title: 'Your account · Workspace · CASA Bremen' };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t('Dein Konto · Arbeitsbereich · CASA Bremen', 'Your account · Workspace · CASA Bremen') };
+}
 
 /**
  * The signed-in colleague's own account, opened from their name in the top bar.
@@ -25,12 +29,13 @@ export default async function AccountPage({
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
   const user = await requireModule('overview');
+  const { t, lang } = await getI18n();
   const [params, account] = await Promise.all([searchParams, getOwnAccount(user.id)]);
   const hasPassword = account?.hasPassword ?? true;
 
   return (
     <div>
-      <PageHeader title="Your account" />
+      <PageHeader title={t('Dein Konto', 'Your account')} />
 
       {params.error ? (
         <p
@@ -51,23 +56,23 @@ export default async function AccountPage({
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        <Card title="Details" icon={Icon.person} tint="green">
+        <Card title={t('Angaben', 'Details')} icon={Icon.person} tint="green">
           <DetailList
             items={[
-              { label: 'Name', value: user.name },
-              { label: 'Role', value: roleLabel(user.role) },
-              { label: 'Signs in as', value: account?.username ?? user.name },
-              { label: 'Email', value: user.email },
+              { label: t('Name', 'Name'), value: user.name },
+              { label: t('Rolle', 'Role'), value: roleLabel(user.role, lang) },
+              { label: t('Meldet sich an als', 'Signs in as'), value: account?.username ?? user.name },
+              { label: t('E-Mail', 'Email'), value: user.email },
               ...(microsoftEnabled()
                 ? [
                     {
                       label: 'Microsoft',
                       value: account?.microsoftLinkedAt ? (
                         <>
-                          Linked since <DateText value={account.microsoftLinkedAt} />
+                          {t('Verknüpft seit', 'Linked since')} <DateText value={account.microsoftLinkedAt} />
                         </>
                       ) : (
-                        'Not linked yet'
+                        t('Noch nicht verknüpft', 'Not linked yet')
                       ),
                     },
                   ]
@@ -76,14 +81,22 @@ export default async function AccountPage({
           />
         </Card>
 
-        <Card title={hasPassword ? 'Change password' : 'Set a password'} icon={Icon.settings} tint="ink">
+        <Card
+          title={hasPassword ? t('Passwort ändern', 'Change password') : t('Passwort festlegen', 'Set a password')}
+          icon={Icon.settings}
+          tint="ink"
+        >
           <form action={changeOwnPasswordAction} className="space-y-3">
             {hasPassword ? (
-              <Field label="Current password" htmlFor="current-password">
+              <Field label={t('Aktuelles Passwort', 'Current password')} htmlFor="current-password">
                 <Input id="current-password" name="current" type="password" required autoComplete="current-password" />
               </Field>
             ) : null}
-            <Field label="New password" hint={`${MIN_PASSWORD_LENGTH} characters or more`} htmlFor="new-password">
+            <Field
+              label={t('Neues Passwort', 'New password')}
+              hint={t(`Mindestens ${MIN_PASSWORD_LENGTH} Zeichen`, `${MIN_PASSWORD_LENGTH} characters or more`)}
+              htmlFor="new-password"
+            >
               <Input
                 id="new-password"
                 name="password"
@@ -93,7 +106,7 @@ export default async function AccountPage({
                 autoComplete="new-password"
               />
             </Field>
-            <Field label="New password again" htmlFor="repeat-password">
+            <Field label={t('Neues Passwort wiederholen', 'New password again')} htmlFor="repeat-password">
               <Input
                 id="repeat-password"
                 name="repeat"
@@ -103,7 +116,9 @@ export default async function AccountPage({
                 autoComplete="new-password"
               />
             </Field>
-            <Button type="submit">{hasPassword ? 'Change password' : 'Set password'}</Button>
+            <Button type="submit">
+              {hasPassword ? t('Passwort ändern', 'Change password') : t('Passwort festlegen', 'Set password')}
+            </Button>
           </form>
         </Card>
       </div>

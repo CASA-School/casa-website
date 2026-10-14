@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation';
 import { ADJUSTABLE, isLevel, roleDefault, type AccessLevel } from '@/lib/admin/access';
 import { canDeleteStaff, revokeAllSessions, type StaffRole } from '@/lib/admin/auth';
 import { requireModule } from '@/lib/admin/guard';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { describePasswordProblem } from '@/lib/admin/password';
 import { looksLikeEmail } from '@/lib/admin/sign-in-names';
 import {
@@ -42,6 +44,7 @@ const WEBSITE_LEVELS = new Set<string>(['none', 'view', 'edit', 'full']);
 
 export async function createStaffAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
+  const { t, lang } = await getI18n();
 
   const email = String(formData.get('email') ?? '').trim();
   const name = String(formData.get('name') ?? '').trim();
@@ -51,25 +54,25 @@ export async function createStaffAction(formData: FormData): Promise<void> {
   const password = String(formData.get('password') ?? '');
 
   if (name.length < 2) {
-    back('Give the account a name.');
+    back(t('Gib dem Konto einen Namen.', 'Give the account a name.'));
   }
 
   if (!looksLikeEmail(email)) {
-    back('That does not look like an email address.');
+    back(t('Das sieht nicht nach einer E-Mail-Adresse aus.', 'That does not look like an email address.'));
   }
 
   if (!ROLES.has(role) || !WEBSITE_LEVELS.has(website)) {
-    back('Unknown role.');
+    back(t('Unbekannte Rolle.', 'Unknown role.'));
   }
 
   // Only an owner may create another owner. An admin promoting themselves via
   // a colleague's account would otherwise be a one-step privilege escalation.
   if (role === 'owner' && !canDeleteStaff(actor.role)) {
-    back('Only an owner can create another owner.');
+    back(t('Nur Inhaber können weitere Inhaber anlegen.', 'Only an owner can create another owner.'));
   }
 
   // The password is optional: without one, Microsoft until an owner sets it.
-  const problem = password ? describePasswordProblem(password) : null;
+  const problem = password ? describePasswordProblem(password, lang) : null;
   if (problem) {
     back(problem);
   }
@@ -85,11 +88,19 @@ export async function createStaffAction(formData: FormData): Promise<void> {
   });
 
   if (!result.ok) {
-    back(result.reason);
+    back(pick(lang, result.reason));
   }
 
   revalidatePath('/admin/team');
-  back(password ? `${name} can now sign in.` : `${name} can sign in with Microsoft. Set a password for them when you have it.`, 'ok');
+  back(
+    password
+      ? t(`${name} kann sich jetzt anmelden.`, `${name} can now sign in.`)
+      : t(
+          `${name} kann sich mit Microsoft anmelden. Setz ein Passwort, sobald du es hast.`,
+          `${name} can sign in with Microsoft. Set a password for them when you have it.`
+        ),
+    'ok'
+  );
 }
 
 /**
@@ -99,22 +110,23 @@ export async function createStaffAction(formData: FormData): Promise<void> {
  */
 export async function createStaffBatchAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
+  const { t, lang } = await getI18n();
   const website = String(formData.get('website') ?? 'edit');
-  if (!WEBSITE_LEVELS.has(website)) back('Unknown access level.');
+  if (!WEBSITE_LEVELS.has(website)) back(t('Unbekannte Zugriffsstufe.', 'Unknown access level.'));
 
   const lines = String(formData.get('people') ?? '')
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
-  if (lines.length === 0) back('Add one colleague per line: full name, email.');
-  if (lines.length > 40) back('Add at most 40 at once.');
+  if (lines.length === 0) back(t('Eine Person pro Zeile: voller Name, E-Mail.', 'Add one colleague per line: full name, email.'));
+  if (lines.length > 40) back(t('Höchstens 40 auf einmal.', 'Add at most 40 at once.'));
 
   const added: string[] = [];
   const problems: string[] = [];
   for (const line of lines) {
     const match = /^(.+?)[,;\t]\s*([^\s,;]+@[^\s,;]+)$/.exec(line);
     if (!match || match[1].trim().length < 2 || !looksLikeEmail(match[2])) {
-      problems.push(`“${line}”: write it as full name, email`);
+      problems.push(t(`„${line}“: schreib es als voller Name, E-Mail`, `“${line}”: write it as full name, email`));
       continue;
     }
     const result = await createStaffAccount({
@@ -126,101 +138,129 @@ export async function createStaffBatchAction(formData: FormData): Promise<void> 
       actor,
     });
     if (result.ok) added.push(match[1].trim());
-    else problems.push(`${match[1].trim()}: ${result.reason}`);
+    else problems.push(`${match[1].trim()}: ${pick(lang, result.reason)}`);
   }
 
   revalidatePath('/admin/team');
-  if (problems.length) back(`${added.length ? `Added ${added.join(', ')}. ` : ''}Not added: ${problems.join('; ')}`);
-  back(`Added ${added.join(', ')}. They can sign in with Microsoft now; set their passwords when you have them.`, 'ok');
+  if (problems.length)
+    back(
+      t(
+        `${added.length ? `Hinzugefügt: ${added.join(', ')}. ` : ''}Nicht hinzugefügt: ${problems.join('; ')}`,
+        `${added.length ? `Added ${added.join(', ')}. ` : ''}Not added: ${problems.join('; ')}`
+      )
+    );
+  back(
+    t(
+      `Hinzugefügt: ${added.join(', ')}. Sie können sich jetzt mit Microsoft anmelden; setz ihre Passwörter, sobald du sie hast.`,
+      `Added ${added.join(', ')}. They can sign in with Microsoft now; set their passwords when you have them.`
+    ),
+    'ok'
+  );
 }
 
 export async function updateStaffAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
+  const { t, lang } = await getI18n();
   const staffUserId = String(formData.get('staffUserId') ?? '');
   const name = String(formData.get('name') ?? '').trim();
   const username = String(formData.get('username') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
 
-  if (!UUID.test(staffUserId)) back('Unknown account.');
-  if (name.length < 2) back('Give the account a name.');
-  if (!looksLikeEmail(email)) back('That does not look like an email address.');
+  if (!UUID.test(staffUserId)) back(t('Unbekanntes Konto.', 'Unknown account.'));
+  if (name.length < 2) back(t('Gib dem Konto einen Namen.', 'Give the account a name.'));
+  if (!looksLikeEmail(email)) back(t('Das sieht nicht nach einer E-Mail-Adresse aus.', 'That does not look like an email address.'));
 
   const result = await updateStaffProfile({ staffUserId, name, username, email, actor });
-  if (!result.ok) back(result.reason);
+  if (!result.ok) back(pick(lang, result.reason));
 
   revalidatePath('/admin/team');
-  back(`${name} updated.`, 'ok');
+  back(t(`${name} gespeichert.`, `${name} updated.`), 'ok');
 }
 
 export async function unlinkMicrosoftAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
+  const { t } = await getI18n();
   const staffUserId = String(formData.get('staffUserId') ?? '');
-  if (!UUID.test(staffUserId)) back('Unknown account.');
-  if (formData.get('confirmed') !== '1') back('Unlinking was not confirmed.');
+  if (!UUID.test(staffUserId)) back(t('Unbekanntes Konto.', 'Unknown account.'));
+  if (formData.get('confirmed') !== '1') back(t('Das Trennen wurde nicht bestätigt.', 'Unlinking was not confirmed.'));
 
   await unlinkMicrosoft({ staffUserId, actor });
   revalidatePath('/admin/team');
-  back('Microsoft unlinked. The next Microsoft sign-in under that address links it again.', 'ok');
+  back(
+    t(
+      'Microsoft getrennt. Die nächste Microsoft-Anmeldung mit dieser Adresse verknüpft es wieder.',
+      'Microsoft unlinked. The next Microsoft sign-in under that address links it again.'
+    ),
+    'ok'
+  );
 }
 
 export async function setActiveAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
+  const { t, lang } = await getI18n();
   const staffUserId = String(formData.get('staffUserId') ?? '');
   const isActive = formData.get('isActive') === 'true';
 
   if (!UUID.test(staffUserId)) {
-    back('Unknown account.');
+    back(t('Unbekanntes Konto.', 'Unknown account.'));
   }
 
   // Deactivating signs the person out everywhere; it goes through the
   // confirmation dialog, and a request that skipped it is refused.
   if (!isActive && formData.get('confirmed') !== '1') {
-    back('Deactivation was not confirmed.');
+    back(t('Das Deaktivieren wurde nicht bestätigt.', 'Deactivation was not confirmed.'));
   }
 
   const result = await setStaffActive({ staffUserId, isActive, actor });
 
   if (!result.ok) {
-    back(result.reason);
+    back(pick(lang, result.reason));
   }
 
   revalidatePath('/admin/team');
-  back(isActive ? 'Account reactivated.' : 'Account deactivated and signed out.', 'ok');
+  back(
+    isActive
+      ? t('Konto wieder aktiviert.', 'Account reactivated.')
+      : t('Konto deaktiviert und abgemeldet.', 'Account deactivated and signed out.'),
+    'ok'
+  );
 }
 
 export async function setRoleAction(formData: FormData): Promise<void> {
   const actor = await requireManager();
+  const { t, lang } = await getI18n();
   const staffUserId = String(formData.get('staffUserId') ?? '');
   const role = String(formData.get('role') ?? '');
 
   if (!UUID.test(staffUserId) || !ROLES.has(role)) {
-    back('Unknown account or role.');
+    back(t('Unbekanntes Konto oder unbekannte Rolle.', 'Unknown account or role.'));
   }
 
   if (role === 'owner' && !canDeleteStaff(actor.role)) {
-    back('Only an owner can grant the owner role.');
+    back(t('Nur Inhaber können die Inhaber-Rolle vergeben.', 'Only an owner can grant the owner role.'));
   }
 
   const result = await setStaffRole({ staffUserId, role: role as StaffRole, actor });
 
   if (!result.ok) {
-    back(result.reason);
+    back(pick(lang, result.reason));
   }
 
   revalidatePath('/admin/team');
-  back('Role changed. That person has been signed out.', 'ok');
+  back(t('Rolle geändert. Die Person wurde abgemeldet.', 'Role changed. That person has been signed out.'), 'ok');
 }
 
 export async function resetPasswordAction(formData: FormData): Promise<void> {
   await requireManager();
+  const { t, lang } = await getI18n();
   const staffUserId = String(formData.get('staffUserId') ?? '');
   const password = String(formData.get('password') ?? '');
 
   if (!UUID.test(staffUserId)) {
-    back('Unknown account.');
+    back(t('Unbekanntes Konto.', 'Unknown account.'));
   }
 
-  const problem = describePasswordProblem(password);
+  const problem = describePasswordProblem(password, lang);
   if (problem) {
     back(problem);
   }
@@ -228,23 +268,25 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
   await setStaffPassword({ staffUserId, password });
 
   revalidatePath('/admin/team');
-  back('Password set. Every session for that account is closed.', 'ok');
+  back(t('Passwort gesetzt. Alle Sitzungen dieses Kontos sind beendet.', 'Password set. Every session for that account is closed.'), 'ok');
 }
 
 /** What one person may do in each module. Levels equal to the role default are not stored. */
 export async function setModuleAccessAction(formData: FormData): Promise<void> {
   const manager = await requireManager();
+  const { t } = await getI18n();
   const staffUserId = String(formData.get('staffUserId') ?? '');
-  if (!UUID.test(staffUserId)) back('Invalid account.');
-  if (staffUserId === manager.id) back('Ask another administrator to change your own access.');
+  if (!UUID.test(staffUserId)) back(t('Ungültiges Konto.', 'Invalid account.'));
+  if (staffUserId === manager.id)
+    back(t('Bitte einen anderen Administrator, deinen eigenen Zugriff zu ändern.', 'Ask another administrator to change your own access.'));
 
   const role = String(formData.get('role') ?? '');
-  if (!ROLES.has(role)) back('Invalid role.');
+  if (!ROLES.has(role)) back(t('Ungültige Rolle.', 'Invalid role.'));
 
   const levels: Record<string, AccessLevel> = {};
   for (const name of ADJUSTABLE) {
     const level = String(formData.get(`level:${name}`) ?? '');
-    if (!isLevel(level)) back('Invalid access level.');
+    if (!isLevel(level)) back(t('Ungültige Zugriffsstufe.', 'Invalid access level.'));
     levels[name] = level;
   }
 
@@ -252,5 +294,5 @@ export async function setModuleAccessAction(formData: FormData): Promise<void> {
   // A narrowed set must take effect now, not when the session next reloads.
   await revokeAllSessions(staffUserId);
   revalidatePath('/admin/team');
-  back('Access updated.', 'ok');
+  back(t('Zugriff gespeichert.', 'Access updated.'), 'ok');
 }

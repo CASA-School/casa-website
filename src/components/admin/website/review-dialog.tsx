@@ -8,6 +8,8 @@ import {
   publishChangesAction,
   requestReviewAction,
 } from '@/app/(admin)/admin/(editor)/website/actions';
+import { useWsLang } from '@/components/admin/lang';
+import { wsLocale, type WsLang } from '@/lib/admin/i18n';
 import { formatBerlin } from '@/lib/cms/berlin-time';
 import type { ChangeItem, ReleaseSummary } from '@/lib/cms/editor-types';
 import type { CmsLocale } from '@/lib/cms/locales';
@@ -31,10 +33,10 @@ function tomorrowMorning(): string {
   return `${parts}T08:00`;
 }
 
-/** `2027-01-01T08:00` as "1 Jan 2027, 08:00": the Bremen time the colleague chose, as they chose it. */
-function wallClock(local: string): string {
+/** `2027-01-01T08:00` as "1 Jan 2027, 08:00" („1. Jan. 2027, 08:00“): the Bremen time the colleague chose, as they chose it. */
+function wallClock(local: string, lang: WsLang): string {
   const [day, time] = local.split('T');
-  const date = new Date(`${day}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const date = new Date(`${day}T12:00:00Z`).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
   return `${date}, ${time}`;
 }
 
@@ -55,6 +57,7 @@ export function ReviewDialog({
   onChanged: () => void;
   notify: (message: string) => void;
 }) {
+  const { t, lang } = useWsLang();
   const [changes, setChanges] = useState<ChangeItem[] | null>(null);
   const [pending, setPending] = useState<ReleaseSummary[]>([]);
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
@@ -96,8 +99,14 @@ export function ReviewDialog({
       if (!result.ok) return notify(result.error);
       onDone(
         result.scheduled
-          ? `${plural(result.count, 'change', 'changes')} scheduled for ${wallClock(at)}`
-          : `${plural(result.count, 'change', 'changes')} live on casa-bremen.de`,
+          ? t(
+              `${plural(result.count, 'Änderung', 'Änderungen')} geplant für ${wallClock(at, lang)}`,
+              `${plural(result.count, 'change', 'changes')} scheduled for ${wallClock(at, lang)}`
+            )
+          : t(
+              `${plural(result.count, 'Änderung', 'Änderungen')} live auf casa-bremen.de`,
+              `${plural(result.count, 'change', 'changes')} live on casa-bremen.de`
+            ),
         result.scheduled ? undefined : result.releaseId
       );
       return;
@@ -105,7 +114,12 @@ export function ReviewDialog({
     const result = await requestReviewAction(payload);
     setBusy(null);
     if (!result.ok) return notify(result.error);
-    onDone(`${plural(result.count, 'change', 'changes')} sent for approval`);
+    onDone(
+      t(
+        `${plural(result.count, 'Änderung', 'Änderungen')} zur Freigabe gesendet`,
+        `${plural(result.count, 'change', 'changes')} sent for approval`
+      )
+    );
   }
 
   async function decide(release: ReleaseSummary, approve: boolean) {
@@ -113,25 +127,33 @@ export function ReviewDialog({
     const result = await decideReleaseAction({ id: release.id, approve });
     setBusy(null);
     if (!result.ok) return notify(result.error);
-    notify(approve ? 'Approved and live' : 'Sent back to drafts');
+    notify(approve ? t('Freigegeben und live', 'Approved and live') : t('Zurück zu den Entwürfen geschickt', 'Sent back to drafts'));
     onChanged();
     void load();
   }
 
   return (
-    <Modal label="Review changes" onClose={onClose}>
+    <Modal label={t('Änderungen prüfen', 'Review changes')} onClose={onClose}>
       <header className="flex items-start gap-4 px-7 pt-6 pb-2">
         <div className="flex-1">
-          <h2 className="font-display text-[1.65rem] font-semibold leading-tight text-[var(--casa-ink)]">Review changes</h2>
+          <h2 className="font-display text-[1.65rem] font-semibold leading-tight text-[var(--casa-ink)]">
+            {t('Änderungen prüfen', 'Review changes')}
+          </h2>
           <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">
             {changes === null
               ? ' '
               : level === 'full'
-                ? `${plural(changes.length, 'unpublished change', 'unpublished changes')} · live on casa-bremen.de when you publish`
-                : `${plural(changes.length, 'unpublished change', 'unpublished changes')} · live after approval`}
+                ? t(
+                    `${plural(changes.length, 'unveröffentlichte Änderung', 'unveröffentlichte Änderungen')} · live auf casa-bremen.de, sobald du veröffentlichst`,
+                    `${plural(changes.length, 'unpublished change', 'unpublished changes')} · live on casa-bremen.de when you publish`
+                  )
+                : t(
+                    `${plural(changes.length, 'unveröffentlichte Änderung', 'unveröffentlichte Änderungen')} · live nach der Freigabe`,
+                    `${plural(changes.length, 'unpublished change', 'unpublished changes')} · live after approval`
+                  )}
           </p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
+        <button type="button" onClick={onClose} aria-label={t('Schließen', 'Close')} className="grid h-9 w-9 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
           {I.close}
         </button>
       </header>
@@ -144,15 +166,18 @@ export function ReviewDialog({
         ) : null}
 
         {level === 'full' && pending.length ? (
-          <section className="mt-3" aria-label="Waiting for approval">
-            <p className="text-xs font-semibold text-[var(--casa-text-subtle)]">Waiting for approval</p>
+          <section className="mt-3" aria-label={t('Wartet auf Freigabe', 'Waiting for approval')}>
+            <p className="text-xs font-semibold text-[var(--casa-text-subtle)]">{t('Wartet auf Freigabe', 'Waiting for approval')}</p>
             <div className="mt-2 space-y-3">
               {pending.map((release) => (
                 <article key={release.id} className="rounded-xl border border-[#ecd68a] bg-[var(--casa-sun-tint)]/50 p-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="flex-1 text-sm font-semibold text-[var(--casa-ink)]">
-                      {release.createdBy ?? 'A colleague'} asks to publish {plural(release.items.length, 'text', 'texts')}
-                      <span className="ml-2 font-normal text-[var(--casa-text-subtle)]">{formatBerlin(release.createdAt)}</span>
+                      {t(
+                        `${release.createdBy ?? 'Jemand aus dem Team'} möchte ${plural(release.items.length, 'Text', 'Texte')} veröffentlichen`,
+                        `${release.createdBy ?? 'A colleague'} asks to publish ${plural(release.items.length, 'text', 'texts')}`
+                      )}
+                      <span className="ml-2 font-normal text-[var(--casa-text-subtle)]">{formatBerlin(release.createdAt, wsLocale(lang))}</span>
                     </p>
                     <button
                       type="button"
@@ -160,7 +185,7 @@ export function ReviewDialog({
                       disabled={busy !== null}
                       className="h-8 rounded-lg px-3 text-xs font-semibold text-[var(--casa-text-subtle)] hover:bg-white"
                     >
-                      Send back
+                      {t('Zurückschicken', 'Send back')}
                     </button>
                     <button
                       type="button"
@@ -169,7 +194,7 @@ export function ReviewDialog({
                       className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-ws-line-firm bg-white px-3 text-xs font-semibold text-[var(--casa-ink)] hover:border-[var(--casa-blue)]/45"
                     >
                       {busy === release.id ? <Spinner className="h-3.5 w-3.5" /> : I.check}
-                      Approve and publish
+                      {t('Freigeben und veröffentlichen', 'Approve and publish')}
                     </button>
                   </div>
                   {release.note ? <p className="mt-1 text-sm text-[var(--casa-muted)]">{release.note}</p> : null}
@@ -192,8 +217,10 @@ export function ReviewDialog({
         {changes && changes.length === 0 && !pending.length ? (
           <div className="grid h-40 place-items-center text-center">
             <div>
-              <p className="flex items-center justify-center gap-2 text-sm font-semibold text-[var(--casa-success-text)]">{I.check} Everything is live</p>
-              <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">No unpublished changes</p>
+              <p className="flex items-center justify-center gap-2 text-sm font-semibold text-[var(--casa-success-text)]">
+                {I.check} {t('Alles ist live', 'Everything is live')}
+              </p>
+              <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">{t('Keine unveröffentlichten Änderungen', 'No unpublished changes')}</p>
             </div>
           </div>
         ) : null}
@@ -203,7 +230,7 @@ export function ReviewDialog({
             <p className="flex items-center gap-2 text-xs font-semibold text-[var(--casa-text-subtle)]">
               {items[0]?.scope.startsWith('Every') ? I.link : I.page}
               {scope}
-              <span className="font-normal">· {plural(items.length, 'change', 'changes')}</span>
+              <span className="font-normal">· {plural(items.length, t('Änderung', 'change'), t('Änderungen', 'changes'))}</span>
             </p>
             <ul className="mt-1">
               {items.map((item) => {
@@ -234,10 +261,10 @@ export function ReviewDialog({
                       <Diff before={item.previous} after={item.value} className={cn('mt-1.5', !checked && 'opacity-50')} />
                       {item.staleLocales.map((code) => (
                         <div key={code} className="mt-2 flex items-center gap-3 rounded-lg bg-[var(--casa-sun-tint)] px-3 py-2 text-[0.8rem] font-medium text-[#5c4900]">
-                          <span className="flex-1">{label(code)} still says the old text</span>
+                          <span className="flex-1">{t(`${label(code)} hat noch den alten Text`, `${label(code)} still says the old text`)}</span>
                           {level !== 'view' ? (
                             <button type="button" onClick={() => onFixTranslation(item.key, code)} className="font-semibold text-[var(--casa-accent-text)] hover:underline">
-                              Update {label(code)}
+                              {t(`${label(code)} aktualisieren`, `Update ${label(code)}`)}
                             </button>
                           ) : null}
                         </div>
@@ -254,19 +281,19 @@ export function ReviewDialog({
       {level !== 'view' && changes && changes.length > 0 ? (
         <footer className="space-y-3 border-t border-ws-line-soft px-7 py-4">
           <label htmlFor="release-note" className="sr-only">
-            Note
+            {t('Notiz', 'Note')}
           </label>
           <input
             id="release-note"
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            placeholder="Note for the history (optional)"
+            placeholder={t('Notiz für den Verlauf (optional)', 'Note for the history (optional)')}
             className="h-10 w-full rounded-lg border border-ws-line-firm px-3 text-sm outline-none focus:border-[var(--casa-blue)] focus:shadow-[0_0_0_3px_rgba(0,159,227,0.16)]"
           />
           <div className="flex flex-wrap items-center justify-end gap-2">
           {level === 'full' ? (
             <div className="mr-auto flex items-center gap-2">
-              <div role="radiogroup" aria-label="When" className="inline-flex rounded-lg bg-ws-sunk p-0.5">
+              <div role="radiogroup" aria-label={t('Wann', 'When')} className="inline-flex rounded-lg bg-ws-sunk p-0.5">
                 {(['now', 'later'] as const).map((option) => (
                   <button
                     key={option}
@@ -280,14 +307,14 @@ export function ReviewDialog({
                     )}
                   >
                     {option === 'later' ? I.calendar : null}
-                    {option === 'now' ? 'Now' : 'Schedule'}
+                    {option === 'now' ? t('Jetzt', 'Now') : t('Planen', 'Schedule')}
                   </button>
                 ))}
               </div>
               {when === 'later' ? (
                 <>
                   <label htmlFor="release-at" className="sr-only">
-                    Publish at (Bremen time)
+                    {t('Veröffentlichen um (Bremer Zeit)', 'Publish at (Bremen time)')}
                   </label>
                   <input
                     id="release-at"
@@ -309,9 +336,9 @@ export function ReviewDialog({
             {busy === 'submit' ? <Spinner /> : null}
             {level === 'full'
               ? when === 'later'
-                ? `Schedule ${plural(count, 'change', 'changes')}`
-                : `Publish ${plural(count, 'change', 'changes')}`
-              : `Send ${count} for approval`}
+                ? t(`${plural(count, 'Änderung', 'Änderungen')} planen`, `Schedule ${plural(count, 'change', 'changes')}`)
+                : t(`${plural(count, 'Änderung', 'Änderungen')} veröffentlichen`, `Publish ${plural(count, 'change', 'changes')}`)
+              : t(`${count} zur Freigabe senden`, `Send ${count} for approval`)}
           </button>
           </div>
         </footer>

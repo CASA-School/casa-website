@@ -1,3 +1,5 @@
+import type { WsLang } from '../i18n';
+
 import { WEEKDAYS, type Weekday } from './types';
 
 /**
@@ -91,23 +93,13 @@ export function weekStartOf(date: string): string {
   return addDays(date, -(dow - 1));
 }
 
-const MONTHS_DE = [
-  'Januar',
-  'Februar',
-  'März',
-  'April',
-  'Mai',
-  'Juni',
-  'Juli',
-  'August',
-  'September',
-  'Oktober',
-  'November',
-  'Dezember',
-];
+const MONTHS: Record<WsLang, readonly string[]> = {
+  de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
 
-/** `2026-10` or `2026-10-01` → `Oktober 2026`. */
-export function monthLabel(month: string): string {
+/** `2026-10` or `2026-10-01` → `Oktober 2026` / `October 2026`. */
+export function monthLabel(month: string, lang: WsLang): string {
   const [y, m] = month.split('-').map(Number);
-  return `${MONTHS_DE[m - 1]} ${y}`;
+  return `${MONTHS[lang][m - 1]} ${y}`;
 }

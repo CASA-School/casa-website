@@ -4,6 +4,7 @@ import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
 import { raiseFlag } from './flags';
+import { pick, type Bilingual, type WsLang } from './i18n';
 
 /**
  * Bookings — a person's confirmed place on a course, with dates, cost lines
@@ -37,11 +38,12 @@ export const BOOKING_STATUSES: readonly BookingStatus[] = [
   'completed',
   'cancelled',
 ];
-export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
-  reserved: 'Reserved',
-  confirmed: 'Confirmed',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
+/** The labels below are read with `pick(lang, …)` (docs/ADMIN_I18N.md). */
+export const BOOKING_STATUS_LABELS: Record<BookingStatus, Bilingual> = {
+  reserved: { de: 'Reserviert', en: 'Reserved' },
+  confirmed: { de: 'Bestätigt', en: 'Confirmed' },
+  completed: { de: 'Abgeschlossen', en: 'Completed' },
+  cancelled: { de: 'Storniert', en: 'Cancelled' },
 };
 export const BOOKING_STATUS_TONES: Record<
   BookingStatus,
@@ -52,30 +54,47 @@ export const BOOKING_STATUS_TONES: Record<
   completed: 'neutral',
   cancelled: 'quiet',
 };
-export const PAYER_LABELS: Record<Payer, string> = {
-  self: 'Learner',
-  agency: 'Agency',
-  company: 'Company',
-  other: 'Other',
+export const PAYER_LABELS: Record<Payer, Bilingual> = {
+  self: { de: 'Lernende(r)', en: 'Learner' },
+  agency: { de: 'Agentur', en: 'Agency' },
+  company: { de: 'Firma', en: 'Company' },
+  other: { de: 'Sonstige', en: 'Other' },
 };
-export const CHARGE_KIND_LABELS: Record<ChargeKind, string> = {
-  enrolment_fee: 'Enrolment fee',
-  tuition: 'Course price',
-  books: 'Books',
-  exam_fee: 'Exam fee',
-  accommodation: 'Accommodation',
-  deposit: 'Deposit',
-  cancellation: 'Cancellation',
-  discount: 'Discount',
-  other: 'Other',
+export const CHARGE_KIND_LABELS: Record<ChargeKind, Bilingual> = {
+  enrolment_fee: { de: 'Anmeldegebühr', en: 'Enrolment fee' },
+  tuition: { de: 'Kurspreis', en: 'Course price' },
+  books: { de: 'Bücher', en: 'Books' },
+  exam_fee: { de: 'Prüfungsgebühr', en: 'Exam fee' },
+  accommodation: { de: 'Unterkunft', en: 'Accommodation' },
+  deposit: { de: 'Kaution', en: 'Deposit' },
+  cancellation: { de: 'Stornierung', en: 'Cancellation' },
+  discount: { de: 'Rabatt', en: 'Discount' },
+  other: { de: 'Sonstiges', en: 'Other' },
 };
-export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  card: 'Card',
-  cash: 'Cash',
-  transfer: 'Bank transfer',
-  carryover: 'Carried over',
-  agency: 'Via agency',
-  offset: 'Offset',
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, Bilingual> = {
+  card: { de: 'Karte', en: 'Card' },
+  cash: { de: 'Bar', en: 'Cash' },
+  transfer: { de: 'Überweisung', en: 'Bank transfer' },
+  carryover: { de: 'Übertragen', en: 'Carried over' },
+  agency: { de: 'Über die Agentur', en: 'Via agency' },
+  offset: { de: 'Verrechnet', en: 'Offset' },
+};
+
+/**
+ * Words the workspace writes into a booking by itself (a default reason, an
+ * extension's line) are stored in English whoever saves them, so the data reads
+ * one way; a screen shows them in its reader's language.
+ */
+const STORED_WORDS: Record<string, Bilingual> = {
+  Extension: { de: 'Verlängerung', en: 'Extension' },
+  Voided: { de: 'Storniert', en: 'Voided' },
+  'Voided by staff': { de: 'Vom Team storniert', en: 'Voided by staff' },
+  Cancelled: { de: 'Storniert', en: 'Cancelled' },
+};
+
+export const storedWords = (value: string, lang: WsLang): string => {
+  const known = STORED_WORDS[value];
+  return known ? pick(lang, known) : value;
 };
 
 export type BookingListItem = {
@@ -558,7 +577,7 @@ export async function removePeriod(
   bookingId: string,
   periodId: string,
   actor: StaffUser
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   const count = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM booking_periods WHERE booking_id = $1`,
     [bookingId]
@@ -566,7 +585,10 @@ export async function removePeriod(
   if (Number(count?.n ?? 0) <= 1)
     return {
       ok: false,
-      reason: 'A booking keeps at least one period. Cancel the booking instead.',
+      reason: {
+        de: 'Eine Buchung behält mindestens einen Zeitraum. Storniere stattdessen die Buchung.',
+        en: 'A booking keeps at least one period. Cancel the booking instead.',
+      },
     };
   await query(`DELETE FROM booking_periods WHERE id = $1 AND booking_id = $2`, [
     periodId,
@@ -689,13 +711,19 @@ export async function cancelBooking(id: string, reason: string, actor: StaffUser
 export async function deleteBooking(
   id: string,
   actor: StaffUser
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   const paid = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM payments WHERE booking_id = $1`,
     [id]
   );
   if (Number(paid?.n ?? 0) > 0)
-    return { ok: false, reason: 'This booking has payments. Cancel it instead of deleting it.' };
+    return {
+      ok: false,
+      reason: {
+        de: 'Diese Buchung hat Zahlungen. Storniere sie, statt sie zu löschen.',
+        en: 'This booking has payments. Cancel it instead of deleting it.',
+      },
+    };
   await query(
     `UPDATE bookings SET deleted_at = now(), deleted_by = $2 WHERE id = $1 AND deleted_at IS NULL`,
     [id, actor.id]

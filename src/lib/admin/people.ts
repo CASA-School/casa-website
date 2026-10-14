@@ -3,6 +3,7 @@ import type { StaffUser } from './auth';
 import { logActivity } from './activity';
 import { countryCodeFromName, normalizeEmail, normalizePhone, parseIsoDate } from './normalize';
 import { displayName } from './normalize';
+import type { Bilingual, WsLang } from './i18n';
 
 /**
  * People — one row per human, from first contact.
@@ -30,8 +31,8 @@ export type PersonSummary = {
   nationalityRaw: string | null;
   mergedInto: string | null;
   createdBy: string;
-  /** `createdBy` as a person or a place, never `staff:<uuid>`. */
-  createdByLabel: string;
+  /** `createdBy` as a person or a place, never `staff:<uuid>`; read with `pick(lang, …)`. */
+  createdByLabel: Bilingual;
   createdAt: Date;
 };
 
@@ -86,7 +87,9 @@ const toSummary = (r: Row): PersonSummary => ({
   nationalityRaw: r.nationality_raw,
   mergedInto: r.merged_into,
   createdBy: r.created_by,
-  createdByLabel: r.created_by_name ?? describeOrigin(r.created_by),
+  createdByLabel: r.created_by_name
+    ? { de: r.created_by_name, en: r.created_by_name }
+    : describeOrigin(r.created_by),
   createdAt: r.created_at,
 });
 
@@ -95,12 +98,12 @@ const toSummary = (r: Row): PersonSummary => ({
  * the origin is not always a person: the public site, a demo seed and a
  * migration all create people.
  */
-function describeOrigin(createdBy: string): string {
-  if (createdBy === 'public-site') return 'The website';
-  if (createdBy === 'demo-seed') return 'Demo data';
-  if (createdBy.startsWith('migration-')) return 'Imported';
-  if (createdBy.startsWith('staff:')) return 'A colleague';
-  return createdBy;
+function describeOrigin(createdBy: string): Bilingual {
+  if (createdBy === 'public-site') return { de: 'Die Website', en: 'The website' };
+  if (createdBy === 'demo-seed') return { de: 'Demodaten', en: 'Demo data' };
+  if (createdBy.startsWith('migration-')) return { de: 'Importiert', en: 'Imported' };
+  if (createdBy.startsWith('staff:')) return { de: 'jemandem aus dem Team', en: 'A colleague' };
+  return { de: createdBy, en: createdBy };
 }
 
 export async function getPersonSummary(id: string): Promise<PersonSummary | null> {
@@ -233,12 +236,12 @@ export type TimelineItem = {
   href: string;
 };
 
-/** Everything that ever came in under this person or a row linked to them. */
-export async function personTimeline(canonicalId: string): Promise<TimelineItem[]> {
+/** Everything that ever came in under this person or a row linked to them, titled in `lang`. */
+export async function personTimeline(canonicalId: string, lang: WsLang): Promise<TimelineItem[]> {
   const rows = await query<{
     kind: TimelineItem['kind'];
     id: string;
-    title: string;
+    title: string | null;
     detail: string | null;
     status: string | null;
     at: Date;
@@ -248,15 +251,15 @@ export async function personTimeline(canonicalId: string): Promise<TimelineItem[
               left(e.message, 140) AS detail, e.status::text, e.submitted_at AS at
          FROM enquiries e WHERE canonical_person_id(e.person_id) = $1
        UNION ALL
-       SELECT 'course', r.id, coalesce(r.course_type_label, 'Course registration'),
+       SELECT 'course', r.id, r.course_type_label,
               r.course_instance_label, r.status::text, r.submitted_at
          FROM course_registrations r WHERE canonical_person_id(r.person_id) = $1
        UNION ALL
-       SELECT 'exam', r.id, coalesce(r.exam_type_label, 'Exam registration'),
+       SELECT 'exam', r.id, r.exam_type_label,
               r.exam_session_label, r.status::text, r.submitted_at
          FROM exam_registrations r WHERE canonical_person_id(r.person_id) = $1
        UNION ALL
-       SELECT 'review', rv.attempt_id, 'Placement confirmed ' || rv.confirmed_level,
+       SELECT 'review', rv.attempt_id, rv.confirmed_level,
               rv.note, NULL, rv.decided_at
          FROM placement_reviews rv WHERE canonical_person_id(rv.person_id) = $1
      ) t ORDER BY at DESC`,
@@ -268,7 +271,15 @@ export async function personTimeline(canonicalId: string): Promise<TimelineItem[
     exam: '/admin/registrations/exam',
     review: '/admin/placement',
   };
-  return rows.map((r) => ({ ...r, href: `${href[r.kind]}/${r.id}` }));
+  const en = lang === 'en';
+  // The words around a stored value, in the reader's language; the value itself as stored.
+  const title = (r: (typeof rows)[number]): string => {
+    if (r.kind === 'course') return r.title ?? (en ? 'Course registration' : 'Kursanmeldung');
+    if (r.kind === 'exam') return r.title ?? (en ? 'Exam registration' : 'Prüfungsanmeldung');
+    if (r.kind === 'review') return `${en ? 'Placement confirmed' : 'Einstufung bestätigt:'} ${r.title ?? ''}`.trim();
+    return r.title ?? '';
+  };
+  return rows.map((r) => ({ ...r, title: title(r), href: `${href[r.kind]}/${r.id}` }));
 }
 
 /**
@@ -339,8 +350,9 @@ export async function linkPerson({
   duplicateId: string;
   survivorId: string;
   actor: StaffUser;
-}): Promise<{ ok: true } | { ok: false; reason: string }> {
-  if (duplicateId === survivorId) return { ok: false, reason: 'That is the same record.' };
+}): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
+  if (duplicateId === survivorId)
+    return { ok: false, reason: { de: 'Das ist derselbe Datensatz.', en: 'That is the same record.' } };
 
   return withTransaction(async (client) => {
     const { rows } = await client.query<{
@@ -351,14 +363,22 @@ export async function linkPerson({
       [duplicateId, survivorId]
     );
     const canonical = rows[0]?.canonical;
-    if (!canonical) return { ok: false, reason: 'The surviving record no longer exists.' };
+    if (!canonical)
+      return {
+        ok: false,
+        reason: { de: 'Den verbleibenden Datensatz gibt es nicht mehr.', en: 'The surviving record no longer exists.' },
+      };
     if (canonical === duplicateId) {
       return {
         ok: false,
-        reason: 'Those two records already point at each other.',
+        reason: {
+          de: 'Diese beiden Datensätze verweisen schon aufeinander.',
+          en: 'Those two records already point at each other.',
+        },
       };
     }
-    if (rows[0].already) return { ok: false, reason: 'This record is already linked.' };
+    if (rows[0].already)
+      return { ok: false, reason: { de: 'Dieser Datensatz ist schon verknüpft.', en: 'This record is already linked.' } };
 
     await client.query(`UPDATE people SET merged_into = $2 WHERE id = $1`, [
       duplicateId,
@@ -546,13 +566,19 @@ export async function updatePerson(
 export async function deletePerson(
   id: string,
   actor: StaffUser
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   const linked = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM people WHERE merged_into = $1`,
     [id]
   );
   if (Number(linked?.n ?? 0) > 0) {
-    return { ok: false, reason: 'Other records are linked to this person. Unlink them first.' };
+    return {
+      ok: false,
+      reason: {
+        de: 'Mit dieser Person sind andere Datensätze verknüpft. Trenne sie zuerst.',
+        en: 'Other records are linked to this person. Unlink them first.',
+      },
+    };
   }
   await query(
     `UPDATE people SET deleted_at = now(), deleted_by = $2 WHERE id = $1 AND deleted_at IS NULL`,

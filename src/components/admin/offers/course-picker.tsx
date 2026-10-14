@@ -3,7 +3,9 @@
 import { useState } from 'react';
 
 import { DateField } from '@/components/admin/date-picker';
+import { useWsLang } from '@/components/admin/lang';
 import { formatDay } from '@/lib/admin/calendar';
+import type { T, WsLang } from '@/lib/admin/i18n';
 import { formatMoney } from '@/lib/admin/letters/format';
 import {
   buildCourse,
@@ -26,8 +28,9 @@ import { levelChoiceGroups } from '@/lib/registration/levels';
 
 import ui from './offers.module.css';
 
-const eur = (n: number | null) => (n == null ? 'no price' : formatMoney(n, 'de'));
-const short = (iso: string) => formatDay(iso).slice(4);
+const eur = (t: T, n: number | null) => (n == null ? t('kein Preis', 'no price') : formatMoney(n, 'de'));
+/** "26 Oct 2026" / "26. Okt. 2026": the day without its weekday. */
+const short = (iso: string, lang: WsLang) => formatDay(iso, lang).slice(4);
 
 /**
  * A learner's course, picked the way a colleague thinks it through: which
@@ -50,6 +53,7 @@ export function CoursePicker({
   /** What CASA knows of the learner; null when nobody can tell (an agency, a company). */
   history: LearnerHistory | null;
 }) {
+  const { t, lang } = useWsLang();
   const first = value?.steps[0];
   const [slug, setSlug] = useState(value?.slug ?? catalogue.courses[0]?.slug ?? '');
   const [slot, setSlot] = useState(slotKey(value?.slot ?? null));
@@ -66,7 +70,7 @@ export function CoursePicker({
   const slots = course ? slotsOf(course) : [];
   const slotGroup = slots.find((s) => s.key === slot) ?? slots[0] ?? null;
   const terms = slotGroup?.terms ?? [];
-  const groups = course?.levels.length ? levelChoiceGroups(course.slug, course.levels, 'en') : [];
+  const groups = course?.levels.length ? levelChoiceGroups(course.slug, course.levels, lang) : [];
   const onward = course && level ? continuationLevels(course.slug, level, course.levels) : [];
 
   const build = (
@@ -108,17 +112,17 @@ export function CoursePicker({
   };
 
   const choice = value;
-  const lines = choice ? courseLines(choice, 'en') : [];
+  const lines = choice ? courseLines(choice, lang) : [];
   const examOptions = choice ? examsAfter(choice, catalogue.exams) : [];
   const total = lines.reduce((sum, l) => sum + (l.unitAmount ?? 0), 0);
 
-  if (!catalogue.courses.length) return <div className={ui.empty}>No course has upcoming dates.</div>;
+  if (!catalogue.courses.length) return <div className={ui.empty}>{t('Kein Kurs hat kommende Termine.', 'No course has upcoming dates.')}</div>;
 
   return (
     <div className={ui.picker}>
       <div className={ui.section}>
-        <span className={ui.sectionLabel}>Course</span>
-        <div className={ui.courseTiles} role="radiogroup" aria-label="Course">
+        <span className={ui.sectionLabel}>{t('Kurs', 'Course')}</span>
+        <div className={ui.courseTiles} role="radiogroup" aria-label={t('Kurs', 'Course')}>
           {catalogue.courses.map((c) => {
             const on = c.slug === slug;
             return (
@@ -138,7 +142,7 @@ export function CoursePicker({
                   onChange(null);
                 }}
               >
-                <b>{c.name.en}</b>
+                <b>{c.name[lang]}</b>
               </button>
             );
           })}
@@ -147,7 +151,7 @@ export function CoursePicker({
 
       {course && slots.length > 1 ? (
         <div className={ui.section}>
-          <span className={ui.sectionLabel}>Time of day</span>
+          <span className={ui.sectionLabel}>{t('Tageszeit', 'Time of day')}</span>
           <div className={ui.choiceGrid} style={{ gridTemplateColumns: `repeat(${Math.min(slots.length, 3)}, minmax(0, 1fr))` }}>
             {slots.map((s) => (
               <button
@@ -161,7 +165,7 @@ export function CoursePicker({
                   onChange(null);
                 }}
               >
-                <b>{slotLabel(s.slot, 'en').split(', ')[0]}</b>
+                <b>{slotLabel(s.slot, lang).split(', ')[0]}</b>
               </button>
             ))}
           </div>
@@ -170,20 +174,20 @@ export function CoursePicker({
 
       {course ? (
         <div className={ui.section}>
-          <span className={ui.sectionLabel}>Starting</span>
+          <span className={ui.sectionLabel}>{t('Beginn', 'Starting')}</span>
           <div className={ui.termGrid}>
-            {terms.slice(0, 10).map((t) => (
+            {terms.slice(0, 10).map((term) => (
               <button
-                key={t.id}
+                key={term.id}
                 type="button"
-                aria-pressed={t.id === termId}
-                className={`${ui.term} ${t.id === termId ? ui.termOn : ''}`}
+                aria-pressed={term.id === termId}
+                className={`${ui.term} ${term.id === termId ? ui.termOn : ''}`}
                 onClick={() => {
-                  setTermId(t.id);
-                  build({ termId: t.id, accommodation: accommodation ? { ...accommodation, from: null, to: null } : null });
+                  setTermId(term.id);
+                  build({ termId: term.id, accommodation: accommodation ? { ...accommodation, from: null, to: null } : null });
                 }}
               >
-                <b>{short(t.startDate)}</b>
+                <b>{short(term.startDate, lang)}</b>
               </button>
             ))}
           </div>
@@ -192,7 +196,7 @@ export function CoursePicker({
 
       {course && termId && groups.length ? (
         <div className={ui.section}>
-          <span className={ui.sectionLabel}>Level</span>
+          <span className={ui.sectionLabel}>{t('Niveau', 'Level')}</span>
           <div className={ui.levelRows}>
             {groups.map((g) => (
               <div key={g.level} className={ui.acts}>
@@ -219,7 +223,7 @@ export function CoursePicker({
 
       {course && termId && level && onward.length ? (
         <div className={ui.section}>
-          <span className={ui.sectionLabel}>And on to</span>
+          <span className={ui.sectionLabel}>{t('Und weiter bis', 'And on to')}</span>
           <div className={ui.acts}>
             {['', ...onward].map((to) => (
               <button
@@ -232,7 +236,7 @@ export function CoursePicker({
                   build({ pathTo: to });
                 }}
               >
-                {to ? `to ${to}` : 'This level only'}
+                {to ? t(`bis ${to}`, `to ${to}`) : t('Nur dieses Niveau', 'This level only')}
               </button>
             ))}
           </div>
@@ -241,20 +245,20 @@ export function CoursePicker({
 
       {choice ? (
         <div className={ui.section}>
-          <span className={ui.sectionLabel}>On the offer</span>
+          <span className={ui.sectionLabel}>{t('Auf dem Angebot', 'On the offer')}</span>
           <div className={ui.lineList}>
             {choice.steps.map((step, i) => (
               <div key={i} className={ui.lineRow}>
                 <span>
                   <b>
-                    {choice.name.en}
-                    {step.level ? ` ${levelLabel(step, 'en')}` : ''}
+                    {choice.name[lang]}
+                    {step.level ? ` ${levelLabel(step, lang)}` : ''}
                   </b>
                   <small>
-                    {step.start && step.end ? `${short(step.start)} – ${short(step.end)}` : 'Dates by arrangement'}
+                    {step.start && step.end ? `${short(step.start, lang)} – ${short(step.end, lang)}` : t('Termine nach Absprache', 'Dates by arrangement')}
                   </small>
                 </span>
-                <em>{eur(lines[i]?.unitAmount ?? null)}</em>
+                <em>{eur(t, lines[i]?.unitAmount ?? null)}</em>
               </div>
             ))}
             <label className={ui.lineRow}>
@@ -268,11 +272,17 @@ export function CoursePicker({
                       build({ withBooks: e.target.checked });
                     }}
                   />{' '}
-                  Books
+                  {t('Bücher', 'Books')}
                 </b>
-                <small>{choice.books.length ? choice.books.map((b) => b.title).join(', ') : withBooks ? 'None on the price list for this level' : 'The learner has them'}</small>
+                <small>
+                  {choice.books.length
+                    ? choice.books.map((b) => b.title).join(', ')
+                    : withBooks
+                      ? t('Keine in der Preisliste für dieses Niveau', 'None on the price list for this level')
+                      : t('Die lernende Person hat sie schon', 'The learner has them')}
+                </small>
               </span>
-              <em>{choice.books.length ? eur(choice.books.reduce((s, b) => s + (b.price ?? 0), 0)) : '—'}</em>
+              <em>{choice.books.length ? eur(t, choice.books.reduce((s, b) => s + (b.price ?? 0), 0)) : '—'}</em>
             </label>
             <label className={ui.lineRow}>
               <span>
@@ -285,11 +295,17 @@ export function CoursePicker({
                       build({ newStudent: e.target.checked });
                     }}
                   />{' '}
-                  Enrolment fee
+                  {t('Anmeldegebühr', 'Enrolment fee')}
                 </b>
-                <small>{history?.studiedBefore ? 'Has studied at CASA before' : history ? 'First registration at CASA' : 'Once, on a first registration'}</small>
+                <small>
+                  {history?.studiedBefore
+                    ? t('Hat schon bei CASA gelernt', 'Has studied at CASA before')
+                    : history
+                      ? t('Erste Anmeldung bei CASA', 'First registration at CASA')
+                      : t('Einmal, bei der ersten Anmeldung', 'Once, on a first registration')}
+                </small>
               </span>
-              <em>{newStudent ? eur(lines.find((l) => l.key === 'enrolment')?.unitAmount ?? null) : '—'}</em>
+              <em>{newStudent ? eur(t, lines.find((l) => l.key === 'enrolment')?.unitAmount ?? null) : '—'}</em>
             </label>
             <label className={ui.lineRow}>
               <span>
@@ -303,12 +319,12 @@ export function CoursePicker({
                       build({ accommodation: next });
                     }}
                   />{' '}
-                  Accommodation
+                  {t('Unterkunft', 'Accommodation')}
                 </b>
               </span>
               <em>
                 {accommodation
-                  ? eur(lines.filter((l) => ['accommodation', 'placement', 'deposit'].includes(l.key)).reduce((sum, l) => sum + (l.unitAmount ?? 0), 0))
+                  ? eur(t, lines.filter((l) => ['accommodation', 'placement', 'deposit'].includes(l.key)).reduce((sum, l) => sum + (l.unitAmount ?? 0), 0))
                   : '—'}
               </em>
             </label>
@@ -317,8 +333,8 @@ export function CoursePicker({
                 <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
                   {(
                     [
-                      ['host_family', 'Host family'],
-                      ['shared_flat', 'CASA shared flat'],
+                      ['host_family', t('Gastfamilie', 'Host family')],
+                      ['shared_flat', t('CASA-WG', 'CASA shared flat')],
                     ] as const
                   ).map(([kind, b]) => (
                     <button
@@ -339,8 +355,8 @@ export function CoursePicker({
                 <div className={ui.row2}>
                   {(
                     [
-                      ['from', 'Arrival'],
-                      ['to', 'Departure'],
+                      ['from', t('Anreise', 'Arrival')],
+                      ['to', t('Abreise', 'Departure')],
                     ] as const
                   ).map(([end, label]) => (
                     <div key={end} className={ui.fld}>
@@ -360,7 +376,10 @@ export function CoursePicker({
                 </div>
                 {extraNights(accommodation) ? (
                   <div className={ui.fieldNote}>
-                    {extraNights(accommodation)} {extraNights(accommodation) === 1 ? 'night' : 'nights'} beyond whole weeks, not in the rent
+                    {t(
+                      `${extraNights(accommodation)} ${extraNights(accommodation) === 1 ? 'Nacht' : 'Nächte'} über ganze Wochen hinaus, nicht in der Miete`,
+                      `${extraNights(accommodation)} ${extraNights(accommodation) === 1 ? 'night' : 'nights'} beyond whole weeks, not in the rent`
+                    )}
                   </div>
                 ) : null}
                 <label className={ui.toggleLine}>
@@ -373,7 +392,8 @@ export function CoursePicker({
                     }}
                   />
                   <span>
-                    First stay with CASA {history?.stayedBefore ? <small>· has stayed before</small> : null}
+                    {t('Erster Aufenthalt bei CASA', 'First stay with CASA')}{' '}
+                    {history?.stayedBefore ? <small>{t('· hat schon bei CASA gewohnt', '· has stayed before')}</small> : null}
                   </span>
                 </label>
               </div>
@@ -398,7 +418,7 @@ export function CoursePicker({
                         {e.name}
                       </b>
                     </span>
-                    <em>{on ? eur(exam?.fee ?? null) : '—'}</em>
+                    <em>{on ? eur(t, exam?.fee ?? null) : '—'}</em>
                   </label>
                   {on ? (
                     <div className={ui.lineDetail}>
@@ -415,7 +435,7 @@ export function CoursePicker({
                               build({ exam: next });
                             }}
                           >
-                            {short(s.date)}
+                            {short(s.date, lang)}
                           </button>
                         ))}
                       </div>
@@ -426,14 +446,14 @@ export function CoursePicker({
             })}
             <div className={`${ui.lineRow} ${ui.lineTotal}`}>
               <span>
-                <b>Total</b>
+                <b>{t('Gesamt', 'Total')}</b>
               </span>
-              <em>{eur(total)}</em>
+              <em>{eur(t, total)}</em>
             </div>
           </div>
         </div>
       ) : course && termId && groups.length ? (
-        <div className={ui.note}>Choose the level.</div>
+        <div className={ui.note}>{t('Wähle das Niveau.', 'Choose the level.')}</div>
       ) : null}
     </div>
   );

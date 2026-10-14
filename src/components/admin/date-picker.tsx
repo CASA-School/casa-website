@@ -6,6 +6,8 @@ import { addMonths, formatDay, isoParts, monthGrid, monthTitle, parseTypedDate, 
 import { addDays, daysBetween } from '@/lib/admin/offers/stay';
 import { todayInputValue } from '@/lib/dates';
 
+import { useWsLang } from './lang';
+
 import s from './date-picker.module.css';
 
 /**
@@ -47,7 +49,7 @@ export function DateInput({
   today,
   min,
   max,
-  placeholder = 'Type or pick a date',
+  placeholder,
   ariaLabel,
   onFocus,
   toggle,
@@ -64,6 +66,7 @@ export function DateInput({
   toggle?: ReactNode;
 }) {
   const [text, setText] = useState('');
+  const { t, lang } = useWsLang();
   const [editing, setEditing] = useState(false);
   const [invalid, setInvalid] = useState(false);
 
@@ -93,8 +96,8 @@ export function DateInput({
         aria-label={ariaLabel}
         aria-invalid={invalid || undefined}
         autoComplete="off"
-        placeholder={placeholder}
-        value={editing ? text : value ? formatDay(value) : ''}
+        placeholder={placeholder ?? t('Datum eingeben oder wählen', 'Type or pick a date')}
+        value={editing ? text : value ? formatDay(value, lang) : ''}
         onFocus={(e) => {
           setEditing(true);
           setText(value ? toGerman(value) : '');
@@ -141,6 +144,7 @@ export function Calendar({
     return { y, m };
   });
   const [focus, setFocus] = useState(anchor);
+  const { lang } = useWsLang();
   const [hover, setHover] = useState<string | null>(null);
   const grid = useRef<HTMLDivElement>(null);
   const keyed = useRef(false);
@@ -218,10 +222,10 @@ export function Calendar({
       <div className={s.months} ref={grid} onKeyDown={onKey}>
         {Array.from({ length: months }, (_, i) => addMonths(view.y, view.m, i)).map(({ y, m }) => (
           <div key={`${y}-${m}`} className={s.month}>
-            <div className={s.title}>{monthTitle(y, m)}</div>
-            <div className={s.grid} role="grid" aria-label={monthTitle(y, m)}>
+            <div className={s.title}>{monthTitle(y, m, lang)}</div>
+            <div className={s.grid} role="grid" aria-label={monthTitle(y, m, lang)}>
               <div className={s.row} role="row">
-                {WEEKDAYS.map((w) => (
+                {WEEKDAYS[lang].map((w) => (
                   <span key={w} className={s.wd} role="columnheader">
                     {w}
                   </span>
@@ -238,7 +242,7 @@ export function Calendar({
                         data-iso={iso}
                         tabIndex={iso === focus ? 0 : -1}
                         aria-selected={pick.mode === 'single' ? iso === pick.value : iso === pick.from || iso === pick.to}
-                        aria-label={formatDay(iso)}
+                        aria-label={formatDay(iso, lang)}
                         disabled={!inBounds(iso, min, max)}
                         className={classFor(iso)}
                         onMouseEnter={() => setHover(iso)}
@@ -323,6 +327,7 @@ export function DateField({
 }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
+  const { t } = useWsLang();
   const wrap = useRef<HTMLDivElement>(null);
   // Near the foot of the window the calendar opens upwards, not off the screen.
   const show = () => {
@@ -363,13 +368,13 @@ export function DateField({
         ariaLabel={ariaLabel}
         onFocus={show}
         toggle={
-          <button type="button" className={s.toggle} aria-label="Open the calendar" aria-expanded={open} onClick={() => (open ? setOpen(false) : show())}>
+          <button type="button" className={s.toggle} aria-label={t('Kalender öffnen', 'Open the calendar')} aria-expanded={open} onClick={() => (open ? setOpen(false) : show())}>
             {CALENDAR_ICON}
           </button>
         }
       />
       {open ? (
-        <div className={`${s.pop} ${up ? s.popUp : ''}`} role="dialog" aria-label="Pick a date">
+        <div className={`${s.pop} ${up ? s.popUp : ''}`} role="dialog" aria-label={t('Datum wählen', 'Pick a date')}>
           <Calendar mode="single" value={value} onPick={choose} today={today} min={min} max={max} compact />
           {quick.length ? (
             <div className={s.foot} style={{ marginTop: 10 }}>
@@ -412,6 +417,7 @@ export function DateRange({
   compact?: boolean;
 }) {
   const [picking, setPicking] = useState<'start' | 'end'>(from && !to ? 'end' : 'start');
+  const { t, lang } = useWsLang();
   const id = useId();
   const nights = from && to && to > from ? daysBetween(from, to) : null;
 
@@ -429,7 +435,7 @@ export function DateRange({
     <div className={s.range}>
       <div className={s.ends}>
         <div>
-          <label htmlFor={`${id}-from`}>Arrival</label>
+          <label htmlFor={`${id}-from`}>{t('Anreise', 'Arrival')}</label>
           <DateInput
             id={`${id}-from`}
             value={from}
@@ -442,7 +448,7 @@ export function DateRange({
           />
         </div>
         <div>
-          <label htmlFor={`${id}-to`}>Departure</label>
+          <label htmlFor={`${id}-to`}>{t('Abreise', 'Departure')}</label>
           <DateInput
             id={`${id}-to`}
             value={to}
@@ -460,17 +466,20 @@ export function DateRange({
       <div className={s.foot}>
         <span>
           {nights != null
-            ? `${nights} ${nights === 1 ? 'night' : 'nights'} · ${formatDay(from!).slice(0, 3)} to ${formatDay(to!).slice(0, 3)}`
+            ? t(
+                `${nights} ${nights === 1 ? 'Nacht' : 'Nächte'} · ${formatDay(from!, lang).slice(0, 3)} bis ${formatDay(to!, lang).slice(0, 3)}`,
+                `${nights} ${nights === 1 ? 'night' : 'nights'} · ${formatDay(from!, lang).slice(0, 3)} to ${formatDay(to!, lang).slice(0, 3)}`
+              )
             : picking === 'end' && from
-              ? 'Now the departure'
-              : 'Pick the arrival'}
+              ? t('Jetzt die Abreise', 'Now the departure')
+              : t('Die Anreise wählen', 'Pick the arrival')}
         </span>
         {from
           ? [1, 2, 3, 4].map((w) => {
               const end = addDays(from, w * 7 - 1);
               return (
                 <button key={w} type="button" className={`${s.chip} ${to === end ? s.chipOn : ''}`} onClick={() => onChange(from, end)}>
-                  {w} {w === 1 ? 'week' : 'weeks'}
+                  {w} {w === 1 ? t('Woche', 'week') : t('Wochen', 'weeks')}
                 </button>
               );
             })

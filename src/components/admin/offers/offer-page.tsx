@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { GRUPPEN_ACTIVITIES, GRUPPEN_PACKAGES_BY_STACK, activityById, fullBoardBaseTotal, type GruppenActivity } from '@/config/gruppen/packages';
+import { useWsLang } from '@/components/admin/lang';
 import { LetterSheet } from '@/components/admin/letters/letter-sheet';
+import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
 import { formatDateRange, formatLetterDate, formatMoney } from '@/lib/admin/letters/format';
 import { hasProblems } from '@/lib/admin/offers/checks';
@@ -53,15 +55,21 @@ const PACKAGE_COLOUR: Record<PackageChoice, [string, string]> = {
   esel: ['var(--c-ink)', 'var(--c-ink-tint)'],
   own: ['var(--o-line-firm)', '#f6f8fb'],
 };
-const ESCORT_SHORT: Record<EscortPricing, string> = { paid: 'paying', free: 'free', shared: 'shared' };
-const ACTIVITY_TINT: Record<GruppenActivity['category'], Tint> = { city: 'blue', culture: 'red', science: 'sun', sport: 'ink', daytrip: 'ink' };
-const CATEGORY_LABEL: Record<GruppenActivity['category'], string> = {
-  city: 'In the city',
-  culture: 'Culture and history',
-  science: 'Science and nature',
-  sport: 'Sport',
-  daytrip: 'Day trips',
+const ESCORT_SHORT: Record<EscortPricing, Bilingual> = {
+  paid: { de: 'zahlend', en: 'paying' },
+  free: { de: 'kostenfrei', en: 'free' },
+  shared: { de: 'geteilt', en: 'shared' },
 };
+const ACTIVITY_TINT: Record<GruppenActivity['category'], Tint> = { city: 'blue', culture: 'red', science: 'sun', sport: 'ink', daytrip: 'ink' };
+const CATEGORY_LABEL: Record<GruppenActivity['category'], Bilingual> = {
+  city: { de: 'In der Stadt', en: 'In the city' },
+  culture: { de: 'Kultur und Geschichte', en: 'Culture and history' },
+  science: { de: 'Wissenschaft und Natur', en: 'Science and nature' },
+  sport: { de: 'Sport', en: 'Sport' },
+  daytrip: { de: 'Tagesausflüge', en: 'Day trips' },
+};
+const weeksWord = (t: T, n: number) => (n === 1 ? t('Woche', 'week') : t('Wochen', 'weeks'));
+const escortsWord = (t: T, n: number) => (n === 1 ? t('Begleitperson', 'escort') : t('Begleitpersonen', 'escorts'));
 const ALL_MODULES: StayChoices['modules'] = { course: true, materials: true, accommodation: true, lunch: true, transport: true };
 
 /** Esel built from what a package holds — the way to take something out of a fixed package. */
@@ -104,6 +112,8 @@ export function OfferPage({
 }) {
   const { meta } = record;
   const router = useRouter();
+  // `lang` below is the letter's own language, chosen per offer; `t` and `wsLang` are the workspace's.
+  const { t, lang: wsLang } = useWsLang();
   const od = useOfferDraft({
     id: meta.id,
     status: meta.status,
@@ -132,13 +142,13 @@ export function OfferPage({
   };
 
   const problems = checks.filter((c) => c.level === 'problem');
-  const status = saveLabel(od.saveState, od.saveError, editable);
+  const status = saveLabel(od.saveState, od.saveError, editable, t);
 
   return (
     <OfferFrame
-      back={{ href: '/admin/offers', label: 'Offers', before: od.flush }}
+      back={{ href: '/admin/offers', label: t('Angebote', 'Offers'), before: od.flush }}
       title={name}
-      subtitle={`${meta.number} · ${OFFER_STATUS_LABELS[meta.status]}`}
+      subtitle={`${meta.number} · ${pick(wsLang, OFFER_STATUS_LABELS[meta.status])}`}
       tabs={{ id: meta.id, active: 'offer', before: od.flush }}
       right={
         <>
@@ -149,11 +159,11 @@ export function OfferPage({
             status={meta.status}
             canWrite={canWrite}
             canDelete={canDelete}
-            extra={[{ label: 'Print / PDF', onSelect: print }]}
+            extra={[{ label: t('Drucken / PDF', 'Print / PDF'), onSelect: print }]}
             send={{
               canSend: !hasProblems(checks) && od.saveState !== 'stale',
               busy: od.saveState === 'dirty' || od.saveState === 'saving',
-              problems: problems.map((p) => p.message),
+              problems: problems.map((p) => pick(wsLang, p.message)),
               email: draft.contactEmail,
               letter,
               onPrint: print,
@@ -166,10 +176,13 @@ export function OfferPage({
       <main className={ui.page}>
         {od.saveState === 'stale' ? (
           <div className={ui.banner} style={{ marginBottom: 16 }}>
-            A colleague has changed this offer in the meantime. The last change is not saved.
+            {t(
+              'Jemand aus dem Team hat dieses Angebot inzwischen geändert. Die letzte Änderung ist nicht gespeichert.',
+              'A colleague has changed this offer in the meantime. The last change is not saved.'
+            )}
             <span style={{ flex: 1 }} />
             <button type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={() => window.location.reload()}>
-              Reload
+              {t('Neu laden', 'Reload')}
             </button>
           </div>
         ) : null}
@@ -183,14 +196,14 @@ export function OfferPage({
             <Extras draft={draft} update={update} editable={editable} lines={lines} priceList={priceList} chargeTypes={options.chargeTypes} />
           </div>
 
-          <aside className={ui.aside} aria-label="Summary">
+          <aside className={ui.aside} aria-label={t('Zusammenfassung', 'Summary')}>
             <PriceCard draft={draft} totals={totals} />
             {meta.status === 'draft' ? <ChecksCard checks={checks} /> : null}
-            <section className={ui.card} aria-label="Letter">
+            <section className={ui.card} aria-label={t('Brief', 'Letter')}>
               <a
                 href={`/admin/offers/${meta.id}/letter`}
                 className={ui.thumb}
-                aria-label="Open the letter"
+                aria-label={t('Brief öffnen', 'Open the letter')}
                 onClick={(e) => {
                   e.preventDefault();
                   void openLetter();
@@ -202,10 +215,11 @@ export function OfferPage({
               </a>
               <div className={ui.thumbFoot}>
                 <span>
-                  {lang === 'de' ? 'Deutsch' : 'English'} · {draft.presentation === 'package' ? 'one price per person' : 'every line priced'}
+                  {lang === 'de' ? 'Deutsch' : 'English'} ·{' '}
+                  {draft.presentation === 'package' ? t('ein Preis pro Person', 'one price per person') : t('jede Zeile mit Preis', 'every line priced')}
                 </span>
                 <button type="button" className={ui.link} onClick={() => void openLetter()}>
-                  Open the letter →
+                  {t('Brief öffnen →', 'Open the letter →')}
                 </button>
               </div>
             </section>
@@ -261,6 +275,7 @@ function Head({
   today: string;
   status: OfferRecord['meta']['status'];
 }) {
+  const { t, lang } = useWsLang();
   const group = draft.kind === 'group';
   const { nights, weeks, fromDates } = measure(draft);
   const c = draft.stay.choices;
@@ -275,10 +290,10 @@ function Head({
         <div>
           {editable ? (
             <input
-              aria-label="Name of the offer"
+              aria-label={t('Name des Angebots', 'Name of the offer')}
               className={ui.titleInput}
               value={draft.groupName}
-              placeholder={draft.recipientName || 'Name this offer'}
+              placeholder={draft.recipientName || t('Gib dem Angebot einen Namen', 'Name this offer')}
               onChange={(e) => update({ groupName: e.target.value })}
             />
           ) : (
@@ -286,7 +301,7 @@ function Head({
           )}
           <div className={ui.subtitle}>
             <ClickPanel
-              label="Recipient"
+              label={t('Empfänger', 'Recipient')}
               icon={<Chip tint="ink" icon={ICONS.people} big />}
               className={ui.editable}
               triggerId={FIX.recipient}
@@ -297,14 +312,14 @@ function Head({
             </ClickPanel>
           </div>
         </div>
-        <span className={`${ui.pill} ${ui[`pill_${status}`]}`}>{OFFER_STATUS_LABELS[status]}</span>
+        <span className={`${ui.pill} ${ui[`pill_${status}`]}`}>{pick(lang, OFFER_STATUS_LABELS[status])}</span>
       </div>
 
       <div className={`${ui.specs} ${group ? '' : ui.specs3}`}>
         {group ? (
           <ClickPanel
             {...panel}
-            label="Dates"
+            label={t('Daten', 'Dates')}
             icon={<Chip tint="blue" icon={ICONS.calendar} big />}
             triggerId={FIX.dates}
             dates
@@ -320,8 +335,8 @@ function Head({
                 />
                 {!fromDates && !fixedWeeks ? (
                   <div className={ui.fld}>
-                    <span>Weeks, until there are dates</span>
-                    <Stepper label="Weeks" value={c.weeks} min={1} max={c.package === 'esel' ? 4 : 52} onChange={(v) => update((d) => setChoices(d, { weeks: v ?? 1 }))} />
+                    <span>{t('Wochen, bis es Daten gibt', 'Weeks, until there are dates')}</span>
+                    <Stepper label={t('Wochen', 'Weeks')} value={c.weeks} min={1} max={c.package === 'esel' ? 4 : 52} onChange={(v) => update((d) => setChoices(d, { weeks: v ?? 1 }))} />
                   </div>
                 ) : null}
               </>
@@ -330,9 +345,13 @@ function Head({
             <Spec
               tint="blue"
               icon={ICONS.calendar}
-              label="Dates"
-              value={fromDates && draft.arrival && draft.departure ? formatDateRange(draft.arrival, draft.departure, 'en') : `${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}
-              sub={fromDates ? `${nights} nights · ${weeks} ${weeks === 1 ? 'week' : 'weeks'}` : 'No dates yet'}
+              label={t('Daten', 'Dates')}
+              value={fromDates && draft.arrival && draft.departure ? formatDateRange(draft.arrival, draft.departure, lang) : `${weeks} ${weeksWord(t, weeks)}`}
+              sub={
+                fromDates
+                  ? `${t(`${nights} ${nights === 1 ? 'Nacht' : 'Nächte'}`, `${nights} nights`)} · ${weeks} ${weeksWord(t, weeks)}`
+                  : t('Noch keine Daten', 'No dates yet')
+              }
             />
           </ClickPanel>
         ) : null}
@@ -340,7 +359,7 @@ function Head({
         {group ? (
           <ClickPanel
             {...panel}
-            label="The group"
+            label={t('Die Gruppe', 'The group')}
             icon={<Chip tint="red" icon={ICONS.people} big />}
             triggerId={FIX.participants}
             wide
@@ -348,17 +367,17 @@ function Head({
               <>
                 <div className={ui.row2}>
                   <div className={ui.fld}>
-                    <span>Participants</span>
-                    <Stepper label="Participants" value={draft.participants} min={1} max={500} onChange={(v) => update({ participants: v })} />
+                    <span>{t('Teilnehmende', 'Participants')}</span>
+                    <Stepper label={t('Teilnehmende', 'Participants')} value={draft.participants} min={1} max={500} onChange={(v) => update({ participants: v })} />
                   </div>
                   <div className={ui.fld}>
-                    <span>Escorts</span>
-                    <Stepper label="Escorts" value={draft.escorts} min={0} max={50} onChange={(v) => update({ escorts: v ?? 0 })} />
+                    <span>{t('Begleitpersonen', 'Escorts')}</span>
+                    <Stepper label={t('Begleitpersonen', 'Escorts')} value={draft.escorts} min={0} max={50} onChange={(v) => update({ escorts: v ?? 0 })} />
                   </div>
                 </div>
                 {draft.escorts > 0 ? (
                   <div className={ui.fld}>
-                    <span>The escorts</span>
+                    <span>{t('Die Begleitpersonen', 'The escorts')}</span>
                     <div className={ui.choiceGrid}>
                       {(['paid', 'free', 'shared'] as const).map((k: EscortPricing) => (
                         <button
@@ -368,8 +387,14 @@ function Head({
                           aria-pressed={c.escortPricing === k}
                           onClick={() => update((d) => setChoices(d, { escortPricing: k }))}
                         >
-                          <b>{ESCORT_PRICING_LABELS[k]}</b>
-                          <span>{k === 'paid' ? 'Their own price' : k === 'free' ? 'CASA carries them' : 'In the price per person'}</span>
+                          <b>{pick(lang, ESCORT_PRICING_LABELS[k])}</b>
+                          <span>
+                            {k === 'paid'
+                              ? t('Ihr eigener Preis', 'Their own price')
+                              : k === 'free'
+                                ? t('CASA trägt sie', 'CASA carries them')
+                                : t('Im Preis pro Person', 'In the price per person')}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -381,17 +406,21 @@ function Head({
             <Spec
               tint="red"
               icon={ICONS.people}
-              label="The group"
+              label={t('Die Gruppe', 'The group')}
               warn={!draft.participants}
-              value={draft.participants ? `${draft.participants} participants` : 'Participants?'}
-              sub={draft.escorts ? `${draft.escorts} ${draft.escorts === 1 ? 'escort' : 'escorts'}, ${ESCORT_SHORT[c.escortPricing]}` : 'No escorts'}
+              value={draft.participants ? t(`${draft.participants} Teilnehmende`, `${draft.participants} participants`) : t('Teilnehmende?', 'Participants?')}
+              sub={
+                draft.escorts
+                  ? `${draft.escorts} ${escortsWord(t, draft.escorts)}, ${pick(lang, ESCORT_SHORT[c.escortPricing])}`
+                  : t('Keine Begleitpersonen', 'No escorts')
+              }
             />
           </ClickPanel>
         ) : null}
 
         <ClickPanel
           {...panel}
-          label="Language"
+          label={t('Sprache', 'Language')}
           icon={<Chip tint="sun" icon={ICONS.language} big />}
           body={(close) => (
             <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -412,24 +441,26 @@ function Head({
             </div>
           )}
         >
-          <Spec tint="sun" icon={ICONS.language} label="Language" value={draft.language === 'de' ? 'Deutsch' : 'English'} sub={null} />
+          <Spec tint="sun" icon={ICONS.language} label={t('Sprache', 'Language')} value={draft.language === 'de' ? 'Deutsch' : 'English'} sub={null} />
         </ClickPanel>
 
         <ClickPanel
           {...panel}
-          label="Valid until"
+          label={t('Gültig bis', 'Valid until')}
           icon={<Chip tint="ink" icon={ICONS.hourglass} big />}
           triggerId={FIX.validity}
           body={() => (
             <InlineDatePicker
-              ariaLabel="Valid until"
+              ariaLabel={t('Gültig bis', 'Valid until')}
               value={draft.validUntil}
               today={today}
               min={today}
               onChange={(v) => update({ validUntil: v })}
               quick={[
-                ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
-                ...(draft.arrival && addDays(draft.arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(draft.arrival, -42) }] : []),
+                ...[14, 28, 42].map((days) => ({ label: t(`${days / 7} Wochen`, `${days / 7} weeks`), value: addDays(today, days) })),
+                ...(draft.arrival && addDays(draft.arrival, -42) > today
+                  ? [{ label: t('6 Wochen vor der Anreise', '6 weeks before arrival'), value: addDays(draft.arrival, -42) }]
+                  : []),
               ]}
             />
           )}
@@ -437,16 +468,24 @@ function Head({
           <Spec
             tint="ink"
             icon={ICONS.hourglass}
-            label="Valid until"
+            label={t('Gültig bis', 'Valid until')}
             warn={validIn == null || validIn < 0}
-            value={draft.validUntil ? formatLetterDate(draft.validUntil, 'en') : 'No date'}
-            sub={validIn == null ? 'The letter gives none' : validIn < 0 ? 'Passed' : validIn === 0 ? 'Today' : `In ${validIn} ${validIn === 1 ? 'day' : 'days'}`}
+            value={draft.validUntil ? formatLetterDate(draft.validUntil, lang) : t('Kein Datum', 'No date')}
+            sub={
+              validIn == null
+                ? t('Der Brief nennt keins', 'The letter gives none')
+                : validIn < 0
+                  ? t('Vorbei', 'Passed')
+                  : validIn === 0
+                    ? t('Heute', 'Today')
+                    : t(`In ${validIn} ${validIn === 1 ? 'Tag' : 'Tagen'}`, `In ${validIn} ${validIn === 1 ? 'day' : 'days'}`)
+            }
           />
         </ClickPanel>
 
         <ClickPanel
           {...panel}
-          label="Signed by"
+          label={t('Unterschrieben von', 'Signed by')}
           icon={<Chip tint="ink" icon={ICONS.pen} big />}
           body={(close) => (
             <div className={ui.radioList}>
@@ -469,7 +508,7 @@ function Head({
             </div>
           )}
         >
-          <Spec tint="ink" icon={ICONS.pen} label="Signed by" warn={!owner} value={owner ?? 'Nobody'} sub={null} />
+          <Spec tint="ink" icon={ICONS.pen} label={t('Unterschrieben von', 'Signed by')} warn={!owner} value={owner ?? t('Niemand', 'Nobody')} sub={null} />
         </ClickPanel>
       </div>
     </section>
@@ -477,63 +516,77 @@ function Head({
 }
 
 function RecipientSummary({ draft, countries }: { draft: OfferDraft; countries: Countries }) {
+  const { t, lang } = useWsLang();
   const contact = [draft.contactFirstName, draft.contactLastName].filter(Boolean).join(' ');
   const town = draft.address.split('\n').filter(Boolean).pop();
-  const country = countries.find((c) => c.code === draft.countryCode)?.en;
+  const country = countries.find((c) => c.code === draft.countryCode)?.[lang];
   const parts = [draft.recipientName, contact === draft.recipientName ? '' : contact, draft.contactEmail, [town, country].filter(Boolean).join(', ')].filter(Boolean);
   return (
     <span>
-      {parts.join(' · ') || <span className={ui.placeholder}>Who is it for?</span>}
-      {!draft.contactEmail ? <span className={ui.missing}>{parts.length ? ' · ' : ''}Add contact and email</span> : null}
+      {parts.join(' · ') || <span className={ui.placeholder}>{t('Für wen ist es?', 'Who is it for?')}</span>}
+      {!draft.contactEmail ? (
+        <span className={ui.missing}>
+          {parts.length ? ' · ' : ''}
+          {t('Kontakt und E-Mail ergänzen', 'Add contact and email')}
+        </span>
+      ) : null}
     </span>
   );
 }
 
 export function RecipientFields({ draft, update, countries }: { draft: OfferDraft; update: Update; countries: Countries }) {
+  const { t, lang } = useWsLang();
   return (
     <>
       <div className={ui.fld}>
-        <label htmlFor="r-name">{draft.kind === 'group' || draft.organisationId ? 'Organisation' : 'Name'}</label>
+        <label htmlFor="r-name">{draft.kind === 'group' || draft.organisationId ? t('Organisation', 'Organisation') : t('Name', 'Name')}</label>
         <input id="r-name" className={ui.fi} value={draft.recipientName} onChange={(e) => update({ recipientName: e.target.value })} />
       </div>
       <div className={ui.fld}>
-        <span>Contact</span>
+        <span>{t('Kontakt', 'Contact')}</span>
         <Seg
-          label="Salutation"
+          label={t('Anrede', 'Salutation')}
           value={draft.contactSalutation}
           options={[
-            ['ms', 'Ms'],
-            ['mr', 'Mr'],
-            ['none', 'None'],
+            ['ms', t('Frau', 'Ms')],
+            ['mr', t('Herr', 'Mr')],
+            ['none', t('Keine', 'None')],
           ]}
           onChange={(v) => update({ contactSalutation: v })}
         />
       </div>
       <div className={ui.row2}>
         <div className={ui.fld}>
-          <label htmlFor="r-first">First name</label>
+          <label htmlFor="r-first">{t('Vorname', 'First name')}</label>
           <input id="r-first" className={ui.fi} value={draft.contactFirstName} onChange={(e) => update({ contactFirstName: e.target.value })} />
         </div>
         <div className={ui.fld}>
-          <label htmlFor="r-last">Last name</label>
+          <label htmlFor="r-last">{t('Nachname', 'Last name')}</label>
           <input id="r-last" className={ui.fi} value={draft.contactLastName} onChange={(e) => update({ contactLastName: e.target.value })} />
         </div>
       </div>
       <div className={ui.fld}>
-        <label htmlFor="r-email">Email</label>
+        <label htmlFor="r-email">{t('E-Mail', 'Email')}</label>
         <input id="r-email" type="email" className={ui.fi} value={draft.contactEmail} onChange={(e) => update({ contactEmail: e.target.value })} />
       </div>
       <div className={ui.fld}>
-        <label htmlFor="r-address">Address</label>
-        <textarea id="r-address" rows={2} className={ui.fi} value={draft.address} placeholder={'Street and number\nPostcode and town'} onChange={(e) => update({ address: e.target.value })} />
+        <label htmlFor="r-address">{t('Adresse', 'Address')}</label>
+        <textarea
+          id="r-address"
+          rows={2}
+          className={ui.fi}
+          value={draft.address}
+          placeholder={t('Straße und Hausnummer\nPLZ und Ort', 'Street and number\nPostcode and town')}
+          onChange={(e) => update({ address: e.target.value })}
+        />
       </div>
       <div className={ui.fld}>
-        <label htmlFor="r-country">Country</label>
+        <label htmlFor="r-country">{t('Land', 'Country')}</label>
         <select id="r-country" className={ui.fi} value={draft.countryCode ?? ''} onChange={(e) => update({ countryCode: e.target.value || null })}>
           <option value="">—</option>
           {countries.map((c) => (
             <option key={c.code} value={c.code}>
-              {c.en}
+              {c[lang]}
             </option>
           ))}
         </select>
@@ -544,28 +597,32 @@ export function RecipientFields({ draft, update, countries }: { draft: OfferDraf
 
 // ------------------------------------------------------------- packages
 
-const OWN = { name: 'Own offer', desc: 'No package: only what you put on it' };
+const OWN = {
+  name: { de: 'Eigenes Angebot', en: 'Own offer' },
+  desc: { de: 'Kein Paket: nur das, was du draufsetzt', en: 'No package: only what you put on it' },
+} satisfies Record<string, Bilingual>;
 
 function Packages({ draft, update, editable }: { draft: OfferDraft; update: Update; editable: boolean }) {
+  const { t, lang } = useWsLang();
   const current = draft.stay.choices.package;
   const choose = (choice: PackageChoice) => update((d) => (choice === 'esel' ? asEsel(d) : setChoices(d, { package: choice })));
   const tiles: { choice: PackageChoice; name: string; desc: string; price: ReactNode }[] = [
     ...GRUPPEN_PACKAGES_BY_STACK.map((p) => ({
       choice: p.slug as PackageChoice,
-      name: p.animal.en,
-      desc: p.descriptor.en,
+      name: p.animal[lang],
+      desc: p.descriptor[lang],
       price:
         p.priceFrom != null ? (
           <>
-            {eur(p.priceFrom)} <small>per person</small>
+            {eur(p.priceFrom)} <small>{t('pro Person', 'per person')}</small>
           </>
         ) : (
           <>
-            <small>from</small> {eur(fullBoardBaseTotal(1))} <small>· 1–4 weeks</small>
+            <small>{t('ab', 'from')}</small> {eur(fullBoardBaseTotal(1))} <small>{t('· 1–4 Wochen', '· 1–4 weeks')}</small>
           </>
         ),
     })),
-    { choice: 'own', name: OWN.name, desc: OWN.desc, price: <small>Lines of your choice</small> },
+    { choice: 'own', name: pick(lang, OWN.name), desc: pick(lang, OWN.desc), price: <small>{t('Zeilen nach Wahl', 'Lines of your choice')}</small> },
   ];
 
   return (
@@ -573,30 +630,30 @@ function Packages({ draft, update, editable }: { draft: OfferDraft; update: Upda
       <div className={ui.cardHead}>
         <h2>
           <Chip tint={PACKAGE_TINT[current]} icon={ICONS.package} />
-          Built on
+          {t('Grundlage', 'Built on')}
         </h2>
-        <span>The packages of the groups page, or none</span>
+        <span>{t('Die Pakete der Gruppenseite oder keins', 'The packages of the groups page, or none')}</span>
       </div>
       <div className={ui.cardBody}>
-        <div className={ui.pkgs} role="radiogroup" aria-label="Package">
-          {tiles.map((t) => {
-            const on = current === t.choice;
-            const [colour, tint] = PACKAGE_COLOUR[t.choice];
+        <div className={ui.pkgs} role="radiogroup" aria-label={t('Paket', 'Package')}>
+          {tiles.map((tile) => {
+            const on = current === tile.choice;
+            const [colour, tint] = PACKAGE_COLOUR[tile.choice];
             return (
               <button
-                key={t.choice}
+                key={tile.choice}
                 type="button"
                 role="radio"
                 aria-checked={on}
                 disabled={!editable}
-                className={`${ui.pkg} ${on ? ui.pkgOn : ''} ${t.choice === 'own' ? ui.pkgOwn : ''}`}
+                className={`${ui.pkg} ${on ? ui.pkgOn : ''} ${tile.choice === 'own' ? ui.pkgOwn : ''}`}
                 style={{ ['--pkg' as string]: colour, ['--pkg-tint' as string]: tint }}
-                onClick={() => choose(t.choice)}
+                onClick={() => choose(tile.choice)}
               >
                 {on ? <span className={ui.pkgCheck}>✓</span> : null}
-                <span className={ui.pkgName}>{t.name}</span>
-                <span className={ui.pkgDesc}>{t.desc}</span>
-                <span className={ui.pkgPrice}>{t.price}</span>
+                <span className={ui.pkgName}>{tile.name}</span>
+                <span className={ui.pkgDesc}>{tile.desc}</span>
+                <span className={ui.pkgPrice}>{tile.price}</span>
               </button>
             );
           })}
@@ -609,17 +666,19 @@ function Packages({ draft, update, editable }: { draft: OfferDraft; update: Upda
 // --------------------------------------------------------------- course
 
 /** What each line of a learner's course is, in the workspace's words; the letter's own text sits under it. */
-function courseRowName(l: OfferLine, course: CourseChoice): { name: string; tint: Tint; icon: ReactNode } {
+function courseRowName(l: OfferLine, course: CourseChoice, t: T, lang: WsLang): { name: string; tint: Tint; icon: ReactNode } {
   if (l.key.startsWith('course:')) {
     const step = course.steps[Number(l.key.slice(7))];
-    return { name: `${course.name.en}${step?.level ? ` ${levelLabel(step, 'en')}` : ''}`, tint: 'red', icon: ICONS.book };
+    return { name: `${course.name[lang]}${step?.level ? ` ${levelLabel(step, lang)}` : ''}`, tint: 'red', icon: ICONS.book };
   }
-  if (l.key.startsWith('book:')) return { name: 'Textbook', tint: 'red', icon: ICONS.layers };
-  if (l.key === 'enrolment') return { name: 'Enrolment fee', tint: 'ink', icon: ICONS.people };
-  if (l.key === 'accommodation') return { name: course.accommodation?.kind === 'shared_flat' ? 'CASA shared flat' : 'Host family', tint: 'blue', icon: ICONS.house };
-  if (l.key === 'placement') return { name: 'Placement fee', tint: 'blue', icon: ICONS.house };
-  if (l.key === 'deposit') return { name: 'Deposit', tint: 'blue', icon: ICONS.house };
-  return { name: course.exam?.name ?? 'Exam', tint: 'sun', icon: ICONS.star };
+  if (l.key.startsWith('book:')) return { name: t('Lehrbuch', 'Textbook'), tint: 'red', icon: ICONS.layers };
+  if (l.key === 'enrolment') return { name: t('Anmeldegebühr', 'Enrolment fee'), tint: 'ink', icon: ICONS.people };
+  if (l.key === 'accommodation') {
+    return { name: course.accommodation?.kind === 'shared_flat' ? t('CASA-WG', 'CASA shared flat') : t('Gastfamilie', 'Host family'), tint: 'blue', icon: ICONS.house };
+  }
+  if (l.key === 'placement') return { name: t('Vermittlungsgebühr', 'Placement fee'), tint: 'blue', icon: ICONS.house };
+  if (l.key === 'deposit') return { name: t('Kaution', 'Deposit'), tint: 'blue', icon: ICONS.house };
+  return { name: course.exam?.name ?? t('Prüfung', 'Exam'), tint: 'sun', icon: ICONS.star };
 }
 
 /**
@@ -644,13 +703,14 @@ function CourseCard({
   catalogue: CourseCatalogue;
   history: LearnerHistory | null;
 }) {
+  const { t, lang } = useWsLang();
   const course = draft.stay.choices.course;
   const rows = course ? lines.filter((l) => !l.manual && l.audience === 'participant') : [];
   const span = course ? courseSpan(course) : null;
   const change = (
     <ClickPanel
       wide
-      label={course ? 'Change the course' : 'Choose the course'}
+      label={course ? t('Kurs ändern', 'Change the course') : t('Kurs wählen', 'Choose the course')}
       icon={<Chip tint="red" icon={ICONS.book} big />}
       className={`${ui.btn} ${ui.btnSm}`}
       triggerId={FIX.course}
@@ -659,7 +719,7 @@ function CourseCard({
         <CoursePicker catalogue={catalogue} value={course} onChange={(next) => update((d) => setChoices(d, { course: next }))} history={history} />
       )}
     >
-      {course ? 'Change' : 'Choose a course'}
+      {course ? t('Ändern', 'Change') : t('Kurs wählen', 'Choose a course')}
     </ClickPanel>
   );
 
@@ -668,9 +728,9 @@ function CourseCard({
       <div className={ui.cardHead}>
         <h2>
           <Chip tint="red" icon={ICONS.book} />
-          {course ? courseTitle(course, 'en') : 'Course'}
+          {course ? courseTitle(course, lang) : t('Kurs', 'Course')}
         </h2>
-        {course ? null : <span>Which course, from when, at which level</span>}
+        {course ? null : <span>{t('Welcher Kurs, ab wann, auf welchem Niveau', 'Which course, from when, at which level')}</span>}
         {editable ? change : null}
       </div>
       {course && span ? (
@@ -678,12 +738,12 @@ function CourseCard({
           {course.slot ? (
             <span>
               {ICONS.clock}
-              {slotLabel(course.slot, 'en').split(', ')[0]}
+              {slotLabel(course.slot, lang).split(', ')[0]}
             </span>
           ) : null}
           <span>
             {ICONS.calendar}
-            {span.start && span.end ? formatDateRange(span.start, span.end, 'en') : 'Dates by arrangement'}
+            {span.start && span.end ? formatDateRange(span.start, span.end, lang) : t('Termine nach Absprache', 'Dates by arrangement')}
           </span>
         </div>
       ) : null}
@@ -691,7 +751,7 @@ function CourseCard({
       <div className={ui.rows}>
         {course ? (
           rows.map((l) => {
-            const look = courseRowName(l, course);
+            const look = courseRowName(l, course, t, lang);
             return (
               <ClickPanel
                 key={l.key}
@@ -701,7 +761,7 @@ function CourseCard({
                 className={ui.inc}
                 openClassName={ui.incOpen}
                 disabled={!editable}
-                body={() => <MoneyField label="Price" line={l} update={update} />}
+                body={() => <MoneyField label={t('Preis', 'Price')} line={l} update={update} />}
               >
                 <span className={ui.incMain}>
                   <Chip tint={look.tint} icon={look.icon} big />
@@ -710,12 +770,12 @@ function CourseCard({
                     <span className={ui.incDetail}>{l.description}</span>
                   </span>
                 </span>
-                {amountCell(l)}
+                {amountCell(t, l)}
               </ClickPanel>
             );
           })
         ) : (
-          <div className={ui.empty}>No course on this offer — choose one, or put lines on below</div>
+          <div className={ui.empty}>{t('Kein Kurs auf diesem Angebot – wähle einen oder füge unten Zeilen hinzu', 'No course on this offer — choose one, or put lines on below')}</div>
         )}
       </div>
     </section>
@@ -725,46 +785,50 @@ function CourseCard({
 // ------------------------------------------------------------- included
 
 type ServiceKey = ModuleKey | 'programme';
-type Service = { key: ServiceKey; name: string; tint: Tint; icon: ReactNode };
+type Service = { key: ServiceKey; name: Bilingual; tint: Tint; icon: ReactNode };
 const SERVICES: Service[] = [
-  { key: 'course', name: 'Intensive German course', tint: 'red', icon: ICONS.book },
-  { key: 'materials', name: 'Course materials', tint: 'red', icon: ICONS.layers },
-  { key: 'accommodation', name: 'Host family', tint: 'blue', icon: ICONS.house },
-  { key: 'lunch', name: 'Lunch at the canteen', tint: 'blue', icon: ICONS.cup },
-  { key: 'transport', name: 'Public transport', tint: 'ink', icon: ICONS.tram },
-  { key: 'programme', name: 'Culture programme', tint: 'sun', icon: ICONS.star },
+  { key: 'course', name: { de: 'Intensivkurs Deutsch', en: 'Intensive German course' }, tint: 'red', icon: ICONS.book },
+  { key: 'materials', name: { de: 'Kursmaterial', en: 'Course materials' }, tint: 'red', icon: ICONS.layers },
+  { key: 'accommodation', name: { de: 'Gastfamilie', en: 'Host family' }, tint: 'blue', icon: ICONS.house },
+  { key: 'lunch', name: { de: 'Mittagessen in der Mensa', en: 'Lunch at the canteen' }, tint: 'blue', icon: ICONS.cup },
+  { key: 'transport', name: { de: 'Öffentlicher Nahverkehr', en: 'Public transport' }, tint: 'ink', icon: ICONS.tram },
+  { key: 'programme', name: { de: 'Kulturprogramm', en: 'Culture programme' }, tint: 'sun', icon: ICONS.star },
 ];
 const NO_ESCORT: ServiceKey[] = ['course', 'materials'];
 
-type AmountCell = (l: OfferLine | null, on?: boolean) => ReactNode;
+type AmountCell = (t: T, l: OfferLine | null, on?: boolean) => ReactNode;
 
-const amountCell: AmountCell = (l, on = true) =>
+const amountCell: AmountCell = (t, l, on = true) =>
   !on ? (
-    <span className={ui.incOffTag}>Not included</span>
+    <span className={ui.incOffTag}>{t('Nicht enthalten', 'Not included')}</span>
   ) : !l ? (
     <span className={ui.incNone}>—</span>
   ) : l.included ? (
-    <span className={ui.incIncl}>Included</span>
+    <span className={ui.incIncl}>{t('Enthalten', 'Included')}</span>
   ) : l.amount == null ? (
-    <span className={ui.amountMissing}>No price</span>
+    <span className={ui.amountMissing}>{t('Kein Preis', 'No price')}</span>
   ) : (
     <span className={`${ui.incAmt} ${l.amount < 0 ? ui.incCredit : ''}`}>
-      {l.listUnitAmount != null && l.unitAmount !== l.listUnitAmount ? <i className={ui.changed} title="Changed from the price list" /> : null}
+      {l.listUnitAmount != null && l.unitAmount !== l.listUnitAmount ? (
+        <i className={ui.changed} title={t('Weicht von der Preisliste ab', 'Changed from the price list')} />
+      ) : null}
       {l.amount < 0 ? `− ${eur(-l.amount)}` : eur(l.amount)}
     </span>
   );
 
 function ColumnHead({ group, escorts }: { group: boolean; escorts: boolean }) {
+  const { t } = useWsLang();
   return (
     <div className={`${ui.incHead} ${escorts ? ui.two : ''}`}>
       <span />
-      <span>{group ? 'Per participant' : 'Amount'}</span>
-      {escorts ? <span>Per escort</span> : null}
+      <span>{group ? t('Pro Person', 'Per participant') : t('Betrag', 'Amount')}</span>
+      {escorts ? <span>{t('Pro Begleitperson', 'Per escort')}</span> : null}
     </div>
   );
 }
 
 function Included({ draft, update, editable, lines }: { draft: OfferDraft; update: Update; editable: boolean; lines: OfferLine[] }) {
+  const { t, lang } = useWsLang();
   const c = draft.stay.choices;
   const fixed = isFixedPackage(c.package);
   const escortCol = draft.escorts > 0;
@@ -777,16 +841,21 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
   const pkg = GRUPPEN_PACKAGES_BY_STACK.find((p) => p.slug === c.package);
 
   const detail: Record<ServiceKey, string> = {
-    course: `${weeks * 20} lessons · Mon–Fri 09:00–12:30`,
-    materials: 'Workbook and copies, theirs to keep',
-    accommodation: `Double room · breakfast and dinner · ${nights} nights`,
-    lunch: 'Hot lunch on school days',
-    transport: 'Trams and buses for the whole stay',
-    programme: activities.length ? `${activities.length} ${activities.length === 1 ? 'afternoon' : 'afternoons'}` : 'No activities chosen',
+    course: t(`${weeks * 20} UE · Mo–Fr 09:00–12:30`, `${weeks * 20} lessons · Mon–Fri 09:00–12:30`),
+    materials: t('Arbeitsbuch und Kopien, die sie behalten', 'Workbook and copies, theirs to keep'),
+    accommodation: t(`Doppelzimmer · Frühstück und Abendessen · ${nights} Nächte`, `Double room · breakfast and dinner · ${nights} nights`),
+    lunch: t('Warmes Mittagessen an Schultagen', 'Hot lunch on school days'),
+    transport: t('Straßenbahn und Bus für den ganzen Aufenthalt', 'Trams and buses for the whole stay'),
+    programme: activities.length
+      ? activities.length === 1
+        ? t('1 Nachmittag', '1 afternoon')
+        : t(`${activities.length} Nachmittage`, `${activities.length} afternoons`)
+      : t('Keine Aktivitäten gewählt', 'No activities chosen'),
   };
+  const animal = pkg?.animal[lang];
   const toEsel = () => (
     <button type="button" className={ui.link} onClick={() => update(asEsel)}>
-      Leave something out: build it from blocks (Esel)
+      {t('Etwas weglassen: aus Bausteinen zusammenstellen (Esel)', 'Leave something out: build it from blocks (Esel)')}
     </button>
   );
 
@@ -795,24 +864,30 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
       <div className={ui.cardHead}>
         <h2>
           <Chip tint="blue" icon={ICONS.house} />
-          Included
+          {t('Enthalten', 'Included')}
         </h2>
-        <span>{fixed ? `Everything ${pkg?.animal.en ?? 'the package'} includes` : 'The blocks the group takes'}</span>
+        <span>
+          {fixed
+            ? t(`Alles, was ${animal ?? 'das Paket'} enthält`, `Everything ${animal ?? 'the package'} includes`)
+            : t('Die Bausteine, die die Gruppe nimmt', 'The blocks the group takes')}
+        </span>
       </div>
       <ColumnHead group escorts={escortCol} />
       <div className={ui.rows}>
         {fixed && pkgLine ? (
           <ClickPanel
             block
-            label={pkg ? `${pkg.animal.en} package` : pkgLine.description}
+            label={animal ? t(`Paket ${animal}`, `${animal} package`) : pkgLine.description}
             icon={<Chip tint={PACKAGE_TINT[c.package]} icon={ICONS.package} big />}
             className={`${ui.inc} ${two}`}
             openClassName={ui.incOpen}
             disabled={!editable}
             body={() => (
               <>
-                <MoneyField label="Price per participant" line={pkgLine} update={update} />
-                <div className={ui.fieldNote}>A price agreed with the group replaces the package price on the letter.</div>
+                <MoneyField label={t('Preis pro Person', 'Price per participant')} line={pkgLine} update={update} />
+                <div className={ui.fieldNote}>
+                  {t('Ein mit der Gruppe vereinbarter Preis ersetzt im Brief den Paketpreis.', 'A price agreed with the group replaces the package price on the letter.')}
+                </div>
               </>
             )}
             foot={toEsel}
@@ -820,13 +895,16 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
             <span className={ui.incMain}>
               <Chip tint={PACKAGE_TINT[c.package]} icon={ICONS.package} big />
               <span className={ui.incText}>
-                <span className={ui.incName}>{pkg ? `${pkg.animal.en} · ${pkg.descriptor.en}` : pkgLine.description}</span>
+                <span className={ui.incName}>{pkg ? `${pkg.animal[lang]} · ${pkg.descriptor[lang]}` : pkgLine.description}</span>
                 <span className={ui.incDetail}>
-                  The package price · everything below, for {weeks} {weeks === 1 ? 'week' : 'weeks'}
+                  {t(
+                    `Der Paketpreis · alles darunter, für ${weeks} ${weeksWord(t, weeks)}`,
+                    `The package price · everything below, for ${weeks} ${weeksWord(t, weeks)}`
+                  )}
                 </span>
               </span>
             </span>
-            {amountCell(pkgLine)}
+            {amountCell(t, pkgLine)}
             {escortCol ? <span className={ui.incNone}>—</span> : null}
           </ClickPanel>
         ) : null}
@@ -840,8 +918,16 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
             <ClickPanel
               key={s.key}
               block
-              label={s.name}
-              subtitle={fixed ? `Part of ${pkg?.animal.en ?? 'the package'}` : on ? detail[s.key] : 'Not in this offer'}
+              label={pick(lang, s.name)}
+              subtitle={
+                fixed
+                  ? animal
+                    ? t(`Teil von ${animal}`, `Part of ${animal}`)
+                    : t('Teil des Pakets', 'Part of the package')
+                  : on
+                    ? detail[s.key]
+                    : t('Nicht in diesem Angebot', 'Not in this offer')
+              }
               icon={<Chip tint={s.tint} icon={s.icon} big />}
               className={`${ui.inc} ${two} ${on ? '' : ui.incOff}`}
               openClassName={ui.incOpen}
@@ -854,13 +940,13 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
               <span className={ui.incMain}>
                 <Chip tint={s.tint} icon={s.icon} big />
                 <span className={ui.incText}>
-                  <span className={ui.incName}>{s.name}</span>
+                  <span className={ui.incName}>{pick(lang, s.name)}</span>
                   <span className={ui.incDetail}>{detail[s.key]}</span>
                   {s.key === 'programme' && activities.length ? <ActivityChips ids={activities} /> : null}
                 </span>
               </span>
-              {s.key === 'programme' && !activities.length ? <span className={ui.incOffTag}>Choose</span> : amountCell(p, on)}
-              {escortCol ? amountCell(e, on) : null}
+              {s.key === 'programme' && !activities.length ? <span className={ui.incOffTag}>{t('Wählen', 'Choose')}</span> : amountCell(t, p, on)}
+              {escortCol ? amountCell(t, e, on) : null}
             </ClickPanel>
           );
         })}
@@ -886,6 +972,7 @@ function ActivityChips({ ids }: { ids: string[] }) {
 
 /** The sixteen activities by category, to choose from; `taken` ones are already in the package. */
 function ActivityPicker({ chosen, taken = [], onToggle, note }: { chosen: string[]; taken?: string[]; onToggle: (id: string) => void; note: ReactNode }) {
+  const { t, lang } = useWsLang();
   const on = new Set(chosen);
   const off = new Set(taken);
   return (
@@ -893,7 +980,7 @@ function ActivityPicker({ chosen, taken = [], onToggle, note }: { chosen: string
       <div className={ui.fieldNote}>{note}</div>
       {(['city', 'culture', 'science', 'sport', 'daytrip'] as const).map((cat) => (
         <div key={cat} className={ui.actGroup}>
-          <span>{CATEGORY_LABEL[cat]}</span>
+          <span>{pick(lang, CATEGORY_LABEL[cat])}</span>
           <div className={ui.acts}>
             {GRUPPEN_ACTIVITIES.filter((a) => a.category === cat).map((a) => {
               const isOn = on.has(a.id) || off.has(a.id);
@@ -903,11 +990,11 @@ function ActivityPicker({ chosen, taken = [], onToggle, note }: { chosen: string
                   type="button"
                   aria-pressed={isOn}
                   disabled={off.has(a.id)}
-                  title={off.has(a.id) ? 'In the package already' : undefined}
+                  title={off.has(a.id) ? t('Schon im Paket', 'In the package already') : undefined}
                   className={`${ui.act} ${isOn ? `${ui.actOn} ${ui[`tint_${ACTIVITY_TINT[a.category]}`]}` : ''}`}
                   onClick={() => onToggle(a.id)}
                 >
-                  {a.name} <small>{off.has(a.id) ? 'included' : eur(a.price)}</small>
+                  {a.name} <small>{off.has(a.id) ? t('enthalten', 'included') : eur(a.price)}</small>
                 </button>
               );
             })}
@@ -937,15 +1024,17 @@ function ServiceBody({
   participantLine: OfferLine | null;
   escortLine: OfferLine | null;
 }) {
+  const { t } = useWsLang();
   const c = draft.stay.choices;
   const weeks = pricedWeeks(draft);
+  const perEscort = t('Preis pro Begleitperson', 'Price per escort');
   if (service.key === 'programme') {
     if (fixed) {
       return (
         <>
           <ActivityChips ids={activitiesOf(c)} />
-          <div className={ui.fieldNote}>More afternoons go under Extras, on top of the package.</div>
-          {escortLine ? <MoneyField label="Price per escort" line={escortLine} update={update} /> : null}
+          <div className={ui.fieldNote}>{t('Weitere Nachmittage kommen unter Extras, zusätzlich zum Paket.', 'More afternoons go under Extras, on top of the package.')}</div>
+          {escortLine ? <MoneyField label={perEscort} line={escortLine} update={update} /> : null}
         </>
       );
     }
@@ -955,9 +1044,12 @@ function ServiceBody({
         <ActivityPicker
           chosen={chosen}
           onToggle={(id) => update((d) => setChoices(d, { activities: toggleIn(d.stay.choices.activities, id) }))}
-          note={`${chosen.length} chosen · up to ${activityAllowance(weeks)} for ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}
+          note={t(
+            `${chosen.length} gewählt · bis zu ${activityAllowance(weeks)} für ${weeks} ${weeksWord(t, weeks)}`,
+            `${chosen.length} chosen · up to ${activityAllowance(weeks)} for ${weeks} ${weeksWord(t, weeks)}`
+          )}
         />
-        {escortLine ? <MoneyField label="Price per escort" line={escortLine} update={update} /> : null}
+        {escortLine ? <MoneyField label={perEscort} line={escortLine} update={update} /> : null}
       </>
     );
   }
@@ -967,7 +1059,7 @@ function ServiceBody({
     <>
       {!fixed ? (
         <div className={ui.fld}>
-          <span>In this offer</span>
+          <span>{t('In diesem Angebot', 'In this offer')}</span>
           <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
             {[true, false].map((v) => (
               <button
@@ -977,22 +1069,29 @@ function ServiceBody({
                 className={`${ui.choiceCard} ${on === v ? ui.choiceOn : ''}`}
                 onClick={() => update((d) => setChoices(d, { modules: { ...d.stay.choices.modules, [key]: v } }))}
               >
-                <b>{v ? 'Included' : 'Not included'}</b>
-                <span>{v ? 'Priced for the stay' : key === 'course' ? 'A stay without lessons' : 'The group arranges it'}</span>
+                <b>{v ? t('Enthalten', 'Included') : t('Nicht enthalten', 'Not included')}</b>
+                <span>
+                  {v
+                    ? t('Für den Aufenthalt berechnet', 'Priced for the stay')
+                    : key === 'course'
+                      ? t('Ein Aufenthalt ohne Unterricht', 'A stay without lessons')
+                      : t('Die Gruppe organisiert das selbst', 'The group arranges it')}
+                </span>
               </button>
             ))}
           </div>
         </div>
       ) : (
-        <div className={ui.fieldNote}>Included in the package price.</div>
+        <div className={ui.fieldNote}>{t('Im Paketpreis enthalten.', 'Included in the package price.')}</div>
       )}
-      {participantLine && on ? <MoneyField label="Price per participant" line={participantLine} update={update} /> : null}
-      {escortLine && on ? <MoneyField label="Price per escort" line={escortLine} update={update} /> : null}
+      {participantLine && on ? <MoneyField label={t('Preis pro Person', 'Price per participant')} line={participantLine} update={update} /> : null}
+      {escortLine && on ? <MoneyField label={perEscort} line={escortLine} update={update} /> : null}
     </>
   );
 }
 
 function MoneyField({ label, line, update }: { label: string; line: OfferLine; update: Update }) {
+  const { t } = useWsLang();
   const changed = line.listUnitAmount != null && line.unitAmount !== line.listUnitAmount;
   return (
     <div className={ui.fld}>
@@ -1002,10 +1101,14 @@ function MoneyField({ label, line, update }: { label: string; line: OfferLine; u
           <NumberInput ariaLabel={`${label}: ${line.description}`} className={ui.fi} value={line.unitAmount} placeholder="0" onCommit={(v) => update((d) => setLinePrice(d, line, v))} />
         </span>
         <span className={ui.fieldNote}>
-          {line.listUnitAmount == null ? 'No list price' : changed ? `List price ${eur(line.listUnitAmount)}` : 'The list price'}
+          {line.listUnitAmount == null
+            ? t('Kein Listenpreis', 'No list price')
+            : changed
+              ? t(`Listenpreis ${eur(line.listUnitAmount)}`, `List price ${eur(line.listUnitAmount)}`)
+              : t('Der Listenpreis', 'The list price')}
           {changed ? (
             <button type="button" className={ui.link} onClick={() => update((d) => resetLine(d, line))}>
-              Use it
+              {t('Übernehmen', 'Use it')}
             </button>
           ) : null}
         </span>
@@ -1036,6 +1139,7 @@ function Extras({
   priceList: PriceListItem[];
   chargeTypes: EditorOptions['chargeTypes'];
 }) {
+  const { t } = useWsLang();
   const group = draft.kind === 'group';
   const c = draft.stay.choices;
   const escortCol = group && draft.escorts > 0;
@@ -1047,8 +1151,15 @@ function Extras({
   const afternoons = group && c.package !== 'esel';
   const own = group && c.package === 'own';
 
-  const title = !group ? (c.course ? 'Also on the offer' : 'On the offer') : own ? 'On the offer' : 'Extras';
-  const sub = !group ? 'From the price list, or typed — a transfer, a reduction' : own ? 'Everything this offer is made of' : `On top of ${c.package === 'esel' ? 'the blocks' : 'the package'}`;
+  const onOffer = t('Auf dem Angebot', 'On the offer');
+  const title = !group ? (c.course ? t('Außerdem auf dem Angebot', 'Also on the offer') : onOffer) : own ? onOffer : t('Extras', 'Extras');
+  const sub = !group
+    ? t('Aus der Preisliste oder selbst eingegeben – ein Transfer, eine Ermäßigung', 'From the price list, or typed — a transfer, a reduction')
+    : own
+      ? t('Alles, woraus dieses Angebot besteht', 'Everything this offer is made of')
+      : c.package === 'esel'
+        ? t('Zusätzlich zu den Bausteinen', 'On top of the blocks')
+        : t('Zusätzlich zum Paket', 'On top of the package');
   const nothing = !extras.length && !share && !typed.length && !afternoons;
 
   return (
@@ -1066,7 +1177,7 @@ function Extras({
           <ClickPanel
             block
             wide
-            label="More afternoons"
+            label={t('Weitere Nachmittage', 'More afternoons')}
             icon={<Chip tint="sun" icon={ICONS.star} big />}
             className={`${ui.inc} ${two}`}
             openClassName={ui.incOpen}
@@ -1079,9 +1190,13 @@ function Extras({
                     chosen={extras}
                     taken={activitiesOf(c)}
                     onToggle={(id) => update((d) => setChoices(d, { extras: toggleIn(extrasOf(d.stay.choices), id) }))}
-                    note={extras.length ? `${extras.length} chosen, priced per person` : 'Priced per person, as on the groups page'}
+                    note={
+                      extras.length
+                        ? t(`${extras.length} gewählt, pro Person berechnet`, `${extras.length} chosen, priced per person`)
+                        : t('Pro Person berechnet, wie auf der Gruppenseite', 'Priced per person, as on the groups page')
+                    }
                   />
-                  {extraLine ? <MoneyField label="Price per escort" line={extraLine} update={update} /> : null}
+                  {extraLine ? <MoneyField label={t('Preis pro Begleitperson', 'Price per escort')} line={extraLine} update={update} /> : null}
                 </>
               );
             }}
@@ -1089,13 +1204,17 @@ function Extras({
             <span className={ui.incMain}>
               <Chip tint="sun" icon={ICONS.star} big />
               <span className={ui.incText}>
-                <span className={ui.incName}>More afternoons</span>
-                <span className={ui.incDetail}>{extras.length ? `${extras.length} on top` : 'An excursion, a day trip, a visit the package does not have'}</span>
+                <span className={ui.incName}>{t('Weitere Nachmittage', 'More afternoons')}</span>
+                <span className={ui.incDetail}>
+                  {extras.length
+                    ? t(`${extras.length} zusätzlich`, `${extras.length} on top`)
+                    : t('Ein Ausflug, ein Tagesausflug, ein Besuch, den das Paket nicht hat', 'An excursion, a day trip, a visit the package does not have')}
+                </span>
                 {extras.length ? <ActivityChips ids={extras} /> : null}
               </span>
             </span>
-            {extras.length ? amountCell(find('extras')) : <span className={ui.incOffTag}>Add</span>}
-            {escortCol ? (extras.length ? amountCell(find('extras', 'escort')) : <span className={ui.incNone}>—</span>) : null}
+            {extras.length ? amountCell(t, find('extras')) : <span className={ui.incOffTag}>{t('Hinzufügen', 'Add')}</span>}
+            {escortCol ? (extras.length ? amountCell(t, find('extras', 'escort')) : <span className={ui.incNone}>—</span>) : null}
           </ClickPanel>
         ) : null}
 
@@ -1106,29 +1225,32 @@ function Extras({
         {share ? (
           <ClickPanel
             block
-            label="Share of the escorts"
-            subtitle={`Their costs over ${draft.participants} participants, rounded up`}
+            label={t('Anteil der Begleitpersonen', 'Share of the escorts')}
+            subtitle={t(`Ihre Kosten auf ${draft.participants} Teilnehmende verteilt, aufgerundet`, `Their costs over ${draft.participants} participants, rounded up`)}
             icon={<Chip tint="ink" icon={ICONS.share} big />}
             className={`${ui.inc} ${two}`}
             openClassName={ui.incOpen}
             disabled={!editable}
-            body={() => <MoneyField label="Per participant" line={share} update={update} />}
+            body={() => <MoneyField label={t('Pro Person', 'Per participant')} line={share} update={update} />}
           >
             <span className={ui.incMain}>
               <Chip tint="ink" icon={ICONS.share} big />
               <span className={ui.incText}>
-                <span className={ui.incName}>Share of the escorts</span>
+                <span className={ui.incName}>{t('Anteil der Begleitpersonen', 'Share of the escorts')}</span>
                 <span className={ui.incDetail}>
-                  {draft.escorts} {draft.escorts === 1 ? 'escort' : 'escorts'} over {draft.participants} participants
+                  {t(
+                    `${draft.escorts} ${escortsWord(t, draft.escorts)} auf ${draft.participants} Teilnehmende`,
+                    `${draft.escorts} ${escortsWord(t, draft.escorts)} over ${draft.participants} participants`
+                  )}
                 </span>
               </span>
             </span>
-            {amountCell(share)}
+            {amountCell(t, share)}
             {escortCol ? <span className={ui.incNone}>—</span> : null}
           </ClickPanel>
         ) : null}
 
-        {nothing ? <div className={ui.empty}>{own ? 'Nothing on this offer yet' : 'No lines yet'}</div> : null}
+        {nothing ? <div className={ui.empty}>{own ? t('Noch nichts auf diesem Angebot', 'Nothing on this offer yet') : t('Noch keine Zeilen', 'No lines yet')}</div> : null}
       </div>
       {editable ? (
         <div className={ui.cardFoot}>
@@ -1154,6 +1276,7 @@ function TypedRow({
   escortCol: boolean;
   chargeTypes: EditorOptions['chargeTypes'];
 }) {
+  const { t, lang } = useWsLang();
   const credit = isCredit(line.chargeType);
   const setPrice = (v: number | null) => update((d) => setLinePrice(d, line, v == null ? null : credit ? -Math.abs(v) : v));
   const shown = line.unitAmount == null ? null : credit ? Math.abs(line.unitAmount) : line.unitAmount;
@@ -1162,7 +1285,7 @@ function TypedRow({
   return (
     <ClickPanel
       block
-      label={line.description || 'New line'}
+      label={line.description || t('Neue Zeile', 'New line')}
       icon={<Chip tint={tint} icon={icon} big />}
       className={`${ui.inc} ${two}`}
       openClassName={ui.incOpen}
@@ -1170,45 +1293,45 @@ function TypedRow({
       body={() => (
         <>
           <div className={ui.fld}>
-            <label htmlFor={`t-${line.key}`}>Text on the offer</label>
+            <label htmlFor={`t-${line.key}`}>{t('Text auf dem Angebot', 'Text on the offer')}</label>
             <input id={`t-${line.key}`} className={ui.fi} value={line.description} autoFocus={!line.description} onChange={(e) => update((d) => setLineText(d, line, e.target.value))} />
           </div>
           <div className={ui.row2}>
             <div className={ui.fld}>
-              <label htmlFor={`q-${line.key}`}>Quantity</label>
+              <label htmlFor={`q-${line.key}`}>{t('Menge', 'Quantity')}</label>
               <NumberInput id={`q-${line.key}`} className={ui.fi} value={line.quantity} onCommit={(q) => update((d) => setLineQuantity(d, line.key, q ?? 1))} />
             </div>
             <div className={ui.fld}>
-              <label htmlFor={`p-${line.key}`}>{credit ? 'Taken off, per person' : 'Price'}</label>
+              <label htmlFor={`p-${line.key}`}>{credit ? t('Abzug pro Person', 'Taken off, per person') : t('Preis', 'Price')}</label>
               <span className={ui.money}>
                 <NumberInput id={`p-${line.key}`} className={ui.fi} value={shown} placeholder="0" onCommit={setPrice} />
               </span>
             </div>
           </div>
           <div className={ui.fld}>
-            <label htmlFor={`k-${line.key}`}>Kind of cost</label>
+            <label htmlFor={`k-${line.key}`}>{t('Kostenart', 'Kind of cost')}</label>
             <select
               id={`k-${line.key}`}
               className={ui.fi}
               value={line.chargeType}
               onChange={(e) => update((d) => ({ ...d, stay: { ...d.stay, manual: d.stay.manual.map((m) => (m.key === line.key ? { ...m, chargeType: e.target.value } : m)) } }))}
             >
-              {chargeTypes.map((t) => (
-                <option key={t.code} value={t.code}>
-                  {t.en}
+              {chargeTypes.map((type) => (
+                <option key={type.code} value={type.code}>
+                  {type[lang]}
                 </option>
               ))}
             </select>
           </div>
           {escortCol ? (
             <div className={ui.fld}>
-              <span>Paid by</span>
+              <span>{t('Bezahlt von', 'Paid by')}</span>
               <Seg<Audience>
-                label="Paid by"
+                label={t('Bezahlt von', 'Paid by')}
                 value={line.audience}
                 options={[
-                  ['participant', 'Participants'],
-                  ['escort', 'Escorts'],
+                  ['participant', t('Teilnehmende', 'Participants')],
+                  ['escort', t('Begleitpersonen', 'Escorts')],
                 ]}
                 onChange={(v) => update((d) => moveLineTo(d, line.key, v))}
               />
@@ -1226,26 +1349,33 @@ function TypedRow({
             close();
           }}
         >
-          Remove the line
+          {t('Zeile entfernen', 'Remove the line')}
         </button>
       )}
     >
       <span className={ui.incMain}>
         <Chip tint={tint} icon={icon} big />
         <span className={ui.incText}>
-          <span className={ui.incName}>{line.description || <span className={ui.placeholder}>New line</span>}</span>
+          <span className={ui.incName}>{line.description || <span className={ui.placeholder}>{t('Neue Zeile', 'New line')}</span>}</span>
           <span className={ui.incDetail}>
-            {line.quantity !== 1 ? `${line.quantity} × ${eur(shown)}` : credit ? 'Reduction' : line.unitAmount == null ? 'Type the price' : 'Own line'}
+            {line.quantity !== 1
+              ? `${line.quantity} × ${eur(shown)}`
+              : credit
+                ? t('Ermäßigung', 'Reduction')
+                : line.unitAmount == null
+                  ? t('Preis eingeben', 'Type the price')
+                  : t('Eigene Zeile', 'Own line')}
           </span>
         </span>
       </span>
-      {line.audience === 'participant' ? amountCell(line) : <span className={ui.incNone}>—</span>}
-      {escortCol ? line.audience === 'escort' ? amountCell(line) : <span className={ui.incNone}>—</span> : null}
+      {line.audience === 'participant' ? amountCell(t, line) : <span className={ui.incNone}>—</span>}
+      {escortCol ? line.audience === 'escort' ? amountCell(t, line) : <span className={ui.incNone}>—</span> : null}
     </ClickPanel>
   );
 }
 
 function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; update: Update; group: boolean }) {
+  const { t, lang } = useWsLang();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -1268,16 +1398,16 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
   return (
     <div ref={wrap} className={ui.menuWrap}>
       <button type="button" className={ui.add} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        + Add {group ? 'an extra' : 'a line'}
+        {group ? t('+ Extra hinzufügen', '+ Add an extra') : t('+ Zeile hinzufügen', '+ Add a line')}
       </button>
       {open ? (
         <div className={ui.menu} role="menu" style={{ left: 0, right: 'auto', top: 'auto', bottom: 'calc(100% + 6px)', width: 330 }}>
           {group ? (
             <>
-              <div className={ui.menuHead}>Often asked for</div>
+              <div className={ui.menuHead}>{t('Oft gefragt', 'Often asked for')}</div>
               {GROUP_EXTRAS.map((p) => (
-                <button key={p.label} type="button" role="menuitem" className={ui.menuItem} onClick={() => addPreset(p)}>
-                  {p.label}
+                <button key={p.label.en} type="button" role="menuitem" className={ui.menuItem} onClick={() => addPreset(p)}>
+                  {pick(lang, p.label)}
                 </button>
               ))}
               <div className={ui.menuRule} />
@@ -1285,7 +1415,7 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
           ) : null}
           <div style={{ padding: '4px 4px 6px' }}>
             <select
-              aria-label="From the price list"
+              aria-label={t('Aus der Preisliste', 'From the price list')}
               className={ui.fi}
               value=""
               onChange={(e) => {
@@ -1295,7 +1425,7 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
                 setOpen(false);
               }}
             >
-              <option value="">From the price list …</option>
+              <option value="">{t('Aus der Preisliste …', 'From the price list …')}</option>
               {Object.entries(byGroup).map(([name, items]) => (
                 <optgroup key={name} label={name}>
                   {items.map((item) => (
@@ -1309,7 +1439,7 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
             </select>
           </div>
           <button type="button" role="menuitem" className={ui.menuItem} onClick={() => addPreset(REDUCTION)}>
-            A reduction
+            {t('Eine Ermäßigung', 'A reduction')}
           </button>
           <button
             type="button"
@@ -1320,7 +1450,7 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
               setOpen(false);
             }}
           >
-            A line of your own
+            {t('Eine eigene Zeile', 'A line of your own')}
           </button>
         </div>
       ) : null}
@@ -1331,41 +1461,44 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
 // ---------------------------------------------------------------- aside
 
 function PriceCard({ draft, totals }: { draft: OfferDraft; totals: OfferTotals }) {
+  const { t } = useWsLang();
   const pricing = draft.stay.choices.escortPricing;
   if (draft.kind !== 'group') {
     return (
-      <section className={ui.price} aria-label="Price">
-        <div className={ui.priceKey}>Total</div>
+      <section className={ui.price} aria-label={t('Preis', 'Price')}>
+        <div className={ui.priceKey}>{t('Gesamt', 'Total')}</div>
         <div className={ui.priceBig}>{eur(totals.perParticipant)}</div>
       </section>
     );
   }
   return (
-    <section className={ui.price} aria-label="Price">
-      <div className={ui.priceKey}>Per participant</div>
+    <section className={ui.price} aria-label={t('Preis', 'Price')}>
+      <div className={ui.priceKey}>{t('Pro Person', 'Per participant')}</div>
       <div className={ui.priceBig}>{eur(totals.perParticipant)}</div>
-      {totals.escortShare != null ? <div className={ui.priceSub}>incl. {eur(totals.escortShare)} for the escorts</div> : null}
+      {totals.escortShare != null ? (
+        <div className={ui.priceSub}>{t(`inkl. ${eur(totals.escortShare)} für die Begleitpersonen`, `incl. ${eur(totals.escortShare)} for the escorts`)}</div>
+      ) : null}
       <div className={ui.priceRows}>
         <div className={ui.priceRow}>
           <span>
-            Per escort
+            {t('Pro Begleitperson', 'Per escort')}
             <small>
               {draft.escorts === 0
-                ? 'No escorts'
+                ? t('Keine Begleitpersonen', 'No escorts')
                 : pricing === 'free'
-                  ? `Free · CASA carries ${eur(totals.carriedByCasa)}`
+                  ? t(`Kostenfrei · CASA trägt ${eur(totals.carriedByCasa)}`, `Free · CASA carries ${eur(totals.carriedByCasa)}`)
                   : pricing === 'shared'
-                    ? 'Shared by the group'
-                    : `${draft.escorts} ${draft.escorts === 1 ? 'escort' : 'escorts'}`}
+                    ? t('Trägt die Gruppe', 'Shared by the group')
+                    : `${draft.escorts} ${escortsWord(t, draft.escorts)}`}
             </small>
           </span>
           <b>{draft.escorts === 0 ? '—' : eur(totals.perEscort)}</b>
         </div>
         <div className={ui.priceRow}>
           <span>
-            The group
+            {t('Die Gruppe', 'The group')}
             <small>
-              {draft.participants ? `${draft.participants} × ${eur(totals.perParticipant)}` : 'Participants missing'}
+              {draft.participants ? `${draft.participants} × ${eur(totals.perParticipant)}` : t('Teilnehmende fehlen', 'Participants missing')}
               {pricing === 'paid' && draft.escorts && totals.perEscort != null ? ` + ${draft.escorts} × ${eur(totals.perEscort)}` : ''}
             </small>
           </span>
@@ -1377,22 +1510,23 @@ function PriceCard({ draft, totals }: { draft: OfferDraft; totals: OfferTotals }
 }
 
 function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
+  const { t, lang } = useWsLang();
   const problems = checks.filter((c) => c.level === 'problem');
   const hints = checks.filter((c) => c.level === 'hint');
   return (
-    <section className={ui.card} aria-label="Checks">
+    <section className={ui.card} aria-label={t('Prüfpunkte', 'Checks')}>
       {problems.length ? (
         <div className={`${ui.cardHead} ${ui.cardHeadWarn}`}>
           <h2>
             <span className={`${ui.checkMark} ${ui.tint_sun}`}>!</span>
-            Before it can go
+            {t('Bevor es rausgehen kann', 'Before it can go')}
           </h2>
           <span className={ui.count}>{problems.length}</span>
         </div>
       ) : (
         <div className={`${ui.checksOk} ${hints.length ? ui.checksOkRule : ''}`}>
           <span className={`${ui.checkMark} ${ui.tint_green}`}>✓</span>
-          Ready to send
+          {t('Bereit zum Senden', 'Ready to send')}
         </div>
       )}
       {problems.length || hints.length ? (
@@ -1402,7 +1536,7 @@ function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
             const body = (
               <>
                 <i className={c.level === 'problem' ? ui.dotProblem : ui.dotHint} />
-                <span>{c.message}</span>
+                <span>{pick(lang, c.message)}</span>
                 {fix ? <span className={ui.checkGo}>→</span> : null}
               </>
             );
@@ -1433,18 +1567,23 @@ function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
 }
 
 function History({ record }: { record: OfferRecord }) {
+  const { t, lang } = useWsLang();
   const { meta } = record;
+  const statusWord = (status: OfferRecord['meta']['status']) => {
+    const word = pick(lang, OFFER_STATUS_LABELS[status]);
+    return lang === 'en' ? word.toLowerCase() : word;
+  };
   return (
-    <section className={ui.card} aria-label="History">
+    <section className={ui.card} aria-label={t('Verlauf', 'History')}>
       <div className={ui.cardHead}>
-        <h2>History</h2>
+        <h2>{t('Verlauf', 'History')}</h2>
       </div>
       <div className={ui.timeline}>
         {meta.decidedAt ? (
           <div className={`${ui.event} ${meta.status === 'accepted' ? ui.eventGood : ''}`}>
             <i />
             <div>
-              <b>{OFFER_STATUS_LABELS[meta.status]}</b>
+              <b>{pick(lang, OFFER_STATUS_LABELS[meta.status])}</b>
               <span>
                 {day(meta.decidedAt)}
                 {meta.decidedByName ? ` · ${meta.decidedByName}` : ''}
@@ -1457,7 +1596,7 @@ function History({ record }: { record: OfferRecord }) {
           <div key={l.id} className={`${ui.event} ${ui.eventOn}`}>
             <i />
             <div>
-              <Link href={`/admin/offers/${meta.id}/letter?version=${l.version}`}>Version {l.version} sent</Link>
+              <Link href={`/admin/offers/${meta.id}/letter?version=${l.version}`}>{t(`Fassung ${l.version} gesendet`, `Version ${l.version} sent`)}</Link>
               <span>
                 {day(l.sentAt)}
                 {l.sentByName ? ` · ${l.sentByName}` : ''}
@@ -1468,24 +1607,24 @@ function History({ record }: { record: OfferRecord }) {
         <div className={ui.event}>
           <i />
           <div>
-            <b>Created</b>
+            <b>{t('Angelegt', 'Created')}</b>
             <span>
               {day(meta.createdAt)}
               {meta.createdByName ? ` · ${meta.createdByName}` : ''}
             </span>
             {meta.enquiryId ? (
               <span>
-                From <Link href={`/admin/enquiries/${meta.enquiryId}`}>an enquiry</Link>
+                {t('Aus', 'From')} <Link href={`/admin/enquiries/${meta.enquiryId}`}>{t('einer Anfrage', 'an enquiry')}</Link>
               </span>
             ) : null}
             {meta.personId ? (
               <span>
-                For <Link href={`/admin/people/${meta.personId}`}>a learner</Link>
+                {t('Für', 'For')} <Link href={`/admin/people/${meta.personId}`}>{t('eine lernende Person', 'a learner')}</Link>
               </span>
             ) : null}
             {meta.copiedFrom ? (
               <span>
-                Repeats <Link href={`/admin/offers/${meta.copiedFrom}`}>an earlier offer</Link>
+                {t('Wiederholt', 'Repeats')} <Link href={`/admin/offers/${meta.copiedFrom}`}>{t('ein früheres Angebot', 'an earlier offer')}</Link>
               </span>
             ) : null}
           </div>
@@ -1494,10 +1633,10 @@ function History({ record }: { record: OfferRecord }) {
           <div className={ui.event}>
             <i />
             <div>
-              <b>Earlier offers to {record.draft.recipientName}</b>
+              <b>{t(`Frühere Angebote an ${record.draft.recipientName}`, `Earlier offers to ${record.draft.recipientName}`)}</b>
               {record.related.map((r) => (
                 <span key={r.id}>
-                  <Link href={`/admin/offers/${r.id}`}>{r.number}</Link> · {OFFER_STATUS_LABELS[r.status].toLowerCase()}
+                  <Link href={`/admin/offers/${r.id}`}>{r.number}</Link> · {statusWord(r.status)}
                   {r.perParticipant != null ? ` · ${eur(r.perParticipant)}` : ''}
                 </span>
               ))}

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { getI18n } from '@/lib/admin/i18n.server';
 import { pageCount, PAGE_SIZE } from '@/lib/admin/paging';
 
 /**
@@ -13,7 +14,7 @@ import { pageCount, PAGE_SIZE } from '@/lib/admin/paging';
  * Renders nothing when everything fits on one page, rather than a disabled
  * control, so a clear queue does not end in dead furniture.
  */
-export function Pagination({
+export async function Pagination({
   basePath,
   page,
   total,
@@ -26,6 +27,7 @@ export function Pagination({
   params: Record<string, string | string[] | undefined>;
 }) {
   const pages = pageCount(total);
+  const { t } = await getI18n();
 
   if (pages <= 1) {
     return null;
@@ -50,11 +52,11 @@ export function Pagination({
 
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={t('Seiten', 'Pagination')}
       className="mt-4 flex items-center justify-between gap-4 text-xs"
     >
       <p className="font-semibold text-[var(--casa-text-subtle)] tabular-nums">
-        {first}–{last} of {total}
+        {t(`${first}–${last} von ${total}`, `${first}–${last} of ${total}`)}
       </p>
 
       <div className="flex gap-2">
@@ -63,7 +65,7 @@ export function Pagination({
             href={hrefFor(page - 1)}
             className="inline-flex h-8 items-center rounded-lg border border-ws-line-firm bg-white px-3 font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
           >
-            Previous
+            {t('Zurück', 'Previous')}
           </Link>
         ) : null}
         {page < pages ? (
@@ -71,7 +73,7 @@ export function Pagination({
             href={hrefFor(page + 1)}
             className="inline-flex h-8 items-center rounded-lg border border-ws-line-firm bg-white px-3 font-semibold text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]"
           >
-            Next
+            {t('Weiter', 'Next')}
           </Link>
         ) : null}
       </div>

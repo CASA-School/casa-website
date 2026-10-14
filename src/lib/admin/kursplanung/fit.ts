@@ -1,4 +1,6 @@
-import { SHIFT_INFO, type Absence, type Assignment, type CourseGroup, type Teacher } from './types';
+import type { Bilingual } from '../i18n';
+
+import { ABSENCE_LABELS, SHIFT_INFO, WEEKDAY_LABELS, type Absence, type Assignment, type CourseGroup, type Teacher } from './types';
 import { weekStartOf, weekdayOf, type PlanningWeek } from './weeks';
 
 /**
@@ -23,7 +25,7 @@ export type PlanContext = {
 
 export type Fit =
   | { ok: true; substitute: boolean; levelMatch: boolean }
-  | { ok: false; reason: string };
+  | { ok: false; reason: Bilingual };
 
 export const assignmentKey = (groupId: string, onDate: string) => `${groupId}|${onDate}`;
 
@@ -89,14 +91,14 @@ export function remainingDays(ctx: PlanContext, teacher: Teacher, weekStart: str
 
 export function fit(ctx: PlanContext, teacherId: string, group: CourseGroup, date: string): Fit {
   const teacher = teacherById(ctx, teacherId);
-  if (!teacher || !teacher.isActive) return { ok: false, reason: 'nicht im Kollegium' };
+  if (!teacher || !teacher.isActive) return { ok: false, reason: { de: 'nicht im Kollegium', en: 'not on the staff' } };
 
   const absence = absenceOn(ctx, teacherId, date);
-  if (absence) return { ok: false, reason: absence.reason };
+  if (absence) return { ok: false, reason: ABSENCE_LABELS[absence.reason] };
 
   const dow = weekdayOf(date);
-  if (!dow) return { ok: false, reason: 'Wochenende' };
-  if (!teacher.weekdays.includes(dow)) return { ok: false, reason: `nicht am ${dow}` };
+  if (!dow) return { ok: false, reason: { de: 'Wochenende', en: 'weekend' } };
+  if (!teacher.weekdays.includes(dow)) return { ok: false, reason: { de: `nicht am ${dow}`, en: `not on ${WEEKDAY_LABELS[dow].en}` } };
 
   const current = assignmentAt(ctx, group.id, date);
   const here = current?.teacherId === teacherId;
@@ -108,10 +110,10 @@ export function fit(ctx: PlanContext, teacherId: string, group: CourseGroup, dat
       a.groupId !== group.id &&
       ctx.groups.find((g) => g.id === a.groupId)?.shift === group.shift
   );
-  if (elsewhere) return { ok: false, reason: 'schon verplant' };
+  if (elsewhere) return { ok: false, reason: { de: 'schon verplant', en: 'already planned' } };
 
   if (!here && remainingDays(ctx, teacher, weekStartOf(date)).rest <= 0) {
-    return { ok: false, reason: 'Woche voll' };
+    return { ok: false, reason: { de: 'Woche voll', en: 'week full' } };
   }
 
   return {

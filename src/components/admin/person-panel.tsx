@@ -4,6 +4,8 @@ import { linkPersonAction, resolveFlagAction } from '@/app/(admin)/admin/(worksp
 import { Button, Card, DateText } from './ui';
 import { Icon } from './icons';
 import { FLAG_LABELS, type RecordFlag } from '@/lib/admin/flags';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import type { PersonSummary } from '@/lib/admin/people';
 
 /**
@@ -22,7 +24,7 @@ import type { PersonSummary } from '@/lib/admin/people';
  * question — linked, or cleared the flag as "no, different person" — the
  * panel stops asking.
  */
-export function PersonPanel({
+export async function PersonPanel({
   person,
   candidates,
   flags,
@@ -39,9 +41,15 @@ export function PersonPanel({
   const duplicateFlag = open.find((f) => f.code === 'duplicate_candidate');
   const otherFlags = open.filter((f) => f.code !== 'duplicate_candidate');
   const linked = person && person.canonicalId !== person.id;
+  const { t, lang } = await getI18n();
 
   return (
-    <Card title="Person" description={linked ? 'Linked to an existing person.' : undefined} icon={Icon.person} tint="green">
+    <Card
+      title={t('Person', 'Person')}
+      description={linked ? t('Mit einer bestehenden Person verknüpft.', 'Linked to an existing person.') : undefined}
+      icon={Icon.person}
+      tint="green"
+    >
       {person ? (
         <Link
           href={`/admin/people/${person.canonicalId}`}
@@ -50,10 +58,10 @@ export function PersonPanel({
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{person.displayName}</span>
             <span className="block text-xs text-[var(--casa-text-subtle)]">
-              {person.nationalityName ?? person.nationalityRaw ?? 'Nationality not given'}
+              {person.nationalityName ?? person.nationalityRaw ?? t('Nationalität nicht angegeben', 'Nationality not given')}
               {person.birthDate ? (
                 <>
-                  {' · born '}
+                  {t(' · geboren ', ' · born ')}
                   <DateText value={person.birthDate} />
                 </>
               ) : null}
@@ -71,7 +79,7 @@ export function PersonPanel({
       {duplicateFlag && person && candidates.length > 0 ? (
         <div className="mt-4 rounded-lg border border-[var(--casa-warning-text)]/30 bg-[var(--casa-warning-text)]/8 p-3">
           <p className="flex items-center gap-1.5 text-xs font-semibold text-[var(--casa-warning-text)]">
-            {Icon.flag} {FLAG_LABELS.duplicate_candidate}
+            {Icon.flag} {pick(lang, FLAG_LABELS.duplicate_candidate)}
           </p>
           <ul className="mt-3 space-y-2">
             {candidates.map((candidate) => (
@@ -82,8 +90,10 @@ export function PersonPanel({
                 >
                   <span className="block truncate">{candidate.displayName}</span>
                   <span className="block text-xs font-normal text-[var(--casa-text-subtle)]">
-                    {candidate.reason === 'email' ? 'Same email' : 'Same surname and date of birth'}
-                    {' · since '}
+                    {candidate.reason === 'email'
+                      ? t('Gleiche E-Mail', 'Same email')
+                      : t('Gleicher Nachname und gleiches Geburtsdatum', 'Same surname and date of birth')}
+                    {t(' · seit ', ' · since ')}
                     <DateText value={candidate.createdAt} compact />
                   </span>
                 </Link>
@@ -92,7 +102,7 @@ export function PersonPanel({
                   <input type="hidden" name="survivorId" value={candidate.id} />
                   <input type="hidden" name="returnTo" value={returnTo} />
                   <Button type="submit" variant="secondary" size="sm">
-                    Same person
+                    {t('Dieselbe Person', 'Same person')}
                   </Button>
                 </form>
               </li>
@@ -105,7 +115,7 @@ export function PersonPanel({
             <input type="hidden" name="flagId" value={duplicateFlag.id} />
             <input type="hidden" name="returnTo" value={returnTo} />
             <Button type="submit" variant="ghost" size="sm">
-              Not a duplicate
+              {t('Kein Duplikat', 'Not a duplicate')}
             </Button>
           </form>
         </div>
@@ -120,11 +130,11 @@ export function PersonPanel({
             >
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5 text-xs font-semibold">
-                  {Icon.flag} {FLAG_LABELS[flag.code]}
+                  {Icon.flag} {pick(lang, FLAG_LABELS[flag.code])}
                 </span>
                 {typeof flag.detail?.raw === 'string' ? (
                   <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                    “{flag.detail.raw}”
+                    {t(`„${flag.detail.raw}“`, `“${flag.detail.raw}”`)}
                   </span>
                 ) : null}
               </span>
@@ -135,9 +145,9 @@ export function PersonPanel({
                   type="submit"
                   variant="ghost"
                   size="sm"
-                  aria-label={`Clear: ${FLAG_LABELS[flag.code]}`}
+                  aria-label={t(`Erledigt: ${pick(lang, FLAG_LABELS[flag.code])}`, `Clear: ${pick(lang, FLAG_LABELS[flag.code])}`)}
                 >
-                  Clear
+                  {t('Erledigt', 'Clear')}
                 </Button>
               </form>
             </li>

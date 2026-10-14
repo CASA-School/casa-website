@@ -1,4 +1,5 @@
 import type { StaffRole, StaffUser } from './auth';
+import type { Bilingual } from './i18n';
 
 /**
  * Modules, and how much of each a person may do.
@@ -43,32 +44,34 @@ export type WorkspaceModule = (typeof MODULES)[number];
 export const LEVELS = ['none', 'view', 'edit', 'full'] as const;
 export type AccessLevel = (typeof LEVELS)[number];
 
-export const LEVEL_LABELS: Record<AccessLevel, string> = {
-  none: 'No access',
-  view: 'View',
-  edit: 'Edit',
-  full: 'Full',
+/** Read with `pick(lang, LEVEL_LABELS[level])` (docs/ADMIN_I18N.md). */
+export const LEVEL_LABELS: Record<AccessLevel, Bilingual> = {
+  none: { de: 'Kein Zugriff', en: 'No access' },
+  view: { de: 'Ansehen', en: 'View' },
+  edit: { de: 'Bearbeiten', en: 'Edit' },
+  full: { de: 'Vollzugriff', en: 'Full' },
 };
 
 const RANK: Record<AccessLevel, number> = { none: 0, view: 1, edit: 2, full: 3 };
 
-export const MODULE_LABELS: Record<WorkspaceModule, string> = {
-  overview: 'Overview',
-  enquiries: 'Enquiries',
-  registrations: 'Registrations',
-  placement: 'Placement',
-  applications: 'Applications',
-  people: 'People',
-  bookings: 'Bookings',
-  offers: 'Offers',
-  rooms: 'Rooms',
-  prices: 'Prices',
-  catalogue: 'Courses & exams',
-  kursplanung: 'Kursplanung',
-  website: 'Website',
-  activity: 'Activity',
-  team: 'Team',
-  settings: 'Settings',
+/** Read with `pick(lang, MODULE_LABELS[module])`. */
+export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
+  overview: { de: 'Übersicht', en: 'Overview' },
+  enquiries: { de: 'Anfragen', en: 'Enquiries' },
+  registrations: { de: 'Anmeldungen', en: 'Registrations' },
+  placement: { de: 'Einstufungstests', en: 'Placement' },
+  applications: { de: 'Bewerbungen', en: 'Applications' },
+  people: { de: 'Teilnehmende', en: 'People' },
+  bookings: { de: 'Buchungen', en: 'Bookings' },
+  offers: { de: 'Angebote', en: 'Offers' },
+  rooms: { de: 'Räume', en: 'Rooms' },
+  prices: { de: 'Preise', en: 'Prices' },
+  catalogue: { de: 'Kurse & Prüfungen', en: 'Courses & exams' },
+  kursplanung: { de: 'Kursplanung', en: 'Kursplanung' },
+  website: { de: 'Website', en: 'Website' },
+  activity: { de: 'Aktivität', en: 'Activity' },
+  team: { de: 'Team', en: 'Team' },
+  settings: { de: 'Einstellungen', en: 'Settings' },
 };
 
 /** Modules that cannot be taken away: the frame the rest hangs on. */

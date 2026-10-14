@@ -1,4 +1,5 @@
 import { query } from './db';
+import type { Bilingual } from './i18n';
 
 /**
  * The school's own setup: the vocabularies. The price list has its own
@@ -14,7 +15,8 @@ import { query } from './db';
 
 export type VocabularySummary = {
   key: string;
-  label: string;
+  /** Read with `pick(lang, label)`. */
+  label: Bilingual;
   total: number;
   active: number;
   /** A few names, so the screen shows what the list contains without opening it. */
@@ -59,24 +61,24 @@ export async function vocabularySummaries(): Promise<VocabularySummary[]> {
      SELECT 'countries', count(*)::text, count(*)::text, ARRAY[]::text[] FROM countries`
   );
 
-  const LABELS: Record<string, string> = {
-    course_types: 'Course types',
-    exam_types: 'Exams',
-    levels: 'Levels',
-    day_times: 'Day sessions',
-    charge_types: 'Charge types',
-    accommodation_types: 'Accommodation types',
-    catering_options: 'Catering',
-    accommodation_room_types: 'Accommodation rooms',
-    materials: 'Books & material',
-    countries: 'Countries',
+  const LABELS: Record<string, Bilingual> = {
+    course_types: { de: 'Kursarten', en: 'Course types' },
+    exam_types: { de: 'Prüfungen', en: 'Exams' },
+    levels: { de: 'Niveaus', en: 'Levels' },
+    day_times: { de: 'Tageszeiten', en: 'Day sessions' },
+    charge_types: { de: 'Kostenarten', en: 'Charge types' },
+    accommodation_types: { de: 'Unterkunftsarten', en: 'Accommodation types' },
+    catering_options: { de: 'Verpflegung', en: 'Catering' },
+    accommodation_room_types: { de: 'Zimmerarten', en: 'Accommodation rooms' },
+    materials: { de: 'Bücher & Material', en: 'Books & material' },
+    countries: { de: 'Länder', en: 'Countries' },
   };
   const ORDER = Object.keys(LABELS);
 
   return rows
     .map((r) => ({
       key: r.key,
-      label: LABELS[r.key] ?? r.key,
+      label: LABELS[r.key] ?? { de: r.key, en: r.key },
       total: Number(r.total),
       active: Number(r.active),
       sample: r.sample ?? [],

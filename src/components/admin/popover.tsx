@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { useWsLang } from './lang';
+
 /**
  * A value that opens a small panel when clicked — the offers module's way of
  * changing one thing (docs/OFFERS.md §Design), for the rest of the workspace.
@@ -29,6 +31,7 @@ export function Popover({
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useWsLang();
   const [up, setUp] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
 
@@ -61,7 +64,7 @@ export function Popover({
       <button
         type="button"
         aria-expanded={open}
-        aria-label={`${label}: change`}
+        aria-label={t(`${label}: ändern`, `${label}: change`)}
         onClick={toggle}
         className={cn(
           'block w-full rounded-lg text-left transition-colors outline-none hover:bg-[#f6f9fc] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',

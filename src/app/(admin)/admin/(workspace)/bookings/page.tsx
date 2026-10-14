@@ -11,6 +11,8 @@ import {
 } from '@/lib/admin/bookings';
 import { toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
+import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
  * Bookings.
@@ -27,17 +29,17 @@ import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging'
  * column of its own.
  */
 
-const VIEWS: { key: BookingFilter; label: string }[] = [
-  { key: 'current', label: 'Current' },
-  { key: 'upcoming', label: 'Upcoming' },
-  { key: 'past', label: 'Past' },
-  { key: 'cancelled', label: 'Cancelled' },
-  { key: 'all', label: 'All' },
+const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
+  { key: 'current', label: { de: 'Laufend', en: 'Current' } },
+  { key: 'upcoming', label: { de: 'Kommend', en: 'Upcoming' } },
+  { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
+  { key: 'cancelled', label: { de: 'Storniert', en: 'Cancelled' } },
+  { key: 'all', label: { de: 'Alle', en: 'All' } },
 ];
 
 const STAGES = [
-  { key: 'reserved', label: 'Reserved' },
-  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'reserved', label: BOOKING_STATUS_LABELS.reserved },
+  { key: 'confirmed', label: BOOKING_STATUS_LABELS.confirmed },
 ] as const;
 
 const money = (n: number, currency: string) =>
@@ -45,21 +47,21 @@ const money = (n: number, currency: string) =>
     ? euros(n)
     : new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(n);
 
-function when(b: BookingListItem): string {
+function when(b: BookingListItem, lang: WsLang): string {
   const from = toDateInputValue(b.startDate);
   const to = toDateInputValue(b.endDate);
-  return from && to ? dayRange(from, to) : '';
+  return from && to ? dayRange(from, to, lang) : '';
 }
 
-function Balance({ b }: { b: BookingListItem }) {
+function Balance({ b, t }: { b: BookingListItem; t: T }) {
   if (b.charged === 0 && b.paid === 0) return null;
   const open = b.charged - b.paid;
-  if (Math.abs(open) < 0.005) return <span className="text-[0.8rem] text-[var(--casa-text-subtle)]">Paid</span>;
+  if (Math.abs(open) < 0.005) return <span className="text-[0.8rem] text-[var(--casa-text-subtle)]">{t('Bezahlt', 'Paid')}</span>;
   if (open > 0) return <span className="font-semibold text-[#9a5b00]">{money(open, b.currency)}</span>;
   return (
     <>
       <span className="font-semibold">{money(-open, b.currency)}</span>
-      <span className="ml-1 text-xs text-[var(--casa-text-subtle)]">credit</span>
+      <span className="ml-1 text-xs text-[var(--casa-text-subtle)]">{t('Guthaben', 'credit')}</span>
     </>
   );
 }
@@ -75,14 +77,17 @@ export default async function BookingsPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, counts] = await Promise.all([
+  const [{ items, total }, counts, { t, lang }] = await Promise.all([
     listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page) }),
     bookingCounts(),
+    getI18n(),
   ]);
 
   const grouped = filter === 'current' || filter === 'upcoming';
   const groups = grouped
-    ? STAGES.map((stage) => ({ ...stage, rows: items.filter((b) => b.status === stage.key) })).filter((g) => g.rows.length)
+    ? STAGES.map((stage) => ({ key: stage.key, label: pick(lang, stage.label), rows: items.filter((b) => b.status === stage.key) })).filter(
+        (g) => g.rows.length
+      )
     : [{ key: filter, label: '', rows: items }];
   // Where the view cannot group, the status stays as a column: a dot and the word.
   const showStatus = filter === 'past' || filter === 'all';
@@ -92,31 +97,31 @@ export default async function BookingsPage({
 
   return (
     <>
-      <PageHeader title="Bookings" />
+      <PageHeader title={t('Buchungen', 'Bookings')} />
 
       <Card bleed>
         <ListBar
-          tabs={VIEWS.map((v) => ({ key: v.key, label: v.label, href: href(v.key), count: counts[v.key] }))}
+          tabs={VIEWS.map((v) => ({ key: v.key, label: pick(lang, v.label), href: href(v.key), count: counts[v.key] }))}
           active={filter}
           search={{
             action: '/admin/bookings',
             value: search,
-            placeholder: 'Name or course',
+            placeholder: t('Name oder Kurs', 'Name or course'),
             keep: { filter: filter === 'current' ? undefined : filter },
           }}
         />
         {items.length === 0 ? (
-          <ListEmpty title={search ? 'Nothing found' : 'No bookings here'}>
-            {search ? `No booking matches “${search}”.` : null}
+          <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Hier gibt es keine Buchungen', 'No bookings here')}>
+            {search ? t(`Keine Buchung passt zu „${search}“.`, `No booking matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
           <Table
             head={[
-              'Booking',
-              { label: 'Dates', className: `w-[13.5rem] ${hide}` },
-              ...(showStatus ? [{ label: 'Status', className: `w-[9rem] ${hide}` }] : []),
-              { label: 'Total', align: 'right' as const, className: `w-[8rem] ${hide}` },
-              { label: 'Balance', align: 'right' as const, className: 'w-[8.5rem]' },
+              t('Buchung', 'Booking'),
+              { label: t('Zeitraum', 'Dates'), className: `w-[13.5rem] ${hide}` },
+              ...(showStatus ? [{ label: t('Status', 'Status'), className: `w-[9rem] ${hide}` }] : []),
+              { label: t('Gesamt', 'Total'), align: 'right' as const, className: `w-[8rem] ${hide}` },
+              { label: t('Offen', 'Balance'), align: 'right' as const, className: 'w-[8.5rem]' },
             ]}
           >
             {groups.map((group) => [
@@ -126,11 +131,11 @@ export default async function BookingsPage({
                   <Cell href={`/admin/bookings/${b.id}`} className="max-w-0">
                     <RecordName name={b.personName} about={b.courseTypeName ?? undefined} />
                   </Cell>
-                  <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b)}</Cell>
+                  <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b, lang)}</Cell>
                   {showStatus ? (
                     <Cell className={hide}>
                       <Status tone={b.status === 'completed' || b.status === 'cancelled' ? 'quiet' : BOOKING_STATUS_TONES[b.status]}>
-                        {BOOKING_STATUS_LABELS[b.status]}
+                        {pick(lang, BOOKING_STATUS_LABELS[b.status])}
                       </Status>
                     </Cell>
                   ) : null}
@@ -138,7 +143,7 @@ export default async function BookingsPage({
                     {b.charged !== 0 ? money(b.charged, b.currency) : null}
                   </Cell>
                   <Cell align="right" className="whitespace-nowrap tabular-nums">
-                    <Balance b={b} />
+                    <Balance b={b} t={t} />
                   </Cell>
                 </TableRow>
               )),

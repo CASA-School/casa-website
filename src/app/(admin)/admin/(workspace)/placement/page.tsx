@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 import { ListBar, ListEmpty, ListGroup, Owner, Status } from '@/components/admin/list';
 import { ButtonLink, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { pick, translator, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { firstParam } from '@/lib/admin/paging';
 import {
   listPlacementAttempts,
@@ -36,11 +38,11 @@ import { RELEASE_MODE } from '@/config/placement/policy';
  * column only when the rows differ in it. An attempt carries no name until a
  * teacher attaches a person to the decision, so the rows have nothing to name.
  */
-const FILTERS: readonly { key: PlacementFilter; label: string }[] = [
-  { key: 'needs_review', label: 'Awaiting a teacher' },
-  { key: 'confirmed', label: 'Confirmed' },
-  { key: 'in_progress', label: 'Still testing' },
-  { key: 'all', label: 'Everything' },
+const FILTERS: readonly { key: PlacementFilter; label: Bilingual }[] = [
+  { key: 'needs_review', label: { de: 'Wartet auf Lehrkraft', en: 'Awaiting a teacher' } },
+  { key: 'confirmed', label: { de: 'Bestätigt', en: 'Confirmed' } },
+  { key: 'in_progress', label: { de: 'Test läuft noch', en: 'Still testing' } },
+  { key: 'all', label: { de: 'Alle', en: 'Everything' } },
 ];
 
 /** The first view: enough to work from without a 2,000px page. */
@@ -50,17 +52,18 @@ const SHOW_ALL_LIMIT = 5000;
 
 const ZONE = 'Europe/Berlin';
 const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
-const timeOfDay = new Intl.DateTimeFormat('en-GB', { timeZone: ZONE, hour: '2-digit', minute: '2-digit' });
+const timeOfDay = (lang: WsLang) => new Intl.DateTimeFormat(wsLocale(lang), { timeZone: ZONE, hour: '2-digit', minute: '2-digit' });
 
-/** "Today", "Yesterday", or "Thu 8 Oct" (with the year when it is not this one). */
-function dayLabel(key: string, now: Date): string {
+/** "Today", "Yesterday", or "Thu 8 Oct" / "Do., 8. Okt." (with the year when it is not this one). */
+function dayLabel(key: string, now: Date, lang: WsLang): string {
+  const t = translator(lang);
   const today = dayKey.format(now);
   const yesterday = dayKey.format(new Date(now.getTime() - 86_400_000));
-  if (key === today) return 'Today';
-  if (key === yesterday) return 'Yesterday';
+  if (key === today) return t('Heute', 'Today');
+  if (key === yesterday) return t('Gestern', 'Yesterday');
   const [year, month, day] = key.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1, day, 12));
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString(wsLocale(lang), {
     timeZone: 'UTC',
     weekday: 'short',
     day: 'numeric',
@@ -69,12 +72,12 @@ function dayLabel(key: string, now: Date): string {
   });
 }
 
-const STAGE_LABELS: Record<string, string> = {
-  submitted: 'Submitted',
-  abandoned: 'Abandoned',
+const STAGE_LABELS: Record<string, Bilingual> = {
+  submitted: { de: 'Abgeschickt', en: 'Submitted' },
+  abandoned: { de: 'Abgebrochen', en: 'Abandoned' },
 };
 
-const language = (locale: string) => (locale === 'de' ? 'German' : 'English');
+const language = (locale: string, t: T) => (locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'));
 
 type Column = { label: string; align?: 'left' | 'right'; className?: string };
 
@@ -93,13 +96,14 @@ export default async function PlacementPage({
     : 'needs_review';
   const showAll = firstParam(params.show) === 'all';
 
-  const [{ items, total }, counts] = await Promise.all([
+  const [{ items, total }, counts, { t, lang }] = await Promise.all([
     listPlacementAttempts({
       filter,
       limit: showAll ? SHOW_ALL_LIMIT : FIRST_VIEW,
       offset: 0,
     }),
     placementCounts(),
+    getI18n(),
   ]);
 
   const now = new Date();
@@ -117,20 +121,24 @@ export default async function PlacementPage({
   // The same language on every row is noise; it is a column only when the rows differ.
   const languages = new Set(items.map((item) => item.locale)).size > 1;
 
+  const languageColumn = { label: t('Sprache', 'Language'), className: `${WIDE} w-[8rem]` };
   const columns: Column[] = testing
-    ? [{ label: 'Started' }, ...(languages ? [{ label: 'Language', className: `${WIDE} w-[8rem]` }] : [])]
+    ? [{ label: t('Begonnen', 'Started') }, ...(languages ? [languageColumn] : [])]
     : [
         // The level is short; the slack goes after the confidence, so a row reads left to right.
-        { label: 'Recommended', className: 'w-[9rem]' },
-        { label: 'Confidence', className: WIDE },
+        { label: t('Empfohlen', 'Recommended'), className: 'w-[9rem]' },
+        { label: t('Sicherheit', 'Confidence'), className: WIDE },
         ...(decided
           ? [
-              { label: filter === 'confirmed' ? 'Confirmed' : 'Decision', className: `${WIDE} w-[12rem]` },
-              { label: 'Teacher', className: `${WIDE} w-[5rem]` },
+              {
+                label: filter === 'confirmed' ? t('Bestätigt', 'Confirmed') : t('Entscheidung', 'Decision'),
+                className: `${WIDE} w-[12rem]`,
+              },
+              { label: t('Lehrkraft', 'Teacher'), className: `${WIDE} w-[5rem]` },
             ]
           : []),
-        ...(languages ? [{ label: 'Language', className: `${WIDE} w-[8rem]` }] : []),
-        { label: 'Submitted', className: 'w-[6.5rem]' },
+        ...(languages ? [languageColumn] : []),
+        { label: t('Abgeschickt', 'Submitted'), className: 'w-[6.5rem]' },
       ];
 
   const hrefFor = (key: PlacementFilter, all = false) => {
@@ -143,15 +151,23 @@ export default async function PlacementPage({
 
   return (
     <>
-      <PageHeader title="Placement" />
+      <PageHeader title={t('Einstufungstests', 'Placement')} />
 
       <p className="-mt-2 mb-4 flex items-start gap-2.5 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">
         <span aria-hidden="true" className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-[#d97706]" />
-        <span>
-          <span className="font-semibold text-[var(--casa-ink)]">Pilot test, {RELEASE_MODE} mode.</span> Items
-          unreviewed, cut scores provisional. A recommendation is evidence to weigh — never a pass, a fail or a
-          certificate.
-        </span>
+        {lang === 'de' ? (
+          <span>
+            <span className="font-semibold text-[var(--casa-ink)]">Pilottest im Modus „{RELEASE_MODE}“.</span> Aufgaben
+            ungeprüft, Grenzwerte vorläufig. Eine Empfehlung ist ein Hinweis zum Abwägen – nie ein „bestanden“, ein
+            „nicht bestanden“ oder ein Zertifikat.
+          </span>
+        ) : (
+          <span>
+            <span className="font-semibold text-[var(--casa-ink)]">Pilot test, {RELEASE_MODE} mode.</span> Items
+            unreviewed, cut scores provisional. A recommendation is evidence to weigh — never a pass, a fail or a
+            certificate.
+          </span>
+        )}
       </p>
 
       <Card
@@ -160,17 +176,19 @@ export default async function PlacementPage({
           items.length > 0 && (total > items.length || showAll) ? (
             <div className="flex items-center justify-between gap-4 text-xs">
               <p className="font-semibold text-[var(--casa-text-subtle)] tabular-nums">
-                {total > items.length ? `Latest ${items.length} of ${total}` : `All ${total}`}
+                {total > items.length
+                  ? t(`Neueste ${items.length} von ${total}`, `Latest ${items.length} of ${total}`)
+                  : t(`Alle ${total}`, `All ${total}`)}
               </p>
               {showAll ? (
                 total > FIRST_VIEW ? (
                   <ButtonLink href={hrefFor(filter)} size="sm">
-                    Show latest {FIRST_VIEW}
+                    {t(`Neueste ${FIRST_VIEW} zeigen`, `Show latest ${FIRST_VIEW}`)}
                   </ButtonLink>
                 ) : null
               ) : (
                 <ButtonLink href={hrefFor(filter, true)} size="sm">
-                  Show all {total}
+                  {t(`Alle ${total} zeigen`, `Show all ${total}`)}
                 </ButtonLink>
               )}
             </div>
@@ -180,7 +198,7 @@ export default async function PlacementPage({
         <ListBar
           tabs={FILTERS.map((option) => ({
             key: option.key,
-            label: option.label,
+            label: pick(lang, option.label),
             href: hrefFor(option.key),
             count: counts[option.key],
           }))}
@@ -188,14 +206,22 @@ export default async function PlacementPage({
         />
 
         {items.length === 0 ? (
-          <ListEmpty title={filter === 'needs_review' ? 'Nothing waiting' : 'Nothing here'} />
+          <ListEmpty title={filter === 'needs_review' ? t('Nichts wartet', 'Nothing waiting') : t('Hier ist nichts', 'Nothing here')} />
         ) : (
           <Table head={columns}>
             {days.flatMap((day, index) => [
               // An unsubmitted attempt sorts last, so a day can come round twice in Everything.
-              <ListGroup key={`${day.key}-${index}`} label={dayLabel(day.key, now)} count={day.items.length} span={columns.length} />,
+              <ListGroup key={`${day.key}-${index}`} label={dayLabel(day.key, now, lang)} count={day.items.length} span={columns.length} />,
               ...day.items.map((item) => (
-                <AttemptRow key={item.id} item={item} testing={testing} decided={decided} filter={filter} languages={languages} />
+                <AttemptRow
+                  key={item.id}
+                  item={item}
+                  testing={testing}
+                  decided={decided}
+                  filter={filter}
+                  languages={languages}
+                  lang={lang}
+                />
               )),
             ])}
           </Table>
@@ -212,11 +238,13 @@ const CONFIDENCE_TONE: Record<string, string> = {
 };
 
 /** What became of an attempt, in the Everything view: a dot and the word. */
-function decision(item: PlacementListItem): ReactNode {
-  if (item.confirmedLevel) return <Status tone="positive">{item.confirmedLevel} confirmed</Status>;
-  if (!item.recommendedBand) return <Status tone="quiet">Still testing</Status>;
-  if (item.needsReview) return <Status tone="accent">Needs a teacher</Status>;
-  return <Status tone="neutral">Unconfirmed</Status>;
+function decision(item: PlacementListItem, t: T): ReactNode {
+  if (item.confirmedLevel) {
+    return <Status tone="positive">{t(`${item.confirmedLevel} bestätigt`, `${item.confirmedLevel} confirmed`)}</Status>;
+  }
+  if (!item.recommendedBand) return <Status tone="quiet">{t('Test läuft noch', 'Still testing')}</Status>;
+  if (item.needsReview) return <Status tone="accent">{t('Braucht eine Lehrkraft', 'Needs a teacher')}</Status>;
+  return <Status tone="neutral">{t('Unbestätigt', 'Unconfirmed')}</Status>;
 }
 
 function AttemptRow({
@@ -225,19 +253,22 @@ function AttemptRow({
   decided,
   filter,
   languages,
+  lang,
 }: {
   item: PlacementListItem;
   testing: boolean;
   decided: boolean;
   filter: PlacementFilter;
   languages: boolean;
+  lang: WsLang;
 }) {
+  const t = translator(lang);
   const href = `/admin/placement/${item.id}`;
   const partial = item.answeredShare !== null && item.answeredShare < 1;
   const at = item.submittedAt ?? item.createdAt;
-  const time = <time dateTime={at.toISOString()}>{timeOfDay.format(at)}</time>;
+  const time = <time dateTime={at.toISOString()}>{timeOfDay(lang).format(at)}</time>;
   const languageCell = languages ? (
-    <Cell className={`${WIDE} text-[0.84rem] text-[var(--casa-muted)]`}>{language(item.locale)}</Cell>
+    <Cell className={`${WIDE} text-[0.84rem] text-[var(--casa-muted)]`}>{language(item.locale, t)}</Cell>
   ) : null;
 
   if (testing) {
@@ -246,7 +277,7 @@ function AttemptRow({
         <Cell href={href} className="max-w-0 text-[0.84rem] font-medium tabular-nums">
           {time}
           {STAGE_LABELS[item.status] ? (
-            <span className="ml-2 text-[0.8rem] font-normal text-[var(--casa-text-subtle)]">{STAGE_LABELS[item.status]}</span>
+            <span className="ml-2 text-[0.8rem] font-normal text-[var(--casa-text-subtle)]">{pick(lang, STAGE_LABELS[item.status])}</span>
           ) : null}
         </Cell>
         {languageCell}
@@ -263,18 +294,25 @@ function AttemptRow({
       <Cell className={`${WIDE} text-[0.84rem] whitespace-nowrap`}>
         {item.confidence ? (
           <span className={CONFIDENCE_TONE[item.confidence]}>
-            {CONFIDENCE_COPY[item.confidence as keyof typeof CONFIDENCE_COPY] ?? item.confidence}
+            {item.confidence in CONFIDENCE_COPY
+              ? pick(lang, CONFIDENCE_COPY[item.confidence as keyof typeof CONFIDENCE_COPY])
+              : item.confidence}
           </span>
         ) : null}
         {partial ? (
-          <span className="ml-2 text-[0.8rem] text-[#9a5b00]">{Math.round((item.answeredShare ?? 0) * 100)}% answered</span>
+          <span className="ml-2 text-[0.8rem] text-[#9a5b00]">
+            {t(
+              `${Math.round((item.answeredShare ?? 0) * 100)} % bearbeitet`,
+              `${Math.round((item.answeredShare ?? 0) * 100)}% answered`
+            )}
+          </span>
         ) : null}
       </Cell>
 
       {decided ? (
         <>
           <Cell className={`${WIDE} text-[0.84rem] whitespace-nowrap`}>
-            {filter === 'confirmed' ? <span className="font-bold">{item.confirmedLevel}</span> : decision(item)}
+            {filter === 'confirmed' ? <span className="font-bold">{item.confirmedLevel}</span> : decision(item, t)}
           </Cell>
           <Cell className={WIDE}>
             <Owner name={item.reviewerName} />

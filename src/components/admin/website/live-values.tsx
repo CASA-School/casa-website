@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useWsLang } from '@/components/admin/lang';
+import { pick } from '@/lib/admin/i18n';
 import type { EditorFacts } from '@/lib/cms/editor-types';
 import { factsIn, NO_VALUE, type FactDef } from '@/lib/cms/facts';
 import { cn } from '@/lib/utils';
@@ -26,6 +28,7 @@ const IS_FACT_TOKEN = /^\{[a-zA-Z][\w-]*(?:\.[\w-]+)+\}$/;
 
 /** A text with each live value shown as a pill holding what it says today. */
 export function TextWithFacts({ text, facts, locale }: { text: string; facts: EditorFacts; locale: string }) {
+  const { lang } = useWsLang();
   const values = facts.values[locale] ?? facts.values.en ?? {};
   const byId = useMemo(() => new Map(facts.defs.map((def) => [def.id, def])), [facts.defs]);
   return (
@@ -37,7 +40,7 @@ export function TextWithFacts({ text, facts, locale }: { text: string; facts: Ed
         return (
           <span
             key={index}
-            title={def ? `${def.group} · ${def.label}` : id}
+            title={def ? `${def.group} · ${pick(lang, def.label)}` : id}
             className="mx-0.5 inline-flex items-center rounded-md bg-[var(--casa-blue-tint)] px-1.5 text-[0.92em] font-semibold text-[var(--casa-accent-text)]"
           >
             {values[id] ?? NO_VALUE}
@@ -60,13 +63,14 @@ export function UsedLiveValues({
   locale: string;
   screens: Screens;
 }) {
+  const { t, lang } = useWsLang();
   const byId = new Map(facts.defs.map((def) => [def.id, def]));
   // An unknown name gets its own warning in the popup, not a row here.
   const ids = factsIn(text).filter((id) => byId.has(id));
   if (!ids.length) return null;
   const values = facts.values[locale] ?? facts.values.en ?? {};
   return (
-    <ul className="mt-2.5 space-y-1" aria-label="Live values in this text">
+    <ul className="mt-2.5 space-y-1" aria-label={t('Live-Werte in diesem Text', 'Live values in this text')}>
       {ids.map((id) => {
         const def = byId.get(id)!;
         const screen = screens[def.source];
@@ -74,14 +78,14 @@ export function UsedLiveValues({
           <li key={id} className="flex items-center gap-2 rounded-lg bg-ws-sunk px-2.5 py-1.5 text-[0.78rem]">
             <span className="shrink-0 text-[var(--casa-muted)]">{I.data}</span>
             <span className="min-w-0 flex-1 truncate">
-              <span className="font-semibold text-[var(--casa-ink)]">{`${def.group} · ${def.label}`}</span>
-              <span className="text-[var(--casa-text-subtle)]"> — {values[id] ?? 'no value right now'}</span>
+              <span className="font-semibold text-[var(--casa-ink)]">{`${def.group} · ${pick(lang, def.label)}`}</span>
+              <span className="text-[var(--casa-text-subtle)]"> — {values[id] ?? t('gerade kein Wert', 'no value right now')}</span>
             </span>
             {screen ? (
               <Link
                 href={screen.href}
                 target="_blank"
-                title={`Change it in ${screen.label}`}
+                title={t(`Ändern unter „${screen.label}“`, `Change it in ${screen.label}`)}
                 className="inline-flex shrink-0 items-center gap-1 font-semibold text-[var(--casa-accent-text)] hover:underline"
               >
                 {screen.label}
@@ -107,6 +111,7 @@ export function LiveValuePicker({
   onPick: (def: FactDef) => void;
   onClose: () => void;
 }) {
+  const { t, lang } = useWsLang();
   const [query, setQuery] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const values = useMemo(() => facts.values[locale] ?? facts.values.en ?? {}, [facts.values, locale]);
@@ -116,7 +121,8 @@ export function LiveValuePicker({
   const groups = useMemo(() => {
     const words = query.toLocaleLowerCase('de').split(/\s+/).filter(Boolean);
     const matches = facts.defs.filter((def) => {
-      const haystack = `${def.group} ${def.label} ${def.source} ${values[def.id] ?? ''}`.toLocaleLowerCase('de');
+      // Both languages' names, so a value is found whichever the colleague thinks in.
+      const haystack = `${def.group} ${def.label.de} ${def.label.en} ${def.source} ${values[def.id] ?? ''}`.toLocaleLowerCase('de');
       return words.every((word) => haystack.includes(word));
     });
     const out = new Map<string, FactDef[]>();
@@ -137,12 +143,12 @@ export function LiveValuePicker({
     >
       <label className="flex items-center gap-2 border-b border-ws-line-soft px-3">
         <span className="text-[var(--casa-text-subtle)]">{I.search}</span>
-        <span className="sr-only">Find a live value</span>
+        <span className="sr-only">{t('Live-Wert suchen', 'Find a live value')}</span>
         <input
           ref={input}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Course, exam, price, date…"
+          placeholder={t('Kurs, Prüfung, Preis, Datum …', 'Course, exam, price, date…')}
           className="h-10 min-w-0 flex-1 bg-transparent text-[0.85rem] text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-text-subtle)]"
         />
       </label>
@@ -158,16 +164,16 @@ export function LiveValuePicker({
                   onClick={() => onPick(def)}
                   className="flex w-full items-center gap-3 px-3 py-1.5 text-left text-[0.82rem] hover:bg-ws-sunk focus-visible:bg-ws-sunk focus-visible:outline-none"
                 >
-                  <span className="flex-1 font-semibold text-[var(--casa-ink)]">{def.label}</span>
+                  <span className="flex-1 font-semibold text-[var(--casa-ink)]">{pick(lang, def.label)}</span>
                   <span className={cn('tabular-nums', values[def.id] ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-text-subtle)] italic')}>
-                    {values[def.id] ?? 'none right now'}
+                    {values[def.id] ?? t('gerade keiner', 'none right now')}
                   </span>
                 </button>
               ))}
             </div>
           ))
         ) : (
-          <p className="px-3 py-3 text-[0.82rem] text-[var(--casa-text-subtle)]">No live value matches.</p>
+          <p className="px-3 py-3 text-[0.82rem] text-[var(--casa-text-subtle)]">{t('Kein Live-Wert passt.', 'No live value matches.')}</p>
         )}
       </div>
     </div>

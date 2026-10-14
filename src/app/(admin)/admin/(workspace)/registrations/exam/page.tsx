@@ -4,21 +4,23 @@ import { parseFilter, QueueToolbar, queueEmptyTitle } from '@/components/admin/q
 import { RegistrationTable } from '@/components/admin/registration-table';
 import { RegistrationTabs } from '@/components/admin/registration-tabs';
 import { Card, PageHeader } from '@/components/admin/ui';
+import { translator, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
 import { listExamRegistrations, registrationTypeLabel } from '@/lib/admin/registrations';
 import { formatDay, parseOptionLabel } from '../option-label';
 
 /** "telc Deutsch B2 · 13 Nov": the exam, and the day of its sitting. */
-function examAbout(exam: string, option: string | null): string {
+function examAbout(exam: string, option: string | null, lang: WsLang): string {
   const parsed = parseOptionLabel(option);
   if (!parsed) return exam;
-  if (parsed.toBeArranged) return `${exam} · Date to be arranged`;
-  return `${exam} · ${parsed.start ? formatDay(parsed.start) : parsed.raw}`;
+  if (parsed.toBeArranged) return `${exam} · ${translator(lang)('Termin wird noch festgelegt', 'Date to be arranged')}`;
+  return `${exam} · ${parsed.start ? formatDay(parsed.start, lang) : parsed.raw}`;
 }
 
 /** The full exam is the normal case; only a single part is marked on its row. */
-const FULL_EXAM = registrationTypeLabel('full');
+const FULL_EXAM = 'full';
 
 export default async function ExamRegistrationsPage({
   searchParams,
@@ -30,7 +32,7 @@ export default async function ExamRegistrationsPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, courseCounts, examCounts] = await Promise.all([
+  const [{ items, total }, courseCounts, examCounts, { t, lang }] = await Promise.all([
     listExamRegistrations({
       status: filter,
       search,
@@ -39,12 +41,13 @@ export default async function ExamRegistrationsPage({
     }),
     queueStatusCounts('course_registration'),
     queueStatusCounts('exam_registration'),
+    getI18n(),
   ]);
 
   const rows = items.map((item) => ({
     ...item,
-    about: examAbout(item.productLabel, item.optionLabel),
-    flag: item.detailNote && item.detailNote !== FULL_EXAM ? item.detailNote : null,
+    about: examAbout(item.productLabel ?? t('Prüfung', 'Exam'), item.optionLabel, lang),
+    flag: item.detailNote && item.detailNote !== FULL_EXAM ? registrationTypeLabel(item.detailNote, lang) : null,
   }));
 
   const open = (counts: typeof examCounts) =>
@@ -53,8 +56,8 @@ export default async function ExamRegistrationsPage({
   return (
     <>
       <PageHeader
-        title="Registrations"
-        actions={<RegistrationTabs active="exam" counts={{ course: open(courseCounts), exam: open(examCounts) }} />}
+        title={t('Anmeldungen', 'Registrations')}
+        actions={<RegistrationTabs active="exam" counts={{ course: open(courseCounts), exam: open(examCounts) }} lang={lang} />}
       />
 
       <Card bleed>
@@ -63,13 +66,14 @@ export default async function ExamRegistrationsPage({
           active={filter}
           counts={{ ...examCounts.byStatus, open: open(examCounts), all: examCounts.total }}
           search={search}
-          searchPlaceholder="Name, email or exam"
+          searchPlaceholder={t('Name, E-Mail oder Prüfung', 'Name, email or exam')}
+          lang={lang}
         />
 
         {items.length === 0 ? (
-          <ListEmpty title={queueEmptyTitle(filter, search)} />
+          <ListEmpty title={queueEmptyTitle(lang, filter, search)} />
         ) : (
-          <RegistrationTable items={rows} basePath="/admin/registrations/exam" filter={filter} />
+          <RegistrationTable items={rows} basePath="/admin/registrations/exam" filter={filter} lang={lang} />
         )}
       </Card>
 

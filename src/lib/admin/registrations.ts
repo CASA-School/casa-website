@@ -1,4 +1,5 @@
 import { query, queryFirst } from './db';
+import { pick, type Bilingual, type WsLang } from './i18n';
 import { normaliseStatus, type WorkStatus } from './queues';
 
 /**
@@ -18,8 +19,8 @@ export type RegistrationListItem = {
   firstName: string;
   lastName: string;
   email: string;
-  /** The course or exam the person chose, as they saw it named. */
-  productLabel: string;
+  /** The course or exam the person chose, as they saw it named; null when none was stored. */
+  productLabel: string | null;
   /** The dated option within it: a cohort start, or an exam sitting. */
   optionLabel: string | null;
   status: WorkStatus;
@@ -29,7 +30,10 @@ export type RegistrationListItem = {
   openFlags: number;
   /** Course only. Set when the learner asked for a room. */
   accommodationRequired?: boolean;
-  /** Course only, self-declared. Exam only: which part they are sitting. */
+  /**
+   * Course only: the declared level, self-declared. Exam only: the stored
+   * registration type (`full`, `written`, `oral`), named with `registrationTypeLabel`.
+   */
   detailNote?: string | null;
 };
 
@@ -97,13 +101,16 @@ export type ExamRegistrationDetail = {
   submittedAt: Date;
 };
 
-const REGISTRATION_TYPE_LABELS: Record<string, string> = {
-  full: 'Full exam',
-  written: 'Written part only',
-  oral: 'Oral part only',
+const REGISTRATION_TYPE_LABELS: Record<string, Bilingual> = {
+  full: { de: 'Ganze Prüfung', en: 'Full exam' },
+  written: { de: 'Nur schriftlicher Teil', en: 'Written part only' },
+  oral: { de: 'Nur mündlicher Teil', en: 'Oral part only' },
 };
 
-export const registrationTypeLabel = (value: string) => REGISTRATION_TYPE_LABELS[value] ?? value;
+export const registrationTypeLabel = (value: string, lang: WsLang) => {
+  const label = REGISTRATION_TYPE_LABELS[value];
+  return label ? pick(lang, label) : value;
+};
 
 function statusFilter(
   column: string,
@@ -201,7 +208,7 @@ export async function listCourseRegistrations({
       firstName: row.first_name,
       lastName: row.last_name,
       email: row.email,
-      productLabel: row.course_type_label ?? 'Course',
+      productLabel: row.course_type_label,
       optionLabel: row.course_instance_label,
       status: normaliseStatus(row.status),
       assigneeName: row.assignee_name,
@@ -291,14 +298,14 @@ export async function listExamRegistrations({
       firstName: row.first_name,
       lastName: row.last_name,
       email: row.email,
-      productLabel: row.exam_type_label ?? 'Exam',
+      productLabel: row.exam_type_label,
       optionLabel: row.exam_session_label,
       status: normaliseStatus(row.status),
       assigneeName: row.assignee_name,
       submittedAt: row.submitted_at,
       personId: row.person_id,
       openFlags: Number(row.open_flags ?? 0),
-      detailNote: registrationTypeLabel(row.registration_type),
+      detailNote: row.registration_type,
     })),
   };
 }

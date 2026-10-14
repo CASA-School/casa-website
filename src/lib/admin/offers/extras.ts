@@ -8,16 +8,19 @@
  * negative one.
  */
 
-export type ExtraPreset = { label: string; chargeType: string; de: string; en: string };
+import type { Bilingual } from '../i18n';
+
+/** `label` is the menu's, in the workspace's language; `de` and `en` are the line's text on the letter. */
+export type ExtraPreset = { label: Bilingual; chargeType: string; de: string; en: string };
 
 export const GROUP_EXTRAS: ExtraPreset[] = [
-  { label: 'Airport transfer', chargeType: 'transfer', de: 'Flughafentransfer (Hin- und Rückfahrt)', en: 'Airport transfer (both ways)' },
-  { label: 'Single room supplement', chargeType: 'accommodation_rent', de: 'Einzelzimmerzuschlag', en: 'Single room supplement' },
-  { label: 'Extra night', chargeType: 'extra_nights', de: 'Zusätzliche Nacht in der Gastfamilie', en: 'Extra night with the host family' },
-  { label: 'Extra lessons', chargeType: 'tuition', de: 'Zusätzlicher Unterricht', en: 'Extra lessons' },
+  { label: { de: 'Flughafentransfer', en: 'Airport transfer' }, chargeType: 'transfer', de: 'Flughafentransfer (Hin- und Rückfahrt)', en: 'Airport transfer (both ways)' },
+  { label: { de: 'Einzelzimmerzuschlag', en: 'Single room supplement' }, chargeType: 'accommodation_rent', de: 'Einzelzimmerzuschlag', en: 'Single room supplement' },
+  { label: { de: 'Zusätzliche Nacht', en: 'Extra night' }, chargeType: 'extra_nights', de: 'Zusätzliche Nacht in der Gastfamilie', en: 'Extra night with the host family' },
+  { label: { de: 'Zusätzlicher Unterricht', en: 'Extra lessons' }, chargeType: 'tuition', de: 'Zusätzlicher Unterricht', en: 'Extra lessons' },
 ];
 
-export const REDUCTION: ExtraPreset = { label: 'Reduction', chargeType: 'discount', de: 'Ermäßigung', en: 'Reduction' };
+export const REDUCTION: ExtraPreset = { label: { de: 'Ermäßigung', en: 'Reduction' }, chargeType: 'discount', de: 'Ermäßigung', en: 'Reduction' };
 
 /** A line that takes money off: shown and typed as a positive amount, stored as a negative one. */
 export const isCredit = (chargeType: string) => chargeType === 'discount';

@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 
+import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { diffWords } from '@/lib/cms/diff';
 import type { LocaleStatus } from '@/lib/cms/editor-types';
+import type { FactSource } from '@/lib/cms/facts';
 import { cn } from '@/lib/utils';
 
 import styles from './editor.module.css';
@@ -143,15 +145,27 @@ export function Spinner({ className }: { className?: string }) {
   );
 }
 
-const STATUS_LABEL: Record<LocaleStatus, string> = {
-  live: 'Live',
-  draft: 'Draft',
-  upcoming: 'Waiting to go live',
-  stale: 'Needs update',
-  missing: 'Not written yet',
+const STATUS_LABEL: Record<LocaleStatus, Bilingual> = {
+  live: { de: 'Live', en: 'Live' },
+  draft: { de: 'Entwurf', en: 'Draft' },
+  upcoming: { de: 'Wartet auf Veröffentlichung', en: 'Waiting to go live' },
+  stale: { de: 'Muss aktualisiert werden', en: 'Needs update' },
+  missing: { de: 'Noch nicht geschrieben', en: 'Not written yet' },
 };
 
-export const statusLabel = (status: LocaleStatus) => STATUS_LABEL[status];
+export const statusLabel = (status: LocaleStatus, lang: WsLang) => pick(lang, STATUS_LABEL[status]);
+
+/** Where a live value or a data-tagged text comes from, as the workspace names it. */
+const SOURCE_LABEL: Record<FactSource, Bilingual> = {
+  'Course dates': { de: 'Kurstermine', en: 'Course dates' },
+  'Course types': { de: 'Kursarten', en: 'Course types' },
+  Prices: { de: 'Preise', en: 'Prices' },
+  'Exam dates': { de: 'Prüfungstermine', en: 'Exam dates' },
+};
+
+/** A source's name; one the editor does not know is shown as the page sent it. */
+export const sourceLabel = (source: string, lang: WsLang) =>
+  Object.hasOwn(SOURCE_LABEL, source) ? pick(lang, SOURCE_LABEL[source as FactSource]) : source;
 
 export function StatusDot({ status, className }: { status: LocaleStatus; className?: string }) {
   return (

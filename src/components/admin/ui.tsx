@@ -7,7 +7,7 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 
-import { toDateInputValue } from '@/lib/dates';
+import { Tr } from './lang';
 import { Avatar } from './list';
 import { cn } from '@/lib/utils';
 
@@ -300,7 +300,7 @@ function BackLink({ href, label }: { href: string; label?: string }) {
       >
         <path d="M6.5 3.5 2.5 8l4 4.5M2.5 8h11" />
       </svg>
-      {label ?? 'Back'}
+      {label ?? <Tr de="Zurück" en="Back" />}
     </Link>
   );
 }
@@ -600,7 +600,9 @@ export function Cell({
     >
       {href ? (
         <Link href={href} className="absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 focus-visible:ring-inset">
-          <span className="sr-only">Open</span>
+          <span className="sr-only">
+            <Tr de="Öffnen" en="Open" />
+          </span>
           {/* The row opens something: a quiet arrow at its end, on hover or focus. */}
           <span
             aria-hidden="true"
@@ -681,110 +683,5 @@ export function Meter({
   );
 }
 
-/**
- * A dated line. `<time>` so the value is machine-readable, and the workspace's
- * tabular-numerals rule (globals.css) picks it up by element.
- *
- * `compact` drops the year, and every list table uses it. A six-column queue
- * has about 1100px to work with on a laptop, and "07 Sept 2026" spends 40 of
- * them on a year that is the current one for all but a handful of rows —
- * enough, across six columns, to push the table into horizontal scroll. The
- * year comes back on a record's own screen, where there is room and where the
- * exact date is being read rather than scanned. A row older than the current
- * year keeps its year in either mode, since that is the case where it carries
- * information.
- */
-export function DateText({
-  value,
-  withTime = false,
-  compact = false,
-}: {
-  value: Date | string | null | undefined;
-  withTime?: boolean;
-  compact?: boolean;
-}) {
-  if (!value) {
-    return <span className="text-[var(--casa-text-subtle)]">—</span>;
-  }
-
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return <span className="text-[var(--casa-text-subtle)]">—</span>;
-  }
-
-  const sameYear = date.getFullYear() === new Date().getFullYear();
-
-  return (
-    <time dateTime={date.toISOString()} className="whitespace-nowrap">
-      {date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        ...(compact && sameYear ? {} : { year: 'numeric' }),
-      })}
-      {withTime
-        ? `, ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
-        : ''}
-    </time>
-  );
-}
-
-/**
- * A date of birth.
- *
- * Since 0007 every queue row carries two columns: `birth_date` (a real `date`,
- * set when the submitted text parsed as one) and `birth_date_raw` (the text,
- * verbatim). Pass the typed value first and the raw as fallback:
- * `<BirthDate value={row.birthDate ?? row.birthDateRaw} />`. A `Date` or an
- * ISO string is formatted; anything else is printed exactly as it arrived —
- * a date read for identity checks against a passport must not be reformatted
- * on a maybe. The row is flagged `birth_date_unparsed` in that case, so the
- * verbatim text is never the only signal.
- */
-export function BirthDate({ value }: { value: Date | string | null | undefined }) {
-  if (!value) {
-    return <span className="text-[var(--casa-text-subtle)]">—</span>;
-  }
-
-  // From LOCAL components. `toISOString()` here rendered every stored date a
-  // day early for any positive UTC offset — 1998-03-14 showed as 13 March.
-  const iso =
-    value instanceof Date
-      ? toDateInputValue(value) || null
-      : (/^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim())?.[0] ?? null);
-
-  if (!iso) {
-    return <span>{String(value)}</span>;
-  }
-
-  const date = new Date(`${iso}T00:00:00Z`);
-
-  if (Number.isNaN(date.getTime())) {
-    return <span>{String(value)}</span>;
-  }
-
-  return (
-    <time dateTime={iso}>
-      {date.toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC',
-      })}
-    </time>
-  );
-}
-
-/** "3 days ago". Rendered on the server, so it is the server's clock. */
-export function relativeDays(value: Date | string): string {
-  const date = value instanceof Date ? value : new Date(value);
-  const midnight = (d: Date) => new Date(d).setHours(0, 0, 0, 0);
-  const days = Math.round((midnight(new Date()) - midnight(date)) / 86_400_000);
-
-  if (days <= 0) return 'today';
-  if (days === 1) return 'yesterday';
-  if (days < 7) return `${days} days ago`;
-  if (days < 14) return 'last week';
-  if (days < 60) return `${Math.round(days / 7)} weeks ago`;
-  return `${Math.round(days / 30)} months ago`;
-}
+// Dates in the workspace's language (client components that read it from the shell).
+export { BirthDate, DateText } from './date-text';

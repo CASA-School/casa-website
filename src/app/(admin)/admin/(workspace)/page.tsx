@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { Icon } from '@/components/admin/icons';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
+import { num, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { getOverviewFacts, type OverviewFacts } from '@/lib/admin/overview';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
@@ -43,161 +45,186 @@ type Card = {
   pill?: (f: OverviewFacts) => Pill;
 };
 
-const fmt = (n: number) => n.toLocaleString('en-GB');
-const plural = (n: number, one: string, many = `${one}s`) => (n === 1 ? one : many);
-const shortDay = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-const monthYear = (d: Date) => new Date(`${toDateInputValue(d)}T00:00:00`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+/** The cards, in the language of the request: a function of `t` so each text sits beside its German. */
+function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
+  const n = (value: number) => num(lang, value);
+  const day = (d: Date) => d.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' });
+  const date = (d: Date) => d.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' });
+  const monthYear = (d: Date) =>
+    new Date(`${toDateInputValue(d)}T00:00:00`).toLocaleDateString(wsLocale(lang), { month: 'short', year: 'numeric' });
+  const open = t('offen', 'open');
+  const fresh = (count: number) => ({ text: t(`${n(count)} neu`, `${n(count)} new`), tone: 'new' as const });
 
-const GROUPS: { label: string; cards: Card[] }[] = [
-  {
-    label: 'Inbox',
-    cards: [
-      {
-        title: 'Enquiries',
-        href: '/admin/enquiries',
-        module: 'enquiries',
-        icon: Icon.enquiries,
-        tone: 'blue',
-        figure: (f) => ({ value: fmt(f.enquiriesOpen), label: 'open' }),
-        pill: (f) => (f.enquiriesNew ? { text: `${f.enquiriesNew} new`, tone: 'new' } : null),
-      },
-      {
-        title: 'Registrations',
-        href: '/admin/registrations',
-        module: 'registrations',
-        icon: Icon.registrations,
-        tone: 'blue',
-        figure: (f) => ({ value: fmt(f.registrationsOpen), label: 'open' }),
-        pill: (f) => (f.registrationsNew ? { text: `${f.registrationsNew} new`, tone: 'new' } : null),
-      },
-    ],
-  },
-  {
-    label: 'School',
-    cards: [
-      {
-        title: 'Students',
-        href: '/admin/people',
-        module: 'people',
-        icon: Icon.people,
-        tone: 'green',
-        figure: (f) => ({ value: fmt(f.students), label: 'in the register' }),
-      },
-      {
-        title: 'Placement tests',
-        href: '/admin/placement',
-        module: 'placement',
-        icon: Icon.placement,
-        tone: 'green',
-        figure: (f) => (f.placementToReview ? { value: fmt(f.placementToReview), label: 'to review' } : { value: 'All reviewed' }),
-      },
-      {
-        title: 'Bookings',
-        href: '/admin/bookings',
-        module: 'bookings',
-        icon: Icon.bookings,
-        tone: 'sun',
-        figure: (f) => ({ value: fmt(f.bookingsCurrent), label: 'current' }),
-      },
-      {
-        title: 'Offers',
-        href: '/admin/offers',
-        module: 'offers',
-        icon: Icon.offers,
-        tone: 'sun',
-        figure: (f) => ({ value: fmt(f.offersOpen), label: 'open' }),
-        pill: (f) => (f.offersToFollowUp ? { text: `${f.offersToFollowUp} to follow up`, tone: 'warn' } : null),
-      },
-      {
-        title: 'Courses',
-        href: '/admin/catalogue',
-        module: 'catalogue',
-        icon: Icon.catalogue,
-        tone: 'red',
-        figure: (f) => ({ value: fmt(f.cohortsUpcoming), label: plural(f.cohortsUpcoming, 'cohort ahead', 'cohorts ahead') }),
-      },
-      {
-        title: 'Exams',
-        href: '/admin/catalogue/exams',
-        module: 'catalogue',
-        icon: Icon.calendar,
-        tone: 'red',
-        figure: (f) => (f.nextExam ? { lead: 'Next sitting', value: shortDay(f.nextExam) } : null),
-      },
-    ],
-  },
-  {
-    label: 'Management',
-    cards: [
-      {
-        title: 'Applications',
-        href: '/admin/applications',
-        module: 'applications',
-        icon: Icon.applications,
-        tone: 'green',
-        figure: (f) => ({ value: fmt(f.applicationsOpen), label: 'open' }),
-      },
-      {
-        title: 'Kursplanung',
-        href: '/admin/kursplanung',
-        module: 'kursplanung',
-        icon: Icon.kursplanung,
-        tone: 'red',
-        figure: (f) => (f.plannedTo ? { lead: 'Planned to', value: monthYear(f.plannedTo) } : null),
-      },
-      {
-        title: 'Website',
-        href: '/admin/website',
-        module: 'website',
-        icon: Icon.website,
-        tone: 'blue',
-        figure: (f) => (f.websiteDrafts ? { value: fmt(f.websiteDrafts), label: plural(f.websiteDrafts, 'draft') } : { value: 'Up to date' }),
-        pill: (f) => (f.websitePending ? { text: `${f.websitePending} to approve`, tone: 'warn' } : null),
-      },
-      {
-        title: 'Prices',
-        href: '/admin/settings/prices',
-        module: 'prices',
-        icon: Icon.money,
-        tone: 'sun',
-        figure: (f) => (f.pricesSince ? { lead: 'In force since', value: `${shortDay(f.pricesSince)} ${f.pricesSince.getFullYear()}` } : null),
-      },
-      {
-        title: 'Team',
-        href: '/admin/team',
-        module: 'team',
-        icon: Icon.team,
-        tone: 'green',
-        figure: (f) => ({ value: fmt(f.colleagues), label: plural(f.colleagues, 'colleague') }),
-      },
-      {
-        title: 'Activity',
-        href: '/admin/activity',
-        module: 'activity',
-        icon: Icon.note,
-        tone: 'ink',
-        figure: (f) => ({ value: fmt(f.changesToday), label: `${plural(f.changesToday, 'change')} today` }),
-      },
-      { title: 'Settings', href: '/admin/settings', module: 'settings', icon: Icon.settings, tone: 'ink' },
-    ],
-  },
-];
+  return [
+    {
+      label: t('Posteingang', 'Inbox'),
+      cards: [
+        {
+          title: t('Anfragen', 'Enquiries'),
+          href: '/admin/enquiries',
+          module: 'enquiries',
+          icon: Icon.enquiries,
+          tone: 'blue',
+          figure: (f) => ({ value: n(f.enquiriesOpen), label: open }),
+          pill: (f) => (f.enquiriesNew ? fresh(f.enquiriesNew) : null),
+        },
+        {
+          title: t('Anmeldungen', 'Registrations'),
+          href: '/admin/registrations',
+          module: 'registrations',
+          icon: Icon.registrations,
+          tone: 'blue',
+          figure: (f) => ({ value: n(f.registrationsOpen), label: open }),
+          pill: (f) => (f.registrationsNew ? fresh(f.registrationsNew) : null),
+        },
+      ],
+    },
+    {
+      label: t('Schule', 'School'),
+      cards: [
+        {
+          title: t('Teilnehmende', 'Students'),
+          href: '/admin/people',
+          module: 'people',
+          icon: Icon.people,
+          tone: 'green',
+          figure: (f) => ({ value: n(f.students), label: t('in der Kartei', 'in the register') }),
+        },
+        {
+          title: t('Einstufungstests', 'Placement tests'),
+          href: '/admin/placement',
+          module: 'placement',
+          icon: Icon.placement,
+          tone: 'green',
+          figure: (f) =>
+            f.placementToReview
+              ? { value: n(f.placementToReview), label: t('zu prüfen', 'to review') }
+              : { value: t('Alle geprüft', 'All reviewed') },
+        },
+        {
+          title: t('Buchungen', 'Bookings'),
+          href: '/admin/bookings',
+          module: 'bookings',
+          icon: Icon.bookings,
+          tone: 'sun',
+          figure: (f) => ({ value: n(f.bookingsCurrent), label: t('laufend', 'current') }),
+        },
+        {
+          title: t('Angebote', 'Offers'),
+          href: '/admin/offers',
+          module: 'offers',
+          icon: Icon.offers,
+          tone: 'sun',
+          figure: (f) => ({ value: n(f.offersOpen), label: open }),
+          pill: (f) =>
+            f.offersToFollowUp
+              ? { text: t(`${n(f.offersToFollowUp)} nachfassen`, `${n(f.offersToFollowUp)} to follow up`), tone: 'warn' }
+              : null,
+        },
+        {
+          title: t('Kurse', 'Courses'),
+          href: '/admin/catalogue',
+          module: 'catalogue',
+          icon: Icon.catalogue,
+          tone: 'red',
+          figure: (f) => ({
+            value: n(f.cohortsUpcoming),
+            label: f.cohortsUpcoming === 1 ? t('kommender Termin', 'cohort ahead') : t('kommende Termine', 'cohorts ahead'),
+          }),
+        },
+        {
+          title: t('Prüfungen', 'Exams'),
+          href: '/admin/catalogue/exams',
+          module: 'catalogue',
+          icon: Icon.calendar,
+          tone: 'red',
+          figure: (f) => (f.nextExam ? { lead: t('Nächster Termin', 'Next sitting'), value: day(f.nextExam) } : null),
+        },
+      ],
+    },
+    {
+      label: t('Verwaltung', 'Management'),
+      cards: [
+        {
+          title: t('Bewerbungen', 'Applications'),
+          href: '/admin/applications',
+          module: 'applications',
+          icon: Icon.applications,
+          tone: 'green',
+          figure: (f) => ({ value: n(f.applicationsOpen), label: open }),
+        },
+        {
+          title: 'Kursplanung',
+          href: '/admin/kursplanung',
+          module: 'kursplanung',
+          icon: Icon.kursplanung,
+          tone: 'red',
+          figure: (f) => (f.plannedTo ? { lead: t('Geplant bis', 'Planned to'), value: monthYear(f.plannedTo) } : null),
+        },
+        {
+          title: 'Website',
+          href: '/admin/website',
+          module: 'website',
+          icon: Icon.website,
+          tone: 'blue',
+          figure: (f) =>
+            f.websiteDrafts
+              ? { value: n(f.websiteDrafts), label: f.websiteDrafts === 1 ? t('Entwurf', 'draft') : t('Entwürfe', 'drafts') }
+              : { value: t('Alles veröffentlicht', 'Up to date') },
+          pill: (f) =>
+            f.websitePending
+              ? { text: t(`${n(f.websitePending)} zur Freigabe`, `${n(f.websitePending)} to approve`), tone: 'warn' }
+              : null,
+        },
+        {
+          title: t('Preise', 'Prices'),
+          href: '/admin/settings/prices',
+          module: 'prices',
+          icon: Icon.money,
+          tone: 'sun',
+          figure: (f) => (f.pricesSince ? { lead: t('Gültig seit', 'In force since'), value: date(f.pricesSince) } : null),
+        },
+        {
+          title: 'Team',
+          href: '/admin/team',
+          module: 'team',
+          icon: Icon.team,
+          tone: 'green',
+          figure: (f) => ({ value: n(f.colleagues), label: f.colleagues === 1 ? t('Person', 'colleague') : t('Personen', 'colleagues') }),
+        },
+        {
+          title: t('Aktivität', 'Activity'),
+          href: '/admin/activity',
+          module: 'activity',
+          icon: Icon.note,
+          tone: 'ink',
+          figure: (f) => ({
+            value: n(f.changesToday),
+            label: f.changesToday === 1 ? t('Änderung heute', 'change today') : t('Änderungen heute', 'changes today'),
+          }),
+        },
+        { title: t('Einstellungen', 'Settings'), href: '/admin/settings', module: 'settings', icon: Icon.settings, tone: 'ink' },
+      ],
+    },
+  ];
+}
 
 export default async function OverviewPage() {
   const user = await requireModule('overview');
-  const facts = await getOverviewFacts();
+  const [facts, { t, lang }] = await Promise.all([getOverviewFacts(), getI18n()]);
 
   const now = new Date();
   const hour = now.getHours();
-  const greeting = hour < 11 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const greeting =
+    hour < 11 ? t('Guten Morgen', 'Good morning') : hour < 18 ? t('Guten Tag', 'Good afternoon') : t('Guten Abend', 'Good evening');
   const firstName = (user.name ?? '').split(/\s+/)[0];
-  const groups = GROUPS.map((g) => ({ ...g, cards: g.cards.filter((c) => canAccess(user, c.module)) })).filter((g) => g.cards.length);
+  const visible = groups(t, lang).map((g) => ({ ...g, cards: g.cards.filter((c) => canAccess(user, c.module)) })).filter((g) => g.cards.length);
 
   return (
     <div className="mx-auto max-w-[1120px] pb-6">
       <header className="mb-10 pt-1">
         <p className="text-[0.82rem] font-medium text-[var(--casa-text-subtle)]">
-          {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+          {now.toLocaleDateString(wsLocale(lang), { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
         <h1 className="mt-1.5 text-[2.15rem] leading-[1.1] font-extrabold tracking-[-0.03em] text-[var(--casa-ink)]">
           {greeting}
@@ -206,10 +233,10 @@ export default async function OverviewPage() {
       </header>
 
       <div className="space-y-10">
-        {groups.map((group) => (
-          <section key={group.label} aria-labelledby={`overview-${group.label}`}>
+        {visible.map((group) => (
+          <section key={group.label} aria-labelledby={`overview-${group.cards[0].module}`}>
             <div className="mb-4 flex items-center gap-3">
-              <h2 id={`overview-${group.label}`} className="text-[0.8rem] font-semibold tracking-[0.01em] text-[var(--casa-muted)]">
+              <h2 id={`overview-${group.cards[0].module}`} className="text-[0.8rem] font-semibold tracking-[0.01em] text-[var(--casa-muted)]">
                 {group.label}
               </h2>
               <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-[#d3dbe6] to-transparent" />

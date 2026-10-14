@@ -2,6 +2,14 @@ import { ListEmpty, ListGroup } from '@/components/admin/list';
 import { Badge, Card, PageHeader } from '@/components/admin/ui';
 import { listUpcomingExamSessions } from '@/lib/admin/catalogue';
 import { groupRuns, monthKey, monthLabel, openCell, OpenTable, SeatLine, sentenceCase, shortDate } from '../list-parts';
+import { pick, wsLocale, type Bilingual } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
+
+/** A sitting's status other than scheduled, in words; an unknown one as stored. */
+const STATUS_LABELS: Record<string, Bilingual> = {
+  cancelled: { de: 'Abgesagt', en: 'Cancelled' },
+  draft: { de: 'Entwurf', en: 'Draft' },
+};
 
 /**
  * Exam sittings, with entries against them.
@@ -18,7 +26,7 @@ import { groupRuns, monthKey, monthLabel, openCell, OpenTable, SeatLine, sentenc
  * already say it.
  */
 export default async function ExamCataloguePage() {
-  const sessions = await listUpcomingExamSessions(30);
+  const [sessions, { t, lang }] = await Promise.all([listUpcomingExamSessions(30), getI18n()]);
   const months = groupRuns(sessions, (session) => monthKey(session.startsAt));
   const today = new Date().setHours(0, 0, 0, 0);
   const subtle = 'text-[var(--casa-text-subtle)]';
@@ -26,22 +34,22 @@ export default async function ExamCataloguePage() {
 
   return (
     <>
-      <PageHeader title="Exams" />
+      <PageHeader title={t('Prüfungen', 'Exams')} />
 
       <Card bleed>
         {sessions.length === 0 ? (
-          <ListEmpty title="No sittings scheduled" />
+          <ListEmpty title={t('Keine Prüfungstermine geplant', 'No sittings scheduled')} />
         ) : (
           <OpenTable
             head={[
-              { label: 'Exam' },
-              { label: 'Sitting', className: 'w-px md:w-[11rem]' },
-              { label: 'Entries close', className: `w-[12rem] ${hide}` },
-              { label: 'Candidates', className: `w-[13rem] ${hide}` },
+              { label: t('Prüfung', 'Exam') },
+              { label: t('Termin', 'Sitting'), className: 'w-px md:w-[11rem]' },
+              { label: t('Anmeldeschluss', 'Entries close'), className: `w-[12rem] ${hide}` },
+              { label: t('Teilnehmende', 'Candidates'), className: `w-[13rem] ${hide}` },
             ]}
           >
             {months.flatMap((month) => [
-              <ListGroup key={month.key} label={monthLabel(month.key)} count={month.items.length} span={4} />,
+              <ListGroup key={month.key} label={monthLabel(month.key, lang)} count={month.items.length} span={4} />,
               ...month.items.map((session) => {
                 const startsAt = new Date(session.startsAt);
                 const deadline = session.registrationDeadline ? new Date(session.registrationDeadline) : null;
@@ -62,7 +70,9 @@ export default async function ExamCataloguePage() {
                         </span>
                         {session.status !== 'scheduled' ? (
                           <Badge tone={session.status === 'cancelled' ? 'danger' : 'neutral'}>
-                            {sentenceCase(session.status)}
+                            {STATUS_LABELS[session.status]
+                              ? pick(lang, STATUS_LABELS[session.status])
+                              : sentenceCase(session.status)}
                           </Badge>
                         ) : null}
                       </span>
@@ -70,22 +80,26 @@ export default async function ExamCataloguePage() {
                     </td>
                     <td className={`${openCell} py-3.5 text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums`}>
                       <time dateTime={startsAt.toISOString()}>
-                        {shortDate(startsAt, { weekday: true })}
+                        {shortDate(startsAt, lang, { weekday: true })}
                         <span className={subtle}>
                           {' · '}
-                          {startsAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                          {startsAt.toLocaleTimeString(wsLocale(lang), { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </time>
                     </td>
                     <td className={`${openCell} py-3.5 text-[0.84rem] whitespace-nowrap tabular-nums ${hide}`}>
                       {deadline ? (
                         <span className="flex flex-wrap items-baseline gap-x-2">
-                          <span className={closed ? subtle : 'text-[#2b3546]'}>{shortDate(deadline)}</span>
+                          <span className={closed ? subtle : 'text-[#2b3546]'}>{shortDate(deadline, lang)}</span>
                           {closed ? (
-                            <span className={`text-xs ${subtle}`}>Closed</span>
+                            <span className={`text-xs ${subtle}`}>{t('Geschlossen', 'Closed')}</span>
                           ) : daysLeft !== null && daysLeft <= 30 ? (
                             <span className={closing ? 'text-xs font-semibold text-[#9a5b00]' : `text-xs ${subtle}`}>
-                              {daysLeft === 0 ? 'Today' : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`}
+                              {daysLeft === 0
+                                ? t('Heute', 'Today')
+                                : daysLeft === 1
+                                  ? t('noch 1 Tag', '1 day left')
+                                  : t(`noch ${daysLeft} Tage`, `${daysLeft} days left`)}
                             </span>
                           ) : null}
                         </span>
@@ -95,7 +109,10 @@ export default async function ExamCataloguePage() {
                       <SeatLine
                         taken={session.registrationCount}
                         capacity={session.capacity}
-                        label={`${session.registrationCount} of ${session.capacity} places taken`}
+                        label={t(
+                          `${session.registrationCount} von ${session.capacity} Plätzen belegt`,
+                          `${session.registrationCount} of ${session.capacity} places taken`
+                        )}
                         warn={closing}
                       />
                     </td>

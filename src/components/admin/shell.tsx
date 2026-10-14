@@ -2,11 +2,14 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { CommandSearch } from './command-search';
+import { LangSwitch } from './lang-switch';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
 import { SidebarToggle } from './sidebar-toggle';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
+import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 
 /**
@@ -35,7 +38,7 @@ import { cn } from '@/lib/utils';
  * icon width and the page drops the 1180px measure.
  */
 
-export function WorkspaceShell({
+export async function WorkspaceShell({
   user,
   signOutAction,
   variant = 'default',
@@ -47,12 +50,13 @@ export function WorkspaceShell({
   children: ReactNode;
 }) {
   const focus = variant === 'focus';
+  const { t, lang } = await getI18n();
   // Rooms, the type lists and the price list: defined once and left alone for a season.
   // The price list is finance's and management's (module `prices`).
   const settingsItems = [
-    ...(canAccess(user, 'prices') ? [{ href: '/admin/settings/prices', label: 'Prices' }] : []),
-    { href: '/admin/settings/setup', label: 'Lists' },
-    ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: 'Rooms' }] : []),
+    ...(canAccess(user, 'prices') ? [{ href: '/admin/settings/prices', label: t('Preise', 'Prices') }] : []),
+    { href: '/admin/settings/setup', label: t('Listen', 'Lists') },
+    ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: t('Räume', 'Rooms') }] : []),
   ];
 
   return (
@@ -63,15 +67,19 @@ export function WorkspaceShell({
             {/* The name in type, nothing else (Rahman, 2026-10-14): set in the workspace's display serif, as the logo's lettering is. */}
             <Link
               href="/admin"
-              aria-label="CASA, Overview"
+              aria-label={t('CASA, Übersicht', 'CASA, Overview')}
               data-rail-brand
               className="rounded-md px-1 font-[family-name:var(--font-display)] text-[1.4rem] leading-none font-semibold tracking-[0.06em] text-white outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
               CASA
             </Link>
+            <span className="ml-auto hidden lg:inline-flex">
+              <LangSwitch />
+            </span>
             <span className="flex items-center gap-1 lg:hidden">
+              <LangSwitch />
               <CommandSearch variant="rail-icon" />
-              <Link href="/admin/account" title="Your account" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+              <Link href="/admin/account" title={t('Dein Konto', 'Your account')} className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/40">
                 <Avatar name={user.name} size={28} tone="rail" />
               </Link>
             </span>
@@ -83,41 +91,41 @@ export function WorkspaceShell({
           </div>
 
           <nav
-            aria-label="Workspace"
+            aria-label={t('Arbeitsbereich', 'Workspace')}
             className="flex snap-x gap-1 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-0.5 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-6 lg:[mask-image:linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]"
           >
-            <NavLink href="/admin" icon={Icon.overview} title="Overview">
-              Overview
+            <NavLink href="/admin" icon={Icon.overview} title={t('Übersicht', 'Overview')}>
+              {t('Übersicht', 'Overview')}
             </NavLink>
 
             {canAccess(user, 'enquiries') || canAccess(user, 'registrations') ? (
               <NavGroup
                 id="inbox"
-                label="Inbox"
+                label={t('Posteingang', 'Inbox')}
                 hrefs={['/admin/enquiries', '/admin/registrations']}
               >
                 {canAccess(user, 'enquiries') ? (
-                  <NavLink href="/admin/enquiries" icon={Icon.enquiries} title="Enquiries">
-                    Enquiries
+                  <NavLink href="/admin/enquiries" icon={Icon.enquiries} title={t('Anfragen', 'Enquiries')}>
+                    {t('Anfragen', 'Enquiries')}
                   </NavLink>
                 ) : null}
                 {canAccess(user, 'registrations') ? (
                   <NavLink
                     href="/admin/registrations"
-                    title="Registrations"
+                    title={t('Anmeldungen', 'Registrations')}
                     icon={Icon.registrations}
                     items={[
                       {
                         href: '/admin/registrations/course',
-                        label: 'Courses',
+                        label: t('Kurse', 'Courses'),
                       },
                       {
                         href: '/admin/registrations/exam',
-                        label: 'Exams',
+                        label: t('Prüfungen', 'Exams'),
                       },
                     ]}
                   >
-                    Registrations
+                    {t('Anmeldungen', 'Registrations')}
                   </NavLink>
                 ) : null}
               </NavGroup>
@@ -129,7 +137,7 @@ export function WorkspaceShell({
             canAccess(user, 'catalogue') ? (
               <NavGroup
                 id="school"
-                label="School"
+                label={t('Schule', 'School')}
                 hrefs={['/admin/people', '/admin/placement', '/admin/bookings', '/admin/offers', '/admin/catalogue']}
               >
                 {/*
@@ -142,32 +150,32 @@ export function WorkspaceShell({
                 {canAccess(user, 'people') ? (
                   <NavLink
                     href="/admin/people"
-                    title="Students"
+                    title={t('Teilnehmende', 'Students')}
                     icon={Icon.people}
                     items={
                       canAccess(user, 'placement')
                         ? [
                             {
                               href: '/admin/placement',
-                              label: 'Placement tests',
+                              label: t('Einstufungstests', 'Placement tests'),
                             },
                           ]
                         : []
                     }
                   >
-                    Students
+                    {t('Teilnehmende', 'Students')}
                   </NavLink>
                 ) : null}
                 {canAccess(user, 'bookings') ? (
-                  <NavLink href="/admin/bookings" icon={Icon.bookings} title="Bookings">
-                    Bookings
+                  <NavLink href="/admin/bookings" icon={Icon.bookings} title={t('Buchungen', 'Bookings')}>
+                    {t('Buchungen', 'Bookings')}
                   </NavLink>
                 ) : null}
                 {/* Offers sit beside Bookings: an accepted offer is the
                     booking that has not happened yet. Opened per person. */}
                 {canAccess(user, 'offers') ? (
-                  <NavLink href="/admin/offers" icon={Icon.offers} title="Offers">
-                    Offers
+                  <NavLink href="/admin/offers" icon={Icon.offers} title={t('Angebote', 'Offers')}>
+                    {t('Angebote', 'Offers')}
                   </NavLink>
                 ) : null}
                 {/* Courses and exams are two areas of work, not one screen with
@@ -175,11 +183,11 @@ export function WorkspaceShell({
                     catalogue table and almost nothing else. */}
                 {canAccess(user, 'catalogue') ? (
                   <>
-                    <NavLink href="/admin/catalogue" icon={Icon.catalogue} title="Courses" exact>
-                      Courses
+                    <NavLink href="/admin/catalogue" icon={Icon.catalogue} title={t('Kurse', 'Courses')} exact>
+                      {t('Kurse', 'Courses')}
                     </NavLink>
-                    <NavLink href="/admin/catalogue/exams" icon={Icon.placement} title="Exams">
-                      Exams
+                    <NavLink href="/admin/catalogue/exams" icon={Icon.placement} title={t('Prüfungen', 'Exams')}>
+                      {t('Prüfungen', 'Exams')}
                     </NavLink>
                   </>
                 ) : null}
@@ -188,7 +196,7 @@ export function WorkspaceShell({
 
             <NavGroup
               id="admin"
-              label="Management"
+              label={t('Verwaltung', 'Management')}
               hrefs={[
                 '/admin/applications',
                 '/admin/kursplanung',
@@ -198,8 +206,8 @@ export function WorkspaceShell({
               ]}
             >
               {canAccess(user, 'applications') ? (
-                <NavLink href="/admin/applications" title="Applications" icon={Icon.applications}>
-                  Applications
+                <NavLink href="/admin/applications" title={t('Bewerbungen', 'Applications')} icon={Icon.applications}>
+                  {t('Bewerbungen', 'Applications')}
                 </NavLink>
               ) : null}
               {canAccess(user, 'kursplanung') ? (
@@ -208,8 +216,8 @@ export function WorkspaceShell({
                   icon={Icon.kursplanung}
                   title="Kursplanung"
                   items={[
-                    { href: '/admin/kursplanung/kurse', label: 'Kurse' },
-                    { href: '/admin/kursplanung/lehrkraefte', label: 'Lehrkräfte' },
+                    { href: '/admin/kursplanung/kurse', label: t('Kurse', 'Courses') },
+                    { href: '/admin/kursplanung/lehrkraefte', label: t('Lehrkräfte', 'Teachers') },
                   ]}
                 >
                   Kursplanung
@@ -217,33 +225,33 @@ export function WorkspaceShell({
               ) : null}
               {/* What the public site says. Opens the editor full screen, outside the shell. */}
               {canAccess(user, 'website') ? (
-                <NavLink href="/admin/website" icon={Icon.website} title="Website">
+                <NavLink href="/admin/website" icon={Icon.website} title={t('Website', 'Website')}>
                   Website
                 </NavLink>
               ) : null}
               {canAccess(user, 'activity') ? (
-                <NavLink href="/admin/activity" icon={Icon.note} title="Activity">
-                  Activity
+                <NavLink href="/admin/activity" icon={Icon.note} title={t('Aktivität', 'Activity')}>
+                  {t('Aktivität', 'Activity')}
                 </NavLink>
               ) : null}
               {canAccess(user, 'team') ? (
-                <NavLink href="/admin/team" icon={Icon.team} title="Team">
+                <NavLink href="/admin/team" icon={Icon.team} title={t('Team', 'Team')}>
                   Team
                 </NavLink>
               ) : null}
               {/* On a phone Settings stays in the strip; on a desktop it sits at the foot, beside the person. */}
               <div className="lg:hidden">
-                <NavLink href="/admin/settings" title="Settings" icon={Icon.settings} items={settingsItems}>
-                  Settings
+                <NavLink href="/admin/settings" title={t('Einstellungen', 'Settings')} icon={Icon.settings} items={settingsItems}>
+                  {t('Einstellungen', 'Settings')}
                 </NavLink>
               </div>
             </NavGroup>
           </nav>
 
           {/* Settings — rooms, the lists, the prices: set up once a season, so at the foot, as in every tool. */}
-          <nav aria-label="Settings" className="hidden shrink-0 px-3 pt-2 lg:block">
-            <NavLink href="/admin/settings" title="Settings" icon={Icon.settings} items={settingsItems}>
-              Settings
+          <nav aria-label={t('Einstellungen', 'Settings')} className="hidden shrink-0 px-3 pt-2 lg:block">
+            <NavLink href="/admin/settings" title={t('Einstellungen', 'Settings')} icon={Icon.settings} items={settingsItems}>
+              {t('Einstellungen', 'Settings')}
             </NavLink>
           </nav>
 
@@ -252,19 +260,19 @@ export function WorkspaceShell({
             <div data-rail-foot className="flex items-center gap-0.5 rounded-xl bg-white/[0.045] p-1 ring-1 ring-white/[0.07] ring-inset">
               <Link
                 href="/admin/account"
-                title="Your account"
+                title={t('Dein Konto', 'Your account')}
                 className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors outline-none hover:bg-white/[0.07] focus-visible:ring-2 focus-visible:ring-white/40"
               >
                 <Avatar name={user.name} size={30} tone="rail" />
                 <span data-rail-hide className="min-w-0">
                   <span className="block truncate text-[0.82rem] leading-tight font-semibold text-white">{user.name}</span>
-                  <span className="block text-[0.7rem] leading-tight text-white/50">{roleLabel(user.role)}</span>
+                  <span className="block text-[0.7rem] leading-tight text-white/50">{roleLabel(user.role, lang)}</span>
                 </span>
               </Link>
               <Link
                 href="/"
-                title="The website"
-                aria-label="The website"
+                title={t('Zur Website', 'The website')}
+                aria-label={t('Zur Website', 'The website')}
                 data-rail-hide
                 className="flex size-7 shrink-0 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
               >
@@ -273,8 +281,8 @@ export function WorkspaceShell({
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  title="Sign out"
-                  aria-label="Sign out"
+                  title={t('Abmelden', 'Sign out')}
+                  aria-label={t('Abmelden', 'Sign out')}
                   className="flex size-7 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
                 >
                   {Icon.signOut}
@@ -303,13 +311,13 @@ export function WorkspaceShell({
   );
 }
 
-const ROLE_LABELS: Record<StaffRole, string> = {
-  owner: 'Owner',
-  admin: 'Administrator',
-  staff: 'Staff',
+const ROLE_LABELS: Record<StaffRole, Bilingual> = {
+  owner: { de: 'Inhaber', en: 'Owner' },
+  admin: { de: 'Administrator', en: 'Administrator' },
+  staff: { de: 'Mitarbeitende', en: 'Staff' },
 };
 
-export const roleLabel = (role: StaffRole) => ROLE_LABELS[role];
+export const roleLabel = (role: StaffRole, lang: WsLang) => pick(lang, ROLE_LABELS[role]);
 
 /**
  * Initials, not a photograph.

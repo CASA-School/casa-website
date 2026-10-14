@@ -22,7 +22,6 @@ import {
   DetailList,
   RecordHeader,
   Textarea,
-  relativeDays,
 } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor, describeActivity } from '@/lib/admin/activity';
@@ -34,10 +33,13 @@ import {
   listCohortOptions,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
+  storedWords,
 } from '@/lib/admin/bookings';
 import { listCourseTypes } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
+import { pick, relativeDays } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 
 const money = (n: number, currency: string) =>
@@ -100,6 +102,7 @@ export default async function BookingPage({
   ]);
   const booking = await getBooking(id);
   if (!booking) notFound();
+  const { t, lang } = await getI18n();
 
   const canEdit = canAccess(user, 'bookings', 'edit');
   const canFull = canAccess(user, 'bookings', 'full');
@@ -133,31 +136,31 @@ export default async function BookingPage({
   const recordFields = [
     booking.cancelledAt
       ? {
-          label: 'Cancelled',
+          label: t('Storniert', 'Cancelled'),
           value: (
             <span>
               <DateText value={booking.cancelledAt} />
-              {booking.cancelReason ? ` · ${booking.cancelReason}` : ''}
+              {booking.cancelReason ? ` · ${storedWords(booking.cancelReason, lang)}` : ''}
             </span>
           ),
         }
       : null,
     booking.sourceRegistrationId
       ? {
-          label: 'From registration',
+          label: t('Aus der Anmeldung', 'From registration'),
           value: (
             <Link
               href={`/admin/registrations/course/${booking.sourceRegistrationId}`}
               className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
             >
-              Open
+              {t('Öffnen', 'Open')}
             </Link>
           ),
         }
       : null,
     stay && stay.from
       ? {
-          label: 'Stay',
+          label: t('Unterkunft', 'Stay'),
           wide: true,
           value: (
             <>
@@ -179,40 +182,40 @@ export default async function BookingPage({
     <>
       <RecordHeader
         backHref="/admin/bookings"
-        backLabel="All bookings"
+        backLabel={t('Alle Buchungen', 'All bookings')}
         title={booking.personName}
         avatar={booking.personName}
         subtitle={
           <span className="flex flex-wrap items-center gap-x-2">
             <span>
-              Booked <DateText value={booking.createdAt} />
+              {t('Gebucht', 'Booked')} <DateText value={booking.createdAt} />
             </span>
             <span aria-hidden="true">·</span>
             <Link
               href={`/admin/people/${booking.personId}`}
               className="inline-flex items-center gap-1 font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
             >
-              Student page {Icon.chevronRight}
+              {t('Zur Person', 'Student page')} {Icon.chevronRight}
             </Link>
           </span>
         }
         status={
           <>
             <Badge tone={BOOKING_STATUS_TONES[booking.status]}>
-              {BOOKING_STATUS_LABELS[booking.status]}
+              {pick(lang, BOOKING_STATUS_LABELS[booking.status])}
             </Badge>
-            {booking.visaRequired ? <Badge tone="warning">Visa required</Badge> : null}
+            {booking.visaRequired ? <Badge tone="warning">{t('Visum nötig', 'Visa required')}</Badge> : null}
           </>
         }
         actions={
           <>
             {canEdit && open ? (
-              <FormDialog trigger="Extend" title="Extend the booking">
+              <FormDialog trigger={t('Verlängern', 'Extend')} title={t('Buchung verlängern', 'Extend the booking')}>
                 <ExtendBookingForm booking={booking} cohorts={cohorts} />
               </FormDialog>
             ) : null}
             {canEdit ? (
-              <FormDialog trigger="Edit" title="Edit the booking">
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Buchung bearbeiten', 'Edit the booking')}>
                 <EditBookingForm booking={booking} courseTypes={courseTypes} />
               </FormDialog>
             ) : null}
@@ -220,14 +223,14 @@ export default async function BookingPage({
         }
         facts={[
           {
-            label: 'Course',
+            label: t('Kurs', 'Course'),
             icon: Icon.catalogue,
             tint: 'red',
             value: booking.courseTypeName,
             sub: singleCohortTitle ?? undefined,
           },
           {
-            label: 'Dates',
+            label: t('Zeitraum', 'Dates'),
             icon: Icon.calendar,
             tint: 'blue',
             value: booking.startDate ? (
@@ -237,35 +240,44 @@ export default async function BookingPage({
               </>
             ) : null,
             sub: [
-              weeks ? `${weeks} ${weeks === 1 ? 'week' : 'weeks'}` : null,
-              booking.periods.length > 1 ? `${booking.periods.length} periods` : null,
+              weeks
+                ? weeks === 1
+                  ? t('1 Woche', '1 week')
+                  : t(`${weeks} Wochen`, `${weeks} weeks`)
+                : null,
+              booking.periods.length > 1 ? t(`${booking.periods.length} Zeiträume`, `${booking.periods.length} periods`) : null,
               // One period has no card of its own (it would repeat these
               // dates), so a missing cohort is said here.
-              single && !single.courseInstanceId ? 'No cohort yet' : null,
+              single && !single.courseInstanceId ? t('Noch kein Termin', 'No cohort yet') : null,
             ]
               .filter(Boolean)
               .join(' · '),
           },
           {
-            label: 'Stay',
+            label: t('Unterkunft', 'Stay'),
             icon: Icon.rooms,
             tint: 'blue',
-            value: stay ? stay.typeName : 'None',
+            value: stay ? stay.typeName : t('Keine', 'None'),
             sub: stay ? [stay.roomTypeName, stay.cateringName].filter(Boolean).join(' · ') : undefined,
           },
           {
-            label: 'Payer',
+            label: t('Wer zahlt', 'Payer'),
             icon: Icon.person,
             tint: 'ink',
-            value: PAYER_LABELS[booking.payer],
+            value: pick(lang, PAYER_LABELS[booking.payer]),
             sub: booking.payerName ?? undefined,
           },
           {
-            label: 'Balance',
+            label: t('Saldo', 'Balance'),
             icon: Icon.money,
             tint: booking.balance > 0 ? 'sun' : booking.balance < 0 ? 'red' : 'green',
             value: <span className={balanceTone}>{money(booking.balance, booking.currency)}</span>,
-            sub: booking.balance > 0 ? 'still open' : booking.balance < 0 ? 'paid over' : 'paid in full',
+            sub:
+              booking.balance > 0
+                ? t('noch offen', 'still open')
+                : booking.balance < 0
+                  ? t('überzahlt', 'paid over')
+                  : t('vollständig bezahlt', 'paid in full'),
           },
         ]}
       />
@@ -282,14 +294,14 @@ export default async function BookingPage({
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
           {booking.periods.length > 1 ? (
-            <Card title="Periods" icon={Icon.calendar} tint="blue">
+            <Card title={t('Zeiträume', 'Periods')} icon={Icon.calendar} tint="blue">
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
                 {booking.periods.map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
                     <span className="min-w-0 text-sm">
                       <span className="flex items-center gap-2 font-semibold">
                         <DateText value={p.startDate} /> – <DateText value={p.endDate} />
-                        {p.kind === 'extension' ? <Badge tone="quiet">Extension</Badge> : null}
+                        {p.kind === 'extension' ? <Badge tone="quiet">{t('Verlängerung', 'Extension')}</Badge> : null}
                       </span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
                         {p.courseInstanceId ? (
@@ -297,7 +309,7 @@ export default async function BookingPage({
                             {p.cohortLabel}
                           </Link>
                         ) : (
-                          <Badge tone="warning">No cohort yet</Badge>
+                          <Badge tone="warning">{t('Noch kein Termin', 'No cohort yet')}</Badge>
                         )}
                       </span>
                     </span>
@@ -306,12 +318,12 @@ export default async function BookingPage({
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="periodId" value={p.id} />
                         <ConfirmSubmit
-                          title="Remove these dates?"
-                          description="The period is removed from the booking."
-                          confirmLabel="Remove"
+                          title={t('Diesen Zeitraum entfernen?', 'Remove these dates?')}
+                          description={t('Der Zeitraum wird aus der Buchung entfernt.', 'The period is removed from the booking.')}
+                          confirmLabel={t('Entfernen', 'Remove')}
                           variant="ghost"
                         >
-                          Remove
+                          {t('Entfernen', 'Remove')}
                         </ConfirmSubmit>
                       </form>
                     ) : null}
@@ -322,12 +334,12 @@ export default async function BookingPage({
           ) : null}
 
           <Card
-            title="Cost"
+            title={t('Kosten', 'Cost')}
             icon={Icon.catalogue}
             tint="red"
             actions={
               canEdit && open ? (
-                <FormDialog trigger="Add line" title="Add a cost line" size="sm">
+                <FormDialog trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
                   <ChargeForm bookingId={booking.id} />
                 </FormDialog>
               ) : undefined
@@ -339,67 +351,73 @@ export default async function BookingPage({
                   <span className="font-extrabold">{money(booking.charged, booking.currency)}</span>
                 }
               >
-                <span className="text-sm font-bold text-[var(--casa-muted)]">Total</span>
+                <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Gesamt', 'Total')}</span>
               </LedgerLine>
             }
           >
             {booking.charges.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">No cost lines.</p>
+              <p className="text-sm text-[var(--casa-text-subtle)]">{t('Keine Kostenposten.', 'No cost lines.')}</p>
             ) : (
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {booking.charges.map((c) => (
-                  <li key={c.id}>
-                    <LedgerLine
-                      className="py-2.5"
-                      withAction={removesCharges}
-                      amount={
-                        <span
-                          className={cn(
-                            'font-semibold',
-                            c.amount < 0 ? 'text-[var(--casa-danger-text)]' : ''
-                          )}
-                        >
-                          {money(c.amount, booking.currency)}
-                        </span>
-                      }
-                      action={
-                        removesCharges ? (
-                          <form action={removeChargeAction}>
-                            <input type="hidden" name="bookingId" value={booking.id} />
-                            <input type="hidden" name="chargeId" value={c.id} />
-                            <ConfirmSubmit
-                              title={`Remove "${c.description}"?`}
-                              description="The line is removed from the booking."
-                              confirmLabel="Remove"
-                              variant="ghost"
-                            >
-                              Remove
-                            </ConfirmSubmit>
-                          </form>
-                        ) : null
-                      }
-                    >
-                      <span className="block text-sm font-semibold">{c.description}</span>
-                      {/* The kind only when the line's own text does not already say it. */}
-                      {CHARGE_KIND_LABELS[c.kind] !== c.description ? (
-                        <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">{CHARGE_KIND_LABELS[c.kind]}</span>
-                      ) : null}
-                    </LedgerLine>
-                  </li>
-                ))}
+                {booking.charges.map((c) => {
+                  // A line whose text is its kind's label, in either language, reads in this one.
+                  const kindLabel = CHARGE_KIND_LABELS[c.kind];
+                  const isKind = c.description === kindLabel.en || c.description === kindLabel.de;
+                  const description = isKind ? pick(lang, kindLabel) : storedWords(c.description, lang);
+                  return (
+                    <li key={c.id}>
+                      <LedgerLine
+                        className="py-2.5"
+                        withAction={removesCharges}
+                        amount={
+                          <span
+                            className={cn(
+                              'font-semibold',
+                              c.amount < 0 ? 'text-[var(--casa-danger-text)]' : ''
+                            )}
+                          >
+                            {money(c.amount, booking.currency)}
+                          </span>
+                        }
+                        action={
+                          removesCharges ? (
+                            <form action={removeChargeAction}>
+                              <input type="hidden" name="bookingId" value={booking.id} />
+                              <input type="hidden" name="chargeId" value={c.id} />
+                              <ConfirmSubmit
+                                title={t(`„${description}“ entfernen?`, `Remove "${description}"?`)}
+                                description={t('Der Posten wird aus der Buchung entfernt.', 'The line is removed from the booking.')}
+                                confirmLabel={t('Entfernen', 'Remove')}
+                                variant="ghost"
+                              >
+                                {t('Entfernen', 'Remove')}
+                              </ConfirmSubmit>
+                            </form>
+                          ) : null
+                        }
+                      >
+                        <span className="block text-sm font-semibold">{description}</span>
+                        {/* The kind only when the line's own text does not already say it. */}
+                        {!isKind ? (
+                          <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">{pick(lang, kindLabel)}</span>
+                        ) : null}
+                      </LedgerLine>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </Card>
 
           <Card
-            title="Payments"
+            title={t('Zahlungen', 'Payments')}
             icon={Icon.money}
             tint="green"
             actions={
               canEdit && open ? (
                 <FormDialog
-                  trigger="Record payment"
-                  title="Record a payment"
+                  trigger={t('Zahlung erfassen', 'Record payment')}
+                  title={t('Zahlung erfassen', 'Record a payment')}
                   size="sm"
                   triggerVariant="primary"
                 >
@@ -416,12 +434,12 @@ export default async function BookingPage({
                   </span>
                 }
               >
-                <span className="text-sm font-bold text-[var(--casa-muted)]">Received</span>
+                <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Eingegangen', 'Received')}</span>
               </LedgerLine>
             }
           >
             {booking.payments.length === 0 ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">Nothing received yet.</p>
+              <p className="text-sm text-[var(--casa-text-subtle)]">{t('Noch nichts eingegangen.', 'Nothing received yet.')}</p>
             ) : (
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
                 {booking.payments.map((p) => (
@@ -441,12 +459,15 @@ export default async function BookingPage({
                             <input type="hidden" name="paymentId" value={p.id} />
                             <input type="hidden" name="reason" value="Voided by staff" />
                             <ConfirmSubmit
-                              title={`Void ${money(p.amount, booking.currency)}?`}
-                              description="The payment stays on the record, marked void, and no longer counts towards the balance."
-                              confirmLabel="Void"
+                              title={t(`${money(p.amount, booking.currency)} stornieren?`, `Void ${money(p.amount, booking.currency)}?`)}
+                              description={t(
+                                'Die Zahlung bleibt als storniert auf dem Datensatz und zählt nicht mehr zum Saldo.',
+                                'The payment stays on the record, marked void, and no longer counts towards the balance.'
+                              )}
+                              confirmLabel={t('Stornieren', 'Void')}
                               variant="ghost"
                             >
-                              Void
+                              {t('Stornieren', 'Void')}
                             </ConfirmSubmit>
                           </form>
                         ) : null
@@ -454,13 +475,13 @@ export default async function BookingPage({
                     >
                       <span className="flex items-center gap-2 text-sm font-semibold">
                         {p.subject}
-                        {p.voidedAt ? <Badge tone="quiet">Voided</Badge> : null}
+                        {p.voidedAt ? <Badge tone="quiet">{t('Storniert', 'Voided')}</Badge> : null}
                       </span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                        <DateText value={p.receivedAt} /> · {PAYMENT_METHOD_LABELS[p.method]}
+                        <DateText value={p.receivedAt} /> · {pick(lang, PAYMENT_METHOD_LABELS[p.method])}
                         {p.reference ? ` · ${p.reference}` : ''}
                         {p.recordedByName ? ` · ${p.recordedByName}` : ''}
-                        {p.voidReason ? ` · ${p.voidReason}` : ''}
+                        {p.voidReason ? ` · ${storedWords(p.voidReason, lang)}` : ''}
                       </span>
                     </LedgerLine>
                   </li>
@@ -472,12 +493,12 @@ export default async function BookingPage({
 
         <div className="space-y-4">
           {recordFields.length > 0 ? (
-            <Card title="Booking" icon={Icon.bookings} tint="ink">
+            <Card title={t('Buchung', 'Booking')} icon={Icon.bookings} tint="ink">
               <DetailList items={recordFields} />
             </Card>
           ) : null}
 
-          <Card title="Notes" icon={Icon.note} tint="sun">
+          <Card title={t('Notizen', 'Notes')} icon={Icon.note} tint="sun">
             {canEdit ? (
               <form action={addNoteAction} className="space-y-2">
                 <input type="hidden" name="entity" value="booking" />
@@ -486,11 +507,11 @@ export default async function BookingPage({
                   name="body"
                   rows={3}
                   required
-                  placeholder="What was agreed, and what happens next?"
-                  aria-label="New note"
+                  placeholder={t('Was wurde vereinbart, und wie geht es weiter?', 'What was agreed, and what happens next?')}
+                  aria-label={t('Neue Notiz', 'New note')}
                 />
                 <Button type="submit" variant="secondary" size="sm">
-                  Add note
+                  {t('Notiz hinzufügen', 'Add note')}
                 </Button>
               </form>
             ) : null}
@@ -505,7 +526,7 @@ export default async function BookingPage({
                     <p className="text-sm leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">
                       {booking.notes}
                     </p>
-                    <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">On the booking</p>
+                    <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">{t('In der Buchung', 'On the booking')}</p>
                   </li>
                 ) : null}
                 {notes.map((note) => (
@@ -514,18 +535,19 @@ export default async function BookingPage({
                       {note.body}
                     </p>
                     <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">
-                      {note.authorName ?? 'A former colleague'} · {relativeDays(note.createdAt)}
+                      {note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague')} ·{' '}
+                      {relativeDays(note.createdAt, lang)}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : !canEdit ? (
-              <p className="text-sm text-[var(--casa-text-subtle)]">No notes.</p>
+              <p className="text-sm text-[var(--casa-text-subtle)]">{t('Keine Notizen.', 'No notes.')}</p>
             ) : null}
           </Card>
 
           {activity.length > 0 ? (
-            <Card title="History" icon={Icon.clock} tint="ink">
+            <Card title={t('Verlauf', 'History')} icon={Icon.clock} tint="ink">
               <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
                 {activity.map((entry) => (
                   <li key={entry.id} className="relative flex gap-3 text-xs">
@@ -535,9 +557,9 @@ export default async function BookingPage({
                     />
                     <span className="text-[var(--casa-text-subtle)]">
                       <span className="font-bold text-[var(--casa-ink)]">
-                        {entry.staffName ?? 'Someone'}
+                        {entry.staffName ?? t('Jemand', 'Someone')}
                       </span>{' '}
-                      {describeActivity(entry)} · {relativeDays(entry.createdAt)}
+                      {describeActivity(entry, lang)} · {relativeDays(entry.createdAt, lang)}
                     </span>
                   </li>
                 ))}
@@ -553,21 +575,27 @@ export default async function BookingPage({
             <form action={cancelBookingAction}>
               <input type="hidden" name="bookingId" value={booking.id} />
               <ConfirmSubmit
-                title={`Cancel ${booking.personName}'s booking?`}
-                description="The place is released. Cost lines and payments stay on the record so the refund can be worked out. This cannot be undone."
-                confirmLabel="Cancel booking"
+                title={t(`Buchung von ${booking.personName} stornieren?`, `Cancel ${booking.personName}'s booking?`)}
+                description={t(
+                  'Der Platz wird frei. Kostenposten und Zahlungen bleiben auf dem Datensatz, damit die Erstattung berechnet werden kann. Das lässt sich nicht rückgängig machen.',
+                  'The place is released. Cost lines and payments stay on the record so the refund can be worked out. This cannot be undone.'
+                )}
+                confirmLabel={t('Buchung stornieren', 'Cancel booking')}
               >
-                Cancel booking
+                {t('Buchung stornieren', 'Cancel booking')}
               </ConfirmSubmit>
             </form>
           ) : null}
           <form action={deleteBookingAction}>
             <input type="hidden" name="bookingId" value={booking.id} />
             <ConfirmSubmit
-              title="Delete this booking?"
-              description="Only possible while no payment has been recorded. The booking disappears from every list."
+              title={t('Diese Buchung löschen?', 'Delete this booking?')}
+              description={t(
+                'Nur möglich, solange keine Zahlung erfasst ist. Die Buchung verschwindet aus allen Listen.',
+                'Only possible while no payment has been recorded. The booking disappears from every list.'
+              )}
             >
-              Delete booking
+              {t('Buchung löschen', 'Delete booking')}
             </ConfirmSubmit>
           </form>
         </RecordFoot>

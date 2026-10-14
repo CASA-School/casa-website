@@ -15,18 +15,18 @@ describe('fit', () => {
 
   it('blocks an absent day with its reason', () => {
     const ctx = context({ teachers: [anna], groups: [a1], absences: [{ teacherId: 'anna', onDate: KW40[0], reason: 'Krank' }] });
-    expect(fit(ctx, 'anna', a1, KW40[0])).toEqual({ ok: false, reason: 'Krank' });
+    expect(fit(ctx, 'anna', a1, KW40[0])).toEqual({ ok: false, reason: { de: 'Krank', en: 'Sick' } });
   });
 
   it('blocks a weekday the person does not work', () => {
     const noFriday = teacher({ id: 'nf', weekdays: ['Mo', 'Di', 'Mi', 'Do'] });
     const ctx = context({ teachers: [noFriday], groups: [a1] });
-    expect(fit(ctx, 'nf', a1, KW40[4])).toEqual({ ok: false, reason: 'nicht am Fr' });
+    expect(fit(ctx, 'nf', a1, KW40[4])).toEqual({ ok: false, reason: { de: 'nicht am Fr', en: 'not on Fri' } });
   });
 
   it('blocks a second course of the same shift on the same day', () => {
     const ctx = context({ teachers: [anna], groups: [a1, a2], assignments: [assignment('a2', KW40[0], 'anna')] });
-    expect(fit(ctx, 'anna', a1, KW40[0])).toEqual({ ok: false, reason: 'schon verplant' });
+    expect(fit(ctx, 'anna', a1, KW40[0])).toEqual({ ok: false, reason: { de: 'schon verplant', en: 'already planned' } });
   });
 
   it('blocks when the week is full, but not the day already held', () => {
@@ -36,7 +36,7 @@ describe('fit', () => {
       groups: [a1],
       assignments: [assignment('a1', KW40[0], 'two'), assignment('a1', KW40[1], 'two')],
     });
-    expect(fit(ctx, 'two', a1, KW40[2])).toEqual({ ok: false, reason: 'Woche voll' });
+    expect(fit(ctx, 'two', a1, KW40[2])).toEqual({ ok: false, reason: { de: 'Woche voll', en: 'week full' } });
     expect(fit(ctx, 'two', a1, KW40[0]).ok).toBe(true);
   });
 

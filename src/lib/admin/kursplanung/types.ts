@@ -1,3 +1,5 @@
+import type { Bilingual } from '../i18n';
+
 /**
  * The course-planning domain, as data.
  *
@@ -17,6 +19,15 @@ export type Level = (typeof LEVELS)[number];
 export const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr'] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
 
+/** A weekday as the board writes it. The code (`Mo`) is the stored value; this is only its label. */
+export const WEEKDAY_LABELS: Record<Weekday, Bilingual> = {
+  Mo: { de: 'Mo', en: 'Mon' },
+  Di: { de: 'Di', en: 'Tue' },
+  Mi: { de: 'Mi', en: 'Wed' },
+  Do: { de: 'Do', en: 'Thu' },
+  Fr: { de: 'Fr', en: 'Fri' },
+};
+
 export const ABSENCE_REASONS = [
   'Urlaub',
   'Krank',
@@ -26,6 +37,16 @@ export const ABSENCE_REASONS = [
   'Sonstiges',
 ] as const;
 export type AbsenceReason = (typeof ABSENCE_REASONS)[number];
+
+/** A reason's label. The German word is the stored value; this is what the screens show. */
+export const ABSENCE_LABELS: Record<AbsenceReason, Bilingual> = {
+  Urlaub: { de: 'Urlaub', en: 'Holiday' },
+  Krank: { de: 'Krank', en: 'Sick' },
+  Fortbildung: { de: 'Fortbildung', en: 'Training' },
+  Freistellung: { de: 'Freistellung', en: 'Released from duty' },
+  Elternzeit: { de: 'Elternzeit', en: 'Parental leave' },
+  Sonstiges: { de: 'Sonstiges', en: 'Other' },
+};
 
 export type Contract = 'employed' | 'freelance';
 
@@ -37,10 +58,22 @@ export type Contract = 'employed' | 'freelance';
  */
 export const SHIFT_INFO: Record<
   Shift,
-  { label: string; days: number; half: number; time: string; halves: [string, string] }
+  { label: Bilingual; days: number; half: number; time: string; halves: [Bilingual, Bilingual] }
 > = {
-  morning: { label: 'Vormittag', days: 5, half: 3, time: '09:00–12:30', halves: ['Mo–Mi', 'Do–Fr'] },
-  afternoon: { label: 'Nachmittag', days: 4, half: 2, time: '13:00–17:30', halves: ['Mo–Di', 'Mi–Do'] },
+  morning: {
+    label: { de: 'Vormittag', en: 'Morning' },
+    days: 5,
+    half: 3,
+    time: '09:00–12:30',
+    halves: [{ de: 'Mo–Mi', en: 'Mon–Wed' }, { de: 'Do–Fr', en: 'Thu–Fri' }],
+  },
+  afternoon: {
+    label: { de: 'Nachmittag', en: 'Afternoon' },
+    days: 4,
+    half: 2,
+    time: '13:00–17:30',
+    halves: [{ de: 'Mo–Di', en: 'Mon–Tue' }, { de: 'Mi–Do', en: 'Wed–Thu' }],
+  },
 };
 
 export type Teacher = {

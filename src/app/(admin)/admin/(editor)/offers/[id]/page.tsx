@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { OfferPage } from '@/components/admin/offers/offer-page';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { courseCatalogue, learnerHistory } from '@/lib/admin/offers/course-catalogue';
 import { editorOptions, getOffer, offerTexts, priceListOptions } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
@@ -23,9 +24,10 @@ export default async function Page({
   const record = await getOffer(id);
   if (!record) notFound();
   const individual = record.draft.kind === 'individual';
+  const { lang } = await getI18n();
   const [options, priceList, texts, catalogue, history] = await Promise.all([
     editorOptions(),
-    priceListOptions(),
+    priceListOptions(lang),
     offerTexts(),
     individual ? courseCatalogue() : Promise.resolve({ courses: [], books: [], exams: [], prices: [] }),
     individual && record.meta.personId ? learnerHistory(record.meta.personId) : Promise.resolve(null),

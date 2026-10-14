@@ -42,6 +42,7 @@ describe('planning weeks', () => {
     expect(weekdayOf('2026-10-01')).toBe('Do');
     expect(weekdayOf('2026-10-03')).toBeNull();
     expect(weekStartOf('2026-10-01')).toBe('2026-09-28');
-    expect(monthLabel('2026-10')).toBe('Oktober 2026');
+    expect(monthLabel('2026-10', 'de')).toBe('Oktober 2026');
+    expect(monthLabel('2026-10', 'en')).toBe('October 2026');
   });
 });

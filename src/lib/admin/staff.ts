@@ -4,6 +4,7 @@ import type { AccessLevel } from './access';
 import { query, queryFirst } from './db';
 import { logActivity } from './activity';
 import { revokeAllSessions, revokeOtherSessions, type StaffRole, type StaffUser } from './auth';
+import type { Bilingual } from './i18n';
 import { hashPassword, verifyPassword } from './password';
 import { cleanUsername, usernameKey } from './sign-in-names';
 
@@ -85,16 +86,23 @@ export async function listAssignableStaff(): Promise<{ id: string; name: string 
   );
 }
 
+/** A reason a person reads, in both languages: the action picks one (docs/ADMIN_I18N.md). */
+const GONE: Bilingual = { de: 'Dieses Konto gibt es nicht mehr.', en: 'That account no longer exists.' };
+
 /** Why a name or address cannot be used for another account, or null. */
-async function identityTaken(email: string, username: string, exceptId: string | null): Promise<string | null> {
+async function identityTaken(email: string, username: string, exceptId: string | null): Promise<Bilingual | null> {
   const clash = await queryFirst<{ email_taken: boolean; username_taken: boolean }>(
     `SELECT bool_or(lower(email) = $1) AS email_taken, bool_or(username_key = $2) AS username_taken
        FROM staff_users
       WHERE (lower(email) = $1 OR username_key = $2) AND ($3::uuid IS NULL OR id <> $3)`,
     [email, usernameKey(username), exceptId]
   );
-  if (clash?.email_taken) return 'An account with that email already exists.';
-  if (clash?.username_taken) return 'Someone already signs in with that name. Add a middle name or initial.';
+  if (clash?.email_taken) return { de: 'Es gibt schon ein Konto mit dieser E-Mail-Adresse.', en: 'An account with that email already exists.' };
+  if (clash?.username_taken)
+    return {
+      de: 'Mit diesem Namen meldet sich schon jemand an. Ergänze einen zweiten Vornamen oder eine Initiale.',
+      en: 'Someone already signs in with that name. Add a middle name or initial.',
+    };
   return null;
 }
 
@@ -119,7 +127,7 @@ export async function createStaffAccount({
   password: string | null;
   website?: AccessLevel;
   actor: StaffUser;
-}): Promise<{ ok: true; id: string } | { ok: false; reason: string }> {
+}): Promise<{ ok: true; id: string } | { ok: false; reason: Bilingual }> {
   const normalised = email.trim().toLowerCase();
   const login = cleanUsername(username || name);
 
@@ -142,7 +150,7 @@ export async function createStaffAccount({
       password ? new Date() : null,
     ]
   );
-  if (!created) return { ok: false, reason: 'The account could not be created.' };
+  if (!created) return { ok: false, reason: { de: 'Das Konto konnte nicht angelegt werden.', en: 'The account could not be created.' } };
 
   if (website && website !== 'none' && role === 'staff') {
     await query(
@@ -176,7 +184,7 @@ export async function updateStaffProfile({
   username: string;
   email: string;
   actor: StaffUser;
-}): Promise<{ ok: true } | { ok: false; reason: string }> {
+}): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   const normalised = email.trim().toLowerCase();
   const login = cleanUsername(username || name);
   const taken = await identityTaken(normalised, login, staffUserId);
@@ -186,7 +194,7 @@ export async function updateStaffProfile({
     `UPDATE staff_users SET name = $2, username = $3, username_key = $4, email = $5 WHERE id = $1 RETURNING id`,
     [staffUserId, name.trim(), login, usernameKey(login), normalised]
   );
-  if (!updated) return { ok: false, reason: 'That account no longer exists.' };
+  if (!updated) return { ok: false, reason: GONE };
 
   await logActivity({
     actor,
@@ -221,9 +229,9 @@ export async function setStaffActive({
   staffUserId: string;
   isActive: boolean;
   actor: StaffUser;
-}): Promise<{ ok: true } | { ok: false; reason: string }> {
+}): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   if (staffUserId === actor.id && !isActive) {
-    return { ok: false, reason: 'You cannot deactivate your own account.' };
+    return { ok: false, reason: { de: 'Dein eigenes Konto kannst du nicht deaktivieren.', en: 'You cannot deactivate your own account.' } };
   }
 
   const target = await queryFirst<{ email: string; role: StaffRole }>(
@@ -232,7 +240,7 @@ export async function setStaffActive({
   );
 
   if (!target) {
-    return { ok: false, reason: 'That account no longer exists.' };
+    return { ok: false, reason: GONE };
   }
 
   // Locking out the last owner leaves nobody who can create accounts.
@@ -243,7 +251,7 @@ export async function setStaffActive({
     );
 
     if (Number(remaining?.n ?? 0) === 0) {
-      return { ok: false, reason: 'This is the last active owner account.' };
+      return { ok: false, reason: { de: 'Das ist das letzte aktive Inhaber-Konto.', en: 'This is the last active owner account.' } };
     }
   }
 
@@ -272,9 +280,9 @@ export async function setStaffRole({
   staffUserId: string;
   role: StaffRole;
   actor: StaffUser;
-}): Promise<{ ok: true } | { ok: false; reason: string }> {
+}): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   if (staffUserId === actor.id) {
-    return { ok: false, reason: 'You cannot change your own role.' };
+    return { ok: false, reason: { de: 'Deine eigene Rolle kannst du nicht ändern.', en: 'You cannot change your own role.' } };
   }
 
   const target = await queryFirst<{ email: string; role: StaffRole }>(
@@ -283,7 +291,7 @@ export async function setStaffRole({
   );
 
   if (!target) {
-    return { ok: false, reason: 'That account no longer exists.' };
+    return { ok: false, reason: GONE };
   }
 
   if (target.role === 'owner' && role !== 'owner') {
@@ -293,7 +301,7 @@ export async function setStaffRole({
     );
 
     if (Number(remaining?.n ?? 0) === 0) {
-      return { ok: false, reason: 'This is the last owner account.' };
+      return { ok: false, reason: { de: 'Das ist das letzte Inhaber-Konto.', en: 'This is the last owner account.' } };
     }
   }
 
@@ -349,14 +357,14 @@ export async function changeOwnPassword(
   actor: StaffUser,
   current: string,
   next: string
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true } | { ok: false; error: Bilingual }> {
   const row = await queryFirst<{ password_hash: string; has_password: boolean }>(
     `SELECT password_hash, password_set_at IS NOT NULL AS has_password FROM staff_users WHERE id = $1`,
     [actor.id]
   );
-  if (!row) return { ok: false, error: 'Unknown account.' };
+  if (!row) return { ok: false, error: { de: 'Unbekanntes Konto.', en: 'Unknown account.' } };
   if (row.has_password && !(await verifyPassword(current, row.password_hash))) {
-    return { ok: false, error: 'The current password is not right.' };
+    return { ok: false, error: { de: 'Das aktuelle Passwort stimmt nicht.', en: 'The current password is not right.' } };
   }
 
   await query(`UPDATE staff_users SET password_hash = $2, password_set_at = now() WHERE id = $1`, [

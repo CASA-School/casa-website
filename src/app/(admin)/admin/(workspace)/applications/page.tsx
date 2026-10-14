@@ -2,14 +2,15 @@ import { ListEmpty, ListGroup, Owner, RecordName } from '@/components/admin/list
 import { Pagination } from '@/components/admin/pagination';
 import {
   parseFilter,
-  QUEUE_TAIL_HEAD,
   QueueToolbar,
   queueEmptyTitle,
   queueGroups,
+  queueTailHead,
   Received,
 } from '@/components/admin/queue-toolbar';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { listApplications } from '@/lib/admin/careers';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { queueStatusCounts } from '@/lib/admin/queues';
 
@@ -32,7 +33,7 @@ export default async function ApplicationsPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, counts] = await Promise.all([
+  const [{ items, total }, counts, { t, lang }] = await Promise.all([
     listApplications({
       status: filter,
       search,
@@ -40,13 +41,14 @@ export default async function ApplicationsPage({
       offset: offsetFor(page),
     }),
     queueStatusCounts('career_application'),
+    getI18n(),
   ]);
 
-  const groups = queueGroups(items, filter);
+  const groups = queueGroups(items, filter, lang);
 
   return (
     <>
-      <PageHeader title="Applications" />
+      <PageHeader title={t('Bewerbungen', 'Applications')} />
 
       <Card bleed>
         <QueueToolbar
@@ -58,13 +60,14 @@ export default async function ApplicationsPage({
             all: counts.total,
           }}
           search={search}
-          searchPlaceholder="Name, email or position"
+          searchPlaceholder={t('Name, E-Mail oder Stelle', 'Name, email or position')}
+          lang={lang}
         />
 
         {items.length === 0 ? (
-          <ListEmpty title={queueEmptyTitle(filter, search)} />
+          <ListEmpty title={queueEmptyTitle(lang, filter, search)} />
         ) : (
-          <Table head={['Application', ...QUEUE_TAIL_HEAD]}>
+          <Table head={[t('Bewerbung', 'Application'), ...queueTailHead(lang)]}>
             {groups.map((group) => [
               group.label ? (
                 <ListGroup key={group.key} label={group.label} count={group.rows.length} span={3} />
@@ -81,7 +84,7 @@ export default async function ApplicationsPage({
                     <Owner name={item.assigneeName} />
                   </Cell>
                   <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
-                    <Received at={item.createdAt} status={item.status} />
+                    <Received at={item.createdAt} status={item.status} lang={lang} />
                   </Cell>
                 </TableRow>
               )),

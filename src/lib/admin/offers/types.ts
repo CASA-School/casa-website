@@ -1,3 +1,5 @@
+import type { Bilingual } from '../i18n';
+
 import type { CourseChoice } from './course';
 
 /**
@@ -10,12 +12,13 @@ import type { CourseChoice } from './course';
 export const OFFER_STATUSES = ['draft', 'sent', 'accepted', 'declined', 'withdrawn'] as const;
 export type OfferStatus = (typeof OFFER_STATUSES)[number];
 
-export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
-  draft: 'Draft',
-  sent: 'Sent',
-  accepted: 'Accepted',
-  declined: 'Declined',
-  withdrawn: 'Withdrawn',
+/** The workspace's words for a status, read with `pick(lang, …)`; never printed on the letter. */
+export const OFFER_STATUS_LABELS: Record<OfferStatus, Bilingual> = {
+  draft: { de: 'Entwurf', en: 'Draft' },
+  sent: { de: 'Gesendet', en: 'Sent' },
+  accepted: { de: 'Angenommen', en: 'Accepted' },
+  declined: { de: 'Abgelehnt', en: 'Declined' },
+  withdrawn: { de: 'Zurückgezogen', en: 'Withdrawn' },
 };
 
 export type OfferKind = 'group' | 'individual';
@@ -30,10 +33,10 @@ export type OrganisationKind = (typeof ORGANISATION_KINDS)[number];
 
 /** How the escorts' own costs are paid. */
 export type EscortPricing = 'paid' | 'free' | 'shared';
-export const ESCORT_PRICING_LABELS: Record<EscortPricing, string> = {
-  paid: 'Pay their own',
-  free: 'Free of charge',
-  shared: 'Shared by the group',
+export const ESCORT_PRICING_LABELS: Record<EscortPricing, Bilingual> = {
+  paid: { de: 'Zahlen selbst', en: 'Pay their own' },
+  free: { de: 'Kostenfrei', en: 'Free of charge' },
+  shared: { de: 'Trägt die Gruppe', en: 'Shared by the group' },
 };
 
 /** The four group packages of the groups page (src/config/gruppen/packages.ts). */
@@ -155,7 +158,8 @@ export type OfferTotals = {
 };
 
 export type CheckLevel = 'problem' | 'hint';
-export type OfferCheck = { level: CheckLevel; field: string; message: string };
+/** A check's message in both languages: the editor shows the workspace's, a refused send names them all. */
+export type OfferCheck = { level: CheckLevel; field: string; message: Bilingual };
 
 export const overrideKey = (audience: Audience, key: string) => `${audience}:${key}`;
 

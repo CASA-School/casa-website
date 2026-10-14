@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatRange, optionLine, parseOptionLabel } from './option-label';
+import { formatRange, localDays, optionLine, parseOptionLabel } from './option-label';
 
 const iso = (date: Date | null) => date?.toISOString().slice(0, 10) ?? null;
 
@@ -46,22 +46,35 @@ describe('optionLine', () => {
   const year = new Date().getFullYear();
 
   it('puts every row in one shape', () => {
-    expect(optionLine(`26. Okt. ${year} - 18. Dez. ${year} | Mo, Di • 09:00-12:30 | CASA`, 'course')).toBe(
+    expect(optionLine(`26. Okt. ${year} - 18. Dez. ${year} | Mo, Di • 09:00-12:30 | CASA`, 'course', 'en')).toBe(
       'Starts 26 Oct · 09:00–12:30'
     );
-    expect(optionLine(`Starts 24/08/${year}`, 'course')).toBe('Starts 24 Aug');
-    expect(optionLine(`13. Nov. ${year}, 09:00 - 17:00 | CASA`, 'exam')).toBe('13 Nov · 09:00–17:00');
-    expect(optionLine('Date to be arranged', 'course')).toBe('Date to be arranged');
-    expect(optionLine('Sometime in spring', 'course')).toBe('Sometime in spring');
-    expect(optionLine(null, 'exam')).toBeNull();
+    expect(optionLine(`Starts 24/08/${year}`, 'course', 'en')).toBe('Starts 24 Aug');
+    expect(optionLine(`13. Nov. ${year}, 09:00 - 17:00 | CASA`, 'exam', 'en')).toBe('13 Nov · 09:00–17:00');
+    expect(optionLine('Date to be arranged', 'course', 'en')).toBe('Date to be arranged');
+    expect(optionLine('Sometime in spring', 'course', 'en')).toBe('Sometime in spring');
+    expect(optionLine(null, 'exam', 'en')).toBeNull();
+  });
+
+  it('says it in German', () => {
+    expect(optionLine(`26. Okt. ${year} - 18. Dez. ${year} | Mo, Di • 09:00-12:30 | CASA`, 'course', 'de')).toBe(
+      'Beginn 26. Okt. · 09:00–12:30'
+    );
+    expect(optionLine('Date to be arranged', 'course', 'de')).toBe('Termin wird noch festgelegt');
+    expect(localDays('Mon–Fri', 'de')).toBe('Mo–Fr');
+    expect(localDays('Mon, Wed', 'de')).toBe('Mo, Mi');
+    expect(localDays('Mon–Fri', 'en')).toBe('Mon–Fri');
   });
 
   it('names the year once in a range', () => {
-    expect(formatRange(new Date(Date.UTC(2026, 9, 26, 12)), new Date(Date.UTC(2026, 11, 18, 12)))).toBe(
+    expect(formatRange(new Date(Date.UTC(2026, 9, 26, 12)), new Date(Date.UTC(2026, 11, 18, 12)), 'en')).toBe(
       '26 Oct – 18 Dec 2026'
     );
-    expect(formatRange(new Date(Date.UTC(2026, 11, 7, 12)), new Date(Date.UTC(2027, 0, 29, 12)))).toBe(
+    expect(formatRange(new Date(Date.UTC(2026, 11, 7, 12)), new Date(Date.UTC(2027, 0, 29, 12)), 'en')).toBe(
       '7 Dec 2026 – 29 Jan 2027'
+    );
+    expect(formatRange(new Date(Date.UTC(2026, 9, 26, 12)), new Date(Date.UTC(2026, 11, 18, 12)), 'de')).toBe(
+      '26. Okt. – 18. Dez. 2026'
     );
   });
 });

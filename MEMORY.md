@@ -2742,3 +2742,16 @@ ground; the way back is a small rounded pill; list titles 28px. Badges everywher
 rounded pills with a fine edge. In lists, initials are softly tinted per name (colleagues stay navy),
 a list without views says what it holds ("18 students"), and a row shows a quiet arrow on hover.
 Sidebar rows back to 32px with a fade where the menu scrolls.
+
+Twenty-first pass: **the workspace in two languages.** Rahman: "have it in two languages, the
+dashboard. the default language should be in german". Every text on an `/admin` screen is written
+in German and English beside the code that shows it (`t('Anfragen', 'Enquiries')`; labels kept in
+tables are `Bilingual`, read with `pick`), German first and in du; dates and numbers follow the
+language. German is the default; each colleague switches with DE | EN in the sidebar head or on the
+sign-in page (`/admin/lang`), and the choice is kept on the account (`staff_users.language`,
+migration 0025) and in the browser (cookie `casa_ws_lang`). Kursplanung, German before, gained its
+English. Not translated: names, what people wrote, the catalogue's names, the offer letter (it has
+its own language) and planners' shorthand. Words the workspace writes into a booking by itself are
+stored in English and shown in the reader's language. The site's copy extractor now skips
+`src/app/(admin)`. e2e specs that read English set the cookie; Kursplanung's pins German.
+docs/ADMIN_I18N.md has the API, the rules and the glossary.

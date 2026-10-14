@@ -4,6 +4,7 @@ import type { PoolClient } from 'pg';
 
 import type { StaffUser } from '../auth';
 import { query, queryFirst } from '../db';
+import { pick, translator, type Bilingual, type WsLang } from '../i18n';
 import { normalizeEmail } from '../normalize';
 import { toDateInputValue } from '@/lib/dates';
 
@@ -31,13 +32,20 @@ import type {
  * creates the one that is really new (docs/OFFERS.md §New offer).
  */
 
-const KIND_WORD: Record<OrganisationKind, string> = {
-  school: 'School',
-  agency: 'Agency',
-  company: 'Company',
-  public_body: 'Public body',
-  other: 'Organisation',
+const KIND_WORD: Record<OrganisationKind, Bilingual> = {
+  school: { de: 'Schule', en: 'School' },
+  agency: { de: 'Agentur', en: 'Agency' },
+  company: { de: 'Unternehmen', en: 'Company' },
+  public_body: { de: 'Behörde', en: 'Public body' },
+  other: { de: 'Organisation', en: 'Organisation' },
 };
+
+/** A recipient that went while the wizard was open: its message in both languages, for the action to show. */
+export class RecipientGoneError extends Error {
+  constructor(readonly text: Bilingual) {
+    super(text.en);
+  }
+}
 
 const day = (d: Date) => toDateInputValue(d).split('-').reverse().join('.');
 const trimCode = (c: string | null) => (c ? c.trim() : null);
@@ -52,7 +60,8 @@ const peopleSalutation = (s: string | null): Salutation => (s === 'ms' || s === 
  * and learners (by name or address). With nothing typed, the enquiries
  * waiting and the organisations written to last.
  */
-export async function findRecipients(q: string, filter: RecipientFilter = 'all'): Promise<RecipientHit[]> {
+export async function findRecipients(q: string, filter: RecipientFilter, lang: WsLang): Promise<RecipientHit[]> {
+  const t = translator(lang);
   const term = q.trim().toLowerCase();
   const like = `%${term}%`;
   const orgKind = filter === 'all' || filter === 'person' ? null : filter;
@@ -72,7 +81,7 @@ export async function findRecipients(q: string, filter: RecipientFilter = 'all')
     filter === 'person'
       ? Promise.resolve([])
       : query<{ id: string; name: string; kind: OrganisationKind; language: OfferLanguage; country_code: string | null; country: string | null; contact: string | null; offers: string; last: Date | null }>(
-          `SELECT g.id, g.name, g.kind, g.language, g.country_code, c.name_en AS country,
+          `SELECT g.id, g.name, g.kind, g.language, g.country_code, ${lang === 'en' ? 'c.name_en' : 'c.name_de'} AS country,
                   (SELECT nullif(concat_ws(' ', oc.first_name, oc.last_name), '') FROM organisation_contacts oc
                     WHERE oc.organisation_id = g.id ORDER BY oc.last_written_at DESC LIMIT 1) AS contact,
                   (SELECT count(*) FROM offers o WHERE o.organisation_id = g.id AND o.deleted_at IS NULL) AS offers,
@@ -106,13 +115,13 @@ export async function findRecipients(q: string, filter: RecipientFilter = 'all')
   return [
     ...enquiries.map((e): RecipientHit => {
       const org = typeof e.brief?.organisationName === 'string' ? (e.brief.organisationName as string) : '';
-      const size = e.brief?.groupSize ? `${e.brief.groupSize} people` : '';
+      const size = e.brief?.groupSize ? t(`${e.brief.groupSize} Personen`, `${e.brief.groupSize} people`) : '';
       const when = typeof e.brief?.preferredDates === 'string' ? (e.brief.preferredDates as string) : '';
       return {
         type: 'enquiry',
         id: e.id,
         name: org || fullName(e.first_name, e.last_name),
-        detail: [e.kind === 'company' ? 'Company enquiry' : 'Group enquiry', day(e.submitted_at), size, when].filter(Boolean).join(' · '),
+        detail: [e.kind === 'company' ? t('Firmenanfrage', 'Company enquiry') : t('Gruppenanfrage', 'Group enquiry'), day(e.submitted_at), size, when].filter(Boolean).join(' · '),
         enquiryKind: e.kind,
       };
     }),
@@ -123,12 +132,19 @@ export async function findRecipients(q: string, filter: RecipientFilter = 'all')
         id: o.id,
         name: o.name,
         kind: o.kind,
-        detail: [KIND_WORD[o.kind], o.country, o.contact, n ? `${n === 1 ? '1 offer' : `${n} offers`}${o.last ? `, last ${day(o.last)}` : ''}` : ''].filter(Boolean).join(' · '),
+        detail: [
+          pick(lang, KIND_WORD[o.kind]),
+          o.country,
+          o.contact,
+          n ? `${n === 1 ? t('1 Angebot', '1 offer') : t(`${n} Angebote`, `${n} offers`)}${o.last ? t(`, zuletzt ${day(o.last)}`, `, last ${day(o.last)}`) : ''}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · '),
         language: o.language,
         countryCode: trimCode(o.country_code),
       };
     }),
-    ...people.map((p): RecipientHit => personHit(p)),
+    ...people.map((p): RecipientHit => personHit(p, lang)),
   ];
 }
 
@@ -145,13 +161,19 @@ type PersonRow = {
   stayed: boolean;
 };
 
-function personHit(p: PersonRow): PersonHit {
+function personHit(p: PersonRow, lang: WsLang): PersonHit {
+  const t = translator(lang);
   const bookings = Number(p.bookings ?? 0);
   return {
     type: 'person',
     id: p.id,
     name: fullName(p.first_name, p.last_name),
-    detail: [bookings ? `Student · ${bookings === 1 ? '1 booking' : `${bookings} bookings`}` : 'Person', p.email].filter(Boolean).join(' · '),
+    detail: [
+      bookings ? `${t('Teilnehmende', 'Student')} · ${bookings === 1 ? t('1 Buchung', '1 booking') : t(`${bookings} Buchungen`, `${bookings} bookings`)}` : 'Person',
+      p.email,
+    ]
+      .filter(Boolean)
+      .join(' · '),
     salutation: peopleSalutation(p.salutation),
     firstName: p.first_name,
     lastName: p.last_name ?? '',
@@ -220,7 +242,8 @@ function contactFromRow(c: { id: string; salutation: Salutation; first_name: str
  * same name written another way, one whose contacts write from the same mail
  * domain, anyone with the same address, a learner with the same name.
  */
-export async function matchRecipients({ name, email }: { name: string; email: string }): Promise<RecipientMatch[]> {
+export async function matchRecipients({ name, email }: { name: string; email: string }, lang: WsLang): Promise<RecipientMatch[]> {
+  const t = translator(lang);
   const out: RecipientMatch[] = [];
   const seen = new Set<string>();
   const add = (m: RecipientMatch) => {
@@ -268,17 +291,19 @@ export async function matchRecipients({ name, email }: { name: string; email: st
       : Promise.resolve([]),
   ]);
 
-  for (const o of byAddress) add({ type: 'organisation', id: o.id, name: o.name, reason: 'Has this address' });
-  for (const p of peopleByAddress) add({ type: 'person', id: p.id, name: fullName(p.first_name, p.last_name), reason: 'Has this address' });
-  for (const o of byName.filter((o) => sameName(o.name, name))) add({ type: 'organisation', id: o.id, name: o.name, reason: 'The same name' });
-  for (const o of byDomain) add({ type: 'organisation', id: o.id, name: o.name, reason: `Writes from @${domain}` });
-  for (const p of peopleByName) add({ type: 'person', id: p.id, name: fullName(p.first_name, p.last_name), reason: 'The same name' });
+  const sameAddress = t('Hat diese Adresse', 'Has this address');
+  const sameNameReason = t('Derselbe Name', 'The same name');
+  for (const o of byAddress) add({ type: 'organisation', id: o.id, name: o.name, reason: sameAddress });
+  for (const p of peopleByAddress) add({ type: 'person', id: p.id, name: fullName(p.first_name, p.last_name), reason: sameAddress });
+  for (const o of byName.filter((o) => sameName(o.name, name))) add({ type: 'organisation', id: o.id, name: o.name, reason: sameNameReason });
+  for (const o of byDomain) add({ type: 'organisation', id: o.id, name: o.name, reason: t(`Schreibt von @${domain}`, `Writes from @${domain}`) });
+  for (const p of peopleByName) add({ type: 'person', id: p.id, name: fullName(p.first_name, p.last_name), reason: sameNameReason });
   return out.slice(0, 5);
 }
 
 // ---------------------------------------------------- opened from a record
 
-async function personById(id: string): Promise<PersonHit | null> {
+async function personById(id: string, lang: WsLang): Promise<PersonHit | null> {
   const p = await queryFirst<PersonRow>(
     `SELECT p.id, p.salutation::text AS salutation, p.first_name, p.last_name, p.nationality_code,
             (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at DESC LIMIT 1) AS email,
@@ -288,7 +313,7 @@ async function personById(id: string): Promise<PersonHit | null> {
        FROM people p WHERE p.id = canonical_person_id($1) AND p.deleted_at IS NULL`,
     [id]
   );
-  return p ? personHit(p) : null;
+  return p ? personHit(p, lang) : null;
 }
 
 const asOrganisationKind = (k: string | null, fallback: OrganisationKind): OrganisationKind =>
@@ -300,7 +325,7 @@ const asOrganisationKind = (k: string | null, fallback: OrganisationKind): Organ
  * or as a new one with its kind and country guessed — and its brief: the
  * package, the size, the weeks.
  */
-export async function wizardStart(from: { enquiryId?: string; personId?: string; organisationId?: string }): Promise<WizardStart | null> {
+export async function wizardStart(from: { enquiryId?: string; personId?: string; organisationId?: string }, lang: WsLang): Promise<WizardStart | null> {
   if (from.enquiryId) {
     const e = await queryFirst<{ id: string; kind: 'general' | 'group' | 'company'; locale: string; first_name: string; last_name: string | null; email: string; person_id: string | null; brief: Record<string, unknown> | null }>(
       `SELECT id, kind, locale, first_name, last_name, email, person_id, organiser_brief AS brief FROM enquiries WHERE id = $1`,
@@ -314,7 +339,7 @@ export async function wizardStart(from: { enquiryId?: string; personId?: string;
     const preferred = typeof e.brief?.preferredDates === 'string' ? e.brief.preferredDates.trim() : '';
     const base = {
       enquiryId: e.id,
-      enquiryNote: preferred ? `Preferred dates: ${preferred}` : null,
+      enquiryNote: preferred ? translator(lang)(`Wunschtermine: ${preferred}`, `Preferred dates: ${preferred}`) : null,
       kind: group ? ('group' as const) : ('individual' as const),
       group: group
         ? (() => {
@@ -348,12 +373,12 @@ export async function wizardStart(from: { enquiryId?: string; personId?: string;
         },
       };
     }
-    const person = e.person_id ? await personById(e.person_id) : null;
+    const person = e.person_id ? await personById(e.person_id, lang) : null;
     return { ...base, recipient: person ? { type: 'person', person } : null };
   }
 
   if (from.personId) {
-    const person = await personById(from.personId);
+    const person = await personById(from.personId, lang);
     if (!person) return null;
     return { recipient: { type: 'person', person }, enquiryId: null, enquiryNote: null, kind: 'individual', group: null, language: 'de' };
   }
@@ -431,7 +456,7 @@ export async function resolveRecipient(client: PoolClient, r: NewOfferInput['rec
         `SELECT id, name, address, country_code FROM organisations WHERE id = $1`,
         [r.id]
       );
-      if (!rows[0]) throw new Error('This organisation no longer exists.');
+      if (!rows[0]) throw new RecipientGoneError({ de: 'Diese Organisation gibt es nicht mehr.', en: 'This organisation no longer exists.' });
       ({ id: orgId, name } = rows[0]);
       address = rows[0].address ?? '';
       countryCode = trimCode(rows[0].country_code);
@@ -508,7 +533,7 @@ export async function resolveRecipient(client: PoolClient, r: NewOfferInput['rec
     [personId]
   );
   const p = rows[0];
-  if (!p) throw new Error('This person no longer exists.');
+  if (!p) throw new RecipientGoneError({ de: 'Diese Person gibt es nicht mehr.', en: 'This person no longer exists.' });
   return {
     organisationId: null,
     personId: p.id,

@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { cookies } from 'next/headers';
 
 import { resolveAccess, type Access } from './access';
+import type { WsLang } from './i18n';
 import { query, queryFirst } from './db';
 import { verifyPassword } from './password';
 import { looksLikeEmail, usernameCandidates } from './sign-in-names';
@@ -70,6 +71,8 @@ export type StaffUser = {
   role: StaffRole;
   /** What this person may do in each module — role default plus exceptions. */
   access: Access;
+  /** The workspace's language for this person: German unless they chose English (0025). */
+  language: WsLang;
 };
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -79,6 +82,7 @@ type StaffRow = {
   email: string;
   name: string;
   role: StaffRole;
+  language: WsLang;
   password_hash: string;
   is_active: boolean;
   password_set_at: Date | null;
@@ -128,10 +132,10 @@ export async function signIn(
 
   const row = await queryFirst<StaffRow>(
     byEmail
-      ? `SELECT id, email, name, role, password_hash, is_active, password_set_at
+      ? `SELECT id, email, name, role, language, password_hash, is_active, password_set_at
            FROM staff_users
           WHERE lower(email) = $1`
-      : `SELECT id, email, name, role, password_hash, is_active, password_set_at
+      : `SELECT id, email, name, role, language, password_hash, is_active, password_set_at
            FROM staff_users
           WHERE username_key = ANY($1::text[])
           ORDER BY username_key = $2 DESC
@@ -175,6 +179,7 @@ export async function signIn(
       name: row.name,
       role: row.role,
       access: resolveAccess(row.role, []),
+      language: row.language,
     },
     token,
   };
@@ -340,6 +345,7 @@ type SessionRow = {
   email: string;
   name: string;
   role: StaffRole;
+  language: WsLang;
   exceptions: { module: string; level: string }[] | null;
 };
 
@@ -367,6 +373,7 @@ export async function getStaffUser(): Promise<StaffUser | null> {
               u.email,
               u.name,
               u.role,
+              u.language,
               (SELECT json_agg(json_build_object('module', a.module, 'level', a.level))
                  FROM staff_module_access a WHERE a.staff_user_id = u.id) AS exceptions
          FROM staff_sessions s
@@ -406,6 +413,7 @@ export async function getStaffUser(): Promise<StaffUser | null> {
     name: row.name,
     role: row.role,
     access: resolveAccess(row.role, row.exceptions ?? []),
+    language: row.language,
   };
 }
 

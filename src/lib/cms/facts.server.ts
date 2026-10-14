@@ -68,13 +68,13 @@ async function build(locale: string): Promise<Facts> {
   for (const course of finder.courses) {
     const group = COURSE_GROUPS[course.slug] ?? course.slug;
     const id = `course.${course.slug}`;
-    add({ id: `${id}.price`, group, label: 'Price', source: 'Course types' }, priceIn(course, locale));
+    add({ id: `${id}.price`, group, label: { de: 'Preis', en: 'Price' }, source: 'Course types' }, priceIn(course, locale));
     add(
-      { id: `${id}.lessons`, group, label: 'Lessons a week', source: 'Course types' },
+      { id: `${id}.lessons`, group, label: { de: 'Unterrichtseinheiten pro Woche', en: 'Lessons a week' }, source: 'Course types' },
       course.lessons_per_week > 0 ? String(course.lessons_per_week) : null
     );
     add(
-      { id: `${id}.levels`, group, label: 'Levels', source: 'Course types' },
+      { id: `${id}.levels`, group, label: { de: 'Niveaus', en: 'Levels' }, source: 'Course types' },
       course.level_min && course.level_max ? `${course.level_min}–${course.level_max}` : null
     );
 
@@ -85,9 +85,9 @@ async function build(locale: string): Promise<Facts> {
           .filter((option) => option.startDate <= next && (!option.endDate || option.endDate >= next))
           .sort((a, b) => b.startDate.localeCompare(a.startDate))[0]
       : undefined;
-    add({ id: `${id}.next-start`, group, label: 'Next start', source: 'Course dates' }, next ? formatDay(next, locale) : null);
+    add({ id: `${id}.next-start`, group, label: { de: 'Nächster Beginn', en: 'Next start' }, source: 'Course dates' }, next ? formatDay(next, locale) : null);
     add(
-      { id: `${id}.next-end`, group, label: 'End of that term', source: 'Course dates' },
+      { id: `${id}.next-end`, group, label: { de: 'Ende dieses Termins', en: 'End of that term' }, source: 'Course dates' },
       term?.endDate ? formatDay(term.endDate, locale) : null
     );
   }
@@ -102,10 +102,10 @@ async function build(locale: string): Promise<Facts> {
     // A session's own fee, else the price list's full exam, else the exam type's.
     const listed = published.exams[item.examType.code as keyof typeof published.exams]?.full;
     const fee = Number(upcoming?.fee_override ?? listed ?? item.examType.default_fee);
-    add({ id: `${id}.fee`, group, label: 'Exam fee', source: 'Prices' }, Number.isFinite(fee) && fee > 0 ? formatEuro(fee, locale) : null);
-    add({ id: `${id}.next-date`, group, label: 'Next exam day', source: 'Exam dates' }, upcoming ? formatDay(String(upcoming.starts_at), locale) : null);
+    add({ id: `${id}.fee`, group, label: { de: 'Prüfungsgebühr', en: 'Exam fee' }, source: 'Prices' }, Number.isFinite(fee) && fee > 0 ? formatEuro(fee, locale) : null);
+    add({ id: `${id}.next-date`, group, label: { de: 'Nächster Prüfungstag', en: 'Next exam day' }, source: 'Exam dates' }, upcoming ? formatDay(String(upcoming.starts_at), locale) : null);
     add(
-      { id: `${id}.deadline`, group, label: 'Registration closes', source: 'Exam dates' },
+      { id: `${id}.deadline`, group, label: { de: 'Anmeldeschluss', en: 'Registration closes' }, source: 'Exam dates' },
       upcoming?.registration_deadline ? formatDay(String(upcoming.registration_deadline), locale) : null
     );
   }

@@ -10,6 +10,7 @@
  * "today", "+14", "+6w".
  */
 
+import { monthShort, type WsLang } from './i18n';
 import { addDays, isIsoDate } from './offers/stay';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -47,16 +48,27 @@ export function monthGrid(y: number, m: number): (string | null)[][] {
   return weeks;
 }
 
-export const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+/** The calendar's column heads, Monday first. */
+export const WEEKDAYS: Record<WsLang, readonly string[]> = {
+  de: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+  en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+};
+const MONTHS: Record<WsLang, readonly string[]> = {
+  de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+const DAYS: Record<WsLang, readonly string[]> = {
+  de: ['Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.', 'So.'],
+  en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+};
 
-export const monthTitle = (y: number, m: number) => `${MONTHS[m - 1]} ${y}`;
+export const monthTitle = (y: number, m: number, lang: WsLang) => `${MONTHS[lang][m - 1]} ${y}`;
 
-/** "Sun 11 Apr 2027" — the weekday matters: groups arrive on a Sunday. */
-export function formatDay(iso: string): string {
+/** "Sun 11 Apr 2027" / "So. 11. Apr. 2027" — the weekday matters: groups arrive on a Sunday. */
+export function formatDay(iso: string, lang: WsLang): string {
   const { y, m, d } = isoParts(iso);
-  return `${DAYS[weekday(iso)]} ${d} ${MONTHS[m - 1].slice(0, 3)} ${y}`;
+  if (lang === 'de') return `${DAYS.de[weekday(iso)]} ${d}. ${monthShort('de', m)} ${y}`;
+  return `${DAYS.en[weekday(iso)]} ${d} ${MONTHS.en[m - 1].slice(0, 3)} ${y}`;
 }
 
 const MONTH_WORDS: Record<string, number> = {};

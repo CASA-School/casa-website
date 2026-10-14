@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { logActivity } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
+import { getI18n } from '@/lib/admin/i18n.server';
 import {
   addComment,
   cancelRelease,
@@ -51,11 +52,13 @@ import { cmsLocales, SOURCE_LOCALE } from '@/lib/cms/locales';
 
 export type Result<T> = ({ ok: true } & T) | { ok: false; error: string };
 
-const fail = (error: unknown): { ok: false; error: string } => {
-  if (error instanceof WebsiteEditError || error instanceof AiError) return { ok: false, error: error.message };
-  if (error instanceof z.ZodError) return { ok: false, error: 'That request was not complete.' };
+/** The message the editor shows, in the colleague's language. */
+const fail = async (error: unknown): Promise<{ ok: false; error: string }> => {
+  const { t } = await getI18n();
+  if (error instanceof WebsiteEditError || error instanceof AiError) return { ok: false, error: t(error.de, error.message) };
+  if (error instanceof z.ZodError) return { ok: false, error: t('Die Anfrage war nicht vollständig.', 'That request was not complete.') };
   console.error('[website editor]', error);
-  return { ok: false, error: 'Something went wrong. Try again.' };
+  return { ok: false, error: t('Etwas ist schiefgelaufen. Versuch es noch einmal.', 'Something went wrong. Try again.') };
 };
 
 const Key = z.string().min(3).max(200);
@@ -142,7 +145,7 @@ export async function publishChangesAction(input: unknown): Promise<Result<{ cou
     const { items, note, at } = Release.parse(input);
     const publishAt = at ? berlinLocalToDate(at) : null;
     if (at && (!publishAt || publishAt.getTime() < Date.now() + 60_000)) {
-      throw new WebsiteEditError('Choose a time in the future.');
+      throw new WebsiteEditError('Wähl einen Zeitpunkt in der Zukunft.', 'Choose a time in the future.');
     }
     const release = await createRelease(user, items, publishAt ? 'schedule' : 'publish', publishAt, note?.trim() || null);
     forgetLiveContent();
@@ -285,7 +288,7 @@ export async function searchAction(term: unknown): Promise<Result<{ hits: Search
 
 const slotContext = (key: string) => {
   const slot = slotFor(key);
-  if (!slot) throw new WebsiteEditError('This text is not editable.');
+  if (!slot) throw new WebsiteEditError('Dieser Text lässt sich nicht bearbeiten.', 'This text is not editable.');
   return { label: slot.label, section: slot.section, scope: slot.scope, kind: slot.kind, max: slot.max };
 };
 
@@ -310,7 +313,7 @@ export async function aiAssistAction(
       const { notes, suggestion } = await checkVoice({ text, locale, slot });
       return { ok: true, options: suggestion ? [suggestion] : [], notes };
     }
-    if (!source) throw new WebsiteEditError('There is no German text to translate from.');
+    if (!source) throw new WebsiteEditError('Es gibt keinen deutschen Text, aus dem übersetzt werden kann.', 'There is no German text to translate from.');
     const translated = await translate({ source, sourceLocale: SOURCE_LOCALE, target: locale, current: text || null, slot });
     return { ok: true, options: [translated], notes: [] };
   } catch (error) {

@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { createOfferAction, findRecipientsAction, matchRecipientsAction, pickRecipientAction } from '@/app/(admin)/admin/(editor)/offers/actions';
+import { useWsLang } from '@/components/admin/lang';
 import { GRUPPEN_PACKAGES_BY_STACK, fullBoardBaseTotal } from '@/config/gruppen/packages';
+import { pick, type Bilingual, type T } from '@/lib/admin/i18n';
 import { formatDateRange, formatLetterDate, formatMoney } from '@/lib/admin/letters/format';
 import { courseFacts, courseLines, courseSpan, courseTitle, type CourseCatalogue, type CourseChoice, type LearnerHistory } from '@/lib/admin/offers/course';
 import { packageWeeks } from '@/lib/admin/offers/engine';
@@ -34,13 +36,13 @@ import ui from './offers.module.css';
 
 const eur = (n: number | null) => (n == null ? '—' : formatMoney(n, 'de'));
 
-const KIND_LABEL: Record<RecipientKind, string> = {
-  school: 'School',
-  agency: 'Agency',
-  company: 'Company',
-  public_body: 'Public body',
-  other: 'Other organisation',
-  person: 'Learner',
+const KIND_LABEL: Record<RecipientKind, Bilingual> = {
+  school: { de: 'Schule', en: 'School' },
+  agency: { de: 'Agentur', en: 'Agency' },
+  company: { de: 'Unternehmen', en: 'Company' },
+  public_body: { de: 'Behörde', en: 'Public body' },
+  other: { de: 'Andere Organisation', en: 'Other organisation' },
+  person: { de: 'Lernende', en: 'Learner' },
 };
 const KIND_LOOK: Record<RecipientKind | 'enquiry', { tint: Tint; icon: ReactNode }> = {
   school: { tint: 'blue', icon: ICONS.school },
@@ -51,13 +53,13 @@ const KIND_LOOK: Record<RecipientKind | 'enquiry', { tint: Tint; icon: ReactNode
   person: { tint: 'green', icon: ICONS.person },
   enquiry: { tint: 'sun', icon: ICONS.mail },
 };
-const FILTERS: [RecipientFilter, string][] = [
-  ['all', 'All'],
-  ['school', 'Schools'],
-  ['agency', 'Agencies'],
-  ['company', 'Companies'],
-  ['public_body', 'Public bodies'],
-  ['person', 'Learners'],
+const filters = (t: T): [RecipientFilter, string][] => [
+  ['all', t('Alle', 'All')],
+  ['school', t('Schulen', 'Schools')],
+  ['agency', t('Agenturen', 'Agencies')],
+  ['company', t('Unternehmen', 'Companies')],
+  ['public_body', t('Behörden', 'Public bodies')],
+  ['person', t('Lernende', 'Learners')],
 ];
 const PACKAGE_COLOUR: Record<PackageChoice, [string, string]> = {
   hahn: ['var(--c-sun)', 'var(--c-sun-tint)'],
@@ -66,7 +68,15 @@ const PACKAGE_COLOUR: Record<PackageChoice, [string, string]> = {
   esel: ['var(--c-ink)', 'var(--c-ink-tint)'],
   own: ['var(--o-line-firm)', '#f6f8fb'],
 };
-const PACKAGE_NAME: Record<PackageChoice, string> = { hahn: 'Hahn', katze: 'Katze', hund: 'Hund', esel: 'Esel', own: 'Own offer' };
+const PACKAGE_NAME: Record<PackageChoice, Bilingual> = {
+  hahn: { de: 'Hahn', en: 'Hahn' },
+  katze: { de: 'Katze', en: 'Katze' },
+  hund: { de: 'Hund', en: 'Hund' },
+  esel: { de: 'Esel', en: 'Esel' },
+  own: { de: 'Eigenes Angebot', en: 'Own offer' },
+};
+const weeksWord = (t: T, n: number) => (n === 1 ? t('Woche', 'week') : t('Wochen', 'weeks'));
+const escortsWord = (t: T, n: number) => (n === 1 ? t('Begleitperson', 'escort') : t('Begleitpersonen', 'escorts'));
 
 const NO_CONTACT: ContactInput = { salutation: 'none', firstName: '', lastName: '', email: '' };
 
@@ -141,6 +151,7 @@ export function NewOffer({
   today: string;
 }) {
   const router = useRouter();
+  const { t, lang } = useWsLang();
   const [step, setStep] = useState<StepId>(start?.recipient ? 'offer' : 'recipient');
   const [recipient, setRecipient] = useState<Recipient | null>(() => recipientFromStart(start));
   const [enquiryId, setEnquiryId] = useState(start?.enquiryId ?? null);
@@ -172,27 +183,37 @@ export function NewOffer({
   // Without a country: English to an organisation (groups come from abroad), German to a learner.
   const language = languageChoice ?? suggestedLanguage ?? languageFor(country, isOrganisation(recipient) ? 'en' : 'de');
   const steps: { id: StepId; title: string; summary: string | null }[] = [
-    { id: 'recipient', title: 'Who it is for', summary: recipient ? recipientName(recipient) || 'New recipient' : null },
+    { id: 'recipient', title: t('Für wen', 'Who it is for'), summary: recipient ? recipientName(recipient) || t('Neuer Empfänger', 'New recipient') : null },
     {
       id: 'offer',
-      title: 'What it is',
+      title: t('Was es ist', 'What it is'),
       summary:
         recipient && step !== 'recipient'
           ? group
-            ? `${PACKAGE_NAME[pkg]}${packageWeeks(pkg) ? '' : ` · ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}`
-            : [course ? courseTitle(course, 'en') : null, picked.length ? `${picked.length} from the price list` : null].filter(Boolean).join(' · ') || 'A course'
+            ? `${pick(lang, PACKAGE_NAME[pkg])}${packageWeeks(pkg) ? '' : ` · ${weeks} ${weeksWord(t, weeks)}`}`
+            : [
+                course ? courseTitle(course, lang) : null,
+                picked.length ? t(`${picked.length} aus der Preisliste`, `${picked.length} from the price list`) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ') || t('Ein Kurs', 'A course')
           : null,
     },
     ...(group
       ? [
           {
             id: 'group' as const,
-            title: 'The group',
-            summary: arrival && departure ? `${formatDateRange(arrival, departure, 'en')}${participants ? ` · ${participants}` : ''}` : participants ? `${participants} participants` : null,
+            title: t('Die Gruppe', 'The group'),
+            summary:
+              arrival && departure
+                ? `${formatDateRange(arrival, departure, lang)}${participants ? ` · ${participants}` : ''}`
+                : participants
+                  ? t(`${participants} Teilnehmende`, `${participants} participants`)
+                  : null,
           },
         ]
       : []),
-    { id: 'letter', title: 'The letter', summary: step === 'letter' ? `${language === 'de' ? 'Deutsch' : 'English'}` : null },
+    { id: 'letter', title: t('Der Brief', 'The letter'), summary: step === 'letter' ? `${language === 'de' ? 'Deutsch' : 'English'}` : null },
   ];
   const index = steps.findIndex((s) => s.id === step);
   const [reached, setReached] = useState<StepId[]>([step]);
@@ -299,11 +320,11 @@ export function NewOffer({
   const canContinue = step === 'recipient' ? recipientReady : true;
 
   return (
-    <OfferFrame back={{ href: '/admin/offers', label: 'Offers' }} title="New offer">
+    <OfferFrame back={{ href: '/admin/offers', label: t('Angebote', 'Offers') }} title={t('Neues Angebot', 'New offer')}>
       <main className={ui.wz}>
         <div className={ui.wzCard}>
-          <nav className={ui.wzRail} aria-label="Steps">
-            <h1>New offer</h1>
+          <nav className={ui.wzRail} aria-label={t('Schritte', 'Steps')}>
+            <h1>{t('Neues Angebot', 'New offer')}</h1>
             <ol className={ui.wzSteps}>
               {steps.map((s, i) => {
                 const done = i < index;
@@ -400,12 +421,12 @@ export function NewOffer({
 
               {step === 'letter' ? (
                 <>
-                  <h2 className={ui.wzQ}>The letter</h2>
+                  <h2 className={ui.wzQ}>{t('Der Brief', 'The letter')}</h2>
                   <div className={ui.fld}>
-                    <span>Language</span>
+                    <span>{t('Sprache', 'Language')}</span>
                     <div className={ui.inline}>
                       <Seg<OfferLanguage>
-                        label="Language"
+                        label={t('Sprache', 'Language')}
                         value={language}
                         options={[
                           ['de', 'Deutsch'],
@@ -414,23 +435,25 @@ export function NewOffer({
                         onChange={setLanguageChoice}
                       />
                       {country && !languageChoice && !suggestedLanguage ? (
-                        <span className={ui.guess}>From the country: {countries.find((c) => c.code === country)?.en ?? country}</span>
+                        <span className={ui.guess}>
+                          {t('Aus dem Land', 'From the country')}: {countries.find((c) => c.code === country)?.[lang] ?? country}
+                        </span>
                       ) : null}
                     </div>
                   </div>
                   {group ? (
                     <div className={ui.fld}>
-                      <label htmlFor="wz-name">Name of the offer</label>
+                      <label htmlFor="wz-name">{t('Name des Angebots', 'Name of the offer')}</label>
                       <input id="wz-name" className={ui.fi} value={groupName ?? defaultGroupName} onChange={(e) => setGroupName(e.target.value)} />
                     </div>
                   ) : null}
                   <div className={ui.fld}>
-                    <label htmlFor="wz-title">Title on the letter</label>
+                    <label htmlFor="wz-title">{t('Titel im Brief', 'Title on the letter')}</label>
                     <input id="wz-title" className={ui.fi} value={title ?? defaultTitle} onChange={(e) => setTitle(e.target.value)} />
                   </div>
                   <div className={ui.row2}>
                     <div className={ui.fld}>
-                      <label htmlFor="wz-valid">Valid until</label>
+                      <label htmlFor="wz-valid">{t('Gültig bis', 'Valid until')}</label>
                       <DateField
                         id="wz-valid"
                         value={validUntil}
@@ -438,14 +461,16 @@ export function NewOffer({
                         min={today}
                         onChange={setValidChoice}
                         quick={[
-                          ...[14, 28, 42].map((days) => ({ label: `${days / 7} weeks`, value: addDays(today, days) })),
-                          ...(group && arrival && addDays(arrival, -42) > today ? [{ label: '6 weeks before arrival', value: addDays(arrival, -42) }] : []),
-                          ...(weekBefore && weekBefore > today ? [{ label: 'A week before the course', value: weekBefore }] : []),
+                          ...[14, 28, 42].map((days) => ({ label: t(`${days / 7} Wochen`, `${days / 7} weeks`), value: addDays(today, days) })),
+                          ...(group && arrival && addDays(arrival, -42) > today
+                            ? [{ label: t('6 Wochen vor der Anreise', '6 weeks before arrival'), value: addDays(arrival, -42) }]
+                            : []),
+                          ...(weekBefore && weekBefore > today ? [{ label: t('Eine Woche vor dem Kurs', 'A week before the course'), value: weekBefore }] : []),
                         ]}
                       />
                     </div>
                     <div className={ui.fld}>
-                      <label htmlFor="wz-owner">Signed by</label>
+                      <label htmlFor="wz-owner">{t('Unterschrieben von', 'Signed by')}</label>
                       <select id="wz-owner" className={ui.fi} value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
                         {staff.map((s) => (
                           <option key={s.id} value={s.id}>
@@ -456,56 +481,63 @@ export function NewOffer({
                     </div>
                   </div>
                   <dl className={ui.summary}>
-                    <dt>For</dt>
+                    <dt>{t('Für', 'For')}</dt>
                     <dd>
                       {name || '—'}
-                      {recipient?.type === 'new-organisation' || recipient?.type === 'new-person' ? ' · new' : ''}
+                      {recipient?.type === 'new-organisation' || recipient?.type === 'new-person' ? t(' · neu', ' · new') : ''}
                     </dd>
-                    <dt>Offer</dt>
+                    <dt>{t('Angebot', 'Offer')}</dt>
                     <dd>
                       {group
-                        ? `${PACKAGE_NAME[pkg]}${basedOn ? ' · like last time' : ''}`
-                        : [course ? courseTitle(course, 'en') : null, ...picked.map((i) => priceList[i]?.label)].filter(Boolean).join(', ') || 'Lines added on the offer'}
+                        ? `${pick(lang, PACKAGE_NAME[pkg])}${basedOn ? t(' · wie beim letzten Mal', ' · like last time') : ''}`
+                        : [course ? courseTitle(course, lang) : null, ...picked.map((i) => priceList[i]?.label)].filter(Boolean).join(', ') ||
+                          t('Zeilen kommen auf dem Angebot dazu', 'Lines added on the offer')}
                     </dd>
                     {course && !group ? (
                       <>
-                        <dt>Course</dt>
-                        <dd>{courseFacts(course, 'en')}</dd>
-                        <dt>Total</dt>
+                        <dt>{t('Kurs', 'Course')}</dt>
+                        <dd>{courseFacts(course, lang)}</dd>
+                        <dt>{t('Gesamt', 'Total')}</dt>
                         <dd>{eur((courseTotal ?? 0) + picked.reduce((sum, i) => sum + (priceList[i]?.unitAmount ?? 0), 0))}</dd>
                       </>
                     ) : null}
                     {group ? (
                       <>
-                        <dt>Group</dt>
+                        <dt>{t('Gruppe', 'Group')}</dt>
                         <dd>
-                          {[arrival && departure ? formatDateRange(arrival, departure, 'en') : null, participants ? `${participants} participants` : null, escorts ? `${escorts} ${escorts === 1 ? 'escort' : 'escorts'}` : null]
+                          {[
+                            arrival && departure ? formatDateRange(arrival, departure, lang) : null,
+                            participants ? t(`${participants} Teilnehmende`, `${participants} participants`) : null,
+                            escorts ? `${escorts} ${escortsWord(t, escorts)}` : null,
+                          ]
                             .filter(Boolean)
-                            .join(' · ') || 'To be filled in'}
+                            .join(' · ') || t('Noch offen', 'To be filled in')}
                         </dd>
                       </>
                     ) : null}
-                    <dt>Valid until</dt>
-                    <dd>{formatLetterDate(validUntil, 'en')}</dd>
+                    <dt>{t('Gültig bis', 'Valid until')}</dt>
+                    <dd>{formatLetterDate(validUntil, lang)}</dd>
                   </dl>
                 </>
               ) : null}
             </div>
 
             <div className={ui.wzFoot}>
-              <span className={error ? ui.wzError : undefined}>{error ?? (step === 'recipient' && !recipient ? 'Pick someone, or add them new.' : '')}</span>
+              <span className={error ? ui.wzError : undefined}>
+                {error ?? (step === 'recipient' && !recipient ? t('Wähle jemanden aus oder lege die Person neu an.', 'Pick someone, or add them new.') : '')}
+              </span>
               {index > 0 ? (
                 <button type="button" className={ui.btn} onClick={back} disabled={busy}>
-                  Back
+                  {t('Zurück', 'Back')}
                 </button>
               ) : null}
               {last ? (
                 <button type="button" className={ui.primary} disabled={!recipientReady || busy} onClick={() => void create()}>
-                  {busy ? 'Creating …' : 'Create offer'}
+                  {busy ? t('Wird angelegt …', 'Creating …') : t('Angebot anlegen', 'Create offer')}
                 </button>
               ) : (
                 <button type="button" className={ui.primary} disabled={!canContinue} onClick={next}>
-                  Continue
+                  {t('Weiter', 'Continue')}
                 </button>
               )}
             </div>
@@ -541,6 +573,7 @@ function RecipientStep({
   onPick: (hit: RecipientHit) => Promise<void>;
   onClear: () => void;
 }) {
+  const { t } = useWsLang();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<RecipientFilter>('all');
   const [hits, setHits] = useState(suggestions);
@@ -552,7 +585,7 @@ function RecipientStep({
     if (recipient) return;
     const term = q.trim();
     const n = ++asked.current;
-    const t = setTimeout(
+    const timer = setTimeout(
       async () => {
         const found = term || filter !== 'all' ? await findRecipientsAction(term, filter) : suggestions;
         if (n === asked.current) {
@@ -562,7 +595,7 @@ function RecipientStep({
       },
       term ? 180 : 0
     );
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [q, filter, suggestions, recipient]);
 
   const pick = async (hit: RecipientHit) => {
@@ -576,23 +609,26 @@ function RecipientStep({
   }
 
   const groups: { head: string; items: RecipientHit[] }[] = [
-    { head: q ? 'Enquiries' : 'Enquiries waiting for an offer', items: hits.filter((h) => h.type === 'enquiry') },
-    { head: q || filter !== 'all' ? 'Organisations' : 'Written to lately', items: hits.filter((h) => h.type === 'organisation') },
-    { head: 'Learners', items: hits.filter((h) => h.type === 'person') },
+    { head: q ? t('Anfragen', 'Enquiries') : t('Anfragen, die auf ein Angebot warten', 'Enquiries waiting for an offer'), items: hits.filter((h) => h.type === 'enquiry') },
+    {
+      head: q || filter !== 'all' ? t('Organisationen', 'Organisations') : t('Zuletzt angeschrieben', 'Written to lately'),
+      items: hits.filter((h) => h.type === 'organisation'),
+    },
+    { head: t('Lernende', 'Learners'), items: hits.filter((h) => h.type === 'person') },
   ].filter((g) => g.items.length);
   const flat = groups.flatMap((g) => g.items);
   const typed = q.trim() ? fromTyped(q, filter) : null;
 
   return (
     <>
-      <h2 className={ui.wzQ}>Who is it for?</h2>
+      <h2 className={ui.wzQ}>{t('Für wen ist es?', 'Who is it for?')}</h2>
       <div className={ui.searchBox}>
         {ICONS.search}
         <input
           autoFocus
           value={q}
-          placeholder="Name, contact or email"
-          aria-label="Who the offer is for"
+          placeholder={t('Name, Kontakt oder E-Mail', 'Name, contact or email')}
+          aria-label={t('Für wen das Angebot ist', 'Who the offer is for')}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown') {
@@ -609,8 +645,8 @@ function RecipientStep({
           }}
         />
       </div>
-      <div className={ui.kinds} role="radiogroup" aria-label="Kind">
-        {FILTERS.map(([f, label]) => (
+      <div className={ui.kinds} role="radiogroup" aria-label={t('Art', 'Kind')}>
+        {filters(t).map(([f, label]) => (
           <button key={f} type="button" role="radio" aria-checked={filter === f} className={`${ui.kind} ${filter === f ? ui.kindOn : ''}`} onClick={() => setFilter(f)}>
             {label}
           </button>
@@ -638,7 +674,7 @@ function RecipientStep({
                       <b>{h.name}</b>
                       <span>{h.detail}</span>
                     </span>
-                    <span className={ui.hitGo}>{picking === h.id ? 'Opening …' : 'Choose →'}</span>
+                    <span className={ui.hitGo}>{picking === h.id ? t('Wird geöffnet …', 'Opening …') : t('Auswählen →', 'Choose →')}</span>
                   </button>
                 );
               })}
@@ -646,17 +682,17 @@ function RecipientStep({
           ))}
         </div>
       ) : q.trim() ? (
-        <div className={ui.note}>Nobody by that name yet.</div>
+        <div className={ui.note}>{t('Noch niemand mit diesem Namen.', 'Nobody by that name yet.')}</div>
       ) : null}
 
       {typed ? (
         <button type="button" className={ui.newHit} onClick={() => setRecipient(typed)}>
           <Mark kind={typed.type === 'new-person' ? 'person' : typed.type === 'new-organisation' ? typed.kind : 'other'} />
           <span className={ui.hitText}>
-            <b>Add “{q.trim()}” as new</b>
-            <span>Not in the list: it is made with the offer</span>
+            <b>{t(`„${q.trim()}“ neu anlegen`, `Add “${q.trim()}” as new`)}</b>
+            <span>{t('Nicht in der Liste: wird mit dem Angebot angelegt', 'Not in the list: it is made with the offer')}</span>
           </span>
-          <span className={ui.hitGo}>{'Add →'}</span>
+          <span className={ui.hitGo}>{t('Anlegen →', 'Add →')}</span>
         </button>
       ) : null}
     </>
@@ -676,43 +712,55 @@ function ChosenRecipient({
   onClear: () => void;
   onUse: (hit: RecipientHit) => void;
 }) {
+  const { t, lang } = useWsLang();
   const isNew = recipient.type === 'new-organisation' || recipient.type === 'new-person';
   const kind: RecipientKind =
     recipient.type === 'organisation' ? recipient.org.kind : recipient.type === 'new-organisation' ? recipient.kind : 'person';
   const detail =
     recipient.type === 'organisation'
-      ? [KIND_LABEL[recipient.org.kind], countries.find((c) => c.code === recipient.org.countryCode)?.en, recipient.org.lastOffer ? `last offer ${recipient.org.lastOffer.number}` : 'no offer yet'].filter(Boolean).join(' · ')
+      ? [
+          pick(lang, KIND_LABEL[recipient.org.kind]),
+          countries.find((c) => c.code === recipient.org.countryCode)?.[lang],
+          recipient.org.lastOffer
+            ? t(`letztes Angebot ${recipient.org.lastOffer.number}`, `last offer ${recipient.org.lastOffer.number}`)
+            : t('noch kein Angebot', 'no offer yet'),
+        ]
+          .filter(Boolean)
+          .join(' · ')
       : recipient.type === 'person'
         ? recipient.person.detail
-        : `New ${KIND_LABEL[kind].toLowerCase()} · made with the offer`;
+        : t(`${KIND_LABEL[kind].de} (neu) · wird mit dem Angebot angelegt`, `New ${KIND_LABEL[kind].en.toLowerCase()} · made with the offer`);
+  const bookings = recipient.type === 'person' ? recipient.person.bookings : 0;
 
   return (
     <>
-      <h2 className={ui.wzQ}>{isNew ? 'Someone new' : 'Who is it for?'}</h2>
+      <h2 className={ui.wzQ}>{isNew ? t('Jemand Neues', 'Someone new') : t('Für wen ist es?', 'Who is it for?')}</h2>
       <div className={ui.chosen}>
         <Mark kind={kind} />
         <div>
-          <b>{recipientName(recipient) || (recipient.type === 'new-person' ? 'A new learner' : 'A new organisation')}</b>
+          <b>{recipientName(recipient) || (recipient.type === 'new-person' ? t('Neue Person', 'A new learner') : t('Neue Organisation', 'A new organisation'))}</b>
           <span>{detail}</span>
         </div>
         <button type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={onClear}>
-          Change
+          {t('Ändern', 'Change')}
         </button>
       </div>
 
       {recipient.type === 'person' ? (
         <dl className={ui.summary}>
-          <dt>Email</dt>
+          <dt>{t('E-Mail', 'Email')}</dt>
           <dd>{recipient.person.email ?? '—'}</dd>
-          <dt>Phone</dt>
+          <dt>{t('Telefon', 'Phone')}</dt>
           <dd>{recipient.person.phone ?? '—'}</dd>
-          <dt>Nationality</dt>
-          <dd>{countries.find((c) => c.code === recipient.person.countryCode)?.en ?? '—'}</dd>
-          <dt>At CASA</dt>
+          <dt>{t('Nationalität', 'Nationality')}</dt>
+          <dd>{countries.find((c) => c.code === recipient.person.countryCode)?.[lang] ?? '—'}</dd>
+          <dt>{t('Bei CASA', 'At CASA')}</dt>
           <dd>
-            {recipient.person.bookings
-              ? `${recipient.person.bookings === 1 ? '1 booking' : `${recipient.person.bookings} bookings`}${recipient.person.studiedBefore ? ' · no enrolment fee' : ''}${recipient.person.stayedBefore ? ' · has stayed with CASA' : ''}`
-              : 'First time — enrolment fee due'}
+            {bookings
+              ? `${bookings === 1 ? t('1 Buchung', '1 booking') : t(`${bookings} Buchungen`, `${bookings} bookings`)}${
+                  recipient.person.studiedBefore ? t(' · keine Anmeldegebühr', ' · no enrolment fee') : ''
+                }${recipient.person.stayedBefore ? t(' · hat schon bei CASA gewohnt', ' · has stayed with CASA') : ''}`
+              : t('Zum ersten Mal – Anmeldegebühr fällig', 'First time — enrolment fee due')}
           </dd>
         </dl>
       ) : null}
@@ -723,33 +771,34 @@ function ChosenRecipient({
 }
 
 function ContactFields({ value, onChange, idPrefix }: { value: ContactInput; onChange: (c: ContactInput) => void; idPrefix: string }) {
+  const { t } = useWsLang();
   return (
     <>
       <div className={ui.row3}>
         <div className={ui.fld}>
-          <span>Salutation</span>
+          <span>{t('Anrede', 'Salutation')}</span>
           <Seg<Salutation>
-            label="Salutation"
+            label={t('Anrede', 'Salutation')}
             value={value.salutation}
             options={[
-              ['ms', 'Ms'],
-              ['mr', 'Mr'],
+              ['ms', t('Frau', 'Ms')],
+              ['mr', t('Herr', 'Mr')],
               ['none', '—'],
             ]}
             onChange={(v) => onChange({ ...value, salutation: v })}
           />
         </div>
         <div className={ui.fld}>
-          <label htmlFor={`${idPrefix}-first`}>First name</label>
+          <label htmlFor={`${idPrefix}-first`}>{t('Vorname', 'First name')}</label>
           <input id={`${idPrefix}-first`} className={ui.fi} value={value.firstName} onChange={(e) => onChange({ ...value, firstName: e.target.value })} />
         </div>
         <div className={ui.fld}>
-          <label htmlFor={`${idPrefix}-last`}>Last name</label>
+          <label htmlFor={`${idPrefix}-last`}>{t('Nachname', 'Last name')}</label>
           <input id={`${idPrefix}-last`} className={ui.fi} value={value.lastName} onChange={(e) => onChange({ ...value, lastName: e.target.value })} />
         </div>
       </div>
       <div className={ui.fld}>
-        <label htmlFor={`${idPrefix}-email`}>Email</label>
+        <label htmlFor={`${idPrefix}-email`}>{t('E-Mail', 'Email')}</label>
         <input
           id={`${idPrefix}-email`}
           type="email"
@@ -768,20 +817,21 @@ function ContactFields({ value, onChange, idPrefix }: { value: ContactInput; onC
 }
 
 function ContactChoice({ recipient, setRecipient }: { recipient: Extract<Recipient, { type: 'organisation' }>; setRecipient: (r: Recipient) => void }) {
+  const { t } = useWsLang();
   const { org } = recipient;
   const someoneElse = recipient.contactId == null;
   if (!org.contacts.length) {
     return (
       <div className={ui.section}>
-        <span className={ui.sectionLabel}>The person to write to</span>
+        <span className={ui.sectionLabel}>{t('An wen wir schreiben', 'The person to write to')}</span>
         <ContactFields idPrefix="oc" value={recipient.newContact ?? NO_CONTACT} onChange={(c) => setRecipient({ ...recipient, contactId: null, newContact: c })} />
       </div>
     );
   }
   return (
     <div className={ui.section}>
-      <span className={ui.sectionLabel}>Written to</span>
-      <div className={ui.radioList} role="radiogroup" aria-label="Contact">
+      <span className={ui.sectionLabel}>{t('Angeschrieben', 'Written to')}</span>
+      <div className={ui.radioList} role="radiogroup" aria-label={t('Kontakt', 'Contact')}>
         {org.contacts.map((c) => (
           <button
             key={c.id}
@@ -794,7 +844,7 @@ function ContactChoice({ recipient, setRecipient }: { recipient: Extract<Recipie
             <i />
             <span>
               <b>{[c.firstName, c.lastName].filter(Boolean).join(' ') || c.email}</b>
-              <span>{c.email || 'No email'}</span>
+              <span>{c.email || t('Keine E-Mail', 'No email')}</span>
             </span>
           </button>
         ))}
@@ -807,8 +857,8 @@ function ContactChoice({ recipient, setRecipient }: { recipient: Extract<Recipie
         >
           <i />
           <span>
-            <b>Someone else</b>
-            <span>A new name at the organisation</span>
+            <b>{t('Jemand anderes', 'Someone else')}</b>
+            <span>{t('Ein neuer Name bei der Organisation', 'A new name at the organisation')}</span>
           </span>
         </button>
       </div>
@@ -830,6 +880,7 @@ function NewRecipientForm({
   countries: EditorOptions['countries'];
   onUse: (hit: RecipientHit) => void;
 }) {
+  const { t, lang } = useWsLang();
   const [matches, setMatches] = useState<RecipientMatch[]>([]);
   const kind: RecipientKind = recipient.type === 'new-person' ? 'person' : recipient.kind;
   const name = recipientName(recipient);
@@ -837,13 +888,13 @@ function NewRecipientForm({
 
   useEffect(() => {
     let live = true;
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const found = name.trim().length >= 3 || email.includes('@') ? await matchRecipientsAction({ name, email }) : [];
       if (live) setMatches(found);
     }, 300);
     return () => {
       live = false;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
   }, [name, email]);
 
@@ -871,7 +922,7 @@ function NewRecipientForm({
       <option value="">—</option>
       {countries.map((c) => (
         <option key={c.code} value={c.code}>
-          {c.en}
+          {c[lang]}
         </option>
       ))}
     </select>
@@ -881,11 +932,11 @@ function NewRecipientForm({
   return (
     <>
       <div className={ui.section}>
-        <span className={ui.sectionLabel}>What they are</span>
-        <div className={ui.kinds} role="radiogroup" aria-label="Kind of recipient">
+        <span className={ui.sectionLabel}>{t('Was sie sind', 'What they are')}</span>
+        <div className={ui.kinds} role="radiogroup" aria-label={t('Art des Empfängers', 'Kind of recipient')}>
           {[...ORGANISATION_KINDS, 'person' as const].map((k) => (
             <button key={k} type="button" role="radio" aria-checked={kind === k} className={`${ui.kind} ${kind === k ? ui.kindOn : ''}`} onClick={() => switchKind(k)}>
-              {KIND_LABEL[k]}
+              {pick(lang, KIND_LABEL[k])}
             </button>
           ))}
         </div>
@@ -894,7 +945,7 @@ function NewRecipientForm({
       {recipient.type === 'new-organisation' ? (
         <>
           <div className={ui.fld}>
-            <label htmlFor="nr-name">Name</label>
+            <label htmlFor="nr-name">{t('Name', 'Name')}</label>
             <input
               id="nr-name"
               className={ui.fi}
@@ -909,16 +960,23 @@ function NewRecipientForm({
           </div>
           <div className={ui.row2}>
             <div className={ui.fld}>
-              <label htmlFor="nr-country">Country</label>
+              <label htmlFor="nr-country">{t('Land', 'Country')}</label>
               {countrySelect(recipient.countryCode, (v) => setRecipient({ ...recipient, countryCode: v }))}
             </div>
             <div className={ui.fld}>
-              <label htmlFor="nr-address">Address</label>
-              <textarea id="nr-address" rows={2} className={ui.fi} value={recipient.address} placeholder={'Street and number\nPostcode and town'} onChange={(e) => setRecipient({ ...recipient, address: e.target.value })} />
+              <label htmlFor="nr-address">{t('Adresse', 'Address')}</label>
+              <textarea
+                id="nr-address"
+                rows={2}
+                className={ui.fi}
+                value={recipient.address}
+                placeholder={t('Straße und Hausnummer\nPLZ und Ort', 'Street and number\nPostcode and town')}
+                onChange={(e) => setRecipient({ ...recipient, address: e.target.value })}
+              />
             </div>
           </div>
           <div className={ui.section}>
-            <span className={ui.sectionLabel}>The person to write to</span>
+            <span className={ui.sectionLabel}>{t('An wen wir schreiben', 'The person to write to')}</span>
             <ContactFields
               idPrefix="nr"
               value={recipient.contact}
@@ -930,30 +988,30 @@ function NewRecipientForm({
         <>
           <div className={ui.row3}>
             <div className={ui.fld}>
-              <span>Salutation</span>
+              <span>{t('Anrede', 'Salutation')}</span>
               <Seg<Salutation>
-                label="Salutation"
+                label={t('Anrede', 'Salutation')}
                 value={recipient.salutation}
                 options={[
-                  ['ms', 'Ms'],
-                  ['mr', 'Mr'],
+                  ['ms', t('Frau', 'Ms')],
+                  ['mr', t('Herr', 'Mr')],
                   ['none', '—'],
                 ]}
                 onChange={(v) => setRecipient({ ...recipient, salutation: v })}
               />
             </div>
             <div className={ui.fld}>
-              <label htmlFor="np-first">First name</label>
+              <label htmlFor="np-first">{t('Vorname', 'First name')}</label>
               <input id="np-first" className={ui.fi} value={recipient.firstName} autoFocus={!recipient.firstName} onChange={(e) => setRecipient({ ...recipient, firstName: e.target.value })} />
             </div>
             <div className={ui.fld}>
-              <label htmlFor="np-last">Last name</label>
+              <label htmlFor="np-last">{t('Nachname', 'Last name')}</label>
               <input id="np-last" className={ui.fi} value={recipient.lastName} onChange={(e) => setRecipient({ ...recipient, lastName: e.target.value })} />
             </div>
           </div>
           <div className={ui.row2}>
             <div className={ui.fld}>
-              <label htmlFor="np-email">Email</label>
+              <label htmlFor="np-email">{t('E-Mail', 'Email')}</label>
               <input
                 id="np-email"
                 type="email"
@@ -964,7 +1022,7 @@ function NewRecipientForm({
               />
             </div>
             <div className={ui.fld}>
-              <label htmlFor="nr-country">Nationality</label>
+              <label htmlFor="nr-country">{t('Nationalität', 'Nationality')}</label>
               {countrySelect(recipient.countryCode, (v) => setRecipient({ ...recipient, countryCode: v }))}
             </div>
           </div>
@@ -972,12 +1030,14 @@ function NewRecipientForm({
       )}
 
       {guessedCountry && recipient.countryCode === guessedCountry ? (
-        <span className={ui.guess}>Country read from the address: {countries.find((c) => c.code === guessedCountry)?.en ?? guessedCountry}</span>
+        <span className={ui.guess}>
+          {t('Land aus der E-Mail-Adresse', 'Country read from the address')}: {countries.find((c) => c.code === guessedCountry)?.[lang] ?? guessedCountry}
+        </span>
       ) : null}
 
       {matches.length ? (
         <div className={ui.matches} role="status">
-          <b>CASA may have them already</b>
+          <b>{t('CASA hat sie vielleicht schon', 'CASA may have them already')}</b>
           {matches.map((m) => (
             <div key={`${m.type}:${m.id}`} className={ui.match}>
               <span>
@@ -994,7 +1054,7 @@ function NewRecipientForm({
                   )
                 }
               >
-                Use this
+                {t('Übernehmen', 'Use this')}
               </button>
             </div>
           ))}
@@ -1041,6 +1101,7 @@ function OfferStep({
   setCourse: (c: CourseChoice | null) => void;
   history: LearnerHistory | null;
 }) {
+  const { t, lang } = useWsLang();
   const org = recipient?.type === 'organisation' ? recipient.org : null;
   const last = org?.lastOffer ?? null;
   // A learner's offer is a course; the price list is for what is not one (an exam, a fee, books alone).
@@ -1048,31 +1109,31 @@ function OfferStep({
   const tiles: { choice: PackageChoice; name: string; desc: string; price: ReactNode }[] = [
     ...GRUPPEN_PACKAGES_BY_STACK.map((p) => ({
       choice: p.slug as PackageChoice,
-      name: p.animal.en,
-      desc: p.descriptor.en,
+      name: p.animal[lang],
+      desc: p.descriptor[lang],
       price:
         p.priceFrom != null ? (
           <>
-            {eur(p.priceFrom)} <small>p. p.</small>
+            {eur(p.priceFrom)} <small>{t('p. P.', 'p. p.')}</small>
           </>
         ) : (
           <>
-            <small>from</small> {eur(fullBoardBaseTotal(1))}
+            <small>{t('ab', 'from')}</small> {eur(fullBoardBaseTotal(1))}
           </>
         ),
     })),
-    { choice: 'own', name: 'Own offer', desc: 'Lines of your choice', price: <small>No package</small> },
+    { choice: 'own', name: pick(lang, PACKAGE_NAME.own), desc: t('Zeilen nach Wahl', 'Lines of your choice'), price: <small>{t('Kein Paket', 'No package')}</small> },
   ];
 
   return (
     <>
-      <h2 className={ui.wzQ}>What is it?</h2>
+      <h2 className={ui.wzQ}>{t('Was ist es?', 'What is it?')}</h2>
       {isOrganisation(recipient) ? (
         <div className={ui.choiceGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
           {(
             [
-              ['group', 'A group stay'],
-              ['individual', 'A course'],
+              ['group', t('Ein Gruppenaufenthalt', 'A group stay')],
+              ['individual', t('Ein Kurs', 'A course')],
             ] as const
           ).map(([k, b]) => (
             <button key={k} type="button" aria-pressed={kind === k} className={`${ui.choiceCard} ${kind === k ? ui.choiceOn : ''}`} onClick={() => setKind(k)}>
@@ -1088,54 +1149,60 @@ function OfferStep({
             <button type="button" aria-pressed={basedOn === last.id} className={`${ui.again} ${basedOn === last.id ? ui.choiceOn : ''}`} onClick={() => repeat(last)}>
               <span className={`${ui.mark} ${ui.tint_blue}`}>{ICONS.repeat}</span>
               <span style={{ flex: 1 }}>
-                <b>Like last time</b>
+                <b>{t('Wie beim letzten Mal', 'Like last time')}</b>
                 <span>
-                  {last.number} · {PACKAGE_NAME[last.package]}
-                  {last.participants ? ` · ${last.participants} participants` : ''}
-                  {last.escorts ? ` · ${last.escorts} ${last.escorts === 1 ? 'escort' : 'escorts'}` : ''} · {last.year} — with its extras and prices
+                  {last.number} · {pick(lang, PACKAGE_NAME[last.package])}
+                  {last.participants ? t(` · ${last.participants} Teilnehmende`, ` · ${last.participants} participants`) : ''}
+                  {last.escorts ? ` · ${last.escorts} ${escortsWord(t, last.escorts)}` : ''} · {last.year}{' '}
+                  {t('– mit seinen Extras und Preisen', '— with its extras and prices')}
                 </span>
               </span>
               {basedOn === last.id ? <span className={ui.pkgCheck} style={{ position: 'static' }}>✓</span> : null}
             </button>
           ) : null}
-          <div className={ui.pkgs} role="radiogroup" aria-label="Package">
-            {tiles.map((t) => {
-              const on = pkg === t.choice;
-              const [colour, tint] = PACKAGE_COLOUR[t.choice];
+          <div className={ui.pkgs} role="radiogroup" aria-label={t('Paket', 'Package')}>
+            {tiles.map((tile) => {
+              const on = pkg === tile.choice;
+              const [colour, tint] = PACKAGE_COLOUR[tile.choice];
               return (
                 <button
-                  key={t.choice}
+                  key={tile.choice}
                   type="button"
                   role="radio"
                   aria-checked={on}
-                  className={`${ui.pkg} ${on ? ui.pkgOn : ''} ${t.choice === 'own' ? ui.pkgOwn : ''}`}
+                  className={`${ui.pkg} ${on ? ui.pkgOn : ''} ${tile.choice === 'own' ? ui.pkgOwn : ''}`}
                   style={{ ['--pkg' as string]: colour, ['--pkg-tint' as string]: tint }}
-                  onClick={() => setPkg(t.choice)}
+                  onClick={() => setPkg(tile.choice)}
                 >
                   {on ? <span className={ui.pkgCheck}>✓</span> : null}
-                  <span className={ui.pkgName}>{t.name}</span>
-                  <span className={ui.pkgDesc}>{t.desc}</span>
-                  <span className={ui.pkgPrice}>{t.price}</span>
+                  <span className={ui.pkgName}>{tile.name}</span>
+                  <span className={ui.pkgDesc}>{tile.desc}</span>
+                  <span className={ui.pkgPrice}>{tile.price}</span>
                 </button>
               );
             })}
           </div>
           {packageWeeks(pkg) == null ? (
             <div className={ui.fld}>
-              <span>How long, until there are dates</span>
-              <Stepper label="Weeks" value={weeks} min={1} max={pkg === 'esel' ? 4 : 52} onChange={(v) => setWeeks(v ?? 1)} />
+              <span>{t('Wie lange, bis es Daten gibt', 'How long, until there are dates')}</span>
+              <Stepper label={t('Wochen', 'Weeks')} value={weeks} min={1} max={pkg === 'esel' ? 4 : 52} onChange={(v) => setWeeks(v ?? 1)} />
             </div>
           ) : null}
-          <div className={ui.note}>Extras — more afternoons, a transfer, a single room, a reduction — are added on the offer.</div>
+          <div className={ui.note}>
+            {t(
+              'Extras – mehr Nachmittage, ein Transfer, ein Einzelzimmer, eine Ermäßigung – kommen auf dem Angebot dazu.',
+              'Extras — more afternoons, a transfer, a single room, a reduction — are added on the offer.'
+            )}
+          </div>
         </>
       ) : (
         <>
           <Seg<'course' | 'list'>
-            label="What it is"
+            label={t('Was es ist', 'What it is')}
             value={from}
             options={[
-              ['course', 'A course'],
-              ['list', picked.length ? `From the price list · ${picked.length}` : 'From the price list'],
+              ['course', t('Ein Kurs', 'A course')],
+              ['list', picked.length ? t(`Aus der Preisliste · ${picked.length}`, `From the price list · ${picked.length}`) : t('Aus der Preisliste', 'From the price list')],
             ]}
             onChange={setFrom}
           />
@@ -1160,6 +1227,7 @@ function PriceListPicker({
   picked: number[];
   setPicked: (p: number[]) => void;
 }) {
+  const { t } = useWsLang();
   const [q, setQ] = useState('');
   const shown = useMemo(
     () => priceList.map((item, i) => ({ item, i })).filter(({ item }) => !q.trim() || item.label.toLowerCase().includes(q.trim().toLowerCase())),
@@ -1169,9 +1237,14 @@ function PriceListPicker({
     <>
       <div className={ui.searchBox}>
         {ICONS.search}
-        <input value={q} placeholder="Find a course, a fee, a book, an exam" aria-label="Find in the price list" onChange={(e) => setQ(e.target.value)} />
+        <input
+          value={q}
+          placeholder={t('Kurs, Gebühr, Buch oder Prüfung finden', 'Find a course, a fee, a book, an exam')}
+          aria-label={t('In der Preisliste suchen', 'Find in the price list')}
+          onChange={(e) => setQ(e.target.value)}
+        />
       </div>
-      <div className={ui.courseList} role="group" aria-label="Price list">
+      <div className={ui.courseList} role="group" aria-label={t('Preisliste', 'Price list')}>
         {shown.length ? (
           shown.map(({ item, i }) => {
             const on = picked.includes(i);
@@ -1181,18 +1254,18 @@ function PriceListPicker({
                 <span>
                   {item.label} <span className={ui.note}>· {item.group}</span>
                 </span>
-                <small>{item.unitAmount != null ? eur(item.unitAmount) : 'no price'}</small>
+                <small>{item.unitAmount != null ? eur(item.unitAmount) : t('kein Preis', 'no price')}</small>
               </button>
             );
           })
         ) : (
-          <div className={ui.empty}>Nothing matches</div>
+          <div className={ui.empty}>{t('Nichts passt', 'Nothing matches')}</div>
         )}
       </div>
       <div className={ui.note}>
         {picked.length
-          ? `${picked.length} chosen · ${eur(picked.reduce((s, i) => s + (priceList[i]?.unitAmount ?? 0), 0))}`
-          : 'Nothing chosen: lines can also be added on the offer.'}
+          ? `${t(`${picked.length} ausgewählt`, `${picked.length} chosen`)} · ${eur(picked.reduce((s, i) => s + (priceList[i]?.unitAmount ?? 0), 0))}`
+          : t('Nichts ausgewählt: Zeilen kannst du auch auf dem Angebot hinzufügen.', 'Nothing chosen: lines can also be added on the offer.')}
       </div>
     </>
   );
@@ -1225,28 +1298,36 @@ function GroupStep({
   setEscorts: (n: number) => void;
   note: string | null;
 }) {
+  const { t, lang } = useWsLang();
   const length = packageWeeks(pkg) ?? weeks;
   const stay = stayLength(arrival, departure);
+  const sold = packageWeeks(pkg);
   return (
     <>
-      <h2 className={ui.wzQ}>The group</h2>
+      <h2 className={ui.wzQ}>{t('Die Gruppe', 'The group')}</h2>
       {note ? <span className={ui.guess}>{note}</span> : null}
       <div className={ui.wzDates}>
         <DateRange from={arrival} to={departure} today={today} suggestEnd={(a) => addDays(a, length * 7 - 1)} onChange={setDates} />
       </div>
       <div className={ui.note}>
         {stay
-          ? `Priced as ${stay.weeks} ${stay.weeks === 1 ? 'week' : 'weeks'}${packageWeeks(pkg) && stay.weeks !== packageWeeks(pkg) ? ` — ${PACKAGE_NAME[pkg]} is ${packageWeeks(pkg)}` : ''}.`
-          : `The departure follows from the arrival: ${length} ${length === 1 ? 'week' : 'weeks'}, Sunday to Saturday.`}
+          ? t(
+              `Berechnet als ${stay.weeks} ${weeksWord(t, stay.weeks)}${sold && stay.weeks !== sold ? ` – ${pick(lang, PACKAGE_NAME[pkg])} hat ${sold}` : ''}.`,
+              `Priced as ${stay.weeks} ${weeksWord(t, stay.weeks)}${sold && stay.weeks !== sold ? ` — ${pick(lang, PACKAGE_NAME[pkg])} is ${sold}` : ''}.`
+            )
+          : t(
+              `Die Abreise ergibt sich aus der Anreise: ${length} ${weeksWord(t, length)}, Sonntag bis Samstag.`,
+              `The departure follows from the arrival: ${length} ${weeksWord(t, length)}, Sunday to Saturday.`
+            )}
       </div>
       <div className={ui.row2}>
         <div className={ui.fld}>
-          <span>Participants</span>
-          <Stepper label="Participants" value={participants} min={1} max={500} placeholder="—" onChange={setParticipants} />
+          <span>{t('Teilnehmende', 'Participants')}</span>
+          <Stepper label={t('Teilnehmende', 'Participants')} value={participants} min={1} max={500} placeholder="—" onChange={setParticipants} />
         </div>
         <div className={ui.fld}>
-          <span>Escorts</span>
-          <Stepper label="Escorts" value={escorts} min={0} max={50} onChange={(v) => setEscorts(v ?? 0)} />
+          <span>{t('Begleitpersonen', 'Escorts')}</span>
+          <Stepper label={t('Begleitpersonen', 'Escorts')} value={escorts} min={0} max={50} onChange={(v) => setEscorts(v ?? 0)} />
         </div>
       </div>
     </>

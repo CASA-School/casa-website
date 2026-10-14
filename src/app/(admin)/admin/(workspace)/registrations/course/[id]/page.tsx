@@ -9,9 +9,11 @@ import { bookingOffer } from '@/lib/admin/booking-offer';
 import { requireModule } from '@/lib/admin/guard';
 import { RecordRail } from '@/components/admin/record-rail';
 import { Icon } from '@/components/admin/icons';
-import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader, relativeDays } from '@/components/admin/ui';
+import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { listFlags } from '@/lib/admin/flags';
+import { pick, relativeDays, type Bilingual } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import {
   findDuplicateCandidates,
@@ -23,18 +25,18 @@ import { getCourseRegistration } from '@/lib/admin/registrations';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
 import { courseNameResolver } from '../../course-names';
-import { formatRange, parseOptionLabel } from '../../option-label';
+import { formatRange, localDays, parseOptionLabel } from '../../option-label';
 
-const SALUTATIONS: Record<string, string> = {
-  mr: 'Mr',
-  ms: 'Ms',
-  mx: 'Mx',
-  neutral: 'No salutation',
+const SALUTATIONS: Record<string, Bilingual> = {
+  mr: { de: 'Herr', en: 'Mr' },
+  ms: { de: 'Frau', en: 'Ms' },
+  mx: { de: 'Mx', en: 'Mx' },
+  neutral: { de: 'Keine Anrede', en: 'No salutation' },
 };
 
-const ACCOMMODATION: Record<string, string> = {
-  flat: 'Shared flat',
-  host: 'Host family',
+const ACCOMMODATION: Record<string, Bilingual> = {
+  flat: { de: 'WG', en: 'Shared flat' },
+  host: { de: 'Gastfamilie', en: 'Host family' },
 };
 
 /**
@@ -53,7 +55,7 @@ export default async function CourseRegistrationPage({
   params: Promise<{ id: string }>;
 }) {
   const [{ id }, user] = await Promise.all([params, requireModule('registrations')]);
-  const registration = await getCourseRegistration(id);
+  const [registration, { t, lang }] = await Promise.all([getCourseRegistration(id), getI18n()]);
 
   if (!registration) {
     notFound();
@@ -92,17 +94,17 @@ export default async function CourseRegistrationPage({
     <>
       <RecordHeader
         backHref="/admin/registrations/course"
-        backLabel="All course registrations"
+        backLabel={t('Alle Kursanmeldungen', 'All course registrations')}
         title={fullName}
         avatar={fullName}
         subtitle={course ?? undefined}
-        status={<Badge tone={STATUS_TONES[registration.status]}>{STATUS_LABELS[registration.status]}</Badge>}
+        status={<Badge tone={STATUS_TONES[registration.status]}>{pick(lang, STATUS_LABELS[registration.status])}</Badge>}
         actions={
           <>
             {canBook && offer && registration.personId ? (
               <FormDialog
-                trigger="Create booking"
-                title={`Book ${fullName}`}
+                trigger={t('Buchung anlegen', 'Create booking')}
+                title={t(`${fullName} buchen`, `Book ${fullName}`)}
                 triggerVariant="primary"
                 width="lg"
               >
@@ -119,73 +121,78 @@ export default async function CourseRegistrationPage({
             ) : null}
             <ButtonLink href={`mailto:${registration.email}?subject=${encodeURIComponent(
                 `CASA registration — ${course ?? 'your course'}`
-              )}`}>Reply by email</ButtonLink>
+              )}`}>{t('Per E-Mail antworten', 'Reply by email')}</ButtonLink>
           </>
         }
         facts={[
           {
-            label: 'Received',
+            label: t('Eingegangen', 'Received'),
             icon: Icon.clock,
             tint: 'blue',
             value: <DateText value={registration.submittedAt} />,
-            sub: relativeDays(registration.submittedAt),
+            sub: relativeDays(registration.submittedAt, lang),
           },
           {
-            label: 'Dates',
+            label: t('Zeitraum', 'Dates'),
             icon: Icon.calendar,
             tint: 'blue',
             value: option?.start
-              ? formatRange(option.start, option.end)
+              ? formatRange(option.start, option.end, lang)
               : option?.toBeArranged
-                ? 'To be arranged'
+                ? t('Wird noch festgelegt', 'To be arranged')
                 : (option?.raw ?? null),
-            sub: [option?.days, option?.time].filter(Boolean).join(' · ') || undefined,
+            sub: [localDays(option?.days ?? null, lang), option?.time].filter(Boolean).join(' · ') || undefined,
           },
           {
             // A confirmed level outranks the learner's own claim; the claim
             // stays on the Applicant card below when both exist.
-            label: 'Level',
+            label: t('Niveau', 'Level'),
             icon: Icon.book,
             tint: 'red',
             value: confirmed?.level ?? declared,
             sub: confirmed
-              ? `Placement · ${confirmed.reviewerName ?? 'a former colleague'}`
+              ? t(
+                  `Einstufung · ${confirmed.reviewerName ?? 'ehemaliges Teammitglied'}`,
+                  `Placement · ${confirmed.reviewerName ?? 'a former colleague'}`
+                )
               : declared
                 ? registration.declaredLevelCode
-                  ? 'Self-declared'
-                  : 'Self-declared · unrecognised'
+                  ? t('Selbst angegeben', 'Self-declared')
+                  : t('Selbst angegeben · nicht erkannt', 'Self-declared · unrecognised')
                 : undefined,
           },
           {
-            label: 'Accommodation',
+            label: t('Unterkunft', 'Accommodation'),
             icon: Icon.rooms,
             tint: registration.accommodationRequired ? 'blue' : 'ink',
             value: registration.accommodationRequired
               ? registration.accommodationType
-                ? (ACCOMMODATION[registration.accommodationType] ?? registration.accommodationType)
-                : 'Needed'
-              : 'Not needed',
+                ? ACCOMMODATION[registration.accommodationType]
+                  ? pick(lang, ACCOMMODATION[registration.accommodationType])
+                  : registration.accommodationType
+                : t('Nötig', 'Needed')
+              : t('Nicht nötig', 'Not needed'),
           },
           {
-            label: 'Visa support',
+            label: t('Visumshilfe', 'Visa support'),
             icon: Icon.globe,
             tint: registration.visaRequired ? 'sun' : 'ink',
-            value: registration.visaRequired ? 'Needed' : 'Not needed',
+            value: registration.visaRequired ? t('Nötig', 'Needed') : t('Nicht nötig', 'Not needed'),
           },
         ]}
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          <Card title="Applicant" icon={Icon.person} tint="ink">
+          <Card title={t('Angaben zur Person', 'Applicant')} icon={Icon.person} tint="ink">
             <DetailList
               items={[
                 {
-                  label: 'Name',
-                  value: `${SALUTATIONS[registration.salutation] ?? registration.salutation} ${fullName}`,
+                  label: t('Name', 'Name'),
+                  value: `${SALUTATIONS[registration.salutation] ? pick(lang, SALUTATIONS[registration.salutation]) : registration.salutation} ${fullName}`,
                 },
                 {
-                  label: 'Email',
+                  label: t('E-Mail', 'Email'),
                   value: (
                     <a
                       href={`mailto:${registration.email}`}
@@ -196,7 +203,7 @@ export default async function CourseRegistrationPage({
                   ),
                 },
                 {
-                  label: 'Phone',
+                  label: t('Telefon', 'Phone'),
                   value: (
                     <a href={`tel:${registration.phone}`} className="font-medium">
                       {registration.phone}
@@ -204,31 +211,31 @@ export default async function CourseRegistrationPage({
                   ),
                 },
                 {
-                  label: 'Nationality',
+                  label: t('Nationalität', 'Nationality'),
                   value: registration.nationalityName ?? (
                     <span className="flex items-center gap-2">
                       {registration.nationalityRaw}
-                      <Badge tone="warning">unrecognised</Badge>
+                      <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
                     </span>
                   ),
                 },
                 {
-                  label: 'Date of birth',
+                  label: t('Geburtsdatum', 'Date of birth'),
                   value: <BirthDate value={registration.birthDate ?? registration.birthDateRaw} />,
                 },
                 {
-                  label: 'Registered in',
-                  value: registration.locale === 'de' ? 'German' : 'English',
+                  label: t('Angemeldet auf', 'Registered in'),
+                  value: registration.locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'),
                 },
                 ...(confirmed && declared
                   ? [
                       {
-                        label: 'Declared level',
+                        label: t('Angegebenes Niveau', 'Declared level'),
                         value: (
                           <span className="flex items-center gap-2">
                             {declared}
                             {!registration.declaredLevelCode ? (
-                              <Badge tone="warning">unrecognised</Badge>
+                              <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
                             ) : null}
                           </span>
                         ),
@@ -240,12 +247,12 @@ export default async function CourseRegistrationPage({
           </Card>
 
           {needsSomething ? (
-            <Card title="Needs arranging" icon={Icon.attention} tint="sun">
+            <Card title={t('Zu organisieren', 'Needs arranging')} icon={Icon.attention} tint="sun">
               <DetailList
                 items={[
-                  { label: 'Allergies', value: registration.allergies },
+                  { label: t('Allergien', 'Allergies'), value: registration.allergies },
                   {
-                    label: 'Their notes',
+                    label: t('Eigene Anmerkungen', 'Their notes'),
                     value: registration.notes,
                     wide: true,
                   },

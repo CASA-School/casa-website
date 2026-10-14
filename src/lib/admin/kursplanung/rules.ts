@@ -1,5 +1,7 @@
+import type { Bilingual } from '../i18n';
+
 import { absenceOn, assignmentKey, courseDays, teacherById, type PlanContext } from './fit';
-import { SHIFT_INFO, type Shift } from './types';
+import { ABSENCE_LABELS, SHIFT_INFO, WEEKDAY_LABELS, type Shift, type Weekday } from './types';
 import { weekdayOf } from './weeks';
 
 /**
@@ -35,7 +37,7 @@ export type Issue = {
   weekStart: string;
   shift: Shift;
   teacherId: string | null;
-  text: string;
+  text: Bilingual;
 };
 
 export type Analysis = {
@@ -45,6 +47,9 @@ export type Analysis = {
   /** weekStart → teacherId → dates assigned. */
   usage: Map<string, Map<string, Set<string>>>;
 };
+
+/** A weekday's English label for an issue's text; the German keeps the code. */
+const dayEn = (dow: Weekday | null) => (dow ? WEEKDAY_LABELS[dow].en : '');
 
 export function analysePlan(ctx: PlanContext): Analysis {
   const issues: Issue[] = [];
@@ -72,7 +77,7 @@ export function analysePlan(ctx: PlanContext): Analysis {
       for (const date of courseDays(group, week)) {
         const assignment = ctx.assignments.find((a) => a.groupId === group.id && a.onDate === date);
         if (!assignment) {
-          push({ ...base, severity: 'open', code: 'offen', onDate: date, teacherId: null, text: 'offen' });
+          push({ ...base, severity: 'open', code: 'offen', onDate: date, teacherId: null, text: { de: 'offen', en: 'open' } });
           continue;
         }
 
@@ -89,23 +94,23 @@ export function analysePlan(ctx: PlanContext): Analysis {
 
         const absence = absenceOn(ctx, assignment.teacherId, date);
         if (absence) {
-          push({ ...base, severity: 'hard', code: 'abwesend', onDate: date, teacherId: assignment.teacherId, text: `${absence.reason} · ${weekdayOf(date) ?? ''}` });
+          push({ ...base, severity: 'hard', code: 'abwesend', onDate: date, teacherId: assignment.teacherId, text: { de: `${absence.reason} · ${weekdayOf(date) ?? ''}`, en: `${ABSENCE_LABELS[absence.reason].en} · ${dayEn(weekdayOf(date))}` } });
         }
         const dow = weekdayOf(date);
         if (teacher && dow && !teacher.weekdays.includes(dow)) {
-          push({ ...base, severity: 'hard', code: 'wochentag', onDate: date, teacherId: assignment.teacherId, text: `arbeitet nicht am ${dow}` });
+          push({ ...base, severity: 'hard', code: 'wochentag', onDate: date, teacherId: assignment.teacherId, text: { de: `arbeitet nicht am ${dow}`, en: `does not work on ${dayEn(dow)}` } });
         }
         if (teacher && !teacher.shifts.includes(group.shift) && !assignment.isSubstitute) {
-          push({ ...base, severity: 'warn', code: 'schicht', onDate: date, teacherId: assignment.teacherId, text: `sonst ${teacher.shifts.map((s) => SHIFT_INFO[s].label).join('/')}` });
+          push({ ...base, severity: 'warn', code: 'schicht', onDate: date, teacherId: assignment.teacherId, text: { de: `sonst ${teacher.shifts.map((s) => SHIFT_INFO[s].label.de).join('/')}`, en: `usually ${teacher.shifts.map((s) => SHIFT_INFO[s].label.en.toLowerCase()).join('/')}` } });
         }
         if (teacher && !teacher.levels.includes(group.level)) {
-          push({ ...base, severity: 'warn', code: 'niveau', onDate: date, teacherId: assignment.teacherId, text: `${group.level} nicht hinterlegt` });
+          push({ ...base, severity: 'warn', code: 'niveau', onDate: date, teacherId: assignment.teacherId, text: { de: `${group.level} nicht hinterlegt`, en: `${group.level} not listed` } });
         }
         void name;
       }
 
       if (faces.size > 2) {
-        push({ ...base, severity: 'warn', code: 'wechsel', onDate: null, teacherId: null, text: `${faces.size} Lehrkräfte in einer Woche` });
+        push({ ...base, severity: 'warn', code: 'wechsel', onDate: null, teacherId: null, text: { de: `${faces.size} Lehrkräfte in einer Woche`, en: `${faces.size} teachers in one week` } });
       }
     }
 
@@ -114,7 +119,7 @@ export function analysePlan(ctx: PlanContext): Analysis {
       const [shift, date, teacherId] = dayKey.split('|');
       const name = teacherById(ctx, teacherId)?.shortName ?? '?';
       for (const groupId of groupIds) {
-        push({ severity: 'hard', code: 'doppelt', groupId, onDate: date, weekStart: week.start, shift: shift as Shift, teacherId, text: `${name} doppelt am ${weekdayOf(date) ?? ''}` });
+        push({ severity: 'hard', code: 'doppelt', groupId, onDate: date, weekStart: week.start, shift: shift as Shift, teacherId, text: { de: `${name} doppelt am ${weekdayOf(date) ?? ''}`, en: `${name} double-booked on ${dayEn(weekdayOf(date))}` } });
       }
     }
 
@@ -125,7 +130,7 @@ export function analysePlan(ctx: PlanContext): Analysis {
         if (a.teacherId !== teacherId || !dates.has(a.onDate)) continue;
         const group = ctx.groups.find((g) => g.id === a.groupId);
         if (!group) continue;
-        push({ severity: 'hard', code: 'kontingent', groupId: group.id, onDate: a.onDate, weekStart: week.start, shift: group.shift, teacherId, text: `${dates.size} Tage statt ${teacher.daysPerWeek}` });
+        push({ severity: 'hard', code: 'kontingent', groupId: group.id, onDate: a.onDate, weekStart: week.start, shift: group.shift, teacherId, text: { de: `${dates.size} Tage statt ${teacher.daysPerWeek}`, en: `${dates.size} days instead of ${teacher.daysPerWeek}` } });
       }
     }
   }

@@ -34,10 +34,10 @@ export function berlinLocalToDate(local: string): Date | null {
   return Number.isNaN(result.getTime()) ? null : result;
 }
 
-/** "1. Jan. 2027, 00:00" style, in Bremen time, for the editor's lists. */
-export function formatBerlin(iso: string | null): string {
+/** "1 Jan 2027, 00:00" style, in Bremen time, for the editor's lists; `locale` is the workspace's (`wsLocale`). */
+export function formatBerlin(iso: string | null, locale = 'en-GB'): string {
   if (!iso) return '';
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale, {
     timeZone: 'Europe/Berlin',
     day: 'numeric',
     month: 'short',

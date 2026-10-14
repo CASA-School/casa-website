@@ -2,6 +2,7 @@ import 'server-only';
 
 import type { WorkspaceModule } from './access';
 import { query } from './db';
+import type { T } from './i18n';
 
 /**
  * The workspace's search (⌘K in the top bar): a name, an address or an offer
@@ -20,7 +21,17 @@ const LIMIT = 5;
 const name = (first: string | null, last: string | null) => [first, last].filter(Boolean).join(' ');
 const day = (d: Date | null) => (d ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'Europe/Berlin' }) : '');
 
-export async function searchWorkspace(text: string, holds: (module: WorkspaceModule) => boolean): Promise<SearchHit[]> {
+export async function searchWorkspace(
+  text: string,
+  holds: (module: WorkspaceModule) => boolean,
+  t: T
+): Promise<SearchHit[]> {
+  const status: Record<string, string> = {
+    reserved: t('Reserviert', 'Reserved'),
+    confirmed: t('Bestätigt', 'Confirmed'),
+    cancelled: t('Storniert', 'Cancelled'),
+    completed: t('Abgeschlossen', 'Completed'),
+  };
   const term = text.trim().toLowerCase().slice(0, 80);
   if (term.length < 2) return [];
   const like = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
@@ -46,7 +57,7 @@ export async function searchWorkspace(text: string, holds: (module: WorkspaceMod
             kind: 'person' as const,
             id: r.id,
             title: name(r.first_name, r.last_name),
-            detail: [n ? (n === 1 ? '1 booking' : `${n} bookings`) : 'Student', r.email].filter(Boolean).join(' · '),
+            detail: [n ? (n === 1 ? t('1 Buchung', '1 booking') : t(`${n} Buchungen`, `${n} bookings`)) : t('Teilnehmende', 'Student'), r.email].filter(Boolean).join(' · '),
             href: `/admin/people/${r.id}`,
           };
         })
@@ -141,7 +152,7 @@ export async function searchWorkspace(text: string, holds: (module: WorkspaceMod
           kind: 'booking' as const,
           id: r.id,
           title: name(r.first_name, r.last_name),
-          detail: [r.course, r.status.charAt(0).toUpperCase() + r.status.slice(1)].filter(Boolean).join(' · '),
+          detail: [r.course, status[r.status] ?? r.status].filter(Boolean).join(' · '),
           href: `/admin/bookings/${r.id}`,
         }))
       )
@@ -160,7 +171,7 @@ export async function searchWorkspace(text: string, holds: (module: WorkspaceMod
           kind: 'application' as const,
           id: r.id,
           title: name(r.first_name, r.last_name),
-          detail: r.position_title ?? 'Job application',
+          detail: r.position_title ?? t('Bewerbung', 'Job application'),
           href: `/admin/applications/${r.id}`,
         }))
       )

@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dates';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { DateField } from '@/components/admin/date-picker';
+import { useWsLang } from '@/components/admin/lang';
+import type { T } from '@/lib/admin/i18n';
 
 /**
  * The booking wizard.
@@ -35,13 +37,25 @@ import { DateField } from '@/components/admin/date-picker';
 
 type Step = 'what' | 'course' | 'level' | 'accommodation' | 'review';
 
-const STEPS: readonly { key: Step; label: string }[] = [
-  { key: 'what', label: 'What' },
-  { key: 'course', label: 'Which' },
-  { key: 'level', label: 'Level & books' },
-  { key: 'accommodation', label: 'Accommodation' },
-  { key: 'review', label: 'Review' },
+const steps = (t: T): readonly { key: Step; label: string }[] => [
+  { key: 'what', label: t('Was', 'What') },
+  { key: 'course', label: t('Auswahl', 'Which') },
+  { key: 'level', label: t('Niveau & Bücher', 'Level & books') },
+  { key: 'accommodation', label: t('Unterkunft', 'Accommodation') },
+  { key: 'review', label: t('Prüfen', 'Review') },
 ];
+
+/** A cohort's session as stored ('morning'), in words; anything else as stored. */
+const sessionLabel = (t: T, session: string): string =>
+  session === 'morning'
+    ? t('Vormittag', 'morning')
+    : session === 'afternoon'
+      ? t('Nachmittag', 'afternoon')
+      : session === 'evening'
+        ? t('Abend', 'evening')
+        : session;
+
+const weeksLabel = (t: T, weeks: number) => (weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`));
 
 export function BookingWizard({
   personId,
@@ -60,6 +74,7 @@ export function BookingWizard({
   returnTo: string;
   action: (formData: FormData) => void | Promise<void>;
 }) {
+  const { t } = useWsLang();
   const preselected = useMemo(
     () =>
       preselectedCohortId
@@ -106,7 +121,7 @@ export function BookingWizard({
     ? (offer.accommodation.find((a) => a.code === accType) ?? null)
     : null;
 
-  const visible = STEPS.filter((s) => (kind === 'exam' ? s.key !== 'level' : true));
+  const visible = steps(t).filter((s) => (kind === 'exam' ? s.key !== 'level' : true));
   const index = visible.findIndex((s) => s.key === step);
   const canAdvance =
     (step === 'what' && (kind === 'course' || (kind === 'exam' && Boolean(examTypeId)))) ||
@@ -166,23 +181,25 @@ export function BookingWizard({
 
       {step === 'what' ? (
         <section className="space-y-3">
-          <Question>What is {personName.split(' ')[0]} booking?</Question>
+          <Question>
+            {t(`Was bucht ${personName.split(' ')[0]}?`, `What is ${personName.split(' ')[0]} booking?`)}
+          </Question>
           <div className="grid gap-2 sm:grid-cols-2">
             <Choice
               selected={kind === 'course'}
               onSelect={() => setKind('course')}
-              title="A course"
+              title={t('Einen Kurs', 'A course')}
             >
-              Intensive, evening, special or exam preparation
+              {t('Intensiv, abends, Spezialkurs oder Prüfungsvorbereitung', 'Intensive, evening, special or exam preparation')}
             </Choice>
-            <Choice selected={kind === 'exam'} onSelect={() => setKind('exam')} title="An exam">
-              A telc sitting on its own
+            <Choice selected={kind === 'exam'} onSelect={() => setKind('exam')} title={t('Eine Prüfung', 'An exam')}>
+              {t('Ein einzelner telc-Prüfungstermin', 'A telc sitting on its own')}
             </Choice>
           </div>
 
           {kind === 'exam' ? (
             <div className="space-y-3 border-t border-ws-line-soft pt-4">
-              <Question small>Which exam?</Question>
+              <Question small>{t('Welche Prüfung?', 'Which exam?')}</Question>
               <div className="grid gap-2">
                 {offer.exams.map((e) => (
                   <Choice
@@ -206,7 +223,7 @@ export function BookingWizard({
                         : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
                     )}
                   >
-                    {parts === 2 ? 'Both parts' : 'One part only'}
+                    {parts === 2 ? t('Beide Teile', 'Both parts') : t('Nur ein Teil', 'One part only')}
                   </button>
                 ))}
               </div>
@@ -217,31 +234,31 @@ export function BookingWizard({
 
       {step === 'course' ? (
         <section className="space-y-3">
-          <Question>Which kind of course?</Question>
+          <Question>{t('Welche Kursart?', 'Which kind of course?')}</Question>
           <div className="flex flex-wrap gap-2">
-            {offer.courseTypes.map((t) => (
+            {offer.courseTypes.map((type) => (
               <button
-                key={t.id}
+                key={type.id}
                 type="button"
                 onClick={() => {
-                  setCourseTypeId(t.id);
+                  setCourseTypeId(type.id);
                   setCohort(null);
                 }}
                 className={cn(
                   'rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors',
-                  courseTypeId === t.id
+                  courseTypeId === type.id
                     ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
                     : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
                 )}
               >
-                {t.name}
+                {type.name}
                 <span
                   className={cn(
                     'ml-2 text-xs font-normal',
-                    courseTypeId === t.id ? 'text-white/60' : 'text-[var(--casa-text-subtle)]'
+                    courseTypeId === type.id ? 'text-white/60' : 'text-[var(--casa-text-subtle)]'
                   )}
                 >
-                  {t.cohorts.length}
+                  {type.cohorts.length}
                 </span>
               </button>
             ))}
@@ -249,9 +266,9 @@ export function BookingWizard({
 
           {courseTypeId ? (
             <div className="space-y-2 border-t border-ws-line-soft pt-4">
-              <Question small>Which one?</Question>
+              <Question small>{t('Welcher Termin?', 'Which one?')}</Question>
               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                {(offer.courseTypes.find((t) => t.id === courseTypeId)?.cohorts ?? []).map((c) => {
+                {(offer.courseTypes.find((type) => type.id === courseTypeId)?.cohorts ?? []).map((c) => {
                   const left = c.capacity > 0 ? c.capacity - c.seatsTaken : null;
                   return (
                     <Choice
@@ -264,9 +281,9 @@ export function BookingWizard({
                       title={c.label}
                     >
                       {[
-                        `${c.weeks} ${c.weeks === 1 ? 'week' : 'weeks'}`,
-                        c.session,
-                        left !== null ? `${left} of ${c.capacity} seats free` : null,
+                        weeksLabel(t, c.weeks),
+                        c.session ? sessionLabel(t, c.session) : null,
+                        left !== null ? t(`${left} von ${c.capacity} Plätzen frei`, `${left} of ${c.capacity} seats free`) : null,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -281,7 +298,7 @@ export function BookingWizard({
 
       {step === 'level' ? (
         <section className="space-y-3">
-          <Question>Which level are they starting at?</Question>
+          <Question>{t('Mit welchem Niveau beginnt die Person?', 'Which level are they starting at?')}</Question>
           <div className="flex flex-wrap gap-1.5">
             {offer.levels.map((l) => (
               <button
@@ -304,34 +321,34 @@ export function BookingWizard({
             <>
               {levelSiblings(levelCode).length > 1 ? (
                 <div className="flex flex-wrap gap-2 border-t border-ws-line-soft pt-4">
-                  <Question small>How much of {levelBand(levelCode)}?</Question>
+                  <Question small>{t(`Wie viel von ${levelBand(levelCode)}?`, `How much of ${levelBand(levelCode)}?`)}</Question>
                   <div className="flex w-full gap-2">
                     <Toggle
                       selected={levelScope === 'whole'}
                       onSelect={() => setLevelScope('whole')}
-                      label={`The whole ${levelBand(levelCode)}`}
+                      label={t(`Das ganze ${levelBand(levelCode)}`, `The whole ${levelBand(levelCode)}`)}
                     />
                     <Toggle
                       selected={levelScope === 'half'}
                       onSelect={() => setLevelScope('half')}
-                      label={`${levelCode} only`}
+                      label={t(`Nur ${levelCode}`, `${levelCode} only`)}
                     />
                   </div>
                 </div>
               ) : null}
 
               <div className="space-y-2 border-t border-ws-line-soft pt-4">
-                <Question small>Do they want the book?</Question>
+                <Question small>{t('Möchte die Person das Buch?', 'Do they want the book?')}</Question>
                 <div className="flex gap-2">
                   <Toggle
                     selected={wantsBooks === true}
                     onSelect={() => setWantsBooks(true)}
-                    label="Yes"
+                    label={t('Ja', 'Yes')}
                   />
                   <Toggle
                     selected={wantsBooks === false}
                     onSelect={() => setWantsBooks(false)}
-                    label="No"
+                    label={t('Nein', 'No')}
                   />
                 </div>
 
@@ -359,7 +376,7 @@ export function BookingWizard({
                 ) : null}
                 {wantsBooks && books.length === 0 ? (
                   <p className="text-xs text-[var(--casa-text-subtle)]">
-                    No book is listed for {levelCode}.
+                    {t(`Für ${levelCode} ist kein Buch hinterlegt.`, `No book is listed for ${levelCode}.`)}
                   </p>
                 ) : null}
               </div>
@@ -370,7 +387,7 @@ export function BookingWizard({
 
       {step === 'accommodation' ? (
         <section className="space-y-3">
-          <Question>Do they need accommodation?</Question>
+          <Question>{t('Braucht die Person eine Unterkunft?', 'Do they need accommodation?')}</Question>
           <div className="flex gap-2">
             <Toggle
               selected={wantsAccommodation === true}
@@ -381,18 +398,18 @@ export function BookingWizard({
                   setAccTo(toDateInputValue(cohort.endDate));
                 }
               }}
-              label="Yes"
+              label={t('Ja', 'Yes')}
             />
             <Toggle
               selected={wantsAccommodation === false}
               onSelect={() => setWantsAccommodation(false)}
-              label="No"
+              label={t('Nein', 'No')}
             />
           </div>
 
           {wantsAccommodation ? (
             <div className="space-y-3 border-t border-ws-line-soft pt-4">
-              <Question small>Which kind?</Question>
+              <Question small>{t('Welche Art?', 'Which kind?')}</Question>
               <div className="grid gap-2 sm:grid-cols-2">
                 {offer.accommodation.map((a) => (
                   <Choice
@@ -401,20 +418,20 @@ export function BookingWizard({
                     onSelect={() => setAccType(a.code)}
                     title={a.name}
                   >
-                    {a.isCasaManaged ? 'CASA managed' : undefined}
+                    {a.isCasaManaged ? t('Von CASA betreut', 'CASA managed') : undefined}
                   </Choice>
                 ))}
               </div>
 
               {accType ? (
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Room" htmlFor="acc-room">
+                  <Field label={t('Zimmer', 'Room')} htmlFor="acc-room">
                     <Select
                       id="acc-room"
                       value={roomType}
                       onChange={(e) => setRoomType(e.target.value)}
                     >
-                      <option value="">Not specified</option>
+                      <option value="">{t('Nicht angegeben', 'Not specified')}</option>
                       {offer.roomTypes.map((r) => (
                         <option key={r.code} value={r.code}>
                           {r.name}
@@ -422,13 +439,13 @@ export function BookingWizard({
                       ))}
                     </Select>
                   </Field>
-                  <Field label="Catering" htmlFor="acc-catering">
+                  <Field label={t('Verpflegung', 'Catering')} htmlFor="acc-catering">
                     <Select
                       id="acc-catering"
                       value={catering}
                       onChange={(e) => setCatering(e.target.value)}
                     >
-                      <option value="">Not specified</option>
+                      <option value="">{t('Nicht angegeben', 'Not specified')}</option>
                       {offer.catering.map((c) => (
                         <option key={c.code} value={c.code}>
                           {c.name}
@@ -436,14 +453,14 @@ export function BookingWizard({
                       ))}
                     </Select>
                   </Field>
-                  <Field label="From" htmlFor="acc-from">
+                  <Field label={t('Von', 'From')} htmlFor="acc-from">
                     <DateField
                       id="acc-from"
                       value={accFrom || null}
                       onChange={(v) => setAccFrom(v ?? '')}
                     />
                   </Field>
-                  <Field label="Until" htmlFor="acc-to">
+                  <Field label={t('Bis', 'Until')} htmlFor="acc-to">
                     <DateField
                       id="acc-to"
                       value={accTo || null}
@@ -505,7 +522,7 @@ export function BookingWizard({
           <input type="hidden" name="accommodationFrom" value={wantsAccommodation ? accFrom : ''} />
           <input type="hidden" name="accommodationTo" value={wantsAccommodation ? accTo : ''} />
           <dl className="divide-y divide-ws-line-soft rounded-xl border border-ws-line">
-            {summaryRows({
+            {summaryRows(t, {
               kind,
               cohort,
               exam,
@@ -526,24 +543,28 @@ export function BookingWizard({
             ))}
           </dl>
 
-          <OptionalSection requires={['personId']} heading="Status, payer and notes" alwaysOpen>
+          <OptionalSection
+            requires={['personId']}
+            heading={t('Status, wer zahlt und Notizen', 'Status, payer and notes')}
+            alwaysOpen
+          >
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Status" htmlFor="review-status">
+              <Field label={t('Status', 'Status')} htmlFor="review-status">
                 <Select id="review-status" name="status" defaultValue="reserved">
-                  <option value="reserved">Reserved</option>
-                  <option value="confirmed">Confirmed</option>
+                  <option value="reserved">{t('Reserviert', 'Reserved')}</option>
+                  <option value="confirmed">{t('Bestätigt', 'Confirmed')}</option>
                 </Select>
               </Field>
-              <Field label="Who pays" htmlFor="review-payer">
+              <Field label={t('Wer zahlt', 'Who pays')} htmlFor="review-payer">
                 <Select id="review-payer" name="payer" defaultValue="self">
-                  <option value="self">Learner</option>
-                  <option value="agency">Agency</option>
-                  <option value="company">Company</option>
-                  <option value="other">Other</option>
+                  <option value="self">{t('Lernende(r)', 'Learner')}</option>
+                  <option value="agency">{t('Agentur', 'Agency')}</option>
+                  <option value="company">{t('Firma', 'Company')}</option>
+                  <option value="other">{t('Sonstige', 'Other')}</option>
                 </Select>
               </Field>
             </div>
-            <Field label="Payer name" htmlFor="review-payer-name">
+            <Field label={t('Name der Zahlenden', 'Payer name')} htmlFor="review-payer-name">
               <Input id="review-payer-name" name="payerName" maxLength={120} />
             </Field>
             <label className="flex items-center gap-2.5 text-sm">
@@ -553,7 +574,7 @@ export function BookingWizard({
                 onChange={(e) => setIncludeFee(e.target.checked)}
                 className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
               />
-              Charge the enrolment fee
+              {t('Anmeldegebühr berechnen', 'Charge the enrolment fee')}
             </label>
             <label className="flex items-center gap-2.5 text-sm">
               <input
@@ -561,27 +582,27 @@ export function BookingWizard({
                 name="visaRequired"
                 className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
               />
-              Visa required
+              {t('Visum nötig', 'Visa required')}
             </label>
-            <Field label="Notes" htmlFor="review-notes">
+            <Field label={t('Notizen', 'Notes')} htmlFor="review-notes">
               <Textarea id="review-notes" name="notes" rows={2} />
             </Field>
           </OptionalSection>
 
           <div className="flex items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
             <Button type="button" variant="ghost" onClick={() => go(-1)}>
-              Back
+              {t('Zurück', 'Back')}
             </Button>
-            <Button type="submit">Create booking</Button>
+            <Button type="submit">{t('Buchung anlegen', 'Create booking')}</Button>
           </div>
         </form>
       ) : (
         <div className="flex items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
           <Button type="button" variant="ghost" onClick={() => go(-1)} disabled={index === 0}>
-            Back
+            {t('Zurück', 'Back')}
           </Button>
           <Button type="button" onClick={() => go(1)} disabled={!canAdvance}>
-            Continue
+            {t('Weiter', 'Continue')}
           </Button>
         </div>
       )}
@@ -667,62 +688,68 @@ function Toggle({
  * What the booking will say, in the order it was chosen. Words, not amounts:
  * the cost is resolved on the server and shown on the booking afterwards.
  */
-function summaryRows({
-  kind,
-  cohort,
-  exam,
-  examParts,
-  levelCode,
-  levelScope,
-  books,
-  accommodation,
-  accFrom,
-  accTo,
-}: {
-  kind: 'course' | 'exam';
-  cohort: CohortOffer | null;
-  exam: { name: string } | null;
-  examParts: 1 | 2;
-  levelCode: string | null;
-  levelScope: 'half' | 'whole';
-  books: readonly { id: string; title: string }[];
-  accommodation: { name: string } | null;
-  accFrom: string;
-  accTo: string;
-}): { label: string; value: string }[] {
+function summaryRows(
+  t: T,
+  {
+    kind,
+    cohort,
+    exam,
+    examParts,
+    levelCode,
+    levelScope,
+    books,
+    accommodation,
+    accFrom,
+    accTo,
+  }: {
+    kind: 'course' | 'exam';
+    cohort: CohortOffer | null;
+    exam: { name: string } | null;
+    examParts: 1 | 2;
+    levelCode: string | null;
+    levelScope: 'half' | 'whole';
+    books: readonly { id: string; title: string }[];
+    accommodation: { name: string } | null;
+    accFrom: string;
+    accTo: string;
+  }
+): { label: string; value: string }[] {
   const rows: { label: string; value: string }[] = [];
 
   if (kind === 'course' && cohort) {
-    rows.push({ label: 'Course', value: cohort.label });
+    rows.push({ label: t('Kurs', 'Course'), value: cohort.label });
     rows.push({
-      label: 'Runs for',
-      value: `${cohort.weeks} ${cohort.weeks === 1 ? 'week' : 'weeks'}`,
+      label: t('Dauer', 'Runs for'),
+      value: weeksLabel(t, cohort.weeks),
     });
   }
   if (kind === 'exam' && exam) {
-    rows.push({ label: 'Exam', value: exam.name });
-    rows.push({ label: 'Sitting', value: examParts === 1 ? 'One part' : 'Both parts' });
+    rows.push({ label: t('Prüfung', 'Exam'), value: exam.name });
+    rows.push({
+      label: t('Prüfungsteile', 'Sitting'),
+      value: examParts === 1 ? t('Ein Teil', 'One part') : t('Beide Teile', 'Both parts'),
+    });
   }
   if (levelCode) {
     rows.push({
-      label: 'Level',
+      label: t('Niveau', 'Level'),
       value:
         levelScope === 'whole' && levelSiblings(levelCode).length > 1
-          ? `The whole ${levelBand(levelCode)}`
+          ? t(`Das ganze ${levelBand(levelCode)}`, `The whole ${levelBand(levelCode)}`)
           : levelCode,
     });
   }
   rows.push({
-    label: 'Books',
-    value: books.length === 0 ? 'None' : books.map((b) => b.title).join(', '),
+    label: t('Bücher', 'Books'),
+    value: books.length === 0 ? t('Keine', 'None') : books.map((b) => b.title).join(', '),
   });
   rows.push({
-    label: 'Accommodation',
+    label: t('Unterkunft', 'Accommodation'),
     value: accommodation
       ? [accommodation.name, accFrom && accTo ? `${german(accFrom)} – ${german(accTo)}` : null]
           .filter(Boolean)
           .join(' · ')
-      : 'None',
+      : t('Keine', 'None'),
   });
 
   return rows;

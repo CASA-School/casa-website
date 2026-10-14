@@ -4,6 +4,7 @@ import type { PoolClient } from 'pg';
 
 import type { StaffUser } from '../auth';
 import { query, queryFirst, withTransaction } from '../db';
+import { translator, type Bilingual, type WsLang } from '../i18n';
 import { issueLetter, lettersForOffer, saveStandardText, standardTexts, type LetterListItem } from '../letters/repo';
 import { coursePrice } from '../prices/price-list';
 import { loadPriceLists } from '../prices/repo';
@@ -142,7 +143,7 @@ export type OfferListItem = {
   recipientName: string;
   arrival: string | null;
   departure: string | null;
-  /** A learner's course: its first and last day, and "Intensive German B2 to C1 · Mornings". */
+  /** A learner's course: its first and last day, and "Intensive German B2 to C1 · Mornings" in the workspace's language. */
   course: { start: string | null; end: string | null; label: string } | null;
   participants: number | null;
   escorts: number;
@@ -166,7 +167,7 @@ const FILTER_SQL: Record<OfferListFilter, string> = {
 /** Days without an answer after which a sent offer is worth a follow-up. */
 export const FOLLOW_UP_AFTER_DAYS = 10;
 
-export async function listOffers({ filter, q }: { filter: OfferListFilter; q?: string }): Promise<OfferListItem[]> {
+export async function listOffers({ filter, q, lang }: { filter: OfferListFilter; q?: string; lang: WsLang }): Promise<OfferListItem[]> {
   const params: unknown[] = [];
   let search = '';
   if (q && q.trim()) {
@@ -219,7 +220,7 @@ export async function listOffers({ filter, q }: { filter: OfferListFilter; q?: s
         r.kind === 'individual' && stay.choices.course
           ? {
               ...courseSpan(stay.choices.course),
-              label: [courseTitle(stay.choices.course, 'en'), slotLabel(stay.choices.course.slot, 'en').split(', ')[0]].filter(Boolean).join(' · '),
+              label: [courseTitle(stay.choices.course, lang), slotLabel(stay.choices.course.slot, lang).split(', ')[0]].filter(Boolean).join(' · '),
             }
           : null,
       participants: r.participants,
@@ -471,9 +472,11 @@ function draftParams(d: OfferDraft) {
   ];
 }
 
+const GONE: Bilingual = { de: 'Dieses Angebot gibt es nicht mehr.', en: 'This offer no longer exists.' };
+
 export type SaveResult =
   | { ok: true; revision: number; lines: OfferLine[]; totals: OfferTotals; checks: OfferCheck[] }
-  | { ok: false; error: string; stale?: boolean };
+  | { ok: false; error: Bilingual; stale?: boolean };
 
 /**
  * One save of the editor: the whole draft, conditional on the revision the
@@ -487,10 +490,12 @@ export async function saveOffer(id: string, draft: OfferDraft, baseRevision: num
       [id]
     );
     const current = rows[0];
-    if (!current) return { ok: false, error: 'This offer no longer exists.' };
-    if (current.status !== 'draft') return { ok: false, error: 'Only a draft can be changed. Revise the offer first.' };
+    if (!current) return { ok: false, error: GONE };
+    if (current.status !== 'draft') {
+      return { ok: false, error: { de: 'Nur ein Entwurf kann geändert werden. Überarbeite das Angebot zuerst.', en: 'Only a draft can be changed. Revise the offer first.' } };
+    }
     if (current.revision !== baseRevision) {
-      return { ok: false, stale: true, error: 'A colleague has changed this offer in the meantime.' };
+      return { ok: false, stale: true, error: { de: 'Jemand aus dem Team hat dieses Angebot inzwischen geändert.', en: 'A colleague has changed this offer in the meantime.' } };
     }
     const priced = priceDraft(draft);
     await client.query(
@@ -616,7 +621,7 @@ export async function duplicateOffer(id: string, actor: StaffUser): Promise<stri
 
 // ------------------------------------------------------------- sending
 
-export type SendResult = { ok: true } | { ok: false; error: string };
+export type SendResult = { ok: true } | { ok: false; error: Bilingual };
 
 async function nameOf(client: PoolClient, sql: string, value: string): Promise<string | null> {
   const { rows } = await client.query<{ name: string }>(sql, [value]);
@@ -634,12 +639,13 @@ export async function markSent(id: string, actor: StaffUser): Promise<SendResult
   return withTransaction(async (client) => {
     const { rows } = await client.query<OfferRow>(`${OFFER_SELECT} WHERE o.id = $1 AND o.deleted_at IS NULL FOR UPDATE OF o`, [id]);
     const row = rows[0];
-    if (!row) return { ok: false, error: 'This offer no longer exists.' };
-    if (row.status !== 'draft') return { ok: false, error: 'This offer has already been sent.' };
+    if (!row) return { ok: false, error: GONE };
+    if (row.status !== 'draft') return { ok: false, error: { de: 'Dieses Angebot ist schon gesendet.', en: 'This offer has already been sent.' } };
     const draft = draftFromRow(row);
     const priced = priceDraft(draft);
     if (hasProblems(priced.checks)) {
-      return { ok: false, error: priced.checks.filter((c) => c.level === 'problem').map((c) => c.message).join(' · ') };
+      const problems = priced.checks.filter((c) => c.level === 'problem');
+      return { ok: false, error: { de: problems.map((c) => c.message.de).join(' · '), en: problems.map((c) => c.message.en).join(' · ') } };
     }
     const version = row.version + 1;
     const countryName = draft.countryCode
@@ -780,7 +786,7 @@ export async function editorOptions(): Promise<EditorOptions> {
   };
 }
 
-/** One thing from the price list, as a line it would add, in both languages. */
+/** One thing from the price list, as a line it would add, in both languages; `group` and `label` are the workspace's. */
 export type PriceListItem = {
   group: string;
   label: string;
@@ -797,7 +803,8 @@ const ddmmyy = (d: Date) => toDateInputValue(d).split('-').reverse().join('.');
  * enrolment fee, a book, an exam. The same rates the booking wizard prices a
  * booking from, so an offer and the booking that follows it agree.
  */
-export async function priceListOptions(): Promise<PriceListItem[]> {
+export async function priceListOptions(lang: WsLang): Promise<PriceListItem[]> {
+  const t = translator(lang);
   const [courses, fee, books, exams, prices] = await Promise.all([
     query<{
       name: string;
@@ -845,8 +852,8 @@ export async function priceListOptions(): Promise<PriceListItem[]> {
     const span = `${ddmmyy(c.start_date)}–${ddmmyy(c.end_date)}`;
     const level = c.level_code ? ` ${c.level_code}` : '';
     items.push({
-      group: 'Courses',
-      label: `${c.name}${level} · ${span}`,
+      group: t('Kurse', 'Courses'),
+      label: `${lang === 'en' ? c.name : (c.name_de ?? c.name)}${level} · ${span}`,
       chargeType: 'tuition',
       de: `${c.name_de ?? c.name}${level}, ${span} (${weeks} ${weeks === 1 ? 'Woche' : 'Wochen'})`,
       en: `${c.name}${level}, ${span} (${weeks} ${weeks === 1 ? 'week' : 'weeks'})`,
@@ -854,19 +861,19 @@ export async function priceListOptions(): Promise<PriceListItem[]> {
     });
   }
   items.push({
-    group: 'Fees',
-    label: 'Enrolment fee',
+    group: t('Gebühren', 'Fees'),
+    label: t('Anmeldegebühr', 'Enrolment fee'),
     chargeType: 'enrolment_fee',
     de: 'Einschreibegebühr',
     en: 'Enrolment fee',
     unitAmount: fee ? Number(fee.amount) : null,
   });
   for (const b of books) {
-    items.push({ group: 'Books', label: b.title, chargeType: 'books', de: b.title, en: b.title, unitAmount: b.price == null ? null : Number(b.price) });
+    items.push({ group: t('Bücher', 'Books'), label: b.title, chargeType: 'books', de: b.title, en: b.title, unitAmount: b.price == null ? null : Number(b.price) });
   }
   for (const e of exams) {
-    if (e.both != null) items.push({ group: 'Exams', label: `${e.name} · both parts`, chargeType: 'exam_fee', de: `Prüfung ${e.name}`, en: `Exam ${e.name}`, unitAmount: Number(e.both) });
-    if (e.one != null) items.push({ group: 'Exams', label: `${e.name} · one part`, chargeType: 'exam_fee', de: `Prüfung ${e.name} (ein Teil)`, en: `Exam ${e.name} (one part)`, unitAmount: Number(e.one) });
+    if (e.both != null) items.push({ group: t('Prüfungen', 'Exams'), label: `${e.name} · ${t('beide Teile', 'both parts')}`, chargeType: 'exam_fee', de: `Prüfung ${e.name}`, en: `Exam ${e.name}`, unitAmount: Number(e.both) });
+    if (e.one != null) items.push({ group: t('Prüfungen', 'Exams'), label: `${e.name} · ${t('ein Teil', 'one part')}`, chargeType: 'exam_fee', de: `Prüfung ${e.name} (ein Teil)`, en: `Exam ${e.name} (one part)`, unitAmount: Number(e.one) });
   }
   return items;
 }

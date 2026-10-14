@@ -14,6 +14,8 @@ import type { CourseTypeSummary } from '@/lib/admin/catalogue';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { toDateInputValue } from '@/lib/dates';
 import { DateFormField } from '@/components/admin/date-picker';
+import { pick, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import {
   addChargeAction,
   extendBookingAction,
@@ -37,57 +39,68 @@ const More = ({ heading, children }: { heading: string; children: ReactNode }) =
   </OptionalSection>
 );
 
-function PayerFields({ payer = 'self', payerName = '' }: { payer?: string; payerName?: string }) {
+function PayerFields({
+  payer = 'self',
+  payerName = '',
+  t,
+  lang,
+}: {
+  payer?: string;
+  payerName?: string;
+  t: T;
+  lang: WsLang;
+}) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Field label="Who pays" htmlFor="booking-payer">
+      <Field label={t('Wer zahlt', 'Who pays')} htmlFor="booking-payer">
         <Select id="booking-payer" name="payer" defaultValue={payer}>
           {(Object.keys(PAYER_LABELS) as (keyof typeof PAYER_LABELS)[]).map((p) => (
             <option key={p} value={p}>
-              {PAYER_LABELS[p]}
+              {pick(lang, PAYER_LABELS[p])}
             </option>
           ))}
         </Select>
       </Field>
-      <Field label="Payer name" htmlFor="booking-payer-name">
+      <Field label={t('Name der Zahlenden', 'Payer name')} htmlFor="booking-payer-name">
         <Input id="booking-payer-name" name="payerName" defaultValue={payerName} maxLength={120} />
       </Field>
     </div>
   );
 }
 
-export function EditBookingForm({
+export async function EditBookingForm({
   booking,
   courseTypes,
 }: {
   booking: BookingDetail;
   courseTypes: CourseTypeSummary[];
 }) {
+  const { t, lang } = await getI18n();
   return (
     <form action={updateBookingAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={booking.id} />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Course type" htmlFor="edit-type">
+        <Field label={t('Kursart', 'Course type')} htmlFor="edit-type">
           <Select id="edit-type" name="courseTypeId" defaultValue={booking.courseTypeId ?? ''}>
             <option value="">—</option>
-            {courseTypes.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
+            {courseTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
               </option>
             ))}
           </Select>
         </Field>
-        <Field label="Status" htmlFor="edit-status">
+        <Field label={t('Status', 'Status')} htmlFor="edit-status">
           <Select id="edit-status" name="status" defaultValue={booking.status}>
             {BOOKING_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {BOOKING_STATUS_LABELS[s]}
+                {pick(lang, BOOKING_STATUS_LABELS[s])}
               </option>
             ))}
           </Select>
         </Field>
       </div>
-      <PayerFields payer={booking.payer} payerName={booking.payerName ?? ''} />
+      <PayerFields payer={booking.payer} payerName={booking.payerName ?? ''} t={t} lang={lang} />
       <label className="flex items-center gap-2.5 text-sm">
         <input
           type="checkbox"
@@ -95,34 +108,35 @@ export function EditBookingForm({
           defaultChecked={booking.visaRequired}
           className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
         />
-        Visa required
+        {t('Visum nötig', 'Visa required')}
       </label>
-      <Field label="Notes" htmlFor="edit-notes">
+      <Field label={t('Notizen', 'Notes')} htmlFor="edit-notes">
         <Textarea id="edit-notes" name="notes" rows={3} defaultValue={booking.notes ?? ''} />
       </Field>
       <div className="flex justify-end pt-1">
-        <Button type="submit">Save</Button>
+        <Button type="submit">{t('Speichern', 'Save')}</Button>
       </div>
     </form>
   );
 }
 
-export function ExtendBookingForm({
+export async function ExtendBookingForm({
   booking,
   cohorts,
 }: {
   booking: BookingDetail;
   cohorts: CohortOption[];
 }) {
+  const { t } = await getI18n();
   const last = booking.periods[booking.periods.length - 1];
   const next = last ? new Date(last.endDate) : null;
   if (next) next.setDate(next.getDate() + 1);
   return (
     <form action={extendBookingAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={booking.id} />
-      <Field label="Cohort" htmlFor="extend-cohort">
+      <Field label={t('Termin', 'Cohort')} htmlFor="extend-cohort">
         <Select id="extend-cohort" name="courseInstanceId" defaultValue="">
-          <option value="">No cohort yet — dates only</option>
+          <option value="">{t('Noch kein Termin – nur Daten', 'No cohort yet — dates only')}</option>
           {cohorts.map((c) => (
             <option key={c.id} value={c.id}>
               {c.label}
@@ -131,7 +145,7 @@ export function ExtendBookingForm({
         </Select>
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="From" htmlFor="extend-start">
+        <Field label={t('Von', 'From')} htmlFor="extend-start">
           <DateFormField
             id="extend-start"
             name="startDate"
@@ -139,21 +153,21 @@ export function ExtendBookingForm({
             defaultValue={toDateInputValue(next)}
           />
         </Field>
-        <Field label="To" htmlFor="extend-end">
+        <Field label={t('Bis', 'To')} htmlFor="extend-end">
           <DateFormField id="extend-end" name="endDate" required />
         </Field>
       </div>
-      <More heading="Cost line">
+      <More heading={t('Kostenposten', 'Cost line')}>
         <div className="grid grid-cols-[1fr_auto] gap-3">
-          <Field label="Cost line" htmlFor="extend-tuition-label">
+          <Field label={t('Kostenposten', 'Cost line')} htmlFor="extend-tuition-label">
             <Input
               id="extend-tuition-label"
               name="tuitionLabel"
-              defaultValue="Extension"
+              defaultValue={t('Verlängerung', 'Extension')}
               maxLength={120}
             />
           </Field>
-          <Field label="Amount" htmlFor="extend-tuition">
+          <Field label={t('Betrag', 'Amount')} htmlFor="extend-tuition">
             <Input
               id="extend-tuition"
               name="tuition"
@@ -164,31 +178,36 @@ export function ExtendBookingForm({
         </div>
       </More>
       <div className="flex justify-end pt-1">
-        <Button type="submit">Extend</Button>
+        <Button type="submit">{t('Verlängern', 'Extend')}</Button>
       </div>
     </form>
   );
 }
 
-export function ChargeForm({ bookingId }: { bookingId: string }) {
+export async function ChargeForm({ bookingId }: { bookingId: string }) {
+  const { t, lang } = await getI18n();
   return (
     <form action={addChargeAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={bookingId} />
       <div className="grid grid-cols-[auto_1fr] gap-3">
-        <Field label="Kind" htmlFor="charge-kind">
+        <Field label={t('Art', 'Kind')} htmlFor="charge-kind">
           <Select id="charge-kind" name="kind" defaultValue="other">
             {(Object.keys(CHARGE_KIND_LABELS) as (keyof typeof CHARGE_KIND_LABELS)[]).map((k) => (
               <option key={k} value={k}>
-                {CHARGE_KIND_LABELS[k]}
+                {pick(lang, CHARGE_KIND_LABELS[k])}
               </option>
             ))}
           </Select>
         </Field>
-        <Field label="Description" htmlFor="charge-desc">
+        <Field label={t('Beschreibung', 'Description')} htmlFor="charge-desc">
           <Input id="charge-desc" name="description" required maxLength={160} />
         </Field>
       </div>
-      <Field label="Amount" hint="negative for a refund or cancellation" htmlFor="charge-amount">
+      <Field
+        label={t('Betrag', 'Amount')}
+        hint={t('negativ für eine Erstattung oder Stornierung', 'negative for a refund or cancellation')}
+        htmlFor="charge-amount"
+      >
         <Input
           id="charge-amount"
           name="amount"
@@ -198,18 +217,19 @@ export function ChargeForm({ bookingId }: { bookingId: string }) {
         />
       </Field>
       <div className="flex justify-end pt-1">
-        <Button type="submit">Add line</Button>
+        <Button type="submit">{t('Posten hinzufügen', 'Add line')}</Button>
       </div>
     </form>
   );
 }
 
-export function PaymentForm({ bookingId, balance }: { bookingId: string; balance: number }) {
+export async function PaymentForm({ bookingId, balance }: { bookingId: string; balance: number }) {
+  const { t, lang } = await getI18n();
   return (
     <form action={recordPaymentAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={bookingId} />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Amount" htmlFor="pay-amount">
+        <Field label={t('Betrag', 'Amount')} htmlFor="pay-amount">
           <Input
             id="pay-amount"
             name="amount"
@@ -219,30 +239,30 @@ export function PaymentForm({ bookingId, balance }: { bookingId: string; balance
             defaultValue={balance > 0 ? balance.toFixed(2) : ''}
           />
         </Field>
-        <Field label="Method" htmlFor="pay-method">
+        <Field label={t('Zahlungsart', 'Method')} htmlFor="pay-method">
           <Select id="pay-method" name="method" defaultValue="transfer">
             {(Object.keys(PAYMENT_METHOD_LABELS) as (keyof typeof PAYMENT_METHOD_LABELS)[]).map(
               (m) => (
                 <option key={m} value={m}>
-                  {PAYMENT_METHOD_LABELS[m]}
+                  {pick(lang, PAYMENT_METHOD_LABELS[m])}
                 </option>
               )
             )}
           </Select>
         </Field>
       </div>
-      <Field label="For" htmlFor="pay-subject">
+      <Field label={t('Wofür', 'For')} htmlFor="pay-subject">
         <Input
           id="pay-subject"
           name="subject"
           required
           maxLength={160}
-          defaultValue="Course price"
+          defaultValue={pick(lang, CHARGE_KIND_LABELS.tuition)}
         />
       </Field>
-      <More heading="Date and reference">
+      <More heading={t('Datum und Referenz', 'Date and reference')}>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Received on" htmlFor="pay-date">
+          <Field label={t('Eingegangen am', 'Received on')} htmlFor="pay-date">
             <DateFormField
               id="pay-date"
               name="receivedAt"
@@ -250,13 +270,13 @@ export function PaymentForm({ bookingId, balance }: { bookingId: string; balance
               required
             />
           </Field>
-          <Field label="Reference" htmlFor="pay-ref">
+          <Field label={t('Referenz', 'Reference')} htmlFor="pay-ref">
             <Input id="pay-ref" name="reference" maxLength={120} />
           </Field>
         </div>
       </More>
       <div className="flex justify-end pt-1">
-        <Button type="submit">Record payment</Button>
+        <Button type="submit">{t('Zahlung erfassen', 'Record payment')}</Button>
       </div>
     </form>
   );

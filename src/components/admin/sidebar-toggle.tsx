@@ -4,6 +4,8 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { useWsLang } from './lang';
+
 /**
  * Collapses the sidebar to icons.
  *
@@ -26,6 +28,7 @@ const KEY = 'casa-workspace-nav';
 const EVENT = 'casa-workspace-nav-change';
 
 export function SidebarToggle() {
+  const { t } = useWsLang();
   const subscribe = useCallback((onChange: () => void) => {
     window.addEventListener(EVENT, onChange);
     window.addEventListener('storage', onChange);
@@ -57,8 +60,8 @@ export function SidebarToggle() {
       type="button"
       onClick={toggle}
       aria-pressed={collapsed}
-      aria-label={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}
-      title={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}
+      aria-label={collapsed ? t('Seitenleiste ausklappen', 'Expand the sidebar') : t('Seitenleiste einklappen', 'Collapse the sidebar')}
+      title={collapsed ? t('Seitenleiste ausklappen', 'Expand the sidebar') : t('Seitenleiste einklappen', 'Collapse the sidebar')}
       className={cn(
         'hidden size-8 shrink-0 items-center justify-center rounded-lg text-white/50',
         'transition-colors hover:bg-white/[0.07] hover:text-white',

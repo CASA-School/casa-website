@@ -6,6 +6,8 @@ import { z } from 'zod';
 
 import { logActivity } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
 import { fromFormData, parseGroupForm, parseTeacherForm } from '@/lib/admin/kursplanung/forms';
 import { assignmentsFromPairs } from '@/lib/admin/kursplanung/pairs';
@@ -75,9 +77,10 @@ const fingerprint = (list: readonly { groupId: string; onDate: string; teacherId
 
 export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   const user = await requireModule('kursplanung', 'edit');
+  const { t } = await getI18n();
 
   const parsed = Payload.safeParse(input);
-  if (!parsed.success) return { ok: false, error: 'Ungültige Daten.' };
+  if (!parsed.success) return { ok: false, error: t('Ungültige Daten.', 'Invalid data.') };
   const payload = parsed.data;
 
   const [groups, teachers] = await Promise.all([listGroups(payload.month), listTeachers()]);
@@ -92,7 +95,7 @@ export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   if (payload.base) {
     const now = await assignmentsNow(shiftGroups.map((g) => g.id), days);
     if (fingerprint(now) !== fingerprint(payload.base)) {
-      return { ok: false, stale: true, error: 'Diese Woche wurde inzwischen von jemand anderem geändert.' };
+      return { ok: false, stale: true, error: t('Diese Woche wurde inzwischen von jemand anderem geändert.', 'Someone else has changed this week in the meantime.') };
     }
   }
 
@@ -144,74 +147,80 @@ const revalidateAll = () => ['/admin/kursplanung', '/admin/kursplanung/kurse', '
 
 export async function saveTeacherAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'edit');
+  const { t, lang } = await getI18n();
   const teacherId = String(formData.get('teacherId') ?? '');
   const month = String(formData.get('month') ?? '');
-  if (!UUID.test(teacherId) || !MONTH.test(month)) back(formData, 'Ungültige Anfrage.', 'error');
+  if (!UUID.test(teacherId) || !MONTH.test(month)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
 
   const weeks = planningWeeks(month);
   const parsed = parseTeacherForm(fromFormData(formData), teacherId, weeks);
-  if (!parsed.ok) back(formData, parsed.error, 'error');
+  if (!parsed.ok) back(formData, pick(lang, parsed.error), 'error');
 
   await updateTeacherRules(teacherId, parsed.rules);
   await replaceTeacherAbsences(teacherId, monthStart(month), monthStart(nextMonth(month)), parsed.absences, user.id);
   await logActivity({ actor: user, entity: 'kursplanung.teacher', entityId: teacherId, action: 'rules.saved', detail: { month, absences: parsed.absences.length, daysPerWeek: parsed.rules.daysPerWeek } });
   revalidateAll();
-  back(formData, `${parsed.rules.shortName} gespeichert.`, 'ok');
+  back(formData, t(`${parsed.rules.shortName} gespeichert.`, `${parsed.rules.shortName} saved.`), 'ok');
 }
 
 export async function saveGroupAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'edit');
+  const { t, lang } = await getI18n();
   const groupId = String(formData.get('groupId') ?? '');
-  if (!UUID.test(groupId)) back(formData, 'Ungültige Anfrage.', 'error');
+  if (!UUID.test(groupId)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
   const parsed = parseGroupForm(fromFormData(formData));
-  if (!parsed.ok) back(formData, parsed.error, 'error');
+  if (!parsed.ok) back(formData, pick(lang, parsed.error), 'error');
 
   await updateGroup(groupId, parsed);
   await logActivity({ actor: user, entity: 'kursplanung.group', entityId: groupId, action: 'group.saved', detail: { registrations: parsed.registrations } });
   revalidateAll();
-  back(formData, 'Gruppe gespeichert.', 'ok');
+  back(formData, t('Gruppe gespeichert.', 'Group saved.'), 'ok');
 }
 
 export async function addGroupAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'edit');
+  const { t } = await getI18n();
   const month = String(formData.get('month') ?? ''), shift = String(formData.get('shift') ?? ''), level = String(formData.get('level') ?? ''), phase = String(formData.get('phase') ?? '');
-  if (!MONTH.test(month) || !isShift(shift) || !isLevel(level) || !(phase === '1' || phase === '2')) back(formData, 'Ungültige Anfrage.', 'error');
+  if (!MONTH.test(month) || !isShift(shift) || !isLevel(level) || !(phase === '1' || phase === '2')) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
   await addGroup(month, shift, level, phase);
   await logActivity({ actor: user, entity: 'kursplanung.group', entityId: null, action: 'group.added', detail: { month, shift, level, phase } });
   revalidateAll();
-  back(formData, `${level}.${phase}: weitere Gruppe angelegt.`, 'ok');
+  back(formData, t(`${level}.${phase}: weitere Gruppe angelegt.`, `${level}.${phase}: another group added.`), 'ok');
 }
 
 export async function removeGroupAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'full');
-  if (String(formData.get('confirmed') ?? '') !== '1') back(formData, 'Bitte bestätigen.', 'error');
+  const { t } = await getI18n();
+  if (String(formData.get('confirmed') ?? '') !== '1') back(formData, t('Bitte bestätigen.', 'Please confirm.'), 'error');
   const groupId = String(formData.get('groupId') ?? '');
-  if (!UUID.test(groupId)) back(formData, 'Ungültige Anfrage.', 'error');
+  if (!UUID.test(groupId)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
   const removed = await removeGroupIfEmpty(groupId);
-  if (!removed) back(formData, 'Die Gruppe ist im Plan belegt – erst leeren.', 'error');
+  if (!removed) back(formData, t('Die Gruppe ist im Plan belegt – erst leeren.', 'The group has planned days – clear them first.'), 'error');
   await logActivity({ actor: user, entity: 'kursplanung.group', entityId: groupId, action: 'group.removed' });
   revalidateAll();
-  back(formData, 'Gruppe entfernt.', 'ok');
+  back(formData, t('Gruppe entfernt.', 'Group removed.'), 'ok');
 }
 
 /** Lays every group's pair on its halves for all weeks of the month where the cell is free and the teacher fits. */
 export async function fillFromPairsAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'edit');
+  const { t } = await getI18n();
   const month = String(formData.get('month') ?? ''), shift = String(formData.get('shift') ?? ''), groupId = String(formData.get('groupId') ?? '');
-  if (!MONTH.test(month) || !isShift(shift)) back(formData, 'Ungültige Anfrage.', 'error');
+  if (!MONTH.test(month) || !isShift(shift)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
   const plan = await loadPlan(month);
   const targets = plan.groups.filter((g) => g.shift === shift && (!groupId || g.id === groupId));
   const added = await insertMissingAssignments(assignmentsFromPairs(plan, targets), user.id);
   await logActivity({ actor: user, entity: 'kursplanung', entityId: null, action: 'pairs.filled', detail: { month, shift, groups: targets.length, added } });
   revalidateAll();
-  back(formData, `${added} Kurstage aus den Paaren belegt.`, 'ok');
+  back(formData, t(`${added} Kurstage aus den Paaren belegt.`, `${added} course days filled from the pairs.`), 'ok');
 }
 
 /** The next month from this one: `.1` courses continue as `.2` with their pairs; the new starts are added on Kurse. */
 export async function createMonthAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'edit');
+  const { t } = await getI18n();
   const from = String(formData.get('month') ?? '');
-  if (!MONTH.test(from)) back(formData, 'Ungültige Anfrage.', 'error');
+  if (!MONTH.test(from)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
   const to = nextMonth(from);
   if ((await listPlanMonths()).includes(to)) {
     redirect(`/admin/kursplanung/kurse?month=${to}`);
@@ -219,5 +228,5 @@ export async function createMonthAction(formData: FormData): Promise<void> {
   const created = await createContinuationMonth(from, to);
   await logActivity({ actor: user, entity: 'kursplanung', entityId: null, action: 'month.created', detail: { from, to, groups: created } });
   revalidateAll();
-  redirect(`/admin/kursplanung/kurse?month=${to}&ok=${encodeURIComponent(`${created} Fortsetzungsgruppen angelegt.`)}`);
+  redirect(`/admin/kursplanung/kurse?month=${to}&ok=${encodeURIComponent(t(`${created} Fortsetzungsgruppen angelegt.`, `${created} continuation groups added.`))}`);
 }

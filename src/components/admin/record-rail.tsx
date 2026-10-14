@@ -7,6 +7,8 @@ import { Popover, PopoverChoice } from './popover';
 import { Badge, Button, Card, Textarea } from './ui';
 import { Icon } from './icons';
 import { describeActivity, type ActivityEntry } from '@/lib/admin/activity';
+import { pick, relativeDays, type T } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import type { StaffNote } from '@/lib/admin/notes';
 import {
   STATUS_LABELS,
@@ -15,7 +17,6 @@ import {
   type QueueEntity,
   type WorkStatus,
 } from '@/lib/admin/queues';
-import { relativeDays } from './ui';
 
 /**
  * The right-hand rail on every record screen.
@@ -32,19 +33,20 @@ import { relativeDays } from './ui';
  * than "change it".
  */
 /** A label and its value on one line, with the hint that a click changes it. */
-function ValueRow({ label, children }: { label: string; children: React.ReactNode }) {
+function ValueRow({ label, t, children }: { label: string; t: T; children: React.ReactNode }) {
   return (
     <span className="flex min-h-11 items-center gap-3 px-2.5 py-2">
-      <span className="w-14 shrink-0 text-xs font-bold text-[var(--casa-muted)]">{label}</span>
+      {/* 4.5rem: wide enough for „Zuständig". */}
+      <span className="w-[4.5rem] shrink-0 text-xs font-bold text-[var(--casa-muted)]">{label}</span>
       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[var(--casa-ink)]">{children}</span>
       <span aria-hidden="true" className="text-xs text-[var(--casa-text-subtle)]">
-        Change
+        {t('Ändern', 'Change')}
       </span>
     </span>
   );
 }
 
-export function RecordRail({
+export async function RecordRail({
   entity,
   id,
   status,
@@ -64,28 +66,44 @@ export function RecordRail({
   /** `placement_attempt` shares the notes panel but is not a queue entity. */
   noteEntity?: string;
 }) {
+  const { t, lang } = await getI18n();
   const owner = assignableStaff.find((member) => member.id === assignedTo)?.name;
+  const nobody = t('Noch niemand', 'Nobody yet');
   return (
     <div className="space-y-4">
-      <Card title="Status" icon={Icon.check} tint="blue" overflow="visible">
+      <Card title={t('Status', 'Status')} icon={Icon.check} tint="blue" overflow="visible">
         <div className="-mx-2 -my-2 divide-y divide-ws-line-soft">
-          <Popover label="Status" trigger={<ValueRow label="Status"><Badge tone={STATUS_TONES[status]}>{STATUS_LABELS[status]}</Badge></ValueRow>}>
+          <Popover
+            label={t('Status', 'Status')}
+            trigger={
+              <ValueRow label={t('Status', 'Status')} t={t}>
+                <Badge tone={STATUS_TONES[status]}>{pick(lang, STATUS_LABELS[status])}</Badge>
+              </ValueRow>
+            }
+          >
             <form action={updateStatusAction}>
               <input type="hidden" name="entity" value={entity} />
               <input type="hidden" name="id" value={id} />
               {WORK_STATUSES.map((value) => (
                 <PopoverChoice key={value} name="status" value={value} current={value === status}>
-                  <Badge tone={STATUS_TONES[value]}>{STATUS_LABELS[value]}</Badge>
+                  <Badge tone={STATUS_TONES[value]}>{pick(lang, STATUS_LABELS[value])}</Badge>
                 </PopoverChoice>
               ))}
             </form>
           </Popover>
-          <Popover label="Who is dealing with this" trigger={<ValueRow label="Owner">{owner ?? <span className="text-[var(--casa-text-subtle)]">Nobody yet</span>}</ValueRow>}>
+          <Popover
+            label={t('Wer sich darum kümmert', 'Who is dealing with this')}
+            trigger={
+              <ValueRow label={t('Zuständig', 'Owner')} t={t}>
+                {owner ?? <span className="text-[var(--casa-text-subtle)]">{nobody}</span>}
+              </ValueRow>
+            }
+          >
             <form action={assignAction}>
               <input type="hidden" name="entity" value={entity} />
               <input type="hidden" name="id" value={id} />
               <PopoverChoice name="staffUserId" value="" current={!assignedTo}>
-                Nobody yet
+                {nobody}
               </PopoverChoice>
               {assignableStaff.map((member) => (
                 <PopoverChoice key={member.id} name="staffUserId" value={member.id} current={member.id === assignedTo}>
@@ -97,7 +115,7 @@ export function RecordRail({
         </div>
       </Card>
 
-      <Card title="Notes" icon={Icon.note} tint="sun">
+      <Card title={t('Notizen', 'Notes')} icon={Icon.note} tint="sun">
         <form action={addNoteAction} className="space-y-2">
           <input type="hidden" name="entity" value={noteEntity ?? entity} />
           <input type="hidden" name="entityId" value={id} />
@@ -105,11 +123,11 @@ export function RecordRail({
             name="body"
             rows={3}
             required
-            placeholder="What did you agree, and what happens next?"
-            aria-label="New note"
+            placeholder={t('Was habt ihr vereinbart, und wie geht es weiter?', 'What did you agree, and what happens next?')}
+            aria-label={t('Neue Notiz', 'New note')}
           />
           <Button type="submit" variant="secondary" size="sm">
-            Add note
+            {t('Notiz hinzufügen', 'Add note')}
           </Button>
         </form>
 
@@ -121,7 +139,7 @@ export function RecordRail({
                   {note.body}
                 </p>
                 <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">
-                  {note.authorName ?? 'A former colleague'} · {relativeDays(note.createdAt)}
+                  {note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague')} · {relativeDays(note.createdAt, lang)}
                 </p>
               </li>
             ))}
@@ -130,14 +148,14 @@ export function RecordRail({
       </Card>
 
       {activity.length > 0 ? (
-        <Card title="History" icon={Icon.clock} tint="ink">
+        <Card title={t('Verlauf', 'History')} icon={Icon.clock} tint="ink">
           <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
             {activity.map((entry) => (
               <li key={entry.id} className="relative flex gap-3 text-xs">
                 <span aria-hidden="true" className="relative mt-1 h-[9px] w-[9px] shrink-0 rounded-full border-2 border-white bg-ws-line-firm" />
                 <span className="text-[var(--casa-text-subtle)]">
-                  <span className="font-bold text-[var(--casa-ink)]">{entry.staffName ?? 'Someone'}</span>{' '}
-                  {describeActivity(entry)} · {relativeDays(entry.createdAt)}
+                  <span className="font-bold text-[var(--casa-ink)]">{entry.staffName ?? t('Jemand', 'Someone')}</span>{' '}
+                  {describeActivity(entry, lang)} · {relativeDays(entry.createdAt, lang)}
                 </span>
               </li>
             ))}

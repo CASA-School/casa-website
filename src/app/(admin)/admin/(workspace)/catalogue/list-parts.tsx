@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Meter } from '@/components/admin/ui';
+import { wsLocale, type WsLang } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -28,10 +29,10 @@ export function monthKey(value: Date | string): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-/** "October" for a `monthKey` this year, "January 2027" for another. */
-export function monthLabel(key: string, thisYear = new Date().getFullYear()): string {
+/** "October" for a `monthKey` this year, "January 2027" for another; in the workspace's language. */
+export function monthLabel(key: string, lang: WsLang, thisYear = new Date().getFullYear()): string {
   const [year, month] = key.split('-').map(Number);
-  return new Date(year, month - 1, 1).toLocaleDateString('en-GB', {
+  return new Date(year, month - 1, 1).toLocaleDateString(wsLocale(lang), {
     month: 'long',
     ...(year === thisYear ? {} : { year: 'numeric' }),
   });
@@ -42,9 +43,9 @@ export function monthLabel(key: string, thisYear = new Date().getFullYear()): st
  * says which year. Local components, like `DateText`, so a Postgres `date`
  * keeps its day.
  */
-export function shortDate(value: Date | string, { weekday = false } = {}): string {
+export function shortDate(value: Date | string, lang: WsLang, { weekday = false } = {}): string {
   const date = value instanceof Date ? value : new Date(value);
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString(wsLocale(lang), {
     day: 'numeric',
     month: 'short',
     ...(weekday ? { weekday: 'short' } : {}),

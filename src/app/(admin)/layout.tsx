@@ -3,6 +3,9 @@ import { Manrope, Playfair_Display } from 'next/font/google';
 
 import '../globals.css';
 
+import { WsLangProvider } from '@/components/admin/lang';
+import { getWsLang } from '@/lib/admin/i18n.server';
+
 /**
  * Root layout for the STAFF WORKSPACE.
  *
@@ -51,10 +54,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 
-export default function WorkspaceRootLayout({ children }: { children: React.ReactNode }) {
+export default async function WorkspaceRootLayout({ children }: { children: React.ReactNode }) {
+  // German unless this colleague chose English (docs/ADMIN_I18N.md); every client component reads it from here.
+  const lang = await getWsLang();
   return (
     <html
-      lang="en"
+      lang={lang}
       className={`${manrope.variable} ${playfairDisplay.variable}`}
       suppressHydrationWarning
     >
@@ -71,7 +76,7 @@ export default function WorkspaceRootLayout({ children }: { children: React.Reac
               "try{var v=localStorage.getItem('casa-workspace-nav');if(v)document.documentElement.dataset.workspaceNav=v}catch(e){}",
           }}
         />
-        {children}
+        <WsLangProvider lang={lang}>{children}</WsLangProvider>
       </body>
     </html>
   );

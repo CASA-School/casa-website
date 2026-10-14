@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 
 import { createCourseInstance } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { assignRoom, createRoom, deleteRoom, updateRoom, type RoomKind } from '@/lib/admin/rooms';
 
 /** Planning module mutations. Creating and editing need `edit`; deleting needs `full`. */
@@ -36,15 +38,20 @@ export async function updateRoomAction(formData: FormData): Promise<void> {
   const roomId = id(formData, 'roomId');
   const kind = String(formData.get('kind') ?? '');
   if (!KINDS.has(kind)) throw new Error('Invalid kind');
+  const { t } = await getI18n();
   const name = text(formData, 'name', 80);
   if (!name)
-    redirect(`/admin/settings/rooms/${roomId}?error=${encodeURIComponent('A room needs a name.')}`);
+    redirect(
+      `/admin/settings/rooms/${roomId}?error=${encodeURIComponent(t('Ein Raum braucht einen Namen.', 'A room needs a name.'))}`
+    );
 
   const capacity = optionalInt(formData, 'capacity');
   const capacityMax = optionalInt(formData, 'capacityMax');
   if (capacity !== null && capacityMax !== null && capacityMax < capacity) {
     redirect(
-      `/admin/settings/rooms/${roomId}?error=${encodeURIComponent('The maximum cannot be below the planning capacity.')}`
+      `/admin/settings/rooms/${roomId}?error=${encodeURIComponent(
+        t('Das Maximum darf nicht unter der geplanten Kapazität liegen.', 'The maximum cannot be below the planning capacity.')
+      )}`
     );
   }
 
@@ -70,8 +77,10 @@ export async function updateRoomAction(formData: FormData): Promise<void> {
 export async function createRoomAction(formData: FormData): Promise<void> {
   const actor = await requireModule('rooms', 'edit');
   const locationId = id(formData, 'locationId');
+  const { t } = await getI18n();
   const name = text(formData, 'name', 80);
-  if (!name) redirect(`/admin/settings/rooms?error=${encodeURIComponent('A room needs a name.')}`);
+  if (!name)
+    redirect(`/admin/settings/rooms?error=${encodeURIComponent(t('Ein Raum braucht einen Namen.', 'A room needs a name.'))}`);
   const kind = String(formData.get('kind') ?? 'classroom');
   if (!KINDS.has(kind)) throw new Error('Invalid kind');
   const floorRaw = String(formData.get('floor') ?? '').trim();
@@ -108,8 +117,9 @@ export async function assignRoomAction(formData: FormData): Promise<void> {
   const result = await assignRoom(courseInstanceId, roomId, actor);
   revalidatePath('/admin/catalogue');
   revalidatePath('/admin/settings/rooms', 'layout');
+  const { lang } = await getI18n();
   redirect(
-    result.ok ? '/admin/catalogue' : `/admin/catalogue?error=${encodeURIComponent(result.reason)}`
+    result.ok ? '/admin/catalogue' : `/admin/catalogue?error=${encodeURIComponent(pick(lang, result.reason))}`
   );
 }
 
@@ -122,8 +132,10 @@ export async function deleteRoomAction(formData: FormData): Promise<void> {
   const result = await deleteRoom(roomId, actor);
   revalidatePath('/admin/settings/rooms', 'layout');
   revalidatePath('/admin/catalogue');
-  if (!result.ok)
-    redirect(`/admin/settings/rooms/${roomId}?error=${encodeURIComponent(result.reason)}`);
+  if (!result.ok) {
+    const { lang } = await getI18n();
+    redirect(`/admin/settings/rooms/${roomId}?error=${encodeURIComponent(pick(lang, result.reason))}`);
+  }
   redirect('/admin/settings/rooms');
 }
 
@@ -135,13 +147,14 @@ export async function createCohortAction(formData: FormData): Promise<void> {
   const actor = await requireModule('rooms', 'edit');
   const back = '/admin/catalogue';
   const courseTypeId = id(formData, 'courseTypeId');
+  const { t } = await getI18n();
   const startDate = String(formData.get('startDate') ?? '');
   const endDate = String(formData.get('endDate') ?? '');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-    redirect(`${back}?error=${encodeURIComponent('Start and end dates are required.')}`);
+    redirect(`${back}?error=${encodeURIComponent(t('Start- und Enddatum sind nötig.', 'Start and end dates are required.'))}`);
   }
   if (endDate < startDate)
-    redirect(`${back}?error=${encodeURIComponent('The end date is before the start.')}`);
+    redirect(`${back}?error=${encodeURIComponent(t('Das Enddatum liegt vor dem Start.', 'The end date is before the start.'))}`);
   const capacity = optionalInt(formData, 'capacity') ?? 0;
   const session = String(formData.get('session') ?? '');
   const days = formData

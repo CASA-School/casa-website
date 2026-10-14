@@ -28,6 +28,7 @@ const staffUser = (
   name: 'Colleague',
   role,
   access: resolveAccess(role, exceptions),
+  language: 'de',
 });
 
 const download = () =>

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { searchAction } from '@/app/(admin)/admin/(editor)/website/actions';
+import { useWsLang } from '@/components/admin/lang';
+import { pick } from '@/lib/admin/i18n';
 import type { EditorPageGroup } from '@/config/cms/editor-pages';
 import type { SearchHit } from '@/lib/cms/editor-types';
 import { cn } from '@/lib/utils';
@@ -46,6 +48,7 @@ export function PagePicker({
   onReveal: (hit: SearchHit) => void;
   onClose: () => void;
 }) {
+  const { t, lang } = useWsLang();
   const [term, setTerm] = useState('');
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [searching, setSearching] = useState(false);
@@ -77,7 +80,7 @@ export function PagePicker({
 
   return (
     <>
-      <button type="button" aria-label="Close" className="fixed inset-0 z-30 cursor-default" onClick={onClose} />
+      <button type="button" aria-label={t('Schließen', 'Close')} className="fixed inset-0 z-30 cursor-default" onClick={onClose} />
       <div
         className={cn(
           'absolute left-4 top-[calc(100%+8px)] z-40 w-[min(780px,calc(100vw-32px))] overflow-hidden rounded-2xl border border-ws-line bg-white shadow-[0_28px_64px_-24px_rgba(15,23,42,0.38)]',
@@ -88,7 +91,7 @@ export function PagePicker({
         <div className="flex items-center gap-3 border-b border-ws-line-soft px-4 py-3 text-[var(--casa-text-subtle)]">
           {I.search}
           <label htmlFor="page-search" className="sr-only">
-            Search pages and text
+            {t('Seiten und Texte suchen', 'Search pages and text')}
           </label>
           <input
             id="page-search"
@@ -98,7 +101,7 @@ export function PagePicker({
               setTerm(event.target.value);
               setSearching(event.target.value.trim().length >= 2);
             }}
-            placeholder="Search pages and text"
+            placeholder={t('Seiten und Texte suchen', 'Search pages and text')}
             className="h-8 flex-1 bg-transparent text-[0.95rem] font-medium text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-text-subtle)]"
           />
           {searching ? <Spinner /> : null}
@@ -107,7 +110,7 @@ export function PagePicker({
         <div className="max-h-[min(480px,70dvh)] overflow-y-auto p-3">
           {visibleHits.length ? (
             <section className="mb-2">
-              <p className="px-2.5 pt-1 pb-1.5 text-xs font-semibold text-[var(--casa-text-subtle)]">Text on the site</p>
+              <p className="px-2.5 pt-1 pb-1.5 text-xs font-semibold text-[var(--casa-text-subtle)]">{t('Text auf der Website', 'Text on the site')}</p>
               {visibleHits.map((hit) => (
                 <button
                   key={`${hit.key}|${hit.locale}`}
@@ -128,8 +131,8 @@ export function PagePicker({
 
           <div className="grid gap-x-5 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
             {groups.map((group) => (
-              <div key={group.group}>
-                <p className="px-2.5 pt-2.5 pb-1 text-xs font-semibold text-[var(--casa-text-subtle)]">{group.group}</p>
+              <div key={group.group.en}>
+                <p className="px-2.5 pt-2.5 pb-1 text-xs font-semibold text-[var(--casa-text-subtle)]">{pick(lang, group.group)}</p>
                 {group.pages.map((page) => {
                   const current = page.path === currentPath;
                   return (

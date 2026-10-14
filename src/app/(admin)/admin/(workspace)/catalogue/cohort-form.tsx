@@ -1,12 +1,24 @@
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import type { Room } from '@/lib/admin/rooms';
 import { createCohortAction } from '../settings/rooms/actions';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { DateFormField } from '@/components/admin/date-picker';
 
+/** The value each day posts, as stored in the schedule, and its label in German. */
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+const DAYS_DE: Record<(typeof DAYS)[number], string> = {
+  Mon: 'Mo',
+  Tue: 'Di',
+  Wed: 'Mi',
+  Thu: 'Do',
+  Fri: 'Fr',
+  Sat: 'Sa',
+  Sun: 'So',
+};
 
 /**
  * Schedule a cohort. Course, dates and capacity first; level, session, days,
@@ -14,7 +26,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
  * Course screen's fields, in two steps. The days are checkboxes drawn as
  * toggles, so a glance shows the week and the form still posts `days` per day.
  */
-export function CohortForm({
+export async function CohortForm({
   courseTypes,
   rooms,
   levels,
@@ -23,24 +35,25 @@ export function CohortForm({
   rooms: Room[];
   levels: string[];
 }) {
+  const { t, lang } = await getI18n();
   return (
     <form action={createCohortAction} className="space-y-3">
       <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
-        <Field label="Course" htmlFor="cohort-type">
+        <Field label={t('Kurs', 'Course')} htmlFor="cohort-type">
           <Select id="cohort-type" name="courseTypeId" required defaultValue="">
             <option value="" disabled>
-              Choose
+              {t('Auswählen', 'Choose')}
             </option>
             {courseTypes
-              .filter((t) => t.isActive)
-              .map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+              .filter((type) => type.isActive)
+              .map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
                 </option>
               ))}
           </Select>
         </Field>
-        <Field label="Seats" htmlFor="cohort-capacity">
+        <Field label={t('Plätze', 'Seats')} htmlFor="cohort-capacity">
           <Input
             id="cohort-capacity"
             name="capacity"
@@ -52,20 +65,20 @@ export function CohortForm({
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Start" htmlFor="cohort-start">
+        <Field label={t('Beginn', 'Start')} htmlFor="cohort-start">
           <DateFormField id="cohort-start" name="startDate" required />
         </Field>
-        <Field label="End" htmlFor="cohort-end">
+        <Field label={t('Ende', 'End')} htmlFor="cohort-end">
           <DateFormField id="cohort-end" name="endDate" required />
         </Field>
       </div>
 
       <OptionalSection
         requires={['courseTypeId', 'startDate', 'endDate']}
-        heading="Level, schedule and room"
+        heading={t('Niveau, Zeiten und Raum', 'Level, schedule and room')}
       >
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Level" htmlFor="cohort-level">
+          <Field label={t('Niveau', 'Level')} htmlFor="cohort-level">
             <Select id="cohort-level" name="levelCode" defaultValue="">
               <option value="">—</option>
               {levels.map((l) => (
@@ -75,19 +88,19 @@ export function CohortForm({
               ))}
             </Select>
           </Field>
-          <Field label="Session" htmlFor="cohort-session">
+          <Field label={t('Tageszeit', 'Session')} htmlFor="cohort-session">
             <Select id="cohort-session" name="session" defaultValue="">
               <option value="">—</option>
               {(Object.keys(SESSION_LABELS) as (keyof typeof SESSION_LABELS)[]).map((s) => (
                 <option key={s} value={s}>
-                  {SESSION_LABELS[s]}
+                  {pick(lang, SESSION_LABELS[s])}
                 </option>
               ))}
             </Select>
           </Field>
         </div>
         <fieldset>
-          <legend className="mb-1.5 text-xs font-bold text-[var(--casa-muted)]">Days</legend>
+          <legend className="mb-1.5 text-xs font-bold text-[var(--casa-muted)]">{t('Tage', 'Days')}</legend>
           <div className="flex flex-wrap gap-1">
             {DAYS.map((d) => (
               <label
@@ -101,18 +114,18 @@ export function CohortForm({
                   defaultChecked={d !== 'Sat' && d !== 'Sun'}
                   className="sr-only"
                 />
-                {d}
+                {t(DAYS_DE[d], d)}
               </label>
             ))}
           </div>
         </fieldset>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Time" htmlFor="cohort-time">
+          <Field label={t('Uhrzeit', 'Time')} htmlFor="cohort-time">
             <Input id="cohort-time" name="time" placeholder="09:00-12:30" maxLength={40} />
           </Field>
-          <Field label="Room" htmlFor="cohort-room">
+          <Field label={t('Raum', 'Room')} htmlFor="cohort-room">
             <Select id="cohort-room" name="roomId" defaultValue="">
-              <option value="">Not yet</option>
+              <option value="">{t('Noch nicht', 'Not yet')}</option>
               {rooms.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.nickname ? `${r.name} · ${r.nickname}` : r.name}
@@ -122,13 +135,13 @@ export function CohortForm({
             </Select>
           </Field>
         </div>
-        <Field label="Title" hint="optional" htmlFor="cohort-title">
+        <Field label={t('Titel', 'Title')} hint={t('optional', 'optional')} htmlFor="cohort-title">
           <Input id="cohort-title" name="title" maxLength={120} />
         </Field>
       </OptionalSection>
 
       <div className="flex justify-end pt-1">
-        <Button type="submit">Schedule cohort</Button>
+        <Button type="submit">{t('Termin planen', 'Schedule cohort')}</Button>
       </div>
     </form>
   );

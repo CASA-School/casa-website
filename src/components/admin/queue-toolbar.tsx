@@ -1,5 +1,5 @@
 import { ListBar, type ListTab } from './list';
-import { relativeDays } from './ui';
+import { capitalise, pick, relativeDays, translator, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { STATUS_LABELS, WORK_STATUSES, type WorkStatus } from '@/lib/admin/queues';
 
 /**
@@ -21,10 +21,10 @@ export type QueueFilter = WorkStatus | 'open' | 'all';
 /** The states a record is still being worked in — the groups of Open. */
 const OPEN_STATUSES: readonly WorkStatus[] = ['new', 'in_progress', 'waiting'];
 
-const FILTER_LABELS: Record<QueueFilter, string> = {
-  open: 'Open',
+const FILTER_LABELS: Record<QueueFilter, Bilingual> = {
+  open: { de: 'Offen', en: 'Open' },
   ...STATUS_LABELS,
-  all: 'Everything',
+  all: { de: 'Alle', en: 'Everything' },
 };
 
 export function QueueToolbar({
@@ -33,6 +33,7 @@ export function QueueToolbar({
   counts,
   search,
   searchPlaceholder,
+  lang,
 }: {
   basePath: string;
   active: QueueFilter;
@@ -40,6 +41,7 @@ export function QueueToolbar({
   counts: Partial<Record<QueueFilter, number>>;
   search?: string;
   searchPlaceholder: string;
+  lang: WsLang;
 }) {
   const hrefFor = (filter: QueueFilter) => {
     const params = new URLSearchParams();
@@ -59,7 +61,7 @@ export function QueueToolbar({
 
   const tabs: ListTab[] = filters.map((filter) => ({
     key: filter,
-    label: FILTER_LABELS[filter],
+    label: pick(lang, FILTER_LABELS[filter]),
     href: hrefFor(filter),
     count: counts[filter],
   }));
@@ -97,13 +99,14 @@ export function parseFilter(raw: string | string[] | undefined): QueueFilter {
  */
 export function queueGroups<T extends { status: WorkStatus }>(
   items: readonly T[],
-  filter: QueueFilter
+  filter: QueueFilter,
+  lang: WsLang
 ): { key: string; label: string; rows: T[] }[] {
   if (filter !== 'open' && filter !== 'all') return [{ key: filter, label: '', rows: [...items] }];
 
   return WORK_STATUSES.map((status) => ({
     key: status,
-    label: STATUS_LABELS[status],
+    label: pick(lang, STATUS_LABELS[status]),
     rows: items.filter((item) => item.status === status),
   })).filter((group) => group.rows.length > 0);
 }
@@ -117,19 +120,18 @@ const daysSince = (value: Date) => {
 };
 
 /**
- * When it came in, as relative time ("Today", "3 days ago"). A record still
- * new after two days shows its age in amber, so what is getting old stands
- * out without a column of its own.
+ * When it came in, as relative time ("Today", "3 days ago"; "Heute", "Vor 3
+ * Tagen"). A record still new after two days shows its age in amber, so what
+ * is getting old stands out without a column of its own.
  */
-export function Received({ at, status }: { at: Date; status: WorkStatus }) {
-  const said = relativeDays(at);
-  const label = said.charAt(0).toUpperCase() + said.slice(1);
+export function Received({ at, status, lang }: { at: Date; status: WorkStatus; lang: WsLang }) {
+  const label = capitalise(relativeDays(at, lang));
   const stale = status === 'new' && daysSince(at) > STALE_AFTER_DAYS;
 
   return (
     <time
       dateTime={at.toISOString()}
-      title={at.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Berlin' })}
+      title={at.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Berlin' })}
       className={stale ? 'font-semibold text-[#9a5b00]' : undefined}
     >
       {label}
@@ -138,13 +140,17 @@ export function Received({ at, status }: { at: Date; status: WorkStatus }) {
 }
 
 /** The column heads every queue ends with: who has it, and when it came in. */
-export const QUEUE_TAIL_HEAD = [
-  { label: 'Owner', className: 'hidden w-[4.5rem] md:table-cell' },
-  { label: 'Received', className: 'w-[8.5rem]' },
-] as const;
+export function queueTailHead(lang: WsLang) {
+  const t = translator(lang);
+  return [
+    { label: t('Zuständig', 'Owner'), className: 'hidden w-[4.5rem] md:table-cell' },
+    { label: t('Eingegangen', 'Received'), className: 'w-[8.5rem]' },
+  ] as const;
+}
 
 /** The empty view's one line. */
-export function queueEmptyTitle(filter: QueueFilter, search?: string): string {
-  if (search) return `Nothing matches “${search}”`;
-  return filter === 'open' ? 'Nothing open' : 'Nothing here';
+export function queueEmptyTitle(lang: WsLang, filter: QueueFilter, search?: string): string {
+  const t = translator(lang);
+  if (search) return t(`Nichts passt zu „${search}“`, `Nothing matches “${search}”`);
+  return filter === 'open' ? t('Nichts offen', 'Nothing open') : t('Hier ist nichts', 'Nothing here');
 }

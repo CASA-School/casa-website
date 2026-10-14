@@ -279,6 +279,17 @@ in `docs/ADMIN_WORKSPACE.md` or a code comment. Every workspace feature is a
 module in `src/lib/admin/access.ts`, gated by role and per-person exception;
 design a new screen by answering "who may see this" first.
 
+**The workspace speaks German, and English on request (2026-10-14).** Every text
+on an `/admin` screen is written in both, German first, beside the code that shows
+it: `t('Anfragen', 'Enquiries')` from `getI18n()` on the server or `useWsLang()` in
+a client component; a label kept in a table is a `Bilingual` read with `pick`.
+Dates and numbers follow the language (`wsLocale`, `dayRange(…, lang)`,
+`relativeDays(…, lang)`). German says „du". The choice is per colleague
+(`staff_users.language`, migration 0025) and per browser (cookie `casa_ws_lang`),
+switched with DE | EN in the sidebar and on the sign-in page. e2e specs that read
+English set that cookie. **Read `docs/ADMIN_I18N.md` (rules and glossary) before
+writing workspace copy.**
+
 **Create, edit, delete — with a confirmation on anything destructive.** Every
 record module offers the three. Forms open in `FormDialog`; deletes go through
 `ConfirmSubmit`, and the server action checks the hidden `confirmed` field, so
@@ -412,6 +423,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/OFFERS.md` | **Read before touching `/admin/offers`.** FileMaker's offers measured (396 offers, the bugs), the model, group offers on the four packages with extras and the own offer, the new-offer wizard, the engine, the design direction |
 | `docs/LETTERS.md` | **Read before adding a kind of letter.** The `letters` table (every letter as sent), the shared shape, the sheet, printing, standard texts, how to add a kind |
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
+| `docs/ADMIN_I18N.md` | **Read before writing any workspace text.** German by default, English on request: the API, what is and is not translated, and the glossary |
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |

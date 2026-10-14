@@ -13,6 +13,8 @@ import {
 } from '@/lib/admin/catalogue';
 import { query } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
+import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { listBookableRooms, type Room } from '@/lib/admin/rooms';
 import { toDateInputValue } from '@/lib/dates';
 import { CohortForm } from './cohort-form';
@@ -40,10 +42,10 @@ import { RoomPicker } from './room-picker';
  * cell whose "Set room" appears on hover.
  */
 
-const VIEWS = [
-  { key: 'cohorts', label: 'Upcoming cohorts' },
-  { key: 'types', label: 'Course types' },
-] as const;
+const VIEWS: readonly { key: 'cohorts' | 'types'; label: Bilingual }[] = [
+  { key: 'cohorts', label: { de: 'Kommende Termine', en: 'Upcoming cohorts' } },
+  { key: 'types', label: { de: 'Kursarten', en: 'Course types' } },
+];
 
 const hide = 'hidden md:table-cell';
 
@@ -53,6 +55,7 @@ export default async function CataloguePage({
   searchParams: Promise<{ error?: string; created?: string; view?: string }>;
 }) {
   const user = await requireModule('catalogue');
+  const { t, lang } = await getI18n();
   const plans = canAccess(user, 'rooms', 'edit');
   const [{ error, view: rawView }, types, instances, rooms, levels] = await Promise.all([
     searchParams,
@@ -68,10 +71,10 @@ export default async function CataloguePage({
   return (
     <>
       <PageHeader
-        title="Courses"
+        title={t('Kurse', 'Courses')}
         actions={
           plans ? (
-            <FormDialog trigger="Schedule cohort" title="Schedule a cohort" triggerVariant="primary">
+            <FormDialog trigger={t('Termin planen', 'Schedule cohort')} title={t('Termin planen', 'Schedule a cohort')} triggerVariant="primary">
               <CohortForm courseTypes={types} rooms={rooms} levels={levels} />
             </FormDialog>
           ) : null
@@ -91,19 +94,35 @@ export default async function CataloguePage({
         <ListBar
           tabs={VIEWS.map((v) => ({
             key: v.key,
-            label: v.label,
+            label: pick(lang, v.label),
             href: `/admin/catalogue${v.key === 'cohorts' ? '' : `?view=${v.key}`}`,
           }))}
           active={view}
         />
-        {view === 'cohorts' ? <Cohorts instances={instances} rooms={rooms} plans={plans} /> : <CourseTypes types={types} />}
+        {view === 'cohorts' ? (
+          <Cohorts instances={instances} rooms={rooms} plans={plans} t={t} lang={lang} />
+        ) : (
+          <CourseTypes types={types} t={t} />
+        )}
       </Card>
     </>
   );
 }
 
-function Cohorts({ instances, rooms, plans }: { instances: CourseInstanceSummary[]; rooms: Room[]; plans: boolean }) {
-  if (instances.length === 0) return <ListEmpty title="No cohorts scheduled" />;
+function Cohorts({
+  instances,
+  rooms,
+  plans,
+  t,
+  lang,
+}: {
+  instances: CourseInstanceSummary[];
+  rooms: Room[];
+  plans: boolean;
+  t: T;
+  lang: WsLang;
+}) {
+  if (instances.length === 0) return <ListEmpty title={t('Keine Termine geplant', 'No cohorts scheduled')} />;
 
   // Same-day cohorts in a fixed order, so a row does not swap places after its room changes.
   const ordered = [...instances].sort(
@@ -117,29 +136,41 @@ function Cohorts({ instances, rooms, plans }: { instances: CourseInstanceSummary
   return (
     <OpenTable
       head={[
-        { label: 'Course' },
-        { label: 'Runs', className: 'w-px md:w-[13.5rem]' },
-        { label: 'Room', className: `w-[15rem] ${hide}` },
-        { label: 'Seats', className: `w-[15rem] ${hide}` },
+        { label: t('Kurs', 'Course') },
+        { label: t('Zeitraum', 'Runs'), className: 'w-px md:w-[13.5rem]' },
+        { label: t('Raum', 'Room'), className: `w-[15rem] ${hide}` },
+        { label: t('Plätze', 'Seats'), className: `w-[15rem] ${hide}` },
       ]}
     >
       {months.flatMap((month) => [
-        <ListGroup key={month.key} label={monthLabel(month.key)} count={month.items.length} span={4} />,
+        <ListGroup key={month.key} label={monthLabel(month.key, lang)} count={month.items.length} span={4} />,
         ...month.items.map((instance) => (
-          <CohortRow key={instance.id} instance={instance} rooms={rooms} plans={plans} />
+          <CohortRow key={instance.id} instance={instance} rooms={rooms} plans={plans} t={t} lang={lang} />
         )),
       ])}
     </OpenTable>
   );
 }
 
-const STATUS_LABELS: Record<string, { label: string; tone: 'quiet' | 'neutral' | 'danger' }> = {
-  cancelled: { label: 'Cancelled', tone: 'danger' },
-  draft: { label: 'Draft', tone: 'quiet' },
+const STATUS_LABELS: Record<string, { label: Bilingual; tone: 'quiet' | 'neutral' | 'danger' }> = {
+  cancelled: { label: { de: 'Abgesagt', en: 'Cancelled' }, tone: 'danger' },
+  draft: { label: { de: 'Entwurf', en: 'Draft' }, tone: 'quiet' },
 };
 
 /** One cohort: what it is, when, where, and how full. */
-function CohortRow({ instance, rooms, plans }: { instance: CourseInstanceSummary; rooms: Room[]; plans: boolean }) {
+function CohortRow({
+  instance,
+  rooms,
+  plans,
+  t,
+  lang,
+}: {
+  instance: CourseInstanceSummary;
+  rooms: Room[];
+  plans: boolean;
+  t: T;
+  lang: WsLang;
+}) {
   const full = instance.capacity > 0 && instance.registrationCount >= instance.capacity;
   const nearlyFull = instance.capacity > 0 && !full && instance.registrationCount / instance.capacity >= 0.8;
   const overRoom =
@@ -151,15 +182,18 @@ function CohortRow({ instance, rooms, plans }: { instance: CourseInstanceSummary
   const sub = [
     instance.title && instance.title !== instance.courseTypeName ? instance.title : null,
     instance.levelCode,
-    instance.session ? SESSION_LABELS[instance.session] : null,
+    instance.session ? pick(lang, SESSION_LABELS[instance.session]) : null,
   ]
     .filter(Boolean)
     .join(' · ');
 
+  const known = STATUS_LABELS[instance.status];
   const status =
     instance.status === 'scheduled'
       ? null
-      : (STATUS_LABELS[instance.status] ?? { label: sentenceCase(instance.status), tone: 'neutral' });
+      : known
+        ? { label: pick(lang, known.label), tone: known.tone }
+        : { label: sentenceCase(instance.status), tone: 'neutral' as const };
 
   return (
     <tr className="group" data-cohort={instance.id}>
@@ -172,7 +206,12 @@ function CohortRow({ instance, rooms, plans }: { instance: CourseInstanceSummary
       </td>
       <td className={`${openCell} py-3 text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums`}>
         {/* The month group above says the year; the range names one only when it crosses into another. */}
-        {dayRange(toDateInputValue(instance.startDate), toDateInputValue(instance.endDate), new Date(instance.startDate).getFullYear())}
+        {dayRange(
+          toDateInputValue(instance.startDate),
+          toDateInputValue(instance.endDate),
+          lang,
+          new Date(instance.startDate).getFullYear()
+        )}
       </td>
       <td className={`${openCell} py-1.5 ${hide}`}>
         {plans ? (
@@ -187,19 +226,24 @@ function CohortRow({ instance, rooms, plans }: { instance: CourseInstanceSummary
         ) : instance.location ? (
           <span className="text-[0.84rem] text-[var(--casa-muted)]">{instance.location}</span>
         ) : null}
-        {overRoom ? <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">Room too small</span> : null}
+        {overRoom ? (
+          <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">{t('Raum zu klein', 'Room too small')}</span>
+        ) : null}
       </td>
       <td className={`${openCell} py-3 ${hide}`}>
         <SeatLine
           taken={instance.registrationCount}
           capacity={instance.capacity}
-          label={`${instance.registrationCount} of ${instance.capacity} seats taken`}
+          label={t(
+            `${instance.registrationCount} von ${instance.capacity} Plätzen belegt`,
+            `${instance.registrationCount} of ${instance.capacity} seats taken`
+          )}
           warn={full || nearlyFull}
           note={
             full || nearlyFull ? (
-              <span className="font-semibold text-[#9a5b00]">{full ? 'Full' : 'Nearly full'}</span>
+              <span className="font-semibold text-[#9a5b00]">{full ? t('Voll', 'Full') : t('Fast voll', 'Nearly full')}</span>
             ) : instance.bookingCount > 0 ? (
-              <span className="text-[var(--casa-text-subtle)]">{instance.bookingCount} booked</span>
+              <span className="text-[var(--casa-text-subtle)]">{t(`${instance.bookingCount} gebucht`, `${instance.bookingCount} booked`)}</span>
             ) : null
           }
         />
@@ -208,17 +252,17 @@ function CohortRow({ instance, rooms, plans }: { instance: CourseInstanceSummary
   );
 }
 
-function CourseTypes({ types }: { types: CourseTypeSummary[] }) {
-  if (types.length === 0) return <ListEmpty title="No course types" />;
+function CourseTypes({ types, t }: { types: CourseTypeSummary[]; t: T }) {
+  if (types.length === 0) return <ListEmpty title={t('Keine Kursarten', 'No course types')} />;
   return (
     <Table
       head={[
-        'Course',
-        { label: 'Levels', className: `w-[8rem] ${hide}` },
-        { label: 'Format', className: `w-[11rem] ${hide}` },
-        { label: 'UE / week', align: 'right', className: `w-[7rem] ${hide}` },
-        { label: 'Price', align: 'right', className: 'w-[7rem]' },
-        { label: 'Registrations', align: 'right', className: `w-[8rem] ${hide}` },
+        t('Kurs', 'Course'),
+        { label: t('Niveaus', 'Levels'), className: `w-[8rem] ${hide}` },
+        { label: t('Format', 'Format'), className: `w-[11rem] ${hide}` },
+        { label: t('UE / Woche', 'UE / week'), align: 'right', className: `w-[7rem] ${hide}` },
+        { label: t('Preis', 'Price'), align: 'right', className: 'w-[7rem]' },
+        { label: t('Anmeldungen', 'Registrations'), align: 'right', className: `w-[8rem] ${hide}` },
       ]}
     >
       {types.map((type) => (
@@ -226,11 +270,13 @@ function CourseTypes({ types }: { types: CourseTypeSummary[] }) {
           <Cell className="max-w-0">
             <span className="flex min-w-0 items-center gap-2">
               <span className="truncate text-[0.9rem] font-semibold">{type.name}</span>
-              {type.isActive ? null : <Badge tone="quiet">Not published</Badge>}
+              {type.isActive ? null : <Badge tone="quiet">{t('Nicht veröffentlicht', 'Not published')}</Badge>}
             </span>
             {type.upcomingCount > 0 ? (
               <span className="mt-0.5 block text-[0.8rem] text-[var(--casa-muted)]">
-                {type.upcomingCount} upcoming {type.upcomingCount === 1 ? 'cohort' : 'cohorts'}
+                {type.upcomingCount === 1
+                  ? t('1 kommender Termin', '1 upcoming cohort')
+                  : t(`${type.upcomingCount} kommende Termine`, `${type.upcomingCount} upcoming cohorts`)}
               </span>
             ) : null}
           </Cell>

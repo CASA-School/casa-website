@@ -13,7 +13,8 @@ import { ORGANISER_CHOICES, organiserBriefFields } from '@/lib/validation/contac
 describe('queue status vocabulary', () => {
   it('labels and tones every status', () => {
     for (const status of WORK_STATUSES) {
-      expect(STATUS_LABELS[status]).toBeTruthy();
+      expect(STATUS_LABELS[status].de).toBeTruthy();
+      expect(STATUS_LABELS[status].en).toBeTruthy();
       expect(STATUS_TONES[status]).toBeTruthy();
     }
   });
@@ -61,15 +62,22 @@ describe('activity copy', () => {
   it('uses the right article for a vowel-initial noun', () => {
     // The trail is the most-read prose in the workspace; "a enquiry" in every
     // third line makes the whole screen look machine-generated.
-    expect(describeActivity(entry({}))).toBe('moved an enquiry from New to Done');
-    expect(describeActivity(entry({ entity: 'course_registration' }))).toContain(
+    expect(describeActivity(entry({}), 'en')).toBe('moved an enquiry from New to Done');
+    expect(describeActivity(entry({ entity: 'course_registration' }), 'en')).toContain(
       'a course registration'
     );
-    expect(describeActivity(entry({ entity: 'career_application' }))).toContain('an application');
+    expect(describeActivity(entry({ entity: 'career_application' }), 'en')).toContain('an application');
+  });
+
+  it('reads as German with the article the noun takes', () => {
+    expect(describeActivity(entry({}), 'de')).toBe('hat eine Anfrage von Neu auf Erledigt gesetzt');
+    expect(describeActivity(entry({ action: 'note_added', entity: 'placement_attempt' }), 'de')).toBe(
+      'hat eine Notiz zu einem Einstufungstest hinzugefügt'
+    );
   });
 
   it('names statuses in their human form, not the enum', () => {
-    expect(describeActivity(entry({ detail: { from: 'in_progress', to: 'waiting' } }))).toBe(
+    expect(describeActivity(entry({ detail: { from: 'in_progress', to: 'waiting' } }), 'en')).toBe(
       'moved an enquiry from In progress to Waiting on them'
     );
   });
@@ -92,13 +100,15 @@ describe('activity copy', () => {
     ];
 
     for (const action of written) {
-      const line = describeActivity(entry({ action, detail: { to: 'X', level: 'B1.2', email: 'a@b.c' } }));
-      expect(line, action).not.toContain('_');
+      for (const lang of ['en', 'de'] as const) {
+        const line = describeActivity(entry({ action, detail: { to: 'X', level: 'B1.2', email: 'a@b.c' } }), lang);
+        expect(line, `${action} (${lang})`).not.toContain('_');
+      }
     }
   });
 
   it('falls back readably for an action it has never seen', () => {
-    expect(describeActivity(entry({ action: 'some_new_thing' }))).toBe(
+    expect(describeActivity(entry({ action: 'some_new_thing' }), 'en')).toBe(
       'some new thing on an enquiry'
     );
   });
@@ -114,7 +124,8 @@ describe('organiser brief labels', () => {
     ]);
 
     for (const field of fields) {
-      expect(ORGANISER_BRIEF_LABELS[field], field).toBeTruthy();
+      expect(ORGANISER_BRIEF_LABELS[field]?.de, field).toBeTruthy();
+      expect(ORGANISER_BRIEF_LABELS[field]?.en, field).toBeTruthy();
     }
   });
 
@@ -126,27 +137,30 @@ describe('organiser brief labels', () => {
     // in capitalisation, so "did not come back verbatim" proves it is mapped.
     for (const [field, values] of Object.entries(ORGANISER_CHOICES)) {
       for (const value of values) {
-        expect(formatBriefValue(value), `${field}=${value} is unmapped`).not.toBe(value);
+        expect(formatBriefValue(value, 'de'), `${field}=${value} is unmapped`).not.toBe(value);
+        expect(formatBriefValue(value, 'en'), `${field}=${value} is unmapped`).not.toBe(value);
       }
     }
   });
 
   it('keeps an age range readable rather than de-hyphenating it', () => {
     // "14 17" is not an age band.
-    expect(formatBriefValue('14-17')).toBe('14–17');
-    expect(formatBriefValue('26-plus')).toBe('26 and over');
+    expect(formatBriefValue('14-17', 'en')).toBe('14–17');
+    expect(formatBriefValue('26-plus', 'en')).toBe('26 and over');
+    expect(formatBriefValue('26-plus', 'de')).toBe('26 und älter');
   });
 
   it('shows an unmapped token exactly as stored', () => {
     // A visibly raw value says "the form gained a field and nobody labelled
     // it". A plausible-looking guess hides that.
-    expect(formatBriefValue('some-new-token')).toBe('some-new-token');
+    expect(formatBriefValue('some-new-token', 'de')).toBe('some-new-token');
   });
 
   it('renders booleans and numbers', () => {
-    expect(formatBriefValue(true)).toBe('Yes');
-    expect(formatBriefValue(false)).toBe('No');
-    expect(formatBriefValue(18)).toBe('18');
+    expect(formatBriefValue(true, 'en')).toBe('Yes');
+    expect(formatBriefValue(false, 'en')).toBe('No');
+    expect(formatBriefValue(true, 'de')).toBe('Ja');
+    expect(formatBriefValue(18, 'de')).toBe('18');
   });
 });
 

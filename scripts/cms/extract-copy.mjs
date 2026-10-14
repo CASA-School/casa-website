@@ -69,6 +69,8 @@ const isText = (de, en) => {
 // emails, data and formatting layers, the legal texts, the closed placement test.
 const EXCLUDE = [
   /^src\/(lib|components)\/(admin|cms)\//,
+  // The staff workspace: its own two languages (docs/ADMIN_I18N.md), not the site's copy.
+  /^src\/app\/\(admin\)\//,
   /^src\/config\/cms\//,
   /^src\/lib\/(seo|structured-data|llms)\b/,
   /^src\/lib\/(api|assistant|knowledge|notifications|validation|search|registration|placement|appointments|db)\//,

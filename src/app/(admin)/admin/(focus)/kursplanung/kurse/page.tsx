@@ -1,6 +1,8 @@
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { levelStyle } from '@/lib/admin/kursplanung/colours';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
 import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
@@ -25,6 +27,7 @@ import ui from '../ui.module.css';
  */
 export default async function KursePage({ searchParams }: { searchParams: Promise<{ month?: string; ok?: string; error?: string }> }) {
   const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
+  const { t, lang } = await getI18n();
   const month = await resolvePlanMonth(params.month);
   const [plan, months] = await Promise.all([loadPlan(month), listPlanMonths()]);
   const canWrite = canAccess(user, 'kursplanung', 'edit');
@@ -42,12 +45,12 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
     return (
       <>
         <option value="">—</option>
-        <optgroup label={SHIFT_INFO[g.shift].label}>
+        <optgroup label={pick(lang, SHIFT_INFO[g.shift].label)}>
           {own.map((t) => (
             <option key={t.id} value={t.id}>{t.shortName}{t.levels.includes(g.level) ? '' : ` · ${g.level}?`}</option>
           ))}
         </optgroup>
-        <optgroup label="Andere Schicht (Vertretung)">
+        <optgroup label={t('Andere Schicht (Vertretung)', 'Other shift (cover)')}>
           {other.map((t) => (
             <option key={t.id} value={t.id}>{t.shortName}</option>
           ))}
@@ -57,6 +60,8 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
   };
   const hidden = (fields: Record<string, string>) => Object.entries(fields).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />);
   const next = nextMonth(month);
+  const thisLabel = monthLabel(month, lang), nextLabel = monthLabel(next, lang);
+  const phaseLabel = (phase: '1' | '2') => (phase === '1' ? t('Kursstart', 'Course start') : t('Fortsetzung', 'Continuation'));
 
   return (
     <div className={ui.module}>
@@ -64,7 +69,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
         {canWrite && !months.includes(next) ? (
           <form action={createMonthAction}>
             {hidden({ month, returnTo })}
-            <button type="submit" className={ui.ghost}>{monthLabel(next)} aus {monthLabel(month)} anlegen</button>
+            <button type="submit" className={ui.ghost}>{t(`${nextLabel} aus ${thisLabel} anlegen`, `Create ${nextLabel} from ${thisLabel}`)}</button>
           </form>
         ) : null}
       </Header>
@@ -73,32 +78,33 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
         const groups = plan.groups.filter((g) => g.shift === shift);
         const otherPhase = plan.groups.find((g) => g.shift !== shift)?.phase;
         const phase: '1' | '2' = groups[0]?.phase ?? (otherPhase === '2' ? '1' : otherPhase === '1' ? '2' : '1');
-        const halves = SHIFT_INFO[shift].halves;
+        const halves = SHIFT_INFO[shift].halves.map((h) => pick(lang, h));
+        const shiftLabel = pick(lang, SHIFT_INFO[shift].label);
         return (
           <section key={shift} className={ui.section}>
             <div className={ui.shiftHead}>
-              <h2>{SHIFT_INFO[shift].label}</h2>
-              <span className={ui.sub}>· {phase === '1' ? 'Kursstart' : 'Fortsetzung'} (.{phase}) · {SHIFT_INFO[shift].time}</span>
+              <h2>{shiftLabel}</h2>
+              <span className={ui.sub}>· {phaseLabel(phase)} (.{phase}) · {SHIFT_INFO[shift].time}</span>
               <span className={ui.spacer} />
               {canWrite && groups.length ? (
                 <form action={fillFromPairsAction}>
                   {hidden({ month, shift, returnTo })}
-                  <button type="submit" className={ui.ghost}>Alle Gruppen aus ihren Paaren belegen</button>
+                  <button type="submit" className={ui.ghost}>{t('Alle Gruppen aus ihren Paaren belegen', 'Fill all groups from their pairs')}</button>
                 </form>
               ) : null}
               {canWrite ? (
-                <FormDialog trigger="Gruppe anlegen" size="sm" title={`Gruppe anlegen · ${SHIFT_INFO[shift].label}`} description={`${monthLabel(month)} · ${phase === '1' ? 'Kursstart' : 'Fortsetzung'} (.${phase})`} titleClassName={ui.dlgTitle}>
+                <FormDialog trigger={t('Gruppe anlegen', 'Add group')} size="sm" title={`${t('Gruppe anlegen', 'Add group')} · ${shiftLabel}`} description={`${thisLabel} · ${phaseLabel(phase)} (.${phase})`} titleClassName={ui.dlgTitle}>
                   <form action={addGroupAction} className={ui.module}>
                     {hidden({ month, shift, phase, returnTo })}
                     <div className={ui.sec}>
-                      <label className={ui.lbl} htmlFor={`lvl-${shift}`}>Niveau</label>
+                      <label className={ui.lbl} htmlFor={`lvl-${shift}`}>{t('Niveau', 'Level')}</label>
                       <select id={`lvl-${shift}`} name="level" defaultValue="A1" className={`${ui.sel} ${ui.selLg}`}>
                         {LEVELS.map((l) => (
                           <option key={l} value={l}>{l}.{phase}</option>
                         ))}
                       </select>
                     </div>
-                    <div className={ui.foot}><button type="submit" className={ui.primary}>Anlegen</button></div>
+                    <div className={ui.foot}><button type="submit" className={ui.primary}>{t('Anlegen', 'Add')}</button></div>
                   </form>
                 </FormDialog>
               ) : null}
@@ -106,16 +112,16 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
 
             <div className={ui.card}>
               {groups.length === 0 ? (
-                <div className={ui.empty}>Noch keine Gruppen in diesem Monat.</div>
+                <div className={ui.empty}>{t('Noch keine Gruppen in diesem Monat.', 'No groups this month yet.')}</div>
               ) : (
                 <table className={ui.tbl}>
                   <thead>
                     <tr>
-                      <th>Gruppe</th>
-                      <th className={ui.right}>TN</th>
+                      <th>{t('Gruppe', 'Group')}</th>
+                      <th className={ui.right}>{t('TN', 'Students')}</th>
                       <th>{halves[0]}</th>
                       <th>{halves[1]}</th>
-                      <th>Geplant im Monat</th>
+                      <th>{t('Geplant im Monat', 'Planned this month')}</th>
                       <th>FileMaker</th>
                       <th />
                     </tr>
@@ -131,16 +137,16 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                           <td colSpan={6}>
                             <span className={ui.lv} style={levelStyle(level)}>{level}.{phase}</span>
                             <span className={ui.meta}>
-                              <span>Anmeldungen <b>{total}</b></span>
-                              <span>Gruppen <b>{lg.length}</b></span>
-                              {suggest !== lg.length ? <span>Vorschlag <b>{suggest}</b></span> : null}
+                              <span>{t('Anmeldungen', 'Registrations')} <b>{total}</b></span>
+                              <span>{t('Gruppen', 'Groups')} <b>{lg.length}</b></span>
+                              {suggest !== lg.length ? <span>{t('Vorschlag', 'Suggested')} <b>{suggest}</b></span> : null}
                             </span>
                           </td>
                           <td className={ui.right}>
                             {canWrite ? (
                               <form action={addGroupAction}>
                                 {hidden({ month, shift, level, phase, returnTo })}
-                                <button type="submit" className={`${ui.ghost} ${ui.ghostSm}`}>+ Gruppe</button>
+                                <button type="submit" className={`${ui.ghost} ${ui.ghostSm}`}>{t('+ Gruppe', '+ Group')}</button>
                               </form>
                             ) : null}
                           </td>
@@ -158,10 +164,10 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                     <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
                                   </form>
                                 ) : null}
-                                <span className={ui.name}>{g.level}.{g.phase}{lg.length > 1 ? <small>Gruppe {g.groupIndex}</small> : null}</span>
+                                <span className={ui.name}>{g.level}.{g.phase}{lg.length > 1 ? <small>{t('Gruppe', 'Group')} {g.groupIndex}</small> : null}</span>
                               </td>
                               <td className={ui.right}>
-                                {canWrite ? <input form={fid} name="registrations" type="number" min={0} max={999} defaultValue={g.registrations} className={`${ui.dashed} ${ui.dashedNum}`} aria-label="Anmeldungen" /> : <span className={ui.num}>{g.registrations}</span>}
+                                {canWrite ? <input form={fid} name="registrations" type="number" min={0} max={999} defaultValue={g.registrations} className={`${ui.dashed} ${ui.dashedNum}`} aria-label={t('Anmeldungen', 'Registrations')} /> : <span className={ui.num}>{g.registrations}</span>}
                               </td>
                               <td>{canWrite ? <select form={fid} name="teacherFirst" defaultValue={g.teacherFirst ?? ''} className={ui.sel} aria-label={halves[0]}>{pairOptions(g)}</select> : name(g.teacherFirst)}</td>
                               <td>{canWrite ? <select form={fid} name="teacherSecond" defaultValue={g.teacherSecond ?? ''} className={ui.sel} aria-label={halves[1]}>{pairOptions(g)}</select> : name(g.teacherSecond)}</td>
@@ -171,19 +177,28 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                   <b>{p.have} <small>/ {p.need}</small></b>
                                 </span>
                               </td>
-                              <td>{canWrite ? <input form={fid} name="filemakerCourseId" defaultValue={g.filemakerCourseId ?? ''} placeholder="Kurs-ID" maxLength={40} className={ui.dashed} aria-label="FileMaker Kurs-ID" /> : <span className={ui.num}>{g.filemakerCourseId ?? '—'}</span>}</td>
+                              <td>{canWrite ? <input form={fid} name="filemakerCourseId" defaultValue={g.filemakerCourseId ?? ''} placeholder={t('Kurs-ID', 'Course ID')} maxLength={40} className={ui.dashed} aria-label={t('FileMaker Kurs-ID', 'FileMaker course ID')} /> : <span className={ui.num}>{g.filemakerCourseId ?? '—'}</span>}</td>
                               <td className={ui.right}>
                                 <span className={ui.acts}>
                                   {canWrite && p.have < p.need ? (
                                     <form action={fillFromPairsAction}>
                                       {hidden({ month, shift, groupId: g.id, returnTo })}
-                                      <button type="submit" className={`${ui.ghost} ${ui.ghostSm}`}>Alle Wochen belegen</button>
+                                      <button type="submit" className={`${ui.ghost} ${ui.ghostSm}`}>{t('Alle Wochen belegen', 'Fill all weeks')}</button>
                                     </form>
                                   ) : null}
                                   {canRemove && p.have === 0 ? (
                                     <form action={removeGroupAction}>
                                       {hidden({ groupId: g.id, month, returnTo })}
-                                      <ConfirmSubmit title="Gruppe entfernen?" description={`${g.level}.${g.phase} Gruppe ${g.groupIndex} ist leer und wird aus ${monthLabel(month)} entfernt.`} confirmLabel="Entfernen">Entfernen</ConfirmSubmit>
+                                      <ConfirmSubmit
+                                        title={t('Gruppe entfernen?', 'Remove group?')}
+                                        description={t(
+                                          `${g.level}.${g.phase} Gruppe ${g.groupIndex} ist leer und wird aus ${thisLabel} entfernt.`,
+                                          `${g.level}.${g.phase} group ${g.groupIndex} is empty and will be removed from ${thisLabel}.`
+                                        )}
+                                        confirmLabel={t('Entfernen', 'Remove')}
+                                      >
+                                        {t('Entfernen', 'Remove')}
+                                      </ConfirmSubmit>
                                     </form>
                                   ) : null}
                                 </span>

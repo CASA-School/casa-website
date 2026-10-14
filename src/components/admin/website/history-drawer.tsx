@@ -8,6 +8,8 @@ import {
   listChangesAction,
   undoReleaseAction,
 } from '@/app/(admin)/admin/(editor)/website/actions';
+import { useWsLang } from '@/components/admin/lang';
+import { wsLocale } from '@/lib/admin/i18n';
 import { formatBerlin } from '@/lib/cms/berlin-time';
 import type { ReleaseSummary } from '@/lib/cms/editor-types';
 import type { CmsLocale } from '@/lib/cms/locales';
@@ -36,6 +38,7 @@ export function HistoryDrawer({
   onChanged: () => void;
   notify: (message: string) => void;
 }) {
+  const { t, lang } = useWsLang();
   const [releases, setReleases] = useState<ReleaseSummary[] | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -63,12 +66,12 @@ export function HistoryDrawer({
     if (!result.ok) return notify(result.error);
     notify(
       action === 'undo'
-        ? 'Taken back off the site'
+        ? t('Von der Website genommen', 'Taken back off the site')
         : action === 'cancel'
-          ? 'Withdrawn, back in drafts'
+          ? t('Zurückgezogen, wieder bei den Entwürfen', 'Withdrawn, back in drafts')
           : action === 'approve'
-            ? 'Approved and live'
-            : 'Sent back to drafts'
+            ? t('Freigegeben und live', 'Approved and live')
+            : t('Zurück zu den Entwürfen geschickt', 'Sent back to drafts')
     );
     onChanged();
     void load();
@@ -77,22 +80,22 @@ export function HistoryDrawer({
   const label = (code: string) => locales.find((locale) => locale.code === code)?.label ?? code;
   const sections: [string, ReleaseSummary[]][] = releases
     ? [
-        ['Scheduled', releases.filter((release) => release.state === 'scheduled' && !release.live)],
-        ['Waiting for approval', releases.filter((release) => release.state === 'pending')],
-        ['Live', releases.filter((release) => release.live)],
-        ['Earlier', releases.filter((release) => ['undone', 'rejected', 'cancelled'].includes(release.state))],
+        [t('Geplant', 'Scheduled'), releases.filter((release) => release.state === 'scheduled' && !release.live)],
+        [t('Wartet auf Freigabe', 'Waiting for approval'), releases.filter((release) => release.state === 'pending')],
+        [t('Live', 'Live'), releases.filter((release) => release.live)],
+        [t('Früher', 'Earlier'), releases.filter((release) => ['undone', 'rejected', 'cancelled'].includes(release.state))],
       ]
     : [];
 
   return (
     <aside
-      aria-label="History"
+      aria-label={t('Verlauf', 'History')}
       className={cn('absolute inset-y-0 right-0 z-40 flex w-full max-w-[420px] flex-col border-l border-ws-line bg-white shadow-[-24px_0_48px_-28px_rgba(15,23,42,0.35)]', styles.sheet)}
     >
       <header className="flex items-center gap-3 border-b border-ws-line-soft px-5 py-4">
         <span className="text-[var(--casa-text-subtle)]">{I.history}</span>
-        <h2 className="flex-1 font-display text-xl font-semibold text-[var(--casa-ink)]">History</h2>
-        <button type="button" onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
+        <h2 className="flex-1 font-display text-xl font-semibold text-[var(--casa-ink)]">{t('Verlauf', 'History')}</h2>
+        <button type="button" onClick={onClose} aria-label={t('Schließen', 'Close')} className="grid h-9 w-9 place-items-center rounded-lg text-[var(--casa-text-subtle)] hover:bg-ws-sunk">
           {I.close}
         </button>
       </header>
@@ -103,7 +106,9 @@ export function HistoryDrawer({
             <Spinner />
           </div>
         ) : releases.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-[var(--casa-text-subtle)]">Nothing has been published from the editor yet.</p>
+          <p className="mt-10 text-center text-sm text-[var(--casa-text-subtle)]">
+            {t('Aus dem Editor wurde noch nichts veröffentlicht.', 'Nothing has been published from the editor yet.')}
+          </p>
         ) : (
           sections
             .filter(([, list]) => list.length)
@@ -118,8 +123,8 @@ export function HistoryDrawer({
                       <li key={release.id} className={cn('rounded-xl border border-ws-line p-3.5', !release.live && release.state !== 'scheduled' && release.state !== 'pending' && 'opacity-70')}>
                         <button type="button" onClick={() => setOpen(expanded ? null : release.id)} className="block w-full text-left" aria-expanded={expanded}>
                           <div className="flex items-baseline justify-between gap-3">
-                            <span className="text-sm font-bold text-[var(--casa-ink)]">{plural(release.items.length, 'text', 'texts')}</span>
-                            <span className="text-xs tabular-nums text-[var(--casa-text-subtle)]">{formatBerlin(release.publishAt ?? release.createdAt)}</span>
+                            <span className="text-sm font-bold text-[var(--casa-ink)]">{plural(release.items.length, t('Text', 'text'), t('Texte', 'texts'))}</span>
+                            <span className="text-xs tabular-nums text-[var(--casa-text-subtle)]">{formatBerlin(release.publishAt ?? release.createdAt, wsLocale(lang))}</span>
                           </div>
                           <div className="mt-0.5 truncate text-xs text-[var(--casa-text-subtle)]">
                             {[release.createdBy, scopes.join(', ')].filter(Boolean).join(' · ')}
@@ -141,21 +146,21 @@ export function HistoryDrawer({
                           <div className="mt-2.5 flex flex-wrap justify-end gap-1.5">
                             {release.live && release.state !== 'undone' ? (
                               <Action busy={busy === release.id} onClick={() => void act(release, 'undo')}>
-                                Undo
+                                {t('Rückgängig', 'Undo')}
                               </Action>
                             ) : null}
                             {release.state === 'scheduled' && !release.live ? (
                               <Action busy={busy === release.id} onClick={() => void act(release, 'cancel')}>
-                                Withdraw
+                                {t('Zurückziehen', 'Withdraw')}
                               </Action>
                             ) : null}
                             {release.state === 'pending' ? (
                               <>
                                 <Action busy={busy === release.id} onClick={() => void act(release, 'reject')}>
-                                  Send back
+                                  {t('Zurückschicken', 'Send back')}
                                 </Action>
                                 <Action strong busy={busy === release.id} onClick={() => void act(release, 'approve')}>
-                                  Approve and publish
+                                  {t('Freigeben und veröffentlichen', 'Approve and publish')}
                                 </Action>
                               </>
                             ) : null}

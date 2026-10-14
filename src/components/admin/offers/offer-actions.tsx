@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { decideOfferAction, deleteOfferAction, duplicateOfferAction, reviseOfferAction, sendOfferAction } from '@/app/(admin)/admin/(editor)/offers/actions';
+import { useWsLang } from '@/components/admin/lang';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { subjectLine, type Letter } from '@/lib/admin/letters/types';
 import type { OfferStatus } from '@/lib/admin/offers/types';
@@ -32,6 +33,7 @@ export function OfferToolbarActions({
   send: Omit<Parameters<typeof SendButton>[0], 'id'> | null;
   extra?: { label: string; onSelect: () => void }[];
 }) {
+  const { t } = useWsLang();
   const duplicate = useRef<HTMLFormElement>(null);
   const revise = useRef<HTMLFormElement>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -39,10 +41,10 @@ export function OfferToolbarActions({
 
   const items = [
     ...(extra ?? []),
-    ...(canWrite ? [{ label: 'Duplicate', onSelect: () => duplicate.current?.requestSubmit() }] : []),
-    ...(canWrite && status !== 'draft' ? [{ label: 'Revise', onSelect: () => revise.current?.requestSubmit() }] : []),
-    ...(canWrite && status === 'sent' ? [{ label: 'Not accepted …', onSelect: () => setDecision('declined') }] : []),
-    ...(canDelete ? [{ label: 'Delete …', onSelect: () => setConfirmDelete(true), danger: true, rule: true }] : []),
+    ...(canWrite ? [{ label: t('Duplizieren', 'Duplicate'), onSelect: () => duplicate.current?.requestSubmit() }] : []),
+    ...(canWrite && status !== 'draft' ? [{ label: t('Überarbeiten', 'Revise'), onSelect: () => revise.current?.requestSubmit() }] : []),
+    ...(canWrite && status === 'sent' ? [{ label: t('Nicht angenommen …', 'Not accepted …'), onSelect: () => setDecision('declined') }] : []),
+    ...(canDelete ? [{ label: t('Löschen …', 'Delete …'), onSelect: () => setConfirmDelete(true), danger: true, rule: true }] : []),
   ];
 
   return (
@@ -57,22 +59,27 @@ export function OfferToolbarActions({
       {canWrite && status === 'draft' && send ? <SendButton id={id} {...send} /> : null}
       {canWrite && status === 'sent' ? (
         <button type="button" className={ui.primary} onClick={() => setDecision('accepted')}>
-          Accepted
+          {t('Angenommen', 'Accepted')}
         </button>
       ) : null}
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <DialogContent className={panel} closeLabel="Close">
-          <DialogTitle className={ui.dlgTitle}>Delete this offer?</DialogTitle>
-          <DialogDescription className="mt-1 text-sm">It disappears from the list. Versions already sent stay in the history.</DialogDescription>
+        <DialogContent className={panel} closeLabel={t('Schließen', 'Close')}>
+          <DialogTitle className={ui.dlgTitle}>{t('Möchtest du dieses Angebot löschen?', 'Delete this offer?')}</DialogTitle>
+          <DialogDescription className="mt-1 text-sm">
+            {t(
+              'Es verschwindet aus der Liste. Bereits gesendete Fassungen bleiben im Verlauf.',
+              'It disappears from the list. Versions already sent stay in the history.'
+            )}
+          </DialogDescription>
           <form action={deleteOfferAction} className={ui.foot} style={{ marginTop: 18 }}>
             <input type="hidden" name="id" value={id} />
             <input type="hidden" name="confirmed" value="1" />
             <button type="button" className={ui.btn} onClick={() => setConfirmDelete(false)}>
-              Cancel
+              {t('Abbrechen', 'Cancel')}
             </button>
             <button type="submit" className={ui.primary} style={{ background: '#c81e1e' }}>
-              Delete
+              {t('Löschen', 'Delete')}
             </button>
           </form>
         </DialogContent>
@@ -117,6 +124,7 @@ export function SendButton({
   onPrint: () => void;
   onBeforeSend: () => Promise<void>;
 }) {
+  const { t } = useWsLang();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -130,28 +138,28 @@ export function SendButton({
           setOpen(true);
         }}
       >
-        Send …
+        {t('Senden …', 'Send …')}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={panel} closeLabel="Close">
-          <DialogTitle className={ui.dlgTitle}>Send the offer</DialogTitle>
+        <DialogContent className={panel} closeLabel={t('Schließen', 'Close')}>
+          <DialogTitle className={ui.dlgTitle}>{t('Angebot senden', 'Send the offer')}</DialogTitle>
           <DialogDescription className="mt-1 text-sm">{subjectLine(letter)}</DialogDescription>
           <form action={sendOfferAction} className={ui.form} style={{ marginTop: 18 }}>
             <input type="hidden" name="id" value={id} />
             <ol className={ui.steps}>
               <li>
                 <b>1</b>
-                <span>Save the letter as a PDF</span>
+                <span>{t('Brief als PDF speichern', 'Save the letter as a PDF')}</span>
                 <button type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={onPrint}>
-                  Print / PDF
+                  {t('Drucken / PDF', 'Print / PDF')}
                 </button>
               </li>
               <li>
                 <b>2</b>
-                <span>{email ? `Email it to ${email}` : 'Email it'}</span>
+                <span>{email ? t(`Per E-Mail an ${email} schicken`, `Email it to ${email}`) : t('Per E-Mail schicken', 'Email it')}</span>
                 {email ? (
                   <a className={`${ui.btn} ${ui.btnSm}`} href={mailto(email, letter)}>
-                    Write email
+                    {t('E-Mail schreiben', 'Write email')}
                   </a>
                 ) : (
                   <span />
@@ -159,16 +167,16 @@ export function SendButton({
               </li>
               <li>
                 <b>3</b>
-                <span>Mark it as sent. This version is kept as it is.</span>
+                <span>{t('Als gesendet markieren. Diese Fassung wird so aufbewahrt, wie sie ist.', 'Mark it as sent. This version is kept as it is.')}</span>
                 <span />
               </li>
             </ol>
             <div className={ui.foot}>
               <button type="button" className={ui.btn} onClick={() => setOpen(false)}>
-                Cancel
+                {t('Abbrechen', 'Cancel')}
               </button>
               <button type="submit" className={ui.primary} disabled={busy}>
-                Mark as sent
+                {t('Als gesendet markieren', 'Mark as sent')}
               </button>
             </div>
           </form>
@@ -179,22 +187,25 @@ export function SendButton({
 }
 
 function DecideDialog({ id, decision, onClose }: { id: string; decision: 'accepted' | 'declined'; onClose: () => void }) {
+  const { t } = useWsLang();
   const [reason, setReason] = useState<'declined' | 'withdrawn'>('declined');
   const accepted = decision === 'accepted';
   return (
     <Dialog open onOpenChange={(o) => (o ? null : onClose())}>
-      <DialogContent className={panel} closeLabel="Close">
-        <DialogTitle className={ui.dlgTitle}>{accepted ? 'The offer was accepted' : 'The offer was not accepted'}</DialogTitle>
-        <DialogDescription className="sr-only">Record the answer</DialogDescription>
+      <DialogContent className={panel} closeLabel={t('Schließen', 'Close')}>
+        <DialogTitle className={ui.dlgTitle}>
+          {accepted ? t('Das Angebot wurde angenommen', 'The offer was accepted') : t('Das Angebot wurde nicht angenommen', 'The offer was not accepted')}
+        </DialogTitle>
+        <DialogDescription className="sr-only">{t('Antwort festhalten', 'Record the answer')}</DialogDescription>
         <form action={decideOfferAction} className={ui.form} style={{ marginTop: 16 }}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="decision" value={accepted ? 'accepted' : reason} />
           {!accepted ? (
-            <div className={ui.seg} role="radiogroup" aria-label="Why">
+            <div className={ui.seg} role="radiogroup" aria-label={t('Warum', 'Why')}>
               {(
                 [
-                  ['declined', 'Declined by them'],
-                  ['withdrawn', 'Withdrawn by us'],
+                  ['declined', t('Von ihnen abgelehnt', 'Declined by them')],
+                  ['withdrawn', t('Von uns zurückgezogen', 'Withdrawn by us')],
                 ] as const
               ).map(([v, label]) => (
                 <label key={v}>
@@ -206,16 +217,16 @@ function DecideDialog({ id, decision, onClose }: { id: string; decision: 'accept
           ) : null}
           <div>
             <label className={ui.lbl} htmlFor={`note-${decision}`}>
-              Note
+              {t('Notiz', 'Note')}
             </label>
             <textarea id={`note-${decision}`} name="note" rows={3} className={ui.textarea} />
           </div>
           <div className={ui.foot}>
             <button type="button" className={ui.btn} onClick={onClose}>
-              Cancel
+              {t('Abbrechen', 'Cancel')}
             </button>
             <button type="submit" className={ui.primary}>
-              Save
+              {t('Speichern', 'Save')}
             </button>
           </div>
         </form>

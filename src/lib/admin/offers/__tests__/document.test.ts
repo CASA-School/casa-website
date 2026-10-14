@@ -159,23 +159,23 @@ describe('checks before sending', () => {
   });
 
   it('stops an offer with no participants or no title', () => {
-    expect(run(draft({ participants: null })).map((c) => c.message)).toContain('Number of participants missing');
-    expect(run(draft({ title: '' })).map((c) => c.message)).toContain('No title');
+    expect(run(draft({ participants: null })).map((c) => c.message.en)).toContain('Number of participants missing');
+    expect(run(draft({ title: '' })).map((c) => c.message.en)).toContain('No title');
   });
 
   it('stops Esel beyond four weeks, where nothing has a price', () => {
-    const messages = run(draft({ departure: '2027-05-15' }, { package: 'esel', modules: ALL })).filter((c) => c.level === 'problem').map((c) => c.message);
+    const messages = run(draft({ departure: '2027-05-15' }, { package: 'esel', modules: ALL })).filter((c) => c.level === 'problem').map((c) => c.message.en);
     expect(messages).toContain('Esel is priced up to four weeks');
     expect(messages.some((m) => m.startsWith('No price for'))).toBe(true);
   });
 
   it('notices when the dates and a fixed package disagree', () => {
-    expect(run(draft({ departure: '2027-05-01' })).map((c) => c.message)).toContain('The package is 2 weeks, the dates 3');
+    expect(run(draft({ departure: '2027-05-01' })).map((c) => c.message.en)).toContain('The package is 2 weeks, the dates 3');
   });
 
   it('stops an offer whose validity has passed, and an empty one (FileMaker sent 37622 three times)', () => {
     expect(hasProblems(run(draft({ validUntil: '2026-10-01' })))).toBe(true);
-    expect(offerChecks(draft({ kind: 'individual' }), [], '2026-10-13').map((c) => c.message)).toContain('No prices on the offer');
+    expect(offerChecks(draft({ kind: 'individual' }), [], '2026-10-13').map((c) => c.message.en)).toContain('No prices on the offer');
   });
 
   it('points out a price typed over the list price, without stopping it', () => {
@@ -183,7 +183,7 @@ describe('checks before sending', () => {
     d.stay.overrides['participant:package'] = { unitAmount: 1100 };
     const checks = run(d);
     expect(hasProblems(checks)).toBe(false);
-    expect(checks.find((c) => c.level === 'hint' && c.message.includes('1100 € instead of 1130 €'))).toBeTruthy();
+    expect(checks.find((c) => c.level === 'hint' && c.message.en.includes('1100 € instead of 1130 €'))).toBeTruthy();
   });
 });
 
@@ -205,7 +205,10 @@ describe('from a group enquiry', () => {
 describe('what the editor may write', () => {
   it('accepts a whole draft and refuses departure before arrival', () => {
     expect(parseOfferDraft(draft()).ok).toBe(true);
-    expect(parseOfferDraft(draft({ arrival: '2027-04-24', departure: '2027-04-11' }))).toEqual({ ok: false, error: 'departure: Departure must be after arrival' });
+    expect(parseOfferDraft(draft({ arrival: '2027-04-24', departure: '2027-04-11' }))).toEqual({
+      ok: false,
+      error: { de: 'departure: Die Abreise muss nach der Anreise liegen', en: 'departure: Departure must be after arrival' },
+    });
   });
 
   it('refuses a typed line with a key the builder does not make, rather than dropping the typed lines', () => {

@@ -6,13 +6,16 @@
  * change with a lawyer, not in the editor.
  */
 
+import type { Bilingual } from '@/lib/admin/i18n';
+
 export type EditorPage = { name: string; path: string; locked?: boolean };
-export type EditorPageGroup = { group: string; pages: EditorPage[] };
+/** `group` is a heading in the editor's page list, in the workspace's language; `name` is what staff call the page. */
+export type EditorPageGroup = { group: Bilingual; pages: EditorPage[] };
 
 export const EDITOR_PAGES: readonly EditorPageGroup[] = [
-  { group: 'Home', pages: [{ name: 'Startseite', path: '/' }] },
+  { group: { de: 'Startseite', en: 'Home' }, pages: [{ name: 'Startseite', path: '/' }] },
   {
-    group: 'Courses',
+    group: { de: 'Kurse', en: 'Courses' },
     pages: [
       { name: 'Sprachkurse', path: '/sprachkurse' },
       { name: 'Intensivkurse', path: '/sprachkurse/deutsch-intensiv' },
@@ -25,7 +28,7 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     ],
   },
   {
-    group: 'Exams',
+    group: { de: 'Prüfungen', en: 'Exams' },
     pages: [
       { name: 'Prüfungszentrum', path: '/pruefungszentrum' },
       { name: 'telc Deutsch B2', path: '/pruefungszentrum/telc-deutsch-b2' },
@@ -33,7 +36,7 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     ],
   },
   {
-    group: 'Accommodation',
+    group: { de: 'Unterkunft', en: 'Accommodation' },
     pages: [
       { name: 'Unterkunft', path: '/unterkunft' },
       { name: 'Die CASA-WG', path: '/unterkunft/die-casa-wg' },
@@ -42,7 +45,7 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     ],
   },
   {
-    group: 'About CASA',
+    group: { de: 'Über CASA', en: 'About CASA' },
     pages: [
       { name: 'Leitbild', path: '/ueber-uns/casa-leitbild' },
       { name: 'Team', path: '/ueber-uns/casa-team' },
@@ -52,7 +55,7 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     ],
   },
   {
-    group: 'Service',
+    group: { de: 'Service', en: 'Service' },
     pages: [
       { name: 'Kontakt', path: '/kontakt' },
       { name: 'FAQ', path: '/faq' },
@@ -63,7 +66,7 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     ],
   },
   {
-    group: 'Guides',
+    group: { de: 'Ratgeber', en: 'Guides' },
     pages: [
       { name: 'Warum Deutschland', path: '/ratgeber/warum-deutschland' },
       { name: 'Studieren in Deutschland', path: '/ratgeber/studieren-in-deutschland' },
@@ -71,7 +74,7 @@ export const EDITOR_PAGES: readonly EditorPageGroup[] = [
     ],
   },
   {
-    group: 'Legal texts',
+    group: { de: 'Rechtstexte', en: 'Legal texts' },
     pages: [
       { name: 'AGB', path: '/agb', locked: true },
       { name: 'Datenschutz', path: '/datenschutz', locked: true },

@@ -4,6 +4,7 @@ import { WebsiteEditor } from '@/components/admin/website/editor';
 import { DEFAULT_EDITOR_PATH, EDITOR_PAGES } from '@/config/cms/editor-pages';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { aiEnabled } from '@/lib/cms/ai.server';
 import { initialsOf } from '@/lib/cms/editor-types';
 import { loadFacts } from '@/lib/cms/facts.server';
@@ -11,7 +12,10 @@ import { cmsLocales } from '@/lib/cms/locales';
 import { publicSiteOrigin } from '@/lib/cms/origins';
 import { createPreviewToken, safePreviewPath } from '@/lib/cms/preview-token';
 
-export const metadata: Metadata = { title: 'Website · Workspace · CASA Bremen' };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t('Website · Arbeitsbereich · CASA Bremen', 'Website · Workspace · CASA Bremen') };
+}
 
 /**
  * The website editor. docs/WEBSITE_EDITOR.md explains it.
@@ -23,13 +27,13 @@ export const metadata: Metadata = { title: 'Website · Workspace · CASA Bremen'
  */
 export default async function WebsiteEditorPage({ searchParams }: { searchParams: Promise<{ path?: string }> }) {
   const [user, params] = await Promise.all([requireModule('website'), searchParams]);
-  const [origin, de, en] = await Promise.all([publicSiteOrigin(), loadFacts('de'), loadFacts('en')]);
+  const [origin, de, en, { t }] = await Promise.all([publicSiteOrigin(), loadFacts('de'), loadFacts('en'), getI18n()]);
   const token = createPreviewToken(user.id);
   // Where each live value is changed, for the colleagues who may change it there.
   const dataScreens = {
-    ...(canAccess(user, 'catalogue') ? { 'Course dates': { label: 'Courses', href: '/admin/catalogue' } } : {}),
-    'Course types': { label: 'Lists', href: '/admin/settings/setup' },
-    ...(canAccess(user, 'prices') ? { Prices: { label: 'Prices', href: '/admin/settings/prices' } } : {}),
+    ...(canAccess(user, 'catalogue') ? { 'Course dates': { label: t('Kurse', 'Courses'), href: '/admin/catalogue' } } : {}),
+    'Course types': { label: t('Listen', 'Lists'), href: '/admin/settings/setup' },
+    ...(canAccess(user, 'prices') ? { Prices: { label: t('Preise', 'Prices'), href: '/admin/settings/prices' } } : {}),
   };
 
   return (

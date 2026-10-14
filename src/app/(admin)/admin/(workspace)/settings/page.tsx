@@ -7,6 +7,7 @@ import { Status } from '@/components/admin/list';
 import { Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { getStaffUser } from '@/lib/admin/auth';
+import { getI18n } from '@/lib/admin/i18n.server';
 import { formDeliveryConfig } from '@/lib/notifications/forms.server';
 import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/config/placement/policy';
 
@@ -32,34 +33,36 @@ export default async function SettingsPage() {
     redirect('/admin/sign-in');
   }
 
+  const { t, lang } = await getI18n();
+
   const integrations = [
     {
-      label: 'Contact form fan-out',
+      label: t('Weiterleitung Kontaktformular', 'Contact form fan-out'),
       variable: 'CONTACT_WEBHOOK_URL',
       configured: hasEnv('CONTACT_WEBHOOK_URL'),
     },
     {
-      label: 'Group and company briefs',
+      label: t('Gruppen- und Firmenanfragen', 'Group and company briefs'),
       variable: 'GROUP_INQUIRY_WEBHOOK_URL',
       configured: hasEnv('GROUP_INQUIRY_WEBHOOK_URL'),
     },
     {
-      label: 'Course registrations',
+      label: t('Kursanmeldungen', 'Course registrations'),
       variable: 'COURSE_REGISTRATION_WEBHOOK_URL',
       configured: hasEnv('COURSE_REGISTRATION_WEBHOOK_URL'),
     },
     {
-      label: 'Exam registrations',
+      label: t('Prüfungsanmeldungen', 'Exam registrations'),
       variable: 'EXAM_REGISTRATION_WEBHOOK_URL',
       configured: hasEnv('EXAM_REGISTRATION_WEBHOOK_URL'),
     },
     {
-      label: 'Career applications',
+      label: t('Bewerbungen', 'Career applications'),
       variable: 'CAREERS_APPLICATION_WEBHOOK_URL',
       configured: hasEnv('CAREERS_APPLICATION_WEBHOOK_URL'),
     },
     {
-      label: 'Placement result hand-off',
+      label: t('Übergabe der Einstufungsergebnisse', 'Placement result hand-off'),
       variable: 'PLACEMENT_RESULT_WEBHOOK_URL',
       configured: hasEnv('PLACEMENT_RESULT_WEBHOOK_URL'),
     },
@@ -70,7 +73,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" />
+      <PageHeader title={t('Einstellungen', 'Settings')} />
 
       {/*
        * The deployment's connections in the wide column, the facts that are
@@ -79,33 +82,35 @@ export default async function SettingsPage() {
        */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          <Card title="Website email" icon={Icon.mail} tint="blue">
+          <Card title={t('E-Mails der Website', 'Website email')} icon={Icon.mail} tint="blue">
             <DetailList
               items={[
                 {
-                  label: 'Delivery mode',
+                  label: t('Versandmodus', 'Delivery mode'),
                   value: delivery.test ? (
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <Status tone="warning">Testing</Status>
-                      Every form goes to admin@casa-bremen.de
+                      <Status tone="warning">{t('Test', 'Testing')}</Status>
+                      {t('Jedes Formular geht an admin@casa-bremen.de', 'Every form goes to admin@casa-bremen.de')}
                     </span>
                   ) : (
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <Status tone="positive">Live</Status>
-                      Recipients are set per form
+                      <Status tone="positive">{t('Live', 'Live')}</Status>
+                      {t('Empfänger sind pro Formular festgelegt', 'Recipients are set per form')}
                     </span>
                   ),
                 },
                 {
                   label: 'Microsoft 365',
-                  value: microsoftMail ? 'Configured' : 'Sender connection not configured',
+                  value: microsoftMail
+                    ? t('Eingerichtet', 'Configured')
+                    : t('Absenderverbindung nicht eingerichtet', 'Sender connection not configured'),
                 },
               ]}
             />
           </Card>
 
           <Card
-            title="Integrations"
+            title={t('Anbindungen', 'Integrations')}
             icon={Icon.external}
             tint="ink"
             bleed
@@ -120,12 +125,12 @@ export default async function SettingsPage() {
                   <span className="min-w-0 text-[0.875rem] font-semibold text-[var(--casa-ink)]">{integration.label}</span>
                   {integration.configured ? (
                     delivery.test ? (
-                      <Status tone="warning">Bypassed for testing</Status>
+                      <Status tone="warning">{t('Im Test übersprungen', 'Bypassed for testing')}</Status>
                     ) : (
-                      <Status tone="positive">Connected</Status>
+                      <Status tone="positive">{t('Verbunden', 'Connected')}</Status>
                     )
                   ) : (
-                    <Status tone="quiet">Not connected</Status>
+                    <Status tone="quiet">{t('Nicht verbunden', 'Not connected')}</Status>
                   )}
                 </li>
               ))}
@@ -134,45 +139,48 @@ export default async function SettingsPage() {
         </div>
 
         <div className="space-y-4">
-          <Card title="Your account" icon={Icon.person} tint="green">
+          <Card title={t('Dein Konto', 'Your account')} icon={Icon.person} tint="green">
             <DetailList
               items={[
-                { label: 'Name', value: user.name },
-                { label: 'Role', value: roleLabel(user.role) },
-                { label: 'Email', value: user.email, wide: true },
+                { label: t('Name', 'Name'), value: user.name },
+                { label: t('Rolle', 'Role'), value: roleLabel(user.role, lang) },
+                { label: t('E-Mail', 'Email'), value: user.email, wide: true },
               ]}
             />
           </Card>
 
-          <Card title="Placement engine" icon={Icon.placement} tint="red">
+          <Card title={t('Einstufungstest', 'Placement engine')} icon={Icon.placement} tint="red">
             <DetailList
               items={[
                 {
-                  label: 'Release mode',
+                  label: t('Freigabemodus', 'Release mode'),
                   value: (
                     <Status tone={RELEASE_MODE === 'live' ? 'positive' : 'warning'}>
-                      {RELEASE_MODE.charAt(0).toUpperCase() + RELEASE_MODE.slice(1)}
+                      {RELEASE_MODE === 'live' ? t('Live', 'Live') : t('Schattenbetrieb', 'Shadow')}
                     </Status>
                   ),
                 },
-                { label: 'Cut score version', value: `Policy version ${POLICY_VERSION}` },
+                { label: t('Version der Grenzwerte', 'Cut score version'), value: t(`Version ${POLICY_VERSION}`, `Policy version ${POLICY_VERSION}`) },
                 {
-                  label: 'Listening',
-                  value: LISTENING_AUDIO_AVAILABLE ? 'Measured' : <Status tone="warning">Not measured</Status>,
+                  label: t('Hören', 'Listening'),
+                  value: LISTENING_AUDIO_AVAILABLE ? t('Gemessen', 'Measured') : <Status tone="warning">{t('Nicht gemessen', 'Not measured')}</Status>,
                 },
-                { label: 'Item bank', value: <Status tone="warning">Pilot, unreviewed</Status> },
+                {
+                  label: t('Aufgabenpool', 'Item bank'),
+                  value: <Status tone="warning">{t('Pilot, nicht geprüft', 'Pilot, unreviewed')}</Status>,
+                },
               ]}
             />
           </Card>
 
-          <Card title="Setup" icon={Icon.catalogue} tint="ink" bleed>
+          <Card title={t('Einrichtung', 'Setup')} icon={Icon.catalogue} tint="ink" bleed>
             <ul className="divide-y divide-ws-line-soft">
               {[
                 ...(canAccess(user, 'prices')
-                  ? [{ href: '/admin/settings/prices', label: 'Prices' }]
+                  ? [{ href: '/admin/settings/prices', label: t('Preise', 'Prices') }]
                   : []),
-                { href: '/admin/settings/setup', label: 'Lists' },
-                ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: 'Rooms' }] : []),
+                { href: '/admin/settings/setup', label: t('Listen', 'Lists') },
+                ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: t('Räume', 'Rooms') }] : []),
               ].map((item) => (
                 <li key={item.href}>
                   <Link

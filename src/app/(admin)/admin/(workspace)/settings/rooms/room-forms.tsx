@@ -2,6 +2,8 @@ import { Button, Field, Input, Select } from '@/components/admin/ui';
 import { ROOM_KIND_LABELS, type Location, type Room } from '@/lib/admin/rooms';
 import { createRoomAction, updateRoomAction } from './actions';
 import { OptionalSection } from '@/components/admin/optional-section';
+import { pick } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
  * The two room forms, rendered inside dialogs.
@@ -13,13 +15,14 @@ import { OptionalSection } from '@/components/admin/optional-section';
 
 const checkbox = 'size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]';
 
-export function CreateRoomForm({ locations }: { locations: Location[] }) {
+export async function CreateRoomForm({ locations }: { locations: Location[] }) {
+  const { t, lang } = await getI18n();
   return (
     <form action={createRoomAction} className="space-y-3">
-      <Field label="Location" htmlFor="new-room-location">
+      <Field label={t('Standort', 'Location')} htmlFor="new-room-location">
         <Select id="new-room-location" name="locationId" required defaultValue="">
           <option value="" disabled>
-            Choose
+            {t('Auswählen', 'Choose')}
           </option>
           {locations
             .filter((l) => l.isActive)
@@ -30,52 +33,53 @@ export function CreateRoomForm({ locations }: { locations: Location[] }) {
             ))}
         </Select>
       </Field>
-      <Field label="Name" htmlFor="new-room-name">
+      <Field label={t('Name', 'Name')} htmlFor="new-room-name">
         <Input id="new-room-name" name="name" required maxLength={80} autoFocus />
       </Field>
 
-      <OptionalSection requires={['locationId', 'name']} heading="Details">
-        <Field label="Nickname" htmlFor="new-room-nickname">
+      <OptionalSection requires={['locationId', 'name']} heading={t('Details', 'Details')}>
+        <Field label={t('Rufname', 'Nickname')} htmlFor="new-room-nickname">
           <Input id="new-room-nickname" name="nickname" maxLength={40} />
         </Field>
-        <Field label="Floor" htmlFor="new-room-floor">
+        <Field label={t('Etage', 'Floor')} htmlFor="new-room-floor">
           <Input id="new-room-floor" name="floor" type="number" min={-3} max={30} />
         </Field>
-        <Field label="Kind" htmlFor="new-room-kind">
+        <Field label={t('Art', 'Kind')} htmlFor="new-room-kind">
           <Select id="new-room-kind" name="kind" defaultValue="classroom">
             {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
-                {label}
+                {pick(lang, label)}
               </option>
             ))}
           </Select>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Capacity" htmlFor="new-room-capacity">
+          <Field label={t('Kapazität', 'Capacity')} htmlFor="new-room-capacity">
             <Input id="new-room-capacity" name="capacity" type="number" min={0} max={500} />
           </Field>
-          <Field label="Maximum" htmlFor="new-room-max">
+          <Field label={t('Maximum', 'Maximum')} htmlFor="new-room-max">
             <Input id="new-room-max" name="capacityMax" type="number" min={0} max={500} />
           </Field>
         </div>
       </OptionalSection>
 
       <div className="flex justify-end pt-1">
-        <Button type="submit">Add room</Button>
+        <Button type="submit">{t('Raum hinzufügen', 'Add room')}</Button>
       </div>
     </form>
   );
 }
 
-export function EditRoomForm({ room }: { room: Room }) {
+export async function EditRoomForm({ room }: { room: Room }) {
+  const { t, lang } = await getI18n();
   return (
     <form action={updateRoomAction} className="space-y-3">
       <input type="hidden" name="roomId" value={room.id} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Name" htmlFor="room-name">
+        <Field label={t('Name', 'Name')} htmlFor="room-name">
           <Input id="room-name" name="name" defaultValue={room.name} required maxLength={80} />
         </Field>
-        <Field label="Nickname" htmlFor="room-nickname">
+        <Field label={t('Rufname', 'Nickname')} htmlFor="room-nickname">
           <Input
             id="room-nickname"
             name="nickname"
@@ -83,17 +87,17 @@ export function EditRoomForm({ room }: { room: Room }) {
             maxLength={40}
           />
         </Field>
-        <Field label="Kind" htmlFor="room-kind">
+        <Field label={t('Art', 'Kind')} htmlFor="room-kind">
           <Select id="room-kind" name="kind" defaultValue={room.kind}>
             {Object.entries(ROOM_KIND_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
-                {label}
+                {pick(lang, label)}
               </option>
             ))}
           </Select>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Capacity" htmlFor="room-capacity">
+          <Field label={t('Kapazität', 'Capacity')} htmlFor="room-capacity">
             <Input
               id="room-capacity"
               name="capacity"
@@ -103,7 +107,7 @@ export function EditRoomForm({ room }: { room: Room }) {
               defaultValue={room.capacity ?? ''}
             />
           </Field>
-          <Field label="Maximum" htmlFor="room-max">
+          <Field label={t('Maximum', 'Maximum')} htmlFor="room-max">
             <Input
               id="room-max"
               name="capacityMax"
@@ -123,7 +127,7 @@ export function EditRoomForm({ room }: { room: Room }) {
             defaultChecked={room.isBookable}
             className={checkbox}
           />
-          Bookable for courses
+          {t('Für Kurse buchbar', 'Bookable for courses')}
         </label>
         <label className="flex items-center gap-2.5 text-sm">
           <input
@@ -132,14 +136,14 @@ export function EditRoomForm({ room }: { room: Room }) {
             defaultChecked={room.isActive}
             className={checkbox}
           />
-          Active
+          {t('Aktiv', 'Active')}
         </label>
       </div>
-      <Field label="Notes" htmlFor="room-notes">
+      <Field label={t('Notizen', 'Notes')} htmlFor="room-notes">
         <Input id="room-notes" name="notes" defaultValue={room.notes ?? ''} maxLength={500} />
       </Field>
       <div className="flex justify-end pt-1">
-        <Button type="submit">Save</Button>
+        <Button type="submit">{t('Speichern', 'Save')}</Button>
       </div>
     </form>
   );

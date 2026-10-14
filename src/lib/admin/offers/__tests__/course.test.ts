@@ -250,7 +250,7 @@ describe('on the offer', () => {
 
   it('is checked: a validity after the start, accommodation without dates, nights beyond whole weeks', () => {
     const course = b2({ accommodation: { kind: 'host_family', from: '2026-10-25', to: '2026-12-20' } });
-    const checks = (d: OfferDraft) => offerChecks(d, buildLines(d), '2026-10-13').map((c) => c.message);
+    const checks = (d: OfferDraft) => offerChecks(d, buildLines(d), '2026-10-13').map((c) => c.message.en);
     expect(checks(draft(course, { validUntil: '2026-11-01' }))).toEqual(
       expect.arrayContaining(['Valid until after the course starts', '1 night of the stay beyond whole weeks, not priced'])
     );
