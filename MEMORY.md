@@ -2716,3 +2716,9 @@ migration 0025 withdrawn and dropped locally). `day_tasks` stays in the database
 Overview: a greeting and shortcut cards grouped as the sidebar (Inbox, School, Management), a tinted
 icon and the name, a small navy count only when something is new (`getOverviewSignals`), cards
 filtered by access. Staff hold Overview at `view` now. FileMaker's navy stays as the primary colour.
+
+Seventeenth pass: **a premium overview.** Each card got one live figure counted as its own screen
+counts it ("5 open", "Next sitting 16 Oct", "In force since 1 Jan 2026"; `getOverviewFacts`), a
+gradient icon tile with an inner edge, refined pills (blue new, amber to follow up / to approve),
+layered shadows, a hairline beside each group heading, and a lift with a navy arrow on hover; two
+columns on a phone.

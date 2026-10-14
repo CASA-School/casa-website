@@ -496,12 +496,18 @@ Nine top-level items, and the placements are the argument:
 
 `/admin` is a clean start page: a greeting, and shortcut cards into every area
 the colleague may open, grouped as the sidebar is (Inbox, School, Management).
-A card is a tinted icon and the area's name; it carries a small navy count only
-when something is new behind it — enquiries and registrations nobody has
-opened, sent offers to follow up (ten days without an answer, or past their
-validity), placement tests awaiting a teacher, new job applications
-(`getOverviewSignals` in `overview.ts`, one round trip). Cards follow access:
-someone without Offers sees no Offers card.
+Cards follow access: someone without Offers sees no Offers card.
+
+A card (made premium on request the same day): an icon on a soft gradient tile
+with a fine inner edge, the area's name, and **one live figure** — "5 open",
+"18 in the register", "1 current", "20 cohorts ahead", "Next sitting 16 Oct",
+"Planned to September 2026", "In force since 1 Jan 2026", "6 colleagues",
+"8 changes today" — plus a pill when something is waiting: new enquiries and
+registrations (blue), offers to follow up and website releases to approve
+(amber). Every figure is counted as its own screen counts it
+(`getOverviewFacts` in `overview.ts`, one round trip), so a card and the list it
+opens never disagree. Layered shadow, a 3px lift and a navy arrow on hover
+(none with reduced motion); two columns on a phone, four on a wide screen.
 
 Rahman, 2026-10-14: "delete the today page for now, i think, we have been
 looking at things the wrong way … both today and rota, delete it. Instead we

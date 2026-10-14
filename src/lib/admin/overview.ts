@@ -3,8 +3,8 @@ import { FOLLOW_UP_AFTER_DAYS } from './offers/repo';
 
 /**
  * The workspace's counts, each in one round trip: the queues' totals and the
- * inbound volume (Activity), the newest arrivals (Activity), and what is new
- * behind each card on the overview (`getOverviewSignals`).
+ * inbound volume (Activity), the newest arrivals (Activity), and the figures
+ * on the overview's cards (`getOverviewFacts`).
  *
  * Aggregate marketing numbers (learners supported, countries represented) are
  * public-site claims governed by CLAUDE.md rule 1 and have no business here.
@@ -207,37 +207,85 @@ export async function getRecentInbound(
 }
 
 /**
- * What is new behind each card on the overview, in one round trip: what nobody
- * has opened yet in each queue, the sent offers gone quiet (ten days without an
- * answer, or past their validity), the placement tests awaiting a teacher. A
- * card shows its number only when there is one.
+ * The figures on the overview's cards, in one round trip — each counted the way
+ * its own screen counts it (open = new, in progress or waiting; current
+ * bookings = a period running today; offers to follow up = sent, ten days
+ * without an answer or past their validity), so a card and the list it opens
+ * never disagree.
  */
-export type OverviewSignals = {
-  enquiries: number;
-  registrations: number;
-  offers: number;
-  placement: number;
-  applications: number;
+export type OverviewFacts = {
+  enquiriesOpen: number;
+  enquiriesNew: number;
+  registrationsOpen: number;
+  registrationsNew: number;
+  students: number;
+  placementToReview: number;
+  bookingsCurrent: number;
+  offersOpen: number;
+  offersToFollowUp: number;
+  cohortsUpcoming: number;
+  nextExam: Date | null;
+  applicationsOpen: number;
+  colleagues: number;
+  changesToday: number;
+  /** Website releases waiting for approval, and texts drafted but not released. */
+  websitePending: number;
+  websiteDrafts: number;
+  /** The first day of the price list in force, and the last month the teaching plan covers. */
+  pricesSince: Date | null;
+  plannedTo: Date | null;
 };
 
-export async function getOverviewSignals(): Promise<OverviewSignals> {
-  const row = await queryFirst<Record<keyof OverviewSignals, string>>(
-    `SELECT (SELECT count(*) FROM enquiries WHERE status = 'new') AS enquiries,
-            (SELECT count(*) FROM course_registrations WHERE status = 'new')
-              + (SELECT count(*) FROM exam_registrations WHERE status = 'new') AS registrations,
-            (SELECT count(*) FROM offers o
-              WHERE o.deleted_at IS NULL AND o.status = 'sent'
-                AND (o.valid_until < current_date OR o.sent_at::date <= current_date - ${FOLLOW_UP_AFTER_DAYS})) AS offers,
-            (SELECT count(*) FROM placement_attempts a LEFT JOIN placement_reviews r ON r.attempt_id = a.id
-              WHERE a.decision IS NOT NULL AND r.attempt_id IS NULL) AS placement,
-            (SELECT count(*) FROM career_applications WHERE status IN ('submitted', 'new')) AS applications`
+export async function getOverviewFacts(): Promise<OverviewFacts> {
+  type Dates = 'nextExam' | 'pricesSince' | 'plannedTo';
+  const row = await queryFirst<Record<Exclude<keyof OverviewFacts, Dates>, string> & Record<Dates, Date | null>>(
+    `SELECT
+       (SELECT count(*) FROM enquiries WHERE status IN ('new', 'in_progress', 'waiting')) AS "enquiriesOpen",
+       (SELECT count(*) FROM enquiries WHERE status = 'new') AS "enquiriesNew",
+       (SELECT count(*) FROM course_registrations WHERE status IN ('new', 'in_progress', 'waiting'))
+         + (SELECT count(*) FROM exam_registrations WHERE status IN ('new', 'in_progress', 'waiting')) AS "registrationsOpen",
+       (SELECT count(*) FROM course_registrations WHERE status = 'new')
+         + (SELECT count(*) FROM exam_registrations WHERE status = 'new') AS "registrationsNew",
+       (SELECT count(*) FROM people WHERE deleted_at IS NULL AND merged_into IS NULL) AS students,
+       (SELECT count(*) FROM placement_attempts a LEFT JOIN placement_reviews r ON r.attempt_id = a.id
+         WHERE a.decision IS NOT NULL AND r.attempt_id IS NULL) AS "placementToReview",
+       (SELECT count(*) FROM bookings b
+         WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed')
+           AND EXISTS (SELECT 1 FROM booking_periods bp WHERE bp.booking_id = b.id
+                        AND bp.start_date <= current_date AND bp.end_date >= current_date)) AS "bookingsCurrent",
+       (SELECT count(*) FROM offers WHERE deleted_at IS NULL AND status IN ('draft', 'sent')) AS "offersOpen",
+       (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.status = 'sent'
+         AND (o.valid_until < current_date OR o.sent_at::date <= current_date - ${FOLLOW_UP_AFTER_DAYS})) AS "offersToFollowUp",
+       (SELECT count(*) FROM course_instances WHERE start_date >= current_date AND status <> 'cancelled') AS "cohortsUpcoming",
+       (SELECT min(starts_at) FROM exam_sessions WHERE starts_at >= current_date AND status <> 'cancelled') AS "nextExam",
+       (SELECT count(*) FROM career_applications
+         WHERE status IN ('submitted', 'new', 'in_progress', 'waiting', 'interview')) AS "applicationsOpen",
+       (SELECT count(*) FROM staff_users WHERE is_active) AS colleagues,
+       (SELECT count(*) FROM staff_activity WHERE created_at >= current_date) AS "changesToday",
+       (SELECT count(*) FROM website_releases WHERE state = 'pending') AS "websitePending",
+       (SELECT count(*) FROM website_drafts) AS "websiteDrafts",
+       (SELECT max(valid_from) FROM rates WHERE valid_from <= current_date) AS "pricesSince",
+       (SELECT max(month) FROM course_groups) AS "plannedTo"`
   );
   const n = (v: string | undefined) => Number(v ?? 0);
   return {
-    enquiries: n(row?.enquiries),
-    registrations: n(row?.registrations),
-    offers: n(row?.offers),
-    placement: n(row?.placement),
-    applications: n(row?.applications),
+    enquiriesOpen: n(row?.enquiriesOpen),
+    enquiriesNew: n(row?.enquiriesNew),
+    registrationsOpen: n(row?.registrationsOpen),
+    registrationsNew: n(row?.registrationsNew),
+    students: n(row?.students),
+    placementToReview: n(row?.placementToReview),
+    bookingsCurrent: n(row?.bookingsCurrent),
+    offersOpen: n(row?.offersOpen),
+    offersToFollowUp: n(row?.offersToFollowUp),
+    cohortsUpcoming: n(row?.cohortsUpcoming),
+    nextExam: row?.nextExam ?? null,
+    applicationsOpen: n(row?.applicationsOpen),
+    colleagues: n(row?.colleagues),
+    changesToday: n(row?.changesToday),
+    websitePending: n(row?.websitePending),
+    websiteDrafts: n(row?.websiteDrafts),
+    pricesSince: row?.pricesSince ?? null,
+    plannedTo: row?.plannedTo ?? null,
   };
 }
