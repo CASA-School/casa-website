@@ -2728,3 +2728,10 @@ for this". The sidebar's head is now an app icon drawn for the workspace (`app-m
 rising over water on a CASA-blue tile) with "CASA Bremen" beside it; it stays when the sidebar
 folds. The navy deepens top to bottom, the account is one soft card at the foot, and Next's dev
 badge moved to the bottom right (development only).
+
+Nineteenth pass: **the name in type, and a calmer navigation.** Rahman: "for the logo, just write
+CASA and nothing else at this point". The sidebar's head is the word "CASA" in the display serif
+(the app icon tried before is gone). Navigation: 34px rows, 17px icons, one highlight on the screen
+(the item you are on, its icon in CASA's light blue; a parent with a current sub-page reads as the
+branch in white), no yellow marker, chevrons only on hover or when open, more air above group
+labels, and Settings at the foot beside the account card (still in the strip on a phone).

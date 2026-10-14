@@ -45,37 +45,33 @@ export function NavLink({
 }) {
   const pathname = usePathname();
   const active = exact ? pathname === href : isCurrent(pathname, href);
-  const branchOpen = active || (items?.some((i) => isCurrent(pathname, i.href)) ?? false);
+  const childCurrent = items?.some((i) => isCurrent(pathname, i.href)) ?? false;
+  const branchOpen = active || childCurrent;
+  // One highlight on the screen: the item you are on. A parent whose child is
+  // current reads as the branch (white text), not as a second filled row.
+  const here = active && !childCurrent;
 
   return (
     <div className="shrink-0">
       <Link
         href={href}
         title={title}
-        aria-current={
-          active && !items?.some((i) => isCurrent(pathname, i.href)) ? 'page' : undefined
-        }
+        aria-current={here ? 'page' : undefined}
         className={cn(
-          'group relative flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[0.84rem] whitespace-nowrap transition-colors lg:overflow-hidden',
+          'group relative flex h-[34px] items-center gap-2.5 rounded-lg px-2.5 text-[0.85rem] whitespace-nowrap transition-colors duration-150 lg:overflow-hidden',
           'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
-          active
-            ? 'bg-white/[0.11] font-semibold text-white'
-            : 'font-medium text-white/70 hover:bg-white/[0.06] hover:text-white'
+          here
+            ? 'bg-white/[0.1] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
+            : branchOpen
+              ? 'font-semibold text-white hover:bg-white/[0.06]'
+              : 'font-medium text-white/68 hover:bg-white/[0.06] hover:text-white'
         )}
       >
-        {/* "You are here": one fine mark in FileMaker's pale yellow, at the sidebar's edge. */}
         <span
           aria-hidden="true"
           className={cn(
-            'absolute top-1/2 left-0 hidden h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--fm-yellow)] transition-opacity lg:block',
-            active ? 'opacity-100' : 'opacity-0'
-          )}
-        />
-        <span
-          aria-hidden="true"
-          className={cn(
-            'shrink-0 transition-colors',
-            active ? 'text-white' : 'text-white/45 group-hover:text-white/80'
+            'shrink-0 transition-colors duration-150 [&_svg]:size-[17px]',
+            here ? 'text-[#8fd6ff]' : branchOpen ? 'text-white/85' : 'text-white/42 group-hover:text-white/80'
           )}
         >
           {icon}
@@ -88,8 +84,8 @@ export function NavLink({
             aria-hidden="true"
             data-nav-label
             className={cn(
-              'hidden text-white/35 transition-transform lg:inline',
-              branchOpen ? 'rotate-90' : ''
+              'hidden text-white/40 transition duration-150 lg:inline',
+              branchOpen ? 'rotate-90 opacity-70' : 'opacity-0 group-hover:opacity-100'
             )}
           >
             <svg
@@ -110,7 +106,7 @@ export function NavLink({
       {items && items.length > 0 && branchOpen ? (
         <ul
           data-nav-children
-          className="mt-0.5 mb-1 ml-[1.15rem] hidden space-y-0.5 border-l border-white/12 pl-3 lg:block"
+          className="mt-0.5 mb-1.5 ml-[1.2rem] hidden space-y-0.5 border-l border-white/[0.1] pl-2.5 lg:block"
         >
           {items.map((item) => {
             const current = isCurrent(pathname, item.href);
@@ -120,9 +116,11 @@ export function NavLink({
                   href={item.href}
                   aria-current={current ? 'page' : undefined}
                   className={cn(
-                    'flex h-7 items-center gap-2 rounded-md px-2.5 text-[0.8rem] transition-colors',
+                    'flex h-[30px] items-center gap-2 rounded-lg px-2.5 text-[0.82rem] transition-colors duration-150',
                     'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
-                    current ? 'bg-white/[0.08] font-semibold text-white' : 'font-medium text-white/55 hover:text-white'
+                    current
+                      ? 'bg-white/[0.1] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
+                      : 'font-medium text-white/55 hover:bg-white/[0.05] hover:text-white'
                   )}
                 >
                   <span data-nav-label className="min-w-0 flex-1">
@@ -204,7 +202,7 @@ export function NavGroup({
         aria-expanded={open}
         aria-controls={`nav-group-${id}`}
         data-nav-group-label
-        className="group/label mt-5 mb-1 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.72rem] font-semibold text-white/40 transition-colors hover:text-white/75 lg:flex"
+        className="group/label mt-6 mb-1.5 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.72rem] font-semibold tracking-[0.02em] text-white/38 transition-colors hover:text-white/70 lg:flex"
       >
         {label}
         <svg

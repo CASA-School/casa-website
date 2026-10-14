@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { AppMark } from './app-mark';
 import { CommandSearch } from './command-search';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
@@ -18,8 +17,8 @@ import { cn } from '@/lib/utils';
  * "Workspace" under it: "do you think professional saas dashboards sidebar
  * looks like this"). Deep navy — FileMaker's structural colour, which the team
  * knows, on the surface every modern product darkens — so the white pages read
- * as the lit work area and the frame recedes. From the top: the workspace's own
- * app icon (`app-mark.tsx`) and "CASA Bremen", search (⌘K), the navigation in its groups,
+ * as the lit work area and the frame recedes. From the top: the name "CASA" in
+ * type, search (⌘K), the navigation in its groups, Settings at the foot,
  * and at the foot who is signed in, the way to the website and sign-out. There
  * is no top bar on a desktop: everything it held lives in the sidebar, and the
  * page gets the height.
@@ -48,22 +47,27 @@ export function WorkspaceShell({
   children: ReactNode;
 }) {
   const focus = variant === 'focus';
+  // Rooms, the type lists and the price list: defined once and left alone for a season.
+  // The price list is finance's and management's (module `prices`).
+  const settingsItems = [
+    ...(canAccess(user, 'prices') ? [{ href: '/admin/settings/prices', label: 'Prices' }] : []),
+    { href: '/admin/settings/setup', label: 'Lists' },
+    ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: 'Rooms' }] : []),
+  ];
 
   return (
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
       <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[linear-gradient(180deg,var(--ws-rail-top)_0%,var(--ws-rail)_45%)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
         <div className="flex h-full flex-col overflow-x-hidden">
           <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4 lg:h-16">
-            {/* The workspace's own mark and name, not the school's logo: an app icon that stays when the sidebar folds. */}
+            {/* The name in type, nothing else (Rahman, 2026-10-14): set in the workspace's display serif, as the logo's lettering is. */}
             <Link
               href="/admin"
-              aria-label="CASA Bremen, Overview"
-              className="flex min-w-0 items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              aria-label="CASA, Overview"
+              data-rail-brand
+              className="rounded-md px-1 font-[family-name:var(--font-display)] text-[1.4rem] leading-none font-semibold tracking-[0.06em] text-white outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
-              <AppMark className="size-[30px]" />
-              <span data-rail-hide className="min-w-0 truncate text-[0.98rem] leading-none font-extrabold tracking-[-0.015em] text-white">
-                CASA <span className="font-semibold text-white/50">Bremen</span>
-              </span>
+              CASA
             </Link>
             <span className="flex items-center gap-1 lg:hidden">
               <CommandSearch variant="rail-icon" />
@@ -191,7 +195,6 @@ export function WorkspaceShell({
                 '/admin/website',
                 '/admin/activity',
                 '/admin/team',
-                '/admin/settings',
               ]}
             >
               {canAccess(user, 'applications') ? (
@@ -228,24 +231,20 @@ export function WorkspaceShell({
                   Team
                 </NavLink>
               ) : null}
-              {/* Rooms, the type lists and the price list all live here: they
-                  are defined once and then left alone for a season. The price
-                  list is finance's and management's (module `prices`). */}
-              <NavLink
-                href="/admin/settings"
-                title="Settings"
-                icon={Icon.settings}
-                items={[
-                  ...(canAccess(user, 'prices') ? [{ href: '/admin/settings/prices', label: 'Prices' }] : []),
-                  { href: '/admin/settings/setup', label: 'Lists' },
-                  ...(canAccess(user, 'rooms')
-                    ? [{ href: '/admin/settings/rooms', label: 'Rooms' }]
-                    : []),
-                ]}
-              >
-                Settings
-              </NavLink>
+              {/* On a phone Settings stays in the strip; on a desktop it sits at the foot, beside the person. */}
+              <div className="lg:hidden">
+                <NavLink href="/admin/settings" title="Settings" icon={Icon.settings} items={settingsItems}>
+                  Settings
+                </NavLink>
+              </div>
             </NavGroup>
+          </nav>
+
+          {/* Settings — rooms, the lists, the prices: set up once a season, so at the foot, as in every tool. */}
+          <nav aria-label="Settings" className="hidden shrink-0 px-3 pt-2 lg:block">
+            <NavLink href="/admin/settings" title="Settings" icon={Icon.settings} items={settingsItems}>
+              Settings
+            </NavLink>
           </nav>
 
           {/* Who is signed in, the way to the website, and out. */}
@@ -257,7 +256,7 @@ export function WorkspaceShell({
                 className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors outline-none hover:bg-white/[0.07] focus-visible:ring-2 focus-visible:ring-white/40"
               >
                 <Avatar name={user.name} size={30} tone="rail" />
-                <span data-nav-label className="min-w-0">
+                <span data-rail-hide className="min-w-0">
                   <span className="block truncate text-[0.82rem] leading-tight font-semibold text-white">{user.name}</span>
                   <span className="block text-[0.7rem] leading-tight text-white/50">{roleLabel(user.role)}</span>
                 </span>

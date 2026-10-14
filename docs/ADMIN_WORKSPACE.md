@@ -574,22 +574,25 @@ professional tool looks like (`shell.tsx`):
 
 - **A deep navy sidebar** (`--ws-rail`, a step deeper than FileMaker's navy,
   which the team knows), so the white pages read as the lit work area and the
-  frame recedes. Text white at 70%, icons at 45%, section labels at 40% in
-  sentence case; the current page a soft white fill with one fine mark in
-  FileMaker's pale yellow at its edge.
-- **The head:** the workspace's own app icon (`app-mark.tsx`, 2026-10-14:
-  "change the logo, don't use the standard logo for this") — CASA's sun rising
-  over its water on a CASA-blue tile, drawn for 30px rather than cropped from
-  the logo — with "CASA Bremen" set beside it, and the collapse toggle. The
-  icon stays when the sidebar folds, stacked over the toggle; the wide wordmark
-  never could. The sidebar's navy deepens from top to bottom (`--ws-rail-top`
-  → `--ws-rail`), and the account sits in one soft card at its foot.
-- **Search under the logo** (`command-search.tsx`, ⌘K, Ctrl K or "/"): a name,
+  frame recedes.
+- **The head:** the word "CASA" set in the workspace's display serif, nothing
+  else (Rahman, 2026-10-14: "for the logo, just write CASA and nothing else at
+  this point"; an app icon and the school's logo were both tried first), and the
+  collapse toggle. Folded, the word sets smaller over the toggle. The sidebar's
+  navy deepens from top to bottom (`--ws-rail-top` → `--ws-rail`).
+- **Navigation:** 34px rows, icons at 17px, labels at 68% white; one highlight
+  on the screen — the item you are on, a soft fill with its icon in CASA's light
+  blue; a parent whose sub-page is current reads as the branch in white, not as
+  a second filled row; chevrons only on hover or when a branch is open; group
+  labels in sentence case with air above them.
+- **Search under the name** (`command-search.tsx`, ⌘K, Ctrl K or "/"): a name,
   an email address or an offer number, and Enter opens the record — students,
   enquiries, registrations, offers, bookings and job applications, each only for
   a colleague who holds that module (`src/lib/admin/search.ts`), five a kind.
-- **The foot:** who is signed in (their name opens Your account), the way to
-  the website, and sign-out — visible collapsed too, as the avatar and the
+- **The foot:** Settings (rooms, the lists, the prices — set up once a season,
+  so at the foot as in every tool; on a phone it stays in the strip), then who is
+  signed in (their name opens Your account), the way to the website and
+  sign-out in one soft card — visible collapsed too, as the avatar and the
   sign-out icon.
 - **No top bar on a desktop.** Everything it held lives in the sidebar, and
   the page gets the height. On a phone the sidebar is a navy band at the top:
@@ -619,8 +622,8 @@ shrinking rail instead of wrapping under its icon. Only things with no icon to
 fall back on — group headings, nested lists — are removed, and those go a beat
 *after* the width settles. Collapsed, the rail is 4.25rem of centred icons with
 hairlines where the group headings were, and every link carries its label as a
-tooltip. The name beside the app icon hides (`data-rail-hide`) and the icon
-stays; search keeps its icon, the foot the avatar and sign-out.
+tooltip. The word "CASA" sets smaller and stays; search keeps its icon, the
+foot Settings, the avatar and sign-out.
 
 Desktop only: on a phone the rail is already a scrolling strip.
 `suppressHydrationWarning` on `<html>` is required and deliberate — the
@@ -698,9 +701,8 @@ The rules, each of which came from a real defect on a real screen.
 Rahman asked for the colours to lean "a little towards filemaker so staff don't
 feel too strange". What stayed after the control room was withdrawn: FileMaker's
 navy `#1f3e6c` is the workspace's primary action and its colleagues' initials
-(`--casa-ink-deep` inside `.casa-workspace`; text stays near-black), the
-sidebar is a deeper navy (`--ws-rail`), and the one fine "you are here" mark
-in the sidebar is FileMaker's pale yellow. The public site is untouched.
+(`--casa-ink-deep` inside `.casa-workspace`; text stays near-black), and the
+sidebar is a deeper navy (`--ws-rail`). The public site is untouched.
 
 ## Lists
 
