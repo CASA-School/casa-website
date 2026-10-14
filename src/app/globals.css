@@ -916,6 +916,13 @@ h3 {
    */
   --ws-canvas: #e8edf4;
 
+  /* Lists: the head is a soft band of FileMaker's navy, and every other row a
+     breath of it, so a long list reads row by row without ruled lines. */
+  --ws-head: #e7eef8;
+  --ws-head-line: #d3deed;
+  --ws-row-alt: #f3f7fc;
+  --ws-row-hover: #e8f0fa;
+
   /* The sidebar. `--casa-ink-deep` is the site's inverted band; the workspace
      wants one step deeper so the white content area reads as the lit surface
      and the panel as the frame around it. */
@@ -1066,6 +1073,30 @@ h3 {
    than relying on the `.bg-[var(--casa-ink-deep)]` selectors above, because
    the panel paints `--ws-panel` and would otherwise keep the light-surface
    tokens and fail contrast. The shell's own rail is navy (`--ws-rail`) and sets its colours itself. */
+/*
+ * LISTS (`Table` and the catalogue's `OpenTable`). Rows are white and every
+ * other one `--ws-row-alt`, counted past the group headings (`ListGroup`'s
+ * `data-group`), so a heading never breaks the rhythm; hovering a row that
+ * opens a record deepens it. Here rather than on the row so the count can
+ * skip the headings, and unlayered so it outranks the row's utilities.
+ */
+.casa-workspace .ws-table > tbody > tr {
+  background-color: #fff;
+}
+.casa-workspace .ws-table > tbody > tr:nth-child(even of :not([data-group])) {
+  background-color: var(--ws-row-alt);
+}
+.casa-workspace .ws-table > tbody > tr[data-interactive]:hover {
+  background-color: var(--ws-row-hover);
+}
+/* `OpenTable`'s card does not clip, so its last row takes the card's corners. */
+.casa-workspace .ws-table-open > tbody > tr:last-child > :first-child {
+  border-bottom-left-radius: calc(1.5rem - 1px);
+}
+.casa-workspace .ws-table-open > tbody > tr:last-child > :last-child {
+  border-bottom-right-radius: calc(1.5rem - 1px);
+}
+
 .casa-workspace-panel {
   --casa-accent-text: var(--casa-accent-on-dark);
   --casa-accent-text-hover: var(--casa-accent-on-dark-hover);

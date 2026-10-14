@@ -71,11 +71,10 @@ export function sentenceCase(value: string): string {
 export const openCell = 'px-4 align-middle first:pl-5 last:pr-5';
 
 /**
- * The workspace table's look (a quiet head, 20px edges), without a scrolling
- * wrapper on wider screens, so a panel opened from a cell (the room picker)
- * is not clipped by the table. Rows carry no background of their own: the
- * card behind them is white, and a square row corner would otherwise cover
- * the card's rounded border.
+ * The workspace table's look (the navy head, alternating rows, 20px edges),
+ * without a scrolling wrapper on wider screens, so a panel opened from a cell
+ * (the room picker) is not clipped by the table. Its card does not clip either,
+ * so `.ws-table-open` rounds the last row's corners to the card's.
  */
 export function OpenTable({
   head,
@@ -86,15 +85,15 @@ export function OpenTable({
 }) {
   return (
     <div className="max-md:overflow-x-auto">
-      <table className="w-full min-w-full border-collapse text-sm">
+      <table className="ws-table ws-table-open w-full min-w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-ws-line-soft">
+          <tr className="border-b border-[var(--ws-head-line)] bg-[var(--ws-head)]">
             {head.map((column, index) => (
               <th
                 key={index}
                 scope="col"
                 className={cn(
-                  'px-4 py-2.5 text-xs font-medium whitespace-nowrap text-[var(--casa-text-subtle)] first:pl-5 last:pr-5',
+                  'px-4 py-3 text-xs font-semibold whitespace-nowrap text-[var(--fm-navy)] first:pl-5 last:pr-5',
                   column.align === 'right' ? 'text-right' : 'text-left',
                   column.className
                 )}
@@ -104,7 +103,7 @@ export function OpenTable({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-ws-line-soft">{children}</tbody>
+        <tbody>{children}</tbody>
       </table>
     </div>
   );

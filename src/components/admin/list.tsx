@@ -20,14 +20,14 @@ export { ListBar, type ListTab } from './list-bar';
 /** A group of rows inside a `Table`: what they have in common, and how many. */
 export function ListGroup({ label, count, span }: { label: string; count?: number; span: number }) {
   return (
-    <tr>
-      <th
-        colSpan={span}
-        scope="colgroup"
-        className="bg-[#f8fafc] px-5 pt-3 pb-2 text-left text-xs font-bold text-[var(--casa-muted)]"
-      >
+    <tr data-group>
+      <th colSpan={span} scope="colgroup" className="border-t border-ws-line bg-white px-5 pt-4 pb-2 text-left text-xs font-bold text-[var(--fm-navy)]">
         {label}
-        {count ? <span className="ml-1.5 font-semibold text-[var(--casa-text-subtle)] tabular-nums">{count}</span> : null}
+        {count ? (
+          <span className="ml-2 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">
+            {count}
+          </span>
+        ) : null}
       </th>
     </tr>
   );

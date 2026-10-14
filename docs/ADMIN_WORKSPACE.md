@@ -752,6 +752,15 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
 14. **An empty value is an empty cell**, not a dash; a row of dashes is noise
     that hides the one value that is there. Relative time ("Today", "3 days
     ago") for what happened; the date for what is planned.
+15. **The head is a band; rows alternate (Rahman, 2026-10-14: "give them a clean
+    background color so they look more prominent … use two colors, one per each
+    row").** The column head sits on a soft band of FileMaker's navy
+    (`--ws-head`) with its labels in navy; rows are white and every other one
+    `--ws-row-alt`, with no ruled lines between them, and a row that opens a
+    record deepens on hover (`--ws-row-hover`). The alternation is counted past
+    the group headings, which are white with a hairline above and their count
+    in a small pill. It lives in `.ws-table` in globals.css, so `Table` and the
+    catalogue's `OpenTable` share it; Kursplanung keeps its own tables.
 
 ## Copy on screens — labels, not explanations
 

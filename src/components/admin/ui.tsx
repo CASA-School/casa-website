@@ -509,9 +509,9 @@ export function Table({
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-full border-collapse text-sm">
+      <table className="ws-table w-full min-w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-ws-line-soft">
+          <tr className="border-b border-[var(--ws-head-line)] bg-[var(--ws-head)]">
             {head.map((column, index) => {
               const isSpec = typeof column === 'object' && column !== null && 'label' in column;
               const label = isSpec ? column.label : column;
@@ -522,7 +522,7 @@ export function Table({
                   key={index}
                   scope="col"
                   className={cn(
-                    'px-4 py-2.5 text-xs font-medium whitespace-nowrap text-[var(--casa-text-subtle)] first:pl-5 last:pr-5',
+                    'px-4 py-3 text-xs font-semibold whitespace-nowrap text-[var(--fm-navy)] first:pl-5 last:pr-5',
                     align === 'right' ? 'text-right' : 'text-left',
                     isSpec ? column.className : undefined
                   )}
@@ -533,7 +533,7 @@ export function Table({
             })}
           </tr>
         </thead>
-        <tbody className="divide-y divide-ws-line-soft">{children}</tbody>
+        <tbody>{children}</tbody>
       </table>
     </div>
   );
@@ -542,7 +542,9 @@ export function Table({
 /**
  * A clickable table row.
  *
- * The row carries the hover state and the positioning context; the link itself
+ * Its background — white, every other row a breath of navy, a deeper one on
+ * hover — comes from `.ws-table` in globals.css, which can count rows past the
+ * group headings. The row carries the hover state and the positioning context; the link itself
  * is rendered by the FIRST cell, via `Cell href=...`, and stretched over the
  * whole row with `absolute inset-0`.
  *
@@ -563,12 +565,7 @@ export function TableRow({
   children: ReactNode;
 }) {
   return (
-    <tr
-      className={cn(
-        'group bg-white transition-colors',
-        interactive ? 'relative hover:bg-[#f7f9fc]' : undefined
-      )}
-    >
+    <tr data-interactive={interactive || undefined} className={cn('group transition-colors', interactive ? 'relative' : undefined)}>
       {children}
     </tr>
   );
