@@ -17,6 +17,8 @@ export type EnquiryListItem = {
   firstName: string;
   lastName: string | null;
   email: string;
+  /** The language the form was sent in — the one to reply in. */
+  locale: string;
   topic: string;
   message: string;
   status: WorkStatus;
@@ -29,7 +31,6 @@ export type EnquiryListItem = {
 
 export type EnquiryDetail = EnquiryListItem & {
   requestId: string;
-  locale: string;
   topicKey: string | null;
   source: string;
   organiserBrief: Record<string, unknown> | null;
@@ -90,6 +91,7 @@ const toListItem = (row: Row): EnquiryListItem => ({
   firstName: row.first_name,
   lastName: row.last_name,
   email: row.email,
+  locale: row.locale,
   topic: row.topic,
   message: row.message,
   status: normaliseStatus(row.status),
@@ -139,9 +141,7 @@ export async function listEnquiries({
 
   const rows = await query<Row>(
     `${SELECT} ${where}
-     ORDER BY CASE e.status::text WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'waiting' THEN 2
-                                  WHEN 'done' THEN 3 WHEN 'declined' THEN 4 ELSE 5 END,
-              e.submitted_at DESC
+     ORDER BY e.submitted_at DESC
      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
@@ -159,7 +159,6 @@ export async function getEnquiry(id: string): Promise<EnquiryDetail | null> {
   return {
     ...toListItem(row),
     requestId: row.request_id,
-    locale: row.locale,
     topicKey: row.topic_key,
     source: row.source,
     organiserBrief: row.organiser_brief,
