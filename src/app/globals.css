@@ -916,12 +916,14 @@ h3 {
    */
   --ws-canvas: #e8edf4;
 
-  /* Lists: the head is a soft band of FileMaker's navy, and every other row a
-     breath of it, so a long list reads row by row without ruled lines. */
-  --ws-head: #e7eef8;
-  --ws-head-line: #d3deed;
-  --ws-row-alt: #f3f7fc;
-  --ws-row-hover: #e8f0fa;
+  /* Lists: the head is a band of CASA's warm cream (the site's `--casa-warm-soft`
+     family, quieter), and every other row a breath of it, so a long list reads
+     row by row without ruled lines and sits warm against the navy frame. */
+  --ws-head: #f8f1e3;
+  --ws-head-line: #ebdfc7;
+  --ws-head-text: #5c4a1f;
+  --ws-row-alt: #fcf9f2;
+  --ws-row-hover: #f6eedc;
 
   /* The sidebar. `--casa-ink-deep` is the site's inverted band; the workspace
      wants one step deeper so the white content area reads as the lit surface

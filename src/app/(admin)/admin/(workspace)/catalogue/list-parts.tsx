@@ -93,7 +93,7 @@ export function OpenTable({
                 key={index}
                 scope="col"
                 className={cn(
-                  'px-4 py-3 text-xs font-semibold whitespace-nowrap text-[var(--fm-navy)] first:pl-5 last:pr-5',
+                  'px-4 py-3 text-xs font-semibold whitespace-nowrap text-[var(--ws-head-text)] first:pl-5 last:pr-5',
                   column.align === 'right' ? 'text-right' : 'text-left',
                   column.className
                 )}

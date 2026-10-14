@@ -21,7 +21,7 @@ export { ListBar, type ListTab } from './list-bar';
 export function ListGroup({ label, count, span }: { label: string; count?: number; span: number }) {
   return (
     <tr data-group>
-      <th colSpan={span} scope="colgroup" className="border-t border-ws-line bg-white px-5 pt-4 pb-2 text-left text-xs font-bold text-[var(--fm-navy)]">
+      <th colSpan={span} scope="colgroup" className="border-t border-ws-line bg-white px-5 pt-4 pb-2 text-left text-xs font-bold text-[var(--casa-ink)]">
         {label}
         {count ? (
           <span className="ml-2 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">
