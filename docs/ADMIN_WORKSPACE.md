@@ -577,9 +577,13 @@ professional tool looks like (`shell.tsx`):
   frame recedes. Text white at 70%, icons at 45%, section labels at 40% in
   sentence case; the current page a soft white fill with one fine mark in
   FileMaker's pale yellow at its edge.
-- **The head:** the CASA logo in its on-dark version (white lettering, the
-  red sail and the sun kept), cropped to its top row — no caption under it —
-  and the collapse toggle beside it.
+- **The head:** the workspace's own app icon (`app-mark.tsx`, 2026-10-14:
+  "change the logo, don't use the standard logo for this") — CASA's sun rising
+  over its water on a CASA-blue tile, drawn for 30px rather than cropped from
+  the logo — with "CASA Bremen" set beside it, and the collapse toggle. The
+  icon stays when the sidebar folds, stacked over the toggle; the wide wordmark
+  never could. The sidebar's navy deepens from top to bottom (`--ws-rail-top`
+  → `--ws-rail`), and the account sits in one soft card at its foot.
 - **Search under the logo** (`command-search.tsx`, ⌘K, Ctrl K or "/"): a name,
   an email address or an offer number, and Enter opens the record — students,
   enquiries, registrations, offers, bookings and job applications, each only for
@@ -615,9 +619,8 @@ shrinking rail instead of wrapping under its icon. Only things with no icon to
 fall back on — group headings, nested lists — are removed, and those go a beat
 *after* the width settles. Collapsed, the rail is 4.25rem of centred icons with
 hairlines where the group headings were, and every link carries its label as a
-tooltip. The logo hides too (`data-rail-hide`): nearly six times as wide as
-tall, at icon width it would be a sliver of the letter C, and CASA has no
-separate emblem; search keeps its icon, the foot the avatar and sign-out.
+tooltip. The name beside the app icon hides (`data-rail-hide`) and the icon
+stays; search keeps its icon, the foot the avatar and sign-out.
 
 Desktop only: on a phone the rail is already a scrolling strip.
 `suppressHydrationWarning` on `<html>` is required and deliberate — the

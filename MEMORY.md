@@ -2722,3 +2722,9 @@ counts it ("5 open", "Next sitting 16 Oct", "In force since 1 Jan 2026"; `getOve
 gradient icon tile with an inner edge, refined pills (blue new, amber to follow up / to approve),
 layered shadows, a hairline beside each group heading, and a lift with a navy arrow on hover; two
 columns on a phone.
+
+Eighteenth pass: **the workspace's own mark.** Rahman: "change the logo, don't use the standard logo
+for this". The sidebar's head is now an app icon drawn for the workspace (`app-mark.tsx`: CASA's sun
+rising over water on a CASA-blue tile) with "CASA Bremen" beside it; it stays when the sidebar
+folds. The navy deepens top to bottom, the account is one soft card at the foot, and Next's dev
+badge moved to the bottom right (development only).

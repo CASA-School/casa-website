@@ -44,6 +44,8 @@ const EDITOR_FRAME_HEADERS = [
 const INDEXABLE_HOSTS = '(www\\.)?casa-bremen\\.de';
 
 const nextConfig: NextConfig = {
+  // Development only: the badge sat on the workspace sidebar's account card in the bottom-left corner.
+  devIndicators: { position: 'bottom-right' },
   typedRoutes: false,
   poweredByHeader: false,
   /*

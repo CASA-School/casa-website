@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { AppMark } from './app-mark';
 import { CommandSearch } from './command-search';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
 import { SidebarToggle } from './sidebar-toggle';
-import { Logo } from '@/components/ui/logo';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
 import { cn } from '@/lib/utils';
@@ -18,8 +18,8 @@ import { cn } from '@/lib/utils';
  * "Workspace" under it: "do you think professional saas dashboards sidebar
  * looks like this"). Deep navy — FileMaker's structural colour, which the team
  * knows, on the surface every modern product darkens — so the white pages read
- * as the lit work area and the frame recedes. From the top: the CASA logo in
- * its on-dark version (no caption), search (⌘K), the navigation in its groups,
+ * as the lit work area and the frame recedes. From the top: the workspace's own
+ * app icon (`app-mark.tsx`) and "CASA Bremen", search (⌘K), the navigation in its groups,
  * and at the foot who is signed in, the way to the website and sign-out. There
  * is no top bar on a desktop: everything it held lives in the sidebar, and the
  * page gets the height.
@@ -51,18 +51,18 @@ export function WorkspaceShell({
 
   return (
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
-      <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[var(--ws-rail)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
+      <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[linear-gradient(180deg,var(--ws-rail-top)_0%,var(--ws-rail)_45%)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
         <div className="flex h-full flex-col overflow-x-hidden">
           <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4 lg:h-16">
+            {/* The workspace's own mark and name, not the school's logo: an app icon that stays when the sidebar folds. */}
             <Link
               href="/admin"
-              data-rail-hide
-              aria-label="CASA — Overview"
-              className="block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              aria-label="CASA Bremen, Overview"
+              className="flex min-w-0 items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
-              {/* The flyer artwork with white lettering, cropped to its top row: the subtitle would be four pixels tall here. */}
-              <span className="block h-[23px] w-[128px] overflow-hidden">
-                <Logo variant="onDark" className="h-auto w-[128px]" />
+              <AppMark className="size-[30px]" />
+              <span data-rail-hide className="min-w-0 truncate text-[0.98rem] leading-none font-extrabold tracking-[-0.015em] text-white">
+                CASA <span className="font-semibold text-white/50">Bremen</span>
               </span>
             </Link>
             <span className="flex items-center gap-1 lg:hidden">
@@ -249,8 +249,8 @@ export function WorkspaceShell({
           </nav>
 
           {/* Who is signed in, the way to the website, and out. */}
-          <div className="hidden shrink-0 border-t border-white/10 p-2.5 lg:block">
-            <div data-rail-foot className="flex items-center gap-1">
+          <div className="hidden shrink-0 p-2.5 lg:block">
+            <div data-rail-foot className="flex items-center gap-0.5 rounded-xl bg-white/[0.045] p-1 ring-1 ring-white/[0.07] ring-inset">
               <Link
                 href="/admin/account"
                 title="Your account"
@@ -258,7 +258,7 @@ export function WorkspaceShell({
               >
                 <Avatar name={user.name} size={30} tone="rail" />
                 <span data-nav-label className="min-w-0">
-                  <span className="block truncate text-[0.84rem] leading-tight font-semibold text-white">{user.name}</span>
+                  <span className="block truncate text-[0.82rem] leading-tight font-semibold text-white">{user.name}</span>
                   <span className="block text-[0.7rem] leading-tight text-white/50">{roleLabel(user.role)}</span>
                 </span>
               </Link>
@@ -267,7 +267,7 @@ export function WorkspaceShell({
                 title="The website"
                 aria-label="The website"
                 data-rail-hide
-                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
               >
                 {Icon.website}
               </Link>
@@ -276,7 +276,7 @@ export function WorkspaceShell({
                   type="submit"
                   title="Sign out"
                   aria-label="Sign out"
-                  className="flex size-8 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
+                  className="flex size-7 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
                 >
                   {Icon.signOut}
                 </button>

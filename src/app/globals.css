@@ -942,6 +942,8 @@ h3 {
 
   /* The sidebar: a deeper navy than FileMaker's, so the white pages read as the work area. */
   --ws-rail: #12284a;
+  /* Its top, a step lighter, so the frame has depth rather than a flat fill. */
+  --ws-rail-top: #183460;
 
   /* The workspace's primary action and its ink chips: FileMaker's navy, not black. */
   --casa-ink-deep: var(--fm-navy);
@@ -1031,10 +1033,13 @@ h3 {
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-hide] {
     display: none;
   }
+  /* Folded, the head stacks the app icon over the toggle. */
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-head] {
+    flex-direction: column;
     justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
+    gap: 0.5rem;
+    height: auto;
+    padding: 1rem 0 0.75rem;
   }
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-search] {
     justify-content: center;
@@ -1043,6 +1048,8 @@ h3 {
   }
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-foot] {
     flex-direction: column;
+    background: transparent;
+    box-shadow: none;
   }
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-foot] > a:first-child {
     flex: none;
