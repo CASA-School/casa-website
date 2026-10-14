@@ -251,12 +251,10 @@ the site shows is one entry of the workspace's price list in force (`src/lib/con
 slot-based so final copy, photography, and schedules can be swapped in without a
 structural refactor.
 
-**The workspace opens on a control room** (`/admin`), FileMaker's home calendar rebuilt: a
-week of day rows (Sunday to Saturday), launch rows of areas, per-day keys that say whether
-there is something behind them, reception and absences, and what is wrong with a day in
-words; a date opens `/admin/day`. Its colours, and a little of the rest of the workspace's,
-are FileMaker's (`--fm-*` in `globals.css`): navy primary, pale yellow "you are here".
-`docs/ADMIN_WORKSPACE.md` §Today and §FileMaker's colours.
+**The workspace opens on a clean overview** (`/admin`, 2026-10-14): a greeting and shortcut
+cards into the areas the colleague may open, each with a small count only when something is new.
+Today (the day board, the FileMaker-style control room) and the rota were removed at Rahman's
+request; `day_tasks` stays in the database. `docs/ADMIN_WORKSPACE.md` §Overview.
 
 **Workspace design standards.** A section is one white block and the canvas
 between sections separates them — a card header is white with a rule, never a

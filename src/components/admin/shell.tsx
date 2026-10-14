@@ -57,7 +57,7 @@ export function WorkspaceShell({
             <Link
               href="/admin"
               data-rail-hide
-              aria-label="CASA — Today"
+              aria-label="CASA — Overview"
               className="block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
               {/* The flyer artwork with white lettering, cropped to its top row: the subtitle would be four pixels tall here. */}
@@ -82,8 +82,8 @@ export function WorkspaceShell({
             aria-label="Workspace"
             className="flex snap-x gap-1 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-0.5 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-4"
           >
-            <NavLink href="/admin" icon={Icon.calendar} title="Today">
-              Today
+            <NavLink href="/admin" icon={Icon.overview} title="Overview">
+              Overview
             </NavLink>
 
             {canAccess(user, 'enquiries') || canAccess(user, 'registrations') ? (
@@ -188,7 +188,6 @@ export function WorkspaceShell({
               hrefs={[
                 '/admin/applications',
                 '/admin/kursplanung',
-                '/admin/rota',
                 '/admin/website',
                 '/admin/activity',
                 '/admin/team',
@@ -211,12 +210,6 @@ export function WorkspaceShell({
                   ]}
                 >
                   Kursplanung
-                </NavLink>
-              ) : null}
-              {/* Who is at the office desk when, and who is away. Everyone sees it; planning is per person. */}
-              {canAccess(user, 'rota') ? (
-                <NavLink href="/admin/rota" icon={Icon.clock} title="Rota">
-                  Rota
                 </NavLink>
               ) : null}
               {/* What the public site says. Opens the editor full screen, outside the shell. */}

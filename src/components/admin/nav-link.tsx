@@ -23,9 +23,7 @@ import { cn } from '@/lib/utils';
  */
 
 const isCurrent = (pathname: string, href: string) =>
-  href === '/admin'
-    ? pathname === href || pathname === '/admin/day'
-    : pathname === href || pathname.startsWith(`${href}/`);
+  href === '/admin' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
 export function NavLink({
   href,

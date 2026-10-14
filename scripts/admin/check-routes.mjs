@@ -55,8 +55,6 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
 
 const routes = [
   '/admin',
-  '/admin/day',
-  '/admin?week=2026-09-02',
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
   '/admin/kursplanung/lehrkraefte',
@@ -87,7 +85,6 @@ const routes = [
   '/admin/applications',
   application && `/admin/applications/${application}`,
   '/admin/activity',
-  '/admin/rota',
   '/admin/team',
   '/admin/settings',
   '/admin/settings/setup',

@@ -1,117 +1,131 @@
-import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
-import { addDay, controlWeek, sundayOf } from '@/lib/admin/control-room';
-import { queryFirst } from '@/lib/admin/db';
-import { requireModule } from '@/lib/admin/guard';
-import { isoWeek } from '@/lib/admin/kursplanung/weeks';
-import { rotaSpan } from '@/lib/admin/rota';
-import { listAssignableStaff } from '@/lib/admin/staff';
-import { todayInputValue } from '@/lib/dates';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
 
-import { DayRow } from './control/day-row';
-import { Launch } from './control/launch';
+import { Icon } from '@/components/admin/icons';
+import { TINTS, type Tint } from '@/components/admin/ui';
+import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
+import { getOverviewSignals, type OverviewSignals } from '@/lib/admin/overview';
+import { cn } from '@/lib/utils';
 
 /**
- * Today — the control room. FileMaker's `SingleDayCalendar_Overview`, the
- * screen the team has opened every morning for years, rebuilt rather than
- * copied (Rahman, 2026-10-13: "this filemaker style control-room is a bit
- * important to have … not everything like filemaker but better logic and
- * intelligence").
- *
- * Kept from FileMaker, because hands and eyes know it: the week from Sunday to
- * Saturday as rows, a thick navy line between days, the date red at the
- * weekend and today on cream, the red-brown bar with « ‹ › », the rows of
- * pale yellow and grey cells that open every area, the first-day box, the
- * keys in their columns, reception, and the absences with TU and kr.
- *
- * Better than FileMaker: every key says whether there is something behind it;
- * what is wrong with a day is said in words at the end of its head — a room
- * booked twice, a plan conflict, lessons nobody teaches, office hours nobody
- * covers, someone on shift who is away, tasks left from earlier; the
- * weekend is one line unless someone arrives; each area and key is there
- * only for whoever may open it; a building block still to come stands in its
- * place, quiet. A date opens the day in detail (`/admin/day`).
- *
- * `?week=YYYY-MM-DD` (any day of the week); this week without it.
+ * Overview — the start page. A clean set of shortcuts into every area the
+ * colleague may open, grouped as the sidebar is, each card showing what is new
+ * behind it when there is something (Rahman, 2026-10-14: "a overview or a start
+ * page that is basically like any other dashboard, just a clean interface with
+ * some shortcut cards … based on people's access they see different nav items").
+ * It replaced Today and the rota; more goes here later, one thing at a time.
  */
-export default async function ControlRoomPage({ searchParams }: { searchParams: Promise<{ week?: string; error?: string }> }) {
-  const [params, user] = await Promise.all([searchParams, requireModule('overview')]);
-  const today = todayInputValue();
-  const anyDay = /^\d{4}-\d{2}-\d{2}$/.test(params.week ?? '') ? params.week! : today;
-  const holds = (module: WorkspaceModule) => canAccess(user, module);
-  const can = {
-    tasks: canAccess(user, 'overview', 'edit'),
-    rota: holds('rota'),
-    rotaEdit: canAccess(user, 'rota', 'edit'),
-    offers: canAccess(user, 'offers', 'edit'),
-    teaching: holds('kursplanung'),
-    catalogue: holds('catalogue'),
-  };
 
-  const sunday = sundayOf(anyDay);
-  const [week, staff, rotaStaff, overdue] = await Promise.all([
-    controlWeek(anyDay, { teaching: can.teaching, rota: can.rota }),
-    can.tasks ? listAssignableStaff() : Promise.resolve([]),
-    can.rotaEdit ? rotaSpan(sunday, sunday).then((r) => r.staff) : Promise.resolve([]),
-    queryFirst<{ n: string }>(`SELECT count(*) AS n FROM day_tasks WHERE on_date < current_date AND done_at IS NULL`).then((r) => Number(r?.n ?? 0)),
-  ]);
+type Card = {
+  title: string;
+  href: string;
+  module: WorkspaceModule;
+  icon: ReactNode;
+  tint: Tint;
+  /** What is new behind it, from the signals; nothing when there is nothing. */
+  signal?: (s: OverviewSignals) => string | null;
+};
+
+const count = (n: number, word: string) => (n > 0 ? `${n} ${word}` : null);
+
+const GROUPS: { label: string; cards: Card[] }[] = [
+  {
+    label: 'Inbox',
+    cards: [
+      { title: 'Enquiries', href: '/admin/enquiries', module: 'enquiries', icon: Icon.enquiries, tint: 'blue', signal: (s) => count(s.enquiries, 'new') },
+      { title: 'Registrations', href: '/admin/registrations', module: 'registrations', icon: Icon.registrations, tint: 'blue', signal: (s) => count(s.registrations, 'new') },
+    ],
+  },
+  {
+    label: 'School',
+    cards: [
+      { title: 'Students', href: '/admin/people', module: 'people', icon: Icon.people, tint: 'green' },
+      { title: 'Placement tests', href: '/admin/placement', module: 'placement', icon: Icon.placement, tint: 'green', signal: (s) => count(s.placement, 'to review') },
+      { title: 'Bookings', href: '/admin/bookings', module: 'bookings', icon: Icon.bookings, tint: 'sun' },
+      { title: 'Offers', href: '/admin/offers', module: 'offers', icon: Icon.offers, tint: 'sun', signal: (s) => count(s.offers, 'to follow up') },
+      { title: 'Courses', href: '/admin/catalogue', module: 'catalogue', icon: Icon.catalogue, tint: 'red' },
+      { title: 'Exams', href: '/admin/catalogue/exams', module: 'catalogue', icon: Icon.calendar, tint: 'red' },
+    ],
+  },
+  {
+    label: 'Management',
+    cards: [
+      { title: 'Applications', href: '/admin/applications', module: 'applications', icon: Icon.applications, tint: 'green', signal: (s) => count(s.applications, 'new') },
+      { title: 'Kursplanung', href: '/admin/kursplanung', module: 'kursplanung', icon: Icon.kursplanung, tint: 'red' },
+      { title: 'Website', href: '/admin/website', module: 'website', icon: Icon.website, tint: 'blue' },
+      { title: 'Prices', href: '/admin/settings/prices', module: 'prices', icon: Icon.money, tint: 'sun' },
+      { title: 'Team', href: '/admin/team', module: 'team', icon: Icon.team, tint: 'green' },
+      { title: 'Activity', href: '/admin/activity', module: 'activity', icon: Icon.note, tint: 'ink' },
+      { title: 'Settings', href: '/admin/settings', module: 'settings', icon: Icon.settings, tint: 'ink' },
+    ],
+  },
+];
+
+export default async function OverviewPage() {
+  const user = await requireModule('overview');
+  const signals = await getOverviewSignals();
 
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 11 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const firstName = (user.name ?? '').split(/\s+/)[0];
-  const thisWeek = sunday === sundayOf(today);
-  const href = (d: string) => (sundayOf(d) === sundayOf(today) ? '/admin' : `/admin?week=${d}`);
-  const [, am, ad] = week.sunday.split('-').map(Number);
-  const [by, bm, bd] = week.saturday.split('-').map(Number);
-  const month = (m: number) => new Date(2000, m - 1, 1).toLocaleDateString('en-GB', { month: 'long' });
-  const span = am === bm ? `${ad}–${bd} ${month(bm)} ${by}` : `${ad} ${month(am)} – ${bd} ${month(bm)} ${by}`;
+  const groups = GROUPS.map((g) => ({ ...g, cards: g.cards.filter((c) => canAccess(user, c.module)) })).filter((g) => g.cards.length);
 
   return (
-    <div>
-      <header className="mb-4">
-        <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">
+    <div className="mx-auto max-w-[1080px]">
+      <header className="mb-9">
+        <p className="text-sm font-medium text-[var(--casa-text-subtle)]">
+          {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </p>
+        <h1 className="mt-1 text-[2rem] leading-tight font-extrabold tracking-[-0.025em] text-[var(--casa-ink)]">
           {greeting}
           {firstName ? `, ${firstName}` : ''}
         </h1>
-        <p className="mt-0.5 text-sm font-medium text-[var(--casa-muted)]">
-          {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-        </p>
       </header>
 
-      {params.error ? (
-        <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
-          {params.error}
-        </p>
-      ) : null}
-
-      <div className="shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-        <Launch
-          title={`Week ${isoWeek(addDay(week.sunday, 1))} · ${span}`}
-          week={week}
-          thisWeek={thisWeek}
-          holds={holds}
-          nav={{
-            back4: href(addDay(sunday, -28)),
-            back: href(addDay(sunday, -7)),
-            next: href(addDay(sunday, 7)),
-            next4: href(addDay(sunday, 28)),
-          }}
-        />
-        <div className="overflow-visible rounded-b-md border border-t-0 border-[var(--fm-navy)]/35 bg-white">
-          {week.days.map((day) => (
-            <DayRow
-              key={day.date}
-              day={day}
-              today={today}
-              overdue={overdue}
-              can={can}
-              staff={staff}
-              rotaStaff={rotaStaff}
-              showReason={can.rotaEdit}
-            />
-          ))}
-          <div className="h-[3px] rounded-b-md bg-[var(--fm-navy)]" />
-        </div>
+      <div className="space-y-9">
+        {groups.map((group) => (
+          <section key={group.label} aria-labelledby={`overview-${group.label}`}>
+            <h2 id={`overview-${group.label}`} className="mb-3 text-[0.8rem] font-semibold text-[var(--casa-muted)]">
+              {group.label}
+            </h2>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {group.cards.map((card) => {
+                const signal = card.signal?.(signals) ?? null;
+                return (
+                  <li key={card.href}>
+                    <Link
+                      href={card.href}
+                      className={cn(
+                        'group flex h-full min-h-[7.5rem] flex-col justify-between rounded-2xl border border-ws-line bg-white p-5',
+                        'shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 ease-out',
+                        'hover:-translate-y-0.5 hover:border-[#c9d4e3] hover:shadow-[0_14px_30px_-20px_rgba(15,23,42,0.4)]',
+                        'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0'
+                      )}
+                    >
+                      <span className="flex items-start justify-between gap-3">
+                        <span aria-hidden="true" className={cn('grid size-10 place-items-center rounded-xl [&_svg]:size-[18px]', TINTS[card.tint])}>
+                          {card.icon}
+                        </span>
+                        {signal ? (
+                          <span className="rounded-full bg-[var(--casa-ink-deep)] px-2.5 py-1 text-[0.72rem] leading-none font-bold text-white tabular-nums">
+                            {signal}
+                          </span>
+                        ) : (
+                          <span aria-hidden="true" className="text-[var(--casa-text-subtle)] opacity-0 transition-opacity group-hover:opacity-100 [&_svg]:size-4">
+                            {Icon.chevronRight}
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-5 block text-[0.98rem] font-bold text-[var(--casa-ink)]">{card.title}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
       </div>
     </div>
   );

@@ -194,17 +194,13 @@ export function Status({ tone, children }: { tone: DotTone; children: ReactNode 
   );
 }
 
-/**
- * Who has it: the colleague's initials, the name for a screen reader and on
- * hover. `away` (from the rota) rings them in amber: the work of someone who is
- * not in today is work someone else should pick up.
- */
-export function Owner({ name, away = false }: { name: string | null | undefined; away?: boolean }) {
+/** Who has it: the colleague's initials, the name for a screen reader and on hover. */
+export function Owner({ name }: { name: string | null | undefined }) {
   if (!name) return null;
   return (
-    <span className={cn('inline-flex rounded-full', away && 'ring-2 ring-[#f59e0b] ring-offset-1 ring-offset-white')} title={away ? `${name} · away` : name}>
+    <span className="inline-flex" title={name}>
       <Avatar name={name} staff size="sm" />
-      <span className="sr-only">{away ? `${name}, away` : name}</span>
+      <span className="sr-only">{name}</span>
     </span>
   );
 }

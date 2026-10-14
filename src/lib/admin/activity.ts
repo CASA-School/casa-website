@@ -205,17 +205,6 @@ export function describeActivity(entry: ActivityEntry): string {
       return 'deleted a booking';
     case 'cohort_created':
       return 'scheduled a cohort';
-    case 'shift_saved':
-      return 'planned a shift on the rota';
-    case 'shift_removed':
-      return 'took a shift off the rota';
-    case 'shifts_copied':
-      return `copied last week's shifts into the rota${typeof entry.detail?.count === 'number' ? ` (${entry.detail.count})` : ''}`;
-    case 'absence_saved':
-      // Never the reason: Activity is read by the whole team.
-      return 'recorded an absence on the rota';
-    case 'absence_deleted':
-      return 'removed an absence from the rota';
     case 'person_linked':
       return 'linked a duplicate person record to the existing one';
     case 'person_unlinked':

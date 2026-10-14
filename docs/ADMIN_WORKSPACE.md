@@ -219,9 +219,7 @@ Every exported action in every `'use server'` file under `src/app/(admin)`
 (`actions.ts`, `team/actions.ts`, `kursplanung/actions.ts` and the rest)
 resolves the actor through `requireModule(<module>, <level>)` from
 `src/lib/admin/guard.ts` before it awaits anything else, and asks for `full`
-when it deletes, removes, voids or cancels. The one exception is
-`deleteDayTaskAction`: the day board is the team's shared surface and a task
-on it is deleted at `edit` (day-board/actions.ts). `src/lib/admin/__tests__/host-routing.test.ts`
+when it deletes, removes, voids or cancels. `src/lib/admin/__tests__/host-routing.test.ts`
 finds the action files itself and asserts all of this, so a new file cannot be
 forgotten.
 
@@ -387,8 +385,8 @@ password — or uses **Sign in with Microsoft**.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, bookings, offers, rooms, catalogue, kursplanung, rota,
-website, activity, team, settings. For each
+applications, people, bookings, offers, rooms, catalogue, kursplanung, website,
+activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -401,7 +399,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `edit` on Today, Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `view` on Settings and Rota; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers and Team |
+| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -494,68 +492,25 @@ Nine top-level items, and the placements are the argument:
 - The register is labelled **Students**, the word the team uses, and the screen
   says the same. A rail label and a page title that disagree is a bug.
 
-### Today — the control room, and the day
+### Overview — the start page (2026-10-14)
 
-**`/admin` is the control room: FileMaker's `SingleDayCalendar_Overview`,
-rebuilt** (Rahman, 2026-10-13: "this filemaker style control-room is a bit
-important to have, we don't need to have everything like filemaker but better
-logic and intelligence that helps the staff to do their work"; an earlier
-modern dashboard missed the point — "you are not understanding it properly").
-Studied from the live layout: a week of day rows, each a control panel.
-`control-room.ts` reads the week in one round; `control/launch.tsx` and
-`control/day-row.tsx` draw it.
+`/admin` is a clean start page: a greeting, and shortcut cards into every area
+the colleague may open, grouped as the sidebar is (Inbox, School, Management).
+A card is a tinted icon and the area's name; it carries a small navy count only
+when something is new behind it — enquiries and registrations nobody has
+opened, sent offers to follow up (ten days without an answer, or past their
+validity), placement tests awaiting a teacher, new job applications
+(`getOverviewSignals` in `overview.ts`, one round trip). Cards follow access:
+someone without Offers sees no Offers card.
 
-Kept from FileMaker, because hands and eyes know it:
-
-- **The week runs Sunday to Saturday**, a row a day, a thick navy line between
-  days — Sunday is when people move in (FileMaker's FirstDayAcco), Monday when
-  they start (FirstDayStudent). The date is `12.10.26` with its weekday, red at
-  the weekend; today's head is cream and underlined. `?week=YYYY-MM-DD` (any
-  day of the week); this week without it.
-- **The red-brown bar** with « ‹ › » (four weeks, one week) and the week's
-  span, and under it **the launch rows**: pale yellow cells for the daily
-  destinations, each with what is new in it (enquiries and registrations
-  nobody has opened, offers to follow up, placement tests awaiting a teacher),
-  grey cells for the other areas. Only the areas the colleague holds.
-- Per day: the **first-day box** (first day, moving in, moving out, the
-  names in a panel); the **keys** in FileMaker's columns — the day's work
-  (Tasks | n, Messages, Rota, Day), something new (+ Task, + Absence, + Offer,
-  + Message — FileMaker's green plus), its rooms (Rooms, Classes | n with
-  each cohort's room, Exam | n, Clash | n) and, for Kursplanung holders, its
-  teaching (Teachers, Timetable, Conflicts | n, Vacant | n); **Reception**
-  (FileMaker's "Shift | Reception": who is at the desk when, with the note);
-  **Away · office** and **Away · teaching** numbered, with FileMaker's codes
-  (TU leave in blue, kr sick on yellow, AÜ, Fb, uU).
-
-Better than FileMaker:
-
-- A key says whether there is something behind it — bold and underlined when
-  there is (FileMaker's own mark), amber when it needs a look, orange with red
-  text when a plan contradicts itself, quiet when there is nothing.
-- **What is wrong with a day is said in words** at the end of its head: a
-  room booked twice at the same time (worked out from the cohorts' rooms and
-  times), plan conflicts and lessons that need a teacher (`teachingOn`, the
-  board's own `analysePlan`), office hours nobody covers at the desk,
-  someone on shift who is away, tasks left from earlier.
-- A weekend is one line, unless someone moves in or starts.
-- The launch row carries the areas once for the week, so a day row carries only
-  that day's keys.
-- An absence's code shows only to whoever plans the rota; everyone else sees
-  "–" (an absence's reason is personal data).
-- **Building blocks still to come stand in their place, quiet** (a dashed
-  cell or key, not a link): Messages (FileMaker's OfficeTalk), Transfers (its
-  airport and station shortcuts), Agencies, Companies, Internships. They are
-  built one at a time and then light up where the team already expects them.
-
-**`/admin/day` is one day in detail**, opened by its date (or the Day key):
-who is waiting for an answer (today only, `getWaiting`: the people CASA owes
-an answer, by name, the longest wait first), the day's **tasks** to tick (an
-unfinished task stays on its own date and shows under "From earlier" with its
-date in amber — nothing rolls it forward), **In the office** from the rota,
-**At CASA today** by name, and **Coming up**. The work of a colleague who is
-away wears an amber ring on their initials, so someone else picks it up.
-`?date=YYYY-MM-DD`; today without it. A task written in the control room
-returns there (`from=week`); one written on the day stays on the day.
+Rahman, 2026-10-14: "delete the today page for now, i think, we have been
+looking at things the wrong way … both today and rota, delete it. Instead we
+need a overview or a start page that is basically like any other dashboard,
+just a clean interface with some shortcut cards". So the day board, the week
+"control room" modelled on FileMaker's home calendar, the day view and the
+rota were removed on that date. **Their tables stay**: `day_tasks` (migration
+0012) holds whatever the team wrote; the rota's migration was never deployed
+and was withdrawn. More goes on the overview later, one thing at a time.
 
 The fortnight trend and the newest inbound records moved to **Activity**. Both
 look backwards, and a daily screen that also carries last week's chart is a
@@ -577,40 +532,6 @@ dressed as a feature. A forgotten password is reset by an owner or admin on the
 Team screen, and an owner's from the shell (`npm run admin:password`).
 
 ---
-
-### Rota — who is in the office, and who is away (2026-10-13)
-
-`/admin/rota`, module `rota` (migration 0025, `src/lib/admin/rota.ts`, the
-rules in `rota-rules.ts`). FileMaker's home calendar carried "Shift |
-Reception" (each colleague's hours at the desk, with a note: "14–16:30
-Seminar") and the administration's absences with a code (TU, kr, AÜ, uU);
-Rahman asked for both on 2026-10-13. Teachers' absences stay Kursplanung's
-(`teacher_absences`).
-
-- **The week**: a colleague a row (active workspace accounts — the office
-  team signs in, and an account is who work is assigned to), Monday to Friday
-  a column. A cell is the shift, set in a small panel (from, to in quarter
-  hours, a note) or cleared; "On leave" when the colleague is away; a shift
-  on a day its colleague is away is struck through in red.
-- **Reception** under the week: per day "Covered", or the stretches of the
-  office hours nobody covers ("15:30–19:00 open"). The office hours are the
-  ones the public site states (Mon–Thu 08:30–19:00, Fri 08:30–13:00;
-  `OFFICE_HOURS`, and a test fails if the footer says otherwise). A gap under
-  a quarter hour is a handover, not an empty desk. Nothing shows until the
-  week has a shift.
-- **Copy last week** plans a week in one click — the rota repeats more than
-  it changes — and leaves out a day someone is away and anyone whose account
-  is closed; a day that already has a shift keeps it.
-- **Absences**: a span (from, until), a reason (on leave, sick, time off,
-  training, unpaid leave, away) and a note; recorded and changed in a dialog,
-  removed with a confirmation.
-
-Who may: everyone `view` (who is at the desk, who is away), planning `edit`
-(given per person on the Team screen), removing an absence `full`. **An
-absence's reason is personal data** — "sick" above all — so it and its note
-show only at `edit`: everyone else, on the Rota and on Today, reads "Away". Activity says
-"recorded an absence on the rota", never the reason. No retention period is
-set yet (see Open items).
 
 ## Progressive disclosure
 
@@ -666,8 +587,8 @@ professional tool looks like (`shell.tsx`):
 
 **There are no counts in the sidebar.** The numbers beside Enquiries,
 Registrations and Placement were queue backlogs, not notifications, and a
-permanent number next to a label reads as nagging (the control room's launch
-row carries what is new, once). When a notification system has a real source
+permanent number next to a label reads as nagging (the overview's cards carry
+what is new, once). When a notification system has a real source
 — something happened, to a record you own, since you last looked — it belongs
 at the foot of the sidebar, beside the person. Until then there is no bell.
 
@@ -763,20 +684,14 @@ The rules, each of which came from a real defect on a real screen.
    an input's format. The letter to a learner still states hours and dates in
    full — that is for the learner, not the team.
 
-### FileMaker's colours (2026-10-13)
+### FileMaker's navy (2026-10-13)
 
-Rahman: "adapt to color a little towards filemaker so staff don't feel too
-strange with the colors". Sampled from SchoolMan's home calendar and kept as
-tokens in `.casa-workspace` (`globals.css`, `--fm-*`): navy `#1f3e6c` for
-structure, red-brown `#b5431d` for the control room's bar, pale yellow
-`#fffcb4` for a daily destination, cream `#fefbea` for today, link blue
-`#3477a1`, red `#9c1f14` for a weekend and a conflict, orange `#ef9872` for a
-clash in a plan, sun `#f8d355` for someone off sick, green `#59b038` for a
-"new" plus. The control room uses them as FileMaker does. The rest of the
-workspace takes them a little: its primary action and a colleague's initials
-are navy (`--casa-ink-deep` is FileMaker's navy inside the workspace; text
-stays near-black), and "you are here" in the rail is the pale yellow cell
-with a navy edge. The public site is untouched.
+Rahman asked for the colours to lean "a little towards filemaker so staff don't
+feel too strange". What stayed after the control room was withdrawn: FileMaker's
+navy `#1f3e6c` is the workspace's primary action and its colleagues' initials
+(`--casa-ink-deep` inside `.casa-workspace`; text stays near-black), the
+sidebar is a deeper navy (`--ws-rail`), and the one fine "you are here" mark
+in the sidebar is FileMaker's pale yellow. The public site is untouched.
 
 ## Lists
 
@@ -1036,13 +951,6 @@ Seeded: the 36 book prices, the four exam fees recovered from the script, the
 CASA enters them once, per period (`docs/CATALOGUE_AND_PRICING.md` §5 lists
 the decisions).
 
-### 0025 — the rota
-
-`staff_shifts` (a colleague, a day, from and to, a note; one a person a day)
-and `staff_absences` (a colleague, from and until, a reason, a note). Both
-hang off `staff_users`, so a shift and an absence belong to the same account
-work is assigned to. §Rota has the screen and who may see an absence's reason.
-
 ### 0014 — Kursplanung
 
 Who teaches which course on which day. `teachers` is the school's teaching
@@ -1061,7 +969,8 @@ the plan of record: `docs/KURSPLANUNG.md`.
 
 ### 0012 — the day board
 
-One table, `day_tasks`: the date it belongs to, a title, an optional detail, an
+No screen since 2026-10-14 (the day board went with Today); the table stays
+with what the team wrote. One table, `day_tasks`: the date it belongs to, a title, an optional detail, an
 area (students / courses / accommodation / exams / payments / anything else), an
 optional owner, and who finished it and when. A task is not a workflow — no
 stages, no dependencies, no recurrence — and `done_at` plus `done_by` answers

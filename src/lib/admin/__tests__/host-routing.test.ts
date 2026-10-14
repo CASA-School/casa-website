@@ -252,12 +252,6 @@ describe('workspace auth gate', () => {
     expect(files).toContain(path.join('(editor)', 'website', 'actions.ts'));
     expect(files).toContain(path.join('(workspace)', 'actions.ts'));
 
-    /*
-     * Deleting a day-board task needs only `edit`: the board is the team's
-     * shared surface (day-board/actions.ts), and the delete still goes
-     * through the confirmation.
-     */
-    const DESTRUCTIVE_AT_EDIT = new Set(['deleteDayTaskAction']);
 
     for (const file of files) {
       const source = readFileSync(path.join(ADMIN_APP, file), 'utf8');
@@ -274,7 +268,7 @@ describe('workspace auth gate', () => {
           `${file}: ${name} must await requireModule() or requireManager() before anything else`
         ).toMatch(/^(requireModule|requireManager)$/);
 
-        if (/^(delete|remove|void|cancel)/.test(name) && !DESTRUCTIVE_AT_EDIT.has(name)) {
+        if (/^(delete|remove|void|cancel)/.test(name)) {
           const level = firstAwait?.[1] === 'requireManager' ? "'full'" : firstAwait?.[2].split(',')[1]?.trim();
           expect(level, `${file}: ${name} destroys, so it must ask for 'full'`).toBe("'full'");
         }
@@ -321,7 +315,6 @@ describe('workspace auth gate', () => {
       ['catalogue', '(workspace)/catalogue'],
       ['activity', '(workspace)/activity'],
       ['team', '(workspace)/team'],
-      ['rota', '(workspace)/rota'],
       ['kursplanung', '(focus)/kursplanung'],
       ['offers', '(editor)/offers'],
       ['website', '(editor)/website'],

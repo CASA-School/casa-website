@@ -22,8 +22,6 @@ import { expect, test } from '@playwright/test';
 /** Every path that renders somebody's personal data once you are inside. */
 const GUARDED_PATHS = [
   '/admin',
-  '/admin/day',
-  '/admin/rota',
   '/admin/enquiries',
   '/admin/registrations/course',
   '/admin/registrations/exam',

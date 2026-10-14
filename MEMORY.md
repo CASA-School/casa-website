@@ -2706,3 +2706,13 @@ navy frame (`--ws-rail`): the on-dark CASA logo cropped to its top row with no c
 under it, quiet navigation (white text, a soft fill and one fine pale-yellow mark for the current
 page), and at its foot the person, the website and sign-out. The top bar is gone on a desktop; on a
 phone the sidebar is a navy band. Collapsed: icons, search icon, avatar and sign-out.
+
+Sixteenth pass: **a clean overview instead of Today and the rota.** Rahman: "delete the today page
+for now, i think, we have been looking at things the wrong way … both today and rota, delete it.
+Instead we need a overview or a start page that is basically like any other dashboard, just a clean
+interface with some shortcut cards … based on people's access". Removed: the day board, the
+FileMaker-style control room, the day view, the rota (screen, module, lib, tests; its never-deployed
+migration 0025 withdrawn and dropped locally). `day_tasks` stays in the database. `/admin` is now
+Overview: a greeting and shortcut cards grouped as the sidebar (Inbox, School, Management), a tinted
+icon and the name, a small navy count only when something is new (`getOverviewSignals`), cards
+filtered by access. Staff hold Overview at `view` now. FileMaker's navy stays as the primary colour.
