@@ -21,17 +21,33 @@ export const berlinTime = (value: Date, lang: WsLang): string =>
 /** Whole days since a moment: how long something has waited. */
 export const daysSince = (value: Date, now = new Date()): number => Math.floor((now.getTime() - value.getTime()) / 86_400_000);
 
-/** Records in runs of one day each, in the order they came (newest first, as lists are sorted). */
-export function groupByDay<T>(items: readonly T[], at: (item: T) => Date): { day: string; rows: T[] }[] {
-  const groups: { day: string; rows: T[] }[] = [];
+/** Records in runs that share a key, in the order they came (newest first, as lists are sorted). */
+function runs<T>(items: readonly T[], key: (item: T) => string): { key: string; rows: T[] }[] {
+  const groups: { key: string; rows: T[] }[] = [];
   for (const item of items) {
-    const day = berlinDay(at(item));
+    const k = key(item);
     const last = groups.at(-1);
-    if (last?.day === day) last.rows.push(item);
-    else groups.push({ day, rows: [item] });
+    if (last?.key === k) last.rows.push(item);
+    else groups.push({ key: k, rows: [item] });
   }
   return groups;
 }
+
+/** Records in runs of one day each. */
+export const groupByDay = <T,>(items: readonly T[], at: (item: T) => Date) =>
+  runs(items, (item) => berlinDay(at(item))).map(({ key, rows }) => ({ day: key, rows }));
+
+/** Records in runs of one month each (`YYYY-MM`), for a history. */
+export const groupByMonth = <T,>(items: readonly T[], at: (item: T) => Date) =>
+  runs(items, (item) => berlinDay(at(item)).slice(0, 7)).map(({ key, rows }) => ({ month: key, rows }));
+
+/** "September 2026". */
+export const monthHeading = (month: string, lang: WsLang): string =>
+  new Date(`${month}-15T12:00:00Z`).toLocaleDateString(wsLocale(lang), { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+/** A short date for a history row: "Di., 8. Sept." / "Tue 8 Sept". */
+export const shortDay = (value: Date, lang: WsLang): string =>
+  value.toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', timeZone: ZONE });
 
 /**
  * A day's heading: "Heute" or "Gestern" with the date beside it; an older day

@@ -4,9 +4,10 @@ import { expect, test } from '@playwright/test';
 import pg from 'pg';
 
 /**
- * The enquiry queue by day, and „Erledigt" in one click (2026-10-14): an
- * enquiry sent today sits under „Heute"; closing it takes it out of Offen and
- * its count, and the Erledigt view opens it again.
+ * The enquiry queue: the last seven days by day, „Erledigt" in one click, the
+ * history behind it (2026-10-14). An enquiry sent today sits under „Heute";
+ * closing it keeps it under its day, marked, and takes it out of the open count;
+ * „Wieder öffnen" undoes it. It is not in the history, and a search finds it.
  *
  * Runs only with a database and an owner account, in German (the default,
  * pinned in case the account chose English). The enquiry it writes is deleted
@@ -64,28 +65,33 @@ test.describe('enquiries', () => {
     ]);
   });
 
-  test('a new enquiry is under Heute, and „Erledigt" takes it out of the open count until it is reopened', async ({ page }) => {
+  test('a new enquiry is under Heute; „Erledigt" keeps it there, closed, and takes it out of the open count', async ({ page }) => {
     const name = `${NAME.first} ${NAME.last}`;
-    const openTab = page.getByRole('navigation', { name: 'Ansichten' }).getByRole('link', { name: /^Offen/ });
-    const openCount = async () => Number((await openTab.innerText()).replace(/\D+/g, '') || 0);
+    const tally = async (tone: 'new' | 'working') => {
+      const count = page.locator(`[data-tally="${tone}"] b`);
+      return (await count.count()) ? Number((await count.innerText()).replace(/\D+/g, '')) : 0;
+    };
 
     await page.goto('/admin/enquiries');
     const today = page.locator('section', { has: page.getByRole('heading', { name: 'Heute' }) });
     const row = today.getByRole('listitem').filter({ hasText: name });
     await expect(row).toContainText('Abendkurs im November');
-    const before = await openCount();
+    const fresh = await tally('new');
+    const working = await tally('working');
 
     await row.getByRole('button', { name: 'Erledigt' }).click();
-    await expect(page.getByRole('listitem').filter({ hasText: name })).toHaveCount(0);
-    expect(await openCount()).toBe(before - 1);
+    await expect(row.getByRole('button', { name: 'Wieder öffnen' })).toBeVisible();
+    await expect(row).toContainText('Erledigt');
+    expect(await tally('new')).toBe(fresh - 1);
 
-    await page.getByRole('link', { name: /^Erledigt/ }).click();
-    const closed = page.getByRole('listitem').filter({ hasText: name });
-    await closed.getByRole('button', { name: 'Wieder öffnen' }).click();
-    await expect(page.getByRole('listitem').filter({ hasText: name })).toHaveCount(0);
+    await row.getByRole('button', { name: 'Wieder öffnen' }).click();
+    await expect(row).toContainText('In Bearbeitung');
+    expect(await tally('working')).toBe(working + 1);
 
-    await page.goto('/admin/enquiries');
-    await expect(page.getByRole('listitem').filter({ hasText: name })).toContainText('In Bearbeitung');
-    expect(await openCount()).toBe(before);
+    // Today is not history; a search looks through every week and finds it.
+    await page.goto('/admin/enquiries?view=history');
+    await expect(page.getByRole('listitem').filter({ hasText: name })).toHaveCount(0);
+    await page.goto(`/admin/enquiries?q=${encodeURIComponent(NAME.last)}`);
+    await expect(page.getByRole('listitem').filter({ hasText: name })).toHaveCount(1);
   });
 });

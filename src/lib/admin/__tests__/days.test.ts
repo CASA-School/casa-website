@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { berlinDay, dayHeading, groupByDay } from '../days';
+import { berlinDay, dayHeading, groupByDay, groupByMonth, monthHeading } from '../days';
 
 describe('days on Bremen’s calendar', () => {
   it('puts a message sent after midnight in Bremen on that day, not the UTC one', () => {
@@ -24,5 +24,15 @@ describe('days on Bremen’s calendar', () => {
     expect(dayHeading('2026-10-13', 'en', '2026-10-14')).toEqual({ title: 'Yesterday', aside: 'Tuesday 13 October' });
     expect(dayHeading('2026-10-12', 'de', '2026-10-14').title).toBe('Montag, 12. Oktober');
     expect(dayHeading('2025-12-30', 'en', '2026-10-14').title).toBe('Tuesday, 30 December 2025');
+  });
+
+  it('groups a history by month, on Bremen’s calendar', () => {
+    const items = ['2026-10-01T09:00:00Z', '2026-09-30T22:30:00Z', '2026-09-12T15:00:00Z'].map((at) => ({ at: new Date(at) }));
+    // 22:30 UTC on 30 September is already 1 October in Bremen.
+    expect(groupByMonth(items, (item) => item.at).map((g) => [g.month, g.rows.length])).toEqual([
+      ['2026-10', 2],
+      ['2026-09', 1],
+    ]);
+    expect(monthHeading('2026-09', 'de')).toBe('September 2026');
   });
 });

@@ -101,13 +101,29 @@ const toListItem = (row: Row): EnquiryListItem => ({
   openFlags: Number(row.open_flags ?? 0),
 });
 
+/**
+ * The start of the enquiry queue's week: midnight in Bremen six days ago, so the
+ * week is today and the six days before it. Everything earlier is the history.
+ */
+const WEEK_START = `((date_trunc('day', now() AT TIME ZONE 'Europe/Berlin') - interval '6 days') AT TIME ZONE 'Europe/Berlin')`;
+
+const OPEN = `('new', 'in_progress', 'waiting')`;
+
+/** The week, the history before it, or (for a search) everything. */
+export type EnquiryPeriod = 'week' | 'history' | 'all';
+
+/** Within a period: every state but spam, only the open ones, or only the closed ones. */
+export type EnquiryState = 'any' | 'open' | 'closed';
+
 export async function listEnquiries({
-  status,
+  period = 'week',
+  state = 'any',
   search,
   limit = 50,
   offset = 0,
 }: {
-  status?: WorkStatus | 'open' | 'all';
+  period?: EnquiryPeriod;
+  state?: EnquiryState;
   search?: string;
   limit?: number;
   offset?: number;
@@ -115,14 +131,13 @@ export async function listEnquiries({
   const conditions: string[] = [];
   const params: unknown[] = [];
 
-  // "Open" is the default working view: everything that is not closed. A staff
-  // member opening the queue wants their workload, not the archive.
-  if (status === 'open' || status === undefined) {
-    conditions.push(`e.status IN ('new', 'in_progress', 'waiting')`);
-  } else if (status !== 'all') {
-    params.push(status);
-    conditions.push(`e.status = $${params.length}::work_status`);
-  }
+  if (period === 'week') conditions.push(`e.submitted_at >= ${WEEK_START}`);
+  if (period === 'history') conditions.push(`e.submitted_at < ${WEEK_START}`);
+
+  // Spam is never part of the day's work; it stays in the table, out of sight.
+  if (state === 'open') conditions.push(`e.status IN ${OPEN}`);
+  else if (state === 'closed') conditions.push(`e.status IN ('done', 'declined')`);
+  else conditions.push(`e.status <> 'spam'`);
 
   if (search && search.trim().length > 0) {
     params.push(`%${search.trim()}%`);
@@ -132,7 +147,7 @@ export async function listEnquiries({
     );
   }
 
-  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const where = `WHERE ${conditions.join(' AND ')}`;
 
   const totalRow = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM enquiries e ${where}`,
@@ -147,6 +162,34 @@ export async function listEnquiries({
   );
 
   return { items: rows.map(toListItem), total: Number(totalRow?.n ?? 0) };
+}
+
+/** What the queue's head counts: the week, the history, the open states, and what is open from before the week. */
+export async function enquiryCounts(): Promise<{
+  week: number;
+  history: number;
+  openOlder: number;
+  new: number;
+  inProgress: number;
+  waiting: number;
+}> {
+  const row = await queryFirst<Record<'week' | 'history' | 'open_older' | 'new' | 'in_progress' | 'waiting', string>>(
+    `SELECT count(*) FILTER (WHERE submitted_at >= ${WEEK_START} AND status <> 'spam') AS week,
+            count(*) FILTER (WHERE submitted_at < ${WEEK_START} AND status <> 'spam') AS history,
+            count(*) FILTER (WHERE submitted_at < ${WEEK_START} AND status IN ${OPEN}) AS open_older,
+            count(*) FILTER (WHERE status = 'new') AS new,
+            count(*) FILTER (WHERE status = 'in_progress') AS in_progress,
+            count(*) FILTER (WHERE status = 'waiting') AS waiting
+       FROM enquiries`
+  );
+  return {
+    week: Number(row?.week ?? 0),
+    history: Number(row?.history ?? 0),
+    openOlder: Number(row?.open_older ?? 0),
+    new: Number(row?.new ?? 0),
+    inProgress: Number(row?.in_progress ?? 0),
+    waiting: Number(row?.waiting ?? 0),
+  };
 }
 
 export async function getEnquiry(id: string): Promise<EnquiryDetail | null> {

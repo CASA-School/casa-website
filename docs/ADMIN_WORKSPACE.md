@@ -770,20 +770,29 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     the group headings, which are white with a hairline above and their count
     in a small pill. It lives in `.ws-table` in globals.css, so `Table` and the
     catalogue's `OpenTable` share it; Kursplanung keeps its own tables.
-16. **The enquiry queue reads by day (Rahman, 2026-10-14: "per day format …
-    when things are taking care of we could do completed so it doesn't show in
-    the number of open enquiries").** One section per day an enquiry came in, on
-    Bremen's calendar (`src/lib/admin/days.ts`: „Heute", „Gestern", then the
-    date with how long ago), newest first, each day a card of inbox rows: who
+16. **The enquiry queue: the last seven days by day, the rest a history
+    (Rahman, 2026-10-14: "per day format … when things are taking care of we
+    could do completed so it doesn't show in the number of open enquiries", then
+    "display only one week history and the rest should be more like a history
+    that is hidden from interface but if the team wants to go back it should be
+    possible").** „Letzte 7 Tage" is today and the six days before, one section
+    per day on Bremen's calendar (`src/lib/admin/days.ts`: „Heute", „Gestern",
+    then the date with how long ago), newest first; today always has its
+    section, so a quiet morning says so. Each day is a card of inbox rows: who
     wrote, the topic, two lines of the message, the time, the language when it
     is not German (the one to reply in), who has it. A blue dot on the initials
     marks a new one; a new one older than two days shows its time in amber.
-    „Erledigt" on the row closes it in one click (`updateStatusAction`, no
-    confirmation — it is undone from the Erledigt view with „Wieder öffnen",
-    which sets it in progress), so it leaves Offen and every open count. The
-    tallies under the title are the three open states. Rule 12's status groups
-    still hold for the other queues; the day is the enquiry queue's group, and
-    a row carries its state as a pill.
+    „Erledigt" on a row closes it in one click (`updateStatusAction`, no
+    confirmation — „Wieder öffnen" on the same row undoes it, setting it in
+    progress); it stays under its day, quieter, and leaves every open count, so
+    a day reads as what came in and what was dealt with, and its heading says
+    „2 offen" or „alle erledigt". „Verlauf" is everything before the week, by
+    month, one line each, filtered Alle / Offen / Erledigt, in pages. An enquiry
+    from before the week that is still open is unfinished work, not history, so
+    the week shows one amber line — „5 ältere Anfragen sind noch offen" — that
+    links to them. A search looks through every week. The tallies under the
+    title are the open states of any age. Spam is never listed. Rule 12's status
+    groups still hold for the other queues.
 
 ## Copy on screens — labels, not explanations
 
