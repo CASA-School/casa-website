@@ -209,3 +209,12 @@ export async function getEnquiry(id: string): Promise<EnquiryDetail | null> {
     assignedTo: row.assigned_to,
   };
 }
+
+/** The other enquiries sent from the same address, newest first: what this person asked before. */
+export async function otherEnquiriesFrom(email: string, exceptId: string): Promise<EnquiryListItem[]> {
+  const rows = await query<Row>(
+    `${SELECT} WHERE lower(e.email) = lower($1) AND e.id <> $2 AND e.status <> 'spam' ORDER BY e.submitted_at DESC LIMIT 6`,
+    [email, exceptId]
+  );
+  return rows.map(toListItem);
+}

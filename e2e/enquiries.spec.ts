@@ -8,6 +8,8 @@ import pg from 'pg';
  * history behind it (2026-10-14). An enquiry sent today sits under „Heute";
  * closing it keeps it under its day, marked, and takes it out of the open count;
  * „Wieder öffnen" undoes it. It is not in the history, and a search finds it.
+ * On its page, a colleague takes it, moves it along, writes a note, and the
+ * reply opens in the language it was written in.
  *
  * Runs only with a database and an owner account, in German (the default,
  * pinned in case the account chose English). The enquiry it writes is deleted
@@ -51,6 +53,7 @@ test.describe('enquiries', () => {
   test.afterAll(async () => {
     if (!client) return;
     if (enquiryId) {
+      await client.query(`DELETE FROM staff_notes WHERE entity = 'enquiry' AND entity_id = $1`, [enquiryId]);
       await client.query(`DELETE FROM staff_activity WHERE entity = 'enquiry' AND entity_id = $1`, [enquiryId]);
       await client.query(`DELETE FROM enquiries WHERE id = $1`, [enquiryId]);
     }
@@ -93,5 +96,25 @@ test.describe('enquiries', () => {
     await expect(page.getByRole('listitem').filter({ hasText: name })).toHaveCount(0);
     await page.goto(`/admin/enquiries?q=${encodeURIComponent(NAME.last)}`);
     await expect(page.getByRole('listitem').filter({ hasText: name })).toHaveCount(1);
+  });
+
+  test('on the enquiry: take it, move it along, write a note, reply in its language', async ({ page }) => {
+    await page.goto(`/admin/enquiries/${enquiryId}`);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${NAME.first} ${NAME.last}`);
+
+    await page.getByRole('button', { name: 'Übernehmen' }).click();
+    await expect(page.getByText('Zuständig: du')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Übernehmen' })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Wartet auf Antwort' }).click();
+    await expect(page.getByRole('button', { name: 'Wartet auf Antwort' })).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByRole('textbox', { name: 'Neue Notiz' }).fill('Angerufen, Platzanfrage an den Kurs weitergegeben.');
+    await page.getByRole('button', { name: 'Notiz hinzufügen' }).click();
+    await expect(page.getByText('Angerufen, Platzanfrage an den Kurs weitergegeben.')).toBeVisible();
+
+    // Written in German, so the reply opens with a German greeting.
+    const reply = await page.getByRole('link', { name: 'Antworten' }).getAttribute('href');
+    expect(decodeURIComponent(reply ?? '')).toContain(`Hallo ${NAME.first},`);
   });
 });

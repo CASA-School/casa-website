@@ -369,6 +369,7 @@ export function RecordHeader({
   status,
   actions,
   facts = [],
+  bar,
 }: {
   backHref?: string;
   backLabel?: string;
@@ -379,6 +380,8 @@ export function RecordHeader({
   status?: ReactNode;
   actions?: ReactNode;
   facts?: readonly Fact[];
+  /** A strip under the head for the record's working controls (a queue record: its status and owner). */
+  bar?: ReactNode;
 }) {
   return (
     <header className="mb-4">
@@ -426,6 +429,9 @@ export function RecordHeader({
               );
             })}
           </dl>
+        ) : null}
+        {bar ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line-soft bg-[#fbfcfe] px-6 py-3">{bar}</div>
         ) : null}
       </section>
     </header>

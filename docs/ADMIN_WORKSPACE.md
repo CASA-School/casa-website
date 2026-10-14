@@ -793,6 +793,21 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     links to them. A search looks through every week. The tallies under the
     title are the open states of any age. Spam is never listed. Rule 12's status
     groups still hold for the other queues.
+17. **An enquiry's page (2026-10-14).** The head says who wrote and about
+    what — the organisation and group size for a group, the address, the
+    language — and its bar holds what a colleague changes most: where it stands
+    (`StatusBar` in `record-parts.tsx`: Neu, In Bearbeitung, Wartet auf Antwort,
+    Erledigt in one row, the current one lit, any other one click; Abgelehnt and
+    Spam behind „Mehr"; two by two on a phone) and who has it (`OwnerControl`:
+    „Zuständig: …", changed in a panel, „Übernehmen" takes it). The message
+    reads as an email — sender, address, date, subject, the text at reading
+    size — with „Antworten" under it, a `mailto:` opened with „Re:" and a
+    greeting and sign-off in the language the enquiry was written in, signed by
+    the colleague. A group's or company's brief is grouped as a coordinator
+    reads it (the group, the stay, the lessons, the invoice). Beside it: the
+    person, earlier enquiries from the same address, and `Timeline` — notes and
+    changes in one line of time, ending with the arrival. The other queues'
+    pages still use `RecordRail` until they get the same treatment.
 
 ## Copy on screens — labels, not explanations
 
