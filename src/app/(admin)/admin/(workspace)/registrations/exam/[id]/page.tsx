@@ -69,6 +69,7 @@ export default async function ExamRegistrationPage({
         backHref="/admin/registrations/exam"
         backLabel="All exam registrations"
         title={fullName}
+        avatar={fullName}
         subtitle={registration.examTypeLabel ?? undefined}
         status={<Badge tone={STATUS_TONES[registration.status]}>{STATUS_LABELS[registration.status]}</Badge>}
         actions={

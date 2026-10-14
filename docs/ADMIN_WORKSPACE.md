@@ -580,7 +580,7 @@ professional tool looks like (`shell.tsx`):
   this point"; an app icon and the school's logo were both tried first), and the
   collapse toggle. Folded, the word sets smaller over the toggle. The sidebar's
   navy deepens from top to bottom (`--ws-rail-top` → `--ws-rail`).
-- **Navigation:** 34px rows, icons at 17px, labels at 68% white; one highlight
+- **Navigation:** 32px rows, icons at 17px, labels at 68% white; one highlight
   on the screen — the item you are on, a soft fill with its icon in CASA's light
   blue; a parent whose sub-page is current reads as the branch in white, not as
   a second filled row; chevrons only on hover or when a branch is open; group
@@ -703,6 +703,21 @@ feel too strange". What stayed after the control room was withdrawn: FileMaker's
 navy `#1f3e6c` is the workspace's primary action and its colleagues' initials
 (`--casa-ink-deep` inside `.casa-workspace`; text stays near-black), and the
 sidebar is a deeper navy (`--ws-rail`). The public site is untouched.
+
+## The top of a page, and a record's head (2026-10-14)
+
+Rahman: "now improve the top of the pages and the lists too". A list page's
+head is the title at 28px, tight, with its actions level with it. A record's
+head (`RecordHeader`) is clean white — the tinted wash it had is gone — with
+the person's initials large and tinted beside the name (`avatar`), the status
+as a soft pill, and the facts bar on a faint ground under a hairline. The way
+back is a small rounded pill ("← All bookings"). Badges everywhere are soft
+rounded pills with a fine edge instead of solid blocks of colour.
+
+In lists, a record's initials are softly tinted — the same tint for the same
+name, so a person is recognisable down a list; a colleague's stay navy. A list
+without views says what it holds where the tabs would be ("18 students"), and a
+row shows a quiet arrow at its end when pointed at.
 
 ## Lists
 

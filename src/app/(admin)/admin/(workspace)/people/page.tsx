@@ -93,7 +93,10 @@ export default async function PeoplePage({
       ) : null}
 
       <Card bleed>
-        <ListBar search={{ action: '/admin/people', value: search, placeholder: 'Name or email' }} />
+        <ListBar
+          summary={search ? `${total.toLocaleString('en-GB')} found` : `${total.toLocaleString('en-GB')} ${total === 1 ? 'student' : 'students'}`}
+          search={{ action: '/admin/people', value: search, placeholder: 'Name or email' }}
+        />
         {items.length === 0 ? (
           <ListEmpty title={search ? 'Nothing found' : 'No students yet'}>
             {search ? `Nobody matches “${search}”.` : null}

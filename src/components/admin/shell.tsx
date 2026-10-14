@@ -84,7 +84,7 @@ export function WorkspaceShell({
 
           <nav
             aria-label="Workspace"
-            className="flex snap-x gap-1 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-0.5 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-4"
+            className="flex snap-x gap-1 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-0.5 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-6 lg:[mask-image:linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]"
           >
             <NavLink href="/admin" icon={Icon.overview} title="Overview">
               Overview

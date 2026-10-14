@@ -44,6 +44,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
         backHref="/admin/applications"
         backLabel="All applications"
         title={`${application.firstName} ${application.lastName}`}
+        avatar={`${application.firstName} ${application.lastName}`}
         subtitle={application.positionTitle}
         status={
           <>

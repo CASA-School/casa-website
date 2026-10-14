@@ -58,7 +58,7 @@ export function NavLink({
         title={title}
         aria-current={here ? 'page' : undefined}
         className={cn(
-          'group relative flex h-[34px] items-center gap-2.5 rounded-lg px-2.5 text-[0.85rem] whitespace-nowrap transition-colors duration-150 lg:overflow-hidden',
+          'group relative flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[0.85rem] whitespace-nowrap transition-colors duration-150 lg:overflow-hidden',
           'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
           here
             ? 'bg-white/[0.1] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
@@ -116,7 +116,7 @@ export function NavLink({
                   href={item.href}
                   aria-current={current ? 'page' : undefined}
                   className={cn(
-                    'flex h-[30px] items-center gap-2 rounded-lg px-2.5 text-[0.82rem] transition-colors duration-150',
+                    'flex h-7 items-center gap-2 rounded-lg px-2.5 text-[0.82rem] transition-colors duration-150',
                     'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
                     current
                       ? 'bg-white/[0.1] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
@@ -202,7 +202,7 @@ export function NavGroup({
         aria-expanded={open}
         aria-controls={`nav-group-${id}`}
         data-nav-group-label
-        className="group/label mt-6 mb-1.5 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.72rem] font-semibold tracking-[0.02em] text-white/38 transition-colors hover:text-white/70 lg:flex"
+        className="group/label mt-5 mb-1 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.72rem] font-semibold tracking-[0.02em] text-white/38 transition-colors hover:text-white/70 lg:flex"
       >
         {label}
         <svg

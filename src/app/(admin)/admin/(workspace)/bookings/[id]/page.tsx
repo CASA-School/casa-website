@@ -181,6 +181,7 @@ export default async function BookingPage({
         backHref="/admin/bookings"
         backLabel="All bookings"
         title={booking.personName}
+        avatar={booking.personName}
         subtitle={
           <span className="flex flex-wrap items-center gap-x-2">
             <span>

@@ -23,10 +23,13 @@ export type ListTab = { key: string; label: string; href: string; count?: number
 export function ListBar({
   tabs,
   active,
+  summary,
   search,
 }: {
   tabs?: readonly ListTab[];
   active?: string;
+  /** For a list without views: what it holds, in a few words ("18 students"), where the tabs would be. */
+  summary?: ReactNode;
   search?: {
     action: string;
     value?: string;
@@ -64,6 +67,8 @@ export function ListBar({
             );
           })}
         </nav>
+      ) : summary ? (
+        <p className="py-3.5 text-[0.84rem] font-semibold text-[var(--casa-muted)]">{summary}</p>
       ) : (
         <span />
       )}
@@ -124,22 +129,32 @@ const initials = (name: string) =>
     .map((w) => w[0]!.toUpperCase())
     .join('') || '·';
 
+/** Soft tints for a record's initials; a name always gets the same one, so a person is recognisable down a list. */
+const TINTS = [
+  'bg-[#e8f1fd] text-[#1e4f9a] ring-[#d3e3f8]',
+  'bg-[#e9f7ef] text-[#17693a] ring-[#cfead9]',
+  'bg-[#fff4dc] text-[#8a5a00] ring-[#f1dfb0]',
+  'bg-[#fdecef] text-[#a22545] ring-[#f5d1d9]',
+  'bg-[#f1ecfd] text-[#5b3aa6] ring-[#e0d6f7]',
+  'bg-[#e6f6f7] text-[#16676d] ring-[#c9e9eb]',
+] as const;
+
+const tintOf = (name: string) => TINTS[[...name].reduce((sum, c) => sum + c.charCodeAt(0), 0) % TINTS.length];
+
 /**
- * Initials in a circle. A record (a learner, a school) is light; a colleague
- * is ink, as in the top bar — so "who it is about" and "who has it" never
- * read alike.
+ * Initials in a circle. A record (a learner, a school) is softly tinted, the
+ * same tint for the same name; a colleague is navy — so "who it is about" and
+ * "who has it" never read alike.
  */
-export function Avatar({ name, staff = false, size = 'md' }: { name: string; staff?: boolean; size?: 'sm' | 'md' }) {
+export function Avatar({ name, staff = false, size = 'md' }: { name: string; staff?: boolean; size?: 'sm' | 'md' | 'lg' }) {
   return (
     <span
       title={name}
       aria-hidden="true"
       className={cn(
         'inline-grid shrink-0 place-items-center rounded-full font-bold tracking-[0.02em] select-none',
-        size === 'md' ? 'size-8 text-[0.7rem]' : 'size-6 text-[0.6rem]',
-        staff
-          ? 'bg-[var(--casa-ink-deep)] text-white'
-          : 'bg-ws-sunk text-[#2b3546] ring-1 ring-ws-line ring-inset'
+        size === 'lg' ? 'size-12 text-[0.95rem]' : size === 'md' ? 'size-9 text-[0.72rem]' : 'size-6 text-[0.6rem]',
+        staff ? 'bg-[var(--casa-ink-deep)] text-white' : cn('ring-1 ring-inset', tintOf(name))
       )}
     >
       {initials(name)}
@@ -154,7 +169,7 @@ export function RecordName({ name, reference, about, flag }: { name: string; ref
       <Avatar name={name} />
       <span className="min-w-0">
         <span className="flex min-w-0 items-baseline gap-2">
-          <span className="truncate text-[0.9rem] font-semibold text-[var(--casa-ink)]">{name}</span>
+          <span className="truncate text-[0.9rem] font-semibold tracking-[-0.005em] text-[var(--casa-ink)]">{name}</span>
           {/* On a phone the name needs the width more than the reference does. */}
           {reference ? <span className="hidden shrink-0 text-xs font-medium text-[var(--casa-text-subtle)] tabular-nums sm:inline">{reference}</span> : null}
           {flag}

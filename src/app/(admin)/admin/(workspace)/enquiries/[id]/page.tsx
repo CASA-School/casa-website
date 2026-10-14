@@ -91,6 +91,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         backHref="/admin/enquiries"
         backLabel="All enquiries"
         title={fullName || enquiry.email}
+        avatar={fullName || enquiry.email}
         subtitle={enquiry.topic}
         status={<Badge tone={STATUS_TONES[enquiry.status]}>{STATUS_LABELS[enquiry.status]}</Badge>}
         actions={

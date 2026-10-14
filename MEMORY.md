@@ -2735,3 +2735,10 @@ CASA and nothing else at this point". The sidebar's head is the word "CASA" in t
 (the item you are on, its icon in CASA's light blue; a parent with a current sub-page reads as the
 branch in white), no yellow marker, chevrons only on hover or when open, more air above group
 labels, and Settings at the foot beside the account card (still in the strip on a phone).
+
+Twentieth pass: **the top of the pages, and livelier lists.** Record heads are clean white with the
+person's initials large and tinted beside the name, the status a soft pill, the facts bar on a faint
+ground; the way back is a small rounded pill; list titles 28px. Badges everywhere became soft
+rounded pills with a fine edge. In lists, initials are softly tinted per name (colleagues stay navy),
+a list without views says what it holds ("18 students"), and a row shows a quiet arrow on hover.
+Sidebar rows back to 32px with a fade where the menu scrolls.

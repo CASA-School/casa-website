@@ -8,6 +8,7 @@ import type {
 } from 'react';
 
 import { toDateInputValue } from '@/lib/dates';
+import { Avatar } from './list';
 import { cn } from '@/lib/utils';
 
 /**
@@ -285,7 +286,7 @@ function BackLink({ href, label }: { href: string; label?: string }) {
   return (
     <Link
       href={href}
-      className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 -ml-1.5 text-xs font-semibold text-[var(--casa-text-subtle)] transition-colors hover:bg-white/70 hover:text-[var(--casa-ink)]"
+      className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/60 py-1 pr-3 pl-2 text-xs font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset transition-colors outline-none hover:bg-white hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
     >
       <svg
         viewBox="0 0 16 16"
@@ -319,11 +320,11 @@ export function PageHeader({
   backLabel?: string;
 }) {
   return (
-    <header className="mb-5">
+    <header className="mb-6">
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex min-h-10 flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-[1.625rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{title}</h1>
+          <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-[-0.025em] text-[var(--casa-ink)]">{title}</h1>
           {description ? (
             <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[var(--casa-text-subtle)]">{description}</p>
           ) : null}
@@ -362,6 +363,7 @@ const FACT_COLUMNS: Record<number, string> = {
 export function RecordHeader({
   backHref,
   backLabel,
+  avatar,
   title,
   subtitle,
   status,
@@ -370,6 +372,8 @@ export function RecordHeader({
 }: {
   backHref?: string;
   backLabel?: string;
+  /** A person's record: their name, shown as large tinted initials beside the title. */
+  avatar?: string;
   title: ReactNode;
   subtitle?: ReactNode;
   status?: ReactNode;
@@ -380,26 +384,28 @@ export function RecordHeader({
     <header className="mb-4">
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
       <section className={cn('overflow-hidden rounded-3xl border border-ws-line bg-white', cardShadow)}>
-        <div className="flex flex-wrap items-start gap-4 bg-[radial-gradient(circle_at_97%_0%,rgba(255,213,0,0.18),transparent_30%),linear-gradient(120deg,#eef6fc_0%,#f9f6ee_100%)] px-5 pt-5 pb-4">
+        {/* Clean white: the record's name carries the head, not a tinted wash behind it. */}
+        <div className="flex flex-wrap items-start gap-4 px-6 pt-6 pb-5">
+          {avatar ? <Avatar name={avatar} size="lg" /> : null}
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-[1.625rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{title}</h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-[-0.025em] text-[var(--casa-ink)]">{title}</h1>
               {status}
             </div>
-            {subtitle ? <div className="mt-1 text-sm text-[var(--casa-text-subtle)]">{subtitle}</div> : null}
+            {subtitle ? <div className="mt-1.5 text-sm text-[var(--casa-text-subtle)]">{subtitle}</div> : null}
           </div>
           {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
         {facts.length ? (
-          <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-line bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
+          <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-line-soft bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
             {facts.map((fact) => {
               const body = (
                 <>
-                  <dt className="mb-1 flex items-center gap-1.5 text-xs font-bold text-[var(--casa-muted)]">
+                  <dt className="mb-1.5 flex items-center gap-2 text-[0.74rem] font-semibold text-[var(--casa-muted)]">
                     {fact.icon ? <IconChip icon={fact.icon} tint={fact.tint} /> : null}
                     {fact.label}
                   </dt>
-                  <dd className="truncate text-[0.9rem] font-extrabold text-[var(--casa-ink)]">
+                  <dd className="truncate text-[0.95rem] font-bold text-[var(--casa-ink)]">
                     {fact.value === null || fact.value === undefined || fact.value === '' ? (
                       <span className="font-semibold text-[var(--casa-text-subtle)]">—</span>
                     ) : (
@@ -410,11 +416,11 @@ export function RecordHeader({
                 </>
               );
               return fact.href ? (
-                <Link key={fact.label} href={fact.href} className="block min-w-0 bg-white px-4 py-3 transition-colors hover:bg-[#f6f9fc]">
+                <Link key={fact.label} href={fact.href} className="block min-w-0 bg-[#fbfcfe] px-5 py-3.5 transition-colors hover:bg-[#f4f7fb]">
                   {body}
                 </Link>
               ) : (
-                <div key={fact.label} className="min-w-0 bg-white px-4 py-3">
+                <div key={fact.label} className="min-w-0 bg-[#fbfcfe] px-5 py-3.5">
                   {body}
                 </div>
               );
@@ -426,14 +432,15 @@ export function RecordHeader({
   );
 }
 
+/** Soft pills with a fine edge: a state is read at a glance without a block of colour shouting it. */
 const badgeTones = {
   /** The one that must interrupt: unanswered, unreviewed, waiting on us. */
-  accent: 'bg-[var(--casa-accent-surface)] text-white',
-  neutral: 'bg-ws-sunk text-[var(--casa-ink)] ring-1 ring-inset ring-ws-line-firm',
-  positive: 'bg-[var(--casa-success-surface)]/12 text-[var(--casa-success-text)]',
-  warning: 'bg-[var(--casa-warning-text)]/12 text-[var(--casa-warning-text)]',
-  danger: 'bg-[var(--casa-danger-text)]/10 text-[var(--casa-danger-text)]',
-  quiet: 'bg-transparent text-[var(--casa-text-subtle)] ring-1 ring-inset ring-ws-line',
+  accent: 'bg-[#e8f1fd] text-[#1d4e96] ring-[#cfe0f7]',
+  neutral: 'bg-[#f1f4f8] text-[#2b3546] ring-[#dde3ec]',
+  positive: 'bg-[#e9f7ef] text-[#17693a] ring-[#cbe8d6]',
+  warning: 'bg-[#fff4dc] text-[#8a5a00] ring-[#f1dfb0]',
+  danger: 'bg-[#fdecec] text-[#a3241f] ring-[#f5cfcd]',
+  quiet: 'bg-transparent text-[var(--casa-text-subtle)] ring-ws-line',
 } as const;
 
 export type BadgeTone = keyof typeof badgeTones;
@@ -450,7 +457,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[0.7rem] font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold whitespace-nowrap ring-1 ring-inset',
         badgeTones[tone],
         className
       )}
@@ -592,8 +599,17 @@ export function Cell({
       )}
     >
       {href ? (
-        <Link href={href} className="absolute inset-0 z-10">
+        <Link href={href} className="absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 focus-visible:ring-inset">
           <span className="sr-only">Open</span>
+          {/* The row opens something: a quiet arrow at its end, on hover or focus. */}
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 right-[5px] hidden -translate-y-1/2 text-[var(--casa-text-subtle)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:block"
+          >
+            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 3.5 4.5 4.5L6 12.5" />
+            </svg>
+          </span>
         </Link>
       ) : null}
       {children}

@@ -155,6 +155,7 @@ export default async function PersonPage({
         backHref="/admin/people"
         backLabel="All students"
         title={title}
+        avatar={person.displayName}
         subtitle={[
           person.id !== id
             ? 'Opened from a linked record'
