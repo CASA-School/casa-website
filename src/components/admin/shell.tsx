@@ -6,10 +6,13 @@ import { LangSwitch } from './lang-switch';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
 import { SidebarToggle } from './sidebar-toggle';
+import { TopBar } from './top-bar';
+import { AccountMenu } from './top-bar-menus';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
 import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { publicSiteOrigin } from '@/lib/cms/origins';
 import { cn } from '@/lib/utils';
 
 /**
@@ -21,17 +24,18 @@ import { cn } from '@/lib/utils';
  * looks like this"). Deep navy — FileMaker's structural colour, which the team
  * knows, on the surface every modern product darkens — so the white pages read
  * as the lit work area and the frame recedes. From the top: the name "CASA" in
- * type, search (⌘K), the navigation in its groups, Settings at the foot,
- * and at the foot who is signed in, the way to the website and sign-out. There
- * is no top bar on a desktop: everything it held lives in the sidebar, and the
- * page gets the height.
+ * type, the navigation in its groups, Settings at the foot. What a colleague
+ * reaches for from any page — search (⌘K), "Neu", the language, who is signed
+ * in — sits in a slim glass top bar over the page (`TopBar`, 2026-10-14), so
+ * the sidebar is navigation and nothing else.
  *
  * Navigation and nothing it does not need: no queue counts beside the labels
  * (backlogs, not notifications), one fine marker for "you are here".
  *
  * On desktop the sidebar collapses to icons (`SidebarToggle`, CSS in
- * globals.css). On a phone it is a navy band at the top: the logo, search and
- * the account, then the destinations as a horizontal scroller.
+ * globals.css). On a phone it is a navy band at the top: the logo, the
+ * language, search and the account, then the destinations as a horizontal
+ * scroller; the top bar is desktop only.
  *
  * FOCUS MODE (`variant="focus"`) is the same frame at a different density, for
  * the one module that is a board rather than a queue: the sidebar is fixed at
@@ -50,7 +54,9 @@ export async function WorkspaceShell({
   children: ReactNode;
 }) {
   const focus = variant === 'focus';
-  const { t, lang } = await getI18n();
+  const [{ t, lang }, site] = await Promise.all([getI18n(), publicSiteOrigin()]);
+  const siteHref = `${site}/`;
+  const roleText = roleLabel(user.role, lang);
   // Rooms, the type lists and the price list: defined once and left alone for a season.
   // The price list is finance's and management's (module `prices`).
   const settingsItems = [
@@ -63,7 +69,7 @@ export async function WorkspaceShell({
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
       <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[linear-gradient(180deg,var(--ws-rail-top)_0%,var(--ws-rail)_45%)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
         <div className="flex h-full flex-col overflow-x-hidden">
-          <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4 lg:h-16">
+          <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
             {/* The name in type, nothing else (Rahman, 2026-10-14): set in the workspace's display serif, as the logo's lettering is. */}
             <Link
               href="/admin"
@@ -73,21 +79,19 @@ export async function WorkspaceShell({
             >
               CASA
             </Link>
-            <span className="ml-auto hidden lg:inline-flex">
-              <LangSwitch />
-            </span>
             <span className="flex items-center gap-1 lg:hidden">
               <LangSwitch />
               <CommandSearch variant="rail-icon" />
-              <Link href="/admin/account" title={t('Dein Konto', 'Your account')} className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/40">
-                <Avatar name={user.name} size={28} tone="rail" />
-              </Link>
+              <AccountMenu
+                tone="rail"
+                name={user.name}
+                role={roleText}
+                email={user.email}
+                siteHref={siteHref}
+                signOutAction={signOutAction}
+              />
             </span>
             {focus ? null : <SidebarToggle />}
-          </div>
-
-          <div className="hidden px-3 pb-3 lg:block">
-            <CommandSearch variant="rail" />
           </div>
 
           <nav
@@ -249,51 +253,16 @@ export async function WorkspaceShell({
           </nav>
 
           {/* Settings — rooms, the lists, the prices: set up once a season, so at the foot, as in every tool. */}
-          <nav aria-label={t('Einstellungen', 'Settings')} className="hidden shrink-0 px-3 pt-2 lg:block">
+          <nav aria-label={t('Einstellungen', 'Settings')} className="hidden shrink-0 px-3 pt-2 pb-4 lg:block">
             <NavLink href="/admin/settings" title={t('Einstellungen', 'Settings')} icon={Icon.settings} items={settingsItems}>
               {t('Einstellungen', 'Settings')}
             </NavLink>
           </nav>
-
-          {/* Who is signed in, the way to the website, and out. */}
-          <div className="hidden shrink-0 p-2.5 lg:block">
-            <div data-rail-foot className="flex items-center gap-0.5 rounded-xl bg-white/[0.045] p-1 ring-1 ring-white/[0.07] ring-inset">
-              <Link
-                href="/admin/account"
-                title={t('Dein Konto', 'Your account')}
-                className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors outline-none hover:bg-white/[0.07] focus-visible:ring-2 focus-visible:ring-white/40"
-              >
-                <Avatar name={user.name} size={30} tone="rail" />
-                <span data-rail-hide className="min-w-0">
-                  <span className="block truncate text-[0.82rem] leading-tight font-semibold text-white">{user.name}</span>
-                  <span className="block text-[0.7rem] leading-tight text-white/50">{roleLabel(user.role, lang)}</span>
-                </span>
-              </Link>
-              <Link
-                href="/"
-                title={t('Zur Website', 'The website')}
-                aria-label={t('Zur Website', 'The website')}
-                data-rail-hide
-                className="flex size-7 shrink-0 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
-              >
-                {Icon.website}
-              </Link>
-              <form action={signOutAction}>
-                <button
-                  type="submit"
-                  title={t('Abmelden', 'Sign out')}
-                  aria-label={t('Abmelden', 'Sign out')}
-                  className="flex size-7 items-center justify-center rounded-lg text-white/50 transition-colors outline-none hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40"
-                >
-                  {Icon.signOut}
-                </button>
-              </form>
-            </div>
-          </div>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar user={user} roleText={roleText} siteHref={siteHref} signOutAction={signOutAction} focus={focus} />
         <main
           className={cn(
             'flex-1 bg-ws-canvas',
@@ -318,36 +287,3 @@ const ROLE_LABELS: Record<StaffRole, Bilingual> = {
 };
 
 export const roleLabel = (role: StaffRole, lang: WsLang) => pick(lang, ROLE_LABELS[role]);
-
-/**
- * Initials, not a photograph.
- *
- * CLAUDE.md rule 3: the portraits in `public/media/casa/team/` are synthetic
- * placeholders and must not be presented as real staff. An avatar slot filled
- * with one of them would do exactly that, on the account menu of the person
- * looking at it.
- *
- * `rail` on the navy sidebar (a lighter navy disc), `ink` on a white page.
- */
-function Avatar({ name, size = 34, tone = 'ink' }: { name: string; size?: number; tone?: 'ink' | 'rail' }) {
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0] ?? '')
-    .join('')
-    .toUpperCase();
-
-  return (
-    <span
-      aria-hidden="true"
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }}
-      className={cn(
-        'flex shrink-0 items-center justify-center rounded-full font-bold',
-        tone === 'rail' ? 'bg-[#2e5288] text-white ring-1 ring-white/15' : 'bg-ws-panel text-ws-on-panel'
-      )}
-    >
-      {initials}
-    </span>
-  );
-}

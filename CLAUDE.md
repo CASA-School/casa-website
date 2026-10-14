@@ -268,9 +268,10 @@ defined once and left for a season; they live under Settings, not the main
 rail. A nav label and the page title it opens must say the same word.
 
 **No counts in the rail, and no fake notifications.** Queue backlogs are not
-notifications. The sidebar is a navy frame (logo, search, navigation, and at its foot
-the person and sign-out); there is no top bar on a desktop, and a notification bell
-goes at the sidebar's foot only once a real source exists. `docs/ADMIN_WORKSPACE.md` §Design standards has the
+notifications. The sidebar is a navy frame (the name, navigation, Settings at its
+foot); a slim glass top bar on a desktop holds search, „Neu", the language and the
+account menu (2026-10-14), and a notification bell goes there only once a real
+source exists. `docs/ADMIN_WORKSPACE.md` §Design standards has the
 measurements and the defect each rule came from.
 
 **Workspace screens: labels, not explanations.** The staff workspace must stay

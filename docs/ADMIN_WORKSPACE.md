@@ -585,25 +585,29 @@ professional tool looks like (`shell.tsx`):
   blue; a parent whose sub-page is current reads as the branch in white, not as
   a second filled row; chevrons only on hover or when a branch is open; group
   labels in sentence case with air above them.
-- **Search under the name** (`command-search.tsx`, ⌘K, Ctrl K or "/"): a name,
-  an email address or an offer number, and Enter opens the record — students,
-  enquiries, registrations, offers, bookings and job applications, each only for
-  a colleague who holds that module (`src/lib/admin/search.ts`), five a kind.
 - **The foot:** Settings (rooms, the lists, the prices — set up once a season,
-  so at the foot as in every tool; on a phone it stays in the strip), then who is
-  signed in (their name opens Your account), the way to the website and
-  sign-out in one soft card — visible collapsed too, as the avatar and the
-  sign-out icon.
-- **No top bar on a desktop.** Everything it held lives in the sidebar, and
-  the page gets the height. On a phone the sidebar is a navy band at the top:
-  the logo, search and the account, then the destinations as a scroller.
+  so at the foot as in every tool; on a phone it stays in the strip).
+- **A slim top bar on a desktop (2026-10-14, Rahman: "a top nav but very sleek
+  and elegant for some of the functionalities"; `top-bar.tsx`).** 56px of glass
+  over the canvas — the page's own ground, a fine line under it — aligned with
+  the page's 1180px measure. On the left the search (`command-search.tsx`, ⌘K,
+  Ctrl K or "/"): a name, an email address or an offer number, and Enter opens
+  the record — students, enquiries, registrations, offers, bookings and job
+  applications, each only for a colleague who holds that module
+  (`src/lib/admin/search.ts`), five a kind. On the right „Neu" (an offer, a
+  person, a cohort — what this colleague may create; `?new=1` opens the form on
+  its page), DE | EN, and who is signed in: their initials and first name open
+  a menu with Your account, the website and sign-out. Navigation stays in the
+  sidebar, which is now navigation and nothing else. On a phone the navy band is
+  the top bar: the logo, the language, search and the initials (the same account
+  menu), then the destinations as a scroller.
 
 **There are no counts in the sidebar.** The numbers beside Enquiries,
 Registrations and Placement were queue backlogs, not notifications, and a
 permanent number next to a label reads as nagging (the overview's cards carry
 what is new, once). When a notification system has a real source
 — something happened, to a record you own, since you last looked — it belongs
-at the foot of the sidebar, beside the person. Until then there is no bell.
+in the top bar, beside the person. Until then there is no bell.
 
 ### Collapsing
 
@@ -731,7 +735,9 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
 10. **A list is one white card.** Its views (tabs, underlined) and its search
     sit across the top of the card (`ListBar`); the rows follow; an empty view
     is one calm line inside the same card (`ListEmpty`), so the views stay in
-    reach. Search submits on Enter — no Search button. A tab with nothing in it
+    reach. Search is a magnifier until it is wanted, then a field that
+    opens beside it and stays open while a search is in force, with a cross to
+    clear it (2026-10-14); it submits on Enter — no Search button. A tab with nothing in it
     shows no count; a tab that only repeats a group of another view goes.
 11. **A column holds one kind of thing.** The record — its initials, its name,
     a quiet reference beside the name, and under it what it is about

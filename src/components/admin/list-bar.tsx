@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -9,6 +9,14 @@ import { Icon } from './icons';
 import { useWsLang } from './lang';
 
 export type ListTab = { key: string; label: string; href: string; count?: number };
+
+type ListSearchProps = {
+  action: string;
+  value?: string;
+  placeholder: string;
+  /** Params the search keeps, the current view among them. */
+  keep?: Record<string, string | undefined>;
+};
 
 /** The top of a list's card: its views on the left, its search on the right. */
 export function ListBar({
@@ -21,13 +29,7 @@ export function ListBar({
   active?: string;
   /** For a list without views: what it holds, in a few words ("18 students"), where the tabs would be. */
   summary?: ReactNode;
-  search?: {
-    action: string;
-    value?: string;
-    placeholder: string;
-    /** Params the search keeps, the current view among them. */
-    keep?: Record<string, string | undefined>;
-  };
+  search?: ListSearchProps;
 }) {
   const { t } = useWsLang();
   return (
@@ -64,24 +66,92 @@ export function ListBar({
       ) : (
         <span />
       )}
-      {search ? (
-        <form action={search.action} role="search" className="relative w-full py-2 sm:w-64">
-          {Object.entries(search.keep ?? {}).map(([name, value]) =>
-            value ? <input key={name} type="hidden" name={name} value={value} /> : null
-          )}
-          <span aria-hidden="true" className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-[var(--casa-text-subtle)] [&_svg]:h-4 [&_svg]:w-4">
-            {Icon.search}
-          </span>
-          <input
-            type="search"
-            name="q"
-            defaultValue={search.value ?? ''}
-            placeholder={search.placeholder}
-            aria-label={t('Suchen', 'Search')}
-            className="h-8 w-full rounded-lg border border-transparent bg-ws-sunk/80 pr-3 pl-8 text-[0.84rem] font-medium text-[var(--casa-ink)] transition-colors outline-none placeholder:font-normal placeholder:text-[var(--casa-text-subtle)] hover:bg-ws-sunk focus:border-[var(--casa-blue)] focus:bg-white focus:ring-[3px] focus:ring-[var(--casa-blue)]/20"
-          />
-        </form>
-      ) : null}
+      {search ? <ListSearch {...search} /> : null}
     </div>
+  );
+}
+
+/**
+ * A list's search: a magnifier until it is wanted (Rahman, 2026-10-14: "use
+ * search icon so it is not taking a lot of space"), then a field that opens
+ * beside it. It stays open while a search is in force, with a cross that clears
+ * it; empty, it folds back on Escape or when the focus leaves it. Enter submits.
+ */
+function ListSearch({ action, value, placeholder, keep }: ListSearchProps) {
+  const { t } = useWsLang();
+  const applied = Boolean(value);
+  const [open, setOpen] = useState(applied);
+  const input = useRef<HTMLInputElement>(null);
+  const kept = Object.entries(keep ?? {}).filter((entry): entry is [string, string] => Boolean(entry[1]));
+  const cleared = `${action}${kept.length ? `?${new URLSearchParams(kept)}` : ''}`;
+
+  const fold = () => {
+    if (!applied && !input.current?.value) setOpen(false);
+  };
+
+  return (
+    <form
+      action={action}
+      role="search"
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) fold();
+      }}
+      className={cn(
+        'relative my-2 flex h-9 items-center rounded-full transition-[width,background-color,box-shadow] duration-200 ease-out motion-reduce:transition-none',
+        open
+          ? 'w-full bg-white shadow-[0_1px_2px_rgba(16,24,40,0.05)] ring-1 ring-ws-line ring-inset focus-within:ring-2 focus-within:ring-[var(--casa-blue)]/35 sm:w-64'
+          : 'w-9'
+      )}
+    >
+      {kept.map(([name, held]) => (
+        <input key={name} type="hidden" name={name} value={held} />
+      ))}
+      <button
+        type="button"
+        onClick={() => {
+          setOpen(true);
+          requestAnimationFrame(() => input.current?.focus());
+        }}
+        tabIndex={open ? -1 : 0}
+        aria-label={t('Suchen', 'Search')}
+        aria-expanded={open}
+        title={t('Suchen', 'Search')}
+        className={cn(
+          'absolute left-0 grid size-9 shrink-0 place-items-center rounded-full text-[var(--casa-muted)] transition-colors outline-none [&_svg]:size-4',
+          open ? 'pointer-events-none' : 'hover:bg-ws-sunk hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40'
+        )}
+      >
+        {Icon.search}
+      </button>
+      <input
+        ref={input}
+        type="search"
+        name="q"
+        defaultValue={value ?? ''}
+        placeholder={placeholder}
+        aria-label={t('Suchen', 'Search')}
+        tabIndex={open ? 0 : -1}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape' && !e.currentTarget.value) {
+            e.currentTarget.blur();
+            setOpen(false);
+          }
+        }}
+        className={cn(
+          'h-full w-full min-w-0 bg-transparent pr-9 pl-9 text-[0.84rem] font-medium text-[var(--casa-ink)] outline-none placeholder:font-normal placeholder:text-[var(--casa-text-subtle)] [&::-webkit-search-cancel-button]:hidden',
+          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+      />
+      {applied ? (
+        <Link
+          href={cleared}
+          aria-label={t('Suche löschen', 'Clear the search')}
+          title={t('Suche löschen', 'Clear the search')}
+          className="absolute right-1.5 grid size-6 place-items-center rounded-full text-[var(--casa-text-subtle)] transition-colors outline-none hover:bg-ws-sunk hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3"
+        >
+          {Icon.close}
+        </Link>
+      ) : null}
+    </form>
   );
 }

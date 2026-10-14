@@ -197,6 +197,22 @@ export const Icon = {
       <path d="m6 3.5 4.5 4.5L6 12.5" />
     </svg>
   ),
+  chevronDown: (
+    <svg {...box}>
+      <path d="m3.5 6 4.5 4.5L12.5 6" />
+    </svg>
+  ),
+  /** Something new: the top bar's create menu. */
+  plus: (
+    <svg {...box}>
+      <path d="M8 3v10M3 8h10" />
+    </svg>
+  ),
+  close: (
+    <svg {...box}>
+      <path d="m4 4 8 8M12 4l-8 8" />
+    </svg>
+  ),
   /** A tick in a circle. */
   check: (
     <svg {...box}>

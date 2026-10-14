@@ -60,7 +60,12 @@ export default async function PeoplePage({
         title={t('Teilnehmende', 'Students')}
         actions={
           canEdit ? (
-            <FormDialog trigger={t('Person hinzufügen', 'Add person')} title={t('Neue Person', 'Add a person')} triggerVariant="primary">
+            <FormDialog
+              trigger={t('Person hinzufügen', 'Add person')}
+              title={t('Neue Person', 'Add a person')}
+              triggerVariant="primary"
+              defaultOpen={params.new === '1'}
+            >
               <PersonForm countries={countries} />
             </FormDialog>
           ) : null

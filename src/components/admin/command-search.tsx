@@ -23,13 +23,14 @@ const GROUPS: { kind: SearchKind; label: Bilingual }[] = [
 ];
 
 /**
- * Search, at the top of the sidebar: ⌘K (Ctrl K) or "/" from anywhere, a name,
- * an address or an offer number, and Enter opens the record. One box for the
- * whole workspace instead of knowing which list a person is in
- * (src/lib/admin/search.ts). `rail` is the field in the sidebar, `rail-icon`
- * the magnifier in its phone band.
+ * Search: ⌘K (Ctrl K) or "/" from anywhere, a name, an address or an offer
+ * number, and Enter opens the record. One box for the whole workspace instead
+ * of knowing which list a person is in (src/lib/admin/search.ts). `bar` is the
+ * field in the desktop top bar, `rail-icon` the magnifier in the phone's navy
+ * band. Both are mounted and CSS shows one, so only the visible one answers
+ * the shortcut — otherwise ⌘K would open two dialogs.
  */
-export function CommandSearch({ variant = 'rail' }: { variant?: 'rail' | 'rail-icon' }) {
+export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-icon' }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
@@ -38,10 +39,12 @@ export function CommandSearch({ variant = 'rail' }: { variant?: 'rail' | 'rail-i
   const [active, setActive] = useState(0);
   const [pending, startTransition] = useTransition();
   const asked = useRef(0);
+  const trigger = useRef<HTMLButtonElement>(null);
   const { t, lang } = useWsLang();
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
+      if (!trigger.current?.offsetParent) return;
       const typing = e.target instanceof HTMLElement && (e.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName));
       if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing)) {
         e.preventDefault();
@@ -83,26 +86,25 @@ export function CommandSearch({ variant = 'rail' }: { variant?: 'rail' | 'rail-i
 
   return (
     <>
-      {variant === 'rail' ? (
+      {variant === 'bar' ? (
         <button
+          ref={trigger}
           type="button"
           onClick={() => setOpen(true)}
-          data-rail-search
           title={t('Suchen', 'Search')}
-          className="flex h-9 w-full items-center gap-2.5 rounded-lg bg-white/[0.07] px-2.5 text-left text-[0.82rem] text-white/55 ring-1 ring-white/10 transition-colors outline-none ring-inset hover:bg-white/[0.1] hover:text-white/80 focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group flex h-9 w-full max-w-[22rem] items-center gap-2.5 rounded-full bg-white/70 pr-1.5 pl-3.5 text-left text-[0.84rem] text-[var(--casa-text-subtle)] ring-1 ring-ws-line ring-inset transition-[background-color,box-shadow] outline-none hover:bg-white hover:shadow-[0_1px_2px_rgba(16,24,40,0.06)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
         >
-          <span aria-hidden="true" className="shrink-0 [&_svg]:h-4 [&_svg]:w-4">
+          <span aria-hidden="true" className="shrink-0 text-[var(--casa-muted)] [&_svg]:h-4 [&_svg]:w-4">
             {Icon.search}
           </span>
-          <span data-rail-hide className="flex-1 truncate">
-            {t('Suchen', 'Search')}
-          </span>
-          <kbd data-rail-hide className="rounded bg-white/10 px-1.5 font-sans text-[0.66rem] font-semibold text-white/60">
+          <span className="flex-1 truncate">{t('Suchen …', 'Search …')}</span>
+          <kbd className="rounded-full bg-ws-sunk px-2 py-0.5 font-sans text-[0.66rem] font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset">
             ⌘K
           </kbd>
         </button>
       ) : (
         <button
+          ref={trigger}
           type="button"
           onClick={() => setOpen(true)}
           title={t('Suchen', 'Search')}

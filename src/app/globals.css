@@ -1033,7 +1033,7 @@ h3 {
     padding: 0;
   }
 
-  /* Collapsed, the head keeps only the toggle, search only its icon, the foot the person and sign-out. */
+  /* Collapsed, the head keeps only the toggle. */
   :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-hide] {
     display: none;
   }
@@ -1044,20 +1044,6 @@ h3 {
     gap: 0.5rem;
     height: auto;
     padding: 1rem 0 0.75rem;
-  }
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-search] {
-    justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
-  }
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-foot] {
-    flex-direction: column;
-    background: transparent;
-    box-shadow: none;
-  }
-  :is(html[data-workspace-nav='collapsed'], .casa-workspace-focus) .casa-workspace-rail [data-rail-foot] > a:first-child {
-    flex: none;
-    justify-content: center;
   }
 
   /* Group headings are gone, so a hairline keeps the grouping legible — and

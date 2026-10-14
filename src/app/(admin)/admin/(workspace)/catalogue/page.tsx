@@ -52,12 +52,12 @@ const hide = 'hidden md:table-cell';
 export default async function CataloguePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string; view?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; view?: string; new?: string }>;
 }) {
   const user = await requireModule('catalogue');
   const { t, lang } = await getI18n();
   const plans = canAccess(user, 'rooms', 'edit');
-  const [{ error, view: rawView }, types, instances, rooms, levels] = await Promise.all([
+  const [{ error, view: rawView, new: fresh }, types, instances, rooms, levels] = await Promise.all([
     searchParams,
     listCourseTypes(),
     listUpcomingCourseInstances(20),
@@ -74,7 +74,12 @@ export default async function CataloguePage({
         title={t('Kurse', 'Courses')}
         actions={
           plans ? (
-            <FormDialog trigger={t('Termin planen', 'Schedule cohort')} title={t('Termin planen', 'Schedule a cohort')} triggerVariant="primary">
+            <FormDialog
+              trigger={t('Termin planen', 'Schedule cohort')}
+              title={t('Termin planen', 'Schedule a cohort')}
+              triggerVariant="primary"
+              defaultOpen={fresh === '1'}
+            >
               <CohortForm courseTypes={types} rooms={rooms} levels={levels} />
             </FormDialog>
           ) : null
