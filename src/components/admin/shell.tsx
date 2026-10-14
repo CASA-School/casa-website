@@ -322,7 +322,7 @@ export const roleLabel = (role: StaffRole) => ROLE_LABELS[role];
  *
  * `rail` on the navy sidebar (a lighter navy disc), `ink` on a white page.
  */
-export function Avatar({ name, size = 34, tone = 'ink' }: { name: string; size?: number; tone?: 'ink' | 'rail' }) {
+function Avatar({ name, size = 34, tone = 'ink' }: { name: string; size?: number; tone?: 'ink' | 'rail' }) {
   const initials = name
     .trim()
     .split(/\s+/)

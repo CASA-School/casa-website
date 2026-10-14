@@ -71,25 +71,6 @@ export const MODULE_LABELS: Record<WorkspaceModule, string> = {
   settings: 'Settings',
 };
 
-export const MODULE_HREFS: Record<WorkspaceModule, string> = {
-  overview: '/admin',
-  enquiries: '/admin/enquiries',
-  registrations: '/admin/registrations',
-  placement: '/admin/placement',
-  applications: '/admin/applications',
-  people: '/admin/people',
-  bookings: '/admin/bookings',
-  offers: '/admin/offers',
-  rooms: '/admin/settings/rooms',
-  prices: '/admin/settings/prices',
-  catalogue: '/admin/catalogue',
-  kursplanung: '/admin/kursplanung',
-  website: '/admin/website',
-  activity: '/admin/activity',
-  team: '/admin/team',
-  settings: '/admin/settings',
-};
-
 /** Modules that cannot be taken away: the frame the rest hangs on. */
 export const ALWAYS_ON: readonly WorkspaceModule[] = ['overview', 'settings'];
 

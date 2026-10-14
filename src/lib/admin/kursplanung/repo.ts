@@ -179,31 +179,6 @@ export async function loadPlan(month: string): Promise<PlanContext> {
   return { teachers, groups, assignments, absences, weeks: planningWeeks(month) };
 }
 
-export type PlanMonthSummary = {
-  groups: number;
-  morning: number;
-  afternoon: number;
-  teachers: number;
-  assignments: number;
-  /** Course days the month asks for: groups × days per week × weeks. */
-  courseDays: number;
-};
-
-export async function planMonthSummary(month: string): Promise<PlanMonthSummary> {
-  const plan = await loadPlan(month);
-  const morning = plan.groups.filter((g) => g.shift === 'morning').length;
-  const afternoon = plan.groups.length - morning;
-  const courseDays = plan.weeks.length * (morning * 5 + afternoon * 4);
-  return {
-    groups: plan.groups.length,
-    morning,
-    afternoon,
-    teachers: plan.teachers.filter((t) => t.isActive).length,
-    assignments: plan.assignments.length,
-    courseDays,
-  };
-}
-
 /**
  * Replaces one shift-week's assignments in a single transaction: the board's
  * only write. `groupIds` are the month's groups of that shift, `days` the

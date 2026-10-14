@@ -286,18 +286,6 @@ export async function confirmPlacement({
   });
 }
 
-/** Attempts waiting on a teacher. Drives the sidebar badge and the overview. */
-export async function placementReviewBacklog(): Promise<number> {
-  const row = await queryFirst<{ n: string }>(
-    `SELECT count(*) AS n
-       FROM placement_attempts a
-       LEFT JOIN placement_reviews r ON r.attempt_id = a.id
-      WHERE a.decision IS NOT NULL AND r.attempt_id IS NULL`
-  );
-
-  return Number(row?.n ?? 0);
-}
-
 /**
  * Names the person a review is about. Optional and reversible (null detaches).
  * Refuses when there is no review yet: a person is attached to a DECISION, not

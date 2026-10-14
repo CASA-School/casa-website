@@ -156,12 +156,6 @@ export const Icon = {
       <path d="M9.5 5.5 12 8l-2.5 2.5M12 8H6" />
     </svg>
   ),
-  /** Back arrow. */
-  back: (
-    <svg {...box}>
-      <path d="M6.5 3.5 2.5 8l4 4.5M2.5 8h11" />
-    </svg>
-  ),
   /** A magnifier. */
   search: (
     <svg {...box}>

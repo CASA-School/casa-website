@@ -94,8 +94,3 @@ export const isWeekday = (value: string): value is Weekday =>
   (WEEKDAYS as readonly string[]).includes(value);
 export const isAbsenceReason = (value: string): value is AbsenceReason =>
   (ABSENCE_REASONS as readonly string[]).includes(value);
-
-/** The code of a course group as the planners say it: `A2.2 · Gruppe 1`. */
-export function groupCode(group: Pick<CourseGroup, 'level' | 'phase' | 'groupIndex'>, of = 1): string {
-  return `${group.level}.${group.phase}${of > 1 ? ` · Gruppe ${group.groupIndex}` : ''}`;
-}

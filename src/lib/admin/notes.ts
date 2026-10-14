@@ -76,23 +76,3 @@ export async function addNote({
     [actor.id, actor.name, entity, entityId]
   );
 }
-
-/** Note counts for a page of records, so a list can show "2 notes" without N+1. */
-export async function noteCounts(
-  entity: NoteEntity,
-  entityIds: readonly string[]
-): Promise<Map<string, number>> {
-  if (entityIds.length === 0) {
-    return new Map();
-  }
-
-  const rows = await query<{ entity_id: string; n: string }>(
-    `SELECT entity_id, count(*) AS n
-       FROM staff_notes
-      WHERE entity = $1 AND entity_id = ANY($2::uuid[])
-      GROUP BY entity_id`,
-    [entity, entityIds]
-  );
-
-  return new Map(rows.map((row) => [row.entity_id, Number(row.n)]));
-}

@@ -84,51 +84,6 @@ function readDates(formData: FormData, back: string): { startDate: string; endDa
   return { startDate, endDate };
 }
 
-export async function createBookingAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('bookings', 'edit');
-  const personId = id(formData, 'personId');
-  const back = String(formData.get('returnTo') ?? `/admin/people/${personId}`);
-  const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(back) ? back : '/admin/bookings';
-
-  const dates = readDates(formData, safeBack);
-  const status = String(formData.get('status') ?? 'reserved');
-  if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
-  const payer = String(formData.get('payer') ?? 'self');
-  if (!PAYERS.has(payer)) throw new Error('Invalid payer');
-
-  const charges: { kind: ChargeKind; description: string; amount: number }[] = [];
-  const tuition = money(formData, 'tuition');
-  if (tuition !== null && tuition !== 0) {
-    charges.push({
-      kind: 'tuition',
-      description: text(formData, 'tuitionLabel', 120) ?? 'Course price',
-      amount: tuition,
-    });
-  }
-  const fee = money(formData, 'enrolmentFee');
-  if (fee !== null && fee !== 0)
-    charges.push({ kind: 'enrolment_fee', description: 'Enrolment fee', amount: fee });
-
-  const bookingId = await createBooking(
-    {
-      personId,
-      courseTypeId: optionalId(formData, 'courseTypeId'),
-      courseInstanceId: optionalId(formData, 'courseInstanceId'),
-      ...dates,
-      status: status as BookingStatus,
-      payer: payer as Payer,
-      payerName: text(formData, 'payerName', 120),
-      visaRequired: formData.get('visaRequired') === 'on',
-      notes: text(formData, 'notes', 2000),
-      charges,
-      sourceRegistrationId: optionalId(formData, 'sourceRegistrationId'),
-    },
-    actor
-  );
-  revalidatePath('/admin', 'layout');
-  redirect(`/admin/bookings/${bookingId}`);
-}
-
 export async function updateBookingAction(formData: FormData): Promise<void> {
   const actor = await requireModule('bookings', 'edit');
   const bookingId = id(formData, 'bookingId');

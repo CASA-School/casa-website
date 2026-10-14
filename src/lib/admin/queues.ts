@@ -1,4 +1,4 @@
-import { query, queryFirst, withTransaction } from './db';
+import { query, withTransaction } from './db';
 import type { StaffUser } from './auth';
 
 /**
@@ -245,18 +245,4 @@ export async function queueStatusCounts(
   }
 
   return { total, byStatus };
-}
-
-/** How many rows in one queue are still untouched. Drives the sidebar badges. */
-export async function unhandledCount(entity: QueueEntity): Promise<number> {
-  const spec = resolve(entity);
-  const openStates =
-    spec.statusColumn === 'text' ? ['new', 'submitted'] : ['new'];
-
-  const row = await queryFirst<{ n: string }>(
-    `SELECT count(*) AS n FROM ${spec.table} WHERE status::text = ANY($1)`,
-    [openStates]
-  );
-
-  return Number(row?.n ?? 0);
 }

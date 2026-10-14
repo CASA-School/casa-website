@@ -409,9 +409,6 @@ export async function getStaffUser(): Promise<StaffUser | null> {
   };
 }
 
-/** Role gate for the few screens only an owner or admin may open. */
-export const canManageStaff = (role: StaffRole) => role === 'owner' || role === 'admin';
-
 /** Deleting is owner-only: an admin can deactivate, which is reversible. */
 export const canDeleteStaff = (role: StaffRole) => role === 'owner';
 

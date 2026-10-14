@@ -88,21 +88,6 @@ export async function listFlags(entity: FlagEntity, entityId: string): Promise<R
   return rows.map(toFlag);
 }
 
-/** Open-flag counts for a page of rows, so a list shows a marker without N+1. */
-export async function openFlagCounts(
-  entity: FlagEntity,
-  entityIds: readonly string[]
-): Promise<Map<string, number>> {
-  if (entityIds.length === 0) return new Map();
-  const rows = await query<{ entity_id: string; n: string }>(
-    `SELECT entity_id, count(*) AS n FROM record_flags
-      WHERE entity = $1 AND entity_id = ANY($2::uuid[]) AND resolved_at IS NULL
-      GROUP BY entity_id`,
-    [entity, entityIds]
-  );
-  return new Map(rows.map((r) => [r.entity_id, Number(r.n)]));
-}
-
 /**
  * Raises a flag; a second raise of the same open flag is a no-op.
  *
@@ -137,21 +122,6 @@ export async function resolveFlag(flagId: string, actor: StaffUser): Promise<voi
     `UPDATE record_flags SET resolved_at = now(), resolved_by = $2
       WHERE id = $1 AND resolved_at IS NULL`,
     [flagId, actor.id]
-  );
-}
-
-/** Resolves every open flag of one code on one row — used when the cause is gone. */
-export async function resolveFlagsByCode(
-  entity: FlagEntity,
-  entityId: string,
-  code: FlagCode,
-  actor: StaffUser,
-  exec: (sql: string, params: unknown[]) => Promise<unknown> = (sql, params) => query(sql, params)
-): Promise<void> {
-  await exec(
-    `UPDATE record_flags SET resolved_at = now(), resolved_by = $4
-      WHERE entity = $1 AND entity_id = $2 AND code = $3 AND resolved_at IS NULL`,
-    [entity, entityId, code, actor.id]
   );
 }
 
