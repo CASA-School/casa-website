@@ -746,6 +746,27 @@ export async function offersFor(where: { enquiryId?: string; personId?: string }
   return rows.map((r) => ({ id: r.id, number: formatOfferNumber(r.year, r.seq), status: r.status }));
 }
 
+/** A person's offers for their page: what it is, when it is for, where it stands; newest first. */
+export async function personOffers(personId: string): Promise<
+  { id: string; number: string; status: OfferStatus; title: string; arrival: Date | null; departure: Date | null; createdAt: Date }[]
+> {
+  const rows = await query<{ id: string; year: number; seq: number; status: OfferStatus; title: string; arrival: Date | null; departure: Date | null; created_at: Date }>(
+    `SELECT id, year, seq, status, title, arrival, departure, created_at FROM offers
+      WHERE deleted_at IS NULL AND (person_id = $1 OR person_id IN (SELECT id FROM people WHERE merged_into = $1))
+      ORDER BY created_at DESC LIMIT 20`,
+    [personId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    number: formatOfferNumber(r.year, r.seq),
+    status: r.status,
+    title: r.title,
+    arrival: r.arrival,
+    departure: r.departure,
+    createdAt: r.created_at,
+  }));
+}
+
 // ------------------------------------------------------- standard texts
 
 export type StandardTexts = Record<OfferLanguage, OfferTexts>;

@@ -34,7 +34,7 @@ const TONE: Record<WorkStatus, { pill: string; dot: string }> = {
 const STEPS: readonly WorkStatus[] = ['new', 'in_progress', 'waiting', 'done'];
 
 /** A state as a small pill with its dot. */
-function StatePill({ status, lang }: { status: WorkStatus; lang: WsLang }) {
+export function StatePill({ status, lang }: { status: WorkStatus; lang: WsLang }) {
   return (
     <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.72rem] font-semibold whitespace-nowrap ring-1 ring-inset', TONE[status].pill)}>
       <span aria-hidden="true" className={cn('size-1.5 rounded-full', TONE[status].dot)} />
@@ -211,7 +211,7 @@ export async function OwnerControl({
 type TimelineItem =
   | { kind: 'note'; at: Date; note: StaffNote }
   | { kind: 'event'; at: Date; entry: ActivityEntry }
-  | { kind: 'origin'; at: Date; label: ReactNode };
+  | { kind: 'origin'; at: Date; label: ReactNode; icon?: ReactNode };
 
 /**
  * What has been said and done, in one line of time, newest first. A note is
@@ -231,14 +231,14 @@ export async function Timeline({
   id: string;
   notes: readonly StaffNote[];
   activity: readonly ActivityEntry[];
-  /** The record's arrival, the first thing that happened to it. */
-  origin?: { at: Date; label: ReactNode };
+  /** The record's arrival, the first thing that happened to it; an inbox record's mark is the envelope. */
+  origin?: { at: Date; label: ReactNode; icon?: ReactNode };
 }) {
   const { t, lang } = await getI18n();
   const items: TimelineItem[] = [
     ...notes.map((note) => ({ kind: 'note' as const, at: note.createdAt, note })),
     ...activity.filter((entry) => entry.action !== 'note_added').map((entry) => ({ kind: 'event' as const, at: entry.createdAt, entry })),
-    ...(origin ? [{ kind: 'origin' as const, at: origin.at, label: origin.label }] : []),
+    ...(origin ? [{ kind: 'origin' as const, at: origin.at, label: origin.label, icon: origin.icon }] : []),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
   const today = berlinDay(new Date());
   const full = (at: Date) => `${shortDay(at, lang)}, ${berlinTime(at, lang)}`;
@@ -295,7 +295,7 @@ export async function Timeline({
             if (item.kind === 'origin') {
               return (
                 <li key={key} className="relative flex gap-3">
-                  <Mark className="bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]">{Icon.enquiries}</Mark>
+                  <Mark className="bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]">{item.icon ?? Icon.enquiries}</Mark>
                   <div className="min-w-0 flex-1 pt-1">
                     <Meta who={item.label} at={full(item.at)} />
                   </div>

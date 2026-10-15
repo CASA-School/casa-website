@@ -15,7 +15,8 @@ export type NoteEntity =
   | 'exam_registration'
   | 'career_application'
   | 'placement_attempt'
-  | 'booking';
+  | 'booking'
+  | 'person';
 
 export type StaffNote = {
   id: string;

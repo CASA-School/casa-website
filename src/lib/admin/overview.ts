@@ -1,4 +1,5 @@
 import { query, queryFirst } from './db';
+import { inboxCounts, openCount } from './inbox';
 import { FOLLOW_UP_AFTER_DAYS } from './offers/repo';
 
 /**
@@ -238,14 +239,16 @@ export type OverviewFacts = {
 
 export async function getOverviewFacts(): Promise<OverviewFacts> {
   type Dates = 'nextExam' | 'pricesSince' | 'plannedTo';
-  const row = await queryFirst<Record<Exclude<keyof OverviewFacts, Dates>, string> & Record<Dates, Date | null>>(
+  type Inbox = 'enquiriesOpen' | 'enquiriesNew' | 'registrationsOpen' | 'registrationsNew' | 'applicationsOpen';
+  // The inboxes are counted as their own screens count them (src/lib/admin/inbox.ts), so a card and its list never disagree.
+  const [enquiries, courses, exams, applications] = await Promise.all([
+    inboxCounts('enquiry'),
+    inboxCounts('course_registration'),
+    inboxCounts('exam_registration'),
+    inboxCounts('career_application'),
+  ]);
+  const row = await queryFirst<Record<Exclude<keyof OverviewFacts, Dates | Inbox>, string> & Record<Dates, Date | null>>(
     `SELECT
-       (SELECT count(*) FROM enquiries WHERE status IN ('new', 'in_progress', 'waiting')) AS "enquiriesOpen",
-       (SELECT count(*) FROM enquiries WHERE status = 'new') AS "enquiriesNew",
-       (SELECT count(*) FROM course_registrations WHERE status IN ('new', 'in_progress', 'waiting'))
-         + (SELECT count(*) FROM exam_registrations WHERE status IN ('new', 'in_progress', 'waiting')) AS "registrationsOpen",
-       (SELECT count(*) FROM course_registrations WHERE status = 'new')
-         + (SELECT count(*) FROM exam_registrations WHERE status = 'new') AS "registrationsNew",
        (SELECT count(*) FROM people WHERE deleted_at IS NULL AND merged_into IS NULL) AS students,
        (SELECT count(*) FROM placement_attempts a LEFT JOIN placement_reviews r ON r.attempt_id = a.id
          WHERE a.decision IS NOT NULL AND r.attempt_id IS NULL) AS "placementToReview",
@@ -258,8 +261,6 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
          AND (o.valid_until < current_date OR o.sent_at::date <= current_date - ${FOLLOW_UP_AFTER_DAYS})) AS "offersToFollowUp",
        (SELECT count(*) FROM course_instances WHERE start_date >= current_date AND status <> 'cancelled') AS "cohortsUpcoming",
        (SELECT min(starts_at) FROM exam_sessions WHERE starts_at >= current_date AND status <> 'cancelled') AS "nextExam",
-       (SELECT count(*) FROM career_applications
-         WHERE status IN ('submitted', 'new', 'in_progress', 'waiting', 'interview')) AS "applicationsOpen",
        (SELECT count(*) FROM staff_users WHERE is_active) AS colleagues,
        (SELECT count(*) FROM staff_activity WHERE created_at >= current_date) AS "changesToday",
        (SELECT count(*) FROM website_releases WHERE state = 'pending') AS "websitePending",
@@ -269,10 +270,10 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
   );
   const n = (v: string | undefined) => Number(v ?? 0);
   return {
-    enquiriesOpen: n(row?.enquiriesOpen),
-    enquiriesNew: n(row?.enquiriesNew),
-    registrationsOpen: n(row?.registrationsOpen),
-    registrationsNew: n(row?.registrationsNew),
+    enquiriesOpen: openCount(enquiries),
+    enquiriesNew: enquiries.new,
+    registrationsOpen: openCount(courses) + openCount(exams),
+    registrationsNew: courses.new + exams.new,
     students: n(row?.students),
     placementToReview: n(row?.placementToReview),
     bookingsCurrent: n(row?.bookingsCurrent),
@@ -280,7 +281,7 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
     offersToFollowUp: n(row?.offersToFollowUp),
     cohortsUpcoming: n(row?.cohortsUpcoming),
     nextExam: row?.nextExam ?? null,
-    applicationsOpen: n(row?.applicationsOpen),
+    applicationsOpen: openCount(applications),
     colleagues: n(row?.colleagues),
     changesToday: n(row?.changesToday),
     websitePending: n(row?.websitePending),

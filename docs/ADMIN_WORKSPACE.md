@@ -847,6 +847,20 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     confirmed, then the sitting and the parts), the cover letter one with the
     CV beside „Antworten"; on a registration „Buchung anlegen" is the main
     action, so „Antworten" is a quiet one there.
+18. **A person's page is the hub (2026-10-15).** Every enquiry, registration,
+    offer and booking leads to it, so it answers the first questions about anyone
+    without a search: the head names them with their address, phone,
+    nationality and birthday as `MetaLine`, and its bar holds four figures — the
+    level a teacher confirmed, their bookings, what they still owe („Zu
+    zahlen"), how many cases are open. „Vorgänge" is everything under their name
+    in one list — enquiries, registrations, placement results, offers, bookings
+    — open first, then „Abgeschlossen", each with its kind's mark, where it
+    stands and, for a booking, what is open or paid. Beside it what needs a look,
+    their details („Angaben", every address and number, FileMaker links), the
+    records linked into this one with an undo, and the same `Timeline` as the
+    inbox records: notes on the person (migration 0026) and the changes to it,
+    ending with how it came to be. The Übersicht's inbox cards count with
+    `inboxCounts`, as the lists do.
 
 ## Copy on screens — labels, not explanations
 

@@ -11,82 +11,98 @@ import { RecordFoot } from '../../bookings/record-foot';
 import { courseNameResolver } from '../../registrations/course-names';
 import { optionLine } from '../../registrations/option-label';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
-import { bookingOffer } from '@/lib/admin/booking-offer';
-import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, personBookings } from '@/lib/admin/bookings';
-import { canAccess } from '@/lib/admin/access';
-import { requireModule } from '@/lib/admin/guard';
 import { Icon } from '@/components/admin/icons';
 import { MakeOffer } from '@/components/admin/make-offer';
-import {
-  Badge,
-  BirthDate,
-  Button,
-  Card,
-  DateText,
-  DetailList,
-  IconChip,
-  RecordHeader,
-  type Tint,
-} from '@/components/admin/ui';
-import { pick, relativeDays, wsLocale, type Bilingual, type T } from '@/lib/admin/i18n';
-import { getI18n } from '@/lib/admin/i18n.server';
-import { activityFor, describeActivity } from '@/lib/admin/activity';
-import { offersFor } from '@/lib/admin/offers/repo';
+import { MetaItem, MetaLine, StatePill, Timeline } from '@/components/admin/record-parts';
+import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone, type Tint } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
+import { activityFor } from '@/lib/admin/activity';
+import { bookingOffer } from '@/lib/admin/booking-offer';
+import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, personBookings } from '@/lib/admin/bookings';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
-import {
-  getPerson,
-  latestConfirmedLevel,
-  listCountries,
-  personTimeline,
-  type TimelineItem,
-} from '@/lib/admin/people';
-import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
+import { requireModule } from '@/lib/admin/guard';
+import { counted, dayRange, num, pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
+import { listNotes } from '@/lib/admin/notes';
+import { personOffers } from '@/lib/admin/offers/repo';
+import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
+import { getPerson, latestConfirmedLevel, listCountries, personTimeline, type TimelineItem } from '@/lib/admin/people';
+import { normaliseStatus } from '@/lib/admin/queues';
+import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
 const SALUTATIONS: Record<string, Bilingual> = {
   mr: { de: 'Herr', en: 'Mr' },
   ms: { de: 'Frau', en: 'Ms' },
   mx: { de: 'Mx', en: 'Mx' },
-  neutral: { de: '', en: '' },
+  neutral: { de: 'Keine Anrede', en: 'No salutation' },
 };
 
-/** What each kind of history entry is, and its meaning colour. */
-const KINDS: Record<TimelineItem['kind'], { label: Bilingual; icon: ReactNode; tint: Tint }> = {
-  enquiry: { label: { de: 'Anfrage', en: 'Enquiry' }, icon: Icon.enquiries, tint: 'ink' },
+type CaseKind = TimelineItem['kind'] | 'offer' | 'booking';
+
+/** What each kind of case is, and its meaning colour. */
+const KINDS: Record<CaseKind, { label: Bilingual; icon: ReactNode; tint: Tint }> = {
+  enquiry: { label: { de: 'Anfrage', en: 'Enquiry' }, icon: Icon.enquiries, tint: 'blue' },
   course: { label: { de: 'Kursanmeldung', en: 'Course registration' }, icon: Icon.registrations, tint: 'red' },
-  exam: { label: { de: 'Prüfungsanmeldung', en: 'Exam registration' }, icon: Icon.registrations, tint: 'blue' },
-  review: { label: { de: 'Einstufung', en: 'Placement' }, icon: Icon.placement, tint: 'red' },
+  exam: { label: { de: 'Prüfungsanmeldung', en: 'Exam registration' }, icon: Icon.registrations, tint: 'red' },
+  review: { label: { de: 'Einstufung', en: 'Placement' }, icon: Icon.placement, tint: 'green' },
+  offer: { label: { de: 'Angebot', en: 'Offer' }, icon: Icon.offers, tint: 'sun' },
+  booking: { label: { de: 'Buchung', en: 'Booking' }, icon: Icon.bookings, tint: 'sun' },
 };
 
-/** How the record came to be, in a few words; nothing for a demo seed. */
-function origin(t: T, createdBy: string, label: string): string | null {
-  if (createdBy === 'demo-seed') return null;
+const OFFER_TONES: Record<OfferStatus, BadgeTone> = {
+  draft: 'neutral',
+  sent: 'accent',
+  accepted: 'positive',
+  declined: 'quiet',
+  withdrawn: 'quiet',
+};
+
+/** One thing under this person's name: a registration, an offer, a booking. */
+type Case = {
+  key: string;
+  kind: CaseKind;
+  title: string;
+  detail: string | null;
+  at: Date;
+  href: string;
+  open: boolean;
+  state: ReactNode;
+  /** A booking's balance, on the right. */
+  amount?: ReactNode;
+};
+
+/** How the record came to be, as the first entry of its history. */
+function origin(t: T, createdBy: string, label: string): string {
   if (createdBy === 'public-site') return t('Über die Website gekommen', 'Came through the website');
   if (createdBy.startsWith('migration-')) return t('Importiert', 'Imported');
+  if (createdBy === 'demo-seed') return t('Angelegt', 'Added');
   return t(`Angelegt von ${label}`, `Added by ${label}`);
 }
 
+const euros = (lang: WsLang, value: number, currency = 'EUR') =>
+  new Intl.NumberFormat(wsLocale(lang), { style: 'currency', currency }).format(value);
+
 /**
- * One person, and everything that has ever come in under their name.
+ * One person — the hub every enquiry, registration, offer and booking leads to
+ * (2026-10-15: "start with the person page"). In the inbox records' one design:
  *
- * The head carries the five things a colleague looks for first — how to reach
- * them, where they are from, when they were born, the level a teacher
- * confirmed — so the cards below are the record's lists: bookings and the
- * history on the left, what still needs a look and the identity decisions on
- * the right.
+ * The head names them and how to reach them, and its bar answers the first
+ * questions about anyone: which level a teacher confirmed, what they have
+ * booked, what they still owe, what is open. „Vorgänge" is everything under
+ * their name in one list — enquiries, registrations, placement results, offers,
+ * bookings — the open ones first, each with where it stands. A registration on
+ * its own says "someone wants a B1 course"; the same registration under a person
+ * who enquired twice, sat a placement and was confirmed A2.2 says something quite
+ * different, and staff should not have to search five lists to find that out.
+ * Beside it their details, anything that needs a look, the records linked into
+ * this one, and the notes and changes in one line of time.
  *
- * The history is the point of the screen. A registration on its own says
- * "someone wants a B1 course"; the same registration under a person who
- * enquired twice, sat a placement and was confirmed A2.2 by a teacher says
- * something quite different, and staff should not have to search four queues
- * to find that out.
- *
- * If this row was linked INTO another, the page redirects its reader to the
- * survivor by rendering the survivor: `getPerson` follows `merged_into`. The
- * rows that were linked into THIS one are listed under the history, each with
- * an undo, because a wrong link is the one identity mistake that must stay
- * cheap to reverse.
+ * If this row was linked INTO another, `getPerson` follows `merged_into` and
+ * the page renders the survivor. The rows linked into THIS one are listed with
+ * an undo, because a wrong link is the one identity mistake that must stay cheap
+ * to reverse.
  */
 export default async function PersonPage({
   params,
@@ -95,11 +111,7 @@ export default async function PersonPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [{ id }, { error }, user] = await Promise.all([
-    params,
-    searchParams,
-    requireModule('people'),
-  ]);
+  const [{ id }, { error }, user] = await Promise.all([params, searchParams, requireModule('people')]);
   const person = await getPerson(id);
 
   if (!person) {
@@ -110,64 +122,131 @@ export default async function PersonPage({
   const canEdit = canAccess(user, 'people', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit');
   const seesBookings = canAccess(user, 'bookings');
+  const seesOffers = canAccess(user, 'offers');
   const canOffer = canAccess(user, 'offers', 'edit');
-  const [timeline, confirmed, flags, activity, fileMakerLinks, countries, bookings, offer, offers, courseName] =
-    await Promise.all([
-      personTimeline(person.id, lang),
-      latestConfirmedLevel(person.id),
-      listFlags('person', person.id),
-      activityFor('person', person.id),
-      listFileMakerLinks('person', person.id),
-      canEdit ? listCountries() : Promise.resolve([]),
-      seesBookings ? personBookings(person.id) : Promise.resolve([]),
-      canBook ? bookingOffer() : Promise.resolve(null),
-      canOffer ? offersFor({ personId: person.id }) : Promise.resolve([]),
-      courseNameResolver(),
-    ]);
-
-  const salutation = SALUTATIONS[person.salutation ?? ''];
-  const title = [salutation ? pick(lang, salutation) : '', person.displayName]
-    .filter(Boolean)
-    .join(' ');
+  const canDelete = canAccess(user, 'people', 'full');
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName] = await Promise.all([
+    personTimeline(person.id, lang),
+    latestConfirmedLevel(person.id),
+    listFlags('person', person.id),
+    activityFor('person', person.id),
+    listNotes('person', person.id),
+    listFileMakerLinks('person', person.id),
+    canEdit ? listCountries() : Promise.resolve([]),
+    seesBookings ? personBookings(person.id) : Promise.resolve([]),
+    canBook ? bookingOffer() : Promise.resolve(null),
+    seesOffers ? personOffers(person.id) : Promise.resolve([]),
+    courseNameResolver(),
+  ]);
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
   const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
-  const more = (n: number) => (n > 1 ? t(`+${n - 1} weitere`, `+${n - 1} more`) : undefined);
   const openFlags = flags.filter((f) => !f.resolvedAt);
-  const manyChannels = person.emails.length > 1 || person.phones.length > 1;
-  // "Added by" is in the head already; the card keeps the decisions after it.
-  const decisions = activity.filter((entry) => entry.action !== 'person_created');
-  // The side column holds only what this person has; without any of it the
-  // record's lists take the full width rather than leaving an empty gutter.
-  const hasSide =
-    openFlags.length > 0 || manyChannels || fileMakerLinks.length > 0 || decisions.length > 0;
-  const canDelete = canAccess(user, 'people', 'full');
-  // A registration's course and dates as the queues show them, not as the
-  // public form stored them.
-  const history = timeline.map((item) =>
-    item.kind === 'course'
-      ? { ...item, title: courseName(item.title) ?? item.title, detail: optionLine(item.detail, 'course', lang) }
-      : item.kind === 'exam'
-        ? { ...item, detail: optionLine(item.detail, 'exam', lang) }
-        : item
-  );
+  const came = origin(t, person.createdBy, pick(lang, person.createdByLabel));
+  const since = person.createdAt.toLocaleDateString(wsLocale(lang), { month: 'long', year: 'numeric' });
+
+  // Everything under their name as one list, the open cases first.
+  const cases: Case[] = [
+    ...timeline.map((item): Case => {
+      const status = item.status ? normaliseStatus(item.status) : null;
+      const title = item.kind === 'course' ? (courseName(item.title) ?? item.title) : item.title;
+      const detail = item.kind === 'course' || item.kind === 'exam' ? optionLine(item.detail, item.kind, lang) : item.detail;
+      return {
+        key: `${item.kind}-${item.id}`,
+        kind: item.kind,
+        title,
+        detail,
+        at: item.at,
+        href: item.href,
+        open: status === 'new' || status === 'in_progress' || status === 'waiting',
+        state: status ? <StatePill status={status} lang={lang} /> : null,
+      };
+    }),
+    ...offers.map(
+      (o): Case => ({
+        key: `offer-${o.id}`,
+        kind: 'offer',
+        title: `${o.title || t('Angebot', 'Offer')} · ${o.number}`,
+        detail: o.arrival && o.departure ? dayRange(toDateInputValue(o.arrival), toDateInputValue(o.departure), lang) : null,
+        at: o.createdAt,
+        href: `/admin/offers/${o.id}`,
+        open: o.status === 'draft' || o.status === 'sent',
+        state: <Badge tone={OFFER_TONES[o.status]}>{pick(lang, OFFER_STATUS_LABELS[o.status])}</Badge>,
+      })
+    ),
+    ...bookings.map((b): Case => {
+      const balance = b.charged - b.paid;
+      return {
+        key: `booking-${b.id}`,
+        kind: 'booking',
+        title: b.courseTypeName ?? t('Buchung', 'Booking'),
+        detail: b.startDate && b.endDate ? dayRange(toDateInputValue(b.startDate), toDateInputValue(b.endDate), lang) : t('Keine Daten', 'No dates'),
+        at: b.createdAt,
+        href: `/admin/bookings/${b.id}`,
+        open: b.status === 'reserved' || b.status === 'confirmed' || balance > 0,
+        state: <Badge tone={BOOKING_STATUS_TONES[b.status]}>{pick(lang, BOOKING_STATUS_LABELS[b.status])}</Badge>,
+        amount:
+          b.status === 'cancelled' ? null : balance > 0 ? (
+            <span className="text-right">
+              <span className="block text-[0.86rem] font-bold text-[#9a5b00] tabular-nums">{euros(lang, balance, b.currency)}</span>
+              <span className="block text-[0.72rem] text-[var(--casa-muted)]">{t('offen', 'open')}</span>
+            </span>
+          ) : (
+            <span className="text-right">
+              <span className="block text-[0.86rem] font-bold text-[#17693a] tabular-nums">{euros(lang, b.charged, b.currency)}</span>
+              <span className="block text-[0.72rem] text-[var(--casa-muted)]">{t('bezahlt', 'paid')}</span>
+            </span>
+          ),
+      };
+    }),
+  ].sort((a, b) => b.at.getTime() - a.at.getTime());
+  const openCases = cases.filter((c) => c.open);
+  const pastCases = cases.filter((c) => !c.open);
+
+  const owed = bookings.filter((b) => b.status !== 'cancelled').reduce((sum, b) => sum + Math.max(0, b.charged - b.paid), 0);
+  const running = bookings.filter((b) => b.status === 'reserved' || b.status === 'confirmed').length;
 
   return (
     <>
       <RecordHeader
         backHref="/admin/people"
-        backLabel={t('Alle Teilnehmenden', 'All students')}
-        title={title}
+        backLabel={t('Teilnehmende', 'Students')}
+        title={person.displayName}
         avatar={person.displayName}
-        subtitle={[
-          person.id !== id
-            ? t('Über einen verknüpften Datensatz geöffnet', 'Opened from a linked record')
-            : t('In Kontakt seit', 'In touch since') +
-              ` ${person.createdAt.toLocaleDateString(wsLocale(lang), { month: 'long', year: 'numeric' })}`,
-          origin(t, person.createdBy, pick(lang, person.createdByLabel)),
-        ]
-          .filter(Boolean)
-          .join(' · ')}
+        status={openFlags.length ? <Badge tone="warning">{t('Zu prüfen', 'Needs a look')}</Badge> : null}
+        subtitle={
+          <>
+            <span className="block text-[0.9rem] text-[var(--casa-muted)]">
+              {person.id !== id
+                ? t('Über einen verknüpften Datensatz geöffnet', 'Opened from a linked record')
+                : t(`Bei CASA seit ${since}`, `With CASA since ${since}`)}
+            </span>
+            <MetaLine>
+              {email ? (
+                <MetaItem icon={Icon.mail}>
+                  <a href={`mailto:${email.address}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                    {email.address}
+                  </a>
+                </MetaItem>
+              ) : null}
+              {phone ? (
+                <MetaItem icon={Icon.phone}>
+                  <a href={`tel:${phone.number}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                    {phone.number}
+                  </a>
+                </MetaItem>
+              ) : null}
+              {person.nationalityName || person.nationalityRaw ? (
+                <MetaItem icon={Icon.globe}>{person.nationalityName ?? person.nationalityRaw}</MetaItem>
+              ) : null}
+              {person.birthDate ? (
+                <MetaItem icon={Icon.calendar}>
+                  {t('Geboren', 'Born')} <BirthDate value={person.birthDate} />
+                </MetaItem>
+              ) : null}
+            </MetaLine>
+          </>
+        }
         actions={
           <>
             {canEdit ? (
@@ -177,182 +256,152 @@ export default async function PersonPage({
             ) : null}
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
-              <FormDialog
-                trigger={t('Neue Buchung', 'New booking')}
-                title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)}
-                triggerVariant="primary"
-                width="lg"
-              >
-                <BookingWizard
-                  personId={person.id}
-                  personName={person.displayName}
-                  offer={offer}
-                  returnTo={`/admin/people/${person.id}`}
-                  action={createBookingFromWizardAction}
-                />
+              <FormDialog trigger={t('Neue Buchung', 'New booking')} title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)} triggerVariant="primary" width="lg">
+                <BookingWizard personId={person.id} personName={person.displayName} offer={offer} returnTo={`/admin/people/${person.id}`} action={createBookingFromWizardAction} />
               </FormDialog>
             ) : null}
           </>
         }
-        facts={[
-          {
-            label: t('E-Mail', 'Email'),
-            icon: Icon.mail,
-            tint: 'ink',
-            value: email?.address,
-            sub: more(person.emails.length),
-            href: email ? `mailto:${email.address}` : undefined,
-          },
-          {
-            label: t('Telefon', 'Phone'),
-            icon: Icon.person,
-            tint: 'green',
-            value: phone?.number,
-            sub: more(person.phones.length),
-            href: phone ? `tel:${phone.number}` : undefined,
-          },
-          {
-            // With the date of birth under it, as the person panel on every
-            // queue record shows them: five columns cut the address short.
-            label: t('Nationalität', 'Nationality'),
-            icon: Icon.globe,
-            tint: 'sun',
-            value: person.nationalityName ?? person.nationalityRaw,
-            sub:
-              person.birthDate || (!person.nationalityName && person.nationalityRaw) ? (
-                <>
-                  {!person.nationalityName && person.nationalityRaw ? t('Nicht erkannt', 'Not recognised') : null}
-                  {!person.nationalityName && person.nationalityRaw && person.birthDate ? ' · ' : null}
-                  {person.birthDate ? (
-                    <>
-                      {t('Geboren', 'Born')} <BirthDate value={person.birthDate} />
-                    </>
-                  ) : null}
-                </>
-              ) : undefined,
-          },
-          {
-            label: t('Niveau', 'Level'),
-            icon: Icon.placement,
-            tint: 'red',
-            value: confirmed?.level,
-            sub: confirmed ? (
-              <>
-                {confirmed.reviewerName ?? t('Ehemaliges Teammitglied', 'A former colleague')} ·{' '}
-                <DateText value={confirmed.decidedAt} />
-              </>
-            ) : (
-              t('Noch nicht bestätigt', 'Not confirmed yet')
-            ),
-          },
-        ]}
+        bar={
+          <dl className="flex w-full flex-wrap items-center gap-x-7 gap-y-2">
+            <Stat label={t('Niveau', 'Level')}>
+              {confirmed ? (
+                <span title={`${confirmed.reviewerName ?? t('Ehemaliges Teammitglied', 'A former colleague')}`}>
+                  {confirmed.level} <span className="text-[0.78rem] font-semibold text-[#17693a]">{t('bestätigt', 'confirmed')}</span>
+                </span>
+              ) : (
+                <span className="font-semibold text-[var(--casa-muted)]">{t('nicht bestätigt', 'not confirmed')}</span>
+              )}
+            </Stat>
+            {seesBookings ? (
+              <Stat label={t('Buchungen', 'Bookings')}>
+                {bookings.length ? (
+                  <>
+                    {num(lang, bookings.length)}
+                    {running ? <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]"> · {t(`${num(lang, running)} laufend`, `${num(lang, running)} current`)}</span> : null}
+                  </>
+                ) : (
+                  <span className="font-semibold text-[var(--casa-muted)]">{t('keine', 'none')}</span>
+                )}
+              </Stat>
+            ) : null}
+            {seesBookings && bookings.length ? (
+              <Stat label={t('Zu zahlen', 'Owed')}>
+                {owed > 0 ? <span className="text-[#9a5b00]">{euros(lang, owed)}</span> : <span className="text-[#17693a]">{t('Alles bezahlt', 'All paid')}</span>}
+              </Stat>
+            ) : null}
+            <Stat label={t('Vorgänge', 'Cases')}>
+              {openCases.length ? (
+                <span>{counted(lang, openCases.length, t('offen', 'open'), t('offen', 'open'))}</span>
+              ) : (
+                <span className="font-semibold text-[var(--casa-muted)]">{t('nichts offen', 'nothing open')}</span>
+              )}
+            </Stat>
+          </dl>
+        }
       />
 
       {error ? (
-        <p
-          role="alert"
-          className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]"
-        >
+        <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
           {error}
         </p>
       ) : null}
 
-      <div
-        className={cn(
-          'grid gap-4 lg:items-start',
-          hasSide ? 'lg:grid-cols-[minmax(0,1fr)_340px]' : undefined
-        )}
-      >
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          {seesBookings && bookings.length > 0 ? (
-            <Card title={t('Buchungen', 'Bookings')} icon={Icon.bookings} tint="red">
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {bookings.map((b) => {
-                  const balance = b.charged - b.paid;
-                  return (
-                    <li key={b.id}>
-                      <Link
-                        href={`/admin/bookings/${b.id}`}
-                        className="-mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ws-sunk"
-                      >
-                        <span className="min-w-0 text-sm">
-                          <span className="flex items-center gap-2 font-semibold">
-                            {b.courseTypeName ?? t('Buchung', 'Booking')}
-                            <Badge tone={BOOKING_STATUS_TONES[b.status]}>
-                              {pick(lang, BOOKING_STATUS_LABELS[b.status])}
-                            </Badge>
-                          </span>
-                          <span className="mt-0.5 block text-xs text-[var(--casa-text-subtle)]">
-                            {b.startDate ? (
-                              <>
-                                <DateText value={b.startDate} /> – <DateText value={b.endDate} />
-                              </>
-                            ) : (
-                              t('Keine Daten', 'No dates')
-                            )}
-                          </span>
-                        </span>
-                        <span className="shrink-0 text-right">
-                          <span
-                            className={cn(
-                              'block text-sm font-extrabold tabular-nums',
-                              balance > 0
-                                ? 'text-[var(--casa-warning-text)]'
-                                : 'text-[var(--casa-success-text)]'
-                            )}
-                          >
-                            {new Intl.NumberFormat('de-DE', {
-                              style: 'currency',
-                              currency: b.currency,
-                            }).format(balance)}
-                          </span>
-                          <span className="block text-xs text-[var(--casa-text-subtle)]">
-                            {balance > 0 ? t('offen', 'open') : t('bezahlt', 'paid')}
-                          </span>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
+          <Card title={t('Vorgänge', 'Cases')} icon={Icon.registrations} tint="blue">
+            {cases.length ? (
+              <div className="-mx-4 -my-4">
+                {openCases.length ? <CaseGroup label={t('Offen', 'Open')} cases={openCases} lang={lang} /> : null}
+                {pastCases.length ? <CaseGroup label={t('Abgeschlossen', 'Closed')} cases={pastCases} lang={lang} quiet /> : null}
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Vorgänge.', 'No cases yet.')}</p>
+            )}
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          {openFlags.length > 0 ? (
+            <Card title={t('Zu prüfen', 'Needs a look')} icon={Icon.flag} tint="sun">
+              <ul className="space-y-2">
+                {openFlags.map((f) => (
+                  <li key={f.id} className="flex items-center gap-2 rounded-xl bg-[#fff8e6] px-3 py-2 text-sm font-semibold ring-1 ring-[#efdca4] ring-inset">
+                    <span className="text-[#9a5b00]">{Icon.flag}</span>
+                    {pick(lang, FLAG_LABELS[f.code])}
+                  </li>
+                ))}
               </ul>
             </Card>
           ) : null}
 
-          {history.length > 0 ? (
-            <Card title={t('Verlauf', 'History')} icon={Icon.clock} tint="blue">
-              <ol className="-my-1.5 divide-y divide-ws-line-soft">
-                {history.map((item) => {
-                  const kind = KINDS[item.kind];
-                  return (
-                    <li key={`${item.kind}-${item.id}`}>
-                      <Link
-                        href={item.href}
-                        className="group -mx-2 flex items-start gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-ws-sunk"
-                      >
-                        <IconChip icon={kind.icon} tint={kind.tint} />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-semibold">{item.title}</span>
-                            {item.status ? (
-                              <Badge tone={STATUS_TONES[normaliseStatus(item.status)]}>
-                                {pick(lang, STATUS_LABELS[normaliseStatus(item.status)])}
-                              </Badge>
-                            ) : null}
-                          </span>
-                          <span className="mt-0.5 block truncate text-xs text-[var(--casa-text-subtle)]">
-                            {[pick(lang, kind.label), item.detail].filter(Boolean).join(' · ')}
-                          </span>
-                        </span>
-                        <span className="shrink-0 pt-0.5 text-xs text-[var(--casa-text-subtle)]">
-                          <DateText value={item.at} compact />
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            </Card>
-          ) : null}
+          <Card title={t('Angaben', 'Details')} icon={Icon.person} tint="ink">
+            <DetailList
+              items={[
+                ...(person.salutation && SALUTATIONS[person.salutation] ? [{ label: t('Anrede', 'Salutation'), value: pick(lang, SALUTATIONS[person.salutation]) }] : []),
+                {
+                  label: t('E-Mail', 'Email'),
+                  wide: true,
+                  value: person.emails.length ? (
+                    <ul className="space-y-0.5">
+                      {person.emails.map((e) => (
+                        <li key={e.address} className="truncate">
+                          <a href={`mailto:${e.address}`} className="font-medium hover:underline">
+                            {e.address}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null,
+                },
+                {
+                  label: t('Telefon', 'Phone'),
+                  wide: true,
+                  value: person.phones.length ? (
+                    <ul className="space-y-0.5">
+                      {person.phones.map((p) => (
+                        <li key={p.number}>
+                          <a href={`tel:${p.number}`} className="font-medium hover:underline">
+                            {p.number}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null,
+                },
+                {
+                  label: t('Nationalität', 'Nationality'),
+                  value:
+                    person.nationalityName ??
+                    (person.nationalityRaw ? (
+                      <span className="flex items-center gap-2">
+                        {person.nationalityRaw}
+                        <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
+                      </span>
+                    ) : null),
+                },
+                { label: t('Geburtsdatum', 'Date of birth'), value: person.birthDate ? <BirthDate value={person.birthDate} /> : null },
+                ...(fileMakerLinks.length
+                  ? [
+                      {
+                        label: 'FileMaker',
+                        wide: true,
+                        value: (
+                          <ul className="space-y-0.5 text-sm">
+                            {fileMakerLinks.map((link) => (
+                              <li key={link.id}>
+                                {link.sourceLayout}{' '}
+                                <span className="font-mono text-xs text-[var(--casa-muted)]">{link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </Card>
 
           {person.linkedDuplicates.length > 0 ? (
             <Card title={t('Verknüpfte Datensätze', 'Linked records')} icon={Icon.people} tint="ink">
@@ -361,7 +410,7 @@ export default async function PersonPage({
                   <li key={dup.id} className="flex items-center justify-between gap-3 py-2.5">
                     <span className="min-w-0 text-sm">
                       <span className="block font-semibold">{dup.displayName}</span>
-                      <span className="block text-xs text-[var(--casa-text-subtle)]">
+                      <span className="block text-xs text-[var(--casa-muted)]">
                         {t('Angelegt', 'Created')} <DateText value={dup.createdAt} /> · {dup.createdBy}
                       </span>
                     </span>
@@ -377,111 +426,15 @@ export default async function PersonPage({
               </ul>
             </Card>
           ) : null}
+
+          <Timeline
+            entity="person"
+            id={person.id}
+            notes={notes}
+            activity={activity.filter((entry) => entry.action !== 'person_created')}
+            origin={{ at: person.createdAt, label: came, icon: Icon.person }}
+          />
         </div>
-
-        {hasSide ? (
-          <div className="space-y-4">
-            {openFlags.length > 0 ? (
-              <Card title={t('Zu prüfen', 'Needs a look')} icon={Icon.flag} tint="sun">
-                <ul className="space-y-2">
-                  {openFlags.map((f) => (
-                    <li
-                      key={f.id}
-                      className="flex items-center gap-2 rounded-xl bg-[#fffbea] px-3 py-2 text-sm font-semibold"
-                    >
-                      <span className="text-[var(--casa-warning-text)]">{Icon.flag}</span>
-                      {pick(lang, FLAG_LABELS[f.code])}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ) : null}
-
-            {manyChannels ? (
-              <Card title={t('Kontakt', 'Contact')} icon={Icon.mail} tint="ink">
-                <DetailList
-                  items={[
-                    {
-                      label: t('E-Mail', 'Email'),
-                      wide: true,
-                      value: (
-                        <ul className="space-y-1">
-                          {person.emails.map((e) => (
-                            <li key={e.address}>
-                              <a
-                                href={`mailto:${e.address}`}
-                                className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                              >
-                                {e.address}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      ),
-                    },
-                    {
-                      label: t('Telefon', 'Phone'),
-                      wide: true,
-                      value:
-                        person.phones.length > 0 ? (
-                          <ul className="space-y-1">
-                            {person.phones.map((p) => (
-                              <li key={p.number}>
-                                <a href={`tel:${p.number}`} className="font-medium">
-                                  {p.number}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : null,
-                    },
-                  ]}
-                />
-              </Card>
-            ) : null}
-
-            {fileMakerLinks.length > 0 ? (
-              <Card title={t('In FileMaker', 'In FileMaker')} icon={Icon.external} tint="ink">
-                <ul className="space-y-1.5 text-sm">
-                  {fileMakerLinks.map((link) => (
-                    <li key={link.id} className="flex items-center justify-between gap-2">
-                      <span>
-                        {link.sourceLayout}{' '}
-                        <span className="font-mono text-xs text-[var(--casa-text-subtle)]">
-                          {link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}
-                        </span>
-                      </span>
-                      <span className="text-xs text-[var(--casa-text-subtle)]">
-                        <DateText value={link.linkedAt} compact />
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ) : null}
-
-            {decisions.length > 0 ? (
-              <Card title={t('Entscheidungen zur Identität', 'Identity decisions')} icon={Icon.check} tint="green">
-                <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
-                  {decisions.map((entry) => (
-                    <li key={entry.id} className="relative flex gap-3 text-xs">
-                      <span
-                        aria-hidden="true"
-                        className="relative mt-1 h-[9px] w-[9px] shrink-0 rounded-full border-2 border-white bg-ws-line-firm"
-                      />
-                      <span className="text-[var(--casa-text-subtle)]">
-                        <span className="font-bold text-[var(--casa-ink)]">
-                          {entry.staffName ?? t('Jemand', 'Someone')}
-                        </span>{' '}
-                        {describeActivity(entry, lang)} · {relativeDays(entry.createdAt, lang)}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </Card>
-            ) : null}
-          </div>
-        ) : null}
       </div>
 
       {canDelete ? (
@@ -501,5 +454,54 @@ export default async function PersonPage({
         </RecordFoot>
       ) : null}
     </>
+  );
+}
+
+/** One figure in the head's bar: its label above, the value under it. */
+function Stat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[0.72rem] font-semibold text-[var(--casa-muted)]">{label}</dt>
+      <dd className="mt-0.5 text-[0.95rem] font-bold text-[var(--casa-ink)] tabular-nums">{children}</dd>
+    </div>
+  );
+}
+
+/** A group of cases — open or closed — as rows: the kind's mark, what it is, when, where it stands. */
+function CaseGroup({ label, cases, lang, quiet = false }: { label: string; cases: readonly Case[]; lang: WsLang; quiet?: boolean }) {
+  return (
+    <section className="border-t border-ws-line-soft first:border-t-0">
+      <h3 className="px-4 pt-3.5 pb-1.5 text-xs font-bold text-[var(--casa-ink)]">
+        {label} <span className="ml-1 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">{cases.length}</span>
+      </h3>
+      <ul className="pb-1.5">
+        {cases.map((c) => (
+          <li key={c.key}>
+            <Link
+              href={c.href}
+              className="group flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]"
+            >
+              <span className={cn(quiet && 'opacity-70')}>
+                <IconChip icon={KINDS[c.kind].icon} tint={KINDS[c.kind].tint} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className={cn('truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{c.title}</span>
+                  {c.state}
+                </span>
+                <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">
+                  {[pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' · ')}
+                </span>
+              </span>
+              {c.amount ?? (
+                <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
+                  <DateText value={c.at} compact />
+                </span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

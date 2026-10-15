@@ -269,7 +269,7 @@ export function Card({
               ) : null}
             </div>
           </div>
-          {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+          {actions ? <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </header>
       ) : null}
 
@@ -397,7 +397,7 @@ export function RecordHeader({
             </div>
             {subtitle ? <div className="mt-1.5 text-sm text-[var(--casa-text-subtle)]">{subtitle}</div> : null}
           </div>
-          {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+          {actions ? <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
         {facts.length ? (
           <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-line-soft bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
