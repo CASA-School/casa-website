@@ -894,6 +894,14 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     The birth date went to the person's page. `peopleCounts` and the
     `OPEN_CASES` / `OWED` / `IN_COURSE` fragments in `people.ts` are the one
     definition of each.
+22. **Kurse and Prüfungen (2026-10-15).** They keep their month-grouped
+    tables and gain the counts line: for courses the dates ahead, the places
+    taken (as the seat bars count them) and the next start; for exams the
+    sittings ahead, the entries and the next registration deadline, amber in
+    its last week. A course type's format is stored as free words („Intensive
+    Block", „evening") and is read through a bilingual map. The exam list keeps
+    the last fortnight's sittings for what follows them, greyed and marked
+    „Vorbei".
 
 ## Copy on screens — labels, not explanations
 

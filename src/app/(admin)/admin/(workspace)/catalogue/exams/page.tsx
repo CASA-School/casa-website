@@ -3,6 +3,7 @@ import { Badge, Card, PageHeader } from '@/components/admin/ui';
 import { listUpcomingExamSessions } from '@/lib/admin/catalogue';
 import { groupRuns, monthKey, monthLabel, openCell, OpenTable, SeatLine, sentenceCase, shortDate } from '../list-parts';
 import { pick, wsLocale, type Bilingual } from '@/lib/admin/i18n';
+import { Tally } from '@/components/admin/inbox';
 import { getI18n } from '@/lib/admin/i18n.server';
 
 /** A sitting's status other than scheduled, in words; an unknown one as stored. */
@@ -29,12 +30,31 @@ export default async function ExamCataloguePage() {
   const [sessions, { t, lang }] = await Promise.all([listUpcomingExamSessions(30), getI18n()]);
   const months = groupRuns(sessions, (session) => monthKey(session.startsAt));
   const today = new Date().setHours(0, 0, 0, 0);
-  const subtle = 'text-[var(--casa-text-subtle)]';
+  const subtle = 'text-[var(--casa-muted)]';
   const hide = 'hidden md:table-cell';
+  const ahead = sessions.filter((session) => new Date(session.startsAt).getTime() >= today);
+  const nextDeadline = ahead
+    .map((session) => (session.registrationDeadline ? new Date(session.registrationDeadline) : null))
+    .find((deadline): deadline is Date => deadline !== null && deadline.setHours(0, 0, 0, 0) >= today);
+  const daysToDeadline = nextDeadline ? Math.round((nextDeadline.getTime() - today) / 86_400_000) : null;
 
   return (
     <>
       <PageHeader title={t('Prüfungen', 'Exams')} />
+
+      {/* What is coming, how many have entered, and the next deadline: a telc entry cannot be filed after it. */}
+      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+        <Tally tone="working" n={ahead.length} label={ahead.length === 1 ? t('kommender Termin', 'sitting ahead') : t('kommende Termine', 'sittings ahead')} lang={lang} />
+        <Tally tone="done" n={ahead.reduce((sum, s) => sum + s.registrationCount, 0)} label={t('Anmeldungen', 'entries')} lang={lang} />
+        {nextDeadline && daysToDeadline !== null ? (
+          <span className={daysToDeadline <= 7 ? 'font-semibold text-[#9a5b00]' : undefined}>
+            {t('Nächster Anmeldeschluss', 'Next deadline')}{' '}
+            <b className="font-semibold text-[var(--casa-ink)]">{shortDate(nextDeadline, lang)}</b>
+            {' · '}
+            {daysToDeadline === 0 ? t('heute', 'today') : daysToDeadline === 1 ? t('noch 1 Tag', '1 day left') : t(`noch ${daysToDeadline} Tage`, `${daysToDeadline} days left`)}
+          </span>
+        ) : null}
+      </p>
 
       <Card bleed>
         {sessions.length === 0 ? (
@@ -60,14 +80,17 @@ export default async function ExamCataloguePage() {
                 const closed = daysLeft !== null && daysLeft < 0;
                 // Most exam names carry the level ("telc Deutsch B2"); say it only when not.
                 const level = session.level && !session.examName.includes(session.level) ? session.level : null;
+                // The last fortnight's sittings stay for what follows them (results, certificates), marked as past.
+                const past = startsAt.getTime() < today;
 
                 return (
                   <tr key={session.id}>
                     <td className={`${openCell} py-3.5 md:max-w-0`}>
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className="text-[0.9rem] font-semibold text-[var(--casa-ink)] md:truncate">
+                        <span className={`text-[0.9rem] font-semibold md:truncate ${past ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]'}`}>
                           {session.examName}
                         </span>
+                        {past ? <Badge tone="quiet">{t('Vorbei', 'Past')}</Badge> : null}
                         {session.status !== 'scheduled' ? (
                           <Badge tone={session.status === 'cancelled' ? 'danger' : 'neutral'}>
                             {STATUS_LABELS[session.status]

@@ -13,7 +13,8 @@ import {
 } from '@/lib/admin/catalogue';
 import { query } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
-import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { Tally } from '@/components/admin/inbox';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listBookableRooms, type Room } from '@/lib/admin/rooms';
 import { toDateInputValue } from '@/lib/dates';
@@ -67,6 +68,7 @@ export default async function CataloguePage({
       : Promise.resolve([]),
   ]);
   const view = rawView === 'types' ? 'types' : 'cohorts';
+  const taken = instances.reduce((sum, i) => sum + i.registrationCount, 0);
 
   return (
     <>
@@ -85,6 +87,25 @@ export default async function CataloguePage({
           ) : null
         }
       />
+
+      {/* What is coming, how full it is, and when the next one starts. */}
+      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+        <Tally tone="working" n={instances.length} label={instances.length === 1 ? t('kommender Termin', 'date ahead') : t('kommende Termine', 'dates ahead')} lang={lang} />
+        <Tally
+          tone="done"
+          n={taken}
+          label={taken === 1 ? t('Platz belegt', 'place taken') : t('Plätze belegt', 'places taken')}
+          lang={lang}
+        />
+        {instances[0] ? (
+          <span>
+            {t('Nächster Beginn', 'Next start')}{' '}
+            <b className="font-semibold text-[var(--casa-ink)]">
+              {new Date(instances[0].startDate).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' })}
+            </b>
+          </span>
+        ) : null}
+      </p>
 
       {error ? (
         <p
@@ -107,7 +128,7 @@ export default async function CataloguePage({
         {view === 'cohorts' ? (
           <Cohorts instances={instances} rooms={rooms} plans={plans} t={t} lang={lang} />
         ) : (
-          <CourseTypes types={types} t={t} />
+          <CourseTypes types={types} t={t} lang={lang} />
         )}
       </Card>
     </>
@@ -257,7 +278,23 @@ function CohortRow({
   );
 }
 
-function CourseTypes({ types, t }: { types: CourseTypeSummary[]; t: T }) {
+/** A course type's format, as stored (free words in FileMaker's style), in the workspace's language. */
+const FORMAT_LABELS: Record<string, Bilingual> = {
+  intensive: { de: 'Intensivkurs', en: 'Intensive' },
+  'intensive block': { de: 'Intensivblock', en: 'Intensive block' },
+  evening: { de: 'Abendkurs', en: 'Evening' },
+  'group package': { de: 'Gruppenpaket', en: 'Group package' },
+  'custom corporate': { de: 'Firmenkurs nach Maß', en: 'Custom corporate' },
+  modular: { de: 'In Modulen', en: 'Modular' },
+  professional: { de: 'Berufsbezogen', en: 'Professional' },
+};
+
+const formatLabel = (format: string, lang: WsLang) => {
+  const label = FORMAT_LABELS[format.trim().toLowerCase()];
+  return label ? pick(lang, label) : sentenceCase(format);
+};
+
+function CourseTypes({ types, t, lang }: { types: CourseTypeSummary[]; t: T; lang: WsLang }) {
   if (types.length === 0) return <ListEmpty title={t('Keine Kursarten', 'No course types')} />;
   return (
     <Table
@@ -286,7 +323,7 @@ function CourseTypes({ types, t }: { types: CourseTypeSummary[]; t: T }) {
             ) : null}
           </Cell>
           <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] ${hide}`}>{type.levelRange}</Cell>
-          <Cell className={`text-[0.84rem] text-[#2b3546] ${hide}`}>{type.format ? sentenceCase(type.format) : null}</Cell>
+          <Cell className={`text-[0.84rem] text-[#2b3546] ${hide}`}>{type.format ? formatLabel(type.format, lang) : null}</Cell>
           <Cell align="right" className={`text-[0.84rem] text-[#2b3546] tabular-nums ${hide}`}>
             {type.lessonsPerWeek || null}
           </Cell>
