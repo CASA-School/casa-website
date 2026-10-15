@@ -59,6 +59,18 @@ Then put the connection string in `.env.local`:
 DATABASE_URL=postgres://casa:casa_local_dev@127.0.0.1:5433/casa
 ```
 
+### Without a password, on your own laptop (2026-10-15)
+
+`ADMIN_DEV_LOGIN=1` in `.env.local` (git-ignored) and `next dev`: opening
+`http://localhost:<port>/admin` signs in as the first active owner — no password
+(an address instead of `1` picks that account). It is an ordinary session, so
+every check behind sign-in still runs. It does nothing in production, nothing on
+`127.0.0.1` (the real sign-in stays there, and the e2e suite uses it), and
+nothing for a connection from another machine. `next dev` listens on the local
+network, though, and a client can fake the two headers it reads, so switch it
+off on a shared network. Binding the dev server to `127.0.0.1` would close that
+but crashes Next 16's dev runtime on server actions. `src/lib/admin/dev-login.ts`.
+
 ### Your first account
 
 There is no bootstrap route and no default password. The first account is

@@ -143,6 +143,7 @@ conclude nothing had come in.
 | `ADMIN_DB_POOL_MAX` | Pool size, default 5 (an Azure B1ms allows ~50 connections total) |
 | `AUTH_MICROSOFT_TENANT_ID`, `AUTH_MICROSOFT_CLIENT_ID`, `AUTH_MICROSOFT_CLIENT_SECRET` | "Sign in with Microsoft" on the workspace, against CASA's Entra ID tenant (`infra/azure/entra-workspace-app.sh`). Without them, sign-in is by name or address and password only. `AUTH_MICROSOFT_REDIRECT_URI` pins the callback |
 | `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` | Reopens `/admin` on the public host in production. For the window between deploying and pointing the admin DNS record |
+| `ADMIN_DEV_LOGIN` | Local only, in `.env.local`: `next dev` on `http://localhost` signs in without a password (`1` = first owner, or an address). Inert in production and on `127.0.0.1`, which keeps the real sign-in for e2e. Off on a shared network (`src/lib/admin/dev-login.ts`) |
 | `CONTACT_WEBHOOK_URL` | Contact form fan-out |
 | `CAREERS_APPLICATION_WEBHOOK_URL` | Career application fan-out |
 | `COURSE_REGISTRATION_WEBHOOK_URL` | Course registration fan-out |

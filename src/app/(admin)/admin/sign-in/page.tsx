@@ -9,6 +9,7 @@ import { Button, Field, Input } from '@/components/admin/ui';
 import { Logo } from '@/components/ui/logo';
 import { getStaffUser, pruneExpiredSessions, signIn, writeSessionCookie } from '@/lib/admin/auth';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
+import { devLoginAllowedHere } from '@/lib/admin/dev-login';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { microsoftEnabled } from '@/lib/admin/microsoft';
 import { clientAddress } from '@/lib/api/rate-limit';
@@ -48,6 +49,11 @@ export default async function SignInPage({
   // Already signed in: nothing on this page applies.
   if (await getStaffUser()) {
     redirect('/admin');
+  }
+
+  // On one's own laptop, with ADMIN_DEV_LOGIN set, no password (src/lib/admin/dev-login.ts).
+  if (devLoginAllowedHere(await headers())) {
+    redirect('/admin/dev-login');
   }
 
   const params = await searchParams;
