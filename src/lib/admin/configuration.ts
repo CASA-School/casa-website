@@ -1,5 +1,5 @@
 import { query } from './db';
-import type { Bilingual } from './i18n';
+import type { Bilingual, WsLang } from './i18n';
 
 /**
  * The school's own setup: the vocabularies. The price list has its own
@@ -23,7 +23,9 @@ export type VocabularySummary = {
   sample: string[];
 };
 
-export async function vocabularySummaries(): Promise<VocabularySummary[]> {
+export async function vocabularySummaries(lang: WsLang = 'de'): Promise<VocabularySummary[]> {
+  // German names where the table keeps them; English (and FileMaker's own words) otherwise.
+  const named = (en: string) => (lang === 'de' ? `coalesce(name_de, ${en})` : en);
   const rows = await query<{
     key: string;
     total: string;
@@ -32,19 +34,19 @@ export async function vocabularySummaries(): Promise<VocabularySummary[]> {
   }>(
     `SELECT 'charge_types' AS key, count(*)::text AS total,
             count(*) FILTER (WHERE is_active)::text AS active,
-            (array_agg(name_en ORDER BY position))[1:4] AS sample FROM charge_types
+            (array_agg(${named('name_en')} ORDER BY position))[1:4] AS sample FROM charge_types
      UNION ALL
      SELECT 'accommodation_types', count(*)::text, count(*) FILTER (WHERE is_bookable)::text,
-            (array_agg(name_en ORDER BY position))[1:4] FROM accommodation_types
+            (array_agg(${named('name_en')} ORDER BY position))[1:4] FROM accommodation_types
      UNION ALL
      SELECT 'catering_options', count(*)::text, count(*)::text,
-            (array_agg(name_en ORDER BY position))[1:4] FROM catering_options
+            (array_agg(${named('name_en')} ORDER BY position))[1:4] FROM catering_options
      UNION ALL
      SELECT 'accommodation_room_types', count(*)::text, count(*)::text,
-            (array_agg(name_en ORDER BY position))[1:4] FROM accommodation_room_types
+            (array_agg(${named('name_en')} ORDER BY position))[1:4] FROM accommodation_room_types
      UNION ALL
      SELECT 'day_times', count(*)::text, count(*)::text,
-            (array_agg(name_en ORDER BY position))[1:4] FROM day_times
+            (array_agg(${named('name_en')} ORDER BY position))[1:4] FROM day_times
      UNION ALL
      SELECT 'levels', count(*)::text, count(*)::text,
             (array_agg(code ORDER BY sort_order))[1:4] FROM levels
@@ -53,7 +55,7 @@ export async function vocabularySummaries(): Promise<VocabularySummary[]> {
             (array_agg(title ORDER BY title))[1:3] FROM materials
      UNION ALL
      SELECT 'course_types', count(*)::text, count(*) FILTER (WHERE is_active)::text,
-            (array_agg(name ORDER BY name))[1:4] FROM course_types
+            (array_agg(${named('name')} ORDER BY name))[1:4] FROM course_types
      UNION ALL
      SELECT 'exam_types', count(*)::text, count(*) FILTER (WHERE is_active)::text,
             (array_agg(name ORDER BY name))[1:4] FROM exam_types

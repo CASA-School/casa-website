@@ -902,6 +902,16 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     Block", „evening") and is read through a bilingual map. The exam list keeps
     the last fortnight's sittings for what follows them, greyed and marked
     „Vorbei".
+23. **The management screens (2026-10-15).** Aktivität reads as the record
+    pages' timeline does: a section per day as the inboxes read, each change
+    with its mark (`activityIcon`: by what it did, else by what it was done
+    to), a change of state as its two states in their colours, the line a link
+    to its record, runs of the same change counted. Listen shows each
+    vocabulary's German names where the table keeps them (`name_de`), so the
+    German view no longer reads „morning, afternoon" or „Enrolment fee". Dein
+    Konto carries the language as a setting of the account (Deutsch | English,
+    the same `/admin/lang` the top bar uses). Team, Einstellungen, Preise and
+    Räume were already in the shared design and kept as they are.
 
 ## Copy on screens — labels, not explanations
 

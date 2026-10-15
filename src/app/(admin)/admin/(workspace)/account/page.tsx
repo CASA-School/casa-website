@@ -63,6 +63,29 @@ export default async function AccountPage({
               { label: t('Rolle', 'Role'), value: roleLabel(user.role, lang) },
               { label: t('Meldet sich an als', 'Signs in as'), value: account?.username ?? user.name },
               { label: t('E-Mail', 'Email'), value: user.email },
+              {
+                // The workspace's language for this account: the same switch as in the top bar, kept on the account.
+                label: t('Sprache', 'Language'),
+                value: (
+                  <span className="inline-flex rounded-full bg-ws-sunk p-1 ring-1 ring-ws-line ring-inset">
+                    {(['de', 'en'] as const).map((code) => (
+                      <a
+                        key={code}
+                        href={`/admin/lang?to=${code}&back=/admin/account`}
+                        aria-current={code === lang ? 'true' : undefined}
+                        lang={code}
+                        className={
+                          code === lang
+                            ? 'rounded-full bg-[var(--fm-navy)] px-3.5 py-1 text-[0.8rem] font-semibold text-white'
+                            : 'rounded-full px-3.5 py-1 text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
+                        }
+                      >
+                        {code === 'de' ? 'Deutsch' : 'English'}
+                      </a>
+                    ))}
+                  </span>
+                ),
+              },
               ...(microsoftEnabled()
                 ? [
                     {

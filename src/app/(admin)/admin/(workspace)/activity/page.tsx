@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { Icon } from '@/components/admin/icons';
 import { InboundChart } from '@/components/admin/inbound-chart';
-import { Avatar, ListEmpty, RecordName, Status } from '@/components/admin/list';
+import { ListEmpty, RecordName, Status } from '@/components/admin/list';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityHref, describeActivity, recentActivity, type ActivityEntry } from '@/lib/admin/activity';
@@ -10,8 +10,8 @@ import { requireModule } from '@/lib/admin/guard';
 import { capitalise, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { getInboundByDay, getOverviewCounts, getRecentInbound } from '@/lib/admin/overview';
-import { normaliseStatus, STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
-import { cn } from '@/lib/utils';
+import { normaliseStatus, queueLabel, STATUS_LABELS, STATUS_TONES, type QueueEntity } from '@/lib/admin/queues';
+import { activityIcon, Mark, StatePill } from '@/components/admin/record-parts';
 
 /**
  * The full activity trail, as one feed.
@@ -23,9 +23,10 @@ import { cn } from '@/lib/utils';
  *
  * Grouped by day, because "what happened on Tuesday" is how people actually
  * ask. A flat list of 200 timestamps is technically the same information and
- * useless for that question. One card, a quiet header per day, and each line
- * a sentence with the colleague's initials beside it and the time at the
- * right (docs/ADMIN_WORKSPACE.md §Lists).
+ * useless for that question. A section per day, as the inboxes read, and each
+ * line in the record pages' timeline style (2026-10-15): the change's own mark,
+ * who did what, a change of state as its two states in their colours, the time
+ * at the right, the line a link to its record (docs/ADMIN_WORKSPACE.md §Lists).
  *
  * It also carries the two backward-looking panels that used to sit on the home
  * screen — what arrived most recently, and the fortnight's volume. Today is for
@@ -124,50 +125,67 @@ export default async function ActivityPage() {
         </Card>
       </div>
 
-      <Card bleed>
-        {entries.length === 0 ? (
+      {entries.length === 0 ? (
+        <div className="rounded-3xl border border-ws-line bg-white">
           <ListEmpty title={t('Noch wurde nichts bearbeitet', 'Nothing has been worked yet')} />
-        ) : (
-          [...byDay.entries()].map(([day, dayEntries], index) => (
+        </div>
+      ) : (
+        <div className="space-y-7">
+          {[...byDay.entries()].map(([day, dayEntries]) => (
             <section key={day} aria-label={dayLabel(new Date(day), lang)}>
-              <h2
-                className={cn(
-                  'bg-[#f8fafc] px-5 pt-3 pb-2 text-xs font-bold text-[var(--casa-muted)]',
-                  index > 0 && 'border-t border-ws-line-soft'
-                )}
-              >
-                {dayLabel(new Date(day), lang)}
-                <span className="ml-1.5 font-semibold text-[var(--casa-text-subtle)] tabular-nums">{dayEntries.length}</span>
-              </h2>
-              <ul className="divide-y divide-ws-line-soft border-t border-ws-line-soft">
+              <header className="sticky top-0 z-10 -mx-1 mb-2.5 flex items-baseline gap-2.5 bg-ws-canvas/90 px-1 py-1.5 backdrop-blur-sm lg:top-14">
+                <h2 className="text-[0.95rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">{dayLabel(new Date(day), lang)}</h2>
+                <span className="ml-auto text-xs font-semibold text-[var(--casa-muted)] tabular-nums">
+                  {dayEntries.length === 1 ? t('1 Änderung', '1 change') : t(`${dayEntries.length} Änderungen`, `${dayEntries.length} changes`)}
+                </span>
+              </header>
+              <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
                 {runsOf(dayEntries, lang).map(({ entry, count, earliest }) => {
                   const href = activityHref(entry);
                   const time = clock(entry.createdAt, lang);
                   const from = clock(earliest, lang);
                   const who = entry.staffName ?? t('Jemand', 'Someone');
+                  const detail = entry.detail ?? {};
+                  const statusChange = entry.action === 'status_changed' && typeof detail.to === 'string';
+                  const subject = isQueue(entry.entity) ? queueLabel(entry.entity, lang) : null;
 
                   const line = (
-                    <span className="flex items-center gap-3 px-5 py-2.5">
-                      <Avatar name={who} staff size="sm" />
-                      <span className="min-w-0 flex-1 text-[0.875rem] text-[#2b3546]">
-                        <span className="font-semibold text-[var(--casa-ink)]">{who}</span> {describeActivity(entry, lang)}
-                        {count > 1 ? (
-                          <span className="ml-2 text-xs whitespace-nowrap text-[var(--casa-text-subtle)]">
-                            {t(
-                              `${count}-mal${from !== time ? `, ab ${from}` : ''}`,
-                              `${count} times${from !== time ? `, from ${from}` : ''}`
-                            )}
+                    <span className="flex items-start gap-3 px-5 py-3">
+                      <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{activityIcon(entry)}</Mark>
+                      <span className="min-w-0 flex-1 pt-0.5">
+                        <span className="block text-[0.86rem] leading-snug text-[#3c4657]">
+                          <span className="font-semibold text-[var(--casa-ink)]">{who}</span>{' '}
+                          {statusChange && subject
+                            ? t(`hat den Status geändert · ${subject}`, `changed the status · ${subject}`)
+                            : describeActivity(entry, lang)}
+                          {count > 1 ? (
+                            <span className="ml-2 text-xs whitespace-nowrap text-[var(--casa-muted)]">
+                              {t(`${count}-mal${from !== time ? `, ab ${from}` : ''}`, `${count} times${from !== time ? `, from ${from}` : ''}`)}
+                            </span>
+                          ) : null}
+                        </span>
+                        {statusChange && subject ? (
+                          <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            {typeof detail.from === 'string' ? (
+                              <>
+                                <StatePill status={normaliseStatus(detail.from)} lang={lang} />
+                                <span aria-hidden="true" className="text-[var(--casa-muted)] [&_svg]:size-3">
+                                  {Icon.chevronRight}
+                                </span>
+                              </>
+                            ) : null}
+                            <StatePill status={normaliseStatus(String(detail.to))} lang={lang} />
                           </span>
                         ) : null}
                       </span>
-                      <span className="shrink-0 self-start pt-0.5 text-xs text-[var(--casa-text-subtle)] tabular-nums">{time}</span>
+                      <span className="shrink-0 pt-0.5 text-xs text-[var(--casa-muted)] tabular-nums">{time}</span>
                     </span>
                   );
 
                   return (
                     <li key={entry.id}>
                       {href ? (
-                        <Link href={href} className="block transition-colors hover:bg-[#f7f9fc]">
+                        <Link href={href} className="block transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]">
                           {line}
                         </Link>
                       ) : (
@@ -178,12 +196,15 @@ export default async function ActivityPage() {
                 })}
               </ul>
             </section>
-          ))
-        )}
-      </Card>
+          ))}
+        </div>
+      )}
     </>
   );
 }
+
+const QUEUES = new Set<string>(['enquiry', 'course_registration', 'exam_registration', 'career_application']);
+const isQueue = (entity: string): entity is QueueEntity => QUEUES.has(entity);
 
 /**
  * The same thing done again and again in a row — a week saved four times in

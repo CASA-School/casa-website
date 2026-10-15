@@ -208,7 +208,7 @@ export async function OwnerControl({
   );
 }
 
-/** A change's mark on the line of time, by what it did; anything else is the clock. */
+/** A change's mark on the line of time, by what it did. */
 const ACTION_ICON: Record<string, ReactNode> = {
   payment_recorded: Icon.money,
   payment_voided: Icon.money,
@@ -227,7 +227,34 @@ const ACTION_ICON: Record<string, ReactNode> = {
   review_detached_from_person: Icon.person,
   room_assigned: Icon.rooms,
   room_unassigned: Icon.rooms,
+  status_changed: Icon.check,
+  assigned: Icon.person,
+  unassigned: Icon.person,
+  note_added: Icon.note,
 };
+
+/** Failing a mark for what it did, the mark of what it was done to. */
+const ENTITY_ICON: Record<string, ReactNode> = {
+  enquiry: Icon.enquiries,
+  course_registration: Icon.registrations,
+  exam_registration: Icon.registrations,
+  career_application: Icon.applications,
+  placement_attempt: Icon.placement,
+  person: Icon.person,
+  booking: Icon.bookings,
+  offer: Icon.offers,
+  letter_text: Icon.offers,
+  kursplanung: Icon.kursplanung,
+  course_instance: Icon.catalogue,
+  room: Icon.rooms,
+  price_list: Icon.money,
+  website_release: Icon.website,
+  staff_user: Icon.team,
+};
+
+/** A change's mark: by what it did, else by what it was done to, else the clock. */
+export const activityIcon = (entry: { action: string; entity: string }): ReactNode =>
+  ACTION_ICON[entry.action] ?? ENTITY_ICON[entry.entity] ?? Icon.clock;
 
 type TimelineItem =
   | { kind: 'note'; at: Date; note: StaffNote }
@@ -371,7 +398,7 @@ export async function Timeline({
             }
             return (
               <li key={key} className="relative flex gap-3">
-                <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{ACTION_ICON[entry.action] ?? Icon.clock}</Mark>
+                <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{activityIcon(entry)}</Mark>
                 <div className="min-w-0 flex-1 pt-1">
                   <Meta who={who} what={describeActivity(entry, lang)} at={when(item.at)} title={full(item.at)} />
                 </div>
@@ -385,7 +412,7 @@ export async function Timeline({
 }
 
 /** An entry's round mark on the line of time. */
-function Mark({ className, children }: { className: string; children: ReactNode }) {
+export function Mark({ className, children }: { className: string; children: ReactNode }) {
   return (
     <span aria-hidden="true" className={cn('relative z-[1] grid size-7 shrink-0 place-items-center rounded-full ring-1 ring-inset [&_svg]:size-3.5', className)}>
       {children}

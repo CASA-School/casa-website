@@ -16,7 +16,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 export default async function SetupPage() {
   await requireModule('settings');
   const { t, lang } = await getI18n();
-  const vocabularies = await vocabularySummaries();
+  const vocabularies = await vocabularySummaries(lang);
 
   return (
     <>
