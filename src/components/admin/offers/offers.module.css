@@ -23,6 +23,9 @@
   /* Text stays near-black; the workspace's navy (FileMaker's) is for the primary action. */
   --o-ink: #111827;
   --o-primary: var(--casa-ink-deep, #1f3e6c);
+  /* A choice that is made: the workspace's navy ring on a faint navy ground, as its menus and tabs mark the current one. */
+  --o-pick: var(--o-primary);
+  --o-pick-tint: #eef3fa;
   --o-ink2: #2b3546;
   --o-mute: #5f6b7d;
   --o-faint: #98a3b3;
@@ -296,7 +299,7 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .choiceCard:hover { border-color: var(--o-line-firm); }
 .choiceCard b { font-size: 13px; font-weight: 800; }
 .choiceCard span { font-size: 12px; color: var(--o-mute); font-weight: 600; }
-.choiceOn, .choiceOn:hover { border-color: var(--o-ink); box-shadow: 0 0 0 1px var(--o-ink); background: var(--c-ink-tint); }
+.choiceOn, .choiceOn:hover { border-color: var(--o-pick); box-shadow: 0 0 0 1px var(--o-pick); background: var(--o-pick-tint); }
 
 .actGroup { display: flex; flex-direction: column; gap: 6px; }
 .actGroup > span { font-size: 12px; font-weight: 700; color: var(--o-mute); }
@@ -351,7 +354,7 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .wzStep:not(:disabled):hover { background: #fff; }
 .wzStepOn, .wzStepOn:not(:disabled):hover { background: #fff; border-color: var(--o-line); box-shadow: var(--o-card); }
 .wzNum { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: #fff; color: var(--o-mute); box-shadow: inset 0 0 0 1.5px var(--o-line-firm); }
-.wzStepOn .wzNum { background: var(--o-ink); color: #fff; box-shadow: none; }
+.wzStepOn .wzNum { background: var(--o-pick); color: #fff; box-shadow: none; }
 .wzDone .wzNum { background: var(--o-green-soft); color: var(--o-green); box-shadow: none; }
 .wzStep b { display: block; font-size: 13.5px; font-weight: 800; margin-top: 3px; }
 .wzStep small { display: block; font-size: 12px; color: var(--o-mute); font-weight: 600; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -373,7 +376,7 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .kinds { display: flex; gap: 6px; flex-wrap: wrap; }
 .kind { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border-radius: var(--r-control); border: 1px solid var(--o-line); background: #fff; font-weight: 700; font-size: 12.5px; color: var(--o-mute); }
 .kind:hover { color: var(--o-ink); border-color: var(--o-line-firm); }
-.kindOn, .kindOn:hover { background: var(--o-ink); border-color: var(--o-ink); color: #fff; }
+.kindOn, .kindOn:hover { background: var(--o-pick); border-color: var(--o-pick); color: #fff; }
 .hits { display: flex; flex-direction: column; border: 1px solid var(--o-line); border-radius: var(--r-card); overflow: hidden; }
 .hitsHead { padding: 7px 14px 5px; font-size: 11.5px; font-weight: 800; color: var(--o-faint); background: var(--o-head); border-top: 1px solid var(--o-rule); }
 .hitsHead:first-child { border-top: 0; }
@@ -401,8 +404,8 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .radio { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: var(--r-card); border: 1px solid var(--o-line); background: #fff; text-align: left; color: inherit; }
 .radio:hover { border-color: var(--o-line-firm); }
 .radio > i { width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--o-line-firm); flex: none; }
-.radioOn, .radioOn:hover { border-color: var(--o-ink); box-shadow: 0 0 0 1px var(--o-ink); background: var(--c-ink-tint); }
-.radioOn > i { box-shadow: inset 0 0 0 5px var(--o-ink); background: #fff; }
+.radioOn, .radioOn:hover { border-color: var(--o-pick); box-shadow: 0 0 0 1px var(--o-pick); background: var(--o-pick-tint); }
+.radioOn > i { box-shadow: inset 0 0 0 5px var(--o-pick); background: #fff; }
 .radio b { display: block; font-weight: 700; }
 .radio span { display: block; font-size: 12.5px; color: var(--o-mute); font-weight: 500; }
 .matches { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: var(--r-card); background: var(--o-amber-soft); border: 1px solid #f3dcae; }
@@ -423,7 +426,7 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .course:first-child { border-top: 0; }
 .course:hover { background: #f6f9fc; }
 .course > i { width: 16px; height: 16px; border-radius: var(--r-control); box-shadow: inset 0 0 0 1.5px var(--o-line-firm); flex: none; display: grid; place-items: center; font-style: normal; font-size: 10px; color: #fff; }
-.courseOn > i { background: var(--o-ink); box-shadow: none; }
+.courseOn > i { background: var(--o-pick); box-shadow: none; }
 .course span { flex: 1; min-width: 0; font-weight: 600; }
 .course small { color: var(--o-mute); font-weight: 700; font-variant-numeric: tabular-nums; }
 
@@ -435,7 +438,7 @@ select.fi { -webkit-appearance: none; appearance: none; background: #fff url("da
 .term:hover { border-color: var(--o-line-firm); }
 .term b { font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .term span { font-size: 12px; color: var(--o-mute); font-weight: 600; }
-.termOn, .termOn:hover { border-color: var(--o-ink); box-shadow: 0 0 0 1px var(--o-ink); background: var(--c-blue-tint); }
+.termOn, .termOn:hover { border-color: var(--o-pick); box-shadow: 0 0 0 1px var(--o-pick); background: var(--o-pick-tint); }
 .levelRows { display: flex; flex-direction: column; gap: 6px; }
 .lineList { display: flex; flex-direction: column; border: 1px solid var(--o-line); border-radius: var(--r-card); overflow: hidden; }
 .lineRow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 14px; border-top: 1px solid var(--o-rule); background: #fff; cursor: default; }

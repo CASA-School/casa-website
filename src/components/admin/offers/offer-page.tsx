@@ -635,7 +635,6 @@ function Packages({ draft, update, editable }: { draft: OfferDraft; update: Upda
           <Chip tint={PACKAGE_TINT[current]} icon={ICONS.package} />
           {t('Grundlage', 'Built on')}
         </h2>
-        <span>{t('Die Pakete der Gruppenseite oder keins', 'The packages of the groups page, or none')}</span>
       </div>
       <div className={ui.cardBody}>
         <div className={ui.pkgs} role="radiogroup" aria-label={t('Paket', 'Package')}>
@@ -755,7 +754,6 @@ function CourseCard({
           <Chip tint="red" icon={ICONS.book} />
           {course ? courseTitle(course, lang) : t('Kurs', 'Course')}
         </h2>
-        {course ? null : <span>{t('Welcher Kurs, ab wann, auf welchem Niveau', 'Which course, from when, at which level')}</span>}
         {editable ? change : null}
       </div>
       {course && span ? (
@@ -891,11 +889,6 @@ function Included({ draft, update, editable, lines }: { draft: OfferDraft; updat
           <Chip tint="blue" icon={ICONS.house} />
           {t('Enthalten', 'Included')}
         </h2>
-        <span>
-          {fixed
-            ? t(`Alles, was ${animal ?? 'das Paket'} enthält`, `Everything ${animal ?? 'the package'} includes`)
-            : t('Die Bausteine, die die Gruppe nimmt', 'The blocks the group takes')}
-        </span>
       </div>
       <ColumnHead group escorts={escortCol} />
       <div className={ui.rows}>
@@ -1178,13 +1171,6 @@ function Extras({
 
   const onOffer = t('Auf dem Angebot', 'On the offer');
   const title = !group ? (c.course ? t('Außerdem auf dem Angebot', 'Also on the offer') : onOffer) : own ? onOffer : t('Extras', 'Extras');
-  const sub = !group
-    ? t('Aus der Preisliste oder selbst eingegeben – ein Transfer, eine Ermäßigung', 'From the price list, or typed — a transfer, a reduction')
-    : own
-      ? t('Alles, woraus dieses Angebot besteht', 'Everything this offer is made of')
-      : c.package === 'esel'
-        ? t('Zusätzlich zu den Bausteinen', 'On top of the blocks')
-        : t('Zusätzlich zum Paket', 'On top of the package');
   const nothing = !extras.length && !share && !typed.length && !afternoons;
 
   return (
@@ -1194,7 +1180,6 @@ function Extras({
           <Chip tint="sun" icon={ICONS.sparkle} />
           {title}
         </h2>
-        <span>{sub}</span>
       </div>
       {nothing ? null : <ColumnHead group={group} escorts={escortCol} />}
       <div className={ui.rows}>

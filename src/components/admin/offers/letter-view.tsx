@@ -239,7 +239,7 @@ export function LetterView({
         },
         signatureName: (name) => (
           <InlinePanel
-            label={t('Unterschrieben von', 'Signed by')}
+            label={t('Unterschrift', 'Signed by')}
             width={280}
             panel={(close) => (
               <span className={ed.choices}>
@@ -343,7 +343,7 @@ export function LetterView({
             {writing ? (
               <section className={o.card}>
                 <div className={o.cardHead}>
-                  <h2>{t('Brief', 'Letter')}</h2>
+                  <h2>{t('Einstellungen', 'Settings')}</h2>
                 </div>
                 <div className={ui.group}>
                   <span>{t('Sprache', 'Language')}</span>
@@ -377,15 +377,12 @@ export function LetterView({
                       <div key={part} className={ui.textRow}>
                         {part === 'intro' ? t('Einleitung', 'Opening') : t('Schluss', 'Closing')}
                         {own ? (
-                          <button
-                            type="button"
-                            className={`${ui.state} ${ui.stateChanged}`}
-                            style={{ border: 0 }}
-                            onClick={() => update({ [part]: null })}
-                            title={t('Standardtext verwenden', 'Use the standard text')}
-                          >
-                            {t('Nur dieser Brief · Standard verwenden', 'Only this letter · use the standard')}
-                          </button>
+                          <span className={ui.textState}>
+                            <span className={`${ui.state} ${ui.stateChanged}`}>{t('Nur dieser Brief', 'Only this letter')}</span>
+                            <button type="button" className={ui.reset} onClick={() => update({ [part]: null })} title={t('Standardtext verwenden', 'Use the standard text')}>
+                              {t('Zurücksetzen', 'Reset')}
+                            </button>
+                          </span>
                         ) : (
                           <span className={`${ui.state} ${ui.stateStandard}`}>{t('Standardtext', 'Standard text')}</span>
                         )}
@@ -393,7 +390,6 @@ export function LetterView({
                     );
                   })}
                 </div>
-                <div className={ui.tip}>{t('Klick auf einen Text im Brief, um ihn zu ändern.', 'Click any text on the letter to change it.')}</div>
               </section>
             ) : null}
 

@@ -91,6 +91,15 @@ The rest of the workspace is to follow this style once Offers is accepted (Rahma
    accepted). The module CSS no longer sets `font` on every button: that unlayered rule beat the
    offers' own button classes and any Tailwind size a shared part brought in.
 
+   The same day, the rest: a card head is its title alone (the lines under „Grundlage", „Enthalten",
+   „Extras" and the course said what the card shows), the wizard and the letter tab lost their hint
+   lines (the footer's „Wähle jemanden aus …", the price list's and the group step's notes, „Klick auf
+   einen Text im Brief …"), a learner in the recipient list shows their bookings and address but not
+   the word „Person", and a choice that is made — a kind, a course, a start, a radio, the current step
+   — is the workspace's navy ring on a faint navy ground (`--o-pick`) where it was black on grey; the
+   package tiles keep their own look. The list's dates column says how long an offer without dates is,
+   „2 Wochen · Daten offen". „Unterschrift" everywhere the signer is chosen.
+
 ## What FileMaker does (read live, read-only, 2026-10-13)
 
 Sources: the live `SchoolMan.fmp12` through AppleScript (396 offers, 1,771 lines, 214 letters) and the

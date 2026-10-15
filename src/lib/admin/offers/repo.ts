@@ -14,7 +14,7 @@ import { hasProblems, offerChecks } from './checks';
 import { courseSpan, courseTitle, slotLabel, teachingWeeks, termLessons } from './course';
 import { OFFER_TEXT_DEFAULTS, offerLetter, type OfferTexts } from './document';
 import { newManualKey } from './draft-ops';
-import { buildLines, computeTotals } from './engine';
+import { buildLines, computeTotals, packageWeeks } from './engine';
 import { resolveRecipient, upsertContact } from './recipients';
 import { normaliseStay } from './schema';
 import { addDays } from './stay';
@@ -147,6 +147,8 @@ export type OfferListItem = {
   course: { start: string | null; end: string | null; label: string } | null;
   participants: number | null;
   escorts: number;
+  /** How long the stay or the course is, for the list's dates column while there are no dates. */
+  weeks: number | null;
   perParticipant: number | null;
   groupTotal: number | null;
   ownerName: string | null;
@@ -225,6 +227,12 @@ export async function listOffers({ filter, q, lang }: { filter: OfferListFilter;
           : null,
       participants: r.participants,
       escorts: r.escorts,
+      weeks:
+        r.kind === 'group'
+          ? (packageWeeks(stay.choices.package) ?? stay.choices.weeks)
+          : stay.choices.course
+            ? courseSpan(stay.choices.course).weeks || null
+            : null,
       perParticipant: p,
       groupTotal,
       ownerName: r.owner_name,

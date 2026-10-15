@@ -46,10 +46,17 @@ function about(o: OfferListItem, t: T, lang: WsLang): string {
     .join(' · ');
 }
 
-function when(o: OfferListItem, lang: WsLang): string {
+/** The dates, or while there are none, how long it is: „1 Woche · Daten offen". */
+function when(o: OfferListItem, t: T, lang: WsLang) {
   const from = o.arrival ?? o.course?.start;
   const to = o.departure ?? o.course?.end;
-  return from && to ? dayRange(from, to, lang) : '';
+  if (from && to) return dayRange(from, to, lang);
+  const open = t('Daten offen', 'Dates open');
+  return (
+    <span className="text-[var(--casa-muted)]">
+      {o.weeks ? `${counted(lang, o.weeks, t('Woche', 'week'), t('Wochen', 'weeks'))} · ${open}` : open}
+    </span>
+  );
 }
 
 /** The latest that happened to it, said as a sentence: sent when, expired, or last changed. */
@@ -148,7 +155,7 @@ export default async function OffersPage({
                     <Cell href={`/admin/offers/${o.id}`} className="max-w-0">
                       <RecordName name={o.groupName || o.recipientName || t('Ohne Namen', 'Untitled')} reference={o.number} about={about(o, t, lang)} />
                     </Cell>
-                    <Cell className="hidden text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums md:table-cell">{when(o, lang)}</Cell>
+                    <Cell className="hidden text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums md:table-cell">{when(o, t, lang)}</Cell>
                     <Cell align="right" className="whitespace-nowrap tabular-nums">
                       {o.kind === 'group' ? (
                         o.perParticipant != null ? (

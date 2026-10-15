@@ -470,7 +470,7 @@ export function NewOffer({
                       />
                     </div>
                     <div className={ui.fld}>
-                      <label htmlFor="wz-owner">{t('Unterschrieben von', 'Signed by')}</label>
+                      <label htmlFor="wz-owner">{t('Unterschrift', 'Signed by')}</label>
                       <select id="wz-owner" className={ui.fi} value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
                         {staff.map((s) => (
                           <option key={s.id} value={s.id}>
@@ -491,7 +491,7 @@ export function NewOffer({
                       {group
                         ? `${pick(lang, PACKAGE_NAME[pkg])}${basedOn ? t(' · wie beim letzten Mal', ' · like last time') : ''}`
                         : [course ? courseTitle(course, lang) : null, ...picked.map((i) => priceList[i]?.label)].filter(Boolean).join(', ') ||
-                          t('Zeilen kommen auf dem Angebot dazu', 'Lines added on the offer')}
+                          t('Noch keine Zeilen', 'No lines yet')}
                     </dd>
                     {course && !group ? (
                       <>
@@ -524,7 +524,7 @@ export function NewOffer({
 
             <div className={ui.wzFoot}>
               <span className={error ? ui.wzError : undefined}>
-                {error ?? (step === 'recipient' && !recipient ? t('Wähle jemanden aus oder lege die Person neu an.', 'Pick someone, or add them new.') : '')}
+                {error ?? ''}
               </span>
               {index > 0 ? (
                 <button type="button" className={ui.btn} onClick={back} disabled={busy}>
@@ -690,7 +690,7 @@ function RecipientStep({
           <Mark kind={typed.type === 'new-person' ? 'person' : typed.type === 'new-organisation' ? typed.kind : 'other'} />
           <span className={ui.hitText}>
             <b>{t(`„${q.trim()}“ neu anlegen`, `Add “${q.trim()}” as new`)}</b>
-            <span>{t('Nicht in der Liste: wird mit dem Angebot angelegt', 'Not in the list: it is made with the offer')}</span>
+            <span>{typed.type === 'new-person' ? t('Neue Person', 'New person') : t('Neue Organisation', 'New organisation')}</span>
           </span>
           <span className={ui.hitGo}>{t('Anlegen →', 'Add →')}</span>
         </button>
@@ -1188,12 +1188,6 @@ function OfferStep({
               <Stepper label={t('Wochen', 'Weeks')} value={weeks} min={1} max={pkg === 'esel' ? 4 : 52} onChange={(v) => setWeeks(v ?? 1)} />
             </div>
           ) : null}
-          <div className={ui.note}>
-            {t(
-              'Extras – mehr Nachmittage, ein Transfer, ein Einzelzimmer, eine Ermäßigung – kommen auf dem Angebot dazu.',
-              'Extras — more afternoons, a transfer, a single room, a reduction — are added on the offer.'
-            )}
-          </div>
         </>
       ) : (
         <>
@@ -1265,7 +1259,7 @@ function PriceListPicker({
       <div className={ui.note}>
         {picked.length
           ? `${t(`${picked.length} ausgewählt`, `${picked.length} chosen`)} · ${eur(picked.reduce((s, i) => s + (priceList[i]?.unitAmount ?? 0), 0))}`
-          : t('Nichts ausgewählt: Zeilen kannst du auch auf dem Angebot hinzufügen.', 'Nothing chosen: lines can also be added on the offer.')}
+          : t('Nichts ausgewählt', 'Nothing chosen')}
       </div>
     </>
   );
@@ -1315,10 +1309,7 @@ function GroupStep({
               `Berechnet als ${stay.weeks} ${weeksWord(t, stay.weeks)}${sold && stay.weeks !== sold ? ` – ${pick(lang, PACKAGE_NAME[pkg])} hat ${sold}` : ''}.`,
               `Priced as ${stay.weeks} ${weeksWord(t, stay.weeks)}${sold && stay.weeks !== sold ? ` — ${pick(lang, PACKAGE_NAME[pkg])} is ${sold}` : ''}.`
             )
-          : t(
-              `Die Abreise ergibt sich aus der Anreise: ${length} ${weeksWord(t, length)}, Sonntag bis Samstag.`,
-              `The departure follows from the arrival: ${length} ${weeksWord(t, length)}, Sunday to Saturday.`
-            )}
+          : t(`${length} ${weeksWord(t, length)}, Sonntag bis Samstag`, `${length} ${weeksWord(t, length)}, Sunday to Saturday`)}
       </div>
       <div className={ui.row2}>
         <div className={ui.fld}>

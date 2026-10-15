@@ -169,7 +169,8 @@ function personHit(p: PersonRow, lang: WsLang): PersonHit {
     id: p.id,
     name: fullName(p.first_name, p.last_name),
     detail: [
-      bookings ? `${t('Teilnehmende', 'Student')} · ${bookings === 1 ? t('1 Buchung', '1 booking') : t(`${bookings} Buchungen`, `${bookings} bookings`)}` : 'Person',
+      // Learners are their own group in the list, so no row says what kind it is.
+      bookings ? (bookings === 1 ? t('1 Buchung', '1 booking') : t(`${bookings} Buchungen`, `${bookings} bookings`)) : null,
       p.email,
     ]
       .filter(Boolean)
