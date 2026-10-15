@@ -3,7 +3,7 @@
 FileMaker Pro must be open with `SchoolMan.fmp12` (the live file on the office
 Mini). Nothing here writes: AppleScript `cell … of every record` reads a whole
 column, and no script, field or record is ever set. Values stay in memory —
-callers print counts, never a person's data (docs/FILEMAKER_MIGRATION.md §Method).
+callers print counts, never a person's data (docs/schoolman/README.md, Method).
 """
 import subprocess
 

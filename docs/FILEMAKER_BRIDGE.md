@@ -23,6 +23,15 @@ first draft said "never write Bookings"; that is now "not in phase 1".
 
 ## 0. The plan this serves
 
+> **Direction, Rahman 2026-10-15 — this replaces the phase-3 bulk import below.** "We are not
+> migrating the system as of now, we are creating our parallel system." The workspace grows beside
+> SchoolMan; a bridge brings data across **slowly and selectively, never all at once**, so the new
+> system is not filled with FileMaker's volume or its defects; staff get the workspace **one module
+> at a time** so they get used to it; and nothing in FileMaker is lost while the team moves out of
+> it. The first job is to understand everything in SchoolMan — `docs/schoolman/` holds that study.
+> The phase table below still describes the order of responsibility, but read "Migration" as
+> "SchoolMan becomes a read-only source the bridge can still reach", not as an import of its tables.
+
 FileMaker is not being replaced by a bridge. It is being **strangled**: kept
 as the record of truth while CASA's own system grows around it, first as the
 place where new work *enters*, then as the place where data *lives*, until
