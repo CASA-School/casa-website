@@ -1,42 +1,30 @@
-import type { ReactNode } from 'react';
-
-import { ListBar, ListEmpty, ListGroup, Owner, Status } from '@/components/admin/list';
-import { ButtonLink, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
-import { pick, translator, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { Assignee, CardRow, DaySections, Language, Tally } from '@/components/admin/inbox';
+import { ListBar } from '@/components/admin/list';
+import { Pagination } from '@/components/admin/pagination';
+import { Badge, PageHeader } from '@/components/admin/ui';
+import { berlinTime } from '@/lib/admin/days';
+import { counted, pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { firstParam } from '@/lib/admin/paging';
-import {
-  listPlacementAttempts,
-  placementCounts,
-  type PlacementFilter,
-  type PlacementListItem,
-} from '@/lib/admin/placement';
+import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
+import { listPlacementAttempts, placementCounts, type PlacementFilter, type PlacementListItem } from '@/lib/admin/placement';
 import { CONFIDENCE_COPY } from '@/lib/admin/placement-copy';
 import { RELEASE_MODE } from '@/config/placement/policy';
+import { cn } from '@/lib/utils';
+import { backgroundItems } from './[id]/background';
 
 /**
- * The placement review queue.
+ * The placement review queue, in the inboxes' design (2026-10-15): the counts
+ * under the title, the views in a bar, the attempts by the day they were sent,
+ * each a card row — the recommended level where an inbox shows initials, how
+ * sure the test is, how much was answered, and the learner's own account of
+ * their German, the start of what a teacher reads before deciding. An attempt
+ * carries no name until a teacher attaches a person to the decision.
  *
- * `db/migrations/0005_placement_test.sql` says in its own header that it
- * carries no staff-review tables because "review belongs to the CASA dashboard
- * workspace". This is that surface, and it is the one screen in the workspace
- * that changes an outcome for a learner rather than a status on a record.
- *
- * The line under the title is not decoration. Every one of the 163 items in
- * the bank is `PILOT_UNREVIEWED` (CLAUDE.md rule 6) and the engine is in shadow
- * mode, so a teacher reading this screen has to know that the level in the
- * "Recommended" column is a course recommendation from an unreviewed
- * instrument — not a measurement they are being asked to rubber-stamp. It sits
- * as one quiet line, so it is read once and does not shout on every visit.
- *
- * The list is the workspace's one list design (docs/ADMIN_WORKSPACE.md §Lists):
- * the views across the top of the card, rows grouped by the day they came in
- * (rule 8), the latest few first — `?show=all` lists every attempt in the view.
- * It says only what the tab does not: on "Awaiting a teacher" every row needs a
- * teacher, so there is no decision column; a fully answered test is the normal
- * case, so only a partial one is noted; the language a test was taken in is a
- * column only when the rows differ in it. An attempt carries no name until a
- * teacher attaches a person to the decision, so the rows have nothing to name.
+ * The line under the title is not decoration. Every one of the 163 items in the
+ * bank is `PILOT_UNREVIEWED` (CLAUDE.md rule 6) and the engine is in shadow
+ * mode, so a teacher reading this screen has to know that a recommendation comes
+ * from an unreviewed instrument — not a measurement to rubber-stamp. It is one
+ * quiet line, read once.
  */
 const FILTERS: readonly { key: PlacementFilter; label: Bilingual }[] = [
   { key: 'needs_review', label: { de: 'Wartet auf Lehrkraft', en: 'Awaiting a teacher' } },
@@ -45,44 +33,12 @@ const FILTERS: readonly { key: PlacementFilter; label: Bilingual }[] = [
   { key: 'all', label: { de: 'Alle', en: 'Everything' } },
 ];
 
-/** The first view: enough to work from without a 2,000px page. */
-const FIRST_VIEW = 25;
-/** "Show all" is still bounded, so a mistyped link cannot ask for a million rows. */
-const SHOW_ALL_LIMIT = 5000;
-
-const ZONE = 'Europe/Berlin';
-const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
-const timeOfDay = (lang: WsLang) => new Intl.DateTimeFormat(wsLocale(lang), { timeZone: ZONE, hour: '2-digit', minute: '2-digit' });
-
-/** "Today", "Yesterday", or "Thu 8 Oct" / "Do., 8. Okt." (with the year when it is not this one). */
-function dayLabel(key: string, now: Date, lang: WsLang): string {
-  const t = translator(lang);
-  const today = dayKey.format(now);
-  const yesterday = dayKey.format(new Date(now.getTime() - 86_400_000));
-  if (key === today) return t('Heute', 'Today');
-  if (key === yesterday) return t('Gestern', 'Yesterday');
-  const [year, month, day] = key.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day, 12));
-  return date.toLocaleDateString(wsLocale(lang), {
-    timeZone: 'UTC',
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    ...(year === Number(today.slice(0, 4)) ? {} : { year: 'numeric' }),
-  });
-}
-
 const STAGE_LABELS: Record<string, Bilingual> = {
   submitted: { de: 'Abgeschickt', en: 'Submitted' },
   abandoned: { de: 'Abgebrochen', en: 'Abandoned' },
 };
 
-const language = (locale: string, t: T) => (locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'));
-
-type Column = { label: string; align?: 'left' | 'right'; className?: string };
-
-/** Below tablet width a row keeps the recommendation and its time; the rest waits for the record. */
-const WIDE = 'hidden md:table-cell';
+const CONFIDENCE_TONE: Record<string, 'positive' | 'neutral' | 'warning'> = { high: 'positive', medium: 'neutral', low: 'warning' };
 
 export default async function PlacementPage({
   searchParams,
@@ -91,238 +47,127 @@ export default async function PlacementPage({
 }) {
   const params = await searchParams;
   const raw = firstParam(params.filter);
-  const filter: PlacementFilter = FILTERS.some((f) => f.key === raw)
-    ? (raw as PlacementFilter)
-    : 'needs_review';
-  const showAll = firstParam(params.show) === 'all';
+  const filter: PlacementFilter = FILTERS.some((f) => f.key === raw) ? (raw as PlacementFilter) : 'needs_review';
+  const page = clampPage(params.page);
 
   const [{ items, total }, counts, { t, lang }] = await Promise.all([
-    listPlacementAttempts({
-      filter,
-      limit: showAll ? SHOW_ALL_LIMIT : FIRST_VIEW,
-      offset: 0,
-    }),
+    listPlacementAttempts({ filter, limit: PAGE_SIZE, offset: offsetFor(page) }),
     placementCounts(),
     getI18n(),
   ]);
 
-  const now = new Date();
-  const days: { key: string; items: PlacementListItem[] }[] = [];
-  for (const item of items) {
-    const key = dayKey.format(item.submittedAt ?? item.createdAt);
-    const last = days[days.length - 1];
-    if (last && last.key === key) last.items.push(item);
-    else days.push({ key, items: [item] });
-  }
-
-  const testing = filter === 'in_progress';
-  // A teacher's decision is a column where the view holds decided rows.
-  const decided = filter === 'confirmed' || filter === 'all';
-  // The same language on every row is noise; it is a column only when the rows differ.
-  const languages = new Set(items.map((item) => item.locale)).size > 1;
-
-  const languageColumn = { label: t('Sprache', 'Language'), className: `${WIDE} w-[8rem]` };
-  const columns: Column[] = testing
-    ? [{ label: t('Begonnen', 'Started') }, ...(languages ? [languageColumn] : [])]
-    : [
-        // The level is short; the slack goes after the confidence, so a row reads left to right.
-        { label: t('Empfohlen', 'Recommended'), className: 'w-[9rem]' },
-        { label: t('Sicherheit', 'Confidence'), className: WIDE },
-        ...(decided
-          ? [
-              {
-                label: filter === 'confirmed' ? t('Bestätigt', 'Confirmed') : t('Entscheidung', 'Decision'),
-                className: `${WIDE} w-[12rem]`,
-              },
-              { label: t('Lehrkraft', 'Teacher'), className: `${WIDE} w-[5rem]` },
-            ]
-          : []),
-        ...(languages ? [languageColumn] : []),
-        { label: t('Abgeschickt', 'Submitted'), className: 'w-[6.5rem]' },
-      ];
-
-  const hrefFor = (key: PlacementFilter, all = false) => {
-    const query = new URLSearchParams();
-    if (key !== 'needs_review') query.set('filter', key);
-    if (all) query.set('show', 'all');
-    const qs = query.toString();
-    return qs ? `/admin/placement?${qs}` : '/admin/placement';
-  };
+  const hrefFor = (key: PlacementFilter) => (key === 'needs_review' ? '/admin/placement' : `/admin/placement?filter=${key}`);
+  const rows = items.map((item) => ({ ...item, at: item.submittedAt ?? item.createdAt }));
 
   return (
     <>
       <PageHeader title={t('Einstufungstests', 'Placement')} />
 
-      <p className="-mt-2 mb-4 flex items-start gap-2.5 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">
+      <p className="-mt-3 mb-2 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+        <Tally tone="new" n={counts.needs_review} label={t('warten auf eine Lehrkraft', 'awaiting a teacher')} lang={lang} />
+        <Tally tone="working" n={counts.in_progress} label={t('Tests laufen noch', 'still testing')} lang={lang} />
+        <Tally tone="done" n={counts.confirmed} label={t('bestätigt', 'confirmed')} lang={lang} />
+      </p>
+      <p className="mb-6 flex items-start gap-2.5 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">
         <span aria-hidden="true" className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-[#d97706]" />
         {lang === 'de' ? (
           <span>
-            <span className="font-semibold text-[var(--casa-ink)]">Pilottest im Modus „{RELEASE_MODE}“.</span> Aufgaben
-            ungeprüft, Grenzwerte vorläufig. Eine Empfehlung ist ein Hinweis zum Abwägen – nie ein „bestanden“, ein
-            „nicht bestanden“ oder ein Zertifikat.
+            <span className="font-semibold text-[var(--casa-ink)]">Pilottest im Modus „{RELEASE_MODE}“.</span> Aufgaben ungeprüft, Grenzwerte
+            vorläufig. Eine Empfehlung ist ein Hinweis zum Abwägen – nie ein „bestanden“, ein „nicht bestanden“ oder ein Zertifikat.
           </span>
         ) : (
           <span>
-            <span className="font-semibold text-[var(--casa-ink)]">Pilot test, {RELEASE_MODE} mode.</span> Items
-            unreviewed, cut scores provisional. A recommendation is evidence to weigh — never a pass, a fail or a
-            certificate.
+            <span className="font-semibold text-[var(--casa-ink)]">Pilot test, {RELEASE_MODE} mode.</span> Items unreviewed, cut scores
+            provisional. A recommendation is evidence to weigh — never a pass, a fail or a certificate.
           </span>
         )}
       </p>
 
-      <Card
-        bleed
-        footer={
-          items.length > 0 && (total > items.length || showAll) ? (
-            <div className="flex items-center justify-between gap-4 text-xs">
-              <p className="font-semibold text-[var(--casa-text-subtle)] tabular-nums">
-                {total > items.length
-                  ? t(`Neueste ${items.length} von ${total}`, `Latest ${items.length} of ${total}`)
-                  : t(`Alle ${total}`, `All ${total}`)}
-              </p>
-              {showAll ? (
-                total > FIRST_VIEW ? (
-                  <ButtonLink href={hrefFor(filter)} size="sm">
-                    {t(`Neueste ${FIRST_VIEW} zeigen`, `Show latest ${FIRST_VIEW}`)}
-                  </ButtonLink>
-                ) : null
-              ) : (
-                <ButtonLink href={hrefFor(filter, true)} size="sm">
-                  {t(`Alle ${total} zeigen`, `Show all ${total}`)}
-                </ButtonLink>
-              )}
-            </div>
-          ) : undefined
-        }
-      >
+      <div className="mb-6 overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
         <ListBar
-          tabs={FILTERS.map((option) => ({
-            key: option.key,
-            label: pick(lang, option.label),
-            href: hrefFor(option.key),
-            count: counts[option.key],
-          }))}
+          tabs={FILTERS.map((option) => ({ key: option.key, label: pick(lang, option.label), href: hrefFor(option.key), count: counts[option.key] }))}
           active={filter}
         />
+      </div>
 
-        {items.length === 0 ? (
-          <ListEmpty title={filter === 'needs_review' ? t('Nichts wartet', 'Nothing waiting') : t('Hier ist nichts', 'Nothing here')} />
-        ) : (
-          <Table head={columns}>
-            {days.flatMap((day, index) => [
-              // An unsubmitted attempt sorts last, so a day can come round twice in Everything.
-              <ListGroup key={`${day.key}-${index}`} label={dayLabel(day.key, now, lang)} count={day.items.length} span={columns.length} />,
-              ...day.items.map((item) => (
-                <AttemptRow
-                  key={item.id}
-                  item={item}
-                  testing={testing}
-                  decided={decided}
-                  filter={filter}
-                  languages={languages}
-                  lang={lang}
-                />
-              )),
-            ])}
-          </Table>
-        )}
-      </Card>
+      <DaySections
+        items={rows}
+        today={null}
+        t={t}
+        lang={lang}
+        emptyTitle={filter === 'needs_review' ? t('Nichts wartet', 'Nothing waiting') : t('Hier ist nichts', 'Nothing here')}
+        summary={(day) => counted(lang, day.length, t('Test', 'test'), t('Tests', 'tests'))}
+        row={(item) => <AttemptRow key={item.id} item={item} filter={filter} t={t} lang={lang} />}
+      />
+
+      <Pagination basePath="/admin/placement" page={page} total={total} params={params} />
     </>
   );
 }
 
-const CONFIDENCE_TONE: Record<string, string> = {
-  high: 'text-[var(--casa-muted)]',
-  medium: 'text-[var(--casa-ink)]',
-  low: 'font-semibold text-[#9a5b00]',
-};
-
-/** What became of an attempt, in the Everything view: a dot and the word. */
-function decision(item: PlacementListItem, t: T): ReactNode {
-  if (item.confirmedLevel) {
-    return <Status tone="positive">{t(`${item.confirmedLevel} bestätigt`, `${item.confirmedLevel} confirmed`)}</Status>;
-  }
-  if (!item.recommendedBand) return <Status tone="quiet">{t('Test läuft noch', 'Still testing')}</Status>;
-  if (item.needsReview) return <Status tone="accent">{t('Braucht eine Lehrkraft', 'Needs a teacher')}</Status>;
-  return <Status tone="neutral">{t('Unbestätigt', 'Unconfirmed')}</Status>;
-}
-
-function AttemptRow({
-  item,
-  testing,
-  decided,
-  filter,
-  languages,
-  lang,
-}: {
-  item: PlacementListItem;
-  testing: boolean;
-  decided: boolean;
-  filter: PlacementFilter;
-  languages: boolean;
-  lang: WsLang;
-}) {
-  const t = translator(lang);
-  const href = `/admin/placement/${item.id}`;
+function AttemptRow({ item, filter, t, lang }: { item: PlacementListItem & { at: Date }; filter: PlacementFilter; t: T; lang: WsLang }) {
+  const testing = item.recommendedBand === null;
   const partial = item.answeredShare !== null && item.answeredShare < 1;
-  const at = item.submittedAt ?? item.createdAt;
-  const time = <time dateTime={at.toISOString()}>{timeOfDay(lang).format(at)}</time>;
-  const languageCell = languages ? (
-    <Cell className={`${WIDE} text-[0.84rem] text-[var(--casa-muted)]`}>{language(item.locale, t)}</Cell>
-  ) : null;
-
-  if (testing) {
-    return (
-      <TableRow interactive>
-        <Cell href={href} className="max-w-0 text-[0.84rem] font-medium tabular-nums">
-          {time}
-          {STAGE_LABELS[item.status] ? (
-            <span className="ml-2 text-[0.8rem] font-normal text-[var(--casa-text-subtle)]">{pick(lang, STAGE_LABELS[item.status])}</span>
-          ) : null}
-        </Cell>
-        {languageCell}
-      </TableRow>
-    );
-  }
+  const background = backgroundItems(item.intake, lang).slice(0, 3);
+  const level = item.confirmedLevel ?? item.recommendedBand;
 
   return (
-    <TableRow interactive>
-      <Cell href={href} className="text-[0.95rem] font-bold whitespace-nowrap tabular-nums">
-        {item.recommendedBand}
-      </Cell>
+    <CardRow href={`/admin/placement/${item.id}`} label={t('Einstufungstest öffnen', 'Open the placement attempt')} quiet={testing}>
+      {/* The level where an inbox shows initials: the first thing a teacher reads. */}
+      <span
+        aria-hidden="true"
+        className={cn(
+          'mt-0.5 grid h-9 min-w-12 shrink-0 place-items-center rounded-xl px-2 text-[0.82rem] font-extrabold tracking-[-0.01em] ring-1 ring-inset tabular-nums',
+          item.confirmedLevel
+            ? 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]'
+            : testing
+              ? 'bg-ws-sunk text-[var(--casa-muted)] ring-ws-line'
+              : 'bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]'
+        )}
+      >
+        {level ?? '…'}
+      </span>
 
-      <Cell className={`${WIDE} text-[0.84rem] whitespace-nowrap`}>
-        {item.confidence ? (
-          <span className={CONFIDENCE_TONE[item.confidence]}>
-            {item.confidence in CONFIDENCE_COPY
-              ? pick(lang, CONFIDENCE_COPY[item.confidence as keyof typeof CONFIDENCE_COPY])
-              : item.confidence}
+      <div className="min-w-0 flex-1 basis-[calc(100%-4.25rem)] sm:basis-auto">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <span className={cn('truncate text-[0.92rem] font-bold tracking-[-0.005em]', testing ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>
+            {testing
+              ? t('Test läuft noch', 'Still testing')
+              : item.confirmedLevel
+                ? t(`${item.confirmedLevel} bestätigt`, `${item.confirmedLevel} confirmed`)
+                : t(`Empfohlen: ${item.recommendedBand}`, `Recommended ${item.recommendedBand}`)}
           </span>
+          {item.confidence ? (
+            <Badge tone={CONFIDENCE_TONE[item.confidence] ?? 'neutral'}>
+              {t('Sicherheit', 'Confidence')}{' '}
+              {item.confidence in CONFIDENCE_COPY ? pick(lang, CONFIDENCE_COPY[item.confidence as keyof typeof CONFIDENCE_COPY]).toLowerCase() : item.confidence}
+            </Badge>
+          ) : null}
+          {partial ? (
+            <Badge tone="warning">
+              {t(`${Math.round((item.answeredShare ?? 0) * 100)} % bearbeitet`, `${Math.round((item.answeredShare ?? 0) * 100)}% answered`)}
+            </Badge>
+          ) : null}
+          {testing && STAGE_LABELS[item.status] ? <Badge tone="quiet">{pick(lang, STAGE_LABELS[item.status])}</Badge> : null}
+          {filter === 'all' && item.needsReview ? <Badge tone="accent">{t('Braucht eine Lehrkraft', 'Needs a teacher')}</Badge> : null}
+        </div>
+        {item.confirmedLevel && item.recommendedBand && item.recommendedBand !== item.confirmedLevel ? (
+          <p className="mt-1 text-[0.84rem] font-semibold text-[#2b3546]">{t(`Empfohlen war ${item.recommendedBand}`, `Recommended ${item.recommendedBand}`)}</p>
         ) : null}
-        {partial ? (
-          <span className="ml-2 text-[0.8rem] text-[#9a5b00]">
-            {t(
-              `${Math.round((item.answeredShare ?? 0) * 100)} % bearbeitet`,
-              `${Math.round((item.answeredShare ?? 0) * 100)}% answered`
-            )}
-          </span>
+        {background.length ? (
+          <p className="mt-0.5 line-clamp-2 text-[0.84rem] leading-relaxed text-[var(--casa-muted)]">
+            {background.map((entry) => `${entry.label}: ${entry.value}`).join(' · ')}
+          </p>
         ) : null}
-      </Cell>
+      </div>
 
-      {decided ? (
-        <>
-          <Cell className={`${WIDE} text-[0.84rem] whitespace-nowrap`}>
-            {filter === 'confirmed' ? <span className="font-bold">{item.confirmedLevel}</span> : decision(item, t)}
-          </Cell>
-          <Cell className={WIDE}>
-            <Owner name={item.reviewerName} />
-          </Cell>
-        </>
-      ) : null}
-
-      {languageCell}
-
-      <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)] tabular-nums">{time}</Cell>
-    </TableRow>
+      <div className="flex w-full shrink-0 items-center justify-between gap-2 pl-[4.25rem] sm:w-auto sm:flex-col sm:items-end sm:justify-start sm:pl-2">
+        <span className="flex items-center gap-2 text-[0.8rem] text-[var(--casa-muted)] tabular-nums">
+          <Language locale={item.locale} t={t} />
+          <time dateTime={item.at.toISOString()}>{berlinTime(item.at, lang)}</time>
+        </span>
+        <Assignee name={item.reviewerName} t={t} />
+      </div>
+    </CardRow>
   );
 }

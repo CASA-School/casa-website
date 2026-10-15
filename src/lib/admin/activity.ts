@@ -257,9 +257,10 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Einstufung von einer Person gelöst', 'detached a placement review from a person');
     case 'placement_confirmed': {
       const level = entry.detail?.level;
+      const against = entry.detail?.agreed === false;
       return t(
-        `hat eine Einstufung auf ${String(level ?? 'ein Niveau')} bestätigt`,
-        `confirmed a placement at ${String(level ?? 'a level')}`
+        `hat eine Einstufung auf ${String(level ?? 'ein Niveau')} bestätigt${against ? ', entgegen der Empfehlung' : ''}`,
+        `confirmed a placement at ${String(level ?? 'a level')}${against ? ', against the recommendation' : ''}`
       );
     }
     case 'staff_invited':

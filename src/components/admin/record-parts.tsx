@@ -493,3 +493,18 @@ export async function SubmissionCard({
     </article>
   );
 }
+
+/** A record's figures in its header's bar: the person's level and bookings, a test's confidence. */
+export function StatBar({ children }: { children: ReactNode }) {
+  return <dl className="flex w-full flex-wrap items-center gap-x-7 gap-y-2">{children}</dl>;
+}
+
+/** One figure: its label above, the value under it, a quiet word after the value when it needs one. */
+export function Stat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[0.72rem] font-semibold text-[var(--casa-muted)]">{label}</dt>
+      <dd className="mt-0.5 text-[0.95rem] font-bold text-[var(--casa-ink)] tabular-nums">{children}</dd>
+    </div>
+  );
+}

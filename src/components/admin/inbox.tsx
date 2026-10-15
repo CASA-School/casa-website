@@ -205,6 +205,57 @@ function Week({
   lang: WsLang;
   emptyTitle: string | null;
 }) {
+  return (
+    <DaySections
+      items={items}
+      today={today}
+      t={t}
+      lang={lang}
+      emptyTitle={emptyTitle}
+      summary={(rows) => {
+        const open = rows.filter((row) => isOpen(row.status)).length;
+        return (
+          <>
+            {counted(lang, rows.length, one, many)}
+            {' · '}
+            {open ? (
+              <span className="text-[var(--casa-ink)]">
+                {num(lang, open)} {t('offen', 'open')}
+              </span>
+            ) : (
+              <span className="text-[#17693a]">{rows.length === 1 ? t('erledigt', 'done') : t('alle erledigt', 'all done')}</span>
+            )}
+          </>
+        );
+      }}
+      row={(item) => <InboxRow key={item.id} item={item} entity={entity} canClose={canClose} one={one} t={t} lang={lang} />}
+    />
+  );
+}
+
+/**
+ * Records by day, the inboxes' and the placement queue's one way of showing
+ * time: a sticky heading per day — „Heute", „Gestern", the date with how long
+ * ago — with a summary on the right, the day's rows in one card. With `today`
+ * set, today always has its section, so a quiet morning says so.
+ */
+export function DaySections<I extends { id: string; at: Date }>({
+  items,
+  today,
+  t,
+  lang,
+  emptyTitle,
+  summary,
+  row,
+}: {
+  items: readonly I[];
+  today: string | null;
+  t: T;
+  lang: WsLang;
+  emptyTitle: string | null;
+  summary: (rows: readonly I[]) => ReactNode;
+  row: (item: I) => ReactNode;
+}) {
   const days = groupByDay(items, (item) => item.at);
   if (today && days[0]?.day !== today) days.unshift({ day: today, rows: [] });
   if (!days.length) {
@@ -217,35 +268,20 @@ function Week({
 
   return (
     <div className="space-y-7">
-      {days.map(({ day, rows }) => {
+      {days.map(({ day, rows }, index) => {
         const heading = dayHeading(day, lang, today ?? berlinDay(new Date()));
-        const open = rows.filter((row) => isOpen(row.status)).length;
         return (
-          <section key={day} aria-labelledby={`day-${day}`}>
+          <section key={`${day}-${index}`} aria-labelledby={`day-${day}-${index}`}>
             <header className="sticky top-0 z-10 -mx-1 mb-2.5 flex items-baseline gap-2.5 bg-ws-canvas/90 px-1 py-1.5 backdrop-blur-sm lg:top-14">
-              <h2 id={`day-${day}`} className="text-[0.95rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">
+              <h2 id={`day-${day}-${index}`} className="text-[0.95rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">
                 {heading.title}
               </h2>
               {heading.aside ? <span className="text-[0.82rem] text-[var(--casa-muted)]">{heading.aside}</span> : null}
-              {rows.length ? (
-                <span className="ml-auto text-xs font-semibold text-[var(--casa-muted)] tabular-nums">
-                  {counted(lang, rows.length, one, many)}
-                  {' · '}
-                  {open ? (
-                    <span className="text-[var(--casa-ink)]">
-                      {num(lang, open)} {t('offen', 'open')}
-                    </span>
-                  ) : (
-                    <span className="text-[#17693a]">{rows.length === 1 ? t('erledigt', 'done') : t('alle erledigt', 'all done')}</span>
-                  )}
-                </span>
-              ) : null}
+              {rows.length ? <span className="ml-auto text-xs font-semibold text-[var(--casa-muted)] tabular-nums">{summary(rows)}</span> : null}
             </header>
             {rows.length ? (
               <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-                {rows.map((item) => (
-                  <InboxRow key={item.id} item={item} entity={entity} canClose={canClose} one={one} t={t} lang={lang} />
-                ))}
+                {rows.map((item) => row(item))}
               </ul>
             ) : (
               <p className="rounded-3xl border border-dashed border-ws-line px-5 py-4 text-[0.86rem] text-[var(--casa-muted)]">
@@ -259,6 +295,21 @@ function Week({
   );
 }
 
+/** One row of a day's card: the whole row opens its record, a button on it sits above the link; a closed one is quieter. */
+export function CardRow({ href, label, quiet = false, children }: { href: string; label: string; quiet?: boolean; children: ReactNode }) {
+  return (
+    <li
+      className={cn(
+        'group relative flex flex-wrap items-start gap-x-3.5 gap-y-2.5 px-4 py-4 transition-colors hover:bg-[var(--ws-row-hover)] sm:flex-nowrap sm:gap-x-4 sm:px-5',
+        quiet && 'bg-[#fbfbfc]'
+      )}
+    >
+      <RowLink href={href} label={label} />
+      {children}
+    </li>
+  );
+}
+
 /** A new record older than this has waited too long, and says so. */
 const STALE_AFTER_DAYS = 2;
 
@@ -268,13 +319,7 @@ function InboxRow({ item, entity, canClose, one, t, lang }: { item: InboxItem; e
   const open = isOpen(item.status);
 
   return (
-    <li
-      className={cn(
-        'group relative flex flex-wrap items-start gap-x-3.5 gap-y-2.5 px-4 py-4 transition-colors hover:bg-[var(--ws-row-hover)] sm:flex-nowrap sm:gap-x-4 sm:px-5',
-        !open && 'bg-[#fbfbfc]'
-      )}
-    >
-      <RowLink href={item.href} label={t(`${one} von ${item.name} öffnen`, `Open the ${one} from ${item.name}`)} />
+    <CardRow href={item.href} label={t(`${one} von ${item.name} öffnen`, `Open the ${one} from ${item.name}`)} quiet={!open}>
 
       <span className={cn('relative mt-0.5 shrink-0', !open && 'opacity-60')}>
         <Avatar name={item.name} />
@@ -320,7 +365,7 @@ function InboxRow({ item, entity, canClose, one, t, lang }: { item: InboxItem; e
           {canClose ? <CloseButton entity={entity} id={item.id} open={open} t={t} /> : null}
         </span>
       </div>
-    </li>
+    </CardRow>
   );
 }
 
@@ -434,7 +479,7 @@ function StateBadge({ status, lang, showNew = false }: { status: WorkStatus; lan
 }
 
 /** The language it was sent in, when it is not German: the one to reply in. */
-function Language({ locale, t }: { locale?: string | null; t: T }) {
+export function Language({ locale, t }: { locale?: string | null; t: T }) {
   if (!locale || locale === 'de') return null;
   return (
     <span
@@ -446,7 +491,7 @@ function Language({ locale, t }: { locale?: string | null; t: T }) {
   );
 }
 
-function Assignee({ name, t }: { name: string | null; t: T }) {
+export function Assignee({ name, t }: { name: string | null; t: T }) {
   if (!name) return null;
   return (
     <span title={name} className="relative inline-flex">
@@ -482,13 +527,16 @@ function CloseButton({ entity, id, open, t, compact = false }: { entity: QueueEn
 }
 
 /** One state's count with its dot; nothing when there are none. */
-function Tally({ tone, n, label, lang }: { tone: 'new' | 'working' | 'waiting'; n: number; label: string; lang: WsLang }) {
+export function Tally({ tone, n, label, lang }: { tone: 'new' | 'working' | 'waiting' | 'done'; n: number; label: string; lang: WsLang }) {
   if (!n) return null;
   return (
     <span data-tally={tone} className="inline-flex items-center gap-2">
       <span
         aria-hidden="true"
-        className={cn('size-2 rounded-full', tone === 'new' ? 'bg-[#2f6fd1]' : tone === 'working' ? 'bg-[var(--fm-navy)]' : 'bg-[#e0a100]')}
+        className={cn(
+          'size-2 rounded-full',
+          tone === 'new' ? 'bg-[#2f6fd1]' : tone === 'working' ? 'bg-[var(--fm-navy)]' : tone === 'done' ? 'bg-[#1f9d55]' : 'bg-[#e0a100]'
+        )}
       />
       <b className="font-semibold text-[var(--casa-ink)] tabular-nums">{num(lang, n)}</b> {label}
     </span>

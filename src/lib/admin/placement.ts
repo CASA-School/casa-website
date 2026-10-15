@@ -32,13 +32,14 @@ export type PlacementListItem = {
   answeredShare: number | null;
   confirmedLevel: string | null;
   reviewerName: string | null;
+  /** The learner's own account of their German, as the intake stored it. */
+  intake: Record<string, unknown> | null;
   createdAt: Date;
   submittedAt: Date | null;
 };
 
 export type PlacementAttemptDetail = PlacementListItem & {
   decision: PlacementDecision | null;
-  intake: Record<string, unknown> | null;
   routerTargetLevel: string | null;
   boundaryModuleId: string | null;
   reviewNote: string | null;
@@ -114,6 +115,7 @@ const toListItem = (row: Row): PlacementListItem => ({
   answeredShare: row.decision?.answeredShare ?? null,
   confirmedLevel: row.confirmed_level,
   reviewerName: row.reviewer_name,
+  intake: row.intake,
   createdAt: row.created_at,
   submittedAt: row.submitted_at,
 });

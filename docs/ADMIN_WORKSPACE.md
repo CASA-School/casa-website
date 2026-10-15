@@ -861,6 +861,18 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     inbox records: notes on the person (migration 0026) and the changes to it,
     ending with how it came to be. The Übersicht's inbox cards count with
     `inboxCounts`, as the lists do.
+19. **Einstufungstests in the same design (2026-10-15).** The placement queue
+    is not an inbox — an attempt has no name until a teacher attaches a person,
+    and its states are awaiting a teacher, confirmed, still testing — so it uses
+    the inboxes' building blocks rather than `InboxScreen`: the tallies, the
+    views in a bar, `DaySections` and `CardRow` from `inbox.tsx`. A row leads
+    with the level where an inbox shows initials (blue recommended, green
+    confirmed, grey still testing), then how sure the test is, how much was
+    answered, and the learner's own account of their German. An attempt's page
+    has the figures bar (`StatBar`: confidence, answered, the spoken check,
+    whether it may settle by itself) in place of five tiles, the background
+    answers as a `FactGrid`, and the shared `Timeline` in place of its own
+    notes and history. The pilot line under the title stays (rule 6).
 
 ## Copy on screens — labels, not explanations
 

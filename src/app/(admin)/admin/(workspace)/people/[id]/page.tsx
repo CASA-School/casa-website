@@ -13,7 +13,7 @@ import { optionLine } from '../../registrations/option-label';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MakeOffer } from '@/components/admin/make-offer';
-import { MetaItem, MetaLine, StatePill, Timeline } from '@/components/admin/record-parts';
+import { MetaItem, MetaLine, Stat, StatBar, StatePill, Timeline } from '@/components/admin/record-parts';
 import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone, type Tint } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
@@ -263,7 +263,7 @@ export default async function PersonPage({
           </>
         }
         bar={
-          <dl className="flex w-full flex-wrap items-center gap-x-7 gap-y-2">
+          <StatBar>
             <Stat label={t('Niveau', 'Level')}>
               {confirmed ? (
                 <span title={`${confirmed.reviewerName ?? t('Ehemaliges Teammitglied', 'A former colleague')}`}>
@@ -297,7 +297,7 @@ export default async function PersonPage({
                 <span className="font-semibold text-[var(--casa-muted)]">{t('nichts offen', 'nothing open')}</span>
               )}
             </Stat>
-          </dl>
+          </StatBar>
         }
       />
 
@@ -454,16 +454,6 @@ export default async function PersonPage({
         </RecordFoot>
       ) : null}
     </>
-  );
-}
-
-/** One figure in the head's bar: its label above, the value under it. */
-function Stat({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[0.72rem] font-semibold text-[var(--casa-muted)]">{label}</dt>
-      <dd className="mt-0.5 text-[0.95rem] font-bold text-[var(--casa-ink)] tabular-nums">{children}</dd>
-    </div>
   );
 }
 

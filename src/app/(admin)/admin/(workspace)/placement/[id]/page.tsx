@@ -2,13 +2,12 @@ import { notFound } from 'next/navigation';
 
 import Link from 'next/link';
 
-import { addNoteAction, attachReviewPersonAction, confirmPlacementAction } from '../../actions';
+import { attachReviewPersonAction, confirmPlacementAction } from '../../actions';
 import {
   Badge,
   Button,
   Card,
   DateText,
-  DetailList,
   Field,
   Input,
   Meter,
@@ -17,8 +16,9 @@ import {
   Textarea,
 } from '@/components/admin/ui';
 import { Icon } from '@/components/admin/icons';
+import { FactGrid, MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { activityFor } from '@/lib/admin/activity';
-import { pick, relativeDays, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { pick, relativeDays, type Bilingual } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { listPeople } from '@/lib/admin/people';
@@ -37,13 +37,6 @@ const STAGES: Record<string, Bilingual> = {
   in_progress: { de: 'Läuft noch', en: 'In progress' },
   submitted: { de: 'Abgeschickt', en: 'Submitted' },
   abandoned: { de: 'Abgebrochen', en: 'Abandoned' },
-};
-
-/** A history line's verb, in German, for the actions this screen records. English reads the code. */
-const ACTIONS_DE: Record<string, string> = {
-  note_added: 'hat eine Notiz hinzugefügt',
-  review_attached_to_person: 'hat eine Person verknüpft',
-  review_detached_from_person: 'hat die Verknüpfung mit der Person gelöst',
 };
 
 /**
@@ -92,26 +85,13 @@ export default async function PlacementAttemptPage({
   const skillLabel = (skill: string) =>
     skill in SKILL_LABELS ? pick(lang, SKILL_LABELS[skill as PlacementSkill]) : skill;
 
-  const confidenceTint = (
-    { high: 'green', medium: 'ink', low: 'sun' } as const
-  )[decision?.confidence ?? 'medium'];
 
   return (
     <>
       <RecordHeader
         backHref="/admin/placement"
-        backLabel={t('Alle Einstufungstests', 'All placement attempts')}
-        title={
-          decision ? t(`Empfohlen: ${decision.band}`, `Recommended ${decision.band}`) : t('Noch nicht ausgewertet', 'Not scored yet')
-        }
-        subtitle={
-          decision
-            ? t(
-                `Pilot-Empfehlung · Richtlinienversion ${decision.policyVersion} · Modus ${decision.releaseMode}`,
-                `Pilot recommendation · policy version ${decision.policyVersion} · ${decision.releaseMode} mode`
-              )
-            : t('Noch nicht abgeschickt, es gibt also nichts zu prüfen', 'Not submitted yet, so there is nothing to review')
-        }
+        backLabel={t('Einstufungstests', 'Placement')}
+        title={attempt.reviewPerson?.name ?? t('Einstufungstest', 'Placement test')}
         status={
           attempt.confirmedLevel ? (
             <Badge tone="positive">{t(`Bestätigt: ${attempt.confirmedLevel}`, `Confirmed ${attempt.confirmedLevel}`)}</Badge>
@@ -123,84 +103,69 @@ export default async function PlacementAttemptPage({
             <Badge tone="quiet">{t('Läuft noch', 'In progress')}</Badge>
           )
         }
-        facts={
-          decision
-            ? [
-                {
-                  label: t('Abgeschickt', 'Submitted'),
-                  icon: Icon.clock,
-                  tint: 'blue',
-                  value: <DateText value={attempt.submittedAt ?? attempt.createdAt} />,
-                  sub: relativeDays(attempt.submittedAt ?? attempt.createdAt, lang),
-                },
-                {
-                  label: t('Sicherheit', 'Confidence'),
-                  icon: Icon.placement,
-                  tint: confidenceTint,
-                  value: pick(lang, CONFIDENCE_COPY[decision.confidence]),
-                  sub: t(
-                    `${(decision.confidenceScore * 100).toFixed(0)} von 100`,
-                    `${(decision.confidenceScore * 100).toFixed(0)} of 100`
-                  ),
-                },
-                {
-                  label: t('Test bearbeitet', 'Test answered'),
-                  icon: Icon.book,
-                  tint: 'red',
-                  value: t(`${Math.round(decision.answeredShare * 100)} %`, `${Math.round(decision.answeredShare * 100)}%`),
-                  // The response count is only shown when there is one.
-                  // "92% · 0 responses" is a contradiction on its face, and it
-                  // happens legitimately: the share is computed by the engine
-                  // at finalisation, while the rows can be absent for an
-                  // attempt migrated in or scored in fallback mode.
-                  sub:
-                    attempt.responseCount > 0
-                      ? t(`${attempt.responseCount} Antworten`, `${attempt.responseCount} responses`)
-                      : t('der gestellten Aufgaben', 'of the items served'),
-                },
-                {
-                  label: t('Gespräch', 'Spoken check'),
-                  icon: Icon.people,
-                  tint: decision.speakingRequired ? 'sun' : 'ink',
-                  value: decision.speakingRequired ? t('Nötig', 'Required') : t('Nicht nötig', 'Not required'),
-                  sub: decision.speakingRequired
-                    ? attempt.speakingCheckDone
-                      ? t('Erledigt', 'Done')
-                      : t('Ab B1+, noch nicht erledigt', 'From B1+, not done yet')
-                    : t('Auf dieser Stufe', 'At this band'),
-                },
-                {
-                  label: t('Automatisch bestätigbar', 'Presentable as settled'),
-                  icon: Icon.check,
-                  tint: decision.autoConfirmable ? 'green' : 'sun',
-                  value: decision.autoConfirmable ? t('Ja', 'Yes') : t('Nein', 'No'),
-                  sub: decision.autoConfirmable
-                    ? t('Laut Richtlinie', 'Under policy')
-                    : t('Eine Lehrkraft muss entscheiden', 'A teacher must decide'),
-                },
-              ]
-            : [
-                {
-                  label: t('Begonnen', 'Started'),
-                  icon: Icon.clock,
-                  tint: 'blue',
-                  value: <DateText value={attempt.createdAt} withTime />,
-                  sub: relativeDays(attempt.createdAt, lang),
-                },
-                { label: t('Antworten bisher', 'Responses so far'), icon: Icon.book, tint: 'red', value: attempt.responseCount },
-                {
-                  label: t('Aktueller Stand', 'Current stage'),
-                  icon: Icon.check,
-                  tint: 'blue',
-                  value: STAGES[attempt.status] ? pick(lang, STAGES[attempt.status]) : humanise(attempt.status),
-                },
-                {
-                  label: t('Einstiegsteil zeigte auf', 'Screener pointed at'),
-                  icon: Icon.placement,
-                  tint: 'red',
-                  value: attempt.routerTargetLevel,
-                },
-              ]
+        subtitle={
+          <>
+            <span className="block text-[0.98rem] font-semibold text-[#2b3546]">
+              {decision ? t(`Empfohlen: ${decision.band}`, `Recommended ${decision.band}`) : t('Noch nicht ausgewertet', 'Not scored yet')}
+            </span>
+            <MetaLine>
+              <MetaItem icon={Icon.clock}>
+                {decision ? t('Abgeschickt', 'Submitted') : t('Begonnen', 'Started')}{' '}
+                <DateText value={decision ? (attempt.submittedAt ?? attempt.createdAt) : attempt.createdAt} withTime />
+              </MetaItem>
+              <MetaItem icon={Icon.globe}>{attempt.locale === 'de' ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
+              {decision ? (
+                <MetaItem icon={Icon.placement}>
+                  {t(`Pilot · Richtlinie ${decision.policyVersion} · Modus ${decision.releaseMode}`, `Pilot · policy ${decision.policyVersion} · ${decision.releaseMode} mode`)}
+                </MetaItem>
+              ) : null}
+            </MetaLine>
+          </>
+        }
+        bar={
+          decision ? (
+            <StatBar>
+              <Stat label={t('Sicherheit', 'Confidence')}>
+                <span className={decision.confidence === 'low' ? 'text-[#9a5b00]' : decision.confidence === 'high' ? 'text-[#17693a]' : undefined}>
+                  {pick(lang, CONFIDENCE_COPY[decision.confidence])}
+                </span>{' '}
+                <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]">
+                  {t(`${(decision.confidenceScore * 100).toFixed(0)} von 100`, `${(decision.confidenceScore * 100).toFixed(0)} of 100`)}
+                </span>
+              </Stat>
+              <Stat label={t('Bearbeitet', 'Answered')}>
+                <span className={decision.answeredShare < 1 ? 'text-[#9a5b00]' : undefined}>
+                  {t(`${Math.round(decision.answeredShare * 100)} %`, `${Math.round(decision.answeredShare * 100)}%`)}
+                </span>
+                {attempt.responseCount > 0 ? (
+                  <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]">
+                    {' '}
+                    · {t(`${attempt.responseCount} Antworten`, `${attempt.responseCount} responses`)}
+                  </span>
+                ) : null}
+              </Stat>
+              <Stat label={t('Gespräch', 'Spoken check')}>
+                {decision.speakingRequired ? (
+                  attempt.speakingCheckDone ? (
+                    <span className="text-[#17693a]">{t('Geführt', 'Done')}</span>
+                  ) : (
+                    <span className="text-[#9a5b00]">{t('Nötig, noch offen', 'Required, not done')}</span>
+                  )
+                ) : (
+                  <span className="text-[var(--casa-muted)]">{t('Nicht nötig', 'Not required')}</span>
+                )}
+              </Stat>
+              <Stat label={t('Automatisch bestätigbar', 'Presentable as settled')}>
+                {decision.autoConfirmable ? t('Ja', 'Yes') : <span className="text-[var(--casa-muted)]">{t('Nein — eine Lehrkraft entscheidet', 'No — a teacher decides')}</span>}
+              </Stat>
+            </StatBar>
+          ) : (
+            <StatBar>
+              <Stat label={t('Antworten bisher', 'Responses so far')}>{attempt.responseCount}</Stat>
+              <Stat label={t('Aktueller Stand', 'Current stage')}>{STAGES[attempt.status] ? pick(lang, STAGES[attempt.status]) : humanise(attempt.status)}</Stat>
+              <Stat label={t('Einstiegsteil zeigte auf', 'Screener pointed at')}>{attempt.routerTargetLevel ?? '—'}</Stat>
+            </StatBar>
+          )
         }
       />
 
@@ -292,7 +257,7 @@ export default async function PlacementAttemptPage({
               icon={Icon.person}
               tint="green"
             >
-              <DetailList items={background} />
+              <FactGrid facts={background} />
             </Card>
           ) : null}
 
@@ -482,97 +447,19 @@ export default async function PlacementAttemptPage({
             </Card>
           ) : null}
 
-          <Card title={t('Notizen', 'Notes')} icon={Icon.note} tint="sun">
-            <PlacementNotes attemptId={attempt.id} notes={notes} t={t} lang={lang} />
-          </Card>
-
-          {activity.length > 0 ? (
-            <Card title={t('Verlauf', 'History')} icon={Icon.clock} tint="ink">
-              <ol className="relative space-y-3 before:absolute before:top-1 before:bottom-1 before:left-[4px] before:w-px before:bg-ws-line">
-                {activity.map((entry) => (
-                  <li key={entry.id} className="relative flex gap-3 text-xs">
-                    <span
-                      aria-hidden="true"
-                      className="relative mt-1 h-[9px] w-[9px] shrink-0 rounded-full border-2 border-white bg-ws-line-firm"
-                    />
-                    <span className="text-[var(--casa-text-subtle)]">
-                      <span className="font-bold text-[var(--casa-ink)]">
-                        {entry.staffName ?? t('Jemand', 'Someone')}
-                      </span>{' '}
-                      {entry.action === 'placement_confirmed'
-                        ? t(
-                            `hat ${String(entry.detail?.level ?? 'ein Niveau')} bestätigt${
-                              entry.detail?.agreed === false ? ', entgegen der Empfehlung' : ''
-                            }`,
-                            `confirmed ${String(entry.detail?.level ?? 'a level')}${
-                              entry.detail?.agreed === false ? ', against the recommendation' : ''
-                            }`
-                          )
-                        : t(ACTIONS_DE[entry.action] ?? entry.action.replace(/_/g, ' '), entry.action.replace(/_/g, ' '))}{' '}
-                      · {relativeDays(entry.createdAt, lang)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </Card>
-          ) : null}
+          <Timeline
+            entity="placement_attempt"
+            id={attempt.id}
+            notes={notes}
+            activity={activity}
+            origin={{
+              at: attempt.submittedAt ?? attempt.createdAt,
+              label: decision ? t('Test abgeschickt', 'Test submitted') : t('Test begonnen', 'Test started'),
+              icon: Icon.placement,
+            }}
+          />
         </div>
       </div>
-    </>
-  );
-}
-
-/** The notes panel, without the queue-entity plumbing the shared rail needs. */
-function PlacementNotes({
-  attemptId,
-  notes,
-  t,
-  lang,
-}: {
-  attemptId: string;
-  notes: readonly {
-    id: string;
-    body: string;
-    authorName: string | null;
-    createdAt: Date;
-  }[];
-  t: T;
-  lang: WsLang;
-}) {
-  return (
-    <>
-      <form action={addNoteAction} className="space-y-2">
-        <input type="hidden" name="entity" value="placement_attempt" />
-        <input type="hidden" name="entityId" value={attemptId} />
-        <Textarea
-          name="body"
-          rows={3}
-          required
-          placeholder={t(
-            'Was das Team wissen sollte, bevor jemand diese Person unterrichtet.',
-            'Anything a colleague should know before they teach this learner.'
-          )}
-          aria-label={t('Neue Notiz', 'New note')}
-        />
-        <Button type="submit" variant="secondary" size="sm">
-          {t('Notiz hinzufügen', 'Add note')}
-        </Button>
-      </form>
-
-      {notes.length > 0 ? (
-        <ul className="mt-4 space-y-3 border-t border-ws-line-soft pt-4">
-          {notes.map((note) => (
-            <li key={note.id} className="rounded-xl bg-[#fffbea] px-3 py-2.5">
-              <p className="text-sm leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">
-                {note.body}
-              </p>
-              <p className="mt-1 text-xs text-[var(--casa-text-subtle)]">
-                {note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague')} · {relativeDays(note.createdAt, lang)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : null}
     </>
   );
 }
