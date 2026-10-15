@@ -78,6 +78,19 @@ direction Rahman chose, and the rules that follow from it:
 
 The rest of the workspace is to follow this style once Offers is accepted (Rahman, 2026-10-13).
 
+9. **One workspace, 2026-10-15.** The workspace cleanup brought Offers in line with the shared
+   record parts while it keeps its own editor. The side column's history is the workspace's
+   *Notizen und Verlauf* (`Timeline` in `record-parts.tsx`, migration 0027 lets `staff_notes` hold an
+   offer): colleagues write notes on an offer, and the offer words its own entries — „hat Fassung 2
+   gesendet" linking to that version, an answer with the note that came with it, a reopening —
+   with the origin (who created it, from which enquiry, for which learner, which offer it repeats)
+   closing the line. Earlier offers to the same recipient are their own small card under it. A
+   learner's course rows no longer repeat the name in their detail: a level reads its dates, a book
+   is named by its title. The title in the head is ink, even while it is the recipient's name standing
+   in, and the list carries the inboxes' counts line (to follow up, awaiting an answer, drafts,
+   accepted). The module CSS no longer sets `font` on every button: that unlayered rule beat the
+   offers' own button classes and any Tailwind size a shared part brought in.
+
 ## What FileMaker does (read live, read-only, 2026-10-13)
 
 Sources: the live `SchoolMan.fmp12` through AppleScript (396 offers, 1,771 lines, 214 letters) and the
@@ -305,7 +318,8 @@ src/app/(admin)/admin/(editor)/offers/
   [id]/letter/page.tsx  the letter (?version=N: a version as sent)
 src/components/admin/offers/
   frame.tsx             the toolbar and the Offer | Letter tabs
-  offer-page.tsx        the offer: head, built on, included, extras; price, checks, letter, history
+  offer-page.tsx        the offer: head, built on, included, extras; price, checks, letter, earlier offers
+                        (the notes and history come from the route, rendered on the server)
   letter-view.tsx       the letter tab: in-place editing, standard texts, versions, send
   new-offer.tsx         the wizard
   course-picker.tsx     a learner's course, in the wizard and on the offer

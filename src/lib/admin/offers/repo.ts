@@ -236,15 +236,24 @@ export async function listOffers({ filter, q, lang }: { filter: OfferListFilter;
   });
 }
 
-export async function offerCounts(): Promise<Record<OfferListFilter, number>> {
-  const [r] = await query<Record<OfferListFilter, string>>(
+/** The tabs' counts, and the open ones by what to do: follow up, wait for the answer, finish the draft. */
+export type OfferCounts = Record<OfferListFilter | 'follow' | 'waiting' | 'draft', number>;
+
+export async function offerCounts(): Promise<OfferCounts> {
+  // `listOffers` decides a follow-up the same way, by Bremen's calendar day.
+  const day = `(now() AT TIME ZONE 'Europe/Berlin')::date`;
+  const follow = `o.status = 'sent' AND (coalesce(o.valid_until < ${day}, false) OR coalesce((o.sent_at AT TIME ZONE 'Europe/Berlin')::date + ${FOLLOW_UP_AFTER_DAYS} <= ${day}, false))`;
+  const [r] = await query<Record<keyof OfferCounts, string>>(
     `SELECT count(*) FILTER (WHERE ${FILTER_SQL.open}) AS open,
             count(*) FILTER (WHERE ${FILTER_SQL.accepted}) AS accepted,
             count(*) FILTER (WHERE ${FILTER_SQL.declined}) AS declined,
-            count(*) AS all
+            count(*) AS all,
+            count(*) FILTER (WHERE ${follow}) AS follow,
+            count(*) FILTER (WHERE o.status = 'sent' AND NOT (${follow})) AS waiting,
+            count(*) FILTER (WHERE o.status = 'draft') AS draft
        FROM offers o WHERE o.deleted_at IS NULL`
   );
-  return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, Number(v)])) as Record<OfferListFilter, number>;
+  return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, Number(v)])) as OfferCounts;
 }
 
 // ------------------------------------------------------------ one offer

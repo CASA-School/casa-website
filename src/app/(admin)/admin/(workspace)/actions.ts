@@ -41,7 +41,7 @@ const QUEUE_ENTITIES = new Set<string>([
   'career_application',
 ]);
 
-const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person']);
+const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person', 'offer']);
 
 /** Which module owns a record type — the module the actor must hold. */
 const MODULE_FOR: Record<string, WorkspaceModule> = {
@@ -52,6 +52,7 @@ const MODULE_FOR: Record<string, WorkspaceModule> = {
   placement_attempt: 'placement',
   booking: 'bookings',
   person: 'people',
+  offer: 'offers',
 };
 
 /** A uuid, or nothing. Guards the id before it reaches a `uuid` column. */
@@ -140,7 +141,9 @@ export async function addNoteAction(formData: FormData): Promise<void> {
         ? `/admin/people/${id}`
         : entity === 'booking'
           ? `/admin/bookings/${id}`
-          : `${queuePath(entity as QueueEntity)}/${id}`
+          : entity === 'offer'
+            ? `/admin/offers/${id}`
+            : `${queuePath(entity as QueueEntity)}/${id}`
   );
 }
 

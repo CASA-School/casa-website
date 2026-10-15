@@ -47,6 +47,7 @@ test.describe('offers', () => {
     const { rows } = await client.query<{ id: string }>(`SELECT id FROM offers WHERE created_at >= $1`, [started]);
     const ids = rows.map((r) => r.id);
     await client.query(`DELETE FROM staff_activity WHERE (entity = 'offer' AND entity_id = ANY($1::uuid[])) OR (entity = 'letter_text' AND created_at >= $2)`, [ids, started]);
+    await client.query(`DELETE FROM staff_notes WHERE entity = 'offer' AND entity_id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM letters WHERE offer_id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM offers WHERE id = ANY($1::uuid[])`, [ids]);
     await client.query(`DELETE FROM organisations WHERE name = $1 AND created_at >= $2`, [ORGANISATION, started]);
@@ -251,6 +252,14 @@ test.describe('offers', () => {
     await expect(page.getByRole('heading', { name: 'Intensive German B2 complete', level: 2 })).toBeVisible();
     // The team sees the time of day; the letter gives the learner the hours.
     await expect(page.locator('[class*="courseFacts"]')).toContainText('Mornings');
+    // A book is named by its title, not six rows of „Textbook".
+    await expect(page.locator('[class*="incName"]').filter({ hasText: 'Kontext B2.1' })).toBeVisible();
+
+    // Notes and history, as on every record.
+    await expect(page.getByText('created the offer')).toBeVisible();
+    await page.getByRole('textbox', { name: 'New note' }).fill('Asked about a single room.');
+    await page.getByRole('button', { name: 'Add note' }).click();
+    await expect(page.getByText('Asked about a single room.')).toBeVisible();
 
     await page.getByRole('link', { name: 'Letter', exact: true }).click();
     await expect(page).toHaveURL(/\/letter$/);

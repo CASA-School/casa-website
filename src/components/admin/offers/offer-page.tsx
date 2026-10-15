@@ -42,7 +42,6 @@ import { ClickPanel } from './panel';
 import { saveLabel, useOfferDraft } from './use-offer-draft';
 
 const eur = (n: number | null) => (n == null ? '—' : formatMoney(n, 'de'));
-const day = (d: Date | string) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 type Update = (change: Partial<OfferDraft> | ((d: OfferDraft) => OfferDraft)) => void;
 type Countries = EditorOptions['countries'];
@@ -97,6 +96,7 @@ export function OfferPage({
   canWrite,
   canDelete,
   notice,
+  timeline,
 }: {
   record: OfferRecord;
   options: EditorOptions;
@@ -109,6 +109,8 @@ export function OfferPage({
   canWrite: boolean;
   canDelete: boolean;
   notice: { ok?: string; error?: string };
+  /** „Notizen und Verlauf", the workspace's own, rendered on the server. */
+  timeline: ReactNode;
 }) {
   const { meta } = record;
   const router = useRouter();
@@ -223,7 +225,8 @@ export function OfferPage({
                 </button>
               </div>
             </section>
-            <History record={record} />
+            {timeline}
+            <Related record={record} />
           </aside>
         </div>
       </main>
@@ -485,7 +488,7 @@ function Head({
 
         <ClickPanel
           {...panel}
-          label={t('Unterschrieben von', 'Signed by')}
+          label={t('Unterschrift', 'Signed by')}
           icon={<Chip tint="ink" icon={ICONS.pen} big />}
           body={(close) => (
             <div className={ui.radioList}>
@@ -508,7 +511,7 @@ function Head({
             </div>
           )}
         >
-          <Spec tint="ink" icon={ICONS.pen} label={t('Unterschrieben von', 'Signed by')} warn={!owner} value={owner ?? t('Niemand', 'Nobody')} sub={null} />
+          <Spec tint="ink" icon={ICONS.pen} label={t('Unterschrift', 'Signed by')} warn={!owner} value={owner ?? t('Niemand', 'Nobody')} sub={null} />
         </ClickPanel>
       </div>
     </section>
@@ -665,13 +668,35 @@ function Packages({ draft, update, editable }: { draft: OfferDraft; update: Upda
 
 // --------------------------------------------------------------- course
 
-/** What each line of a learner's course is, in the workspace's words; the letter's own text sits under it. */
-function courseRowName(l: OfferLine, course: CourseChoice, t: T, lang: WsLang): { name: string; tint: Tint; icon: ReactNode } {
+/**
+ * What each line of a learner's course is, in the workspace's words, and the
+ * letter's text under it without what the name already says: a level's line
+ * reads its dates, and a book is named by its title, so six books are six
+ * names and not six times „Lehrbuch".
+ */
+function courseRowName(l: OfferLine, course: CourseChoice, t: T, lang: WsLang): { name: string; detail: string; tint: Tint; icon: ReactNode } {
   if (l.key.startsWith('course:')) {
     const step = course.steps[Number(l.key.slice(7))];
-    return { name: `${course.name[lang]}${step?.level ? ` ${levelLabel(step, lang)}` : ''}`, tint: 'red', icon: ICONS.book };
+    // The letter's line is „name level · dates (weeks, lessons)".
+    const [, ...rest] = l.description.split(' · ');
+    return {
+      name: `${course.name[lang]}${step?.level ? ` ${levelLabel(step, lang)}` : ''}`,
+      detail: rest.join(' · ') || l.description,
+      tint: 'red',
+      icon: ICONS.book,
+    };
   }
-  if (l.key.startsWith('book:')) return { name: t('Lehrbuch', 'Textbook'), tint: 'red', icon: ICONS.layers };
+  if (l.key.startsWith('book:')) {
+    const book = course.books.find((b) => `book:${b.key}` === l.key);
+    return book
+      ? { name: book.title, detail: t('Lehrbuch', 'Textbook'), tint: 'red', icon: ICONS.layers }
+      : { name: t('Lehrbuch', 'Textbook'), detail: l.description, tint: 'red', icon: ICONS.layers };
+  }
+  const look = otherCourseRow(l, course, t);
+  return { ...look, detail: l.description };
+}
+
+function otherCourseRow(l: OfferLine, course: CourseChoice, t: T): { name: string; tint: Tint; icon: ReactNode } {
   if (l.key === 'enrolment') return { name: t('Anmeldegebühr', 'Enrolment fee'), tint: 'ink', icon: ICONS.people };
   if (l.key === 'accommodation') {
     return { name: course.accommodation?.kind === 'shared_flat' ? t('CASA-WG', 'CASA shared flat') : t('Gastfamilie', 'Host family'), tint: 'blue', icon: ICONS.house };
@@ -767,7 +792,7 @@ function CourseCard({
                   <Chip tint={look.tint} icon={look.icon} big />
                   <span className={ui.incText}>
                     <span className={ui.incName}>{look.name}</span>
-                    <span className={ui.incDetail}>{l.description}</span>
+                    <span className={ui.incDetail}>{look.detail}</span>
                   </span>
                 </span>
                 {amountCell(t, l)}
@@ -1566,83 +1591,27 @@ function ChecksCard({ checks }: { checks: OfferRecord['checks'] }) {
   );
 }
 
-function History({ record }: { record: OfferRecord }) {
+/** The offers this recipient had before, beside this one: what was asked last time, and what came of it. */
+function Related({ record }: { record: OfferRecord }) {
   const { t, lang } = useWsLang();
-  const { meta } = record;
+  if (!record.related.length) return null;
   const statusWord = (status: OfferRecord['meta']['status']) => {
     const word = pick(lang, OFFER_STATUS_LABELS[status]);
     return lang === 'en' ? word.toLowerCase() : word;
   };
   return (
-    <section className={ui.card} aria-label={t('Verlauf', 'History')}>
+    <section className={ui.card} aria-label={t('Frühere Angebote', 'Earlier offers')}>
       <div className={ui.cardHead}>
-        <h2>{t('Verlauf', 'History')}</h2>
+        <h2>{t(`Frühere Angebote an ${record.draft.recipientName}`, `Earlier offers to ${record.draft.recipientName}`)}</h2>
       </div>
-      <div className={ui.timeline}>
-        {meta.decidedAt ? (
-          <div className={`${ui.event} ${meta.status === 'accepted' ? ui.eventGood : ''}`}>
-            <i />
-            <div>
-              <b>{pick(lang, OFFER_STATUS_LABELS[meta.status])}</b>
-              <span>
-                {day(meta.decidedAt)}
-                {meta.decidedByName ? ` · ${meta.decidedByName}` : ''}
-                {meta.decisionNote ? ` · ${meta.decisionNote}` : ''}
-              </span>
-            </div>
-          </div>
-        ) : null}
-        {record.letters.map((l) => (
-          <div key={l.id} className={`${ui.event} ${ui.eventOn}`}>
-            <i />
-            <div>
-              <Link href={`/admin/offers/${meta.id}/letter?version=${l.version}`}>{t(`Fassung ${l.version} gesendet`, `Version ${l.version} sent`)}</Link>
-              <span>
-                {day(l.sentAt)}
-                {l.sentByName ? ` · ${l.sentByName}` : ''}
-              </span>
-            </div>
-          </div>
+      <div className={ui.related}>
+        {record.related.map((r) => (
+          <Link key={r.id} href={`/admin/offers/${r.id}`} className={ui.relatedRow}>
+            <b>{r.number}</b>
+            <span>{statusWord(r.status)}</span>
+            <span className={ui.relatedAmount}>{r.perParticipant != null ? eur(r.perParticipant) : ''}</span>
+          </Link>
         ))}
-        <div className={ui.event}>
-          <i />
-          <div>
-            <b>{t('Angelegt', 'Created')}</b>
-            <span>
-              {day(meta.createdAt)}
-              {meta.createdByName ? ` · ${meta.createdByName}` : ''}
-            </span>
-            {meta.enquiryId ? (
-              <span>
-                {t('Aus', 'From')} <Link href={`/admin/enquiries/${meta.enquiryId}`}>{t('einer Anfrage', 'an enquiry')}</Link>
-              </span>
-            ) : null}
-            {meta.personId ? (
-              <span>
-                {t('Für', 'For')} <Link href={`/admin/people/${meta.personId}`}>{t('eine lernende Person', 'a learner')}</Link>
-              </span>
-            ) : null}
-            {meta.copiedFrom ? (
-              <span>
-                {t('Wiederholt', 'Repeats')} <Link href={`/admin/offers/${meta.copiedFrom}`}>{t('ein früheres Angebot', 'an earlier offer')}</Link>
-              </span>
-            ) : null}
-          </div>
-        </div>
-        {record.related.length ? (
-          <div className={ui.event}>
-            <i />
-            <div>
-              <b>{t(`Frühere Angebote an ${record.draft.recipientName}`, `Earlier offers to ${record.draft.recipientName}`)}</b>
-              {record.related.map((r) => (
-                <span key={r.id}>
-                  <Link href={`/admin/offers/${r.id}`}>{r.number}</Link> · {statusWord(r.status)}
-                  {r.perParticipant != null ? ` · ${eur(r.perParticipant)}` : ''}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : null}
       </div>
     </section>
   );

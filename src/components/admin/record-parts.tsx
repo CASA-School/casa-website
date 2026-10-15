@@ -256,10 +256,25 @@ const ENTITY_ICON: Record<string, ReactNode> = {
 export const activityIcon = (entry: { action: string; entity: string }): ReactNode =>
   ACTION_ICON[entry.action] ?? ENTITY_ICON[entry.entity] ?? Icon.clock;
 
+/** A record's own entry on the line of time, said in its own words: an offer's letter sent, its answer. */
+export type TimelineEvent = {
+  id: string;
+  at: Date;
+  icon: ReactNode;
+  who: ReactNode;
+  what: ReactNode;
+  /** A line under it: the words that came with it, or where it leads. */
+  body?: ReactNode;
+  tone?: 'good';
+};
+
+type TimelineOrigin = { at: Date; label: ReactNode; what?: ReactNode; body?: ReactNode; icon?: ReactNode };
+
 type TimelineItem =
   | { kind: 'note'; at: Date; note: StaffNote }
   | { kind: 'event'; at: Date; entry: ActivityEntry }
-  | { kind: 'origin'; at: Date; label: ReactNode; icon?: ReactNode };
+  | { kind: 'own'; at: Date; event: TimelineEvent }
+  | ({ kind: 'origin' } & TimelineOrigin);
 
 /**
  * What has been said and done, in one line of time, newest first. A note is
@@ -273,6 +288,7 @@ export async function Timeline({
   id,
   notes,
   activity,
+  events = [],
   origin,
   canWrite = true,
 }: {
@@ -280,8 +296,10 @@ export async function Timeline({
   id: string;
   notes: readonly StaffNote[];
   activity: readonly ActivityEntry[];
+  /** Entries the record words itself, beside the general changes. */
+  events?: readonly TimelineEvent[];
   /** The record's arrival, the first thing that happened to it; an inbox record's mark is the envelope. */
-  origin?: { at: Date; label: ReactNode; icon?: ReactNode };
+  origin?: TimelineOrigin;
   /** A colleague who may only look reads the line of time without the note box. */
   canWrite?: boolean;
 }) {
@@ -289,7 +307,8 @@ export async function Timeline({
   const items: TimelineItem[] = [
     ...notes.map((note) => ({ kind: 'note' as const, at: note.createdAt, note })),
     ...activity.filter((entry) => entry.action !== 'note_added').map((entry) => ({ kind: 'event' as const, at: entry.createdAt, entry })),
-    ...(origin ? [{ kind: 'origin' as const, at: origin.at, label: origin.label, icon: origin.icon }] : []),
+    ...events.map((event) => ({ kind: 'own' as const, at: event.at, event })),
+    ...(origin ? [{ kind: 'origin' as const, ...origin }] : []),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
   const today = berlinDay(new Date());
   const full = (at: Date) => `${shortDay(at, lang)}, ${berlinTime(at, lang)}`;
@@ -328,7 +347,8 @@ export async function Timeline({
       {items.length ? (
         <ol className="relative mt-5 space-y-4 before:absolute before:top-3 before:bottom-3 before:left-[13px] before:w-px before:bg-[#d3dbe6]">
           {items.map((item, index) => {
-            const key = item.kind === 'note' ? `n-${item.note.id}` : item.kind === 'event' ? `e-${item.entry.id}` : `o-${index}`;
+            const key =
+              item.kind === 'note' ? `n-${item.note.id}` : item.kind === 'event' ? `e-${item.entry.id}` : item.kind === 'own' ? `r-${item.event.id}` : `o-${index}`;
             if (item.kind === 'note') {
               const author = item.note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague');
               return (
@@ -350,7 +370,26 @@ export async function Timeline({
                 <li key={key} className="relative flex gap-3">
                   <Mark className="bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]">{item.icon ?? Icon.enquiries}</Mark>
                   <div className="min-w-0 flex-1 pt-1">
-                    <Meta who={item.label} at={full(item.at)} />
+                    <Meta who={item.label} what={item.what} at={full(item.at)} />
+                    {item.body ? <div className="mt-1 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">{item.body}</div> : null}
+                  </div>
+                </li>
+              );
+            }
+            if (item.kind === 'own') {
+              const { event } = item;
+              return (
+                <li key={key} className="relative flex gap-3">
+                  <Mark
+                    className={
+                      event.tone === 'good' ? 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]' : 'bg-white text-[var(--casa-muted)] ring-[#d3dbe6]'
+                    }
+                  >
+                    {event.icon}
+                  </Mark>
+                  <div className="min-w-0 flex-1 pt-1">
+                    <Meta who={event.who} what={event.what} at={when(item.at)} title={full(item.at)} />
+                    {event.body ? <div className="mt-1 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">{event.body}</div> : null}
                   </div>
                 </li>
               );

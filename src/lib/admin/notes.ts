@@ -16,7 +16,8 @@ export type NoteEntity =
   | 'career_application'
   | 'placement_attempt'
   | 'booking'
-  | 'person';
+  | 'person'
+  | 'offer';
 
 export type StaffNote = {
   id: string;
