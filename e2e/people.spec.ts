@@ -76,6 +76,11 @@ test.describe('person page', () => {
     await expect(open).toContainText('Abendkurs im Januar');
     await expect(closed).toContainText('Unterkunft im Sommer');
 
+    // In the register, under „Offene Vorgänge", with what is open beside the name.
+    await page.goto(`/admin/people?view=open&q=${encodeURIComponent('Prüfperson')}`);
+    await expect(page.getByRole('row').filter({ hasText: 'Pia Prüfperson' })).toContainText('1 Vorgang');
+
+    await page.goto(`/admin/people/${personId}`);
     await page.getByRole('textbox', { name: 'Neue Notiz' }).fill('Zahlt über die Agentur.');
     await page.getByRole('button', { name: 'Notiz hinzufügen' }).click();
     await expect(page.getByText('Zahlt über die Agentur.')).toBeVisible();

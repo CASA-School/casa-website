@@ -153,12 +153,65 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
   };
 }
 
+/** The register's views: everyone, who is in a course now, who has something open, who still owes money. */
+export type PeopleView = 'all' | 'in_course' | 'open' | 'owing';
+
+/** Open cases under a person (theirs and the rows linked into them): enquiries, registrations, offers in play. */
+const OPEN_CASES = `(
+  (SELECT count(*) FROM enquiries e WHERE e.person_id IS NOT NULL AND canonical_person_id(e.person_id) = p.id AND e.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM course_registrations r WHERE r.person_id IS NOT NULL AND canonical_person_id(r.person_id) = p.id AND r.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM exam_registrations r WHERE r.person_id IS NOT NULL AND canonical_person_id(r.person_id) = p.id AND r.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.person_id IS NOT NULL AND canonical_person_id(o.person_id) = p.id AND o.status IN ('draft', 'sent'))
+)`;
+
+/** What a person still owes across their bookings that are not cancelled. */
+const OWED = `(
+  SELECT coalesce(sum(greatest(0,
+           coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
+         - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0))), 0)
+    FROM bookings b
+   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND canonical_person_id(b.person_id) = p.id
+)`;
+
+/** In a course today: a booking that is not cancelled with a period running now. */
+const IN_COURSE = `EXISTS (
+  SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
+   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND canonical_person_id(b.person_id) = p.id
+     AND bp.start_date <= current_date AND bp.end_date >= current_date
+)`;
+
+const VIEW_CONDITION: Record<PeopleView, string | null> = {
+  all: null,
+  in_course: IN_COURSE,
+  open: `${OPEN_CASES} > 0`,
+  owing: `${OWED} > 0.005`,
+};
+
+/** How many people each view holds, for the counts beside its tabs. */
+export async function peopleCounts(): Promise<Record<PeopleView, number>> {
+  const row = await queryFirst<Record<PeopleView, string>>(
+    `SELECT count(*) AS all,
+            count(*) FILTER (WHERE ${IN_COURSE}) AS in_course,
+            count(*) FILTER (WHERE ${OPEN_CASES} > 0) AS open,
+            count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
+       FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL`
+  );
+  return {
+    all: Number(row?.all ?? 0),
+    in_course: Number(row?.in_course ?? 0),
+    open: Number(row?.open ?? 0),
+    owing: Number(row?.owing ?? 0),
+  };
+}
+
 export async function listPeople({
   search,
+  view = 'all',
   limit = 40,
   offset = 0,
 }: {
   search?: string;
+  view?: PeopleView;
   limit?: number;
   offset?: number;
 }): Promise<{
@@ -166,6 +219,12 @@ export async function listPeople({
     primaryEmail: string | null;
     /** The booking running now or starting next, for the register's line under a name. */
     course: { name: string; start: Date; current: boolean } | null;
+    /** The level a teacher confirmed last. */
+    level: string | null;
+    /** Enquiries, registrations and offers still in play. */
+    openCases: number;
+    /** Still owed across their bookings. */
+    owed: number;
   })[];
   total: number;
 }> {
@@ -176,6 +235,8 @@ export async function listPeople({
     where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR EXISTS (
       SELECT 1 FROM emails e WHERE e.person_id = p.id AND e.address ILIKE $1))`;
   }
+  const condition = VIEW_CONDITION[view];
+  if (condition) where += ` AND ${condition}`;
   const total = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM people p ${where}`,
     params
@@ -183,12 +244,23 @@ export async function listPeople({
   // The course under a name: the earliest open booking that has not ended, so
   // a learner here now shows that course, and one who is coming shows the next.
   const rows = await query<
-    Row & { primary_email: string | null; course_name: string | null; course_start: Date | null }
+    Row & {
+      primary_email: string | null;
+      course_name: string | null;
+      course_start: Date | null;
+      level: string | null;
+      open_cases: string;
+      owed: string;
+    }
   >(
     `${SELECT.replace(
       'FROM people p',
       `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email,
-         nb.course_name, nb.course_start
+         nb.course_name, nb.course_start,
+         (SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
+           WHERE rv.person_id IS NOT NULL AND canonical_person_id(rv.person_id) = p.id ORDER BY rv.decided_at DESC LIMIT 1) AS level,
+         ${OPEN_CASES} AS open_cases,
+         ${OWED} AS owed
     FROM people p
     LEFT JOIN LATERAL (
       SELECT t.name AS course_name, min(bp.start_date) AS course_start
@@ -214,6 +286,9 @@ export async function listPeople({
     items: rows.map((r) => ({
       ...toSummary(r),
       primaryEmail: r.primary_email,
+      level: r.level,
+      openCases: Number(r.open_cases ?? 0),
+      owed: Number(r.owed ?? 0),
       course:
         r.course_name && r.course_start
           ? {

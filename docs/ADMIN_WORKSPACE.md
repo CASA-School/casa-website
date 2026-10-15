@@ -885,6 +885,15 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     (money for payments and costs, a calendar for an extension).
     `Timeline` takes `canWrite`: a colleague who may only look sees the line
     of time without the note box, on every record page.
+21. **Teilnehmende, the register (2026-10-15).** The views answer what staff
+    bring to a register — Alle, Im Kurs (a booking running today), Offene
+    Vorgänge, Zu zahlen — with the counts line above them, and a row says,
+    beside the name and the course or address, the level a teacher confirmed
+    (a green chip), what is open under the person (enquiries, registrations,
+    offers in play, counted across linked records) and what they still owe.
+    The birth date went to the person's page. `peopleCounts` and the
+    `OPEN_CASES` / `OWED` / `IN_COURSE` fragments in `people.ts` are the one
+    definition of each.
 
 ## Copy on screens — labels, not explanations
 
