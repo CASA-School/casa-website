@@ -1,10 +1,12 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 
 import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { OwnerControl, StatusBar, Timeline } from '@/components/admin/record-parts';
 import { Icon } from '@/components/admin/icons';
+import { Avatar } from '@/components/admin/list';
 import { Badge, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
@@ -118,17 +120,19 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         subtitle={
           <>
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{enquiry.topic}</span>
-            <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.84rem] text-[var(--casa-muted)]">
               {organisation ? (
-                <span className="font-semibold text-[var(--casa-muted)]">
-                  {organisation}
+                <MetaItem icon={Icon.people}>
+                  <span className="font-semibold text-[var(--casa-ink)]">{organisation}</span>
                   {groupSize ? ` · ${t(`${groupSize} Teilnehmende`, `${groupSize} participants`)}` : ''}
-                </span>
+                </MetaItem>
               ) : null}
-              <a href={`mailto:${enquiry.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
-                {enquiry.email}
-              </a>
-              <span>{german ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</span>
+              <MetaItem icon={Icon.mail}>
+                <a href={`mailto:${enquiry.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  {enquiry.email}
+                </a>
+              </MetaItem>
+              <MetaItem icon={Icon.globe}>{german ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
             </span>
           </>
         }
@@ -145,33 +149,36 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         <div className="space-y-4">
           {/* The message as an email reads: who, when, the subject, then the text in paragraphs at reading size. */}
           <article className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-            <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 border-b border-ws-line-soft px-6 py-4">
-              <div className="min-w-0 text-[0.84rem]">
-                <p className="truncate">
-                  <span className="font-semibold text-[var(--casa-ink)]">{fullName}</span>{' '}
-                  <span className="text-[var(--casa-text-subtle)]">&lt;{enquiry.email}&gt;</span>
-                </p>
-                <p className="mt-0.5 text-xs text-[var(--casa-text-subtle)]">
-                  {t('an CASA Bremen', 'to CASA Bremen')}
-                  {cameFrom ? ` · ${cameFrom}` : ''}
-                </p>
+            <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-line px-6 py-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar name={fullName || enquiry.email} />
+                <div className="min-w-0 text-[0.84rem]">
+                  <p className="truncate">
+                    <span className="font-semibold text-[var(--casa-ink)]">{fullName}</span>{' '}
+                    <span className="text-[var(--casa-muted)]">&lt;{enquiry.email}&gt;</span>
+                  </p>
+                  <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
+                    {t('an CASA Bremen', 'to CASA Bremen')}
+                    {cameFrom ? ` · ${cameFrom}` : ''}
+                  </p>
+                </div>
               </div>
-              <time dateTime={enquiry.submittedAt.toISOString()} className="text-xs text-[var(--casa-muted)] tabular-nums">
-                {received} · {relativeDays(enquiry.submittedAt, lang)}
+              <time dateTime={enquiry.submittedAt.toISOString()} className="text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
+                <span className="font-semibold text-[var(--casa-ink)]">{received}</span> · {relativeDays(enquiry.submittedAt, lang)}
               </time>
             </header>
             <div className="px-6 pt-5 pb-6">
               <h2 className="text-[1.05rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">{enquiry.topic}</h2>
               <p className="mt-3 max-w-prose text-base leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{enquiry.message}</p>
             </div>
-            <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line-soft bg-[#fbfcfe] px-6 py-3.5">
+            <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3.5">
               <ButtonLink href={reply} variant="primary">
                 <span aria-hidden="true" className="[&_svg]:size-4">
                   {Icon.mail}
                 </span>
                 {t('Antworten', 'Reply')}
               </ButtonLink>
-              <span className="text-xs text-[var(--casa-text-subtle)]">{german ? t('Anrede auf Deutsch', 'Greeting in German') : t('Anrede auf Englisch', 'Greeting in English')}</span>
+              <span className="text-[0.78rem] text-[var(--casa-muted)]">{german ? t('Anrede auf Deutsch', 'Greeting in German') : t('Anrede auf Englisch', 'Greeting in English')}</span>
             </footer>
           </article>
 
@@ -180,11 +187,11 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
               <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
                 {sections.map((section) => (
                   <section key={section.title}>
-                    <h3 className="mb-2 text-xs font-bold text-[var(--casa-muted)]">{section.title}</h3>
-                    <dl className="divide-y divide-ws-line-soft rounded-xl ring-1 ring-ws-line-soft ring-inset">
+                    <h3 className="mb-2 text-xs font-bold text-[var(--casa-ink)]">{section.title}</h3>
+                    <dl className="divide-y divide-ws-line rounded-xl ring-1 ring-ws-line ring-inset">
                       {section.keys.map((key) => (
                         <div key={key} className="flex items-baseline justify-between gap-4 px-3 py-2">
-                          <dt className="text-[0.8rem] text-[var(--casa-muted)]">{ORGANISER_BRIEF_LABELS[key] ? pick(lang, ORGANISER_BRIEF_LABELS[key]) : key}</dt>
+                          <dt className="text-[0.8rem] text-[#3c4657]">{ORGANISER_BRIEF_LABELS[key] ? pick(lang, ORGANISER_BRIEF_LABELS[key]) : key}</dt>
                           <dd className="text-right text-[0.86rem] font-semibold text-[var(--casa-ink)]">{formatBriefValue(brief[key], lang)}</dd>
                         </div>
                       ))}
@@ -208,7 +215,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
                       href={`/admin/enquiries/${item.id}`}
                       className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
                     >
-                      <span className="w-[5.5rem] shrink-0 text-xs text-[var(--casa-muted)] tabular-nums">{shortDay(item.submittedAt, lang)}</span>
+                      <span className="w-[5.5rem] shrink-0 text-xs text-[#3c4657] tabular-nums">{shortDay(item.submittedAt, lang)}</span>
                       <span className="min-w-0 flex-1 truncate text-[0.84rem] font-semibold text-[var(--casa-ink)]">{item.topic}</span>
                       <Badge tone={STATUS_TONES[item.status]}>{pick(lang, STATUS_LABELS[item.status])}</Badge>
                     </Link>
@@ -228,5 +235,17 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
     </>
+  );
+}
+
+/** One fact under the record's name, with its small icon. */
+function MetaItem({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <span aria-hidden="true" className="shrink-0 text-[#6b7a90] [&_svg]:size-3.5">
+        {icon}
+      </span>
+      <span className="min-w-0 truncate">{children}</span>
+    </span>
   );
 }

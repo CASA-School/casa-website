@@ -13,14 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
+import { menuItem, menuPanel } from './choice-menu';
 import { Icon } from './icons';
 import { useWsLang } from './lang';
 
-/** The menus' panel: white, a fine edge, a soft lift; items turn CASA's warm cream on hover, as list rows do. */
-const panel =
-  'casa-ws-menu min-w-56 rounded-xl border-ws-line bg-white p-1.5 text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.05),0_16px_36px_-12px_rgba(16,24,40,0.22)]';
-const item =
-  'cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[0.84rem] font-medium text-[var(--casa-ink)] focus:bg-[var(--ws-row-hover)] focus:text-[var(--casa-ink)] [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]';
+const panel = menuPanel;
+const item = menuItem;
 
 /** A quiet control on the bar: no fill until it is hovered or open. */
 const control =

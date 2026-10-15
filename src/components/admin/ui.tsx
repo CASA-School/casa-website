@@ -431,7 +431,7 @@ export function RecordHeader({
           </dl>
         ) : null}
         {bar ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line-soft bg-[#fbfcfe] px-6 py-3">{bar}</div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3">{bar}</div>
         ) : null}
       </section>
     </header>

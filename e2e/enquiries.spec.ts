@@ -109,6 +109,17 @@ test.describe('enquiries', () => {
     await page.getByRole('button', { name: 'Wartet auf Antwort' }).click();
     await expect(page.getByRole('button', { name: 'Wartet auf Antwort' })).toHaveAttribute('aria-pressed', 'true');
 
+    // The rarer states and the owner are menus that float over the page.
+    await page.getByRole('button', { name: 'Weitere Status' }).click();
+    await page.getByRole('menuitem', { name: 'Abgelehnt' }).click();
+    await expect(page.locator('header').getByText('Abgelehnt', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Wartet auf Antwort' }).click();
+    await expect(page.getByRole('button', { name: 'Wartet auf Antwort' })).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByRole('button', { name: 'Wer sich darum kümmert' }).click();
+    await page.getByRole('menuitem', { name: 'Niemand' }).click();
+    await expect(page.getByText('Zuständig: niemand')).toBeVisible();
+
     await page.getByRole('textbox', { name: 'Neue Notiz' }).fill('Angerufen, Platzanfrage an den Kurs weitergegeben.');
     await page.getByRole('button', { name: 'Notiz hinzufügen' }).click();
     await expect(page.getByText('Angerufen, Platzanfrage an den Kurs weitergegeben.')).toBeVisible();

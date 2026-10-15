@@ -798,15 +798,23 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     language — and its bar holds what a colleague changes most: where it stands
     (`StatusBar` in `record-parts.tsx`: Neu, In Bearbeitung, Wartet auf Antwort,
     Erledigt in one row, the current one lit, any other one click; Abgelehnt and
-    Spam behind „Mehr"; two by two on a phone) and who has it (`OwnerControl`:
-    „Zuständig: …", changed in a panel, „Übernehmen" takes it). The message
+    Spam in the „Mehr" menu; two by two on a phone) and who has it
+    (`OwnerControl`: „Zuständig: …", changed from a menu, „Übernehmen" takes it).
+    Both menus are `ChoiceMenu` (`choice-menu.tsx`): Radix menus that float over
+    the page and align to their trigger — a panel inside the header card was
+    cut off by its edge (2026-10-15) — and post the choice to the same server
+    action a form would. The message
     reads as an email — sender, address, date, subject, the text at reading
     size — with „Antworten" under it, a `mailto:` opened with „Re:" and a
     greeting and sign-off in the language the enquiry was written in, signed by
     the colleague. A group's or company's brief is grouped as a coordinator
     reads it (the group, the stay, the lessons, the invoice). Beside it: the
     person, earlier enquiries from the same address, and `Timeline` — notes and
-    changes in one line of time, ending with the arrival. The other queues'
+    changes in one line of time, newest first, ending with the arrival: a note
+    as the colleague's words in a cream card, a change of state as its two
+    states in their colours, a change of owner as one short line, each with its
+    mark; today's entries by the clock, older ones by the day. Secondary text on
+    this page is `--casa-muted` (7.8:1), not the subtle grey. The other queues'
     pages still use `RecordRail` until they get the same treatment.
 
 ## Copy on screens — labels, not explanations
