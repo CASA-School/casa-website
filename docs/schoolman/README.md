@@ -30,6 +30,7 @@ rule for each) and `docs/FILEMAKER_BRIDGE.md` (the bridge design).
 | Staff, working time and holidays | [staff.md](staff.md) |
 | The Klassenbuch — the teachers' app that reads and writes SchoolMan | [klassenbuch.md](klassenbuch.md) |
 | The screens the team works in, and what they teach | [screens.md](screens.md) |
+| Which fields are in use, rare, abandoned or never used — per table, generated | [fields.md](fields.md) |
 
 Generated files, all in `output/filemaker/` (gitignored, counts and names only): one
 `<Table>.profile.json` per table studied (67), `vocabularies.md` (all 87 reference tables),
@@ -57,6 +58,15 @@ letters · 19,471 staff working days.
 generated ahead and keep an old or no creation date; the lesson date, the week, the day tell what is
 in use. Letters only go back to 2025 in this file (`Letter.fmp12`, a separate file, was not in the
 backup the DDR came from).
+
+### Fields: most are not in use
+
+Of the 2,470 stored fields of the 40 main record tables (constants and audit fields left out), **1,055
+were filled on a row created since 2025** — 43%. 111 more are rare (a handful of rows a year), **372
+were used once and abandoned** (the year they were last filled is in `fields.md`), and **932 were never
+filled at all**. Many of the 1,055 are themselves copies, stored summaries or search helpers. The
+bridge reads from the first group only, and checks each field against `fields.md` before it is used:
+a field filled on 41 rows in 2007 is not a fact about anyone today.
 
 ### The business lines
 
