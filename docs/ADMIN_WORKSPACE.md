@@ -873,6 +873,18 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     whether it may settle by itself) in place of five tiles, the background
     answers as a `FactGrid`, and the shared `Timeline` in place of its own
     notes and history. The pilot line under the title stays (rule 6).
+20. **Buchungen (2026-10-15).** The list keeps its table — money reads in
+    aligned columns — and gains the counts line every list has: what is
+    running, what is coming, and what is still owed across all bookings
+    (`bookingsOwed`). A booking's page: the course, the dates and weeks, the
+    stay and who pays as `MetaLine` under the name; the header's bar is the
+    money (`StatBar`: total, paid, open) with a line that fills as it is paid;
+    the periods, costs and payments stay ledgers; beside them what else
+    belongs to the booking (where it came from, the stay's dates, its own note)
+    and the shared `Timeline`, which gives each kind of change its own mark
+    (money for payments and costs, a calendar for an extension).
+    `Timeline` takes `canWrite`: a colleague who may only look sees the line
+    of time without the note box, on every record page.
 
 ## Copy on screens — labels, not explanations
 

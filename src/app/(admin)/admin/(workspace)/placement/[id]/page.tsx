@@ -17,7 +17,9 @@ import {
 } from '@/components/admin/ui';
 import { Icon } from '@/components/admin/icons';
 import { FactGrid, MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
+import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
+import { requireModule } from '@/lib/admin/guard';
 import { pick, relativeDays, type Bilingual } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
@@ -64,7 +66,8 @@ export default async function PlacementAttemptPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; person?: string }>;
 }) {
-  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const [{ id }, query, user] = await Promise.all([params, searchParams, requireModule('placement')]);
+  const canEdit = canAccess(user, 'placement', 'edit');
   const [attempt, { t, lang }] = await Promise.all([getPlacementAttempt(id), getI18n()]);
 
   if (!attempt) {
@@ -448,6 +451,7 @@ export default async function PlacementAttemptPage({
           ) : null}
 
           <Timeline
+            canWrite={canEdit}
             entity="placement_attempt"
             id={attempt.id}
             notes={notes}

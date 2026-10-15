@@ -253,6 +253,19 @@ export async function bookingCounts(): Promise<Record<BookingFilter, number>> {
   return out;
 }
 
+/** What is still owed across every booking that is not cancelled: the figure finance looks at first. */
+export async function bookingsOwed(): Promise<{ amount: number; bookings: number }> {
+  const row = await queryFirst<{ amount: string | null; bookings: string }>(
+    `SELECT sum(owed) AS amount, count(*) AS bookings FROM (
+       SELECT coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
+            - coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS owed
+         FROM bookings b JOIN people p ON p.id = b.person_id
+        WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status <> 'cancelled'
+     ) balances WHERE owed > 0.005`
+  );
+  return { amount: Number(row?.amount ?? 0), bookings: Number(row?.bookings ?? 0) };
+}
+
 export async function personBookings(canonicalPersonId: string): Promise<BookingListItem[]> {
   const rows = await query<ListRow>(
     `${LIST} WHERE b.deleted_at IS NULL AND canonical_person_id(b.person_id) = $1 ORDER BY start_date DESC NULLS LAST`,

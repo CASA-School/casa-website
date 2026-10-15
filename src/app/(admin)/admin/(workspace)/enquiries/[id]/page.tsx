@@ -203,6 +203,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           ) : null}
 
           <Timeline
+            canWrite={canEdit}
             entity="enquiry"
             id={enquiry.id}
             notes={notes}

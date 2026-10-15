@@ -208,6 +208,27 @@ export async function OwnerControl({
   );
 }
 
+/** A change's mark on the line of time, by what it did; anything else is the clock. */
+const ACTION_ICON: Record<string, ReactNode> = {
+  payment_recorded: Icon.money,
+  payment_voided: Icon.money,
+  charge_added: Icon.money,
+  charge_removed: Icon.money,
+  booking_created: Icon.bookings,
+  booking_updated: Icon.bookings,
+  booking_extended: Icon.calendar,
+  booking_period_removed: Icon.calendar,
+  booking_cancelled: Icon.bookings,
+  person_updated: Icon.person,
+  person_linked: Icon.people,
+  person_unlinked: Icon.people,
+  placement_confirmed: Icon.placement,
+  review_attached_to_person: Icon.person,
+  review_detached_from_person: Icon.person,
+  room_assigned: Icon.rooms,
+  room_unassigned: Icon.rooms,
+};
+
 type TimelineItem =
   | { kind: 'note'; at: Date; note: StaffNote }
   | { kind: 'event'; at: Date; entry: ActivityEntry }
@@ -226,6 +247,7 @@ export async function Timeline({
   notes,
   activity,
   origin,
+  canWrite = true,
 }: {
   entity: string;
   id: string;
@@ -233,6 +255,8 @@ export async function Timeline({
   activity: readonly ActivityEntry[];
   /** The record's arrival, the first thing that happened to it; an inbox record's mark is the envelope. */
   origin?: { at: Date; label: ReactNode; icon?: ReactNode };
+  /** A colleague who may only look reads the line of time without the note box. */
+  canWrite?: boolean;
 }) {
   const { t, lang } = await getI18n();
   const items: TimelineItem[] = [
@@ -248,6 +272,7 @@ export async function Timeline({
 
   return (
     <Card title={t('Notizen und Verlauf', 'Notes and history')} icon={Icon.note} tint="sun">
+      {canWrite ? (
       <form
         action={addNoteAction}
         className="rounded-2xl bg-white ring-1 ring-[#d3dbe6] ring-inset transition-shadow focus-within:ring-2 focus-within:ring-[var(--casa-blue)]/35"
@@ -271,6 +296,7 @@ export async function Timeline({
           </button>
         </div>
       </form>
+      ) : null}
 
       {items.length ? (
         <ol className="relative mt-5 space-y-4 before:absolute before:top-3 before:bottom-3 before:left-[13px] before:w-px before:bg-[#d3dbe6]">
@@ -345,7 +371,7 @@ export async function Timeline({
             }
             return (
               <li key={key} className="relative flex gap-3">
-                <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.clock}</Mark>
+                <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{ACTION_ICON[entry.action] ?? Icon.clock}</Mark>
                 <div className="min-w-0 flex-1 pt-1">
                   <Meta who={who} what={describeActivity(entry, lang)} at={when(item.at)} title={full(item.at)} />
                 </div>

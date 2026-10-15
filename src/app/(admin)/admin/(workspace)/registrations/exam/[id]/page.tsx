@@ -167,6 +167,7 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
         <div className="space-y-4">
           <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/exam/${registration.id}`} />
           <Timeline
+            canWrite={canEdit}
             entity="exam_registration"
             id={registration.id}
             notes={notes}

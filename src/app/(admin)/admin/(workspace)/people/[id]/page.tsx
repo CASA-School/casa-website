@@ -428,6 +428,7 @@ export default async function PersonPage({
           ) : null}
 
           <Timeline
+            canWrite={canEdit}
             entity="person"
             id={person.id}
             notes={notes}

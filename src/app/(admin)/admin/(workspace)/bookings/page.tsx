@@ -5,13 +5,15 @@ import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingCounts,
+  bookingsOwed,
   listBookings,
   type BookingFilter,
   type BookingListItem,
 } from '@/lib/admin/bookings';
 import { toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
-import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { counted, pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { Tally } from '@/components/admin/inbox';
 import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
@@ -77,9 +79,10 @@ export default async function BookingsPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const [{ items, total }, counts, { t, lang }] = await Promise.all([
+  const [{ items, total }, counts, owed, { t, lang }] = await Promise.all([
     listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page) }),
     bookingCounts(),
+    bookingsOwed(),
     getI18n(),
   ]);
 
@@ -98,6 +101,22 @@ export default async function BookingsPage({
   return (
     <>
       <PageHeader title={t('Buchungen', 'Bookings')} />
+
+      {/* What is running, what is coming, and what is still owed across all of it. */}
+      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+        <Tally tone="working" n={counts.current} label={t('laufend', 'current')} lang={lang} />
+        <Tally tone="new" n={counts.upcoming} label={t('kommend', 'upcoming')} lang={lang} />
+        {owed.amount > 0.005 ? (
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden="true" className="size-2 rounded-full bg-[#e0a100]" />
+            <b className="font-semibold text-[#9a5b00] tabular-nums">{euros(owed.amount)}</b>
+            {t(
+              `offen in ${counted(lang, owed.bookings, 'Buchung', 'Buchungen')}`,
+              `owed on ${counted(lang, owed.bookings, 'booking', 'bookings')}`
+            )}
+          </span>
+        ) : null}
+      </p>
 
       <Card bleed>
         <ListBar

@@ -126,6 +126,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
 
         <div className="space-y-4">
           <Timeline
+            canWrite={canEdit}
             entity="career_application"
             id={application.id}
             notes={notes}

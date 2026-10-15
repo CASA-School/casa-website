@@ -239,6 +239,7 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
         <div className="space-y-4">
           <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/course/${registration.id}`} />
           <Timeline
+            canWrite={canEdit}
             entity="course_registration"
             id={registration.id}
             notes={notes}
