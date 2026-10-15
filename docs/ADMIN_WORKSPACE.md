@@ -782,7 +782,21 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     the group headings, which are white with a hairline above and their count
     in a small pill. It lives in `.ws-table` in globals.css, so `Table` and the
     catalogue's `OpenTable` share it; Kursplanung keeps its own tables.
-16. **The enquiry queue: the last seven days by day, the rest a history
+16. **The three inboxes are one design (Rahman, 2026-10-15: "make them look
+    more like enquiries and share same design pattern … if we change something
+    it gets reflected all over these three similar interfaces too").** Enquiries,
+    registrations (course and exam) and applications read the same way: the
+    period, the state and the counts come from `src/lib/admin/inbox.ts` (one
+    definition of the week, of open and closed, including the applications'
+    older words „submitted" and „interview"), the list is `InboxScreen`
+    (`src/components/admin/inbox.tsx`), and a record's page is built from
+    `record-parts.tsx` — `StatusBar`, `OwnerControl`, `SubmissionCard`,
+    `FactGrid`, `MetaLine`, `Timeline` — with the reply from
+    `src/lib/admin/reply.ts`. A page only maps its records to an `InboxItem`
+    (the title, two lines of preview, its badges) and chooses its facts. Change
+    the inbox there, never in one page. What follows was first written for the
+    enquiry queue and now holds for all three.
+    The enquiry queue: the last seven days by day, the rest a history
     (Rahman, 2026-10-14: "per day format … when things are taking care of we
     could do completed so it doesn't show in the number of open enquiries", then
     "display only one week history and the rest should be more like a history
@@ -826,8 +840,13 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     as the colleague's words in a cream card, a change of state as its two
     states in their colours, a change of owner as one short line, each with its
     mark; today's entries by the clock, older ones by the day. Secondary text on
-    this page is `--casa-muted` (7.8:1), not the subtle grey. The other queues'
-    pages still use `RecordRail` until they get the same treatment.
+    this page is `--casa-muted` (7.8:1), not the subtle grey. A registration's
+    and an application's page are the same parts (2026-10-15): the sent
+    registration is a `SubmissionCard` with a `FactGrid` (dates, level, room,
+    visa; for an exam the name on the certificate first, marked until it is
+    confirmed, then the sitting and the parts), the cover letter one with the
+    CV beside „Antworten"; on a registration „Buchung anlegen" is the main
+    action, so „Antworten" is a quiet one there.
 
 ## Copy on screens — labels, not explanations
 

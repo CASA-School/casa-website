@@ -1,4 +1,5 @@
 import { query, queryFirst } from './db';
+import { inboxConditions, type InboxPeriod, type InboxState } from './inbox';
 import { normaliseStatus, type WorkStatus } from './queues';
 
 /**
@@ -19,6 +20,10 @@ export type ApplicationListItem = {
   lastName: string;
   email: string;
   positionTitle: string;
+  /** The language the form was sent in — the one to reply in. */
+  locale: string;
+  /** The start of the cover letter, for a list row. */
+  coverStart: string;
   status: WorkStatus;
   /** The raw stored value, for the rows the public route wrote as 'submitted'. */
   rawStatus: string;
@@ -33,7 +38,6 @@ export type ApplicationDetail = ApplicationListItem & {
   linkedinUrl: string | null;
   coverLetter: string;
   positionSlug: string;
-  locale: string;
   source: string;
   cvMimeType: string | null;
   assignedTo: string | null;
@@ -41,26 +45,21 @@ export type ApplicationDetail = ApplicationListItem & {
 };
 
 export async function listApplications({
-  status,
+  period = 'week',
+  state = 'any',
   search,
   limit = 40,
   offset = 0,
 }: {
-  status?: WorkStatus | 'open' | 'all';
+  period?: InboxPeriod;
+  state?: InboxState;
   search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ items: ApplicationListItem[]; total: number }> {
   const params: unknown[] = [];
-  const conditions: string[] = [];
-
-  // 'submitted' is what the public route writes; it means the same as 'new'.
-  if (status === 'open' || status === undefined) {
-    conditions.push(`a.status IN ('submitted', 'new', 'in_progress', 'waiting', 'interview')`);
-  } else if (status !== 'all') {
-    params.push(status === 'new' ? ['new', 'submitted'] : [status]);
-    conditions.push(`a.status = ANY($${params.length})`);
-  }
+  // 'submitted', which the public route writes, reads as new (src/lib/admin/inbox.ts).
+  const conditions = inboxConditions('career_application', 'a', { period, state });
 
   if (search) {
     params.push(`%${search}%`);
@@ -70,7 +69,7 @@ export async function listApplications({
     );
   }
 
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const where = `WHERE ${conditions.join(' AND ')}`;
 
   const totalRow = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM career_applications a ${where}`,
@@ -83,6 +82,8 @@ export async function listApplications({
     last_name: string;
     email: string;
     position_title: string;
+    locale: string;
+    cover_start: string;
     status: string;
     assignee_name: string | null;
     cv_file_name: string;
@@ -94,6 +95,8 @@ export async function listApplications({
             a.last_name,
             a.email,
             a.position_title,
+            a.locale,
+            left(a.cover_letter, 320) AS cover_start,
             a.status,
             u.name AS assignee_name,
             a.cv_file_name,
@@ -102,10 +105,7 @@ export async function listApplications({
        FROM career_applications a
        LEFT JOIN staff_users u ON u.id = a.assigned_to
        ${where}
-      ORDER BY CASE coalesce(a.status, 'new') WHEN 'new' THEN 0 WHEN 'submitted' THEN 0 WHEN 'in_progress' THEN 1
-                             WHEN 'interview' THEN 1 WHEN 'waiting' THEN 2 WHEN 'done' THEN 3
-                             WHEN 'declined' THEN 4 ELSE 5 END,
-               a.created_at DESC
+      ORDER BY a.created_at DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
@@ -118,6 +118,8 @@ export async function listApplications({
       lastName: row.last_name,
       email: row.email,
       positionTitle: row.position_title,
+      locale: row.locale,
+      coverStart: row.cover_start,
       status: normaliseStatus(row.status),
       rawStatus: row.status,
       assigneeName: row.assignee_name,
@@ -188,6 +190,7 @@ export async function getApplication(id: string): Promise<ApplicationDetail | nu
     phone: row.phone,
     linkedinUrl: row.linkedin_url,
     coverLetter: row.cover_letter,
+    coverStart: row.cover_letter.slice(0, 320),
     positionTitle: row.position_title,
     positionSlug: row.position_slug,
     locale: row.locale,

@@ -74,7 +74,9 @@ export async function PersonPanel({
             {Icon.chevronRight}
           </span>
         </Link>
-      ) : null}
+      ) : (
+        <p className="text-sm text-[var(--casa-muted)]">{t('Noch keiner Person zugeordnet.', 'Not linked to a person yet.')}</p>
+      )}
 
       {duplicateFlag && person && candidates.length > 0 ? (
         <div className="mt-4 rounded-lg border border-[var(--casa-warning-text)]/30 bg-[var(--casa-warning-text)]/8 p-3">

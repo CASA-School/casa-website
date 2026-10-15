@@ -292,6 +292,13 @@ switched with DE | EN in the sidebar and on the sign-in page. e2e specs that rea
 English set that cookie. **Read `docs/ADMIN_I18N.md` (rules and glossary) before
 writing workspace copy.**
 
+**The three inboxes share one design (2026-10-15).** Enquiries, registrations and
+applications are one screen (`InboxScreen`, `src/components/admin/inbox.tsx`), one
+set of reads (`src/lib/admin/inbox.ts`: the week, open, closed, the counts) and one
+set of record parts (`record-parts.tsx`: status bar, owner, the sent submission,
+the timeline). A page maps its records to an `InboxItem` and picks its facts;
+change the inbox in the shared parts, never in one page.
+
 **Create, edit, delete — with a confirmation on anything destructive.** Every
 record module offers the three. Forms open in `FormDialog`; deletes go through
 `ConfirmSubmit`, and the server action checks the hidden `confirmed` field, so

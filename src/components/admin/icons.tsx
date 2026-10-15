@@ -213,6 +213,12 @@ export const Icon = {
       <path d="m4 4 8 8M12 4l-8 8" />
     </svg>
   ),
+  /** A handset: a phone number under a record's name. */
+  phone: (
+    <svg {...box}>
+      <path d="M5.2 2.5h-1.7a1 1 0 0 0-1 1.1 10.6 10.6 0 0 0 9.9 9.9 1 1 0 0 0 1.1-1v-1.7a.8.8 0 0 0-.6-.8l-2-.6a.8.8 0 0 0-.8.2l-.9.9a8.3 8.3 0 0 1-3.7-3.7l.9-.9a.8.8 0 0 0 .2-.8l-.6-2a.8.8 0 0 0-.8-.6Z" />
+    </svg>
+  ),
   /** A tick in a circle. */
   check: (
     <svg {...box}>

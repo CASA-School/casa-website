@@ -1,26 +1,25 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 
 import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
-import { OwnerControl, StatusBar, Timeline } from '@/components/admin/record-parts';
+import { MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
 import { Icon } from '@/components/admin/icons';
-import { Avatar } from '@/components/admin/list';
-import { Badge, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
+import { Badge, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labels';
-import { berlinTime, shortDay } from '@/lib/admin/days';
+import { shortDay } from '@/lib/admin/days';
 import { getEnquiry, otherEnquiriesFrom } from '@/lib/admin/enquiries';
 import { listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
-import { pick, relativeDays, type Bilingual, type WsLang } from '@/lib/admin/i18n';
+import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { offersFor } from '@/lib/admin/offers/repo';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
+import { replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
 /**
@@ -102,12 +101,13 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   const organisation = typeof brief.organisationName === 'string' ? brief.organisationName : null;
   const groupSize = brief.groupSize !== undefined ? formatBriefValue(brief.groupSize, lang) : null;
 
-  // The reply opens in the colleague's mail program, in the enquiry's language.
-  const replyBody = german
-    ? `Hallo ${enquiry.firstName},\n\n\n\nViele Grüße\n${user.name}\nCASA Bremen`
-    : `Hello ${enquiry.firstName},\n\n\n\nBest regards\n${user.name}\nCASA Bremen`;
-  const reply = `mailto:${enquiry.email}?subject=${encodeURIComponent(`Re: ${enquiry.topic}`)}&body=${encodeURIComponent(replyBody)}`;
-  const received = `${shortDay(enquiry.submittedAt, lang)}, ${berlinTime(enquiry.submittedAt, lang)}`;
+  const reply = replyHref({
+    email: enquiry.email,
+    subject: `Re: ${enquiry.topic}`,
+    firstName: enquiry.firstName,
+    locale: enquiry.locale,
+    signer: user.name,
+  });
 
   return (
     <>
@@ -120,7 +120,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         subtitle={
           <>
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{enquiry.topic}</span>
-            <span className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.84rem] text-[var(--casa-muted)]">
+            <MetaLine>
               {organisation ? (
                 <MetaItem icon={Icon.people}>
                   <span className="font-semibold text-[var(--casa-ink)]">{organisation}</span>
@@ -133,7 +133,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
                 </a>
               </MetaItem>
               <MetaItem icon={Icon.globe}>{german ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
-            </span>
+            </MetaLine>
           </>
         }
         actions={canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
@@ -147,40 +147,17 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
-          {/* The message as an email reads: who, when, the subject, then the text in paragraphs at reading size. */}
-          <article className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-            <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-line px-6 py-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <Avatar name={fullName || enquiry.email} />
-                <div className="min-w-0 text-[0.84rem]">
-                  <p className="truncate">
-                    <span className="font-semibold text-[var(--casa-ink)]">{fullName}</span>{' '}
-                    <span className="text-[var(--casa-muted)]">&lt;{enquiry.email}&gt;</span>
-                  </p>
-                  <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
-                    {t('an CASA Bremen', 'to CASA Bremen')}
-                    {cameFrom ? ` · ${cameFrom}` : ''}
-                  </p>
-                </div>
-              </div>
-              <time dateTime={enquiry.submittedAt.toISOString()} className="text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
-                <span className="font-semibold text-[var(--casa-ink)]">{received}</span> · {relativeDays(enquiry.submittedAt, lang)}
-              </time>
-            </header>
-            <div className="px-6 pt-5 pb-6">
-              <h2 className="text-[1.05rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">{enquiry.topic}</h2>
-              <p className="mt-3 max-w-prose text-base leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{enquiry.message}</p>
-            </div>
-            <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3.5">
-              <ButtonLink href={reply} variant="primary">
-                <span aria-hidden="true" className="[&_svg]:size-4">
-                  {Icon.mail}
-                </span>
-                {t('Antworten', 'Reply')}
-              </ButtonLink>
-              <span className="text-[0.78rem] text-[var(--casa-muted)]">{german ? t('Anrede auf Deutsch', 'Greeting in German') : t('Anrede auf Englisch', 'Greeting in English')}</span>
-            </footer>
-          </article>
+          <SubmissionCard
+            name={fullName}
+            email={enquiry.email}
+            at={enquiry.submittedAt}
+            via={cameFrom}
+            title={enquiry.topic}
+            reply={{ href: reply, locale: enquiry.locale }}
+          >
+            {/* The one genuinely prose-shaped field: read in paragraphs, at reading size. */}
+            <p className="max-w-prose text-base leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{enquiry.message}</p>
+          </SubmissionCard>
 
           {sections.length ? (
             <Card title={enquiry.kind === 'company' ? t('Angaben der Firma', 'Company brief') : t('Angaben der Gruppe', 'Group brief')} icon={Icon.people} tint="sun">
@@ -235,17 +212,5 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
     </>
-  );
-}
-
-/** One fact under the record's name, with its small icon. */
-function MetaItem({ icon, children }: { icon: ReactNode; children: ReactNode }) {
-  return (
-    <span className="inline-flex min-w-0 items-center gap-1.5">
-      <span aria-hidden="true" className="shrink-0 text-[#6b7a90] [&_svg]:size-3.5">
-        {icon}
-      </span>
-      <span className="min-w-0 truncate">{children}</span>
-    </span>
   );
 }

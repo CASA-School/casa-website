@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { addNoteAction, assignAction, updateStatusAction } from '@/app/(admin)/admin/(workspace)/actions';
 import { describeActivity, type ActivityEntry } from '@/lib/admin/activity';
 import { berlinDay, berlinTime, shortDay } from '@/lib/admin/days';
-import { pick, type WsLang } from '@/lib/admin/i18n';
+import { pick, relativeDays, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import type { StaffNote } from '@/lib/admin/notes';
 import { normaliseStatus, STATUS_LABELS, type QueueEntity, type WorkStatus } from '@/lib/admin/queues';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { ChoiceMenu } from './choice-menu';
 import { Icon } from './icons';
 import { Avatar } from './list';
-import { Card } from './ui';
+import { ButtonLink, Card } from './ui';
 
 /**
  * The parts of a queue record's page that do the work on it (2026-10-14, the
@@ -379,5 +379,117 @@ function Meta({ who, what, at, title }: { who: ReactNode; what?: ReactNode; at: 
         {at}
       </time>
     </p>
+  );
+}
+
+/** One fact under a record's name, with its small icon: an address, a phone, the language. */
+export function MetaItem({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <span aria-hidden="true" className="shrink-0 text-[#6b7a90] [&_svg]:size-3.5">
+        {icon}
+      </span>
+      <span className="min-w-0 truncate">{children}</span>
+    </span>
+  );
+}
+
+/** The line of facts under a record's name. */
+export function MetaLine({ children }: { children: ReactNode }) {
+  return <span className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.84rem] text-[var(--casa-muted)]">{children}</span>;
+}
+
+/** The facts that decide the next step, in a grid of small framed cells: the dates, the level, a room. */
+export function FactGrid({
+  facts,
+}: {
+  facts: readonly { label: string; value: ReactNode; sub?: ReactNode; tone?: 'plain' | 'attention' | 'good' }[];
+}) {
+  return (
+    <dl className="grid gap-2 sm:grid-cols-2">
+      {facts.map((fact) => (
+        <div
+          key={fact.label}
+          className={cn(
+            'rounded-xl px-3.5 py-2.5 ring-1 ring-inset',
+            fact.tone === 'attention' ? 'bg-[#fff8e6] ring-[#efdca4]' : fact.tone === 'good' ? 'bg-[#f0f9f3] ring-[#c8e6d3]' : 'bg-[#f7f9fc] ring-ws-line'
+          )}
+        >
+          <dt className="text-[0.74rem] font-semibold text-[var(--casa-muted)]">{fact.label}</dt>
+          <dd className="mt-0.5 text-[0.92rem] font-bold text-[var(--casa-ink)]">{fact.value ?? '—'}</dd>
+          {fact.sub ? <dd className="mt-0.5 text-[0.76rem] text-[var(--casa-muted)]">{fact.sub}</dd> : null}
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/**
+ * What the person sent, as an email reads (2026-10-14, the enquiry first; then
+ * registrations and applications): who, their address, how it came, when, the
+ * subject, then what they wrote or chose. Under it „Antworten" — the page's main
+ * action, or beside a booking, a quiet one — with the language the greeting
+ * will be in, and anything else that belongs to the submission (a CV).
+ */
+export async function SubmissionCard({
+  name,
+  email,
+  at,
+  via,
+  title,
+  children,
+  reply,
+  extra,
+}: {
+  name: string;
+  email: string;
+  at: Date;
+  /** How it came, when that says something: „über das Anmeldeformular". */
+  via?: string | null;
+  title: string;
+  children: ReactNode;
+  reply: { href: string; locale: string; primary?: boolean };
+  /** Beside „Antworten": the CV, say. */
+  extra?: ReactNode;
+}) {
+  const { t, lang } = await getI18n();
+  const german = reply.locale === 'de';
+  return (
+    <article className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-line px-6 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <Avatar name={name || email} />
+          <div className="min-w-0 text-[0.84rem]">
+            <p className="truncate">
+              <span className="font-semibold text-[var(--casa-ink)]">{name}</span> <span className="text-[var(--casa-muted)]">&lt;{email}&gt;</span>
+            </p>
+            <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
+              {t('an CASA Bremen', 'to CASA Bremen')}
+              {via ? ` · ${via}` : ''}
+            </p>
+          </div>
+        </div>
+        <time dateTime={at.toISOString()} className="text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
+          <span className="font-semibold text-[var(--casa-ink)]">
+            {shortDay(at, lang)}, {berlinTime(at, lang)}
+          </span>{' '}
+          · {relativeDays(at, lang)}
+        </time>
+      </header>
+      <div className="px-6 pt-5 pb-6">
+        <h2 className="text-[1.05rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</h2>
+        <div className="mt-3">{children}</div>
+      </div>
+      <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3.5">
+        <ButtonLink href={reply.href} variant={reply.primary === false ? 'secondary' : 'primary'}>
+          <span aria-hidden="true" className="[&_svg]:size-4">
+            {Icon.mail}
+          </span>
+          {t('Antworten', 'Reply')}
+        </ButtonLink>
+        {extra}
+        <span className="text-[0.78rem] text-[var(--casa-muted)]">{german ? t('Anrede auf Deutsch', 'Greeting in German') : t('Anrede auf Englisch', 'Greeting in English')}</span>
+      </footer>
+    </article>
   );
 }

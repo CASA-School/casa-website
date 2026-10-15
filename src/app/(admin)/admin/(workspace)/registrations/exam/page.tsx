@@ -1,83 +1,78 @@
-import { ListEmpty } from '@/components/admin/list';
-import { Pagination } from '@/components/admin/pagination';
-import { parseFilter, QueueToolbar, queueEmptyTitle } from '@/components/admin/queue-toolbar';
-import { RegistrationTable } from '@/components/admin/registration-table';
+import { InboxScreen, inboxParams, type InboxItem } from '@/components/admin/inbox';
 import { RegistrationTabs } from '@/components/admin/registration-tabs';
-import { Card, PageHeader } from '@/components/admin/ui';
+import { Badge } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
 import { translator, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
-import { queueStatusCounts } from '@/lib/admin/queues';
+import { inboxCounts, openCount } from '@/lib/admin/inbox';
 import { listExamRegistrations, registrationTypeLabel } from '@/lib/admin/registrations';
 import { formatDay, parseOptionLabel } from '../option-label';
 
-/** "telc Deutsch B2 · 13 Nov": the exam, and the day of its sitting. */
-function examAbout(exam: string, option: string | null, lang: WsLang): string {
+/** "Sa., 7. Nov. 2026 · 09:00": the sitting, as stored when it does not parse. */
+function sittingDetails(option: string | null, lang: WsLang): string | null {
+  const t = translator(lang);
   const parsed = parseOptionLabel(option);
-  if (!parsed) return exam;
-  if (parsed.toBeArranged) return `${exam} · ${translator(lang)('Termin wird noch festgelegt', 'Date to be arranged')}`;
-  return `${exam} · ${parsed.start ? formatDay(parsed.start, lang) : parsed.raw}`;
+  if (!parsed) return null;
+  if (parsed.toBeArranged) return t('Termin wird noch festgelegt', 'Date to be arranged');
+  if (!parsed.start) return parsed.raw;
+  return [t(`Prüfung am ${formatDay(parsed.start, lang, true)}`, `Sitting on ${formatDay(parsed.start, lang, true)}`), parsed.time].filter(Boolean).join(' · ');
 }
 
 /** The full exam is the normal case; only a single part is marked on its row. */
 const FULL_EXAM = 'full';
 
+/**
+ * Exam registrations: the inbox (`InboxScreen`, shared with enquiries and
+ * applications), each row the exam and its sitting, marked when only one part
+ * is taken. Kurs | Prüfung beside the title switches to the course registrations.
+ */
 export default async function ExamRegistrationsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const filter = parseFilter(params.status);
-  const search = firstParam(params.q);
-  const page = clampPage(params.page);
-
-  const [{ items, total }, courseCounts, examCounts, { t, lang }] = await Promise.all([
-    listExamRegistrations({
-      status: filter,
-      search,
-      limit: PAGE_SIZE,
-      offset: offsetFor(page),
-    }),
-    queueStatusCounts('course_registration'),
-    queueStatusCounts('exam_registration'),
+  const view = inboxParams(params);
+  const [user, { items, total }, counts, courseCounts, { t, lang }] = await Promise.all([
+    requireModule('registrations'),
+    listExamRegistrations({ period: view.period, state: view.state, search: view.search, limit: view.limit, offset: view.offset }),
+    inboxCounts('exam_registration'),
+    inboxCounts('course_registration'),
     getI18n(),
   ]);
 
-  const rows = items.map((item) => ({
-    ...item,
-    about: examAbout(item.productLabel ?? t('Prüfung', 'Exam'), item.optionLabel, lang),
-    flag: item.detailNote && item.detailNote !== FULL_EXAM ? registrationTypeLabel(item.detailNote, lang) : null,
+  const rows: InboxItem[] = items.map((item) => ({
+    id: item.id,
+    href: `/admin/registrations/exam/${item.id}`,
+    name: [item.firstName, item.lastName].filter(Boolean).join(' '),
+    status: item.status,
+    at: item.submittedAt,
+    title: item.productLabel ?? t('Prüfung', 'Exam'),
+    preview: sittingDetails(item.optionLabel, lang),
+    badges:
+      item.detailNote && item.detailNote !== FULL_EXAM ? <Badge tone="neutral">{registrationTypeLabel(item.detailNote, lang)}</Badge> : null,
+    locale: item.locale,
+    assigneeName: item.assigneeName,
   }));
 
-  const open = (counts: typeof examCounts) =>
-    counts.byStatus.new + counts.byStatus.in_progress + counts.byStatus.waiting;
-
   return (
-    <>
-      <PageHeader
-        title={t('Anmeldungen', 'Registrations')}
-        actions={<RegistrationTabs active="exam" counts={{ course: open(courseCounts), exam: open(examCounts) }} lang={lang} />}
-      />
-
-      <Card bleed>
-        <QueueToolbar
-          basePath="/admin/registrations/exam"
-          active={filter}
-          counts={{ ...examCounts.byStatus, open: open(examCounts), all: examCounts.total }}
-          search={search}
-          searchPlaceholder={t('Name, E-Mail oder Prüfung', 'Name, email or exam')}
-          lang={lang}
-        />
-
-        {items.length === 0 ? (
-          <ListEmpty title={queueEmptyTitle(lang, filter, search)} />
-        ) : (
-          <RegistrationTable items={rows} basePath="/admin/registrations/exam" filter={filter} lang={lang} />
-        )}
-      </Card>
-
-      <Pagination basePath="/admin/registrations/exam" page={page} total={total} params={params} />
-    </>
+    <InboxScreen
+      entity="exam_registration"
+      basePath="/admin/registrations/exam"
+      title={t('Anmeldungen', 'Registrations')}
+      actions={<RegistrationTabs active="exam" counts={{ course: openCount(courseCounts), exam: openCount(counts) }} lang={lang} />}
+      nouns={{ one: { de: 'Anmeldung', en: 'registration' }, many: { de: 'Anmeldungen', en: 'registrations' } }}
+      searchPlaceholder={t('Name, E-Mail oder Prüfung', 'Name, email or exam')}
+      view={view.view}
+      state={view.state}
+      search={view.search}
+      page={view.page}
+      params={params}
+      counts={counts}
+      items={rows}
+      total={total}
+      canClose={canAccess(user, 'registrations', 'edit')}
+    />
   );
 }

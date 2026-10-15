@@ -1,5 +1,6 @@
 import { query, queryFirst } from './db';
 import { pick, type Bilingual, type WsLang } from './i18n';
+import { inboxConditions, type InboxPeriod, type InboxState } from './inbox';
 import { normaliseStatus, type WorkStatus } from './queues';
 
 /**
@@ -19,6 +20,8 @@ export type RegistrationListItem = {
   firstName: string;
   lastName: string;
   email: string;
+  /** The language the form was sent in — the one to reply in. */
+  locale: string;
   /** The course or exam the person chose, as they saw it named; null when none was stored. */
   productLabel: string | null;
   /** The dated option within it: a cohort start, or an exam sitting. */
@@ -112,39 +115,21 @@ export const registrationTypeLabel = (value: string, lang: WsLang) => {
   return label ? pick(lang, label) : value;
 };
 
-function statusFilter(
-  column: string,
-  status: WorkStatus | 'open' | 'all' | undefined,
-  params: unknown[]
-): string | null {
-  if (status === 'open' || status === undefined) {
-    return `${column} IN ('new', 'in_progress', 'waiting')`;
-  }
-
-  if (status === 'all') {
-    return null;
-  }
-
-  params.push(status);
-  return `${column} = $${params.length}::work_status`;
-}
-
 export async function listCourseRegistrations({
-  status,
+  period = 'week',
+  state = 'any',
   search,
   limit = 40,
   offset = 0,
 }: {
-  status?: WorkStatus | 'open' | 'all';
+  period?: InboxPeriod;
+  state?: InboxState;
   search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ items: RegistrationListItem[]; total: number }> {
   const params: unknown[] = [];
-  const conditions: string[] = [];
-
-  const statusClause = statusFilter('r.status', status, params);
-  if (statusClause) conditions.push(statusClause);
+  const conditions = inboxConditions('course_registration', 'r', { period, state });
 
   if (search) {
     params.push(`%${search}%`);
@@ -154,7 +139,7 @@ export async function listCourseRegistrations({
     );
   }
 
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const where = `WHERE ${conditions.join(' AND ')}`;
 
   const totalRow = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM course_registrations r ${where}`,
@@ -170,6 +155,7 @@ export async function listCourseRegistrations({
     course_instance_label: string | null;
     declared_level: string | null;
     accommodation_required: boolean;
+    locale: string;
     status: string;
     assignee_name: string | null;
     person_id: string | null;
@@ -184,6 +170,7 @@ export async function listCourseRegistrations({
             r.course_instance_label,
             coalesce(r.declared_level_code, r.declared_level_raw) AS declared_level,
             r.accommodation_required,
+            r.locale,
             r.status::text AS status,
             u.name AS assignee_name,
             r.person_id,
@@ -193,9 +180,7 @@ export async function listCourseRegistrations({
        FROM course_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
        ${where}
-      ORDER BY CASE r.status::text WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'waiting' THEN 2
-                                   WHEN 'done' THEN 3 WHEN 'declined' THEN 4 ELSE 5 END,
-               r.submitted_at DESC
+      ORDER BY r.submitted_at DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
@@ -208,6 +193,7 @@ export async function listCourseRegistrations({
       firstName: row.first_name,
       lastName: row.last_name,
       email: row.email,
+      locale: row.locale,
       productLabel: row.course_type_label,
       optionLabel: row.course_instance_label,
       status: normaliseStatus(row.status),
@@ -222,21 +208,20 @@ export async function listCourseRegistrations({
 }
 
 export async function listExamRegistrations({
-  status,
+  period = 'week',
+  state = 'any',
   search,
   limit = 40,
   offset = 0,
 }: {
-  status?: WorkStatus | 'open' | 'all';
+  period?: InboxPeriod;
+  state?: InboxState;
   search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ items: RegistrationListItem[]; total: number }> {
   const params: unknown[] = [];
-  const conditions: string[] = [];
-
-  const statusClause = statusFilter('r.status', status, params);
-  if (statusClause) conditions.push(statusClause);
+  const conditions = inboxConditions('exam_registration', 'r', { period, state });
 
   if (search) {
     params.push(`%${search}%`);
@@ -246,7 +231,7 @@ export async function listExamRegistrations({
     );
   }
 
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const where = `WHERE ${conditions.join(' AND ')}`;
 
   const totalRow = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM exam_registrations r ${where}`,
@@ -261,6 +246,7 @@ export async function listExamRegistrations({
     exam_type_label: string | null;
     exam_session_label: string | null;
     registration_type: string;
+    locale: string;
     status: string;
     assignee_name: string | null;
     person_id: string | null;
@@ -274,6 +260,7 @@ export async function listExamRegistrations({
             r.exam_type_label,
             r.exam_session_label,
             r.registration_type,
+            r.locale,
             r.status::text AS status,
             u.name AS assignee_name,
             r.person_id,
@@ -283,9 +270,7 @@ export async function listExamRegistrations({
        FROM exam_registrations r
        LEFT JOIN staff_users u ON u.id = r.assigned_to
        ${where}
-      ORDER BY CASE r.status::text WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'waiting' THEN 2
-                                   WHEN 'done' THEN 3 WHEN 'declined' THEN 4 ELSE 5 END,
-               r.submitted_at DESC
+      ORDER BY r.submitted_at DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
@@ -298,6 +283,7 @@ export async function listExamRegistrations({
       firstName: row.first_name,
       lastName: row.last_name,
       email: row.email,
+      locale: row.locale,
       productLabel: row.exam_type_label,
       optionLabel: row.exam_session_label,
       status: normaliseStatus(row.status),

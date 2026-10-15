@@ -3,25 +3,21 @@ import { notFound } from 'next/navigation';
 import { createBookingFromWizardAction } from '../../../bookings/actions';
 import { BookingWizard } from '../../../bookings/booking-wizard';
 import { FormDialog } from '@/components/admin/dialogs';
-import { PersonPanel } from '@/components/admin/person-panel';
-import { canAccess } from '@/lib/admin/access';
-import { bookingOffer } from '@/lib/admin/booking-offer';
-import { requireModule } from '@/lib/admin/guard';
-import { RecordRail } from '@/components/admin/record-rail';
 import { Icon } from '@/components/admin/icons';
-import { Badge, BirthDate, ButtonLink, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
+import { PersonPanel } from '@/components/admin/person-panel';
+import { FactGrid, MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
+import { Badge, BirthDate, Card, DetailList, RecordHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
+import { bookingOffer } from '@/lib/admin/booking-offer';
 import { listFlags } from '@/lib/admin/flags';
-import { pick, relativeDays, type Bilingual } from '@/lib/admin/i18n';
+import { requireModule } from '@/lib/admin/guard';
+import { pick, type Bilingual } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
-import {
-  findDuplicateCandidates,
-  getPersonSummary,
-  latestConfirmedLevel,
-} from '@/lib/admin/people';
-import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
+import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
 import { getCourseRegistration } from '@/lib/admin/registrations';
+import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
 import { courseNameResolver } from '../../course-names';
@@ -40,20 +36,15 @@ const ACCOMMODATION: Record<string, Bilingual> = {
 };
 
 /**
- * One course registration.
- *
- * The record's head carries what decides the next step — when it came in, the
- * dates, the level, whether a room or visa support is needed — and the cards
- * under it hold the rest: who they are, and what they asked CASA to arrange
- * beyond a seat. Who has it is the rail's, where it is changed. The dated
- * option is read out of its stored label (`../../option-label.ts`) and shown
- * as written when it does not parse.
+ * One course registration, in the inbox records' one design (the enquiry page
+ * first, 2026-10-14; registrations and applications 2026-10-15): the head with
+ * who and which course and, in its bar, where it stands and who has it; the
+ * registration as it was sent — the course and the facts that decide the next
+ * step (the dates, the level, a room, visa support), with what they wrote; who
+ * they are; beside it the person and one line of notes and changes. „Buchung
+ * anlegen" is the page's main action, so „Antworten" is a quiet one here.
  */
-export default async function CourseRegistrationPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function CourseRegistrationPage({ params }: { params: Promise<{ id: string }> }) {
   const [{ id }, user] = await Promise.all([params, requireModule('registrations')]);
   const [registration, { t, lang }] = await Promise.all([getCourseRegistration(id), getI18n()]);
 
@@ -61,6 +52,7 @@ export default async function CourseRegistrationPage({
     notFound();
   }
 
+  const canEdit = canAccess(user, 'registrations', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit') && Boolean(registration.personId);
   const offer = canBook ? await bookingOffer() : null;
 
@@ -84,131 +76,137 @@ export default async function CourseRegistrationPage({
       ])
     : [[], null];
 
-  const needsSomething = Boolean(registration.allergies) || Boolean(registration.notes);
   const declared = registration.declaredLevelCode ?? registration.declaredLevelRaw;
   const fullName = `${registration.firstName} ${registration.lastName}`;
-  const course = courseName(registration.courseTypeLabel, registration.courseTypeId);
+  const course = courseName(registration.courseTypeLabel, registration.courseTypeId) ?? t('Kurs', 'Course');
   const option = parseOptionLabel(registration.courseInstanceLabel);
+  const german = registration.locale === 'de';
+  const via = t('über das Anmeldeformular', 'from the registration form');
+  const reply = replyHref({
+    email: registration.email,
+    subject: inTheirLanguage(registration.locale, `Deine Anmeldung: ${course}`, `Your registration: ${course}`),
+    firstName: registration.firstName,
+    locale: registration.locale,
+    signer: user.name,
+  });
+  const accommodation = registration.accommodationType
+    ? ACCOMMODATION[registration.accommodationType]
+      ? pick(lang, ACCOMMODATION[registration.accommodationType])
+      : registration.accommodationType
+    : t('Nötig', 'Needed');
 
   return (
     <>
       <RecordHeader
         backHref="/admin/registrations/course"
-        backLabel={t('Alle Kursanmeldungen', 'All course registrations')}
+        backLabel={t('Anmeldungen', 'Registrations')}
         title={fullName}
         avatar={fullName}
-        subtitle={course ?? undefined}
-        status={<Badge tone={STATUS_TONES[registration.status]}>{pick(lang, STATUS_LABELS[registration.status])}</Badge>}
-        actions={
+        status={<Badge tone="neutral">{t('Kurs', 'Course')}</Badge>}
+        subtitle={
           <>
-            {canBook && offer && registration.personId ? (
-              <FormDialog
-                trigger={t('Buchung anlegen', 'Create booking')}
-                title={t(`${fullName} buchen`, `Book ${fullName}`)}
-                triggerVariant="primary"
-                width="lg"
-              >
-                <BookingWizard
-                  personId={registration.personId}
-                  personName={fullName}
-                  offer={offer}
-                  preselectedCohortId={registration.courseInstanceId}
-                  sourceRegistrationId={registration.id}
-                  returnTo={`/admin/registrations/course/${registration.id}`}
-                  action={createBookingFromWizardAction}
-                />
-              </FormDialog>
-            ) : null}
-            <ButtonLink href={`mailto:${registration.email}?subject=${encodeURIComponent(
-                `CASA registration — ${course ?? 'your course'}`
-              )}`}>{t('Per E-Mail antworten', 'Reply by email')}</ButtonLink>
+            <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{course}</span>
+            <MetaLine>
+              <MetaItem icon={Icon.mail}>
+                <a href={`mailto:${registration.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  {registration.email}
+                </a>
+              </MetaItem>
+              <MetaItem icon={Icon.phone}>
+                <a href={`tel:${registration.phone}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  {registration.phone}
+                </a>
+              </MetaItem>
+              <MetaItem icon={Icon.globe}>{german ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
+            </MetaLine>
           </>
         }
-        facts={[
-          {
-            label: t('Eingegangen', 'Received'),
-            icon: Icon.clock,
-            tint: 'blue',
-            value: <DateText value={registration.submittedAt} />,
-            sub: relativeDays(registration.submittedAt, lang),
-          },
-          {
-            label: t('Zeitraum', 'Dates'),
-            icon: Icon.calendar,
-            tint: 'blue',
-            value: option?.start
-              ? formatRange(option.start, option.end, lang)
-              : option?.toBeArranged
-                ? t('Wird noch festgelegt', 'To be arranged')
-                : (option?.raw ?? null),
-            sub: [localDays(option?.days ?? null, lang), option?.time].filter(Boolean).join(' · ') || undefined,
-          },
-          {
-            // A confirmed level outranks the learner's own claim; the claim
-            // stays on the Applicant card below when both exist.
-            label: t('Niveau', 'Level'),
-            icon: Icon.book,
-            tint: 'red',
-            value: confirmed?.level ?? declared,
-            sub: confirmed
-              ? t(
-                  `Einstufung · ${confirmed.reviewerName ?? 'ehemaliges Teammitglied'}`,
-                  `Placement · ${confirmed.reviewerName ?? 'a former colleague'}`
-                )
-              : declared
-                ? registration.declaredLevelCode
-                  ? t('Selbst angegeben', 'Self-declared')
-                  : t('Selbst angegeben · nicht erkannt', 'Self-declared · unrecognised')
-                : undefined,
-          },
-          {
-            label: t('Unterkunft', 'Accommodation'),
-            icon: Icon.rooms,
-            tint: registration.accommodationRequired ? 'blue' : 'ink',
-            value: registration.accommodationRequired
-              ? registration.accommodationType
-                ? ACCOMMODATION[registration.accommodationType]
-                  ? pick(lang, ACCOMMODATION[registration.accommodationType])
-                  : registration.accommodationType
-                : t('Nötig', 'Needed')
-              : t('Nicht nötig', 'Not needed'),
-          },
-          {
-            label: t('Visumshilfe', 'Visa support'),
-            icon: Icon.globe,
-            tint: registration.visaRequired ? 'sun' : 'ink',
-            value: registration.visaRequired ? t('Nötig', 'Needed') : t('Nicht nötig', 'Not needed'),
-          },
-        ]}
+        actions={
+          canBook && offer && registration.personId ? (
+            <FormDialog trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
+              <BookingWizard
+                personId={registration.personId}
+                personName={fullName}
+                offer={offer}
+                preselectedCohortId={registration.courseInstanceId}
+                sourceRegistrationId={registration.id}
+                returnTo={`/admin/registrations/course/${registration.id}`}
+                action={createBookingFromWizardAction}
+              />
+            </FormDialog>
+          ) : null
+        }
+        bar={
+          <>
+            <StatusBar entity="course_registration" id={registration.id} status={registration.status} canEdit={canEdit} />
+            <OwnerControl entity="course_registration" id={registration.id} assignedTo={registration.assignedTo} staff={staff} me={user} canEdit={canEdit} />
+          </>
+        }
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
+          <SubmissionCard
+            name={fullName}
+            email={registration.email}
+            at={registration.submittedAt}
+            via={via}
+            title={course}
+            reply={{ href: reply, locale: registration.locale, primary: !canBook }}
+          >
+            <FactGrid
+              facts={[
+                {
+                  label: t('Zeitraum', 'Dates'),
+                  value: option?.start
+                    ? formatRange(option.start, option.end, lang)
+                    : option?.toBeArranged
+                      ? t('Wird noch festgelegt', 'To be arranged')
+                      : (option?.raw ?? null),
+                  sub: [localDays(option?.days ?? null, lang), option?.time].filter(Boolean).join(' · ') || undefined,
+                },
+                {
+                  // A confirmed level outranks the learner's own claim; the claim stays on the person card below.
+                  label: t('Niveau', 'Level'),
+                  value: confirmed?.level ?? declared,
+                  sub: confirmed
+                    ? t(`Einstufung · ${confirmed.reviewerName ?? 'ehemaliges Teammitglied'}`, `Placement · ${confirmed.reviewerName ?? 'a former colleague'}`)
+                    : declared
+                      ? registration.declaredLevelCode
+                        ? t('Selbst angegeben', 'Self-declared')
+                        : t('Selbst angegeben · nicht erkannt', 'Self-declared · unrecognised')
+                      : undefined,
+                  tone: confirmed ? 'good' : 'plain',
+                },
+                {
+                  label: t('Unterkunft', 'Accommodation'),
+                  value: registration.accommodationRequired ? accommodation : t('Nicht nötig', 'Not needed'),
+                  tone: registration.accommodationRequired ? 'attention' : 'plain',
+                },
+                {
+                  label: t('Visumshilfe', 'Visa support'),
+                  value: registration.visaRequired ? t('Nötig', 'Needed') : t('Nicht nötig', 'Not needed'),
+                  tone: registration.visaRequired ? 'attention' : 'plain',
+                },
+                ...(registration.allergies ? [{ label: t('Allergien', 'Allergies'), value: registration.allergies, tone: 'attention' as const }] : []),
+              ]}
+            />
+            {registration.notes ? (
+              <figure className="mt-4">
+                <figcaption className="mb-1.5 text-[0.74rem] font-semibold text-[var(--casa-muted)]">{t('Eigene Anmerkungen', 'Their notes')}</figcaption>
+                <blockquote className="max-w-prose border-l-2 border-[#d3dbe6] pl-3.5 text-[0.95rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">
+                  {registration.notes}
+                </blockquote>
+              </figure>
+            ) : null}
+          </SubmissionCard>
+
           <Card title={t('Angaben zur Person', 'Applicant')} icon={Icon.person} tint="ink">
             <DetailList
               items={[
                 {
                   label: t('Name', 'Name'),
                   value: `${SALUTATIONS[registration.salutation] ? pick(lang, SALUTATIONS[registration.salutation]) : registration.salutation} ${fullName}`,
-                },
-                {
-                  label: t('E-Mail', 'Email'),
-                  value: (
-                    <a
-                      href={`mailto:${registration.email}`}
-                      className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                    >
-                      {registration.email}
-                    </a>
-                  ),
-                },
-                {
-                  label: t('Telefon', 'Phone'),
-                  value: (
-                    <a href={`tel:${registration.phone}`} className="font-medium">
-                      {registration.phone}
-                    </a>
-                  ),
                 },
                 {
                   label: t('Nationalität', 'Nationality'),
@@ -219,14 +217,7 @@ export default async function CourseRegistrationPage({
                     </span>
                   ),
                 },
-                {
-                  label: t('Geburtsdatum', 'Date of birth'),
-                  value: <BirthDate value={registration.birthDate ?? registration.birthDateRaw} />,
-                },
-                {
-                  label: t('Angemeldet auf', 'Registered in'),
-                  value: registration.locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English'),
-                },
+                { label: t('Geburtsdatum', 'Date of birth'), value: <BirthDate value={registration.birthDate ?? registration.birthDateRaw} /> },
                 ...(confirmed && declared
                   ? [
                       {
@@ -234,9 +225,7 @@ export default async function CourseRegistrationPage({
                         value: (
                           <span className="flex items-center gap-2">
                             {declared}
-                            {!registration.declaredLevelCode ? (
-                              <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
-                            ) : null}
+                            {!registration.declaredLevelCode ? <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge> : null}
                           </span>
                         ),
                       },
@@ -245,38 +234,16 @@ export default async function CourseRegistrationPage({
               ]}
             />
           </Card>
-
-          {needsSomething ? (
-            <Card title={t('Zu organisieren', 'Needs arranging')} icon={Icon.attention} tint="sun">
-              <DetailList
-                items={[
-                  { label: t('Allergien', 'Allergies'), value: registration.allergies },
-                  {
-                    label: t('Eigene Anmerkungen', 'Their notes'),
-                    value: registration.notes,
-                    wide: true,
-                  },
-                ]}
-              />
-            </Card>
-          ) : null}
         </div>
 
         <div className="space-y-4">
-          <PersonPanel
-            person={person}
-            candidates={candidates}
-            flags={flags}
-            returnTo={`/admin/registrations/course/${registration.id}`}
-          />
-          <RecordRail
+          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/course/${registration.id}`} />
+          <Timeline
             entity="course_registration"
             id={registration.id}
-            status={registration.status}
-            assignedTo={registration.assignedTo}
-            assignableStaff={staff}
             notes={notes}
             activity={activity}
+            origin={{ at: registration.submittedAt, label: t('Angemeldet über das Formular', 'Registered through the form') }}
           />
         </div>
       </div>
