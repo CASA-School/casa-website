@@ -32,12 +32,18 @@ the year (`StaticBalance*`), not summed.
 `staff_users` (the workspace's own accounts and roles), `teachers` and `teacher_absences`
 (Kursplanung). No working time, holidays or pay.
 
+## Who works with it
+
+Teachers approve their month and enter daily adjustments in the **Klassenbuch** (`klassenbuch.md`);
+**finance** handles the time sheets and pay (Rahman, 2026-10-15). Everything here moves to the new
+system in the end, like the rest of SchoolMan — one module at a time.
+
 ## For the bridge
 
-Nothing, until it is decided whether working time belongs in the workspace at all. Teachers' names
-and absences for planning are already the workspace's own.
+Nothing yet: working time is one of the later modules, and the Klassenbuch already reads and writes
+the teachers' side of it. Teachers' names and absences for planning are already the workspace's own.
 
 ## Open questions
 
-1. Does working time stay in SchoolMan, move to an HR tool, or come here?
+1. When working time moves, does the Klassenbuch keep the teachers' side and the workspace finance's?
 2. Staff tax, pension and health-insurance numbers sit on `Person` (`people.md`) — who may see them today?

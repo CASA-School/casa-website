@@ -28,6 +28,8 @@ rule for each) and `docs/FILEMAKER_BRIDGE.md` (the bridge design).
 | Accommodation — host families, rooms, stays, rent | [accommodation.md](accommodation.md) |
 | Letters, the work log and notes — and what leaves SchoolMan | [letters-and-history.md](letters-and-history.md) |
 | Staff, working time and holidays | [staff.md](staff.md) |
+| The Klassenbuch — the teachers' app that reads and writes SchoolMan | [klassenbuch.md](klassenbuch.md) |
+| The screens the team works in, and what they teach | [screens.md](screens.md) |
 
 Generated files, all in `output/filemaker/` (gitignored, counts and names only): one
 `<Table>.profile.json` per table studied (67), `vocabularies.md` (all 87 reference tables),
@@ -108,6 +110,10 @@ store a mail password in the script. 117 Excel/CSV exports to the colleague's Do
 WhatsApp messages with a prepared text. No script calls a web service; the Data API is opened by
 privilege sets (`letters-and-history.md`).
 
+**Credentials in plain text.** Nine scripts store a mail password; the `Management` screen's comments
+hold what looks like a password, a SIM PUK and an account number (`organisations.md`). None of it is
+copied into these pages; all of it should be changed and kept in the password manager.
+
 ---
 
 ## Where the workspace stands
@@ -139,7 +145,8 @@ privilege sets (`letters-and-history.md`).
    them, linked once (`filemaker_links`), never a table copied in bulk.
 4. **Facts only.** No copies, stored summaries, balances, defaults or script prices come across.
 5. **A module moves when the workspace can do the whole job**, and the team that uses it is ready —
-   one at a time.
+   one at a time. In the end everything moves (Rahman, 2026-10-15); money last, because finance
+   works there daily beside DATEV.
 
 ## Method — the same for every table
 
@@ -154,11 +161,14 @@ real; a gender label copied from a vocabulary is a copy. Each is judged by what 
 
 ## Open questions for the team
 
-The pages each end with their own; the ones that shape the most:
+Answered (Rahman, 2026-10-15): the booking status (`bookings.md`), who handles payouts, commission,
+host-family payments and time sheets — finance, beside DATEV (`money.md`) — and whether anything
+stays in SchoolMan for good — no, everything moves (`staff.md`). Attendance and time sheets are
+recorded in the Klassenbuch (`klassenbuch.md`).
 
-1. What do the booking statuses *ja*, *nein*, *u.B.*, *???* mean in daily use (`bookings.md`)?
-2. Where do teachers record attendance in 2026 (`courses.md`)?
-3. Which letters go out every week (`letters-and-history.md`)?
-4. Who works with payouts, commission and host families, and would they move (`money.md`,
-   `accommodation.md`)?
-5. Does working time stay in SchoolMan (`staff.md`)?
+Still open; each page ends with its own:
+
+1. When does a booking leave *???*, and who resolves *u.B.* (`bookings.md`)?
+2. Receipts, confirmations and missing-information letters are about half of all letters — build those first (`letters-and-history.md`)?
+3. What does finance export to DATEV, and how often (`money.md`)?
+4. Who manages host families today (`accommodation.md`)?

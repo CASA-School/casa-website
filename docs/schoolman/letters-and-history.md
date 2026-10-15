@@ -28,6 +28,40 @@ letters: confirmation, first and second reminder, cancellation, right level, sho
 visa letter, payment receipt, overview of charges and payments, instalment plan, and the certificate
 of participation (sent as PDF, also by WhatsApp).
 
+## Which letters go out *(live, by the script that wrote them)*
+
+| Letter | All | 2026 |
+| --- | ---: | ---: |
+| Payment receipt (`ReceiptPaymentIn_Booking`) | 7,349 | 3,122 |
+| First confirmation of a booking (`Confirmation.First_Booking`) | 3,657 | 1,534 |
+| Confirmation for an individual learner (`ConfirmationStudentIndividual_IDStudent_Booking`) | 2,135 | 934 |
+| Missing information (`MissingItem.Platform.V10`) | 1,507 | 757 |
+| Visa letter (`VisaLetterSelected_Booking_De`, `VisaLetter.FirstBooking_Booking`) | 1,609 | 733 |
+| Show-up, first and last call (`ShowUp.FirstCall_Booking`, `ShowUp.LastCall_Booking`) | 1,361 | 630 |
+| Exam confirmation (`Confirmation.Exam_Booking`) | 902 | 401 |
+| Room change (`RoomChange_SingleDateCourse`) | 900 | 468 |
+| Instalment plan (`Instalment_Booking.V10`) | 823 | 377 |
+| "Wish you were here" (`WishYouWereHere.Student`) | 818 | 334 |
+| Confirmation through an agency (`ConfirmationAgency_IDStudent_Booking`) | 670 | 266 |
+| Second reminder, course and accommodation (`2.Reminder_Booking*`) | 1,059 | 427 |
+| Waiting-list confirmations, exam and course | 822 | 443 |
+| Student card, course-start mail, invoice, host letters, certificates … | | |
+
+128 kinds in all; 21,000 written in German, 2,300 in English, the rest without a language noted.
+
+**How one is made — the receipt.** The script reads the booking, the person, the course, the
+selected payments and the balance; composes the text in German or English with `Case()` on the
+parameter; makes the booking number from line | booking | year; writes the `Letter` (address header,
+e-mail, subject "Empfangsbestätigung für … | Buchungsnummer …", the text). **It also does something
+else:** when the learner needs a visa and has paid more than 200 €, it marks the visa payment done on
+the booking and e-mails intensiv@ that the visa payment has arrived. A letter that changes a booking
+is the kind of side effect the workspace keeps out of letters.
+
+**Confirmations and reminders** write a work-log line ("Bestätigung mit Zahlungsfrist bis … geschickt")
+and a follow-up date. **The show-up letter** refuses to be written too early or after the deadline for
+moving a course. **Letters mix du and Sie** — a confirmation seen on screen says "danke für deine
+Anmeldung" and then "bitten wir Sie"; the website and the workspace say du throughout.
+
 ## What the work log holds
 
 `WorkFlow` has 184 stored fields; 86 were never filled. A line's text is one auto-entered field
@@ -58,4 +92,5 @@ line of time per record, notes beside changes), `day_tasks`. The workspace sends
 ## Open questions for the team
 
 1. Are the stored mail passwords still valid, and who changes them? (Rahman owns this.)
-2. Which letters does the team send every week — the ones to build first?
+2. Receipts, confirmations (first, individual, exam, agency) and the missing-information letter are
+   about half of all letters (16,220 of 33,218) — the ones to build first?

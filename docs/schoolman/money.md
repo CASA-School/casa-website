@@ -53,6 +53,13 @@ The team works in `CostDetail`, `PaymentIn`, `PaymentIn_Form`, `Instalment`, `In
 - Payment dates in 2029 and 2323 — typing slips nothing stopped.
 - `Commission` copies the charge's amounts onto itself instead of pointing at them.
 
+## Who works with it
+
+**Finance** handles payouts, commission, time sheets and the payments to host families (Rahman,
+2026-10-15). Finance's accounting system is **DATEV**: SchoolMan records what learners are charged
+and pay, but no expenses and little else of the books — so finance depends on DATEV, and SchoolMan's
+money tables are a learner ledger, not the accounts.
+
 ## In the workspace today
 
 `booking_charges`, `payments`, `rates` (the price lists, Settings → Prices) and `charge_types`. Prices
@@ -61,11 +68,14 @@ payouts.
 
 ## For the bridge
 
-- Money is where FileMaker stays the record longest — the finance team works there. The workspace
-  should **read** a booking's charges, payments and open balance for display, and write nothing.
+- Money moves last, because finance works there every day and depends on DATEV beside it. Until then
+  the workspace **reads** a booking's charges, payments and open balance for display, and writes
+  nothing.
 - Never carry the stored balances; sum the lines.
+- When money moves, the question is what goes to DATEV and how — the export, not the screen, is the
+  hard part.
 
 ## Open questions for the team
 
-1. Who works with payouts and commission, and would they ever move?
+1. What does finance export from SchoolMan to DATEV today, and how often?
 2. Is "carry-over" a payment or a transfer between bookings in the team's own words?

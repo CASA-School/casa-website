@@ -45,7 +45,7 @@ has 68 stored fields; apart from links, the only text is a comment field, filled
 | Business line | `_ID_Platform`: intensive 1,238 · evening 516 · exam 20 | 29% |
 | How they got in touch | `Contact._ID_TypeContactReference` — ids and typed labels mixed (`Email` 420, `1` 365, `Besuch im Büro` 133, `1\r3` …) | 20% |
 
-**Status is the default.** `PreBooking._ID_StatusPreBooking`: 4 (*u.B.*, the auto-entered default)
+**Status is the default.** `PreBooking._ID_StatusPreBooking`: 4 (*u.B.*, *unter Beobachtung*, the auto-entered default)
 on 4,896 of 6,081; *nein* 620; *ja* 561. `Contact._ID_StatusContact`: 4 on 3,600 of 5,072. Nobody
 maintains it — LESSONS §4.6.
 

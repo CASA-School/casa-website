@@ -64,9 +64,19 @@ What is **not** a fact but stored as one:
   gender and birth date of the person (100%, 98%) — a copy that goes stale when the person changes.
 - 31 constant fields (`_3`, `_4` … holding a fixed number to draw a relationship).
 
-**The status.** `_ID_EnrolmentDone`: *ja* 7,279 · *u.B.* 6,893 · *nein* 5,175 · *???* 3,135 ·
-*storno* 5. New bookings start at *???* (LESSONS §4.2). `_ID_StatusBooking` is never filled. The
-learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance, Rookie) is on 100%.
+**The status** (`_ID_EnrolmentDone`), as the team uses it (Rahman, 2026-10-15):
+
+| Value | Meaning | Bookings |
+| --- | --- | ---: |
+| *ja* (green) | Right for the course and paid | 7,279 |
+| *u.B.* — *unter Beobachtung* | Something is open: a visa needed and not paid yet, the level not right, something missing | 6,893 |
+| *nein* | Cancelled or to be deleted — in practice the storno | 5,175 |
+| *???* | What a new booking starts with (LESSONS §4.2) | 3,135 |
+| *storno* | The official cancel value, hardly used | 5 |
+
+So the status mixes three questions — is the learner placed right, has money arrived, is anything
+missing — into one value, and *nein* does the work of *storno*. `_ID_StatusBooking` is never filled.
+The learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance, Rookie) is on 100%.
 
 ## In the workspace today
 
@@ -82,7 +92,6 @@ The business line belongs on the course type, not in a table per line.
 
 ## Open questions for the team
 
-1. What do *ja*, *nein*, *u.B.* and *???* mean on a booking in daily use, and which one means
-   "confirmed"?
+1. When does a booking leave *???* — who sets it, and is *u.B.* ever resolved without a colleague?
 2. What do Runner, Unicorn, LastDance and Rookie mean?
 3. When is `Agreement` written (250 this year), and who reads it?

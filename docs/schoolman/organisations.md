@@ -29,6 +29,11 @@ So `Management` is the party, and the other tables are its roles.
   rows linked by `_ID_Corporate` (842), `_ID_Institution` (1,131) or `_ID_Agency` (150), with a job
   title (`Function`, 526).
 
+**Credentials in comments.** The `Management` screen's free-text comments hold what looks like a
+password, a SIM PUK and a customer account number in plain text (seen 2026-10-15, not copied). Anyone
+who can open SchoolMan can read them. They should be moved to the password manager and changed; the
+bridge never reads `Management` comments.
+
 **A trap:** the `_ID_Provider` column on charges (99%), payments (96%), invoices and e-mails is
 **not** a link to `Provider` — it holds a different number on every row, a second serial id under a
 link's name. Read it as nothing.
