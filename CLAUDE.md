@@ -435,6 +435,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/ADMIN_I18N.md` | **Read before writing any workspace text.** German by default, English on request: the API, what is and is not translated, and the glossary |
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
+| `docs/FILEMAKER_MIGRATION.md` | **Read before importing anything from FileMaker.** Every SchoolMan area mapped to the workspace with live counts, what each of our tables lacks, the order of work (people first), the read-only profiler (`scripts/filemaker/`), and the open decisions per table |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |
 | `docs/HOST_FAMILY_IMAGES.md` | **Brief for the AI-generated host-family images** (Codex): slots, sizes, rules, and what to change in the repo when they arrive |
 | `docs/AZURE_DEPLOYMENT_PLAN.md` | Target infrastructure (Azure, alongside the student app), driver port, migration order, data-protection decisions |
