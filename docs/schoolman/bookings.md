@@ -93,8 +93,5 @@ The business line belongs on the course type, not in a table per line.
 
 ## Open questions for the team
 
-1. Every booking starts at *???*, set by the conversion script; 3,135 still say it. Are those old
-   bookings nobody went back to, or recent ones not looked at yet? (To read from SchoolMan by the
-   course's start year.)
 2. What do Runner, Unicorn, LastDance and Rookie mean?
 3. When is `Agreement` written (250 this year), and who reads it?
