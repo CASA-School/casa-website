@@ -36,7 +36,33 @@ export type PersonSummary = {
   createdAt: Date;
 };
 
+/** Everything else SchoolMan knows about a learner (migration 0029); some of it telc asks for. */
+export type PersonFacts = {
+  secondLastName: string | null;
+  nickname: string | null;
+  birthYear: number | null;
+  birthPlace: string | null;
+  birthCountryCode: string | null;
+  birthCountryName: string | null;
+  motherTongue: string | null;
+  occupation: string | null;
+  passportNumber: string | null;
+};
+
+/** Where a person lives: at home, and in Bremen while here. */
+export type AddressKind = 'home' | 'local';
+export type Address = {
+  kind: AddressKind;
+  street: string | null;
+  postcode: string | null;
+  city: string | null;
+  countryCode: string | null;
+  countryName: string | null;
+};
+
 export type PersonDetail = PersonSummary & {
+  facts: PersonFacts;
+  addresses: Address[];
   emails: { address: string; isPrimary: boolean }[];
   phones: { number: string; isPrimary: boolean }[];
   /** Rows linked INTO this one (duplicates that were resolved to it). */
@@ -121,7 +147,29 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
 
   // Channels come from the whole cluster: a duplicate that was linked may have
   // arrived with a second address, and that address is still this person's.
-  const [emails, phones, dups] = await Promise.all([
+  const [facts, addresses, emails, phones, dups] = await Promise.all([
+    queryFirst<{
+      second_last_name: string | null;
+      nickname: string | null;
+      birth_year: number | null;
+      birth_place: string | null;
+      birth_country_code: string | null;
+      birth_country_name: string | null;
+      mother_tongue: string | null;
+      occupation: string | null;
+      passport_number: string | null;
+    }>(
+      `SELECT p.second_last_name, p.nickname, p.birth_year, p.birth_place, p.birth_country_code,
+              c.name_en AS birth_country_name, p.mother_tongue, p.occupation, p.passport_number
+         FROM people p LEFT JOIN countries c ON c.code = p.birth_country_code WHERE p.id = $1`,
+      [row.id]
+    ),
+    query<{ kind: AddressKind; street: string | null; postcode: string | null; city: string | null; country_code: string | null; country_name: string | null }>(
+      `SELECT a.kind, a.street, a.postcode, a.city, a.country_code, c.name_en AS country_name
+         FROM addresses a LEFT JOIN countries c ON c.code = a.country_code
+        WHERE a.person_id = $1 ORDER BY a.kind = 'local' DESC`,
+      [row.id]
+    ),
     query<{ address: string; is_primary: boolean }>(
       `SELECT DISTINCT ON (e.normalized) e.address, e.is_primary
          FROM emails e
@@ -144,6 +192,25 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
 
   return {
     ...toSummary(row),
+    facts: {
+      secondLastName: facts?.second_last_name ?? null,
+      nickname: facts?.nickname ?? null,
+      birthYear: facts?.birth_year ?? null,
+      birthPlace: facts?.birth_place ?? null,
+      birthCountryCode: facts?.birth_country_code ?? null,
+      birthCountryName: facts?.birth_country_name ?? null,
+      motherTongue: facts?.mother_tongue ?? null,
+      occupation: facts?.occupation ?? null,
+      passportNumber: facts?.passport_number ?? null,
+    },
+    addresses: addresses.map((a) => ({
+      kind: a.kind,
+      street: a.street,
+      postcode: a.postcode,
+      city: a.city,
+      countryCode: a.country_code,
+      countryName: a.country_name,
+    })),
     emails: emails.map((e) => ({
       address: e.address,
       isPrimary: e.is_primary,
@@ -606,7 +673,20 @@ export type PersonInput = {
   nationality: string | null;
   email: string | null;
   phone: string | null;
+  /** On edit only; a new person is created with the essentials. */
+  facts?: {
+    secondLastName: string | null;
+    nickname: string | null;
+    birthYear: number | null;
+    birthPlace: string | null;
+    birthCountry: string | null;
+    motherTongue: string | null;
+    occupation: string | null;
+    passportNumber: string | null;
+  };
 };
+
+export type AddressInput = { street: string | null; postcode: string | null; city: string | null; country: string | null };
 
 export type Country = { code: string; nameEn: string };
 
@@ -684,6 +764,16 @@ export async function updatePerson(
         input.nationality?.trim() || null,
       ]
     );
+    if (input.facts) {
+      const f = input.facts;
+      await client.query(
+        `UPDATE people
+            SET second_last_name = $2, nickname = $3, birth_year = $4, birth_place = $5,
+                birth_country_code = $6, mother_tongue = $7, occupation = $8, passport_number = $9
+          WHERE id = $1`,
+        [id, f.secondLastName, f.nickname, f.birthYear, f.birthPlace, countryCodeFromName(f.birthCountry), f.motherTongue, f.occupation, f.passportNumber]
+      );
+    }
     if (input.email?.trim()) {
       const normalized = normalizeEmail(input.email);
       await client.query(`UPDATE emails SET is_primary = false WHERE person_id = $1`, [id]);
@@ -704,6 +794,96 @@ export async function updatePerson(
     }
   });
   await logActivity({ actor, entity: 'person', entityId: id, action: 'person_updated' });
+}
+
+/** A person's home or local address; an empty one is removed. */
+export async function saveAddress(personId: string, kind: AddressKind, input: AddressInput, actor: StaffUser): Promise<void> {
+  const empty = !input.street && !input.postcode && !input.city && !input.country;
+  if (empty) {
+    await query(`DELETE FROM addresses WHERE person_id = $1 AND kind = $2`, [personId, kind]);
+  } else {
+    await query(
+      `INSERT INTO addresses (person_id, kind, street, postcode, city, country_code) VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (person_id, kind) DO UPDATE
+         SET street = EXCLUDED.street, postcode = EXCLUDED.postcode, city = EXCLUDED.city, country_code = EXCLUDED.country_code`,
+      [personId, kind, input.street, input.postcode, input.city, countryCodeFromName(input.country)]
+    );
+  }
+  await logActivity({ actor, entity: 'person', entityId: personId, action: 'person_address_updated', detail: { kind } });
+}
+
+// ------------------------------------------------------------ protected
+
+/**
+ * Tax, pension and health-insurance numbers and bank accounts (migration 0029). Read and written
+ * only with the module `private_data`; the callers check it. The history says that something
+ * changed, never the value.
+ */
+export type PersonPrivate = {
+  taxId: string | null;
+  pensionInsuranceNumber: string | null;
+  healthInsuranceNumber: string | null;
+  updatedAt: Date | null;
+  updatedByName: string | null;
+  bankAccounts: { id: string; holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null }[];
+};
+
+export async function getPersonPrivate(personId: string): Promise<PersonPrivate> {
+  const [row, banks] = await Promise.all([
+    queryFirst<{ tax_id: string | null; pension_insurance_number: string | null; health_insurance_number: string | null; updated_at: Date; updated_by_name: string | null }>(
+      `SELECT pp.tax_id, pp.pension_insurance_number, pp.health_insurance_number, pp.updated_at, u.name AS updated_by_name
+         FROM person_private pp LEFT JOIN staff_users u ON u.id = pp.updated_by WHERE pp.person_id = $1`,
+      [personId]
+    ),
+    query<{ id: string; holder: string | null; iban: string; bic: string | null; bank_name: string | null; note: string | null }>(
+      `SELECT id, holder, iban, bic, bank_name, note FROM bank_accounts WHERE person_id = $1 ORDER BY created_at`,
+      [personId]
+    ),
+  ]);
+  return {
+    taxId: row?.tax_id ?? null,
+    pensionInsuranceNumber: row?.pension_insurance_number ?? null,
+    healthInsuranceNumber: row?.health_insurance_number ?? null,
+    updatedAt: row?.updated_at ?? null,
+    updatedByName: row?.updated_by_name ?? null,
+    bankAccounts: banks.map((b) => ({ id: b.id, holder: b.holder, iban: b.iban, bic: b.bic, bankName: b.bank_name, note: b.note })),
+  };
+}
+
+export async function savePersonPrivate(
+  personId: string,
+  input: { taxId: string | null; pensionInsuranceNumber: string | null; healthInsuranceNumber: string | null },
+  actor: StaffUser
+): Promise<void> {
+  await query(
+    `INSERT INTO person_private (person_id, tax_id, pension_insurance_number, health_insurance_number, updated_by)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (person_id) DO UPDATE
+       SET tax_id = EXCLUDED.tax_id, pension_insurance_number = EXCLUDED.pension_insurance_number,
+           health_insurance_number = EXCLUDED.health_insurance_number, updated_by = EXCLUDED.updated_by, updated_at = now()`,
+    [personId, input.taxId, input.pensionInsuranceNumber, input.healthInsuranceNumber, actor.id]
+  );
+  await logActivity({ actor, entity: 'person', entityId: personId, action: 'person_private_updated' });
+}
+
+/** The IBAN without spaces, upper case — how banks and DATEV read it. */
+export const normalizeIban = (value: string) => value.replace(/\s+/g, '').toUpperCase();
+
+export async function addBankAccount(
+  personId: string,
+  input: { holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null },
+  actor: StaffUser
+): Promise<void> {
+  await query(
+    `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, note, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [personId, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note, actor.id]
+  );
+  await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_added' });
+}
+
+export async function removeBankAccount(personId: string, accountId: string, actor: StaffUser): Promise<void> {
+  await query(`DELETE FROM bank_accounts WHERE id = $1 AND person_id = $2`, [accountId, personId]);
+  await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_removed' });
 }
 
 /**

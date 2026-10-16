@@ -79,6 +79,9 @@ mapping (matched on the German name; 72 deleted ids flagged), and whichever extr
    restricted access**: only the people whose work needs them (finance, management) see them, not the
    whole team. They live apart from the learner's everyday fields, under their own module right.
 
+*Built 2026-10-16 (migration 0029, `docs/ADMIN_WORKSPACE.md` §Lists 21): the learner facts and two
+addresses on the person's page, and the protected details under the module `private_data`.*
+
 ## Duplicates *(live, 2026-10-16)*
 
 A **duplicate** here is two `Person` records for the same human — not an extension. An extension is

@@ -208,6 +208,14 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Person angelegt', 'added a person');
     case 'person_updated':
       return t('hat eine Person bearbeitet', 'edited a person');
+    case 'person_address_updated':
+      return t('hat eine Adresse geändert', 'changed an address');
+    case 'person_private_updated':
+      return t('hat geschützte Angaben geändert', 'changed protected details');
+    case 'bank_account_added':
+      return t('hat eine Bankverbindung hinzugefügt', 'added a bank account');
+    case 'bank_account_removed':
+      return t('hat eine Bankverbindung entfernt', 'removed a bank account');
     case 'person_deleted':
       return t('hat eine Person gelöscht', 'deleted a person');
     case 'room_created':

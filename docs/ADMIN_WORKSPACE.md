@@ -924,6 +924,20 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     for the dates of the course a learner is in or about to start; nationality
     and birth date are on the person's page, and an unrecognised nationality is
     still a flag above the list.
+
+    **Everything about a learner (2026-10-16, migration 0029).** Rahman: all the
+    information SchoolMan holds comes along, some of it is required for telc.
+    The person's page shows second surname, nickname, place and country of
+    birth, a birth year where the date is missing, mother tongue, occupation
+    and passport number in „Angaben" (edited in the same dialog as the name);
+    „Adressen" holds one address in Bremen and one at home, each changed in its
+    own small dialog. „Geschützte Angaben" — tax, pension and health-insurance
+    numbers and bank accounts (`person_private`, `bank_accounts`) — is its own
+    module, `private_data`: owners and administrators hold it, anyone else is
+    granted it on the Team screen (finance, for example); a colleague without
+    it does not see the card at all, `edit` changes it, `full` removes a bank
+    account after a confirmation. The history says that protected details
+    changed, never what they are.
 22. **Kurse and Prüfungen (2026-10-15).** They keep their month-grouped
     tables and gain the counts line: for courses the dates ahead, the places
     taken (as the seat bars count them) and the next start; for exams the

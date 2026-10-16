@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { unlinkPersonAction } from '../../actions';
-import { deletePersonAction } from '../actions';
-import { PersonForm } from '../person-form';
+import { deletePersonAction, removeBankAccountAction } from '../actions';
+import { AddressForm, BankAccountForm, PersonForm, PrivateForm } from '../person-form';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { createBookingFromWizardAction } from '../../bookings/actions';
 import { RecordFoot } from '../../bookings/record-foot';
@@ -28,7 +28,19 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { personOffers } from '@/lib/admin/offers/repo';
 import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
-import { getPerson, latestConfirmedLevel, LEARNER_STAGE_LABELS, learnerStage, listCountries, personTimeline, type LearnerStage, type TimelineItem } from '@/lib/admin/people';
+import {
+  getPerson,
+  getPersonPrivate,
+  latestConfirmedLevel,
+  LEARNER_STAGE_LABELS,
+  learnerStage,
+  listCountries,
+  personTimeline,
+  type Address,
+  type AddressKind,
+  type LearnerStage,
+  type TimelineItem,
+} from '@/lib/admin/people';
 import { normaliseStatus } from '@/lib/admin/queues';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
@@ -135,7 +147,11 @@ export default async function PersonPage({
   const seesOffers = canAccess(user, 'offers');
   const canOffer = canAccess(user, 'offers', 'edit');
   const canDelete = canAccess(user, 'people', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage] = await Promise.all([
+  // Tax, pension and health-insurance numbers and bank accounts: only with `private_data`.
+  const seesPrivate = canAccess(user, 'private_data');
+  const editsPrivate = canAccess(user, 'private_data', 'edit');
+  const removesBank = canAccess(user, 'private_data', 'full');
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, privateData] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -148,6 +164,7 @@ export default async function PersonPage({
     seesOffers ? personOffers(person.id) : Promise.resolve([]),
     courseNameResolver(),
     seesBookings ? learnerStage(person.id) : Promise.resolve(null),
+    seesPrivate ? getPersonPrivate(person.id) : Promise.resolve(null),
   ]);
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
@@ -275,7 +292,7 @@ export default async function PersonPage({
         actions={
           <>
             {canEdit ? (
-              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={person.displayName}>
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={person.displayName} width="lg">
                 <PersonForm person={person} countries={countries} />
               </FormDialog>
             ) : null}
@@ -405,7 +422,17 @@ export default async function PersonPage({
                       </span>
                     ) : null),
                 },
-                { label: t('Geburtsdatum', 'Date of birth'), value: person.birthDate ? <BirthDate value={person.birthDate} /> : null },
+                {
+                  label: t('Geburtsdatum', 'Date of birth'),
+                  value: person.birthDate ? <BirthDate value={person.birthDate} /> : person.facts.birthYear ? t(`${person.facts.birthYear} (nur das Jahr)`, `${person.facts.birthYear} (year only)`) : null,
+                },
+                { label: t('Geburtsort', 'Place of birth'), value: person.facts.birthPlace },
+                { label: t('Geburtsland', 'Country of birth'), value: person.facts.birthCountryName },
+                { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
+                { label: t('Beruf', 'Occupation'), value: person.facts.occupation },
+                { label: t('Passnummer', 'Passport number'), value: person.facts.passportNumber },
+                ...(person.facts.secondLastName ? [{ label: t('Zweiter Nachname', 'Second surname'), value: person.facts.secondLastName }] : []),
+                ...(person.facts.nickname ? [{ label: t('Rufname', 'Nickname'), value: person.facts.nickname }] : []),
                 ...(fileMakerLinks.length
                   ? [
                       {
@@ -427,6 +454,102 @@ export default async function PersonPage({
               ]}
             />
           </Card>
+
+          {/* Where they live: at home, and in Bremen while here. Letters go to the Bremen one first. */}
+          <Card title={t('Adressen', 'Addresses')} icon={Icon.rooms} tint="ink">
+            <ul className="-my-1.5 divide-y divide-ws-line-soft">
+              {(['local', 'home'] as const).map((kind: AddressKind) => {
+                const address = person.addresses.find((a) => a.kind === kind);
+                return (
+                  <li key={kind} className="flex items-start justify-between gap-3 py-2.5">
+                    <span className="min-w-0 text-sm">
+                      <span className="block text-xs font-medium text-[var(--casa-muted)]">{kind === 'local' ? t('In Bremen', 'In Bremen') : t('Zuhause', 'At home')}</span>
+                      {address ? (
+                        <AddressLines address={address} />
+                      ) : (
+                        <span className="block text-[var(--casa-text-subtle)]">—</span>
+                      )}
+                    </span>
+                    {canEdit ? (
+                      <FormDialog
+                        trigger={address ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')}
+                        title={kind === 'local' ? t('Adresse in Bremen', 'Address in Bremen') : t('Adresse zuhause', 'Home address')}
+                        triggerVariant="ghost"
+                        size="sm"
+                      >
+                        <AddressForm personId={person.id} kind={kind} address={address} countries={countries} />
+                      </FormDialog>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+
+          {/* Protected: tax, pension and health-insurance numbers and bank accounts — only with `private_data`. */}
+          {privateData ? (
+            <Card
+              title={t('Geschützte Angaben', 'Protected details')}
+              icon={Icon.money}
+              tint="red"
+              actions={
+                editsPrivate ? (
+                  <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Geschützte Angaben', 'Protected details')} size="sm">
+                    <PrivateForm personId={person.id} data={privateData} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              <DetailList
+                items={[
+                  // One per row: the labels are long and the column is narrow.
+                  { label: t('Steuer-ID', 'Tax ID'), value: privateData.taxId, wide: true },
+                  { label: t('Rentenversicherungsnummer', 'Pension insurance number'), value: privateData.pensionInsuranceNumber, wide: true },
+                  { label: t('Krankenversicherungsnummer', 'Health insurance number'), value: privateData.healthInsuranceNumber, wide: true },
+                ]}
+              />
+              <div className="mt-4 border-t border-ws-line-soft pt-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-[var(--casa-muted)]">{t('Bankverbindungen', 'Bank accounts')}</span>
+                  {editsPrivate ? (
+                    <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="ghost" size="sm">
+                      <BankAccountForm personId={person.id} holder={person.displayName} />
+                    </FormDialog>
+                  ) : null}
+                </div>
+                {privateData.bankAccounts.length ? (
+                  <ul className="mt-1 divide-y divide-ws-line-soft">
+                    {privateData.bankAccounts.map((account) => (
+                      <li key={account.id} className="flex items-start justify-between gap-3 py-2">
+                        <span className="min-w-0 text-sm">
+                          <span className="block font-mono text-[0.84rem] font-semibold">{account.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
+                          <span className="block text-xs text-[var(--casa-muted)]">
+                            {[account.holder, account.bankName, account.bic, account.note].filter(Boolean).join(' · ')}
+                          </span>
+                        </span>
+                        {removesBank ? (
+                          <form action={removeBankAccountAction}>
+                            <input type="hidden" name="personId" value={person.id} />
+                            <input type="hidden" name="accountId" value={account.id} />
+                            <ConfirmSubmit
+                              title={t('Diese Bankverbindung entfernen?', 'Remove this bank account?')}
+                              description={t('Sie wird von der Person entfernt.', 'It is removed from the person.')}
+                              confirmLabel={t('Entfernen', 'Remove')}
+                              variant="ghost"
+                            >
+                              {t('Entfernen', 'Remove')}
+                            </ConfirmSubmit>
+                          </form>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">—</p>
+                )}
+              </div>
+            </Card>
+          ) : null}
 
           {person.linkedDuplicates.length > 0 ? (
             <Card title={t('Verknüpfte Datensätze', 'Linked records')} icon={Icon.people} tint="ink">
@@ -519,5 +642,17 @@ function CaseGroup({ label, cases, lang, quiet = false }: { label: string; cases
         ))}
       </ul>
     </section>
+  );
+}
+
+/** An address in its lines: street, postcode and city, the country when it is not Germany. */
+function AddressLines({ address }: { address: Address }) {
+  const cityLine = [address.postcode, address.city].filter(Boolean).join(' ');
+  return (
+    <span className="block leading-relaxed text-[var(--casa-ink)]">
+      {address.street ? <span className="block">{address.street}</span> : null}
+      {cityLine ? <span className="block">{cityLine}</span> : null}
+      {address.countryName && address.countryCode !== 'DE' ? <span className="block">{address.countryName}</span> : null}
+    </span>
   );
 }
