@@ -79,8 +79,15 @@ payouts.
 ## Carry-over
 
 When a booking is overpaid or carries a credit (*Guthaben*), the money is carried over to another
-booking (Rahman, 2026-10-16) — 4,836 payments are recorded that way. The workspace needs the same
-option: move a credit from one booking to another, recorded on both.
+booking (Rahman, 2026-10-16) — 4,836 payments are recorded that way.
+
+**Built (2026-10-16, migration 0030):** „Guthaben übertragen" on a booking that holds a credit moves
+it to another booking of the same learner as two linked payment lines, minus and plus, voided
+together (`docs/ADMIN_WORKSPACE.md` §Lists 20).
+
+TODO (not yet checked in SchoolMan): whether a carry-over there also leaves a minus line on the
+booking the money came from, and whether anything links the two — the bridge needs to know before it
+reads one.
 
 ## Open questions
 

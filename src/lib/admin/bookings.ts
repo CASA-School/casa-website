@@ -132,6 +132,7 @@ const STORED_WORDS: Record<string, Bilingual> = {
   Voided: { de: 'Storniert', en: 'Voided' },
   'Voided by staff': { de: 'Vom Team storniert', en: 'Voided by staff' },
   Cancelled: { de: 'Storniert', en: 'Cancelled' },
+  'Credit carried over': { de: 'Guthaben übertragen', en: 'Credit carried over' },
 };
 
 export const storedWords = (value: string, lang: WsLang): string => {
@@ -182,6 +183,8 @@ export type Payment = {
   recordedByName: string | null;
   voidedAt: Date | null;
   voidReason: string | null;
+  /** A carry-over's other side: the booking the credit went to (amount below zero) or came from. */
+  counterpart: { id: string; courseTypeName: string | null; startDate: Date | null } | null;
 };
 
 export type BookingDetail = BookingListItem & {
@@ -332,6 +335,17 @@ export async function personBookings(canonicalPersonId: string): Promise<Booking
   return rows.map(toItem);
 }
 
+/** Where a booking's credit can go: the same learner's other bookings that are not cancelled, linked records included. */
+export async function carryOverTargets(bookingId: string): Promise<BookingListItem[]> {
+  const rows = await query<ListRow>(
+    `${LIST} WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.id <> $1
+        AND canonical_person_id(b.person_id) = (SELECT canonical_person_id(person_id) FROM bookings WHERE id = $1)
+      ORDER BY start_date DESC NULLS LAST`,
+    [bookingId]
+  );
+  return rows.map(toItem);
+}
+
 export async function getBooking(id: string): Promise<BookingDetail | null> {
   const row = await queryFirst<
     ListRow & {
@@ -404,10 +418,18 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       recorded_by_name: string | null;
       voided_at: Date | null;
       void_reason: string | null;
+      counterpart_id: string | null;
+      counterpart_course: string | null;
+      counterpart_start: Date | null;
     }>(
       `SELECT pm.id, pm.amount, pm.method, pm.received_at, pm.subject, pm.reference,
-              u.name AS recorded_by_name, pm.voided_at, pm.void_reason
-         FROM payments pm LEFT JOIN staff_users u ON u.id = pm.recorded_by
+              u.name AS recorded_by_name, pm.voided_at, pm.void_reason,
+              cb.id AS counterpart_id, ct.name AS counterpart_course,
+              (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = cb.id) AS counterpart_start
+         FROM payments pm
+         LEFT JOIN staff_users u ON u.id = pm.recorded_by
+         LEFT JOIN bookings cb ON cb.id = pm.counterpart_booking_id
+         LEFT JOIN course_types ct ON ct.id = cb.course_type_id
         WHERE pm.booking_id = $1 ORDER BY pm.received_at, pm.created_at`,
       [id]
     ),
@@ -460,6 +482,9 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       recordedByName: p.recorded_by_name,
       voidedAt: p.voided_at,
       voidReason: p.void_reason,
+      counterpart: p.counterpart_id
+        ? { id: p.counterpart_id, courseTypeName: p.counterpart_course, startDate: p.counterpart_start }
+        : null,
     })),
     balance: item.charged - item.paid,
   };
@@ -749,24 +774,76 @@ export async function recordPayment(
   });
 }
 
-/** Money is never deleted: a wrong payment is voided, with a reason. */
+/**
+ * Money is never deleted: a wrong payment is voided, with a reason. A carry-over is voided on both
+ * bookings at once, so the credit is back where it was and never counted twice or lost.
+ */
 export async function voidPayment(
   bookingId: string,
   paymentId: string,
   reason: string,
   actor: StaffUser
 ): Promise<void> {
-  await query(
-    `UPDATE payments SET voided_at = now(), voided_by = $3, void_reason = $4 WHERE id = $1 AND booking_id = $2 AND voided_at IS NULL`,
+  const voided = await query<{ id: string; booking_id: string }>(
+    `UPDATE payments SET voided_at = now(), voided_by = $3, void_reason = $4
+      WHERE voided_at IS NULL
+        AND ((id = $1 AND booking_id = $2)
+          OR transfer_id = (SELECT transfer_id FROM payments WHERE id = $1 AND booking_id = $2))
+      RETURNING id, booking_id`,
     [paymentId, bookingId, actor.id, reason]
   );
-  await logActivity({
-    actor,
-    entity: 'booking',
-    entityId: bookingId,
-    action: 'payment_voided',
-    detail: { payment: paymentId, reason },
+  for (const row of voided)
+    await logActivity({
+      actor,
+      entity: 'booking',
+      entityId: row.booking_id,
+      action: 'payment_voided',
+      detail: { payment: row.id, reason },
+    });
+}
+
+/**
+ * Carries a credit over (docs/schoolman/money.md): minus on this booking, plus on another booking
+ * of the same learner, written together under one `transfer_id`. The amount is at most the credit
+ * this booking holds; the target is not cancelled. Both bookings are locked first, so two
+ * colleagues cannot spend one credit twice.
+ */
+export async function carryOverCredit(
+  sourceId: string,
+  targetId: string,
+  amount: number,
+  actor: StaffUser
+): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
+  const refuse = (de: string, en: string) => ({ ok: false as const, reason: { de, en } });
+  if (!(amount > 0)) return refuse('Ein Betrag über null ist nötig.', 'An amount above zero is required.');
+  if (sourceId === targetId) return refuse('Wähle eine andere Buchung.', 'Choose another booking.');
+
+  const outcome = await withTransaction(async (client) => {
+    await client.query(`SELECT id FROM bookings WHERE id = ANY($1::uuid[]) ORDER BY id FOR UPDATE`, [[sourceId, targetId]]);
+    const { rows } = await client.query<{ id: string; person: string; status: BookingStatus; credit: string }>(
+      `SELECT b.id, canonical_person_id(b.person_id) AS person, b.status::text AS status, ${PAID} - ${CHARGED} AS credit
+         FROM bookings b WHERE b.id = ANY($1::uuid[]) AND b.deleted_at IS NULL`,
+      [[sourceId, targetId]]
+    );
+    const source = rows.find((r) => r.id === sourceId);
+    const target = rows.find((r) => r.id === targetId);
+    if (!source || !target || source.person !== target.person || target.status === 'cancelled')
+      return refuse('Das Guthaben geht nur auf eine andere, nicht stornierte Buchung derselben Person.', 'A credit goes only to another booking of the same person that is not cancelled.');
+    if (amount > Number(source.credit) + 0.005)
+      return refuse('Der Betrag ist höher als das Guthaben dieser Buchung.', 'The amount is more than this booking’s credit.');
+    await client.query(
+      `INSERT INTO payments (booking_id, amount, method, subject, recorded_by, transfer_id, counterpart_booking_id)
+       SELECT v.booking_id, v.amount, 'carryover', 'Credit carried over', $4, t.id, v.counterpart
+         FROM (SELECT gen_random_uuid() AS id) t,
+              (VALUES ($1::uuid, -($3::numeric), $2::uuid), ($2::uuid, $3::numeric, $1::uuid)) AS v (booking_id, amount, counterpart)`,
+      [sourceId, targetId, amount, actor.id]
+    );
+    return { ok: true as const };
   });
+  if (!outcome.ok) return outcome;
+  await logActivity({ actor, entity: 'booking', entityId: sourceId, action: 'credit_carried_over', detail: { amount, to: targetId } });
+  await logActivity({ actor, entity: 'booking', entityId: targetId, action: 'credit_received', detail: { amount, from: sourceId } });
+  return { ok: true };
 }
 
 /** Yellow: a colleague puts the booking under observation, with the reason; the change is a line in its history. */

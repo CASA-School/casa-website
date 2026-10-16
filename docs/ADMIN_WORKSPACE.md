@@ -899,6 +899,20 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     the views *Unklar* and *Unter Beobachtung*. The booking's head shows the
     colour as a pill; a lifecycle badge only for Reserviert and Abgeschlossen.
     A cancelled booking's leftover is not shown as owed.
+
+    **Carry-over (2026-10-16, migration 0030).** A booking that holds a credit —
+    paid over, or what is left of a cancelled one — says „… Guthaben" in its
+    head pill and offers „Guthaben übertragen" (the payments card's primary
+    button then): the credit goes to another booking of the same learner, linked
+    records included, that is not cancelled. `carryOverCredit` writes two
+    payment lines in one transaction — minus here, plus there, method
+    `carryover`, one `transfer_id`, each naming the other booking as
+    `counterpart_booking_id` — after locking both bookings, so a credit cannot
+    be spent twice; it refuses more than the credit. Each line links to the
+    other booking, and voiding either voids both (`docs/schoolman/money.md`).
+    A payment recorded by
+    hand with the method „Übertragen" remains for a credit that sits in
+    FileMaker.
 21. **Teilnehmende, the register (2026-10-15).** The views answer what staff
     bring to a register — Alle, Im Kurs (a booking running today), Offene
     Vorgänge, Zu zahlen — with the counts line above them, and a row says,

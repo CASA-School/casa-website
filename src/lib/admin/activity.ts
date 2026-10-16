@@ -244,6 +244,13 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Zahlung erfasst', 'recorded a payment');
     case 'payment_voided':
       return t('hat eine Zahlung storniert', 'voided a payment');
+    case 'credit_carried_over':
+    case 'credit_received': {
+      const amount = typeof entry.detail?.amount === 'number' ? `${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(entry.detail.amount)} ` : '';
+      return entry.action === 'credit_carried_over'
+        ? t(`hat ${amount}Guthaben auf eine andere Buchung übertragen`, `carried ${amount}credit over to another booking`)
+        : t(`hat ${amount}Guthaben von einer anderen Buchung übertragen`, `carried ${amount}credit over from another booking`);
+    }
     case 'booking_cancelled':
       return t('hat eine Buchung storniert', 'cancelled a booking');
     case 'booking_observed':

@@ -10,7 +10,7 @@ import {
   removePeriodAction,
   voidPaymentAction,
 } from '../actions';
-import { ChargeForm, EditBookingForm, ExtendBookingForm, ObservationForm, PaymentForm } from '../booking-forms';
+import { CarryOverForm, ChargeForm, EditBookingForm, ExtendBookingForm, ObservationForm, PaymentForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
@@ -24,6 +24,7 @@ import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingLight,
+  carryOverTargets,
   CHARGE_KIND_LABELS,
   getBooking,
   OBSERVATION_REASON_LABELS,
@@ -111,12 +112,18 @@ export default async function BookingPage({
   const light = bookingLight(booking);
   const reasonLabel = booking.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[booking.observationReason]) : null;
 
-  const [notes, activity, cohorts, courseTypes] = await Promise.all([
+  // A credit — paid over, or what is left of a cancelled booking — can be carried over to another
+  // booking of the same learner (docs/schoolman/money.md).
+  const credit = booking.balance < -0.005 ? -booking.balance : 0;
+
+  const [notes, activity, cohorts, courseTypes, targets] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit ? listCohortOptions() : Promise.resolve([]),
     canEdit ? listCourseTypes() : Promise.resolve([]),
+    canEdit && credit > 0 ? carryOverTargets(booking.id) : Promise.resolve([]),
   ]);
+  const carriesOver = targets.length > 0;
 
 
   const weeks =
@@ -222,7 +229,15 @@ export default async function BookingPage({
             <BookingLightPill
               light={light}
               label={pick(lang, BOOKING_LIGHT_LABELS[light])}
-              detail={light === 'watch' ? reasonLabel : light === 'unclear' && booking.balance > 0.005 ? t(`${money(booking.balance, booking.currency)} offen`, `${money(booking.balance, booking.currency)} open`) : undefined}
+              detail={
+                light === 'watch'
+                  ? reasonLabel
+                  : light === 'unclear' && booking.balance > 0.005
+                    ? t(`${money(booking.balance, booking.currency)} offen`, `${money(booking.balance, booking.currency)} open`)
+                    : credit > 0
+                      ? t(`${money(credit, booking.currency)} Guthaben`, `${money(credit, booking.currency)} credit`)
+                      : undefined
+              }
             />
             {/* Confirmed is the usual state and cancelled is the red; only reserved and completed add something. */}
             {booking.status === 'reserved' || booking.status === 'completed' ? (
@@ -451,15 +466,29 @@ export default async function BookingPage({
             icon={Icon.money}
             tint="green"
             actions={
-              canEdit && open ? (
-                <FormDialog
-                  trigger={t('Zahlung erfassen', 'Record payment')}
-                  title={t('Zahlung erfassen', 'Record a payment')}
-                  size="sm"
-                  triggerVariant="primary"
-                >
-                  <PaymentForm bookingId={booking.id} balance={booking.balance} />
-                </FormDialog>
+              canEdit && (open || carriesOver) ? (
+                <>
+                  {carriesOver ? (
+                    <FormDialog
+                      trigger={t('Guthaben übertragen', 'Carry credit over')}
+                      title={t(`${money(credit, booking.currency)} Guthaben übertragen`, `Carry ${money(credit, booking.currency)} credit over`)}
+                      size="sm"
+                      triggerVariant="primary"
+                    >
+                      <CarryOverForm bookingId={booking.id} credit={credit} targets={targets} />
+                    </FormDialog>
+                  ) : null}
+                  {open ? (
+                    <FormDialog
+                      trigger={t('Zahlung erfassen', 'Record payment')}
+                      title={t('Zahlung erfassen', 'Record a payment')}
+                      size="sm"
+                      triggerVariant={carriesOver ? 'secondary' : 'primary'}
+                    >
+                      <PaymentForm bookingId={booking.id} balance={booking.balance} />
+                    </FormDialog>
+                  ) : null}
+                </>
               ) : undefined
             }
             footer={
@@ -485,7 +514,7 @@ export default async function BookingPage({
                       className="py-2.5"
                       withAction={canFull && booking.payments.some((x) => !x.voidedAt)}
                       amount={
-                        <span className={cn('font-semibold', p.voidedAt ? 'line-through' : '')}>
+                        <span className={cn('font-semibold', p.voidedAt ? 'line-through' : '', p.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
                           {money(p.amount, booking.currency)}
                         </span>
                       }
@@ -497,10 +526,17 @@ export default async function BookingPage({
                             <input type="hidden" name="reason" value="Voided by staff" />
                             <ConfirmSubmit
                               title={t(`${money(p.amount, booking.currency)} stornieren?`, `Void ${money(p.amount, booking.currency)}?`)}
-                              description={t(
-                                'Die Zahlung bleibt als storniert auf dem Datensatz und zählt nicht mehr zum Saldo.',
-                                'The payment stays on the record, marked void, and no longer counts towards the balance.'
-                              )}
+                              description={
+                                p.counterpart
+                                  ? t(
+                                      'Die Übertragung wird auf beiden Buchungen storniert: das Guthaben ist wieder dort, wo es war.',
+                                      'The carry-over is voided on both bookings: the credit is back where it was.'
+                                    )
+                                  : t(
+                                      'Die Zahlung bleibt als storniert auf dem Datensatz und zählt nicht mehr zum Saldo.',
+                                      'The payment stays on the record, marked void, and no longer counts towards the balance.'
+                                    )
+                              }
                               confirmLabel={t('Stornieren', 'Void')}
                               variant="ghost"
                             >
@@ -511,11 +547,31 @@ export default async function BookingPage({
                       }
                     >
                       <span className="flex items-center gap-2 text-sm font-semibold">
-                        {p.subject}
+                        {storedWords(p.subject, lang)}
                         {p.voidedAt ? <Badge tone="quiet">{t('Storniert', 'Voided')}</Badge> : null}
                       </span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
-                        <DateText value={p.receivedAt} /> · {pick(lang, PAYMENT_METHOD_LABELS[p.method])}
+                        <DateText value={p.receivedAt} /> ·{' '}
+                        {p.counterpart ? (
+                          // A carry-over names the booking on its other side.
+                          <>
+                            {p.amount < 0 ? t('an ', 'to ') : t('von ', 'from ')}
+                            <Link
+                              href={`/admin/bookings/${p.counterpart.id}`}
+                              className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                            >
+                              {p.counterpart.courseTypeName ?? t('Buchung', 'Booking')}
+                              {p.counterpart.startDate ? (
+                                <>
+                                  {t(' ab ', ' from ')}
+                                  <DateText value={p.counterpart.startDate} compact />
+                                </>
+                              ) : null}
+                            </Link>
+                          </>
+                        ) : (
+                          pick(lang, PAYMENT_METHOD_LABELS[p.method])
+                        )}
                         {p.reference ? ` · ${p.reference}` : ''}
                         {p.recordedByName ? ` · ${p.recordedByName}` : ''}
                         {p.voidReason ? ` · ${storedWords(p.voidReason, lang)}` : ''}

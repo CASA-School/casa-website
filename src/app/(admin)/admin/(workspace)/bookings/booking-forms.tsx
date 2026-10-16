@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { dayRange, euros } from '@/components/admin/list';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import {
   BOOKING_STATUS_LABELS,
@@ -10,6 +11,7 @@ import {
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
   type BookingDetail,
+  type BookingListItem,
   type CohortOption,
 } from '@/lib/admin/bookings';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
@@ -20,6 +22,7 @@ import { pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import {
   addChargeAction,
+  carryOverAction,
   extendBookingAction,
   observeBookingAction,
   recordPaymentAction,
@@ -280,6 +283,54 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
       </More>
       <div className="flex justify-end pt-1">
         <Button type="submit">{t('Zahlung erfassen', 'Record payment')}</Button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * Carry-over: the credit this booking holds goes to another booking of the same learner. Each
+ * choice says what is still open there, and the amount starts at the whole credit.
+ */
+export async function CarryOverForm({
+  bookingId,
+  credit,
+  targets,
+}: {
+  bookingId: string;
+  credit: number;
+  targets: BookingListItem[];
+}) {
+  const { t, lang } = await getI18n();
+  const label = (b: BookingListItem) => {
+    const from = toDateInputValue(b.startDate);
+    const to = toDateInputValue(b.endDate);
+    const open = b.charged - b.paid;
+    return [
+      b.courseTypeName ?? t('Buchung', 'Booking'),
+      from && to ? dayRange(from, to, lang) : null,
+      open > 0.005 ? t(`${euros(open)} offen`, `${euros(open)} open`) : null,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  };
+  return (
+    <form action={carryOverAction} className="space-y-3">
+      <input type="hidden" name="bookingId" value={bookingId} />
+      <Field label={t('Auf die Buchung', 'To the booking')} htmlFor="carry-target">
+        <Select id="carry-target" name="targetId" required>
+          {targets.map((b) => (
+            <option key={b.id} value={b.id}>
+              {label(b)}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label={t('Betrag', 'Amount')} htmlFor="carry-amount">
+        <Input id="carry-amount" name="amount" inputMode="decimal" required className="text-right" defaultValue={credit.toFixed(2)} />
+      </Field>
+      <div className="flex justify-end pt-1">
+        <Button type="submit">{t('Guthaben übertragen', 'Carry the credit over')}</Button>
       </div>
     </form>
   );

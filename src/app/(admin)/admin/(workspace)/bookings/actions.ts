@@ -7,6 +7,7 @@ import {
   addCharge,
   BOOKING_STATUSES,
   cancelBooking,
+  carryOverCredit,
   createBooking,
   deleteBooking,
   endObservation,
@@ -30,8 +31,8 @@ import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
- * Bookings module mutations. Creating, editing, extending, adding cost lines
- * and recording payments need `edit`; cancelling, voiding a payment, removing
+ * Bookings module mutations. Creating, editing, extending, adding cost lines,
+ * recording payments and carrying a credit over need `edit`; cancelling, voiding a payment, removing
  * a period or a cost line and deleting need `full` and the confirmation field.
  */
 
@@ -218,6 +219,20 @@ export async function voidPaymentAction(formData: FormData): Promise<void> {
     actor
   );
   revalidatePath('/admin/bookings', 'layout');
+  redirect(back);
+}
+
+/** A credit moved to another booking of the same learner; the library checks the person, the target and the amount. */
+export async function carryOverAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const back = `/admin/bookings/${bookingId}`;
+  const { t, lang } = await getI18n();
+  const amount = money(formData, 'amount');
+  if (amount === null || amount <= 0) fail(back, t('Ein Betrag über null ist nötig.', 'An amount above zero is required.'));
+  const result = await carryOverCredit(bookingId, id(formData, 'targetId'), amount, actor);
+  revalidatePath('/admin/bookings', 'layout');
+  if (!result.ok) fail(back, pick(lang, result.reason));
   redirect(back);
 }
 

@@ -212,6 +212,8 @@ export async function OwnerControl({
 const ACTION_ICON: Record<string, ReactNode> = {
   payment_recorded: Icon.money,
   payment_voided: Icon.money,
+  credit_carried_over: Icon.money,
+  credit_received: Icon.money,
   charge_added: Icon.money,
   charge_removed: Icon.money,
   booking_created: Icon.bookings,
