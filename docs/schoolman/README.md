@@ -201,5 +201,6 @@ Still open:
 1. Receipts, confirmations and missing-information letters are about half of all letters — build those
    first (`letters-and-history.md`)?
 2. What finance exports to DATEV — later, with finance (`money.md`).
-3. The plain-text passwords in SchoolMan — Rahman and the team decide what to change (`letters-and-history.md`,
-   `organisations.md`).
+
+Left as they are for now (Rahman, 2026-10-16): the passwords stored in SchoolMan — it is live, and
+nobody else has access to them.

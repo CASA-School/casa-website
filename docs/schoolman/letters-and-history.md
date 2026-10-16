@@ -91,6 +91,8 @@ line of time per record, notes beside changes), `day_tasks`. The workspace sends
 
 ## Open questions for the team
 
-1. Are the stored mail passwords still valid, and who changes them? (Rahman owns this.)
-2. Receipts, confirmations (first, individual, exam, agency) and the missing-information letter are
+Decided (Rahman, 2026-10-16): the stored passwords stay as they are for now — SchoolMan is live, and
+nobody else has access to them.
+
+1. Receipts, confirmations (first, individual, exam, agency) and the missing-information letter are
    about half of all letters (16,220 of 33,218) — the ones to build first?
