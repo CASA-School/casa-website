@@ -154,7 +154,7 @@ registration is contact type 1 with source 1 — both values pre-date this
 project.
 
 **Status is `DecisionReference`** *(live)*: 1 = *ja*, 2 = *nein*, 3 = *offer*,
-4 = *u.B.* (*unter Beobachtung*: something is open — visa and payment, level, a missing item), 5 = *grau*, 6 = *Undefined*. New Contact,
+4 = *u.B.* (*unter Beobachtung*, yellow: the learner may not have the level, and so on), 5 = *grau*, 6 = *Undefined*. New Contact,
 PreBooking and WaitingRoom rows auto-enter **4**; conversion sets **1**. Current
 distribution across all 5,888 pre-bookings: 4 → 4,755 · 2 → 589 · 1 → 540 ·
 5 → 4. Four in five pre-bookings still sit at the default — FileMaker's own

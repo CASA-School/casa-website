@@ -172,15 +172,19 @@ real; a gender label copied from a vocabulary is a copy. Each is judged by what 
 ## Open questions for the team
 
 Answered (Rahman, 2026-10-15):
-- the booking status, and who resolves *u.B.* — whoever works on the learner (`bookings.md`);
+- the booking status — *ja* green (all good), *u.B.* yellow (under observation), *???* grey (not paid;
+  „unklar" in the workspace), *nein* red (cancelled, no visa, not coming) — changed by whoever works on
+  the learner (`bookings.md`);
 - that SchoolMan has no edit mode and everyone can change everything (`screens.md`);
 - payouts, commission, host payments and time sheets — finance, beside DATEV, with an automated
   DATEV link to design later (`money.md`);
 - host families — Natalia (`accommodation.md`);
 - that everything moves in the end (`staff.md`).
 
-Read from the data (2026-10-16): of 3,139 bookings at *???*, 1,703 are for courses that have ended —
-the status was never set — 734 have no course, 627 start later and 75 are running now (`bookings.md`).
+Read from the data (2026-10-16): of 3,139 bookings at *???* (not paid), most that were charged have
+been **paid in full** — 758 of the ended ones, 380 of those running or to come. The status goes stale
+because a colleague has to remember it; in the workspace, *paid* follows from the charges and payments,
+and the learner's standing is a separate call (`bookings.md`).
 
 Attendance and time sheets are recorded in the Klassenbuch (`klassenbuch.md`).
 

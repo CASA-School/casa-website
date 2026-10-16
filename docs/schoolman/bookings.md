@@ -64,35 +64,48 @@ What is **not** a fact but stored as one:
   gender and birth date of the person (100%, 98%) — a copy that goes stale when the person changes.
 - 31 constant fields (`_3`, `_4` … holding a fixed number to draw a relationship).
 
-**The status** (`_ID_EnrolmentDone`), as the team uses it (Rahman, 2026-10-15):
+**The status** (`_ID_EnrolmentDone`) — four values the team uses, each a colour on the screen
+(Rahman, 2026-10-16):
 
-| Value | Meaning | Bookings |
-| --- | --- | ---: |
-| *ja* (green) | Right for the course and paid | 7,279 |
-| *u.B.* — *unter Beobachtung* | Something is open: a visa needed and not paid yet, the level not right, something missing | 6,893 |
-| *nein* | Cancelled or to be deleted — in practice the storno | 5,175 |
-| *???* | What a new booking starts with (LESSONS §4.2) | 3,135 |
-| *storno* | The official cancel value, hardly used | 5 |
+| Value | Colour | Meaning | Bookings |
+| --- | --- | --- | ---: |
+| *ja* | green | Everything is good | 7,279 |
+| *u.B.* — *unter Beobachtung* | yellow | Under observation — the learner may not have the level, and so on | 6,893 |
+| *???* | grey | **Not paid** — and what every new booking starts with | 3,135 |
+| *nein* | red | It did not work out — cancelled, no visa, not coming | 5,175 |
 
-So the status mixes three questions — is the learner placed right, has money arrived, is anything
-missing — into one value, and *nein* does the work of *storno*. Whoever has the learner, or works on
-them, resolves *u.B.* (Rahman, 2026-10-15): nobody owns it, and nothing records who changed it or why. `_ID_StatusBooking` is never filled.
-The learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance, Rookie) is on 100%.
+The rest of the list (*storno*, *Undefined*) is not used. Whoever has the learner, or works on them,
+changes the status (Rahman, 2026-10-15): nobody owns it, and nothing records who changed it or why.
+`_ID_StatusBooking` is never filled. The learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance,
+Rookie) is on 100%.
 
-**Bookings still at *???*** *(live, 2026-10-16)* — 3,139, read against each booking's course dates:
+**The bookings at *???*, read against the money** *(live, 2026-10-16)* — 3,139, each compared with its
+own charges (`CostDetail`) and payments (`PaymentIn`):
 
-| Where the booking stands | At *???* |
-| --- | ---: |
-| The course has ended | **1,703** — never given a status |
-| No course dates at all | 734 — never placed on a course |
-| The course starts later | 627 — new, not looked at yet |
-| The course is running now | 75 — learners in class without a status |
+| Where the booking stands | At *???* | Paid in full | Partly paid | Nothing paid | Charges net to zero |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| The course has ended | 1,703 | **758** | 74 | 37 | 834 |
+| No course dates | 734 | 487 | 2 | 10 | 235 |
+| Running now or starting later | 702 | **380** | 113 | 193 | 16 |
 
-About one booking in ten of every past year (2019–2025) never left *???*; 78% of the bookings for
-2027 are still at it, as new ones should be. All 36 closed-group bookings of 2026 are at *???*. So
-*???* means "new" for what is coming and "nobody went back" for everything else — the status is not a
-record of what happened. The bridge reads an ended booking at *???* as *unknown*, never as *open*.
-Of the 2026 bookings, more than half (1,959 of 3,699) are *u.B.*.
+So *???* is meant to say "not paid", but most bookings that still carry it **have been paid in full** —
+the money came in and nobody turned the status green. Of the ended ones that were charged, 87% are
+paid. ("Charges net to zero" is a booking never charged, or one cancelled with reversing lines.) About
+one booking in ten of every past year (2019–2025) never left *???*; all 36 closed-group bookings of
+2026 are at it. For comparison, *ja* bookings that have ended are 92% paid in full.
+
+**What it means for the workspace** *(a proposal)*. The one status answers two questions — *has the
+money come in* and *is the learner all right* — and the first goes stale because a colleague has to
+remember to change it. The workspace's booking already has a lifecycle (`reserved`, `confirmed`,
+`completed`, `cancelled`, migration 0010) and already computes what is still owed. What it would add:
+
+- **Paid follows from the money**, never typed: paid in full, or not yet — shown grey as **unklar**
+  (Rahman's word for *???*) until the charges are covered.
+- **The learner's standing** is the colleague's call, in the team's colours: green *in Ordnung*,
+  yellow *unter Beobachtung* with its reason (level, visa, …), red *nein* (cancelled, no visa, not
+  coming — which is the lifecycle's `cancelled`). Each change goes into the history with who and why.
+
+The bridge reads a FileMaker booking's payment state from its charges and payments, never from *???*.
 
 ## In the workspace today
 
