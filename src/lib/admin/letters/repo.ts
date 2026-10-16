@@ -19,7 +19,7 @@ import { subjectLine, type Letter, type LetterKind, type LetterLanguage } from '
 export type IssueLetter = {
   letter: Letter;
   /** The record it is about, the one its kind names: an offer, a booking, a waiting-list entry. */
-  about: { offerId: string } | { bookingId: string } | { waitlistEntryId: string };
+  about: { offerId: string } | { bookingId: string } | { waitlistEntryId: string } | { registrationId: string } | { personId: string };
   version: number;
   organisationId: string | null;
   personId: string | null;
@@ -32,14 +32,15 @@ export type IssueLetter = {
 export async function issueLetter(client: PoolClient, input: IssueLetter, actor: StaffUser): Promise<string> {
   const about = input.about;
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO letters (kind, offer_id, booking_id, waitlist_entry_id, version, language, organisation_id, person_id,
+    `INSERT INTO letters (kind, offer_id, booking_id, waitlist_entry_id, registration_id, version, language, organisation_id, person_id,
                           recipient_name, email, subject, document, source, sent_by)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
     [
       input.letter.kind,
       'offerId' in about ? about.offerId : null,
       'bookingId' in about ? about.bookingId : null,
       'waitlistEntryId' in about ? about.waitlistEntryId : null,
+      'registrationId' in about ? about.registrationId : null,
       input.version,
       input.letter.language,
       input.organisationId,
@@ -61,9 +62,16 @@ export type LetterListItem = { id: string; version: number; subject: string; sen
 export async function nextLetterVersion(
   client: PoolClient,
   kind: LetterKind,
-  about: { bookingId: string } | { waitlistEntryId: string }
+  about: { bookingId: string } | { waitlistEntryId: string } | { registrationId: string } | { personId: string }
 ): Promise<number> {
-  const [column, id] = 'bookingId' in about ? ['booking_id', about.bookingId] : ['waitlist_entry_id', about.waitlistEntryId];
+  const [column, id] =
+    'bookingId' in about
+      ? ['booking_id', about.bookingId]
+      : 'waitlistEntryId' in about
+        ? ['waitlist_entry_id', about.waitlistEntryId]
+        : 'registrationId' in about
+          ? ['registration_id', about.registrationId]
+          : ['person_id', about.personId];
   const { rows } = await client.query<{ n: number }>(`SELECT coalesce(max(version), 0)::int AS n FROM letters WHERE kind = $1 AND ${column} = $2`, [kind, id]);
   return rows[0].n + 1;
 }
@@ -78,10 +86,12 @@ export type SentLetter = {
   bookingId: string | null;
   waitlistEntryId: string | null;
   offerId: string | null;
+  registrationId: string | null;
   personId: string | null;
 };
 
-const SENT = `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id, l.person_id
+const SENT = `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id,
+                     l.registration_id, l.person_id
                 FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by`;
 
 type SentRow = {
@@ -94,6 +104,7 @@ type SentRow = {
   booking_id: string | null;
   waitlist_entry_id: string | null;
   offer_id: string | null;
+  registration_id: string | null;
   person_id: string | null;
 };
 
@@ -107,8 +118,14 @@ const toSent = (r: SentRow): SentLetter => ({
   bookingId: r.booking_id,
   waitlistEntryId: r.waitlist_entry_id,
   offerId: r.offer_id,
+  registrationId: r.registration_id,
   personId: r.person_id,
 });
+
+/** A website registration's letters, the latest first. */
+export async function lettersForRegistration(registrationId: string): Promise<SentLetter[]> {
+  return (await query<SentRow>(`${SENT} WHERE l.registration_id = $1 ORDER BY l.sent_at DESC`, [registrationId])).map(toSent);
+}
 
 /** A booking's letters, the latest first. */
 export async function lettersForBooking(bookingId: string): Promise<SentLetter[]> {
@@ -132,7 +149,7 @@ export async function lettersForPerson(canonicalPersonId: string): Promise<SentL
 export async function getSentLetter(id: string): Promise<(SentLetter & { letter: Letter; email: string | null; recipientName: string }) | null> {
   const row = await queryFirst<SentRow & { document: unknown; email: string | null; recipient_name: string }>(
     `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id,
-            l.person_id, l.document, l.email, l.recipient_name
+            l.registration_id, l.person_id, l.document, l.email, l.recipient_name
        FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by WHERE l.id = $1`,
     [id]
   );

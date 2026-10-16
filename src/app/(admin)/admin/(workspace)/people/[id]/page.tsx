@@ -179,8 +179,10 @@ export default async function PersonPage({
     seesBookings ? personEntries(person.id) : Promise.resolve([]),
     seesBookings || seesOffers ? lettersForPerson(person.id) : Promise.resolve([]),
   ]);
-  // The letters this colleague may open: an offer's with `offers`, the others with `bookings`.
-  const letters = allLetters.filter((l) => (l.kind === 'offer' ? seesOffers : seesBookings));
+  // The letters this colleague may open: an offer's with `offers`, a registration's with
+  // `registrations`, the others with `bookings`.
+  const seesRegistrations = canAccess(user, 'registrations');
+  const letters = allLetters.filter((l) => (l.kind === 'offer' ? seesOffers : l.kind.startsWith('registration_') ? seesRegistrations : seesBookings));
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
   const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
@@ -650,7 +652,19 @@ export default async function PersonPage({
       {/* Every letter sent to them — offers, confirmations, receipts, waiting-list letters — as it went out. */}
       {seesBookings || seesOffers ? (
         <RecordTabPanel id="letters">
-          <Card bleed>
+          <Card
+            bleed
+            title={t('Briefe', 'Letters')}
+            icon={Icon.mail}
+            tint="blue"
+            actions={
+              canBook && bookings.length ? (
+                <Link href={`/admin/people/${person.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                  {t('Bestätigung mehrerer Buchungen', 'Confirm several bookings')}
+                </Link>
+              ) : undefined
+            }
+          >
             {letters.length ? (
               <ul className="py-1.5">
                 {letters.map((l) => (

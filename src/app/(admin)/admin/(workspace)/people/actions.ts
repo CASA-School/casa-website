@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { todayInputValue } from '@/lib/dates';
+import { issueLearnerLetter } from '@/lib/admin/letters/booking-issue';
+import { readChoices } from '@/lib/admin/letters/choices';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -207,4 +209,18 @@ export async function deletePersonAction(formData: FormData): Promise<void> {
     redirect(`/admin/people/${id}?error=${encodeURIComponent(pick(lang, result.reason))}`);
   }
   redirect('/admin/people');
+}
+
+/** One letter confirming several of a learner's bookings, built on the server and kept as sent (docs/LETTERS.md). */
+export async function issueLearnerLetterAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const id = personIdFrom(formData);
+  const back = `/admin/people/${id}/letter`;
+  const choices = readChoices(formData);
+  const { t, lang } = await getI18n();
+  if (!choices) redirect(`${back}?error=${encodeURIComponent(t('Der Brief konnte nicht gelesen werden.', 'The letter could not be read.'))}`);
+  const result = await issueLearnerLetter(id, choices, actor);
+  if (!result.ok) redirect(`${back}?error=${encodeURIComponent(pick(lang, result.reason))}`);
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/letters/${result.letterId}?sent=1`);
 }

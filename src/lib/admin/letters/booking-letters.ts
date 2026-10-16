@@ -25,7 +25,19 @@
 import { teachingWeeks } from '../offers/course';
 
 import { formatDateRange, formatLetterDate, formatMoney, letterhead, recipientLines, salutation, type Salutation } from './format';
-import { LETTER_SCHEMA, type BookingLetterKind, type Letter, type LetterLanguage, type LetterPart, type WaitlistLetterKind } from './types';
+import {
+  LETTER_SCHEMA,
+  type BookingLetterKind,
+  type Letter,
+  type LetterKind,
+  type LetterLanguage,
+  type LetterPart,
+  type RegistrationLetterKind,
+  type WaitlistLetterKind,
+} from './types';
+
+/** Every kind the composer writes: all but the offer, which has its own editor. */
+export type ComposedKind = Exclude<LetterKind, 'offer'>;
 
 // ------------------------------------------------------------------ context
 
@@ -98,7 +110,7 @@ export type WaitlistLetterContext = {
 };
 
 /** Each kind's name, for lists and buttons. */
-export const LETTER_KIND_LABELS: Record<BookingLetterKind | WaitlistLetterKind | 'offer', Record<LetterLanguage, string>> = {
+export const LETTER_KIND_LABELS: Record<LetterKind, Record<LetterLanguage, string>> = {
   offer: { de: 'Angebot', en: 'Offer' },
   booking_confirmation: { de: 'Buchungsbestätigung', en: 'Booking confirmation' },
   payment_receipt: { de: 'Empfangsbestätigung', en: 'Receipt' },
@@ -114,6 +126,49 @@ export const LETTER_KIND_LABELS: Record<BookingLetterKind | WaitlistLetterKind |
   waitlist_confirmation: { de: 'Bestätigung Warteliste', en: 'Waiting-list confirmation' },
   waitlist_place_free: { de: 'Platz frei', en: 'Place free' },
   waitlist_no_place: { de: 'Kein Platz', en: 'No place' },
+  learner_confirmation: { de: 'Bestätigung mehrerer Buchungen', en: 'Confirmation of several bookings' },
+  registration_test_request: { de: 'Bitte um Testergebnis', en: 'Test result request' },
+  registration_deposit_request: { de: 'Bitte um Anzahlung', en: 'Down payment request' },
+};
+
+/** One of a learner's bookings, for the confirmation of several (0035). */
+export type LearnerBooking = {
+  id: string;
+  number: string;
+  status: BookingLetterContext['status'];
+  course: LetterCourse | null;
+  accommodation: BookingLetterContext['accommodation'];
+  charges: { description: string; amount: number }[];
+  charged: number;
+  paid: number;
+  visaRequired: boolean;
+};
+
+export type LearnerLetterContext = {
+  personId: string;
+  language: LetterLanguage;
+  person: LetterPerson;
+  bookings: LearnerBooking[];
+  staff: { id: string; name: string }[];
+};
+
+/** A website registration, before there is a booking (0035): what the learner asked for. */
+export type RegistrationLetterContext = {
+  registrationId: string;
+  /** The person the registration is linked to, when it is: the letter is also theirs. */
+  personId: string | null;
+  language: LetterLanguage;
+  person: LetterPerson;
+  /** The course start they chose, when there is one; else the course as the form named it. */
+  course: LetterCourse | null;
+  courseLabel: string;
+  declaredLevel: string | null;
+  visaRequired: boolean;
+  /** The course type's down payment; the terms' 100 € when it has none. */
+  downPayment: number;
+  /** Where the placement tests are on the website, per language. */
+  placementUrl: Record<LetterLanguage, string>;
+  staff: { id: string; name: string }[];
 };
 
 /** What a colleague chooses for one letter. Texts are per slot; null or absent means the standard. */
@@ -126,6 +181,8 @@ export type LetterChoices = {
   paymentIds?: string[];
   /** The missing-details letter's items (`MISSING_ITEMS`). */
   items?: string[];
+  /** The confirmation of several bookings: which. */
+  bookingIds?: string[];
 };
 
 /** What a letter's rules and words know about the letters already sent for the record. */
@@ -178,7 +235,10 @@ export function missingFromRecord(person: LetterPerson): MissingItem[] {
 }
 
 /** The slots a colleague can save as CASA's standard, per kind. The others are built from figures. */
-export const STANDARD_SLOTS: Record<BookingLetterKind | WaitlistLetterKind, readonly string[]> = {
+export const STANDARD_SLOTS: Record<ComposedKind, readonly string[]> = {
+  learner_confirmation: ['intro', 'closing', 'ps'],
+  registration_test_request: ['intro', 'closing'],
+  registration_deposit_request: ['intro', 'reference', 'visa', 'closing'],
   booking_confirmation: ['intro', 'closing', 'ps'],
   payment_receipt: ['intro', 'closing'],
   payment_reminder: ['intro', 'ways', 'closing'],
@@ -195,7 +255,43 @@ export const STANDARD_SLOTS: Record<BookingLetterKind | WaitlistLetterKind, read
   waitlist_no_place: ['intro', 'closing'],
 };
 
-export const LETTER_STANDARD_DEFAULTS: Record<BookingLetterKind | WaitlistLetterKind, Record<LetterLanguage, Record<string, string>>> = {
+export const LETTER_STANDARD_DEFAULTS: Record<ComposedKind, Record<LetterLanguage, Record<string, string>>> = {
+  learner_confirmation: {
+    de: {
+      intro: 'vielen Dank für deine Anmeldung bei CASA. Hiermit bestätigen wir dir folgende Buchungen:',
+      closing: 'Wir freuen uns, dich bald bei uns begrüßen zu können. Wenn du Fragen hast, schreib uns einfach oder ruf an.',
+      ps: 'PS: Diese Bestätigung gilt vorbehaltlich deiner Zahlung und ist keine Bestätigung für einen Visumantrag.',
+    },
+    en: {
+      intro: 'Thank you for registering with CASA. We are pleased to confirm the following bookings:',
+      closing: 'We look forward to welcoming you soon. If you have any questions, just write to us or give us a call.',
+      ps: 'PS: This confirmation depends on your payment and cannot be used to apply for a visa.',
+    },
+  },
+  registration_test_request: {
+    de: {
+      intro: 'vielen Dank für deine Anmeldung über unsere Website. Wir haben sie erhalten:',
+      closing: 'Bitte schick uns dein Ergebnis in den nächsten Tagen. Sobald wir sicher sind, dass du im richtigen Niveau bist, bearbeiten wir deine Anmeldung weiter.',
+    },
+    en: {
+      intro: 'Thank you for registering on our website. We have received your registration:',
+      closing: 'Please send us your result in the next few days. As soon as we are sure that you are in the right level, we will continue with your registration.',
+    },
+  },
+  registration_deposit_request: {
+    de: {
+      intro: 'vielen Dank für deine Anmeldung über unsere Website. Hiermit bestätigen wir dir den Eingang:',
+      reference: 'Bitte gib bei der Überweisung deinen vollen Namen und dein Geburtsdatum als Verwendungszweck an, damit wir die Zahlung richtig zuordnen können. Unsere Bankverbindung steht unten auf diesem Brief.',
+      visa: 'Wenn du ein Visum für einen Sprachkurs oder ein Studium beantragen musst: Wir können nur Kurse bestätigen, die vollständig im Voraus bezahlt sind. Sobald du nach Deutschland eingereist bist und der Kurs begonnen hat, kann ein visumgebundener Kurs nicht mehr storniert werden.',
+      closing: 'Wenn du Fragen hast, schreib uns einfach.',
+    },
+    en: {
+      intro: 'Thank you for registering on our website. We hereby confirm that we have received your registration:',
+      reference: 'When you transfer the money, please give your full name and your date of birth as the payment reference, so that we can match the payment. Our bank details are at the foot of this letter.',
+      visa: 'If you need to apply for a visa for a language course or for university: we can only confirm courses that have been paid in full in advance. Once you have entered Germany and the course has begun, a course tied to a visa can no longer be cancelled.',
+      closing: 'If you have any questions, just write to us.',
+    },
+  },
   booking_confirmation: {
     de: {
       intro: 'vielen Dank für deine Anmeldung bei CASA. Hiermit bestätigen wir dir folgende Buchung:',
@@ -965,6 +1061,139 @@ export function buildBookingLetter(kind: BookingLetterKind, ctx: BookingLetterCo
     case 'cancellation_confirmation':
       return cancellationLetter(ctx, choices, standard, meta);
   }
+}
+
+// ------------------------------------- several bookings, and a registration (0035)
+
+const MULTI = {
+  de: {
+    lead: 'Bestätigung deiner Buchungen',
+    bookingNo: (n: string) => `Buchung Nr. ${n}`,
+    subtotal: 'Zwischensumme',
+    total: 'Gesamt',
+    pay: (amount: string, by: string) => `Bitte überweise den offenen Betrag von ${amount} bis zum ${by}.`,
+    visa: (amount: string, by: string) =>
+      `Für die verbindliche Reservierung deiner Kursplätze und deinen Visumantrag überweise bitte den Gesamtbetrag von ${amount} bis zum ${by}. Sobald deine Zahlung da ist, schicken wir dir eine eigene Bestätigung für die Botschaft.`,
+    reference: (numbers: string, who: string) => `Verwendungszweck: ${numbers}, ${who}. Unsere Bankverbindung steht unten auf diesem Brief.`,
+    registration: 'Deine Anmeldung',
+    testLead: 'Deine Anmeldung: bitte schick uns dein Testergebnis',
+    depositLead: 'Deine Anmeldung: Anzahlung',
+    level: (l: string) => `angegebenes Niveau ${l}`,
+    test: (url: string) => `Damit wir deine Anmeldung abschließen können, brauchen wir noch das Ergebnis deines Einstufungstests. Die Tests findest du hier: ${url}`,
+    deposit: (amount: string) => `Bitte überweise eine erste Anzahlung von ${amount} für deinen Kurs. Sobald sie bei uns ist, bearbeiten wir deine Anmeldung weiter.`,
+  },
+  en: {
+    lead: 'Confirmation of your bookings',
+    bookingNo: (n: string) => `booking no. ${n}`,
+    subtotal: 'Subtotal',
+    total: 'Total',
+    pay: (amount: string, by: string) => `Please transfer the outstanding ${amount} by ${by}.`,
+    visa: (amount: string, by: string) =>
+      `To reserve your places and for your visa application, please transfer the total of ${amount} by ${by}. As soon as your payment arrives, we will send you a separate confirmation for the embassy.`,
+    reference: (numbers: string, who: string) => `Payment reference: ${numbers}, ${who}. Our bank details are at the foot of this letter.`,
+    registration: 'Your registration',
+    testLead: 'Your registration: please send us your test result',
+    depositLead: 'Your registration: down payment',
+    level: (l: string) => `level given: ${l}`,
+    test: (url: string) => `So that we can complete your registration, we still need the result of your placement test. You can find the tests here: ${url}`,
+    deposit: (amount: string) => `Please transfer a first down payment of ${amount} for your course. As soon as it has arrived, we will continue with your registration.`,
+  },
+} as const;
+
+/** The confirmation of several bookings: only bookings chosen, none cancelled. */
+export function learnerLetterBlock(ctx: LearnerLetterContext, choices: Pick<LetterChoices, 'bookingIds'>): Record<LetterLanguage, string> | null {
+  const chosen = ctx.bookings.filter((b) => choices.bookingIds?.includes(b.id));
+  if (chosen.length === 0) return { de: 'Bitte wähle die Buchungen, die der Brief bestätigt.', en: 'Choose the bookings the letter confirms.' };
+  if (chosen.some((b) => b.status === 'cancelled')) return { de: 'Eine gewählte Buchung ist storniert.', en: 'A chosen booking is cancelled.' };
+  return null;
+}
+
+/**
+ * SchoolMan's `ConfirmationStudentIndividual` (915 in 2026): the bookings a colleague chooses — a
+ * course, an exam, a stay — each with its costs and subtotal, then the total, what came in, what is
+ * open and by when. SchoolMan's left the amount blank in one branch and never printed the payments.
+ */
+export function learnerConfirmationLetter(ctx: LearnerLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MULTI[lang];
+  const w = W[lang];
+  const money = (n: number) => formatMoney(n, lang);
+  // In the order the learner will take them, whatever order the list was in.
+  const chosen = ctx.bookings
+    .filter((b) => choices.bookingIds?.includes(b.id))
+    .sort((a, b) => (a.course?.startDate ?? '').localeCompare(b.course?.startDate ?? ''));
+  const charged = chosen.reduce((sum, b) => sum + b.charged, 0);
+  const paid = chosen.reduce((sum, b) => sum + b.paid, 0);
+  const balance = Math.round((charged - paid) * 100) / 100;
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  for (const b of chosen) {
+    body.push({
+      type: 'heading',
+      text: `${b.course ? courseTitle(b.course, lang) : w.costs} · ${m.bookingNo(b.number)}`,
+      detail: b.course ? courseDetail(b.course, lang) : null,
+    });
+    if (b.accommodation) {
+      body.push({
+        type: 'heading',
+        text: `${w.stay}: ${b.accommodation.name[lang]}`,
+        detail: b.accommodation.to ? formatDateRange(b.accommodation.from, b.accommodation.to, lang) : formatLetterDate(b.accommodation.from, lang),
+      });
+    }
+    body.push({ type: 'table', heading: null, rows: b.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: m.subtotal, amount: money(b.charged) } });
+  }
+  body.push({ type: 'sum', label: m.total, amount: money(charged) });
+  if (paid > 0.005) {
+    body.push({ type: 'sum', label: w.received, amount: money(paid) });
+    body.push({ type: 'sum', label: balance < -0.005 ? w.credit : w.open, amount: money(Math.abs(balance)) });
+  }
+  // A week from today, or the first start when it comes sooner; the whole amount for a visa.
+  const starts = chosen.map((b) => b.course?.startDate).filter((d): d is string => Boolean(d) && d! > meta.today).sort();
+  const week = addDays(meta.today, 7);
+  const by = formatLetterDate(starts[0] && starts[0] < week ? starts[0] : week, lang);
+  const payment = balance > 0.005 ? (chosen.some((b) => b.visaRequired) ? m.visa(money(balance), by) : m.pay(money(balance), by)) : charged > 0 ? w.allPaid : '';
+  body.push(text(choices, 'payment', payment, true));
+  if (balance > 0.005) {
+    body.push({ type: 'text', slot: null, text: m.reference(chosen.map((b) => b.number).join(', '), fullName(ctx.person)), strong: false });
+  }
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  body.push(text(choices, 'ps', standard.ps));
+  return frame('learner_confirmation', ctx.person, ctx.staff, choices, meta.today, { lead: m.lead, title: fullName(ctx.person), tail: meta.version > 1 ? w.version(meta.version) : null }, body);
+}
+
+/**
+ * SchoolMan's `NewLetter.SendTest` and `NewLetterDownPayment`: a registration from the website,
+ * answered before there is a booking — please send the placement-test result, or the down payment.
+ */
+export function registrationLetter(kind: RegistrationLetterKind, ctx: RegistrationLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MULTI[lang];
+  const body: LetterPart[] = [
+    text(choices, 'intro', standard.intro),
+    {
+      type: 'heading',
+      text: ctx.course ? courseTitle({ ...ctx.course, level: ctx.course.level ?? null }, lang) : ctx.courseLabel,
+      detail: [ctx.course ? courseDetail(ctx.course, lang) : null, ctx.declaredLevel ? m.level(ctx.declaredLevel) : null].filter(Boolean).join(' · ') || null,
+    },
+  ];
+  if (kind === 'registration_test_request') {
+    body.push(text(choices, 'test', m.test(ctx.placementUrl[lang]), true));
+  } else {
+    body.push(text(choices, 'deposit', m.deposit(formatMoney(ctx.downPayment, lang)), true));
+    body.push(text(choices, 'reference', standard.reference));
+    if (ctx.visaRequired) body.push(text(choices, 'visa', standard.visa));
+  }
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame(
+    kind,
+    ctx.person,
+    ctx.staff,
+    choices,
+    meta.today,
+    { lead: kind === 'registration_test_request' ? m.testLead : m.depositLead, title: ctx.course ? courseTitle(ctx.course, lang) : ctx.courseLabel, tail: null },
+    body
+  );
 }
 
 // ------------------------------------------------------- the waiting list

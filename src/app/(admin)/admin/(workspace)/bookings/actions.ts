@@ -30,10 +30,10 @@ import {
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
 import { issueBookingLetter } from '@/lib/admin/letters/booking-issue';
-import { BOOKING_LETTER_KEYS, STANDARD_SLOTS } from '@/lib/admin/letters/booking-letters';
+import { BOOKING_LETTER_KEYS, STANDARD_SLOTS, type ComposedKind } from '@/lib/admin/letters/booking-letters';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { saveStandardText } from '@/lib/admin/letters/repo';
-import { BOOKING_LETTER_KINDS, WAITLIST_LETTER_KINDS, type BookingLetterKind, type LetterLanguage } from '@/lib/admin/letters/types';
+import { BOOKING_LETTER_KINDS, REGISTRATION_LETTER_KINDS, WAITLIST_LETTER_KINDS, type BookingLetterKind, type LetterLanguage } from '@/lib/admin/letters/types';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -439,12 +439,15 @@ export async function issueBookingLetterAction(formData: FormData): Promise<void
   redirect(`/admin/letters/${result.letterId}?sent=1`);
 }
 
-/** A booking or waiting-list letter's opening or closing, saved as CASA's standard: `full`, as for offers. */
+/**
+ * A letter's standard text — an opening, a closing — saved as CASA's: `full`, as for offers, on the
+ * module the letter belongs to (a registration's on Registrations, the others on Bookings).
+ */
 export async function saveLetterStandardAction(input: { kind: string; language: LetterLanguage; part: string; body: string }): Promise<{ ok: boolean }> {
-  const actor = await requireModule('bookings', 'full');
-  const kinds = [...BOOKING_LETTER_KINDS, ...WAITLIST_LETTER_KINDS] as readonly string[];
+  const actor = await requireModule(String(input.kind).startsWith('registration_') ? 'registrations' : 'bookings', 'full');
+  const kinds = [...BOOKING_LETTER_KINDS, ...WAITLIST_LETTER_KINDS, 'learner_confirmation', ...REGISTRATION_LETTER_KINDS] as readonly string[];
   if (!kinds.includes(input.kind) || (input.language !== 'de' && input.language !== 'en')) return { ok: false };
-  const kind = input.kind as (typeof BOOKING_LETTER_KINDS)[number] | (typeof WAITLIST_LETTER_KINDS)[number];
+  const kind = input.kind as ComposedKind;
   const body = String(input.body ?? '').trim().slice(0, 2000);
   if (!STANDARD_SLOTS[kind].includes(input.part) || !body) return { ok: false };
   await saveStandardText(kind, input.language, input.part, body, actor);

@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
   amountInWords,
+  learnerConfirmationLetter,
+  learnerLetterBlock,
+  registrationLetter,
+  type LearnerLetterContext,
+  type RegistrationLetterContext,
   bookingConfirmationLetter,
   bookingLetterBlock,
   buildBookingLetter,
@@ -211,5 +216,64 @@ describe('more of a booking’s letters (0034)', () => {
     expect(bookingLetterBlock('cancellation_confirmation', base, meta)?.de).toBe('Die Buchung ist nicht storniert.');
     const letter = buildBookingLetter('cancellation_confirmation', cancelled, de, LETTER_STANDARD_DEFAULTS.cancellation_confirmation.de, meta);
     expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'money', text: expect.stringContaining('Guthaben von 160,00 €') }));
+  });
+});
+
+describe('several bookings, and a registration (0035)', () => {
+  const meta = { today: '2026-10-16', version: 1 };
+  const learner: LearnerLetterContext = {
+    personId: 'p',
+    language: 'de',
+    person,
+    staff: base.staff,
+    bookings: [
+      { id: 'a', number: 'B-2026-0042', status: 'confirmed', course, accommodation: null, charges: [{ description: 'Kurspreis 8 Wochen', amount: 940 }], charged: 940, paid: 200, visaRequired: false },
+      { id: 'b', number: 'B-2026-0043', status: 'confirmed', course: { ...course, name: { de: 'Prüfung', en: 'Exam' }, level: null }, accommodation: null, charges: [{ description: 'telc Deutsch B2', amount: 230 }], charged: 230, paid: 0, visaRequired: false },
+      { id: 'c', number: 'B-2026-0001', status: 'cancelled', course, accommodation: null, charges: [], charged: 0, paid: 0, visaRequired: false },
+    ],
+  };
+
+  it('needs bookings chosen, none cancelled', () => {
+    expect(learnerLetterBlock(learner, { bookingIds: [] })?.de).toContain('Bitte wähle');
+    expect(learnerLetterBlock(learner, { bookingIds: ['a', 'c'] })?.de).toContain('storniert');
+    expect(learnerLetterBlock(learner, { bookingIds: ['a', 'b'] })).toBeNull();
+  });
+
+  it('lists each booking with its subtotal, then the total, what came in and what is open', () => {
+    const letter = learnerConfirmationLetter(learner, { ...de, bookingIds: ['a', 'b'] }, LETTER_STANDARD_DEFAULTS.learner_confirmation.de, meta);
+    expect(letter.body.filter((p) => p.type === 'heading').map((p) => (p.type === 'heading' ? p.text : ''))).toEqual([
+      'Intensivkurs B1.1 · Buchung Nr. B-2026-0042',
+      'Prüfung · Buchung Nr. B-2026-0043',
+    ]);
+    expect(letter.body).toContainEqual({ type: 'sum', label: 'Gesamt', amount: '1.170,00\u00a0€' });
+    expect(letter.body).toContainEqual({ type: 'sum', label: 'Noch offen', amount: '970,00\u00a0€' });
+    expect(letter.body).toContainEqual(expect.objectContaining({ text: expect.stringContaining('Verwendungszweck: B-2026-0042, B-2026-0043, Lucía Fernández') }));
+  });
+
+  const registration: RegistrationLetterContext = {
+    registrationId: 'r',
+    personId: null,
+    language: 'de',
+    person,
+    course,
+    courseLabel: 'Intensivkurs',
+    declaredLevel: 'A2.2',
+    visaRequired: true,
+    downPayment: 100,
+    placementUrl: { de: 'https://casa-bremen.de/anmeldung/einstufungstest', en: 'https://casa-bremen.de/en/placement-test' },
+    staff: base.staff,
+  };
+
+  it('asks for the placement test with the link in the letter’s language', () => {
+    const letter = registrationLetter('registration_test_request', registration, { ...de, language: 'en' }, LETTER_STANDARD_DEFAULTS.registration_test_request.en, meta);
+    expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'test', text: expect.stringContaining('https://casa-bremen.de/en/placement-test') }));
+  });
+
+  it('asks for the down payment, with the visa paragraph only for a visa', () => {
+    const letter = registrationLetter('registration_deposit_request', registration, de, LETTER_STANDARD_DEFAULTS.registration_deposit_request.de, meta);
+    expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'deposit', text: expect.stringContaining('Anzahlung von 100,00\u00a0€') }));
+    expect(letter.body.some((p) => p.type === 'text' && p.slot === 'visa')).toBe(true);
+    const noVisa = registrationLetter('registration_deposit_request', { ...registration, visaRequired: false }, de, LETTER_STANDARD_DEFAULTS.registration_deposit_request.de, meta);
+    expect(noVisa.body.some((p) => p.type === 'text' && p.slot === 'visa')).toBe(false);
   });
 });

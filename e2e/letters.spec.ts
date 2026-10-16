@@ -23,6 +23,7 @@ test.describe('letters', () => {
   let personId = '';
   let bookingId = '';
   let entryId = '';
+  let registrationId = '';
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -58,12 +59,26 @@ test.describe('letters', () => {
         [personId, instanceId]
       )
     ).rows[0].id;
+    registrationId = (
+      await client.query<{ id: string }>(
+        `INSERT INTO course_registrations (request_id, course_type_id, course_instance_id, salutation, first_name, last_name, email, phone, nationality_raw, birth_date_raw, visa_required, locale)
+         SELECT gen_random_uuid(), course_type_id, id, 'mr', 'Omar', 'Anmeldetest', 'omar@example.com', '+20 100', 'Ägypten', '1998-01-01', true, 'de'
+           FROM course_instances WHERE id = $1 RETURNING id`,
+        [instanceId]
+      )
+    ).rows[0].id;
   });
 
   test.afterAll(async () => {
     if (!client) return;
-    await client.query(`DELETE FROM letters WHERE booking_id = $1 OR waitlist_entry_id = $2`, [bookingId || null, entryId || null]);
-    await client.query(`DELETE FROM staff_activity WHERE entity_id = ANY($1::uuid[])`, [[personId, bookingId, instanceId].filter(Boolean)]);
+    await client.query(`DELETE FROM letters WHERE booking_id = $1 OR waitlist_entry_id = $2 OR person_id = $3 OR registration_id = $4`, [
+      bookingId || null,
+      entryId || null,
+      personId || null,
+      registrationId || null,
+    ]);
+    await client.query(`DELETE FROM staff_activity WHERE entity_id = ANY($1::uuid[])`, [[personId, bookingId, instanceId, registrationId].filter(Boolean)]);
+    if (registrationId) await client.query(`DELETE FROM course_registrations WHERE id = $1`, [registrationId]);
     if (instanceId) await client.query(`DELETE FROM waitlist_entries WHERE course_instance_id = $1`, [instanceId]);
     if (bookingId) {
       await client.query(`DELETE FROM payments WHERE booking_id = $1`, [bookingId]);
@@ -126,5 +141,33 @@ test.describe('letters', () => {
     await page.goto(`/admin/people/${personId}?tab=letters`);
     await expect(page.getByRole('tabpanel')).toContainText('Platz frei');
     await expect(page.getByRole('tabpanel')).toContainText('Buchungsbestätigung');
+  });
+
+  test('one confirmation for several bookings is kept on the learner', async ({ page }) => {
+    await page.goto(`/admin/people/${personId}/letter`);
+    const sheet = page.locator('article').first();
+    await expect(sheet).toContainText(/Buchung Nr\. B-\d{4}-\d{4}/);
+    await expect(sheet).toContainText(/Noch offen\s*740,00\s€/);
+    await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
+    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    const { rows } = await client.query<{ booking_id: string | null }>(`SELECT booking_id FROM letters WHERE person_id = $1 AND kind = 'learner_confirmation'`, [personId]);
+    expect(rows).toEqual([{ booking_id: null }]);
+  });
+
+  test('a registration letter asks for the down payment, and the registration waits for it', async ({ page }) => {
+    await page.goto(`/admin/registrations/course/${registrationId}/letter`);
+    const sheet = page.locator('article').first();
+    await expect(sheet).toContainText('Lieber Omar,');
+    await expect(sheet).toContainText(/Anzahlung von \d+,00\s€/);
+    await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
+    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    const { rows } = await client.query<{ kind: string; status: string }>(
+      `SELECT l.kind, r.status::text AS status FROM letters l JOIN course_registrations r ON r.id = l.registration_id WHERE r.id = $1`,
+      [registrationId]
+    );
+    expect(rows).toEqual([{ kind: 'registration_deposit_request', status: 'waiting' }]);
+
+    await page.goto(`/admin/registrations/course/${registrationId}`);
+    await expect(page.getByRole('heading', { name: 'Briefe' }).locator('xpath=ancestor::section[1]')).toContainText('Bitte um Anzahlung');
   });
 });

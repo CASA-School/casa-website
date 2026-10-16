@@ -136,10 +136,6 @@ on the letters, the booking page, the course start page and the learner's „Woc
 
 **The rest of the 128, and what each waits for** (2026 counts):
 
-- *Confirmation of several bookings* (`ConfirmationStudentIndividual`, 915) — one letter over a
-  learner's chosen bookings: a person-level letter, next.
-- *Registration letters* (`NewLetter.SendTest` 180, `NewLetterDownPayment` 260) — about a web
-  registration (placement-test result, 100 € deposit): need a letter about a registration, next.
 - *Exams* — confirmation (395), receipt (105), reminder (83), invitation (52), waiting list (375):
   wait for exam bookings with a sitting.
 - *Instalment agreement* (370) — waits for instalment plans.
@@ -153,6 +149,31 @@ on the letters, the booking page, the course start page and the learner's „Woc
 - *Staff circulars, teacher logins* — not letters to learners. SchoolMan writes teachers' Klassenbuch
   logins into stored letter text; the workspace will not.
 - *Dead*: about 25 kinds unused in 2026 or used fewer than ten times.
+
+## A learner's and a registration's letters (2026-10-17, migration 0035)
+
+Two letters are about something other than one booking, so `letters` gains a subject for each:
+
+- **Confirmation of several bookings** (`learner_confirmation`; SchoolMan's
+  `ConfirmationStudentIndividual`, 915 in 2026) is about **the learner** (`person_id`, versioned per
+  person). It opens from the learner's „Briefe" tab, or from a booking's letter list with that
+  booking ticked (`/admin/people/[id]/letter?bookings=…`). The colleague ticks the bookings; by
+  default those neither cancelled nor ended are ticked. Each booking is shown with its number,
+  dates, lines and subtotal, in the order of the courses. Then come the total, what has been paid
+  and what is open. The payment sentence covers everything: by 7 days from today or the first
+  course start, whichever is earlier, or, for a visa, the whole amount. The reference carries every
+  booking number. A cancelled booking cannot be confirmed (`learnerLetterBlock`). Which bookings
+  the letter covered is in its `source`, and each of them logs it.
+- **Registration letters** are about **a website registration** (`registration_id`, `ON DELETE
+  RESTRICT`), before there is a booking, at `/admin/registrations/course/[id]/letter`:
+  `registration_deposit_request` („Bitte um Anzahlung"; `NewLetterDownPayment`, 260) asks for the
+  course type's down payment, falling back to 100 € (the AGB's figure) when none is set, and adds
+  the visa paragraph when the learner asked for a visa. `registration_test_request`
+  („Bitte um Testergebnis"; `NewLetter.SendTest`, 180) asks for the placement-test result, with the
+  link to the public placement page in the letter's language. The letter is in the registration's
+  language. **Sending one sets a new or in-progress registration to „Wartet auf Antwort"**: what it asks for
+  is now the learner's to answer. SchoolMan wrote these and its list never knew. Both texts are
+  standard texts, editable with `registrations` at `full`.
 
 ## Adding a kind of letter
 

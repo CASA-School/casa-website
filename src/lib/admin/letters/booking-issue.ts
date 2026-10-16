@@ -5,10 +5,20 @@ import type { StaffUser } from '../auth';
 import { withTransaction } from '../db';
 import type { Bilingual } from '../i18n';
 
-import { bookingLetterContext, waitlistLetterContext } from './booking-context';
-import { bookingLetterBlock, buildBookingLetter, LETTER_STANDARD_DEFAULTS, waitlistLetter, type LetterChoices } from './booking-letters';
+import { bookingLetterContext, learnerLetterContext, registrationLetterContext, waitlistLetterContext } from './booking-context';
+import {
+  bookingLetterBlock,
+  buildBookingLetter,
+  learnerConfirmationLetter,
+  learnerLetterBlock,
+  LETTER_STANDARD_DEFAULTS,
+  registrationLetter,
+  waitlistLetter,
+  type LetterChoices,
+} from './booking-letters';
 import { issueLetter, lettersForBooking, nextLetterVersion, standardTexts } from './repo';
-import { subjectLine, type BookingLetterKind, type WaitlistLetterKind } from './types';
+import { subjectLine, type BookingLetterKind, type RegistrationLetterKind, type WaitlistLetterKind } from './types';
+import { setQueueStatus } from '../queues';
 
 /**
  * Sending a booking's or a waiting-list entry's letter (docs/LETTERS.md). The letter is built again
@@ -98,5 +108,74 @@ export async function issueWaitlistLetter(entryId: string, kind: WaitlistLetterK
     return { id, subject: subjectLine(letter) };
   });
   await logActivity({ actor, entity: 'person', entityId: ctx.person.id, action: 'letter_sent', detail: { kind, letter: result.id, subject: result.subject } });
+  return { ok: true, letterId: result.id };
+}
+
+/** The confirmation of several of a learner's bookings, about the learner; the bookings it covers are in its source. */
+export async function issueLearnerLetter(personId: string, choices: LetterChoices, actor: StaffUser): Promise<Result> {
+  const ctx = await learnerLetterContext(personId);
+  if (!ctx) return refuse('Die Person gibt es nicht mehr.', 'The person no longer exists.');
+  const blocked = learnerLetterBlock(ctx, choices);
+  if (blocked) return { ok: false, reason: blocked };
+  const standard = (await standardTexts('learner_confirmation', LETTER_STANDARD_DEFAULTS.learner_confirmation))[choices.language];
+  const result = await withTransaction(async (client) => {
+    const version = await nextLetterVersion(client, 'learner_confirmation', { personId: ctx.personId });
+    const letter = learnerConfirmationLetter(ctx, choices, standard, { today: todayIso(), version });
+    const id = await issueLetter(
+      client,
+      {
+        letter,
+        about: { personId: ctx.personId },
+        version,
+        organisationId: null,
+        personId: ctx.personId,
+        recipientName: [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' '),
+        email: ctx.person.email,
+        source: { choices, bookings: choices.bookingIds },
+      },
+      actor
+    );
+    return { id, subject: subjectLine(letter) };
+  });
+  await logActivity({ actor, entity: 'person', entityId: ctx.personId, action: 'letter_sent', detail: { kind: 'learner_confirmation', letter: result.id, subject: result.subject } });
+  for (const bookingId of choices.bookingIds ?? []) {
+    await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'letter_sent', detail: { kind: 'learner_confirmation', letter: result.id, subject: result.subject } });
+  }
+  return { ok: true, letterId: result.id };
+}
+
+/**
+ * A website registration's letter. What it asks for — the test result, the down payment — is now
+ * the learner's to answer: a registration still new or in progress waits for the reply.
+ */
+export async function issueRegistrationLetter(registrationId: string, kind: RegistrationLetterKind, choices: LetterChoices, actor: StaffUser): Promise<Result> {
+  const ctx = await registrationLetterContext(registrationId);
+  if (!ctx) return refuse('Die Anmeldung gibt es nicht mehr.', 'The registration no longer exists.');
+  const standard = (await standardTexts(kind, LETTER_STANDARD_DEFAULTS[kind]))[choices.language];
+  const result = await withTransaction(async (client) => {
+    const version = await nextLetterVersion(client, kind, { registrationId });
+    const letter = registrationLetter(kind, ctx, choices, standard, { today: todayIso(), version });
+    const id = await issueLetter(
+      client,
+      {
+        letter,
+        about: { registrationId },
+        version,
+        organisationId: null,
+        personId: ctx.personId,
+        recipientName: [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' '),
+        email: ctx.person.email,
+        source: { choices },
+      },
+      actor
+    );
+    const status = await client.query<{ status: string }>(`SELECT status::text AS status FROM course_registrations WHERE id = $1`, [registrationId]);
+    return { id, subject: subjectLine(letter), status: status.rows[0]?.status ?? null };
+  });
+  await logActivity({ actor, entity: 'course_registration', entityId: registrationId, action: 'letter_sent', detail: { kind, letter: result.id, subject: result.subject } });
+  if (ctx.personId) await logActivity({ actor, entity: 'person', entityId: ctx.personId, action: 'letter_sent', detail: { kind, letter: result.id, subject: result.subject } });
+  if (result.status === 'new' || result.status === 'in_progress') {
+    await setQueueStatus({ entity: 'course_registration', id: registrationId, status: 'waiting', actor });
+  }
   return { ok: true, letterId: result.id };
 }

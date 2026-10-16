@@ -16,12 +16,13 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const found = await getSentLetter(id);
   if (!found) notFound();
-  await requireModule(found.kind === 'offer' ? 'offers' : 'bookings');
+  await requireModule(found.kind === 'offer' ? 'offers' : found.kind.startsWith('registration_') ? 'registrations' : 'bookings');
   const { t, lang } = await getI18n();
 
   let back = { href: found.personId ? `/admin/people/${found.personId}?tab=letters` : '/admin', label: t('Zur Person', 'Back to the person') };
   if (found.bookingId) back = { href: `/admin/bookings/${found.bookingId}`, label: t('Zur Buchung', 'Back to the booking') };
   if (found.offerId) back = { href: `/admin/offers/${found.offerId}/letter?version=${found.version}`, label: t('Zum Angebot', 'Back to the offer') };
+  if (found.registrationId) back = { href: `/admin/registrations/course/${found.registrationId}`, label: t('Zur Anmeldung', 'Back to the registration') };
   if (found.waitlistEntryId) {
     const entry = await queryFirst<{ course_instance_id: string; level_code: string }>(
       `SELECT course_instance_id, level_code FROM waitlist_entries WHERE id = $1`,

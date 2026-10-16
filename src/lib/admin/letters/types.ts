@@ -29,12 +29,19 @@ export const BOOKING_LETTER_KINDS = [
   'cancellation_confirmation',
 ] as const;
 
+/** A website registration's letters, before there is a booking (0035). */
+export const REGISTRATION_LETTER_KINDS = ['registration_test_request', 'registration_deposit_request'] as const;
+export type RegistrationLetterKind = (typeof REGISTRATION_LETTER_KINDS)[number];
+
 export const LETTER_KINDS = [
   'offer',
   ...BOOKING_LETTER_KINDS,
   'waitlist_confirmation',
   'waitlist_place_free',
   'waitlist_no_place',
+  /** Several bookings of one learner in one letter (0035). */
+  'learner_confirmation',
+  ...REGISTRATION_LETTER_KINDS,
 ] as const;
 export type LetterKind = (typeof LETTER_KINDS)[number];
 

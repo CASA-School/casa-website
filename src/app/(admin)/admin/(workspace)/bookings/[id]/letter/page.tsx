@@ -60,14 +60,20 @@ export default async function BookingLetterPage({
       issueAction={issueBookingLetterAction}
       saveStandardAction={saveLetterStandardAction}
       hidden={{ bookingId: id, kind }}
-      kindGroups={BOOKING_LETTER_GROUPS.map((group) => ({
+      kindGroups={BOOKING_LETTER_GROUPS.map((group, i) => ({
         label: pick(lang, group.label),
-        items: group.kinds.map((k) => ({
-          label: pick(lang, LETTER_KIND_LABELS[k]),
-          href: href(k),
-          active: k === kind,
-          sentCount: letters.filter((l) => l.kind === k).length,
-        })),
+        items: [
+          ...group.kinds.map((k) => ({
+            label: pick(lang, LETTER_KIND_LABELS[k]),
+            href: href(k),
+            active: k === kind,
+            sentCount: letters.filter((l) => l.kind === k).length,
+          })),
+          // This booking with the learner's others, in one confirmation.
+          ...(i === 0
+            ? [{ label: pick(lang, LETTER_KIND_LABELS.learner_confirmation), href: `/admin/people/${ctx.person.id}/letter?bookings=${id}`, active: false, sentCount: 0 }]
+            : []),
+        ],
       }))}
       history={history}
       blocked={blocked ? pick(lang, blocked) : null}

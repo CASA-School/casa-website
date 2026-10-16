@@ -11,15 +11,27 @@ import { PrintCopy, printLetter } from '@/components/admin/letters/print';
 import { Button } from '@/components/admin/ui';
 import {
   buildBookingLetter,
+  learnerConfirmationLetter,
+  learnerLetterBlock,
   MISSING_ITEM_LABELS,
   MISSING_ITEMS,
+  registrationLetter,
   STANDARD_SLOTS,
   waitlistLetter,
   type BookingLetterContext,
+  type LearnerLetterContext,
   type LetterChoices,
+  type RegistrationLetterContext,
   type WaitlistLetterContext,
 } from '@/lib/admin/letters/booking-letters';
-import { subjectLine, type BookingLetterKind, type LetterLanguage, type LetterPart, type WaitlistLetterKind } from '@/lib/admin/letters/types';
+import {
+  subjectLine,
+  type BookingLetterKind,
+  type LetterLanguage,
+  type LetterPart,
+  type RegistrationLetterKind,
+  type WaitlistLetterKind,
+} from '@/lib/admin/letters/types';
 import { cn } from '@/lib/utils';
 
 /**
@@ -34,11 +46,13 @@ import { cn } from '@/lib/utils';
 
 export type ComposerContext =
   | { type: 'booking'; kind: BookingLetterKind; ctx: BookingLetterContext }
-  | { type: 'waitlist'; kind: WaitlistLetterKind; ctx: WaitlistLetterContext };
+  | { type: 'waitlist'; kind: WaitlistLetterKind; ctx: WaitlistLetterContext }
+  | { type: 'learner'; kind: 'learner_confirmation'; ctx: LearnerLetterContext }
+  | { type: 'registration'; kind: RegistrationLetterKind; ctx: RegistrationLetterContext };
 
 type Standards = Record<LetterLanguage, Record<string, string>>;
 
-const COMPUTED_SLOTS = ['payment', 'position', 'next', 'open', 'enrolled', 'lessons', 'request', 'start', 'certify', 'money'];
+const COMPUTED_SLOTS = ['payment', 'position', 'next', 'open', 'enrolled', 'lessons', 'request', 'start', 'certify', 'money', 'test', 'deposit'];
 
 export function LetterComposer({
   source,
@@ -59,6 +73,7 @@ export function LetterComposer({
   blocked,
   initialAddress,
   initialItems,
+  initialBookingIds,
   back,
   title,
   error,
@@ -85,6 +100,8 @@ export function LetterComposer({
   blocked?: string | null;
   initialAddress?: 'home' | 'local' | 'none';
   initialItems?: string[];
+  /** The confirmation of several bookings: which are ticked when it opens. */
+  initialBookingIds?: string[];
   back: { href: string; label: string };
   title: string;
   error?: string;
@@ -99,6 +116,7 @@ export function LetterComposer({
     texts: {},
     paymentIds: source.type === 'booking' && source.kind === 'payment_receipt' ? source.ctx.payments.slice(-1).map((p) => p.id) : [],
     items: initialItems ?? [],
+    bookingIds: initialBookingIds ?? [],
   });
   const [addingNote, setAddingNote] = useState(false);
   const lang = choices.language;
@@ -108,6 +126,8 @@ export function LetterComposer({
   const letter = useMemo(() => {
     const meta = { today, version, sent: history };
     if (source.type === 'booking') return buildBookingLetter(source.kind, source.ctx, choices, standard, meta);
+    if (source.type === 'learner') return learnerConfirmationLetter(source.ctx, choices, standard, meta);
+    if (source.type === 'registration') return registrationLetter(source.kind, source.ctx, choices, standard, meta);
     return waitlistLetter(source.kind, source.ctx, choices, standard, meta);
   }, [source, choices, standard, today, version, history]);
 
@@ -150,6 +170,10 @@ export function LetterComposer({
     practical: t('Praktisches', 'Practical'),
     certify: t('Bestätigung', 'Confirmation'),
     money: t('Betrag', 'Amount'),
+    test: t('Einstufungstest', 'Placement test'),
+    deposit: t('Anzahlung', 'Down payment'),
+    reference: t('Verwendungszweck', 'Payment reference'),
+    visa: t('Visum', 'Visa'),
   };
   // Every editable part has a name on its bar; one without its own is simply "Text".
   const slotLabel = new Proxy(labels, { get: (target, key: string) => target[key] ?? t('Text', 'Text') });
@@ -272,10 +296,14 @@ export function LetterComposer({
               {(choices.items ?? []).map((item) => (
                 <input key={item} type="hidden" name="items" value={item} />
               ))}
+              {(choices.bookingIds ?? []).map((id) => (
+                <input key={id} type="hidden" name="bookingIds" value={id} />
+              ))}
               <Button
                 type="submit"
                 disabled={
                   Boolean(blocked) ||
+                  (source.type === 'learner' && Boolean(learnerLetterBlock(source.ctx, choices))) ||
                   (source.type === 'booking' && source.kind === 'payment_receipt' && !choices.paymentIds?.length) ||
                   (source.type === 'booking' && source.kind === 'missing_items' && !choices.items?.length)
                 }
@@ -392,6 +420,35 @@ export function LetterComposer({
                         {new Date(`${p.date}T12:00:00`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })} · {p.subject}
                       </span>
                       <span className="font-semibold tabular-nums">{p.amount.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
+                    </label>
+                  ))}
+                </div>
+              </Choice>
+            ) : null}
+            {source.type === 'learner' ? (
+              <Choice label={t('Buchungen', 'Bookings')}>
+                <div className="space-y-1.5">
+                  {source.ctx.bookings.map((b) => (
+                    <label key={b.id} className={cn('flex cursor-pointer items-start gap-2.5 text-[0.84rem]', b.status === 'cancelled' && 'opacity-50')}>
+                      <input
+                        type="checkbox"
+                        disabled={b.status === 'cancelled'}
+                        checked={choices.bookingIds?.includes(b.id) ?? false}
+                        onChange={(e) =>
+                          setChoices((prev) => ({
+                            ...prev,
+                            bookingIds: e.target.checked ? [...(prev.bookingIds ?? []), b.id] : (prev.bookingIds ?? []).filter((x) => x !== b.id),
+                          }))
+                        }
+                        className="mt-0.5 size-4 accent-[var(--casa-ink-deep)]"
+                      />
+                      <span className="min-w-0">
+                        <span className="block font-semibold">{b.course ? [b.course.name[lang], b.course.level].filter(Boolean).join(' ') : b.number}</span>
+                        <span className="block text-xs text-[var(--casa-muted)]">
+                          {b.number}
+                          {b.course ? ` · ${new Date(`${b.course.startDate}T12:00:00`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })}` : ''}
+                        </span>
+                      </span>
                     </label>
                   ))}
                 </div>

@@ -3,7 +3,17 @@ import 'server-only';
 import { query, queryFirst } from '../db';
 import { sessionOf } from '../waitlist';
 
-import type { BookingLetterContext, LetterAddress, LetterCourse, LetterPerson, WaitlistLetterContext } from './booking-letters';
+import { getSiteUrl } from '@/lib/seo';
+
+import type {
+  BookingLetterContext,
+  LearnerLetterContext,
+  LetterAddress,
+  LetterCourse,
+  LetterPerson,
+  RegistrationLetterContext,
+  WaitlistLetterContext,
+} from './booking-letters';
 
 /**
  * What a booking's or a waiting-list entry's letter is built from, read once (docs/LETTERS.md).
@@ -233,5 +243,112 @@ export async function waitlistLetterContext(entryId: string): Promise<WaitlistLe
     position: entry.position,
     nextStart: next?.start_date ?? null,
     staff,
+  };
+}
+
+/** A learner's bookings that are not deleted, the latest first: what the confirmation of several chooses from. */
+export async function learnerLetterContext(personId: string): Promise<LearnerLetterContext | null> {
+  const person = await letterPerson(personId);
+  if (!person) return null;
+  const ids = await query<{ id: string }>(
+    `SELECT b.id FROM bookings b
+      WHERE b.deleted_at IS NULL AND canonical_person_id(b.person_id) = $1
+      ORDER BY (SELECT min(start_date) FROM booking_periods WHERE booking_id = b.id) DESC NULLS LAST, b.created_at DESC`,
+    [person.id]
+  );
+  const [contexts, staff] = await Promise.all([Promise.all(ids.map((r) => bookingLetterContext(r.id))), signers()]);
+  const bookings = contexts.filter((c): c is BookingLetterContext => c !== null);
+  return {
+    personId: person.id,
+    // The language of their last website registration, else German.
+    language: bookings.find((b) => b.language === 'en') ? 'en' : 'de',
+    person,
+    bookings: bookings.map((b) => ({
+      id: b.bookingId,
+      number: b.number,
+      status: b.status,
+      course: b.course,
+      accommodation: b.accommodation,
+      charges: b.charges.map((c) => ({ description: c.description, amount: c.amount })),
+      charged: b.charged,
+      paid: b.paid,
+      visaRequired: b.visaRequired,
+    })),
+    staff,
+  };
+}
+
+/**
+ * A website registration, for its letters: the course they chose (its start when they picked one),
+ * the level they gave, the visa, and who they are — the linked person's record when there is one
+ * (their address), else the form's own fields.
+ */
+export async function registrationLetterContext(registrationId: string): Promise<RegistrationLetterContext | null> {
+  const r = await queryFirst<
+    CourseRow & {
+      id: string;
+      person_id: string | null;
+      first_name: string;
+      last_name: string;
+      salutation: string | null;
+      email: string;
+      phone: string | null;
+      birth_date: string | null;
+      locale: string | null;
+      visa_required: boolean;
+      declared_level: string | null;
+      course_type_label: string | null;
+      course_instance_label: string | null;
+      down_payment: string | null;
+      has_instance: boolean;
+    }
+  >(
+    `SELECT r.id, r.person_id, r.first_name, r.last_name, r.salutation::text AS salutation, r.email, r.phone,
+            to_char(r.birth_date, 'YYYY-MM-DD') AS birth_date, r.locale, r.visa_required,
+            coalesce(r.declared_level_code, r.declared_level_raw) AS declared_level,
+            r.course_type_label, r.course_instance_label, t.down_payment,
+            coalesce(t.name, r.course_type_label, '') AS name, t.name_de,
+            to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date,
+            i.session, i.schedule, t.lessons_per_week,
+            (SELECT coalesce(rm.nickname, rm.name) FROM rooms rm WHERE rm.id = i.room_id) AS room_name,
+            (SELECT rm.floor FROM rooms rm WHERE rm.id = i.room_id) AS room_floor,
+            i.id IS NOT NULL AS has_instance
+       FROM course_registrations r
+       LEFT JOIN course_instances i ON i.id = r.course_instance_id
+       LEFT JOIN course_types t ON t.id = coalesce(i.course_type_id, r.course_type_id)
+      WHERE r.id = $1`,
+    [registrationId]
+  );
+  if (!r) return null;
+  const linked = r.person_id ? await letterPerson(r.person_id) : null;
+  const person: LetterPerson = linked ?? {
+    id: r.id,
+    firstName: r.first_name,
+    lastName: r.last_name,
+    salutation: r.salutation === 'ms' ? 'ms' : r.salutation === 'mr' ? 'mr' : 'none',
+    email: r.email,
+    phone: r.phone,
+    motherTongue: null,
+    birthPlace: null,
+    birthDate: r.birth_date,
+    nationality: { de: null, en: null },
+    passportNumber: null,
+    home: null,
+    local: null,
+  };
+  const site = getSiteUrl();
+  return {
+    registrationId: r.id,
+    personId: linked?.id ?? null,
+    language: r.locale === 'en' ? 'en' : 'de',
+    person: { ...person, email: r.email || person.email },
+    course: r.has_instance && r.start_date && r.end_date ? toCourse(r, null) : null,
+    courseLabel: [r.course_type_label, r.course_instance_label].filter(Boolean).join(' · ') || r.name,
+    declaredLevel: r.declared_level,
+    visaRequired: r.visa_required,
+    // The terms' down payment (AGB §5.2) where the course type names none.
+    downPayment: r.down_payment === null ? 100 : Number(r.down_payment),
+    placementUrl: { de: `${site}/anmeldung/einstufungstest`, en: `${site}/en/placement-test` },
+    staff: await signers(),
   };
 }

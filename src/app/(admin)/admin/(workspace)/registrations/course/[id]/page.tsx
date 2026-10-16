@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../../bookings/actions';
@@ -7,7 +8,7 @@ import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { FactGrid, MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
-import { Badge, BirthDate, Card, DetailList, RecordHeader } from '@/components/admin/ui';
+import { Badge, BirthDate, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
@@ -22,6 +23,8 @@ import { getCourseRegistration } from '@/lib/admin/registrations';
 import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { levelGroups } from '@/lib/admin/waitlist';
+import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
+import { lettersForRegistration } from '@/lib/admin/letters/repo';
 import { toDateInputValue } from '@/lib/dates';
 import { courseNameResolver } from '../../course-names';
 import { formatRange, localDays, parseOptionLabel } from '../../option-label';
@@ -67,13 +70,14 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
       ])
     : [[], []];
 
-  const [notes, activity, staff, flags, person, courseName] = await Promise.all([
+  const [notes, activity, staff, flags, person, courseName, letters] = await Promise.all([
     listNotes('course_registration', registration.id),
     activityFor('course_registration', registration.id),
     listAssignableStaff(),
     listFlags('course_registration', registration.id),
     registration.personId ? getPersonSummary(registration.personId) : null,
     courseNameResolver(),
+    lettersForRegistration(registration.id),
   ]);
   const [candidates, confirmed] = person
     ? await Promise.all([
@@ -265,6 +269,37 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
 
         <div className="space-y-4">
           <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/course/${registration.id}`} />
+          {/* Before there is a booking: the down payment, or the placement-test result (docs/LETTERS.md). */}
+          <Card
+            title={t('Briefe', 'Letters')}
+            icon={Icon.mail}
+            tint="blue"
+            actions={
+              canEdit ? (
+                <Link href={`/admin/registrations/course/${registration.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                  {t('Brief schreiben', 'Write a letter')}
+                </Link>
+              ) : undefined
+            }
+          >
+            {letters.length ? (
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {letters.map((l) => (
+                  <li key={l.id}>
+                    <Link href={`/admin/letters/${l.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:underline">
+                      <span className="font-semibold">{pick(lang, LETTER_KIND_LABELS[l.kind])}</span>
+                      <span className="shrink-0 text-xs text-[var(--casa-muted)]">
+                        <DateText value={l.sentAt} compact />
+                        {l.sentByName ? ` · ${l.sentByName}` : ''}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Brief.', 'No letter yet.')}</p>
+            )}
+          </Card>
           <Timeline
             canWrite={canEdit}
             entity="course_registration"
