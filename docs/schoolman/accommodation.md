@@ -32,6 +32,12 @@ A host family is a `Management` record turned into an `Accommodation` (`Go_Manag
 — its members are `Person` rows with a family role (Vater, Mutter, Tochter …, 589 people). The family's
 description is stored twice, German and English (`DescriptionAccommodation_1/2`, on a quarter).
 
+## Who works with it
+
+**Natalia** does the accommodation placement (*Vermittlung*): she finds host families for learners and
+manages the rest of the stay (Rahman, 2026-10-15). Payments to hosts are finance's (`money.md`). When
+accommodation moves, it is built with her.
+
 ## In the workspace today
 
 Only the vocabularies: `accommodation_types`, `accommodation_room_types`, `catering_options`. The
@@ -45,5 +51,5 @@ website's host-family pages are content, not data. There are no host families, r
 
 ## Open questions for the team
 
-1. Who manages host families today, and is that a module they would use?
-2. Is `DateRent` still how a family's availability is recorded?
+1. Is `DateRent` still how a family's availability is recorded? (Natalia)
+2. Which of the stay's work lists does she use every week? (Natalia)

@@ -171,14 +171,19 @@ real; a gender label copied from a vocabulary is a copy. Each is judged by what 
 
 ## Open questions for the team
 
-Answered (Rahman, 2026-10-15): the booking status (`bookings.md`), who handles payouts, commission,
-host-family payments and time sheets — finance, beside DATEV (`money.md`) — and whether anything
-stays in SchoolMan for good — no, everything moves (`staff.md`). Attendance and time sheets are
-recorded in the Klassenbuch (`klassenbuch.md`).
+Answered (Rahman, 2026-10-15):
+- the booking status, and who resolves *u.B.* — whoever works on the learner (`bookings.md`);
+- that SchoolMan has no edit mode and everyone can change everything (`screens.md`);
+- payouts, commission, host payments and time sheets — finance, beside DATEV, with an automated
+  DATEV link to design later (`money.md`);
+- host families — Natalia (`accommodation.md`);
+- that everything moves in the end (`staff.md`).
+
+Attendance and time sheets are recorded in the Klassenbuch (`klassenbuch.md`).
 
 Still open; each page ends with its own:
 
-1. When does a booking leave *???*, and who resolves *u.B.* (`bookings.md`)?
-2. Receipts, confirmations and missing-information letters are about half of all letters — build those first (`letters-and-history.md`)?
-3. What does finance export to DATEV, and how often (`money.md`)?
-4. Who manages host families today (`accommodation.md`)?
+1. The 3,135 bookings still at *???* — old and forgotten, or new and not yet looked at (`bookings.md`)?
+2. Receipts, confirmations and missing-information letters are about half of all letters — build those
+   first (`letters-and-history.md`)?
+3. What finance exports to DATEV today (Rahman asks finance, `money.md`).

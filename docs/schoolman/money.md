@@ -73,7 +73,8 @@ payouts.
   nothing.
 - Never carry the stored balances; sum the lines.
 - When money moves, the question is what goes to DATEV and how — the export, not the screen, is the
-  hard part.
+  hard part. Rahman will ask finance what they export today; the aim is an **automated link between
+  DATEV and the workspace** that saves finance the work, designed with them.
 
 ## Open questions for the team
 

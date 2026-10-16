@@ -86,6 +86,16 @@ comment, teaching, administration, the whole and the target; the month's and the
 all colleagues' months in a list; e-mail and print the sheet; approvals (also made in the
 Klassenbuch).
 
+## Everyone can change everything
+
+SchoolMan has **no edit mode**. A colleague clicks into a field on any screen — a learner, a teacher,
+a colleague, a company — and types; the change is saved. Everyone can change everything, nothing
+asks "are you sure", and only the record's last-changed stamp says who touched it last, not what
+changed. The team is used to it and makes fewer mistakes than it once did, but it is not a good
+system (Rahman, 2026-10-15). The workspace is meant to be much better: a record is read until a
+colleague chooses to change it, the change happens in a dialog with its own save, deletions confirm,
+rights are per module and level, and every change is a line in the record's history.
+
 ## What the screens teach the workspace
 
 1. **Work lists are what the team lives in.** "New this week", "ending", "staying after the course",

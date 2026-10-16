@@ -75,7 +75,8 @@ What is **not** a fact but stored as one:
 | *storno* | The official cancel value, hardly used | 5 |
 
 So the status mixes three questions — is the learner placed right, has money arrived, is anything
-missing — into one value, and *nein* does the work of *storno*. `_ID_StatusBooking` is never filled.
+missing — into one value, and *nein* does the work of *storno*. Whoever has the learner, or works on
+them, resolves *u.B.* (Rahman, 2026-10-15): nobody owns it, and nothing records who changed it or why. `_ID_StatusBooking` is never filled.
 The learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance, Rookie) is on 100%.
 
 ## In the workspace today
@@ -92,6 +93,8 @@ The business line belongs on the course type, not in a table per line.
 
 ## Open questions for the team
 
-1. When does a booking leave *???* — who sets it, and is *u.B.* ever resolved without a colleague?
+1. Every booking starts at *???*, set by the conversion script; 3,135 still say it. Are those old
+   bookings nobody went back to, or recent ones not looked at yet? (To read from SchoolMan by the
+   course's start year.)
 2. What do Runner, Unicorn, LastDance and Rookie mean?
 3. When is `Agreement` written (250 this year), and who reads it?
