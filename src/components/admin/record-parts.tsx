@@ -227,6 +227,7 @@ const ACTION_ICON: Record<string, ReactNode> = {
   person_address_updated: Icon.person,
   person_private_updated: Icon.person,
   bank_account_added: Icon.money,
+  bank_account_updated: Icon.money,
   bank_account_removed: Icon.money,
   person_linked: Icon.people,
   person_unlinked: Icon.people,

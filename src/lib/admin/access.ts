@@ -63,7 +63,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
   placement: { de: 'Einstufungstests', en: 'Placement' },
   applications: { de: 'Bewerbungen', en: 'Applications' },
   people: { de: 'Teilnehmende', en: 'People' },
-  private_data: { de: 'Geschützte Angaben', en: 'Protected details' },
+  private_data: { de: 'Bankverbindungen', en: 'Bank details' },
   bookings: { de: 'Buchungen', en: 'Bookings' },
   offers: { de: 'Angebote', en: 'Offers' },
   rooms: { de: 'Räume', en: 'Rooms' },
@@ -105,15 +105,18 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * and management's: owners and administrators hold it, and a colleague in
  * finance is given it on the Team screen (`edit` changes prices and prepares
  * next year's list, `full` also deletes a list that has not started).
- * `private_data` is absent: tax, pension and health-insurance numbers and bank
- * accounts are seen only by those whose work needs them (Rahman, 2026-10-16) —
- * owners and administrators, and whoever is granted it, finance for example.
+ * `private_data` — a learner's bank details — is the team's (Rahman, 2026-10-16:
+ * "the staff should be able to write the information of the students like bank
+ * details"): `edit` adds and corrects an account, removing one is `full`. It stays
+ * its own module, so it is checked on the server like every other and can be
+ * withdrawn from one person on the Team screen.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',
   'registrations',
   'placement',
   'people',
+  'private_data',
   'bookings',
   'catalogue',
   'activity',

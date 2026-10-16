@@ -215,7 +215,7 @@ export function RecordTabPanel({ id, children }: { id: string; children: ReactNo
   );
 }
 
-/** A link to another tab of the same record, such as „Alle Vorgänge" under the overview's short list. */
+/** A link to another tab of the same record, such as „Alle anzeigen" under the overview's short list. */
 export function RecordTabLink({ to, children, className }: { to: string; children: ReactNode; className?: string }) {
   const { select, base } = useTabs();
   return (

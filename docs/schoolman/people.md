@@ -80,7 +80,10 @@ mapping (matched on the German name; 72 deleted ids flagged), and whichever extr
    whole team. They live apart from the learner's everyday fields, under their own module right.
 
 *Built 2026-10-16 (migration 0029, `docs/ADMIN_WORKSPACE.md` §Lists 21): the learner facts and two
-addresses on the person's page, and the protected details under the module `private_data`.*
+addresses on the person's page, and bank accounts under the module `private_data` — which the whole
+team holds (Rahman, the same day: staff must be able to enter a learner's bank details). The tax,
+pension and health-insurance numbers belong to the 86 employee records; their table exists and they
+come back on the staff pages, restricted to finance and management.*
 
 ## Duplicates *(live, 2026-10-16)*
 

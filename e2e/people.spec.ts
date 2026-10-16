@@ -5,7 +5,7 @@ import pg from 'pg';
 
 /**
  * A person's page (2026-10-15): the hub every record leads to. Their enquiry
- * is one of their „Vorgänge" and open, a closed one is under „Abgeschlossen",
+ * is open under „Anfragen & Buchungen", a closed one under „Abgeschlossen",
  * and a note written on the person lands in „Notizen und Verlauf" (migration
  * 0026 lets `staff_notes` hold a person).
  *
@@ -74,16 +74,16 @@ test.describe('person page', () => {
     await expect(page.getByRole('heading', { name: 'Offen', exact: true }).locator('xpath=ancestor::section[1]')).toContainText('Abendkurs im Januar');
     await expect(page.getByRole('heading', { name: 'Zuletzt abgeschlossen' }).locator('xpath=ancestor::section[1]')).toContainText('Unterkunft im Sommer');
 
-    // All of it on the Vorgänge tab, each group its heading's own section.
-    await page.getByRole('tab', { name: /^Vorgänge/ }).click();
+    // All of it on the „Anfragen & Buchungen" tab, each group its heading's own section.
+    await page.getByRole('tab', { name: /^Anfragen & Buchungen/ }).click();
     const open = page.getByRole('heading', { name: /^Offen/ }).locator('xpath=..');
     const closed = page.getByRole('heading', { name: /^Abgeschlossen/ }).locator('xpath=..');
     await expect(open).toContainText('Abendkurs im Januar');
     await expect(closed).toContainText('Unterkunft im Sommer');
 
-    // In the register, under „Offene Vorgänge", with what is open beside the name.
+    // In the register, under „Offene Anfragen", with what is open beside the name.
     await page.goto(`/admin/people?view=open&q=${encodeURIComponent('Prüfperson')}`);
-    await expect(page.getByRole('row').filter({ hasText: 'Pia Prüfperson' })).toContainText('1 Vorgang');
+    await expect(page.getByRole('row').filter({ hasText: 'Pia Prüfperson' })).toContainText('1 offene Anfrage');
 
     await page.goto(`/admin/people/${personId}`);
     await page.getByRole('textbox', { name: 'Neue Notiz' }).fill('Zahlt über die Agentur.');

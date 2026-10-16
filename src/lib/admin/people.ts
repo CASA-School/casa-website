@@ -812,73 +812,47 @@ export async function saveAddress(personId: string, kind: AddressKind, input: Ad
   await logActivity({ actor, entity: 'person', entityId: personId, action: 'person_address_updated', detail: { kind } });
 }
 
-// ------------------------------------------------------------ protected
+// ------------------------------------------------------------ bank details
 
 /**
- * Tax, pension and health-insurance numbers and bank accounts (migration 0029). Read and written
- * only with the module `private_data`; the callers check it. The history says that something
- * changed, never the value.
+ * A person's bank accounts (migration 0029) — a learner's, for a refund. Read and written with the
+ * module `private_data`, which the team holds; the callers check it. The history says that an
+ * account was added, changed or removed, never the number.
+ *
+ * The same migration's `person_private` (tax, pension and health-insurance numbers) is staff data
+ * from SchoolMan's employee records, not a learner's: it is shown on the staff pages when they are
+ * built, under a right of its own.
  */
-export type PersonPrivate = {
-  taxId: string | null;
-  pensionInsuranceNumber: string | null;
-  healthInsuranceNumber: string | null;
-  updatedAt: Date | null;
-  updatedByName: string | null;
-  bankAccounts: { id: string; holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null }[];
-};
+export type BankAccount = { id: string; holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null };
 
-export async function getPersonPrivate(personId: string): Promise<PersonPrivate> {
-  const [row, banks] = await Promise.all([
-    queryFirst<{ tax_id: string | null; pension_insurance_number: string | null; health_insurance_number: string | null; updated_at: Date; updated_by_name: string | null }>(
-      `SELECT pp.tax_id, pp.pension_insurance_number, pp.health_insurance_number, pp.updated_at, u.name AS updated_by_name
-         FROM person_private pp LEFT JOIN staff_users u ON u.id = pp.updated_by WHERE pp.person_id = $1`,
-      [personId]
-    ),
-    query<{ id: string; holder: string | null; iban: string; bic: string | null; bank_name: string | null; note: string | null }>(
-      `SELECT id, holder, iban, bic, bank_name, note FROM bank_accounts WHERE person_id = $1 ORDER BY created_at`,
-      [personId]
-    ),
-  ]);
-  return {
-    taxId: row?.tax_id ?? null,
-    pensionInsuranceNumber: row?.pension_insurance_number ?? null,
-    healthInsuranceNumber: row?.health_insurance_number ?? null,
-    updatedAt: row?.updated_at ?? null,
-    updatedByName: row?.updated_by_name ?? null,
-    bankAccounts: banks.map((b) => ({ id: b.id, holder: b.holder, iban: b.iban, bic: b.bic, bankName: b.bank_name, note: b.note })),
-  };
-}
+export type BankAccountInput = { holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null };
 
-export async function savePersonPrivate(
-  personId: string,
-  input: { taxId: string | null; pensionInsuranceNumber: string | null; healthInsuranceNumber: string | null },
-  actor: StaffUser
-): Promise<void> {
-  await query(
-    `INSERT INTO person_private (person_id, tax_id, pension_insurance_number, health_insurance_number, updated_by)
-     VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (person_id) DO UPDATE
-       SET tax_id = EXCLUDED.tax_id, pension_insurance_number = EXCLUDED.pension_insurance_number,
-           health_insurance_number = EXCLUDED.health_insurance_number, updated_by = EXCLUDED.updated_by, updated_at = now()`,
-    [personId, input.taxId, input.pensionInsuranceNumber, input.healthInsuranceNumber, actor.id]
+export async function listBankAccounts(personId: string): Promise<BankAccount[]> {
+  const rows = await query<{ id: string; holder: string | null; iban: string; bic: string | null; bank_name: string | null; note: string | null }>(
+    `SELECT id, holder, iban, bic, bank_name, note FROM bank_accounts WHERE person_id = $1 ORDER BY created_at`,
+    [personId]
   );
-  await logActivity({ actor, entity: 'person', entityId: personId, action: 'person_private_updated' });
+  return rows.map((b) => ({ id: b.id, holder: b.holder, iban: b.iban, bic: b.bic, bankName: b.bank_name, note: b.note }));
 }
 
 /** The IBAN without spaces, upper case — how banks and DATEV read it. */
 export const normalizeIban = (value: string) => value.replace(/\s+/g, '').toUpperCase();
 
-export async function addBankAccount(
-  personId: string,
-  input: { holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null },
-  actor: StaffUser
-): Promise<void> {
+export async function addBankAccount(personId: string, input: BankAccountInput, actor: StaffUser): Promise<void> {
   await query(
     `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, note, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
     [personId, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note, actor.id]
   );
   await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_added' });
+}
+
+/** A wrong digit is corrected in place; the history says the account changed, not to what. */
+export async function updateBankAccount(personId: string, accountId: string, input: BankAccountInput, actor: StaffUser): Promise<void> {
+  await query(
+    `UPDATE bank_accounts SET holder = $3, iban = $4, bic = $5, bank_name = $6, note = $7 WHERE id = $1 AND person_id = $2`,
+    [accountId, personId, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note]
+  );
+  await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_updated' });
 }
 
 export async function removeBankAccount(personId: string, accountId: string, actor: StaffUser): Promise<void> {

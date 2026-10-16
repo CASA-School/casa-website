@@ -1,7 +1,7 @@
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
-import type { Address, AddressKind, Country, PersonDetail, PersonPrivate } from '@/lib/admin/people';
+import type { Address, AddressKind, BankAccount, Country, PersonDetail } from '@/lib/admin/people';
 import { OptionalSection } from '@/components/admin/optional-section';
-import { addBankAccountAction, createPersonAction, savePrivateAction, saveAddressAction, updatePersonAction } from './actions';
+import { addBankAccountAction, createPersonAction, saveAddressAction, updateBankAccountAction, updatePersonAction } from './actions';
 import { toDateInputValue, todayInputValue } from '@/lib/dates';
 import { DateFormField } from '@/components/admin/date-picker';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -194,53 +194,40 @@ export async function AddressForm({ personId, kind, address, countries }: { pers
   );
 }
 
-/** Tax, pension and health-insurance numbers — protected (`private_data`). */
-export async function PrivateForm({ personId, data }: { personId: string; data: PersonPrivate }) {
+/** A bank account — for a refund, a host's rent, a salary. New, or an existing one corrected. */
+export async function BankAccountForm({ personId, holder, account }: { personId: string; holder: string; account?: BankAccount }) {
   const { t } = await getI18n();
   return (
-    <form action={savePrivateAction} className="space-y-3">
+    <form action={account ? updateBankAccountAction : addBankAccountAction} className="space-y-3">
       <input type="hidden" name="personId" value={personId} />
-      <Field label={t('Steuer-ID', 'Tax ID')} htmlFor="private-tax">
-        <Input id="private-tax" name="taxId" maxLength={40} defaultValue={data.taxId ?? ''} autoComplete="off" />
-      </Field>
-      <Field label={t('Rentenversicherungsnummer', 'Pension insurance number')} htmlFor="private-pension">
-        <Input id="private-pension" name="pensionInsuranceNumber" maxLength={40} defaultValue={data.pensionInsuranceNumber ?? ''} autoComplete="off" />
-      </Field>
-      <Field label={t('Krankenversicherungsnummer', 'Health insurance number')} htmlFor="private-health">
-        <Input id="private-health" name="healthInsuranceNumber" maxLength={40} defaultValue={data.healthInsuranceNumber ?? ''} autoComplete="off" />
-      </Field>
-      <div className="flex justify-end pt-1">
-        <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
-    </form>
-  );
-}
-
-/** A bank account — for a refund, a host's rent, a salary. Protected. */
-export async function BankAccountForm({ personId, holder }: { personId: string; holder: string }) {
-  const { t } = await getI18n();
-  return (
-    <form action={addBankAccountAction} className="space-y-3">
-      <input type="hidden" name="personId" value={personId} />
+      {account ? <input type="hidden" name="accountId" value={account.id} /> : null}
       <Field label="IBAN" htmlFor="bank-iban">
-        <Input id="bank-iban" name="iban" required maxLength={42} autoComplete="off" className="font-mono" />
+        <Input
+          id="bank-iban"
+          name="iban"
+          required
+          maxLength={42}
+          autoComplete="off"
+          className="font-mono"
+          defaultValue={account ? account.iban.replace(/(.{4})/g, '$1 ').trim() : ''}
+        />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label={t('Kontoinhaber', 'Account holder')} htmlFor="bank-holder">
-          <Input id="bank-holder" name="holder" maxLength={120} defaultValue={holder} />
+          <Input id="bank-holder" name="holder" maxLength={120} defaultValue={account ? (account.holder ?? '') : holder} />
         </Field>
         <Field label="BIC" htmlFor="bank-bic">
-          <Input id="bank-bic" name="bic" maxLength={11} autoComplete="off" className="font-mono" />
+          <Input id="bank-bic" name="bic" maxLength={11} autoComplete="off" className="font-mono" defaultValue={account?.bic ?? ''} />
         </Field>
       </div>
       <Field label={t('Bank', 'Bank')} htmlFor="bank-name">
-        <Input id="bank-name" name="bankName" maxLength={120} />
+        <Input id="bank-name" name="bankName" maxLength={120} defaultValue={account?.bankName ?? ''} />
       </Field>
       <Field label={t('Notiz', 'Note')} htmlFor="bank-note">
-        <Textarea id="bank-note" name="note" rows={2} maxLength={200} />
+        <Textarea id="bank-note" name="note" rows={2} maxLength={200} defaultValue={account?.note ?? ''} />
       </Field>
       <div className="flex justify-end pt-1">
-        <Button type="submit">{t('Konto hinzufügen', 'Add account')}</Button>
+        <Button type="submit">{account ? t('Speichern', 'Save') : t('Konto hinzufügen', 'Add account')}</Button>
       </div>
     </form>
   );

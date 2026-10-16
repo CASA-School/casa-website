@@ -500,7 +500,7 @@ Nine top-level items, and the placements are the argument:
   (`placementTestSwitchedOn()`, the explicit `CASA_ENABLE_PLACEMENT_TEST`, not
   the development default), and then under **Posteingang**: its results come in
   from the website and wait for a teacher, like an enquiry. A learner's own
-  placement results stay on their page among the Vorgänge, and the screens stay
+  placement results stay on their page under „Anfragen & Buchungen", and the screens stay
   reachable by address.
 - **Courses and Exams are two items, not one screen with a tab strip.** A term
   of courses and a telc sitting share a catalogue table and almost nothing
@@ -762,16 +762,24 @@ it is.
   came from (remembered for the visit, in memory only).
 - Keyboard: arrows, Home and End move along the strip; the line does not slide
   under `prefers-reduced-motion`. On a phone the strip scrolls sideways.
-- A tab a colleague may not see is not rendered at all, not hidden: without
-  `private_data` there is no „Geschützt" tab and no data in the page.
+- A tab a colleague may not see is not rendered at all, not hidden: with the
+  bank right withdrawn there is no „Bankverbindung" tab and no data in the page.
+- **Names in the team's words** (Rahman, 2026-10-16: "use terms that are clear
+  and understandable for staff"). A tab says what is in it — „Anfragen &
+  Buchungen", „Bankverbindung" — never a word for how it is handled
+  („Vorgänge", „Geschützt"). Access is the server's business: it is checked
+  there and never announced on the screen.
 
 The learner's tabs: **Übersicht** — the course they are in (week 3 of 8, as a
 line) or the next one and how soon, what else is open, the last three closed
-cases with a link to all, and beside them anything to check and the notes;
-**Vorgänge** — everything under their name, open and closed; **Angaben** —
-person, contact, addresses, and the record itself (created, source, FileMaker,
-linked records); **Geschützt** — tax and insurance numbers and bank accounts.
-A teacher's or an organisation's page uses the same parts with its own tabs.
+with „Alle anzeigen", and beside them anything to check and the notes;
+**Anfragen & Buchungen** — everything under their name (enquiries,
+registrations, placement results, offers, bookings), open and closed;
+**Persönliche Daten** — person, contact, addresses, and the record itself
+(created, source, FileMaker, linked records); **Bankverbindung** — the accounts
+for a refund, which any colleague adds and corrects. The head's last figure is
+„Offen", in words: „1 Anmeldung · 1 Buchung". A teacher's or an
+organisation's page uses the same parts with its own tabs.
 
 ## Lists
 
@@ -890,7 +898,7 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     without a search: the head names them with their address, phone,
     nationality and birthday as `MetaLine`, and its bar holds four figures — the
     level a teacher confirmed, their bookings, what they still owe („Zu
-    zahlen"), how many cases are open. „Vorgänge" is everything under their name
+    zahlen"), what is open. Everything under their name is
     in one list — enquiries, registrations, placement results, offers, bookings
     — open first, then „Abgeschlossen", each with its kind's mark, where it
     stands and, for a booking, what is open or paid. Beside it what needs a look,
@@ -953,7 +961,7 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     FileMaker.
 21. **Teilnehmende, the register (2026-10-15).** The views answer what staff
     bring to a register — Alle, Im Kurs (a booking running today), Offene
-    Vorgänge, Zu zahlen — with the counts line above them, and a row says,
+    Anfragen, Zu zahlen — with the counts line above them, and a row says,
     beside the name and the course or address, the level a teacher confirmed
     (a green chip), what is open under the person (enquiries, registrations,
     offers in play, counted across linked records) and what they still owe.
@@ -983,13 +991,16 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     birth, a birth year where the date is missing, mother tongue, occupation
     and passport number in „Angaben" (edited in the same dialog as the name);
     „Adressen" holds one address in Bremen and one at home, each changed in its
-    own small dialog. „Geschützte Angaben" — tax, pension and health-insurance
-    numbers and bank accounts (`person_private`, `bank_accounts`) — is its own
-    module, `private_data`: owners and administrators hold it, anyone else is
-    granted it on the Team screen (finance, for example); a colleague without
-    it does not see the card at all, `edit` changes it, `full` removes a bank
-    account after a confirmation. The history says that protected details
-    changed, never what they are.
+    own small dialog. Bank accounts (`bank_accounts`) have their own module,
+    `private_data` („Bankverbindungen" on the Team screen), which the team holds
+    since Rahman's correction the same day ("the staff should be able to write
+    the information of the students like bank details"): `edit` adds and
+    corrects an account, `full` removes one after a confirmation, and a
+    colleague whose right is withdrawn does not see the tab at all. The history
+    says that an account changed, never the number. The same migration's
+    `person_private` — tax, pension and health-insurance numbers — is staff data
+    from SchoolMan's employee records, not a learner's: it is not on the learner
+    page and comes back on the staff pages, under a right of its own.
 22. **Kurse and Prüfungen (2026-10-15).** They keep their month-grouped
     tables and gain the counts line: for courses the dates ahead, the places
     taken (as the seat bars count them) and the next start; for exams the

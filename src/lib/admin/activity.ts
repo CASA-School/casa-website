@@ -211,9 +211,11 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
     case 'person_address_updated':
       return t('hat eine Adresse geändert', 'changed an address');
     case 'person_private_updated':
-      return t('hat geschützte Angaben geändert', 'changed protected details');
+      return t('hat Steuer- und Versicherungsnummern geändert', 'changed tax and insurance numbers');
     case 'bank_account_added':
       return t('hat eine Bankverbindung hinzugefügt', 'added a bank account');
+    case 'bank_account_updated':
+      return t('hat eine Bankverbindung geändert', 'changed a bank account');
     case 'bank_account_removed':
       return t('hat eine Bankverbindung entfernt', 'removed a bank account');
     case 'person_deleted':

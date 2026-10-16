@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction, removeBankAccountAction } from '../actions';
-import { AddressForm, BankAccountForm, PersonForm, PrivateForm } from '../person-form';
+import { AddressForm, BankAccountForm, PersonForm } from '../person-form';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { createBookingFromWizardAction } from '../../bookings/actions';
 import { RecordFoot } from '../../bookings/record-foot';
@@ -31,10 +31,10 @@ import { personOffers } from '@/lib/admin/offers/repo';
 import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
 import {
   getPerson,
-  getPersonPrivate,
   latestConfirmedLevel,
   LEARNER_STAGE_LABELS,
   learnerStage,
+  listBankAccounts,
   listCountries,
   personTimeline,
   type Address,
@@ -113,17 +113,18 @@ const euros = (lang: WsLang, value: number, currency = 'EUR') =>
  *
  * The head names them and how to reach them, and its bar answers the first
  * questions about anyone: which level a teacher confirmed, what they have
- * booked, what they still owe, what is open. „Vorgänge" is everything under
+ * booked, what they still owe, what is open. The second tab is everything under
  * their name in one list — enquiries, registrations, placement results, offers,
  * bookings — the open ones first, each with where it stands. A registration on
  * its own says "someone wants a B1 course"; the same registration under a person
  * who enquired twice, sat a placement and was confirmed A2.2 says something quite
  * different, and staff should not have to search five lists to find that out.
  *
- * In tabs under the head (2026-10-16, `record-tabs.tsx`): Übersicht — the course
- * now or next, what else is open, the last closed, anything to check, the notes;
- * Vorgänge — all of it; Angaben — person, contact, addresses, the record and the
- * records linked into it; Geschützt — only with `private_data`.
+ * In tabs under the head (2026-10-16, `record-tabs.tsx`), named in the team's
+ * words: Übersicht — the course now or next, what else is open, the last closed,
+ * anything to check, the notes; Anfragen & Buchungen — all of it; Persönliche
+ * Daten — person, contact, addresses, the record and the records linked into it;
+ * Bankverbindung — for a refund (module `private_data`, which the team holds).
  *
  * If this row was linked INTO another, `getPerson` follows `merged_into` and
  * the page renders the survivor. The rows linked into THIS one are listed with
@@ -151,11 +152,11 @@ export default async function PersonPage({
   const seesOffers = canAccess(user, 'offers');
   const canOffer = canAccess(user, 'offers', 'edit');
   const canDelete = canAccess(user, 'people', 'full');
-  // Tax, pension and health-insurance numbers and bank accounts: only with `private_data`.
-  const seesPrivate = canAccess(user, 'private_data');
-  const editsPrivate = canAccess(user, 'private_data', 'edit');
+  // Bank accounts: the module `private_data`, which the team holds (removing one is `full`).
+  const seesBank = canAccess(user, 'private_data');
+  const editsBank = canAccess(user, 'private_data', 'edit');
   const removesBank = canAccess(user, 'private_data', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, privateData] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -168,7 +169,7 @@ export default async function PersonPage({
     seesOffers ? personOffers(person.id) : Promise.resolve([]),
     courseNameResolver(),
     seesBookings ? learnerStage(person.id) : Promise.resolve(null),
-    seesPrivate ? getPersonPrivate(person.id) : Promise.resolve(null),
+    seesBank ? listBankAccounts(person.id) : Promise.resolve(null),
   ]);
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
@@ -264,10 +265,25 @@ export default async function PersonPage({
 
   const tabs: RecordTab[] = [
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
-    { id: 'cases', label: t('Vorgänge', 'Cases'), icon: Icon.registrations, count: cases.length },
-    { id: 'details', label: t('Angaben', 'Details'), icon: Icon.person },
-    ...(privateData ? [{ id: 'protected', label: t('Geschützt', 'Protected'), icon: Icon.lock }] : []),
+    { id: 'cases', label: t('Anfragen & Buchungen', 'Enquiries & bookings'), icon: Icon.registrations, count: cases.length },
+    { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
+    ...(bankAccounts ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
+  // What is open, in the team's words: „1 Anmeldung · 1 Buchung".
+  const OPEN_WORDS: Record<'enquiry' | 'registration' | 'review' | 'offer' | 'booking', [string, string]> = {
+    enquiry: [t('Anfrage', 'enquiry'), t('Anfragen', 'enquiries')],
+    registration: [t('Anmeldung', 'registration'), t('Anmeldungen', 'registrations')],
+    review: [t('Einstufung', 'placement'), t('Einstufungen', 'placements')],
+    offer: [t('Angebot', 'offer'), t('Angebote', 'offers')],
+    booking: [t('Buchung', 'booking'), t('Buchungen', 'bookings')],
+  };
+  const openSummary = (Object.keys(OPEN_WORDS) as (keyof typeof OPEN_WORDS)[])
+    .map((word) => {
+      const n = openCases.filter((c) => (c.kind === 'course' || c.kind === 'exam' ? 'registration' : c.kind) === word).length;
+      return n ? counted(lang, n, ...OPEN_WORDS[word]) : null;
+    })
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <RecordTabs tabs={tabs} initial={tab}>
@@ -356,12 +372,8 @@ export default async function PersonPage({
                 {owed > 0 ? <span className="text-[#9a5b00]">{euros(lang, owed)}</span> : <span className="text-[#17693a]">{t('Alles bezahlt', 'All paid')}</span>}
               </Stat>
             ) : null}
-            <Stat label={t('Vorgänge', 'Cases')}>
-              {openCases.length ? (
-                <span>{counted(lang, openCases.length, t('offen', 'open'), t('offen', 'open'))}</span>
-              ) : (
-                <span className="font-semibold text-[var(--casa-muted)]">{t('nichts offen', 'nothing open')}</span>
-              )}
+            <Stat label={t('Offen', 'Open')}>
+              {openSummary ? <span>{openSummary}</span> : <span className="font-semibold text-[var(--casa-muted)]">{t('nichts', 'nothing')}</span>}
             </Stat>
           </StatBar>
         }
@@ -398,7 +410,7 @@ export default async function PersonPage({
                 actions={
                   pastCases.length > recent.length ? (
                     <RecordTabLink to="cases">
-                      {t(`Alle ${num(lang, cases.length)} Vorgänge`, `All ${num(lang, cases.length)} cases`)} {Icon.chevronRight}
+                      {t('Alle anzeigen', 'Show all')} {Icon.chevronRight}
                     </RecordTabLink>
                   ) : undefined
                 }
@@ -435,14 +447,14 @@ export default async function PersonPage({
 
       {/* Everything under their name: enquiries, registrations, placement results, offers, bookings. */}
       <RecordTabPanel id="cases">
-        <Card title={t('Vorgänge', 'Cases')} icon={Icon.registrations} tint="blue">
+        <Card>
           {cases.length ? (
             <div className="-mx-4 -my-4">
               {openCases.length ? <CaseGroup label={t('Offen', 'Open')} cases={openCases} lang={lang} /> : null}
               {pastCases.length ? <CaseGroup label={t('Abgeschlossen', 'Closed')} cases={pastCases} lang={lang} quiet /> : null}
             </div>
           ) : (
-            <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Vorgänge.', 'No cases yet.')}</p>
+            <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Anfragen oder Buchungen.', 'No enquiries or bookings yet.')}</p>
           )}
         </Card>
       </RecordTabPanel>
@@ -600,51 +612,35 @@ export default async function PersonPage({
         </div>
       </RecordTabPanel>
 
-      {/* Protected: tax, pension and health-insurance numbers and bank accounts — only with `private_data`. */}
-      {privateData ? (
-        <RecordTabPanel id="protected">
-          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-            <Card
-              title={t('Steuer und Versicherung', 'Tax and insurance')}
-              icon={Icon.lock}
-              tint="red"
-              actions={
-                editsPrivate ? (
-                  <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Steuer und Versicherung', 'Tax and insurance')} size="sm" triggerVariant="ghost">
-                    <PrivateForm personId={person.id} data={privateData} />
-                  </FormDialog>
-                ) : undefined
-              }
-            >
-              <DetailList
-                items={[
-                  // One per row: the labels are long.
-                  { label: t('Steuer-ID', 'Tax ID'), value: privateData.taxId, wide: true },
-                  { label: t('Rentenversicherungsnummer', 'Pension insurance number'), value: privateData.pensionInsuranceNumber, wide: true },
-                  { label: t('Krankenversicherungsnummer', 'Health insurance number'), value: privateData.healthInsuranceNumber, wide: true },
-                ]}
-              />
-            </Card>
-            <Card
-              title={t('Bankverbindungen', 'Bank accounts')}
-              icon={Icon.money}
-              tint="red"
-              actions={
-                editsPrivate ? (
-                  <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="ghost" size="sm">
-                    <BankAccountForm personId={person.id} holder={person.displayName} />
-                  </FormDialog>
-                ) : undefined
-              }
-            >
-              {privateData.bankAccounts.length ? (
-                <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                  {privateData.bankAccounts.map((account) => (
-                    <li key={account.id} className="flex items-start justify-between gap-3 py-2.5">
-                      <span className="min-w-0 text-sm">
-                        <span className="block font-mono text-[0.84rem] font-semibold">{account.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
-                        <span className="block text-xs text-[var(--casa-muted)]">{[account.holder, account.bankName, account.bic, account.note].filter(Boolean).join(' · ')}</span>
-                      </span>
+      {/* For a refund: the learner's bank accounts. Shown with the module `private_data`, which the team holds. */}
+      {bankAccounts ? (
+        <RecordTabPanel id="bank">
+          <Card
+            title={t('Bankverbindungen', 'Bank accounts')}
+            icon={Icon.money}
+            tint="green"
+            actions={
+              editsBank ? (
+                <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="secondary" size="sm">
+                  <BankAccountForm personId={person.id} holder={person.displayName} />
+                </FormDialog>
+              ) : undefined
+            }
+          >
+            {bankAccounts.length ? (
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {bankAccounts.map((account) => (
+                  <li key={account.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-mono text-[0.9rem] font-semibold tracking-[0.02em]">{account.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
+                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">{[account.holder, account.bankName, account.bic, account.note].filter(Boolean).join(' · ')}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      {editsBank ? (
+                        <FormDialog trigger={t('Ändern', 'Change')} title={t('Bankverbindung ändern', 'Change the bank account')} triggerVariant="ghost" size="sm">
+                          <BankAccountForm personId={person.id} holder={person.displayName} account={account} />
+                        </FormDialog>
+                      ) : null}
                       {removesBank ? (
                         <form action={removeBankAccountAction}>
                           <input type="hidden" name="personId" value={person.id} />
@@ -659,14 +655,14 @@ export default async function PersonPage({
                           </ConfirmSubmit>
                         </form>
                       ) : null}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-[var(--casa-muted)]">{t('Keine Bankverbindung.', 'No bank account.')}</p>
-              )}
-            </Card>
-          </div>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Bankverbindung.', 'No bank account yet.')}</p>
+            )}
+          </Card>
         </RecordTabPanel>
       ) : null}
 

@@ -47,7 +47,7 @@ const VIEWS: readonly { key: PeopleView; label: Bilingual }[] = [
   { key: 'last', label: LEARNER_STAGE_LABELS.last },
   { key: 'coming', label: LEARNER_STAGE_LABELS.coming },
   { key: 'finished', label: LEARNER_STAGE_LABELS.finished },
-  { key: 'open', label: { de: 'Offene Vorgänge', en: 'Something open' } },
+  { key: 'open', label: { de: 'Offene Anfragen', en: 'Open enquiries' } },
   { key: 'owing', label: { de: 'Zu zahlen', en: 'Owing' } },
 ];
 
@@ -110,7 +110,7 @@ export default async function PeoplePage({
       <p className="-mt-3 mb-2 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
         <Tally tone="done" n={counts.in_course} label={t('im Kurs', 'in a course')} lang={lang} />
         <Tally tone="working" n={counts.last} label={t('im letzten Kurs', 'in their last course')} lang={lang} />
-        <Tally tone="new" n={counts.open} label={t('mit offenen Vorgängen', 'with something open')} lang={lang} />
+        <Tally tone="new" n={counts.open} label={t('mit offenen Anfragen', 'with open enquiries')} lang={lang} />
         <Tally tone="waiting" n={counts.owing} label={t('mit offenen Beträgen', 'owing money')} lang={lang} />
       </p>
 
@@ -184,7 +184,7 @@ export default async function PeoplePage({
                   <span className="flex flex-wrap items-center gap-1.5">
                     {person.openCases > 0 ? (
                       <Badge tone="accent">
-                        {person.openCases === 1 ? t('1 Vorgang', '1 case') : t(`${num(lang, person.openCases)} Vorgänge`, `${num(lang, person.openCases)} cases`)}
+                        {person.openCases === 1 ? t('1 offene Anfrage', '1 open enquiry') : t(`${num(lang, person.openCases)} offene Anfragen`, `${num(lang, person.openCases)} open enquiries`)}
                       </Badge>
                     ) : null}
                     {person.owed > 0.005 ? <Badge tone="warning">{euros(person.owed)}</Badge> : null}

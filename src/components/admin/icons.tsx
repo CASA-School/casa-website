@@ -247,13 +247,6 @@ export const Icon = {
       <path d="M3 14a5 5 0 0 1 10 0" />
     </svg>
   ),
-  /** A padlock — details only some colleagues may see. */
-  lock: (
-    <svg {...box}>
-      <rect x="3.25" y="7" width="9.5" height="6.75" rx="1.4" />
-      <path d="M5.5 7V5.25a2.5 2.5 0 0 1 5 0V7" />
-    </svg>
-  ),
   /** A coin with the euro — money owed or paid. */
   money: (
     <svg {...box}>

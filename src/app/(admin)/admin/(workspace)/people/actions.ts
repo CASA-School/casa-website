@@ -14,16 +14,17 @@ import {
   normalizeIban,
   removeBankAccount,
   saveAddress,
-  savePersonPrivate,
+  updateBankAccount,
   updatePerson,
   type AddressKind,
+  type BankAccountInput,
   type PersonInput,
 } from '@/lib/admin/people';
 
 /**
- * People module mutations. Creating and editing need `edit`; deleting needs `full`. The protected
- * details — tax, pension and health-insurance numbers, bank accounts — need the module
- * `private_data` instead: `edit` to change them, `full` to remove a bank account.
+ * People module mutations. Creating and editing need `edit`; deleting needs `full`. Bank accounts
+ * have their own module, `private_data`, which the team holds: `edit` to add or correct one, `full`
+ * to remove one.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -107,44 +108,43 @@ export async function saveAddressAction(formData: FormData): Promise<void> {
   redirect(`/admin/people/${id}`);
 }
 
-/** Tax, pension and health-insurance numbers: protected. */
-export async function savePrivateAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('private_data', 'edit');
-  const id = personIdFrom(formData);
-  await savePersonPrivate(
-    id,
-    {
-      taxId: field(formData, 'taxId', 40),
-      pensionInsuranceNumber: field(formData, 'pensionInsuranceNumber', 40),
-      healthInsuranceNumber: field(formData, 'healthInsuranceNumber', 40),
-    },
-    actor
-  );
-  revalidatePath(`/admin/people/${id}`);
-  redirect(`/admin/people/${id}`);
-}
-
-/** A bank account — for a refund, a host's rent, a salary. Protected. */
-export async function addBankAccountAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('private_data', 'edit');
-  const id = personIdFrom(formData);
+/** The account's fields, the IBAN checked for its shape; a message when it does not look right. */
+async function readBankAccount(formData: FormData): Promise<BankAccountInput | string> {
   const iban = normalizeIban(String(formData.get('iban') ?? ''));
   // Two letters, two check digits, then 11–30 letters and digits: the shape of every IBAN.
   if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) {
     const { t } = await getI18n();
-    redirect(`/admin/people/${id}?error=${encodeURIComponent(t('Diese IBAN sieht nicht richtig aus.', 'That IBAN does not look right.'))}`);
+    return t('Diese IBAN sieht nicht richtig aus.', 'That IBAN does not look right.');
   }
-  await addBankAccount(
-    id,
-    {
-      holder: field(formData, 'holder', 120),
-      iban,
-      bic: field(formData, 'bic', 11)?.toUpperCase() ?? null,
-      bankName: field(formData, 'bankName', 120),
-      note: field(formData, 'note', 200),
-    },
-    actor
-  );
+  return {
+    holder: field(formData, 'holder', 120),
+    iban,
+    bic: field(formData, 'bic', 11)?.toUpperCase() ?? null,
+    bankName: field(formData, 'bankName', 120),
+    note: field(formData, 'note', 200),
+  };
+}
+
+/** A bank account — for a refund, a host's rent, a salary. */
+export async function addBankAccountAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('private_data', 'edit');
+  const id = personIdFrom(formData);
+  const input = await readBankAccount(formData);
+  if (typeof input === 'string') redirect(`/admin/people/${id}?error=${encodeURIComponent(input)}`);
+  await addBankAccount(id, input, actor);
+  revalidatePath(`/admin/people/${id}`);
+  redirect(`/admin/people/${id}`);
+}
+
+/** A correction to an account already there. */
+export async function updateBankAccountAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('private_data', 'edit');
+  const id = personIdFrom(formData);
+  const accountId = String(formData.get('accountId') ?? '');
+  if (!UUID.test(accountId)) throw new Error('Invalid accountId');
+  const input = await readBankAccount(formData);
+  if (typeof input === 'string') redirect(`/admin/people/${id}?error=${encodeURIComponent(input)}`);
+  await updateBankAccount(id, accountId, input, actor);
   revalidatePath(`/admin/people/${id}`);
   redirect(`/admin/people/${id}`);
 }
