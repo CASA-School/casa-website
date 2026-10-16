@@ -18,7 +18,8 @@ import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordH
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
-import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, personBookings } from '@/lib/admin/bookings';
+import { BOOKING_LIGHT_LABELS, bookingLight, OBSERVATION_REASON_LABELS, personBookings } from '@/lib/admin/bookings';
+import { BookingLightPill } from '@/components/admin/booking-light';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
@@ -27,7 +28,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { personOffers } from '@/lib/admin/offers/repo';
 import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
-import { getPerson, latestConfirmedLevel, listCountries, personTimeline, type TimelineItem } from '@/lib/admin/people';
+import { getPerson, latestConfirmedLevel, LEARNER_STAGE_LABELS, learnerStage, listCountries, personTimeline, type LearnerStage, type TimelineItem } from '@/lib/admin/people';
 import { normaliseStatus } from '@/lib/admin/queues';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
@@ -57,6 +58,15 @@ const OFFER_TONES: Record<OfferStatus, BadgeTone> = {
   accepted: 'positive',
   declined: 'quiet',
   withdrawn: 'quiet',
+};
+
+/** Where a learner stands, as a badge in the head: the new and the last course stand out. */
+const STAGE_TONES: Record<LearnerStage, 'accent' | 'neutral' | 'positive' | 'quiet' | 'warning'> = {
+  new: 'accent',
+  in_course: 'positive',
+  last: 'warning',
+  coming: 'neutral',
+  finished: 'quiet',
 };
 
 /** One thing under this person's name: a registration, an offer, a booking. */
@@ -125,7 +135,7 @@ export default async function PersonPage({
   const seesOffers = canAccess(user, 'offers');
   const canOffer = canAccess(user, 'offers', 'edit');
   const canDelete = canAccess(user, 'people', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -137,6 +147,7 @@ export default async function PersonPage({
     canBook ? bookingOffer() : Promise.resolve(null),
     seesOffers ? personOffers(person.id) : Promise.resolve([]),
     courseNameResolver(),
+    seesBookings ? learnerStage(person.id) : Promise.resolve(null),
   ]);
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
@@ -184,7 +195,14 @@ export default async function PersonPage({
         at: b.createdAt,
         href: `/admin/bookings/${b.id}`,
         open: b.status === 'reserved' || b.status === 'confirmed' || balance > 0,
-        state: <Badge tone={BOOKING_STATUS_TONES[b.status]}>{pick(lang, BOOKING_STATUS_LABELS[b.status])}</Badge>,
+        // The booking's colour, as on its own page: red, yellow with the reason, grey until paid, green.
+        state: (
+          <BookingLightPill
+            light={bookingLight(b)}
+            label={pick(lang, BOOKING_LIGHT_LABELS[bookingLight(b)])}
+            detail={b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
+          />
+        ),
         amount:
           b.status === 'cancelled' ? null : balance > 0 ? (
             <span className="text-right">
@@ -213,7 +231,14 @@ export default async function PersonPage({
         backLabel={t('Teilnehmende', 'Students')}
         title={person.displayName}
         avatar={person.displayName}
-        status={openFlags.length ? <Badge tone="warning">{t('Zu prüfen', 'Needs a look')}</Badge> : null}
+        status={
+          stage || openFlags.length ? (
+            <>
+              {stage ? <Badge tone={STAGE_TONES[stage]}>{pick(lang, LEARNER_STAGE_LABELS[stage])}</Badge> : null}
+              {openFlags.length ? <Badge tone="warning">{t('Zu prüfen', 'Needs a look')}</Badge> : null}
+            </>
+          ) : null
+        }
         subtitle={
           <>
             <span className="block text-[0.9rem] text-[var(--casa-muted)]">

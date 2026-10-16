@@ -153,8 +153,26 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
   };
 }
 
-/** The register's views: everyone, who is in a course now, who has something open, who still owes money. */
-export type PeopleView = 'all' | 'in_course' | 'open' | 'owing';
+/**
+ * Where a learner stands, worked out from their booked periods — FileMaker's Rookie, Runner,
+ * LastDance and Unicorn, which a colleague typed (docs/schoolman/bookings.md):
+ * new (in their first course, started in the last four weeks), in a course, in their last course
+ * (nothing booked after it — the one to ask about extending), coming (booked, not started) and
+ * finished (all over, nothing to come). Someone who has only enquired has no stage.
+ */
+export type LearnerStage = 'new' | 'in_course' | 'last' | 'coming' | 'finished';
+export const LEARNER_STAGE_LABELS: Record<LearnerStage, Bilingual> = {
+  new: { de: 'Neu', en: 'New' },
+  in_course: { de: 'Im Kurs', en: 'In a course' },
+  last: { de: 'Letzter Kurs', en: 'Last course' },
+  coming: { de: 'Kommend', en: 'Coming' },
+  finished: { de: 'Abgeschlossen', en: 'Finished' },
+};
+/** How long a learner counts as new after their first course starts. */
+const NEW_FOR_DAYS = 28;
+
+/** The register's views: everyone, the learner stages, who has something open, who still owes money. */
+export type PeopleView = 'all' | 'in_course' | 'new' | 'last' | 'coming' | 'finished' | 'open' | 'owing';
 
 /** Open cases under a person (theirs and the rows linked into them): enquiries, registrations, offers in play. */
 const OPEN_CASES = `(
@@ -180,9 +198,48 @@ const IN_COURSE = `EXISTS (
      AND bp.start_date <= current_date AND bp.end_date >= current_date
 )`;
 
+/** A period of an open booking that starts after today — something still to come. */
+const LATER = `EXISTS (
+  SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
+   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND canonical_person_id(b.person_id) = p.id
+     AND bp.start_date > current_date
+)`;
+
+/** The first day of their first course that was not cancelled. */
+const FIRST_START = `(
+  SELECT min(bp.start_date) FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
+   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND canonical_person_id(b.person_id) = p.id
+)`;
+
+/** A period that has ended, of a booking that was not cancelled. */
+const HAD_COURSE = `EXISTS (
+  SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
+   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND canonical_person_id(b.person_id) = p.id
+     AND bp.end_date < current_date
+)`;
+
+const STAGE = `(CASE
+  WHEN ${IN_COURSE} AND ${FIRST_START} >= current_date - ${NEW_FOR_DAYS} THEN 'new'
+  WHEN ${IN_COURSE} AND NOT ${LATER} THEN 'last'
+  WHEN ${IN_COURSE} THEN 'in_course'
+  WHEN ${LATER} THEN 'coming'
+  WHEN ${HAD_COURSE} THEN 'finished'
+END)`;
+
+/** Where one person stands, for the head of their page. */
+export async function learnerStage(personId: string): Promise<LearnerStage | null> {
+  const row = await queryFirst<{ stage: LearnerStage | null }>(`SELECT ${STAGE} AS stage FROM people p WHERE p.id = $1`, [personId]);
+  return row?.stage ?? null;
+}
+
 const VIEW_CONDITION: Record<PeopleView, string | null> = {
   all: null,
+  // „Im Kurs" is everyone in a course today — the new and the last-course ones too.
   in_course: IN_COURSE,
+  new: `${STAGE} = 'new'`,
+  last: `${STAGE} = 'last'`,
+  coming: `${STAGE} = 'coming'`,
+  finished: `${STAGE} = 'finished'`,
   open: `${OPEN_CASES} > 0`,
   owing: `${OWED} > 0.005`,
 };
@@ -192,15 +249,24 @@ export async function peopleCounts(): Promise<Record<PeopleView, number>> {
   const row = await queryFirst<Record<PeopleView, string>>(
     `SELECT count(*) AS all,
             count(*) FILTER (WHERE ${IN_COURSE}) AS in_course,
+            count(*) FILTER (WHERE stage = 'new') AS new,
+            count(*) FILTER (WHERE stage = 'last') AS last,
+            count(*) FILTER (WHERE stage = 'coming') AS coming,
+            count(*) FILTER (WHERE stage = 'finished') AS finished,
             count(*) FILTER (WHERE ${OPEN_CASES} > 0) AS open,
             count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
-       FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL`
+       FROM (SELECT p.*, ${STAGE} AS stage FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL) p`
   );
+  const n = (key: PeopleView) => Number(row?.[key] ?? 0);
   return {
-    all: Number(row?.all ?? 0),
-    in_course: Number(row?.in_course ?? 0),
-    open: Number(row?.open ?? 0),
-    owing: Number(row?.owing ?? 0),
+    all: n('all'),
+    in_course: n('in_course'),
+    new: n('new'),
+    last: n('last'),
+    coming: n('coming'),
+    finished: n('finished'),
+    open: n('open'),
+    owing: n('owing'),
   };
 }
 
@@ -225,6 +291,8 @@ export async function listPeople({
     openCases: number;
     /** Still owed across their bookings. */
     owed: number;
+    /** Where they stand as a learner; null for someone who has only enquired. */
+    stage: LearnerStage | null;
   })[];
   total: number;
 }> {
@@ -251,6 +319,7 @@ export async function listPeople({
       level: string | null;
       open_cases: string;
       owed: string;
+      stage: LearnerStage | null;
     }
   >(
     `${SELECT.replace(
@@ -260,7 +329,8 @@ export async function listPeople({
          (SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
            WHERE rv.person_id IS NOT NULL AND canonical_person_id(rv.person_id) = p.id ORDER BY rv.decided_at DESC LIMIT 1) AS level,
          ${OPEN_CASES} AS open_cases,
-         ${OWED} AS owed
+         ${OWED} AS owed,
+         ${STAGE} AS stage
     FROM people p
     LEFT JOIN LATERAL (
       SELECT t.name AS course_name, min(bp.start_date) AS course_start
@@ -289,6 +359,7 @@ export async function listPeople({
       level: r.level,
       openCases: Number(r.open_cases ?? 0),
       owed: Number(r.owed ?? 0),
+      stage: r.stage,
       course:
         r.course_name && r.course_start
           ? {

@@ -12,7 +12,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { listCountries, listPeople, peopleCounts, type PeopleView } from '@/lib/admin/people';
+import { LEARNER_STAGE_LABELS, listCountries, listPeople, peopleCounts, type PeopleView } from '@/lib/admin/people';
 import { PersonForm } from './person-form';
 
 /**
@@ -28,8 +28,11 @@ import { PersonForm } from './person-form';
  * running now or starting next, otherwise the address they wrote from; then the
  * level a teacher confirmed, what is open under them (enquiries, registrations,
  * offers in play) and what they still owe (2026-10-15). The views answer the
- * questions staff bring to a register — who is here now, who has something open,
- * who owes money — and the counts line says how many. Open flags are one quiet
+ * questions staff bring to a register — who is here now, who is new, who is in
+ * their last course, who is coming, who has finished, who has something open,
+ * who owes money — and the counts line says how many. The learner stages are
+ * FileMaker's Rookie, Runner, LastDance and Unicorn, worked out from the
+ * booked periods instead of typed (2026-10-16, docs/schoolman/bookings.md). Open flags are one quiet
  * line above the list, each a link to that work list; they are cleared on the
  * record they belong to, not here (docs/ADMIN_WORKSPACE.md §Design standards 4, §Lists).
  */
@@ -37,6 +40,10 @@ import { PersonForm } from './person-form';
 const VIEWS: readonly { key: PeopleView; label: Bilingual }[] = [
   { key: 'all', label: { de: 'Alle', en: 'All' } },
   { key: 'in_course', label: { de: 'Im Kurs', en: 'In a course' } },
+  { key: 'new', label: LEARNER_STAGE_LABELS.new },
+  { key: 'last', label: LEARNER_STAGE_LABELS.last },
+  { key: 'coming', label: LEARNER_STAGE_LABELS.coming },
+  { key: 'finished', label: LEARNER_STAGE_LABELS.finished },
   { key: 'open', label: { de: 'Offene Vorgänge', en: 'Something open' } },
   { key: 'owing', label: { de: 'Zu zahlen', en: 'Owing' } },
 ];
@@ -99,6 +106,7 @@ export default async function PeoplePage({
       {/* Who is here, who has something open, who still owes: the register at a glance. */}
       <p className="-mt-3 mb-2 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
         <Tally tone="done" n={counts.in_course} label={t('im Kurs', 'in a course')} lang={lang} />
+        <Tally tone="working" n={counts.last} label={t('im letzten Kurs', 'in their last course')} lang={lang} />
         <Tally tone="new" n={counts.open} label={t('mit offenen Vorgängen', 'with something open')} lang={lang} />
         <Tally tone="waiting" n={counts.owing} label={t('mit offenen Beträgen', 'owing money')} lang={lang} />
       </p>
@@ -146,11 +154,19 @@ export default async function PeoplePage({
                   <RecordName
                     name={person.displayName}
                     about={
-                      person.course
-                        ? person.course.current
-                          ? person.course.name
-                          : `${person.course.name} · ${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`
-                        : (person.primaryEmail ?? undefined)
+                      [
+                        // Where they stand, unless the view already says it.
+                        person.stage && view !== person.stage ? pick(lang, LEARNER_STAGE_LABELS[person.stage]) : null,
+                        person.course
+                          ? person.course.current
+                            ? person.course.name
+                            : `${person.course.name} · ${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`
+                          : person.stage
+                            ? null
+                            : person.primaryEmail,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ') || undefined
                     }
                   />
                 </Cell>

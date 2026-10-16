@@ -908,6 +908,16 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     The birth date went to the person's page. `peopleCounts` and the
     `OPEN_CASES` / `OWED` / `IN_COURSE` fragments in `people.ts` are the one
     definition of each.
+
+    **Learner stages (2026-10-16).** FileMaker's Rookie, Runner, LastDance and
+    Unicorn, worked out from the booked periods by one SQL fragment (`STAGE`
+    in `people.ts`) instead of typed: *Neu* (in a course whose first day was
+    in the last four weeks), *Letzter Kurs* (in a course, nothing booked after
+    it — the list to ask about extending), *Im Kurs*, *Kommend* (booked, not
+    started), *Abgeschlossen* (all over). They are views of the register, a
+    word in each row's line (left out where the view already says it) and a
+    badge in the head of the person's page; the person's bookings carry the
+    booking colours (§20).
 22. **Kurse and Prüfungen (2026-10-15).** They keep their month-grouped
     tables and gain the counts line: for courses the dates ahead, the places
     taken (as the seat bars count them) and the next start; for exams the
