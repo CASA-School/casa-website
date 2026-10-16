@@ -492,9 +492,16 @@ Nine top-level items, and the placements are the argument:
   strip. Rooms moved from `/admin/planning` to `/admin/settings/rooms` and the
   module is called `rooms`, because "planning" described a screen that turned
   out to be setup.
-- **Placement belongs to the student.** A learner who wants B1 sits the A1 and
-  A2 test on the way there, so the result is part of their profile. The review
-  list is nested under **Students** rather than standing beside the queues.
+- **The placement queue appears only where the test runs (2026-10-16).** It
+  reviews CASA's own online placement test, which is closed on the live site
+  (the Klett tests are used), so a rail item for it was a screen nobody's day
+  passes through — Rahman asked why it sat under Students at all. The item and
+  the overview's card now show only where a deployment has switched the test on
+  (`placementTestSwitchedOn()`, the explicit `CASA_ENABLE_PLACEMENT_TEST`, not
+  the development default), and then under **Posteingang**: its results come in
+  from the website and wait for a teacher, like an enquiry. A learner's own
+  placement results stay on their page among the Vorgänge, and the screens stay
+  reachable by address.
 - **Courses and Exams are two items, not one screen with a tab strip.** A term
   of courses and a telc sitting share a catalogue table and almost nothing
   else. The old `CatalogueTabs` is gone: the rail makes that choice now, and
@@ -734,6 +741,37 @@ In lists, a record's initials are softly tinted — the same tint for the same
 name, so a person is recognisable down a list; a colleague's stay navy. A list
 without views says what it holds where the tabs would be ("18 students"), and a
 row shows a quiet arrow at its end when pointed at.
+
+### A record in tabs (2026-10-16)
+
+Rahman: the person page, and the teacher, staff and organisation pages to come,
+should not put everything on one screen — a few tabs, the most important
+information in the first, and it should feel advanced. `record-tabs.tsx` is the
+pattern: `RecordTabs` wraps the page and holds the open tab, `RecordTabList` is
+the strip on the head's lower edge (`RecordHeader`'s `tabs` slot: icon, label, a
+count where it helps, a navy line that slides to the open tab), and each
+`RecordTabPanel` is one tab. The head stays the same on every tab — name, how to
+reach them, the figures, the actions — so a colleague never loses whose record
+it is.
+
+- Every panel is server-rendered and stays mounted, only hidden: switching is
+  instant, and a half-typed note survives a look at another tab.
+- The open tab is in the address (`?tab=details`), so a reload or a shared link
+  lands on it; the first tab has a clean address. A form sent from a tab
+  redirects to the record's plain address, and the page reopens on the tab it
+  came from (remembered for the visit, in memory only).
+- Keyboard: arrows, Home and End move along the strip; the line does not slide
+  under `prefers-reduced-motion`. On a phone the strip scrolls sideways.
+- A tab a colleague may not see is not rendered at all, not hidden: without
+  `private_data` there is no „Geschützt" tab and no data in the page.
+
+The learner's tabs: **Übersicht** — the course they are in (week 3 of 8, as a
+line) or the next one and how soon, what else is open, the last three closed
+cases with a link to all, and beside them anything to check and the notes;
+**Vorgänge** — everything under their name, open and closed; **Angaben** —
+person, contact, addresses, and the record itself (created, source, FileMaker,
+linked records); **Geschützt** — tax and insurance numbers and bank accounts.
+A teacher's or an organisation's page uses the same parts with its own tabs.
 
 ## Lists
 

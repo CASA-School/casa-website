@@ -370,6 +370,7 @@ export function RecordHeader({
   actions,
   facts = [],
   bar,
+  tabs,
 }: {
   backHref?: string;
   backLabel?: string;
@@ -382,6 +383,8 @@ export function RecordHeader({
   facts?: readonly Fact[];
   /** A strip under the head for the record's working controls (a queue record: its status and owner). */
   bar?: ReactNode;
+  /** The record's tabs (`RecordTabList`), on the head's lower edge. */
+  tabs?: ReactNode;
 }) {
   return (
     <header className="mb-4">
@@ -433,6 +436,7 @@ export function RecordHeader({
         {bar ? (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3">{bar}</div>
         ) : null}
+        {tabs ? <div className="border-t border-ws-line px-3">{tabs}</div> : null}
       </section>
     </header>
   );

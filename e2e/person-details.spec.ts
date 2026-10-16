@@ -5,8 +5,9 @@ import pg from 'pg';
 
 /**
  * Everything about a learner (2026-10-16, migration 0029): the details SchoolMan holds — some of
- * them telc asks for — an address in Bremen, and the protected card (tax, pension, health
+ * them telc asks for — an address in Bremen, and the protected tab (tax, pension, health
  * insurance, bank accounts) that an owner sees and a colleague without `private_data` does not.
+ * The page is in tabs: a save returns to the tab it was made on.
  *
  * Runs only with a database and an owner account, in German (pinned). The person, the test
  * colleague and both sessions are deleted afterwards.
@@ -75,7 +76,8 @@ test.describe('person details', () => {
     await page.getByLabel('Geburtsort').fill('Valparaíso');
     await page.getByLabel('Passnummer').fill('P1234567');
     await page.getByRole('button', { name: 'Speichern' }).click();
-    const details = page.getByRole('heading', { name: 'Angaben', exact: true }).locator('xpath=ancestor::section[1]');
+    await page.getByRole('tab', { name: 'Angaben' }).click();
+    const details = page.getByRole('heading', { name: 'Person', exact: true }).locator('xpath=ancestor::section[1]');
     await expect(details).toContainText('Spanisch');
     await expect(details).toContainText('Valparaíso');
     await expect(details).toContainText('P1234567');
@@ -85,22 +87,25 @@ test.describe('person details', () => {
     await page.getByLabel('Straße und Hausnummer').fill('Am Dobben 14');
     await page.getByLabel('PLZ').fill('28203');
     await page.getByRole('button', { name: 'Speichern' }).click();
+    await expect(page.getByRole('tab', { selected: true })).toHaveText('Angaben');
     await expect(addresses).toContainText('Am Dobben 14');
     await expect(addresses).toContainText('28203 Bremen');
 
-    const protectedCard = page.getByRole('heading', { name: 'Geschützte Angaben' }).locator('xpath=ancestor::section[1]');
-    await protectedCard.getByRole('button', { name: 'Konto hinzufügen' }).click();
+    await page.getByRole('tab', { name: 'Geschützt' }).click();
+    const accounts = page.getByRole('heading', { name: 'Bankverbindungen' }).locator('xpath=ancestor::section[1]');
+    await accounts.getByRole('button', { name: 'Konto hinzufügen' }).click();
     await page.getByLabel('IBAN').fill('de89 3704 0044 0532 0130 00');
-    await page.getByRole('button', { name: 'Konto hinzufügen' }).last().click();
-    await expect(protectedCard).toContainText('DE89 3704 0044 0532 0130 00');
+    await page.getByRole('dialog').getByRole('button', { name: 'Konto hinzufügen' }).click();
+    await expect(accounts).toContainText('DE89 3704 0044 0532 0130 00');
   });
 
-  test('a colleague without the right does not see the protected card', async ({ page, context, baseURL }) => {
+  test('a colleague without the right has no protected tab', async ({ page, context, baseURL }) => {
     await signIn(context, baseURL!, staffToken);
-    await page.goto(`/admin/people/${personId}`);
+    await page.goto(`/admin/people/${personId}?tab=protected`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tia Telcfall');
-    await expect(page.getByRole('heading', { name: 'Angaben', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Geschützte Angaben' })).toHaveCount(0);
+    await expect(page.getByRole('tab', { name: 'Angaben' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Geschützt' })).toHaveCount(0);
+    await expect(page.getByRole('tab', { selected: true })).toHaveText('Übersicht');
     await expect(page.getByText('DE89')).toHaveCount(0);
   });
 });

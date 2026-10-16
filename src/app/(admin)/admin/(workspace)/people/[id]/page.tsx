@@ -14,16 +14,17 @@ import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MakeOffer } from '@/components/admin/make-offer';
 import { MetaItem, MetaLine, Stat, StatBar, StatePill, Timeline } from '@/components/admin/record-parts';
+import { RecordTabLink, RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone, type Tint } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
-import { BOOKING_LIGHT_LABELS, bookingLight, OBSERVATION_REASON_LABELS, personBookings } from '@/lib/admin/bookings';
+import { BOOKING_LIGHT_LABELS, bookingLight, OBSERVATION_REASON_LABELS, personBookings, type BookingListItem } from '@/lib/admin/bookings';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
-import { counted, dayRange, num, pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { counted, dayRange, num, pick, translator, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { personOffers } from '@/lib/admin/offers/repo';
@@ -118,8 +119,11 @@ const euros = (lang: WsLang, value: number, currency = 'EUR') =>
  * its own says "someone wants a B1 course"; the same registration under a person
  * who enquired twice, sat a placement and was confirmed A2.2 says something quite
  * different, and staff should not have to search five lists to find that out.
- * Beside it their details, anything that needs a look, the records linked into
- * this one, and the notes and changes in one line of time.
+ *
+ * In tabs under the head (2026-10-16, `record-tabs.tsx`): Übersicht — the course
+ * now or next, what else is open, the last closed, anything to check, the notes;
+ * Vorgänge — all of it; Angaben — person, contact, addresses, the record and the
+ * records linked into it; Geschützt — only with `private_data`.
  *
  * If this row was linked INTO another, `getPerson` follows `merged_into` and
  * the page renders the survivor. The rows linked into THIS one are listed with
@@ -131,9 +135,9 @@ export default async function PersonPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; tab?: string }>;
 }) {
-  const [{ id }, { error }, user] = await Promise.all([params, searchParams, requireModule('people')]);
+  const [{ id }, { error, tab }, user] = await Promise.all([params, searchParams, requireModule('people')]);
   const person = await getPerson(id);
 
   if (!person) {
@@ -241,8 +245,32 @@ export default async function PersonPage({
   const owed = bookings.filter((b) => b.status !== 'cancelled').reduce((sum, b) => sum + Math.max(0, b.charged - b.paid), 0);
   const running = bookings.filter((b) => b.status === 'reserved' || b.status === 'confirmed').length;
 
+  // The course they are in, or the next one: the first thing anyone asks about a learner.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dated = bookings.filter((b) => b.status !== 'cancelled' && b.startDate && b.endDate);
+  const current = dated.find((b) => b.startDate! <= today && b.endDate! >= today) ?? null;
+  const next = current ? null : (dated.filter((b) => b.startDate! > today).sort((a, b) => a.startDate!.getTime() - b.startDate!.getTime())[0] ?? null);
+  const spotlight = current ?? next;
+  const overviewOpen = openCases.filter((c) => c.key !== `booking-${spotlight?.id}`);
+  const recent = pastCases.slice(0, 3);
+
+  const personDialog = (variant: 'secondary' | 'ghost') =>
+    canEdit ? (
+      <FormDialog trigger={t('Bearbeiten', 'Edit')} title={person.displayName} width="lg" triggerVariant={variant} size={variant === 'ghost' ? 'sm' : undefined}>
+        <PersonForm person={person} countries={countries} />
+      </FormDialog>
+    ) : null;
+
+  const tabs: RecordTab[] = [
+    { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
+    { id: 'cases', label: t('Vorgänge', 'Cases'), icon: Icon.registrations, count: cases.length },
+    { id: 'details', label: t('Angaben', 'Details'), icon: Icon.person },
+    ...(privateData ? [{ id: 'protected', label: t('Geschützt', 'Protected'), icon: Icon.lock }] : []),
+  ];
+
   return (
-    <>
+    <RecordTabs tabs={tabs} initial={tab}>
       <RecordHeader
         backHref="/admin/people"
         backLabel={t('Teilnehmende', 'Students')}
@@ -291,11 +319,7 @@ export default async function PersonPage({
         }
         actions={
           <>
-            {canEdit ? (
-              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={person.displayName} width="lg">
-                <PersonForm person={person} countries={countries} />
-              </FormDialog>
-            ) : null}
+            {personDialog('secondary')}
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog trigger={t('Neue Buchung', 'New booking')} title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)} triggerVariant="primary" width="lg">
@@ -341,6 +365,7 @@ export default async function PersonPage({
             </Stat>
           </StatBar>
         }
+        tabs={<RecordTabList label={t(`${person.displayName}: Bereiche`, `${person.displayName}: sections`)} />}
       />
 
       {error ? (
@@ -349,152 +374,243 @@ export default async function PersonPage({
         </p>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        <div className="space-y-4">
-          <Card title={t('Vorgänge', 'Cases')} icon={Icon.registrations} tint="blue">
-            {cases.length ? (
-              <div className="-mx-4 -my-4">
-                {openCases.length ? <CaseGroup label={t('Offen', 'Open')} cases={openCases} lang={lang} /> : null}
-                {pastCases.length ? <CaseGroup label={t('Abgeschlossen', 'Closed')} cases={pastCases} lang={lang} quiet /> : null}
-              </div>
-            ) : (
-              <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Vorgänge.', 'No cases yet.')}</p>
-            )}
-          </Card>
-        </div>
+      {/* What a colleague needs first: the course now, what is open, the notes. */}
+      <RecordTabPanel id="overview">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+          <div className="space-y-4">
+            {spotlight ? <CourseNow booking={spotlight} running={spotlight === current} today={today} lang={lang} /> : null}
+            {/* The course above is already open; „nothing open" only when nothing at all is. */}
+            {overviewOpen.length || !spotlight ? (
+              <Card title={t('Offen', 'Open')} icon={Icon.registrations} tint="blue" bleed>
+                {overviewOpen.length ? (
+                  <CaseRows cases={overviewOpen} lang={lang} />
+                ) : (
+                  <p className="px-4 py-4 text-sm text-[var(--casa-muted)]">{t('Nichts offen.', 'Nothing open.')}</p>
+                )}
+              </Card>
+            ) : null}
+            {recent.length ? (
+              <Card
+                title={t('Zuletzt abgeschlossen', 'Recently closed')}
+                icon={Icon.check}
+                tint="ink"
+                bleed
+                actions={
+                  pastCases.length > recent.length ? (
+                    <RecordTabLink to="cases">
+                      {t(`Alle ${num(lang, cases.length)} Vorgänge`, `All ${num(lang, cases.length)} cases`)} {Icon.chevronRight}
+                    </RecordTabLink>
+                  ) : undefined
+                }
+              >
+                <CaseRows cases={recent} lang={lang} quiet />
+              </Card>
+            ) : null}
+          </div>
 
-        <div className="space-y-4">
-          {openFlags.length > 0 ? (
-            <Card title={t('Zu prüfen', 'Needs a look')} icon={Icon.flag} tint="sun">
-              <ul className="space-y-2">
-                {openFlags.map((f) => (
-                  <li key={f.id} className="flex items-center gap-2 rounded-xl bg-[#fff8e6] px-3 py-2 text-sm font-semibold ring-1 ring-[#efdca4] ring-inset">
-                    <span className="text-[#9a5b00]">{Icon.flag}</span>
-                    {pick(lang, FLAG_LABELS[f.code])}
-                  </li>
-                ))}
+          <div className="space-y-4">
+            {openFlags.length > 0 ? (
+              <Card title={t('Zu prüfen', 'Needs a look')} icon={Icon.flag} tint="sun">
+                <ul className="space-y-2">
+                  {openFlags.map((f) => (
+                    <li key={f.id} className="flex items-center gap-2 rounded-xl bg-[#fff8e6] px-3 py-2 text-sm font-semibold ring-1 ring-[#efdca4] ring-inset">
+                      <span className="text-[#9a5b00]">{Icon.flag}</span>
+                      {pick(lang, FLAG_LABELS[f.code])}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : null}
+            <Timeline
+              canWrite={canEdit}
+              entity="person"
+              id={person.id}
+              notes={notes}
+              activity={activity.filter((entry) => entry.action !== 'person_created')}
+              origin={{ at: person.createdAt, label: came, icon: Icon.person }}
+            />
+          </div>
+        </div>
+      </RecordTabPanel>
+
+      {/* Everything under their name: enquiries, registrations, placement results, offers, bookings. */}
+      <RecordTabPanel id="cases">
+        <Card title={t('Vorgänge', 'Cases')} icon={Icon.registrations} tint="blue">
+          {cases.length ? (
+            <div className="-mx-4 -my-4">
+              {openCases.length ? <CaseGroup label={t('Offen', 'Open')} cases={openCases} lang={lang} /> : null}
+              {pastCases.length ? <CaseGroup label={t('Abgeschlossen', 'Closed')} cases={pastCases} lang={lang} quiet /> : null}
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Vorgänge.', 'No cases yet.')}</p>
+          )}
+        </Card>
+      </RecordTabPanel>
+
+      {/* Who they are, how to reach them, where they live, where the record came from. */}
+      <RecordTabPanel id="details">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <div className="space-y-4">
+            <Card title={t('Person', 'Person')} icon={Icon.person} tint="ink" actions={personDialog('ghost')}>
+              <DetailList
+                items={[
+                  ...(person.salutation && SALUTATIONS[person.salutation] ? [{ label: t('Anrede', 'Salutation'), value: pick(lang, SALUTATIONS[person.salutation]) }] : []),
+                  ...(person.facts.nickname ? [{ label: t('Rufname', 'Nickname'), value: person.facts.nickname }] : []),
+                  ...(person.facts.secondLastName ? [{ label: t('Zweiter Nachname', 'Second surname'), value: person.facts.secondLastName }] : []),
+                  {
+                    label: t('Geburtsdatum', 'Date of birth'),
+                    value: person.birthDate ? <BirthDate value={person.birthDate} /> : person.facts.birthYear ? t(`${person.facts.birthYear} (nur das Jahr)`, `${person.facts.birthYear} (year only)`) : null,
+                  },
+                  { label: t('Geburtsort', 'Place of birth'), value: person.facts.birthPlace },
+                  { label: t('Geburtsland', 'Country of birth'), value: person.facts.birthCountryName },
+                  {
+                    label: t('Nationalität', 'Nationality'),
+                    value:
+                      person.nationalityName ??
+                      (person.nationalityRaw ? (
+                        <span className="flex items-center gap-2">
+                          {person.nationalityRaw}
+                          <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
+                        </span>
+                      ) : null),
+                  },
+                  { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
+                  { label: t('Beruf', 'Occupation'), value: person.facts.occupation },
+                  { label: t('Passnummer', 'Passport number'), value: person.facts.passportNumber },
+                ]}
+              />
+            </Card>
+            <Card title={t('Kontakt', 'Contact')} icon={Icon.mail} tint="blue">
+              <DetailList
+                items={[
+                  {
+                    label: t('E-Mail', 'Email'),
+                    wide: true,
+                    value: person.emails.length ? (
+                      <ul className="space-y-0.5">
+                        {person.emails.map((e) => (
+                          <li key={e.address} className="truncate">
+                            <a href={`mailto:${e.address}`} className="font-medium hover:underline">
+                              {e.address}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null,
+                  },
+                  {
+                    label: t('Telefon', 'Phone'),
+                    wide: true,
+                    value: person.phones.length ? (
+                      <ul className="space-y-0.5">
+                        {person.phones.map((p) => (
+                          <li key={p.number}>
+                            <a href={`tel:${p.number}`} className="font-medium hover:underline">
+                              {p.number}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null,
+                  },
+                ]}
+              />
+            </Card>
+          </div>
+
+          <div className="space-y-4">
+            {/* Where they live: at home, and in Bremen while here. Letters go to the Bremen one first. */}
+            <Card title={t('Adressen', 'Addresses')} icon={Icon.rooms} tint="ink">
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {(['local', 'home'] as const).map((kind: AddressKind) => {
+                  const address = person.addresses.find((a) => a.kind === kind);
+                  return (
+                    <li key={kind} className="flex items-start justify-between gap-3 py-2.5">
+                      <span className="min-w-0 text-sm">
+                        <span className="block text-xs font-medium text-[var(--casa-muted)]">{kind === 'local' ? t('In Bremen', 'In Bremen') : t('Zuhause', 'At home')}</span>
+                        {address ? <AddressLines address={address} /> : <span className="block text-[var(--casa-text-subtle)]">—</span>}
+                      </span>
+                      {canEdit ? (
+                        <FormDialog
+                          trigger={address ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')}
+                          title={kind === 'local' ? t('Adresse in Bremen', 'Address in Bremen') : t('Adresse zuhause', 'Home address')}
+                          triggerVariant="ghost"
+                          size="sm"
+                        >
+                          <AddressForm personId={person.id} kind={kind} address={address} countries={countries} />
+                        </FormDialog>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
             </Card>
-          ) : null}
 
-          <Card title={t('Angaben', 'Details')} icon={Icon.person} tint="ink">
-            <DetailList
-              items={[
-                ...(person.salutation && SALUTATIONS[person.salutation] ? [{ label: t('Anrede', 'Salutation'), value: pick(lang, SALUTATIONS[person.salutation]) }] : []),
-                {
-                  label: t('E-Mail', 'Email'),
-                  wide: true,
-                  value: person.emails.length ? (
-                    <ul className="space-y-0.5">
-                      {person.emails.map((e) => (
-                        <li key={e.address} className="truncate">
-                          <a href={`mailto:${e.address}`} className="font-medium hover:underline">
-                            {e.address}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null,
-                },
-                {
-                  label: t('Telefon', 'Phone'),
-                  wide: true,
-                  value: person.phones.length ? (
-                    <ul className="space-y-0.5">
-                      {person.phones.map((p) => (
-                        <li key={p.number}>
-                          <a href={`tel:${p.number}`} className="font-medium hover:underline">
-                            {p.number}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null,
-                },
-                {
-                  label: t('Nationalität', 'Nationality'),
-                  value:
-                    person.nationalityName ??
-                    (person.nationalityRaw ? (
-                      <span className="flex items-center gap-2">
-                        {person.nationalityRaw}
-                        <Badge tone="warning">{t('nicht erkannt', 'unrecognised')}</Badge>
-                      </span>
-                    ) : null),
-                },
-                {
-                  label: t('Geburtsdatum', 'Date of birth'),
-                  value: person.birthDate ? <BirthDate value={person.birthDate} /> : person.facts.birthYear ? t(`${person.facts.birthYear} (nur das Jahr)`, `${person.facts.birthYear} (year only)`) : null,
-                },
-                { label: t('Geburtsort', 'Place of birth'), value: person.facts.birthPlace },
-                { label: t('Geburtsland', 'Country of birth'), value: person.facts.birthCountryName },
-                { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
-                { label: t('Beruf', 'Occupation'), value: person.facts.occupation },
-                { label: t('Passnummer', 'Passport number'), value: person.facts.passportNumber },
-                ...(person.facts.secondLastName ? [{ label: t('Zweiter Nachname', 'Second surname'), value: person.facts.secondLastName }] : []),
-                ...(person.facts.nickname ? [{ label: t('Rufname', 'Nickname'), value: person.facts.nickname }] : []),
-                ...(fileMakerLinks.length
-                  ? [
-                      {
-                        label: 'FileMaker',
-                        wide: true,
-                        value: (
-                          <ul className="space-y-0.5 text-sm">
-                            {fileMakerLinks.map((link) => (
-                              <li key={link.id}>
-                                {link.sourceLayout}{' '}
-                                <span className="font-mono text-xs text-[var(--casa-muted)]">{link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        ),
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-          </Card>
+            <Card title={t('Datensatz', 'Record')} icon={Icon.note} tint="ink">
+              <DetailList
+                items={[
+                  { label: t('Angelegt', 'Created'), value: <DateText value={person.createdAt} /> },
+                  { label: t('Herkunft', 'Source'), value: came },
+                  ...(fileMakerLinks.length
+                    ? [
+                        {
+                          label: 'FileMaker',
+                          wide: true,
+                          value: (
+                            <ul className="space-y-0.5 text-sm">
+                              {fileMakerLinks.map((link) => (
+                                <li key={link.id}>
+                                  {link.sourceLayout}{' '}
+                                  <span className="font-mono text-xs text-[var(--casa-muted)]">{link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+              {person.linkedDuplicates.length > 0 ? (
+                <div className="mt-4 border-t border-ws-line-soft pt-3">
+                  <span className="text-xs font-medium text-[var(--casa-muted)]">{t('Verknüpfte Datensätze', 'Linked records')}</span>
+                  <ul className="mt-1 divide-y divide-ws-line-soft">
+                    {person.linkedDuplicates.map((dup) => (
+                      <li key={dup.id} className="flex items-center justify-between gap-3 py-2">
+                        <span className="min-w-0 text-sm">
+                          <span className="block font-semibold">{dup.displayName}</span>
+                          <span className="block text-xs text-[var(--casa-muted)]">
+                            {t('Angelegt', 'Created')} <DateText value={dup.createdAt} /> · {dup.createdBy}
+                          </span>
+                        </span>
+                        <form action={unlinkPersonAction}>
+                          <input type="hidden" name="personId" value={dup.id} />
+                          <input type="hidden" name="returnTo" value={`/admin/people/${person.id}`} />
+                          <Button type="submit" variant="ghost" size="sm">
+                            {t('Trennen', 'Unlink')}
+                          </Button>
+                        </form>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </Card>
+          </div>
+        </div>
+      </RecordTabPanel>
 
-          {/* Where they live: at home, and in Bremen while here. Letters go to the Bremen one first. */}
-          <Card title={t('Adressen', 'Addresses')} icon={Icon.rooms} tint="ink">
-            <ul className="-my-1.5 divide-y divide-ws-line-soft">
-              {(['local', 'home'] as const).map((kind: AddressKind) => {
-                const address = person.addresses.find((a) => a.kind === kind);
-                return (
-                  <li key={kind} className="flex items-start justify-between gap-3 py-2.5">
-                    <span className="min-w-0 text-sm">
-                      <span className="block text-xs font-medium text-[var(--casa-muted)]">{kind === 'local' ? t('In Bremen', 'In Bremen') : t('Zuhause', 'At home')}</span>
-                      {address ? (
-                        <AddressLines address={address} />
-                      ) : (
-                        <span className="block text-[var(--casa-text-subtle)]">—</span>
-                      )}
-                    </span>
-                    {canEdit ? (
-                      <FormDialog
-                        trigger={address ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')}
-                        title={kind === 'local' ? t('Adresse in Bremen', 'Address in Bremen') : t('Adresse zuhause', 'Home address')}
-                        triggerVariant="ghost"
-                        size="sm"
-                      >
-                        <AddressForm personId={person.id} kind={kind} address={address} countries={countries} />
-                      </FormDialog>
-                    ) : null}
-                  </li>
-                );
-              })}
-            </ul>
-          </Card>
-
-          {/* Protected: tax, pension and health-insurance numbers and bank accounts — only with `private_data`. */}
-          {privateData ? (
+      {/* Protected: tax, pension and health-insurance numbers and bank accounts — only with `private_data`. */}
+      {privateData ? (
+        <RecordTabPanel id="protected">
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
             <Card
-              title={t('Geschützte Angaben', 'Protected details')}
-              icon={Icon.money}
+              title={t('Steuer und Versicherung', 'Tax and insurance')}
+              icon={Icon.lock}
               tint="red"
               actions={
                 editsPrivate ? (
-                  <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Geschützte Angaben', 'Protected details')} size="sm">
+                  <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Steuer und Versicherung', 'Tax and insurance')} size="sm" triggerVariant="ghost">
                     <PrivateForm personId={person.id} data={privateData} />
                   </FormDialog>
                 ) : undefined
@@ -502,89 +618,57 @@ export default async function PersonPage({
             >
               <DetailList
                 items={[
-                  // One per row: the labels are long and the column is narrow.
+                  // One per row: the labels are long.
                   { label: t('Steuer-ID', 'Tax ID'), value: privateData.taxId, wide: true },
                   { label: t('Rentenversicherungsnummer', 'Pension insurance number'), value: privateData.pensionInsuranceNumber, wide: true },
                   { label: t('Krankenversicherungsnummer', 'Health insurance number'), value: privateData.healthInsuranceNumber, wide: true },
                 ]}
               />
-              <div className="mt-4 border-t border-ws-line-soft pt-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-[var(--casa-muted)]">{t('Bankverbindungen', 'Bank accounts')}</span>
-                  {editsPrivate ? (
-                    <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="ghost" size="sm">
-                      <BankAccountForm personId={person.id} holder={person.displayName} />
-                    </FormDialog>
-                  ) : null}
-                </div>
-                {privateData.bankAccounts.length ? (
-                  <ul className="mt-1 divide-y divide-ws-line-soft">
-                    {privateData.bankAccounts.map((account) => (
-                      <li key={account.id} className="flex items-start justify-between gap-3 py-2">
-                        <span className="min-w-0 text-sm">
-                          <span className="block font-mono text-[0.84rem] font-semibold">{account.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
-                          <span className="block text-xs text-[var(--casa-muted)]">
-                            {[account.holder, account.bankName, account.bic, account.note].filter(Boolean).join(' · ')}
-                          </span>
-                        </span>
-                        {removesBank ? (
-                          <form action={removeBankAccountAction}>
-                            <input type="hidden" name="personId" value={person.id} />
-                            <input type="hidden" name="accountId" value={account.id} />
-                            <ConfirmSubmit
-                              title={t('Diese Bankverbindung entfernen?', 'Remove this bank account?')}
-                              description={t('Sie wird von der Person entfernt.', 'It is removed from the person.')}
-                              confirmLabel={t('Entfernen', 'Remove')}
-                              variant="ghost"
-                            >
-                              {t('Entfernen', 'Remove')}
-                            </ConfirmSubmit>
-                          </form>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">—</p>
-                )}
-              </div>
             </Card>
-          ) : null}
-
-          {person.linkedDuplicates.length > 0 ? (
-            <Card title={t('Verknüpfte Datensätze', 'Linked records')} icon={Icon.people} tint="ink">
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {person.linkedDuplicates.map((dup) => (
-                  <li key={dup.id} className="flex items-center justify-between gap-3 py-2.5">
-                    <span className="min-w-0 text-sm">
-                      <span className="block font-semibold">{dup.displayName}</span>
-                      <span className="block text-xs text-[var(--casa-muted)]">
-                        {t('Angelegt', 'Created')} <DateText value={dup.createdAt} /> · {dup.createdBy}
+            <Card
+              title={t('Bankverbindungen', 'Bank accounts')}
+              icon={Icon.money}
+              tint="red"
+              actions={
+                editsPrivate ? (
+                  <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="ghost" size="sm">
+                    <BankAccountForm personId={person.id} holder={person.displayName} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              {privateData.bankAccounts.length ? (
+                <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                  {privateData.bankAccounts.map((account) => (
+                    <li key={account.id} className="flex items-start justify-between gap-3 py-2.5">
+                      <span className="min-w-0 text-sm">
+                        <span className="block font-mono text-[0.84rem] font-semibold">{account.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
+                        <span className="block text-xs text-[var(--casa-muted)]">{[account.holder, account.bankName, account.bic, account.note].filter(Boolean).join(' · ')}</span>
                       </span>
-                    </span>
-                    <form action={unlinkPersonAction}>
-                      <input type="hidden" name="personId" value={dup.id} />
-                      <input type="hidden" name="returnTo" value={`/admin/people/${person.id}`} />
-                      <Button type="submit" variant="ghost" size="sm">
-                        {t('Trennen', 'Unlink')}
-                      </Button>
-                    </form>
-                  </li>
-                ))}
-              </ul>
+                      {removesBank ? (
+                        <form action={removeBankAccountAction}>
+                          <input type="hidden" name="personId" value={person.id} />
+                          <input type="hidden" name="accountId" value={account.id} />
+                          <ConfirmSubmit
+                            title={t('Diese Bankverbindung entfernen?', 'Remove this bank account?')}
+                            description={t('Sie wird von der Person entfernt.', 'It is removed from the person.')}
+                            confirmLabel={t('Entfernen', 'Remove')}
+                            variant="ghost"
+                          >
+                            {t('Entfernen', 'Remove')}
+                          </ConfirmSubmit>
+                        </form>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Keine Bankverbindung.', 'No bank account.')}</p>
+              )}
             </Card>
-          ) : null}
-
-          <Timeline
-            canWrite={canEdit}
-            entity="person"
-            id={person.id}
-            notes={notes}
-            activity={activity.filter((entry) => entry.action !== 'person_created')}
-            origin={{ at: person.createdAt, label: came, icon: Icon.person }}
-          />
-        </div>
-      </div>
+          </div>
+        </RecordTabPanel>
+      ) : null}
 
       {canDelete ? (
         <RecordFoot>
@@ -602,46 +686,123 @@ export default async function PersonPage({
           </form>
         </RecordFoot>
       ) : null}
-    </>
+    </RecordTabs>
   );
 }
 
-/** A group of cases — open or closed — as rows: the kind's mark, what it is, when, where it stands. */
+/** A group of cases — open or closed — under its label and count. */
 function CaseGroup({ label, cases, lang, quiet = false }: { label: string; cases: readonly Case[]; lang: WsLang; quiet?: boolean }) {
   return (
     <section className="border-t border-ws-line-soft first:border-t-0">
       <h3 className="px-4 pt-3.5 pb-1.5 text-xs font-bold text-[var(--casa-ink)]">
         {label} <span className="ml-1 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">{cases.length}</span>
       </h3>
-      <ul className="pb-1.5">
-        {cases.map((c) => (
-          <li key={c.key}>
-            <Link
-              href={c.href}
-              className="group flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]"
-            >
-              <span className={cn(quiet && 'opacity-70')}>
-                <IconChip icon={KINDS[c.kind].icon} tint={KINDS[c.kind].tint} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className={cn('truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{c.title}</span>
-                  {c.state}
-                </span>
-                <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">
-                  {[pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' · ')}
-                </span>
-              </span>
-              {c.amount ?? (
-                <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
-                  <DateText value={c.at} compact />
-                </span>
-              )}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <CaseRows cases={cases} lang={lang} quiet={quiet} />
     </section>
+  );
+}
+
+/** Cases as rows: the kind's mark, what it is, when, where it stands. */
+function CaseRows({ cases, lang, quiet = false }: { cases: readonly Case[]; lang: WsLang; quiet?: boolean }) {
+  return (
+    <ul className="py-1.5">
+      {cases.map((c) => (
+        <li key={c.key}>
+          <Link
+            href={c.href}
+            className="group flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]"
+          >
+            <span className={cn(quiet && 'opacity-70')}>
+              <IconChip icon={KINDS[c.kind].icon} tint={KINDS[c.kind].tint} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <span className={cn('truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{c.title}</span>
+                {c.state}
+              </span>
+              <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">
+                {[pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' · ')}
+              </span>
+            </span>
+            {c.amount ?? (
+              <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
+                <DateText value={c.at} compact />
+              </span>
+            )}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const DAY = 86_400_000;
+
+/**
+ * The course a learner is in — which week of how many, as a line that fills — or the next one and
+ * how soon it starts, with the booking's colour and what is still open on it.
+ */
+function CourseNow({ booking, running, today, lang }: { booking: BookingListItem; running: boolean; today: Date; lang: WsLang }) {
+  const t = translator(lang);
+  const start = booking.startDate!;
+  const end = booking.endDate!;
+  const weeks = Math.max(1, Math.round((end.getTime() - start.getTime() + DAY) / (7 * DAY)));
+  const week = Math.min(weeks, Math.floor((today.getTime() - start.getTime()) / (7 * DAY)) + 1);
+  const inDays = Math.round((start.getTime() - today.getTime()) / DAY);
+  const light = bookingLight(booking);
+  const open = booking.charged - booking.paid;
+  return (
+    <Card
+      title={running ? t('Im Kurs', 'In a course') : t('Nächster Kurs', 'Next course')}
+      icon={Icon.bookings}
+      tint="sun"
+      actions={
+        <Link href={`/admin/bookings/${booking.id}`} className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+          {t('Zur Buchung', 'Open booking')} {Icon.chevronRight}
+        </Link>
+      }
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="text-[1.15rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{booking.courseTypeName ?? t('Buchung', 'Booking')}</span>
+            <BookingLightPill
+              light={light}
+              label={pick(lang, BOOKING_LIGHT_LABELS[light])}
+              detail={booking.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[booking.observationReason]) : undefined}
+            />
+          </div>
+          <p className="mt-1 text-sm text-[var(--casa-muted)]">
+            {dayRange(toDateInputValue(start), toDateInputValue(end), lang)} · {weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}
+          </p>
+        </div>
+        {booking.status !== 'cancelled' && booking.charged > 0 ? (
+          <div className="ml-auto text-right">
+            <span className={cn('block text-[1.05rem] font-extrabold tabular-nums', open > 0.005 ? 'text-[#9a5b00]' : 'text-[#17693a]')}>
+              {open > 0.005 ? euros(lang, open, booking.currency) : t('Bezahlt', 'Paid')}
+            </span>
+            <span className="block text-[0.72rem] text-[var(--casa-muted)]">{open > 0.005 ? t('offen', 'open') : euros(lang, booking.charged, booking.currency)}</span>
+          </div>
+        ) : null}
+      </div>
+      {running ? (
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-baseline justify-between text-[0.78rem]">
+            <span className="font-semibold text-[var(--casa-ink)]">{t(`Woche ${week} von ${weeks}`, `Week ${week} of ${weeks}`)}</span>
+            <span className="text-[var(--casa-muted)]">
+              {t('endet', 'ends')} <DateText value={end} compact />
+            </span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-[#e7ecf3]" aria-hidden="true">
+            <div className="h-full rounded-full bg-[var(--fm-navy)]" style={{ width: `${Math.round((week / weeks) * 100)}%` }} />
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-[0.82rem] font-semibold text-[var(--casa-ink)]">
+          {inDays === 1 ? t('Beginnt morgen', 'Starts tomorrow') : t(`Beginnt in ${num(lang, inDays)} Tagen`, `Starts in ${num(lang, inDays)} days`)}
+        </p>
+      )}
+    </Card>
   );
 }
 

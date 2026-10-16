@@ -7,6 +7,7 @@ import { requireModule } from '@/lib/admin/guard';
 import { num, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { getOverviewFacts, type OverviewFacts } from '@/lib/admin/overview';
+import { placementTestSwitchedOn } from '@/lib/placement/availability';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
@@ -77,6 +78,17 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
           figure: (f) => ({ value: n(f.registrationsOpen), label: open }),
           pill: (f) => (f.registrationsNew ? fresh(f.registrationsNew) : null),
         },
+        {
+          title: t('Einstufungstests', 'Placement tests'),
+          href: '/admin/placement',
+          module: 'placement',
+          icon: Icon.placement,
+          tone: 'green',
+          figure: (f) =>
+            f.placementToReview
+              ? { value: n(f.placementToReview), label: t('zu prüfen', 'to review') }
+              : { value: t('Alle geprüft', 'All reviewed') },
+        },
       ],
     },
     {
@@ -89,17 +101,6 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
           icon: Icon.people,
           tone: 'green',
           figure: (f) => ({ value: n(f.students), label: t('in der Kartei', 'in the register') }),
-        },
-        {
-          title: t('Einstufungstests', 'Placement tests'),
-          href: '/admin/placement',
-          module: 'placement',
-          icon: Icon.placement,
-          tone: 'green',
-          figure: (f) =>
-            f.placementToReview
-              ? { value: n(f.placementToReview), label: t('zu prüfen', 'to review') }
-              : { value: t('Alle geprüft', 'All reviewed') },
         },
         {
           title: t('Buchungen', 'Bookings'),
@@ -218,7 +219,9 @@ export default async function OverviewPage() {
   const greeting =
     hour < 11 ? t('Guten Morgen', 'Good morning') : hour < 18 ? t('Guten Tag', 'Good afternoon') : t('Guten Abend', 'Good evening');
   const firstName = (user.name ?? '').split(/\s+/)[0];
-  const visible = groups(t, lang).map((g) => ({ ...g, cards: g.cards.filter((c) => canAccess(user, c.module)) })).filter((g) => g.cards.length);
+  // The placement queue only where CASA's own test is switched on (`placementTestSwitchedOn`), as in the rail.
+  const shown = (module: WorkspaceModule) => canAccess(user, module) && (module !== 'placement' || placementTestSwitchedOn());
+  const visible = groups(t, lang).map((g) => ({ ...g, cards: g.cards.filter((c) => shown(c.module)) })).filter((g) => g.cards.length);
 
   return (
     <div className="mx-auto max-w-[1120px] pb-6">

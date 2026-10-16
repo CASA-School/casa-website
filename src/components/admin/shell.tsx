@@ -13,6 +13,7 @@ import type { StaffRole, StaffUser } from '@/lib/admin/auth';
 import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { publicSiteOrigin } from '@/lib/cms/origins';
+import { placementTestSwitchedOn } from '@/lib/placement/availability';
 import { cn } from '@/lib/utils';
 
 /**
@@ -64,6 +65,7 @@ export async function WorkspaceShell({
     { href: '/admin/settings/setup', label: t('Listen', 'Lists') },
     ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: t('Räume', 'Rooms') }] : []),
   ];
+  const placementReview = canAccess(user, 'placement') && placementTestSwitchedOn();
 
   return (
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
@@ -102,11 +104,11 @@ export async function WorkspaceShell({
               {t('Übersicht', 'Overview')}
             </NavLink>
 
-            {canAccess(user, 'enquiries') || canAccess(user, 'registrations') ? (
+            {canAccess(user, 'enquiries') || canAccess(user, 'registrations') || placementReview ? (
               <NavGroup
                 id="inbox"
                 label={t('Posteingang', 'Inbox')}
-                hrefs={['/admin/enquiries', '/admin/registrations']}
+                hrefs={['/admin/enquiries', '/admin/registrations', '/admin/placement']}
               >
                 {canAccess(user, 'enquiries') ? (
                   <NavLink href="/admin/enquiries" icon={Icon.enquiries} title={t('Anfragen', 'Enquiries')}>
@@ -132,6 +134,14 @@ export async function WorkspaceShell({
                     {t('Anmeldungen', 'Registrations')}
                   </NavLink>
                 ) : null}
+                {/* CASA's own online placement test: its results come in from the website and wait
+                    for a teacher, like an enquiry. Shown only where the test is switched on — on the
+                    live site it is closed and the Klett tests are used. */}
+                {placementReview ? (
+                  <NavLink href="/admin/placement" icon={Icon.placement} title={t('Einstufungstests', 'Placement tests')}>
+                    {t('Einstufungstests', 'Placement tests')}
+                  </NavLink>
+                ) : null}
               </NavGroup>
             ) : null}
 
@@ -142,31 +152,10 @@ export async function WorkspaceShell({
               <NavGroup
                 id="school"
                 label={t('Schule', 'School')}
-                hrefs={['/admin/people', '/admin/placement', '/admin/bookings', '/admin/offers', '/admin/catalogue']}
+                hrefs={['/admin/people', '/admin/bookings', '/admin/offers', '/admin/catalogue']}
               >
-                {/*
-                  Placement is nested under Students, not a queue of its own. A
-                  learner who wants B1 sits the A1 and A2 test on the way there,
-                  so the result belongs to their profile; the list is where a
-                  teacher goes to confirm one, which is a step in that story
-                  rather than a separate area of the school.
-                */}
                 {canAccess(user, 'people') ? (
-                  <NavLink
-                    href="/admin/people"
-                    title={t('Teilnehmende', 'Students')}
-                    icon={Icon.people}
-                    items={
-                      canAccess(user, 'placement')
-                        ? [
-                            {
-                              href: '/admin/placement',
-                              label: t('Einstufungstests', 'Placement tests'),
-                            },
-                          ]
-                        : []
-                    }
-                  >
+                  <NavLink href="/admin/people" title={t('Teilnehmende', 'Students')} icon={Icon.people}>
                     {t('Teilnehmende', 'Students')}
                   </NavLink>
                 ) : null}

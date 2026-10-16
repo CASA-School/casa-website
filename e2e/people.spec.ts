@@ -70,7 +70,12 @@ test.describe('person page', () => {
     await page.goto(`/admin/people/${personId}`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Pia Prüfperson');
 
-    // Each group is its heading's own section, inside the Vorgänge card.
+    // The overview: what is open, and the last closed.
+    await expect(page.getByRole('heading', { name: 'Offen', exact: true }).locator('xpath=ancestor::section[1]')).toContainText('Abendkurs im Januar');
+    await expect(page.getByRole('heading', { name: 'Zuletzt abgeschlossen' }).locator('xpath=ancestor::section[1]')).toContainText('Unterkunft im Sommer');
+
+    // All of it on the Vorgänge tab, each group its heading's own section.
+    await page.getByRole('tab', { name: /^Vorgänge/ }).click();
     const open = page.getByRole('heading', { name: /^Offen/ }).locator('xpath=..');
     const closed = page.getByRole('heading', { name: /^Abgeschlossen/ }).locator('xpath=..');
     await expect(open).toContainText('Abendkurs im Januar');

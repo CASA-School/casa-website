@@ -20,3 +20,14 @@ export function placementTestEnabled(): boolean {
 
   return process.env.VERCEL_ENV !== 'production' && process.env.NODE_ENV !== 'production';
 }
+
+/**
+ * Whether a deployment has opened the test on purpose (CASA_ENABLE_PLACEMENT_TEST), not by the
+ * development default. The workspace shows its review queue in the rail and on the overview only
+ * then (Rahman, 2026-10-16: an item for a test nobody sits is not part of the team's day), so the
+ * rail on a laptop is the rail the team sees. The screens themselves stay reachable by address.
+ */
+export function placementTestSwitchedOn(): boolean {
+  const flag = process.env.CASA_ENABLE_PLACEMENT_TEST?.trim().toLowerCase();
+  return flag === '1' || flag === 'true' || flag === 'yes' || flag === 'on';
+}
