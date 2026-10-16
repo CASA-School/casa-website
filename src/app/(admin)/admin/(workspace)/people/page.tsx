@@ -5,7 +5,7 @@ import { Icon } from '@/components/admin/icons';
 import { Tally } from '@/components/admin/inbox';
 import { dayRange, euros, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { Badge, Button, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { capitalise, num, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { toDateInputValue } from '@/lib/dates';
@@ -13,7 +13,8 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { LEARNER_STAGE_LABELS, listCountries, listPeople, peopleCounts, type PeopleView } from '@/lib/admin/people';
+import { LEARNER_STAGE_LABELS, listCountries, listDeletedPeople, listPeople, peopleCounts, type PeopleView } from '@/lib/admin/people';
+import { restorePersonAction } from './actions';
 import { PersonForm } from './person-form';
 
 /**
@@ -40,7 +41,10 @@ import { PersonForm } from './person-form';
  * record they belong to, not here (docs/ADMIN_WORKSPACE.md §Design standards 4, §Lists).
  */
 
-const VIEWS: readonly { key: PeopleView; label: Bilingual }[] = [
+/** The register's views, and „Gelöscht" for whoever may delete (and so restore) a person. */
+type RegisterView = PeopleView | 'deleted';
+
+const VIEWS: readonly { key: RegisterView; label: Bilingual }[] = [
   { key: 'all', label: { de: 'Alle', en: 'All' } },
   { key: 'in_course', label: { de: 'Im Kurs', en: 'In a course' } },
   { key: 'new', label: LEARNER_STAGE_LABELS.new },
@@ -65,15 +69,19 @@ export default async function PeoplePage({
   const user = await requireModule('people');
   const { t, lang } = await getI18n();
   const canEdit = canAccess(user, 'people', 'edit');
+  const canRestore = canAccess(user, 'people', 'full');
+  const views = canRestore ? [...VIEWS, { key: 'deleted' as const, label: { de: 'Gelöscht', en: 'Deleted' } }] : VIEWS;
   const rawView = firstParam(params.view);
-  const view: PeopleView = VIEWS.some((v) => v.key === rawView) ? (rawView as PeopleView) : 'all';
-  const [{ items, total }, counts, flagCounts, countries] = await Promise.all([
-    listPeople({ search, view, limit: PAGE_SIZE, offset: offsetFor(page) }),
+  const view: RegisterView = views.some((v) => v.key === rawView) ? (rawView as RegisterView) : 'all';
+  const deletedView = view === 'deleted';
+  const [{ items, total }, counts, flagCounts, countries, deleted] = await Promise.all([
+    deletedView ? Promise.resolve({ items: [], total: 0 }) : listPeople({ search, view, limit: PAGE_SIZE, offset: offsetFor(page) }),
     peopleCounts(),
     openFlagsByCode(),
     canEdit ? listCountries() : Promise.resolve([]),
+    canRestore ? listDeletedPeople({ search: deletedView ? search : undefined, limit: deletedView ? PAGE_SIZE : 0, offset: deletedView ? offsetFor(page) : 0 }) : Promise.resolve(null),
   ]);
-  const href = (key: PeopleView) => (key === 'all' ? '/admin/people' : `/admin/people?view=${key}`);
+  const href = (key: RegisterView) => (key === 'all' ? '/admin/people' : `/admin/people?view=${key}`);
   const error = firstParam(params.error);
 
   const flagEntries = (Object.entries(flagCounts) as [FlagCode, number][]).filter(([, n]) => n > 0);
@@ -133,11 +141,44 @@ export default async function PeoplePage({
 
       <Card bleed>
         <ListBar
-          tabs={VIEWS.map((v) => ({ key: v.key, label: pick(lang, v.label), href: href(v.key), count: counts[v.key] }))}
+          tabs={views.map((v) => ({ key: v.key, label: pick(lang, v.label), href: href(v.key), count: v.key === 'deleted' ? (deleted?.total ?? 0) : counts[v.key] }))}
           active={view}
           search={{ action: '/admin/people', value: search, placeholder: t('Name oder E-Mail', 'Name or email'), keep: { view: view === 'all' ? undefined : view } }}
         />
-        {items.length === 0 ? (
+        {deletedView && deleted ? (
+          deleted.items.length === 0 ? (
+            <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Niemand gelöscht', 'Nobody deleted')} />
+          ) : (
+            // Deleted people have no page to open; each row says when and by whom, and brings them back.
+            <Table
+              head={[
+                t('Teilnehmende', 'Student'),
+                { label: t('Gelöscht', 'Deleted'), className: 'w-[14rem]' },
+                { label: '', className: 'w-[11rem]' },
+              ]}
+            >
+              {deleted.items.map((person) => (
+                <TableRow key={person.id}>
+                  <Cell className="max-w-0">
+                    <RecordName name={person.displayName} about={person.primaryEmail ?? undefined} />
+                  </Cell>
+                  <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
+                    {capitalise(relativeDays(person.deletedAt, lang))}
+                    {person.deletedByName ? ` · ${person.deletedByName}` : ''}
+                  </Cell>
+                  <Cell className="text-right">
+                    <form action={restorePersonAction}>
+                      <input type="hidden" name="personId" value={person.id} />
+                      <Button type="submit" variant="secondary" size="sm">
+                        {t('Wiederherstellen', 'Restore')}
+                      </Button>
+                    </form>
+                  </Cell>
+                </TableRow>
+              ))}
+            </Table>
+          )
+        ) : items.length === 0 ? (
           <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : view !== 'all' ? t('Hier ist niemand', 'Nobody here') : t('Noch keine Teilnehmenden', 'No students yet')}>
             {search ? t(`Niemand passt zu „${search}“.`, `Nobody matches “${search}”.`) : null}
           </ListEmpty>
@@ -203,7 +244,7 @@ export default async function PeoplePage({
         )}
       </Card>
 
-      <Pagination basePath="/admin/people" page={page} total={total} params={params} />
+      <Pagination basePath="/admin/people" page={page} total={deletedView ? (deleted?.total ?? 0) : total} params={params} />
     </>
   );
 }

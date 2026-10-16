@@ -666,15 +666,16 @@ export default async function PersonPage({
         </RecordTabPanel>
       ) : null}
 
-      {canDelete ? (
+      {/* Not while they have bookings: their bookings and payments would drop out of every list. */}
+      {canDelete && bookings.length === 0 ? (
         <RecordFoot>
           <form action={deletePersonAction}>
             <input type="hidden" name="personId" value={person.id} />
             <ConfirmSubmit
               title={t(`${person.displayName} löschen?`, `Delete ${person.displayName}?`)}
               description={t(
-                'Die Person verschwindet aus allen Listen. Ihre Anmeldungen und Anfragen bleiben im Posteingang. Ein Inhaber kann den Datensatz wiederherstellen.',
-                'The person disappears from every list. Their registrations and enquiries stay in the queues. An owner can restore the record.'
+                'Die Person verschwindet aus allen Listen. Ihre Anmeldungen und Anfragen bleiben im Posteingang. Unter Teilnehmende → Gelöscht lässt sie sich wiederherstellen.',
+                'The person disappears from every list. Their registrations and enquiries stay in the queues. Students → Deleted brings them back.'
               )}
             >
               {t('Person löschen', 'Delete person')}

@@ -220,6 +220,8 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Bankverbindung entfernt', 'removed a bank account');
     case 'person_deleted':
       return t('hat eine Person gelöscht', 'deleted a person');
+    case 'person_restored':
+      return t('hat eine Person wiederhergestellt', 'restored a person');
     case 'room_created':
       return t('hat einen Raum angelegt', 'added a room');
     case 'room_updated':

@@ -861,9 +861,11 @@ export async function removeBankAccount(personId: string, accountId: string, act
 }
 
 /**
- * Soft delete. The row and everything that points at it stay; every read
- * filters it out. Refused while other rows are linked into this one — unlink
- * them first, so no history vanishes by accident.
+ * Soft delete: the row stays, marked with who deleted it and when, and every read filters it out;
+ * `restorePerson` brings it back. Refused while other rows are linked into this one — unlink them
+ * first — and while the person has bookings: the bookings list and what is owed leave out a deleted
+ * person's bookings, so deleting a learner would hide their money (2026-10-16). A booking without
+ * payments can be deleted on its own page; one with payments keeps its person.
  */
 export async function deletePerson(
   id: string,
@@ -882,10 +884,65 @@ export async function deletePerson(
       },
     };
   }
+  const booked = await queryFirst<{ n: string }>(
+    `SELECT count(*) AS n FROM bookings WHERE person_id = $1 AND deleted_at IS NULL`,
+    [id]
+  );
+  if (Number(booked?.n ?? 0) > 0) {
+    return {
+      ok: false,
+      reason: {
+        de: 'Diese Person hat Buchungen und bleibt deshalb in der Kartei. Eine Buchung ohne Zahlung lässt sich auf ihrer Seite löschen.',
+        en: 'This person has bookings, so they stay in the register. A booking without payments can be deleted on its own page.',
+      },
+    };
+  }
   await query(
     `UPDATE people SET deleted_at = now(), deleted_by = $2 WHERE id = $1 AND deleted_at IS NULL`,
     [id, actor.id]
   );
   await logActivity({ actor, entity: 'person', entityId: id, action: 'person_deleted' });
   return { ok: true };
+}
+
+/** A deleted person back in the register, with everything that pointed at them. */
+export async function restorePerson(id: string, actor: StaffUser): Promise<void> {
+  const restored = await query<{ id: string }>(
+    `UPDATE people SET deleted_at = NULL, deleted_by = NULL WHERE id = $1 AND deleted_at IS NOT NULL RETURNING id`,
+    [id]
+  );
+  if (restored.length) await logActivity({ actor, entity: 'person', entityId: id, action: 'person_restored' });
+}
+
+export type DeletedPerson = { id: string; displayName: string; primaryEmail: string | null; deletedAt: Date; deletedByName: string | null };
+
+/** The register's „Gelöscht" view: who was deleted, when and by whom, the latest first. */
+export async function listDeletedPeople({ search, limit = 40, offset = 0 }: { search?: string; limit?: number; offset?: number }): Promise<{ items: DeletedPerson[]; total: number }> {
+  const params: unknown[] = [];
+  let where = `WHERE p.deleted_at IS NOT NULL AND p.merged_into IS NULL`;
+  if (search) {
+    params.push(`%${search}%`);
+    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR EXISTS (
+      SELECT 1 FROM emails e WHERE e.person_id = p.id AND e.address ILIKE $1))`;
+  }
+  const total = await queryFirst<{ n: string }>(`SELECT count(*) AS n FROM people p ${where}`, params);
+  const rows = await query<{ id: string; first_name: string; last_name: string | null; primary_email: string | null; deleted_at: Date; deleted_by_name: string | null }>(
+    `SELECT p.id, p.first_name, p.last_name, p.deleted_at, u.name AS deleted_by_name,
+            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email
+       FROM people p LEFT JOIN staff_users u ON u.id = p.deleted_by
+      ${where}
+      ORDER BY p.deleted_at DESC
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    [...params, limit, offset]
+  );
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      displayName: displayName(r.first_name, r.last_name),
+      primaryEmail: r.primary_email,
+      deletedAt: r.deleted_at,
+      deletedByName: r.deleted_by_name,
+    })),
+    total: Number(total?.n ?? 0),
+  };
 }

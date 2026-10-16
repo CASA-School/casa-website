@@ -13,6 +13,7 @@ import {
   deletePerson,
   normalizeIban,
   removeBankAccount,
+  restorePerson,
   saveAddress,
   updateBankAccount,
   updatePerson,
@@ -158,6 +159,16 @@ export async function removeBankAccountAction(formData: FormData): Promise<void>
   if (formData.get('confirmed') !== '1') redirect(`/admin/people/${id}`);
   await removeBankAccount(id, accountId, actor);
   revalidatePath(`/admin/people/${id}`);
+  redirect(`/admin/people/${id}`);
+}
+
+/** A deleted person back in the register: whoever may delete may undo it. Not destructive, so no confirmation. */
+export async function restorePersonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('people', 'full');
+  const id = String(formData.get('personId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid personId');
+  await restorePerson(id, actor);
+  revalidatePath('/admin/people', 'layout');
   redirect(`/admin/people/${id}`);
 }
 

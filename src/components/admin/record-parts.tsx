@@ -224,6 +224,7 @@ const ACTION_ICON: Record<string, ReactNode> = {
   booking_observed: Icon.attention,
   booking_observation_ended: Icon.check,
   person_updated: Icon.person,
+  person_restored: Icon.person,
   person_address_updated: Icon.person,
   person_private_updated: Icon.person,
   bank_account_added: Icon.money,

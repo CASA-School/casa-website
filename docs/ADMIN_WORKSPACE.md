@@ -474,6 +474,18 @@ once its cohorts are moved; a payment is voided, never deleted). Today: people
 cancel, delete), cohorts (schedule, assign room), rooms (add, edit, delete),
 staff accounts (add, deactivate with confirmation).
 
+**Deleting a person hides them; it never erases (2026-10-16).** „Person
+löschen" (people `full`) marks the row with who deleted it and when; every
+list, the search and the matching of new website registrations leave it out.
+It is refused while other records are linked into the person, and while the
+person has bookings — the bookings list and what is owed skip a deleted
+person's bookings, so a learner who still owed money would vanish with it; the
+button is not offered then. Teilnehmende → **„Gelöscht"** (the same right)
+lists who was deleted, when and by whom, with „Wiederherstellen", which brings
+the person back with everything that pointed at them. A real erasure for a
+data-protection request is not built: it waits for a named privacy owner and a
+retention period (Open items).
+
 ### Navigation
 
 **Today** on its own at the top, then three collapsible groups:
