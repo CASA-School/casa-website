@@ -79,6 +79,21 @@ missing — into one value, and *nein* does the work of *storno*. Whoever has th
 them, resolves *u.B.* (Rahman, 2026-10-15): nobody owns it, and nothing records who changed it or why. `_ID_StatusBooking` is never filled.
 The learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance, Rookie) is on 100%.
 
+**Bookings still at *???*** *(live, 2026-10-16)* — 3,139, read against each booking's course dates:
+
+| Where the booking stands | At *???* |
+| --- | ---: |
+| The course has ended | **1,703** — never given a status |
+| No course dates at all | 734 — never placed on a course |
+| The course starts later | 627 — new, not looked at yet |
+| The course is running now | 75 — learners in class without a status |
+
+About one booking in ten of every past year (2019–2025) never left *???*; 78% of the bookings for
+2027 are still at it, as new ones should be. All 36 closed-group bookings of 2026 are at *???*. So
+*???* means "new" for what is coming and "nobody went back" for everything else — the status is not a
+record of what happened. The bridge reads an ended booking at *???* as *unknown*, never as *open*.
+Of the 2026 bookings, more than half (1,959 of 3,699) are *u.B.*.
+
 ## In the workspace today
 
 `bookings` and `booking_periods` (migration 0010) model a booking with periods; one local booking.
@@ -93,5 +108,5 @@ The business line belongs on the course type, not in a table per line.
 
 ## Open questions for the team
 
-2. What do Runner, Unicorn, LastDance and Rookie mean?
-3. When is `Agreement` written (250 this year), and who reads it?
+1. What do Runner, Unicorn, LastDance and Rookie mean?
+2. When is `Agreement` written (250 this year), and who reads it?

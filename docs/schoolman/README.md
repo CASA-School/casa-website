@@ -179,11 +179,13 @@ Answered (Rahman, 2026-10-15):
 - host families — Natalia (`accommodation.md`);
 - that everything moves in the end (`staff.md`).
 
+Read from the data (2026-10-16): of 3,139 bookings at *???*, 1,703 are for courses that have ended —
+the status was never set — 734 have no course, 627 start later and 75 are running now (`bookings.md`).
+
 Attendance and time sheets are recorded in the Klassenbuch (`klassenbuch.md`).
 
 Still open; each page ends with its own:
 
-1. The 3,135 bookings still at *???* — old and forgotten, or new and not yet looked at (`bookings.md`)?
-2. Receipts, confirmations and missing-information letters are about half of all letters — build those
+1. Receipts, confirmations and missing-information letters are about half of all letters — build those
    first (`letters-and-history.md`)?
-3. What finance exports to DATEV today (Rahman asks finance, `money.md`).
+2. What finance exports to DATEV today (Rahman asks finance, `money.md`).
