@@ -12,11 +12,13 @@ import {
   deleteBooking,
   endObservation,
   extendBooking,
+  isLevelCode,
   observeBooking,
   OBSERVATION_REASONS,
   recordPayment,
   removeCharge,
   removePeriod,
+  setPeriodLevel,
   updateBooking,
   voidPayment,
   type BookingStatus,
@@ -26,6 +28,7 @@ import {
   type Payer,
 } from '@/lib/admin/bookings';
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
+import { addToWaitlist } from '@/lib/admin/waitlist';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -121,9 +124,10 @@ export async function extendBookingAction(formData: FormData): Promise<void> {
   const back = `/admin/bookings/${bookingId}`;
   const { t } = await getI18n();
   const dates = readDates(formData, back, t);
+  const levelRaw = text(formData, 'levelCode', 8);
   await extendBooking(
     bookingId,
-    { courseInstanceId: optionalId(formData, 'courseInstanceId'), ...dates },
+    { courseInstanceId: optionalId(formData, 'courseInstanceId'), ...dates, levelCode: levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null },
     actor
   );
   const tuition = money(formData, 'tuition');
@@ -339,6 +343,7 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
       personId,
       courseTypeId: selection.courseTypeId,
       courseInstanceId: selection.courseInstanceId,
+      levelCode: kind === 'course' && levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null,
       ...dates,
       status: status as BookingStatus,
       payer: payer as Payer,
@@ -364,4 +369,48 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
 
   revalidatePath('/admin', 'layout');
   redirect(`/admin/bookings/${bookingId}`);
+}
+
+/**
+ * The wizard's other ending: the level is full, so the learner goes into its queue instead of a
+ * booking. Nothing is priced and nothing is booked; the registration it came from is answered.
+ */
+export async function waitlistFromWizardAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const personId = id(formData, 'personId');
+  const raw = String(formData.get('returnTo') ?? '');
+  const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
+  const { t, lang } = await getI18n();
+  const courseInstanceId = optionalId(formData, 'courseInstanceId');
+  const levelCode = text(formData, 'levelCode', 8);
+  if (!courseInstanceId || !levelCode || !(await isLevelCode(levelCode))) {
+    fail(safeBack, t('Für die Warteliste braucht es einen Kurstermin und ein Niveau.', 'The waiting list needs a course date and a level.'));
+  }
+  const registrationId = optionalId(formData, 'sourceRegistrationId');
+  const result = await addToWaitlist(
+    {
+      personId,
+      courseInstanceId,
+      levelCode,
+      source: registrationId ? 'registration' : 'office',
+      registrationId,
+      note: text(formData, 'notes', 300),
+    },
+    actor
+  );
+  if (!result.ok) fail(safeBack, pick(lang, result.reason));
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/catalogue/${courseInstanceId}?level=${encodeURIComponent(levelCode)}`);
+}
+
+/** A period's level, set or corrected: what the start's places count. */
+export async function setPeriodLevelAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const back = `/admin/bookings/${bookingId}`;
+  const levelRaw = text(formData, 'levelCode', 8);
+  if (levelRaw && !(await isLevelCode(levelRaw))) fail(back, (await getI18n()).t('Unbekanntes Niveau.', 'Unknown level.'));
+  await setPeriodLevel(bookingId, id(formData, 'periodId'), levelRaw, actor);
+  revalidatePath('/admin', 'layout');
+  redirect(back);
 }

@@ -17,9 +17,10 @@ import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin
 import { Tally } from '@/components/admin/inbox';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listBookableRooms, type Room } from '@/lib/admin/rooms';
+import { freePlaces, levelGroups, placeForNext, type LevelGroup } from '@/lib/admin/waitlist';
 import { toDateInputValue } from '@/lib/dates';
 import { CohortForm } from './cohort-form';
-import { groupRuns, monthKey, monthLabel, openCell, OpenTable, SeatLine, sentenceCase } from './list-parts';
+import { groupRuns, monthKey, monthLabel, openCell, OpenTable, sentenceCase } from './list-parts';
 import { RoomPicker } from './room-picker';
 
 /**
@@ -68,7 +69,9 @@ export default async function CataloguePage({
       : Promise.resolve([]),
   ]);
   const view = rawView === 'types' ? 'types' : 'cohorts';
-  const taken = instances.reduce((sum, i) => sum + i.registrationCount, 0);
+  const taken = instances.reduce((sum, i) => sum + i.bookingCount, 0);
+  // Places are per level (the waiting list, 0031): each start's levels, for what is waiting and free.
+  const groups = await levelGroups(instances.map((i) => i.id));
 
   return (
     <>
@@ -91,12 +94,7 @@ export default async function CataloguePage({
       {/* What is coming, how full it is, and when the next one starts. */}
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
         <Tally tone="working" n={instances.length} label={instances.length === 1 ? t('kommender Termin', 'date ahead') : t('kommende Termine', 'dates ahead')} lang={lang} />
-        <Tally
-          tone="done"
-          n={taken}
-          label={taken === 1 ? t('Platz belegt', 'place taken') : t('Plätze belegt', 'places taken')}
-          lang={lang}
-        />
+        <Tally tone="done" n={taken} label={t('gebucht', 'booked')} lang={lang} />
         {instances[0] ? (
           <span>
             {t('Nächster Beginn', 'Next start')}{' '}
@@ -126,7 +124,7 @@ export default async function CataloguePage({
           active={view}
         />
         {view === 'cohorts' ? (
-          <Cohorts instances={instances} rooms={rooms} plans={plans} t={t} lang={lang} />
+          <Cohorts instances={instances} groups={groups} rooms={rooms} plans={plans} t={t} lang={lang} />
         ) : (
           <CourseTypes types={types} t={t} lang={lang} />
         )}
@@ -137,12 +135,14 @@ export default async function CataloguePage({
 
 function Cohorts({
   instances,
+  groups,
   rooms,
   plans,
   t,
   lang,
 }: {
   instances: CourseInstanceSummary[];
+  groups: LevelGroup[];
   rooms: Room[];
   plans: boolean;
   t: T;
@@ -165,13 +165,13 @@ function Cohorts({
         { label: t('Kurs', 'Course') },
         { label: t('Zeitraum', 'Runs'), className: 'w-px md:w-[13.5rem]' },
         { label: t('Raum', 'Room'), className: `w-[15rem] ${hide}` },
-        { label: t('Plätze', 'Seats'), className: `w-[15rem] ${hide}` },
+        { label: t('Belegung', 'Taken'), className: `w-[15rem] ${hide}` },
       ]}
     >
       {months.flatMap((month) => [
         <ListGroup key={month.key} label={monthLabel(month.key, lang)} count={month.items.length} span={4} />,
         ...month.items.map((instance) => (
-          <CohortRow key={instance.id} instance={instance} rooms={rooms} plans={plans} t={t} lang={lang} />
+          <CohortRow key={instance.id} instance={instance} groups={groups.filter((g) => g.courseInstanceId === instance.id)} rooms={rooms} plans={plans} t={t} lang={lang} />
         )),
       ])}
     </OpenTable>
@@ -183,22 +183,25 @@ const STATUS_LABELS: Record<string, { label: Bilingual; tone: 'quiet' | 'neutral
   draft: { label: { de: 'Entwurf', en: 'Draft' }, tone: 'quiet' },
 };
 
-/** One cohort: what it is, when, where, and how full. */
+/** One cohort: what it is, when, where, how many are booked, who waits and whether a place is free for them. */
 function CohortRow({
   instance,
+  groups,
   rooms,
   plans,
   t,
   lang,
 }: {
   instance: CourseInstanceSummary;
+  groups: LevelGroup[];
   rooms: Room[];
   plans: boolean;
   t: T;
   lang: WsLang;
 }) {
-  const full = instance.capacity > 0 && instance.registrationCount >= instance.capacity;
-  const nearlyFull = instance.capacity > 0 && !full && instance.registrationCount / instance.capacity >= 0.8;
+  const waiting = groups.reduce((sum, g) => sum + g.waiting + g.offered, 0);
+  const freeForNext = groups.some(placeForNext);
+  const fullLevels = groups.filter((g) => g.places > 0 && freePlaces(g) === 0).map((g) => g.levelCode);
   const overRoom =
     instance.room?.capacity !== null &&
     instance.room?.capacity !== undefined &&
@@ -225,7 +228,9 @@ function CohortRow({
     <tr className="group" data-cohort={instance.id}>
       <td className={`${openCell} py-3 md:max-w-0`}>
         <span className="flex min-w-0 items-center gap-2">
-          <span className="text-[0.9rem] font-semibold text-[var(--casa-ink)] md:truncate">{instance.courseTypeName}</span>
+          <Link href={`/admin/catalogue/${instance.id}`} className="text-[0.9rem] font-semibold text-[var(--casa-ink)] hover:underline md:truncate">
+            {instance.courseTypeName}
+          </Link>
           {status ? <Badge tone={status.tone}>{status.label}</Badge> : null}
         </span>
         {sub ? <span className="mt-0.5 block truncate text-[0.8rem] text-[var(--casa-muted)]">{sub}</span> : null}
@@ -257,22 +262,16 @@ function CohortRow({
         ) : null}
       </td>
       <td className={`${openCell} py-3 ${hide}`}>
-        <SeatLine
-          taken={instance.registrationCount}
-          capacity={instance.capacity}
-          label={t(
-            `${instance.registrationCount} von ${instance.capacity} Plätzen belegt`,
-            `${instance.registrationCount} of ${instance.capacity} seats taken`
-          )}
-          warn={full || nearlyFull}
-          note={
-            full || nearlyFull ? (
-              <span className="font-semibold text-[#9a5b00]">{full ? t('Voll', 'Full') : t('Fast voll', 'Nearly full')}</span>
-            ) : instance.bookingCount > 0 ? (
-              <span className="text-[var(--casa-text-subtle)]">{t(`${instance.bookingCount} gebucht`, `${instance.bookingCount} booked`)}</span>
-            ) : null
-          }
-        />
+        <span className="flex flex-wrap items-center gap-1.5 text-[0.84rem]">
+          <span className={instance.bookingCount ? 'font-semibold text-[var(--casa-ink)] tabular-nums' : 'text-[var(--casa-text-subtle)] tabular-nums'}>
+            {t(`${instance.bookingCount} gebucht`, `${instance.bookingCount} booked`)}
+          </span>
+          {freeForNext ? <Badge tone="positive">{t('Platz frei', 'Place free')}</Badge> : null}
+          {waiting ? <Badge tone="accent">{t(`${waiting} Warteliste`, `${waiting} waiting`)}</Badge> : null}
+        </span>
+        {fullLevels.length ? (
+          <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">{t(`Voll: ${fullLevels.join(', ')}`, `Full: ${fullLevels.join(', ')}`)}</span>
+        ) : null}
       </td>
     </tr>
   );

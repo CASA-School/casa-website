@@ -6,7 +6,7 @@ import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction, removeBankAccountAction } from '../actions';
 import { AddressForm, BankAccountForm, PersonForm } from '../person-form';
 import { BookingWizard } from '../../bookings/booking-wizard';
-import { createBookingFromWizardAction } from '../../bookings/actions';
+import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
 import { RecordFoot } from '../../bookings/record-foot';
 import { courseNameResolver } from '../../registrations/course-names';
 import { optionLine } from '../../registrations/option-label';
@@ -43,6 +43,8 @@ import {
   type TimelineItem,
 } from '@/lib/admin/people';
 import { normaliseStatus } from '@/lib/admin/queues';
+import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
+import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
@@ -53,7 +55,7 @@ const SALUTATIONS: Record<string, Bilingual> = {
   neutral: { de: 'Keine Anrede', en: 'No salutation' },
 };
 
-type CaseKind = TimelineItem['kind'] | 'offer' | 'booking';
+type CaseKind = TimelineItem['kind'] | 'offer' | 'booking' | 'waitlist';
 
 /** What each kind of case is, and its meaning colour. */
 const KINDS: Record<CaseKind, { label: Bilingual; icon: ReactNode; tint: Tint }> = {
@@ -63,6 +65,7 @@ const KINDS: Record<CaseKind, { label: Bilingual; icon: ReactNode; tint: Tint }>
   review: { label: { de: 'Einstufung', en: 'Placement' }, icon: Icon.placement, tint: 'green' },
   offer: { label: { de: 'Angebot', en: 'Offer' }, icon: Icon.offers, tint: 'sun' },
   booking: { label: { de: 'Buchung', en: 'Booking' }, icon: Icon.bookings, tint: 'sun' },
+  waitlist: { label: { de: 'Warteliste', en: 'Waiting list' }, icon: Icon.clock, tint: 'blue' },
 };
 
 const OFFER_TONES: Record<OfferStatus, BadgeTone> = {
@@ -156,7 +159,7 @@ export default async function PersonPage({
   const seesBank = canAccess(user, 'private_data');
   const editsBank = canAccess(user, 'private_data', 'edit');
   const removesBank = canAccess(user, 'private_data', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -170,6 +173,7 @@ export default async function PersonPage({
     courseNameResolver(),
     seesBookings ? learnerStage(person.id) : Promise.resolve(null),
     seesBank ? listBankAccounts(person.id) : Promise.resolve(null),
+    seesBookings ? personEntries(person.id) : Promise.resolve([]),
   ]);
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
@@ -239,6 +243,29 @@ export default async function PersonPage({
           ),
       };
     }),
+    // Their places in waiting lists: the queue's course and level, and where they stand in it.
+    ...waits.map(
+      (w): Case => ({
+        key: `waitlist-${w.id}`,
+        kind: 'waitlist',
+        title: `${w.courseTypeName} · ${w.levelCode}`,
+        detail: [
+          w.session ? pick(lang, SESSION_LABELS[w.session]) : null,
+          `${t('ab', 'from')} ${new Date(w.startDate).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })}`,
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        at: w.joinedAt,
+        href: `/admin/catalogue/${w.courseInstanceId}?level=${encodeURIComponent(w.levelCode)}`,
+        open: w.status === 'waiting' || w.status === 'offered',
+        state:
+          w.status === 'waiting' ? (
+            <Badge tone="accent">{t(`Platz ${w.position}`, `Place ${w.position}`)}</Badge>
+          ) : (
+            <Badge tone={w.status === 'offered' ? 'positive' : w.status === 'booked' ? 'positive' : 'quiet'}>{pick(lang, WAITLIST_STATUS_LABELS[w.status])}</Badge>
+          ),
+      })
+    ),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
   const openCases = cases.filter((c) => c.open);
   const pastCases = cases.filter((c) => !c.open);
@@ -270,12 +297,13 @@ export default async function PersonPage({
     ...(bankAccounts ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
   // What is open, in the team's words: „1 Anmeldung · 1 Buchung".
-  const OPEN_WORDS: Record<'enquiry' | 'registration' | 'review' | 'offer' | 'booking', [string, string]> = {
+  const OPEN_WORDS: Record<'enquiry' | 'registration' | 'review' | 'offer' | 'booking' | 'waitlist', [string, string]> = {
     enquiry: [t('Anfrage', 'enquiry'), t('Anfragen', 'enquiries')],
     registration: [t('Anmeldung', 'registration'), t('Anmeldungen', 'registrations')],
     review: [t('Einstufung', 'placement'), t('Einstufungen', 'placements')],
     offer: [t('Angebot', 'offer'), t('Angebote', 'offers')],
     booking: [t('Buchung', 'booking'), t('Buchungen', 'bookings')],
+    waitlist: [t('Warteliste', 'waiting list'), t('Wartelisten', 'waiting lists')],
   };
   const openSummary = (Object.keys(OPEN_WORDS) as (keyof typeof OPEN_WORDS)[])
     .map((word) => {
@@ -339,7 +367,7 @@ export default async function PersonPage({
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog trigger={t('Neue Buchung', 'New booking')} title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)} triggerVariant="primary" width="lg">
-                <BookingWizard personId={person.id} personName={person.displayName} offer={offer} returnTo={`/admin/people/${person.id}`} action={createBookingFromWizardAction} />
+                <BookingWizard personId={person.id} personName={person.displayName} offer={offer} returnTo={`/admin/people/${person.id}`} action={createBookingFromWizardAction} waitlistAction={waitlistFromWizardAction} />
               </FormDialog>
             ) : null}
           </>

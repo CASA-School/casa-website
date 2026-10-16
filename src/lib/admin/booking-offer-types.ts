@@ -19,9 +19,35 @@ export type CohortOffer = {
   roomName: string | null;
   seatsTaken: number;
   capacity: number;
+  /**
+   * Places per level in this start (the waiting list, 0031): only levels with places set, bookings
+   * or a queue; any other level is one group of 14, empty. `queue` is the waiting learners in order.
+   */
+  levels: Record<string, LevelPlaces>;
   /** Resolved rate, else the catalogue's published price, else null. */
   tuition: number | null;
   tuitionUnit: 'week' | 'item' | 'lesson' | null;
+};
+
+/** `queue`: the learners waiting, in order; `offeredTo`: those a place is held for. Canonical person ids. */
+export type LevelPlaces = { places: number; booked: number; offered: number; queue: string[]; offeredTo: string[] };
+
+/** A level in a start, with the default for one nobody has used yet. */
+export const levelPlaces = (cohort: Pick<CohortOffer, 'levels'>, levelCode: string): LevelPlaces =>
+  cohort.levels[levelCode] ?? { places: 14, booked: 0, offered: 0, queue: [], offeredTo: [] };
+
+/**
+ * Free places: what is left after bookings and places held for an offer, never below zero. For the
+ * learner a place is held for, that place is theirs: it is free to them.
+ */
+export const levelFree = (l: LevelPlaces, forPerson?: string) =>
+  Math.max(0, l.places - l.booked - l.offered + (forPerson && l.offeredTo.includes(forPerson) ? 1 : 0));
+
+/** How many wait in front of a learner: none if a place is held for them, their place if queued, else all. */
+export const waitingAhead = (l: LevelPlaces, person: string) => {
+  if (l.offeredTo.includes(person)) return 0;
+  const at = l.queue.indexOf(person);
+  return at === -1 ? l.queue.length : at;
 };
 
 export type CourseTypeOffer = {

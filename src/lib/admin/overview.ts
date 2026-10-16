@@ -1,6 +1,7 @@
 import { query, queryFirst } from './db';
 import { inboxCounts, openCount } from './inbox';
 import { FOLLOW_UP_AFTER_DAYS } from './offers/repo';
+import { waitlistCounts } from './waitlist';
 
 /**
  * The workspace's counts, each in one round trip: the queues' totals and the
@@ -235,17 +236,21 @@ export type OverviewFacts = {
   /** The first day of the price list in force, and the last month the teaching plan covers. */
   pricesSince: Date | null;
   plannedTo: Date | null;
+  /** Learners in a waiting list, and the lists where a place is free for the next one (counted as the screen counts them). */
+  waitlistWaiting: number;
+  waitlistFree: number;
 };
 
 export async function getOverviewFacts(): Promise<OverviewFacts> {
   type Dates = 'nextExam' | 'pricesSince' | 'plannedTo';
-  type Inbox = 'enquiriesOpen' | 'enquiriesNew' | 'registrationsOpen' | 'registrationsNew' | 'applicationsOpen';
+  type Inbox = 'enquiriesOpen' | 'enquiriesNew' | 'registrationsOpen' | 'registrationsNew' | 'applicationsOpen' | 'waitlistWaiting' | 'waitlistFree';
   // The inboxes are counted as their own screens count them (src/lib/admin/inbox.ts), so a card and its list never disagree.
-  const [enquiries, courses, exams, applications] = await Promise.all([
+  const [enquiries, courses, exams, applications, waitlist] = await Promise.all([
     inboxCounts('enquiry'),
     inboxCounts('course_registration'),
     inboxCounts('exam_registration'),
     inboxCounts('career_application'),
+    waitlistCounts(),
   ]);
   const row = await queryFirst<Record<Exclude<keyof OverviewFacts, Dates | Inbox>, string> & Record<Dates, Date | null>>(
     `SELECT
@@ -288,5 +293,7 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
     websiteDrafts: n(row?.websiteDrafts),
     pricesSince: row?.pricesSince ?? null,
     plannedTo: row?.plannedTo ?? null,
+    waitlistWaiting: waitlist.waiting,
+    waitlistFree: waitlist.free,
   };
 }

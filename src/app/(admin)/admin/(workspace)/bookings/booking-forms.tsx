@@ -26,6 +26,7 @@ import {
   extendBookingAction,
   observeBookingAction,
   recordPaymentAction,
+  setPeriodLevelAction,
   updateBookingAction,
 } from './actions';
 
@@ -129,9 +130,11 @@ export async function EditBookingForm({
 export async function ExtendBookingForm({
   booking,
   cohorts,
+  levels,
 }: {
   booking: BookingDetail;
   cohorts: CohortOption[];
+  levels: readonly string[];
 }) {
   const { t } = await getI18n();
   const last = booking.periods[booking.periods.length - 1];
@@ -146,6 +149,17 @@ export async function ExtendBookingForm({
           {cohorts.map((c) => (
             <option key={c.id} value={c.id}>
               {c.label}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      {/* The level of the new period: what the cohort's places count, and what closes a place in its waiting list. */}
+      <Field label={last?.levelCode ? t(`Niveau (zuletzt ${last.levelCode})`, `Level (last ${last.levelCode})`) : t('Niveau', 'Level')} htmlFor="extend-level">
+        <Select id="extend-level" name="levelCode" defaultValue="">
+          <option value="">{t('Noch offen', 'Not decided yet')}</option>
+          {levels.map((code) => (
+            <option key={code} value={code}>
+              {code}
             </option>
           ))}
         </Select>
@@ -361,6 +375,30 @@ export async function ObservationForm({ bookingId }: { bookingId: string }) {
       </Field>
       <div className="flex justify-end pt-1">
         <Button type="submit">{t('Unter Beobachtung stellen', 'Put under observation')}</Button>
+      </div>
+    </form>
+  );
+}
+
+/** A period's level: set or corrected, so the cohort's places for that level count the learner. */
+export async function PeriodLevelForm({ bookingId, periodId, levelCode, levels }: { bookingId: string; periodId: string; levelCode: string | null; levels: readonly string[] }) {
+  const { t } = await getI18n();
+  return (
+    <form action={setPeriodLevelAction} className="space-y-3">
+      <input type="hidden" name="bookingId" value={bookingId} />
+      <input type="hidden" name="periodId" value={periodId} />
+      <Field label={t('Niveau', 'Level')} htmlFor={`period-level-${periodId}`}>
+        <Select id={`period-level-${periodId}`} name="levelCode" defaultValue={levelCode ?? ''}>
+          <option value="">{t('Kein Niveau', 'No level')}</option>
+          {levels.map((code) => (
+            <option key={code} value={code}>
+              {code}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <div className="flex justify-end pt-1">
+        <Button type="submit">{t('Speichern', 'Save')}</Button>
       </div>
     </form>
   );

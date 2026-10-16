@@ -3,6 +3,7 @@ import { query, queryFirst } from './db';
 import { accommodationWeeks, teachingWeeks, termLessons } from './offers/course';
 import { coursePrice, rentPrice, type PriceList } from './prices/price-list';
 import { loadPriceLists } from './prices/repo';
+import { upcomingLevelPlaces } from './waitlist';
 import { toDateInputValue } from '@/lib/dates';
 
 /**
@@ -130,6 +131,8 @@ export async function bookingOffer(): Promise<BookingOffer> {
 
   const byType = new Map<string, CourseTypeOffer>();
 
+  const places = await upcomingLevelPlaces();
+
   for (const row of cohortRows) {
     const { weeks, price } = cohortPrice(prices, row);
     const published = Number(row.default_price);
@@ -153,6 +156,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
       roomName: row.room_name,
       seatsTaken: Number(row.seats_taken),
       capacity: row.capacity,
+      levels: places.get(row.id) ?? {},
       tuition: price?.amount ?? (published > 0 ? published : null),
       tuitionUnit: price || published > 0 ? 'item' : null,
     };

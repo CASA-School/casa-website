@@ -6,7 +6,10 @@ import { Icon } from '@/components/admin/icons';
 import { Button, Field, Input, Select, Textarea, TINTS } from '@/components/admin/ui';
 import {
   levelBand,
+  levelFree,
+  levelPlaces,
   levelSiblings,
+  waitingAhead,
   type BookingOffer,
   type CohortOffer,
 } from '@/lib/admin/booking-offer-types';
@@ -62,17 +65,23 @@ export function BookingWizard({
   personName,
   offer,
   preselectedCohortId,
+  preselectedLevelCode,
   sourceRegistrationId,
   returnTo,
   action,
+  waitlistAction,
 }: {
   personId: string;
   personName: string;
   offer: BookingOffer;
   preselectedCohortId?: string | null;
+  /** From a waiting list: the level the learner waited for. */
+  preselectedLevelCode?: string | null;
   sourceRegistrationId?: string | null;
   returnTo: string;
   action: (formData: FormData) => void | Promise<void>;
+  /** The other ending when the level is full: the learner goes into its queue (`waitlistFromWizardAction`). */
+  waitlistAction?: (formData: FormData) => void | Promise<void>;
 }) {
   const { t } = useWsLang();
   const preselected = useMemo(
@@ -93,7 +102,7 @@ export function BookingWizard({
   const [examTypeId, setExamTypeId] = useState<string | null>(null);
   const [examParts, setExamParts] = useState<1 | 2>(2);
 
-  const [levelCode, setLevelCode] = useState<string | null>(preselected?.levelCode ?? null);
+  const [levelCode, setLevelCode] = useState<string | null>(preselectedLevelCode ?? preselected?.levelCode ?? null);
   const [levelScope, setLevelScope] = useState<'half' | 'whole'>('whole');
   const [wantsBooks, setWantsBooks] = useState<boolean | null>(null);
   const [excludedBooks, setExcludedBooks] = useState<Set<string>>(new Set());
@@ -116,6 +125,13 @@ export function BookingWizard({
   }, [levelCode, levelScope, offer.materials]);
 
   const chosenBooks = books.filter((b) => !excludedBooks.has(b.id));
+
+  // The chosen level in the chosen start: its places and who already waits for them.
+  const group = kind === 'course' && cohort && levelCode ? levelPlaces(cohort, levelCode) : null;
+  const free = group ? levelFree(group, personId) : null;
+  const ahead = group ? waitingAhead(group, personId) : 0;
+  const full = group !== null && free === 0;
+  const queueFirst = Boolean(waitlistAction) && group !== null && (full || ahead > 0);
 
   const chosenAccommodation = wantsAccommodation
     ? (offer.accommodation.find((a) => a.code === accType) ?? null)
@@ -269,7 +285,6 @@ export function BookingWizard({
               <Question small>{t('Welcher Termin?', 'Which one?')}</Question>
               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                 {(offer.courseTypes.find((type) => type.id === courseTypeId)?.cohorts ?? []).map((c) => {
-                  const left = c.capacity > 0 ? c.capacity - c.seatsTaken : null;
                   return (
                     <Choice
                       key={c.id}
@@ -283,7 +298,8 @@ export function BookingWizard({
                       {[
                         weeksLabel(t, c.weeks),
                         c.session ? sessionLabel(t, c.session) : null,
-                        left !== null ? t(`${left} von ${c.capacity} Plätzen frei`, `${left} of ${c.capacity} seats free`) : null,
+                        // Places are per level and show on the next step; here, how many are booked in all.
+                        c.seatsTaken > 0 ? t(`${c.seatsTaken} gebucht`, `${c.seatsTaken} booked`) : null,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -300,22 +316,41 @@ export function BookingWizard({
         <section className="space-y-3">
           <Question>{t('Mit welchem Niveau beginnt die Person?', 'Which level are they starting at?')}</Question>
           <div className="flex flex-wrap gap-1.5">
-            {offer.levels.map((l) => (
-              <button
-                key={l.code}
-                type="button"
-                onClick={() => setLevelCode(l.code)}
-                className={cn(
-                  'rounded-lg border px-2.5 py-1.5 text-sm font-semibold tabular-nums transition-colors',
-                  levelCode === l.code
-                    ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
-                    : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
-                )}
-              >
-                {l.code}
-              </button>
-            ))}
+            {offer.levels.map((l) => {
+              const isFull = cohort ? levelFree(levelPlaces(cohort, l.code), personId) === 0 : false;
+              return (
+                <button
+                  key={l.code}
+                  type="button"
+                  onClick={() => setLevelCode(l.code)}
+                  className={cn(
+                    'rounded-lg border px-2.5 py-1.5 text-sm font-semibold tabular-nums transition-colors',
+                    levelCode === l.code
+                      ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
+                      : isFull
+                        ? 'border-[#efdca4] bg-[#fff8e6] text-[#7a4a00] hover:border-[#d9b65c]'
+                        : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
+                  )}
+                >
+                  {l.code}
+                  {isFull ? <span className="ml-1 text-[0.72rem] font-bold opacity-80">{t('voll', 'full')}</span> : null}
+                </button>
+              );
+            })}
           </div>
+          {group ? (
+            // The chosen level's places in this start, before the rest is asked.
+            <p className={cn('text-[0.82rem]', full ? 'font-semibold text-[#9a5b00]' : 'text-[var(--casa-muted)]')}>
+              {full
+                ? t(`${levelCode} ist voll: ${group.booked} von ${group.places} Plätzen gebucht`, `${levelCode} is full: ${group.booked} of ${group.places} places booked`)
+                : t(`${levelCode}: ${free} von ${group.places} Plätzen frei`, `${levelCode}: ${free} of ${group.places} places free`)}
+              {group.offeredTo.includes(personId)
+                ? t(' · der Platz ist für diese Person reserviert', ' · the place is held for this person')
+                : group.queue.length
+                  ? t(` · ${group.queue.length} auf der Warteliste`, ` · ${group.queue.length} on the waiting list`)
+                  : ''}
+            </p>
+          ) : null}
 
           {levelCode ? (
             <>
@@ -589,11 +624,44 @@ export function BookingWizard({
             </Field>
           </OptionalSection>
 
-          <div className="flex items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
+          {queueFirst && group ? (
+            // A full level, or learners waiting in front: the queue is offered first, and booking anyway stays possible.
+            <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+              {full
+                ? t(
+                    `${levelCode} ist in diesem Termin voll (${group.booked} von ${group.places} Plätzen). Auf der Warteliste wäre ${personName} Nr. ${ahead + 1}.`,
+                    `${levelCode} is full in this start (${group.booked} of ${group.places} places). On the waiting list ${personName} would be no. ${ahead + 1}.`
+                  )
+                : t(
+                    `${ahead === 1 ? '1 Person wartet' : `${ahead} Personen warten`} schon auf ${levelCode} in diesem Termin. Ein freier Platz geht zuerst an die Warteliste.`,
+                    `${ahead === 1 ? '1 person is' : `${ahead} people are`} already waiting for ${levelCode} in this start. A free place goes to the waiting list first.`
+                  )}
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
             <Button type="button" variant="ghost" onClick={() => go(-1)}>
               {t('Zurück', 'Back')}
             </Button>
-            <Button type="submit">{t('Buchung anlegen', 'Create booking')}</Button>
+            {queueFirst && full ? (
+              <span className="flex flex-wrap gap-2">
+                <Button type="submit" variant="secondary">
+                  {t('Trotzdem buchen', 'Book anyway')}
+                </Button>
+                <Button type="submit" formAction={waitlistAction}>
+                  {t('Auf die Warteliste', 'Add to waiting list')}
+                </Button>
+              </span>
+            ) : queueFirst ? (
+              <span className="flex flex-wrap gap-2">
+                <Button type="submit" variant="secondary" formAction={waitlistAction}>
+                  {t('Auf die Warteliste', 'Add to waiting list')}
+                </Button>
+                <Button type="submit">{t('Buchung anlegen', 'Create booking')}</Button>
+              </span>
+            ) : (
+              <Button type="submit">{t('Buchung anlegen', 'Create booking')}</Button>
+            )}
           </div>
         </form>
       ) : (

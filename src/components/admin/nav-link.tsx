@@ -32,6 +32,7 @@ export function NavLink({
   children,
   items,
   exact,
+  exclude,
 }: {
   href: string;
   icon: ReactNode;
@@ -40,11 +41,13 @@ export function NavLink({
   children: ReactNode;
   /** Nested destinations under this one. */
   items?: { href: string; label: string }[];
-  /** Current only on its own path: Courses is `/admin/catalogue`, and Exams lives under it. */
+  /** Current only on its own path. */
   exact?: boolean;
+  /** Paths under this one that are their own item: Courses is `/admin/catalogue`, and Exams lives under it. */
+  exclude?: readonly string[];
 }) {
   const pathname = usePathname();
-  const active = exact ? pathname === href : isCurrent(pathname, href);
+  const active = (exact ? pathname === href : isCurrent(pathname, href)) && !exclude?.some((path) => isCurrent(pathname, path));
   const childCurrent = items?.some((i) => isCurrent(pathname, i.href)) ?? false;
   const branchOpen = active || childCurrent;
   // One highlight on the screen: the item you are on. A parent whose child is

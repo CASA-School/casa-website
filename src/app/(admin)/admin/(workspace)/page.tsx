@@ -123,6 +123,18 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
               : null,
         },
         {
+          title: t('Wartelisten', 'Waiting lists'),
+          href: '/admin/catalogue/waitlist',
+          module: 'catalogue',
+          icon: Icon.clock,
+          tone: 'blue',
+          figure: (f) => (f.waitlistWaiting ? { value: n(f.waitlistWaiting), label: f.waitlistWaiting === 1 ? t('wartet', 'waiting') : t('warten', 'waiting') } : { value: t('Niemand wartet', 'Nobody waiting') }),
+          pill: (f) =>
+            f.waitlistFree
+              ? { text: f.waitlistFree === 1 ? t('Platz frei', 'Place free') : t(`${n(f.waitlistFree)} Plätze frei`, `${n(f.waitlistFree)} places free`), tone: 'warn' }
+              : null,
+        },
+        {
           title: t('Kurse', 'Courses'),
           href: '/admin/catalogue',
           module: 'catalogue',

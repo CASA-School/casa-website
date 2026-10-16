@@ -1032,6 +1032,81 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     the same `/admin/lang` the top bar uses). Team, Einstellungen, Preise and
     Räume were already in the shared design and kept as they are.
 
+## Waiting list (2026-10-16, migration 0031)
+
+Rahman: "do it properly and better than FileMaker — it is an important thing".
+CASA's waiting list is a queue per course: when an upcoming course is full, a
+learner waits; when a place frees up, the next one is taken; when the queue for a
+level is long, a second course of that level opens (`docs/schoolman/intake.md`).
+
+**What fills up is a level group within a course start** — "B1.1, Intensive
+mornings from 26 Oct" — Rahman's choice of the two models offered. Its places
+are groups × places per group, **14 by default** (SchoolMan's `CapStudent`),
+changed per start and level (`course_level_places`; „Plätze ändern", module
+`rooms` at `edit`, the right that schedules a start). A booked period now
+records its level (`booking_periods.level_code`): the wizard stores the level it
+asks for, an extension asks for one, and the booking page sets or corrects it
+(„Niveau · Festlegen"). Bookings from before have none: a start's page lists
+them under „Ohne Niveau", and they count for no level until one is set.
+
+**Nothing that can be counted is stored** (`src/lib/admin/waitlist.ts`). Booked
+places are counted from bookings that are not cancelled; a place offered to a
+learner is *held* for them; free = places − booked − held, never below zero. A
+learner's position is worked out from the queue's order on every read.
+`freePlaces`, `placeForNext` and the wizard's `levelFree` / `waitingAhead` are
+the whole of "full", "free" and "who is next" (unit-tested).
+
+**An entry** (`waitlist_entries`) names its start and level, the person, the day
+they joined, how they came (office, website registration, continuing after a
+course) and a note. Its order is a `rank` — the join time, unless a colleague
+moves someone, which always takes a reason and is a line in the learner's
+history. States: *wartet* → *Platz angeboten* (no deadline, Rahman's choice: the
+team decides when to move on, and „Angebot zurücknehmen" puts the learner back
+in their place) → *gebucht* | *abgesagt* | *von der Liste genommen* (with a
+reason). **A booking closes the entry by itself** — `createBooking` and
+`extendBooking` close every open entry of that person in that start, in the same
+transaction — so the list never keeps someone already booked, which is how
+SchoolMan's lists filled up (87% of its entries sit at the default status).
+
+**Where it shows**
+
+- **A course start's page** (`/admin/catalogue/[id]`, from the course list):
+  the start in its head with booked, waiting and free in the bar; one card per
+  level — the places as a line (booked, then held), „1 Platz frei · als Nächste
+  dran: …" with „Platz anbieten" when a place is free and someone waits, the
+  queue in order (place, name, since when, how they came; „Platz anbieten",
+  „Buchen" into the wizard with start and level chosen, „Verschieben" — another
+  place with a reason, or another start or level keeping the join day — and
+  „Von der Liste"/„Abgesagt"), the booked learners and the history of the queue.
+  When a level is full and someone waits, „Zweite Gruppe eröffnen" adds a group.
+- **Kurse → Wartelisten** (`/admin/catalogue/waitlist`, nested under Kurse):
+  every queue, grouped by start and level, with the views *Platz frei* (opens
+  there when there is one), *Wartend*, *Angeboten*, *Kurs begonnen* (learners
+  whose start has begun while they waited — move them or take them off) and
+  *Abgeschlossen*.
+- **The booking wizard** marks full levels, says how a level stands in the
+  chosen start, and at the end — when the level is full, or others already
+  wait — offers „Auf die Warteliste" with the learner's would-be position,
+  „Trotzdem buchen" staying possible. A place held for the learner being booked
+  counts as free to them.
+- **A course registration** has „Auf die Warteliste" beside „Buchung anlegen";
+  the registration is answered (done) and the entry remembers it.
+- **The learner's page** lists their waiting places among „Anfragen &
+  Buchungen" and in the Übersicht („Platz 2"), and „Offen" counts them.
+- **The course list** shows per start how many are booked, „Platz frei", how
+  many wait, and which levels are full. **The Übersicht** has a Wartelisten
+  card: how many wait, and „Platz frei" when a place is free for someone.
+
+**Rights.** Putting someone on a list, offering, booking, moving and closing are
+bookings work (`bookings` at `edit`); places and groups are the course
+planners' (`rooms` at `edit`); seeing the lists needs `catalogue`.
+
+**Not yet:** the three letters SchoolMan writes (on the list / a place is free /
+maybe next time) — they need a letter kind beyond offers (`docs/LETTERS.md`);
+until then the row's envelope opens a mail with the subject filled in. Exam
+waiting lists (sittings have a capacity; SchoolMan has them). The link to
+Kursplanung's course groups, which are planned by hand per month.
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,

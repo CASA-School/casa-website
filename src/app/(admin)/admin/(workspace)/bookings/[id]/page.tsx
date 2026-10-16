@@ -10,7 +10,7 @@ import {
   removePeriodAction,
   voidPaymentAction,
 } from '../actions';
-import { CarryOverForm, ChargeForm, EditBookingForm, ExtendBookingForm, ObservationForm, PaymentForm } from '../booking-forms';
+import { CarryOverForm, ChargeForm, EditBookingForm, ExtendBookingForm, ObservationForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
@@ -37,6 +37,7 @@ import {
 import { listCourseTypes } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
+import { levelCodes } from '@/lib/admin/waitlist';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
@@ -116,12 +117,13 @@ export default async function BookingPage({
   // booking of the same learner (docs/schoolman/money.md).
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
-  const [notes, activity, cohorts, courseTypes, targets] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit ? listCohortOptions() : Promise.resolve([]),
     canEdit ? listCourseTypes() : Promise.resolve([]),
     canEdit && credit > 0 ? carryOverTargets(booking.id) : Promise.resolve([]),
+    canEdit ? levelCodes() : Promise.resolve([]),
   ]);
   const carriesOver = targets.length > 0;
 
@@ -137,7 +139,20 @@ export default async function BookingPage({
   const removesCharges = canFull && open;
   // The record's own fields, those that have a value: when it was booked is
   // in the head, so a booking with nothing else has no card for it.
+  const single = booking.periods.length === 1 ? booking.periods[0] : null;
+  // A period's level, set or changed in a small dialog: what the cohort's places count (the waiting list, 0031).
+  const levelValue = (period: { id: string; levelCode: string | null }) => (
+    <span className="flex items-center gap-2">
+      {period.levelCode ? <span className="font-semibold">{period.levelCode}</span> : <span className="text-[var(--casa-text-subtle)]">—</span>}
+      {canEdit && booking.status !== 'cancelled' ? (
+        <FormDialog trigger={period.levelCode ? t('Ändern', 'Change') : t('Festlegen', 'Set')} title={t('Niveau', 'Level')} size="sm" triggerVariant="ghost">
+          <PeriodLevelForm bookingId={booking.id} periodId={period.id} levelCode={period.levelCode} levels={levels} />
+        </FormDialog>
+      ) : null}
+    </span>
+  );
   const recordFields = [
+    single && single.courseInstanceId ? { label: t('Niveau', 'Level'), value: levelValue(single) } : null,
     booking.observationReason
       ? {
           label: t('Unter Beobachtung', 'Under observation'),
@@ -209,7 +224,6 @@ export default async function BookingPage({
         tone: observed ? ('watch' as const) : undefined,
       };
     });
-  const single = booking.periods.length === 1 ? booking.periods[0] : null;
   // A cohort's label is its title, or "Course · 31.08.26 – 23.10.26" built
   // from the course and dates the head already shows; only a title is news.
   const singleCohortTitle =
@@ -250,6 +264,7 @@ export default async function BookingPage({
           <>
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">
               {booking.courseTypeName ?? t('Buchung', 'Booking')}
+              {single?.levelCode ? <span className="font-medium text-[var(--casa-muted)]"> · {single.levelCode}</span> : null}
               {singleCohortTitle ? <span className="font-medium text-[var(--casa-muted)]"> · {singleCohortTitle}</span> : null}
             </span>
             <MetaLine>
@@ -298,7 +313,7 @@ export default async function BookingPage({
             ) : null}
             {canEdit && open ? (
               <FormDialog trigger={t('Verlängern', 'Extend')} title={t('Buchung verlängern', 'Extend the booking')}>
-                <ExtendBookingForm booking={booking} cohorts={cohorts} />
+                <ExtendBookingForm booking={booking} cohorts={cohorts} levels={levels} />
               </FormDialog>
             ) : null}
             {canEdit ? (
@@ -355,9 +370,10 @@ export default async function BookingPage({
                         <DateText value={p.startDate} /> – <DateText value={p.endDate} />
                         {p.kind === 'extension' ? <Badge tone="quiet">{t('Verlängerung', 'Extension')}</Badge> : null}
                       </span>
+                      {p.courseInstanceId ? <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">{levelValue(p)}</span> : null}
                       <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
                         {p.courseInstanceId ? (
-                          <Link href="/admin/catalogue" className="hover:underline">
+                          <Link href={`/admin/catalogue/${p.courseInstanceId}`} className="hover:underline">
                             {p.cohortLabel}
                           </Link>
                         ) : (

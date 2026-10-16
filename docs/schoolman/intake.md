@@ -60,8 +60,9 @@ lesson-end tests, so the same table records progress. 29% have no test date.
 ## In the workspace today
 
 `enquiries`, `course_registrations`, `exam_registrations` and the placement tables receive new
-intake from the website, with a status and an owner — the part FileMaker never maintained. There is
-no waiting list yet, and offers have their own module.
+intake from the website, with a status and an owner — the part FileMaker never maintained. The
+waiting list is its own (below, and `docs/ADMIN_WORKSPACE.md` §Waiting list); offers have their own
+module.
 
 ## For the bridge
 
@@ -77,6 +78,13 @@ learner is taken from it; and when the list for a level is long, CASA opens a se
 same level (Rahman, 2026-10-16). So the waiting list is both a queue per course and the signal for a
 parallel course — in the workspace it belongs with the course and with Kursplanung, ordered, with the
 date each learner joined it. 575 learners joined one in 2026.
+
+**Built 2026-10-16** (migration 0031, `docs/ADMIN_WORKSPACE.md` §Waiting list): a queue per level
+group of a course start, 14 places per group by default, offered places held without a deadline, and
+entries that close themselves when the learner is booked. What SchoolMan does instead, read from its
+DDR: `WaitingRoom` has no course since 2023 (only the pre-booking does), no order but creation order,
+no "place offered" step, nothing that notices a freed place, and no entry is ever closed — the
+conversion script never touches it.
 
 ## Which tests matter
 

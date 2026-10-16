@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 
-import { createBookingFromWizardAction } from '../../../bookings/actions';
+import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../../bookings/actions';
 import { BookingWizard } from '../../../bookings/booking-wizard';
+import { WaitlistForm } from '../../../catalogue/waitlist-forms';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { PersonPanel } from '@/components/admin/person-panel';
@@ -10,6 +11,7 @@ import { Badge, BirthDate, Card, DetailList, RecordHeader } from '@/components/a
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
+import { query } from '@/lib/admin/db';
 import { listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type Bilingual } from '@/lib/admin/i18n';
@@ -19,6 +21,7 @@ import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from 
 import { getCourseRegistration } from '@/lib/admin/registrations';
 import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
+import { levelGroups } from '@/lib/admin/waitlist';
 import { toDateInputValue } from '@/lib/dates';
 import { courseNameResolver } from '../../course-names';
 import { formatRange, localDays, parseOptionLabel } from '../../option-label';
@@ -55,6 +58,14 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
   const canEdit = canAccess(user, 'registrations', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit') && Boolean(registration.personId);
   const offer = canBook ? await bookingOffer() : null;
+  // A full course: the registration can go straight into a level's queue for its start.
+  const queues = canBook && registration.courseInstanceId;
+  const [levels, groups] = queues
+    ? await Promise.all([
+        query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`).then((rows) => rows.map((r) => r.code)),
+        levelGroups([registration.courseInstanceId!]),
+      ])
+    : [[], []];
 
   const [notes, activity, staff, flags, person, courseName] = await Promise.all([
     listNotes('course_registration', registration.id),
@@ -123,17 +134,33 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
         }
         actions={
           canBook && offer && registration.personId ? (
-            <FormDialog trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
-              <BookingWizard
-                personId={registration.personId}
-                personName={fullName}
-                offer={offer}
-                preselectedCohortId={registration.courseInstanceId}
-                sourceRegistrationId={registration.id}
-                returnTo={`/admin/registrations/course/${registration.id}`}
-                action={createBookingFromWizardAction}
-              />
-            </FormDialog>
+            <>
+              {queues ? (
+                <FormDialog trigger={t('Auf die Warteliste', 'Waiting list')} title={t(`${fullName} auf die Warteliste`, `${fullName} on the waiting list`)} size="sm">
+                  <WaitlistForm
+                    personId={registration.personId}
+                    courseInstanceId={registration.courseInstanceId!}
+                    levels={levels}
+                    groups={groups}
+                    registrationId={registration.id}
+                    defaultLevel={registration.declaredLevelCode}
+                    returnTo={`/admin/registrations/course/${registration.id}`}
+                  />
+                </FormDialog>
+              ) : null}
+              <FormDialog trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
+                <BookingWizard
+                  personId={registration.personId}
+                  personName={fullName}
+                  offer={offer}
+                  preselectedCohortId={registration.courseInstanceId}
+                  sourceRegistrationId={registration.id}
+                  returnTo={`/admin/registrations/course/${registration.id}`}
+                  action={createBookingFromWizardAction}
+                  waitlistAction={waitlistFromWizardAction}
+                />
+              </FormDialog>
+            </>
           ) : null
         }
         bar={

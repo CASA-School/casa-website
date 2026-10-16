@@ -4,6 +4,7 @@ import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
 import { raiseFlag } from './flags';
+import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './waitlist';
 import { pick, type Bilingual, type WsLang } from './i18n';
 
 /**
@@ -163,6 +164,8 @@ export type BookingPeriod = {
   startDate: Date;
   endDate: Date;
   kind: 'initial' | 'extension';
+  /** The level taught in this period: what a start's places are counted by (0031). */
+  levelCode: string | null;
 };
 
 export type BookingCharge = {
@@ -392,8 +395,9 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       start_date: Date;
       end_date: Date;
       kind: 'initial' | 'extension';
+      level_code: string | null;
     }>(
-      `SELECT bp.id, bp.course_instance_id, bp.start_date, bp.end_date, bp.kind,
+      `SELECT bp.id, bp.course_instance_id, bp.start_date, bp.end_date, bp.kind, bp.level_code,
               CASE WHEN i.id IS NULL THEN NULL
                    ELSE coalesce(i.title, t.name || ' · ' || to_char(i.start_date, 'DD.MM.YY') || ' – ' || to_char(i.end_date, 'DD.MM.YY'))
               END AS cohort_label
@@ -464,6 +468,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       startDate: p.start_date,
       endDate: p.end_date,
       kind: p.kind,
+      levelCode: p.level_code,
     })),
     charges: charges.map((c) => ({
       id: c.id,
@@ -496,6 +501,8 @@ export type NewBooking = {
   personId: string;
   courseTypeId: string | null;
   courseInstanceId: string | null;
+  /** The level the learner starts at; the start's places for that level count it. */
+  levelCode?: string | null;
   startDate: string;
   endDate: string;
   status: BookingStatus;
@@ -532,13 +539,14 @@ async function addPeriodOn(
     startDate: string;
     endDate: string;
     kind: 'initial' | 'extension';
+    levelCode?: string | null;
   },
   actor: StaffUser
 ): Promise<string> {
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, created_by)
-     VALUES ($1, $2, $3::date, $4::date, $5, $6) RETURNING id`,
-    [bookingId, input.courseInstanceId, input.startDate, input.endDate, input.kind, actor.id]
+    `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, level_code, created_by)
+     VALUES ($1, $2, $3::date, $4::date, $5, $6, $7) RETURNING id`,
+    [bookingId, input.courseInstanceId, input.startDate, input.endDate, input.kind, input.levelCode ?? null, actor.id]
   );
   if (!input.courseInstanceId) {
     await raiseFlag(
@@ -555,7 +563,8 @@ async function addPeriodOn(
 }
 
 export async function createBooking(input: NewBooking, actor: StaffUser): Promise<string> {
-  return withTransaction(async (client) => {
+  let closed: WaitlistEntryCore[] = [];
+  const bookingId = await withTransaction(async (client) => {
     const { rows } = await client.query<{ id: string }>(
       `INSERT INTO bookings
          (person_id, course_type_id, status, payer, payer_name, visa_required, notes,
@@ -589,9 +598,12 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
         startDate: input.startDate,
         endDate: input.endDate,
         kind: 'initial',
+        levelCode: input.levelCode ?? null,
       },
       actor
     );
+    // Booked into the course they were waiting for: their place in its queue closes with it.
+    if (input.courseInstanceId) closed = await closeOnBooking(client, input.personId, input.courseInstanceId, id, actor);
     for (const c of input.charges) {
       await client.query(
         `INSERT INTO booking_charges
@@ -618,6 +630,8 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
     );
     return id;
   });
+  await logClosedByBooking(closed, bookingId, actor);
+  return bookingId;
 }
 
 export async function updateBooking(
@@ -656,15 +670,21 @@ export async function updateBooking(
   });
 }
 
-/** An extension: more dates, usually into the next cohort. */
+/** An extension: more dates, usually into the next cohort — which closes the learner's place in its queue. */
 export async function extendBooking(
   id: string,
-  input: { courseInstanceId: string | null; startDate: string; endDate: string },
+  input: { courseInstanceId: string | null; startDate: string; endDate: string; levelCode?: string | null },
   actor: StaffUser
 ): Promise<void> {
+  let closed: WaitlistEntryCore[] = [];
   await withTransaction(async (client) => {
     await addPeriodOn(client, id, { ...input, kind: 'extension' }, actor);
+    if (input.courseInstanceId) {
+      const owner = await client.query<{ person_id: string }>(`SELECT person_id FROM bookings WHERE id = $1`, [id]);
+      if (owner.rows[0]) closed = await closeOnBooking(client, owner.rows[0].person_id, input.courseInstanceId, id, actor);
+    }
   });
+  await logClosedByBooking(closed, id, actor);
   await logActivity({
     actor,
     entity: 'booking',
@@ -672,6 +692,17 @@ export async function extendBooking(
     action: 'booking_extended',
     detail: input,
   });
+}
+
+/** The level a period is taught at — set or corrected on the booking's page. */
+export async function setPeriodLevel(bookingId: string, periodId: string, levelCode: string | null, actor: StaffUser): Promise<void> {
+  await query(`UPDATE booking_periods SET level_code = $3 WHERE id = $1 AND booking_id = $2`, [periodId, bookingId, levelCode]);
+  await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'booking_level_set', detail: { period: periodId, level: levelCode } });
+}
+
+/** Whether a code is one of the levels (a form's value, before it reaches a foreign key). */
+export async function isLevelCode(code: string): Promise<boolean> {
+  return Boolean(await queryFirst<{ code: string }>(`SELECT code FROM levels WHERE code = $1`, [code]));
 }
 
 export async function removePeriod(

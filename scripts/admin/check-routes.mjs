@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -51,6 +51,9 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT id FROM placement_attempts ORDER BY created_at DESC LIMIT 1`),
     firstId(`SELECT id FROM career_applications ORDER BY created_at DESC LIMIT 1`),
     firstId(`SELECT id FROM offers WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 1`),
+    // A course start, the one with a waiting list if any: its page reads the queues.
+    firstId(`SELECT i.id FROM course_instances i LEFT JOIN waitlist_entries w ON w.course_instance_id = i.id
+              WHERE i.end_date >= current_date GROUP BY i.id ORDER BY count(w.id) DESC, min(i.start_date) LIMIT 1`),
   ]);
 
 const routes = [
@@ -79,6 +82,9 @@ const routes = [
   offer && `/admin/offers/${offer}`,
   offer && `/admin/offers/${offer}/letter`,
   '/admin/catalogue',
+  start && `/admin/catalogue/${start}`,
+  '/admin/catalogue/waitlist',
+  '/admin/catalogue/waitlist?view=closed',
   '/admin/catalogue/exams',
   '/admin/settings/rooms',
   room && `/admin/settings/rooms/${room}`,

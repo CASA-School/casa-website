@@ -1,6 +1,6 @@
 import { query } from './db';
 import type { StaffUser } from './auth';
-import { pick, translator, wsLocale, type WsLang } from './i18n';
+import { dayRange, pick, translator, wsLocale, type WsLang } from './i18n';
 import { queueLabel, queuePath, STATUS_LABELS, type QueueEntity, type WorkStatus } from './queues';
 
 /**
@@ -136,7 +136,7 @@ const article = (noun: string) => (/^[aeiou]/i.test(noun) ? 'an' : 'a');
 /** "an enquiry" / "a course registration". */
 const subjectOf = (entity: string) => {
   const queue = asQueue(entity);
-  const noun = queue ? queueLabel(queue, 'en').toLowerCase() : entity.replace(/_/g, ' ');
+  const noun = queue ? queueLabel(queue, 'en').toLowerCase() : entity === 'course_instance' ? 'course start' : entity.replace(/_/g, ' ');
   return `${article(noun)} ${noun}`;
 };
 
@@ -151,6 +151,7 @@ const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   exam_registration: { noun: 'Prüfungsanmeldung', gender: 'f' },
   career_application: { noun: 'Bewerbung', gender: 'f' },
   placement_attempt: { noun: 'Einstufungstest', gender: 'm' },
+  course_instance: { noun: 'Kurstermin', gender: 'm' },
   booking: { noun: 'Buchung', gender: 'f' },
   person: { noun: 'Person', gender: 'f' },
   offer: { noun: 'Angebot', gender: 'n' },
@@ -263,6 +264,51 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat die Beobachtung einer Buchung beendet', 'ended the observation of a booking');
     case 'booking_deleted':
       return t('hat eine Buchung gelöscht', 'deleted a booking');
+    case 'booking_level_set':
+      return t('hat das Niveau einer Buchung festgelegt', "set a booking's level");
+    case 'waitlist_joined':
+    case 'waitlist_offered':
+    case 'waitlist_offer_taken_back':
+    case 'waitlist_declined':
+    case 'waitlist_withdrawn':
+    case 'waitlist_moved':
+    case 'waitlist_moved_course':
+    case 'waitlist_booked': {
+      // "Intensive German B1.1 ab 26. Okt.": the queue, as the detail names it.
+      const level = String(entry.detail?.level ?? '');
+      const start = typeof entry.detail?.start === 'string' && entry.detail.start ? dayRange(entry.detail.start, entry.detail.start, lang) : '';
+      const what = [entry.detail?.course, level].filter(Boolean).join(' ') + (start ? ` ${t('ab', 'from')} ${start}` : '');
+      switch (entry.action) {
+        case 'waitlist_joined':
+          return t(`hat ${acc} auf die Warteliste ${what} gesetzt`, `put ${subject} on the waiting list for ${what}`);
+        case 'waitlist_offered':
+          return t(`hat ${dat} einen Platz in ${what} angeboten`, `offered ${subject} a place in ${what}`);
+        case 'waitlist_offer_taken_back':
+          return t(`hat das Platzangebot in ${what} zurückgenommen`, `took back the place offered in ${what}`);
+        case 'waitlist_declined':
+          return t(`hat eingetragen, dass der Platz in ${what} abgesagt wurde`, `recorded that the place in ${what} was declined`);
+        case 'waitlist_withdrawn':
+          return t(`hat ${acc} von der Warteliste ${what} genommen`, `took ${subject} off the waiting list for ${what}`);
+        case 'waitlist_moved': {
+          const reason = typeof entry.detail?.reason === 'string' ? ` („${entry.detail.reason}“)` : '';
+          return t(
+            `hat ${acc} in der Warteliste ${what} von Platz ${entry.detail?.from} auf ${entry.detail?.to} gesetzt${reason}`,
+            `moved ${subject} from place ${entry.detail?.from} to ${entry.detail?.to} in the waiting list for ${what}${reason}`
+          );
+        }
+        case 'waitlist_moved_course':
+          return t(`hat ${acc} auf die Warteliste ${what} verschoben`, `moved ${subject} to the waiting list for ${what}`);
+        default:
+          return t(`hat ${acc} aus der Warteliste ${what} gebucht`, `booked ${subject} from the waiting list for ${what}`);
+      }
+    }
+    case 'places_set':
+      return t(
+        `hat die Plätze für ${entry.detail?.level} auf ${entry.detail?.groups} × ${entry.detail?.placesPerGroup} gesetzt`,
+        `set ${entry.detail?.level} to ${entry.detail?.groups} × ${entry.detail?.placesPerGroup} places`
+      );
+    case 'group_opened':
+      return t(`hat eine weitere Gruppe ${entry.detail?.level} eröffnet`, `opened another ${entry.detail?.level} group`);
     case 'cohort_created':
       return t('hat eine Kursgruppe angesetzt', 'scheduled a cohort');
     case 'person_linked':
@@ -426,6 +472,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'booking' && entry.entityId) {
     return `/admin/bookings/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'course_instance' && entry.entityId) {
+    return `/admin/catalogue/${entry.entityId}`;
   }
 
   if (entry.entity === 'offer' && entry.entityId && entry.action !== 'offer_deleted') {
