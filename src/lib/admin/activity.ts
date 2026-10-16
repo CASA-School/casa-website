@@ -238,6 +238,10 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Zahlung storniert', 'voided a payment');
     case 'booking_cancelled':
       return t('hat eine Buchung storniert', 'cancelled a booking');
+    case 'booking_observed':
+      return t('hat eine Buchung unter Beobachtung gestellt', 'put a booking under observation');
+    case 'booking_observation_ended':
+      return t('hat die Beobachtung einer Buchung beendet', 'ended the observation of a booking');
     case 'booking_deleted':
       return t('hat eine Buchung gelöscht', 'deleted a booking');
     case 'cohort_created':

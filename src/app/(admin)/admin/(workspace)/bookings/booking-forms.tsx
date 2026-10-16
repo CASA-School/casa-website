@@ -5,6 +5,8 @@ import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUSES,
   CHARGE_KIND_LABELS,
+  OBSERVATION_REASON_LABELS,
+  OBSERVATION_REASONS,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
   type BookingDetail,
@@ -19,6 +21,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import {
   addChargeAction,
   extendBookingAction,
+  observeBookingAction,
   recordPaymentAction,
   updateBookingAction,
 } from './actions';
@@ -277,6 +280,36 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
       </More>
       <div className="flex justify-end pt-1">
         <Button type="submit">{t('Zahlung erfassen', 'Record payment')}</Button>
+      </div>
+    </form>
+  );
+}
+
+/** Yellow: why the booking is under observation, and a note for the colleague who looks next. */
+export async function ObservationForm({ bookingId }: { bookingId: string }) {
+  const { t, lang } = await getI18n();
+  return (
+    <form action={observeBookingAction} className="space-y-4">
+      <input type="hidden" name="bookingId" value={bookingId} />
+      <fieldset>
+        <legend className="mb-2 text-[0.8rem] font-semibold text-[var(--casa-ink)]">{t('Grund', 'Reason')}</legend>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {OBSERVATION_REASONS.map((reason, i) => (
+            <label
+              key={reason}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-ws-line-firm bg-white px-3 py-2 text-[0.84rem] font-semibold text-[var(--casa-ink)] transition-colors has-[:checked]:border-[#d99a00] has-[:checked]:bg-[#fff8e6]"
+            >
+              <input type="radio" name="reason" value={reason} required defaultChecked={i === 0} className="accent-[#d99a00]" />
+              {pick(lang, OBSERVATION_REASON_LABELS[reason])}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <Field label={t('Notiz', 'Note')} hint={t('Bei „Sonstiges" nötig', 'Needed for “Other”')} htmlFor="observation-note">
+        <Textarea id="observation-note" name="note" rows={3} maxLength={300} />
+      </Field>
+      <div className="flex justify-end pt-1">
+        <Button type="submit">{t('Unter Beobachtung stellen', 'Put under observation')}</Button>
       </div>
     </form>
   );

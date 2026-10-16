@@ -1,16 +1,20 @@
-import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName, Status } from '@/components/admin/list';
+import { BookingLightDot, BookingLightLabel } from '@/components/admin/booking-light';
+import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import {
+  BOOKING_LIGHT_LABELS,
   BOOKING_STATUS_LABELS,
-  BOOKING_STATUS_TONES,
   bookingCounts,
+  bookingLight,
   bookingsOwed,
   listBookings,
+  OBSERVATION_REASON_LABELS,
   type BookingFilter,
   type BookingListItem,
 } from '@/lib/admin/bookings';
-import { toDateInputValue } from '@/lib/dates';
+import { addDays } from '@/lib/admin/offers/stay';
+import { todayInputValue, toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { counted, pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { Tally } from '@/components/admin/inbox';
@@ -20,10 +24,12 @@ import { getI18n } from '@/lib/admin/i18n.server';
  * Bookings.
  *
  * A booking is created from a person or a registration, never from here — the
- * list is where you find one. The views split by time; Current and Upcoming
- * read in groups by what is left to do, the reserved ones first, so the group
- * is the status and no row repeats it (docs/ADMIN_WORKSPACE.md §Lists). A
- * Reserved view of its own only repeated those groups, so it went.
+ * list is where you find one. Every row carries the team's colour from SchoolMan
+ * (docs/schoolman/bookings.md): green all good, yellow under observation, grey
+ * „unklar" until paid in full, red cancelled. The views are the team's work
+ * lists: what is running (ending soon first), what is coming (starting soon
+ * first), what is unclear, what is under observation, then the past and the
+ * cancelled.
  *
  * Money is two figures: the total charged, and the balance still open — the
  * one the team looks at first, in a calm amber while something is owed and a
@@ -34,15 +40,15 @@ import { getI18n } from '@/lib/admin/i18n.server';
 const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
   { key: 'current', label: { de: 'Laufend', en: 'Current' } },
   { key: 'upcoming', label: { de: 'Kommend', en: 'Upcoming' } },
+  { key: 'unclear', label: { de: 'Unklar', en: 'Unclear' } },
+  { key: 'watch', label: { de: 'Unter Beobachtung', en: 'Under observation' } },
   { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
   { key: 'cancelled', label: { de: 'Storniert', en: 'Cancelled' } },
   { key: 'all', label: { de: 'Alle', en: 'All' } },
 ];
 
-const STAGES = [
-  { key: 'reserved', label: BOOKING_STATUS_LABELS.reserved },
-  { key: 'confirmed', label: BOOKING_STATUS_LABELS.confirmed },
-] as const;
+/** Two weeks: "soon" for a course that starts or ends — the team's NewStart and End lists. */
+const SOON_DAYS = 14;
 
 const money = (n: number, currency: string) =>
   currency === 'EUR'
@@ -59,6 +65,8 @@ function Balance({ b, t }: { b: BookingListItem; t: T }) {
   if (b.charged === 0 && b.paid === 0) return null;
   const open = b.charged - b.paid;
   if (Math.abs(open) < 0.005) return <span className="text-[0.8rem] text-[var(--casa-text-subtle)]">{t('Bezahlt', 'Paid')}</span>;
+  // A cancelled booking owes nothing more; only a credit — a refund due — is still news.
+  if (open > 0 && b.status === 'cancelled') return null;
   if (open > 0) return <span className="font-semibold text-[#9a5b00]">{money(open, b.currency)}</span>;
   return (
     <>
@@ -86,15 +94,24 @@ export default async function BookingsPage({
     getI18n(),
   ]);
 
-  const grouped = filter === 'current' || filter === 'upcoming';
-  const groups = grouped
-    ? STAGES.map((stage) => ({ key: stage.key, label: pick(lang, stage.label), rows: items.filter((b) => b.status === stage.key) })).filter(
-        (g) => g.rows.length
-      )
-    : [{ key: filter, label: '', rows: items }];
-  // Where the view cannot group, the status stays as a column: a dot and the word.
-  const showStatus = filter === 'past' || filter === 'all';
-  const span = showStatus ? 5 : 4;
+  // Running ones split by whether they end within two weeks, coming ones by whether they start
+  // within two weeks; the other views are one list.
+  const soon = addDays(todayInputValue(), SOON_DAYS);
+  const endsSoon = (b: BookingListItem) => (toDateInputValue(b.endDate) || '9999') <= soon;
+  const startsSoon = (b: BookingListItem) => (toDateInputValue(b.startDate) || '9999') <= soon;
+  const groups =
+    filter === 'current'
+      ? [
+          { key: 'ending', label: t('Enden bald', 'Ending soon'), rows: items.filter(endsSoon) },
+          { key: 'running', label: t('Laufen weiter', 'Running on'), rows: items.filter((b) => !endsSoon(b)) },
+        ].filter((g) => g.rows.length)
+      : filter === 'upcoming'
+        ? [
+            { key: 'starting', label: t('Starten bald', 'Starting soon'), rows: items.filter(startsSoon) },
+            { key: 'later', label: t('Später', 'Later'), rows: items.filter((b) => !startsSoon(b)) },
+          ].filter((g) => g.rows.length)
+        : [{ key: filter, label: '', rows: items }];
+  const span = 5;
   const hide = 'hidden md:table-cell';
   const href = (key: BookingFilter) => `/admin/bookings${key === 'current' ? '' : `?filter=${key}`}`;
 
@@ -106,6 +123,7 @@ export default async function BookingsPage({
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
         <Tally tone="working" n={counts.current} label={t('laufend', 'current')} lang={lang} />
         <Tally tone="new" n={counts.upcoming} label={t('kommend', 'upcoming')} lang={lang} />
+        <Tally tone="waiting" n={counts.watch} label={t('unter Beobachtung', 'under observation')} lang={lang} />
         {owed.amount > 0.005 ? (
           <span className="inline-flex items-center gap-2">
             <span aria-hidden="true" className="size-2 rounded-full bg-[#e0a100]" />
@@ -138,26 +156,35 @@ export default async function BookingsPage({
             head={[
               t('Buchung', 'Booking'),
               { label: t('Zeitraum', 'Dates'), className: `w-[13.5rem] ${hide}` },
-              ...(showStatus ? [{ label: t('Status', 'Status'), className: `w-[9rem] ${hide}` }] : []),
+              { label: t('Stand', 'Standing'), className: `w-[12rem] ${hide}` },
               { label: t('Gesamt', 'Total'), align: 'right' as const, className: `w-[8rem] ${hide}` },
               { label: t('Offen', 'Balance'), align: 'right' as const, className: 'w-[8.5rem]' },
             ]}
           >
             {groups.map((group) => [
               group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={span} /> : null,
-              ...group.rows.map((b) => (
+              ...group.rows.map((b) => {
+                const light = bookingLight(b);
+                const lightLabel = pick(lang, BOOKING_LIGHT_LABELS[light]);
+                const about = [b.courseTypeName, b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null].filter(Boolean).join(' · ');
+                return (
                 <TableRow key={b.id} interactive>
                   <Cell href={`/admin/bookings/${b.id}`} className="max-w-0">
-                    <RecordName name={b.personName} about={b.courseTypeName ?? undefined} />
+                    <span className="flex items-center gap-2">
+                      <span className="md:hidden">
+                        <BookingLightDot light={light} label={lightLabel} />
+                      </span>
+                      <RecordName name={b.personName} about={about || undefined} />
+                    </span>
                   </Cell>
                   <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b, lang)}</Cell>
-                  {showStatus ? (
-                    <Cell className={hide}>
-                      <Status tone={b.status === 'completed' || b.status === 'cancelled' ? 'quiet' : BOOKING_STATUS_TONES[b.status]}>
-                        {pick(lang, BOOKING_STATUS_LABELS[b.status])}
-                      </Status>
-                    </Cell>
-                  ) : null}
+                  <Cell className={`max-w-0 ${hide}`}>
+                    <BookingLightLabel
+                      light={light}
+                      label={lightLabel}
+                      detail={light === 'watch' && b.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
+                    />
+                  </Cell>
                   <Cell align="right" className={`whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>
                     {b.charged !== 0 ? money(b.charged, b.currency) : null}
                   </Cell>
@@ -165,7 +192,8 @@ export default async function BookingsPage({
                     <Balance b={b} t={t} />
                   </Cell>
                 </TableRow>
-              )),
+                );
+              }),
             ])}
           </Table>
         )}

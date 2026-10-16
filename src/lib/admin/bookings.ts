@@ -81,6 +81,48 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, Bilingual> = {
 };
 
 /**
+ * Why a booking is under observation — the team's yellow (u.B., *unter Beobachtung*). The other
+ * three colours are not typed: red is the cancellation, grey and green follow from the money.
+ */
+export type ObservationReason = 'level' | 'visa' | 'attendance' | 'documents' | 'other';
+export const OBSERVATION_REASONS: readonly ObservationReason[] = ['level', 'visa', 'attendance', 'documents', 'other'];
+export const OBSERVATION_REASON_LABELS: Record<ObservationReason, Bilingual> = {
+  level: { de: 'Niveau', en: 'Level' },
+  visa: { de: 'Visum', en: 'Visa' },
+  attendance: { de: 'Anwesenheit', en: 'Attendance' },
+  documents: { de: 'Unterlagen fehlen', en: 'Documents missing' },
+  other: { de: 'Sonstiges', en: 'Other' },
+};
+
+/**
+ * The booking's colour, as the team reads it in SchoolMan (docs/schoolman/bookings.md):
+ * red when it is cancelled, yellow while a colleague has it under observation, grey — „unklar" —
+ * until the charges are paid in full, green when all is well. Worked out, never stored, so it
+ * cannot go stale the way SchoolMan's `???` does.
+ */
+export type BookingLight = 'ok' | 'watch' | 'unclear' | 'no';
+export const BOOKING_LIGHT_LABELS: Record<BookingLight, Bilingual> = {
+  ok: { de: 'In Ordnung', en: 'All good' },
+  watch: { de: 'Unter Beobachtung', en: 'Under observation' },
+  unclear: { de: 'Unklar', en: 'Unclear' },
+  no: { de: 'Storniert', en: 'Cancelled' },
+};
+
+/** Paid in full means something was charged and nothing of it is open. */
+export const paidInFull = (charged: number, paid: number) => charged > 0.005 && paid >= charged - 0.005;
+
+export function bookingLight(b: {
+  status: BookingStatus;
+  observationReason: ObservationReason | null;
+  charged: number;
+  paid: number;
+}): BookingLight {
+  if (b.status === 'cancelled') return 'no';
+  if (b.observationReason) return 'watch';
+  return paidInFull(b.charged, b.paid) ? 'ok' : 'unclear';
+}
+
+/**
  * Words the workspace writes into a booking by itself (a default reason, an
  * extension's line) are stored in English whoever saves them, so the data reads
  * one way; a screen shows them in its reader's language.
@@ -109,6 +151,8 @@ export type BookingListItem = {
   paid: number;
   currency: string;
   createdAt: Date;
+  observationReason: ObservationReason | null;
+  observationNote: string | null;
 };
 
 export type BookingPeriod = {
@@ -149,6 +193,8 @@ export type BookingDetail = BookingListItem & {
   sourceRegistrationId: string | null;
   cancelledAt: Date | null;
   cancelReason: string | null;
+  observedAt: Date | null;
+  observedByName: string | null;
   /** What was booked (0013), whether or not a rate has priced it. */
   accommodation: {
     typeName: string;
@@ -166,6 +212,7 @@ export type BookingDetail = BookingListItem & {
 const LIST = `
   SELECT b.id, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
          t.name AS course_type_name, b.status::text AS status, b.currency, b.created_at,
+         b.observation_reason, b.observation_note,
          (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = b.id) AS start_date,
          (SELECT max(end_date) FROM booking_periods bp WHERE bp.booking_id = b.id) AS end_date,
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
@@ -187,6 +234,8 @@ type ListRow = {
   end_date: Date | null;
   charged: string;
   paid: string;
+  observation_reason: ObservationReason | null;
+  observation_note: string | null;
 };
 
 const toItem = (r: ListRow): BookingListItem => ({
@@ -201,11 +250,20 @@ const toItem = (r: ListRow): BookingListItem => ({
   paid: Number(r.paid),
   currency: r.currency,
   createdAt: r.created_at,
+  observationReason: r.observation_reason,
+  observationNote: r.observation_note,
 });
 
-export type BookingFilter = 'current' | 'upcoming' | 'reserved' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'reserved' | 'past' | 'cancelled' | 'all';
+
+const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
+const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
 
 const FILTERS: Record<BookingFilter, string> = {
+  // The grey and the yellow of `bookingLight`, as lists: not cancelled, and either not paid in
+  // full (and not under observation, which shows yellow), or under observation.
+  unclear: `b.status <> 'cancelled' AND b.observation_reason IS NULL AND NOT (${CHARGED} > 0.005 AND ${PAID} >= ${CHARGED} - 0.005)`,
+  watch: `b.status <> 'cancelled' AND b.observation_reason IS NOT NULL`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_periods bp WHERE bp.booking_id = b.id AND bp.start_date <= current_date AND bp.end_date >= current_date)`,
   upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = b.id) > current_date`,
   reserved: `b.status = 'reserved'`,
@@ -285,6 +343,8 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       source_registration_id: string | null;
       cancelled_at: Date | null;
       cancel_reason: string | null;
+      observed_at: Date | null;
+      observed_by_name: string | null;
       accommodation_type_name: string | null;
       accommodation_room_type_name: string | null;
       accommodation_catering_name: string | null;
@@ -295,7 +355,8 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     `${LIST.replace(
       'FROM bookings b',
       `, b.course_type_id, b.payer, b.payer_name, b.visa_required, b.notes, b.source_registration_id,
-         b.cancelled_at, b.cancel_reason,
+         b.cancelled_at, b.cancel_reason, b.observed_at,
+         (SELECT name FROM staff_users WHERE id = b.observed_by) AS observed_by_name,
          at.name_en AS accommodation_type_name,
          art.name_en AS accommodation_room_type_name,
          co.name_en AS accommodation_catering_name,
@@ -363,6 +424,8 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     sourceRegistrationId: row.source_registration_id,
     cancelledAt: row.cancelled_at,
     cancelReason: row.cancel_reason,
+    observedAt: row.observed_at,
+    observedByName: row.observed_by_name,
     accommodation: row.accommodation_type_name
       ? {
           typeName: row.accommodation_type_name,
@@ -704,6 +767,30 @@ export async function voidPayment(
     action: 'payment_voided',
     detail: { payment: paymentId, reason },
   });
+}
+
+/** Yellow: a colleague puts the booking under observation, with the reason; the change is a line in its history. */
+export async function observeBooking(id: string, reason: ObservationReason, note: string | null, actor: StaffUser): Promise<void> {
+  await query(
+    `UPDATE bookings SET observation_reason = $2, observation_note = $3, observed_at = now(), observed_by = $4
+      WHERE id = $1 AND deleted_at IS NULL AND status <> 'cancelled'`,
+    [id, reason, note, actor.id]
+  );
+  await logActivity({ actor, entity: 'booking', entityId: id, action: 'booking_observed', detail: { reason, note } });
+}
+
+/** The observation ends: the booking's colour is the money's again. */
+export async function endObservation(id: string, actor: StaffUser): Promise<void> {
+  const before = await queryFirst<{ observation_reason: ObservationReason | null }>(
+    `SELECT observation_reason FROM bookings WHERE id = $1 AND deleted_at IS NULL`,
+    [id]
+  );
+  if (!before?.observation_reason) return;
+  await query(
+    `UPDATE bookings SET observation_reason = NULL, observation_note = NULL, observed_at = NULL, observed_by = NULL WHERE id = $1`,
+    [id]
+  );
+  await logActivity({ actor, entity: 'booking', entityId: id, action: 'booking_observation_ended', detail: { reason: before.observation_reason } });
 }
 
 export async function cancelBooking(id: string, reason: string, actor: StaffUser): Promise<void> {

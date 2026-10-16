@@ -219,6 +219,8 @@ const ACTION_ICON: Record<string, ReactNode> = {
   booking_extended: Icon.calendar,
   booking_period_removed: Icon.calendar,
   booking_cancelled: Icon.bookings,
+  booking_observed: Icon.attention,
+  booking_observation_ended: Icon.check,
   person_updated: Icon.person,
   person_linked: Icon.people,
   person_unlinked: Icon.people,
@@ -265,7 +267,7 @@ export type TimelineEvent = {
   what: ReactNode;
   /** A line under it: the words that came with it, or where it leads. */
   body?: ReactNode;
-  tone?: 'good';
+  tone?: 'good' | 'watch';
 };
 
 type TimelineOrigin = { at: Date; label: ReactNode; what?: ReactNode; body?: ReactNode; icon?: ReactNode };
@@ -382,7 +384,11 @@ export async function Timeline({
                 <li key={key} className="relative flex gap-3">
                   <Mark
                     className={
-                      event.tone === 'good' ? 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]' : 'bg-white text-[var(--casa-muted)] ring-[#d3dbe6]'
+                      event.tone === 'good'
+                        ? 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]'
+                        : event.tone === 'watch'
+                          ? 'bg-[#fff2d6] text-[#6e4700] ring-[#ebd298]'
+                          : 'bg-white text-[var(--casa-muted)] ring-[#d3dbe6]'
                     }
                   >
                     {event.icon}

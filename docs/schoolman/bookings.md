@@ -95,7 +95,7 @@ paid. ("Charges net to zero" is a booking never charged, or one cancelled with r
 one booking in ten of every past year (2019–2025) never left *???*; all 36 closed-group bookings of
 2026 are at it. For comparison, *ja* bookings that have ended are 92% paid in full.
 
-**What it means for the workspace** *(a proposal)*. The one status answers two questions — *has the
+**What it means for the workspace** — *built 2026-10-16 (migration 0028, `docs/ADMIN_WORKSPACE.md` §Lists 20)*. The one status answers two questions — *has the
 money come in* and *is the learner all right* — and the first goes stale because a colleague has to
 remember to change it. The workspace's booking already has a lifecycle (`reserved`, `confirmed`,
 `completed`, `cancelled`, migration 0010) and already computes what is still owed. What it would add:

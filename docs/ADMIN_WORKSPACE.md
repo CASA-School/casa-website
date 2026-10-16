@@ -885,6 +885,20 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     (money for payments and costs, a calendar for an extension).
     `Timeline` takes `canWrite`: a colleague who may only look sees the line
     of time without the note box, on every record page.
+
+    **The team's colours (2026-10-16, migration 0028).** Every booking shows the
+    colour the team knows from SchoolMan (`docs/schoolman/bookings.md`), worked
+    out by `bookingLight()` and never typed: red when cancelled, yellow while a
+    colleague has it *unter Beobachtung* (with a reason — Niveau, Visum,
+    Anwesenheit, Unterlagen fehlen, Sonstiges — and a note), grey *Unklar* until
+    the charges are paid in full, green when all is well. Only yellow is stored
+    (`observation_reason`, who and when); setting and ending it are lines in the
+    booking's history. The list has a „Stand" column (a dot beside the name on a
+    phone) and the team's work lists: Laufend splits into „Enden bald" and
+    „Laufen weiter", Kommend into „Starten bald" and „Später" (two weeks), plus
+    the views *Unklar* and *Unter Beobachtung*. The booking's head shows the
+    colour as a pill; a lifecycle badge only for Reserviert and Abgeschlossen.
+    A cancelled booking's leftover is not shown as owed.
 21. **Teilnehmende, the register (2026-10-15).** The views answer what staff
     bring to a register — Alle, Im Kurs (a booking running today), Offene
     Vorgänge, Zu zahlen — with the counts line above them, and a row says,

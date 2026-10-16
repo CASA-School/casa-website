@@ -5,23 +5,29 @@ import type { ReactNode } from 'react';
 import {
   cancelBookingAction,
   deleteBookingAction,
+  endObservationAction,
   removeChargeAction,
   removePeriodAction,
   voidPaymentAction,
 } from '../actions';
-import { ChargeForm, EditBookingForm, ExtendBookingForm, PaymentForm } from '../booking-forms';
+import { ChargeForm, EditBookingForm, ExtendBookingForm, ObservationForm, PaymentForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
+import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
-import { Badge, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
+import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
+import { Badge, Button, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import {
+  BOOKING_LIGHT_LABELS,
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
+  bookingLight,
   CHARGE_KIND_LABELS,
   getBooking,
+  OBSERVATION_REASON_LABELS,
+  type ObservationReason,
   listCohortOptions,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -100,6 +106,10 @@ export default async function BookingPage({
   const canEdit = canAccess(user, 'bookings', 'edit');
   const canFull = canAccess(user, 'bookings', 'full');
   const open = booking.status !== 'cancelled';
+  // The team's colour (docs/schoolman/bookings.md): red cancelled, yellow under observation, grey
+  // until paid in full, green when all is well.
+  const light = bookingLight(booking);
+  const reasonLabel = booking.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[booking.observationReason]) : null;
 
   const [notes, activity, cohorts, courseTypes] = await Promise.all([
     listNotes('booking', booking.id),
@@ -121,6 +131,22 @@ export default async function BookingPage({
   // The record's own fields, those that have a value: when it was booked is
   // in the head, so a booking with nothing else has no card for it.
   const recordFields = [
+    booking.observationReason
+      ? {
+          label: t('Unter Beobachtung', 'Under observation'),
+          wide: true,
+          value: (
+            <span>
+              <span className="font-semibold">{reasonLabel}</span>
+              {booking.observationNote ? <span className="block whitespace-pre-line">{booking.observationNote}</span> : null}
+              <span className="block text-xs text-[var(--casa-muted)]">
+                {t('seit', 'since')} <DateText value={booking.observedAt} />
+                {booking.observedByName ? ` · ${booking.observedByName}` : ''}
+              </span>
+            </span>
+          ),
+        }
+      : null,
     booking.cancelledAt
       ? {
           label: t('Storniert', 'Cancelled'),
@@ -157,6 +183,25 @@ export default async function BookingPage({
         }
       : null,
   ].filter((item) => item !== null);
+  // The observation in the booking's own words: why, and what was noted.
+  const observationEvents: TimelineEvent[] = activity
+    .filter((entry) => entry.action === 'booking_observed' || entry.action === 'booking_observation_ended')
+    .map((entry) => {
+      const reason = typeof entry.detail?.reason === 'string' && entry.detail.reason in OBSERVATION_REASON_LABELS
+        ? pick(lang, OBSERVATION_REASON_LABELS[entry.detail.reason as ObservationReason])
+        : null;
+      const note = typeof entry.detail?.note === 'string' && entry.detail.note ? entry.detail.note : null;
+      const observed = entry.action === 'booking_observed';
+      return {
+        id: entry.id,
+        at: entry.createdAt,
+        icon: observed ? Icon.attention : Icon.check,
+        who: entry.staffName ?? t('Jemand', 'Someone'),
+        what: observed ? t('hat die Buchung unter Beobachtung gestellt', 'put the booking under observation') : t('hat die Beobachtung beendet', 'ended the observation'),
+        body: observed ? [reason, note].filter(Boolean).join(' · ') || undefined : undefined,
+        tone: observed ? ('watch' as const) : undefined,
+      };
+    });
   const single = booking.periods.length === 1 ? booking.periods[0] : null;
   // A cohort's label is its title, or "Course · 31.08.26 – 23.10.26" built
   // from the course and dates the head already shows; only a title is news.
@@ -174,7 +219,15 @@ export default async function BookingPage({
         avatar={booking.personName}
         status={
           <>
-            <Badge tone={BOOKING_STATUS_TONES[booking.status]}>{pick(lang, BOOKING_STATUS_LABELS[booking.status])}</Badge>
+            <BookingLightPill
+              light={light}
+              label={pick(lang, BOOKING_LIGHT_LABELS[light])}
+              detail={light === 'watch' ? reasonLabel : light === 'unclear' && booking.balance > 0.005 ? t(`${money(booking.balance, booking.currency)} offen`, `${money(booking.balance, booking.currency)} open`) : undefined}
+            />
+            {/* Confirmed is the usual state and cancelled is the red; only reserved and completed add something. */}
+            {booking.status === 'reserved' || booking.status === 'completed' ? (
+              <Badge tone={BOOKING_STATUS_TONES[booking.status]}>{pick(lang, BOOKING_STATUS_LABELS[booking.status])}</Badge>
+            ) : null}
             {booking.visaRequired ? <Badge tone="warning">{t('Visum nötig', 'Visa required')}</Badge> : null}
           </>
         }
@@ -214,6 +267,20 @@ export default async function BookingPage({
         }
         actions={
           <>
+            {canEdit && open ? (
+              booking.observationReason ? (
+                <form action={endObservationAction}>
+                  <input type="hidden" name="bookingId" value={booking.id} />
+                  <Button type="submit" variant="secondary">
+                    {t('Beobachtung beenden', 'End observation')}
+                  </Button>
+                </form>
+              ) : (
+                <FormDialog trigger={t('Beobachten', 'Observe')} title={t('Unter Beobachtung stellen', 'Put under observation')}>
+                  <ObservationForm bookingId={booking.id} />
+                </FormDialog>
+              )
+            ) : null}
             {canEdit && open ? (
               <FormDialog trigger={t('Verlängern', 'Extend')} title={t('Buchung verlängern', 'Extend the booking')}>
                 <ExtendBookingForm booking={booking} cohorts={cohorts} />
@@ -484,7 +551,8 @@ export default async function BookingPage({
             entity="booking"
             id={booking.id}
             notes={notes}
-            activity={activity.filter((entry) => entry.action !== 'booking_created')}
+            activity={activity.filter((entry) => !['booking_created', 'booking_observed', 'booking_observation_ended'].includes(entry.action))}
+            events={observationEvents}
             origin={{ at: booking.createdAt, label: t('Gebucht', 'Booked'), icon: Icon.bookings }}
           />
         </div>

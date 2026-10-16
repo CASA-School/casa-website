@@ -9,7 +9,10 @@ import {
   cancelBooking,
   createBooking,
   deleteBooking,
+  endObservation,
   extendBooking,
+  observeBooking,
+  OBSERVATION_REASONS,
   recordPayment,
   removeCharge,
   removePeriod,
@@ -17,6 +20,7 @@ import {
   voidPayment,
   type BookingStatus,
   type ChargeKind,
+  type ObservationReason,
   type PaymentMethod,
   type Payer,
 } from '@/lib/admin/bookings';
@@ -215,6 +219,32 @@ export async function voidPaymentAction(formData: FormData): Promise<void> {
   );
   revalidatePath('/admin/bookings', 'layout');
   redirect(back);
+}
+
+/** Yellow, with its reason. „Sonstiges" needs a note saying what; the others may have one. */
+export async function observeBookingAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const back = `/admin/bookings/${bookingId}`;
+  const reason = String(formData.get('reason') ?? '');
+  if (!(OBSERVATION_REASONS as readonly string[]).includes(reason)) {
+    fail(back, (await getI18n()).t('Bitte wähle einen Grund.', 'Choose a reason.'));
+  }
+  const note = text(formData, 'note', 300);
+  if (reason === 'other' && !note) {
+    fail(back, (await getI18n()).t('Bei „Sonstiges" sag kurz, worum es geht.', 'For “Other”, say briefly what it is.'));
+  }
+  await observeBooking(bookingId, reason as ObservationReason, note, actor);
+  revalidatePath('/admin/bookings', 'layout');
+  redirect(back);
+}
+
+export async function endObservationAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  await endObservation(bookingId, actor);
+  revalidatePath('/admin/bookings', 'layout');
+  redirect(`/admin/bookings/${bookingId}`);
 }
 
 export async function cancelBookingAction(formData: FormData): Promise<void> {
