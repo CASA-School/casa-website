@@ -29,6 +29,11 @@ import {
 } from '@/lib/admin/bookings';
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
+import { issueBookingLetter } from '@/lib/admin/letters/booking-issue';
+import { STANDARD_SLOTS } from '@/lib/admin/letters/booking-letters';
+import { readChoices } from '@/lib/admin/letters/choices';
+import { saveStandardText } from '@/lib/admin/letters/repo';
+import { BOOKING_LETTER_KINDS, WAITLIST_LETTER_KINDS, type BookingLetterKind, type LetterLanguage } from '@/lib/admin/letters/types';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -82,7 +87,7 @@ const money = (formData: FormData, field: string): number | null => {
 // A function declaration, not an arrow: TypeScript only narrows after a call
 // to a `never`-returning function whose type is declared explicitly.
 function fail(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+  redirect(`${path}${path.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
 }
 const confirmed = (formData: FormData) => formData.get('confirmed') === '1';
 
@@ -413,4 +418,35 @@ export async function setPeriodLevelAction(formData: FormData): Promise<void> {
   await setPeriodLevel(bookingId, id(formData, 'periodId'), levelRaw, actor);
   revalidatePath('/admin', 'layout');
   redirect(back);
+}
+
+/**
+ * A booking's letter, sent: built again on the server from the booking and the colleague's
+ * choices, kept as it went out (docs/LETTERS.md), and then shown as sent, to print and mail.
+ */
+export async function issueBookingLetterAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const kind = String(formData.get('kind') ?? '');
+  if (!(BOOKING_LETTER_KINDS as readonly string[]).includes(kind)) throw new Error('Invalid kind');
+  const back = `/admin/bookings/${bookingId}/letter?kind=${kind === 'payment_receipt' ? 'receipt' : 'confirmation'}`;
+  const choices = readChoices(formData);
+  const { t, lang } = await getI18n();
+  if (!choices) fail(back, t('Der Brief konnte nicht gelesen werden.', 'The letter could not be read.'));
+  const result = await issueBookingLetter(bookingId, kind as BookingLetterKind, choices, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/letters/${result.letterId}?sent=1`);
+}
+
+/** A booking or waiting-list letter's opening or closing, saved as CASA's standard: `full`, as for offers. */
+export async function saveLetterStandardAction(input: { kind: string; language: LetterLanguage; part: string; body: string }): Promise<{ ok: boolean }> {
+  const actor = await requireModule('bookings', 'full');
+  const kinds = [...BOOKING_LETTER_KINDS, ...WAITLIST_LETTER_KINDS] as readonly string[];
+  if (!kinds.includes(input.kind) || (input.language !== 'de' && input.language !== 'en')) return { ok: false };
+  const kind = input.kind as (typeof BOOKING_LETTER_KINDS)[number] | (typeof WAITLIST_LETTER_KINDS)[number];
+  const body = String(input.body ?? '').trim().slice(0, 2000);
+  if (!STANDARD_SLOTS[kind].includes(input.part) || !body) return { ok: false };
+  await saveStandardText(kind, input.language, input.part, body, actor);
+  return { ok: true };
 }

@@ -4,6 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { isLevelCode } from '@/lib/admin/bookings';
+import { issueWaitlistLetter } from '@/lib/admin/letters/booking-issue';
+import { readChoices } from '@/lib/admin/letters/choices';
+import { WAITLIST_LETTER_KINDS, type WaitlistLetterKind } from '@/lib/admin/letters/types';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -169,4 +172,20 @@ export async function openGroupAction(formData: FormData): Promise<void> {
   const result = await openGroup(courseInstanceId, levelCode, actor);
   if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   done(back);
+}
+
+/** A waiting-list letter, sent — and what it says, done: a free place held, or the learner off the list. */
+export async function issueWaitlistLetterAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const entryId = id(formData, 'entryId');
+  const kind = String(formData.get('kind') ?? '');
+  if (!(WAITLIST_LETTER_KINDS as readonly string[]).includes(kind)) throw new Error('Invalid kind');
+  const back = `/admin/catalogue/waitlist/${entryId}/letter?kind=${kind.replace('waitlist_', '')}`;
+  const choices = readChoices(formData);
+  const { t, lang } = await getI18n();
+  if (!choices) fail(back, t('Der Brief konnte nicht gelesen werden.', 'The letter could not be read.'));
+  const result = await issueWaitlistLetter(entryId, kind as WaitlistLetterKind, choices, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/letters/${result.letterId}?sent=1`);
 }

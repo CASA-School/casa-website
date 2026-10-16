@@ -237,6 +237,7 @@ const ACTION_ICON: Record<string, ReactNode> = {
   waitlist_moved: Icon.clock,
   waitlist_moved_course: Icon.clock,
   waitlist_booked: Icon.bookings,
+  letter_sent: Icon.mail,
   booking_level_set: Icon.bookings,
   bank_account_removed: Icon.money,
   person_linked: Icon.people,

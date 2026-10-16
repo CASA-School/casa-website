@@ -35,6 +35,8 @@ import {
   type WaitlistEntry,
 } from '@/lib/admin/waitlist';
 import { toDateInputValue } from '@/lib/dates';
+import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
+import { lettersForEntries, type SentLetter } from '@/lib/admin/letters/repo';
 import { cn } from '@/lib/utils';
 
 /**
@@ -69,6 +71,8 @@ export default async function CourseStartPage({
     levelCodes(),
     handles ? upcomingStarts() : Promise.resolve([]),
   ]);
+  // The last letter to each learner in a queue, to say on their row what they have been told.
+  const letters = await lettersForEntries(entries.map((e) => e.id));
   // The wizard only where a row can be booked: an offered place, or a waiting learner with a free place.
   const bookable = handles && entries.some((e) => e.status === 'offered' || e.status === 'waiting');
   const offer = bookable ? await bookingOffer() : null;
@@ -151,6 +155,7 @@ export default async function CourseStartPage({
             key={group.levelCode}
             group={group}
             entries={entries.filter((e) => e.levelCode === group.levelCode)}
+            letters={letters}
             bookings={bookings.filter((b) => b.levelCode === group.levelCode)}
             focused={focusLevel === group.levelCode}
             plans={plans}
@@ -179,6 +184,7 @@ export default async function CourseStartPage({
 function LevelCard({
   group,
   entries,
+  letters,
   bookings,
   focused,
   plans,
@@ -192,6 +198,7 @@ function LevelCard({
 }: {
   group: LevelGroup;
   entries: WaitlistEntry[];
+  letters: SentLetter[];
   bookings: StartBooking[];
   focused: boolean;
   plans: boolean;
@@ -310,6 +317,7 @@ function LevelCard({
               entry={entry}
               queueLength={open.length}
               hasPlace={withPlace.has(entry.id)}
+              lastLetter={letters.find((l) => l.waitlistEntryId === entry.id) ?? null}
               handles={handles}
               offer={offer}
               startOptions={startOptions}
@@ -370,6 +378,7 @@ function QueueRow({
   entry,
   queueLength,
   hasPlace,
+  lastLetter,
   handles,
   offer,
   startOptions,
@@ -381,6 +390,7 @@ function QueueRow({
   entry: WaitlistEntry;
   queueLength: number;
   hasPlace: boolean;
+  lastLetter: SentLetter | null;
   handles: boolean;
   offer: BookingOffer | null;
   startOptions: { id: string; label: string }[];
@@ -427,6 +437,13 @@ function QueueRow({
               ? t(`angeboten ${relativeDays(entry.offeredAt, lang)}${entry.offeredByName ? ` von ${entry.offeredByName}` : ''}`, `offered ${relativeDays(entry.offeredAt, lang)}${entry.offeredByName ? ` by ${entry.offeredByName}` : ''}`)
               : t(`wartet seit ${new Date(entry.joinedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}`, `waiting since ${new Date(entry.joinedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}`),
             pick(lang, WAITLIST_SOURCE_LABELS[entry.source]),
+            // What they were told last, and when.
+            lastLetter
+              ? t(
+                  `${pick(lang, LETTER_KIND_LABELS[lastLetter.kind])} gesendet ${new Date(lastLetter.sentAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}`,
+                  `${pick(lang, LETTER_KIND_LABELS[lastLetter.kind])} sent ${new Date(lastLetter.sentAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}`
+                )
+              : null,
             entry.note,
           ]
             .filter(Boolean)
@@ -467,6 +484,12 @@ function QueueRow({
               </Button>
             </form>
           ) : null}
+          <Link
+            href={`/admin/catalogue/waitlist/${entry.id}/letter${offered ? '?kind=place_free' : ''}`}
+            className="inline-flex h-8 items-center rounded-lg px-2.5 text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]"
+          >
+            {t('Brief', 'Letter')}
+          </Link>
           <FormDialog trigger={t('Verschieben', 'Move')} title={t(`${entry.personName} verschieben`, `Move ${entry.personName}`)} size="sm" triggerVariant="ghost">
             <MoveForm entry={entry} queueLength={queueLength} starts={startOptions} levels={levels} returnTo={back} />
           </FormDialog>

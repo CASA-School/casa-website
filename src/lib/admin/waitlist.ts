@@ -44,12 +44,14 @@ export const WAITLIST_SOURCE_LABELS: Record<WaitlistSource, Bilingual> = {
 
 /** Why an entry leaves the list without a booking. Stored in English, read in the reader's language. */
 export const CLOSE_REASONS = ['no_longer_interested', 'other_course', 'no_reply', 'other'] as const;
-export type CloseReason = (typeof CLOSE_REASONS)[number];
+export type CloseReason = (typeof CLOSE_REASONS)[number] | 'no_place';
+/** `no_place` is set by the "no place this time" letter, not chosen in the dialog. */
 export const CLOSE_REASON_LABELS: Record<CloseReason, Bilingual> = {
   no_longer_interested: { de: 'Kein Interesse mehr', en: 'No longer interested' },
   other_course: { de: 'Anderen Kurs gebucht', en: 'Booked another course' },
   no_reply: { de: 'Keine Antwort', en: 'No reply' },
   other: { de: 'Sonstiges', en: 'Other' },
+  no_place: { de: 'Kein Platz frei geworden', en: 'No place became free' },
 };
 
 export type Session = 'morning' | 'afternoon' | 'evening';

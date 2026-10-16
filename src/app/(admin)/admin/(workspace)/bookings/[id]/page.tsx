@@ -38,6 +38,8 @@ import { listCourseTypes } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
 import { levelCodes } from '@/lib/admin/waitlist';
+import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
+import { lettersForBooking } from '@/lib/admin/letters/repo';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
@@ -117,13 +119,14 @@ export default async function BookingPage({
   // booking of the same learner (docs/schoolman/money.md).
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
-  const [notes, activity, cohorts, courseTypes, targets, levels] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit ? listCohortOptions() : Promise.resolve([]),
     canEdit ? listCourseTypes() : Promise.resolve([]),
     canEdit && credit > 0 ? carryOverTargets(booking.id) : Promise.resolve([]),
     canEdit ? levelCodes() : Promise.resolve([]),
+    lettersForBooking(booking.id),
   ]);
   const carriesOver = targets.length > 0;
 
@@ -617,6 +620,48 @@ export default async function BookingPage({
               ) : null}
             </Card>
           ) : null}
+
+          {/* The booking's letters: the confirmation and a receipt, and everything sent (docs/LETTERS.md). */}
+          <Card
+            title={t('Briefe', 'Letters')}
+            icon={Icon.mail}
+            tint="blue"
+            actions={
+              canEdit && booking.status !== 'cancelled' ? (
+                <span className="flex flex-wrap gap-1.5">
+                  <Link href={`/admin/bookings/${booking.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                    {t('Bestätigung', 'Confirmation')}
+                  </Link>
+                  {booking.payments.some((p) => !p.voidedAt) ? (
+                    <>
+                      <span className="text-[var(--casa-text-subtle)]">·</span>
+                      <Link href={`/admin/bookings/${booking.id}/letter?kind=receipt`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                        {t('Empfangsbestätigung', 'Receipt')}
+                      </Link>
+                    </>
+                  ) : null}
+                </span>
+              ) : undefined
+            }
+          >
+            {letters.length ? (
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {letters.map((l) => (
+                  <li key={l.id}>
+                    <Link href={`/admin/letters/${l.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:underline">
+                      <span className="font-semibold">{pick(lang, LETTER_KIND_LABELS[l.kind])}{l.version > 1 ? ` · ${t(`Fassung ${l.version}`, `version ${l.version}`)}` : ''}</span>
+                      <span className="shrink-0 text-xs text-[var(--casa-muted)]">
+                        <DateText value={l.sentAt} compact />
+                        {l.sentByName ? ` · ${l.sentByName}` : ''}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Brief.', 'No letter yet.')}</p>
+            )}
+          </Card>
 
           <Timeline
             canWrite={canEdit}

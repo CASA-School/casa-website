@@ -14,8 +14,21 @@
 /** Bump when the shape changes, and teach `readLetter` the old one. */
 export const LETTER_SCHEMA = 1;
 
-export const LETTER_KINDS = ['offer'] as const;
+export const LETTER_KINDS = [
+  'offer',
+  'booking_confirmation',
+  'payment_receipt',
+  'waitlist_confirmation',
+  'waitlist_place_free',
+  'waitlist_no_place',
+] as const;
 export type LetterKind = (typeof LETTER_KINDS)[number];
+
+/** A booking's letters and the waiting list's (0032). */
+export const BOOKING_LETTER_KINDS = ['booking_confirmation', 'payment_receipt'] as const;
+export type BookingLetterKind = (typeof BOOKING_LETTER_KINDS)[number];
+export const WAITLIST_LETTER_KINDS = ['waitlist_confirmation', 'waitlist_place_free', 'waitlist_no_place'] as const;
+export type WaitlistLetterKind = (typeof WAITLIST_LETTER_KINDS)[number];
 
 export type LetterLanguage = 'de' | 'en';
 

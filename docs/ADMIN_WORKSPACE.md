@@ -1101,11 +1101,12 @@ SchoolMan's lists filled up (87% of its entries sit at the default status).
 bookings work (`bookings` at `edit`); places and groups are the course
 planners' (`rooms` at `edit`); seeing the lists needs `catalogue`.
 
-**Not yet:** the three letters SchoolMan writes (on the list / a place is free /
-maybe next time) — they need a letter kind beyond offers (`docs/LETTERS.md`);
-until then the row's envelope opens a mail with the subject filled in. Exam
-waiting lists (sittings have a capacity; SchoolMan has them). The link to
-Kursplanung's course groups, which are planned by hand per month.
+**Letters (2026-10-16, 0032):** each row has „Brief" — on the list, a place is
+free (which holds the place), no place this time (which takes the learner off)
+— and says which letter went last (`docs/LETTERS.md`).
+
+**Not yet:** exam waiting lists (sittings have a capacity; SchoolMan has them).
+The link to Kursplanung's course groups, which are planned by hand per month.
 
 ## Copy on screens — labels, not explanations
 

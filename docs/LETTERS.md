@@ -66,6 +66,48 @@ lacked a field the sheet had started to read, and opening one crashed the letter
   `globals.css` hides everything else on paper and sets `@page letter` (A4, the first page's margins
   inside the sheet). `printLetter(name)` names the PDF.
 
+## A booking's letters and the waiting list's (2026-10-16, migration 0032)
+
+Rahman: "start with the letters". SchoolMan's most written letters after offers, read from its DDR
+(`docs/schoolman/letters-and-history.md`), each a kind here, about one record by one foreign key
+(`letters.booking_id`, `letters.waitlist_entry_id`):
+
+| Kind | About | SchoolMan's | What it says |
+| --- | --- | --- | --- |
+| `booking_confirmation` | booking | `Confirmation.First_Booking` (3,657) | the course with its days, times and lessons a week, the stay, the costs and total, what came in and what is open, what to transfer by when, the payment reference, a PS that it is no visa confirmation |
+| `payment_receipt` | booking | `ReceiptPaymentIn_Booking` (7,349) | the payments chosen (the latest by default), their sum and the sum in words — in the letter's language, where SchoolMan spelled German on English receipts — the booking's total, paid and open |
+| `waitlist_confirmation` | waiting-list entry | `ConfirmationWaitingList.Course` | the course is full, the learner is on the list, their place in it |
+| `waitlist_place_free` | waiting-list entry | `FreePlaceWaitingList.Course` | a place is free and held; please answer soon |
+| `waitlist_no_place` | waiting-list entry | `Maybenexttime_Course` | no place this time; the next start of the same course |
+
+The builders are `src/lib/admin/letters/booking-letters.ts` (pure, tested), fed by
+`booking-context.ts` (one read of the record). **What to pay and by when follows the terms**
+(AGB §5.2–5.3): a learner abroad (visa) pays the whole first course within a week; anyone else a down
+payment (`course_types.down_payment`) within a week and the rest four weeks before the start, or by
+the first day of a follow-up booking; within a week of the start, by the start. SchoolMan used a
+seven-day deadline and, in one variant, left the amount blank.
+
+**What the letter says, the record does** (`booking-issue.ts`): sending "a place is free" marks the
+entry offered (the place is held); sending "no place this time" takes the learner off the list
+(reason `no_place`). The confirmation and the receipt change nothing on the booking — SchoolMan's
+receipt script set a visa flag and opened a mail while writing.
+
+**Where.** A booking's „Briefe" card (confirmation, receipt, everything sent) →
+`/admin/bookings/[id]/letter?kind=confirmation|receipt`. A waiting-list row's „Brief", and its line
+saying what was sent last → `/admin/catalogue/waitlist/[entryId]/letter?kind=confirmation|place_free|no_place`.
+The learner's „Briefe" tab lists every letter to them, offers included. `/admin/letters/[id]` shows
+one as it went out, to print, save as PDF and email (`mailto:` with the subject). The composer
+(`letter-composer.tsx`) is the offer letter's way of editing: the opening, closing and PS are
+standard texts (save as standard: `bookings` at `full`); the sentences built from figures — what to
+pay, a place in the queue, the next start — are changed for one letter; a note can be added; the
+language follows the learner's website registration, else German.
+
+**Open:** bookings have no number yet, so the payment reference is the name and the course start —
+finance matches transfers by SchoolMan's booking number today, and a booking number is worth
+deciding before letters go out from here in volume. The terms (§5.2) name a 100 € down payment for
+the course; the catalogue's `down_payment` says 200 € for intensive courses: the letters use the
+catalogue's figure, and one of the two needs correcting.
+
 ## Adding a kind of letter
 
 1. Migration: add the kind to both `CHECK`s, its record's column to `letters` (a foreign key) and to
@@ -80,5 +122,5 @@ lacked a field the sheet had started to read, and opening one crashed the letter
 
 - Letters are emailed by hand (`mailto:` and the PDF). Sending through Microsoft Graph from the
   workspace would let `letters` record that it went, not only that it was marked.
-- A list of every letter to an organisation or a learner (`letters_organisation_idx`,
-  `letters_person_idx` are there for it) belongs on their records once those pages are redesigned.
+- A list of every letter to an organisation (`letters_organisation_idx`) belongs on its page once
+  organisations have one; a learner's is their „Briefe" tab.

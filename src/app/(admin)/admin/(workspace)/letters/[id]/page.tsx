@@ -1,0 +1,44 @@
+import { notFound } from 'next/navigation';
+
+import { SentLetter } from '@/components/admin/letters/sent-letter';
+import { queryFirst } from '@/lib/admin/db';
+import { requireModule } from '@/lib/admin/guard';
+import { wsLocale } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
+import { getSentLetter } from '@/lib/admin/letters/repo';
+
+/**
+ * One letter, as it went out (docs/LETTERS.md). Seen with the right of what it is about: an offer's
+ * with `offers`, a booking's and the waiting list's with `bookings`. The way back is that record.
+ */
+export default async function LetterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ sent?: string }> }) {
+  const [{ id }, { sent }] = await Promise.all([params, searchParams]);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const found = await getSentLetter(id);
+  if (!found) notFound();
+  await requireModule(found.kind === 'offer' ? 'offers' : 'bookings');
+  const { t, lang } = await getI18n();
+
+  let back = { href: found.personId ? `/admin/people/${found.personId}?tab=letters` : '/admin', label: t('Zur Person', 'Back to the person') };
+  if (found.bookingId) back = { href: `/admin/bookings/${found.bookingId}`, label: t('Zur Buchung', 'Back to the booking') };
+  if (found.offerId) back = { href: `/admin/offers/${found.offerId}/letter?version=${found.version}`, label: t('Zum Angebot', 'Back to the offer') };
+  if (found.waitlistEntryId) {
+    const entry = await queryFirst<{ course_instance_id: string; level_code: string }>(
+      `SELECT course_instance_id, level_code FROM waitlist_entries WHERE id = $1`,
+      [found.waitlistEntryId]
+    );
+    if (entry) back = { href: `/admin/catalogue/${entry.course_instance_id}?level=${encodeURIComponent(entry.level_code)}`, label: t('Zur Warteliste', 'Back to the waiting list') };
+  }
+  const when = found.sentAt.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <SentLetter
+      letter={found.letter}
+      email={found.email}
+      recipientName={found.recipientName}
+      sentLine={t(`Gesendet am ${when}${found.sentByName ? ` von ${found.sentByName}` : ''}`, `Sent on ${when}${found.sentByName ? ` by ${found.sentByName}` : ''}`)}
+      back={back}
+      justSent={sent === '1'}
+    />
+  );
+}

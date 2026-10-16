@@ -264,6 +264,10 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat die Beobachtung einer Buchung beendet', 'ended the observation of a booking');
     case 'booking_deleted':
       return t('hat eine Buchung gelöscht', 'deleted a booking');
+    case 'letter_sent': {
+      const subject = typeof entry.detail?.subject === 'string' ? entry.detail.subject : '';
+      return subject ? t(`hat einen Brief geschickt: „${subject}“`, `sent a letter: “${subject}”`) : t('hat einen Brief geschickt', 'sent a letter');
+    }
     case 'booking_level_set':
       return t('hat das Niveau einer Buchung festgelegt', "set a booking's level");
     case 'waitlist_joined':

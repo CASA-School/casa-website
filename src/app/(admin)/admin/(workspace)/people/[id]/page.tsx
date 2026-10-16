@@ -44,6 +44,8 @@ import {
 } from '@/lib/admin/people';
 import { normaliseStatus } from '@/lib/admin/queues';
 import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
+import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
+import { lettersForPerson } from '@/lib/admin/letters/repo';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
@@ -159,7 +161,7 @@ export default async function PersonPage({
   const seesBank = canAccess(user, 'private_data');
   const editsBank = canAccess(user, 'private_data', 'edit');
   const removesBank = canAccess(user, 'private_data', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -174,7 +176,10 @@ export default async function PersonPage({
     seesBookings ? learnerStage(person.id) : Promise.resolve(null),
     seesBank ? listBankAccounts(person.id) : Promise.resolve(null),
     seesBookings ? personEntries(person.id) : Promise.resolve([]),
+    seesBookings || seesOffers ? lettersForPerson(person.id) : Promise.resolve([]),
   ]);
+  // The letters this colleague may open: an offer's with `offers`, the others with `bookings`.
+  const letters = allLetters.filter((l) => (l.kind === 'offer' ? seesOffers : seesBookings));
 
   const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
   const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
@@ -294,6 +299,7 @@ export default async function PersonPage({
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
     { id: 'cases', label: t('Anfragen & Buchungen', 'Enquiries & bookings'), icon: Icon.registrations, count: cases.length },
     { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
+    ...(seesBookings || seesOffers ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length }] : []),
     ...(bankAccounts ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
   // What is open, in the team's words: „1 Anmeldung · 1 Buchung".
@@ -639,6 +645,37 @@ export default async function PersonPage({
           </div>
         </div>
       </RecordTabPanel>
+
+      {/* Every letter sent to them — offers, confirmations, receipts, waiting-list letters — as it went out. */}
+      {seesBookings || seesOffers ? (
+        <RecordTabPanel id="letters">
+          <Card bleed>
+            {letters.length ? (
+              <ul className="py-1.5">
+                {letters.map((l) => (
+                  <li key={l.id}>
+                    <Link href={`/admin/letters/${l.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
+                      <IconChip icon={Icon.mail} tint="blue" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{l.subject}</span>
+                        <span className="mt-0.5 block text-[0.78rem] text-[var(--casa-muted)]">
+                          {pick(lang, LETTER_KIND_LABELS[l.kind])}
+                          {l.sentByName ? ` · ${l.sentByName}` : ''}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
+                        <DateText value={l.sentAt} compact />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-4 py-4 text-sm text-[var(--casa-muted)]">{t('Noch kein Brief an diese Person.', 'No letter to this person yet.')}</p>
+            )}
+          </Card>
+        </RecordTabPanel>
+      ) : null}
 
       {/* For a refund: the learner's bank accounts. Shown with the module `private_data`, which the team holds. */}
       {bankAccounts ? (

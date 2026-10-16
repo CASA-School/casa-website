@@ -18,8 +18,8 @@ import { subjectLine, type Letter, type LetterKind, type LetterLanguage } from '
 
 export type IssueLetter = {
   letter: Letter;
-  /** The record it is about. One per kind; an offer is the only kind so far. */
-  about: { offerId: string };
+  /** The record it is about, the one its kind names: an offer, a booking, a waiting-list entry. */
+  about: { offerId: string } | { bookingId: string } | { waitlistEntryId: string };
   version: number;
   organisationId: string | null;
   personId: string | null;
@@ -30,13 +30,16 @@ export type IssueLetter = {
 };
 
 export async function issueLetter(client: PoolClient, input: IssueLetter, actor: StaffUser): Promise<string> {
+  const about = input.about;
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO letters (kind, offer_id, version, language, organisation_id, person_id, recipient_name, email,
-                          subject, document, source, sent_by)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
+    `INSERT INTO letters (kind, offer_id, booking_id, waitlist_entry_id, version, language, organisation_id, person_id,
+                          recipient_name, email, subject, document, source, sent_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
     [
       input.letter.kind,
-      input.about.offerId,
+      'offerId' in about ? about.offerId : null,
+      'bookingId' in about ? about.bookingId : null,
+      'waitlistEntryId' in about ? about.waitlistEntryId : null,
       input.version,
       input.letter.language,
       input.organisationId,
@@ -53,6 +56,90 @@ export async function issueLetter(client: PoolClient, input: IssueLetter, actor:
 }
 
 export type LetterListItem = { id: string; version: number; subject: string; sentAt: Date; sentByName: string | null };
+
+/** The next version of a kind of letter about one booking or waiting-list entry: 1 for the first. */
+export async function nextLetterVersion(
+  client: PoolClient,
+  kind: LetterKind,
+  about: { bookingId: string } | { waitlistEntryId: string }
+): Promise<number> {
+  const [column, id] = 'bookingId' in about ? ['booking_id', about.bookingId] : ['waitlist_entry_id', about.waitlistEntryId];
+  const { rows } = await client.query<{ n: number }>(`SELECT coalesce(max(version), 0)::int AS n FROM letters WHERE kind = $1 AND ${column} = $2`, [kind, id]);
+  return rows[0].n + 1;
+}
+
+export type SentLetter = {
+  id: string;
+  kind: LetterKind;
+  version: number;
+  subject: string;
+  sentAt: Date;
+  sentByName: string | null;
+  bookingId: string | null;
+  waitlistEntryId: string | null;
+  offerId: string | null;
+  personId: string | null;
+};
+
+const SENT = `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id, l.person_id
+                FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by`;
+
+type SentRow = {
+  id: string;
+  kind: LetterKind;
+  version: number;
+  subject: string;
+  sent_at: Date;
+  sent_by_name: string | null;
+  booking_id: string | null;
+  waitlist_entry_id: string | null;
+  offer_id: string | null;
+  person_id: string | null;
+};
+
+const toSent = (r: SentRow): SentLetter => ({
+  id: r.id,
+  kind: r.kind,
+  version: r.version,
+  subject: r.subject,
+  sentAt: r.sent_at,
+  sentByName: r.sent_by_name,
+  bookingId: r.booking_id,
+  waitlistEntryId: r.waitlist_entry_id,
+  offerId: r.offer_id,
+  personId: r.person_id,
+});
+
+/** A booking's letters, the latest first. */
+export async function lettersForBooking(bookingId: string): Promise<SentLetter[]> {
+  return (await query<SentRow>(`${SENT} WHERE l.booking_id = $1 ORDER BY l.sent_at DESC`, [bookingId])).map(toSent);
+}
+
+/** The letters of some waiting-list entries, the latest first. */
+export async function lettersForEntries(entryIds: readonly string[]): Promise<SentLetter[]> {
+  if (entryIds.length === 0) return [];
+  return (await query<SentRow>(`${SENT} WHERE l.waitlist_entry_id = ANY($1::uuid[]) ORDER BY l.sent_at DESC`, [entryIds])).map(toSent);
+}
+
+/** Every letter to a person, linked records included, the latest first. */
+export async function lettersForPerson(canonicalPersonId: string): Promise<SentLetter[]> {
+  return (
+    await query<SentRow>(`${SENT} WHERE l.person_id IS NOT NULL AND canonical_person_id(l.person_id) = $1 ORDER BY l.sent_at DESC`, [canonicalPersonId])
+  ).map(toSent);
+}
+
+/** One letter as it went out, with what it is about; null when there is none or it cannot be read. */
+export async function getSentLetter(id: string): Promise<(SentLetter & { letter: Letter; email: string | null; recipientName: string }) | null> {
+  const row = await queryFirst<SentRow & { document: unknown; email: string | null; recipient_name: string }>(
+    `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id,
+            l.person_id, l.document, l.email, l.recipient_name
+       FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by WHERE l.id = $1`,
+    [id]
+  );
+  if (!row) return null;
+  const letter = readLetter(row.document);
+  return letter ? { ...toSent(row), letter, email: row.email, recipientName: row.recipient_name } : null;
+}
 
 /** The letters sent for an offer, the latest first. */
 export async function lettersForOffer(offerId: string): Promise<LetterListItem[]> {
