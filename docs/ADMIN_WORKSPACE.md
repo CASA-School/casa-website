@@ -918,6 +918,12 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     word in each row's line (left out where the view already says it) and a
     badge in the head of the person's page; the person's bookings carry the
     booking colours (§20).
+
+    **What a list carries (Rahman, 2026-10-16).** A list shows what staff act on;
+    the rest is on the record's page. The register lost its Nationality column
+    for the dates of the course a learner is in or about to start; nationality
+    and birth date are on the person's page, and an unrecognised nationality is
+    still a flag above the list.
 22. **Kurse and Prüfungen (2026-10-15).** They keep their month-grouped
     tables and gain the counts line: for courses the dates ahead, the places
     taken (as the seat bars count them) and the next start; for exams the

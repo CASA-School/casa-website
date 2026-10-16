@@ -283,8 +283,8 @@ export async function listPeople({
 }): Promise<{
   items: (PersonSummary & {
     primaryEmail: string | null;
-    /** The booking running now or starting next, for the register's line under a name. */
-    course: { name: string; start: Date; current: boolean } | null;
+    /** The booking running now or starting next, for the register's line under a name and its dates. */
+    course: { name: string | null; start: Date; end: Date; current: boolean } | null;
     /** The level a teacher confirmed last. */
     level: string | null;
     /** Enquiries, registrations and offers still in play. */
@@ -316,6 +316,7 @@ export async function listPeople({
       primary_email: string | null;
       course_name: string | null;
       course_start: Date | null;
+      course_end: Date | null;
       level: string | null;
       open_cases: string;
       owed: string;
@@ -325,7 +326,7 @@ export async function listPeople({
     `${SELECT.replace(
       'FROM people p',
       `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email,
-         nb.course_name, nb.course_start,
+         nb.course_name, nb.course_start, nb.course_end,
          (SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
            WHERE rv.person_id IS NOT NULL AND canonical_person_id(rv.person_id) = p.id ORDER BY rv.decided_at DESC LIMIT 1) AS level,
          ${OPEN_CASES} AS open_cases,
@@ -333,10 +334,10 @@ export async function listPeople({
          ${STAGE} AS stage
     FROM people p
     LEFT JOIN LATERAL (
-      SELECT t.name AS course_name, min(bp.start_date) AS course_start
+      SELECT t.name AS course_name, min(bp.start_date) AS course_start, max(bp.end_date) AS course_end
         FROM bookings b
         JOIN booking_periods bp ON bp.booking_id = b.id
-        JOIN course_types t ON t.id = b.course_type_id
+        LEFT JOIN course_types t ON t.id = b.course_type_id
        WHERE canonical_person_id(b.person_id) = p.id
          AND b.deleted_at IS NULL
          AND b.status IN ('reserved', 'confirmed')
@@ -361,10 +362,11 @@ export async function listPeople({
       owed: Number(r.owed ?? 0),
       stage: r.stage,
       course:
-        r.course_name && r.course_start
+        r.course_start && r.course_end
           ? {
               name: r.course_name,
               start: r.course_start,
+              end: r.course_end,
               current: new Date(r.course_start).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0),
             }
           : null,

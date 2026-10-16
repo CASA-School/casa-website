@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Tally } from '@/components/admin/inbox';
-import { euros, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
+import { dayRange, euros, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { capitalise, num, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
+import { toDateInputValue } from '@/lib/dates';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
@@ -27,7 +28,9 @@ import { PersonForm } from './person-form';
  * A row is the person and, under the name, what they are here for: the course
  * running now or starting next, otherwise the address they wrote from; then the
  * level a teacher confirmed, what is open under them (enquiries, registrations,
- * offers in play) and what they still owe (2026-10-15). The views answer the
+ * offers in play), the dates of that course, and when they were added
+ * (2026-10-15). A list carries what staff act on — nationality and birth date
+ * are on the person's page (Rahman, 2026-10-16). The views answer the
  * questions staff bring to a register — who is here now, who is new, who is in
  * their last course, who is coming, who has finished, who has something open,
  * who owes money — and the counts line says how many. The learner stages are
@@ -144,7 +147,7 @@ export default async function PeoplePage({
               t('Teilnehmende', 'Student'),
               { label: t('Niveau', 'Level'), className: `w-[6.5rem] ${hide}` },
               { label: t('Offen', 'Open'), className: `w-[12rem] ${hide}` },
-              { label: t('Nationalität', 'Nationality'), className: `w-[11rem] ${hide}` },
+              { label: t('Zeitraum', 'Dates'), className: `w-[12.5rem] ${hide}` },
               { label: t('Angelegt', 'Added'), className: 'w-[7.5rem] md:w-[8.5rem]' },
             ]}
           >
@@ -160,7 +163,7 @@ export default async function PeoplePage({
                         person.course
                           ? person.course.current
                             ? person.course.name
-                            : `${person.course.name} · ${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`
+                            : [person.course.name, `${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`].filter(Boolean).join(' · ')
                           : person.stage
                             ? null
                             : person.primaryEmail,
@@ -187,14 +190,9 @@ export default async function PeoplePage({
                     {person.owed > 0.005 ? <Badge tone="warning">{euros(person.owed)}</Badge> : null}
                   </span>
                 </Cell>
-                <Cell className={`text-[0.84rem] text-[#2b3546] ${hide}`}>
-                  {person.nationalityName ??
-                    (person.nationalityRaw ? (
-                      <span className="flex items-center gap-2">
-                        <span className="truncate">{person.nationalityRaw}</span>
-                        <Badge tone="warning">{t('Nicht erkannt', 'Unrecognised')}</Badge>
-                      </span>
-                    ) : null)}
+                {/* The course they are in or about to start: when they are here. Nationality is on their page. */}
+                <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>
+                  {person.course ? dayRange(toDateInputValue(person.course.start), toDateInputValue(person.course.end), lang) : null}
                 </Cell>
                 <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
                   {capitalise(relativeDays(person.createdAt, lang))}
