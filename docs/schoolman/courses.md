@@ -60,6 +60,7 @@ room-by-day records — Kursplanung plans cohorts, not days.
 
 ## Open questions for the team
 
-1. Where do teachers record attendance in 2026 — on the `SingleDateStudent` screens, or somewhere
-   that writes into them?
-2. Which capacity is the real one on a course?
+Answered: teachers record attendance in the Klassenbuch, which writes it into `SingleDateStudent`
+(`klassenbuch.md`).
+
+1. Which capacity is the real one on a course?
