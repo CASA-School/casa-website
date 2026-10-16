@@ -48,6 +48,7 @@ import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForPerson } from '@/lib/admin/letters/repo';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { toDateInputValue } from '@/lib/dates';
+import { teachingWeeks } from '@/lib/admin/offers/course';
 import { cn } from '@/lib/utils';
 
 const SALUTATIONS: Record<string, Bilingual> = {
@@ -808,8 +809,9 @@ function CourseNow({ booking, running, today, lang }: { booking: BookingListItem
   const t = translator(lang);
   const start = booking.startDate!;
   const end = booking.endDate!;
-  const weeks = Math.max(1, Math.round((end.getTime() - start.getTime() + DAY) / (7 * DAY)));
-  const week = Math.min(weeks, Math.floor((today.getTime() - start.getTime()) / (7 * DAY)) + 1);
+  // Teaching weeks, without the school's closures: "Woche 3 von 8", not "von 10" over Christmas.
+  const weeks = teachingWeeks(toDateInputValue(start), toDateInputValue(end));
+  const week = Math.min(weeks, teachingWeeks(toDateInputValue(start), toDateInputValue(today < start ? start : today)));
   const inDays = Math.round((start.getTime() - today.getTime()) / DAY);
   const light = bookingLight(booking);
   const open = booking.charged - booking.paid;

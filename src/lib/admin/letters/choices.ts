@@ -32,5 +32,9 @@ export function readChoices(formData: FormData): LetterChoices | null {
       .getAll('paymentIds')
       .map(String)
       .filter((value) => UUID.test(value)),
+    items: formData
+      .getAll('items')
+      .map(String)
+      .filter((value) => /^[a-z_]{2,20}$/.test(value)),
   };
 }

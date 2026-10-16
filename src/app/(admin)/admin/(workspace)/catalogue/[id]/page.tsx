@@ -35,6 +35,7 @@ import {
   type WaitlistEntry,
 } from '@/lib/admin/waitlist';
 import { toDateInputValue } from '@/lib/dates';
+import { teachingWeeks } from '@/lib/admin/offers/course';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForEntries, type SentLetter } from '@/lib/admin/letters/repo';
 import { cn } from '@/lib/utils';
@@ -86,7 +87,8 @@ export default async function CourseStartPage({
       .filter(Boolean)
       .join(' · ');
   const startOptions = starts.map((s) => ({ id: s.id, label: startLabel(s) }));
-  const weeks = Math.round((new Date(start.endDate).getTime() - new Date(start.startDate).getTime() + 86_400_000) / (7 * 86_400_000));
+  // Teaching weeks: the school's closures (the Christmas break) are not weeks of the course.
+  const weeks = teachingWeeks(toDateInputValue(start.startDate), toDateInputValue(start.endDate));
   const begun = new Date(start.startDate) <= new Date();
 
   return (

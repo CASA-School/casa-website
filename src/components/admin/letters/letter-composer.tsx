@@ -10,8 +10,9 @@ import { LetterSheet, type LetterSlots } from '@/components/admin/letters/letter
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
 import { Button } from '@/components/admin/ui';
 import {
-  bookingConfirmationLetter,
-  paymentReceiptLetter,
+  buildBookingLetter,
+  MISSING_ITEM_LABELS,
+  MISSING_ITEMS,
   STANDARD_SLOTS,
   waitlistLetter,
   type BookingLetterContext,
@@ -37,7 +38,7 @@ export type ComposerContext =
 
 type Standards = Record<LetterLanguage, Record<string, string>>;
 
-const COMPUTED_SLOTS = ['payment', 'position', 'next'];
+const COMPUTED_SLOTS = ['payment', 'position', 'next', 'open', 'enrolled', 'lessons', 'request', 'start', 'certify', 'money'];
 
 export function LetterComposer({
   source,
@@ -52,7 +53,12 @@ export function LetterComposer({
   saveStandardAction,
   hidden,
   kinds,
+  kindGroups,
   sent,
+  history,
+  blocked,
+  initialAddress,
+  initialItems,
   back,
   title,
   error,
@@ -69,9 +75,16 @@ export function LetterComposer({
   saveStandardAction: (input: { kind: string; language: LetterLanguage; part: string; body: string }) => Promise<{ ok: boolean }>;
   /** The record and kind, for the form. */
   hidden: Record<string, string>;
-  /** The other letters of this record, to switch to. */
-  kinds: { label: string; href: string; active: boolean }[];
+  /** The other letters of this record, to switch to: a strip for a few, groups beside the page for many. */
+  kinds?: { label: string; href: string; active: boolean }[];
+  kindGroups?: { label: string; items: { label: string; href: string; active: boolean; sentCount: number }[] }[];
   sent: { id: string; label: string; detail: string }[];
+  /** The record's letters already sent, by kind and day: what the rules and some sentences read. */
+  history?: { kind: string; date: string }[];
+  /** Why this letter cannot go out now; the preview stays. */
+  blocked?: string | null;
+  initialAddress?: 'home' | 'local' | 'none';
+  initialItems?: string[];
   back: { href: string; label: string };
   title: string;
   error?: string;
@@ -81,10 +94,11 @@ export function LetterComposer({
   const [standards, setStandards] = useState(initialStandards);
   const [choices, setChoices] = useState<LetterChoices>({
     language: defaultLanguage,
-    address: person.home ? 'home' : person.local ? 'local' : 'none',
+    address: initialAddress ?? (person.home ? 'home' : person.local ? 'local' : 'none'),
     signatureId: me,
     texts: {},
     paymentIds: source.type === 'booking' && source.kind === 'payment_receipt' ? source.ctx.payments.slice(-1).map((p) => p.id) : [],
+    items: initialItems ?? [],
   });
   const [addingNote, setAddingNote] = useState(false);
   const lang = choices.language;
@@ -92,14 +106,10 @@ export function LetterComposer({
   const standardSlots = STANDARD_SLOTS[source.kind];
 
   const letter = useMemo(() => {
-    const meta = { today, version };
-    if (source.type === 'booking') {
-      return source.kind === 'booking_confirmation'
-        ? bookingConfirmationLetter(source.ctx, choices, standard, meta)
-        : paymentReceiptLetter(source.ctx, choices, standard, meta);
-    }
+    const meta = { today, version, sent: history };
+    if (source.type === 'booking') return buildBookingLetter(source.kind, source.ctx, choices, standard, meta);
     return waitlistLetter(source.kind, source.ctx, choices, standard, meta);
-  }, [source, choices, standard, today, version]);
+  }, [source, choices, standard, today, version, history]);
 
   const setText = (slot: string, value: string | null) =>
     setChoices((prev) => {
@@ -121,14 +131,28 @@ export function LetterComposer({
     setText(slot, null);
   };
 
-  const slotLabel: Record<string, string> = {
+  const labels: Record<string, string> = {
     intro: t('Einleitung', 'Opening'),
     closing: t('Schluss', 'Closing'),
     ps: 'PS',
     payment: t('Zahlung', 'Payment'),
     position: t('Platz in der Warteliste', 'Place in the queue'),
     next: t('Nächster Termin', 'Next start'),
+    open: t('Offener Betrag', 'Amount outstanding'),
+    ways: t('Wie zahlen', 'How to pay'),
+    enrolled: t('Anmeldung', 'Enrolment'),
+    lessons: t('Unterricht', 'Lessons'),
+    programme: t('Programm', 'Programme'),
+    contract: t('Vertrag', 'Contract'),
+    request: t('Bitte', 'Request'),
+    postpone: t('Verschiebung', 'Postponement'),
+    start: t('Kursbeginn', 'Course start'),
+    practical: t('Praktisches', 'Practical'),
+    certify: t('Bestätigung', 'Confirmation'),
+    money: t('Betrag', 'Amount'),
   };
+  // Every editable part has a name on its bar; one without its own is simply "Text".
+  const slotLabel = new Proxy(labels, { get: (target, key: string) => target[key] ?? t('Text', 'Text') });
 
   // A text part, editable where it stands: a standard text, or a sentence built from figures.
   function renderSlot(slot: string) {
@@ -245,7 +269,17 @@ export function LetterComposer({
               {(choices.paymentIds ?? []).map((id) => (
                 <input key={id} type="hidden" name="paymentIds" value={id} />
               ))}
-              <Button type="submit" disabled={source.type === 'booking' && source.kind === 'payment_receipt' && !choices.paymentIds?.length}>
+              {(choices.items ?? []).map((item) => (
+                <input key={item} type="hidden" name="items" value={item} />
+              ))}
+              <Button
+                type="submit"
+                disabled={
+                  Boolean(blocked) ||
+                  (source.type === 'booking' && source.kind === 'payment_receipt' && !choices.paymentIds?.length) ||
+                  (source.type === 'booking' && source.kind === 'missing_items' && !choices.items?.length)
+                }
+              >
                 {t('Als gesendet speichern', 'Save as sent')}
               </Button>
             </form>
@@ -253,7 +287,7 @@ export function LetterComposer({
         </div>
       </div>
 
-      {kinds.length > 1 ? (
+      {kinds && kinds.length > 1 ? (
         <nav aria-label={t('Briefe', 'Letters')} className="mb-4 inline-flex flex-wrap gap-0.5 rounded-xl border border-ws-line bg-white p-1">
           {kinds.map((k) => (
             <Link
@@ -271,6 +305,12 @@ export function LetterComposer({
         </nav>
       ) : null}
 
+      {blocked ? (
+        <p role="status" className="mb-4 rounded-2xl bg-[#fff8e6] px-4 py-3 text-[0.88rem] text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+          {blocked}
+        </p>
+      ) : null}
+
       {error ? (
         <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
           {error}
@@ -283,6 +323,40 @@ export function LetterComposer({
         </div>
 
         <aside className="space-y-4 xl:sticky xl:top-20" aria-label={t('Der Brief', 'The letter')}>
+          {kindGroups ? (
+            <nav aria-label={t('Briefe', 'Letters')} className="rounded-3xl border border-ws-line bg-white">
+              <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Brief', 'Letter')}</h2>
+              <div className="space-y-3 p-2">
+                {kindGroups.map((group) => (
+                  <div key={group.label}>
+                    <span className="block px-2 pt-1 pb-1 text-[0.72rem] font-semibold text-[var(--casa-muted)]">{group.label}</span>
+                    <ul>
+                      {group.items.map((k) => (
+                        <li key={k.href}>
+                          <Link
+                            href={k.href}
+                            aria-current={k.active ? 'page' : undefined}
+                            className={cn(
+                              'flex items-center justify-between gap-2 rounded-xl px-2.5 py-1.5 text-[0.84rem] font-semibold transition-colors',
+                              k.active ? 'bg-[var(--casa-ink-deep)] text-white' : 'text-[var(--casa-ink)] hover:bg-ws-sunk'
+                            )}
+                          >
+                            {k.label}
+                            {k.sentCount ? (
+                              <span className={cn('text-[0.72rem] font-semibold', k.active ? 'text-white/70' : 'text-[var(--casa-muted)]')}>
+                                {t(`${k.sentCount}× gesendet`, `sent ${k.sentCount}×`)}
+                              </span>
+                            ) : null}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </nav>
+          ) : null}
+
           <section className="rounded-3xl border border-ws-line bg-white">
             <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Einstellungen', 'Settings')}</h2>
             <Choice label={t('Sprache', 'Language')}>
@@ -318,6 +392,28 @@ export function LetterComposer({
                         {new Date(`${p.date}T12:00:00`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })} · {p.subject}
                       </span>
                       <span className="font-semibold tabular-nums">{p.amount.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
+                    </label>
+                  ))}
+                </div>
+              </Choice>
+            ) : null}
+            {source.type === 'booking' && source.kind === 'missing_items' ? (
+              <Choice label={t('Was fehlt', 'What is missing')}>
+                <div className="space-y-1.5">
+                  {MISSING_ITEMS.map((item) => (
+                    <label key={item} className="flex cursor-pointer items-center gap-2.5 text-[0.84rem]">
+                      <input
+                        type="checkbox"
+                        checked={choices.items?.includes(item) ?? false}
+                        onChange={(e) =>
+                          setChoices((prev) => ({
+                            ...prev,
+                            items: e.target.checked ? [...(prev.items ?? []), item] : (prev.items ?? []).filter((x) => x !== item),
+                          }))
+                        }
+                        className="size-4 accent-[var(--casa-ink-deep)]"
+                      />
+                      {MISSING_ITEM_LABELS[item][lang]}
                     </label>
                   ))}
                 </div>

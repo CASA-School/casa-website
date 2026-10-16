@@ -30,7 +30,7 @@ import {
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
 import { issueBookingLetter } from '@/lib/admin/letters/booking-issue';
-import { STANDARD_SLOTS } from '@/lib/admin/letters/booking-letters';
+import { BOOKING_LETTER_KEYS, STANDARD_SLOTS } from '@/lib/admin/letters/booking-letters';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { saveStandardText } from '@/lib/admin/letters/repo';
 import { BOOKING_LETTER_KINDS, WAITLIST_LETTER_KINDS, type BookingLetterKind, type LetterLanguage } from '@/lib/admin/letters/types';
@@ -429,7 +429,7 @@ export async function issueBookingLetterAction(formData: FormData): Promise<void
   const bookingId = id(formData, 'bookingId');
   const kind = String(formData.get('kind') ?? '');
   if (!(BOOKING_LETTER_KINDS as readonly string[]).includes(kind)) throw new Error('Invalid kind');
-  const back = `/admin/bookings/${bookingId}/letter?kind=${kind === 'payment_receipt' ? 'receipt' : 'confirmation'}`;
+  const back = `/admin/bookings/${bookingId}/letter?kind=${BOOKING_LETTER_KEYS[kind as BookingLetterKind]}`;
   const choices = readChoices(formData);
   const { t, lang } = await getI18n();
   if (!choices) fail(back, t('Der Brief konnte nicht gelesen werden.', 'The letter could not be read.'));

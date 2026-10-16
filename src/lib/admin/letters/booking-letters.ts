@@ -22,6 +22,8 @@
  * built from figures — what to pay, a place in the queue, the next start — are changed per letter only.
  */
 
+import { teachingWeeks } from '../offers/course';
+
 import { formatDateRange, formatLetterDate, formatMoney, letterhead, recipientLines, salutation, type Salutation } from './format';
 import { LETTER_SCHEMA, type BookingLetterKind, type Letter, type LetterLanguage, type LetterPart, type WaitlistLetterKind } from './types';
 
@@ -35,6 +37,13 @@ export type LetterPerson = {
   lastName: string;
   salutation: Salutation;
   email: string | null;
+  phone: string | null;
+  motherTongue: string | null;
+  birthPlace: string | null;
+  /** For the letters to authorities: the embassy's, the enrolment confirmation. */
+  birthDate: string | null;
+  nationality: Record<LetterLanguage, string | null>;
+  passportNumber: string | null;
   home: LetterAddress | null;
   local: LetterAddress | null;
 };
@@ -48,6 +57,8 @@ export type LetterCourse = {
   time: string | null;
   days: string[];
   lessonsPerWeek: number | null;
+  /** Where it is taught: "Dresden" on the 1st floor, for the course-start letter. */
+  room: { name: string; floor: number | null } | null;
 };
 
 export type BookingLetterContext = {
@@ -59,7 +70,7 @@ export type BookingLetterContext = {
   person: LetterPerson;
   course: LetterCourse | null;
   accommodation: { name: Record<LetterLanguage, string>; from: string; to: string | null } | null;
-  charges: { description: string; amount: number }[];
+  charges: { kind: string; description: string; amount: number }[];
   payments: { id: string; date: string; method: string; amount: number; subject: string }[];
   charged: number;
   paid: number;
@@ -68,6 +79,8 @@ export type BookingLetterContext = {
   followUp: boolean;
   /** The course type's down payment (`course_types.down_payment`), when it has one. */
   downPayment: number | null;
+  status: 'reserved' | 'confirmed' | 'completed' | 'cancelled';
+  cancelledAt: string | null;
   staff: { id: string; name: string }[];
 };
 
@@ -89,6 +102,15 @@ export const LETTER_KIND_LABELS: Record<BookingLetterKind | WaitlistLetterKind |
   offer: { de: 'Angebot', en: 'Offer' },
   booking_confirmation: { de: 'Buchungsbestätigung', en: 'Booking confirmation' },
   payment_receipt: { de: 'Empfangsbestätigung', en: 'Receipt' },
+  payment_reminder: { de: 'Zahlungserinnerung', en: 'Payment reminder' },
+  payments_overview: { de: 'Zahlungsübersicht', en: 'Payments overview' },
+  visa_letter: { de: 'Bestätigung für die Botschaft', en: 'Letter for the embassy' },
+  showup_first_call: { de: 'Kursbeginn bestätigen', en: 'Confirm the course start' },
+  showup_last_call: { de: 'Letzte Nachfrage', en: 'Last call' },
+  missing_items: { de: 'Fehlende Angaben', en: 'Missing details' },
+  course_start: { de: 'Kursbeginn', en: 'Course start' },
+  enrolment_certificate: { de: 'Einschreibebestätigung', en: 'Confirmation of enrolment' },
+  cancellation_confirmation: { de: 'Stornierung', en: 'Cancellation' },
   waitlist_confirmation: { de: 'Bestätigung Warteliste', en: 'Waiting-list confirmation' },
   waitlist_place_free: { de: 'Platz frei', en: 'Place free' },
   waitlist_no_place: { de: 'Kein Platz', en: 'No place' },
@@ -102,12 +124,72 @@ export type LetterChoices = {
   texts: Partial<Record<string, string>>;
   /** The receipt's payments; empty means all. */
   paymentIds?: string[];
+  /** The missing-details letter's items (`MISSING_ITEMS`). */
+  items?: string[];
 };
+
+/** What a letter's rules and words know about the letters already sent for the record. */
+export type LetterMeta = { today: string; version: number; sent?: { kind: string; date: string }[] };
+
+/** What the missing-details letter can ask for — SchoolMan's list, with the bank details for a refund. */
+export const MISSING_ITEMS = [
+  'birth_date',
+  'birth_place',
+  'nationality',
+  'mother_tongue',
+  'passport',
+  'phone',
+  'german_phone',
+  'email',
+  'home_address',
+  'local_address',
+  'placement',
+  'bank',
+] as const;
+export type MissingItem = (typeof MISSING_ITEMS)[number];
+export const MISSING_ITEM_LABELS: Record<MissingItem, Record<LetterLanguage, string>> = {
+  birth_date: { de: 'dein Geburtsdatum', en: 'your date of birth' },
+  birth_place: { de: 'dein Geburtsort', en: 'your place of birth' },
+  nationality: { de: 'deine Staatsangehörigkeit', en: 'your nationality' },
+  mother_tongue: { de: 'deine Muttersprache', en: 'your mother tongue' },
+  passport: { de: 'deine Passnummer', en: 'your passport number' },
+  phone: { de: 'deine Telefonnummer', en: 'your phone number' },
+  german_phone: { de: 'deine deutsche Handynummer', en: 'your German mobile number' },
+  email: { de: 'deine E-Mail-Adresse', en: 'your email address' },
+  home_address: { de: 'deine Adresse in deinem Heimatland', en: 'your home address' },
+  local_address: { de: 'deine Adresse in Bremen', en: 'your address in Bremen' },
+  placement: { de: 'das Ergebnis deines Einstufungstests', en: 'the result of your placement test' },
+  bank: { de: 'deine Bankverbindung, für eine Erstattung', en: 'your bank details, for a refund' },
+};
+
+/** The details the record does not have, ticked when the letter opens; a colleague adds or removes. */
+export function missingFromRecord(person: LetterPerson): MissingItem[] {
+  const out: MissingItem[] = [];
+  if (!person.birthDate) out.push('birth_date');
+  if (!person.birthPlace) out.push('birth_place');
+  if (!person.nationality.de && !person.nationality.en) out.push('nationality');
+  if (!person.motherTongue) out.push('mother_tongue');
+  if (!person.passportNumber) out.push('passport');
+  if (!person.phone) out.push('phone');
+  if (!person.email) out.push('email');
+  if (!person.home) out.push('home_address');
+  if (!person.local) out.push('local_address');
+  return out;
+}
 
 /** The slots a colleague can save as CASA's standard, per kind. The others are built from figures. */
 export const STANDARD_SLOTS: Record<BookingLetterKind | WaitlistLetterKind, readonly string[]> = {
   booking_confirmation: ['intro', 'closing', 'ps'],
   payment_receipt: ['intro', 'closing'],
+  payment_reminder: ['intro', 'ways', 'closing'],
+  payments_overview: ['intro', 'closing'],
+  visa_letter: ['programme', 'contract', 'closing'],
+  showup_first_call: ['intro', 'postpone', 'closing'],
+  showup_last_call: ['intro', 'closing'],
+  missing_items: ['intro', 'closing'],
+  course_start: ['practical', 'closing'],
+  enrolment_certificate: [],
+  cancellation_confirmation: ['intro', 'closing'],
   waitlist_confirmation: ['intro', 'closing'],
   waitlist_place_free: ['intro', 'closing'],
   waitlist_no_place: ['intro', 'closing'],
@@ -129,6 +211,89 @@ export const LETTER_STANDARD_DEFAULTS: Record<BookingLetterKind | WaitlistLetter
   payment_receipt: {
     de: { intro: 'hiermit bestätigen wir dir den Erhalt deiner Zahlung:', closing: 'Vielen Dank!' },
     en: { intro: 'We hereby confirm that we have received your payment:', closing: 'Thank you very much.' },
+  },
+  payment_reminder: {
+    de: {
+      intro: 'wir möchten dich an eine offene Zahlung für deine Buchung erinnern:',
+      ways: 'Du kannst bei uns im Büro mit Karte oder bar bezahlen oder den Betrag überweisen. Unsere Bankverbindung steht unten auf diesem Brief.',
+      closing: 'Wenn du in den letzten Tagen schon bezahlt hast, ist dieser Brief für dich erledigt. Bei Fragen melde dich einfach bei uns.',
+    },
+    en: {
+      intro: 'This is a friendly reminder of an outstanding payment for your booking:',
+      ways: 'You can pay at our office by card or in cash, or transfer the amount. Our bank details are at the foot of this letter.',
+      closing: 'If you have paid in the last few days, please disregard this letter. If you have any questions, just get in touch.',
+    },
+  },
+  payments_overview: {
+    de: { intro: 'hier ist die Aufstellung deiner gebuchten Leistungen und Zahlungen:', closing: 'Wenn dir etwas nicht stimmig vorkommt, melde dich einfach bei uns.' },
+    en: { intro: 'Here is a statement of your booked services and payments:', closing: 'If anything looks wrong to you, just let us know.' },
+  },
+  visa_letter: {
+    de: {
+      programme:
+        'Der Kurs ist Teil eines Programms von sechs aufeinander aufbauenden Niveaustufen von A1 bis einschließlich C1 und bereitet auf die Prüfungen telc Deutsch C1 Hochschule bzw. TestDaF vor. Der gebuchte Kurs kann in Bremen verlängert werden.',
+      contract:
+        'Das Sprachvisum ist an die verbindliche Buchung eines fest definierten Zeitraums an einer Sprachschule gebunden. Es handelt sich um einen Vertrag, der zwischen drei Parteien geschlossen wird: dem deutschen Staat, der Sprachschule und der Person, die das Visum zum Zwecke des Spracherwerbs gebucht hat. Dieser Vertrag kann von der Teilnehmerin oder dem Teilnehmer nicht gekündigt werden.',
+      closing:
+        'Wir bitten Sie freundlich, die entsprechenden Visumspapiere für die Kursteilnahme auszustellen, und danken Ihnen im Voraus für Ihre Bemühungen. Bei Rückfragen stehen wir Ihnen jederzeit gern zur Verfügung.',
+    },
+    en: {
+      programme:
+        'The course is part of a programme of six consecutive levels from A1 up to and including C1 and prepares for the telc Deutsch C1 Hochschule and TestDaF examinations. The course booked can be extended in Bremen.',
+      contract:
+        'The language visa is tied to the binding booking of a fixed period at a language school. It is a contract between three parties: the German state, the language school and the person who has booked the course to learn the language. The participant cannot cancel this contract.',
+      closing:
+        'We kindly ask you to issue the visa documents for the course participation and thank you in advance for your efforts. If you have any questions, please do not hesitate to contact us.',
+    },
+  },
+  showup_first_call: {
+    de: {
+      intro: 'du hast bei uns folgenden Kurs gebucht:',
+      postpone:
+        'Bitte beachte: Eine Verschiebung wegen des Visums ist einmal kostenlos möglich, jede weitere kostet 100,00 €. In beiden Fällen brauchen wir die Information bis zu dieser Frist. Eine spätere Verschiebung verpflichtet zur Zahlung aller gebuchten Leistungen, die in die vierwöchige Frist fallen.',
+      closing: 'Melde dich gern, wenn du Fragen hast.',
+    },
+    en: {
+      intro: 'You have booked the following course with us:',
+      postpone:
+        'Please note: one postponement because of the visa is free of charge; each further one costs €100.00. In both cases we need to know by this deadline. A later postponement means paying for all booked services that fall within the four-week period.',
+      closing: 'Do get in touch if you have any questions.',
+    },
+  },
+  showup_last_call: {
+    de: { intro: 'du hast bei uns folgenden Kurs gebucht:', closing: 'Vielen Dank für dein Verständnis.' },
+    en: { intro: 'You have booked the following course with us:', closing: 'Thank you for your understanding.' },
+  },
+  missing_items: {
+    de: {
+      intro: 'vielen Dank für deine Anmeldung bei CASA. Damit wir alles für deinen Kurs vorbereiten können, brauchen wir noch folgende Angaben von dir:',
+      closing: 'Schick sie uns einfach per E-Mail oder bring sie im Büro vorbei. Vielen Dank für deine Hilfe!',
+    },
+    en: {
+      intro: 'Thank you for registering with CASA. So that we can prepare everything for your course, we still need the following details from you:',
+      closing: 'Just send them to us by email or bring them to the office. Thank you for your help.',
+    },
+  },
+  course_start: {
+    de: {
+      practical: 'Komm am ersten Tag am besten etwa 15 Minuten früher. Das Lehrbuch für deinen Kurs kannst du vorher bei uns im Büro kaufen oder abholen.',
+      closing: 'Bei Fragen melde dich gern. Wir freuen uns auf dich!',
+    },
+    en: {
+      practical: 'On the first day, please come about 15 minutes early. You can buy or collect the coursebook at our office beforehand.',
+      closing: 'If you have any questions, just get in touch. We look forward to seeing you!',
+    },
+  },
+  enrolment_certificate: { de: {}, en: {} },
+  cancellation_confirmation: {
+    de: {
+      intro: 'hiermit bestätigen wir die Stornierung deiner Buchung:',
+      closing: 'Wir würden uns freuen, dich zu einem späteren Zeitpunkt bei CASA zu begrüßen. Bei Fragen melde dich gern.',
+    },
+    en: {
+      intro: 'We hereby confirm the cancellation of your booking:',
+      closing: 'We would be glad to welcome you at CASA at a later date. If you have any questions, just get in touch.',
+    },
   },
   waitlist_confirmation: {
     de: {
@@ -252,8 +417,8 @@ const addDays = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-const weeksBetween = (from: string, to: string) =>
-  Math.max(1, Math.round((new Date(`${to}T12:00:00Z`).getTime() - new Date(`${from}T12:00:00Z`).getTime() + 86_400_000) / (7 * 86_400_000)));
+/** Teaching weeks, the school's closures left out (the Christmas break): a level is 8 weeks, not 10. */
+const weeksBetween = (from: string, to: string) => teachingWeeks(from, to);
 
 /** The course in one line under its name: dates, weeks, when, how much. */
 function courseDetail(course: LetterCourse, lang: LetterLanguage): string {
@@ -279,7 +444,9 @@ function frame(
   choices: LetterChoices,
   today: string,
   subject: Letter['subject'],
-  body: LetterPart[]
+  body: LetterPart[],
+  /** A letter to an authority: no salutation of its own, a formal sign-off. */
+  opts: { salutation?: string; signOff?: string } = {}
 ): Letter {
   const lang = choices.language;
   const address = choices.address === 'none' ? null : choices.address === 'local' ? (person.local ?? person.home) : (person.home ?? person.local);
@@ -298,8 +465,9 @@ function frame(
     }),
     placeDate: `Bremen, ${formatLetterDate(today, lang)}`,
     subject,
-    salutation: salutation({ language: lang, salutation: person.salutation, firstName: person.firstName, lastName: person.lastName }),
+    salutation: opts.salutation ?? salutation({ language: lang, salutation: person.salutation, firstName: person.firstName, lastName: person.lastName }),
     body,
+    ...(opts.signOff !== undefined ? { signOff: opts.signOff } : {}),
   };
 }
 
@@ -417,6 +585,386 @@ export function paymentReceiptLetter(
     { lead: w.receipt, title: [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' '), tail: w.bookingNo(ctx.number) },
     body
   );
+}
+
+// ------------------------------------------------- more of a booking's letters (0034)
+
+const MORE = {
+  de: {
+    bookingNo: (n: string) => `Buchung Nr. ${n}`,
+    reminder: 'Zahlungserinnerung',
+    nth: (v: number) => `${v}. Erinnerung`,
+    open: (amount: string, by: string) => `Für deine Buchung ist noch ein Betrag von ${amount} offen. Bitte zahle ihn bis zum ${by}.`,
+    overview: 'Aufstellung über gebuchte Leistungen und Zahlungen',
+    costsTotal: 'Kosten gesamt',
+    payments: 'Zahlungen',
+    paymentsTotal: 'Zahlungen gesamt',
+    balanceOpen: 'Noch offen',
+    balanceCredit: 'Guthaben',
+    balanceEven: 'Ausgeglichen',
+    visa: 'Anmeldebestätigung',
+    visaSalutation: 'Sehr geehrte Damen und Herren,',
+    formalSignOff: 'Mit freundlichen Grüßen',
+    enrolled: (who: string) =>
+      `hiermit bestätigen wir, dass ${who} bei CASA – Internationale Sprachschule Bremen verbindlich für folgenden Deutschkurs angemeldet ist:`,
+    born: (date: string) => `geboren am ${date}`,
+    nationality: (n: string) => `Staatsangehörigkeit ${n}`,
+    passport: (n: string) => `Reisepass Nr. ${n}`,
+    lessons: (perWeek: number, total: number) =>
+      `Der Kurs umfasst ${perWeek} Unterrichtseinheiten à 45 Minuten pro Woche, insgesamt ${total} Unterrichtseinheiten, und findet als Präsenzunterricht statt. Die persönliche Anwesenheit ist daher erforderlich.`,
+    stay: (name: string, range: string) => `Gebuchte Unterkunft: ${name}, ${range}.`,
+    paidInFull: (amount: string, stay: boolean) => `Wir bestätigen den Erhalt der vollständigen Zahlung in Höhe von ${amount} für die Kursgebühr${stay ? ' und die Unterkunft' : ''}.`,
+    showup: 'Bitte bestätige deinen Kursbeginn',
+    showupRequest: (by: string) =>
+      `Bitte schick uns bis spätestens ${by} einen Nachweis deines Visums (ein Foto der Passseite mit dem Visum) und bestätige uns, dass du den Kurs antreten kannst. Wenn wir bis dahin nichts von dir hören, deaktivieren wir deine Buchung.`,
+    lastCall: 'Dringend: bitte melde dich bis morgen',
+    lastCallRequest: (first: string | null, tomorrow: string) =>
+      `Wir haben dir${first ? ` am ${first}` : ''} eine Nachricht mit einer Antwortfrist geschickt und bis heute keine Antwort von dir bekommen. Bitte melde dich bis morgen, ${tomorrow}. Sonst deaktivieren wir deine Buchung.`,
+    missing: 'Wir brauchen noch ein paar Angaben',
+    courseStart: 'Dein Kurs beginnt',
+    startsOn: (day: string, time: string | null, room: string | null) =>
+      `in wenigen Tagen, am ${day}, beginnt dein Kurs.${time ? ` Der Unterricht beginnt um ${time} Uhr` : ' Der Unterricht findet'} bei uns in der Schule, Am Dobben 14–16 in Bremen${room ? `, im Raum ${room}` : ''}.`,
+    floor: (f: number) => (f === 0 ? 'im Erdgeschoss' : `im ${f}. Stock`),
+    certificate: 'Einschreibebestätigung',
+    certify: (who: string, range: string, course: string) =>
+      `Hiermit bestätigen wir, dass ${who} ${range} in einem Deutschkurs (${course}) bei CASA – Internationale Sprachschule Bremen eingeschrieben ist.`,
+    certifyLessons: (perWeek: number, total: number) => `Der Kurs umfasst ${perWeek} Unterrichtseinheiten à 45 Minuten pro Woche, insgesamt ${total} Unterrichtseinheiten.`,
+    title: { ms: 'Frau ', mr: 'Herr ', none: '' } as Record<Salutation, string>,
+    fromTo: (from: string, to: string) => `vom ${from} bis ${to}`,
+    level: (l: string) => `Niveau ${l}`,
+    cancellation: 'Stornierung deiner Buchung',
+    cancelFee: (fee: string) => `Für die Stornierung berechnen wir eine Gebühr von ${fee}.`,
+    cancelPay: (amount: string, by: string) => `Bitte überweise den offenen Betrag von ${amount} bis zum ${by}.`,
+    cancelCredit: (amount: string) => `Du hast bei uns ein Guthaben von ${amount}. Wir melden uns bei dir, wie wir es dir zurückzahlen oder auf eine neue Buchung übertragen.`,
+    cancelSettled: (fee: string) => `Die Stornierungsgebühr von ${fee} ist damit beglichen.`,
+    weekdays: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+  },
+  en: {
+    bookingNo: (n: string) => `booking no. ${n}`,
+    reminder: 'Payment reminder',
+    nth: (v: number) => `reminder ${v}`,
+    open: (amount: string, by: string) => `There is still ${amount} outstanding on your booking. Please pay it by ${by}.`,
+    overview: 'Statement of booked services and payments',
+    costsTotal: 'Total costs',
+    payments: 'Payments',
+    paymentsTotal: 'Total payments',
+    balanceOpen: 'Still to pay',
+    balanceCredit: 'Credit',
+    balanceEven: 'Settled',
+    visa: 'Confirmation of enrolment',
+    visaSalutation: 'Dear Sir or Madam,',
+    formalSignOff: 'Yours faithfully',
+    enrolled: (who: string) => `We hereby confirm that ${who} is firmly registered at CASA – Internationale Sprachschule Bremen for the following German course:`,
+    born: (date: string) => `born on ${date}`,
+    nationality: (n: string) => `nationality ${n}`,
+    passport: (n: string) => `passport no. ${n}`,
+    lessons: (perWeek: number, total: number) =>
+      `The course comprises ${perWeek} lessons of 45 minutes a week, ${total} lessons in total, and is taught in person. Attendance in person is therefore required.`,
+    stay: (name: string, range: string) => `Accommodation booked: ${name}, ${range}.`,
+    paidInFull: (amount: string, stay: boolean) => `We confirm that we have received the full payment of ${amount} for the course fee${stay ? ' and the accommodation' : ''}.`,
+    showup: 'Please confirm your course start',
+    showupRequest: (by: string) =>
+      `Please send us proof of your visa (a photo of the passport page with the visa) and confirm that you can attend the course by ${by} at the latest. If we do not hear from you by then, we will deactivate your booking.`,
+    lastCall: 'Urgent: please reply by tomorrow',
+    lastCallRequest: (first: string | null, tomorrow: string) =>
+      `We sent you a message${first ? ` on ${first}` : ''} with a deadline for your reply and have not heard from you yet. Please get in touch by tomorrow, ${tomorrow}. Otherwise we will deactivate your booking.`,
+    missing: 'We still need a few details',
+    courseStart: 'Your course starts',
+    startsOn: (day: string, time: string | null, room: string | null) =>
+      `Your course starts in a few days, on ${day}.${time ? ` Lessons begin at ${time}` : ' Lessons take place'} at our school, Am Dobben 14–16 in Bremen${room ? `, in room ${room}` : ''}.`,
+    floor: (f: number) => (f === 0 ? 'on the ground floor' : `on the ${f === 1 ? '1st' : f === 2 ? '2nd' : f === 3 ? '3rd' : `${f}th`} floor`),
+    certificate: 'Confirmation of enrolment',
+    certify: (who: string, range: string, course: string) => `This is to confirm that ${who} is enrolled ${range} in a German course (${course}) at CASA – Internationale Sprachschule Bremen.`,
+    certifyLessons: (perWeek: number, total: number) => `The course comprises ${perWeek} lessons of 45 minutes a week, ${total} lessons in total.`,
+    title: { ms: 'Ms ', mr: 'Mr ', none: '' } as Record<Salutation, string>,
+    fromTo: (from: string, to: string) => `from ${from} to ${to}`,
+    level: (l: string) => `level ${l}`,
+    cancellation: 'Cancellation of your booking',
+    cancelFee: (fee: string) => `We charge a cancellation fee of ${fee}.`,
+    cancelPay: (amount: string, by: string) => `Please transfer the outstanding ${amount} by ${by}.`,
+    cancelCredit: (amount: string) => `You have a credit of ${amount} with us. We will be in touch about refunding it or carrying it over to a new booking.`,
+    cancelSettled: (fee: string) => `The cancellation fee of ${fee} has been settled.`,
+    weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  },
+} as const;
+
+/** "Montag, 04.01.2027" · "Monday, 4 January 2027". */
+function weekdayDate(iso: string, lang: LetterLanguage): string {
+  const day = new Date(`${iso}T12:00:00Z`).getUTCDay();
+  return `${MORE[lang].weekdays[day]}, ${formatLetterDate(iso, lang)}`;
+}
+
+const daysUntil = (from: string, to: string) => Math.round((new Date(`${to}T12:00:00Z`).getTime() - new Date(`${from}T12:00:00Z`).getTime()) / 86_400_000);
+const fullName = (p: LetterPerson) => [p.firstName, p.lastName].filter(Boolean).join(' ');
+const totalLessons = (c: LetterCourse) => (c.lessonsPerWeek ? c.lessonsPerWeek * weeksBetween(c.startDate, c.endDate) : null);
+const reference = (ctx: BookingLetterContext, lang: LetterLanguage): LetterPart => ({ type: 'text', slot: null, text: W[lang].reference(ctx.number, fullName(ctx.person)), strong: false });
+
+/** A week from today, or the course start when it comes sooner. */
+const deadline = (ctx: BookingLetterContext, today: string) => {
+  const week = addDays(today, 7);
+  const start = ctx.course?.startDate;
+  return start && start > today && start < week ? start : week;
+};
+
+/**
+ * Whether a kind of letter can go out for this booking now, and why not — SchoolMan's refusals and
+ * the ones it lacked: no letter for the embassy before the course is paid in full (AGB §5.3; SchoolMan
+ * stated full payment whatever was paid), the show-up letter only between 40 and 9 days before the
+ * start, the last call only after the first.
+ */
+export function bookingLetterBlock(kind: BookingLetterKind, ctx: BookingLetterContext, meta: LetterMeta): Record<LetterLanguage, string> | null {
+  const block = (de: string, en: string) => ({ de, en });
+  const money = (n: number) => formatMoney(n, 'de');
+  const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
+  const cancelled = ctx.status === 'cancelled';
+  const start = ctx.course?.startDate ?? null;
+  if (kind === 'cancellation_confirmation') return cancelled ? null : block('Die Buchung ist nicht storniert.', 'The booking is not cancelled.');
+  if (cancelled && kind !== 'payment_receipt' && kind !== 'payments_overview') return block('Die Buchung ist storniert.', 'The booking is cancelled.');
+  switch (kind) {
+    case 'payment_receipt':
+      return ctx.payments.length ? null : block('Für diese Buchung ist noch keine Zahlung erfasst.', 'No payment is recorded on this booking yet.');
+    case 'payment_reminder':
+      return balance > 0.005 ? null : block('Auf dieser Buchung ist nichts offen.', 'Nothing is outstanding on this booking.');
+    case 'visa_letter':
+      if (!ctx.course) return block('Die Buchung hat keinen Kurs.', 'The booking has no course.');
+      if (!ctx.person.birthDate) return block('Das Geburtsdatum fehlt: auf der Seite der Person eintragen.', 'The date of birth is missing: add it on the person’s page.');
+      if (ctx.charged <= 0.005 || balance > 0.005)
+        return block(
+          `Erst nach vollständiger Zahlung (AGB §5.3): noch offen ${money(Math.max(balance, 0))}.`,
+          `Only once paid in full (terms §5.3): ${formatMoney(Math.max(balance, 0), 'en')} still to pay.`
+        );
+      return null;
+    case 'showup_first_call': {
+      if (!start) return block('Die Buchung hat keinen Kursbeginn.', 'The booking has no course start.');
+      const days = daysUntil(meta.today, start);
+      if (days > 40)
+        return block(`Zu früh: frühestens 40 Tage vor Kursbeginn, ab dem ${formatLetterDate(addDays(start, -40), 'de')}.`, `Too early: at the earliest 40 days before the start, from ${formatLetterDate(addDays(start, -40), 'en')}.`);
+      if (days < 9) return block('Die Frist für eine Verschiebung ist vorbei: weniger als 9 Tage bis zum Kursbeginn.', 'The deadline for a postponement has passed: fewer than 9 days to the start.');
+      return null;
+    }
+    case 'showup_last_call':
+      return meta.sent?.some((l) => l.kind === 'showup_first_call')
+        ? null
+        : block('Erst die Nachfrage „Kursbeginn bestätigen“ schicken.', 'Send “Confirm the course start” first.');
+    case 'course_start':
+      if (!start) return block('Die Buchung hat keinen Kursbeginn.', 'The booking has no course start.');
+      return start < meta.today ? block('Der Kurs hat schon begonnen.', 'The course has already begun.') : null;
+    case 'enrolment_certificate':
+      return ctx.course ? null : block('Die Buchung hat keinen Kurs.', 'The booking has no course.');
+    default:
+      return null;
+  }
+}
+
+export function paymentReminderLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const balance = ctx.charged - ctx.paid;
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: formatDateRange(ctx.course.startDate, ctx.course.endDate, lang) });
+  body.push(text(choices, 'open', m.open(formatMoney(Math.max(balance, 0), lang), formatLetterDate(deadline(ctx, meta.today), lang)), true));
+  body.push(text(choices, 'ways', standard.ways));
+  body.push(reference(ctx, lang));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('payment_reminder', ctx.person, ctx.staff, choices, meta.today, { lead: m.reminder, title: m.bookingNo(ctx.number), tail: meta.version > 1 ? m.nth(meta.version) : null }, body);
+}
+
+export function paymentsOverviewLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const w = W[lang];
+  const money = (n: number) => formatMoney(n, lang);
+  const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) });
+  body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: m.costsTotal, amount: money(ctx.charged) } });
+  body.push({
+    type: 'table',
+    heading: m.payments,
+    rows: ctx.payments.map((p) => ({ text: [formatLetterDate(p.date, lang), p.subject, w.method[p.method] ?? p.method].filter(Boolean).join(' · '), amount: money(p.amount), ref: null })),
+    total: { label: m.paymentsTotal, amount: money(ctx.paid) },
+  });
+  body.push({ type: 'sum', label: balance > 0.005 ? m.balanceOpen : balance < -0.005 ? m.balanceCredit : m.balanceEven, amount: money(Math.abs(balance)) });
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('payments_overview', ctx.person, ctx.staff, choices, meta.today, { lead: m.overview, title: fullName(ctx.person), tail: m.bookingNo(ctx.number) }, body);
+}
+
+export function visaLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const p = ctx.person;
+  const who = [
+    `${m.title[p.salutation]}${fullName(p)}`,
+    p.birthDate ? m.born(formatLetterDate(p.birthDate, lang)) : null,
+    p.nationality[lang] ? m.nationality(p.nationality[lang]!) : null,
+    p.passportNumber ? m.passport(p.passportNumber) : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const body: LetterPart[] = [text(choices, 'enrolled', m.enrolled(who))];
+  if (ctx.course) {
+    body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) });
+    const total = totalLessons(ctx.course);
+    if (ctx.course.lessonsPerWeek && total) body.push(text(choices, 'lessons', m.lessons(ctx.course.lessonsPerWeek, total)));
+  }
+  body.push(text(choices, 'programme', standard.programme));
+  body.push(text(choices, 'contract', standard.contract));
+  if (ctx.accommodation) {
+    const range = ctx.accommodation.to ? formatDateRange(ctx.accommodation.from, ctx.accommodation.to, lang) : formatLetterDate(ctx.accommodation.from, lang);
+    body.push({ type: 'text', slot: null, text: m.stay(ctx.accommodation.name[lang], range), strong: false });
+  }
+  body.push(text(choices, 'payment', m.paidInFull(formatMoney(ctx.paid, lang), Boolean(ctx.accommodation)), true));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('visa_letter', p, ctx.staff, choices, meta.today, { lead: m.visa, title: fullName(p), tail: m.bookingNo(ctx.number) }, body, {
+    salutation: m.visaSalutation,
+    signOff: m.formalSignOff,
+  });
+}
+
+export function showupLetter(kind: 'showup_first_call' | 'showup_last_call', ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) });
+  if (kind === 'showup_first_call') {
+    // SchoolMan's deadline, 19 days before the start — never one already past.
+    const start = ctx.course?.startDate ?? meta.today;
+    const by = [addDays(start, -19), addDays(meta.today, 2)].sort().pop()!;
+    body.push(text(choices, 'request', m.showupRequest(weekdayDate(by, lang)), true));
+    body.push(text(choices, 'postpone', standard.postpone));
+  } else {
+    const first = meta.sent?.find((l) => l.kind === 'showup_first_call')?.date ?? null;
+    body.push(text(choices, 'request', m.lastCallRequest(first ? formatLetterDate(first, lang) : null, weekdayDate(addDays(meta.today, 1), lang)), true));
+  }
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame(kind, ctx.person, ctx.staff, choices, meta.today, { lead: kind === 'showup_first_call' ? m.showup : m.lastCall, title: m.bookingNo(ctx.number), tail: null }, body);
+}
+
+export function missingItemsLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const items = (choices.items ?? []).filter((i): i is MissingItem => (MISSING_ITEMS as readonly string[]).includes(i));
+  const body: LetterPart[] = [
+    text(choices, 'intro', standard.intro),
+    { type: 'table', heading: null, rows: items.map((i) => ({ text: MISSING_ITEM_LABELS[i][lang], amount: null, ref: null })), total: null },
+    text(choices, 'note', ''),
+    text(choices, 'closing', standard.closing),
+  ];
+  return frame('missing_items', ctx.person, ctx.staff, choices, meta.today, { lead: m.missing, title: ctx.course ? courseTitle(ctx.course, lang) : '', tail: m.bookingNo(ctx.number) }, body);
+}
+
+export function courseStartLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const c = ctx.course;
+  const time = c?.time ? (c.time.split('-')[0] ?? null) : null;
+  const room = c?.room ? `${c.room.name}${c.room.floor !== null ? ` (${m.floor(c.room.floor)})` : ''}` : null;
+  const body: LetterPart[] = [];
+  if (c) {
+    body.push(text(choices, 'start', m.startsOn(weekdayDate(c.startDate, lang), time, room)));
+    body.push({ type: 'heading', text: courseTitle(c, lang), detail: courseDetail(c, lang) });
+  }
+  body.push(text(choices, 'practical', standard.practical));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('course_start', ctx.person, ctx.staff, choices, meta.today, { lead: m.courseStart, title: c ? courseTitle(c, lang) : '', tail: c ? formatLetterDate(c.startDate, lang) : null }, body);
+}
+
+export function enrolmentCertificateLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  void standard;
+  const lang = choices.language;
+  const m = MORE[lang];
+  const p = ctx.person;
+  const c = ctx.course;
+  // "Frau Lucía Fernández, geboren am 14.03.1998," — the apposition closed by its comma.
+  const who = `${m.title[p.salutation]}${fullName(p)}${p.birthDate ? `, ${m.born(formatLetterDate(p.birthDate, lang))},` : ''}`;
+  const body: LetterPart[] = [];
+  if (c) {
+    // Enrolment only: SchoolMan also certified "regular attendance", which nothing here records.
+    body.push(text(choices, 'certify', m.certify(who, m.fromTo(formatLetterDate(c.startDate, lang), formatLetterDate(c.endDate, lang)), [c.name[lang], c.level ? m.level(c.level) : null].filter(Boolean).join(', '))));
+    const total = totalLessons(c);
+    if (c.lessonsPerWeek && total) body.push(text(choices, 'lessons', m.certifyLessons(c.lessonsPerWeek, total)));
+  }
+  body.push(text(choices, 'note', ''));
+  return frame('enrolment_certificate', p, ctx.staff, choices, meta.today, { lead: m.certificate, title: fullName(p), tail: null }, body, { salutation: '', signOff: '' });
+}
+
+export function cancellationLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const m = MORE[lang];
+  const money = (n: number) => formatMoney(n, lang);
+  const fee = ctx.charges.filter((c) => c.kind === 'cancellation').reduce((sum, c) => sum + c.amount, 0);
+  const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: formatDateRange(ctx.course.startDate, ctx.course.endDate, lang) });
+  // What is owed or owed back, from the booking's lines — SchoolMan wrote a fixed 100 € fee into the text.
+  const money_ = [
+    fee > 0.005 && balance > 0.005 ? m.cancelFee(money(fee)) : null,
+    balance > 0.005 ? m.cancelPay(money(balance), formatLetterDate(addDays(meta.today, 7), lang)) : null,
+    balance < -0.005 ? m.cancelCredit(money(-balance)) : null,
+    fee > 0.005 && Math.abs(balance) <= 0.005 ? m.cancelSettled(money(fee)) : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  if (money_) body.push(text(choices, 'money', money_, true));
+  if (balance > 0.005) body.push(reference(ctx, lang));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('cancellation_confirmation', ctx.person, ctx.staff, choices, meta.today, { lead: m.cancellation, title: ctx.course ? courseTitle(ctx.course, lang) : '', tail: m.bookingNo(ctx.number) }, body);
+}
+
+/** A booking letter's short name in the address (`?kind=reminder`). */
+export const BOOKING_LETTER_KEYS: Record<BookingLetterKind, string> = {
+  booking_confirmation: 'confirmation',
+  payment_receipt: 'receipt',
+  payment_reminder: 'reminder',
+  payments_overview: 'overview',
+  visa_letter: 'visa',
+  showup_first_call: 'showup',
+  showup_last_call: 'lastcall',
+  missing_items: 'missing',
+  course_start: 'start',
+  enrolment_certificate: 'certificate',
+  cancellation_confirmation: 'cancellation',
+};
+
+/** The booking letters in groups, as the letter page lists them. */
+export const BOOKING_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kinds: BookingLetterKind[] }[] = [
+  { label: { de: 'Anmeldung', en: 'Registration' }, kinds: ['booking_confirmation', 'missing_items', 'visa_letter', 'enrolment_certificate'] },
+  { label: { de: 'Zahlung', en: 'Payment' }, kinds: ['payment_receipt', 'payment_reminder', 'payments_overview'] },
+  { label: { de: 'Vor dem Kurs', en: 'Before the course' }, kinds: ['showup_first_call', 'showup_last_call', 'course_start'] },
+  { label: { de: 'Stornierung', en: 'Cancellation' }, kinds: ['cancellation_confirmation'] },
+];
+
+/** Every booking letter by its kind: what the composer previews and the server keeps. */
+export function buildBookingLetter(kind: BookingLetterKind, ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  switch (kind) {
+    case 'booking_confirmation':
+      return bookingConfirmationLetter(ctx, choices, standard, meta);
+    case 'payment_receipt':
+      return paymentReceiptLetter(ctx, choices, standard, meta);
+    case 'payment_reminder':
+      return paymentReminderLetter(ctx, choices, standard, meta);
+    case 'payments_overview':
+      return paymentsOverviewLetter(ctx, choices, standard, meta);
+    case 'visa_letter':
+      return visaLetter(ctx, choices, standard, meta);
+    case 'showup_first_call':
+    case 'showup_last_call':
+      return showupLetter(kind, ctx, choices, standard, meta);
+    case 'missing_items':
+      return missingItemsLetter(ctx, choices, standard, meta);
+    case 'course_start':
+      return courseStartLetter(ctx, choices, standard, meta);
+    case 'enrolment_certificate':
+      return enrolmentCertificateLetter(ctx, choices, standard, meta);
+    case 'cancellation_confirmation':
+      return cancellationLetter(ctx, choices, standard, meta);
+  }
 }
 
 // ------------------------------------------------------- the waiting list

@@ -7,14 +7,24 @@ import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { bookingLetterContext } from '@/lib/admin/letters/booking-context';
-import { LETTER_KIND_LABELS, LETTER_STANDARD_DEFAULTS } from '@/lib/admin/letters/booking-letters';
+import {
+  BOOKING_LETTER_GROUPS,
+  BOOKING_LETTER_KEYS,
+  bookingLetterBlock,
+  LETTER_KIND_LABELS,
+  LETTER_STANDARD_DEFAULTS,
+  missingFromRecord,
+} from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking, standardTexts } from '@/lib/admin/letters/repo';
-import type { BookingLetterKind } from '@/lib/admin/letters/types';
+import { BOOKING_LETTER_KINDS, type BookingLetterKind } from '@/lib/admin/letters/types';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
 /**
- * A booking's letters (docs/LETTERS.md, 0032): the confirmation (`?kind=confirmation`, the default)
- * and the receipt of payments (`?kind=receipt`), written on the letter, then kept as sent.
+ * A booking's letters (docs/LETTERS.md, 0032, 0034): the confirmation, the receipt, a reminder, the
+ * payments overview, the letter for the embassy, the show-up letters, missing details, the
+ * course-start letter, the enrolment confirmation and the cancellation — `?kind=` by its short name,
+ * the confirmation by default. Each is written on the letter and kept as sent; a letter its rules do
+ * not allow yet shows why, and can still be read and printed.
  */
 export default async function BookingLetterPage({
   params,
@@ -25,33 +35,45 @@ export default async function BookingLetterPage({
 }) {
   const [{ id }, { kind: raw, error }, user] = await Promise.all([params, searchParams, requireModule('bookings')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const kind: BookingLetterKind = raw === 'receipt' ? 'payment_receipt' : 'booking_confirmation';
+  const kind: BookingLetterKind = BOOKING_LETTER_KINDS.find((k) => BOOKING_LETTER_KEYS[k] === raw) ?? 'booking_confirmation';
   const ctx = await bookingLetterContext(id);
   if (!ctx) notFound();
   const { t, lang } = await getI18n();
   const [standards, letters] = await Promise.all([standardTexts(kind, LETTER_STANDARD_DEFAULTS[kind]), lettersForBooking(id)]);
+  const today = todayInputValue();
+  const history = letters.map((l) => ({ kind: l.kind, date: toDateInputValue(l.sentAt) }));
   const sent = letters.filter((l) => l.kind === kind);
+  const blocked = bookingLetterBlock(kind, ctx, { today, version: sent.length + 1, sent: history });
   const name = [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' ');
+  const href = (k: BookingLetterKind) => `/admin/bookings/${id}/letter${k === 'booking_confirmation' ? '' : `?kind=${BOOKING_LETTER_KEYS[k]}`}`;
 
   return (
     <LetterComposer
       source={{ type: 'booking', kind, ctx }}
       standards={standards}
-      today={todayInputValue()}
+      today={today}
       version={sent.length + 1}
       me={user.id}
       defaultLanguage={ctx.language}
-      canIssue={canAccess(user, 'bookings', 'edit') && (kind !== 'payment_receipt' || ctx.payments.length > 0)}
+      canIssue={canAccess(user, 'bookings', 'edit')}
       canSetStandard={canAccess(user, 'bookings', 'full')}
       issueAction={issueBookingLetterAction}
       saveStandardAction={saveLetterStandardAction}
       hidden={{ bookingId: id, kind }}
-      kinds={[
-        { label: pick(lang, LETTER_KIND_LABELS.booking_confirmation), href: `/admin/bookings/${id}/letter`, active: kind === 'booking_confirmation' },
-        ...(ctx.payments.length
-          ? [{ label: pick(lang, LETTER_KIND_LABELS.payment_receipt), href: `/admin/bookings/${id}/letter?kind=receipt`, active: kind === 'payment_receipt' }]
-          : []),
-      ]}
+      kindGroups={BOOKING_LETTER_GROUPS.map((group) => ({
+        label: pick(lang, group.label),
+        items: group.kinds.map((k) => ({
+          label: pick(lang, LETTER_KIND_LABELS[k]),
+          href: href(k),
+          active: k === kind,
+          sentCount: letters.filter((l) => l.kind === k).length,
+        })),
+      }))}
+      history={history}
+      blocked={blocked ? pick(lang, blocked) : null}
+      // A confirmation of enrolment is handed over, not posted: no address unless chosen.
+      initialAddress={kind === 'enrolment_certificate' ? 'none' : undefined}
+      initialItems={kind === 'missing_items' ? missingFromRecord(ctx.person) : undefined}
       sent={sent.map((l) => ({
         id: l.id,
         label: l.version > 1 ? t(`Fassung ${l.version}`, `Version ${l.version}`) : pick(lang, LETTER_KIND_LABELS[kind]),

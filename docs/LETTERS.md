@@ -110,6 +110,50 @@ number — is in the confirmation's subject and the receipt's, and is the paymen
 `down_payment` says 200 € for intensive courses: the letters use the catalogue's figure, and one of
 the two needs correcting.
 
+## More of a booking's letters (2026-10-16, migration 0034)
+
+Rahman: "check the types of letters. there are more types". SchoolMan writes **128 kinds**
+(`Letter.ScriptName`, 33,000 letters since 2025). Read from its DDR and counts, the ones the
+workspace has the data for are built, each about one booking, on the same letter page
+(`/admin/bookings/[id]/letter?kind=…`, a grouped list beside the letter):
+
+| Kind (`?kind=`) | SchoolMan's | 2026 | What it says, and its rule |
+| --- | --- | ---: | --- |
+| `visa_letter` (visa) | `VisaLetterSelected_Booking_De`, `VisaLetter.FirstBooking` | 715 | Sie, to the embassy: enrolled for the course, its lessons a week and in total, in person, the programme A1–C1, the contract clause, the stay, the full payment received; asks for the visa papers. **Only once paid in full and with a date of birth** — SchoolMan stated full payment whatever was paid, and its two versions disagree on 5 or 6 levels (CASA has six: A1, A2, B1, B1+, B2, C1) |
+| `missing_items` (missing) | `MissingItem.Platform.V10` | 710 | the details still needed, ticked from SchoolMan's list; those the record lacks are ticked when the letter opens |
+| `showup_first_call` (showup) | `ShowUp.FirstCall_Booking` | 463 | visa proof and confirmation of attendance 19 days before the start (never a day already past), or the booking is deactivated; postponement rules. **Only 40 to 9 days before the start**, as SchoolMan |
+| `showup_last_call` (lastcall) | `ShowUp.LastCall_Booking` | 167 | reply by tomorrow, with the date. **Only after the first call** |
+| `payment_reminder` (reminder) | `1.`/`2.Reminder_Booking` | 290 | what is open, by when, how to pay (office or transfer), the reference — SchoolMan's first reminder gave no bank details. A second one says „2. Erinnerung". Only with something open. No status change: the booking's colour follows its money |
+| `payments_overview` (overview) | `Overview.Parameter_PaymentIn_Booking` | 322 | the costs (SchoolMan computed them and left them out), the payments, what is open, settled or credit |
+| `course_start` (start) | `CourseStartMail.Individual_Booking` | 211 | the day, the time, the school, the room and floor; come 15 minutes early; the book. SchoolMan's ended "see you on " with the date missing. Not after the start |
+| `enrolment_certificate` (certificate) | `StudentCard_Booking` | 191 | third person, no salutation: enrolled from–to in the course and level, lessons a week and in total. **Not "attends regularly"** — SchoolMan certified attendance nothing recorded; that waits for the Klassenbuch |
+| `cancellation_confirmation` (cancellation) | `CancelStudent.Definite`, `Cancel.Definite`, `Deactivate` | 169 | the cancellation, and what it leaves from the booking's own lines — a fee to pay, or a credit to refund or carry over. SchoolMan wrote a fixed 100 € fee into the text. Only for a cancelled booking |
+
+The rules are `bookingLetterBlock()` — the letter page shows the reason and keeps the preview; the
+server checks them again. A course's weeks and lessons are **teaching weeks** (`teachingWeeks`, the
+school's closures left out), so a level over Christmas is 8 weeks and 160 lessons, not 10 and 200 —
+on the letters, the booking page, the course start page and the learner's „Woche 3 von 8".
+
+**The rest of the 128, and what each waits for** (2026 counts):
+
+- *Confirmation of several bookings* (`ConfirmationStudentIndividual`, 915) — one letter over a
+  learner's chosen bookings: a person-level letter, next.
+- *Registration letters* (`NewLetter.SendTest` 180, `NewLetterDownPayment` 260) — about a web
+  registration (placement-test result, 100 € deposit): need a letter about a registration, next.
+- *Exams* — confirmation (395), receipt (105), reminder (83), invitation (52), waiting list (375):
+  wait for exam bookings with a sitting.
+- *Instalment agreement* (370) — waits for instalment plans.
+- *Agency confirmation with commission* (262), *free letters to organisations* — wait for agency pages.
+- *Invoices* (214 + cancellations) — wait for invoices (and the DATEV link).
+- *Attendance* — "Dein Kurs vermisst dich" (331 + 74), certificates of participation (139 letters,
+  ~2,000 PDFs), learning agreements (258): wait for the Klassenbuch bridge.
+- *Rooms* — room change (461), course start to a whole course (194), course restart (109): wait for
+  rooms per day from Kursplanung.
+- *Accommodation and hosts* (about 700 in all): wait for the accommodation module.
+- *Staff circulars, teacher logins* — not letters to learners. SchoolMan writes teachers' Klassenbuch
+  logins into stored letter text; the workspace will not.
+- *Dead*: about 25 kinds unused in 2026 or used fewer than ten times.
+
 ## Adding a kind of letter
 
 1. Migration: add the kind to both `CHECK`s, its record's column to `letters` (a foreign key) and to

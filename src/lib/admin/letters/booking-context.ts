@@ -17,13 +17,23 @@ type PersonRow = {
   last_name: string | null;
   salutation: string | null;
   email: string | null;
+  birth_date: string | null;
+  nationality_de: string | null;
+  nationality_en: string | null;
+  passport_number: string | null;
+  phone: string | null;
+  mother_tongue: string | null;
+  birth_place: string | null;
 };
 
 async function letterPerson(personId: string): Promise<LetterPerson | null> {
   const person = await queryFirst<PersonRow>(
     `SELECT p.id, p.first_name, p.last_name, p.salutation::text AS salutation,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
-       FROM people p WHERE p.id = canonical_person_id($1)`,
+            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            to_char(p.birth_date, 'YYYY-MM-DD') AS birth_date, c.name_de AS nationality_de, c.name_en AS nationality_en, p.passport_number,
+            (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone,
+            p.mother_tongue, p.birth_place
+       FROM people p LEFT JOIN countries c ON c.code = p.nationality_code WHERE p.id = canonical_person_id($1)`,
     [personId]
   );
   if (!person) return null;
@@ -47,6 +57,12 @@ async function letterPerson(personId: string): Promise<LetterPerson | null> {
     lastName: person.last_name ?? '',
     salutation: person.salutation === 'ms' ? 'ms' : person.salutation === 'mr' ? 'mr' : 'none',
     email: person.email,
+    birthDate: person.birth_date,
+    nationality: { de: person.nationality_de, en: person.nationality_en },
+    passportNumber: person.passport_number,
+    phone: person.phone,
+    motherTongue: person.mother_tongue,
+    birthPlace: person.birth_place,
     home: address('home'),
     local: address('local'),
   };
@@ -60,6 +76,8 @@ type CourseRow = {
   session: string | null;
   schedule: { days?: string[]; time?: string } | null;
   lessons_per_week: number | null;
+  room_name: string | null;
+  room_floor: number | null;
 };
 
 const toCourse = (r: CourseRow, level: string | null): LetterCourse => ({
@@ -71,6 +89,7 @@ const toCourse = (r: CourseRow, level: string | null): LetterCourse => ({
   time: r.schedule?.time ?? null,
   days: Array.isArray(r.schedule?.days) ? r.schedule.days : [],
   lessonsPerWeek: r.lessons_per_week && r.lessons_per_week > 0 ? r.lessons_per_week : null,
+  room: r.room_name ? { name: r.room_name, floor: r.room_floor } : null,
 });
 
 /** Everyone who can sign a letter: the active colleagues. */
@@ -93,9 +112,11 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     accommodation_to: string | null;
     earlier: boolean;
     locale: string | null;
+    cancelled_at: string | null;
   }>(
     `SELECT b.id, b.number, b.person_id, b.status::text AS status, b.visa_required, b.payer, t.down_payment,
             (SELECT r.locale FROM course_registrations r WHERE r.id = b.source_registration_id) AS locale,
+            to_char(b.cancelled_at, 'YYYY-MM-DD') AS cancelled_at,
             at.name_de AS acc_de, at.name_en AS acc_en,
             to_char(b.accommodation_from, 'YYYY-MM-DD') AS accommodation_from,
             to_char(b.accommodation_to, 'YYYY-MM-DD') AS accommodation_to,
@@ -116,16 +137,18 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     queryFirst<CourseRow & { level_code: string | null }>(
       `SELECT t.name, t.name_de, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date,
               to_char((SELECT max(end_date) FROM booking_periods WHERE booking_id = $1), 'YYYY-MM-DD') AS end_date,
-              i.session, i.schedule, t.lessons_per_week, bp.level_code
+              i.session, i.schedule, t.lessons_per_week, bp.level_code,
+              coalesce(r.nickname, r.name) AS room_name, r.floor AS room_floor
          FROM booking_periods bp
          JOIN bookings b ON b.id = bp.booking_id
          LEFT JOIN course_instances i ON i.id = bp.course_instance_id
+         LEFT JOIN rooms r ON r.id = i.room_id
          LEFT JOIN course_types t ON t.id = coalesce(i.course_type_id, b.course_type_id)
         WHERE bp.booking_id = $1
         ORDER BY bp.start_date LIMIT 1`,
       [bookingId]
     ),
-    query<{ description: string; amount: string }>(`SELECT description, amount FROM booking_charges WHERE booking_id = $1 ORDER BY created_at`, [bookingId]),
+    query<{ kind: string; description: string; amount: string }>(`SELECT kind::text AS kind, description, amount FROM booking_charges WHERE booking_id = $1 ORDER BY created_at`, [bookingId]),
     query<{ id: string; received_at: string; method: string; amount: string; subject: string }>(
       `SELECT id, to_char(received_at, 'YYYY-MM-DD') AS received_at, method, amount, subject
          FROM payments WHERE booking_id = $1 AND voided_at IS NULL ORDER BY received_at, created_at`,
@@ -146,13 +169,15 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
       booking.acc_en && booking.accommodation_from
         ? { name: { de: booking.acc_de || booking.acc_en, en: booking.acc_en }, from: booking.accommodation_from, to: booking.accommodation_to }
         : null,
-    charges: charges.map((c) => ({ description: c.description, amount: Number(c.amount) })),
+    charges: charges.map((c) => ({ kind: c.kind, description: c.description, amount: Number(c.amount) })),
     payments: payments.map((p) => ({ id: p.id, date: p.received_at, method: p.method, amount: Number(p.amount), subject: p.subject })),
     charged,
     paid,
     visaRequired: booking.visa_required,
     followUp: booking.earlier,
     downPayment: booking.down_payment === null ? null : Number(booking.down_payment),
+    status: booking.status as 'reserved' | 'confirmed' | 'completed' | 'cancelled',
+    cancelledAt: booking.cancelled_at,
     staff,
   };
 }
@@ -174,6 +199,8 @@ export async function waitlistLetterContext(entryId: string): Promise<WaitlistLe
             (SELECT r.locale FROM course_registrations r WHERE r.id = w.registration_id) AS locale,
             t.name, t.name_de, to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date,
             i.session, i.schedule, t.lessons_per_week,
+            (SELECT coalesce(r.nickname, r.name) FROM rooms r WHERE r.id = i.room_id) AS room_name,
+            (SELECT r.floor FROM rooms r WHERE r.id = i.room_id) AS room_floor,
             CASE WHEN w.status IN ('waiting', 'offered') THEN (
               SELECT count(*)::int FROM waitlist_entries o
                WHERE o.course_instance_id = w.course_instance_id AND o.level_code = w.level_code AND o.status IN ('waiting', 'offered')

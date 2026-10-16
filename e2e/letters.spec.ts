@@ -42,7 +42,7 @@ test.describe('letters', () => {
            FROM course_types WHERE slug = 'intensive-german' RETURNING id`
       )
     ).rows[0].id;
-    personId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, salutation, created_by) VALUES ('Lea', 'Brieftest', 'ms', 'e2e') RETURNING id`)).rows[0].id;
+    personId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, salutation, birth_date, created_by) VALUES ('Lea', 'Brieftest', 'ms', '1999-05-02', 'e2e') RETURNING id`)).rows[0].id;
     await client.query(`INSERT INTO emails (person_id, address, normalized, kind, is_primary) VALUES ($1, 'lea@example.com', 'lea@example.com', 'personal', true)`, [personId]);
     await client.query(`INSERT INTO addresses (person_id, kind, street, postcode, city, country_code) VALUES ($1, 'home', 'Hauptstraße 1', '10115', 'Berlin', 'DE')`, [personId]);
     bookingId = (await client.query<{ id: string }>(`INSERT INTO bookings (person_id, status, course_type_id) VALUES ($1, 'confirmed', '10000000-0000-4000-8000-000000000001') RETURNING id`, [personId])).rows[0].id;
@@ -100,6 +100,19 @@ test.describe('letters', () => {
     await page.goto(`/admin/bookings/${bookingId}`);
     const letters = page.getByRole('heading', { name: 'Briefe' }).locator('xpath=ancestor::section[1]');
     await expect(letters).toContainText('Buchungsbestätigung');
+  });
+
+  test('the letter for the embassy waits for full payment; a reminder goes out', async ({ page }) => {
+    await page.goto(`/admin/bookings/${bookingId}/letter?kind=visa`);
+    await expect(page.getByRole('status')).toContainText('Erst nach vollständiger Zahlung');
+    await expect(page.getByRole('button', { name: 'Als gesendet speichern' })).toBeDisabled();
+
+    await page.getByRole('link', { name: 'Zahlungserinnerung' }).click();
+    await expect(page.locator('article').first()).toContainText(/Für deine Buchung ist noch ein Betrag von 740,00\s€ offen/);
+    await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
+    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1 ORDER BY sent_at`, [bookingId]);
+    expect(rows.map((r) => r.kind)).toEqual(['booking_confirmation', 'payment_reminder']);
   });
 
   test('"a place is free" holds the place for the learner', async ({ page }) => {

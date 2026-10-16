@@ -62,7 +62,8 @@ export function LetterSheet({
           {letter.subject.tail ? ` · ${letter.subject.tail}` : null}
         </p>
 
-        <div className={s.para}>{as(slots.salutation, letter.salutation)}</div>
+        {/* A letter to an authority (the embassy, a certificate) has no salutation of its own. */}
+        {letter.salutation || slots.salutation ? <div className={s.para}>{as(slots.salutation, letter.salutation)}</div> : null}
 
         {letter.body.map((part, i) => {
           if (part.type === 'text') {

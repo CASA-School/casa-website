@@ -14,18 +14,30 @@
 /** Bump when the shape changes, and teach `readLetter` the old one. */
 export const LETTER_SCHEMA = 1;
 
-export const LETTER_KINDS = [
-  'offer',
+/** A booking's letters (0032, 0034), in the order the letter page offers them. */
+export const BOOKING_LETTER_KINDS = [
   'booking_confirmation',
   'payment_receipt',
+  'payment_reminder',
+  'payments_overview',
+  'visa_letter',
+  'showup_first_call',
+  'showup_last_call',
+  'missing_items',
+  'course_start',
+  'enrolment_certificate',
+  'cancellation_confirmation',
+] as const;
+
+export const LETTER_KINDS = [
+  'offer',
+  ...BOOKING_LETTER_KINDS,
   'waitlist_confirmation',
   'waitlist_place_free',
   'waitlist_no_place',
 ] as const;
 export type LetterKind = (typeof LETTER_KINDS)[number];
 
-/** A booking's letters and the waiting list's (0032). */
-export const BOOKING_LETTER_KINDS = ['booking_confirmation', 'payment_receipt'] as const;
 export type BookingLetterKind = (typeof BOOKING_LETTER_KINDS)[number];
 export const WAITLIST_LETTER_KINDS = ['waitlist_confirmation', 'waitlist_place_free', 'waitlist_no_place'] as const;
 export type WaitlistLetterKind = (typeof WAITLIST_LETTER_KINDS)[number];

@@ -38,6 +38,8 @@ import { listCourseTypes } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
 import { levelCodes } from '@/lib/admin/waitlist';
+import { teachingWeeks } from '@/lib/admin/offers/course';
+import { toDateInputValue } from '@/lib/dates';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
 import { pick } from '@/lib/admin/i18n';
@@ -131,13 +133,8 @@ export default async function BookingPage({
   const carriesOver = targets.length > 0;
 
 
-  const weeks =
-    booking.startDate && booking.endDate
-      ? Math.round(
-          (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime() + 86_400_000) /
-            (7 * 86_400_000)
-        )
-      : null;
+  // Teaching weeks: the school's closures (the Christmas break) are not weeks of the course.
+  const weeks = booking.startDate && booking.endDate ? teachingWeeks(toDateInputValue(booking.startDate), toDateInputValue(booking.endDate)) : null;
   const stay = booking.accommodation;
   const removesCharges = canFull && open;
   // The record's own fields, those that have a value: when it was booked is
@@ -629,20 +626,10 @@ export default async function BookingPage({
             icon={Icon.mail}
             tint="blue"
             actions={
-              canEdit && booking.status !== 'cancelled' ? (
-                <span className="flex flex-wrap gap-1.5">
-                  <Link href={`/admin/bookings/${booking.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
-                    {t('Bestätigung', 'Confirmation')}
-                  </Link>
-                  {booking.payments.some((p) => !p.voidedAt) ? (
-                    <>
-                      <span className="text-[var(--casa-text-subtle)]">·</span>
-                      <Link href={`/admin/bookings/${booking.id}/letter?kind=receipt`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
-                        {t('Empfangsbestätigung', 'Receipt')}
-                      </Link>
-                    </>
-                  ) : null}
-                </span>
+              canEdit ? (
+                <Link href={`/admin/bookings/${booking.id}/letter${booking.status === 'cancelled' ? '?kind=cancellation' : ''}`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                  {t('Brief schreiben', 'Write a letter')}
+                </Link>
               ) : undefined
             }
           >

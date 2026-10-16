@@ -6,14 +6,8 @@ import { withTransaction } from '../db';
 import type { Bilingual } from '../i18n';
 
 import { bookingLetterContext, waitlistLetterContext } from './booking-context';
-import {
-  bookingConfirmationLetter,
-  LETTER_STANDARD_DEFAULTS,
-  paymentReceiptLetter,
-  waitlistLetter,
-  type LetterChoices,
-} from './booking-letters';
-import { issueLetter, nextLetterVersion, standardTexts } from './repo';
+import { bookingLetterBlock, buildBookingLetter, LETTER_STANDARD_DEFAULTS, waitlistLetter, type LetterChoices } from './booking-letters';
+import { issueLetter, lettersForBooking, nextLetterVersion, standardTexts } from './repo';
 import { subjectLine, type BookingLetterKind, type WaitlistLetterKind } from './types';
 
 /**
@@ -27,6 +21,8 @@ import { subjectLine, type BookingLetterKind, type WaitlistLetterKind } from './
 type Result = { ok: true; letterId: string } | { ok: false; reason: Bilingual };
 const refuse = (de: string, en: string): Result => ({ ok: false, reason: { de, en } });
 
+const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const todayIso = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -35,12 +31,15 @@ const todayIso = () => {
 export async function issueBookingLetter(bookingId: string, kind: BookingLetterKind, choices: LetterChoices, actor: StaffUser): Promise<Result> {
   const ctx = await bookingLetterContext(bookingId);
   if (!ctx) return refuse('Die Buchung gibt es nicht mehr.', 'The booking no longer exists.');
-  if (kind === 'payment_receipt' && ctx.payments.length === 0) return refuse('Für diese Buchung ist noch keine Zahlung erfasst.', 'No payment is recorded on this booking yet.');
+  const sent = (await lettersForBooking(bookingId)).map((l) => ({ kind: l.kind, date: isoDay(l.sentAt) }));
+  // The same rules the letter page shows, checked again: a form can be sent without the page.
+  const blocked = bookingLetterBlock(kind, ctx, { today: todayIso(), version: 1, sent });
+  if (blocked) return { ok: false, reason: blocked };
+  if (kind === 'missing_items' && !choices.items?.length) return refuse('Bitte wähle mindestens eine Angabe.', 'Choose at least one detail.');
   const standard = (await standardTexts(kind, LETTER_STANDARD_DEFAULTS[kind]))[choices.language];
   const result = await withTransaction(async (client) => {
     const version = await nextLetterVersion(client, kind, { bookingId });
-    const meta = { today: todayIso(), version };
-    const letter = kind === 'booking_confirmation' ? bookingConfirmationLetter(ctx, choices, standard, meta) : paymentReceiptLetter(ctx, choices, standard, meta);
+    const letter = buildBookingLetter(kind, ctx, choices, standard, { today: todayIso(), version, sent });
     const id = await issueLetter(
       client,
       {
