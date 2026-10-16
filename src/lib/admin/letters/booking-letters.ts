@@ -52,6 +52,8 @@ export type LetterCourse = {
 
 export type BookingLetterContext = {
   bookingId: string;
+  /** "B-2026-0042": on the letter, and the reference for a transfer. */
+  number: string;
   /** The language the learner registered in, where they did through the website. */
   language: LetterLanguage;
   person: LetterPerson;
@@ -164,7 +166,8 @@ export const LETTER_STANDARD_DEFAULTS: Record<BookingLetterKind | WaitlistLetter
 
 const W = {
   de: {
-    confirmation: 'Bestätigung der Buchung',
+    confirmation: (n: string) => `Bestätigung der Buchung Nr. ${n}`,
+    bookingNo: (n: string) => `Buchung Nr. ${n}`,
     receipt: 'Empfangsbestätigung',
     waitlist: 'Warteliste',
     placeFree: 'Gute Nachrichten: ein Platz ist frei',
@@ -185,7 +188,7 @@ const W = {
     rest: (amount: string, by: string) => `Bitte überweise den offenen Betrag von ${amount} bis zum ${by}.`,
     visa: (amount: string, by: string) =>
       `Für die verbindliche Reservierung deines Kursplatzes und deinen Visumantrag überweise bitte den Gesamtbetrag von ${amount} bis zum ${by}. Sobald deine Zahlung da ist, schicken wir dir eine eigene Bestätigung für die Botschaft.`,
-    reference: (who: string, start: string) => `Verwendungszweck: ${who}, Kursbeginn ${start}. Unsere Bankverbindung steht unten auf diesem Brief.`,
+    reference: (number: string, who: string) => `Verwendungszweck: ${number}, ${who}. Unsere Bankverbindung steht unten auf diesem Brief.`,
     receivedRow: 'Erhalten',
     inWords: (words: string) => `In Worten: ${words}`,
     bookingTotal: 'Gesamtbetrag der Buchung',
@@ -197,7 +200,8 @@ const W = {
     days: { Mon: 'Mo', Tue: 'Di', Wed: 'Mi', Thu: 'Do', Fri: 'Fr', Sat: 'Sa', Sun: 'So' } as Record<string, string>,
   },
   en: {
-    confirmation: 'Confirmation of booking',
+    confirmation: (n: string) => `Confirmation of booking no. ${n}`,
+    bookingNo: (n: string) => `booking no. ${n}`,
     receipt: 'Receipt',
     waitlist: 'Waiting list',
     placeFree: 'Good news: a place is free',
@@ -218,7 +222,7 @@ const W = {
     rest: (amount: string, by: string) => `Please transfer the outstanding ${amount} by ${by}.`,
     visa: (amount: string, by: string) =>
       `To reserve your place and for your visa application, please transfer the total of ${amount} by ${by}. As soon as your payment arrives, we will send you a separate confirmation for the embassy.`,
-    reference: (who: string, start: string) => `Payment reference: ${who}, course start ${start}. Our bank details are at the foot of this letter.`,
+    reference: (number: string, who: string) => `Payment reference: ${number}, ${who}. Our bank details are at the foot of this letter.`,
     receivedRow: 'Received',
     inWords: (words: string) => `In words: ${words}`,
     bookingTotal: 'Total of the booking',
@@ -361,13 +365,8 @@ export function bookingConfirmationLetter(
   }
   const payment = paymentSentence(ctx, lang, meta.today);
   body.push(text(choices, 'payment', payment, true));
-  if (balance > 0.005 && ctx.course) {
-    body.push({
-      type: 'text',
-      slot: null,
-      text: w.reference([ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' '), formatLetterDate(ctx.course.startDate, lang)),
-      strong: false,
-    });
+  if (balance > 0.005) {
+    body.push({ type: 'text', slot: null, text: w.reference(ctx.number, [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' ')), strong: false });
   }
   body.push(text(choices, 'note', ''));
   body.push(text(choices, 'closing', standard.closing));
@@ -378,7 +377,7 @@ export function bookingConfirmationLetter(
     ctx.staff,
     choices,
     meta.today,
-    { lead: w.confirmation, title: ctx.course ? courseTitle(ctx.course, lang) : '', tail: meta.version > 1 ? w.version(meta.version) : null },
+    { lead: w.confirmation(ctx.number), title: ctx.course ? courseTitle(ctx.course, lang) : '', tail: meta.version > 1 ? w.version(meta.version) : null },
     body
   );
 }
@@ -415,7 +414,7 @@ export function paymentReceiptLetter(
     ctx.staff,
     choices,
     meta.today,
-    { lead: w.receipt, title: [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' '), tail: ctx.course ? courseTitle(ctx.course, lang) : null },
+    { lead: w.receipt, title: [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' '), tail: w.bookingNo(ctx.number) },
     body
   );
 }

@@ -141,10 +141,10 @@ export async function searchWorkspace(
 
   if (holds('bookings')) {
     runs.push(
-      query<{ id: string; first_name: string; last_name: string | null; course: string | null; status: string }>(
-        `SELECT b.id, p.first_name, p.last_name, t.name AS course, b.status::text AS status
+      query<{ id: string; first_name: string; last_name: string | null; course: string | null; status: string; number: string }>(
+        `SELECT b.id, p.first_name, p.last_name, t.name AS course, b.status::text AS status, b.number
            FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
-          WHERE b.deleted_at IS NULL AND lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
+          WHERE b.deleted_at IS NULL AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1 OR lower(b.number) LIKE $1)
           ORDER BY b.updated_at DESC LIMIT ${LIMIT}`,
         [like]
       ).then((rows) =>
@@ -152,7 +152,7 @@ export async function searchWorkspace(
           kind: 'booking' as const,
           id: r.id,
           title: name(r.first_name, r.last_name),
-          detail: [r.course, status[r.status] ?? r.status].filter(Boolean).join(' · '),
+          detail: [r.number, r.course, status[r.status] ?? r.status].filter(Boolean).join(' · '),
           href: `/admin/bookings/${r.id}`,
         }))
       )

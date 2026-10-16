@@ -39,6 +39,7 @@ const course = {
 };
 const base: BookingLetterContext = {
   bookingId: 'b',
+  number: 'B-2026-0042',
   language: 'de',
   person,
   course,
@@ -79,7 +80,13 @@ describe('paymentSentence', () => {
 describe('bookingConfirmationLetter', () => {
   it('names the course with its days and times, the costs, what came in and what is open', () => {
     const letter = bookingConfirmationLetter({ ...base, paid: 200, payments: [{ id: 'x', date: '2026-10-10', method: 'card', amount: 200, subject: 'Anzahlung' }] }, de, LETTER_STANDARD_DEFAULTS.booking_confirmation.de, { today, version: 1 });
-    expect(letter.subject).toEqual({ lead: 'Bestätigung der Buchung', title: 'Intensivkurs B1.1', tail: null });
+    expect(letter.subject).toEqual({ lead: 'Bestätigung der Buchung Nr. B-2026-0042', title: 'Intensivkurs B1.1', tail: null });
+    expect(letter.body).toContainEqual({
+      type: 'text',
+      slot: null,
+      text: 'Verwendungszweck: B-2026-0042, Lucía Fernández. Unsere Bankverbindung steht unten auf diesem Brief.',
+      strong: false,
+    });
     expect(letter.salutation).toBe('Liebe Lucía,');
     expect(letter.recipient).toEqual(['Lucía Fernández', 'Calle Mayor 3', '46001 Valencia', 'Spanien']);
     const heading = letter.body.find((p) => p.type === 'heading');

@@ -958,6 +958,17 @@ are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
     colour as a pill; a lifecycle badge only for Reserviert and Abgeschlossen.
     A cancelled booking's leftover is not shown as owed.
 
+    **Booking numbers (2026-10-16, migration 0033).** Rahman: "give bookings
+    their own numbers". „B-2026-0042": the year a booking was made and a running
+    number in that year, like an offer's 2026-014 with a B so the two never read
+    alike, and unlike SchoolMan's „1 | 23456 | 26" so the two systems' numbers
+    cannot be confused while both run. A trigger hands it out on insert under an
+    advisory lock (`assign_booking_number`), so every booking has one however it
+    is made; `bookings.number` is the formatted, generated column. It stands
+    beside the course on the booking's page, in the list's rows, on the
+    learner's page, in the carry-over choices and in the letters, where it is the
+    payment reference; the bookings list and the search find a booking by it.
+
     **Carry-over (2026-10-16, migration 0030).** A booking that holds a credit —
     paid over, or what is left of a cancelled one — says „… Guthaben" in its
     head pill and offers „Guthaben übertragen" (the payments card's primary

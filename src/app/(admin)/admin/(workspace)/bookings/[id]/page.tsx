@@ -269,6 +269,8 @@ export default async function BookingPage({
               {booking.courseTypeName ?? t('Buchung', 'Booking')}
               {single?.levelCode ? <span className="font-medium text-[var(--casa-muted)]"> · {single.levelCode}</span> : null}
               {singleCohortTitle ? <span className="font-medium text-[var(--casa-muted)]"> · {singleCohortTitle}</span> : null}
+              {/* The number a learner writes on a transfer and finance matches payments by. */}
+              <span className="ml-2 text-[0.84rem] font-semibold text-[var(--casa-muted)] tabular-nums">{booking.number}</span>
             </span>
             <MetaLine>
               <MetaItem icon={Icon.calendar}>

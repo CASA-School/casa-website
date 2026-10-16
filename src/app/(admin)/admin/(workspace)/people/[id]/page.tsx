@@ -222,7 +222,7 @@ export default async function PersonPage({
         key: `booking-${b.id}`,
         kind: 'booking',
         title: b.courseTypeName ?? t('Buchung', 'Booking'),
-        detail: b.startDate && b.endDate ? dayRange(toDateInputValue(b.startDate), toDateInputValue(b.endDate), lang) : t('Keine Daten', 'No dates'),
+        detail: [b.number, b.startDate && b.endDate ? dayRange(toDateInputValue(b.startDate), toDateInputValue(b.endDate), lang) : t('Keine Daten', 'No dates')].join(' · '),
         at: b.createdAt,
         href: `/admin/bookings/${b.id}`,
         open: b.status === 'reserved' || b.status === 'confirmed' || balance > 0,

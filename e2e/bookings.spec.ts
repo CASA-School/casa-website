@@ -88,6 +88,13 @@ test.describe('booking colours', () => {
     await expect(light).toContainText('Niveau');
     await expect(page.getByText('hat die Buchung unter Beobachtung gestellt')).toBeVisible();
 
+    // Found by its number, which stands beside the course.
+    const number = (await client.query<{ number: string }>(`SELECT number FROM bookings WHERE id = $1`, [bookingId])).rows[0].number;
+    expect(number).toMatch(/^B-\d{4}-\d{4}$/);
+    await expect(page.getByText(number)).toBeVisible();
+    await page.goto(`/admin/bookings?filter=all&q=${encodeURIComponent(number)}`);
+    await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toBeVisible();
+
     await page.goto('/admin/bookings?filter=watch');
     await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toContainText('Niveau');
 

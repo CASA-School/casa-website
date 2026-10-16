@@ -81,6 +81,7 @@ async function signers(): Promise<{ id: string; name: string }[]> {
 export async function bookingLetterContext(bookingId: string): Promise<BookingLetterContext | null> {
   const booking = await queryFirst<{
     id: string;
+    number: string;
     person_id: string;
     status: string;
     visa_required: boolean;
@@ -93,7 +94,7 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     earlier: boolean;
     locale: string | null;
   }>(
-    `SELECT b.id, b.person_id, b.status::text AS status, b.visa_required, b.payer, t.down_payment,
+    `SELECT b.id, b.number, b.person_id, b.status::text AS status, b.visa_required, b.payer, t.down_payment,
             (SELECT r.locale FROM course_registrations r WHERE r.id = b.source_registration_id) AS locale,
             at.name_de AS acc_de, at.name_en AS acc_en,
             to_char(b.accommodation_from, 'YYYY-MM-DD') AS accommodation_from,
@@ -137,6 +138,7 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
   const paid = payments.reduce((sum, p) => sum + Number(p.amount), 0);
   return {
     bookingId: booking.id,
+    number: booking.number,
     language: booking.locale === 'en' ? 'en' : 'de',
     person,
     course: course?.name ? toCourse(course, course.level_code) : null,

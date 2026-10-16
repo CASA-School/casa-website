@@ -174,7 +174,7 @@ export default async function BookingsPage({
                       <span className="md:hidden">
                         <BookingLightDot light={light} label={lightLabel} />
                       </span>
-                      <RecordName name={b.personName} about={about || undefined} />
+                      <RecordName name={b.personName} reference={b.number} about={about || undefined} />
                     </span>
                   </Cell>
                   <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b, lang)}</Cell>

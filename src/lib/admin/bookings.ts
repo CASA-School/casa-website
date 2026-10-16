@@ -143,6 +143,8 @@ export const storedWords = (value: string, lang: WsLang): string => {
 
 export type BookingListItem = {
   id: string;
+  /** "B-2026-0042": the year it was booked and a running number (0033). */
+  number: string;
   personId: string;
   personName: string;
   courseTypeName: string | null;
@@ -216,7 +218,7 @@ export type BookingDetail = BookingListItem & {
 };
 
 const LIST = `
-  SELECT b.id, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
+  SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
          t.name AS course_type_name, b.status::text AS status, b.currency, b.created_at,
          b.observation_reason, b.observation_note,
          (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = b.id) AS start_date,
@@ -230,6 +232,7 @@ const LIST = `
 
 type ListRow = {
   id: string;
+  number: string;
   person_id: string;
   person_name: string;
   course_type_name: string | null;
@@ -246,6 +249,7 @@ type ListRow = {
 
 const toItem = (r: ListRow): BookingListItem => ({
   id: r.id,
+  number: r.number,
   personId: r.person_id,
   personName: r.person_name,
   courseTypeName: r.course_type_name,
@@ -293,7 +297,7 @@ export async function listBookings({
   let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})`;
   if (search) {
     params.push(`%${search}%`);
-    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR t.name ILIKE $1)`;
+    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR t.name ILIKE $1 OR b.number ILIKE $1)`;
   }
   const total = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id ${where}`,

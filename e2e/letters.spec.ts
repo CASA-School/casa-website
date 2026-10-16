@@ -85,7 +85,8 @@ test.describe('letters', () => {
   test('a booking confirmation, written from the booking and kept as sent', async ({ page }) => {
     await page.goto(`/admin/bookings/${bookingId}/letter`);
     const sheet = page.locator('article').first();
-    await expect(sheet).toContainText('Bestätigung der Buchung');
+    await expect(sheet).toContainText(/Bestätigung der Buchung Nr\. B-\d{4}-\d{4}/);
+    await expect(sheet).toContainText(/Verwendungszweck: B-\d{4}-\d{4}, Lea Brieftest/);
     await expect(sheet).toContainText('Liebe Lea,');
     await expect(sheet).toContainText('Hauptstraße 1');
     await expect(sheet).toContainText(/Bitte überweise den offenen Betrag von 740,00\s€/);

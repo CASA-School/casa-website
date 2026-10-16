@@ -102,11 +102,13 @@ standard texts (save as standard: `bookings` at `full`); the sentences built fro
 pay, a place in the queue, the next start — are changed for one letter; a note can be added; the
 language follows the learner's website registration, else German.
 
-**Open:** bookings have no number yet, so the payment reference is the name and the course start —
-finance matches transfers by SchoolMan's booking number today, and a booking number is worth
-deciding before letters go out from here in volume. The terms (§5.2) name a 100 € down payment for
-the course; the catalogue's `down_payment` says 200 € for intensive courses: the letters use the
-catalogue's figure, and one of the two needs correcting.
+**Booking numbers (0033).** A booking's number — „B-2026-0042", the year it was made and a running
+number — is in the confirmation's subject and the receipt's, and is the payment reference
+(„Verwendungszweck: B-2026-0042, Lucía Fernández").
+
+**Open:** the terms (§5.2) name a 100 € down payment for the course; the catalogue's
+`down_payment` says 200 € for intensive courses: the letters use the catalogue's figure, and one of
+the two needs correcting.
 
 ## Adding a kind of letter
 

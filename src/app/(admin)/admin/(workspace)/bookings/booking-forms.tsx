@@ -321,6 +321,7 @@ export async function CarryOverForm({
     const to = toDateInputValue(b.endDate);
     const open = b.charged - b.paid;
     return [
+      b.number,
       b.courseTypeName ?? t('Buchung', 'Booking'),
       from && to ? dayRange(from, to, lang) : null,
       open > 0.005 ? t(`${euros(open)} offen`, `${euros(open)} open`) : null,
