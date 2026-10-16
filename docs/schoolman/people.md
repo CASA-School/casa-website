@@ -70,10 +70,30 @@ enquire again, a colleague opens them, a booking needs them — and the bridge r
 What our side lacks for that: an **`addresses`** table (we have none), the **`Flag` → ISO** country
 mapping (matched on the German name; 72 deleted ids flagged), and whichever extra facts are decided.
 
-## Questions
+## Decided (Rahman, 2026-10-16)
 
-1. **Which facts about a learner** does the workspace keep: mother tongue, place and country of
-   birth, occupation, a birth year when the date is unknown, passport number (visa letters use it)?
-2. **Staff HR numbers and bank accounts** stay out of the learner register — agree?
-3. **Duplicates** — 501 probable duplicate people (LESSONS §1.2). When the bridge meets one, the
-   workspace's duplicate check asks a colleague, as it does for new enquiries — agree?
+1. **All learner information comes along** — mother tongue, place and country of birth, occupation,
+   passport number, a birth year where the date is unknown — because some of it is required for telc
+   exam registration. The workspace's `people` gains the columns for it.
+2. **Staff tax, pension and health-insurance numbers, and bank accounts, come along too — with
+   restricted access**: only the people whose work needs them (finance, management) see them, not the
+   whole team. They live apart from the learner's everyday fields, under their own module right.
+
+## Duplicates *(live, 2026-10-16)*
+
+A **duplicate** here is two `Person` records for the same human — not an extension. An extension is
+another booking on the **same** person record, which is the normal case: 4,170 learners have two or
+more bookings that way. Matched on the same first name, surname and birth date (accents and spaces
+ignored), there are **275 groups with 562 person records**:
+
+| What the records hold | Groups |
+| --- | ---: |
+| One has bookings; the person enquired again and got a new record | 96 |
+| Two or more each have bookings — a later booking was made on a new record instead of extending the old one | 74 |
+| One has bookings, the other has nothing | 41 |
+| Enquiries only, or nothing at all | 64 |
+
+And one person id is used by two records. (`docs/FILEMAKER_LESSONS.md` counted 501 with a looser
+match.) *Proposal:* when the bridge brings a person across and finds a second record for the same
+human, a colleague confirms that they are one; both FileMaker records are then linked to the one
+workspace person (`filemaker_links`), and both histories are kept.

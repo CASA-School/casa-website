@@ -188,8 +188,18 @@ and the learner's standing is a separate call (`bookings.md`).
 
 Attendance and time sheets are recorded in the Klassenbuch (`klassenbuch.md`).
 
-Still open; each page ends with its own:
+Answered (Rahman, 2026-10-16): all learner information comes along (some is needed for telc); staff
+HR numbers and bank accounts too, with restricted access; the learner statuses Runner, Rookie,
+LastDance, Unicorn are not important; the waiting list is a queue per course and the signal for a
+second course; the placement test matters, progress tests are the Klassenbuch's; learning agreements
+move into the Klassenbuch; carry-over of a credit between bookings is needed. Decided from the data:
+`DateRent` is accommodation reserved for group visits; duplicates are second person records, not
+extensions (`people.md`).
+
+Still open:
 
 1. Receipts, confirmations and missing-information letters are about half of all letters — build those
    first (`letters-and-history.md`)?
-2. What finance exports to DATEV today (Rahman asks finance, `money.md`).
+2. What finance exports to DATEV — later, with finance (`money.md`).
+3. The plain-text passwords in SchoolMan — Rahman and the team decide what to change (`letters-and-history.md`,
+   `organisations.md`).

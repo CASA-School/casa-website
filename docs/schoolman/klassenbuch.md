@@ -52,6 +52,12 @@ the final note.
   every save at the moment it is made.
 - The app's own database moves to Postgres last, after the switch.
 
+## A bridge to the Klassenbuch (planned)
+
+Rahman, 2026-10-16: a direct bridge between the workspace and the Klassenbuch comes "at some point".
+It brings the progress tests and the learning agreements (which teachers will create in the
+Klassenbuch instead of on paper) onto the learner's page in the workspace.
+
 ## What it means for the workspace
 
 - Attendance, lesson content, marks and time sheets are **the Klassenbuch's job**. The workspace

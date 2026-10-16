@@ -9,7 +9,7 @@ Part of the SchoolMan study (`README.md`). Live and read-only, 2026-10-15: count
 | `Accommodation` | 142 | 18 | A host family, a CASA flat or another place to stay |
 | `Room` | 416 | 7 | A room in it (name 59%, bed and room type on a third) |
 | `DateAccommodation` | 2,465 | 510 | **A learner's stay**: dates, type, room, catering |
-| `DateRent` | 543 | 102 | A period a place is offered to CASA, with its min/max number of learners |
+| `DateRent` | 543 | 102 | A place reserved **for a group visit** for a period, with its min/max number of learners |
 | `StatementLandlord` | 752 | 136 | A letter to the host about a stay |
 | `AnimalAtHome` | 29 | 10 | A pet in a host family |
 | `SpecialAccommodation` | 36 | 0 | Special features — unused since 2011 |
@@ -49,7 +49,15 @@ website's host-family pages are content, not data. There are no host families, r
 - Host families hold personal data of people who are not learners; they come over only with their
   own module and a privacy decision.
 
-## Open questions for the team
+## Decided from the data
 
-1. Is `DateRent` still how a family's availability is recorded? (Natalia)
-2. Which of the stay's work lists does she use every week? (Natalia)
+**`DateRent` is accommodation reserved for group visits** (2026-10-16): each row is a host or flat for a
+period, with a minimum and maximum number of learners and a project title; 73% point at a group and
+37% at the group's offer; 247 were made since 2025, most by the accommodation colleague. It belongs
+with group visits and accommodation, not with a host family's general availability.
+
+**The work lists.** The stays screen has buttons that filter the list — new start, very new start, end,
+very end, staying after the end, CASA flats only, private only, only open ones. The workspace's stays
+list starts with the same views in plain words: *arriving soon*, *staying now*, *leaving soon*,
+*staying after their course*, *no place yet*, and a filter for CASA flats or host families. Natalia
+adjusts them when she sees them.

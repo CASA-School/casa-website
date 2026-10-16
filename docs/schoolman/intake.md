@@ -70,7 +70,15 @@ no waiting list yet, and offers have their own module.
   same person enquires again.
 - A test result is worth reading per learner (the level reached and the date), not the table.
 
-## Open questions for the team
+## The waiting list
 
-1. Is the waiting list still used the way the screen suggests (575 new this year)?
-2. Which test results matter later — the placement level only, or the progress tests too?
+When an upcoming course is full, the learner goes on its waiting list; when a place frees up, the next
+learner is taken from it; and when the list for a level is long, CASA opens a second course of the
+same level (Rahman, 2026-10-16). So the waiting list is both a queue per course and the signal for a
+parallel course — in the workspace it belongs with the course and with Kursplanung, ordered, with the
+date each learner joined it. 575 learners joined one in 2026.
+
+## Which tests matter
+
+The **placement test** matters — it decides the course at registration, and the workspace already has
+it. **Progress tests** are the Klassenbuch's; a direct bridge to the Klassenbuch will bring them later.

@@ -76,7 +76,12 @@ payouts.
   hard part. Rahman will ask finance what they export today; the aim is an **automated link between
   DATEV and the workspace** that saves finance the work, designed with them.
 
-## Open questions for the team
+## Carry-over
 
-1. What does finance export from SchoolMan to DATEV today, and how often?
-2. Is "carry-over" a payment or a transfer between bookings in the team's own words?
+When a booking is overpaid or carries a credit (*Guthaben*), the money is carried over to another
+booking (Rahman, 2026-10-16) — 4,836 payments are recorded that way. The workspace needs the same
+option: move a credit from one booking to another, recorded on both.
+
+## Open questions
+
+1. What finance exports to DATEV today — to discuss with finance later, not now.

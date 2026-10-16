@@ -76,8 +76,9 @@ What is **not** a fact but stored as one:
 
 The rest of the list (*storno*, *Undefined*) is not used. Whoever has the learner, or works on them,
 changes the status (Rahman, 2026-10-15): nobody owns it, and nothing records who changed it or why.
-`_ID_StatusBooking` is never filled. The learner's `_ID_StatusStudent` (Runner, Unicorn, LastDance,
-Rookie) is on 100%.
+`_ID_StatusBooking` is never filled. The learner's `_ID_StatusStudent` is on 100% and not important (Rahman): *Rookie* has just started,
+*Runner* is in a course now, *LastDance* is in their last course, *Unicorn* probably finished. The
+workspace can work it out from the bookings' dates.
 
 **The bookings at *???*, read against the money** *(live, 2026-10-16)* — 3,139, each compared with its
 own charges (`CostDetail`) and payments (`PaymentIn`):
@@ -119,7 +120,10 @@ The business line belongs on the course type, not in a table per line.
 - The booking that is running now is the one the team needs first; history can stay in SchoolMan
   until someone asks for it.
 
-## Open questions for the team
+## Learning agreements
 
-1. What do Runner, Unicorn, LastDance and Rookie mean?
-2. When is `Agreement` written (250 this year), and who reads it?
+A learning agreement (`Agreement`) is made when a learner has trouble in a course — the level is below
+the course's, they come late, they are often absent. Today the teacher writes it on paper, teacher and
+learner sign it, and someone in the office types it into SchoolMan and sends it (Rahman, 2026-10-16).
+**The plan:** the teacher creates it in the Klassenbuch and sends it to the learner; once the workspace
+has a bridge to the Klassenbuch, it shows the agreement on the learner's page (`klassenbuch.md`).

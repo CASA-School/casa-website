@@ -46,4 +46,5 @@ the teachers' side of it. Teachers' names and absences for planning are already 
 ## Open questions
 
 1. When working time moves, does the Klassenbuch keep the teachers' side and the workspace finance's?
-2. Staff tax, pension and health-insurance numbers sit on `Person` (`people.md`) — who may see them today?
+Decided: staff tax, pension and health-insurance numbers and bank accounts come along with restricted
+access — only the people whose work needs them (`people.md`).
