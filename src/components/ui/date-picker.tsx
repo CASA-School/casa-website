@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formControlClassName, formControlOpenClassName } from '@/components/forms/form-styles';
 import { cn } from '@/lib/utils';
@@ -101,6 +101,19 @@ export function DatePicker({
     return Array.from({ length: daysInMonth }, (_, i) => i + 1);
   }, [daysInMonth]);
 
+  // Escape closes the calendar and gives the focus back to its field.
+  const trigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setIsOpen(false);
+      trigger.current?.focus();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen]);
+
   const handlePrevMonth = () => {
     if (month === 0) {
       setMonth(11);
@@ -139,8 +152,10 @@ export function DatePicker({
   return (
     <div className="relative">
       <button
+        ref={trigger}
         id={id}
         type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         aria-describedby={ariaDescribedBy}
         data-invalid={hasError || undefined}

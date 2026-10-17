@@ -20,7 +20,7 @@ import { Badge, Button, Card, DateText, DetailList, RecordHeader } from '@/compo
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import {
-  BOOKING_LIGHT_LABELS,
+  bookingLightLabel,
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingLight,
@@ -34,6 +34,7 @@ import {
   PAYMENT_METHOD_LABELS,
   storedWords,
 } from '@/lib/admin/bookings';
+import { stayVocabulary } from '@/lib/admin/booking-offer';
 import { listCourseTypes } from '@/lib/admin/catalogue';
 import { EXAM_OUTCOME_LABELS, EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, overallOutcome } from '@/lib/admin/exam-parts';
 import { sittingsOf } from '@/lib/admin/exams';
@@ -127,7 +128,7 @@ export default async function BookingPage({
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
   const exam = booking.exam;
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
@@ -136,6 +137,7 @@ export default async function BookingPage({
     canEdit && !exam ? levelCodes() : Promise.resolve([]),
     lettersForBooking(booking.id),
     canEdit && exam && open ? sittingsOf(exam.examTypeId) : Promise.resolve([]),
+    canEdit && !exam && open ? stayVocabulary() : Promise.resolve(null),
   ]);
   const carriesOver = targets.length > 0;
   // The letter due now, from the booking and what was sent: the first thing the Briefe card offers.
@@ -161,7 +163,7 @@ export default async function BookingPage({
     <span className="flex items-center gap-2">
       {period.levelCode ? <span className="font-semibold">{period.levelCode}</span> : <span className="text-[var(--casa-text-subtle)]">—</span>}
       {canEdit && booking.status !== 'cancelled' ? (
-        <FormDialog trigger={period.levelCode ? t('Ändern', 'Change') : t('Festlegen', 'Set')} title={t('Niveau', 'Level')} size="sm" triggerVariant="ghost">
+        <FormDialog icon={Icon.bookings} tint="red" trigger={period.levelCode ? t('Ändern', 'Change') : t('Festlegen', 'Set')} title={t('Niveau', 'Level')} size="sm" triggerVariant="ghost">
           <PeriodLevelForm bookingId={booking.id} periodId={period.id} levelCode={period.levelCode} levels={levels} />
         </FormDialog>
       ) : null}
@@ -309,12 +311,15 @@ export default async function BookingPage({
           <>
             <BookingLightPill
               light={light}
-              label={pick(lang, BOOKING_LIGHT_LABELS[light])}
+              label={pick(lang, bookingLightLabel(booking))}
               detail={
                 light === 'watch'
                   ? reasonLabel
                   : light === 'unclear' && booking.balance > 0.005
-                    ? t(`${money(booking.balance, booking.currency)} offen`, `${money(booking.balance, booking.currency)} open`)
+                    ? // „Offen · 2.052,98 €", „Anzahlung erhalten · 1.852,98 € offen".
+                      booking.paid > 0.005
+                      ? t(`${money(booking.balance, booking.currency)} offen`, `${money(booking.balance, booking.currency)} open`)
+                      : money(booking.balance, booking.currency)
                     : credit > 0
                       ? t(`${money(credit, booking.currency)} Guthaben`, `${money(credit, booking.currency)} credit`)
                       : undefined
@@ -332,7 +337,8 @@ export default async function BookingPage({
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">
               {booking.courseTypeName ?? t('Buchung', 'Booking')}
               {exam && exam.parts !== 'full' ? <span className="font-medium text-[var(--casa-muted)]"> · {pick(lang, EXAM_PARTS_LABELS[exam.parts])}</span> : null}
-              {single?.levelCode ? <span className="font-medium text-[var(--casa-muted)]"> · {single.levelCode}</span> : null}
+              {/* How much of the level: „A2.1–A2.2" for a whole level, as the letters say it. */}
+              {booking.levelRange ? <span className="font-medium text-[var(--casa-muted)]"> · {booking.levelRange}</span> : null}
               {singleCohortTitle ? <span className="font-medium text-[var(--casa-muted)]"> · {singleCohortTitle}</span> : null}
               {/* The number a learner writes on a transfer and finance matches payments by. */}
               <span className="ml-2 text-[0.84rem] font-semibold text-[var(--casa-muted)] tabular-nums">{booking.number}</span>
@@ -363,7 +369,12 @@ export default async function BookingPage({
               )}
               {exam && !stay ? null : (
                 <MetaItem icon={Icon.rooms}>
-                  {stay ? [stay.typeName, stay.roomTypeName, stay.cateringName].filter(Boolean).join(' · ') : t('Keine Unterkunft', 'No accommodation')}
+                  {stay
+                    ? [stay.typeName, stay.roomTypeName, stay.cateringName]
+                        .filter((name) => name !== null)
+                        .map((name) => pick(lang, name))
+                        .join(' · ')
+                    : t('Keine Unterkunft', 'No accommodation')}
                 </MetaItem>
               )}
               <MetaItem icon={Icon.person}>
@@ -389,23 +400,23 @@ export default async function BookingPage({
                   </Button>
                 </form>
               ) : (
-                <FormDialog trigger={t('Beobachten', 'Observe')} title={t('Unter Beobachtung stellen', 'Put under observation')}>
+                <FormDialog icon={Icon.attention} tint="sun" trigger={t('Beobachten', 'Observe')} title={t('Unter Beobachtung stellen', 'Put under observation')}>
                   <ObservationForm bookingId={booking.id} />
                 </FormDialog>
               )
             ) : null}
             {canEdit && open && exam ? (
-              <FormDialog trigger={t('Termin ändern', 'Change sitting')} title={t('Termin und Teile', 'Sitting and parts')} size="sm">
+              <FormDialog icon={Icon.calendar} tint="red" trigger={t('Termin ändern', 'Change sitting')} title={t('Termin und Teile', 'Sitting and parts')} size="sm">
                 <ExamChangeForm booking={booking} sittings={sittings} />
               </FormDialog>
             ) : canEdit && open ? (
-              <FormDialog trigger={t('Verlängern', 'Extend')} title={t('Buchung verlängern', 'Extend the booking')}>
+              <FormDialog icon={Icon.calendar} tint="red" trigger={t('Verlängern', 'Extend')} title={t('Buchung verlängern', 'Extend the booking')}>
                 <ExtendBookingForm booking={booking} cohorts={cohorts} levels={levels} />
               </FormDialog>
             ) : null}
             {canEdit ? (
-              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Buchung bearbeiten', 'Edit the booking')}>
-                <EditBookingForm booking={booking} courseTypes={courseTypes} />
+              <FormDialog icon={Icon.bookings} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={t('Buchung bearbeiten', 'Edit the booking')}>
+                <EditBookingForm booking={booking} courseTypes={courseTypes} stays={stays} />
               </FormDialog>
             ) : null}
           </>
@@ -494,7 +505,7 @@ export default async function BookingPage({
             tint="red"
             actions={
               canEdit && open ? (
-                <FormDialog trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
+                <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
                   <ChargeForm bookingId={booking.id} />
                 </FormDialog>
               ) : undefined
@@ -572,7 +583,7 @@ export default async function BookingPage({
               canEdit && (open || carriesOver) ? (
                 <>
                   {carriesOver ? (
-                    <FormDialog
+                    <FormDialog icon={Icon.money} tint="green"
                       trigger={t('Guthaben übertragen', 'Carry credit over')}
                       title={t(`${money(credit, booking.currency)} Guthaben übertragen`, `Carry ${money(credit, booking.currency)} credit over`)}
                       size="sm"
@@ -582,7 +593,7 @@ export default async function BookingPage({
                     </FormDialog>
                   ) : null}
                   {open ? (
-                    <FormDialog
+                    <FormDialog icon={Icon.money} tint="green"
                       trigger={t('Zahlung erfassen', 'Record payment')}
                       title={t('Zahlung erfassen', 'Record a payment')}
                       size="sm"

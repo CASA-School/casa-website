@@ -133,7 +133,7 @@ function priceList(p: PublishedPrices): { def: FactDef; amount: number }[] {
     { def: { id: 'course.intensive-german.price-8-weeks', group: COURSE_GROUPS['intensive-german'], label: { de: 'Preis für 8 Wochen', en: 'Price for 8 weeks' }, source: 'Prices' }, amount: p.intensive8Weeks },
     { def: { id: 'course.special-courses.price-per-module', group: COURSE_GROUPS['special-courses'], label: { de: 'Preis eines Moduls', en: 'Price of a module' }, source: 'Prices' }, amount: p.specialModule },
     { def: { id: 'course.special-courses.price-per-evening', group: COURSE_GROUPS['special-courses'], label: { de: 'Preis pro Abend', en: 'Price per evening' }, source: 'Prices' }, amount: p.specialPerEvening },
-    { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: { de: 'Anmeldegebühr', en: 'Enrolment fee' }, source: 'Prices' }, amount: p.enrolmentFee },
+    { def: { id: 'course.enrolment-fee', group: 'Alle Kurse', label: { de: 'Einschreibegebühr', en: 'Enrolment fee' }, source: 'Prices' }, amount: p.enrolmentFee },
     { def: { id: 'exam.telc_b2.preparation-price', group: b2, label: { de: 'Vorbereitungskurs', en: 'Preparation course' }, source: 'Prices' }, amount: p.exams.telc_b2.prep },
     { def: { id: 'exam.telc_b2.part-fee', group: b2, label: { de: 'Gebühr für einen Teil', en: 'Fee for one part' }, source: 'Prices' }, amount: p.exams.telc_b2.part },
     { def: { id: 'exam.telc_c1_hochschule.preparation-price', group: c1, label: { de: 'Vorbereitungskurs', en: 'Preparation course' }, source: 'Prices' }, amount: p.exams.telc_c1_hochschule.prep },

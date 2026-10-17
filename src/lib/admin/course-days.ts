@@ -294,6 +294,8 @@ export type CourseDay = {
   note: string | null;
   /** On Kursplanung's board. */
   onBoard: boolean;
+  /** The day's teacher is away that day (`staff_absences`): the reason, as stored (Krank, Urlaub …). */
+  teacherAway: string | null;
 };
 
 const NAME = (alias: string) => `nullif(concat_ws(' ', ${alias}.first_name, ${alias}.last_name), '')`;
@@ -320,11 +322,13 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     merged: boolean;
     note: string | null;
     on_board: boolean;
+    teacher_away: string | null;
   }>(
     `SELECT d.id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, to_char(t.starts_at, 'HH24:MI') AS starts_at, to_char(t.ends_at, 'HH24:MI') AS ends_at,
             t.lessons, d.starts_at IS NOT NULL AS own_hours, d.teacher_id, ${NAME('tp')} AS teacher_name, ${NAME('rp')} AS replaced_teacher_name,
             d.is_substitute, d.is_tentative, d.room_id, coalesce(r.nickname, r.name) AS room_name, coalesce(rr.nickname, rr.name) AS replaced_room_name,
-            d.cancelled, d.cancel_reason, d.merged, d.note, d.group_id IS NOT NULL AS on_board
+            d.cancelled, d.cancel_reason, d.merged, d.note, d.group_id IS NOT NULL AS on_board,
+            (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) AS teacher_away
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id
        LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
@@ -355,6 +359,7 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     merged: r.merged,
     note: r.note,
     onBoard: r.on_board,
+    teacherAway: r.teacher_away,
   }));
 }
 

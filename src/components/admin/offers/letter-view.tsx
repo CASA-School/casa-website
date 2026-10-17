@@ -53,6 +53,7 @@ export function LetterView({
   canWrite,
   canDelete,
   canSetStandard,
+  bookHref,
   notice,
 }: {
   record: OfferRecord;
@@ -64,6 +65,8 @@ export function LetterView({
   canWrite: boolean;
   canDelete: boolean;
   canSetStandard: boolean;
+  /** An accepted offer to a learner: their booking wizard, at the offer's course. */
+  bookHref?: string | null;
   notice: { ok?: string; error?: string };
 }) {
   const { meta } = record;
@@ -289,6 +292,7 @@ export function LetterView({
             status={meta.status}
             canWrite={canWrite}
             canDelete={canDelete}
+            bookHref={bookHref}
             send={
               writing
                 ? {

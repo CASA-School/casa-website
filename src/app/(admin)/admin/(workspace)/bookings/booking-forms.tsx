@@ -15,6 +15,8 @@ import {
   type CohortOption,
 } from '@/lib/admin/bookings';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
+import type { StayVocabulary } from '@/lib/admin/booking-offer';
+import { stayFor } from '@/lib/admin/booking-levels';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { toDateInputValue } from '@/lib/dates';
 import { DateFormField } from '@/components/admin/date-picker';
@@ -33,6 +35,7 @@ import {
   updateBookingAction,
 } from './actions';
 import { DialogFooter } from '@/components/admin/dialogs';
+import { PaymentAmountField, PaymentSubjectField } from './payment-fields';
 
 /**
  * The booking forms, rendered inside dialogs.
@@ -82,17 +85,35 @@ function PayerFields({
 export async function EditBookingForm({
   booking,
   courseTypes,
+  stays,
 }: {
   booking: BookingDetail;
   courseTypes: CourseTypeSummary[];
+  /** The accommodation vocabulary: a course booking's stay is changed here, its rent priced again. */
+  stays: StayVocabulary | null;
 }) {
   const { t, lang } = await getI18n();
+  // Once a period is on a course of a start, the course type is the start's: it is not changed here.
+  const typeLocked = booking.periods.some((p) => p.courseInstanceId);
+  const stay = booking.accommodation;
+  const editsStay = Boolean(stays) && !booking.exam && booking.status !== 'cancelled';
+  // A new stay starts around the course: the day before it, to the Saturday after.
+  const around = stayFor(toDateInputValue(booking.startDate) || null, toDateInputValue(booking.endDate) || null);
+  const stayFrom = stay ? toDateInputValue(stay.from) : (around?.from ?? '');
+  const stayTo = stay ? toDateInputValue(stay.to) : (around?.to ?? '');
   return (
     <form action={updateBookingAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={booking.id} />
       <div className="grid grid-cols-2 gap-3">
         {/* An exam booking has no course type: its exam and sitting change under "Termin ändern". */}
-        {booking.exam ? null : (
+        {booking.exam ? null : typeLocked ? (
+          <Field label={t('Kursart', 'Course type')} htmlFor="edit-type">
+            <input type="hidden" name="courseTypeId" value={booking.courseTypeId ?? ''} />
+            <Select id="edit-type" defaultValue={booking.courseTypeId ?? ''} disabled>
+              <option value={booking.courseTypeId ?? ''}>{booking.courseTypeName ?? '—'}</option>
+            </Select>
+          </Field>
+        ) : (
           <Field label={t('Kursart', 'Course type')} htmlFor="edit-type">
             <Select id="edit-type" name="courseTypeId" defaultValue={booking.courseTypeId ?? ''}>
               <option value="">—</option>
@@ -124,6 +145,53 @@ export async function EditBookingForm({
         />
         {t('Visum nötig', 'Visa required')}
       </label>
+      {editsStay && stays ? (
+        <>
+          <input type="hidden" name="stayFields" value="1" />
+          <Field label={t('Unterkunft', 'Accommodation')} htmlFor="edit-stay">
+            <Select id="edit-stay" name="accommodationTypeCode" defaultValue={stay?.typeCode ?? ''}>
+              <option value="">{t('Keine', 'None')}</option>
+              {stays.types
+                .filter((type) => type.bookable || type.code === stay?.typeCode)
+                .map((type) => (
+                  <option key={type.code} value={type.code}>
+                    {pick(lang, type.name)}
+                  </option>
+                ))}
+            </Select>
+          </Field>
+          <OptionalSection requires={['accommodationTypeCode']} heading={t('Zimmer, Verpflegung und Daten', 'Room, meals and dates')}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t('Zimmer', 'Room')} htmlFor="edit-stay-room">
+                <Select id="edit-stay-room" name="roomTypeCode" defaultValue={stay?.roomTypeCode ?? ''}>
+                  <option value="">{t('Nicht angegeben', 'Not specified')}</option>
+                  {stays.rooms.map((r) => (
+                    <option key={r.code} value={r.code}>
+                      {pick(lang, r.name)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label={t('Verpflegung', 'Catering')} htmlFor="edit-stay-catering">
+                <Select id="edit-stay-catering" name="cateringCode" defaultValue={stay?.cateringCode ?? ''}>
+                  <option value="">{t('Nicht angegeben', 'Not specified')}</option>
+                  {stays.catering.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {pick(lang, c.name)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label={t('Anreise', 'Arrival')} htmlFor="edit-stay-from">
+                <DateFormField id="edit-stay-from" name="accommodationFrom" defaultValue={stayFrom} />
+              </Field>
+              <Field label={t('Abreise', 'Departure')} htmlFor="edit-stay-to">
+                <DateFormField id="edit-stay-to" name="accommodationTo" defaultValue={stayTo} />
+              </Field>
+            </div>
+          </OptionalSection>
+        </>
+      ) : null}
       <Field label={t('Notizen', 'Notes')} htmlFor="edit-notes">
         <Textarea id="edit-notes" name="notes" rows={3} defaultValue={booking.notes ?? ''} />
       </Field>
@@ -255,16 +323,9 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
   return (
     <form action={recordPaymentAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={bookingId} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 items-start gap-3">
         <Field label={t('Betrag', 'Amount')} htmlFor="pay-amount">
-          <Input
-            id="pay-amount"
-            name="amount"
-            inputMode="decimal"
-            required
-            className="text-right"
-            defaultValue={balance > 0 ? balance.toFixed(2) : ''}
-          />
+          <PaymentAmountField id="pay-amount" open={balance} />
         </Field>
         <Field label={t('Zahlungsart', 'Method')} htmlFor="pay-method">
           <Select id="pay-method" name="method" defaultValue="transfer">
@@ -278,15 +339,7 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
           </Select>
         </Field>
       </div>
-      <Field label={t('Wofür', 'For')} htmlFor="pay-subject">
-        <Input
-          id="pay-subject"
-          name="subject"
-          required
-          maxLength={160}
-          defaultValue={pick(lang, CHARGE_KIND_LABELS.tuition)}
-        />
-      </Field>
+      <PaymentSubjectField />
       <More heading={t('Datum und Referenz', 'Date and reference')}>
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('Eingegangen am', 'Received on')} htmlFor="pay-date">

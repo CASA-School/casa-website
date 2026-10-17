@@ -114,9 +114,12 @@ export default async function WaitlistPage({ searchParams }: { searchParams: Pro
               // The course whose queue it is: a joiner waits on the running course of the start before.
               const group = groups.find((g) => g.courseId === queue.key);
               const free = group ? freePlaces(group) : 0;
-              const href = group
-                ? `/admin/catalogue/${group.courseInstanceId}?level=${encodeURIComponent(group.levelCode ?? group.courseId)}`
-                : `/admin/catalogue/${queue.items[0].courseInstanceId}`;
+              // A joiner's queue opens on the start they asked for, where the running course's card stands.
+              const first = queue.items[0];
+              const href =
+                group && group.courseInstanceId === first.courseInstanceId
+                  ? `/admin/catalogue/${group.courseInstanceId}?level=${encodeURIComponent(group.levelCode ?? group.courseId)}`
+                  : `/admin/catalogue/${first.courseInstanceId}?level=${encodeURIComponent(first.levelCode)}`;
               return [
                 <ListGroup
                   key={queue.key}
@@ -166,7 +169,7 @@ const EMPTY: Partial<Record<WaitlistView, Bilingual>> = {
 /** "Intensive German · Vormittag · 26. Okt. 2026 · B1.1" */
 function queueLabel(entry: WaitlistEntry, lang: WsLang): string {
   return [
-    entry.courseTypeName,
+    lang === 'de' ? entry.courseTypeNameDe : entry.courseTypeName,
     entry.session ? pick(lang, SESSION_LABELS[entry.session]) : null,
     new Date(entry.startDate).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' }),
     entry.levelCode,

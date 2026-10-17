@@ -33,9 +33,22 @@ export function teacherById(ctx: PlanContext, id: string): Teacher | undefined {
   return ctx.teachers.find((t) => t.id === id);
 }
 
-/** The dates a group teaches in a week: the first 5 (morning) or 4 (afternoon). */
-export function courseDays(group: Pick<CourseGroup, 'shift'>, week: PlanningWeek): readonly string[] {
-  return week.days.slice(0, SHIFT_INFO[group.shift].days);
+/** A shift's teaching days in a week: the first 5 (morning) or 4 (afternoon) — the rows of a column. */
+export function shiftDays(shift: CourseGroup['shift'], week: PlanningWeek): readonly string[] {
+  return week.days.slice(0, SHIFT_INFO[shift].days);
+}
+
+/** Whether a date lies inside the group's course; a group of no course has every day of its month. */
+export function inCourse(group: Pick<CourseGroup, 'courseStart' | 'courseEnd'>, date: string): boolean {
+  return (!group.courseStart || date >= group.courseStart) && (!group.courseEnd || date <= group.courseEnd);
+}
+
+/**
+ * The dates a group teaches in a week: its shift's days, inside its course — none before a start's
+ * first day or after its last, so the board offers no slot and the server takes none there.
+ */
+export function courseDays(group: Pick<CourseGroup, 'shift' | 'courseStart' | 'courseEnd'>, week: PlanningWeek): readonly string[] {
+  return shiftDays(group.shift, week).filter((d) => inCourse(group, d));
 }
 
 /** 0 for the first half of the week, 1 for the second — which of the pair holds it. */
@@ -90,6 +103,7 @@ export function remainingDays(ctx: PlanContext, teacher: Teacher, weekStart: str
 }
 
 export function fit(ctx: PlanContext, teacherId: string, group: CourseGroup, date: string): Fit {
+  if (!inCourse(group, date)) return { ok: false, reason: { de: 'außerhalb des Kurses', en: 'outside the course' } };
   const teacher = teacherById(ctx, teacherId);
   if (!teacher || !teacher.isActive) return { ok: false, reason: { de: 'nicht im Kollegium', en: 'not on the staff' } };
 

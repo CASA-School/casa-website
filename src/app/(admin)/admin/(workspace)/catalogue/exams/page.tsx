@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createSittingAction } from './actions';
 import { SittingForm } from './sitting-form';
 import { FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 
@@ -28,21 +29,31 @@ const STATUS_LABELS: Record<string, Bilingual> = {
  * seats sold is a decision — chase, or hand the seats back — and it is a
  * decision nobody can make from an inbox.
  *
- * The sittings group by month, as on Courses (docs/ADMIN_WORKSPACE.md §Lists).
- * The days left are named only when they are near (a month or less) and turn
- * amber in the last week; a status badge appears only for a sitting that is
- * not simply scheduled, and a level only when the exam's name does not
- * already say it.
+ * The sittings ahead group by month, as on Courses (docs/ADMIN_WORKSPACE.md
+ * §Lists); the last fortnight's follow under „Vorbei", outside the count of
+ * sittings ahead, which leaves out a cancelled one too. The days left are named
+ * only when they are near (a month or less) and turn amber in the last week; a
+ * status badge appears only for a sitting that is not simply scheduled, and a
+ * level only when the exam's name does not already say it.
  */
 export default async function ExamCataloguePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const [sessions, { t, lang }, user, { error }] = await Promise.all([listSittings(30), getI18n(), requireModule('catalogue'), searchParams]);
   // A new sitting (0038): `catalogue` at `edit`, starting from its exam's last one.
   const exams = canAccess(user, 'catalogue', 'edit') ? await sittingDefaults() : [];
-  const months = groupRuns(sessions, (session) => monthKey(session.startsAt));
   const today = new Date().setHours(0, 0, 0, 0);
+  const isPast = (session: (typeof sessions)[number]) => new Date(session.startsAt).getTime() < today;
+  // The sittings ahead by month; the last fortnight's, kept for their results, in a group of their own below.
+  const groups = [
+    ...groupRuns(
+      sessions.filter((session) => !isPast(session)),
+      (session) => monthKey(session.startsAt)
+    ).map((month) => ({ key: month.key, label: monthLabel(month.key, lang), items: month.items })),
+    ...(sessions.some(isPast) ? [{ key: 'past', label: t('Vorbei', 'Past'), items: sessions.filter(isPast) }] : []),
+  ];
   const subtle = 'text-[var(--casa-muted)]';
   const hide = 'hidden md:table-cell';
-  const ahead = sessions.filter((session) => new Date(session.startsAt).getTime() >= today);
+  // What is coming: not the past fortnight, and not a sitting called off.
+  const ahead = sessions.filter((session) => !isPast(session) && session.status !== 'cancelled');
   const nextDeadline = ahead
     .map((session) => (session.registrationDeadline ? new Date(session.registrationDeadline) : null))
     .find((deadline): deadline is Date => deadline !== null && deadline.setHours(0, 0, 0, 0) >= today);
@@ -54,7 +65,7 @@ export default async function ExamCataloguePage({ searchParams }: { searchParams
         title={t('Prüfungen', 'Exams')}
         actions={
           exams.length ? (
-            <FormDialog trigger={t('Neuer Termin', 'New sitting')} title={t('Neuer Prüfungstermin', 'New exam sitting')} triggerVariant="primary">
+            <FormDialog icon={Icon.calendar} tint="red" trigger={t('Neuer Termin', 'New sitting')} title={t('Neuer Prüfungstermin', 'New exam sitting')} triggerVariant="primary">
               <SittingForm action={createSittingAction} exams={exams} />
             </FormDialog>
           ) : null
@@ -92,9 +103,9 @@ export default async function ExamCataloguePage({ searchParams }: { searchParams
               { label: t('Teilnehmende', 'Candidates'), className: `w-[13rem] ${hide}` },
             ]}
           >
-            {months.flatMap((month) => [
-              <ListGroup key={month.key} label={monthLabel(month.key, lang)} count={month.items.length} span={4} />,
-              ...month.items.map((session) => {
+            {groups.flatMap((group) => [
+              <ListGroup key={group.key} label={group.label} count={group.items.length} span={4} />,
+              ...group.items.map((session) => {
                 const startsAt = new Date(session.startsAt);
                 const deadline = session.registrationDeadline ? new Date(session.registrationDeadline) : null;
                 const daysLeft = deadline
@@ -104,7 +115,7 @@ export default async function ExamCataloguePage({ searchParams }: { searchParams
                 const closed = daysLeft !== null && daysLeft < 0;
                 // Most exam names carry the level ("telc Deutsch B2"); say it only when not.
                 const level = session.level && !session.examName.includes(session.level) ? session.level : null;
-                // The last fortnight's sittings stay for what follows them (results, certificates), marked as past.
+                // The last fortnight's sittings stay for what follows them (results, certificates), greyed under „Vorbei".
                 const past = startsAt.getTime() < today;
 
                 return (
@@ -117,7 +128,6 @@ export default async function ExamCataloguePage({ searchParams }: { searchParams
                         >
                           {session.examName}
                         </Link>
-                        {past ? <Badge tone="quiet">{t('Vorbei', 'Past')}</Badge> : null}
                         {session.status !== 'scheduled' ? (
                           <Badge tone={session.status === 'cancelled' ? 'danger' : 'neutral'}>
                             {STATUS_LABELS[session.status]

@@ -90,7 +90,7 @@ const SELECT = `
          canonical_person_id(p.id) AS canonical_id,
          p.salutation::text AS salutation,
          p.first_name, p.last_name, p.birth_date,
-         p.nationality_code, c.name_en AS nationality_name, p.nationality_raw,
+         p.nationality_code, coalesce(c.name_de, c.name_en) AS nationality_name, p.nationality_raw,
          p.merged_into, p.created_by, p.created_at,
          cu.name AS created_by_name
     FROM people p
@@ -160,12 +160,12 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
       passport_number: string | null;
     }>(
       `SELECT p.second_last_name, p.nickname, p.birth_year, p.birth_place, p.birth_country_code,
-              c.name_en AS birth_country_name, p.mother_tongue, p.occupation, p.passport_number
+              coalesce(c.name_de, c.name_en) AS birth_country_name, p.mother_tongue, p.occupation, p.passport_number
          FROM people p LEFT JOIN countries c ON c.code = p.birth_country_code WHERE p.id = $1`,
       [row.id]
     ),
     query<{ kind: AddressKind; street: string | null; postcode: string | null; city: string | null; country_code: string | null; country_name: string | null }>(
-      `SELECT a.kind, a.street, a.postcode, a.city, a.country_code, c.name_en AS country_name
+      `SELECT a.kind, a.street, a.postcode, a.city, a.country_code, coalesce(c.name_de, c.name_en) AS country_name
          FROM addresses a LEFT JOIN countries c ON c.code = a.country_code
         WHERE a.person_id = $1 ORDER BY a.kind = 'local' DESC`,
       [row.id]
@@ -691,13 +691,14 @@ export type PersonInput = {
 
 export type AddressInput = { street: string | null; postcode: string | null; city: string | null; country: string | null };
 
-export type Country = { code: string; nameEn: string };
+/** A country as the workspace names it: German, the team's language, like the other vocabularies. */
+export type Country = { code: string; name: string };
 
 export async function listCountries(): Promise<Country[]> {
-  const rows = await query<{ code: string; name_en: string }>(
-    `SELECT code, name_en FROM countries ORDER BY name_en`
+  const rows = await query<{ code: string; name: string }>(
+    `SELECT code, coalesce(name_de, name_en) AS name FROM countries ORDER BY 2`
   );
-  return rows.map((r) => ({ code: r.code, nameEn: r.name_en }));
+  return rows.map((r) => ({ code: r.code, name: r.name }));
 }
 
 /**

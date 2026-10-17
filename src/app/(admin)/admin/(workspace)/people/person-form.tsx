@@ -76,7 +76,7 @@ export async function PersonForm({
         />
         <datalist id="person-countries">
           {countries.map((c) => (
-            <option key={c.code} value={c.nameEn} />
+            <option key={c.code} value={c.name} />
           ))}
         </datalist>
       </Field>
@@ -211,10 +211,10 @@ export async function AddressForm({
         </Field>
       </div>
       <Field label={t('Land', 'Country')} htmlFor={id('country')}>
-        <Input id={id('country')} name="country" list={id('countries')} maxLength={120} defaultValue={address?.countryName ?? (kind === 'local' ? 'Germany' : '')} />
+        <Input id={id('country')} name="country" list={id('countries')} maxLength={120} defaultValue={address?.countryName ?? (kind === 'local' ? 'Deutschland' : '')} />
         <datalist id={id('countries')}>
           {countries.map((c) => (
-            <option key={c.code} value={c.nameEn} />
+            <option key={c.code} value={c.name} />
           ))}
         </datalist>
       </Field>

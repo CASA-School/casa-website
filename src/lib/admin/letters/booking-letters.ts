@@ -24,6 +24,7 @@
 
 import { partsSat, type ExamOutcome, type ExamParts } from '../exam-parts';
 import { teachingWeeks } from '../offers/course';
+import { paymentSubject } from '../booking-levels';
 
 import { formatDateRange, formatLetterDate, formatMoney, letterhead, recipientLines, salutation, type Salutation } from './format';
 import {
@@ -99,7 +100,8 @@ export type BookingLetterContext = {
   /** An exam booking: the sitting instead of a course. */
   exam: LetterExam | null;
   accommodation: { name: Record<LetterLanguage, string>; from: string; to: string | null } | null;
-  charges: { kind: string; description: string; amount: number }[];
+  /** `names`: the line in both languages, where it can be traced to what it is (`chargeLineNames`); else its own words. */
+  charges: { kind: string; description: string; amount: number; names?: Record<LetterLanguage, string> | null }[];
   payments: { id: string; date: string; method: string; amount: number; subject: string }[];
   charged: number;
   paid: number;
@@ -162,7 +164,7 @@ export type LearnerBooking = {
   course: LetterCourse | null;
   exam: LetterExam | null;
   accommodation: BookingLetterContext['accommodation'];
-  charges: { description: string; amount: number }[];
+  charges: { description: string; amount: number; names?: Record<LetterLanguage, string> | null }[];
   charged: number;
   paid: number;
   visaRequired: boolean;
@@ -697,7 +699,7 @@ export function bookingConfirmationLetter(
   body.push({
     type: 'table',
     heading: w.costs,
-    rows: ctx.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })),
+    rows: ctx.charges.map((c) => ({ text: c.names?.[lang] ?? c.description, amount: money(c.amount), ref: null })),
     total: { label: w.total, amount: money(ctx.charged) },
   });
   if (ctx.paid > 0.005) {
@@ -741,7 +743,7 @@ export function paymentReceiptLetter(
   body.push({
     type: 'table',
     heading: null,
-    rows: chosen.map((p) => ({ text: [formatLetterDate(p.date, lang), p.subject, w.method[p.method] ?? p.method].filter(Boolean).join(' · '), amount: money(p.amount), ref: null })),
+    rows: chosen.map((p) => ({ text: [formatLetterDate(p.date, lang), paymentSubject(p.subject, lang), w.method[p.method] ?? p.method].filter(Boolean).join(' · '), amount: money(p.amount), ref: null })),
     total: { label: w.receivedRow, amount: money(received) },
   });
   body.push({ type: 'text', slot: null, text: w.inWords(amountInWords(received, lang)), strong: false });
@@ -967,11 +969,11 @@ export function paymentsOverviewLetter(ctx: BookingLetterContext, choices: Lette
   const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
   if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) });
   if (ctx.exam) body.push(examHeading(ctx.exam, lang));
-  body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: m.costsTotal, amount: money(ctx.charged) } });
+  body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.names?.[lang] ?? c.description, amount: money(c.amount), ref: null })), total: { label: m.costsTotal, amount: money(ctx.charged) } });
   body.push({
     type: 'table',
     heading: m.payments,
-    rows: ctx.payments.map((p) => ({ text: [formatLetterDate(p.date, lang), p.subject, w.method[p.method] ?? p.method].filter(Boolean).join(' · '), amount: money(p.amount), ref: null })),
+    rows: ctx.payments.map((p) => ({ text: [formatLetterDate(p.date, lang), paymentSubject(p.subject, lang), w.method[p.method] ?? p.method].filter(Boolean).join(' · '), amount: money(p.amount), ref: null })),
     total: { label: m.paymentsTotal, amount: money(ctx.paid) },
   });
   body.push({ type: 'sum', label: balance > 0.005 ? m.balanceOpen : balance < -0.005 ? m.balanceCredit : m.balanceEven, amount: money(Math.abs(balance)) });
@@ -1180,7 +1182,7 @@ export function examConfirmationLetter(ctx: BookingLetterContext, choices: Lette
   const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
   if (ctx.exam) body.push(examHeading(ctx.exam, lang));
   body.push(text(choices, 'place', e.place));
-  body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: w.total, amount: money(ctx.charged) } });
+  body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.names?.[lang] ?? c.description, amount: money(c.amount), ref: null })), total: { label: w.total, amount: money(ctx.charged) } });
   if (ctx.paid > 0.005) {
     body.push({ type: 'sum', label: w.received, amount: money(ctx.paid) });
     body.push({ type: 'sum', label: balance < -0.005 ? w.credit : w.open, amount: money(Math.abs(balance)) });
@@ -1405,7 +1407,7 @@ export function learnerConfirmationLetter(ctx: LearnerLetterContext, choices: Le
         detail: b.accommodation.to ? formatDateRange(b.accommodation.from, b.accommodation.to, lang) : formatLetterDate(b.accommodation.from, lang),
       });
     }
-    body.push({ type: 'table', heading: null, rows: b.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: m.subtotal, amount: money(b.charged) } });
+    body.push({ type: 'table', heading: null, rows: b.charges.map((c) => ({ text: c.names?.[lang] ?? c.description, amount: money(c.amount), ref: null })), total: { label: m.subtotal, amount: money(b.charged) } });
   }
   body.push({ type: 'sum', label: m.total, amount: money(charged) });
   if (paid > 0.005) {

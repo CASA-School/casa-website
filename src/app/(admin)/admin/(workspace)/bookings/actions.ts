@@ -10,6 +10,7 @@ import {
   cancelBooking,
   carryOverCredit,
   changeExam,
+  changeStay,
   createBooking,
   deleteBooking,
   endObservation,
@@ -31,7 +32,7 @@ import {
 } from '@/lib/admin/bookings';
 import { bildungszeitClasses, bildungszeitTypeId } from '@/lib/admin/bildungszeit';
 import { addDays, BZ_WEEKS, bzSegments } from '@/lib/admin/bildungszeit-rules';
-import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
+import { accommodationCharge, bookedPeriod, priceSelection, stayVocabulary, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
 import type { StaffUser } from '@/lib/admin/auth';
 import { isExamParts, ratedParts } from '@/lib/admin/exam-parts';
@@ -84,9 +85,9 @@ const text = (formData: FormData, field: string, max: number): string | null => 
   return value === '' ? null : value.slice(0, max);
 };
 const money = (formData: FormData, field: string): number | null => {
-  const raw = String(formData.get(field) ?? '')
-    .trim()
-    .replace(',', '.');
+  // „2.052,98 €", „2052,98", „2052.98": a German amount's thousands dots go when it has a decimal comma.
+  const typed = String(formData.get(field) ?? '').replace(/[€\s]/g, '');
+  const raw = typed.includes(',') ? typed.replace(/\./g, '').replace(',', '.') : typed;
   if (raw === '') return null;
   const n = Number(raw);
   if (!Number.isFinite(n) || Math.abs(n) > 1_000_000) throw new Error(`Invalid ${field}`);
@@ -98,6 +99,15 @@ function fail(path: string, message: string): never {
   redirect(`${path}${path.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
 }
 const confirmed = (formData: FormData) => formData.get('confirmed') === '1';
+
+/** A stay's arrival and departure from a form: dates or nothing, departure not before arrival. */
+function readStayDates(formData: FormData, back: string, t: T): { from: string | null; to: string | null } {
+  const from = String(formData.get('accommodationFrom') ?? '');
+  const to = String(formData.get('accommodationTo') ?? '');
+  if ((from && !DATE.test(from)) || (to && !DATE.test(to))) fail(back, t('Bitte gib An- und Abreise als Datum an.', 'Give arrival and departure as dates.'));
+  if (from && to && to < from) fail(back, t('Die Abreise liegt vor der Anreise.', 'Departure is before arrival.'));
+  return { from: from || null, to: to || null };
+}
 
 function readDates(formData: FormData, back: string, t: T): { startDate: string; endDate: string } {
   const startDate = String(formData.get('startDate') ?? '');
@@ -115,6 +125,7 @@ export async function updateBookingAction(formData: FormData): Promise<void> {
   if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
   const payer = String(formData.get('payer') ?? 'self');
   if (!PAYERS.has(payer)) throw new Error('Invalid payer');
+  const back = `/admin/bookings/${bookingId}`;
   await updateBooking(
     bookingId,
     {
@@ -127,8 +138,26 @@ export async function updateBookingAction(formData: FormData): Promise<void> {
     },
     actor
   );
+  // The stay, when the form carried it (a course booking that is not cancelled): changed, its rent priced again.
+  if (formData.get('stayFields') === '1') {
+    const { t } = await getI18n();
+    const typeCode = text(formData, 'accommodationTypeCode', 40);
+    const vocabulary = await stayVocabulary();
+    const known = (list: { code: string }[], code: string | null) => (code && list.some((v) => v.code === code) ? code : null);
+    const stay = typeCode
+      ? {
+          typeCode: known(vocabulary.types, typeCode) ?? fail(back, t('Unbekannte Unterkunft.', 'Unknown accommodation.')),
+          roomTypeCode: known(vocabulary.rooms, text(formData, 'roomTypeCode', 40)),
+          cateringCode: known(vocabulary.catering, text(formData, 'cateringCode', 40)),
+          ...readStayDates(formData, back, t),
+        }
+      : null;
+    if (stay && (!stay.from || !stay.to)) fail(back, t('Die Unterkunft braucht An- und Abreise.', 'The stay needs arrival and departure.'));
+    const rent = stay ? await accommodationCharge(stay) : null;
+    await changeStay(bookingId, stay, rent ? { description: rent.description, amount: rent.amount, rateId: rent.rateId } : null, actor);
+  }
   revalidatePath('/admin/bookings', 'layout');
-  redirect(`/admin/bookings/${bookingId}`);
+  redirect(back);
 }
 
 export async function extendBookingAction(formData: FormData): Promise<void> {
@@ -319,13 +348,20 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
   if (kind === 'exam') return createExamBooking(formData, actor, personId, safeBack);
   if (formData.get('superintensive') === '1') return createBildungszeitBooking(formData, actor, personId, safeBack);
   const { t } = await getI18n();
-  const dates = readDates(formData, safeBack, t);
+  const courseInstanceId = optionalId(formData, 'courseInstanceId');
+  const levelRaw = text(formData, 'levelCode', 8);
+  const levelCode = levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null;
+  // A start's dates are worked out here from the level and how much of it, never taken from the form:
+  // the price follows them (a half level is four weeks).
+  const dates =
+    (courseInstanceId
+      ? await bookedPeriod(courseInstanceId, levelCode, formData.get('levelScope') === 'half' ? 'half' : 'whole')
+      : null) ?? readDates(formData, safeBack, t);
   const status = String(formData.get('status') ?? 'reserved');
   if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
   const payer = String(formData.get('payer') ?? 'self');
   if (!PAYERS.has(payer)) throw new Error('Invalid payer');
 
-  const levelRaw = text(formData, 'levelCode', 8);
   const materialIds = formData
     .getAll('materialIds')
     .map(String)
@@ -333,12 +369,13 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
 
   const selection: BookingSelection = {
     kind,
-    courseInstanceId: optionalId(formData, 'courseInstanceId'),
+    courseInstanceId,
     courseTypeId: optionalId(formData, 'courseTypeId'),
     examTypeId: null,
     examParts: null,
-    ...dates,
-    levelCode: levelRaw,
+    startDate: dates.startDate,
+    endDate: dates.endDate,
+    levelCode,
     // No money comes from the wizard: the cohort's price is resolved on the
     // server. An override only exists when a colleague edits the booking.
     tuitionOverride: null,
@@ -347,8 +384,8 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
     accommodationTypeCode: text(formData, 'accommodationTypeCode', 40),
     roomTypeCode: text(formData, 'roomTypeCode', 40),
     cateringCode: text(formData, 'cateringCode', 40),
-    accommodationFrom: text(formData, 'accommodationFrom', 10),
-    accommodationTo: text(formData, 'accommodationTo', 10),
+    accommodationFrom: readStayDates(formData, safeBack, t).from,
+    accommodationTo: readStayDates(formData, safeBack, t).to,
   };
 
   const lines = await priceSelection(selection);
@@ -358,8 +395,9 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
       personId,
       courseTypeId: selection.courseTypeId,
       courseInstanceId: selection.courseInstanceId,
-      levelCode: levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null,
-      ...dates,
+      levelCode,
+      startDate: dates.startDate,
+      endDate: dates.endDate,
       status: status as BookingStatus,
       payer: payer as Payer,
       payerName: text(formData, 'payerName', 120),

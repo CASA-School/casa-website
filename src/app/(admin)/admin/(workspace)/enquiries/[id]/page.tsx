@@ -5,7 +5,7 @@ import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
 import { Icon } from '@/components/admin/icons';
-import { Badge, Card, RecordHeader } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labels';
@@ -65,6 +65,10 @@ const BRIEF_SECTIONS: readonly { title: Bilingual; keys: readonly string[] }[] =
  * „Antworten" is a `mailto:` — the workspace sends no mail (CLAUDE.md, known
  * open items) — opened with the subject and a greeting and sign-off in the
  * language the enquiry was written in, signed by the colleague replying.
+ *
+ * What an enquiry leads to is in the head: „Angebot erstellen" (the offer
+ * wizard, from this enquiry), and for a learner's own enquiry „Buchung anlegen"
+ * — their booking wizard, on their page.
  */
 export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
   const [{ id }, user] = await Promise.all([params, requireModule('enquiries')]);
@@ -76,6 +80,9 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
 
   const canEdit = canAccess(user, 'enquiries', 'edit');
   const canOffer = canAccess(user, 'offers', 'edit');
+  // A learner's own enquiry can become a booking at once: the person's wizard (`?book=1`). A group's
+  // or a company's becomes an offer first.
+  const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') && enquiry.kind === 'general';
   const [notes, activity, staff, flags, person, offers, earlier] = await Promise.all([
     listNotes('enquiry', enquiry.id),
     activityFor('enquiry', enquiry.id),
@@ -136,7 +143,14 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
             </MetaLine>
           </>
         }
-        actions={canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
+        actions={
+          canOffer || (canBook && person) ? (
+            <>
+              {canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
+              {canBook && person ? <ButtonLink href={`/admin/people/${person.canonicalId}?book=1`}>{t('Buchung anlegen', 'Create booking')}</ButtonLink> : null}
+            </>
+          ) : null
+        }
         bar={
           <>
             <StatusBar entity="enquiry" id={enquiry.id} status={enquiry.status} canEdit={canEdit} />

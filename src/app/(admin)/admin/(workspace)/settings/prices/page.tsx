@@ -53,7 +53,7 @@ const UNIT_LABEL: Record<PriceUnit, Bilingual> = {
   item: { de: 'pro Kurs', en: 'per course' },
 };
 const FEE_LABEL: Record<FeeCode, Bilingual> = {
-  enrolment_fee: { de: 'Anmeldegebühr', en: 'Enrolment fee' },
+  enrolment_fee: { de: 'Einschreibegebühr', en: 'Enrolment fee' },
   accommodation_placement_fee: { de: 'Vermittlungsgebühr', en: 'Placement fee' },
   deposit: { de: 'Kaution', en: 'Deposit' },
 };
@@ -79,7 +79,7 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
         title={t('Preise', 'Prices')}
         actions={
           canPrepare ? (
-            <FormDialog
+            <FormDialog icon={Icon.money} tint="green"
               trigger={t(`${nextStart.slice(0, 4)} vorbereiten`, `Prepare ${nextStart.slice(0, 4)}`)}
               title={t(`Preisliste ab ${nextStart.slice(0, 4)}`, `Price list from ${nextStart.slice(0, 4)}`)}
               triggerVariant="primary"
@@ -352,7 +352,7 @@ function PriceCard({
       bleed
       actions={
         canEdit ? (
-          <FormDialog trigger={t('Bearbeiten', 'Edit')} size="sm" title={title} width={rows.length > 8 ? 'lg' : 'md'}>
+          <FormDialog icon={Icon.money} tint="green" trigger={t('Bearbeiten', 'Edit')} size="sm" title={title} width={rows.length > 8 ? 'lg' : 'md'}>
             <form action={savePricesAction} className="space-y-4">
               <input type="hidden" name="list" value={list.validFrom} />
               <div className={cn('grid max-h-[60vh] gap-3 overflow-y-auto pr-1', rows.length > 8 ? 'sm:grid-cols-2' : '')}>

@@ -6,8 +6,10 @@ import { BookingWizard } from '../../../bookings/booking-wizard';
 import { offerPlaceAction, takeBackOfferAction } from '../../actions';
 import { CloseForm, MoveForm } from '../../waitlist-forms';
 import { cancelSittingAction, deleteSittingAction, fileCandidatesAction, markCollectedAction, unassignExaminerAction, unfileCandidateAction, updateSittingAction } from '../actions';
+import { CandidatePicker } from '../candidate-picker';
 import { ExaminerForm } from '../examiner-form';
 import { SittingForm } from '../sitting-form';
+import { PersonForm } from '../../../people/person-form';
 import { RecordFoot } from '../../../bookings/record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
@@ -17,7 +19,7 @@ import { Badge, Button, Card, Field, Input, RecordHeader } from '@/components/ad
 import { canAccess } from '@/lib/admin/access';
 import { bookingOffer } from '@/lib/admin/booking-offer';
 import type { BookingOffer } from '@/lib/admin/booking-offer-types';
-import { BOOKING_LIGHT_LABELS, bookingLight, type ObservationReason } from '@/lib/admin/bookings';
+import { bookingLight, bookingLightLabel, type ObservationReason } from '@/lib/admin/bookings';
 import { EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, EXAMINER_PART_LABELS, needsLicence, overallOutcome, SITTING_STATUS_LABELS } from '@/lib/admin/exam-parts';
 import { examinerChoices, sittingExaminers } from '@/lib/admin/examiners';
 import {
@@ -34,6 +36,7 @@ import {
   type SittingCandidate,
 } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
+import { listCountries } from '@/lib/admin/people';
 import { capitalise, num, pick, relativeDays, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
@@ -72,6 +75,10 @@ export default async function ExamSittingPage({ params, searchParams }: { params
     plans ? examinerChoices(id) : Promise.resolve([]),
   ]);
   const seesStaff = canAccess(user, 'staff');
+  // „Buchen": a learner found by name, or a new one, then the booking wizard at this sitting.
+  const books = handles && canAccess(user, 'people') && sitting.status === 'scheduled' && new Date(sitting.startsAt).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0);
+  const addsPeople = books && canAccess(user, 'people', 'edit');
+  const countries = addsPeople ? await listCountries() : [];
   const letters = await lettersForEntries(entries.map((e) => e.id));
   const open = entries.filter((e) => e.status === 'waiting' || e.status === 'offered');
   const closed = entries.filter((e) => e.status !== 'waiting' && e.status !== 'offered');
@@ -135,8 +142,25 @@ export default async function ExamSittingPage({ params, searchParams }: { params
               </Link>
             ) : null}
             {plans && form ? (
-              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Prüfungstermin bearbeiten', 'Edit the sitting')} triggerVariant="secondary">
+              <FormDialog icon={Icon.calendar} tint="red" trigger={t('Bearbeiten', 'Edit')} title={t('Prüfungstermin bearbeiten', 'Edit the sitting')} triggerVariant="secondary">
                 <SittingForm action={updateSittingAction} exams={exams} sittingId={id} initial={form} examLocked={sitting.booked > 0} />
+              </FormDialog>
+            ) : null}
+            {books ? (
+              <FormDialog icon={Icon.bookings} tint="red"
+                trigger={t('Buchen', 'Book')}
+                title={t('Wen buchen?', 'Who to book?')}
+                description={`${sitting.examName} · ${sittingWhen(sitting, lang)}`}
+                triggerVariant={next ? 'secondary' : 'primary'}
+              >
+                <CandidatePicker
+                  sittingId={id}
+                  newPerson={
+                    addsPeople ? (
+                      <PersonForm countries={countries} hidden={{ then: 'book', sitting: id }} submitLabel={t('Weiter zur Buchung', 'On to the booking')} />
+                    ) : null
+                  }
+                />
               </FormDialog>
             ) : null}
           </>
@@ -273,7 +297,7 @@ export default async function ExamSittingPage({ params, searchParams }: { params
           bleed
           actions={
             plans && sitting.status !== 'cancelled' && choices.length ? (
-              <FormDialog trigger={t('Eintragen', 'Add')} title={t('Prüfende eintragen', 'Add an examiner')} triggerVariant="ghost" size="sm">
+              <FormDialog icon={Icon.people} tint="ink" trigger={t('Eintragen', 'Add')} title={t('Prüfende eintragen', 'Add an examiner')} triggerVariant="ghost" size="sm">
                 <ExaminerForm sittingId={id} choices={choices} />
               </FormDialog>
             ) : undefined
@@ -439,7 +463,8 @@ function CandidateRow({
   lang: WsLang;
 }) {
   const overall = c.result ? overallOutcome(c.parts, c.result) : null;
-  const light = bookingLight({ status: c.status, observationReason: c.observationReason as ObservationReason | null, charged: c.charged, paid: c.paid });
+  const money = { status: c.status, observationReason: c.observationReason as ObservationReason | null, charged: c.charged, paid: c.paid };
+  const light = bookingLight(money);
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-5 py-3">
       {files ? (
@@ -461,7 +486,7 @@ function CandidateRow({
           {c.parts !== 'full' ? ` · ${pick(lang, EXAM_PARTS_LABELS[c.parts])}` : ''}
         </p>
       </div>
-      <BookingLightPill light={light} label={pick(lang, BOOKING_LIGHT_LABELS[light])} />
+      <BookingLightPill light={light} label={pick(lang, bookingLightLabel(money))} />
       <span className="w-full text-[0.8rem] sm:w-56 sm:text-right">
         {c.result ? (
           // The result telc sent, then whether it was collected.
@@ -474,7 +499,7 @@ function CandidateRow({
                 · {t('abgeholt', 'collected')} {new Date(c.result.collectedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}
               </span>
             ) : handles && overall !== 'absent' ? (
-              <FormDialog trigger={t('Abgeholt', 'Collected')} title={t(`Ergebnis von ${c.personName} abgeholt`, `${c.personName}'s result collected`)} size="sm" triggerVariant="ghost">
+              <FormDialog icon={Icon.award} tint="ink" trigger={t('Abgeholt', 'Collected')} title={t(`Ergebnis von ${c.personName} abgeholt`, `${c.personName}'s result collected`)} size="sm" triggerVariant="ghost">
                 <form action={markCollectedAction} className="space-y-3">
                   <input type="hidden" name="sittingId" value={sittingId} />
                   <input type="hidden" name="bookingId" value={c.bookingId} />

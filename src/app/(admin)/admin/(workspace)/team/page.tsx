@@ -17,6 +17,7 @@ import {
   Textarea,
 } from '@/components/admin/ui';
 import { FormDialog, DialogFooter } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { Avatar, ListGroup } from '@/components/admin/list';
 import { roleLabel } from '@/components/admin/shell';
 import { canDeleteStaff } from '@/lib/admin/auth';
@@ -80,7 +81,7 @@ export default async function TeamPage({
         title={t('Zugänge', 'Accounts')}
         actions={
           <>
-            <FormDialog trigger={t('Büroteam hinzufügen', 'Add the office team')} title={t('Büroteam hinzufügen', 'Add the office team')}>
+            <FormDialog icon={Icon.team} tint="ink" trigger={t('Büroteam hinzufügen', 'Add the office team')} title={t('Büroteam hinzufügen', 'Add the office team')}>
               <form action={createStaffBatchAction} className="space-y-3">
                 <Field
                   label={t('Personen', 'Colleagues')}
@@ -106,7 +107,7 @@ export default async function TeamPage({
               </form>
             </FormDialog>
 
-            <FormDialog
+            <FormDialog icon={Icon.lock} tint="ink"
               trigger={t('Konto anlegen', 'Add an account')}
               title={t('Konto anlegen', 'Add an account')}
               description={t(

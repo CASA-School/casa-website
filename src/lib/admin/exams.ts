@@ -158,6 +158,30 @@ export async function upcomingSittings(): Promise<SittingChoice[]> {
 // ------------------------------------------------------------ candidates
 
 /** What telc needs to register a candidate, by the record's own words; what is missing is named. */
+/** Someone a sitting's „Buchen" can book: a learner, never a colleague, a deleted or a linked-away record. */
+export type CandidateMatch = { id: string; name: string; email: string | null; bookings: number; booked: boolean };
+
+export async function findCandidates(sittingId: string, text: string): Promise<CandidateMatch[]> {
+  const term = text.trim().toLowerCase().slice(0, 80);
+  if (term.length < 2) return [];
+  const like = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const rows = await query<{ id: string; first_name: string; last_name: string | null; email: string | null; bookings: number; booked: boolean }>(
+    `SELECT p.id, p.first_name, p.last_name,
+            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            (SELECT count(*) FROM bookings b WHERE canonical_person_id(b.person_id) = p.id AND b.deleted_at IS NULL)::int AS bookings,
+            EXISTS (SELECT 1 FROM bookings b WHERE canonical_person_id(b.person_id) = p.id AND b.exam_session_id = $2
+                       AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS booked
+       FROM people p
+      WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
+        AND NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)
+        AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
+             OR EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND lower(e.address) LIKE $1))
+      ORDER BY p.updated_at DESC LIMIT 6`,
+    [like, sittingId]
+  );
+  return rows.map((r) => ({ id: r.id, name: [r.first_name, r.last_name].filter(Boolean).join(' '), email: r.email, bookings: r.bookings, booked: r.booked }));
+}
+
 export const TELC_FIELDS = ['birth_date', 'birth_place', 'birth_country', 'mother_tongue'] as const;
 export type TelcField = (typeof TELC_FIELDS)[number];
 export const TELC_FIELD_LABELS: Record<TelcField, Bilingual> = {

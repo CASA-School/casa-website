@@ -24,6 +24,9 @@ test.describe('Bildungszeit', () => {
   let danId = '';
   let startId = '';
   let placesBefore: { groups: number; places_per_group: number } | null = null;
+  // Intensive courses around today that SchoolMan has closed, opened for the run and closed again after:
+  // these tests book open classes; a full one is the third test's.
+  let reopened: string[] = [];
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -39,6 +42,15 @@ test.describe('Bildungszeit', () => {
     beaId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ('Bea', 'Bildungstest', 'e2e') RETURNING id`)).rows[0].id;
     cemId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ('Cem', 'Bildungstest', 'e2e') RETURNING id`)).rows[0].id;
     danId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ('Dan', 'Bildungstest', 'e2e') RETURNING id`)).rows[0].id;
+    reopened = (
+      await client.query<{ id: string }>(
+        `UPDATE courses c SET bookable = true
+           FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
+          WHERE c.course_instance_id = i.id AND t.format = 'intensive' AND NOT c.bookable
+            AND i.end_date >= current_date - 70 AND i.start_date <= current_date + 70
+         RETURNING c.id`
+      )
+    ).rows.map((r) => r.id);
   });
 
   test.afterAll(async () => {
@@ -57,6 +69,7 @@ test.describe('Bildungszeit', () => {
         ]);
       else await client.query(`UPDATE courses SET groups = 1, places_per_group = 14 WHERE course_instance_id = $1 AND level_code = 'B1.1'`, [startId]);
     }
+    if (reopened.length) await client.query(`UPDATE courses SET bookable = false WHERE id = ANY($1::uuid[])`, [reopened]);
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });
@@ -75,7 +88,7 @@ test.describe('Bildungszeit', () => {
     await page.getByRole('button', { name: 'Neue Buchung' }).click();
     await dialog.getByRole('button', { name: /^Einen Kurs/ }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
-    await dialog.getByRole('button', { name: /^Bildungszeit German/ }).click();
+    await dialog.getByRole('button', { name: /^Bildungszeit/ }).click();
     await dialog.getByRole('button', { name: /^KW \d+/ }).first().click();
     await dialog.getByRole('button', { name: '1 Woche' }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
@@ -92,7 +105,7 @@ test.describe('Bildungszeit', () => {
     await dialog.getByRole('button', { name: 'Weiter' }).click();
     await dialog.getByRole('button', { name: 'Nein' }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
-    await expect(dialog).toContainText('Bildungszeit German');
+    await expect(dialog).toContainText('Bildungszeit');
     await dialog.getByRole('button', { name: 'Buchung anlegen' }).click();
     await expect(page).toHaveURL(/\/admin\/bookings\/[0-9a-f-]{36}$/);
     const bookingId = page.url().split('/').pop()!;
@@ -124,7 +137,8 @@ test.describe('Bildungszeit', () => {
       [bookingId]
     );
     expect(booking[0].slug).toBe('bildungszeit');
-    expect(booking[0].description).toMatch(/^Bildungszeit \(superintensive\)/);
+    // Written in German (2026-10-17): the course type's German name and the week.
+    expect(booking[0].description).toMatch(/^Bildungszeit · \d{2}\.\d{2}\.\d{2} – /);
   });
 
   test('two weeks: a new course starting in between gives the second week its own two classes', async ({ page }) => {
@@ -133,7 +147,7 @@ test.describe('Bildungszeit', () => {
     await page.getByRole('button', { name: 'Neue Buchung' }).click();
     await dialog.getByRole('button', { name: /^Einen Kurs/ }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
-    await dialog.getByRole('button', { name: /^Bildungszeit German/ }).click();
+    await dialog.getByRole('button', { name: /^Bildungszeit/ }).click();
     await dialog.getByRole('button', { name: /^KW \d+/ }).first().click();
     await dialog.getByRole('button', { name: '2 Wochen' }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();

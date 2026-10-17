@@ -93,7 +93,7 @@ export default async function PeoplePage({
         title={t('Teilnehmende', 'Students')}
         actions={
           canEdit ? (
-            <FormDialog
+            <FormDialog icon={Icon.person} tint="ink"
               trigger={t('Person hinzufügen', 'Add person')}
               title={params.then === 'book' ? t('Neue Buchung: wer?', 'New booking: who?') : t('Neue Person', 'Add a person')}
               triggerVariant="primary"

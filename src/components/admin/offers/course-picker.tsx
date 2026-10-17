@@ -295,7 +295,7 @@ export function CoursePicker({
                       build({ newStudent: e.target.checked });
                     }}
                   />{' '}
-                  {t('Anmeldegebühr', 'Enrolment fee')}
+                  {t('Einschreibegebühr', 'Enrolment fee')}
                 </b>
                 <small>
                   {history?.studiedBefore

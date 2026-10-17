@@ -268,6 +268,15 @@ test.describe('offers', () => {
     await expect(letter).toContainText('Vormittags, Mo–Fr 09:00–12:30');
     await expect(letter).toContainText('Einschreibegebühr');
     await expect(letter).toContainText('Kaution Unterkunft (rückerstattbar)');
+
+    // Accepted (recorded here directly), it leads to the learner's booking wizard at the offer's course.
+    const offerId = new URL(page.url()).pathname.split('/')[3];
+    await client.query(`UPDATE offers SET status = 'accepted', decided_at = now() WHERE id = $1`, [offerId]);
+    await page.goto(`/admin/offers/${offerId}`);
+    const book = page.getByRole('link', { name: 'Create booking' });
+    await expect(book).toHaveAttribute('href', /^\/admin\/people\/[0-9a-f-]{36}\?book=1&cohort=[0-9a-f-]{36}&level=B2$/);
+    await book.click();
+    await expect(page.getByRole('dialog')).toContainText('How much of B2?');
   });
 
   test("a colleague's save in between is not overwritten", async ({ page }) => {

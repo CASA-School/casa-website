@@ -4,6 +4,7 @@ import { LetterView } from '@/components/admin/offers/letter-view';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { sentOfferLetter } from '@/lib/admin/letters/repo';
+import { offerBookingHref } from '@/lib/admin/offers/booking-link';
 import { editorOptions, getOffer, offerTexts } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
 
@@ -51,6 +52,7 @@ export default async function OfferLetterPage({
       canWrite={canAccess(user, 'offers', 'edit')}
       canDelete={canAccess(user, 'offers', 'full')}
       canSetStandard={canAccess(user, 'offers', 'full')}
+      bookHref={canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') ? offerBookingHref({ ...record.meta, draft: record.draft }) : null}
       notice={{ ok: sp.ok, error: sp.error }}
     />
   );

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import pg from 'pg';
 
 /**
- * A booking's colour (2026-10-16, docs/schoolman/bookings.md): grey „Unklar" until paid in full,
+ * A booking's colour (2026-10-16, docs/schoolman/bookings.md): grey („Offen", „Anzahlung erhalten") until paid in full,
  * yellow while a colleague has it under observation — with the reason in its head, in the list's
  * „Unter Beobachtung" view and in its history — and green once the money is in.
  *
@@ -77,7 +77,8 @@ test.describe('booking colours', () => {
 
     await page.goto(`/admin/bookings/${bookingId}`);
     await expect(light).toHaveAttribute('data-light', 'unclear');
-    await expect(light).toContainText('Unklar');
+    // The grey says what it is (2026-10-17): nothing has come in yet.
+    await expect(light).toContainText('Offen');
 
     // Yellow, with the reason, in the head, the list and the history.
     await page.getByRole('button', { name: 'Beobachten' }).click();

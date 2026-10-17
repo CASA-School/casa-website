@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bookingLight, paidInFull } from '../bookings';
+import { bookingLight, bookingLightLabel, paidInFull } from '../bookings';
 
 /**
  * The team's colours (docs/schoolman/bookings.md): red cancelled, yellow under observation, grey
@@ -36,5 +36,15 @@ describe('bookingLight', () => {
   it('counts a cent of rounding as paid', () => {
     expect(paidInFull(417.99, 417.985)).toBe(true);
     expect(paidInFull(417.99, 417.9)).toBe(false);
+  });
+});
+
+describe('bookingLightLabel', () => {
+  it('says what the grey is: open, part paid, or nothing charged', () => {
+    expect(bookingLightLabel({ ...base, paid: 0 }).de).toBe('Offen');
+    expect(bookingLightLabel({ ...base, paid: 200 }).de).toBe('Anzahlung erhalten');
+    expect(bookingLightLabel({ ...base, charged: 0, paid: 0 }).de).toBe('Ohne Kosten');
+    expect(bookingLightLabel(base).de).toBe('In Ordnung');
+    expect(bookingLightLabel({ ...base, observationReason: 'level', paid: 0 }).de).toBe('Unter Beobachtung');
   });
 });

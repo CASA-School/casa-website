@@ -49,7 +49,7 @@ export default async function RoomPage({
         actions={
           <>
             {canAccess(user, 'rooms', 'edit') ? (
-              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={room.name}>
+              <FormDialog icon={Icon.rooms} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={room.name}>
                 <EditRoomForm room={room} />
               </FormDialog>
             ) : null}

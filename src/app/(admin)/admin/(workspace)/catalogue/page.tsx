@@ -19,7 +19,8 @@ import { Tally } from '@/components/admin/inbox';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listBookableRooms, type Room } from '@/lib/admin/rooms';
 import { freePlaces, levelGroups, placeForNext, type LevelGroup } from '@/lib/admin/waitlist';
-import { toDateInputValue } from '@/lib/dates';
+import { todayInputValue, toDateInputValue } from '@/lib/dates';
+import { nextStart, roomName } from '@/lib/admin/course-starts';
 import { CohortForm } from './cohort-form';
 import { groupRuns, monthKey, monthLabel, openCell, OpenTable, sentenceCase } from './list-parts';
 import { RoomPicker } from './room-picker';
@@ -70,6 +71,8 @@ export default async function CataloguePage({
       : Promise.resolve([]),
   ]);
   const view = rawView === 'types' ? 'types' : 'cohorts';
+  // The list keeps starts of the last two weeks (under way); the next start is one still ahead.
+  const next = nextStart(instances.filter((i) => i.status !== 'cancelled'), todayInputValue());
   const taken = instances.reduce((sum, i) => sum + i.bookingCount, 0);
   // Places are per level (the waiting list, 0031): each start's levels, for what is waiting and free.
   const groups = await levelGroups(instances.map((i) => i.id));
@@ -86,7 +89,14 @@ export default async function CataloguePage({
               triggerVariant="primary"
               defaultOpen={fresh === '1'}
             >
-              <CohortForm courseTypes={types} rooms={rooms} levels={levels} />
+              <CohortForm
+                // Every kind with courses of its own, the website's and the workspace's (0042); not Bildungszeit.
+                courseTypes={types
+                  .filter((type) => !BOOKED_INTO_OTHER_COURSES.includes(type.slug))
+                  .map((type) => ({ id: type.id, slug: type.slug, label: lang === 'de' ? type.nameDe : type.name }))}
+                rooms={rooms.map((r) => ({ id: r.id, name: r.name, nickname: r.nickname, capacity: r.capacity }))}
+                levels={levels}
+              />
             </FormDialog>
           ) : null
         }
@@ -96,11 +106,11 @@ export default async function CataloguePage({
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
         <Tally tone="working" n={instances.length} label={instances.length === 1 ? t('kommender Termin', 'date ahead') : t('kommende Termine', 'dates ahead')} lang={lang} />
         <Tally tone="done" n={taken} label={t('gebucht', 'booked')} lang={lang} />
-        {instances[0] ? (
+        {next ? (
           <span>
             {t('Nächster Beginn', 'Next start')}{' '}
             <b className="font-semibold text-[var(--casa-ink)]">
-              {new Date(instances[0].startDate).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' })}
+              {new Date(next.startDate).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' })}
             </b>
           </span>
         ) : null}
@@ -202,7 +212,9 @@ function CohortRow({
 }) {
   const waiting = groups.reduce((sum, g) => sum + g.waiting + g.offered, 0);
   const freeForNext = groups.some(placeForNext);
-  const fullLevels = groups.filter((g) => !g.cancelled && g.places > 0 && freePlaces(g) === 0).map((g) => g.label);
+  // Full — or closed, which SchoolMan does to a full course: by level; a named course is the row itself.
+  const full = groups.filter((g) => !g.cancelled && g.places > 0 && freePlaces(g) === 0);
+  const fullLevels = full.map((g) => g.levelCode).filter((code): code is string => Boolean(code));
   const overRoom =
     instance.room?.capacity !== null &&
     instance.room?.capacity !== undefined &&
@@ -212,7 +224,7 @@ function CohortRow({
   // levels names its courses (0041).
   const courseLabels = instance.title ? [] : groups.filter((g) => !g.cancelled && g.levelCode).map((g) => g.label);
   const sub = [
-    instance.title && instance.title !== instance.courseTypeName ? instance.title : null,
+    instance.title && instance.title !== instance.courseTypeName && instance.title !== instance.courseTypeNameDe ? instance.title : null,
     courseLabels.length ? courseLabels.join(' · ') : instance.levelCode,
     instance.session ? pick(lang, SESSION_LABELS[instance.session]) : null,
   ]
@@ -255,7 +267,7 @@ function CohortRow({
             href={`/admin/settings/rooms/${instance.room.id}`}
             className="text-[0.84rem] font-medium text-[var(--casa-ink)] hover:underline"
           >
-            {instance.room.nickname ?? instance.room.name}
+            {roomName(instance.room)}
           </Link>
         ) : instance.location ? (
           <span className="text-[0.84rem] text-[var(--casa-muted)]">{instance.location}</span>
@@ -272,8 +284,10 @@ function CohortRow({
           {freeForNext ? <Badge tone="positive">{t('Platz frei', 'Place free')}</Badge> : null}
           {waiting ? <Badge tone="accent">{t(`${waiting} Warteliste`, `${waiting} waiting`)}</Badge> : null}
         </span>
-        {fullLevels.length ? (
-          <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">{t(`Voll: ${fullLevels.join(', ')}`, `Full: ${fullLevels.join(', ')}`)}</span>
+        {full.length ? (
+          <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">
+            {fullLevels.length ? t(`Voll: ${fullLevels.join(', ')}`, `Full: ${fullLevels.join(', ')}`) : t('Voll', 'Full')}
+          </span>
         ) : null}
       </td>
     </tr>

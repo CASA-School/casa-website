@@ -72,7 +72,7 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
       // The newest start's course at its first half; at a second half, the previous start's course of
       // that level, running — the course a learner at that step sits in (`resolveCourse`).
       const c = code.endsWith('.1') ? course(f.start.id, code) : course(f.previous.id, `${code.slice(0, -2)}.1`);
-      (code.endsWith('.1') ? first : second)[code] = { places: c?.places ?? DEFAULT_PLACES, booked: learners(f, c?.courseId), offered: c?.offered ?? 0 };
+      (code.endsWith('.1') ? first : second)[code] = { places: c?.places ?? DEFAULT_PLACES, booked: learners(f, c?.courseId), offered: c?.offered ?? 0, closed: c ? !c.bookable : false };
     }
     return { ...f, first, second };
   });

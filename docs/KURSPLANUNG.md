@@ -97,7 +97,10 @@ off, changes one day, or generates the days ahead from the course's weekly plan.
 course's days makes its two groups here, so the board shows them. `linkGroupsAndDays()` runs after
 `addGroup` and `createContinuationMonth`; `removeGroupIfEmpty` deletes only days of no course. A start
 on a month's last Monday has its first week in the previous planning month, where no group of it exists:
-that week is on the course page only.
+that week is on the course page only. The board offers no slot outside a group's course (0049): its
+groups carry the course's first and last day, `validateWeekAssignments` and `setDayTeacher` refuse a
+date outside it, and `link_course_days()` joins a board day to its course only inside it — so the
+October board's KW 44 is empty for the groups whose course ended on 23 October.
 
 ## Course starts (2026-10-17)
 

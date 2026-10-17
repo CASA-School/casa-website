@@ -16,6 +16,7 @@ import { courseLearners } from '@/lib/admin/courses';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { ABSENCE_LABELS, isAbsenceReason } from '@/lib/admin/kursplanung/types';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
 import { courseGroup } from '@/lib/admin/waitlist';
 import { todayInputValue } from '@/lib/dates';
@@ -51,8 +52,8 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   const lessons = held.reduce((n, d) => n + (d.lessons ?? 0), 0);
   const teachers = [...new Set(held.map((d) => d.teacherName).filter(Boolean))];
   const today = todayInputValue();
-  // Days ahead still waiting for a teacher: what staff act on.
-  const open = held.filter((d) => !d.teacherId && !d.merged && d.date >= today).length;
+  // Days ahead still waiting for a teacher — none set, or the one set is away that day: what staff act on.
+  const open = held.filter((d) => (!d.teacherId || d.teacherAway) && !d.merged && d.date >= today).length;
   const startHref = `/admin/catalogue/${course.courseInstanceId}`;
 
   const tabs: RecordTab[] = [
@@ -251,6 +252,9 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   );
 }
 
+/** An absence's reason as stored (`Krank`), in the reader's language. */
+const absenceWord = (reason: string, lang: WsLang) => (isAbsenceReason(reason) ? pick(lang, ABSENCE_LABELS[reason]) : null);
+
 const WEEKDAY_SHORT = { de: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'], en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] };
 const weekdayName = (n: number, lang: WsLang) => WEEKDAY_SHORT[lang][n - 1];
 
@@ -316,7 +320,13 @@ function DayTable({
                     </span>
                   ) : d.teacherName ? (
                     <span className="flex flex-wrap items-center gap-1.5">
-                      {d.teacherName}
+                      <span className={d.teacherAway ? 'text-[var(--casa-muted)]' : undefined}>{d.teacherName}</span>
+                      {d.teacherAway ? (
+                        <Badge tone="danger">
+                          {t('abwesend', 'absent')}
+                          {absenceWord(d.teacherAway, lang) ? ` · ${absenceWord(d.teacherAway, lang)}` : ''}
+                        </Badge>
+                      ) : null}
                       {d.substitute ? <Badge tone="warning">{d.replacedTeacherName ? t(`für ${d.replacedTeacherName}`, `for ${d.replacedTeacherName}`) : t('Vertretung', 'Cover')}</Badge> : null}
                       {d.tentative ? <Badge tone="quiet">?</Badge> : null}
                       {d.merged ? <Badge tone="quiet">{t('zusammengelegt', 'merged')}</Badge> : null}

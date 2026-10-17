@@ -53,7 +53,7 @@ export const WEEKDAYS: Record<WsLang, readonly string[]> = {
   de: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
   en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
 };
-const MONTHS: Record<WsLang, readonly string[]> = {
+export const MONTHS: Record<WsLang, readonly string[]> = {
   de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 };

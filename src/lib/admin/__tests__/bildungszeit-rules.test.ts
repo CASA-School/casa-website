@@ -61,4 +61,9 @@ describe('bzRun and bzFree', () => {
     expect(bzFree(bzRun(weeks, '2026-09-14', 2)!, 'first', 'B1.1')).toBe(0);
     expect(bzFree(bzRun(weeks, '2026-09-14', 1)!, 'second', 'B1.2')).toBe(14);
   });
+
+  it('has no place in a course closed for booking', () => {
+    const closed = weeks.map((w) => ({ ...w, first: { 'B1.1': { places: 14, booked: 0, offered: 0, closed: true } } }));
+    expect(bzFree(bzRun(closed, '2026-09-14', 1)!, 'first', 'B1.1')).toBe(0);
+  });
 });

@@ -23,6 +23,7 @@ test.describe('exam bookings', () => {
   let sittingId = '';
   let anaId = '';
   let benId = '';
+  let caraId = '';
   let bookingId = '';
   let pastId = '';
   let pastBookingId = '';
@@ -70,7 +71,8 @@ test.describe('exam bookings', () => {
 
   test.afterAll(async () => {
     if (!client) return;
-    const people = [anaId, benId].filter(Boolean);
+    const people = [anaId, benId, caraId].filter(Boolean);
+    await client.query(`DELETE FROM emails WHERE person_id = ANY($1::uuid[])`, [people]);
     if (newSittingId) await client.query(`DELETE FROM staff_activity WHERE entity_id = $1`, [newSittingId]);
     if (newSittingId) await client.query(`DELETE FROM exam_sessions WHERE id = $1`, [newSittingId]);
     await client.query(`DELETE FROM letters WHERE person_id = ANY($1::uuid[])`, [people]);
@@ -166,6 +168,48 @@ test.describe('exam bookings', () => {
     await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
     const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1`, [bookingId]);
     expect(rows).toEqual([{ kind: 'exam_confirmation' }]);
+  });
+
+  test('„Buchen“ on a sitting: a learner found by name, or a new one, then the wizard at that sitting', async ({ page }) => {
+    await page.goto(`/admin/catalogue/exams/${sittingId}`);
+    // The head's „Buchen" (a queue row has its own, for its person).
+    await page.getByRole('button', { name: 'Buchen', exact: true }).first().click();
+    const dialog = page.getByRole('dialog');
+    const search = dialog.getByRole('searchbox', { name: 'Person suchen' });
+    // Booked already: said, not offered again.
+    await search.fill('Ana Prüfungst');
+    await expect(dialog.getByRole('link', { name: /Ana Prüfungstest/ })).toContainText('Schon gebucht');
+    await search.fill('Ben Prüfungst');
+    await expect(dialog.getByRole('link', { name: /Ben Prüfungstest/ })).toHaveAttribute('href', `/admin/people/${benId}?book=1&sitting=${sittingId}`);
+    // Nobody: a new person from what was typed, on into the wizard at this sitting.
+    await search.fill('Cara Prüfungstest');
+    await dialog.getByRole('button', { name: '„Cara Prüfungstest“ neu anlegen' }).click();
+    await expect(dialog.getByLabel('Vorname')).toHaveValue('Cara');
+    await expect(dialog.getByLabel('Nachname')).toHaveValue('Prüfungstest');
+    await dialog.getByLabel('E-Mail').fill('cara.pruefungstest@example.com');
+    await dialog.getByRole('button', { name: 'Weiter zur Buchung' }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/people/[0-9a-f-]{36}\\?book=1&sitting=${sittingId}$`));
+    caraId = new URL(page.url()).pathname.split('/').pop()!;
+    const wizard = page.getByRole('dialog');
+    await expect(wizard).toContainText('Welcher Termin für telc Deutsch B2?');
+    const { rows } = await client.query<{ starts_at: Date }>(`SELECT starts_at FROM exam_sessions WHERE id = $1`, [sittingId]);
+    const day = rows[0].starts_at.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    await expect(wizard.getByRole('button').filter({ hasText: day }).first()).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('the list counts the sittings ahead, and the last fortnight’s stand under „Vorbei“', async ({ page }) => {
+    await page.goto('/admin/catalogue/exams');
+    const rows = page.locator('table tbody tr');
+    const texts = await rows.allInnerTexts();
+    const past = texts.findIndex((text) => /^\s*Vorbei\s*\d+\s*$/.test(text));
+    expect(past).toBeGreaterThan(0);
+    const pastRow = await rows.filter({ has: page.locator(`a[href="/admin/catalogue/exams/${pastId}"]`) }).first().evaluate((tr) => [...tr.parentElement!.children].indexOf(tr));
+    const aheadRow = await rows.filter({ has: page.locator(`a[href="/admin/catalogue/exams/${sittingId}"]`) }).first().evaluate((tr) => [...tr.parentElement!.children].indexOf(tr));
+    expect(pastRow).toBeGreaterThan(past);
+    expect(aheadRow).toBeLessThan(past);
+    // „n kommende Termine": the rows above „Vorbei", without the month headings and a cancelled one.
+    const ahead = texts.slice(0, past).filter((text) => /\d{2}:\d{2}/.test(text) && !/Abgesagt/.test(text)).length;
+    await expect(page.locator('main')).toContainText(new RegExp(`${ahead}\\s*kommender? Termin`));
   });
 
   test('a sitting with a candidate is not called off', async ({ page }) => {

@@ -1,4 +1,5 @@
 import { FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { ListBar, ListEmpty, ListGroup } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
@@ -65,7 +66,7 @@ export default async function RoomsPage({
         backLabel={t('Einstellungen', 'Settings')}
         actions={
           canAccess(user, 'rooms', 'edit') ? (
-            <FormDialog trigger={t('Raum hinzufügen', 'Add room')} title={t('Neuer Raum', 'Add a room')} triggerVariant="primary">
+            <FormDialog icon={Icon.rooms} tint="ink" trigger={t('Raum hinzufügen', 'Add room')} title={t('Neuer Raum', 'Add a room')} triggerVariant="primary">
               <CreateRoomForm locations={locations} />
             </FormDialog>
           ) : null

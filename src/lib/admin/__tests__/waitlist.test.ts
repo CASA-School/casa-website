@@ -18,6 +18,13 @@ describe('freePlaces', () => {
   it('is never below zero: an overbooked level is simply full', () => {
     expect(freePlaces({ places: 14, booked: 15, offered: 0 })).toBe(0);
   });
+
+  it('is none for a closed or cancelled course, whatever its numbers (audit 2026-10-17: a closed A2.1 showed 16 free)', () => {
+    expect(freePlaces({ places: 16, booked: 0, offered: 0, bookable: false })).toBe(0);
+    expect(freePlaces({ places: 16, booked: 0, offered: 0, cancelled: true })).toBe(0);
+    expect(freePlaces({ places: 16, booked: 0, offered: 0, closed: true })).toBe(0);
+    expect(placeForNext({ places: 16, booked: 0, offered: 0, waiting: 1, bookable: false })).toBe(false);
+  });
 });
 
 describe('placeForNext', () => {

@@ -1,5 +1,6 @@
 import { NewStaffForm } from './staff-forms';
 import { FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
 import { Tally } from '@/components/admin/inbox';
 import { ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
@@ -32,7 +33,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
         title={t('Mitarbeitende', 'Staff')}
         actions={
           canAccess(user, 'staff', 'edit') ? (
-            <FormDialog trigger={t('Neu', 'New')} title={t('Neue Person im Team', 'A new colleague')} triggerVariant="primary" width="lg">
+            <FormDialog icon={Icon.person} tint="ink" trigger={t('Neu', 'New')} title={t('Neue Person im Team', 'A new colleague')} triggerVariant="primary" width="lg">
               <NewStaffForm roles={roles} />
             </FormDialog>
           ) : null

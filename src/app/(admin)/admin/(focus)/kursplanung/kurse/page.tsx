@@ -40,7 +40,8 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
   const returnTo = '/admin/kursplanung/kurse';
   const name = (id: string | null) => (id ? plan.teachers.find((t) => t.id === id)?.shortName ?? '?' : '—');
   const planned = (g: CourseGroup) => {
-    const need = plan.weeks.length * SHIFT_INFO[g.shift].days;
+    // The group's days inside its course: a week before the start or after the end has none.
+    const need = plan.weeks.reduce((n, w) => n + courseDays(g, w).length, 0);
     const have = plan.weeks.reduce((n, w) => n + courseDays(g, w).filter((d) => plan.assignments.some((a) => a.groupId === g.id && a.onDate === d)).length, 0);
     return { have, need };
   };

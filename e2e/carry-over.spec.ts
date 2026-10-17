@@ -101,7 +101,8 @@ test.describe('carry-over', () => {
     // Voided here, voided there: the credit is back on the first booking.
     await payments.getByRole('button', { name: 'Stornieren' }).click();
     await dialog.getByRole('button', { name: 'Stornieren' }).click();
-    await expect(light).toContainText('940,00 € offen');
+    await expect(light).toContainText('Offen');
+    await expect(light).toContainText('940,00 €');
     await page.goto(`/admin/bookings/${sourceId}`);
     await expect(payments.getByRole('button', { name: 'Guthaben übertragen' })).toBeVisible();
   });

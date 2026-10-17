@@ -7,7 +7,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, use
 import { useWsLang } from '@/components/admin/lang';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
-import { absenceOn, assignmentKey, courseDays, fit, remainingDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
+import { absenceOn, assignmentKey, courseDays, fit, remainingDays, shiftDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
 import { SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
@@ -229,7 +229,8 @@ export function Board({
     const current = assignments.find((a) => a.groupId === groupId && a.onDate === dates[0]);
     if (!group || !current) return;
     const w = weekOf(dates[0]);
-    const cd = courseDays(group, w);
+    // Rows are the shift's weekdays; a day outside the course stops the piece (`fit`).
+    const cd = shiftDays(group.shift, w);
     const start = cd.indexOf(dates[0]);
     const end = Math.max(start, endRow - 1);
     const base = without(assignments, groupId, dates);
@@ -255,11 +256,12 @@ export function Board({
     const next = [...assignments];
     let n = 0;
     for (const g of groups) {
-      const from = courseDays(g, week), target = courseDays(g, to);
-      from.forEach((d, k) => {
+      const target = courseDays(g, to);
+      courseDays(g, week).forEach((d) => {
         const src = assignments.find((a) => a.groupId === g.id && a.onDate === d);
-        const dst = target[k];
-        if (!src || !dst || next.some((a) => a.groupId === g.id && a.onDate === dst)) return;
+        // The same weekday a week on, if the course still runs then.
+        const dst = to.days[week.days.indexOf(d)];
+        if (!src || !dst || !target.includes(dst) || next.some((a) => a.groupId === g.id && a.onDate === dst)) return;
         if (!fit({ ...ctx, assignments: next }, src.teacherId, g, dst).ok) return;
         next.push({ ...src, onDate: dst });
         n++;
@@ -542,14 +544,17 @@ export function Board({
             const mark = marks.get(`${g.id}|${w.start}`);
             const pair = [g.teacherFirst, g.teacherSecond].map((id) => (id ? teacher(id)?.shortName : null)).filter(Boolean).join(' / ');
             const gd = cd(g);
+            // A column's rows are its shift's weekdays, so the columns line up; a day outside the course is an empty row.
+            const rows = shiftDays(g.shift, w);
+            const rowOf = (d: string) => rows.indexOf(d) + 1;
             return (
               <section key={g.id} className={`${styles.col} ${mark === 'can' ? styles.colCan : mark === 'maybe' ? styles.colMaybe : mark === 'no' ? styles.colNo : ''}`} style={lvStyle(g.level)}>
                 <header className={styles.colHead}>
                   <span className={styles.lv}>{g.level}.{g.phase}</span>
                   <span className={styles.grp} title={`${g.phase === '1' ? t('Vorschlag', 'Suggested') : t('Stamm', 'Regular')}: ${pair || '–'}`}>{of > 1 ? `${t('Gruppe', 'Group')} ${g.groupIndex} · ` : ''}{g.registrations} {t('TN', 'students')}</span>
                 </header>
-                <div className={styles.sockets} style={{ '--rows': gd.length } as React.CSSProperties}>
-                  {gd.map((d, i) => {
+                <div className={styles.sockets} style={{ '--rows': rows.length } as React.CSSProperties}>
+                  {gd.map((d) => {
                     if (assignments.some((a) => a.groupId === g.id && a.onDate === d)) return null;
                     const key = assignmentKey(g.id, d);
                     const pv = preview?.keys.has(key) ? preview.cls : '';
@@ -558,8 +563,8 @@ export function Board({
                         key={d}
                         type="button"
                         className={`${styles.socket} ${pv}`}
-                        style={{ gridRow: i + 1 }}
-                        data-row={i + 1}
+                        style={{ gridRow: rowOf(d) }}
+                        data-row={rowOf(d)}
                         data-group={g.id}
                         data-week={w.start}
                         data-date={d}
@@ -588,8 +593,8 @@ export function Board({
                         tabIndex={0}
                         draggable={canWrite}
                         className={`${styles.piece} ${a.isSubstitute ? styles.pieceSub : ''} ${a.isTentative ? styles.pieceTent : ''} ${hardIss.length ? styles.pieceBad : warnIss ? styles.pieceWarn : ''}`}
-                        style={{ gridRow: `${gd.indexOf(dates[0]) + 1} / span ${dates.length}` }}
-                        data-row={gd.indexOf(dates[0]) + 1}
+                        style={{ gridRow: `${rowOf(dates[0])} / span ${dates.length}` }}
+                        data-row={rowOf(dates[0])}
                         data-group={g.id}
                         data-week={w.start}
                         title={`${who?.fullName ?? ''}${issues.length ? `\n${issues.map((i) => `• ${pick(lang, i.text)}`).join('\n')}` : ''}`}

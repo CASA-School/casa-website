@@ -757,9 +757,9 @@ function ChosenRecipient({
           <dd>
             {bookings
               ? `${bookings === 1 ? t('1 Buchung', '1 booking') : t(`${bookings} Buchungen`, `${bookings} bookings`)}${
-                  recipient.person.studiedBefore ? t(' · keine Anmeldegebühr', ' · no enrolment fee') : ''
+                  recipient.person.studiedBefore ? t(' · keine Einschreibegebühr', ' · no enrolment fee') : ''
                 }${recipient.person.stayedBefore ? t(' · hat schon bei CASA gewohnt', ' · has stayed with CASA') : ''}`
-              : t('Zum ersten Mal – Anmeldegebühr fällig', 'First time — enrolment fee due')}
+              : t('Zum ersten Mal – Einschreibegebühr fällig', 'First time — enrolment fee due')}
           </dd>
         </dl>
       ) : null}

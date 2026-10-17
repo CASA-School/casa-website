@@ -3,6 +3,7 @@ import type { CourseInstanceSummary } from '@/lib/admin/catalogue';
 import type { Room } from '@/lib/admin/rooms';
 import { assignRoomAction } from '../settings/rooms/actions';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { roomName } from '@/lib/admin/course-starts';
 
 /**
  * A cohort's room as a value: the name, or an empty cell with a quiet "Set
@@ -14,7 +15,7 @@ export async function RoomPicker({
   instance,
   rooms,
 }: {
-  instance: Pick<CourseInstanceSummary, 'id' | 'courseTypeName' | 'room'>;
+  instance: Pick<CourseInstanceSummary, 'id' | 'courseTypeName' | 'courseTypeNameDe' | 'room'>;
   rooms: readonly Room[];
 }) {
   const { t } = await getI18n();
@@ -27,17 +28,13 @@ export async function RoomPicker({
 
   return (
     <Popover
-      label={t(`Raum für ${instance.courseTypeName}`, `Room for ${instance.courseTypeName}`)}
+      label={t(`Raum für ${instance.courseTypeNameDe}`, `Room for ${instance.courseTypeName}`)}
       width={280}
       trigger={
         <span className="-mx-2 flex min-h-8 items-center px-2 py-1 text-sm">
           {current ? (
-            <span className="truncate font-medium text-[var(--casa-ink)]">
-              {current.name}
-              {current.nickname ? (
-                <span className="font-normal text-[var(--casa-text-subtle)]"> · {current.nickname}</span>
-              ) : null}
-            </span>
+            // The team's name for the room, its city; the room's own name is in the choices.
+            <span className="truncate font-medium text-[var(--casa-ink)]">{roomName(current)}</span>
           ) : (
             // An unset room is an empty cell: "No room" on every row was noise
             // (§Design standards 6). The way to set one appears on the row's hover
@@ -58,10 +55,8 @@ export async function RoomPicker({
           <PopoverChoice key={room.id} name="roomId" value={room.id} current={room.id === current?.id}>
             <span className="flex items-baseline gap-2">
               <span>
-                {room.name}
-                {room.nickname ? (
-                  <span className="font-normal text-[var(--casa-text-subtle)]"> · {room.nickname}</span>
-                ) : null}
+                {roomName(room)}
+                {room.nickname ? <span className="font-normal text-[var(--casa-text-subtle)]"> · {room.name}</span> : null}
               </span>
               {room.capacity !== null ? (
                 <span className="text-xs font-normal whitespace-nowrap text-[var(--casa-text-subtle)] tabular-nums">

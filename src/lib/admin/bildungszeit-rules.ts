@@ -11,7 +11,8 @@
 
 export type BzShift = 'morning' | 'afternoon';
 export type BzStart = { id: string; startDate: string; endDate: string; shift: BzShift | null };
-export type BzClassPlaces = { places: number; booked: number; offered: number };
+/** A class's places in a week; a course closed for booking (`bookable` false) has none free. */
+export type BzClassPlaces = { places: number; booked: number; offered: number; closed?: boolean };
 
 export type BzWeek = {
   /** Monday and Friday, `yyyy-mm-dd`. */
@@ -82,7 +83,7 @@ export function bzSegments<W extends Pick<BzWeek, 'monday' | 'friday' | 'start' 
 export function bzFree(run: readonly BzWeek[], half: 'first' | 'second', code: string): number {
   return Math.max(0, Math.min(...run.map((w) => {
     const c = w[half][code];
-    return c ? c.places - c.booked - c.offered : 14;
+    return c ? (c.closed ? 0 : c.places - c.booked - c.offered) : 14;
   })));
 }
 

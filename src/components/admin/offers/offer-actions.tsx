@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRef, useState } from 'react';
 
 import { decideOfferAction, deleteOfferAction, duplicateOfferAction, reviseOfferAction, sendOfferAction } from '@/app/(admin)/admin/(workspace)/offers/actions';
@@ -15,14 +16,15 @@ const panel = `${ui.tokens} max-w-lg rounded-3xl p-6 sm:rounded-3xl`;
 
 /**
  * The toolbar's right side: the one thing to do next as the primary button —
- * Send for a draft, Accepted for an offer waiting for an answer — and the rest
- * behind "⋯".
+ * Send for a draft, Accepted for an offer waiting for an answer, „Buchung
+ * anlegen" for an accepted offer to a learner — and the rest behind "⋯".
  */
 export function OfferToolbarActions({
   id,
   status,
   canWrite,
   canDelete,
+  bookHref,
   send,
   extra,
 }: {
@@ -30,6 +32,7 @@ export function OfferToolbarActions({
   status: OfferStatus;
   canWrite: boolean;
   canDelete: boolean;
+  bookHref?: string | null;
   send: Omit<Parameters<typeof SendButton>[0], 'id'> | null;
   extra?: { label: string; onSelect: () => void }[];
 }) {
@@ -61,6 +64,11 @@ export function OfferToolbarActions({
         <button type="button" className={ui.primary} onClick={() => setDecision('accepted')}>
           {t('Angenommen', 'Accepted')}
         </button>
+      ) : null}
+      {status === 'accepted' && bookHref ? (
+        <Link href={bookHref} className={ui.primary}>
+          {t('Buchung anlegen', 'Create booking')}
+        </Link>
       ) : null}
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>

@@ -1,4 +1,5 @@
 import type { BildungszeitOffer } from './bildungszeit-rules';
+import type { Bilingual } from './i18n';
 
 /**
  * The booking offer's shapes and its two pure helpers.
@@ -18,6 +19,11 @@ export type CohortOffer = {
   weeks: number;
   levelCode: string | null;
   session: string | null;
+  /** The course type's format: `intensive` sells a whole level or a half, an evening term one half. */
+  format: string | null;
+  /** When it meets: the weekdays (Mon … Sun) and the time, "09:00-12:30". */
+  days: string[] | null;
+  time: string | null;
   roomName: string | null;
   seatsTaken: number;
   capacity: number;
@@ -49,6 +55,21 @@ export const levelPlaces = (cohort: Pick<CohortOffer, 'levels'>, levelCode: stri
 export const levelFree = (l: LevelPlaces, forPerson?: string) =>
   l.closed ? 0 : Math.max(0, l.places - l.booked - l.offered + (forPerson && l.offeredTo.includes(forPerson) ? 1 : 0));
 
+/**
+ * A start's free places, for the list of starts: the chosen level's, when the level is known, else
+ * every course of the start together (a second half joined here sits in another start's course and is
+ * left out), else its seats. Null when nothing is known; `closed` when no course of it is offered.
+ */
+export function startFree(cohort: Pick<CohortOffer, 'levels' | 'capacity' | 'seatsTaken'>, levelCode: string | null, forPerson?: string): { free: number; closed: boolean } | null {
+  if (levelCode) {
+    const l = levelPlaces(cohort, levelCode);
+    return { free: levelFree(l, forPerson), closed: Boolean(l.closed) };
+  }
+  const own = Object.values(cohort.levels).filter((l) => !l.until);
+  if (own.length) return { free: own.reduce((sum, l) => sum + levelFree(l, forPerson), 0), closed: own.every((l) => l.closed) };
+  return cohort.capacity > 0 ? { free: Math.max(0, cohort.capacity - cohort.seatsTaken), closed: false } : null;
+}
+
 /** How many wait in front of a learner: none if a place is held for them, their place if queued, else all. */
 export const waitingAhead = (l: LevelPlaces, person: string) => {
   if (l.offeredTo.includes(person)) return 0;
@@ -73,7 +94,7 @@ export type MaterialOffer = {
 
 export type AccommodationOffer = {
   code: string;
-  name: string;
+  name: Bilingual;
   isCasaManaged: boolean;
 };
 
@@ -103,8 +124,8 @@ export type BookingOffer = {
   levels: { code: string; cefr: string | null }[];
   materials: MaterialOffer[];
   accommodation: AccommodationOffer[];
-  roomTypes: { code: string; name: string }[];
-  catering: { code: string; name: string }[];
+  roomTypes: { code: string; name: Bilingual }[];
+  catering: { code: string; name: Bilingual }[];
   enrolmentFee: number | null;
   currency: string;
 };

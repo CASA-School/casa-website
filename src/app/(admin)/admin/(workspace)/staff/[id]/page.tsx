@@ -25,7 +25,7 @@ import { canAccess } from '@/lib/admin/access';
 import { EXAMINER_PART_LABELS, needsLicence } from '@/lib/admin/exam-parts';
 import { licenceExams, staffLicences, staffSittings } from '@/lib/admin/examiners';
 import { requireModule } from '@/lib/admin/guard';
-import { num, pick, wsLocale, type WsLang } from '@/lib/admin/i18n';
+import { counted, num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { ABSENCE_LABELS, WEEKDAY_LABELS } from '@/lib/admin/kursplanung/types';
 import { getPerson, listBankAccounts, listCountries } from '@/lib/admin/people';
@@ -41,15 +41,28 @@ import {
   type TeachingDay,
 } from '@/lib/admin/staff-members';
 
+/** How far ahead the lesson days are shown: four weeks unless a colleague asks for more (`?weeks=`). */
+const SPANS = [4, 8, 12, 26] as const;
+type Span = (typeof SPANS)[number];
+const spanOf = (value: string | undefined): Span => SPANS.find((n) => String(n) === value) ?? 4;
+
 /**
  * A colleague (2026-10-17, migration 0039; docs/ADMIN_WORKSPACE.md §Staff), in the record pages'
- * tabs: the overview — what they do, the next four weeks, days away, their account; teaching — the
+ * tabs: the overview — what they do, the next weeks (four, or up to 26 with `?weeks=`), days away,
+ * their account; teaching — the
  * rules Kursplanung fits them by, their days on the board, their absences; their person; their
  * contracts and HR numbers and their bank details, with `staff_private`. Who teaches which group on
  * which day is changed on the board; here it is read.
  */
-export default async function StaffMemberPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; error?: string }> }) {
-  const [{ id }, { tab, error }, user] = await Promise.all([params, searchParams, requireModule('staff')]);
+export default async function StaffMemberPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string; error?: string; weeks?: string }>;
+}) {
+  const [{ id }, { tab, error, weeks: weeksParam }, user] = await Promise.all([params, searchParams, requireModule('staff')]);
+  const weeks = spanOf(weeksParam);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const member = await getStaffMember(id);
   if (!member) notFound();
@@ -67,7 +80,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
   const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts] = await Promise.all([
     staffRoles(),
     getPerson(member.personId),
-    upcomingTeaching(id),
+    upcomingTeaching(id, weeks * 7),
     upcomingAbsences(id),
     staffLicences(id),
     staffSittings(id),
@@ -87,6 +100,8 @@ export default async function StaffMemberPage({ params, searchParams }: { params
   const hidden = { staffId: id };
   const day = (iso: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) => new Date(`${iso}T12:00:00`).toLocaleDateString(wsLocale(lang), opts);
   const full = (iso: string) => day(iso, { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const awayDays = absences.reduce((n, a) => n + a.days, 0);
+  const teachingDays = new Set(teaching.map((d) => d.date)).size;
   const period = (from: string | null, to: string | null) =>
     from && to ? `${full(from)} – ${full(to)}` : from ? t(`seit ${full(from)}`, `since ${full(from)}`) : to ? t(`bis ${full(to)}`, `until ${full(to)}`) : t('ohne Datum', 'no dates');
 
@@ -100,7 +115,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
   ];
 
   const rolesDialog = canEdit ? (
-    <FormDialog trigger={t('Aufgaben', 'Roles')} title={t(`Aufgaben von ${member.name}`, `${member.name}'s roles`)} triggerVariant="ghost" size="sm" width="lg">
+    <FormDialog icon={Icon.team} tint="ink" trigger={t('Aufgaben', 'Roles')} title={t(`Aufgaben von ${member.name}`, `${member.name}'s roles`)} triggerVariant="ghost" size="sm" width="lg">
       <RolesForm staffId={id} roles={roles} checked={member.roles} />
     </FormDialog>
   ) : null;
@@ -147,12 +162,12 @@ export default async function StaffMemberPage({ params, searchParams }: { params
               </Stat>
             ) : null}
             {teaches ? (
-              <Stat label={t('Unterricht, 4 Wochen', 'Teaching, 4 weeks')}>
-                {teaching.length ? t(`${num(lang, new Set(teaching.map((d) => d.date)).size)} Tage`, `${num(lang, new Set(teaching.map((d) => d.date)).size)} days`) : <span className="font-semibold text-[var(--casa-muted)]">{t('nichts geplant', 'nothing planned')}</span>}
+              <Stat label={t(`Unterricht, ${weeks} Wochen`, `Teaching, ${weeks} weeks`)}>
+                {teaching.length ? counted(lang, teachingDays, t('Tag', 'day'), t('Tage', 'days')) : <span className="font-semibold text-[var(--casa-muted)]">{t('nichts geplant', 'nothing planned')}</span>}
               </Stat>
             ) : null}
             <Stat label={t('Abwesend', 'Away')}>
-              {absences.length ? t(`${num(lang, absences.reduce((n, a) => n + a.days, 0))} Tage`, `${num(lang, absences.reduce((n, a) => n + a.days, 0))} days`) : <span className="font-semibold text-[var(--casa-muted)]">{t('nein', 'no')}</span>}
+              {absences.length ? counted(lang, awayDays, t('Tag', 'day'), t('Tage', 'days')) : <span className="font-semibold text-[var(--casa-muted)]">{t('nein', 'no')}</span>}
             </Stat>
           </StatBar>
         }
@@ -170,18 +185,21 @@ export default async function StaffMemberPage({ params, searchParams }: { params
           <div className="space-y-4">
             {teaches || teaching.length ? (
               <Card
-                title={t('Die nächsten vier Wochen', 'The next four weeks')}
+                title={weeks === 4 ? t('Die nächsten vier Wochen', 'The next four weeks') : t(`Die nächsten ${weeks} Wochen`, `The next ${weeks} weeks`)}
                 icon={Icon.kursplanung}
                 tint="sun"
                 actions={
-                  canAccess(user, 'kursplanung') ? (
-                    <Link href="/admin/kursplanung" className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
-                      {t('Zur Kursplanung', 'Open Kursplanung')}
-                    </Link>
-                  ) : undefined
+                  <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <SpanChoice id={id} tab={null} weeks={weeks} t={t} />
+                    {canAccess(user, 'kursplanung') ? (
+                      <Link href="/admin/kursplanung" className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                        {t('Zur Kursplanung', 'Open Kursplanung')}
+                      </Link>
+                    ) : null}
+                  </span>
                 }
               >
-                <TeachingWeeks days={teaching} lang={lang} />
+                <TeachingWeeks days={teaching} weeks={weeks} lang={lang} />
               </Card>
             ) : null}
             <Card title={t('Abwesend', 'Away')} icon={Icon.calendar} tint="ink">
@@ -219,7 +237,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
               tint="ink"
               actions={
                 canEdit && managesAccounts ? (
-                  <FormDialog trigger={member.account ? t('Ändern', 'Change') : t('Verbinden', 'Link')} title={t('Konto im Arbeitsbereich', 'Workspace account')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.lock} tint="ink" trigger={member.account ? t('Ändern', 'Change') : t('Verbinden', 'Link')} title={t('Konto im Arbeitsbereich', 'Workspace account')} triggerVariant="ghost" size="sm">
                     <AccountForm staffId={id} current={member.account?.id ?? null} accounts={member.account ? [{ id: member.account.id, name: member.account.name, email: member.account.email }, ...accounts] : accounts} />
                   </FormDialog>
                 ) : undefined
@@ -247,8 +265,8 @@ export default async function StaffMemberPage({ params, searchParams }: { params
         <RecordTabPanel id="teaching">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
             <div className="space-y-4">
-              <Card title={t('Auf dem Plan', 'On the board')} icon={Icon.kursplanung} tint="sun">
-                <TeachingWeeks days={teaching} lang={lang} />
+              <Card title={t('Auf dem Plan', 'On the board')} icon={Icon.kursplanung} tint="sun" actions={<SpanChoice id={id} tab="teaching" weeks={weeks} t={t} />}>
+                <TeachingWeeks days={teaching} weeks={weeks} lang={lang} />
               </Card>
               <Card
                 title={t('Abwesenheiten', 'Time away')}
@@ -256,7 +274,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
                 tint="ink"
                 actions={
                   canEdit ? (
-                    <FormDialog trigger={t('Eintragen', 'Add')} title={t('Abwesenheit eintragen', 'Add time away')} triggerVariant="ghost" size="sm">
+                    <FormDialog icon={Icon.calendar} tint="sun" trigger={t('Eintragen', 'Add')} title={t('Abwesenheit eintragen', 'Add time away')} triggerVariant="ghost" size="sm">
                       <AbsenceForm staffId={id} />
                     </FormDialog>
                   ) : undefined
@@ -296,7 +314,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
               tint="blue"
               actions={
                 canEdit ? (
-                  <FormDialog trigger={t('Ändern', 'Change')} title={t('Regeln für die Kursplanung', 'Rules for Kursplanung')} triggerVariant="ghost" size="sm" width="lg">
+                  <FormDialog icon={Icon.kursplanung} tint="sun" trigger={t('Ändern', 'Change')} title={t('Regeln für die Kursplanung', 'Rules for Kursplanung')} triggerVariant="ghost" size="sm" width="lg">
                     <TeachingForm member={member} />
                   </FormDialog>
                 ) : undefined
@@ -352,7 +370,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
               tint="green"
               actions={
                 canEdit && examTypes.length ? (
-                  <FormDialog trigger={t('Eintragen', 'Add')} title={t('Lizenz eintragen', 'Add a licence')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.award} tint="ink" trigger={t('Eintragen', 'Add')} title={t('Lizenz eintragen', 'Add a licence')} triggerVariant="ghost" size="sm">
                     <LicenceForm staffId={id} exams={examTypes} />
                   </FormDialog>
                 ) : undefined
@@ -377,7 +395,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
                       {l.note ? <span className="block text-[0.8rem] text-[var(--casa-muted)]">{l.note}</span> : null}
                       {canEdit ? (
                         <span className="mt-1 flex items-center gap-1">
-                          <FormDialog trigger={t('Ändern', 'Change')} title={t('Lizenz', 'Licence')} triggerVariant="ghost" size="sm">
+                          <FormDialog icon={Icon.award} tint="ink" trigger={t('Ändern', 'Change')} title={t('Lizenz', 'Licence')} triggerVariant="ghost" size="sm">
                             <LicenceForm staffId={id} exams={examTypes} licence={l} />
                           </FormDialog>
                           {canDelete ? (
@@ -410,7 +428,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
             tint="ink"
             actions={
               canEdit ? (
-                <FormDialog trigger={t('Bearbeiten', 'Edit')} title={member.name} triggerVariant="ghost" size="sm" width="lg">
+                <FormDialog icon={Icon.person} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={member.name} triggerVariant="ghost" size="sm" width="lg">
                   <PersonForm person={person} countries={countries} action={updateStaffPersonAction} hidden={hidden} />
                 </FormDialog>
               ) : undefined
@@ -433,7 +451,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
             tint="ink"
             actions={
               canEdit ? (
-                <FormDialog trigger={home ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')} title={t('Adresse', 'Address')} triggerVariant="ghost" size="sm">
+                <FormDialog icon={Icon.globe} tint="ink" trigger={home ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')} title={t('Adresse', 'Address')} triggerVariant="ghost" size="sm">
                   <AddressForm personId={person.id} kind="home" address={home} countries={countries} action={saveStaffAddressAction} hidden={hidden} />
                 </FormDialog>
               ) : undefined
@@ -463,7 +481,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
               tint="blue"
               actions={
                 editsPrivate ? (
-                  <FormDialog trigger={t('Vertrag hinzufügen', 'Add contract')} title={t('Neuer Vertrag', 'New contract')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.statement} tint="ink" trigger={t('Vertrag hinzufügen', 'Add contract')} title={t('Neuer Vertrag', 'New contract')} triggerVariant="ghost" size="sm">
                     <ContractForm staffId={id} />
                   </FormDialog>
                 ) : undefined
@@ -491,7 +509,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
                       </span>
                       <span className="flex items-center gap-1">
                         {editsPrivate ? (
-                          <FormDialog trigger={t('Ändern', 'Change')} title={t('Vertrag', 'Contract')} triggerVariant="ghost" size="sm">
+                          <FormDialog icon={Icon.statement} tint="ink" trigger={t('Ändern', 'Change')} title={t('Vertrag', 'Contract')} triggerVariant="ghost" size="sm">
                             <ContractForm staffId={id} contract={c} />
                           </FormDialog>
                         ) : null}
@@ -518,7 +536,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
               tint="ink"
               actions={
                 editsPrivate && hr ? (
-                  <FormDialog trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.lock} tint="ink" trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="ghost" size="sm">
                     <HrNumbersForm staffId={id} numbers={hr} />
                   </FormDialog>
                 ) : undefined
@@ -544,7 +562,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
             tint="green"
             actions={
               editsPrivate ? (
-                <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
                   <BankAccountForm personId={person.id} holder={member.name} action={addStaffBankAccountAction} hidden={hidden} />
                 </FormDialog>
               ) : undefined
@@ -560,7 +578,7 @@ export default async function StaffMemberPage({ params, searchParams }: { params
                     </span>
                     <span className="flex items-center gap-1">
                       {editsPrivate ? (
-                        <FormDialog trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
                           <BankAccountForm personId={person.id} holder={member.name} account={b} action={updateStaffBankAccountAction} hidden={hidden} />
                         </FormDialog>
                       ) : null}
@@ -615,11 +633,49 @@ export default async function StaffMemberPage({ params, searchParams }: { params
   );
 }
 
+/** „4 · 8 · 12 · 26 Wochen": how far ahead the lesson days reach, the chosen span in ink. */
+function SpanChoice({ id, tab, weeks, t }: { id: string; tab: string | null; weeks: Span; t: T }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[0.78rem] text-[var(--casa-muted)]" role="group" aria-label={t('Zeitraum', 'Period')}>
+      {SPANS.map((n) => {
+        const query = new URLSearchParams({ ...(tab ? { tab } : {}), ...(n === 4 ? {} : { weeks: String(n) }) }).toString();
+        return (
+          <Link
+            key={n}
+            href={`/admin/staff/${id}${query ? `?${query}` : ''}`}
+            scroll={false}
+            aria-current={n === weeks ? 'true' : undefined}
+            className={
+              n === weeks
+                ? 'rounded-md bg-ws-sunk px-1.5 py-0.5 font-bold text-[var(--casa-ink)] tabular-nums'
+                : 'rounded-md px-1.5 py-0.5 font-semibold tabular-nums hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
+            }
+          >
+            {n}
+          </Link>
+        );
+      })}
+      <span className="ml-0.5">{t('Wochen', 'weeks')}</span>
+    </span>
+  );
+}
+
 const SHIFT_SHORT = { morning: { de: 'Vorm.', en: 'a.m.' }, afternoon: { de: 'Nachm.', en: 'p.m.' }, evening: { de: 'Abends', en: 'eve.' } } as const;
 
 /** Their lesson days, week by week: the days, the course, a substitution or a tentative day marked. */
-function TeachingWeeks({ days, lang }: { days: TeachingDay[]; lang: WsLang }) {
-  if (!days.length) return <p className="text-sm text-[var(--casa-muted)]">{lang === 'de' ? 'In den nächsten vier Wochen nichts geplant.' : 'Nothing planned in the next four weeks.'}</p>;
+function TeachingWeeks({ days, weeks, lang }: { days: TeachingDay[]; weeks: Span; lang: WsLang }) {
+  if (!days.length)
+    return (
+      <p className="text-sm text-[var(--casa-muted)]">
+        {weeks === 4
+          ? lang === 'de'
+            ? 'In den nächsten vier Wochen nichts geplant.'
+            : 'Nothing planned in the next four weeks.'
+          : lang === 'de'
+            ? `In den nächsten ${weeks} Wochen nichts geplant.`
+            : `Nothing planned in the next ${weeks} weeks.`}
+      </p>
+    );
   // One line per week and course: "26. Okt. · B1.1 Gruppe 2 · Vorm. · Mo, Di, Mi".
   const monday = (iso: string) => {
     const d = new Date(`${iso}T12:00:00Z`);

@@ -18,14 +18,18 @@
 .toggle svg { position: static; width: 16px; height: 16px; }
 .withToggle .input { padding-right: 40px; }
 
-.pop { position: absolute; z-index: 45; top: calc(100% + 8px); left: 0; padding: 14px; background: #fff; border-radius: 6px; box-shadow: 0 24px 56px -22px rgba(15, 23, 42, 0.42), 0 0 0 1px rgba(15, 23, 42, 0.08); animation: pop 140ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
-.popUp { top: auto; bottom: calc(100% + 8px); }
+/* Placed by `Floating` (fixed, above the page), so nothing around the field can cut it off. */
+.pop { padding: 14px; background: #fff; border-radius: 6px; box-shadow: 0 24px 56px -22px rgba(15, 23, 42, 0.42), 0 0 0 1px rgba(15, 23, 42, 0.08); animation: pop 140ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
 
 .cal { --cell: 36px; position: relative; display: inline-flex; flex-direction: column; gap: 10px; user-select: none; }
 .compact { --cell: 33px; }
 .months { display: flex; gap: 22px; }
 .month { display: flex; flex-direction: column; gap: 6px; }
-.title { height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 800; color: #111827; }
+.title { height: 32px; display: flex; align-items: center; justify-content: center; gap: 2px; font-size: 13.5px; font-weight: 800; color: #111827; }
+/* The month and the year in a one-month calendar's head: plain text until hovered, a choice when clicked. */
+.jump { appearance: none; height: 28px; padding: 0 18px 0 6px; border: 0; border-radius: 4px; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5l3 3 3-3' fill='none' stroke='%2346536a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 4px center; font: inherit; color: inherit; cursor: pointer; }
+.jump:hover { background-color: var(--ws-sunk, #f0f4f9); }
+.jump:focus-visible { outline: 2px solid rgba(29, 115, 198, 0.35); outline-offset: 1px; }
 .nav { position: absolute; top: 0; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: #46536a; font-size: 18px; line-height: 1; cursor: pointer; }
 .nav:hover { background: var(--ws-sunk, #f0f4f9); color: #111827; }
 .prev { left: 0; }

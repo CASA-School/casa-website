@@ -104,15 +104,21 @@ type GroupRow = {
   teacher_second: string | null;
   room_id: string | null;
   filemaker_course_id: string | null;
+  course_start: string | null;
+  course_end: string | null;
 };
 
 export async function listGroups(month: string): Promise<CourseGroup[]> {
   const rows = await query<GroupRow>(
-    `SELECT id, to_char(month, 'YYYY-MM-DD') AS month, shift, level, phase, group_index,
-            registrations, teacher_first, teacher_second, room_id, filemaker_course_id
-       FROM course_groups
-      WHERE month = $1::date
-      ORDER BY shift, level, phase, group_index`,
+    // Each group with its course's first and last day: the board plans no day outside them.
+    `SELECT g.id, to_char(g.month, 'YYYY-MM-DD') AS month, g.shift, g.level, g.phase, g.group_index,
+            g.registrations, g.teacher_first, g.teacher_second, g.room_id, g.filemaker_course_id,
+            to_char(i.start_date, 'YYYY-MM-DD') AS course_start, to_char(i.end_date, 'YYYY-MM-DD') AS course_end
+       FROM course_groups g
+       LEFT JOIN courses c ON c.id = g.course_id
+       LEFT JOIN course_instances i ON i.id = c.course_instance_id
+      WHERE g.month = $1::date
+      ORDER BY g.shift, g.level, g.phase, g.group_index`,
     [`${month}-01`]
   );
   return rows.flatMap((r) =>
@@ -130,6 +136,8 @@ export async function listGroups(month: string): Promise<CourseGroup[]> {
             teacherSecond: r.teacher_second,
             roomId: r.room_id,
             filemakerCourseId: r.filemaker_course_id,
+            courseStart: r.course_start,
+            courseEnd: r.course_end,
           },
         ]
       : []
@@ -226,11 +234,18 @@ export async function replaceWeekAssignments(
   });
 }
 
-/** One board cell: the group's lesson day on that date, made if missing, gets the teacher. */
+/**
+ * One board cell: the group's lesson day on that date, made if missing, gets the teacher — never a date
+ * outside the group's course (the action has refused it already; this is the floor under it).
+ */
 async function setDayTeacher(client: PoolClient, a: Assignment, changedBy: string, onlyIfEmpty = false): Promise<number> {
   const r = await client.query(
     `INSERT INTO course_days (group_id, course_id, group_index, on_date, teacher_id, is_substitute, is_tentative, changed_by)
-     SELECT g.id, g.course_id, g.group_index, $2::date, $3, $4, $5, $6 FROM course_groups g WHERE g.id = $1
+     SELECT g.id, g.course_id, g.group_index, $2::date, $3, $4, $5, $6
+       FROM course_groups g
+       LEFT JOIN courses c ON c.id = g.course_id
+       LEFT JOIN course_instances i ON i.id = c.course_instance_id
+      WHERE g.id = $1 AND (i.id IS NULL OR $2::date BETWEEN i.start_date AND i.end_date)
      ON CONFLICT (group_id, on_date) WHERE group_id IS NOT NULL DO UPDATE
        SET teacher_id = EXCLUDED.teacher_id, is_substitute = EXCLUDED.is_substitute, is_tentative = EXCLUDED.is_tentative,
            changed_by = EXCLUDED.changed_by, updated_at = timezone('utc', now())

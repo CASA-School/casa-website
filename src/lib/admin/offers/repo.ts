@@ -900,7 +900,7 @@ export async function priceListOptions(lang: WsLang): Promise<PriceListItem[]> {
   }
   items.push({
     group: t('Gebühren', 'Fees'),
-    label: t('Anmeldegebühr', 'Enrolment fee'),
+    label: t('Einschreibegebühr', 'Enrolment fee'),
     chargeType: 'enrolment_fee',
     de: 'Einschreibegebühr',
     en: 'Enrolment fee',

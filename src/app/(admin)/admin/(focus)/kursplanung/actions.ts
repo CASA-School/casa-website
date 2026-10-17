@@ -86,7 +86,10 @@ export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   const [groups, teachers] = await Promise.all([listGroups(payload.month), listTeachers()]);
   const weeks = planningWeeks(payload.month);
   const errors = validateWeekAssignments(payload, groups, teachers, weeks);
-  if (errors.length > 0) return { ok: false, error: errors[0] };
+  if (errors.length > 0) {
+    if (errors[0].startsWith('outside the course')) return { ok: false, error: t('Dieser Tag liegt außerhalb des Kurses.', 'That day is outside the course.') };
+    return { ok: false, error: errors[0] };
+  }
 
   const week = weeks.find((w) => w.start === payload.weekStart)!;
   const shiftGroups = groups.filter((g) => g.shift === payload.shift);

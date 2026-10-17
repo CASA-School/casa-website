@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { isLevelCode } from '@/lib/admin/bookings';
+import { cancelCourseInstance, deleteCourseInstance, updateCourseInstance } from '@/lib/admin/catalogue';
+import { readStartForm } from '@/lib/admin/course-starts';
 import { cancelCourse, courseForEdit, createCourse, deleteCourse, openCourseGroup, updateCourse, type CourseInput } from '@/lib/admin/courses';
 import { issueWaitlistLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
@@ -250,4 +252,44 @@ export async function issueWaitlistLetterAction(formData: FormData): Promise<voi
   if (!result.ok) fail(back, pick(lang, result.reason));
   revalidatePath('/admin', 'layout');
   redirect(`/admin/letters/${result.letterId}?sent=1`);
+}
+
+// ------------------------------------------------------------------ a course start
+
+/**
+ * A start's dates, schedule, title, room and website, from its page („Bearbeiten"): the course
+ * planners' (`rooms` at `edit`), as „Termin planen" is. Sent back to the form with the reason when it
+ * cannot be saved, so nothing typed is lost.
+ */
+export async function updateStartAction(_previous: { error: string | null }, formData: FormData): Promise<{ error: string | null }> {
+  const actor = await requireModule('rooms', 'edit');
+  const startId = id(formData, 'startId');
+  const { lang } = await getI18n();
+  const read = readStartForm(formData);
+  if (!read.ok) return { error: pick(lang, read.error) };
+  const result = await updateCourseInstance(startId, read.value, actor);
+  if (!result.ok) return { error: pick(lang, result.reason) };
+  done(`/admin/catalogue/${startId}`);
+}
+
+/** Called off, with the confirmation: off the website, kept with its courses — not while anyone is booked or waits. */
+export async function cancelStartAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('rooms', 'full');
+  const startId = id(formData, 'startId');
+  const back = `/admin/catalogue/${startId}`;
+  if (formData.get('confirmed') !== '1') fail(back, (await getI18n()).t('Bitte bestätige das Absagen.', 'Please confirm the cancellation.'));
+  const result = await cancelCourseInstance(startId, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
+}
+
+/** A start planned here by mistake, never used, with the confirmation. */
+export async function deleteStartAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('rooms', 'full');
+  const startId = id(formData, 'startId');
+  const back = `/admin/catalogue/${startId}`;
+  if (formData.get('confirmed') !== '1') fail(back, (await getI18n()).t('Bitte bestätige das Löschen.', 'Please confirm the deletion.'));
+  const result = await deleteCourseInstance(startId, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done('/admin/catalogue');
 }

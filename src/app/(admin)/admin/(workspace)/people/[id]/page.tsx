@@ -19,7 +19,7 @@ import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordH
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
-import { BOOKING_LIGHT_LABELS, bookingLight, OBSERVATION_REASON_LABELS, personBookings, type BookingListItem } from '@/lib/admin/bookings';
+import { bookingLight, bookingLightLabel, type BookingListItem, OBSERVATION_REASON_LABELS, personBookings } from '@/lib/admin/bookings';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
@@ -44,6 +44,7 @@ import {
 } from '@/lib/admin/people';
 import { normaliseStatus } from '@/lib/admin/queues';
 import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
+import { isExamParts } from '@/lib/admin/exam-parts';
 import { personExamEntries } from '@/lib/admin/exams';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { staffIdForPerson } from '@/lib/admin/staff-members';
@@ -145,9 +146,14 @@ export default async function PersonPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; tab?: string; book?: string }>;
+  /**
+   * `book=1` opens the booking wizard at once; with `sitting` (and `parts`) it starts at that exam
+   * sitting, with `cohort` (and `level`) at that course start — links from a sitting's „Buchen" and an
+   * accepted offer.
+   */
+  searchParams: Promise<{ error?: string; tab?: string; book?: string; sitting?: string; parts?: string; cohort?: string; level?: string }>;
 }) {
-  const [{ id }, { error, tab, book }, user] = await Promise.all([params, searchParams, requireModule('people')]);
+  const [{ id }, { error, tab, book, sitting, parts, cohort, level }, user] = await Promise.all([params, searchParams, requireModule('people')]);
   const person = await getPerson(id);
 
   if (!person) {
@@ -243,7 +249,7 @@ export default async function PersonPage({
         state: (
           <BookingLightPill
             light={bookingLight(b)}
-            label={pick(lang, BOOKING_LIGHT_LABELS[bookingLight(b)])}
+            label={pick(lang, bookingLightLabel(b))}
             detail={b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
           />
         ),
@@ -307,11 +313,14 @@ export default async function PersonPage({
   const pastCases = cases.filter((c) => !c.open);
 
   const owed = bookings.filter((b) => b.status !== 'cancelled').reduce((sum, b) => sum + Math.max(0, b.charged - b.paid), 0);
-  const running = bookings.filter((b) => b.status === 'reserved' || b.status === 'confirmed').length;
 
   // The course they are in, or the next one: the first thing anyone asks about a learner.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  // Under the bookings, by their dates: running today, or still to come (an exam on its day).
+  const standing = bookings.filter((b) => b.status !== 'cancelled' && b.startDate && b.endDate);
+  const running = standing.filter((b) => b.startDate! <= today && b.endDate! >= today).length;
+  const upcoming = standing.filter((b) => b.startDate! > today).length;
   // A course: an exam booking is a day, and shows among the open cases instead.
   const dated = bookings.filter((b) => !b.examSessionId && b.status !== 'cancelled' && b.startDate && b.endDate);
   const current = dated.find((b) => b.startDate! <= today && b.endDate! >= today) ?? null;
@@ -322,7 +331,7 @@ export default async function PersonPage({
 
   const personDialog = (variant: 'secondary' | 'ghost') =>
     canEdit ? (
-      <FormDialog trigger={t('Bearbeiten', 'Edit')} title={person.displayName} width="lg" triggerVariant={variant} size={variant === 'ghost' ? 'sm' : undefined}>
+      <FormDialog icon={Icon.person} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={person.displayName} width="lg" triggerVariant={variant} size={variant === 'ghost' ? 'sm' : undefined}>
         <PersonForm person={person} countries={countries} />
       </FormDialog>
     ) : null;
@@ -404,14 +413,22 @@ export default async function PersonPage({
             {personDialog('secondary')}
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
-              <FormDialog
+              <FormDialog icon={Icon.bookings} tint="red"
                 trigger={t('Neue Buchung', 'New booking')}
                 title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)}
                 triggerVariant="primary"
                 width="lg"
                 defaultOpen={book === '1'}
               >
-                <BookingWizard personId={person.id} personName={person.displayName} offer={offer} returnTo={`/admin/people/${person.id}`} action={createBookingFromWizardAction} waitlistAction={waitlistFromWizardAction} />
+                <BookingWizard
+                  personId={person.id}
+                  personName={person.displayName}
+                  offer={offer}
+                  {...(book === '1' ? wizardStart(offer, { sitting, parts, cohort, level }) : {})}
+                  returnTo={`/admin/people/${person.id}`}
+                  action={createBookingFromWizardAction}
+                  waitlistAction={waitlistFromWizardAction}
+                />
               </FormDialog>
             ) : null}
           </>
@@ -432,7 +449,12 @@ export default async function PersonPage({
                 {bookings.length ? (
                   <>
                     {num(lang, bookings.length)}
-                    {running ? <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]"> · {t(`${num(lang, running)} laufend`, `${num(lang, running)} current`)}</span> : null}
+                    {running || upcoming ? (
+                      <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]">
+                        {running ? ` · ${t(`${num(lang, running)} laufend`, `${num(lang, running)} running`)}` : ''}
+                        {upcoming ? ` · ${t(`${num(lang, upcoming)} kommend`, `${num(lang, upcoming)} upcoming`)}` : ''}
+                      </span>
+                    ) : null}
                   </>
                 ) : (
                   <span className="font-semibold text-[var(--casa-muted)]">{t('keine', 'none')}</span>
@@ -615,7 +637,7 @@ export default async function PersonPage({
                         {address ? <AddressLines address={address} /> : <span className="block text-[var(--casa-text-subtle)]">—</span>}
                       </span>
                       {canEdit ? (
-                        <FormDialog
+                        <FormDialog icon={Icon.globe} tint="ink"
                           trigger={address ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')}
                           title={kind === 'local' ? t('Adresse in Bremen', 'Address in Bremen') : t('Adresse zuhause', 'Home address')}
                           triggerVariant="ghost"
@@ -736,7 +758,7 @@ export default async function PersonPage({
             tint="green"
             actions={
               editsBank ? (
-                <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="secondary" size="sm">
+                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung hinzufügen', 'Add a bank account')} triggerVariant="secondary" size="sm">
                   <BankAccountForm personId={person.id} holder={person.displayName} />
                 </FormDialog>
               ) : undefined
@@ -752,7 +774,7 @@ export default async function PersonPage({
                     </span>
                     <span className="flex items-center gap-1">
                       {editsBank ? (
-                        <FormDialog trigger={t('Ändern', 'Change')} title={t('Bankverbindung ändern', 'Change the bank account')} triggerVariant="ghost" size="sm">
+                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung ändern', 'Change the bank account')} triggerVariant="ghost" size="sm">
                           <BankAccountForm personId={person.id} holder={person.displayName} account={account} />
                         </FormDialog>
                       ) : null}
@@ -800,6 +822,34 @@ export default async function PersonPage({
       ) : null}
     </RecordTabs>
   );
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Where the wizard starts when a link says: an exam sitting still bookable (with the parts), or a
+ * course start (with the level, „B2" taken as its first half). Anything it does not offer is dropped,
+ * and the wizard starts at the beginning as usual.
+ */
+function wizardStart(
+  offer: NonNullable<Awaited<ReturnType<typeof bookingOffer>>>,
+  link: { sitting?: string; parts?: string; cohort?: string; level?: string }
+): Pick<Parameters<typeof BookingWizard>[0], 'preselectedExam' | 'preselectedCohortId' | 'preselectedLevelCode'> {
+  if (link.sitting && UUID.test(link.sitting)) {
+    const exam = offer.exams.find((e) => e.sittings.some((s) => s.id === link.sitting));
+    if (exam) return { preselectedExam: { examTypeId: exam.id, sittingId: link.sitting, parts: isExamParts(link.parts) ? link.parts : 'full' } };
+  }
+  if (link.cohort && UUID.test(link.cohort)) {
+    const cohort = offer.courseTypes.flatMap((type) => type.cohorts).find((c) => c.id === link.cohort);
+    if (cohort) {
+      const typed = (link.level ?? '').trim().toUpperCase();
+      // A whole level is booked from its first half; the wizard then asks how much of it.
+      const half = /^[ABC][12]\+?$/.test(typed) ? `${typed}.1` : typed;
+      const known = offer.levels.some((l) => l.code === half);
+      return { preselectedCohortId: cohort.id, preselectedLevelCode: known ? half : null };
+    }
+  }
+  return {};
 }
 
 /** A group of cases — open or closed — under its label and count. */
@@ -881,7 +931,7 @@ function CourseNow({ booking, running, today, lang }: { booking: BookingListItem
             <span className="text-[1.15rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{booking.courseTypeName ?? t('Buchung', 'Booking')}</span>
             <BookingLightPill
               light={light}
-              label={pick(lang, BOOKING_LIGHT_LABELS[light])}
+              label={pick(lang, bookingLightLabel(booking))}
               detail={booking.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[booking.observationReason]) : undefined}
             />
           </div>

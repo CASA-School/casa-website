@@ -105,6 +105,13 @@ export type CourseGroup = {
   teacherSecond: string | null;
   roomId: string | null;
   filemakerCourseId: string | null;
+  /**
+   * The first and last day of the group's course (`course_id`, 0045), `yyyy-mm-dd`: a planning month
+   * opens on the Monday of the week the 1st falls in, which can lie before a start's first day or after
+   * the previous start's last. Null for a group of no course: every day of its month is open.
+   */
+  courseStart?: string | null;
+  courseEnd?: string | null;
 };
 
 export type Assignment = {

@@ -103,7 +103,7 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
               {t('Zur Buchung', 'Open the booking')}
             </Link>
           ) : canBook && offer && registration.personId ? (
-            <FormDialog trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
+            <FormDialog icon={Icon.bookings} tint="red" trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
               <BookingWizard
                 personId={registration.personId}
                 personName={fullName}

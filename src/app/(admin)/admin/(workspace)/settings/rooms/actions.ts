@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { isLevelCode } from '@/lib/admin/bookings';
 import { createCourseInstance } from '@/lib/admin/catalogue';
+import { readStartForm } from '@/lib/admin/course-starts';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -139,49 +141,30 @@ export async function deleteRoomAction(formData: FormData): Promise<void> {
   redirect('/admin/settings/rooms');
 }
 
-const DAYS = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
-const SESSIONS = new Set(['morning', 'afternoon', 'evening']);
+/** What „Termin planen" shows when it is sent back: the reason, in the reader's language. */
+export type CohortFormState = { error: string | null };
 
-/** Schedules a cohort from the catalogue. Planning `edit`. */
-export async function createCohortAction(formData: FormData): Promise<void> {
+/**
+ * Schedules a course start from the catalogue (planning `edit`), and opens it. The form's dates,
+ * schedule, room and website go through `readStartForm`: an en dash or spaces in the hours are read,
+ * empty hours take the time of day's, and anything else unreadable comes back to the form with the
+ * reason instead of failing on the database's check.
+ */
+export async function createCohortAction(_previous: CohortFormState, formData: FormData): Promise<CohortFormState> {
   const actor = await requireModule('rooms', 'edit');
-  const back = '/admin/catalogue';
-  const courseTypeId = id(formData, 'courseTypeId');
-  const { t } = await getI18n();
-  const startDate = String(formData.get('startDate') ?? '');
-  const endDate = String(formData.get('endDate') ?? '');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-    redirect(`${back}?error=${encodeURIComponent(t('Start- und Enddatum sind nötig.', 'Start and end dates are required.'))}`);
-  }
-  if (endDate < startDate)
-    redirect(`${back}?error=${encodeURIComponent(t('Das Enddatum liegt vor dem Start.', 'The end date is before the start.'))}`);
-  const capacity = optionalInt(formData, 'capacity') ?? 0;
-  const session = String(formData.get('session') ?? '');
-  const days = formData
-    .getAll('days')
-    .map(String)
-    .filter((d) => DAYS.has(d));
-  const time = text(formData, 'time', 40);
+  const { t, lang } = await getI18n();
+  const courseTypeId = String(formData.get('courseTypeId') ?? '');
+  if (!UUID.test(courseTypeId)) return { error: t('Bitte wähle einen Kurs.', 'Choose a course.') };
+  const read = readStartForm(formData);
+  if (!read.ok) return { error: pick(lang, read.error) };
   const levelCode = text(formData, 'levelCode', 8);
-  const roomRaw = String(formData.get('roomId') ?? '');
-  if (roomRaw && !UUID.test(roomRaw)) throw new Error('Invalid roomId');
+  if (levelCode && !(await isLevelCode(levelCode))) return { error: t('Bitte wähle ein Niveau.', 'Choose a level.') };
+  const places = Number(String(formData.get('placesPerGroup') ?? '14').trim() || '14');
+  if (!Number.isInteger(places) || places < 1 || places > 40) return { error: t('Plätze pro Gruppe: 1 bis 40.', 'Places per group: 1 to 40.') };
 
-  const cohortId = await createCourseInstance(
-    {
-      courseTypeId,
-      startDate,
-      endDate,
-      capacity,
-      levelCode,
-      session: SESSIONS.has(session) ? (session as 'morning' | 'afternoon' | 'evening') : null,
-      days,
-      time,
-      roomId: roomRaw || null,
-      title: text(formData, 'title', 120),
-    },
-    actor
-  );
+  const result = await createCourseInstance({ courseTypeId, capacity: places, levelCode, ...read.value }, actor);
+  if (!result.ok) return { error: pick(lang, result.reason) };
   revalidatePath('/admin/catalogue');
   revalidatePath('/admin/settings/rooms', 'layout');
-  redirect(`${back}?created=${cohortId}`);
+  redirect(`/admin/catalogue/${result.id}`);
 }

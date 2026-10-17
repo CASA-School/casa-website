@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 
 import { createBookingFromWizardAction } from '../../bookings/actions';
 import { BookingWizard } from '../../bookings/booking-wizard';
-import { cancelCourseAction, deleteCourseAction, offerPlaceAction, openGroupAction, takeBackOfferAction } from '../actions';
+import { cancelCourseAction, cancelStartAction, deleteCourseAction, deleteStartAction, offerPlaceAction, openGroupAction, takeBackOfferAction } from '../actions';
+import { StartEditForm } from '../cohort-form';
+import { RecordFoot } from '../../bookings/record-foot';
 import { CourseForm, NewCourseForm } from '../course-forms';
 import { CloseForm, MoveForm } from '../waitlist-forms';
 import { BookingLightPill } from '@/components/admin/booking-light';
@@ -15,8 +17,9 @@ import { Badge, Button, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { bookingOffer } from '@/lib/admin/booking-offer';
 import type { BookingOffer } from '@/lib/admin/booking-offer-types';
-import { BOOKING_LIGHT_LABELS, bookingLight, type ObservationReason } from '@/lib/admin/bookings';
-import { SESSION_LABELS } from '@/lib/admin/catalogue';
+import { bookingLight, bookingLightLabel, type ObservationReason } from '@/lib/admin/bookings';
+import { PER_LEVEL_TYPES, SESSION_LABELS, startForEdit } from '@/lib/admin/catalogue';
+import { roomChoice } from '@/lib/admin/course-starts';
 import { coursesForEdit, type CourseForEdit } from '@/lib/admin/courses';
 import { requireModule } from '@/lib/admin/guard';
 import { capitalise, num, pick, relativeDays, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
@@ -25,6 +28,7 @@ import { startClasses, type PlanClass, type StartClass } from '@/lib/admin/kursp
 import { SHIFT_INFO } from '@/lib/admin/kursplanung/types';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 import {
+  courseGroups,
   freePlaces,
   getCourseStart,
   levelCodes,
@@ -43,7 +47,7 @@ import { toDateInputValue } from '@/lib/dates';
 import { teachingWeeks } from '@/lib/admin/offers/course';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForEntries, type SentLetter } from '@/lib/admin/letters/repo';
-import { listBookableRooms } from '@/lib/admin/rooms';
+import { listBookableRooms, type Room } from '@/lib/admin/rooms';
 import { cn } from '@/lib/utils';
 
 /**
@@ -72,7 +76,7 @@ export default async function CourseStartPage({
   const plans = canAccess(user, 'rooms', 'edit');
   const ends = canAccess(user, 'rooms', 'full');
   const handles = canAccess(user, 'bookings', 'edit');
-  const [groups, entries, bookings, levels, starts, teaching, forms, rooms] = await Promise.all([
+  const [groups, entries, bookings, levels, starts, teaching, forms, bookableRooms, editing] = await Promise.all([
     levelGroups([id]),
     startEntries(id),
     canAccess(user, 'bookings') ? startBookings(id) : Promise.resolve([]),
@@ -80,10 +84,22 @@ export default async function CourseStartPage({
     handles ? upcomingStarts() : Promise.resolve([]),
     startClasses(id),
     plans ? coursesForEdit(id) : Promise.resolve([]),
-    plans ? listBookableRooms().then((r) => r.map((room) => ({ id: room.id, name: room.nickname ?? room.name }))) : Promise.resolve([]),
+    plans ? listBookableRooms() : Promise.resolve([] as Room[]),
+    plans || ends ? startForEdit(id) : Promise.resolve(null),
   ]);
+  // The rooms as the team calls them, their city first.
+  const rooms = bookableRooms.map((room) => ({ id: room.id, name: roomChoice(room) }));
   // A start of intensive or evening courses has a course per level; any other a named course each.
-  const named = !['intensive-german', 'evening-german'].includes(start.courseTypeSlug);
+  const named = !PER_LEVEL_TYPES.includes(start.courseTypeSlug);
+  // Courses of another start this one's learners wait on or are booked into: a `.2` joiner sits in the
+  // running course of the start before (`resolveCourse`). Each gets its card here, under the level asked for.
+  const joinerIds = [...new Set([...entries.map((e) => e.courseId), ...bookings.map((b) => b.courseId)].filter((c): c is string => Boolean(c) && !groups.some((g) => g.courseId === c)))];
+  const joiners = await courseGroups(joinerIds);
+  const joinerLevel = (courseId: string) =>
+    entries.find((e) => e.courseId === courseId && e.courseInstanceId === id)?.levelCode ?? bookings.find((b) => b.courseId === courseId)?.levelCode ?? null;
+  const joinerStarts = new Map(
+    (await Promise.all([...new Set(joiners.map((g) => g.courseInstanceId))].map((sid) => getCourseStart(sid)))).filter((s): s is NonNullable<typeof s> => Boolean(s)).map((s) => [s.id, s])
+  );
   // The last letter to each learner in a queue, to say on their row what they have been told.
   const letters = await lettersForEntries(entries.map((e) => e.id));
   // The wizard only where a row can be booked: an offered place, or a waiting learner with a free place.
@@ -91,11 +107,13 @@ export default async function CourseStartPage({
   const offer = bookable ? await bookingOffer() : null;
 
   const booked = groups.reduce((sum, g) => sum + g.booked, 0);
-  const waiting = groups.reduce((sum, g) => sum + g.waiting + g.offered, 0);
+  // Everyone waiting for this start, a joiner on the course before included.
+  const waiting = entries.filter((e) => e.status === 'waiting' || e.status === 'offered').length;
   const free = groups.reduce((sum, g) => sum + freePlaces(g), 0);
   const back = `/admin/catalogue/${id}`;
-  const startLabel = (s: { courseTypeName: string; startDate: Date; session: keyof typeof SESSION_LABELS | null }) =>
-    [s.courseTypeName, s.session ? pick(lang, SESSION_LABELS[s.session]) : null, new Date(s.startDate).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })]
+  const typeName = (s: { courseTypeName: string; courseTypeNameDe: string }) => (lang === 'de' ? s.courseTypeNameDe : s.courseTypeName);
+  const startLabel = (s: { courseTypeName: string; courseTypeNameDe: string; title: string | null; startDate: Date; session: keyof typeof SESSION_LABELS | null }) =>
+    [s.title ?? typeName(s), s.session ? pick(lang, SESSION_LABELS[s.session]) : null, new Date(s.startDate).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })]
       .filter(Boolean)
       .join(' · ');
   const startOptions = starts.map((s) => ({ id: s.id, label: startLabel(s) }));
@@ -108,15 +126,18 @@ export default async function CourseStartPage({
       <RecordHeader
         backHref="/admin/catalogue"
         backLabel={t('Kurse', 'Courses')}
-        title={start.courseTypeName}
+        // The start's own title when it has one („Basisgrammatik"), the kind beside it; else the kind.
+        title={start.title ?? typeName(start)}
         status={
           <>
             {start.status === 'cancelled' ? <Badge tone="danger">{t('Abgesagt', 'Cancelled')}</Badge> : null}
             {begun ? <Badge tone="quiet">{t('Hat begonnen', 'Under way')}</Badge> : null}
+            {!start.onWebsite && start.status !== 'cancelled' ? <Badge tone="quiet">{t('Nicht auf der Website', 'Not on the website')}</Badge> : null}
           </>
         }
         subtitle={
           <MetaLine>
+            {start.title ? <MetaItem icon={Icon.catalogue}>{typeName(start)}</MetaItem> : null}
             <MetaItem icon={Icon.calendar}>
               {dayRange(toDateInputValue(start.startDate), toDateInputValue(start.endDate), lang)} · {weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}
             </MetaItem>
@@ -129,10 +150,32 @@ export default async function CourseStartPage({
           </MetaLine>
         }
         actions={
-          plans ? (
-            <FormDialog trigger={t('Kurs hinzufügen', 'Add a course')} title={t('Neuer Kurs in diesem Termin', 'A new course in this start')} size="sm">
-              <NewCourseForm courseInstanceId={id} levels={levels.filter((code) => !groups.some((g) => g.levelCode === code))} rooms={rooms} named={named} returnTo={back} />
-            </FormDialog>
+          plans && start.status !== 'cancelled' ? (
+            <>
+              {editing ? (
+                <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Termin bearbeiten', 'Edit the start')} size="sm">
+                  <StartEditForm
+                    start={{
+                      id,
+                      startDate: editing.startDate,
+                      endDate: editing.endDate,
+                      session: editing.session,
+                      days: editing.days,
+                      time: editing.time,
+                      title: editing.title,
+                      roomId: editing.roomId,
+                      onWebsite: editing.onWebsite,
+                      datesFixed: editing.datesFixed,
+                      scheduleFixed: editing.scheduleFixed,
+                    }}
+                    rooms={bookableRooms.map((r) => ({ id: r.id, name: r.name, nickname: r.nickname, capacity: r.capacity }))}
+                  />
+                </FormDialog>
+              ) : null}
+              <FormDialog trigger={t('Kurs hinzufügen', 'Add a course')} title={t('Neuer Kurs in diesem Termin', 'A new course in this start')} size="sm">
+                <NewCourseForm courseInstanceId={id} levels={levels.filter((code) => !groups.some((g) => g.levelCode === code))} rooms={rooms} named={named} returnTo={back} />
+              </FormDialog>
+            </>
           ) : null
         }
         bar={
@@ -188,6 +231,38 @@ export default async function CourseStartPage({
           />
         ))}
 
+        {joiners.map((group) => {
+          const level = joinerLevel(group.courseId);
+          const from = joinerStarts.get(group.courseInstanceId);
+          return (
+            <LevelCard
+              key={group.courseId}
+              group={group}
+              joiner={{
+                levelCode: level,
+                startHref: `/admin/catalogue/${group.courseInstanceId}?level=${encodeURIComponent(group.levelCode ?? group.courseId)}`,
+                startDate: from?.startDate ?? null,
+                endDate: from?.endDate ?? null,
+              }}
+              form={null}
+              rooms={rooms}
+              entries={entries.filter((e) => e.courseId === group.courseId && e.courseInstanceId === id)}
+              letters={letters}
+              bookings={bookings.filter((b) => b.courseId === group.courseId)}
+              focused={focusLevel === level || focusLevel === group.courseId}
+              plans={false}
+              ends={false}
+              handles={handles}
+              offer={offer}
+              startOptions={startOptions}
+              levels={levels}
+              back={back}
+              t={t}
+              lang={lang}
+            />
+          );
+        })}
+
         {/* Booked here without a course: they hold a place no course counts until a level is set on the booking. */}
         {bookings.some((b) => !b.courseId) ? (
           <Card title={t('Ohne Kurs', 'Without a course')} icon={Icon.attention} tint="sun" bleed>
@@ -195,6 +270,31 @@ export default async function CourseStartPage({
           </Card>
         ) : null}
       </div>
+
+      {/* Called off while nobody is booked or waits; deleted only when planned here and never used. */}
+      {ends && editing && start.status !== 'cancelled' && editing.booked === 0 && editing.waiting === 0 ? (
+        <RecordFoot>
+          {editing.createdHere && !editing.used ? (
+            <form action={deleteStartAction}>
+              <input type="hidden" name="startId" value={id} />
+              <ConfirmSubmit title={t('Diesen Termin löschen?', 'Delete this start?')} description={t('Er verschwindet mit seinen Kursen und Kurstagen ganz.', 'It is gone for good, with its courses and lesson days.')}>
+                {t('Termin löschen', 'Delete start')}
+              </ConfirmSubmit>
+            </form>
+          ) : (
+            <form action={cancelStartAction}>
+              <input type="hidden" name="startId" value={id} />
+              <ConfirmSubmit
+                title={t('Diesen Termin absagen?', 'Cancel this start?')}
+                description={t('Er verschwindet von der Website und bleibt hier mit seinen Kursen als abgesagt stehen.', 'It leaves the website and stays here, with its courses, as cancelled.')}
+                confirmLabel={t('Termin absagen', 'Cancel start')}
+              >
+                {t('Termin absagen', 'Cancel start')}
+              </ConfirmSubmit>
+            </form>
+          )}
+        </RecordFoot>
+      ) : null}
     </>
   );
 }
@@ -292,9 +392,15 @@ function TeachingCard({
   );
 }
 
-/** One course of the start: its places and room, who is next for a free one, the queue, the booked learners. */
+/**
+ * One course of the start: its places and room, who is next for a free one, the queue, the booked
+ * learners. A joiner's card (`joiner`) is the running course of another start, under the level asked
+ * for here: its queue and learners for this start, its places as that course has them; it is planned
+ * on its own start's page.
+ */
 function LevelCard({
   group,
+  joiner,
   form,
   rooms,
   entries,
@@ -312,6 +418,7 @@ function LevelCard({
   lang,
 }: {
   group: LevelGroup;
+  joiner?: { levelCode: string | null; startHref: string; startDate: Date | null; endDate: Date | null };
   form: CourseForEdit | null;
   rooms: { id: string; name: string }[];
   entries: WaitlistEntry[];
@@ -335,11 +442,34 @@ function LevelCard({
   const next = placeForNext(group) ? open.find((e) => e.status === 'waiting') : undefined;
   // Waiting learners a free place is there for: the first `free` of those still waiting.
   const withPlace = new Set(open.filter((e) => e.status === 'waiting').slice(0, free).map((e) => e.id));
-  const levelBack = `${back}?level=${encodeURIComponent(group.levelCode ?? group.courseId)}`;
+  const key = joiner?.levelCode ?? group.levelCode ?? group.courseId;
+  const levelBack = `${back}?level=${encodeURIComponent(key)}`;
+  const day = (d: Date) => new Date(d).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' });
+  const openGroup = (prominent: boolean) => (
+    <form action={openGroupAction}>
+      <input type="hidden" name="courseId" value={group.courseId} />
+      <input type="hidden" name="returnTo" value={levelBack} />
+      <ConfirmSubmit
+        title={t(`Eine ${group.groups === 1 ? 'zweite' : 'weitere'} Gruppe ${group.label} eröffnen?`, `Open ${group.groups === 1 ? 'a second' : 'another'} ${group.label} group?`)}
+        description={t(
+          open.length
+            ? `${group.placesPerGroup} Plätze mehr. Die Warteliste rückt nach: wer vorne steht, kann dann gebucht werden.`
+            : `${group.placesPerGroup} Plätze mehr, und die Gruppe in der Kursplanung.`,
+          open.length
+            ? `${group.placesPerGroup} more places. The waiting list moves up: the first in line can then be booked.`
+            : `${group.placesPerGroup} more places, and the group in Kursplanung.`
+        )}
+        confirmLabel={t('Gruppe eröffnen', 'Open group')}
+        variant={prominent ? 'secondary' : 'ghost'}
+      >
+        {group.groups === 1 ? t('Zweite Gruppe eröffnen', 'Open a second group') : t('Weitere Gruppe eröffnen', 'Open another group')}
+      </ConfirmSubmit>
+    </form>
+  );
 
   return (
     <section
-      id={`level-${group.levelCode ?? group.courseId}`}
+      id={`level-${key}`}
       className={cn(
         'scroll-mt-24 overflow-hidden rounded-3xl border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]',
         focused ? 'border-[var(--fm-navy)]/40 ring-2 ring-[var(--fm-navy)]/10' : 'border-ws-line'
@@ -353,7 +483,7 @@ function LevelCard({
               group.cancelled ? 'bg-ws-sunk text-[var(--casa-muted)] line-through' : 'bg-[var(--fm-navy)] text-white'
             )}
           >
-            {group.levelCode ?? (group.title ? group.title.slice(0, 2).toUpperCase() : '—')}
+            {joiner?.levelCode ?? group.levelCode ?? (group.title ? group.title.slice(0, 2).toUpperCase() : '—')}
           </span>
           <div className="min-w-0">
             <h2 className="text-[0.95rem] leading-tight font-extrabold text-[var(--casa-ink)]">
@@ -368,6 +498,12 @@ function LevelCard({
             </h2>
             <p className="mt-0.5 text-xs text-[var(--casa-muted)]">
               {[
+                // A joiner sits in the running course of the start before, to its end.
+                joiner
+                  ? joiner.startDate && joiner.endDate
+                    ? t(`im laufenden Kurs ${group.label} · ${day(joiner.startDate)} bis ${day(joiner.endDate)}`, `in the running ${group.label} course · ${day(joiner.startDate)} to ${day(joiner.endDate)}`)
+                    : t(`im laufenden Kurs ${group.label}`, `in the running ${group.label} course`)
+                  : null,
                 group.groups === 1
                   ? t(`1 Gruppe · ${group.placesPerGroup} Plätze`, `1 group · ${group.placesPerGroup} places`)
                   : t(`${group.groups} Gruppen à ${group.placesPerGroup} · ${group.places} Plätze`, `${group.groups} groups of ${group.placesPerGroup} · ${group.places} places`),
@@ -379,12 +515,21 @@ function LevelCard({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/admin/catalogue/courses/${group.courseId}`}
-            className="inline-flex h-8 items-center rounded-lg border border-ws-line bg-white px-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm"
-          >
-            {t('Kurstage', 'Lesson days')}
-          </Link>
+          {joiner ? (
+            <Link
+              href={joiner.startHref}
+              className="inline-flex h-8 items-center rounded-lg border border-ws-line bg-white px-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm"
+            >
+              {t(`Kurs ${group.label}`, `Course ${group.label}`)}
+            </Link>
+          ) : (
+            <Link
+              href={`/admin/catalogue/courses/${group.courseId}`}
+              className="inline-flex h-8 items-center rounded-lg border border-ws-line bg-white px-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm"
+            >
+              {t('Kurstage', 'Lesson days')}
+            </Link>
+          )}
           {plans ? (
             <>
             {form ? (
@@ -410,23 +555,8 @@ function LevelCard({
                 </ConfirmSubmit>
               </form>
             ) : null}
-            {open.length > 0 && full && !group.cancelled ? (
-              <form action={openGroupAction}>
-                <input type="hidden" name="courseId" value={group.courseId} />
-                <input type="hidden" name="returnTo" value={levelBack} />
-                <ConfirmSubmit
-                  title={t(`Eine ${group.groups === 1 ? 'zweite' : 'weitere'} Gruppe ${group.label} eröffnen?`, `Open ${group.groups === 1 ? 'a second' : 'another'} ${group.label} group?`)}
-                  description={t(
-                    `${group.placesPerGroup} Plätze mehr. Die Warteliste rückt nach: wer vorne steht, kann dann gebucht werden.`,
-                    `${group.placesPerGroup} more places. The waiting list moves up: the first in line can then be booked.`
-                  )}
-                  confirmLabel={t('Gruppe eröffnen', 'Open group')}
-                  variant="secondary"
-                >
-                  {group.groups === 1 ? t('Zweite Gruppe eröffnen', 'Open a second group') : t('Weitere Gruppe eröffnen', 'Open another group')}
-                </ConfirmSubmit>
-              </form>
-            ) : null}
+            {/* Another group: prominent when the course is full and someone waits, quiet otherwise. */}
+            {!group.cancelled && group.groups < 9 ? openGroup(open.length > 0 && full && group.bookable) : null}
             </>
           ) : null}
         </div>
@@ -673,12 +803,13 @@ function BookedRows({ bookings, lang }: { bookings: StartBooking[]; lang: WsLang
   return (
     <ul className="pb-2">
       {bookings.map((b) => {
-        const light = bookingLight({ status: b.status, observationReason: b.observationReason as ObservationReason | null, charged: b.charged, paid: b.paid });
+        const money = { status: b.status, observationReason: b.observationReason as ObservationReason | null, charged: b.charged, paid: b.paid };
+        const light = bookingLight(money);
         return (
           <li key={b.id}>
             <Link href={`/admin/bookings/${b.id}`} className="flex items-center justify-between gap-3 px-5 py-2 text-[0.86rem] transition-colors hover:bg-[var(--ws-row-hover)]">
               <span className="truncate font-medium text-[var(--casa-ink)]">{b.personName}</span>
-              <BookingLightPill light={light} label={pick(lang, BOOKING_LIGHT_LABELS[light])} />
+              <BookingLightPill light={light} label={pick(lang, bookingLightLabel(money))} />
             </Link>
           </li>
         );

@@ -10,6 +10,7 @@ import { requireModule } from '@/lib/admin/guard';
 import type { T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
+import { offerBookingHref } from '@/lib/admin/offers/booking-link';
 import { courseCatalogue, learnerHistory } from '@/lib/admin/offers/course-catalogue';
 import { editorOptions, getOffer, offerTexts, priceListOptions, type OfferRecord } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
@@ -42,6 +43,8 @@ export default async function Page({
     activityFor('offer', id, 50),
   ]);
   const own = offerEvents(record, activity, t);
+  // An accepted offer to a learner leads to their booking: the person's wizard, at the offer's course.
+  const bookHref = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') ? offerBookingHref({ ...record.meta, draft: record.draft }) : null;
 
   return (
     <OfferPage
@@ -55,6 +58,7 @@ export default async function Page({
       today={todayInputValue()}
       canWrite={canWrite}
       canDelete={canAccess(user, 'offers', 'full')}
+      bookHref={bookHref}
       notice={{ ok: sp.ok, error: sp.error }}
       timeline={
         <Timeline

@@ -12,6 +12,7 @@ import { Badge, BirthDate, Card, DateText, DetailList, RecordHeader } from '@/co
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
+import { REGISTRATION_ACCOMMODATION, wishesWholeLevel } from '@/lib/admin/booking-levels';
 import { query } from '@/lib/admin/db';
 import { listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
@@ -92,7 +93,9 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
       ])
     : [[], null];
 
-  const declared = registration.declaredLevelCode ?? registration.declaredLevelRaw;
+  // The level as they asked for it — „A2 komplett (A2.1 + A2.2) · 8 Wochen", not only the step it starts at.
+  const declared = registration.declaredLevelRaw?.trim() || registration.declaredLevelCode;
+  const wholeLevel = wishesWholeLevel(registration.declaredLevelRaw);
   const fullName = `${registration.firstName} ${registration.lastName}`;
   const course = courseName(registration.courseTypeLabel, registration.courseTypeId) ?? t('Kurs', 'Course');
   const option = parseOptionLabel(registration.courseInstanceLabel);
@@ -141,7 +144,7 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
           canBook && offer && registration.personId ? (
             <>
               {queues ? (
-                <FormDialog trigger={t('Auf die Warteliste', 'Waiting list')} title={t(`${fullName} auf die Warteliste`, `${fullName} on the waiting list`)} size="sm">
+                <FormDialog icon={Icon.clock} tint="sun" trigger={t('Auf die Warteliste', 'Waiting list')} title={t(`${fullName} auf die Warteliste`, `${fullName} on the waiting list`)} size="sm">
                   <WaitlistForm
                     personId={registration.personId}
                     courseInstanceId={registration.courseInstanceId!}
@@ -153,12 +156,20 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
                   />
                 </FormDialog>
               ) : null}
-              <FormDialog trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
+              <FormDialog icon={Icon.bookings} tint="red" trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
                 <BookingWizard
                   personId={registration.personId}
                   personName={fullName}
                   offer={offer}
                   preselectedCohortId={registration.courseInstanceId}
+                  // What they asked for, carried into the booking: the level and how much of it, and the stay.
+                  preselectedLevelCode={registration.declaredLevelCode}
+                  preselectedLevelScope={registration.declaredLevelCode ? (wholeLevel ? 'whole' : 'half') : null}
+                  preselectedAccommodation={
+                    registration.accommodationRequired && registration.accommodationType
+                      ? (REGISTRATION_ACCOMMODATION[registration.accommodationType] ?? null)
+                      : null
+                  }
                   sourceRegistrationId={registration.id}
                   returnTo={`/admin/registrations/course/${registration.id}`}
                   action={createBookingFromWizardAction}

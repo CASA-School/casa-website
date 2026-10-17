@@ -202,6 +202,16 @@ everything else (per week, per lesson, or one price):
 | Exams | `exam_type`, `parts` 2 and 1 | telc B2 190 / 160 €, C1 Hochschule 210 / 185 € |
 | Books | `material` | the 36 from 0004 |
 
+**A booking's rent (2026-10-17)** is priced by the offers module's rule
+(`rentPrice`): whole Sunday-to-Saturday weeks of the stay, which defaults to the
+day before the course to the Saturday after — 8 weeks for an 8-week course. A
+rate for the stay's own type, room or meals would come first; the list has only
+the generic rent today, as SchoolMan prices every type alike, and the Prices
+screen cannot enter one per type yet. The offers module also adds the placement
+fee and the deposit on a learner's first stay; a booking does not yet — open
+decision. The enrolment fee („Einschreibegebühr", SchoolMan's and the website's
+word) is charged once, on a learner's first booking.
+
 The course, rent and fee rows came with `db/seeds/0007_price_list_2026_from_filemaker.sql`
 (from `WriteCoursePriceInternationalAirport_Booking`,
 `WriteCoursePriceCentralStation_Booking`, `WriteAccommodationPrice`), imported

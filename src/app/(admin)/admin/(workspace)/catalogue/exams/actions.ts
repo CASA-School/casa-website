@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { canAccess } from '@/lib/admin/access';
 import { isExamParts } from '@/lib/admin/exam-parts';
 import { assignExaminer, unassignExaminer } from '@/lib/admin/examiners';
-import { cancelSitting, createSitting, deleteSitting, markCollected, saveResults, setFiled, updateSitting, type SittingInput } from '@/lib/admin/exams';
+import { cancelSitting, createSitting, deleteSitting, findCandidates, markCollected, saveResults, setFiled, updateSitting, type CandidateMatch, type SittingInput } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
 import { issueSittingLetters, SITTING_LETTER_KINDS, type SittingLetterKind } from '@/lib/admin/letters/exam-bulk';
 import { pick } from '@/lib/admin/i18n';
@@ -28,6 +29,16 @@ const id = (formData: FormData, field: string): string => {
 
 function fail(path: string, message: string): never {
   redirect(`${path}${path.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
+}
+
+/**
+ * „Buchen" on a sitting, its first step: who. A name or an address finds the learners to book (not
+ * colleagues); booking is `bookings` at `edit`, and the people found are the `people` module's.
+ */
+export async function findCandidatesAction(sittingId: string, text: string): Promise<CandidateMatch[]> {
+  const user = await requireModule('bookings', 'edit');
+  if (!canAccess(user, 'people') || typeof sittingId !== 'string' || !UUID.test(sittingId) || typeof text !== 'string') return [];
+  return findCandidates(sittingId, text);
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;

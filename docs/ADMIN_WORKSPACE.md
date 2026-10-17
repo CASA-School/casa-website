@@ -475,10 +475,39 @@ week** (`BOOKED`, `waitlist.ts`), which for a full-course booking is the same
 number as before. Code: `bildungszeit-rules.ts` (pure, tested),
 `bildungszeit.ts`, `createBildungszeitBooking` in the bookings actions.
 
+**What the front desk audit changed (2026-10-17).** A walk-in: „+ Neu →
+Buchung" asks who (`/admin/people?new=1&then=book`), creates the person and
+opens the wizard (`/admin/people/<id>?book=1`; the person page also reads
+`sitting`, `parts`, `cohort` and `level`, so an exam sitting's „Buchen", an
+enquiry's or an accepted offer's „Buchung anlegen" arrive with their choice
+made). A web registration opens the wizard with its wish chosen — the level, „Das
+ganze A2" for „A2 komplett", and the accommodation („Gastfamilie" is
+`with_germans`, „bei Deutschen"; „WG" is `shared_flat`). The list of starts says
+what staff choose by: Vormittag or Nachmittag, an evening term's weekdays, free
+places, and „geschlossen" for a closed level. „Das ganze …" is offered only on an
+intensive start from a `.1` step; „Nur A2.1" books its four teaching weeks, and
+joining at a `.2` step books to the end of the running course; the server works
+the dates out itself (`bookedPeriod`, `booking-levels.ts`). The enrolment fee is
+charged once: the tick starts unticked for a learner who has studied here before
+(the offers module's rule). The stay defaults to the day before the course to the
+Saturday after (`stayAround`), so an 8-week course pays 8 weeks of rent, priced
+by the offers module's rule (`rentPrice`). Cost lines are written in German
+(`name_de`), and a letter in English translates them; a whole level reads
+„Intensivkurs A2.1–A2.2" on the booking and its letter.
+
 **Accommodation is part of the booking, not only a cost line** (0013). The type,
 room, catering and dates are columns on `bookings`, so the answer is kept even
 though CASA has published no accommodation rate yet; a `booking_charges` line
 appears once a rate does cover it.
+
+The booking's edit dialog holds the stay too (type, room, meals, arrival,
+departure); saving replaces the rent line the workspace priced, and leaves lines
+typed by hand. Once a period sits on a course start, the booking's course type is
+locked. **Buchungen → Unterkunft** lists the bookings with a stay by arrival:
+Gerade da, Anreise bald, Später. A payment is recorded with an empty amount (a
+chip fills what is open) and what it is for: Anzahlung, Restzahlung, Kurspreis,
+Unterkunft or Sonstiges. A booking's money says what it is: Offen, Anzahlung
+erhalten, Ohne Kosten, Bezahlt, Überfällig.
 
 ### Create, edit, delete
 
@@ -1136,6 +1165,23 @@ run: 158 courses, 125 courses here, 22 own starts; 18 courses of three intensive
 starts beyond our twelve months (Oct 2027 – Jan 2028) and one evening course of
 14 Sep 2026 wait for a start of ours.
 
+**Planning a start (2026-10-17, migration 0049).** „Termin planen" keeps what was
+typed and answers in the dialog when something is wrong. Hours are read however
+they are written („09:00–12:30", „9-12.30", „bis 12:30 Uhr") and fill from the
+Tageszeit when left empty (Vormittag 09:00–12:30, Nachmittag 13:00–17:30, Abend
+18:30–20:00; `course-starts.ts`). „Plätze pro Gruppe" (14) goes to every course
+the form makes. A planned start is **not on the website** until „Auf der Website
+anbieten" is ticked, and the dialog lands on the new start's page. On the start
+page: „Bearbeiten" (`rooms` edit: dates, Tageszeit, days, hours, title, room,
+website — dates move only for a start planned here with nothing booked and no
+lesson days; Tageszeit, days and hours lock once lesson days exist), „Termin
+absagen" (`rooms` full, nobody booked or waiting; cancels its courses) and
+„Termin löschen" (only a start planned here and never used;
+`course_instances.created_by` tells it from seeded and imported starts). The
+heading is the start's own title with the German type name, and a start off the
+website says so. Every course card can open a further group; the button is
+prominent only when the course is full, open and someone waits.
+
 Places, the queue, Bildungszeit's weeks and Kursplanung's „Gebucht" all count
 by course. The course start page lists its courses as cards — places and room,
 who is next, the queue, the booked — with „Bearbeiten" (places, room, offered,
@@ -1299,8 +1345,12 @@ free (which holds the place), no place this time (which takes the learner off)
 **Exam sittings have their own queue (2026-10-17):** the same table and rules,
 an entry about a sitting instead of a start's level — see Exams below.
 
-**Not yet:** the link to Kursplanung's course groups, which are planned by hand
-per month.
+**A closed course counts as full (2026-10-17).** A course closed for booking
+(`bookable` false) or cancelled has no free place (`freePlaces`), on the start
+page, in Wartelisten's „Platz frei", in the wizard („geschlossen") and in
+Bildungszeit's classes. A learner who waits at a second half (`A2.2`) waits on the
+running course of the start before (`resolveCourse`); the start they asked for
+shows them too, as „A2.2 · im laufenden Kurs A2.1 · …", and counts them.
 
 ## Exams (2026-10-17, migrations 0036–0037)
 
@@ -1396,6 +1446,14 @@ one page: „Alle drucken / PDF", a letter a page (`@page letters`), and one ema
 to all with the addresses in BCC — SchoolMan's circular put every address on
 the letter.
 
+**Booking from the sitting (2026-10-17).** „Buchen" in the sitting's head
+(a scheduled sitting not yet past; bookings `edit` and people) asks „Wen
+buchen?": a learner found by name or email (colleagues, deleted and merged
+records left out; one already booked is marked „Schon gebucht"), or a new person
+from what was typed, then the wizard opens with this sitting chosen. The list of
+sittings puts past ones in their own „Vorbei" group, and „kommende Termine" and
+the next deadline leave out past and cancelled sittings.
+
 **Not yet:** points per part; TestDaF and TestAS, which are not in the catalogue
 (only the two telc exams are); a full sitting still shows on the public form,
 where a registration becomes a waiting-list place.
@@ -1488,6 +1546,10 @@ left is made active again — SchoolMan's flag is not always kept up (Werner is
 still active there). Six colleagues have no person in SchoolMan; their names come
 from its search fields, which hold the name twice in two orders. First run,
 local database: 56 colleagues, 38 of them Kursplanung's teachers, 18 new.
+
+A colleague's Overview and Unterricht read 4, 8, 12 or 26 weeks ahead
+(`?weeks=`). Search (⌘K) lists colleagues in their own group, „Mitarbeitende",
+and never among the learners.
 
 **Not now:** time sheets, holiday entitlement and pay — the teachers' side is
 the Klassenbuch's, the rest finance's (DATEV), and SchoolMan calculates no pay

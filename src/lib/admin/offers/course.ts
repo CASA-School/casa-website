@@ -254,7 +254,7 @@ export function extraNights(a: AccommodationChoice | null): number {
  * A stay around the course: arrive the day before it starts, leave on the
  * Saturday after it ends.
  */
-export function stayAround(steps: readonly CourseStep[]): { from: string | null; to: string | null } {
+export function stayAround(steps: readonly Pick<CourseStep, 'start' | 'end'>[]): { from: string | null; to: string | null } {
   const dated = steps.filter((s) => s.start && s.end);
   if (!dated.length) return { from: null, to: null };
   const start = dated[0].start!;

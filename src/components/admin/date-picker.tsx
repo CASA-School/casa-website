@@ -2,10 +2,11 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
-import { addMonths, formatDay, isoParts, monthGrid, monthTitle, parseTypedDate, weekday, WEEKDAYS } from '@/lib/admin/calendar';
+import { addMonths, formatDay, isoParts, monthGrid, MONTHS, monthTitle, parseTypedDate, weekday, WEEKDAYS } from '@/lib/admin/calendar';
 import { addDays, daysBetween } from '@/lib/admin/offers/stay';
 import { todayInputValue } from '@/lib/dates';
 
+import { Floating } from './floating';
 import { useWsLang } from './lang';
 
 import s from './date-picker.module.css';
@@ -153,7 +154,11 @@ export function Calendar({
     return { y, m };
   });
   const [focus, setFocus] = useState(anchor);
-  const { lang } = useWsLang();
+  const { t, lang } = useWsLang();
+  // The years a one-month calendar can jump to: a birth date is two choices away, not a hundred clicks.
+  const thisYear = isoParts(today).y;
+  const firstYear = min ? isoParts(min).y : thisYear - 100;
+  const lastYear = max ? isoParts(max).y : thisYear + 5;
   const [hover, setHover] = useState<string | null>(null);
   const grid = useRef<HTMLDivElement>(null);
   const keyed = useRef(false);
@@ -222,16 +227,35 @@ export function Calendar({
 
   return (
     <div className={`${s.cal} ${compact ? s.compact : ''}`} onMouseLeave={() => setHover(null)}>
-      <button type="button" className={`${s.nav} ${s.prev}`} aria-label="Previous month" onClick={() => setView((v) => addMonths(v.y, v.m, -1))}>
+      <button type="button" className={`${s.nav} ${s.prev}`} aria-label={t('Vorheriger Monat', 'Previous month')} onClick={() => setView((v) => addMonths(v.y, v.m, -1))}>
         ‹
       </button>
-      <button type="button" className={`${s.nav} ${s.next}`} aria-label="Next month" onClick={() => setView((v) => addMonths(v.y, v.m, 1))}>
+      <button type="button" className={`${s.nav} ${s.next}`} aria-label={t('Nächster Monat', 'Next month')} onClick={() => setView((v) => addMonths(v.y, v.m, 1))}>
         ›
       </button>
       <div className={s.months} ref={grid} onKeyDown={onKey}>
         {Array.from({ length: months }, (_, i) => addMonths(view.y, view.m, i)).map(({ y, m }) => (
           <div key={`${y}-${m}`} className={s.month}>
-            <div className={s.title}>{monthTitle(y, m, lang)}</div>
+            {months === 1 ? (
+              <div className={s.title}>
+                <select className={s.jump} aria-label={t('Monat', 'Month')} value={m} onChange={(e) => setView({ y, m: Number(e.target.value) })}>
+                  {MONTHS[lang].map((name, i) => (
+                    <option key={name} value={i + 1}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                <select className={s.jump} aria-label={t('Jahr', 'Year')} value={y} onChange={(e) => setView({ y: Number(e.target.value), m })}>
+                  {Array.from({ length: Math.max(lastYear, y) - Math.min(firstYear, y) + 1 }, (_, i) => Math.max(lastYear, y) - i).map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className={s.title}>{monthTitle(y, m, lang)}</div>
+            )}
             <div className={s.grid} role="grid" aria-label={monthTitle(y, m, lang)}>
               <div className={s.row} role="row">
                 {WEEKDAYS[lang].map((w) => (
@@ -335,19 +359,15 @@ export function DateField({
   ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [up, setUp] = useState(false);
   const { t } = useWsLang();
   const wrap = useRef<HTMLDivElement>(null);
-  // Near the foot of the window the calendar opens upwards, not off the screen.
-  const show = () => {
-    const box = wrap.current?.getBoundingClientRect();
-    if (box) setUp(window.innerHeight - box.bottom < 400 && box.top > window.innerHeight - box.bottom);
-    setOpen(true);
-  };
+  const pop = useRef<HTMLDivElement>(null);
+  const show = () => setOpen(true);
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent) => {
-      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (!wrap.current?.contains(target) && !pop.current?.contains(target)) setOpen(false);
     };
     const key = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
@@ -383,7 +403,8 @@ export function DateField({
         }
       />
       {open ? (
-        <div className={`${s.pop} ${up ? s.popUp : ''}`} role="dialog" aria-label={t('Datum wählen', 'Pick a date')}>
+        // Drawn above the page, so no card or collapsible section around the field cuts it off.
+        <Floating anchor={wrap} panelRef={pop} className={s.pop} role="dialog" label={t('Datum wählen', 'Pick a date')}>
           <Calendar mode="single" value={value} onPick={choose} today={today} min={min} max={max} compact />
           {quick.length ? (
             <div className={s.foot} style={{ marginTop: 10 }}>
@@ -394,7 +415,7 @@ export function DateField({
               ))}
             </div>
           ) : null}
-        </div>
+        </Floating>
       ) : null}
     </div>
   );

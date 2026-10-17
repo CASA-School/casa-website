@@ -15,6 +15,7 @@ import { useWsLang } from './lang';
 
 const GROUPS: { kind: SearchKind; label: Bilingual }[] = [
   { kind: 'person', label: { de: 'Teilnehmende', en: 'Students' } },
+  { kind: 'staff', label: { de: 'Mitarbeitende', en: 'Staff' } },
   { kind: 'enquiry', label: { de: 'Anfragen', en: 'Enquiries' } },
   { kind: 'course', label: { de: 'Kursanmeldungen', en: 'Course registrations' } },
   { kind: 'exam', label: { de: 'Prüfungsanmeldungen', en: 'Exam registrations' } },

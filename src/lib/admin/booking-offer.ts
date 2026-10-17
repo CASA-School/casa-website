@@ -3,6 +3,8 @@ import { ownCoursePrice } from './courses';
 import type { BookingOffer, CohortOffer, CourseTypeOffer } from './booking-offer-types';
 import { query, queryFirst } from './db';
 import { upcomingSittings } from './exams';
+import { accommodationLine, bookedLevelLabel, ENROLMENT_FEE, halfLevelEnd } from './booking-levels';
+import type { Bilingual } from './i18n';
 import { accommodationWeeks, teachingWeeks, termLessons } from './offers/course';
 import { coursePrice, listOn, rentPrice, type PriceList } from './prices/price-list';
 import { loadPriceLists } from './prices/repo';
@@ -64,8 +66,9 @@ export async function bookingOffer(): Promise<BookingOffer> {
         lessons: number | null;
         default_price: string;
         type_position: number;
+        format: string | null;
       }>(
-        `SELECT i.id, i.course_type_id, t.name AS course_type_name, t.slug, t.position AS type_position, i.title,
+        `SELECT i.id, i.course_type_id, coalesce(nullif(trim(t.name_de), ''), t.name) AS course_type_name, t.slug, t.format, t.position AS type_position, i.title,
                 i.start_date, i.end_date, i.level_code, i.session,
                 coalesce(r.nickname, r.name) AS room_name, i.capacity,
                 (SELECT count(DISTINCT bp.booking_id) FROM booking_periods bp
@@ -115,15 +118,15 @@ export async function bookingOffer(): Promise<BookingOffer> {
           WHERE m.is_active AND m.level_code IS NOT NULL
           ORDER BY m.level_code, m.part NULLS LAST, m.title`
       ),
-      query<{ code: string; name_en: string; is_casa_managed: boolean }>(
-        `SELECT code, name_en, is_casa_managed FROM accommodation_types
+      query<{ code: string; name_en: string; name_de: string | null; is_casa_managed: boolean }>(
+        `SELECT code, name_en, name_de, is_casa_managed FROM accommodation_types
           WHERE is_bookable ORDER BY position`
       ),
-      query<{ code: string; name_en: string }>(
-        `SELECT code, name_en FROM accommodation_room_types ORDER BY position`
+      query<{ code: string; name_en: string; name_de: string | null }>(
+        `SELECT code, name_en, name_de FROM accommodation_room_types ORDER BY position`
       ),
-      query<{ code: string; name_en: string }>(
-        `SELECT code, name_en FROM catering_options ORDER BY position`
+      query<{ code: string; name_en: string; name_de: string | null }>(
+        `SELECT code, name_en, name_de FROM catering_options ORDER BY position`
       ),
       queryFirst<{ amount: string | null }>(
         `SELECT amount FROM rates WHERE id = applicable_rate(
@@ -143,6 +146,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
     const { weeks, price } = cohortPrice(prices, row);
     const published = Number(row.default_price);
 
+    const slot = scheduleOf(row.schedule);
     const cohort: CohortOffer = {
       id: row.id,
       courseTypeId: row.course_type_id,
@@ -159,6 +163,9 @@ export async function bookingOffer(): Promise<BookingOffer> {
       weeks,
       levelCode: row.level_code,
       session: row.session,
+      format: row.format,
+      days: slot?.days ?? null,
+      time: slot?.time ?? null,
       roomName: row.room_name,
       seatsTaken: Number(row.seats_taken),
       capacity: row.capacity,
@@ -214,31 +221,145 @@ export async function bookingOffer(): Promise<BookingOffer> {
     })),
     accommodation: accommodation.map((a) => ({
       code: a.code,
-      name: a.name_en,
+      name: names(a),
       isCasaManaged: a.is_casa_managed,
     })),
-    roomTypes: roomTypes.map((r) => ({ code: r.code, name: r.name_en })),
-    catering: catering.map((c) => ({ code: c.code, name: c.name_en })),
+    roomTypes: roomTypes.map((r) => ({ code: r.code, name: names(r) })),
+    catering: catering.map((c) => ({ code: c.code, name: names(c) })),
     enrolmentFee: fee?.amount === null || fee?.amount === undefined ? null : Number(fee.amount),
     currency: 'EUR',
   };
 }
 
-/** A cohort's tuition from the price list in force when it starts: its teaching weeks, its lessons. */
+/** A start's schedule as stored: its weekdays and its time, when it has them. */
+function scheduleOf(schedule: { days?: string[]; time?: string } | null): { days: string[]; time: string } | null {
+  return Array.isArray(schedule?.days) && typeof schedule?.time === 'string' ? { days: schedule.days, time: schedule.time } : null;
+}
+
+const names = (r: { name_en: string; name_de: string | null }): Bilingual => ({ de: r.name_de?.trim() || r.name_en, en: r.name_en });
+
+/**
+ * A cohort's tuition from the price list in force when it starts: its teaching weeks, its lessons — or,
+ * for the part of it booked (an intensive start's first half, a second half joined here), that part's.
+ */
 function cohortPrice(
   prices: readonly PriceList[],
-  row: { slug: string; start_date: Date; end_date: Date; lessons_per_week: number; schedule: { days?: string[]; time?: string } | null; lessons: number | null }
+  row: { slug: string; start_date: Date; end_date: Date; lessons_per_week: number; schedule: { days?: string[]; time?: string } | null; lessons: number | null },
+  booked?: { startDate: string; endDate: string } | null
 ) {
   const startDate = toDateInputValue(row.start_date);
   const endDate = toDateInputValue(row.end_date);
-  const weeks = teachingWeeks(startDate, endDate);
-  const slot = Array.isArray(row.schedule?.days) && typeof row.schedule?.time === 'string' ? { days: row.schedule.days, time: row.schedule.time } : null;
-  const lessons = termLessons({ startDate, endDate, slot, lessons: row.lessons }, row.lessons_per_week);
+  const part =
+    booked && (booked.startDate !== startDate || booked.endDate !== endDate)
+      ? { startDate: booked.startDate < startDate ? startDate : booked.startDate, endDate: booked.endDate > endDate ? endDate : booked.endDate }
+      : null;
+  const span = part && part.endDate >= part.startDate ? part : { startDate, endDate };
+  const weeks = teachingWeeks(span.startDate, span.endDate);
+  const lessons = termLessons({ ...span, slot: scheduleOf(row.schedule), lessons: span === part ? null : row.lessons }, row.lessons_per_week);
   return { weeks, price: coursePrice(prices, row.slug, startDate, { weeks, lessons }) };
 }
 
 const format = (d: Date) =>
   new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
+
+/**
+ * The dates a booking of a start at a level covers, decided here and not by the form: the whole start;
+ * an intensive start's first half alone, to the end of its fourth teaching week; a second half joined
+ * at a start, to the end of the running course of the start before (as `resolveCourse` books it).
+ */
+export async function bookedPeriod(
+  courseInstanceId: string,
+  levelCode: string | null,
+  scope: 'whole' | 'half'
+): Promise<{ startDate: string; endDate: string } | null> {
+  const row = await queryFirst<{ start_date: string; end_date: string; format: string | null; schedule: { days?: string[]; time?: string } | null; running_end: string | null }>(
+    `SELECT to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date, t.format, i.schedule,
+            (SELECT to_char(r.end_date, 'YYYY-MM-DD') FROM course_instances r JOIN course_types rt ON rt.id = r.course_type_id
+              WHERE rt.format = 'intensive' AND r.status <> 'cancelled' AND r.start_date < i.start_date AND r.end_date >= i.start_date
+              ORDER BY r.start_date DESC LIMIT 1) AS running_end
+       FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
+      WHERE i.id = $1`,
+    [courseInstanceId]
+  );
+  if (!row) return null;
+  const { start_date: startDate, end_date: endDate } = row;
+  if (row.format === 'intensive' && levelCode && /\.2$/.test(levelCode) && row.running_end) {
+    return { startDate, endDate: row.running_end < endDate ? row.running_end : endDate };
+  }
+  if (row.format === 'intensive' && levelCode && /\.1$/.test(levelCode) && scope === 'half') {
+    return { startDate, endDate: halfLevelEnd(startDate, endDate, scheduleOf(row.schedule)?.days ?? null) };
+  }
+  return { startDate, endDate };
+}
+
+// ------------------------------------------------------------------ accommodation
+
+export type StayVocabulary = {
+  types: { code: string; name: Bilingual; bookable: boolean }[];
+  rooms: { code: string; name: Bilingual }[];
+  catering: { code: string; name: Bilingual }[];
+};
+
+/** The accommodation types, rooms and meals, each name in both languages. */
+export async function stayVocabulary(): Promise<StayVocabulary> {
+  const [types, rooms, catering] = await Promise.all([
+    query<{ code: string; name_en: string; name_de: string | null; is_bookable: boolean }>(
+      `SELECT code, name_en, name_de, is_bookable FROM accommodation_types ORDER BY position`
+    ),
+    query<{ code: string; name_en: string; name_de: string | null }>(`SELECT code, name_en, name_de FROM accommodation_room_types ORDER BY position`),
+    query<{ code: string; name_en: string; name_de: string | null }>(`SELECT code, name_en, name_de FROM catering_options ORDER BY position`),
+  ]);
+  return {
+    types: types.map((t) => ({ code: t.code, name: names(t), bookable: t.is_bookable })),
+    rooms: rooms.map((r) => ({ code: r.code, name: names(r) })),
+    catering: catering.map((c) => ({ code: c.code, name: names(c) })),
+  };
+}
+
+export type StayChoice = { typeCode: string; roomTypeCode: string | null; cateringCode: string | null; from: string | null; to: string | null };
+
+/**
+ * The rent for a stay, as the offers price it (src/lib/admin/offers/course.ts): whole weeks, Sunday to
+ * Saturday, from the price list in force on arrival. A rate for this kind of stay — its type, room or
+ * meals (`rates`, scope `accommodation`), per week or one price — comes first; the 2026 list has none,
+ * as SchoolMan prices every type alike, so today every stay is the list's rent for its weeks.
+ * Written in German; the letters say it in their own language (`chargeLineNames`).
+ */
+export async function accommodationCharge(stay: StayChoice, lists?: readonly PriceList[]): Promise<PricedLine | null> {
+  const prices = lists ?? (await loadPriceLists());
+  const weeks = accommodationWeeks({ kind: 'host_family', from: stay.from, to: stay.to });
+  const vocabulary = await stayVocabulary();
+  const type = vocabulary.types.find((t) => t.code === stay.typeCode);
+  if (!type) return null;
+  const rate = stay.from
+    ? await queryFirst<{ id: string; amount: string; unit: string }>(
+        `SELECT id, amount, unit::text AS unit FROM rates WHERE id = applicable_rate(
+           'accommodation'::rate_scope, $1::date, NULL, NULL, NULL, $2, $3, $4,
+           NULL, NULL, NULL, $5::numeric, NULL)`,
+        [stay.from, stay.typeCode, stay.cateringCode, stay.roomTypeCode, weeks || null]
+      )
+    : null;
+  const rent = rate
+    ? { id: rate.id, amount: rate.unit === 'week' ? Number(rate.amount) * weeks : Number(rate.amount) }
+    : rentPrice(prices, stay.from, weeks);
+  if (!rent || !(rent.amount > 0)) return null;
+  const facts = {
+    type: type.name,
+    room: vocabulary.rooms.find((r) => r.code === stay.roomTypeCode)?.name ?? null,
+    catering: vocabulary.catering.find((c) => c.code === stay.cateringCode)?.name ?? null,
+    from: stay.from,
+    to: stay.to,
+  };
+  return {
+    kind: 'accommodation',
+    chargeTypeCode: 'accommodation_rent',
+    description: accommodationLine(facts, weeks, 'de'),
+    amount: Math.round(rent.amount * 100) / 100,
+    quantity: weeks || null,
+    unitAmount: null,
+    rateId: rent.id,
+  };
+}
 
 // ------------------------------------------------------------------ pricing
 
@@ -285,9 +406,10 @@ export type PricedLine = {
  * fee on the booking itself — which arrives as `tuitionOverride` and is
  * clamped by the action.
  *
- * The descriptions are stored on the cost lines in English, whoever books, so the
- * data reads one way; the booking page shows a kind's own name in its reader's
- * language.
+ * The descriptions are written in German — the course type's, the room's and
+ * the meals' German names (2026-10-17: the letters read them, and CASA writes
+ * German) — and a letter in English says them in English where a line can be
+ * traced to what it is (`chargeLineNames`).
  */
 export async function priceSelection(selection: BookingSelection): Promise<PricedLine[]> {
   const on = selection.startDate;
@@ -304,7 +426,7 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
       lines.push({
         kind: 'enrolment_fee',
         chargeTypeCode: 'enrolment_fee',
-        description: 'Enrolment fee',
+        description: ENROLMENT_FEE.de,
         amount: Number(fee.amount),
         quantity: null,
         unitAmount: null,
@@ -322,11 +444,14 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
     const own = listOn(prices, on)?.courses['bildungszeit']?.table[weeks] ?? null;
     const price = own ?? coursePrice(prices, 'intensive-german', on, { weeks: weeks * 2 });
     const amount = selection.tuitionOverride ?? price?.amount ?? null;
+    const type = selection.courseTypeId
+      ? await queryFirst<{ name: string; name_de: string | null }>(`SELECT name, name_de FROM course_types WHERE id = $1`, [selection.courseTypeId])
+      : null;
     if (amount && amount > 0) {
       lines.push({
         kind: 'tuition',
         chargeTypeCode: 'tuition',
-        description: `Bildungszeit (superintensive) · ${formatIso(selection.startDate)} – ${formatIso(selection.endDate)}`,
+        description: `${type?.name_de?.trim() || type?.name || 'Bildungszeit'} · ${formatIso(selection.startDate)} – ${formatIso(selection.endDate)}`,
         amount,
         quantity: null,
         unitAmount: null,
@@ -334,9 +459,13 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
       });
     }
   } else if (selection.kind === 'course' && selection.courseInstanceId) {
-    // The price list's price for this cohort, else the catalogue's own price.
+    // The price list's price for this cohort — or the part of it booked — else the catalogue's own price.
     const course = await queryFirst<{
-      label: string;
+      title: string | null;
+      name: string;
+      name_de: string | null;
+      format: string | null;
+      level_code: string | null;
       slug: string;
       start_date: Date;
       end_date: Date;
@@ -345,10 +474,7 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
       lessons: number | null;
       default_price: string;
     }>(
-      `SELECT coalesce(i.title, t.name)
-              || coalesce(' ' || i.level_code, '')
-              || ' · ' || to_char(i.start_date, 'DD.MM.YY') || ' – ' || to_char(i.end_date, 'DD.MM.YY')
-              AS label,
+      `SELECT i.title, t.name, t.name_de, t.format, i.level_code,
               t.slug, i.start_date, i.end_date, t.lessons_per_week, i.schedule, i.lessons, t.default_price
          FROM course_instances i
          JOIN course_types t ON t.id = i.course_type_id
@@ -358,14 +484,18 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
     if (course) {
       // The course's own price first (an evening term, a module: SchoolMan's per course), then the list.
       const own = await ownCoursePrice(selection.courseInstanceId, selection.levelCode);
-      const { price: listed } = cohortPrice(prices, course);
+      const { price: listed } = cohortPrice(prices, course, { startDate: selection.startDate, endDate: selection.endDate });
       const price = own ? { id: null, amount: own.amount } : listed;
       const resolved = selection.tuitionOverride ?? price?.amount ?? Number(course.default_price);
+      // „Intensivkurs A2.1–A2.2 · 26.10.26 – 18.12.26": the course in German, how much of the level, the dates booked.
+      const level = bookedLevelLabel([
+        { format: course.format, levelCode: selection.levelCode ?? course.level_code, startDate: selection.startDate, endDate: selection.endDate },
+      ]);
       if (resolved > 0) {
         lines.push({
           kind: 'tuition',
           chargeTypeCode: 'tuition',
-          description: course.label,
+          description: `${course.title?.trim() || course.name_de?.trim() || course.name}${level ? ` ${level}` : ''} · ${formatIso(selection.startDate)} – ${formatIso(selection.endDate)}`,
           amount: resolved,
           quantity: null,
           unitAmount: null,
@@ -430,52 +560,17 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
   }
 
   if (selection.accommodationTypeCode) {
-    const [type, rate] = await Promise.all([
-      queryFirst<{ name_en: string }>(`SELECT name_en FROM accommodation_types WHERE code = $1`, [
-        selection.accommodationTypeCode,
-      ]),
-      queryFirst<{ id: string; amount: string }>(
-        `SELECT id, amount FROM rates WHERE id = applicable_rate(
-           'accommodation'::rate_scope, $1::date, NULL, NULL, NULL, $2, $3, $4,
-           NULL, NULL, NULL, NULL, NULL)`,
-        [on, selection.accommodationTypeCode, selection.cateringCode, selection.roomTypeCode]
-      ),
-    ]);
-    // A rate for this kind of accommodation, else the price list's rent for the stay's whole weeks.
-    const weeks = accommodationWeeks({ kind: 'host_family', from: selection.accommodationFrom, to: selection.accommodationTo });
-    const rent = rate ? { id: rate.id, amount: Number(rate.amount) } : rentPrice(prices, selection.accommodationFrom, weeks);
-    if (!rent) return lines;
-    const extras = [
-      selection.roomTypeCode
-        ? (
-            await queryFirst<{ name_en: string }>(
-              `SELECT name_en FROM accommodation_room_types WHERE code = $1`,
-              [selection.roomTypeCode]
-            )
-          )?.name_en
-        : null,
-      selection.cateringCode
-        ? (
-            await queryFirst<{ name_en: string }>(
-              `SELECT name_en FROM catering_options WHERE code = $1`,
-              [selection.cateringCode]
-            )
-          )?.name_en
-        : null,
-    ].filter(Boolean);
-    const period =
-      selection.accommodationFrom && selection.accommodationTo
-        ? ` · ${formatIso(selection.accommodationFrom)} – ${formatIso(selection.accommodationTo)}`
-        : '';
-    lines.push({
-      kind: 'accommodation',
-      chargeTypeCode: 'accommodation_rent',
-      description: `${type?.name_en ?? 'Accommodation'}${extras.length ? ` (${extras.join(', ')})` : ''}${period}`,
-      amount: rent.amount,
-      quantity: null,
-      unitAmount: null,
-      rateId: rent.id,
-    });
+    const line = await accommodationCharge(
+      {
+        typeCode: selection.accommodationTypeCode,
+        roomTypeCode: selection.roomTypeCode,
+        cateringCode: selection.cateringCode,
+        from: selection.accommodationFrom,
+        to: selection.accommodationTo,
+      },
+      prices
+    );
+    if (line) lines.push(line);
   }
 
   return lines;

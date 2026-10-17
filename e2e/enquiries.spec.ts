@@ -25,6 +25,7 @@ test.describe('enquiries', () => {
   let token = '';
   let tokenHash = '';
   let enquiryId = '';
+  let personId = '';
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -57,6 +58,7 @@ test.describe('enquiries', () => {
       await client.query(`DELETE FROM staff_activity WHERE entity = 'enquiry' AND entity_id = $1`, [enquiryId]);
       await client.query(`DELETE FROM enquiries WHERE id = $1`, [enquiryId]);
     }
+    if (personId) await client.query(`DELETE FROM people WHERE id = $1`, [personId]);
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });
@@ -127,5 +129,15 @@ test.describe('enquiries', () => {
     // Written in German, so the reply opens with a German greeting.
     const reply = await page.getByRole('link', { name: 'Antworten' }).getAttribute('href');
     expect(decodeURIComponent(reply ?? '')).toContain(`Hallo ${NAME.first},`);
+  });
+
+  test('a learner’s enquiry leads to an offer or straight to a booking', async ({ page }) => {
+    personId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ($1, $2, 'e2e') RETURNING id`, [NAME.first, NAME.last])).rows[0].id;
+    await client.query(`UPDATE enquiries SET person_id = $2 WHERE id = $1`, [enquiryId, personId]);
+    await page.goto(`/admin/enquiries/${enquiryId}`);
+    await expect(page.getByRole('link', { name: 'Angebot erstellen' })).toHaveAttribute('href', `/admin/offers/new?enquiry=${enquiryId}`);
+    await page.getByRole('link', { name: 'Buchung anlegen' }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/people/${personId}\\?book=1$`));
+    await expect(page.getByRole('dialog')).toContainText(`${NAME.first} ${NAME.last} buchen`);
   });
 });

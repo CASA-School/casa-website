@@ -95,6 +95,7 @@ export function OfferPage({
   today,
   canWrite,
   canDelete,
+  bookHref,
   notice,
   timeline,
 }: {
@@ -108,6 +109,8 @@ export function OfferPage({
   today: string;
   canWrite: boolean;
   canDelete: boolean;
+  /** An accepted offer to a learner: their booking wizard, at the offer's course. */
+  bookHref?: string | null;
   notice: { ok?: string; error?: string };
   /** „Notizen und Verlauf", the workspace's own, rendered on the server. */
   timeline: ReactNode;
@@ -161,6 +164,7 @@ export function OfferPage({
             status={meta.status}
             canWrite={canWrite}
             canDelete={canDelete}
+            bookHref={bookHref}
             extra={[{ label: t('Drucken / PDF', 'Print / PDF'), onSelect: print }]}
             send={{
               canSend: !hasProblems(checks) && od.saveState !== 'stale',
@@ -696,7 +700,7 @@ function courseRowName(l: OfferLine, course: CourseChoice, t: T, lang: WsLang): 
 }
 
 function otherCourseRow(l: OfferLine, course: CourseChoice, t: T): { name: string; tint: Tint; icon: ReactNode } {
-  if (l.key === 'enrolment') return { name: t('Anmeldegebühr', 'Enrolment fee'), tint: 'ink', icon: ICONS.people };
+  if (l.key === 'enrolment') return { name: t('Einschreibegebühr', 'Enrolment fee'), tint: 'ink', icon: ICONS.people };
   if (l.key === 'accommodation') {
     return { name: course.accommodation?.kind === 'shared_flat' ? t('CASA-WG', 'CASA shared flat') : t('Gastfamilie', 'Host family'), tint: 'blue', icon: ICONS.house };
   }

@@ -88,7 +88,7 @@ test.describe('waiting list', () => {
     await page.getByRole('button', { name: 'Neue Buchung' }).click();
     await dialog.getByRole('button', { name: /^Einen Kurs/ }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
-    await dialog.getByRole('button', { name: /^Intensive German/ }).click();
+    await dialog.getByRole('button', { name: /^Intensivkurs/ }).click();
     await dialog.getByRole('button', { name: /^E2E Warteliste/ }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
     await dialog.getByRole('button', { name: /^B1\.1/ }).click();

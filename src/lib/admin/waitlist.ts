@@ -67,12 +67,25 @@ export function sessionOf(session: string | null, schedule: { time?: string } | 
   return hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
 }
 
-/** What is left in a level group: free places, never below zero — an overbooked group is full. */
-export const freePlaces = (g: { places: number; booked: number; offered: number }) => Math.max(0, g.places - g.booked - g.offered);
+type Places = {
+  places: number;
+  booked: number;
+  offered: number;
+  /** A course not offered for booking — SchoolMan closes a full one — has no free place. */
+  bookable?: boolean;
+  cancelled?: boolean;
+  /** The wizard's word for the same. */
+  closed?: boolean;
+};
+
+/**
+ * What is left in a course: free places, never below zero — an overbooked course is full, and a closed
+ * or cancelled one has none, whatever its numbers say.
+ */
+export const freePlaces = (g: Places) => (g.cancelled || g.closed || g.bookable === false ? 0 : Math.max(0, g.places - g.booked - g.offered));
 
 /** The free place's signal: someone is waiting and a place is there for them. */
-export const placeForNext = (g: { places: number; booked: number; offered: number; waiting: number }) =>
-  g.waiting > 0 && freePlaces(g) > 0;
+export const placeForNext = (g: Places & { waiting: number }) => g.waiting > 0 && freePlaces(g) > 0;
 
 // ------------------------------------------------------------------ reads
 
@@ -215,6 +228,8 @@ export async function courseGroup(courseId: string): Promise<LevelGroup | null> 
 export type CourseStart = {
   id: string;
   courseTypeName: string;
+  /** The type's German name (`name_de`), else the English one. */
+  courseTypeNameDe: string;
   courseTypeSlug: string;
   startDate: Date;
   endDate: Date;
@@ -224,6 +239,7 @@ export type CourseStart = {
   title: string | null;
   status: string;
   roomName: string | null;
+  onWebsite: boolean;
   /** Bookings in this start whose period has no course yet: they hold places no course counts. */
   withoutLevel: number;
 };
@@ -232,6 +248,7 @@ export async function getCourseStart(id: string): Promise<CourseStart | null> {
   const row = await queryFirst<{
     id: string;
     course_type_name: string;
+    course_type_name_de: string;
     course_type_slug: string;
     start_date: Date;
     end_date: Date;
@@ -240,9 +257,11 @@ export async function getCourseStart(id: string): Promise<CourseStart | null> {
     title: string | null;
     status: string;
     room_name: string | null;
+    on_website: boolean;
     without_level: string;
   }>(
-    `SELECT i.id, t.name AS course_type_name, t.slug AS course_type_slug, i.start_date, i.end_date, i.session, i.schedule, i.title, i.status,
+    `SELECT i.id, t.name AS course_type_name, coalesce(t.name_de, t.name) AS course_type_name_de, t.slug AS course_type_slug,
+            i.start_date, i.end_date, i.session, i.schedule, i.title, i.status, i.on_website,
             coalesce(r.nickname, r.name) AS room_name,
             (SELECT count(DISTINCT bp.booking_id) FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
               WHERE bp.course_instance_id = i.id AND bp.course_id IS NULL
@@ -257,6 +276,7 @@ export async function getCourseStart(id: string): Promise<CourseStart | null> {
   return {
     id: row.id,
     courseTypeName: row.course_type_name,
+    courseTypeNameDe: row.course_type_name_de,
     courseTypeSlug: row.course_type_slug,
     startDate: row.start_date,
     endDate: row.end_date,
@@ -266,6 +286,7 @@ export async function getCourseStart(id: string): Promise<CourseStart | null> {
     title: row.title,
     status: row.status,
     roomName: row.room_name,
+    onWebsite: row.on_website,
     withoutLevel: Number(row.without_level),
   };
 }
@@ -279,6 +300,8 @@ export type WaitlistEntry = {
   email: string | null;
   courseInstanceId: string;
   courseTypeName: string;
+  /** The type's German name (`name_de`), else the English one. */
+  courseTypeNameDe: string;
   startDate: Date;
   session: Session | null;
   levelCode: string;
@@ -305,6 +328,7 @@ type EntryRow = {
   email: string | null;
   course_instance_id: string;
   course_type_name: string;
+  course_type_name_de: string;
   start_date: Date;
   session: string | null;
   schedule: { time?: string } | null;
@@ -326,7 +350,7 @@ type EntryRow = {
 const ENTRIES = `
   SELECT w.id, w.course_id, canonical_person_id(w.person_id) AS person_id, p.first_name, p.last_name,
          (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
-         w.course_instance_id, t.name AS course_type_name, i.start_date, i.session, i.schedule,
+         w.course_instance_id, t.name AS course_type_name, coalesce(t.name_de, t.name) AS course_type_name_de, i.start_date, i.session, i.schedule,
          w.level_code, w.status,
          CASE WHEN w.status IN ('waiting', 'offered')
               THEN row_number() OVER (PARTITION BY coalesce(w.course_id::text, w.course_instance_id || w.level_code), (w.status IN ('waiting', 'offered')) ORDER BY w.rank, w.joined_at)
@@ -347,6 +371,7 @@ const toEntry = (r: EntryRow): WaitlistEntry => ({
   email: r.email,
   courseInstanceId: r.course_instance_id,
   courseTypeName: r.course_type_name,
+  courseTypeNameDe: r.course_type_name_de,
   startDate: r.start_date,
   session: sessionOf(r.session, r.schedule),
   levelCode: r.level_code,
@@ -363,11 +388,15 @@ const toEntry = (r: EntryRow): WaitlistEntry => ({
   bookingId: r.booking_id,
 });
 
-/** The queues of a start's courses: the open entries in order, then the closed ones, latest first. */
+/**
+ * The queues a start's page shows: its courses' queues, and the learners waiting for this start whose
+ * course is another's — a `.2` joiner waits on the running course of the start before (`resolveCourse`).
+ * The open entries in order, then the closed ones, latest first.
+ */
 export async function startEntries(courseInstanceId: string): Promise<WaitlistEntry[]> {
   const rows = await query<EntryRow>(
     `SELECT * FROM (${ENTRIES} WHERE w.course_id IN (SELECT id FROM courses WHERE course_instance_id = $1)
-                                OR (w.course_id IS NULL AND w.course_instance_id = $1)) x
+                                OR w.course_instance_id = $1) x
       ORDER BY (status IN ('waiting', 'offered')) DESC, level_code, position NULLS LAST, closed_at DESC`,
     [courseInstanceId]
   );
@@ -404,20 +433,17 @@ export async function listEntries(view: WaitlistView, search?: string): Promise<
   else if (view === 'started') conditions.push(`${open} AND start_date <= current_date`);
   else if (view === 'offered') conditions.push(`status = 'offered' AND start_date > current_date`);
   else if (view === 'waiting') conditions.push(`${open} AND start_date > current_date`);
-  else {
-    // Queues with a free place: worked out from the same numbers as a start's page.
-    conditions.push(`${open} AND start_date > current_date AND course_id IN (
-      SELECT g.course_id FROM (
-        SELECT q.course_id, q.waiting, q.offered, c.groups * c.places_per_group AS places, coalesce(b.n, 0) AS booked
-          FROM (${QUEUED}) q
-          JOIN courses c ON c.id = q.course_id
-          LEFT JOIN (${BOOKED}) b ON b.course_id = q.course_id
-      ) g WHERE g.waiting > 0 AND g.places - g.booked - g.offered > 0)`);
-  }
+  else conditions.push(`${open} AND start_date > current_date`);
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const order = view === 'closed' ? 'closed_at DESC LIMIT 200' : 'start_date, course_type_name, level_code, position';
-  const rows = await query<EntryRow>(`SELECT * FROM (${ENTRIES}) x ${where} ORDER BY ${order}`, params);
-  return rows.map(toEntry);
+  const entries = (await query<EntryRow>(`SELECT * FROM (${ENTRIES}) x ${where} ORDER BY ${order}`, params)).map(toEntry);
+  if (view !== 'free') return entries;
+  // Queues with a free place: the course each entry waits on (`resolveCourse` named it when it joined —
+  // a joiner's is the running course of the start before), counted exactly as a start's page counts it:
+  // the board's groups included, a closed or cancelled course full.
+  const groups = await courseGroups([...new Set(entries.map((e) => e.courseId).filter((v): v is string => Boolean(v)))]);
+  const free = new Set(groups.filter(placeForNext).map((g) => g.courseId));
+  return entries.filter((e) => e.courseId && free.has(e.courseId));
 }
 
 export type WaitlistCounts = Record<WaitlistView, number>;
@@ -558,14 +584,21 @@ export async function startBookings(courseInstanceId: string): Promise<StartBook
 }
 
 /** The starts ahead, for moving a wish to another one: "Intensive German · 26.10.26 · Vormittag". */
-export async function upcomingStarts(): Promise<{ id: string; courseTypeName: string; startDate: Date; session: Session | null }[]> {
-  const rows = await query<{ id: string; name: string; start_date: Date; session: string | null; schedule: { time?: string } | null }>(
-    `SELECT i.id, t.name, i.start_date, i.session, i.schedule
+export async function upcomingStarts(): Promise<{ id: string; courseTypeName: string; courseTypeNameDe: string; title: string | null; startDate: Date; session: Session | null }[]> {
+  const rows = await query<{ id: string; name: string; name_de: string; title: string | null; start_date: Date; session: string | null; schedule: { time?: string } | null }>(
+    `SELECT i.id, t.name, coalesce(t.name_de, t.name) AS name_de, i.title, i.start_date, i.session, i.schedule
        FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
       WHERE i.end_date >= current_date AND i.status <> 'cancelled'
       ORDER BY i.start_date, t.position, t.name`
   );
-  return rows.map((r) => ({ id: r.id, courseTypeName: r.name, startDate: r.start_date, session: sessionOf(r.session, r.schedule) }));
+  return rows.map((r) => ({
+    id: r.id,
+    courseTypeName: r.name,
+    courseTypeNameDe: r.name_de,
+    title: r.title,
+    startDate: r.start_date,
+    session: sessionOf(r.session, r.schedule),
+  }));
 }
 
 // -------------------------------------------------------------- mutations

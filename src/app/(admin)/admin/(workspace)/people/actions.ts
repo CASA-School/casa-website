@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { isExamParts } from '@/lib/admin/exam-parts';
 import { issueLearnerLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { requireModule } from '@/lib/admin/guard';
@@ -127,8 +128,13 @@ export async function createPersonAction(formData: FormData): Promise<void> {
   if (typeof input === 'string') redirect(`/admin/people?error=${encodeURIComponent(input)}`);
   const id = await createPersonByStaff(input, actor);
   revalidatePath('/admin/people', 'layout');
-  // „Neu → Buchung" (a walk-in): straight on into the booking wizard.
-  redirect(formData.get('then') === 'book' ? `/admin/people/${id}?book=1` : `/admin/people/${id}`);
+  // „Neu → Buchung" (a walk-in, or a new candidate from an exam sitting's „Buchen"): straight on into
+  // the booking wizard, at the sitting when one came with it.
+  if (formData.get('then') !== 'book') redirect(`/admin/people/${id}`);
+  const sitting = String(formData.get('sitting') ?? '');
+  const parts = String(formData.get('parts') ?? '');
+  const at = new URLSearchParams({ book: '1', ...(UUID.test(sitting) ? { sitting } : {}), ...(isExamParts(parts) && parts !== 'full' ? { parts } : {}) });
+  redirect(`/admin/people/${id}?${at.toString()}`);
 }
 
 export async function updatePersonAction(formData: FormData): Promise<void> {

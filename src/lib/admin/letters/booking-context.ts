@@ -1,6 +1,8 @@
 import 'server-only';
 
+import { bookedLevelLabel, chargeLineNames, type LineFacts } from '../booking-levels';
 import { query, queryFirst } from '../db';
+import { accommodationWeeks } from '../offers/course';
 import type { ExamOutcome, ExamParts } from '../exam-parts';
 import { sessionOf } from '../waitlist';
 
@@ -165,6 +167,12 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     down_payment: string | null;
     acc_de: string | null;
     acc_en: string | null;
+    room_de: string | null;
+    room_en: string | null;
+    catering_de: string | null;
+    catering_en: string | null;
+    type_de: string | null;
+    type_en: string | null;
     accommodation_from: string | null;
     accommodation_to: string | null;
     earlier: boolean;
@@ -175,7 +183,8 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
             coalesce((SELECT r.locale FROM course_registrations r WHERE r.id = b.source_registration_id),
                      (SELECT r.locale FROM exam_registrations r WHERE r.id = b.source_exam_registration_id)) AS locale,
             to_char(b.cancelled_at, 'YYYY-MM-DD') AS cancelled_at,
-            at.name_de AS acc_de, at.name_en AS acc_en,
+            at.name_de AS acc_de, at.name_en AS acc_en, art.name_de AS room_de, art.name_en AS room_en,
+            co.name_de AS catering_de, co.name_en AS catering_en, t.name_de AS type_de, t.name AS type_en,
             to_char(b.accommodation_from, 'YYYY-MM-DD') AS accommodation_from,
             to_char(b.accommodation_to, 'YYYY-MM-DD') AS accommodation_to,
             -- A follow-up booking: the learner was booked into an earlier course already.
@@ -186,11 +195,13 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
        FROM bookings b
        LEFT JOIN course_types t ON t.id = b.course_type_id
        LEFT JOIN accommodation_types at ON at.code = b.accommodation_type_code
+       LEFT JOIN accommodation_room_types art ON art.code = b.accommodation_room_type_code
+       LEFT JOIN catering_options co ON co.code = b.accommodation_catering_code
       WHERE b.id = $1 AND b.deleted_at IS NULL`,
     [bookingId]
   );
   if (!booking) return null;
-  const [person, course, charges, payments, staff, exam] = await Promise.all([
+  const [person, course, charges, payments, staff, exam, periods] = await Promise.all([
     letterPerson(booking.person_id),
     queryFirst<CourseRow & { level_code: string | null }>(
       `SELECT t.name, t.name_de, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date,
@@ -206,7 +217,10 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
         ORDER BY bp.start_date LIMIT 1`,
       [bookingId]
     ),
-    query<{ kind: string; description: string; amount: string }>(`SELECT kind::text AS kind, description, amount FROM booking_charges WHERE booking_id = $1 ORDER BY created_at`, [bookingId]),
+    query<{ kind: string; charge_type_code: string | null; description: string; amount: string }>(
+      `SELECT kind::text AS kind, charge_type_code, description, amount FROM booking_charges WHERE booking_id = $1 ORDER BY created_at`,
+      [bookingId]
+    ),
     query<{ id: string; received_at: string; method: string; amount: string; subject: string }>(
       `SELECT id, to_char(received_at, 'YYYY-MM-DD') AS received_at, method, amount, subject
          FROM payments WHERE booking_id = $1 AND voided_at IS NULL ORDER BY received_at, created_at`,
@@ -214,8 +228,34 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     ),
     signers(),
     letterExam(`b.id = $1`, bookingId),
+    // Every period with its course's format: how much of a level the booking teaches („A2.1–A2.2").
+    query<{ format: string | null; level_code: string | null; start_date: string; end_date: string }>(
+      `SELECT t.format, bp.level_code, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date
+         FROM booking_periods bp
+         JOIN bookings b ON b.id = bp.booking_id
+         LEFT JOIN course_instances i ON i.id = bp.course_instance_id
+         LEFT JOIN course_types t ON t.id = coalesce(i.course_type_id, b.course_type_id)
+        WHERE bp.booking_id = $1 ORDER BY bp.start_date`,
+      [bookingId]
+    ),
   ]);
   if (!person) return null;
+  const level = bookedLevelLabel(periods.map((p) => ({ format: p.format, levelCode: p.level_code, startDate: p.start_date, endDate: p.end_date })));
+  // Each cost line in the letter's language where it can be traced to what it is (2026-10-17).
+  const named = (en: string | null, de: string | null) => (en ? { de: de?.trim() || en, en } : null);
+  const facts: LineFacts = {
+    course: named(booking.type_en, booking.type_de),
+    accommodation: booking.acc_en
+      ? {
+          type: named(booking.acc_en, booking.acc_de)!,
+          room: named(booking.room_en, booking.room_de),
+          catering: named(booking.catering_en, booking.catering_de),
+          from: booking.accommodation_from,
+          to: booking.accommodation_to,
+        }
+      : null,
+  };
+  const rentWeeks = accommodationWeeks({ kind: 'host_family', from: booking.accommodation_from, to: booking.accommodation_to });
   const charged = charges.reduce((sum, c) => sum + Number(c.amount), 0);
   const paid = payments.reduce((sum, p) => sum + Number(p.amount), 0);
   return {
@@ -223,13 +263,18 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     number: booking.number,
     language: booking.locale === 'en' ? 'en' : 'de',
     person,
-    course: course?.name ? toCourse(course, course.level_code) : null,
+    course: course?.name ? toCourse(course, level ?? course.level_code) : null,
     exam,
     accommodation:
       booking.acc_en && booking.accommodation_from
         ? { name: { de: booking.acc_de || booking.acc_en, en: booking.acc_en }, from: booking.accommodation_from, to: booking.accommodation_to }
         : null,
-    charges: charges.map((c) => ({ kind: c.kind, description: c.description, amount: Number(c.amount) })),
+    charges: charges.map((c) => ({
+      kind: c.kind,
+      description: c.description,
+      amount: Number(c.amount),
+      names: chargeLineNames({ kind: c.kind, chargeTypeCode: c.charge_type_code, description: c.description }, facts, rentWeeks),
+    })),
     payments: payments.map((p) => ({ id: p.id, date: p.received_at, method: p.method, amount: Number(p.amount), subject: p.subject })),
     charged,
     paid,
@@ -358,7 +403,7 @@ export async function learnerLetterContext(personId: string): Promise<LearnerLet
       course: b.course,
       exam: b.exam,
       accommodation: b.accommodation,
-      charges: b.charges.map((c) => ({ description: c.description, amount: c.amount })),
+      charges: b.charges.map((c) => ({ description: c.description, amount: c.amount, names: c.names ?? null })),
       charged: b.charged,
       paid: b.paid,
       visaRequired: b.visaRequired,

@@ -7,12 +7,15 @@ import type { T } from './i18n';
 /**
  * The workspace's search (⌘K in the top bar): a name, an address or an offer
  * number finds the record across the modules the colleague holds — a student,
- * an enquiry, a registration, an offer, a booking, a job application. Five of
- * each at most, newest first; a module the colleague does not hold is not
- * searched at all.
+ * a colleague, an enquiry, a registration, an offer, a booking, a job
+ * application. Five of each at most, newest first; a module the colleague does
+ * not hold is not searched at all.
+ *
+ * A colleague is a person too (0039), but not a student: they are found under
+ * „Mitarbeitende" and open on their staff page, never among the learners.
  */
 
-export type SearchKind = 'person' | 'enquiry' | 'course' | 'exam' | 'offer' | 'booking' | 'application';
+export type SearchKind = 'person' | 'staff' | 'enquiry' | 'course' | 'exam' | 'offer' | 'booking' | 'application';
 
 export type SearchHit = { kind: SearchKind; id: string; title: string; detail: string; href: string };
 
@@ -46,6 +49,7 @@ export async function searchWorkspace(
                 (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings
            FROM people p
           WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
+            AND NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)
             AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
                  OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = p.id AND lower(e.address) LIKE $1))
           ORDER BY p.updated_at DESC LIMIT ${LIMIT}`,
@@ -61,6 +65,31 @@ export async function searchWorkspace(
             href: `/admin/people/${r.id}`,
           };
         })
+      )
+    );
+  }
+
+  if (holds('staff')) {
+    runs.push(
+      query<{ id: string; first_name: string; last_name: string | null; short_name: string; is_active: boolean; roles: string[] | null; roles_de: string[] | null }>(
+        `SELECT s.id, p.first_name, p.last_name, s.short_name, s.is_active,
+                (SELECT array_agg(sr.name_en ORDER BY sr.position) FROM staff_member_roles r JOIN staff_roles sr ON sr.code = r.role_code WHERE r.staff_member_id = s.id) AS roles,
+                (SELECT array_agg(sr.name_de ORDER BY sr.position) FROM staff_member_roles r JOIN staff_roles sr ON sr.code = r.role_code WHERE r.staff_member_id = s.id) AS roles_de
+           FROM staff_members s JOIN people p ON p.id = s.person_id
+          WHERE lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1 OR lower(s.short_name) LIKE $1
+             OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = p.id AND lower(e.address) LIKE $1)
+          ORDER BY s.is_active DESC, p.last_name NULLS LAST, p.first_name LIMIT ${LIMIT}`,
+        [like]
+      ).then((rows) =>
+        rows.map((r) => ({
+          kind: 'staff' as const,
+          id: r.id,
+          title: name(r.first_name, r.last_name),
+          detail: [r.is_active ? null : t('Ehemalig', 'Former'), t((r.roles_de ?? []).slice(0, 2).join(' · '), (r.roles ?? []).slice(0, 2).join(' · ')) || null, r.short_name]
+            .filter(Boolean)
+            .join(' · '),
+          href: `/admin/staff/${r.id}`,
+        }))
       )
     );
   }

@@ -1,4 +1,4 @@
-import { courseDays } from './fit';
+import { courseDays, inCourse } from './fit';
 import { isShift, type Assignment, type CourseGroup, type Shift, type Teacher } from './types';
 import type { PlanningWeek } from './weeks';
 
@@ -8,8 +8,8 @@ import type { PlanningWeek } from './weeks';
  * The board saves a whole shift-week at a time (docs/KURSPLANUNG.md, "One
  * write"), so the check is about the set, not a single cell: every group is one
  * of this month's groups in this shift, every date is a course day of this
- * week for that shift, every teacher exists and is active, and no group has
- * two teachers on one date. Fit (absence, quota, level) is NOT enforced here —
+ * week for that shift and inside the group's course, every teacher exists and
+ * is active, and no group has two teachers on one date. Fit (absence, quota, level) is NOT enforced here —
  * a planner may knowingly save a conflict and fix it next; the board shows it.
  * Enforcing it server-side would make "save with a red ring" impossible, and
  * that is a state the planners live in for hours on a bad Monday.
@@ -45,7 +45,10 @@ export function validateWeekAssignments(
       errors.push(`group ${a.groupId} is not a ${payload.shift} group of ${payload.month}`);
       continue;
     }
-    if (!courseDays(group, week).includes(a.onDate)) {
+    if (!inCourse(group, a.onDate)) {
+      // Before the start's first day or after its last: no lesson day of that course.
+      errors.push(`outside the course: ${a.onDate} for group ${a.groupId}`);
+    } else if (!courseDays(group, week).includes(a.onDate)) {
       errors.push(`${a.onDate} is not a course day of the week ${payload.weekStart}`);
     }
     if (!active.has(a.teacherId)) errors.push(`teacher ${a.teacherId} is unknown or inactive`);

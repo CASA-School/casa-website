@@ -8,6 +8,7 @@ import { ratedParts, type ExamOutcome, type ExamParts } from './exam-parts';
 import { closeOnExamBooking, sittingHasPlace, sittingWords } from './exams';
 import { raiseFlag } from './flags';
 import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './waitlist';
+import { bookedLevelLabel, PAYMENT_SUBJECTS } from './booking-levels';
 import { pick, type Bilingual, type WsLang } from './i18n';
 
 /**
@@ -65,7 +66,7 @@ export const PAYER_LABELS: Record<Payer, Bilingual> = {
   other: { de: 'Sonstige', en: 'Other' },
 };
 export const CHARGE_KIND_LABELS: Record<ChargeKind, Bilingual> = {
-  enrolment_fee: { de: 'Anmeldegebühr', en: 'Enrolment fee' },
+  enrolment_fee: { de: 'Einschreibegebühr', en: 'Enrolment fee' },
   tuition: { de: 'Kurspreis', en: 'Course price' },
   books: { de: 'Bücher', en: 'Books' },
   exam_fee: { de: 'Prüfungsgebühr', en: 'Exam fee' },
@@ -100,7 +101,7 @@ export const OBSERVATION_REASON_LABELS: Record<ObservationReason, Bilingual> = {
 
 /**
  * The booking's colour, as the team reads it in SchoolMan (docs/schoolman/bookings.md):
- * red when it is cancelled, yellow while a colleague has it under observation, grey — „unklar" —
+ * red when it is cancelled, yellow while a colleague has it under observation, grey — SchoolMan’s „unklar", „Offen" here —
  * until the charges are paid in full, green when all is well. Worked out, never stored, so it
  * cannot go stale the way SchoolMan's `???` does.
  */
@@ -108,9 +109,21 @@ export type BookingLight = 'ok' | 'watch' | 'unclear' | 'no';
 export const BOOKING_LIGHT_LABELS: Record<BookingLight, Bilingual> = {
   ok: { de: 'In Ordnung', en: 'All good' },
   watch: { de: 'Unter Beobachtung', en: 'Under observation' },
-  unclear: { de: 'Unklar', en: 'Unclear' },
+  unclear: { de: 'Offen', en: 'Unpaid' },
   no: { de: 'Storniert', en: 'Cancelled' },
 };
+
+/**
+ * The colour's word, saying what the grey is (2026-10-17: „Unklar" said nothing): „Offen" while nothing
+ * has come in, „Anzahlung erhalten" once part of it has, „Ohne Kosten" while nothing is charged.
+ */
+export function bookingLightLabel(b: Parameters<typeof bookingLight>[0]): Bilingual {
+  const light = bookingLight(b);
+  if (light !== 'unclear') return BOOKING_LIGHT_LABELS[light];
+  if (b.charged <= 0.005) return { de: 'Ohne Kosten', en: 'No charges' };
+  if (b.paid > 0.005) return { de: 'Anzahlung erhalten', en: 'Part paid' };
+  return BOOKING_LIGHT_LABELS.unclear;
+}
 
 /** Paid in full means something was charged and nothing of it is open. */
 export const paidInFull = (charged: number, paid: number) => charged > 0.005 && paid >= charged - 0.005;
@@ -137,6 +150,7 @@ const STORED_WORDS: Record<string, Bilingual> = {
   'Voided by staff': { de: 'Vom Team storniert', en: 'Voided by staff' },
   Cancelled: { de: 'Storniert', en: 'Cancelled' },
   'Credit carried over': { de: 'Guthaben übertragen', en: 'Credit carried over' },
+  ...Object.fromEntries(PAYMENT_SUBJECTS.flatMap((s) => [[s.de, s], [s.en, s]])),
 };
 
 export const storedWords = (value: string, lang: WsLang): string => {
@@ -163,7 +177,12 @@ export type BookingListItem = {
   /** An exam booking (0036): the sitting and the parts sat; its name and day are the sitting's. */
   examSessionId: string | null;
   examParts: ExamParts | null;
+  /** The stay booked (0013), as codes: a list names them from `stayVocabulary()`. */
+  stay: { typeCode: string; roomTypeCode: string | null; cateringCode: string | null; from: Date | null; to: Date | null } | null;
 };
+
+/** A vocabulary's name in both languages: the German where it has one. */
+const both = (en: string | null, de: string | null): Bilingual | null => (en ? { de: de?.trim() || en, en } : null);
 
 export type BookingPeriod = {
   id: string;
@@ -224,15 +243,20 @@ export type BookingDetail = BookingListItem & {
   cancelReason: string | null;
   observedAt: Date | null;
   observedByName: string | null;
-  /** What was booked (0013), whether or not a rate has priced it. */
+  /** What was booked (0013), whether or not a rate has priced it; each name in both languages. */
   accommodation: {
-    typeName: string;
-    roomTypeName: string | null;
-    cateringName: string | null;
+    typeCode: string;
+    roomTypeCode: string | null;
+    cateringCode: string | null;
+    typeName: Bilingual;
+    roomTypeName: Bilingual | null;
+    cateringName: Bilingual | null;
     from: Date | null;
     to: Date | null;
   } | null;
   periods: BookingPeriod[];
+  /** How much of a level the booking teaches: „A2.1", or „A2.1–A2.2" for a whole level (`bookedLevelLabel`). */
+  levelRange: string | null;
   /** What an exam booking is for (0036): the sitting, its day and deadline, the parts, the report to telc. */
   exam: BookingExam | null;
   charges: BookingCharge[];
@@ -244,6 +268,7 @@ const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
          coalesce(t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
          b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
+         b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,
          (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS start_date,
          (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
@@ -272,6 +297,11 @@ type ListRow = {
   observation_note: string | null;
   exam_session_id: string | null;
   exam_parts: ExamParts | null;
+  accommodation_type_code: string | null;
+  accommodation_room_type_code: string | null;
+  accommodation_catering_code: string | null;
+  accommodation_from: Date | null;
+  accommodation_to: Date | null;
 };
 
 const toItem = (r: ListRow): BookingListItem => ({
@@ -291,9 +321,18 @@ const toItem = (r: ListRow): BookingListItem => ({
   observationNote: r.observation_note,
   examSessionId: r.exam_session_id,
   examParts: r.exam_parts,
+  stay: r.accommodation_type_code
+    ? {
+        typeCode: r.accommodation_type_code,
+        roomTypeCode: r.accommodation_room_type_code,
+        cateringCode: r.accommodation_catering_code,
+        from: r.accommodation_from,
+        to: r.accommodation_to,
+      }
+    : null,
 });
 
-export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'reserved' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'accommodation' | 'reserved' | 'past' | 'cancelled' | 'all';
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
@@ -303,6 +342,8 @@ const FILTERS: Record<BookingFilter, string> = {
   // full (and not under observation, which shows yellow), or under observation.
   unclear: `b.status <> 'cancelled' AND b.observation_reason IS NULL AND NOT (${CHARGED} > 0.005 AND ${PAID} >= ${CHARGED} - 0.005)`,
   watch: `b.status <> 'cancelled' AND b.observation_reason IS NOT NULL`,
+  // Who needs a room, by arrival: every stay not cancelled that has not ended yet.
+  accommodation: `b.status <> 'cancelled' AND b.accommodation_type_code IS NOT NULL AND coalesce(b.accommodation_to, b.accommodation_from, current_date) >= current_date`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,
   upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) > current_date`,
   reserved: `b.status = 'reserved'`,
@@ -334,7 +375,7 @@ export async function listBookings({
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY ${filter === 'accommodation' ? 'b.accommodation_from ASC NULLS LAST, ' : ''}start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
@@ -396,11 +437,12 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       cancel_reason: string | null;
       observed_at: Date | null;
       observed_by_name: string | null;
-      accommodation_type_name: string | null;
-      accommodation_room_type_name: string | null;
-      accommodation_catering_name: string | null;
-      accommodation_from: Date | null;
-      accommodation_to: Date | null;
+      accommodation_type_en: string | null;
+      accommodation_type_de: string | null;
+      accommodation_room_en: string | null;
+      accommodation_room_de: string | null;
+      accommodation_catering_en: string | null;
+      accommodation_catering_de: string | null;
       exam_type_id: string | null;
       exam_starts_at: Date | null;
       exam_ends_at: Date | null;
@@ -420,10 +462,9 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       `, b.course_type_id, b.payer, b.payer_name, b.visa_required, b.notes, b.source_registration_id,
          b.cancelled_at, b.cancel_reason, b.observed_at,
          (SELECT name FROM staff_users WHERE id = b.observed_by) AS observed_by_name,
-         at.name_en AS accommodation_type_name,
-         art.name_en AS accommodation_room_type_name,
-         co.name_en AS accommodation_catering_name,
-         b.accommodation_from, b.accommodation_to,
+         at.name_en AS accommodation_type_en, at.name_de AS accommodation_type_de,
+         art.name_en AS accommodation_room_en, art.name_de AS accommodation_room_de,
+         co.name_en AS accommodation_catering_en, co.name_de AS accommodation_catering_de,
          es.exam_type_id, es.starts_at AS exam_starts_at, es.ends_at AS exam_ends_at, es.registration_deadline AS exam_deadline,
          b.exam_filed_at, (SELECT name FROM staff_users WHERE id = b.exam_filed_by) AS exam_filed_by_name,
          b.source_exam_registration_id,
@@ -447,8 +488,12 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       end_date: Date;
       kind: 'initial' | 'extension';
       level_code: string | null;
+      format: string | null;
+      start_iso: string;
+      end_iso: string;
     }>(
-      `SELECT bp.id, bp.course_instance_id, bp.start_date, bp.end_date, bp.kind, bp.level_code,
+      `SELECT bp.id, bp.course_instance_id, bp.start_date, bp.end_date, bp.kind, bp.level_code, t.format,
+              to_char(bp.start_date, 'YYYY-MM-DD') AS start_iso, to_char(bp.end_date, 'YYYY-MM-DD') AS end_iso,
               CASE WHEN i.id IS NULL THEN NULL
                    ELSE coalesce(i.title, t.name || ' · ' || to_char(i.start_date, 'DD.MM.YY') || ' – ' || to_char(i.end_date, 'DD.MM.YY'))
               END AS cohort_label
@@ -505,15 +550,20 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     cancelReason: row.cancel_reason,
     observedAt: row.observed_at,
     observedByName: row.observed_by_name,
-    accommodation: row.accommodation_type_name
-      ? {
-          typeName: row.accommodation_type_name,
-          roomTypeName: row.accommodation_room_type_name,
-          cateringName: row.accommodation_catering_name,
-          from: row.accommodation_from,
-          to: row.accommodation_to,
-        }
-      : null,
+    accommodation:
+      row.accommodation_type_code && row.accommodation_type_en
+        ? {
+            typeCode: row.accommodation_type_code,
+            roomTypeCode: row.accommodation_room_type_code,
+            cateringCode: row.accommodation_catering_code,
+            typeName: both(row.accommodation_type_en, row.accommodation_type_de)!,
+            roomTypeName: both(row.accommodation_room_en, row.accommodation_room_de),
+            cateringName: both(row.accommodation_catering_en, row.accommodation_catering_de),
+            from: row.accommodation_from,
+            to: row.accommodation_to,
+          }
+        : null,
+    levelRange: bookedLevelLabel(periods.map((p) => ({ format: p.format, levelCode: p.level_code, startDate: p.start_iso, endDate: p.end_iso }))),
     exam:
       row.exam_session_id && row.exam_parts && row.exam_type_id && row.exam_starts_at && row.exam_ends_at
         ? {
@@ -770,6 +820,10 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
   return bookingId;
 }
 
+/**
+ * A booking's own fields. Its course type stays what it is once a period is on a course of a start:
+ * the start is of a type, and a booking of another type on it would be counted in neither.
+ */
 export async function updateBooking(
   id: string,
   patch: {
@@ -783,7 +837,9 @@ export async function updateBooking(
   actor: StaffUser
 ): Promise<void> {
   await query(
-    `UPDATE bookings SET course_type_id = $2, status = $3::booking_status, payer = $4, payer_name = $5,
+    `UPDATE bookings SET course_type_id = CASE WHEN EXISTS (SELECT 1 FROM booking_periods bp WHERE bp.booking_id = bookings.id AND bp.course_instance_id IS NOT NULL)
+                                            THEN course_type_id ELSE $2 END,
+            status = $3::booking_status, payer = $4, payer_name = $5,
             visa_required = $6, notes = $7,
             cancelled_at = CASE WHEN $3 = 'cancelled' THEN coalesce(cancelled_at, now()) ELSE NULL END
       WHERE id = $1 AND deleted_at IS NULL`,
@@ -804,6 +860,69 @@ export async function updateBooking(
     action: 'booking_updated',
     detail: { status: patch.status },
   });
+}
+
+export type StayInput = { typeCode: string; roomTypeCode: string | null; cateringCode: string | null; from: string | null; to: string | null };
+
+/**
+ * The stay changed on the booking (2026-10-17): its type, room, meals and dates, and the rent with it —
+ * the line the workspace priced (`accommodation_rent`) is replaced by `rent`, priced from the new stay
+ * by the caller; a line a colleague added by hand stays. No stay: the stay and its rent are gone.
+ * Returns whether anything changed. A cancelled booking keeps what it had.
+ */
+export async function changeStay(
+  id: string,
+  stay: StayInput | null,
+  rent: { description: string; amount: number; rateId: string | null } | null,
+  actor: StaffUser
+): Promise<boolean> {
+  const changed = await withTransaction(async (client) => {
+    const { rows } = await client.query<{
+      status: BookingStatus;
+      type: string | null;
+      room: string | null;
+      catering: string | null;
+      from: string | null;
+      to: string | null;
+    }>(
+      `SELECT status::text AS status, accommodation_type_code AS type, accommodation_room_type_code AS room, accommodation_catering_code AS catering,
+              to_char(accommodation_from, 'YYYY-MM-DD') AS "from", to_char(accommodation_to, 'YYYY-MM-DD') AS "to"
+         FROM bookings WHERE id = $1 AND deleted_at IS NULL FOR UPDATE`,
+      [id]
+    );
+    const before = rows[0];
+    if (!before || before.status === 'cancelled') return false;
+    const same = stay
+      ? before.type === stay.typeCode && before.room === stay.roomTypeCode && before.catering === stay.cateringCode && before.from === stay.from && before.to === stay.to
+      : before.type === null;
+    if (same) return false;
+    await client.query(
+      `UPDATE bookings SET accommodation_type_code = $2, accommodation_room_type_code = $3, accommodation_catering_code = $4,
+              accommodation_from = $5::date, accommodation_to = $6::date
+        WHERE id = $1`,
+      [id, stay?.typeCode ?? null, stay?.roomTypeCode ?? null, stay?.cateringCode ?? null, stay?.from ?? null, stay?.to ?? null]
+    );
+    await client.query(`DELETE FROM booking_charges WHERE booking_id = $1 AND charge_type_code = 'accommodation_rent'`, [id]);
+    if (stay && rent) {
+      await client.query(
+        `INSERT INTO booking_charges (booking_id, kind, description, amount, charge_type_code, rate_id, created_by)
+         VALUES ($1, 'accommodation', $2, $3, 'accommodation_rent', $4, $5)`,
+        [id, rent.description, rent.amount, rent.rateId, actor.id]
+      );
+    }
+    return true;
+  });
+  if (changed) {
+    await logActivity({
+      actor,
+      entity: 'booking',
+      entityId: id,
+      // Read as „hat eine Buchung bearbeitet" (activity.ts); the detail says it was the stay.
+      action: 'booking_updated',
+      detail: { stay: stay?.typeCode ?? null, from: stay?.from ?? null, to: stay?.to ?? null, rent: rent?.amount ?? null },
+    });
+  }
+  return changed;
 }
 
 /** An extension: more dates, usually into the next cohort — which closes the learner's place in its queue. */
