@@ -5,6 +5,7 @@ import { dayRange, euros, ListBar, ListEmpty, ListGroup } from '@/components/adm
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import {
+  BOOKED_INTO_OTHER_COURSES,
   listCourseTypes,
   listUpcomingCourseInstances,
   SESSION_LABELS,
@@ -312,10 +313,12 @@ function CourseTypes({ types, t, lang }: { types: CourseTypeSummary[]; t: T; lan
         <TableRow key={type.id}>
           <Cell className="max-w-0">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-[0.9rem] font-semibold">{type.name}</span>
+              <span className="truncate text-[0.9rem] font-semibold">{lang === 'de' ? type.nameDe : type.name}</span>
               {type.isActive ? null : <Badge tone="quiet">{t('Nicht veröffentlicht', 'Not published')}</Badge>}
             </span>
-            {type.upcomingCount > 0 ? (
+            {BOOKED_INTO_OTHER_COURSES.includes(type.slug) ? (
+              <span className="mt-0.5 block text-[0.8rem] text-[var(--casa-muted)]">{t('Gebucht in die Intensivkurse', 'Booked into the intensive courses')}</span>
+            ) : type.upcomingCount > 0 ? (
               <span className="mt-0.5 block text-[0.8rem] text-[var(--casa-muted)]">
                 {type.upcomingCount === 1
                   ? t('1 kommender Termin', '1 upcoming cohort')

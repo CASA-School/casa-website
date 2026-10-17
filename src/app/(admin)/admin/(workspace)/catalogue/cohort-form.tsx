@@ -1,6 +1,6 @@
 import { Button, Field, Input, Select } from '@/components/admin/ui';
 import type { CourseTypeSummary } from '@/lib/admin/catalogue';
-import { SESSION_LABELS } from '@/lib/admin/catalogue';
+import { BOOKED_INTO_OTHER_COURSES, SESSION_LABELS } from '@/lib/admin/catalogue';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import type { Room } from '@/lib/admin/rooms';
@@ -44,11 +44,12 @@ export async function CohortForm({
             <option value="" disabled>
               {t('Auswählen', 'Choose')}
             </option>
+            {/* Every kind with courses of its own, the website's and the workspace's (0042); not Bildungszeit. */}
             {courseTypes
-              .filter((type) => type.isActive)
+              .filter((type) => !BOOKED_INTO_OTHER_COURSES.includes(type.slug))
               .map((type) => (
                 <option key={type.id} value={type.id}>
-                  {type.name}
+                  {lang === 'de' ? type.nameDe : type.name}
                 </option>
               ))}
           </Select>

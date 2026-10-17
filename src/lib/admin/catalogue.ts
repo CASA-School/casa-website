@@ -14,10 +14,19 @@ import type { Bilingual } from './i18n';
  * one thing the source of truth cannot hold: live demand.
  */
 
+/**
+ * Course types that are no course of their own (Rahman, 2026-10-17): Bildungszeit is booked into the
+ * normal intensive courses, a morning and an afternoon one (`bildungszeit.ts`). Its row stays for the
+ * website's page, its price and the booking that names it; it has no starts and no courses here.
+ */
+export const BOOKED_INTO_OTHER_COURSES: readonly string[] = ['bildungszeit'];
+
 export type CourseTypeSummary = {
   id: string;
   slug: string;
   name: string;
+  /** German name (`name_de`), else the English one. */
+  nameDe: string;
   format: string | null;
   levelRange: string | null;
   lessonsPerWeek: number;
@@ -53,6 +62,7 @@ export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
     id: string;
     slug: string;
     name: string;
+    name_de: string | null;
     format: string | null;
     level_min: string | null;
     level_max: string | null;
@@ -66,7 +76,7 @@ export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
   }>(
     `SELECT t.id,
             t.slug,
-            t.name,
+            t.name, t.name_de,
             t.format,
             t.level_min,
             t.level_max,
@@ -90,6 +100,7 @@ export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    nameDe: row.name_de ?? row.name,
     format: row.format,
     levelRange:
       row.level_min && row.level_max
@@ -150,10 +161,10 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
        FROM course_instances i
        JOIN course_types t ON t.id = i.course_type_id
        LEFT JOIN rooms rm ON rm.id = i.room_id
-      WHERE i.start_date >= current_date - interval '14 days'
+      WHERE i.start_date >= current_date - interval '14 days' AND NOT (t.slug = ANY($2::text[]))
       ORDER BY i.start_date ASC, t.position
       LIMIT $1`,
-    [limit]
+    [limit, BOOKED_INTO_OTHER_COURSES]
   );
 
   return rows.map((row) => ({
