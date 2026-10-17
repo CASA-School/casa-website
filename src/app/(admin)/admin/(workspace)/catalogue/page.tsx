@@ -62,7 +62,7 @@ export default async function CataloguePage({
   const [{ error, view: rawView, new: fresh }, types, instances, rooms, levels] = await Promise.all([
     searchParams,
     listCourseTypes(),
-    listUpcomingCourseInstances(20),
+    listUpcomingCourseInstances(120),
     plans ? listBookableRooms() : Promise.resolve([]),
     plans
       ? query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`).then((r) => r.map((x) => x.code))
@@ -207,10 +207,12 @@ function CohortRow({
     instance.room?.capacity !== undefined &&
     instance.capacity > instance.room.capacity;
 
-  // The line under the name carries only what the course name does not already say.
+  // The line under the name carries only what the course name does not already say — and a start of
+  // levels names its courses (0041).
+  const courseLabels = instance.title ? [] : groups.filter((g) => !g.cancelled && g.levelCode).map((g) => g.label);
   const sub = [
     instance.title && instance.title !== instance.courseTypeName ? instance.title : null,
-    instance.levelCode,
+    courseLabels.length ? courseLabels.join(' · ') : instance.levelCode,
     instance.session ? pick(lang, SESSION_LABELS[instance.session]) : null,
   ]
     .filter(Boolean)
@@ -229,7 +231,7 @@ function CohortRow({
       <td className={`${openCell} py-3 md:max-w-0`}>
         <span className="flex min-w-0 items-center gap-2">
           <Link href={`/admin/catalogue/${instance.id}`} className="text-[0.9rem] font-semibold text-[var(--casa-ink)] hover:underline md:truncate">
-            {instance.courseTypeName}
+            {lang === 'de' ? instance.courseTypeNameDe : instance.courseTypeName}
           </Link>
           {status ? <Badge tone={status.tone}>{status.label}</Badge> : null}
         </span>

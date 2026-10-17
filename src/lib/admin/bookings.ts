@@ -630,10 +630,9 @@ async function addPeriodOn(
   actor: StaffUser
 ): Promise<string> {
   // The course the learner sits in (0041): a joiner at a second half on the running course, to its end.
-  const course =
-    input.courseInstanceId && input.levelCode
-      ? await resolveCourse(input.courseInstanceId, input.levelCode, { startDate: input.startDate, endDate: input.endDate }, { client, actor })
-      : null;
+  const course = input.courseInstanceId
+    ? await resolveCourse(input.courseInstanceId, input.levelCode ?? null, { startDate: input.startDate, endDate: input.endDate }, { client, actor })
+    : null;
   const { rows } = await client.query<{ id: string }>(
     `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, level_code, course_id, created_by)
      VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8) RETURNING id`,

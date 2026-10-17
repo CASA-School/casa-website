@@ -772,6 +772,7 @@ export async function getCourseDetail(slug: string, locale: ContentLocale): Prom
               -- last day. lib/content/bookability decides which can be booked.
               AND end_date >= CURRENT_DATE
               AND status = 'scheduled'
+              AND on_website
             ORDER BY start_date ASC
           `,
           [row.id]
@@ -898,6 +899,7 @@ export async function getCourseRegistrationCatalog(
             WHERE course_type_id = ANY($1::uuid[])
               AND end_date >= CURRENT_DATE
               AND status = 'scheduled'
+              AND on_website
             ORDER BY start_date ASC
           `,
           [typeIds]

@@ -35,10 +35,13 @@ export type ResolvedCourse = {
   endDate: string | null;
 };
 
-/** The course a learner's step at a start means; made when the start has none at that step yet. */
+/**
+ * The course a learner's step at a start means; made when the start has none at that step yet. A start
+ * of named courses (a module, a group's, a company's) books onto its course whatever the level, even none.
+ */
 export async function resolveCourse(
   courseInstanceId: string,
-  levelCode: string,
+  levelCode: string | null,
   dates: { startDate: string | null; endDate: string | null } = { startDate: null, endDate: null },
   options: { client?: PoolClient; actor?: StaffUser | null } = {}
 ): Promise<ResolvedCourse | null> {
@@ -49,6 +52,16 @@ export async function resolveCourse(
     [courseInstanceId]
   );
   if (!start) return null;
+
+  // A named course of the start, and none at this exact level: the learner sits in it.
+  const [named] = await run<{ id: string }>(
+    `SELECT id FROM courses WHERE course_instance_id = $1 AND level_code IS NULL AND status <> 'cancelled'
+        AND NOT EXISTS (SELECT 1 FROM courses o WHERE o.course_instance_id = $1 AND o.level_code = $2)
+      ORDER BY created_at LIMIT 1`,
+    [start.id, levelCode]
+  );
+  if (named) return { courseId: named.id, courseInstanceId: start.id, startDate: dates.startDate, endDate: dates.endDate };
+  if (!levelCode) return null;
 
   let instance = start.id;
   let level = levelCode;
@@ -78,6 +91,21 @@ export async function resolveCourse(
   if (!course) return null;
   const endDate = clampEnd && dates.endDate && dates.endDate > clampEnd ? clampEnd : dates.endDate;
   return { courseId: course.id, courseInstanceId: instance, startDate: dates.startDate, endDate };
+}
+
+/**
+ * A course's own price for a start and level — an evening term, a special module, an exam preparation
+ * (SchoolMan prices those per course) — or null: the price list decides. Looks, never makes a course.
+ */
+export async function ownCoursePrice(courseInstanceId: string, levelCode: string | null): Promise<{ amount: number; title: string | null } | null> {
+  const row = await queryFirst<{ price: string; title: string | null }>(
+    `SELECT price, title FROM courses
+      WHERE course_instance_id = $1 AND status <> 'cancelled' AND price IS NOT NULL
+        AND (level_code = $2 OR (level_code IS NULL AND NOT EXISTS (SELECT 1 FROM courses o WHERE o.course_instance_id = $1 AND o.level_code = $2)))
+      ORDER BY (level_code = $2) DESC NULLS LAST LIMIT 1`,
+    [courseInstanceId, levelCode]
+  );
+  return row ? { amount: Number(row.price), title: row.title } : null;
 }
 
 // ------------------------------------------------------------------ edits

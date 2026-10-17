@@ -441,7 +441,7 @@ export async function waitlistCounts(): Promise<WaitlistCounts> {
  * or one with a queue in front of the learner — shows before anything is booked. An intensive start's
  * second half (`B1.2`) is the running course of the start before, with the day it ends.
  */
-export type WizardPlaces = { places: number; booked: number; offered: number; queue: string[]; offeredTo: string[]; until?: string | null };
+export type WizardPlaces = { places: number; booked: number; offered: number; queue: string[]; offeredTo: string[]; until?: string | null; closed?: boolean };
 
 export async function upcomingLevelPlaces(): Promise<Map<string, Record<string, WizardPlaces>>> {
   const starts = await query<{ id: string; start_date: string; end_date: string; format: string }>(
@@ -465,7 +465,8 @@ export async function upcomingLevelPlaces(): Promise<Map<string, Record<string, 
   const byCourse = new Map<string, WizardPlaces>();
   for (const g of groups) {
     if (g.cancelled) continue;
-    byCourse.set(g.courseId, { places: g.places, booked: g.booked, offered: g.offered, queue: [], offeredTo: [] });
+    // A course not offered for booking (SchoolMan closes a full one) counts as full: no free place.
+    byCourse.set(g.courseId, { places: g.places, booked: g.booked, offered: g.offered, queue: [], offeredTo: [], closed: !g.bookable });
   }
   for (const q of queued) {
     const places = byCourse.get(q.course_id);

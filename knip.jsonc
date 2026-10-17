@@ -37,6 +37,13 @@
     // (docs/FILEMAKER_BRIDGE.md) and this script is retired.
     "scripts/filemaker/import-staff.mjs",
 
+    // Writes SchoolMan's courses still running or ahead into `courses`, from
+    // scripts/filemaker/read_courses.py through a pipe (docs/ADMIN_WORKSPACE.md
+    // §Courses). Run by hand on the office Mac, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings courses across.
+    "scripts/filemaker/import-courses.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

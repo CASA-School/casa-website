@@ -32,6 +32,8 @@ export type CourseTypeSummary = {
 export type CourseInstanceSummary = {
   id: string;
   courseTypeName: string;
+  /** The type's German name (`name_de`), for the workspace in German; the English one when it has none. */
+  courseTypeNameDe: string;
   courseTypeSlug: string;
   startDate: Date;
   endDate: Date;
@@ -109,6 +111,7 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
   const rows = await query<{
     id: string;
     course_type_name: string;
+    course_type_name_de: string;
     course_type_slug: string;
     start_date: Date;
     end_date: Date;
@@ -127,6 +130,7 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
   }>(
     `SELECT i.id,
             t.name AS course_type_name,
+            coalesce(t.name_de, t.name) AS course_type_name_de,
             t.slug AS course_type_slug,
             i.start_date,
             i.end_date,
@@ -155,6 +159,7 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
   return rows.map((row) => ({
     id: row.id,
     courseTypeName: row.course_type_name,
+    courseTypeNameDe: row.course_type_name_de,
     courseTypeSlug: row.course_type_slug,
     startDate: row.start_date,
     endDate: row.end_date,
@@ -221,6 +226,37 @@ export async function createCourseInstance(
     ]
   );
   if (!row) throw new Error('Cohort was not created');
+  // Its courses (0041), as SchoolMan plans them: an intensive start one per level, A1 to C1, unless one
+  // level is given; an evening start its level; any other kind one course, named after the start.
+  const type = await queryFirst<{ slug: string; name: string }>(`SELECT slug, name FROM course_types WHERE id = $1`, [input.courseTypeId]);
+  const places = input.capacity >= 1 && input.capacity <= 40 ? input.capacity : 14;
+  if (type?.slug === 'intensive-german' && !input.levelCode) {
+    await query(
+      `INSERT INTO courses (course_instance_id, level_code, places_per_group, created_by)
+       SELECT $1, code, 14, $2 FROM levels WHERE code IN ('A1.1', 'A2.1', 'B1.1', 'B1+.1', 'B2.1', 'C1.1')
+       ON CONFLICT DO NOTHING`,
+      [row.id, actor.id]
+    );
+  } else if (type?.slug === 'intensive-german' || type?.slug === 'evening-german') {
+    if (input.levelCode) {
+      await query(`INSERT INTO courses (course_instance_id, level_code, room_id, places_per_group, created_by) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`, [
+        row.id,
+        input.levelCode,
+        input.roomId,
+        places,
+        actor.id,
+      ]);
+    }
+  } else {
+    await query(`INSERT INTO courses (course_instance_id, level_code, title, room_id, places_per_group, created_by) VALUES ($1, $2, $3, $4, $5, $6)`, [
+      row.id,
+      input.levelCode,
+      input.title ?? type?.name ?? null,
+      input.roomId,
+      places,
+      actor.id,
+    ]);
+  }
   await query(
     `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail)
      VALUES ($1, $2, 'course_instance', $3, 'cohort_created', $4)`,

@@ -431,7 +431,8 @@ export function BookingWizard({
           <Question>{t('Mit welchem Niveau beginnt die Person?', 'Which level are they starting at?')}</Question>
           <div className="flex flex-wrap gap-1.5">
             {offer.levels.map((l) => {
-              const isFull = cohort ? levelFree(levelPlaces(cohort, l.code), personId) === 0 : false;
+              const places = cohort ? levelPlaces(cohort, l.code) : null;
+              const isFull = places ? levelFree(places, personId) === 0 : false;
               return (
                 <button
                   key={l.code}
@@ -447,7 +448,7 @@ export function BookingWizard({
                   )}
                 >
                   {l.code}
-                  {isFull ? <span className="ml-1 text-[0.72rem] font-bold opacity-80">{t('voll', 'full')}</span> : null}
+                  {isFull ? <span className="ml-1 text-[0.72rem] font-bold opacity-80">{places?.closed ? t('geschlossen', 'closed') : t('voll', 'full')}</span> : null}
                 </button>
               );
             })}
@@ -455,7 +456,9 @@ export function BookingWizard({
           {group ? (
             // The chosen level's places in this start, before the rest is asked.
             <p className={cn('text-[0.82rem]', full ? 'font-semibold text-[#9a5b00]' : 'text-[var(--casa-muted)]')}>
-              {full
+              {full && group.closed
+                ? t(`${levelCode} ist geschlossen: nicht zur Buchung angeboten`, `${levelCode} is closed: not offered for booking`)
+                : full
                 ? t(`${levelCode} ist voll: ${group.booked} von ${group.places} Plätzen gebucht`, `${levelCode} is full: ${group.booked} of ${group.places} places booked`)
                 : t(`${levelCode}: ${free} von ${group.places} Plätzen frei`, `${levelCode}: ${free} of ${group.places} places free`)}
               {group.until

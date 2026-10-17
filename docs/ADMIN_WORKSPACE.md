@@ -1091,6 +1091,34 @@ intensive start's second half (`B1.2`) the course of the start before, still
 running — the learner sits in it from their first day to its end, as in
 SchoolMan, and the wizard says so („im laufenden Kurs bis …").
 
+**Kinds (0042).** Besides intensive, evening and special courses, groups' and
+companies' courses: exam preparation, private lessons, junior and online
+courses, as unpublished types (`is_active` false: not on the website), with
+SchoolMan's type numbers. „Termin planen" makes a start's courses as SchoolMan
+plans them: an intensive start one per level, A1.1 to C1.1; an evening start
+its level; any other kind one named course (the start's title, its places). A
+start of named courses books onto its course whatever the learner's level.
+A course's own price (an evening term, a module, an exam preparation) is what a
+booking charges; the price list decides where it has none. A closed course
+(`bookable` false) counts as full in the wizard, which says so („geschlossen").
+
+**From SchoolMan (2026-10-17).**
+`python3 -I scripts/filemaker/read_courses.py | node scripts/filemaker/import-courses.mjs [--dry-run]`
+reads the courses still running or ahead, read-only, and writes them in one
+transaction; counts only. An intensive or evening course lands on our start of
+its type with the same first day (none is made: the starts are the website's
+dates, already from SchoolMan); a level SchoolMan has twice on one start, or
+with 28 places, is one course with two groups. An exam preparation, special
+module or company course becomes its own start — not on the website
+(`course_instances.on_website`, 0043; the website's lists and registration form
+read only starts that are) — with its course. The level comes from `LevelShort`
+and, for an evening term, `LevelShown`: `LevelStepReference` is a stale text
+copy (an evening B2 course reads `B2.1` or `A1.1` alike). Matched on SchoolMan's
+course number, then the start and level; what the workspace has wins. First
+run: 158 courses, 125 courses here, 22 own starts; 18 courses of three intensive
+starts beyond our twelve months (Oct 2027 – Jan 2028) and one evening course of
+14 Sep 2026 wait for a start of ours.
+
 Places, the queue, Bildungszeit's weeks and Kursplanung's „Gebucht" all count
 by course. The course start page lists its courses as cards — places and room,
 who is next, the queue, the booked — with „Bearbeiten" (places, room, offered,

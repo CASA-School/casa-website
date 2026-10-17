@@ -54,3 +54,6 @@ next-env.d.ts
 # gstack tooling state. Carried over from the admin-dashboard worktree, which
 # added it locally and never committed it.
 .gstack/
+
+# Python bytecode (scripts/filemaker reads SchoolMan through FileMaker Pro)
+__pycache__/

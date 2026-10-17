@@ -1,4 +1,5 @@
 import { bildungszeitOffer } from './bildungszeit';
+import { ownCoursePrice } from './courses';
 import type { BookingOffer, CohortOffer, CourseTypeOffer } from './booking-offer-types';
 import { query, queryFirst } from './db';
 import { upcomingSittings } from './exams';
@@ -355,7 +356,10 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
       [selection.courseInstanceId]
     );
     if (course) {
-      const { price } = cohortPrice(prices, course);
+      // The course's own price first (an evening term, a module: SchoolMan's per course), then the list.
+      const own = await ownCoursePrice(selection.courseInstanceId, selection.levelCode);
+      const { price: listed } = cohortPrice(prices, course);
+      const price = own ? { id: null, amount: own.amount } : listed;
       const resolved = selection.tuitionOverride ?? price?.amount ?? Number(course.default_price);
       if (resolved > 0) {
         lines.push({

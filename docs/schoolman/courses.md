@@ -44,6 +44,14 @@ the links say.
 639 absences (ill 470, excused 156, unexcused 13); minutes late on 71% of rows. Each row also
 carries copies of the teacher's name and the learner's gender.
 
+## Levels on a course (2026-10-17)
+
+`LevelStepReference` is a stale text copy and does not say the level: of the courses running or
+ahead, an evening B2 course reads `B2.1` or `A1.1` alike, an intensive start's six courses `A1.1`
+six times. The level is `LevelShort` (the band: an intensive course runs it from the first half)
+and, for an evening term, `LevelShown` — the step `_ID_LevelStepReference` points at (`A2.2`).
+A level with parallel groups appears as two or three courses, or as one with 28 or 42 places.
+
 ## In the workspace today
 
 `course_instances`, `course_groups`, `course_types`, `levels`, `day_times`, `exam_sessions`,

@@ -36,7 +36,7 @@ export type CohortOffer = {
  * order; `offeredTo`: those a place is held for (canonical person ids). `until`: for a second half joined
  * at this start, the day the running course of the start before ends — the booking ends there too.
  */
-export type LevelPlaces = { places: number; booked: number; offered: number; queue: string[]; offeredTo: string[]; until?: string | null };
+export type LevelPlaces = { places: number; booked: number; offered: number; queue: string[]; offeredTo: string[]; until?: string | null; closed?: boolean };
 
 /** A level in a start, with the default for one nobody has used yet. */
 export const levelPlaces = (cohort: Pick<CohortOffer, 'levels'>, levelCode: string): LevelPlaces =>
@@ -47,7 +47,7 @@ export const levelPlaces = (cohort: Pick<CohortOffer, 'levels'>, levelCode: stri
  * learner a place is held for, that place is theirs: it is free to them.
  */
 export const levelFree = (l: LevelPlaces, forPerson?: string) =>
-  Math.max(0, l.places - l.booked - l.offered + (forPerson && l.offeredTo.includes(forPerson) ? 1 : 0));
+  l.closed ? 0 : Math.max(0, l.places - l.booked - l.offered + (forPerson && l.offeredTo.includes(forPerson) ? 1 : 0));
 
 /** How many wait in front of a learner: none if a place is held for them, their place if queued, else all. */
 export const waitingAhead = (l: LevelPlaces, person: string) => {
