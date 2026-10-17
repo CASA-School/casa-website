@@ -8,7 +8,7 @@ import { offerChecks } from '@/lib/admin/offers/checks';
 import { buildLines, computeTotals } from '@/lib/admin/offers/engine';
 import type { OfferCheck, OfferDraft, OfferLine, OfferStatus, OfferTotals } from '@/lib/admin/offers/types';
 
-import { saveOfferAction } from '@/app/(admin)/admin/(editor)/offers/actions';
+import { saveOfferAction } from '@/app/(admin)/admin/(workspace)/offers/actions';
 
 export type SaveState = 'saved' | 'dirty' | 'saving' | 'error' | 'stale';
 

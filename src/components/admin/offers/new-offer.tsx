@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-import { createOfferAction, findRecipientsAction, matchRecipientsAction, pickRecipientAction } from '@/app/(admin)/admin/(editor)/offers/actions';
+import { createOfferAction, findRecipientsAction, matchRecipientsAction, pickRecipientAction } from '@/app/(admin)/admin/(workspace)/offers/actions';
 import { useWsLang } from '@/components/admin/lang';
 import { GRUPPEN_PACKAGES_BY_STACK, fullBoardBaseTotal } from '@/config/gruppen/packages';
 import { pick, type Bilingual, type T } from '@/lib/admin/i18n';
@@ -321,10 +321,9 @@ export function NewOffer({
 
   return (
     <OfferFrame back={{ href: '/admin/offers', label: t('Angebote', 'Offers') }} title={t('Neues Angebot', 'New offer')}>
-      <main className={ui.wz}>
+      <div className={ui.wz}>
         <div className={ui.wzCard}>
           <nav className={ui.wzRail} aria-label={t('Schritte', 'Steps')}>
-            <h1>{t('Neues Angebot', 'New offer')}</h1>
             <ol className={ui.wzSteps}>
               {steps.map((s, i) => {
                 const done = i < index;
@@ -543,7 +542,7 @@ export function NewOffer({
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </OfferFrame>
   );
 }

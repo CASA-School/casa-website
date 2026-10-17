@@ -17,7 +17,7 @@ import type { EditorOptions, OfferRecord, StandardTexts } from '@/lib/admin/offe
 import { addDays } from '@/lib/admin/offers/stay';
 import { OFFER_STATUS_LABELS, overrideKey, type OfferLanguage } from '@/lib/admin/offers/types';
 
-import { saveStandardTextAction } from '@/app/(admin)/admin/(editor)/offers/actions';
+import { saveStandardTextAction } from '@/app/(admin)/admin/(workspace)/offers/actions';
 
 import { InlineDatePicker } from '@/components/admin/date-picker';
 import { Seg } from './fields';

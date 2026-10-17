@@ -1,8 +1,8 @@
 # Offers — the offers module
 
-`/admin/offers` · module `offers` · full screen, like the website editor · branch `admin` (2026-10-13)
+`/admin/offers` · module `offers` · in the workspace's frame (full screen until 2026-10-17) · branch `admin` (2026-10-13)
 
-Read this before touching `src/app/(admin)/admin/(editor)/offers`, `src/components/admin/offers`,
+Read this before touching `src/app/(admin)/admin/(workspace)/offers`, `src/components/admin/offers`,
 `src/lib/admin/offers`, migration 0021 or the group packages in `src/config/gruppen/packages.ts`.
 The letter an offer is sent as is a CASA letter like any other: `docs/LETTERS.md`.
 
@@ -25,9 +25,12 @@ Two attempts were rejected the same day — a form of stacked cards, then a buil
 steppers with a summary rail — as cluttered, "messy", "not a good experience for staff". The
 direction Rahman chose, and the rules that follow from it:
 
-1. **A focused tool, not a dashboard page.** Offers run full screen like the website editor
-   (`(editor)` route group): one slim white toolbar — the way back, the offer's name and number, the
-   two tabs **Offer | Letter**, the save state, "⋯" and the one primary action. No workspace sidebar.
+1. **A focused page in the workspace's frame.** Offers ran full screen like the website editor until
+   2026-10-17, when Rahman asked for them to sit with everything else: now in `(workspace)`, with the
+   sidebar and the top bar. The list has the workspace's page head. An offer's head is slim — the pill
+   back to Offers, the two tabs **Offer | Letter** with its number and status, the save state, "⋯" and
+   the one primary action — because the offer's own head card carries its name, where it is renamed.
+   Full screen stays for the two tools that need the width: the website editor and the board.
 2. **Plain values; a click changes one.** The offer page shows text — "11–24 April 2027 · 13 nights",
    "18 participants · 2 escorts, shared by the group", "Host family · double room · half board ·
    450 €". A click opens a small panel beside it with the few controls for that one thing; Escape or a
@@ -317,8 +320,8 @@ the catalogue's "from" price stands until it is typed over).
 ## Code map
 
 ```
-src/app/(admin)/admin/(editor)/offers/
-  layout.tsx            requireModule('offers') — the (editor) gate is the session
+src/app/(admin)/admin/(workspace)/offers/
+  layout.tsx            requireModule('offers') — the (workspace) gate is the session
   actions.ts            every write and every wizard lookup; each asks requireModule first
                         (edit; delete and standard texts full)
   page.tsx              the list
@@ -326,7 +329,7 @@ src/app/(admin)/admin/(editor)/offers/
   [id]/page.tsx         the offer
   [id]/letter/page.tsx  the letter (?version=N: a version as sent)
 src/components/admin/offers/
-  frame.tsx             the toolbar and the Offer | Letter tabs
+  frame.tsx             an offer's head: the way back, the Offer | Letter tabs, the actions
   offer-page.tsx        the offer: head, built on, included, extras; price, checks, letter, earlier offers
                         (the notes and history come from the route, rendered on the server)
   letter-view.tsx       the letter tab: in-place editing, standard texts, versions, send

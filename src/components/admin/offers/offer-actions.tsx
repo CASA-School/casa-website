@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 
-import { decideOfferAction, deleteOfferAction, duplicateOfferAction, reviseOfferAction, sendOfferAction } from '@/app/(admin)/admin/(editor)/offers/actions';
+import { decideOfferAction, deleteOfferAction, duplicateOfferAction, reviseOfferAction, sendOfferAction } from '@/app/(admin)/admin/(workspace)/offers/actions';
 import { useWsLang } from '@/components/admin/lang';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { subjectLine, type Letter } from '@/lib/admin/letters/types';

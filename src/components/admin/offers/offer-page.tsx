@@ -175,7 +175,7 @@ export function OfferPage({
         </>
       }
     >
-      <main className={ui.page}>
+      <div className={ui.page}>
         {od.saveState === 'stale' ? (
           <div className={ui.banner} style={{ marginBottom: 16 }}>
             {t(
@@ -229,7 +229,7 @@ export function OfferPage({
             <Related record={record} />
           </aside>
         </div>
-      </main>
+      </div>
       <PrintCopy letter={letter} />
     </OfferFrame>
   );

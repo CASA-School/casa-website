@@ -213,7 +213,8 @@ Since 0014 there is a second entry with the same gate:
 `src/app/(admin)/admin/(focus)/layout.tsx`, which renders the shell in focus
 mode (icon rail, no 1180px measure) for the course-planning board. Since 0019
 there is a third, `src/app/(admin)/admin/(editor)/layout.tsx`, with no shell at
-all, for the website editor (docs/WEBSITE_EDITOR.md). All three layouts call
+all, for the website editor (docs/WEBSITE_EDITOR.md); Offers used it too until 2026-10-17 and are in
+`(workspace)` now. All three layouts call
 the one `requireStaff()` in `src/lib/admin/guard.ts`, so "signed in" is still
 defined once; what differs is the chrome, never the check.
 
@@ -493,7 +494,7 @@ retention period (Open items).
 | Group | Holds |
 | --- | --- |
 | **Inbox** | Enquiries, Registrations (→ Courses, Exams) — what the public site sent, waiting to be worked |
-| **School** | Students (→ Placement tests), Bookings, Offers, Courses, Exams — the records the school keeps. Offers opens full screen (docs/OFFERS.md) |
+| **School** | Students (→ Placement tests), Bookings, Offers, Courses, Exams — the records the school keeps. Offers sit in the frame like the rest since 2026-10-17 (docs/OFFERS.md) |
 | **Management** | Applications, Activity, Team, Settings (→ Prices, Lists, Rooms) |
 
 Nine top-level items, and the placements are the argument:
@@ -800,7 +801,7 @@ is so basic and bad").** The Offers list showed why: one column held dates *and*
 group sizes, the status column held a badge with a name and a date under it,
 two money columns were half dashes, and the tabs counted zeros. The parts are
 in `src/components/admin/list.tsx`; `Table`, `TableRow` and `Cell` in `ui.tsx`
-are the body. Offers (`(editor)/offers/page.tsx`) is the reference.
+are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
 
 10. **A list is one white card.** Its views (tabs, underlined) and its search
     sit across the top of the card (`ListBar`); the rows follow; an empty view

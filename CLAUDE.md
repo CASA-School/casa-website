@@ -20,7 +20,7 @@ shell) has its own rules and history: **read `docs/KURSPLANUNG.md` before touchi
 The website editor at `/admin/website` (module `website`, full screen) lets staff
 change the public site's text on the real page: **read `docs/WEBSITE_EDITOR.md`
 before touching it or adding an editable page.**
-Offers at `/admin/offers` (module `offers`, full screen like the editor) are the
+Offers at `/admin/offers` (module `offers`, in the workspace's frame since 2026-10-17) are the
 offers CASA makes to groups, learners and companies — groups priced from the four
 packages of the groups page, the rest from `rates` — written on the letter itself:
 **read `docs/OFFERS.md` before touching it.** Its design —
