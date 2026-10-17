@@ -495,7 +495,7 @@ erDiagram
 One course per start and level (`courses_start_level_key`); a named course has
 no level. `course_level_places` (0031) is gone into it.
 
-## Lesson days (0045–0046)
+## Lesson days (0045–0048)
 
 ```mermaid
 erDiagram
@@ -522,6 +522,7 @@ erDiagram
     bool is_substitute
     bool is_tentative
     bool cancelled
+    bool merged
     text filemaker_id
   }
 ```

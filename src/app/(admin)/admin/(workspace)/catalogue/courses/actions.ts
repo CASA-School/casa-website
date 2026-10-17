@@ -105,7 +105,10 @@ export async function changeDayAction(formData: FormData): Promise<void> {
   const mayPlan = canAccess(actor, 'rooms', 'edit');
   if (!mayTeach && !mayPlan) throw new Error('Not allowed');
   const patch: DayPatch = {};
-  if (mayTeach && formData.has('teacherId')) patch.teacherId = optionalId(formData, 'teacherId');
+  if (mayTeach && formData.has('teacherId')) {
+    patch.teacherId = optionalId(formData, 'teacherId');
+    patch.merged = formData.get('merged') === 'on';
+  }
   if (mayPlan) {
     if (formData.has('roomId')) patch.roomId = optionalId(formData, 'roomId');
     patch.cancelled = formData.get('cancelled') === 'on';

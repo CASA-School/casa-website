@@ -1140,7 +1140,7 @@ chose the same here, in one table, with Kursplanung's board on top of it.
 (hours, lessons, teacher, room). `course_days` is every lesson day of every
 course: course and group, date, its own hours and lessons (null: the plan's),
 teacher, room, who and which room were replaced, the board's marks
-(`is_substitute`, `is_tentative`), called off with a reason, a note,
+(`is_substitute`, `is_tentative`), called off with a reason, merged, a note,
 `filemaker_id`. The view `course_day_times` gives a day's hours as they are:
 its own, else the plan's, else the start's, else the board group's shift —
 what a clash is checked against. Lesson content, homework and attendance stay
@@ -1163,7 +1163,7 @@ replaced the plan's), room („statt Y"), called off; „Kurstage erzeugen" /
 „Fehlende Tage erzeugen" makes what is missing from the plan, leaving the
 school's closures out and a planned teacher off a day they are away; a day that
 exists is never touched. An intensive course's generation also makes its two
-board groups, so Kursplanung shows it. „Ändern" on a day opens its dialog:
+board groups (`make_course_board_groups()`, 0047), so Kursplanung shows it. „Ändern" on a day opens its dialog:
 teacher and room choices name who is away, teaching elsewhere or holding the
 room then, free ones first. *Wochenplan*: the plan per group, defaulting to the
 start's days and hours; „Lehrkräfte übernehmen" / „Räume übernehmen" put the
@@ -1174,6 +1174,33 @@ booked into the course.
 are Kursplanung's (`kursplanung` at `edit`), rooms, hours, calling off and
 generating are the course planners' (`rooms` at `edit`) — the same split as
 the board and the course cards.
+
+**Merged (0048).** SchoolMan's „Zusammenlegung": a group taught together with
+another that day, most often because its teacher is away — it then has no
+teacher of its own, or its teacher takes both. Not called off, and not a day
+waiting for a teacher: the page says „Mit einer anderen Gruppe
+zusammengelegt" and leaves it out of „Ohne Lehrkraft", which counts only days
+ahead. Ticked in the day's dialog (Kursplanung's right, with the teacher).
+
+**From SchoolMan (2026-10-17).**
+`python3 -I scripts/filemaker/read_lesson_days.py | node scripts/filemaker/import-lesson-days.mjs [--dry-run]`
+reads the weekly plans (`WeekDay`) and lesson days (`SingleDateCourse`, with
+the room calendar `SingleDateOccupancy` for a day's room and the room it
+replaced) of the courses still running or ahead, read-only; numbers, dates and
+hours only. Run the course import first: `courses.filemaker_group_ids` holds
+the SchoolMan number of each parallel group, so a group's days land on it. A
+plan comes across only for a group with none here; a day read before is updated
+only while nobody here has changed it (`changed_by` empty); a day the workspace
+already has on that date gets SchoolMan's number and only the teacher and room
+it lacks. A day's hours and lessons are its own only where they differ from the
+plan. SchoolMan's marks: Vertretung → a substitute (with who was replaced),
+Zusammenlegung → merged, Ausfall → called off, Verschiebung → a note; a day
+inside a closure (`_ID_Holiday`, Easter 2027) is left out, as generation does.
+Its rooms match ours by the city name, then the name, then the number; its
+teachers by staff number. A replaced room or teacher that is the same one (93
+of 102 room records) is not a change. First run: 5,017 days of 158 courses,
+4,317 on our 125 courses (700 belong to starts beyond our twelve months), 543
+plan rows, every teacher and room matched; a second run changes nothing.
 
 **Known edge.** A start on the last Monday of a month (26 Oct) has its first
 week in the previous planning month, where the board has no group of it: that

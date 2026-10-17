@@ -72,8 +72,9 @@ try {
 
   // An intensive or evening level SchoolMan has more than once on a start: parallel groups.
   const key = (c) => `${c.type}|${c.start}|${c.daytime}|${levelOf(c, types.get(c.type)?.slug)}`;
+  // Their numbers, group by group (`filemaker_group_ids`): each group's lesson days land on it.
   const parallel = new Map();
-  for (const c of courses) parallel.set(key(c), (parallel.get(key(c)) ?? 0) + 1);
+  for (const c of courses) parallel.set(key(c), [...(parallel.get(key(c)) ?? []), c.id].sort((a, b) => Number(a) - Number(b)));
   const seen = new Set();
 
   for (const c of courses.sort((a, b) => Number(a.id) - Number(b.id))) {
@@ -100,22 +101,24 @@ try {
       }
       if (seen.has(key(c))) continue;
       seen.add(key(c));
-      const groups = Math.max(parallel.get(key(c)), placesOf(c.places).groups);
+      const ids = parallel.get(key(c));
+      const groups = Math.max(ids.length, placesOf(c.places).groups);
       const existing = (await client.query(`SELECT id, filemaker_course_id FROM courses WHERE course_instance_id = $1 AND level_code = $2`, [start.id, level])).rows[0];
       if (existing) {
-        // The workspace's own places stay; SchoolMan's number and its parallel groups are added.
+        // The workspace's own places stay; SchoolMan's numbers and its parallel groups are added.
         const r = await client.query(
-          `UPDATE courses SET filemaker_course_id = coalesce(filemaker_course_id, $2), groups = greatest(groups, $3), updated_at = timezone('utc', now())
-            WHERE id = $1 AND (filemaker_course_id IS NULL OR groups < $3)`,
-          [existing.id, c.id, groups]
+          `UPDATE courses SET filemaker_course_id = coalesce(filemaker_course_id, $2), groups = greatest(groups, $3), filemaker_group_ids = $4::text[],
+                  updated_at = timezone('utc', now())
+            WHERE id = $1 AND (filemaker_course_id IS NULL OR groups < $3 OR filemaker_group_ids IS DISTINCT FROM $4::text[])`,
+          [existing.id, c.id, groups, ids]
         );
         count.matched++;
         if (r.rowCount && groups > 1) count.groups++;
       } else {
         await client.query(
-          `INSERT INTO courses (course_instance_id, level_code, groups, places_per_group, bookable, price, filemaker_course_id)
-           VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING`,
-          [start.id, level, groups, places(c.places), c.bookable && c.active, type.slug === 'evening-german' ? money(c.price) : null, c.id]
+          `INSERT INTO courses (course_instance_id, level_code, groups, places_per_group, bookable, price, filemaker_course_id, filemaker_group_ids)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::text[]) ON CONFLICT DO NOTHING`,
+          [start.id, level, groups, places(c.places), c.bookable && c.active, type.slug === 'evening-german' ? money(c.price) : null, c.id, ids]
         );
         count.created++;
         if (groups > 1) count.groups++;
@@ -124,7 +127,8 @@ try {
     }
 
     // A course of its own: its start, made here and not on the website, then the course.
-    if ((await client.query(`SELECT 1 FROM courses WHERE filemaker_course_id = $1`, [c.id])).rowCount) {
+    if ((await client.query(`UPDATE courses SET filemaker_group_ids = ARRAY[$1] WHERE filemaker_course_id = $1 AND filemaker_group_ids IS NULL`, [c.id])).rowCount ||
+        (await client.query(`SELECT 1 FROM courses WHERE filemaker_course_id = $1`, [c.id])).rowCount) {
       count.matched++;
       continue;
     }
@@ -143,8 +147,8 @@ try {
     count.starts++;
     const level = levelOf(c, type.slug);
     await client.query(
-      `INSERT INTO courses (course_instance_id, level_code, title, places_per_group, bookable, price, filemaker_course_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO courses (course_instance_id, level_code, title, places_per_group, bookable, price, filemaker_course_id, filemaker_group_ids)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, ARRAY[$7])`,
       [start.id, level && levels.has(level) ? level : null, title, places(c.places), c.bookable && c.active, money(c.price), c.id]
     );
     count.created++;

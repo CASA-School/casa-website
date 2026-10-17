@@ -45,16 +45,22 @@ export async function DayForm({
       <input type="hidden" name="dayId" value={day.id} />
       <input type="hidden" name="groupIndex" value={day.groupIndex} />
       {mayTeach ? (
-        <Field label={t('Lehrkraft', 'Teacher')} htmlFor={`day-teacher-${day.id}`}>
-          <Select id={`day-teacher-${day.id}`} name="teacherId" defaultValue={day.teacherId ?? ''}>
-            <option value="">{t('Noch offen', 'Not yet')}</option>
-            {teachers.map((p) => (
-              <option key={p.id} value={p.id}>
-                {teacherLabel(p.id, p.name)}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        <>
+          <Field label={t('Lehrkraft', 'Teacher')} htmlFor={`day-teacher-${day.id}`}>
+            <Select id={`day-teacher-${day.id}`} name="teacherId" defaultValue={day.teacherId ?? ''}>
+              <option value="">{t('Noch offen', 'Not yet')}</option>
+              {teachers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {teacherLabel(p.id, p.name)}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <label className="flex items-center gap-2.5 text-sm">
+            <input type="checkbox" name="merged" defaultChecked={day.merged} className="size-4 rounded border-ws-line-firm accent-[var(--casa-accent-surface)]" />
+            {t('Mit einer anderen Gruppe zusammengelegt', 'Merged with another group')}
+          </label>
+        </>
       ) : null}
       {mayPlan ? (
         <>

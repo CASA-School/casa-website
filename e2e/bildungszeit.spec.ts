@@ -195,15 +195,33 @@ test.describe('Bildungszeit', () => {
       [startId]
     );
 
+    // The board's groups of that course count as its groups (0045): one place each, and the places
+    // beyond Bea's taken by Dan that week.
+    const { rows: board } = await client.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM course_groups g JOIN courses c ON c.id = g.course_id
+        WHERE c.course_instance_id = $1 AND c.level_code = 'B1.1' AND g.phase = '1'`,
+      [startId]
+    );
+    const places = Math.max(1, board[0].n);
+    for (let i = 1; i < places; i++) {
+      const extra = (await client.query<{ id: string }>(`INSERT INTO bookings (person_id, status) VALUES ($1, 'confirmed') RETURNING id`, [danId])).rows[0].id;
+      await client.query(
+        `INSERT INTO booking_periods (booking_id, course_instance_id, course_id, start_date, end_date, level_code)
+         SELECT $1, p.course_instance_id, p.course_id, p.start_date, p.end_date, p.level_code
+           FROM booking_periods p JOIN bookings b ON b.id = p.booking_id WHERE b.person_id = $2 AND p.level_code = 'B1.1' LIMIT 1`,
+        [extra, beaId]
+      );
+    }
+
     const dialog = await toClasses(page, cemId);
     await expect(dialog.getByRole('button', { name: /^B1\.1/ })).toContainText('voll');
     await dialog.getByRole('button', { name: /^B1\.1/ }).click();
-    await expect(dialog).toContainText('B1.1 ist in dieser Zeit voll: 1 von 1 Plätzen');
+    await expect(dialog).toContainText(`B1.1 ist in dieser Zeit voll: ${places} von ${places} Plätzen`);
     await dialog.getByRole('button', { name: 'Nein' }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
     await dialog.getByRole('button', { name: 'Nein' }).click();
     await dialog.getByRole('button', { name: 'Weiter' }).click();
-    await expect(dialog.getByRole('status')).toContainText('B1.1 ist in dieser Zeit voll (1 von 1 Plätzen).');
+    await expect(dialog.getByRole('status')).toContainText(`B1.1 ist in dieser Zeit voll (${places} von ${places} Plätzen).`);
     await expect(dialog.getByRole('button', { name: 'Trotzdem buchen' })).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Buchung anlegen' })).toHaveCount(0);
   });

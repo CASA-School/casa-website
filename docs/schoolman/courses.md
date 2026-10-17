@@ -54,10 +54,20 @@ A level with parallel groups appears as two or three courses, or as one with 28 
 
 ## In the workspace today
 
-`course_instances`, `course_groups`, `course_types`, `levels`, `day_times`, `exam_sessions`,
-`exam_types`, `materials`, `rooms`, `plan_assignments` (Kursplanung). Course terms and exam dates
-are read from SchoolMan into seeds (`db/seeds/0006`). There are no lesson rows, no attendance and no
-room-by-day records — Kursplanung plans cohorts, not days.
+`course_instances`, `courses` (one per level of a start, 0041), `course_groups`, `course_types`,
+`levels`, `day_times`, `exam_sessions`, `exam_types`, `materials`, `rooms`. Course terms and exam
+dates are read from SchoolMan into seeds (`db/seeds/0006`). Since 2026-10-17 lesson days too:
+`course_week_plans` is `WeekDay`, `course_days` is `SingleDateCourse` with the room it replaced
+from `SingleDateOccupancy`, and Kursplanung's board plans the same rows
+(`read_lesson_days.py` + `import-lesson-days.mjs`, docs/ADMIN_WORKSPACE.md §Lesson days).
+No attendance: that stays the Klassenbuch's.
+
+**Lesson-day facts (read 2026-10-17).** Weekdays are numbered 1 Sunday … 7 Saturday
+(`DayNameReference`). A day's `_ID_Particularity` is 20 Vertretung, 21 Zusammenlegung, 22
+Verschiebung or 23 Ausfall (`SelectionDetail`); since August 2026: 120, 42, 0 and 1.
+`_ID_PersonSubstituted` is a staff number (1,954 of 2,007). A day's room is on the day for a third
+of days and otherwise only on its room-calendar row; `_ID_ClassroomSubstituted` names the same room
+in 93 of 102 cases. `_ID_Holiday` marks the 21 days generated inside the Easter 2027 closure.
 
 ## For the bridge
 

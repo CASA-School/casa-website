@@ -4,7 +4,7 @@ import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
 import type { Bilingual } from './i18n';
-import { SHIFT_INFO, isLevel } from './kursplanung/types';
+import { SHIFT_INFO } from './kursplanung/types';
 import { isSchoolClosed } from '@/config/school-closures';
 
 /**
@@ -227,19 +227,10 @@ export async function generateDays(courseId: string, actor: StaffUser): Promise<
         made += r.rowCount ?? 0;
       }
     }
-    // An intensive course's days are the board's: its two months get their groups (phase 1, then 2), so
+    // An intensive course's days are the board's: its two months get their groups (0047), so
     // Kursplanung shows what was made here.
-    const band = course.levelCode?.endsWith('.1') ? course.levelCode.slice(0, -2) : null;
-    if (course.intensive && band && isLevel(band) && (course.session === 'morning' || course.session === 'afternoon')) {
-      await client.query(
-        `INSERT INTO course_groups (month, shift, level, phase, group_index, course_id)
-         SELECT (date_trunc('month', $1::date + 14) + m.add)::date, $2, $3, m.phase, g, $4
-           FROM (VALUES (interval '0 months', '1'), (interval '1 month', '2')) AS m(add, phase), generate_series(1, $5::int) AS g
-         ON CONFLICT (month, shift, level, phase, group_index) DO NOTHING`,
-        [course.startDate, course.session, band, courseId, course.groups]
-      );
-      await client.query(`SELECT link_course_groups()`);
-    }
+    await client.query(`SELECT make_course_board_groups($1)`, [courseId]);
+    await client.query(`SELECT link_course_groups()`);
     await client.query(`SELECT link_course_days()`);
   });
   await logActivity({ actor, entity: 'course', entityId: courseId, action: 'course_days_generated', detail: { made } });
@@ -261,9 +252,9 @@ export async function applyPlan(courseId: string, groupIndex: number, what: 'tea
       const r =
         what === 'teacher'
           ? await client.query(
-              `UPDATE course_days SET teacher_id = $4, replaced_teacher_id = NULL, is_substitute = false, changed_by = $5, updated_at = timezone('utc', now())
+              `UPDATE course_days SET teacher_id = $4, replaced_teacher_id = NULL, is_substitute = false, merged = false, changed_by = $5, updated_at = timezone('utc', now())
                 WHERE course_id = $1 AND group_index = $2 AND extract(isodow FROM on_date) = $3 AND on_date >= current_date AND NOT cancelled
-                  AND teacher_id IS DISTINCT FROM $4`,
+                  AND (teacher_id IS DISTINCT FROM $4 OR merged)`,
               [courseId, groupIndex, row.weekday, row.teacherId, actor.id]
             )
           : await client.query(
@@ -298,6 +289,8 @@ export type CourseDay = {
   replacedRoomName: string | null;
   cancelled: boolean;
   cancelReason: string | null;
+  /** Taught together with another group that day (SchoolMan's Zusammenlegung, 0048). */
+  merged: boolean;
   note: string | null;
   /** On Kursplanung's board. */
   onBoard: boolean;
@@ -324,13 +317,14 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     replaced_room_name: string | null;
     cancelled: boolean;
     cancel_reason: string | null;
+    merged: boolean;
     note: string | null;
     on_board: boolean;
   }>(
     `SELECT d.id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, to_char(t.starts_at, 'HH24:MI') AS starts_at, to_char(t.ends_at, 'HH24:MI') AS ends_at,
             t.lessons, d.starts_at IS NOT NULL AS own_hours, d.teacher_id, ${NAME('tp')} AS teacher_name, ${NAME('rp')} AS replaced_teacher_name,
             d.is_substitute, d.is_tentative, d.room_id, coalesce(r.nickname, r.name) AS room_name, coalesce(rr.nickname, rr.name) AS replaced_room_name,
-            d.cancelled, d.cancel_reason, d.note, d.group_id IS NOT NULL AS on_board
+            d.cancelled, d.cancel_reason, d.merged, d.note, d.group_id IS NOT NULL AS on_board
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id
        LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
@@ -358,6 +352,7 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     replacedRoomName: r.replaced_room_name,
     cancelled: r.cancelled,
     cancelReason: r.cancel_reason,
+    merged: r.merged,
     note: r.note,
     onBoard: r.on_board,
   }));
@@ -420,6 +415,7 @@ export type DayPatch = {
   roomId?: string | null;
   cancelled?: boolean;
   cancelReason?: string | null;
+  merged?: boolean;
   note?: string | null;
   startsAt?: string | null;
   endsAt?: string | null;
@@ -461,6 +457,7 @@ export async function changeDay(dayId: string, patch: DayPatch, actor: StaffUser
     set('cancelled = ?', patch.cancelled);
     set('cancel_reason = ?', patch.cancelled ? (patch.cancelReason ?? null) : null);
   }
+  if (patch.merged !== undefined) set('merged = ?', patch.merged);
   if (patch.note !== undefined) set('note = ?', patch.note);
   if (patch.startsAt !== undefined) set('starts_at = ?::time', patch.startsAt);
   if (patch.endsAt !== undefined) set('ends_at = ?::time', patch.endsAt);

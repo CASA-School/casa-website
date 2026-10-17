@@ -7,8 +7,8 @@ import pg from 'pg';
  * Lesson days (2026-10-17, 0045): a course's weekly plan, its days made from it, and a day changed —
  * another teacher when someone is ill (the plan's is kept as the one replaced), another room, a day
  * called off — then the plan's teacher put back on every day ahead. An intensive course's days are the
- * board's: generating them gives Kursplanung its groups. Uses two `.1` courses of a future intensive
- * start with no days yet, and two teachers and two rooms of the database.
+ * board's: generating them gives Kursplanung its groups. Makes its own intensive start in 2029 with two
+ * courses, and uses two teachers and two rooms of the database.
  *
  * Runs only with a database and an owner account, in German (pinned). Everything is deleted after.
  */
@@ -21,9 +21,10 @@ test.describe('Lesson days', () => {
   let client: pg.Client;
   let token = '';
   let tokenHash = '';
+  let startId = '';
   let courseId = '';
   let otherId = '';
-  let level = '';
+  const level = 'A1.1';
   let groupsBefore: string[] = [];
   let teachers: { id: string; name: string }[] = [];
   let rooms: { id: string; name: string }[] = [];
@@ -33,20 +34,19 @@ test.describe('Lesson days', () => {
     await client.connect();
     const { rows } = await client.query<{ id: string }>(`SELECT id FROM staff_users WHERE role = 'owner' AND is_active ORDER BY created_at LIMIT 1`);
     test.skip(rows.length === 0, 'no owner account');
-    // Two first-half courses of one future intensive start, neither with days or a plan yet.
-    const { rows: courses } = await client.query<{ id: string; level_code: string; course_instance_id: string }>(
-      `SELECT c.id, c.level_code, c.course_instance_id
-         FROM courses c JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types t ON t.id = i.course_type_id
-        WHERE t.format = 'intensive' AND i.status <> 'cancelled' AND c.status <> 'cancelled' AND i.start_date > current_date
-          AND c.level_code IN ('A1.1', 'A2.1', 'B1.1', 'B2.1') AND (i.session IS NOT NULL OR i.schedule->>'time' ~ '^\\d')
-          AND NOT EXISTS (SELECT 1 FROM course_days d JOIN courses o ON o.id = d.course_id WHERE o.course_instance_id = i.id)
-          AND NOT EXISTS (SELECT 1 FROM course_week_plans p JOIN courses o ON o.id = p.course_id WHERE o.course_instance_id = i.id)
-        ORDER BY i.start_date, c.level_code`
-    );
-    const start = courses[0]?.course_instance_id;
-    const pair = courses.filter((c) => c.course_instance_id === start);
-    test.skip(pair.length < 2, 'no future intensive start with two levels and no days');
-    [courseId, otherId, level] = [pair[0].id, pair[1].id, pair[0].level_code];
+    // Its own morning start, eight weeks in 2029 and off the website, with an A1 and an A2 course.
+    const { rows: type } = await client.query<{ id: string }>(`SELECT id FROM course_types WHERE format = 'intensive' ORDER BY position LIMIT 1`);
+    test.skip(type.length === 0, 'no intensive course type');
+    startId = (
+      await client.query<{ id: string }>(
+        `INSERT INTO course_instances (course_type_id, start_date, end_date, capacity, schedule, status, session, on_website)
+         VALUES ($1, '2029-02-26', '2029-04-20', 14, '{"days":["Mon","Tue","Wed","Thu","Fri"],"time":"09:00-12:30"}', 'scheduled', 'morning', false) RETURNING id`,
+        [type[0].id]
+      )
+    ).rows[0].id;
+    [courseId, otherId] = (
+      await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code) VALUES ($1, 'A1.1'), ($1, 'A2.1') RETURNING id`, [startId])
+    ).rows.map((r) => r.id);
     teachers = (
       await client.query<{ id: string; name: string }>(
         `SELECT m.id, concat_ws(' ', p.first_name, p.last_name) AS name FROM staff_members m JOIN people p ON p.id = m.person_id
@@ -70,11 +70,11 @@ test.describe('Lesson days', () => {
     if (!client) return;
     const ids = [courseId, otherId].filter(Boolean);
     if (ids.length) {
-      await client.query(`DELETE FROM course_days WHERE course_id = ANY($1::uuid[])`, [ids]);
-      await client.query(`DELETE FROM course_week_plans WHERE course_id = ANY($1::uuid[])`, [ids]);
       await client.query(`DELETE FROM course_groups WHERE course_id = ANY($1::uuid[]) AND NOT (id = ANY($2::uuid[]))`, [ids, groupsBefore]);
       await client.query(`DELETE FROM staff_activity WHERE entity_id = ANY($1::uuid[])`, [ids]);
     }
+    // The start goes with its courses, their plans and days.
+    if (startId) await client.query(`DELETE FROM course_instances WHERE id = $1`, [startId]);
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });
@@ -87,8 +87,20 @@ test.describe('Lesson days', () => {
   });
 
   const days = (id: string) =>
-    client.query<{ on_date: string; dow: number; teacher_id: string | null; room_id: string | null; is_substitute: boolean; replaced_teacher_id: string | null; replaced_room_id: string | null; cancelled: boolean; group_id: string | null }>(
-      `SELECT to_char(on_date, 'YYYY-MM-DD') AS on_date, extract(isodow FROM on_date)::int AS dow, teacher_id, room_id, is_substitute, replaced_teacher_id, replaced_room_id, cancelled, group_id
+    client.query<{
+      on_date: string;
+      dow: number;
+      teacher_id: string | null;
+      room_id: string | null;
+      is_substitute: boolean;
+      replaced_teacher_id: string | null;
+      replaced_room_id: string | null;
+      cancelled: boolean;
+      merged: boolean;
+      group_id: string | null;
+    }>(
+      `SELECT to_char(on_date, 'YYYY-MM-DD') AS on_date, extract(isodow FROM on_date)::int AS dow, teacher_id, room_id, is_substitute, replaced_teacher_id, replaced_room_id, cancelled,
+              merged, group_id
          FROM course_days WHERE course_id = $1 ORDER BY on_date`,
       [id]
     );
@@ -132,6 +144,14 @@ test.describe('Lesson days', () => {
     await dialog.getByRole('button', { name: 'Speichern' }).click();
     await expect(page.getByText('e2e: Lehrkraft krank')).toBeVisible();
     expect((await days(courseId)).rows[1].cancelled).toBe(true);
+
+    // The third day's group is taught with another: no teacher of its own, and none missing.
+    await page.getByRole('button', { name: 'Ändern' }).nth(2).click();
+    await dialog.locator('select[name="teacherId"]').selectOption('');
+    await dialog.getByLabel('Mit einer anderen Gruppe zusammengelegt').check();
+    await dialog.getByRole('button', { name: 'Speichern' }).click();
+    await expect(page.getByRole('cell', { name: 'Mit einer anderen Gruppe zusammengelegt' })).toBeVisible();
+    expect((await days(courseId)).rows[2]).toMatchObject({ teacher_id: null, merged: true });
   });
 
   test('another course that day sees the teacher as taken', async ({ page }) => {
@@ -155,7 +175,8 @@ test.describe('Lesson days', () => {
     await expect(page.getByText(`für ${a.name}`)).toHaveCount(0);
     const rows = (await days(courseId)).rows;
     expect(rows[0]).toMatchObject({ teacher_id: a.id, is_substitute: false, replaced_teacher_id: null });
-    // A day called off stays off.
+    // A day called off stays off; the merged day has the plan's teacher again.
     expect(rows[1].cancelled).toBe(true);
+    expect(rows[2]).toMatchObject({ teacher_id: a.id, merged: false });
   });
 });

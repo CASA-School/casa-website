@@ -18,6 +18,7 @@ import { num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
 import { courseGroup } from '@/lib/admin/waitlist';
+import { todayInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
 /**
@@ -49,8 +50,9 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   const held = shown.filter((d) => !d.cancelled);
   const lessons = held.reduce((n, d) => n + (d.lessons ?? 0), 0);
   const teachers = [...new Set(held.map((d) => d.teacherName).filter(Boolean))];
-  const open = held.filter((d) => !d.teacherId).length;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInputValue();
+  // Days ahead still waiting for a teacher: what staff act on.
+  const open = held.filter((d) => !d.teacherId && !d.merged && d.date >= today).length;
   const startHref = `/admin/catalogue/${course.courseInstanceId}`;
 
   const tabs: RecordTab[] = [
@@ -317,7 +319,12 @@ function DayTable({
                       {d.teacherName}
                       {d.substitute ? <Badge tone="warning">{d.replacedTeacherName ? t(`für ${d.replacedTeacherName}`, `for ${d.replacedTeacherName}`) : t('Vertretung', 'Cover')}</Badge> : null}
                       {d.tentative ? <Badge tone="quiet">?</Badge> : null}
+                      {d.merged ? <Badge tone="quiet">{t('zusammengelegt', 'merged')}</Badge> : null}
                     </span>
+                  ) : d.merged ? (
+                    <span className="text-[var(--casa-muted)]">{t('Mit einer anderen Gruppe zusammengelegt', 'Merged with another group')}</span>
+                  ) : d.date < today ? (
+                    <span className="text-[var(--casa-text-subtle)]">—</span>
                   ) : (
                     <span className="font-semibold text-[#9a5b00]">{t('Noch offen', 'Not yet')}</span>
                   )}
