@@ -66,8 +66,8 @@ export async function startClasses(startId: string): Promise<{ first: string; se
     query<{ group_id: string; id: string; name: string; days: number; substitute: boolean }>(
       `SELECT a.group_id, a.teacher_id AS id, concat_ws(' ', p.first_name, p.last_name) AS name,
               count(*)::int AS days, bool_and(a.is_substitute) AS substitute
-         FROM plan_assignments a JOIN staff_members m ON m.id = a.teacher_id JOIN people p ON p.id = m.person_id
-        WHERE a.group_id = ANY($1::uuid[])
+         FROM course_days a JOIN staff_members m ON m.id = a.teacher_id JOIN people p ON p.id = m.person_id
+        WHERE a.group_id = ANY($1::uuid[]) AND NOT a.cancelled
         GROUP BY a.group_id, a.teacher_id, p.first_name, p.last_name
         ORDER BY count(*) DESC, p.last_name`,
       [ids]

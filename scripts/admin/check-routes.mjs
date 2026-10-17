@@ -63,7 +63,7 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
               WHERE s.starts_at >= current_date GROUP BY s.id ORDER BY count(b.id) DESC, min(s.starts_at) LIMIT 1`),
     firstId(`SELECT id FROM bookings WHERE exam_session_id IS NOT NULL AND deleted_at IS NULL LIMIT 1`),
     // A colleague, the one most on the board: every tab of their page reads (0039).
-    firstId(`SELECT s.id FROM staff_members s LEFT JOIN plan_assignments a ON a.teacher_id = s.id GROUP BY s.id ORDER BY count(a.*) DESC LIMIT 1`),
+    firstId(`SELECT s.id FROM staff_members s LEFT JOIN course_days a ON a.teacher_id = s.id GROUP BY s.id ORDER BY count(a.*) DESC LIMIT 1`),
   ]);
 
 const routes = [

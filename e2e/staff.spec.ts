@@ -60,7 +60,7 @@ test.describe('staff register', () => {
     if (!client) return;
     const staff = (await client.query<{ id: string; person_id: string }>(`SELECT s.id, s.person_id FROM staff_members s JOIN people p ON p.id = s.person_id WHERE p.last_name = 'Personaltest'`)).rows;
     const staffIds = staff.map((s) => s.id);
-    if (groupIds.length) await client.query(`DELETE FROM plan_assignments WHERE group_id = ANY($1::uuid[])`, [groupIds]);
+    if (groupIds.length) await client.query(`DELETE FROM course_days WHERE group_id = ANY($1::uuid[])`, [groupIds]);
     await client.query(`DELETE FROM course_groups WHERE month IN ('2031-03-01', '2031-04-01')`);
     await client.query(`DELETE FROM exam_session_examiners WHERE staff_member_id = ANY($1::uuid[])`, [staffIds]);
     await client.query(`DELETE FROM staff_activity WHERE entity_id = ANY($1::uuid[])`, [[...staffIds, sittingId, startId].filter(Boolean)]);
@@ -166,7 +166,13 @@ test.describe('staff register', () => {
         ).rows[0].id
       );
     }
-    await client.query(`INSERT INTO plan_assignments (group_id, on_date, teacher_id) VALUES ($1, '2031-03-04', $2)`, [groupIds[0], staffId]);
+    // A board cell is a lesson day of the group with a teacher (0045); the group gets its course first.
+    await client.query(`SELECT link_course_groups()`);
+    await client.query(
+      `INSERT INTO course_days (group_id, course_id, group_index, on_date, teacher_id)
+       SELECT g.id, g.course_id, g.group_index, '2031-03-04', $2 FROM course_groups g WHERE g.id = $1`,
+      [groupIds[0], staffId]
+    );
 
     await page.goto(`/admin/catalogue/${startId}`);
     await expect(page.locator('main')).toContainText('Unterricht');

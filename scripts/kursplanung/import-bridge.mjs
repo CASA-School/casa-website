@@ -211,9 +211,10 @@ try {
             const date = addDays(monday, i);
             if (date < from || date >= to) continue;
             await client.query(
-              `INSERT INTO plan_assignments (group_id, on_date, teacher_id)
-               VALUES ($1, $2::date, $3)
-               ON CONFLICT (group_id, on_date) DO UPDATE SET teacher_id = EXCLUDED.teacher_id, updated_at = timezone('utc', now())`,
+              // A board cell is a lesson day of the group with a teacher (0045).
+              `INSERT INTO course_days (group_id, course_id, group_index, on_date, teacher_id)
+               SELECT g.id, g.course_id, g.group_index, $2::date, $3 FROM course_groups g WHERE g.id = $1
+               ON CONFLICT (group_id, on_date) WHERE group_id IS NOT NULL DO UPDATE SET teacher_id = EXCLUDED.teacher_id, updated_at = timezone('utc', now())`,
               [groupId, date, teacherId]
             );
             counts.assignments++;

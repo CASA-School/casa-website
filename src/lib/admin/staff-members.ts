@@ -221,18 +221,52 @@ export async function staffHrNumbers(personId: string): Promise<StaffHrNumbers> 
   return { taxId: row?.tax_id ?? null, pensionNumber: row?.pension_insurance_number ?? null, healthNumber: row?.health_insurance_number ?? null };
 }
 
-/** What Kursplanung has them teach, from today for four weeks: the day, the group, a substitution. */
-export type TeachingDay = { date: string; shift: Shift; level: Level; phase: '1' | '2'; groupIndex: number; substitute: boolean; tentative: boolean };
+/**
+ * The lesson days they teach (0045), from today for four weeks: the day, the course — a board group's
+ * level and half, or another course's name — the time of day, a substitution, a tentative day.
+ */
+export type TeachingDay = {
+  date: string;
+  shift: Shift | 'evening' | null;
+  /** „B1.1", „B1.2 · Gruppe 2", or a module's name. */
+  label: string;
+  courseId: string | null;
+  groupIndex: number;
+  substitute: boolean;
+  tentative: boolean;
+};
 
 export async function upcomingTeaching(id: string, days = 28): Promise<TeachingDay[]> {
-  const rows = await query<{ on_date: string; shift: Shift; level: Level; phase: '1' | '2'; group_index: number; is_substitute: boolean; is_tentative: boolean }>(
-    `SELECT to_char(a.on_date, 'YYYY-MM-DD') AS on_date, g.shift, g.level, g.phase, g.group_index, a.is_substitute, a.is_tentative
-       FROM plan_assignments a JOIN course_groups g ON g.id = a.group_id
-      WHERE a.teacher_id = $1 AND a.on_date >= current_date AND a.on_date < current_date + $2::int
-      ORDER BY a.on_date, g.shift`,
+  const rows = await query<{
+    on_date: string;
+    shift: string | null;
+    level: string | null;
+    phase: '1' | '2' | null;
+    course_label: string | null;
+    course_id: string | null;
+    group_index: number;
+    is_substitute: boolean;
+    is_tentative: boolean;
+  }>(
+    `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, coalesce(g.shift, c.session, i.session) AS shift, g.level, g.phase,
+            coalesce(c.title, c.level_code) AS course_label, d.course_id, d.group_index, d.is_substitute, d.is_tentative
+       FROM course_days d
+       LEFT JOIN course_groups g ON g.id = d.group_id
+       LEFT JOIN courses c ON c.id = d.course_id
+       LEFT JOIN course_instances i ON i.id = c.course_instance_id
+      WHERE d.teacher_id = $1 AND NOT d.cancelled AND d.on_date >= current_date AND d.on_date < current_date + $2::int
+      ORDER BY d.on_date, d.starts_at NULLS FIRST, g.shift`,
     [id, days]
   );
-  return rows.map((r) => ({ date: r.on_date, shift: r.shift, level: r.level, phase: r.phase, groupIndex: r.group_index, substitute: r.is_substitute, tentative: r.is_tentative }));
+  return rows.map((r) => ({
+    date: r.on_date,
+    shift: r.shift === 'morning' || r.shift === 'afternoon' || r.shift === 'evening' ? r.shift : null,
+    label: r.level && r.phase ? `${r.level}.${r.phase}` : (r.course_label ?? '—'),
+    courseId: r.course_id,
+    groupIndex: r.group_index,
+    substitute: r.is_substitute,
+    tentative: r.is_tentative,
+  }));
 }
 
 /** Days away from today on, consecutive days with the same reason as one stretch. */
@@ -439,7 +473,8 @@ export async function removeAbsence(staffId: string, from: string, to: string, a
 export async function deleteStaffMember(id: string, actor: StaffUser): Promise<Result> {
   const used = await queryFirst<{ used: boolean; person_id: string }>(
     `SELECT s.person_id,
-            EXISTS (SELECT 1 FROM plan_assignments a WHERE a.teacher_id = s.id)
+            EXISTS (SELECT 1 FROM course_days d WHERE d.teacher_id = s.id OR d.replaced_teacher_id = s.id)
+              OR EXISTS (SELECT 1 FROM course_week_plans w WHERE w.teacher_id = s.id)
               OR EXISTS (SELECT 1 FROM course_groups g WHERE g.teacher_first = s.id OR g.teacher_second = s.id)
               OR EXISTS (SELECT 1 FROM exam_session_examiners x WHERE x.staff_member_id = s.id) AS used
        FROM staff_members s WHERE s.id = $1`,

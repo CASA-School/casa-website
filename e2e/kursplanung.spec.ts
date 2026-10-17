@@ -26,7 +26,12 @@ test.describe('kursplanung', () => {
 
   async function cleanUp(groupIds: readonly string[]) {
     if (groupIds.length === 0) return;
-    await client.query(`DELETE FROM plan_assignments WHERE group_id = ANY($1::uuid[]) AND updated_at >= $2`, [groupIds, started]);
+    // The board's cells are lesson days (0045): a day it made goes, a course's day loses the teacher.
+    await client.query(`DELETE FROM course_days WHERE group_id = ANY($1::uuid[]) AND updated_at >= $2 AND course_id IS NULL`, [groupIds, started]);
+    await client.query(
+      `UPDATE course_days SET teacher_id = NULL, is_substitute = false, is_tentative = false WHERE group_id = ANY($1::uuid[]) AND updated_at >= $2`,
+      [groupIds, started]
+    );
   }
 
   test.beforeAll(async () => {
@@ -115,7 +120,12 @@ test.describe('kursplanung', () => {
     try {
       // The colleague's change: straight into the database, after this page loaded its copy of the week.
       const teacher = await client.query<{ id: string }>(`SELECT id FROM staff_members WHERE is_active ORDER BY short_name DESC LIMIT 1`);
-      await client.query(`INSERT INTO plan_assignments (group_id, on_date, teacher_id) VALUES ($1, $2, $3)`, [theirsGroup, theirsDate, teacher.rows[0].id]);
+      await client.query(
+        `INSERT INTO course_days (group_id, course_id, group_index, on_date, teacher_id)
+         SELECT g.id, g.course_id, g.group_index, $2::date, $3 FROM course_groups g WHERE g.id = $1
+         ON CONFLICT (group_id, on_date) WHERE group_id IS NOT NULL DO UPDATE SET teacher_id = EXCLUDED.teacher_id, updated_at = timezone('utc', now())`,
+        [theirsGroup, theirsDate, teacher.rows[0].id]
+      );
 
       await piece.click();
       await expect(page.getByText('in der Hand', { exact: false }).first()).toBeVisible();
@@ -124,8 +134,8 @@ test.describe('kursplanung', () => {
       // Undone here, and nothing of it in the database — the colleague's row is the only new one.
       await expect(page.locator(`button[aria-label="${mineLabel}"]`)).toHaveCount(1);
       const written = await client.query<{ n: number }>(
-        `SELECT count(*)::int AS n FROM plan_assignments
-          WHERE group_id = ANY($1::uuid[]) AND updated_at >= $2 AND NOT (group_id = $3 AND on_date = $4)`,
+        `SELECT count(*)::int AS n FROM course_days
+          WHERE group_id = ANY($1::uuid[]) AND updated_at >= $2 AND teacher_id IS NOT NULL AND NOT (group_id = $3 AND on_date = $4)`,
         [[mineGroup, theirsGroup], started, theirsGroup, theirsDate]
       );
       expect(written.rows[0].n).toBe(0);

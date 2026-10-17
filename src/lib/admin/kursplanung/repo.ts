@@ -1,5 +1,7 @@
 import 'server-only';
 
+import type { PoolClient } from 'pg';
+
 import { query, queryFirst, withTransaction } from '../db';
 import type { PlanContext } from './fit';
 import {
@@ -84,7 +86,7 @@ export async function listTeachers(): Promise<Teacher[]> {
        FROM staff_members s
        JOIN people p ON p.id = s.person_id
       WHERE EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = s.id AND r.role_code = 'teaching')
-         OR EXISTS (SELECT 1 FROM plan_assignments a WHERE a.teacher_id = s.id)
+         OR EXISTS (SELECT 1 FROM course_days d WHERE d.teacher_id = s.id AND d.group_id IS NOT NULL)
       ORDER BY s.short_name COLLATE "C"`
   );
   return rows.map(toTeacher);
@@ -148,11 +150,13 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
     is_substitute: boolean;
     is_tentative: boolean;
   }>(
+    // An assignment is a lesson day of a board group with a teacher (0045), not called off.
     `SELECT a.group_id, to_char(a.on_date, 'YYYY-MM-DD') AS on_date, a.teacher_id,
             a.is_substitute, a.is_tentative
-       FROM plan_assignments a
+       FROM course_days a
        JOIN course_groups g ON g.id = a.group_id
-      WHERE g.month = $1::date AND a.on_date >= $2::date AND a.on_date < $3::date`,
+      WHERE g.month = $1::date AND a.on_date >= $2::date AND a.on_date < $3::date
+        AND a.teacher_id IS NOT NULL AND NOT a.cancelled`,
     [`${month}-01`, from, to]
   );
   return rows.map((r) => ({
@@ -204,19 +208,36 @@ export async function replaceWeekAssignments(
 ): Promise<void> {
   if (groupIds.length === 0 || days.length === 0) return;
   await withTransaction(async (client) => {
+    // The week's lesson days lose their teachers, then get the board's; a course's day stays a day.
+    await client.query(`SELECT link_course_days()`);
     await client.query(
-      `DELETE FROM plan_assignments
-        WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[])`,
+      `UPDATE course_days SET teacher_id = NULL, is_substitute = false, is_tentative = false, changed_by = $3, updated_at = timezone('utc', now())
+        WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[]) AND teacher_id IS NOT NULL`,
+      [groupIds, days, changedBy]
+    );
+    for (const a of assignments) await setDayTeacher(client, a, changedBy);
+    // A board day of no course with nothing on it is no day.
+    await client.query(
+      `DELETE FROM course_days
+        WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[]) AND course_id IS NULL
+          AND teacher_id IS NULL AND room_id IS NULL AND NOT cancelled AND note IS NULL`,
       [groupIds, days]
     );
-    for (const a of assignments) {
-      await client.query(
-        `INSERT INTO plan_assignments (group_id, on_date, teacher_id, is_substitute, is_tentative, changed_by)
-         VALUES ($1, $2::date, $3, $4, $5, $6)`,
-        [a.groupId, a.onDate, a.teacherId, a.isSubstitute, a.isTentative, changedBy]
-      );
-    }
   });
+}
+
+/** One board cell: the group's lesson day on that date, made if missing, gets the teacher. */
+async function setDayTeacher(client: PoolClient, a: Assignment, changedBy: string, onlyIfEmpty = false): Promise<number> {
+  const r = await client.query(
+    `INSERT INTO course_days (group_id, course_id, group_index, on_date, teacher_id, is_substitute, is_tentative, changed_by)
+     SELECT g.id, g.course_id, g.group_index, $2::date, $3, $4, $5, $6 FROM course_groups g WHERE g.id = $1
+     ON CONFLICT (group_id, on_date) WHERE group_id IS NOT NULL DO UPDATE
+       SET teacher_id = EXCLUDED.teacher_id, is_substitute = EXCLUDED.is_substitute, is_tentative = EXCLUDED.is_tentative,
+           changed_by = EXCLUDED.changed_by, updated_at = timezone('utc', now())
+       ${onlyIfEmpty ? 'WHERE course_days.teacher_id IS NULL' : ''}`,
+    [a.groupId, a.onDate, a.teacherId, a.isSubstitute, a.isTentative, changedBy]
+  );
+  return r.rowCount ?? 0;
 }
 
 /* ------------------------------------------------------------- teachers */
@@ -287,32 +308,32 @@ export async function addGroup(month: string, shift: string, level: string, phas
        FROM course_groups WHERE month = $1::date AND shift = $2 AND level = $3 AND phase = $4`,
     [`${month}-01`, shift, level, phase]
   );
+  await linkGroupsAndDays();
 }
 
-/** Removes a group only when nothing is planned in it. Returns false otherwise. */
+/** A new board group gets its course, and the course's days in its month get the group (0045). */
+export async function linkGroupsAndDays(): Promise<void> {
+  await query(`SELECT link_course_groups()`);
+  await query(`SELECT link_course_days()`);
+}
+
+/** Removes a group only when nothing is planned in it — its course's days stay. Returns false otherwise. */
 export async function removeGroupIfEmpty(id: string): Promise<boolean> {
-  const rows = await query<{ id: string }>(
-    `DELETE FROM course_groups g
-      WHERE g.id = $1 AND NOT EXISTS (SELECT 1 FROM plan_assignments a WHERE a.group_id = g.id)
-      RETURNING id`,
-    [id]
-  );
-  return rows.length > 0;
+  return withTransaction(async (client) => {
+    const planned = await client.query(`SELECT 1 FROM course_days WHERE group_id = $1 AND teacher_id IS NOT NULL LIMIT 1`, [id]);
+    if (planned.rowCount) return false;
+    await client.query(`DELETE FROM course_days WHERE group_id = $1 AND course_id IS NULL`, [id]);
+    const rows = await client.query(`DELETE FROM course_groups WHERE id = $1 RETURNING id`, [id]);
+    return (rows.rowCount ?? 0) > 0;
+  });
 }
 
 /** Adds assignments that do not exist yet; existing cells are left alone. Returns how many were added. */
 export async function insertMissingAssignments(assignments: readonly Assignment[], changedBy: string): Promise<number> {
   let added = 0;
   await withTransaction(async (client) => {
-    for (const a of assignments) {
-      const r = await client.query(
-        `INSERT INTO plan_assignments (group_id, on_date, teacher_id, is_substitute, is_tentative, changed_by)
-         VALUES ($1, $2::date, $3, $4, $5, $6)
-         ON CONFLICT (group_id, on_date) DO NOTHING`,
-        [a.groupId, a.onDate, a.teacherId, a.isSubstitute, a.isTentative, changedBy]
-      );
-      added += r.rowCount ?? 0;
-    }
+    await client.query(`SELECT link_course_days()`);
+    for (const a of assignments) added += await setDayTeacher(client, a, changedBy, true);
   });
   return added;
 }
@@ -347,6 +368,7 @@ export async function createContinuationMonth(from: string, to: string): Promise
      SELECT count(*)::text AS n FROM ins`,
     [`${from}-01`, `${to}-01`]
   );
+  await linkGroupsAndDays();
   return Number(rows[0]?.n ?? 0);
 }
 
@@ -355,8 +377,8 @@ export async function assignmentsNow(groupIds: readonly string[], days: readonly
   if (!groupIds.length || !days.length) return [];
   const rows = await query<{ group_id: string; on_date: string; teacher_id: string; is_substitute: boolean; is_tentative: boolean }>(
     `SELECT group_id, to_char(on_date, 'YYYY-MM-DD') AS on_date, teacher_id, is_substitute, is_tentative
-       FROM plan_assignments
-      WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[])`,
+       FROM course_days
+      WHERE group_id = ANY($1::uuid[]) AND on_date = ANY($2::date[]) AND teacher_id IS NOT NULL AND NOT cancelled`,
     [groupIds, days]
   );
   return rows.map((r) => ({ groupId: r.group_id, onDate: r.on_date, teacherId: r.teacher_id, isSubstitute: r.is_substitute, isTentative: r.is_tentative }));

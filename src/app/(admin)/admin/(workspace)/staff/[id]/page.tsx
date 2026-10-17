@@ -40,7 +40,6 @@ import {
   upcomingTeaching,
   type TeachingDay,
 } from '@/lib/admin/staff-members';
-import { cn } from '@/lib/utils';
 
 /**
  * A colleague (2026-10-17, migration 0039; docs/ADMIN_WORKSPACE.md §Staff), in the record pages'
@@ -616,20 +615,20 @@ export default async function StaffMemberPage({ params, searchParams }: { params
   );
 }
 
-const SHIFT_SHORT = { morning: { de: 'Vorm.', en: 'a.m.' }, afternoon: { de: 'Nachm.', en: 'p.m.' } } as const;
+const SHIFT_SHORT = { morning: { de: 'Vorm.', en: 'a.m.' }, afternoon: { de: 'Nachm.', en: 'p.m.' }, evening: { de: 'Abends', en: 'eve.' } } as const;
 
-/** Kursplanung's days for them, week by week: the days, the group, a substitution or a tentative day marked. */
+/** Their lesson days, week by week: the days, the course, a substitution or a tentative day marked. */
 function TeachingWeeks({ days, lang }: { days: TeachingDay[]; lang: WsLang }) {
   if (!days.length) return <p className="text-sm text-[var(--casa-muted)]">{lang === 'de' ? 'In den nächsten vier Wochen nichts geplant.' : 'Nothing planned in the next four weeks.'}</p>;
-  // One line per week and group: "KW 43 · B1.1 Gruppe 1 · Vorm. · Mo, Di, Mi".
+  // One line per week and course: "26. Okt. · B1.1 Gruppe 2 · Vorm. · Mo, Di, Mi".
   const monday = (iso: string) => {
     const d = new Date(`${iso}T12:00:00Z`);
     d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
     return d.toISOString().slice(0, 10);
   };
-  const lines = new Map<string, { week: string; group: string; shift: 'morning' | 'afternoon'; dates: string[]; substitute: boolean; tentative: boolean }>();
+  const lines = new Map<string, { week: string; group: string; shift: TeachingDay['shift']; dates: string[]; substitute: boolean; tentative: boolean }>();
   for (const d of days) {
-    const group = `${d.level}.${d.phase}${d.groupIndex > 1 ? ` · ${lang === 'de' ? 'Gruppe' : 'group'} ${d.groupIndex}` : ''}`;
+    const group = `${d.label}${d.groupIndex > 1 ? ` · ${lang === 'de' ? 'Gruppe' : 'group'} ${d.groupIndex}` : ''}`;
     const key = `${monday(d.date)}|${group}|${d.shift}`;
     const line = lines.get(key) ?? { week: monday(d.date), group, shift: d.shift, dates: [], substitute: false, tentative: false };
     line.dates.push(d.date);
@@ -647,11 +646,11 @@ function TeachingWeeks({ days, lang }: { days: TeachingDay[]; lang: WsLang }) {
               {new Date(`${l.week}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' })}
             </span>
             <span className="font-semibold">{l.group}</span>
-            <span className="text-[var(--casa-muted)]">{SHIFT_SHORT[l.shift][lang]}</span>
+            {l.shift ? <span className="text-[var(--casa-muted)]">{SHIFT_SHORT[l.shift][lang]}</span> : null}
             {l.substitute ? <Badge tone="warning">{lang === 'de' ? 'Vertretung' : 'Cover'}</Badge> : null}
             {l.tentative ? <Badge tone="quiet">?</Badge> : null}
           </span>
-          <span className={cn('text-[0.84rem] tabular-nums')}>{l.dates.map(weekday).join(', ')}</span>
+          <span className="text-[0.84rem] tabular-nums">{l.dates.map(weekday).join(', ')}</span>
         </li>
       ))}
     </ul>
