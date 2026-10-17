@@ -1,8 +1,9 @@
 import Link from 'next/link';
 
+import { CourseActions } from './course-actions';
 import { groupRuns } from './list-parts';
 import { dayRange, ListEmpty } from '@/components/admin/list';
-import { Badge, ButtonLink } from '@/components/admin/ui';
+import { Badge } from '@/components/admin/ui';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import type { CourseGroupRow, CourseListRow, CoursePhase } from '@/lib/admin/course-list';
 import { num, pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
@@ -71,28 +72,8 @@ function dayList(days: readonly string[], lang: WsLang): string | null {
 
 const PHASE_ORDER: Record<CoursePhase, number> = { running: 0, upcoming: 1, past: 2 };
 
-export function CourseList({
-  rows,
-  view,
-  past,
-  canBook,
-  today,
-  t,
-  lang,
-}: {
-  rows: CourseListRow[];
-  view: CourseView;
-  past: boolean;
-  canBook: boolean;
-  today: string;
-  t: T;
-  lang: WsLang;
-}) {
-  if (rows.length === 0) {
-    return <ListEmpty title={past ? t('Keine vergangenen Kurse im letzten Jahr', 'No past courses in the last year') : t('Keine Kurse geplant', 'No courses planned')} />;
-  }
-  const book = canBook && !past;
-  const span = book ? 7 : 6;
+/** The view's sections and their courses, in the order the list shows them (the editor steps through it). */
+export function courseSections(rows: CourseListRow[], view: CourseView, past: boolean, lang: WsLang): { key: string; label: string; rows: CourseListRow[] }[] {
   // The evening by its pair of days, running first; the intensive courses and the rest by running and
   // ahead — the running morning and afternoon courses together at the top, the shift in each start's head.
   const byPhase = (list: CourseListRow[]) => [...list].sort((a, b) => PHASE_ORDER[a.phase] - PHASE_ORDER[b.phase] || (past ? b.startDate.localeCompare(a.startDate) : a.startDate.localeCompare(b.startDate)));
@@ -104,7 +85,14 @@ export function CourseList({
             label: pick(lang, PHASES[phase]),
             rows: rows.filter((r) => r.phase === phase),
           }));
+  return sections.filter((section) => section.rows.length);
+}
 
+export function CourseList({ rows, view, past, today, t, lang }: { rows: CourseListRow[]; view: CourseView; past: boolean; today: string; t: T; lang: WsLang }) {
+  if (rows.length === 0) {
+    return <ListEmpty title={past ? t('Keine vergangenen Kurse im letzten Jahr', 'No past courses in the last year') : t('Keine Kurse geplant', 'No courses planned')} />;
+  }
+  const span = 7;
   let band = 0;
   return (
     <div className="max-md:overflow-x-auto">
@@ -117,16 +105,12 @@ export function CourseList({
             <th scope="col" className="hidden w-[7.5rem] px-3 py-3 lg:table-cell">{t('Raum', 'Room')}</th>
             <th scope="col" className="w-[11.5rem] px-3 py-3">{t('Teilnehmende', 'Learners')}</th>
             <th scope="col" className="hidden w-[6.5rem] px-3 py-3 md:table-cell">{t('Warteliste', 'Waiting')}</th>
-            {book ? (
-              <th scope="col" className="w-px py-3 pr-5 pl-3">
-                <span className="sr-only">{t('Buchen', 'Book')}</span>
-              </th>
-            ) : null}
+            <th scope="col" className="w-px py-3 pr-5 pl-3">
+              <span className="sr-only">{t('Aktionen', 'Actions')}</span>
+            </th>
           </tr>
         </thead>
-        {sections
-          .filter((section) => section.rows.length)
-          .map((section) => (
+        {courseSections(rows, view, past, lang).map((section) => (
             <tbody key={section.key}>
               <tr>
                 <th colSpan={span} scope="colgroup" className="border-t border-ws-line bg-white px-5 pt-4 pb-2 text-left text-xs font-bold text-[var(--casa-ink)]">
@@ -141,7 +125,7 @@ export function CourseList({
                 ...start.items.flatMap((row) => {
                   band++;
                   return row.groupRows.map((group, i) => (
-                    <GroupRow key={`${row.courseId}-${group.index}`} row={row} group={group} first={i === 0} shaded={band % 2 === 0} book={book} today={today} t={t} lang={lang} />
+                    <GroupRow key={`${row.courseId}-${group.index}`} row={row} group={group} first={i === 0} shaded={band % 2 === 0} today={today} t={t} lang={lang} />
                   ));
                 }),
               ])}
@@ -189,7 +173,6 @@ function GroupRow({
   group,
   first,
   shaded,
-  book,
   today,
   t,
   lang,
@@ -198,7 +181,6 @@ function GroupRow({
   group: CourseGroupRow;
   first: boolean;
   shaded: boolean;
-  book: boolean;
   today: string;
   t: T;
   lang: WsLang;
@@ -218,11 +200,6 @@ function GroupRow({
               {row.title ? (
                 <span className="line-clamp-2 text-[0.84rem] leading-snug font-semibold text-[var(--casa-ink)] group-hover:underline" title={row.title}>
                   {row.title}
-                </span>
-              ) : null}
-              {!row.bookable ? (
-                <span className="mt-0.5 block">
-                  <Badge tone="quiet">{t('Geschlossen', 'Closed')}</Badge>
                 </span>
               ) : null}
             </span>
@@ -264,11 +241,9 @@ function GroupRow({
           ) : null}
         </td>
       ) : null}
-      {book && first ? (
+      {first ? (
         <td rowSpan={span} className="py-2 pr-5 pl-3 text-right align-top">
-          <ButtonLink href={`${href}?book=1`} size="sm" variant="ghost">
-            {t('Buchen', 'Book')}
-          </ButtonLink>
+          <CourseActions courseId={row.courseId} />
         </td>
       ) : null}
     </tr>

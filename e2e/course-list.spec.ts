@@ -98,4 +98,38 @@ test.describe('Course list', () => {
     await expect(g1.locator('xpath=following-sibling::tr[1]')).toContainText(teachers[2].short);
     await expect(page.getByText('Gruppen', { exact: false })).toHaveCount(0);
   });
+
+  test('a course’s actions: open or close it for booking, and edit it, the next one a click away', async ({ page }) => {
+    await page.goto('/admin/catalogue?view=evening', { waitUntil: 'networkidle' });
+    const row = page.locator('tr').filter({ has: page.locator(`a[href="/admin/catalogue/courses/${courseId}"]`) });
+    const actions = row.getByRole('button', { name: /^Aktionen für/ });
+    const bookable = async () => (await client.query<{ bookable: boolean }>(`SELECT bookable FROM courses WHERE id = $1`, [courseId])).rows[0].bookable;
+    // Closed for booking, then open again — the menu stays open to show it.
+    await expect(async () => {
+      await actions.click();
+      await expect(page.getByRole('menuitem', { name: /Für Buchungen offen/ })).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
+    await page.getByRole('menuitem', { name: /Für Buchungen offen/ }).click();
+    await expect.poll(bookable).toBe(false);
+    await page.getByRole('menuitem', { name: /Für Buchungen offen/ }).click();
+    await expect.poll(bookable).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('menu')).toBeHidden();
+
+    // The editor: a note saved, and the next course one click on.
+    await expect(async () => {
+      await actions.click();
+      await expect(page.getByRole('menuitem', { name: /Kurs bearbeiten/ })).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
+    await page.getByRole('menuitem', { name: /Kurs bearbeiten/ }).click();
+    const editor = page.getByRole('dialog');
+    await expect(editor.getByRole('heading', { name: 'B1.1' })).toBeVisible();
+    await editor.getByLabel('Notiz').fill('e2e: Raumwechsel ab KW 17');
+    await editor.getByRole('button', { name: 'Speichern' }).click();
+    await expect(editor.getByText('Gespeichert')).toBeVisible();
+    expect((await client.query<{ note: string }>(`SELECT note FROM courses WHERE id = $1`, [courseId])).rows[0].note).toBe('e2e: Raumwechsel ab KW 17');
+    const position = await editor.getByText(/^\d+ \/ \d+$/).innerText();
+    await editor.getByRole('button', { name: /Nächster Kurs|Vorheriger Kurs/ }).and(page.locator(':not([disabled])')).first().click();
+    await expect(editor.getByText(/^\d+ \/ \d+$/)).not.toHaveText(position);
+  });
 });

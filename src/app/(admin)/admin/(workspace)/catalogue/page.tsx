@@ -1,16 +1,19 @@
 import Link from 'next/link';
 
 import { CohortForm } from './cohort-form';
-import { CourseList, viewOf, type CourseView } from './course-list';
+import { CourseActionsProvider, type EditableCourse } from './course-actions';
+import { CourseList, courseSections, viewOf, type CourseView } from './course-list';
 import { sentenceCase } from './list-parts';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Tally } from '@/components/admin/inbox';
-import { euros, ListBar, ListEmpty } from '@/components/admin/list';
+import { dayRange, euros, ListBar, ListEmpty } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { BOOKED_INTO_OTHER_COURSES, listCourseTypes, type CourseTypeSummary } from '@/lib/admin/catalogue';
+import { BOOKED_INTO_OTHER_COURSES, listCourseTypes, SESSION_LABELS, type CourseTypeSummary } from '@/lib/admin/catalogue';
 import { listCourses } from '@/lib/admin/course-list';
+import { roomChoice } from '@/lib/admin/course-starts';
+import { coursesForEditByIds } from '@/lib/admin/courses';
 import { query } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
@@ -59,6 +62,37 @@ export default async function CataloguePage({
       : Promise.resolve([]),
   ]);
   const shown = view === 'types' ? [] : rows.filter((r) => viewOf(r) === view);
+  // The editor steps through the courses in the order the list shows them.
+  const ordered = view === 'types' ? [] : courseSections(shown, view, past, lang).flatMap((section) => section.rows);
+  const edits = new Map((plans ? await coursesForEditByIds(ordered.map((r) => r.courseId)) : []).map((c) => [c.id, c]));
+  const editable: EditableCourse[] = ordered.map((r) => {
+    const e = edits.get(r.courseId);
+    const numbers = r.groupRows.map((g) => g.number).filter(Boolean);
+    return {
+      id: r.courseId,
+      startId: r.courseInstanceId,
+      label: r.title ?? r.levelCode ?? r.typeName,
+      context: [
+        r.title && r.levelCode ? r.levelCode : null,
+        `${r.typeName}${r.session ? ` · ${pick(lang, SESSION_LABELS[r.session])}` : ''}`,
+        dayRange(r.startDate, r.endDate, lang),
+        numbers.length ? `${t('Kurs-Nr.', 'Course no.')} ${numbers.join(' · ')}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      waitingHref: `/admin/catalogue/${r.courseInstanceId}?level=${encodeURIComponent(r.levelCode ?? r.courseId)}`,
+      waiting: r.waiting + r.offered,
+      named: !r.levelCode,
+      title: e?.title ?? r.title,
+      roomId: e?.roomId ?? null,
+      groups: e?.groups ?? r.groups,
+      placesPerGroup: e?.placesPerGroup ?? r.placesPerGroup,
+      bookable: e?.bookable ?? r.bookable,
+      price: e?.price ?? null,
+      lessons: e?.lessons ?? null,
+      note: e?.note ?? null,
+    };
+  });
   const running = rows.filter((r) => r.phase === 'running');
   const learnersNow = running.reduce((sum, r) => sum + r.now, 0);
   const waiting = rows.reduce((sum, r) => sum + r.waiting + r.offered, 0);
@@ -155,7 +189,14 @@ export default async function CataloguePage({
         {view === 'types' ? (
           <CourseTypes types={types} t={t} lang={lang} />
         ) : (
-          <CourseList rows={shown} view={view} past={past} canBook={canBook} today={today} t={t} lang={lang} />
+          <CourseActionsProvider
+            courses={editable}
+            rooms={rooms.filter((r) => r.kind === 'classroom').map((r) => ({ id: r.id, name: roomChoice(r) }))}
+            canPlan={plans}
+            canBook={canBook && !past}
+          >
+            <CourseList rows={shown} view={view} past={past} today={today} t={t} lang={lang} />
+          </CourseActionsProvider>
         )}
       </Card>
     </>

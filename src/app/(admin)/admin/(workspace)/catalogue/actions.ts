@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { isLevelCode } from '@/lib/admin/bookings';
 import { cancelCourseInstance, deleteCourseInstance, updateCourseInstance } from '@/lib/admin/catalogue';
 import { readStartForm } from '@/lib/admin/course-starts';
-import { cancelCourse, courseForEdit, createCourse, deleteCourse, openCourseGroup, updateCourse, type CourseInput } from '@/lib/admin/courses';
+import { cancelCourse, courseForEdit, createCourse, deleteCourse, openCourseGroup, setCourseBookable, updateCourse, type CourseInput } from '@/lib/admin/courses';
 import { issueWaitlistLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { WAITLIST_LETTER_KINDS, type WaitlistLetterKind } from '@/lib/admin/letters/types';
@@ -160,18 +160,19 @@ export async function addToWaitlistAction(formData: FormData): Promise<void> {
 }
 
 /** The course form's fields: places, room, whether it is offered, and a module's name, price and lessons. */
-async function courseInput(formData: FormData, back: string): Promise<CourseInput> {
+/** A course's form, read: the input, or what is wrong with it. */
+async function readCourseInput(formData: FormData): Promise<CourseInput | string> {
   const { t } = await getI18n();
   const groups = Number(formData.get('groups'));
   const placesPerGroup = Number(formData.get('placesPerGroup'));
-  if (!Number.isInteger(groups) || groups < 0 || groups > 9) fail(back, t('Gruppen: 0 bis 9.', 'Groups: 0 to 9.'));
-  if (!Number.isInteger(placesPerGroup) || placesPerGroup < 1 || placesPerGroup > 40) fail(back, t('Plätze pro Gruppe: 1 bis 40.', 'Places per group: 1 to 40.'));
+  if (!Number.isInteger(groups) || groups < 0 || groups > 9) return t('Gruppen: 0 bis 9.', 'Groups: 0 to 9.');
+  if (!Number.isInteger(placesPerGroup) || placesPerGroup < 1 || placesPerGroup > 40) return t('Plätze pro Gruppe: 1 bis 40.', 'Places per group: 1 to 40.');
   const money = text(formData, 'price', 12);
   const price = money === null ? null : Number(money.replace(',', '.'));
-  if (price !== null && (!Number.isFinite(price) || price < 0 || price > 100000)) fail(back, t('Der Preis ist keine Zahl.', 'The price is not a number.'));
+  if (price !== null && (!Number.isFinite(price) || price < 0 || price > 100000)) return t('Der Preis ist keine Zahl.', 'The price is not a number.');
   const count = text(formData, 'lessons', 6);
   const lessons = count === null ? null : Number(count);
-  if (lessons !== null && (!Number.isInteger(lessons) || lessons < 0 || lessons > 2000)) fail(back, t('Unterrichtseinheiten: eine ganze Zahl.', 'Lessons: a whole number.'));
+  if (lessons !== null && (!Number.isInteger(lessons) || lessons < 0 || lessons > 2000)) return t('Unterrichtseinheiten: eine ganze Zahl.', 'Lessons: a whole number.');
   const room = String(formData.get('roomId') ?? '');
   return {
     roomId: UUID.test(room) ? room : null,
@@ -183,6 +184,36 @@ async function courseInput(formData: FormData, back: string): Promise<CourseInpu
     lessons,
     note: text(formData, 'note', 500),
   };
+}
+
+async function courseInput(formData: FormData, back: string): Promise<CourseInput> {
+  const input = await readCourseInput(formData);
+  if (typeof input === 'string') fail(back, input);
+  return input;
+}
+
+/**
+ * The course list's editor (2026-10-17): a course saved without leaving the list, so the editor can go
+ * on to the next one. Answers instead of redirecting.
+ */
+export async function saveCourseAction(courseId: string, formData: FormData): Promise<{ ok: true } | { ok: false; error: string }> {
+  const actor = await requireModule('rooms', 'edit');
+  if (typeof courseId !== 'string' || !UUID.test(courseId)) return { ok: false, error: 'Invalid course' };
+  const input = await readCourseInput(formData);
+  if (typeof input === 'string') return { ok: false, error: input };
+  const result = await updateCourse(courseId, input, actor);
+  if (!result.ok) return { ok: false, error: pick((await getI18n()).lang, result.reason) };
+  revalidatePath('/admin/catalogue', 'layout');
+  return { ok: true };
+}
+
+/** Open or closed for booking, from the course list's actions. */
+export async function setCourseBookableAction(courseId: string, bookable: boolean): Promise<{ ok: boolean }> {
+  const actor = await requireModule('rooms', 'edit');
+  if (typeof courseId !== 'string' || !UUID.test(courseId) || typeof bookable !== 'boolean') return { ok: false };
+  const result = await setCourseBookable(courseId, bookable, actor);
+  revalidatePath('/admin/catalogue', 'layout');
+  return { ok: result.ok };
 }
 
 /** A new course of a start: a level, or a module's (a group's, a company's) own name. */

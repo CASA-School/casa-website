@@ -168,6 +168,23 @@ export async function coursesForEdit(courseInstanceId: string): Promise<CourseFo
   return (await query<EditRow>(`${EDIT} WHERE course_instance_id = $1`, [courseInstanceId])).map(toEdit);
 }
 
+/** Some courses as the course list's editor needs them (2026-10-17). */
+export async function coursesForEditByIds(ids: readonly string[]): Promise<CourseForEdit[]> {
+  if (!ids.length) return [];
+  return (await query<EditRow>(`${EDIT} WHERE id = ANY($1::uuid[])`, [ids])).map(toEdit);
+}
+
+/** Open or closed for booking — the course list's toggle; SchoolMan's „Buchbar". */
+export async function setCourseBookable(id: string, bookable: boolean, actor: StaffUser): Promise<Result> {
+  const row = await queryFirst<{ course_instance_id: string; level_code: string | null }>(
+    `UPDATE courses SET bookable = $2, updated_by = $3, updated_at = timezone('utc', now()) WHERE id = $1 RETURNING course_instance_id, level_code`,
+    [id, bookable, actor.id]
+  );
+  if (!row) return refuse('Diesen Kurs gibt es nicht mehr.', 'That course no longer exists.');
+  await logActivity({ actor, entity: 'course_instance', entityId: row.course_instance_id, action: 'course_updated', detail: { course: id, level: row.level_code, bookable } });
+  return { ok: true };
+}
+
 export async function courseForEdit(id: string): Promise<CourseForEdit | null> {
   const row = await queryFirst<EditRow>(`${EDIT} WHERE id = $1`, [id]);
   return row ? toEdit(row) : null;

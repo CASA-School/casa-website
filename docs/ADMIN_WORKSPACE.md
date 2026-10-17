@@ -1191,10 +1191,20 @@ bar per week (this week in ink; amber when over — SchoolMan never enforced its
 its waiting list and „Buchen" span its rows; the number of groups is not written out (Rahman: not
 important). A level SchoolMan has not yet split into its groups (one record, 28 places) is one row;
 groups whose own learners are not known (bookings made here name no group) show „–". The course page
-shows the numbers in its head and on its group switch. „Buchen" opens the course with „Wen buchen?"
-(`?book=1`): a learner found by name or address, or a new person, then the wizard at that course — from
-the next Monday when it already runs (`from=`); the picker (`components/admin/person-picker.tsx`) is the
-exam sitting's too. The waiting lists are their own item in the rail.
+shows the numbers in its head and on its group switch.
+
+**A course's actions** (Rahman, 2026-10-17: one action button instead of „Buchen", the „Geschlossen"
+badge gone): „Aktionen ▾" at the end of a course's row (`course-actions.tsx`) — **Teilnehmende buchen**
+(the course with „Wen buchen?", `?book=1`: a learner found by name or address, or a new person, then the
+wizard at that course, from the next Monday when it already runs, `from=`; the picker,
+`components/admin/person-picker.tsx`, is the exam sitting's too), **Kurs bearbeiten …**, **Kurstage &
+Lehrkräfte**, **Warteliste**, and the switch **Für Buchungen offen** (SchoolMan's „Buchbar"; a closed
+course counts as full, and „Trotzdem buchen" stays possible). „Kurs bearbeiten" is one editor for the
+whole list: groups, places per group, room, open for booking, note (and a named course's name, price and
+lessons), with „‹ Vorheriger · 2 / 48 · Nächster ›" stepping through the courses in the list's order;
+moving on saves what was changed, as SchoolMan commits a record when it is left. Editing and the switch
+are the course planners' (`rooms` at `edit`); booking needs bookings `edit` and people. The waiting
+lists are their own item in the rail.
 
 **Learners from SchoolMan (0050).** While bookings are made in SchoolMan, its learners count:
 `python3 -I scripts/filemaker/read_course_learners.py | node scripts/filemaker/import-course-learners.mjs`
