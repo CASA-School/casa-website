@@ -198,12 +198,12 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
           figure: (f) => (f.pricesSince ? { lead: t('Gültig seit', 'In force since'), value: date(f.pricesSince) } : null),
         },
         {
-          title: 'Team',
+          title: t('Zugänge', 'Accounts'),
           href: '/admin/team',
           module: 'team',
-          icon: Icon.team,
+          icon: Icon.lock,
           tone: 'green',
-          figure: (f) => ({ value: n(f.colleagues), label: f.colleagues === 1 ? t('Person', 'colleague') : t('Personen', 'colleagues') }),
+          figure: (f) => ({ value: n(f.colleagues), label: f.colleagues === 1 ? t('Konto', 'account') : t('Konten', 'accounts') }),
         },
         {
           title: t('Aktivität', 'Activity'),

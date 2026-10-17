@@ -14,12 +14,13 @@ describe('parseTeacherForm', () => {
   it('reads rules and absences per week into dates', () => {
     const r = parseTeacherForm(reader({
       shortName: ' Claudia G ', shifts: ['morning', 'afternoon'], daysPerWeek: '4', weekdays: ['Mo', 'Di', 'Mi', 'Do'],
-      levels: ['C1', 'C1H', 'nope'], contract: 'freelance', note: 'ab Oktober nur vier Tage',
+      levels: ['C1', 'C1H', 'nope'], note: 'ab Oktober nur vier Tage',
       'abs_2026-10-05': ['Mo', 'Di'], 'reason_2026-10-05': 'Krank',
     }), 't1', weeks);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.rules).toEqual({ shortName: 'Claudia G', contract: 'freelance', shifts: ['morning', 'afternoon'], daysPerWeek: 4, weekdays: ['Mo', 'Di', 'Mi', 'Do'], levels: ['C1', 'C1H'], note: 'ab Oktober nur vier Tage' });
+    // The contract is the staff register's now (0039), not the board's.
+    expect(r.rules).toEqual({ shortName: 'Claudia G', shifts: ['morning', 'afternoon'], daysPerWeek: 4, weekdays: ['Mo', 'Di', 'Mi', 'Do'], levels: ['C1', 'C1H'], note: 'ab Oktober nur vier Tage' });
     expect(r.absences).toEqual([
       { teacherId: 't1', onDate: '2026-10-05', reason: 'Krank' },
       { teacherId: 't1', onDate: '2026-10-06', reason: 'Krank' },

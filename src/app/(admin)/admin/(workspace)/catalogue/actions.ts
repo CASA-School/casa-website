@@ -7,6 +7,7 @@ import { isLevelCode } from '@/lib/admin/bookings';
 import { issueWaitlistLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { WAITLIST_LETTER_KINDS, type WaitlistLetterKind } from '@/lib/admin/letters/types';
+import { openPlanGroups } from '@/lib/admin/kursplanung/link';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -171,6 +172,8 @@ export async function openGroupAction(formData: FormData): Promise<void> {
   if (formData.get('confirmed') !== '1') redirect(back);
   const result = await openGroup(courseInstanceId, levelCode, actor);
   if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  // The same group on the Kursplanung board, when the board has the month.
+  await openPlanGroups(courseInstanceId, levelCode, actor);
   done(back);
 }
 

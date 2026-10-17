@@ -19,6 +19,9 @@ import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { requireModule } from '@/lib/admin/guard';
 import { capitalise, num, pick, relativeDays, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { startClasses, type PlanClass, type StartClass } from '@/lib/admin/kursplanung/link';
+import { SHIFT_INFO } from '@/lib/admin/kursplanung/types';
+import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 import {
   freePlaces,
   getCourseStart,
@@ -65,12 +68,13 @@ export default async function CourseStartPage({
 
   const plans = canAccess(user, 'rooms', 'edit');
   const handles = canAccess(user, 'bookings', 'edit');
-  const [groups, entries, bookings, levels, starts] = await Promise.all([
+  const [groups, entries, bookings, levels, starts, teaching] = await Promise.all([
     levelGroups([id]),
     startEntries(id),
     canAccess(user, 'bookings') ? startBookings(id) : Promise.resolve([]),
     levelCodes(),
     handles ? upcomingStarts() : Promise.resolve([]),
+    startClasses(id),
   ]);
   // The last letter to each learner in a queue, to say on their row what they have been told.
   const letters = await lettersForEntries(entries.map((e) => e.id));
@@ -146,6 +150,8 @@ export default async function CourseStartPage({
       ) : null}
 
       <div className="space-y-4">
+        {teaching ? <TeachingCard teaching={teaching} board={canAccess(user, 'kursplanung')} staff={canAccess(user, 'staff')} t={t} lang={lang} /> : null}
+
         {groups.length === 0 ? (
           <Card>
             <p className="text-sm text-[var(--casa-muted)]">{t('In diesem Termin ist noch niemand mit Niveau gebucht, und niemand wartet.', 'Nobody is booked with a level in this start yet, and nobody is waiting.')}</p>
@@ -179,6 +185,99 @@ export default async function CourseStartPage({
         ) : null}
       </div>
     </>
+  );
+}
+
+/**
+ * The start's classes on the Kursplanung board (docs/KURSPLANUNG.md §Course starts): per level and
+ * group, who teaches it in its first month (`.1`) and in the next (`.2`). Who teaches is changed on
+ * the board; this reads it.
+ */
+function TeachingCard({
+  teaching,
+  board,
+  staff,
+  t,
+  lang,
+}: {
+  teaching: { first: string; second: string; classes: StartClass[] };
+  board: boolean;
+  staff: boolean;
+  t: T;
+  lang: WsLang;
+}) {
+  // The start's shift is in its head; a row names it only when the classes run in both.
+  const mixed = new Set(teaching.classes.map((c) => c.shift)).size > 1;
+  const who = (c: PlanClass | null) => {
+    if (!c) return <span className="text-[var(--casa-text-subtle)]">—</span>;
+    const people = c.teachers.length ? c.teachers : c.pair.map((p) => ({ ...p, days: 0, substitute: false }));
+    if (!people.length) return <span className="text-[var(--casa-text-subtle)]">{t('offen', 'open')}</span>;
+    return (
+      <span className={cn('flex flex-wrap gap-x-2 gap-y-0.5', !c.teachers.length && 'text-[var(--casa-muted)]')}>
+        {people.map((p, i) => (
+          <span key={p.id} className="inline-flex items-center gap-1">
+            <span>
+              {staff ? (
+                <Link href={`/admin/staff/${p.id}?tab=teaching`} className="hover:underline">
+                  {p.name}
+                </Link>
+              ) : (
+                p.name
+              )}
+              {i < people.length - 1 && !p.substitute ? ',' : ''}
+            </span>
+            {p.substitute ? <Badge tone="warning">{t('Vertretung', 'Cover')}</Badge> : null}
+          </span>
+        ))}
+      </span>
+    );
+  };
+  return (
+    <Card
+      title={t('Unterricht', 'Teaching')}
+      icon={Icon.kursplanung}
+      tint="sun"
+      bleed
+      actions={
+        board ? (
+          <Link href={`/admin/kursplanung?month=${teaching.first}`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+            {t('Zur Kursplanung', 'Open Kursplanung')}
+          </Link>
+        ) : undefined
+      }
+    >
+      {teaching.classes.length ? (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[36rem] text-left text-[0.86rem]">
+            <thead>
+              <tr className="border-b border-ws-line text-xs text-[var(--casa-muted)]">
+                <th className="px-5 py-2 font-semibold">{t('Gruppe', 'Group')}</th>
+                <th className="px-3 py-2 font-semibold">{monthLabel(teaching.first, lang)}</th>
+                <th className="px-5 py-2 font-semibold">{monthLabel(teaching.second, lang)}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ws-line-soft">
+              {teaching.classes.map((c) => (
+                <tr key={`${c.shift}${c.level}${c.groupIndex}`} className="align-top">
+                  <td className="px-5 py-2.5">
+                    <span className="flex items-center gap-2">
+                      <span className="inline-flex h-6 min-w-10 items-center justify-center rounded-lg bg-[var(--fm-navy)] px-1.5 text-[0.78rem] font-extrabold text-white tabular-nums">{c.level}</span>
+                      <span className="text-[var(--casa-muted)]">
+                        {[mixed ? pick(lang, SHIFT_INFO[c.shift].label) : null, c.of > 1 ? t(`Gruppe ${c.groupIndex}`, `Group ${c.groupIndex}`) : null].filter(Boolean).join(' · ')}
+                      </span>
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5">{who(c.first)}</td>
+                  <td className="px-5 py-2.5">{who(c.second)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('In der Kursplanung gibt es für diesen Start noch keine Gruppen.', 'Kursplanung has no groups for this start yet.')}</p>
+      )}
+    </Card>
   );
 }
 

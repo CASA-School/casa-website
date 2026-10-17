@@ -1,3 +1,6 @@
+import Link from 'next/link';
+
+import { NewStaffForm } from '../../../(workspace)/staff/staff-forms';
 import { FormDialog } from '@/components/admin/dialogs';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
@@ -5,6 +8,7 @@ import { pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { levelStyle } from '@/lib/admin/kursplanung/colours';
 import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
+import { staffRoles } from '@/lib/admin/staff-members';
 import { ABSENCE_LABELS, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, WEEKDAYS, type Absence, type Teacher } from '@/lib/admin/kursplanung/types';
 import { weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
@@ -39,13 +43,23 @@ export default async function LehrkraeftePage({ searchParams }: { searchParams: 
   const month = await resolvePlanMonth(params.month);
   const [plan, months] = await Promise.all([loadPlan(month), listPlanMonths()]);
   const canWrite = canAccess(user, 'kursplanung', 'edit');
+  // A new teacher is a new colleague on the staff register (0039), with the role Unterricht.
+  const canAdd = canWrite && canAccess(user, 'staff', 'edit');
+  const seesStaff = canAccess(user, 'staff');
+  const roles = canAdd ? await staffRoles() : [];
   const returnTo = '/admin/kursplanung/lehrkraefte';
   const active = plan.teachers.filter((t) => t.isActive).sort((a, b) => a.fullName.localeCompare(b.fullName, 'de'));
   const under = (shift: (typeof SHIFTS)[number]) => active.filter((t) => (shift === 'morning' ? t.shifts.includes('morning') : !t.shifts.includes('morning')));
 
   return (
     <div className={ui.module}>
-      <Header active="lehrkraefte" month={month} months={months} notice={{ ok: params.ok, error: params.error }} />
+      <Header active="lehrkraefte" month={month} months={months} notice={{ ok: params.ok, error: params.error }}>
+        {canAdd ? (
+          <FormDialog trigger={tr('Lehrkraft anlegen', 'Add teacher')} size="sm" width="lg" title={tr('Neue Lehrkraft', 'A new teacher')} titleClassName={ui.dlgTitle}>
+            <NewStaffForm roles={roles} preset={['teaching']} returnTo={returnTo} />
+          </FormDialog>
+        ) : null}
+      </Header>
 
       {SHIFTS.map((shift) => {
         const list = under(shift);
@@ -63,7 +77,7 @@ export default async function LehrkraeftePage({ searchParams }: { searchParams: 
                 return (
                   <div key={t.id} className={ui.trow}>
                     <div className={ui.who}>
-                      <b>{t.fullName}</b>
+                      <b>{seesStaff ? <Link href={`/admin/staff/${t.id}`} className={ui.plainLink}>{t.fullName}</Link> : t.fullName}</b>
                       <small>{t.shortName}{t.note ? ` · ${t.note}` : ''}</small>
                     </div>
                     <div className={ui.chips}>

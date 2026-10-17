@@ -69,12 +69,23 @@ const toTeacher = (r: TeacherRow): Teacher => ({
   isActive: r.is_active,
 });
 
+/**
+ * The teaching staff: the staff register's members with the role Unterricht (0039), or anyone the plan
+ * still names. The name is the person's; employed or freelance is the contract that runs today.
+ */
 export async function listTeachers(): Promise<Teacher[]> {
   const rows = await query<TeacherRow>(
-    `SELECT id, short_name, full_name, contract, shifts, days_per_week, weekdays, levels,
-            note, filemaker_staff_id, is_active
-       FROM teachers
-      ORDER BY short_name COLLATE "C"`
+    `SELECT s.id, s.short_name, btrim(p.first_name || ' ' || coalesce(p.last_name, '')) AS full_name,
+            CASE WHEN (SELECT c.kind FROM staff_contracts c
+                        WHERE c.staff_member_id = s.id AND (c.valid_from IS NULL OR c.valid_from <= current_date)
+                          AND (c.valid_to IS NULL OR c.valid_to >= current_date)
+                        ORDER BY c.valid_from DESC NULLS LAST LIMIT 1) = 'freelance' THEN 'freelance' ELSE 'employed' END AS contract,
+            s.shifts, s.days_per_week, s.weekdays, s.levels, s.note, s.filemaker_staff_id, s.is_active
+       FROM staff_members s
+       JOIN people p ON p.id = s.person_id
+      WHERE EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = s.id AND r.role_code = 'teaching')
+         OR EXISTS (SELECT 1 FROM plan_assignments a WHERE a.teacher_id = s.id)
+      ORDER BY s.short_name COLLATE "C"`
   );
   return rows.map(toTeacher);
 }
@@ -156,8 +167,8 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
 export async function listAbsences(month: string): Promise<Absence[]> {
   const [from, to] = monthRange(month);
   const rows = await query<{ teacher_id: string; on_date: string; reason: string }>(
-    `SELECT teacher_id, to_char(on_date, 'YYYY-MM-DD') AS on_date, reason
-       FROM teacher_absences
+    `SELECT staff_member_id AS teacher_id, to_char(on_date, 'YYYY-MM-DD') AS on_date, reason
+       FROM staff_absences
       WHERE on_date >= $1::date AND on_date < $2::date`,
     [from, to]
   );
@@ -215,11 +226,11 @@ import type { TeacherRules } from './repo-types';
 
 export async function updateTeacherRules(id: string, rules: TeacherRules): Promise<void> {
   await query(
-    `UPDATE teachers
-        SET short_name = $2, contract = $3, shifts = $4, days_per_week = $5, weekdays = $6, levels = $7,
-            note = $8, updated_at = timezone('utc', now())
+    `UPDATE staff_members
+        SET short_name = $2, shifts = $3, days_per_week = $4, weekdays = $5, levels = $6,
+            note = $7, updated_at = timezone('utc', now())
       WHERE id = $1`,
-    [id, rules.shortName, rules.contract, [...rules.shifts], rules.daysPerWeek, [...rules.weekdays], [...rules.levels], rules.note]
+    [id, rules.shortName, [...rules.shifts], rules.daysPerWeek, [...rules.weekdays], [...rules.levels], rules.note]
   );
 }
 
@@ -238,15 +249,15 @@ export async function replaceTeacherAbsences(
 ): Promise<void> {
   await withTransaction(async (client) => {
     await client.query(
-      `DELETE FROM teacher_absences
-        WHERE teacher_id = $1 AND on_date >= $2::date AND on_date < $3::date AND filemaker_ref IS NULL`,
+      `DELETE FROM staff_absences
+        WHERE staff_member_id = $1 AND on_date >= $2::date AND on_date < $3::date AND filemaker_ref IS NULL`,
       [teacherId, from, to]
     );
     for (const a of absences) {
       await client.query(
-        `INSERT INTO teacher_absences (teacher_id, on_date, reason, created_by)
+        `INSERT INTO staff_absences (staff_member_id, on_date, reason, created_by)
          VALUES ($1, $2::date, $3, $4)
-         ON CONFLICT (teacher_id, on_date) DO UPDATE SET reason = EXCLUDED.reason`,
+         ON CONFLICT (staff_member_id, on_date) DO UPDATE SET reason = EXCLUDED.reason`,
         [teacherId, a.onDate, a.reason, createdBy]
       );
     }

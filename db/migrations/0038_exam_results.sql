@@ -52,9 +52,3 @@ ALTER TABLE letter_texts ADD CONSTRAINT letter_texts_kind_check CHECK (kind IN (
   'waitlist_confirmation', 'waitlist_place_free', 'waitlist_no_place',
   'learner_confirmation', 'registration_test_request', 'registration_deposit_request'
 ));
-
--- A sitting is prepared (draft: not on the website), on offer (scheduled: on the registration form
--- until its deadline), or called off (cancelled). The workspace creates and edits them from now on.
-ALTER TABLE exam_sessions DROP CONSTRAINT IF EXISTS exam_sessions_status_check;
-ALTER TABLE exam_sessions ADD CONSTRAINT exam_sessions_status_check CHECK (status IN ('draft', 'scheduled', 'cancelled'));
-ALTER TABLE exam_sessions ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES staff_users (id) ON DELETE SET NULL;

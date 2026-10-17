@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { unlinkPersonAction } from '../../actions';
@@ -46,6 +46,7 @@ import { normaliseStatus } from '@/lib/admin/queues';
 import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
 import { personExamEntries } from '@/lib/admin/exams';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
+import { staffIdForPerson } from '@/lib/admin/staff-members';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForPerson } from '@/lib/admin/letters/repo';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
@@ -150,6 +151,12 @@ export default async function PersonPage({
   const person = await getPerson(id);
 
   if (!person) {
+    notFound();
+  }
+  // A colleague is on the staff register (0039): their page is the staff page, under its rights.
+  const staffId = await staffIdForPerson(person.id);
+  if (staffId) {
+    if (canAccess(user, 'staff')) redirect(`/admin/staff/${staffId}`);
     notFound();
   }
   const { t, lang } = await getI18n();

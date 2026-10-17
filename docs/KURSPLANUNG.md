@@ -64,16 +64,54 @@ into another week to copy it; ⌘Z / Rückgängig; "Woche übernehmen →" copie
 
 | Table | One row is | Notes |
 | --- | --- | --- |
-| `teachers` | a member of the teaching staff | NOT `staff_users`. Rules that shape the piece: `shifts`, `days_per_week`, `weekdays`, `levels`. `filemaker_staff_id`. |
+| `teachers` → `staff_members` (0039) | a colleague on the staff register; the board's teachers are those with the role Unterricht, or named in the plan | NOT `staff_users` (it may link one). Rules that shape the piece: `shifts`, `days_per_week`, `weekdays`, `levels`. The name is the person's (`people`), employed or freelance the contract that runs today (`staff_contracts`). `filemaker_staff_id`. |
 | `course_groups` | one parallel group of a level in a planning month | `phase` '1'/'2', `group_index`, `registrations`, the pair `teacher_first`/`teacher_second`, `room_id`, `filemaker_course_id` (bridge §7 item 6). |
 | `plan_assignments` | one teacher on one group on one date | `is_substitute` (yellow), `is_tentative` (`?`), `changed_by`. Unique per (group, date). |
-| `teacher_absences` | one teacher on one date | reason in Urlaub · Krank · Fortbildung · Freistellung · Elternzeit · Sonstiges. |
+| `teacher_absences` → `staff_absences` (0039) | one colleague on one date | reason in Urlaub · Krank · Fortbildung · Freistellung · Elternzeit · Sonstiges. Entered here or on the colleague's page. |
 
 Audit: `staff_activity` via `logActivity`, entity `kursplanung`.
 
 A planning month starts on the Monday of the week the 1st falls in, or the following Monday when the
 1st is a weekend day, and runs until the next month starts — four weeks, sometimes five (July 2026;
 October 2026, because 1 November is a Sunday). `src/lib/admin/kursplanung/weeks.ts`, tested.
+
+## The staff register (2026-10-17, migration 0039)
+
+The board's teacher list is no longer its own table: a teacher is a colleague on the staff register
+(`/admin/staff`, docs/ADMIN_WORKSPACE.md §Staff) with the role Unterricht. Their planning rules are
+edited here (Details) or on their page (Unterricht); their name, contact, contract and absences live
+on the register. „Lehrkraft anlegen" on Lehrkräfte creates the colleague with the role ticked and
+comes back with their Details open (needs `staff` at `edit` as well). A name on Lehrkräfte opens the
+colleague's page for those who hold `staff`. `scripts/kursplanung/import-bridge.mjs` writes a person,
+a staff row, the role and the contract for a teacher it does not know.
+
+## Course starts (2026-10-17)
+
+A course start's level group and a Kursplanung group are the same class. Nothing is stored to say
+so; the rule (`course-link.ts`, tested) is:
+
+- An **intensive** start (course type format `intensive`) opens the planning month two weeks after its
+  first day — 31 Aug → September, 26 Oct → November (October runs five weeks), 4 Jan → January.
+- A level code names the board's level and phase: `B1.1` → B1 phase 1, `B1+.2` → B1+ phase 2. C1H has
+  no level code and is not linked.
+- A `.1` level is the start's own class: phase 1 in its first month, in the start's shift (its session,
+  or its hours), and the same group (shift, level, index) as phase 2 in the next month. A `.2` level
+  on a start is a joiner: they sit in that month's phase-2 class, the previous start's.
+
+What follows from it (`link.ts`):
+
+- **The course start's page** has „Unterricht": per class, who teaches it in each of its two months —
+  the teachers on the board, most days first, a substitute marked; the pair when nothing is laid down
+  yet. Read only: who teaches is changed on the board.
+- **Groups count in both places.** A start's places for a level are its groups × places per group, and
+  its groups are the larger of the start's own number and the board's (`waitlist.ts`, `PLANNED`).
+  „Weitere Gruppe eröffnen" on a start adds the group on the board too, in the start's shift, and in
+  the next month when the board already has it; a month the board has not set up is left alone.
+- **Kurse** shows per level „Gebucht" — the learners booked in the workspace (phase 1: the month's
+  start at `.1`; phase 2: its `.2` joiners and the previous start's `.1` learners whose booking runs
+  into the month) — and „Kursstart 3. Aug." linking to the start. The typed „Anmeldungen" stays: while
+  FileMaker is where CASA books, the bridge's number is the real one, and replacing it with the
+  workspace's bookings would show zeros.
 
 ## Code map
 
@@ -87,6 +125,8 @@ src/lib/admin/kursplanung/
   week.ts     validateWeekAssignments → what the server accepts for one shift-week
   forms.ts    parseTeacherForm / parseGroupForm → what the dialogs may write (tested)
   repo.ts     reads (server-only) and replaceWeekAssignments
+  course-link.ts  a course start's planning month, a level code's board level and phase (pure, tested)
+  link.ts     startClasses (a start's teachers) · monthBookings (Gebucht per level) · openPlanGroups
 src/app/(admin)/admin/(focus)/
   layout.tsx            the gate in focus mode (same requireStaff as the workspace)
   kursplanung/layout.tsx   requireModule('kursplanung')

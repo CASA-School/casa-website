@@ -40,12 +40,14 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM exam_registrations ORDER BY submitted_at DESC LIMIT 1`),
-    firstId(`SELECT id FROM people WHERE deleted_at IS NULL AND merged_into IS NULL LIMIT 1`),
+    // A learner: a colleague's person page sends to their staff page (0039).
+    firstId(`SELECT id FROM people p WHERE deleted_at IS NULL AND merged_into IS NULL
+              AND NOT EXISTS (SELECT 1 FROM staff_members s WHERE s.person_id = p.id) LIMIT 1`),
     firstId(`SELECT id FROM bookings WHERE deleted_at IS NULL LIMIT 1`),
     firstId(`SELECT id FROM rooms LIMIT 1`),
     firstId(`SELECT id FROM placement_attempts ORDER BY created_at DESC LIMIT 1`),
@@ -60,6 +62,8 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT s.id FROM exam_sessions s LEFT JOIN bookings b ON b.exam_session_id = s.id
               WHERE s.starts_at >= current_date GROUP BY s.id ORDER BY count(b.id) DESC, min(s.starts_at) LIMIT 1`),
     firstId(`SELECT id FROM bookings WHERE exam_session_id IS NOT NULL AND deleted_at IS NULL LIMIT 1`),
+    // A colleague, the one most on the board: every tab of their page reads (0039).
+    firstId(`SELECT s.id FROM staff_members s LEFT JOIN plan_assignments a ON a.teacher_id = s.id GROUP BY s.id ORDER BY count(a.*) DESC LIMIT 1`),
   ]);
 
 const routes = [
@@ -98,6 +102,10 @@ const routes = [
   start && `/admin/catalogue/${start}`,
   '/admin/catalogue/waitlist',
   '/admin/catalogue/waitlist?view=closed',
+  '/admin/staff',
+  '/admin/staff?view=former',
+  staffMember && `/admin/staff/${staffMember}`,
+  staffMember && `/admin/staff/${staffMember}?tab=exams`,
   '/admin/catalogue/exams',
   sitting && `/admin/catalogue/exams/${sitting}`,
   sitting && `/admin/catalogue/exams/${sitting}/telc`,

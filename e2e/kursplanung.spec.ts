@@ -114,7 +114,7 @@ test.describe('kursplanung', () => {
 
     try {
       // The colleague's change: straight into the database, after this page loaded its copy of the week.
-      const teacher = await client.query<{ id: string }>(`SELECT id FROM teachers WHERE is_active ORDER BY short_name DESC LIMIT 1`);
+      const teacher = await client.query<{ id: string }>(`SELECT id FROM staff_members WHERE is_active ORDER BY short_name DESC LIMIT 1`);
       await client.query(`INSERT INTO plan_assignments (group_id, on_date, teacher_id) VALUES ($1, $2, $3)`, [theirsGroup, theirsDate, teacher.rows[0].id]);
 
       await piece.click();
@@ -152,7 +152,10 @@ test.describe('kursplanung', () => {
     await expect(page.getByText('Alle Gruppen aus ihren Paaren belegen').first()).toBeVisible();
 
     const { rows } = await client.query<{ id: string; full_name: string }>(
-      `SELECT id, full_name FROM teachers WHERE is_active ORDER BY short_name LIMIT 1`
+      `SELECT s.id, btrim(p.first_name || ' ' || coalesce(p.last_name, '')) AS full_name
+         FROM staff_members s JOIN people p ON p.id = s.person_id
+        WHERE s.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = s.id AND r.role_code = 'teaching')
+        ORDER BY s.short_name LIMIT 1`
     );
     test.skip(rows.length === 0, 'no teachers');
     await page.goto(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${rows[0].id}`);

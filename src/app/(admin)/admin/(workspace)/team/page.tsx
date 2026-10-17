@@ -77,7 +77,7 @@ export default async function TeamPage({
   return (
     <>
       <PageHeader
-        title={t('Team', 'Team')}
+        title={t('Zugänge', 'Accounts')}
         actions={
           <>
             <FormDialog trigger={t('Büroteam hinzufügen', 'Add the office team')} title={t('Büroteam hinzufügen', 'Add the office team')}>

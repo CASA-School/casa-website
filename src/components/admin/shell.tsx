@@ -198,6 +198,7 @@ export async function WorkspaceShell({
               id="admin"
               label={t('Verwaltung', 'Management')}
               hrefs={[
+                '/admin/staff',
                 '/admin/applications',
                 '/admin/kursplanung',
                 '/admin/website',
@@ -205,6 +206,12 @@ export async function WorkspaceShell({
                 '/admin/team',
               ]}
             >
+              {/* Everyone who works at CASA (0039): teachers, office, management. */}
+              {canAccess(user, 'staff') ? (
+                <NavLink href="/admin/staff" title={t('Mitarbeitende', 'Staff')} icon={Icon.team}>
+                  {t('Mitarbeitende', 'Staff')}
+                </NavLink>
+              ) : null}
               {canAccess(user, 'applications') ? (
                 <NavLink href="/admin/applications" title={t('Bewerbungen', 'Applications')} icon={Icon.applications}>
                   {t('Bewerbungen', 'Applications')}
@@ -235,8 +242,9 @@ export async function WorkspaceShell({
                 </NavLink>
               ) : null}
               {canAccess(user, 'team') ? (
-                <NavLink href="/admin/team" icon={Icon.team} title={t('Team', 'Team')}>
-                  Team
+                // Who signs in, and with which rights: the accounts, apart from the register of staff.
+                <NavLink href="/admin/team" icon={Icon.lock} title={t('Zugänge', 'Accounts')}>
+                  {t('Zugänge', 'Accounts')}
                 </NavLink>
               ) : null}
               {/* On a phone Settings stays in the strip; on a desktop it sits at the foot, beside the person. */}

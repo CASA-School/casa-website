@@ -1,0 +1,659 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { RecordFoot } from '../../bookings/record-foot';
+import { AddressForm, BankAccountForm, PersonForm } from '../../people/person-form';
+import {
+  addStaffBankAccountAction,
+  deleteStaffAction,
+  removeContractAction,
+  removeLicenceAction,
+  removeStaffBankAccountAction,
+  saveStaffAddressAction,
+  setStaffActiveAction,
+  takeBackAbsenceAction,
+  updateStaffBankAccountAction,
+  updateStaffPersonAction,
+} from '../actions';
+import { AbsenceForm, AccountForm, ContractForm, HrNumbersForm, LicenceForm, RolesForm, TeachingForm } from '../staff-forms';
+import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { Icon } from '@/components/admin/icons';
+import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
+import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
+import { Badge, BirthDate, Button, Card, DetailList, RecordHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
+import { EXAMINER_PART_LABELS, needsLicence } from '@/lib/admin/exam-parts';
+import { licenceExams, staffLicences, staffSittings } from '@/lib/admin/examiners';
+import { requireModule } from '@/lib/admin/guard';
+import { num, pick, wsLocale, type WsLang } from '@/lib/admin/i18n';
+import { getI18n } from '@/lib/admin/i18n.server';
+import { ABSENCE_LABELS, WEEKDAY_LABELS } from '@/lib/admin/kursplanung/types';
+import { getPerson, listBankAccounts, listCountries } from '@/lib/admin/people';
+import { CONTRACT_KIND_LABELS } from '@/lib/admin/staff-labels';
+import {
+  getStaffMember,
+  staffContracts,
+  staffHrNumbers,
+  staffRoles,
+  unlinkedAccounts,
+  upcomingAbsences,
+  upcomingTeaching,
+  type TeachingDay,
+} from '@/lib/admin/staff-members';
+import { cn } from '@/lib/utils';
+
+/**
+ * A colleague (2026-10-17, migration 0039; docs/ADMIN_WORKSPACE.md §Staff), in the record pages'
+ * tabs: the overview — what they do, the next four weeks, days away, their account; teaching — the
+ * rules Kursplanung fits them by, their days on the board, their absences; their person; their
+ * contracts and HR numbers and their bank details, with `staff_private`. Who teaches which group on
+ * which day is changed on the board; here it is read.
+ */
+export default async function StaffMemberPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; error?: string }> }) {
+  const [{ id }, { tab, error }, user] = await Promise.all([params, searchParams, requireModule('staff')]);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const member = await getStaffMember(id);
+  if (!member) notFound();
+  const { t, lang } = await getI18n();
+
+  const canEdit = canAccess(user, 'staff', 'edit');
+  const canDelete = canAccess(user, 'staff', 'full');
+  const seesPrivate = canAccess(user, 'staff_private');
+  const editsPrivate = canAccess(user, 'staff_private', 'edit');
+  const removesPrivate = canAccess(user, 'staff_private', 'full');
+  const managesAccounts = canAccess(user, 'team', 'edit');
+  const teaches = member.roles.includes('teaching');
+  const examines = member.roles.includes('examiner') || member.roles.includes('supervision');
+
+  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts] = await Promise.all([
+    staffRoles(),
+    getPerson(member.personId),
+    upcomingTeaching(id),
+    upcomingAbsences(id),
+    staffLicences(id),
+    staffSittings(id),
+    canEdit ? licenceExams() : Promise.resolve([]),
+    seesPrivate ? staffContracts(id) : Promise.resolve([]),
+    seesPrivate ? staffHrNumbers(member.personId) : Promise.resolve(null),
+    seesPrivate ? listBankAccounts(member.personId) : Promise.resolve([]),
+    canEdit ? listCountries() : Promise.resolve([]),
+    canEdit && managesAccounts ? unlinkedAccounts() : Promise.resolve([]),
+  ]);
+  if (!person) notFound();
+  const roleName = new Map(roles.map((r) => [r.code, pick(lang, r.name)]));
+  const current = contracts.find((c) => c.current) ?? null;
+  const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
+  const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
+  const home = person.addresses.find((a) => a.kind === 'home');
+  const hidden = { staffId: id };
+  const day = (iso: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) => new Date(`${iso}T12:00:00`).toLocaleDateString(wsLocale(lang), opts);
+  const full = (iso: string) => day(iso, { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const period = (from: string | null, to: string | null) =>
+    from && to ? `${full(from)} – ${full(to)}` : from ? t(`seit ${full(from)}`, `since ${full(from)}`) : to ? t(`bis ${full(to)}`, `until ${full(to)}`) : t('ohne Datum', 'no dates');
+
+  const tabs: RecordTab[] = [
+    { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
+    ...(teaches || teaching.length ? [{ id: 'teaching', label: t('Unterricht', 'Teaching'), icon: Icon.kursplanung }] : []),
+    ...(examines || licences.length || sittings.length ? [{ id: 'exams', label: t('Prüfungen', 'Exams'), icon: Icon.award }] : []),
+    { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
+    ...(seesPrivate ? [{ id: 'contracts', label: t('Vertrag', 'Contract'), icon: Icon.registrations, count: contracts.length }] : []),
+    ...(seesPrivate ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
+  ];
+
+  const rolesDialog = canEdit ? (
+    <FormDialog trigger={t('Aufgaben', 'Roles')} title={t(`Aufgaben von ${member.name}`, `${member.name}'s roles`)} triggerVariant="ghost" size="sm" width="lg">
+      <RolesForm staffId={id} roles={roles} checked={member.roles} />
+    </FormDialog>
+  ) : null;
+
+  return (
+    <RecordTabs tabs={tabs} initial={tab}>
+      <RecordHeader
+        backHref="/admin/staff"
+        backLabel={t('Mitarbeitende', 'Staff')}
+        title={member.name}
+        avatar={member.name}
+        status={!member.isActive ? <Badge tone="quiet">{t('Ehemalig', 'Former')}</Badge> : null}
+        subtitle={
+          <>
+            <span className="block text-[0.98rem] font-semibold text-[#2b3546]">
+              {member.roles.map((r) => roleName.get(r) ?? r).join(' · ') || t('Noch keine Aufgabe', 'No role yet')}
+              <span className="ml-2 text-[0.84rem] font-semibold text-[var(--casa-muted)]">{member.shortName}</span>
+            </span>
+            <MetaLine>
+              {email ? (
+                <MetaItem icon={Icon.mail}>
+                  <a href={`mailto:${email.address}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                    {email.address}
+                  </a>
+                </MetaItem>
+              ) : null}
+              {phone ? (
+                <MetaItem icon={Icon.phone}>
+                  <a href={`tel:${phone.number}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                    {phone.number}
+                  </a>
+                </MetaItem>
+              ) : null}
+              {member.account ? <MetaItem icon={Icon.lock}>{t('Konto im Arbeitsbereich', 'Workspace account')}</MetaItem> : null}
+            </MetaLine>
+          </>
+        }
+        bar={
+          <StatBar>
+            {seesPrivate ? (
+              <Stat label={t('Vertrag', 'Contract')}>
+                {current ? pick(lang, CONTRACT_KIND_LABELS[current.kind]) : <span className="font-semibold text-[var(--casa-muted)]">{t('keiner', 'none')}</span>}
+                {current?.weeklyHours ? <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]"> · {t(`${num(lang, current.weeklyHours)} Std.`, `${num(lang, current.weeklyHours)} h`)}</span> : null}
+              </Stat>
+            ) : null}
+            {teaches ? (
+              <Stat label={t('Unterricht, 4 Wochen', 'Teaching, 4 weeks')}>
+                {teaching.length ? t(`${num(lang, new Set(teaching.map((d) => d.date)).size)} Tage`, `${num(lang, new Set(teaching.map((d) => d.date)).size)} days`) : <span className="font-semibold text-[var(--casa-muted)]">{t('nichts geplant', 'nothing planned')}</span>}
+              </Stat>
+            ) : null}
+            <Stat label={t('Abwesend', 'Away')}>
+              {absences.length ? t(`${num(lang, absences.reduce((n, a) => n + a.days, 0))} Tage`, `${num(lang, absences.reduce((n, a) => n + a.days, 0))} days`) : <span className="font-semibold text-[var(--casa-muted)]">{t('nein', 'no')}</span>}
+            </Stat>
+          </StatBar>
+        }
+        tabs={<RecordTabList label={t(`${member.name}: Bereiche`, `${member.name}: sections`)} />}
+      />
+
+      {error ? (
+        <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
+          {error}
+        </p>
+      ) : null}
+
+      <RecordTabPanel id="overview">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+          <div className="space-y-4">
+            {teaches || teaching.length ? (
+              <Card
+                title={t('Die nächsten vier Wochen', 'The next four weeks')}
+                icon={Icon.kursplanung}
+                tint="sun"
+                actions={
+                  canAccess(user, 'kursplanung') ? (
+                    <Link href="/admin/kursplanung" className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                      {t('Zur Kursplanung', 'Open Kursplanung')}
+                    </Link>
+                  ) : undefined
+                }
+              >
+                <TeachingWeeks days={teaching} lang={lang} />
+              </Card>
+            ) : null}
+            <Card title={t('Abwesend', 'Away')} icon={Icon.calendar} tint="ink">
+              {absences.length ? (
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {absences.map((a) => (
+                    <li key={a.from} className="flex items-center justify-between gap-3 py-2 text-sm">
+                      <span className="font-semibold">{pick(lang, ABSENCE_LABELS[a.reason])}</span>
+                      <span className="text-[var(--casa-muted)] tabular-nums">{a.from === a.to ? day(a.from) : `${day(a.from)} – ${day(a.to)}`}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Keine Abwesenheit eingetragen.', 'No time away recorded.')}</p>
+              )}
+            </Card>
+          </div>
+          <div className="space-y-4">
+            <Card title={t('Aufgaben', 'Roles')} icon={Icon.team} tint="blue" actions={rolesDialog}>
+              {member.roles.length ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {member.roles.map((r) => (
+                    <Badge key={r} tone={r === 'teaching' ? 'accent' : 'neutral'}>
+                      {roleName.get(r) ?? r}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Aufgabe.', 'No role yet.')}</p>
+              )}
+            </Card>
+            <Card
+              title={t('Zugang', 'Account')}
+              icon={Icon.lock}
+              tint="ink"
+              actions={
+                canEdit && managesAccounts ? (
+                  <FormDialog trigger={member.account ? t('Ändern', 'Change') : t('Verbinden', 'Link')} title={t('Konto im Arbeitsbereich', 'Workspace account')} triggerVariant="ghost" size="sm">
+                    <AccountForm staffId={id} current={member.account?.id ?? null} accounts={member.account ? [{ id: member.account.id, name: member.account.name, email: member.account.email }, ...accounts] : accounts} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              {member.account ? (
+                <DetailList
+                  items={[
+                    { label: t('Konto', 'Account'), value: member.account.email },
+                    {
+                      label: t('Zuletzt angemeldet', 'Last signed in'),
+                      value: member.account.lastSeenAt ? new Date(member.account.lastSeenAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' }) : null,
+                    },
+                  ]}
+                />
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Meldet sich nicht im Arbeitsbereich an.', 'Does not sign in to the workspace.')}</p>
+              )}
+            </Card>
+          </div>
+        </div>
+      </RecordTabPanel>
+
+      {teaches || teaching.length ? (
+        <RecordTabPanel id="teaching">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+            <div className="space-y-4">
+              <Card title={t('Auf dem Plan', 'On the board')} icon={Icon.kursplanung} tint="sun">
+                <TeachingWeeks days={teaching} lang={lang} />
+              </Card>
+              <Card
+                title={t('Abwesenheiten', 'Time away')}
+                icon={Icon.calendar}
+                tint="ink"
+                actions={
+                  canEdit ? (
+                    <FormDialog trigger={t('Eintragen', 'Add')} title={t('Abwesenheit eintragen', 'Add time away')} triggerVariant="ghost" size="sm">
+                      <AbsenceForm staffId={id} />
+                    </FormDialog>
+                  ) : undefined
+                }
+              >
+                {absences.length ? (
+                  <ul className="-my-1 divide-y divide-ws-line-soft">
+                    {absences.map((a) => (
+                      <li key={a.from} className="flex items-center justify-between gap-3 py-2 text-sm">
+                        <span>
+                          <span className="font-semibold">{pick(lang, ABSENCE_LABELS[a.reason])}</span>
+                          <span className="ml-2 text-[var(--casa-muted)] tabular-nums">
+                            {a.from === a.to ? day(a.from) : `${day(a.from)} – ${day(a.to)}`} · {a.days === 1 ? t('1 Tag', '1 day') : t(`${a.days} Tage`, `${a.days} days`)}
+                          </span>
+                        </span>
+                        {canEdit && !a.fromFileMaker ? (
+                          <form action={takeBackAbsenceAction}>
+                            <input type="hidden" name="staffId" value={id} />
+                            <input type="hidden" name="from" value={a.from} />
+                            <input type="hidden" name="to" value={a.to} />
+                            <Button type="submit" size="sm" variant="ghost">
+                              {t('Zurücknehmen', 'Take back')}
+                            </Button>
+                          </form>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-[var(--casa-muted)]">{t('Keine Abwesenheit eingetragen.', 'No time away recorded.')}</p>
+                )}
+              </Card>
+            </div>
+            <Card
+              title={t('Regeln für die Kursplanung', 'Rules for Kursplanung')}
+              icon={Icon.settings}
+              tint="blue"
+              actions={
+                canEdit ? (
+                  <FormDialog trigger={t('Ändern', 'Change')} title={t('Regeln für die Kursplanung', 'Rules for Kursplanung')} triggerVariant="ghost" size="sm" width="lg">
+                    <TeachingForm member={member} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              <DetailList
+                items={[
+                  { label: t('Kürzel', 'Short name'), value: member.shortName },
+                  {
+                    label: t('Schichten', 'Shifts'),
+                    value: member.teaching.shifts.map((s) => (s === 'morning' ? t('Vormittag', 'Morning') : t('Nachmittag', 'Afternoon'))).join(' · '),
+                  },
+                  { label: t('Tage pro Woche', 'Days per week'), value: String(member.teaching.daysPerWeek) },
+                  { label: t('Wochentage', 'Weekdays'), value: member.teaching.weekdays.map((d) => pick(lang, WEEKDAY_LABELS[d])).join(' · ') },
+                  { label: t('Niveaus', 'Levels'), value: member.teaching.levels.join(' · ') || null },
+                  ...(member.teaching.note ? [{ label: t('Notiz', 'Note'), value: member.teaching.note, wide: true }] : []),
+                ]}
+              />
+            </Card>
+          </div>
+        </RecordTabPanel>
+      ) : null}
+
+      {examines || licences.length || sittings.length ? (
+        <RecordTabPanel id="exams">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+            <Card title={t('Prüfungstermine', 'Exam sittings')} icon={Icon.calendar} tint="sun" bleed>
+              {sittings.length ? (
+                <ul className="divide-y divide-ws-line-soft">
+                  {sittings.map((x) => (
+                    <li key={x.sittingId}>
+                      <Link href={`/admin/catalogue/exams/${x.sittingId}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-[0.86rem] hover:bg-[var(--ws-row-hover)]">
+                        <span className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                          <span className="font-semibold text-[var(--casa-ink)]">{x.examName}</span>
+                          <span className="text-[var(--casa-muted)]">{pick(lang, EXAMINER_PART_LABELS[x.part])}</span>
+                          {x.cancelled ? <Badge tone="danger">{t('Abgesagt', 'Cancelled')}</Badge> : null}
+                          {needsLicence(x.part) && !x.licensed ? <Badge tone="warning">{t('Keine gültige Lizenz', 'No valid licence')}</Badge> : null}
+                        </span>
+                        <span className="text-[0.84rem] text-[var(--casa-muted)] tabular-nums">
+                          {x.startsAt.toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Auf keinem Termin eingetragen.', 'Not on any sitting.')}</p>
+              )}
+            </Card>
+            <Card
+              title={t('Lizenzen', 'Licences')}
+              icon={Icon.award}
+              tint="green"
+              actions={
+                canEdit && examTypes.length ? (
+                  <FormDialog trigger={t('Eintragen', 'Add')} title={t('Lizenz eintragen', 'Add a licence')} triggerVariant="ghost" size="sm">
+                    <LicenceForm staffId={id} exams={examTypes} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              {licences.length ? (
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {licences.map((l) => (
+                    <li key={l.id} className="py-2.5">
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-semibold text-[var(--casa-ink)]">{l.examName}</span>
+                        {l.current ? <Badge tone="positive">{t('Gültig', 'Valid')}</Badge> : <Badge tone="quiet">{t('Nicht gültig', 'Not valid')}</Badge>}
+                      </span>
+                      <span className="block text-[0.8rem] text-[var(--casa-muted)] tabular-nums">
+                        {[l.number ? <span key="n" className="font-mono">{l.number}</span> : null, period(l.validFrom, l.validTo)].filter(Boolean).map((part, i) => (
+                          <span key={i}>
+                            {i ? ' · ' : ''}
+                            {part}
+                          </span>
+                        ))}
+                      </span>
+                      {l.note ? <span className="block text-[0.8rem] text-[var(--casa-muted)]">{l.note}</span> : null}
+                      {canEdit ? (
+                        <span className="mt-1 flex items-center gap-1">
+                          <FormDialog trigger={t('Ändern', 'Change')} title={t('Lizenz', 'Licence')} triggerVariant="ghost" size="sm">
+                            <LicenceForm staffId={id} exams={examTypes} licence={l} />
+                          </FormDialog>
+                          {canDelete ? (
+                            <form action={removeLicenceAction}>
+                              <input type="hidden" name="staffId" value={id} />
+                              <input type="hidden" name="licenceId" value={l.id} />
+                              <ConfirmSubmit title={t('Diese Lizenz entfernen?', 'Remove this licence?')} description={l.examName} confirmLabel={t('Entfernen', 'Remove')} size="sm" variant="ghost">
+                                {t('Entfernen', 'Remove')}
+                              </ConfirmSubmit>
+                            </form>
+                          ) : null}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Keine Lizenz eingetragen.', 'No licence recorded.')}</p>
+              )}
+            </Card>
+          </div>
+        </RecordTabPanel>
+      ) : null}
+
+      <RecordTabPanel id="details">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <Card
+            title={t('Person', 'Person')}
+            icon={Icon.person}
+            tint="ink"
+            actions={
+              canEdit ? (
+                <FormDialog trigger={t('Bearbeiten', 'Edit')} title={member.name} triggerVariant="ghost" size="sm" width="lg">
+                  <PersonForm person={person} countries={countries} action={updateStaffPersonAction} hidden={hidden} />
+                </FormDialog>
+              ) : undefined
+            }
+          >
+            <DetailList
+              items={[
+                { label: t('Geburtsdatum', 'Date of birth'), value: person.birthDate ? <BirthDate value={person.birthDate} /> : null },
+                { label: t('Geburtsort', 'Place of birth'), value: person.facts.birthPlace },
+                { label: t('Nationalität', 'Nationality'), value: person.nationalityName ?? person.nationalityRaw },
+                { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
+                { label: t('E-Mail', 'Email'), value: email?.address ?? null },
+                { label: t('Telefon', 'Phone'), value: phone?.number ?? null },
+              ]}
+            />
+          </Card>
+          <Card
+            title={t('Adresse', 'Address')}
+            icon={Icon.rooms}
+            tint="ink"
+            actions={
+              canEdit ? (
+                <FormDialog trigger={home ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')} title={t('Adresse', 'Address')} triggerVariant="ghost" size="sm">
+                  <AddressForm personId={person.id} kind="home" address={home} countries={countries} action={saveStaffAddressAction} hidden={hidden} />
+                </FormDialog>
+              ) : undefined
+            }
+          >
+            {home ? (
+              <p className="text-sm leading-relaxed">
+                {[home.street, [home.postcode, home.city].filter(Boolean).join(' '), home.countryName].filter(Boolean).map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </p>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">—</p>
+            )}
+          </Card>
+        </div>
+      </RecordTabPanel>
+
+      {seesPrivate ? (
+        <RecordTabPanel id="contracts">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+            <Card
+              title={t('Verträge', 'Contracts')}
+              icon={Icon.registrations}
+              tint="blue"
+              actions={
+                editsPrivate ? (
+                  <FormDialog trigger={t('Vertrag hinzufügen', 'Add contract')} title={t('Neuer Vertrag', 'New contract')} triggerVariant="ghost" size="sm">
+                    <ContractForm staffId={id} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              {contracts.length ? (
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {contracts.map((c) => (
+                    <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-[var(--casa-ink)]">
+                          {pick(lang, CONTRACT_KIND_LABELS[c.kind])}
+                          {c.current ? <Badge tone="positive">{t('Läuft', 'Current')}</Badge> : null}
+                        </span>
+                        <span className="block text-[0.8rem] text-[var(--casa-muted)] tabular-nums">
+                          {[
+                            period(c.validFrom, c.validTo),
+                            c.weeklyHours !== null ? t(`${num(lang, c.weeklyHours)} Std. pro Woche`, `${num(lang, c.weeklyHours)} h a week`) : null,
+                            c.weeklyUnits !== null ? t(`${num(lang, c.weeklyUnits)} UE pro Woche`, `${num(lang, c.weeklyUnits)} lessons a week`) : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
+                        {c.note ? <span className="block text-[0.8rem] text-[var(--casa-muted)]">{c.note}</span> : null}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        {editsPrivate ? (
+                          <FormDialog trigger={t('Ändern', 'Change')} title={t('Vertrag', 'Contract')} triggerVariant="ghost" size="sm">
+                            <ContractForm staffId={id} contract={c} />
+                          </FormDialog>
+                        ) : null}
+                        {removesPrivate ? (
+                          <form action={removeContractAction}>
+                            <input type="hidden" name="staffId" value={id} />
+                            <input type="hidden" name="contractId" value={c.id} />
+                            <ConfirmSubmit title={t('Diesen Vertrag entfernen?', 'Remove this contract?')} description={t('Nur für einen Vertrag, der so nie bestand.', 'Only for a contract that never existed like this.')} confirmLabel={t('Entfernen', 'Remove')} size="sm" variant="ghost">
+                              {t('Entfernen', 'Remove')}
+                            </ConfirmSubmit>
+                          </form>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Vertrag eingetragen.', 'No contract recorded yet.')}</p>
+              )}
+            </Card>
+            <Card
+              title={t('Steuer und Versicherung', 'Tax and insurance')}
+              icon={Icon.lock}
+              tint="ink"
+              actions={
+                editsPrivate && hr ? (
+                  <FormDialog trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="ghost" size="sm">
+                    <HrNumbersForm staffId={id} numbers={hr} />
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              <DetailList
+                items={[
+                  { label: t('Steuer-ID', 'Tax ID'), value: hr?.taxId ? <span className="font-mono">{hr.taxId}</span> : null },
+                  { label: t('Rentenversicherung', 'Pension insurance'), value: hr?.pensionNumber ? <span className="font-mono">{hr.pensionNumber}</span> : null },
+                  { label: t('Krankenversicherung', 'Health insurance'), value: hr?.healthNumber ? <span className="font-mono">{hr.healthNumber}</span> : null },
+                ]}
+              />
+            </Card>
+          </div>
+        </RecordTabPanel>
+      ) : null}
+
+      {seesPrivate ? (
+        <RecordTabPanel id="bank">
+          <Card
+            title={t('Bankverbindung', 'Bank details')}
+            icon={Icon.money}
+            tint="green"
+            actions={
+              editsPrivate ? (
+                <FormDialog trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                  <BankAccountForm personId={person.id} holder={member.name} action={addStaffBankAccountAction} hidden={hidden} />
+                </FormDialog>
+              ) : undefined
+            }
+          >
+            {bank.length ? (
+              <ul className="-my-1 divide-y divide-ws-line-soft">
+                {bank.map((b) => (
+                  <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-mono font-semibold">{b.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
+                      <span className="block text-[0.8rem] text-[var(--casa-muted)]">{[b.holder, b.bankName, b.bic].filter(Boolean).join(' · ')}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      {editsPrivate ? (
+                        <FormDialog trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                          <BankAccountForm personId={person.id} holder={member.name} account={b} action={updateStaffBankAccountAction} hidden={hidden} />
+                        </FormDialog>
+                      ) : null}
+                      {removesPrivate ? (
+                        <form action={removeStaffBankAccountAction}>
+                          <input type="hidden" name="staffId" value={id} />
+                          <input type="hidden" name="accountId" value={b.id} />
+                          <ConfirmSubmit title={t('Dieses Konto entfernen?', 'Remove this account?')} description={b.iban.replace(/(.{4})/g, '$1 ').trim()} confirmLabel={t('Entfernen', 'Remove')} size="sm" variant="ghost">
+                            {t('Entfernen', 'Remove')}
+                          </ConfirmSubmit>
+                        </form>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Bankverbindung.', 'No bank details yet.')}</p>
+            )}
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {canEdit ? (
+        <RecordFoot>
+          <form action={setStaffActiveAction}>
+            <input type="hidden" name="staffId" value={id} />
+            <input type="hidden" name="active" value={member.isActive ? '0' : '1'} />
+            <ConfirmSubmit
+              title={member.isActive ? t(`${member.name} als ausgeschieden eintragen?`, `Mark ${member.name} as having left?`) : t(`${member.name} wieder aktiv?`, `${member.name} active again?`)}
+              description={
+                member.isActive
+                  ? t('Die Person bleibt im Verzeichnis, unter „Ehemalige“, und verschwindet aus der Kursplanung.', 'They stay in the register under “Former” and leave Kursplanung.')
+                  : t('Die Person erscheint wieder unter „Aktiv“ und in der Kursplanung.', 'They appear under “Active” and in Kursplanung again.')
+              }
+              confirmLabel={member.isActive ? t('Ausgeschieden', 'Has left') : t('Wieder aktiv', 'Active again')}
+            >
+              {member.isActive ? t('Ausgeschieden', 'Has left') : t('Wieder aktiv', 'Active again')}
+            </ConfirmSubmit>
+          </form>
+          {canDelete && !teaching.length ? (
+            <form action={deleteStaffAction}>
+              <input type="hidden" name="staffId" value={id} />
+              <ConfirmSubmit title={t('Diese Person löschen?', 'Delete this person?')} description={t('Nur für einen Eintrag aus Versehen.', 'Only for an entry made by mistake.')}>
+                {t('Löschen', 'Delete')}
+              </ConfirmSubmit>
+            </form>
+          ) : null}
+        </RecordFoot>
+      ) : null}
+    </RecordTabs>
+  );
+}
+
+const SHIFT_SHORT = { morning: { de: 'Vorm.', en: 'a.m.' }, afternoon: { de: 'Nachm.', en: 'p.m.' } } as const;
+
+/** Kursplanung's days for them, week by week: the days, the group, a substitution or a tentative day marked. */
+function TeachingWeeks({ days, lang }: { days: TeachingDay[]; lang: WsLang }) {
+  if (!days.length) return <p className="text-sm text-[var(--casa-muted)]">{lang === 'de' ? 'In den nächsten vier Wochen nichts geplant.' : 'Nothing planned in the next four weeks.'}</p>;
+  // One line per week and group: "KW 43 · B1.1 Gruppe 1 · Vorm. · Mo, Di, Mi".
+  const monday = (iso: string) => {
+    const d = new Date(`${iso}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+  };
+  const lines = new Map<string, { week: string; group: string; shift: 'morning' | 'afternoon'; dates: string[]; substitute: boolean; tentative: boolean }>();
+  for (const d of days) {
+    const group = `${d.level}.${d.phase}${d.groupIndex > 1 ? ` · ${lang === 'de' ? 'Gruppe' : 'group'} ${d.groupIndex}` : ''}`;
+    const key = `${monday(d.date)}|${group}|${d.shift}`;
+    const line = lines.get(key) ?? { week: monday(d.date), group, shift: d.shift, dates: [], substitute: false, tentative: false };
+    line.dates.push(d.date);
+    line.substitute ||= d.substitute;
+    line.tentative ||= d.tentative;
+    lines.set(key, line);
+  }
+  const weekday = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'short' }).replace('.', '');
+  return (
+    <ul className="-my-1 divide-y divide-ws-line-soft">
+      {[...lines.values()].map((l) => (
+        <li key={`${l.week}${l.group}${l.shift}`} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+          <span className="flex items-center gap-2">
+            <span className="w-20 shrink-0 text-[0.8rem] text-[var(--casa-muted)] tabular-nums">
+              {new Date(`${l.week}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' })}
+            </span>
+            <span className="font-semibold">{l.group}</span>
+            <span className="text-[var(--casa-muted)]">{SHIFT_SHORT[l.shift][lang]}</span>
+            {l.substitute ? <Badge tone="warning">{lang === 'de' ? 'Vertretung' : 'Cover'}</Badge> : null}
+            {l.tentative ? <Badge tone="quiet">?</Badge> : null}
+          </span>
+          <span className={cn('text-[0.84rem] tabular-nums')}>{l.dates.map(weekday).join(', ')}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}

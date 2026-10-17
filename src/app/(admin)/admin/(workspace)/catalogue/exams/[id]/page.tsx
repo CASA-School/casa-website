@@ -5,7 +5,8 @@ import { createBookingFromWizardAction } from '../../../bookings/actions';
 import { BookingWizard } from '../../../bookings/booking-wizard';
 import { offerPlaceAction, takeBackOfferAction } from '../../actions';
 import { CloseForm, MoveForm } from '../../waitlist-forms';
-import { cancelSittingAction, deleteSittingAction, fileCandidatesAction, markCollectedAction, unfileCandidateAction, updateSittingAction } from '../actions';
+import { cancelSittingAction, deleteSittingAction, fileCandidatesAction, markCollectedAction, unassignExaminerAction, unfileCandidateAction, updateSittingAction } from '../actions';
+import { ExaminerForm } from '../examiner-form';
 import { SittingForm } from '../sitting-form';
 import { RecordFoot } from '../../../bookings/record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
@@ -17,7 +18,8 @@ import { canAccess } from '@/lib/admin/access';
 import { bookingOffer } from '@/lib/admin/booking-offer';
 import type { BookingOffer } from '@/lib/admin/booking-offer-types';
 import { BOOKING_LIGHT_LABELS, bookingLight, type ObservationReason } from '@/lib/admin/bookings';
-import { EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, overallOutcome, SITTING_STATUS_LABELS } from '@/lib/admin/exam-parts';
+import { EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, EXAMINER_PART_LABELS, needsLicence, overallOutcome, SITTING_STATUS_LABELS } from '@/lib/admin/exam-parts';
+import { examinerChoices, sittingExaminers } from '@/lib/admin/examiners';
 import {
   freeSeats,
   getSitting,
@@ -60,13 +62,16 @@ export default async function ExamSittingPage({ params, searchParams }: { params
   const handles = canAccess(user, 'bookings', 'edit');
   const plans = canAccess(user, 'catalogue', 'edit');
   const ends = canAccess(user, 'catalogue', 'full');
-  const [candidates, entries, registrations, exams, form] = await Promise.all([
+  const [candidates, entries, registrations, exams, form, examiners, choices] = await Promise.all([
     seesBookings ? sittingCandidates(id) : Promise.resolve([]),
     sittingEntries(id),
     canAccess(user, 'registrations') ? sittingRegistrations(id) : Promise.resolve([]),
     plans ? sittingDefaults() : Promise.resolve([]),
     plans ? sittingForEdit(id) : Promise.resolve(null),
+    sittingExaminers(id),
+    plans ? examinerChoices(id) : Promise.resolve([]),
   ]);
+  const seesStaff = canAccess(user, 'staff');
   const letters = await lettersForEntries(entries.map((e) => e.id));
   const open = entries.filter((e) => e.status === 'waiting' || e.status === 'offered');
   const closed = entries.filter((e) => e.status !== 'waiting' && e.status !== 'offered');
@@ -260,6 +265,51 @@ export default async function ExamSittingPage({ params, searchParams }: { params
             ) : null}
           </Card>
         ) : null}
+
+        <Card
+          title={t('Prüfende', 'Examiners')}
+          icon={Icon.award}
+          tint="green"
+          bleed
+          actions={
+            plans && sitting.status !== 'cancelled' && choices.length ? (
+              <FormDialog trigger={t('Eintragen', 'Add')} title={t('Prüfende eintragen', 'Add an examiner')} triggerVariant="ghost" size="sm">
+                <ExaminerForm sittingId={id} choices={choices} />
+              </FormDialog>
+            ) : undefined
+          }
+        >
+          {examiners.length ? (
+            <ul className="divide-y divide-ws-line-soft">
+              {examiners.map((x) => (
+                <li key={x.staffId} className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-[0.86rem]">
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                    {seesStaff ? (
+                      <Link href={`/admin/staff/${x.staffId}?tab=exams`} className="font-semibold text-[var(--casa-ink)] hover:underline">
+                        {x.name}
+                      </Link>
+                    ) : (
+                      <span className="font-semibold text-[var(--casa-ink)]">{x.name}</span>
+                    )}
+                    <span className="text-[var(--casa-muted)]">{pick(lang, EXAMINER_PART_LABELS[x.part])}</span>
+                    {needsLicence(x.part) && !x.licensed ? <Badge tone="warning">{t('Keine gültige Lizenz am Prüfungstag', 'No valid licence on the day')}</Badge> : null}
+                  </span>
+                  {plans ? (
+                    <form action={unassignExaminerAction}>
+                      <input type="hidden" name="sittingId" value={id} />
+                      <input type="hidden" name="staffId" value={x.staffId} />
+                      <Button type="submit" size="sm" variant="ghost">
+                        {t('Austragen', 'Take off')}
+                      </Button>
+                    </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch niemand eingetragen.', 'Nobody yet.')}</p>
+          )}
+        </Card>
 
         {entries.length ? (
           <Card title={t('Warteliste', 'Waiting list')} icon={Icon.clock} tint="sun" bleed>

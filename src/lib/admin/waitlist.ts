@@ -89,6 +89,23 @@ const QUEUED = `
     FROM waitlist_entries WHERE status IN ('waiting', 'offered')
    GROUP BY course_instance_id, level_code`;
 
+/**
+ * Kursplanung's groups of an intensive start's level (docs/KURSPLANUNG.md §Course starts): the board's
+ * level and phase in the planning month the start opens — `kursplanung/course-link.ts`, in SQL — and,
+ * for a `.1` level, in the start's own shift (a `.2` joiner sits in the previous start's class, in the
+ * other one). Needs `k` (level_code), `ci` and `ct` in scope.
+ */
+const PLANNED = `(SELECT count(*)::int FROM course_groups g
+                   WHERE ct.format = 'intensive'
+                     AND g.month = date_trunc('month', ci.start_date + 14)::date
+                     AND g.level = regexp_replace(k.level_code, '\\.[12]$', '')
+                     AND g.phase = CASE WHEN k.level_code ~ '\\.2$' THEN '2' ELSE '1' END
+                     AND (g.phase = '2' OR g.shift = coalesce(
+                           CASE WHEN ci.session IN ('morning', 'afternoon') THEN ci.session END,
+                           CASE WHEN substring(ci.schedule->>'time' from '^\\d{1,2}')::int < 12 THEN 'morning'
+                                WHEN substring(ci.schedule->>'time' from '^\\d{1,2}')::int < 17 THEN 'afternoon' END,
+                           g.shift)))`;
+
 export type LevelGroup = {
   courseInstanceId: string;
   levelCode: string;
@@ -110,10 +127,12 @@ type GroupRow = {
   booked: number | null;
   offered: number | null;
   waiting: number | null;
+  planned?: number | null;
 };
 
 const toGroup = (r: GroupRow): LevelGroup => {
-  const groups = r.groups ?? 1;
+  // Kursplanung's groups for the level count too: a group opened on the board is a group here.
+  const groups = Math.max(r.groups ?? 1, r.planned ?? 0);
   const placesPerGroup = r.places_per_group ?? DEFAULT_PLACES_PER_GROUP;
   return {
     courseInstanceId: r.course_instance_id,
@@ -124,7 +143,7 @@ const toGroup = (r: GroupRow): LevelGroup => {
     booked: r.booked ?? 0,
     offered: r.offered ?? 0,
     waiting: r.waiting ?? 0,
-    set: r.groups !== null,
+    set: r.groups !== null || (r.planned ?? 0) > 0,
   };
 };
 
@@ -142,9 +161,11 @@ export async function levelGroups(courseInstanceIds: readonly string[]): Promise
             UNION SELECT course_instance_id, level_code FROM queued WHERE course_instance_id = ANY($1::uuid[])
           )
      SELECT k.course_instance_id, k.level_code, p.groups, p.places_per_group,
-            b.n AS booked, q.offered, q.waiting, l.sort_order
+            b.n AS booked, q.offered, q.waiting, l.sort_order, ${PLANNED} AS planned
        FROM keys k
        JOIN levels l ON l.code = k.level_code
+       JOIN course_instances ci ON ci.id = k.course_instance_id
+       JOIN course_types ct ON ct.id = ci.course_type_id
        LEFT JOIN course_level_places p ON p.course_instance_id = k.course_instance_id AND p.level_code = k.level_code
        LEFT JOIN booked b ON b.course_instance_id = k.course_instance_id AND b.level_code = k.level_code
        LEFT JOIN queued q ON q.course_instance_id = k.course_instance_id AND q.level_code = k.level_code
@@ -668,7 +689,7 @@ export async function openGroup(courseInstanceId: string, levelCode: string, act
     `INSERT INTO course_level_places (course_instance_id, level_code, groups, places_per_group, updated_by)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (course_instance_id, level_code) DO UPDATE
-       SET groups = course_level_places.groups + 1, updated_by = EXCLUDED.updated_by, updated_at = now()`,
+       SET groups = EXCLUDED.groups, updated_by = EXCLUDED.updated_by, updated_at = now()`,
     [courseInstanceId, levelCode, current.groups + 1, current.placesPerGroup, actor.id]
   );
   await logActivity({ actor, entity: 'course_instance', entityId: courseInstanceId, action: 'group_opened', detail: { level: levelCode, groups: current.groups + 1 } });

@@ -34,6 +34,8 @@ export const MODULES = [
   'prices',
   'catalogue',
   'kursplanung',
+  'staff',
+  'staff_private',
   'website',
   'activity',
   'team',
@@ -70,9 +72,11 @@ export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
   prices: { de: 'Preise', en: 'Prices' },
   catalogue: { de: 'Kurse & Prüfungen', en: 'Courses & exams' },
   kursplanung: { de: 'Kursplanung', en: 'Kursplanung' },
+  staff: { de: 'Mitarbeitende', en: 'Staff' },
+  staff_private: { de: 'Personaldaten', en: 'Staff records' },
   website: { de: 'Website', en: 'Website' },
   activity: { de: 'Aktivität', en: 'Activity' },
-  team: { de: 'Team', en: 'Team' },
+  team: { de: 'Zugänge', en: 'Accounts' },
   settings: { de: 'Einstellungen', en: 'Settings' },
 };
 
@@ -110,6 +114,10 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * details"): `edit` adds and corrects an account, removing one is `full`. It stays
  * its own module, so it is checked on the server like every other and can be
  * withdrawn from one person on the Team screen.
+ * `staff` — the register of everyone who works at CASA — and `staff_private` —
+ * their contracts, tax and insurance numbers and bank details — are management's
+ * (Rahman, 2026-10-17): owners and administrators hold both, and `staff_private`
+ * is given to a colleague in finance on the Team screen.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
@@ -5,6 +7,7 @@ import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { levelStyle } from '@/lib/admin/kursplanung/colours';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
+import { monthBookings } from '@/lib/admin/kursplanung/link';
 import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { LEVELS, SHIFT_INFO, SHIFTS, type CourseGroup } from '@/lib/admin/kursplanung/types';
 import { monthLabel, nextMonth } from '@/lib/admin/kursplanung/weeks';
@@ -29,7 +32,9 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
   const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
   const { t, lang } = await getI18n();
   const month = await resolvePlanMonth(params.month);
-  const [plan, months] = await Promise.all([loadPlan(month), listPlanMonths()]);
+  const [plan, months, linked] = await Promise.all([loadPlan(month), listPlanMonths(), monthBookings(month)]);
+  const seesStarts = canAccess(user, 'catalogue');
+  const startDay = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' });
   const canWrite = canAccess(user, 'kursplanung', 'edit');
   const canRemove = canAccess(user, 'kursplanung', 'full');
   const returnTo = '/admin/kursplanung/kurse';
@@ -132,14 +137,23 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                       if (!lg.length) return [];
                       const total = lg.reduce((n, g) => n + g.registrations, 0);
                       const suggest = Math.max(1, Math.ceil(total / 16));
+                      const booked = linked.booked.get(`${level}.${phase}`) ?? 0;
+                      // A phase-1 group is this month's course start; a phase-2 group the previous start's class, continued.
+                      const start = level === 'C1H' ? null : linked.startOf(phase, shift);
                       return [
                         <tr key={`${level}-h`} className={ui.lvlRow}>
                           <td colSpan={6}>
                             <span className={ui.lv} style={levelStyle(level)}>{level}.{phase}</span>
                             <span className={ui.meta}>
                               <span>{t('Anmeldungen', 'Registrations')} <b>{total}</b></span>
+                              {booked ? <span>{t('Gebucht', 'Booked')} <b>{booked}</b></span> : null}
                               <span>{t('Gruppen', 'Groups')} <b>{lg.length}</b></span>
                               {suggest !== lg.length ? <span>{t('Vorschlag', 'Suggested')} <b>{suggest}</b></span> : null}
+                              {start && seesStarts ? (
+                                <Link href={`/admin/catalogue/${start.id}?level=${encodeURIComponent(`${level}.1`)}#level-${level}.1`} className={ui.link}>
+                                  {t(`Kursstart ${startDay(start.date)}`, `Start ${startDay(start.date)}`)}
+                                </Link>
+                              ) : null}
                             </span>
                           </td>
                           <td className={ui.right}>

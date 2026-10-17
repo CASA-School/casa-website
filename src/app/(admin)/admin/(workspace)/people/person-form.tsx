@@ -16,7 +16,18 @@ import { getI18n } from '@/lib/admin/i18n.server';
  * about a learner below it (second surname, nickname, place and country of
  * birth, mother tongue, occupation, passport; some of it telc asks for).
  */
-export async function PersonForm({ person, countries }: { person?: PersonDetail; countries: Country[] }) {
+export async function PersonForm({
+  person,
+  countries,
+  action,
+  hidden,
+}: {
+  person?: PersonDetail;
+  countries: Country[];
+  /** Another module's action for the same fields — a colleague's person, on the staff page — and what it needs besides. */
+  action?: (formData: FormData) => void | Promise<void>;
+  hidden?: Record<string, string>;
+}) {
   const { t } = await getI18n();
   const SALUTATIONS = [
     ['', '—'],
@@ -78,8 +89,9 @@ export async function PersonForm({ person, countries }: { person?: PersonDetail;
   );
 
   return (
-    <form action={editing ? updatePersonAction : createPersonAction} className="space-y-3">
+    <form action={action ?? (editing ? updatePersonAction : createPersonAction)} className="space-y-3">
       {person ? <input type="hidden" name="personId" value={person.id} /> : null}
+      <Hidden values={hidden} />
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label={t('Vorname', 'First name')} htmlFor="person-first">
           <Input
@@ -161,13 +173,28 @@ export async function PersonForm({ person, countries }: { person?: PersonDetail;
 }
 
 /** One of a person's two addresses — at home, or in Bremen while here. Emptied, it is removed. */
-export async function AddressForm({ personId, kind, address, countries }: { personId: string; kind: AddressKind; address?: Address; countries: Country[] }) {
+export async function AddressForm({
+  personId,
+  kind,
+  address,
+  countries,
+  action,
+  hidden,
+}: {
+  personId: string;
+  kind: AddressKind;
+  address?: Address;
+  countries: Country[];
+  action?: (formData: FormData) => void | Promise<void>;
+  hidden?: Record<string, string>;
+}) {
   const { t } = await getI18n();
   const id = (name: string) => `address-${kind}-${name}`;
   return (
-    <form action={saveAddressAction} className="space-y-3">
+    <form action={action ?? saveAddressAction} className="space-y-3">
       <input type="hidden" name="personId" value={personId} />
       <input type="hidden" name="kind" value={kind} />
+      <Hidden values={hidden} />
       <Field label={t('Straße und Hausnummer', 'Street and number')} htmlFor={id('street')}>
         <Input id={id('street')} name="street" maxLength={160} defaultValue={address?.street ?? ''} autoFocus />
       </Field>
@@ -195,12 +222,25 @@ export async function AddressForm({ personId, kind, address, countries }: { pers
 }
 
 /** A bank account — for a refund, a host's rent, a salary. New, or an existing one corrected. */
-export async function BankAccountForm({ personId, holder, account }: { personId: string; holder: string; account?: BankAccount }) {
+export async function BankAccountForm({
+  personId,
+  holder,
+  account,
+  action,
+  hidden,
+}: {
+  personId: string;
+  holder: string;
+  account?: BankAccount;
+  action?: (formData: FormData) => void | Promise<void>;
+  hidden?: Record<string, string>;
+}) {
   const { t } = await getI18n();
   return (
-    <form action={account ? updateBankAccountAction : addBankAccountAction} className="space-y-3">
+    <form action={action ?? (account ? updateBankAccountAction : addBankAccountAction)} className="space-y-3">
       <input type="hidden" name="personId" value={personId} />
       {account ? <input type="hidden" name="accountId" value={account.id} /> : null}
+      <Hidden values={hidden} />
       <Field label="IBAN" htmlFor="bank-iban">
         <Input
           id="bank-iban"
@@ -231,4 +271,9 @@ export async function BankAccountForm({ personId, holder, account }: { personId:
       </div>
     </form>
   );
+}
+
+/** What another module's action needs besides the fields. */
+function Hidden({ values }: { values?: Record<string, string> }) {
+  return values ? Object.entries(values).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />) : null;
 }

@@ -10,7 +10,6 @@ import {
   isShift,
   isWeekday,
   type Absence,
-  type Contract,
 } from './types';
 import type { PlanningWeek } from './weeks';
 import type { TeacherRules } from './repo-types';
@@ -47,8 +46,6 @@ export function parseTeacherForm(f: FormReader, teacherId: string, weeks: readon
   if (!weekdays.length) return { ok: false, error: { de: 'Mindestens ein Wochentag.', en: 'At least one weekday.' } };
 
   const levels = LEVELS.filter((l) => f.getAll('levels').includes(l));
-  const contractRaw = f.get('contract') ?? 'employed';
-  const contract: Contract = contractRaw === 'freelance' ? 'freelance' : 'employed';
   const note = (f.get('note') ?? '').trim().slice(0, 200) || null;
 
   const absences: Absence[] = [];
@@ -63,7 +60,7 @@ export function parseTeacherForm(f: FormReader, teacherId: string, weeks: readon
     }
   }
 
-  return { ok: true, rules: { shortName, contract, shifts, daysPerWeek, weekdays, levels, note }, absences };
+  return { ok: true, rules: { shortName, shifts, daysPerWeek, weekdays, levels, note }, absences };
 }
 
 export type GroupFormResult =

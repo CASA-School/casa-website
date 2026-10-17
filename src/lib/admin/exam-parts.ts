@@ -60,3 +60,15 @@ export const SITTING_STATUS_LABELS: Record<'draft' | 'scheduled' | 'cancelled', 
   scheduled: { de: 'Auf der Website', en: 'On the website' },
   cancelled: { de: 'Abgesagt', en: 'Cancelled' },
 };
+
+/**
+ * What a colleague does at a sitting (0039): supervise the written part, examine the oral one, or both.
+ * The oral part is examined only with a telc licence for that exam, valid on the day.
+ */
+export const EXAMINER_PART_LABELS: Record<ExamParts, Bilingual> = {
+  full: { de: 'Schriftlich und mündlich', en: 'Written and oral' },
+  written: { de: 'Aufsicht schriftlich', en: 'Written supervision' },
+  oral: { de: 'Mündliche Prüfung', en: 'Oral examiner' },
+};
+
+export const needsLicence = (part: ExamParts): boolean => part !== 'written';

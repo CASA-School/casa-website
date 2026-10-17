@@ -299,6 +299,9 @@ export async function learnerStage(personId: string): Promise<LearnerStage | nul
   return row?.stage ?? null;
 }
 
+/** Colleagues are on the staff register (0039), not among the learners. */
+const NOT_STAFF = `NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)`;
+
 const VIEW_CONDITION: Record<PeopleView, string | null> = {
   all: null,
   // „Im Kurs" is everyone in a course today — the new and the last-course ones too.
@@ -322,7 +325,7 @@ export async function peopleCounts(): Promise<Record<PeopleView, number>> {
             count(*) FILTER (WHERE stage = 'finished') AS finished,
             count(*) FILTER (WHERE ${OPEN_CASES} > 0) AS open,
             count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
-       FROM (SELECT p.*, ${STAGE} AS stage FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL) p`
+       FROM (SELECT p.*, ${STAGE} AS stage FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF}) p`
   );
   const n = (key: PeopleView) => Number(row?.[key] ?? 0);
   return {
@@ -364,7 +367,7 @@ export async function listPeople({
   total: number;
 }> {
   const params: unknown[] = [];
-  let where = `WHERE p.merged_into IS NULL AND p.deleted_at IS NULL`;
+  let where = `WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF}`;
   if (search) {
     params.push(`%${search}%`);
     where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR EXISTS (

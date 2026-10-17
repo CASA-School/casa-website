@@ -61,15 +61,6 @@ export async function TeacherForm({
             </div>
           </div>
         </div>
-        <div className={ui.row}>
-          <div className={ui.f}>
-            <span className={ui.lbl}>{t('Vertrag', 'Contract')}</span>
-            <div className={ui.opts}>
-              <Opt type="radio" name="contract" value="employed" checked={teacher.contract === 'employed'} label={t('angestellt', 'Employed')} />
-              <Opt type="radio" name="contract" value="freelance" checked={teacher.contract === 'freelance'} label={t('Honorarkraft', 'Freelance')} />
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className={ui.sec}>

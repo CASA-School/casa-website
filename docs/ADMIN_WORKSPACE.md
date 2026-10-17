@@ -399,7 +399,7 @@ password — or uses **Sign in with Microsoft**.
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
 applications, people, bookings, offers, rooms, catalogue, kursplanung, website,
-activity, team, settings. For each
+staff, staff_private, activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -412,7 +412,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers and Team |
+| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -1221,6 +1221,80 @@ the letter.
 (only the two telc exams are); a full sitting still shows on the public form,
 where a registration becomes a waiting-list place.
 
+## Staff (2026-10-17, migration 0039)
+
+Rahman: "we need to build courses and staff so we could assign teachers to courses
+but remember that teachers logic will also be connected to kursplanung". Decided:
+everyone at CASA is on the register; it is management's, with the HR part a
+separate right; a course start's level group and the Kursplanung group are one;
+examiners and their licences come with it.
+
+**What SchoolMan does, and what not to repeat.** One person is spread over
+`Person`, `Management`, `StaffMember`, a second identity `StaffSchool` and
+`Hades` for those who left — one staff id even sits on four people. Roles,
+levels, course types, a course's teachers and an exam's examiners are lists
+packed into single fields. Contracts carry no dates of their own. Teachers are
+copied down four levels (course → ranked list → weekday → lesson), and a bulk
+"replace" overwrites earlier choices. Examiner licences are stored, but matched
+to exams through two lists whose numbers line up only by luck.
+
+**One colleague, one person.** `staff_members` (Kursplanung's `teachers`,
+renamed) points at one `people` row: name, contact, address, the tax, pension
+and health-insurance numbers (`person_private`) and bank details are the
+person's, edited with the people module's own forms. The staff row holds the
+board's short name, the teaching rules Kursplanung reads, the workspace account
+if they have one, and active or left. **Roles** are rows from a vocabulary of
+sixteen (`staff_roles`: Unterricht, Prüfer:in, Einstufung,
+Prüfungsorganisation, Empfang, Verwaltung, Leitung, …), never a packed field.
+**Contracts** are dated periods (`staff_contracts`: angestellt, Honorar,
+Minijob, Aushilfe, Bundesfreiwilligendienst, Praktikum; from–until, hours and
+teaching units a week); the one that runs today is the current one, and
+Kursplanung's employed/freelance is read from it. **Absences** are any
+colleague's (`staff_absences`).
+
+A person on the register is not a learner: the learner list leaves them out,
+`/admin/people/[id]` sends them to their staff page (or 404s without `staff`),
+and the people module's actions refuse them.
+
+**Screens.** „Mitarbeitende" in Verwaltung: the register with views Aktiv,
+Unterricht, Büro and Ehemalige (SchoolMan's `Hades` is a view here), name,
+short name and roles, the contract for those who see it, and „Neu" (name and
+roles; contact, short name and the first contract open once a first name is
+in). A colleague's page in tabs: **Übersicht** (the next four weeks on the
+board, days away, roles, workspace account); **Unterricht** (the board's days,
+absences to add or take back, the rules); **Prüfungen** (sittings and
+licences); **Persönliche Daten**; **Vertrag** (contracts, tax and insurance);
+**Bankverbindung**. The foot: „Ausgeschieden" / „Wieder aktiv", and „Löschen"
+for an entry made by mistake — refused once Kursplanung or an exam names them.
+The old Team screen is now „Zugänge": accounts and rights, not people.
+
+**Examiners.** A licence is for one exam (`staff_licences`: number, valid
+from–until). On a sitting, „Prüfende": a colleague for the written supervision,
+the oral part or both (`exam_session_examiners`). The oral part needs a licence
+for that exam valid on the sitting's day — refused without one, and flagged on
+the sitting and the colleague's page if it has run out by then. The choice
+lists the licensed first, then those with the role Prüfer:in or Aufsicht.
+
+**Kursplanung.** Who teaches what is decided on the board, nowhere else. Its
+teachers are the register's colleagues with Unterricht; „Lehrkraft anlegen"
+there creates one. A course start shows its classes' teachers, groups count in
+both places, and Kurse shows the workspace's bookings per level:
+docs/KURSPLANUNG.md §Course starts.
+
+**Rights.** `staff`: the register — `view` reads, `edit` creates, changes roles,
+rules, absences, licences, the person and leaving, `full` deletes. `staff_private`:
+contracts, tax and insurance numbers, bank details — `edit` writes, `full`
+removes. Owners and administrators hold both; a colleague has neither until
+given one on Zugänge (finance gets `staff_private`). Linking a workspace account
+also needs `team` at `edit`. Examiners on a sitting are the catalogue's
+(`catalogue` at `edit`).
+
+**Not now:** time sheets, holiday entitlement and pay — the teachers' side is
+the Klassenbuch's, the rest finance's (DATEV), and SchoolMan calculates no pay
+either; the contracts' weekly hours are the base for it later. Which course
+types a teacher may teach. A read-only import of SchoolMan's staff, roles,
+contracts and licences.
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,
@@ -1464,6 +1538,15 @@ mutations write `staff_activity` like everything else. The board and its
 rules live in `src/lib/admin/kursplanung/`; the module is management-only by
 default and is served in the shell's focus mode. Product rules, code map and
 the plan of record: `docs/KURSPLANUNG.md`.
+
+### 0039 — the staff register
+
+`teachers` became `staff_members`, each with a `people` row (split from the old
+`full_name`, last word the surname); `teacher_absences` became `staff_absences`.
+New: `staff_roles` and `staff_member_roles` (everyone imported got Unterricht),
+`staff_contracts` (the old `contract` column moved here, without dates),
+`staff_licences`, `exam_session_examiners`. Kursplanung's column names
+(`teacher_id`, `teacher_first`, `teacher_second`) stay. §Staff above.
 
 ### 0012 — the day board
 

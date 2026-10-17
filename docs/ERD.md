@@ -384,6 +384,86 @@ and carry no foreign key to the row, the same pattern as `staff_notes`.
 `people.merged_into`; every reader that groups by person calls it rather than
 reading `person_id` directly.
 
+## The staff register (0039)
+
+Everyone who works at CASA. A colleague is one `people` row (name, contact,
+address, HR numbers in `person_private`, bank details) and one `staff_members`
+row — the 0014 `teachers` table, renamed — with the board's short name and
+teaching rules, the workspace account if any, and active or left. Kursplanung's
+`plan_assignments.teacher_id` and `course_groups.teacher_first`/`teacher_second`
+point at it and keep their names.
+
+```mermaid
+erDiagram
+  PEOPLE ||--o| STAFF_MEMBERS : person_id
+  STAFF_USERS o|--o| STAFF_MEMBERS : staff_user_id
+  STAFF_MEMBERS ||--o{ STAFF_MEMBER_ROLES : roles
+  STAFF_ROLES ||--o{ STAFF_MEMBER_ROLES : role_code
+  STAFF_MEMBERS ||--o{ STAFF_CONTRACTS : contracts
+  STAFF_MEMBERS ||--o{ STAFF_ABSENCES : days_away
+  STAFF_MEMBERS ||--o{ STAFF_LICENCES : licences
+  EXAM_TYPES ||--o{ STAFF_LICENCES : exam_type_id
+  STAFF_MEMBERS ||--o{ EXAM_SESSION_EXAMINERS : examines
+  EXAM_SESSIONS ||--o{ EXAM_SESSION_EXAMINERS : examiners
+  STAFF_MEMBERS ||--o{ PLAN_ASSIGNMENTS : teacher_id
+
+  STAFF_MEMBERS {
+    uuid id PK
+    uuid person_id FK
+    uuid staff_user_id FK
+    text short_name
+    text_array shifts
+    smallint days_per_week
+    text_array weekdays
+    text_array levels
+    text filemaker_staff_id
+    bool is_active
+  }
+
+  STAFF_ROLES {
+    text code PK
+    text name_de
+    text name_en
+    int position
+  }
+
+  STAFF_CONTRACTS {
+    uuid id PK
+    uuid staff_member_id FK
+    text kind
+    date valid_from
+    date valid_to
+    numeric weekly_hours
+    numeric weekly_units
+  }
+
+  STAFF_LICENCES {
+    uuid id PK
+    uuid staff_member_id FK
+    uuid exam_type_id FK
+    text licence_number
+    date valid_from
+    date valid_to
+  }
+
+  EXAM_SESSION_EXAMINERS {
+    uuid exam_session_id PK
+    uuid staff_member_id PK
+    text part
+  }
+
+  STAFF_ABSENCES {
+    uuid staff_member_id FK
+    date on_date
+    text reason
+  }
+```
+
+A course start and a Kursplanung group are joined by rule, not by a key: an
+intensive start opens the planning month two weeks after its first day, and a
+level code names the board's level and phase (`B1.1` → B1, phase 1).
+`docs/KURSPLANUNG.md` §Course starts.
+
 ## Notes
 - `course_instances.schedule` should remain structured JSON.
 - Public reads should only expose active or publishable records.

@@ -8,7 +8,7 @@
  *     [--month=2026-10] [--apply-observed-rules]
  *
  * NOT a seed and not run by `npm run db:reset`: it writes real people into
- * `teachers`, so it runs by hand against a chosen database. Idempotent on the
+ * the staff register (`staff_members`, 0039), so it runs by hand against a chosen database. Idempotent on the
  * FileMaker ids — re-running updates names and counts and never duplicates.
  *
  * WHAT IT DOES NOT TAKE FROM FILEMAKER'S STAFF RECORD: shifts, days per week
@@ -125,7 +125,7 @@ try {
   await client.query('BEGIN');
   const byStaffId = new Map();
 
-  const existing = await client.query('SELECT id, filemaker_staff_id FROM teachers WHERE filemaker_staff_id IS NOT NULL');
+  const existing = await client.query('SELECT id, filemaker_staff_id FROM staff_members WHERE filemaker_staff_id IS NOT NULL');
   for (const r of existing.rows) byStaffId.set(r.filemaker_staff_id, r.id);
 
   const roster = teachersPath ? (await readJson(teachersPath)).teachers ?? [] : [];
@@ -138,16 +138,33 @@ try {
     const short = (t.nickname || t.name.split(' ')[0]).replace(/\.$/, '').trim();
     const contract = /honorar/i.test(t.employment ?? '') ? 'freelance' : 'employed';
     const o = observed.get(String(t.staffId)) ?? { shifts: ['morning'], levels: [], daysPerWeek: 5 };
-    const row = await client.query(
-      `INSERT INTO teachers (short_name, full_name, contract, shifts, levels, days_per_week, filemaker_staff_id, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       ON CONFLICT (filemaker_staff_id) DO UPDATE
-         SET full_name = EXCLUDED.full_name, contract = EXCLUDED.contract,
-             is_active = EXCLUDED.is_active, updated_at = timezone('utc', now())
-             ${applyObserved ? ', shifts = EXCLUDED.shifts, levels = EXCLUDED.levels, days_per_week = EXCLUDED.days_per_week' : ''}
-       RETURNING id`,
-      [short, t.name, contract, o.shifts, o.levels, o.daysPerWeek, String(t.staffId), t.activeStaff !== false]
-    );
+    // Since 0039 a teacher is a member of the staff register: a person, a staff row, the role
+    // Unterricht and a contract. Someone already there keeps the name and contract the office gave
+    // them; only whether they are active, and with --apply-observed the board's rules, follow FileMaker.
+    const known = byStaffId.get(String(t.staffId));
+    let row;
+    if (known) {
+      row = await client.query(
+        `UPDATE staff_members SET is_active = $2, updated_at = timezone('utc', now())
+                ${applyObserved ? ', shifts = $3, levels = $4, days_per_week = $5' : ''}
+          WHERE id = $1 RETURNING id`,
+        applyObserved ? [known, t.activeStaff !== false, o.shifts, o.levels, o.daysPerWeek] : [known, t.activeStaff !== false]
+      );
+    } else {
+      const name = t.name.trim();
+      const space = name.lastIndexOf(' ');
+      const person = await client.query(
+        `INSERT INTO people (first_name, last_name, created_by) VALUES ($1, $2, 'kursplanung-import') RETURNING id`,
+        [space > 0 ? name.slice(0, space) : name, space > 0 ? name.slice(space + 1) : null]
+      );
+      row = await client.query(
+        `INSERT INTO staff_members (person_id, short_name, shifts, levels, days_per_week, filemaker_staff_id, is_active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+        [person.rows[0].id, short, o.shifts, o.levels, o.daysPerWeek, String(t.staffId), t.activeStaff !== false]
+      );
+      await client.query(`INSERT INTO staff_member_roles (staff_member_id, role_code) VALUES ($1, 'teaching') ON CONFLICT DO NOTHING`, [row.rows[0].id]);
+      await client.query(`INSERT INTO staff_contracts (staff_member_id, kind) VALUES ($1, $2)`, [row.rows[0].id, contract]);
+    }
     byStaffId.set(String(t.staffId), row.rows[0].id);
     counts.teachers++;
   }
@@ -220,9 +237,9 @@ try {
         const date = addDays(monday, i);
         if (date < from || date >= to) continue;
         await client.query(
-          `INSERT INTO teacher_absences (teacher_id, on_date, reason, filemaker_ref)
+          `INSERT INTO staff_absences (staff_member_id, on_date, reason, filemaker_ref)
            VALUES ($1, $2::date, $3, $4)
-           ON CONFLICT (teacher_id, on_date) DO NOTHING`,
+           ON CONFLICT (staff_member_id, on_date) DO NOTHING`,
           [teacherId, date, reason, a.id ?? null]
         );
         counts.absences++;

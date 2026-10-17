@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { isExamParts } from '@/lib/admin/exam-parts';
+import { assignExaminer, unassignExaminer } from '@/lib/admin/examiners';
 import { cancelSitting, createSitting, deleteSitting, markCollected, saveResults, setFiled, updateSitting, type SittingInput } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
 import { issueSittingLetters, SITTING_LETTER_KINDS, type SittingLetterKind } from '@/lib/admin/letters/exam-bulk';
@@ -12,7 +14,8 @@ import { getI18n } from '@/lib/admin/i18n.server';
 /**
  * An exam sitting's own mutations (0036, 0038). Reporting candidates to telc, their results and the
  * handover are bookings work: `bookings` at `edit`. The sitting itself — creating, editing, its
- * places — is the catalogue's: `catalogue` at `edit`; cancelling and deleting one, at `full`.
+ * places, who examines it — is the catalogue's: `catalogue` at `edit`; cancelling and deleting one,
+ * at `full`.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -157,4 +160,25 @@ export async function issueSittingLettersAction(formData: FormData): Promise<voi
   if (letterIds.length === 0) fail(back, t('Kein Brief konnte gesendet werden.', 'No letter could be sent.'));
   revalidatePath('/admin', 'layout');
   redirect(`/admin/catalogue/exams/${sittingId}/letters/print?ids=${letterIds.join(',')}`);
+}
+
+/** Puts a colleague on the sitting for the written supervision, the oral part or both (0039). */
+export async function assignExaminerAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('catalogue', 'edit');
+  const sittingId = id(formData, 'sittingId');
+  const back = `/admin/catalogue/exams/${sittingId}`;
+  const { t, lang } = await getI18n();
+  const part = String(formData.get('part') ?? '');
+  if (!isExamParts(part)) fail(back, t('Bitte wähle, was die Person übernimmt.', 'Choose what they do.'));
+  const result = await assignExaminer(sittingId, id(formData, 'staffId'), part, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  done(back);
+}
+
+/** Takes a colleague off the sitting; nothing is lost, they can be put on again. */
+export async function unassignExaminerAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('catalogue', 'edit');
+  const sittingId = id(formData, 'sittingId');
+  await unassignExaminer(sittingId, id(formData, 'staffId'), actor);
+  done(`/admin/catalogue/exams/${sittingId}`);
 }
