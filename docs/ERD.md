@@ -390,7 +390,7 @@ Everyone who works at CASA. A colleague is one `people` row (name, contact,
 address, HR numbers in `person_private`, bank details) and one `staff_members`
 row — the 0014 `teachers` table, renamed — with the board's short name and
 teaching rules, the workspace account if any, and active or left. Kursplanung's
-`plan_assignments.teacher_id` and `course_groups.teacher_first`/`teacher_second`
+`course_days.teacher_id` (0045, was `plan_assignments`) and `course_groups.teacher_first`/`teacher_second`
 point at it and keep their names.
 
 ```mermaid
@@ -494,6 +494,42 @@ erDiagram
 
 One course per start and level (`courses_start_level_key`); a named course has
 no level. `course_level_places` (0031) is gone into it.
+
+## Lesson days (0045–0046)
+
+```mermaid
+erDiagram
+  COURSES ||--o{ COURSE_WEEK_PLANS : "plan per group and weekday"
+  COURSES o|--o{ COURSE_DAYS : course_id
+  COURSES o|--o{ COURSE_GROUPS : course_id
+  COURSE_GROUPS o|--o{ COURSE_DAYS : group_id
+  STAFF_MEMBERS o|--o{ COURSE_DAYS : "teacher_id, replaced_teacher_id"
+  ROOMS o|--o{ COURSE_DAYS : "room_id, replaced_room_id"
+
+  COURSE_DAYS {
+    uuid id PK
+    uuid course_id FK
+    smallint group_index
+    uuid group_id FK
+    date on_date
+    time starts_at
+    time ends_at
+    numeric lessons
+    uuid teacher_id FK
+    uuid replaced_teacher_id FK
+    uuid room_id FK
+    uuid replaced_room_id FK
+    bool is_substitute
+    bool is_tentative
+    bool cancelled
+    text filemaker_id
+  }
+```
+
+A day has a course, a board group, or both (`course_days_owner_check`); unique
+per (course, group, date) and per (board group, date). The view
+`course_day_times` gives its hours as they are. `courses.filemaker_group_ids`
+holds SchoolMan's course numbers of a level's parallel groups.
 
 ## Notes
 - `course_instances.schedule` should remain structured JSON.

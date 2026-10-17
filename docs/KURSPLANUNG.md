@@ -65,8 +65,8 @@ into another week to copy it; ⌘Z / Rückgängig; "Woche übernehmen →" copie
 | Table | One row is | Notes |
 | --- | --- | --- |
 | `teachers` → `staff_members` (0039) | a colleague on the staff register; the board's teachers are those with the role Unterricht, or named in the plan | NOT `staff_users` (it may link one). Rules that shape the piece: `shifts`, `days_per_week`, `weekdays`, `levels`. The name is the person's (`people`), employed or freelance the contract that runs today (`staff_contracts`). `filemaker_staff_id`. |
-| `course_groups` | one parallel group of a level in a planning month | `phase` '1'/'2', `group_index`, `registrations`, the pair `teacher_first`/`teacher_second`, `room_id`, `filemaker_course_id` (bridge §7 item 6). |
-| `plan_assignments` | one teacher on one group on one date | `is_substitute` (yellow), `is_tentative` (`?`), `changed_by`. Unique per (group, date). |
+| `course_groups` | one parallel group of a level in a planning month | its course (`course_id`, 0045: `link_course_groups()`), `phase` '1'/'2', `group_index`, `registrations`, the pair `teacher_first`/`teacher_second`, `room_id`, `filemaker_course_id` (bridge §7 item 6). |
+| `course_days` (0045, was `plan_assignments`) | one lesson day of a course; on the board, a teacher on a group on a date | `is_substitute` (yellow), `is_tentative` (`?`), `changed_by`. Unique per (group, date) and per (course, group, date). The course page edits the same rows (docs/ADMIN_WORKSPACE.md §Lesson days). |
 | `teacher_absences` → `staff_absences` (0039) | one colleague on one date | reason in Urlaub · Krank · Fortbildung · Freistellung · Elternzeit · Sonstiges. Entered here or on the colleague's page. |
 
 Audit: `staff_activity` via `logActivity`, entity `kursplanung`.
@@ -86,6 +86,18 @@ colleague's page for those who hold `staff`. `scripts/kursplanung/import-bridge.
 a staff row, the role and the contract for a teacher it does not know. SchoolMan's staff import
 (2026-10-17) brought five teachers the board had not had; they start with the default rules (morning,
 five days, no levels) until the planners set theirs.
+
+## Lesson days (2026-10-17, migrations 0045–0046)
+
+The board plans lesson days. Each of its groups belongs to a course — the intensive start opening that
+month for phase 1, the one before for phase 2, in the group's shift, at the level's `.1` — and its cells
+are that course's `course_days`. Placing a piece writes a day (upsert on group and date); a course's own
+page (`/admin/catalogue/courses/[id]`) shows the same days with their room, hours and any day called
+off, changes one day, or generates the days ahead from the course's weekly plan. Generating an intensive
+course's days makes its two groups here, so the board shows them. `linkGroupsAndDays()` runs after
+`addGroup` and `createContinuationMonth`; `removeGroupIfEmpty` deletes only days of no course. A start
+on a month's last Monday has its first week in the previous planning month, where no group of it exists:
+that week is on the course page only.
 
 ## Course starts (2026-10-17)
 

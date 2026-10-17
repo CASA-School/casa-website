@@ -1126,6 +1126,59 @@ a named course's price and lessons), „Weitere Gruppe eröffnen" (also on the
 board), and „Absagen" or „Löschen" (`rooms` at `full`; never with anyone booked
 or waiting, and only an unused course is deleted). „Kurs hinzufügen" makes one.
 
+## Lesson days (2026-10-17, migrations 0045–0046)
+
+SchoolMan generates every lesson day of a course (`SingleDateCourse`) from its
+weekly plan (`WeekDay`: each weekday's hours, lessons, teacher, room), and the
+day is where things change: another teacher when someone is ill (962 of ~5,650
+days in 2026 differ from the plan; 445 record who was replaced,
+`_ID_PersonSubstituted`), another room (its room calendar
+`SingleDateOccupancy`, `_ID_ClassroomSubstituted`), a day called off. Rahman
+chose the same here, in one table, with Kursplanung's board on top of it.
+
+**Tables.** `course_week_plans` is a course's plan per group and weekday
+(hours, lessons, teacher, room). `course_days` is every lesson day of every
+course: course and group, date, its own hours and lessons (null: the plan's),
+teacher, room, who and which room were replaced, the board's marks
+(`is_substitute`, `is_tentative`), called off with a reason, a note,
+`filemaker_id`. The view `course_day_times` gives a day's hours as they are:
+its own, else the plan's, else the start's, else the board group's shift —
+what a clash is checked against. Lesson content, homework and attendance stay
+the Klassenbuch's.
+
+**The board is a view of the same rows.** What 0014 called an assignment
+(`plan_assignments`, dropped) is a lesson day with a teacher. A board group
+names its course (`course_groups.course_id`, set by `link_course_groups()`):
+the intensive start opening that month for phase 1, the one before for phase
+2, in the group's shift, at the level's `.1`. `link_course_days()` keeps a
+day's two keys together: a course's day in a group's planning month
+(`planning_month_start()`) gets the group, a board day gets the group's course.
+Both run after the board makes groups and after days are generated. Removing
+an empty group deletes only days of no course.
+
+**The course page** (`/admin/catalogue/courses/[id]`, from „Kurstage" on each
+course card of a start) has three tabs. *Kurstage*: the days week by week —
+date, hours (bold when the day's own), lessons, teacher („für X" when someone
+replaced the plan's), room („statt Y"), called off; „Kurstage erzeugen" /
+„Fehlende Tage erzeugen" makes what is missing from the plan, leaving the
+school's closures out and a planned teacher off a day they are away; a day that
+exists is never touched. An intensive course's generation also makes its two
+board groups, so Kursplanung shows it. „Ändern" on a day opens its dialog:
+teacher and room choices name who is away, teaching elsewhere or holding the
+room then, free ones first. *Wochenplan*: the plan per group, defaulting to the
+start's days and hours; „Lehrkräfte übernehmen" / „Räume übernehmen" put the
+plan's on every day ahead (a day called off stays off). *Teilnehmende*: who is
+booked into the course.
+
+**Rights.** The page is `catalogue`; a day's teacher and the plan's teachers
+are Kursplanung's (`kursplanung` at `edit`), rooms, hours, calling off and
+generating are the course planners' (`rooms` at `edit`) — the same split as
+the board and the course cards.
+
+**Known edge.** A start on the last Monday of a month (26 Oct) has its first
+week in the previous planning month, where the board has no group of it: that
+week shows on the course page, not on the board.
+
 ## Waiting list (2026-10-16, migration 0031)
 
 Rahman: "do it properly and better than FileMaker — it is an important thing".
@@ -1633,7 +1686,8 @@ here — with the RULES that shape a person's piece on the board: shifts, days
 per week, possible weekdays, levels. `course_groups` is one row per parallel
 group of a level in a planning month, with the PAIR that normally holds it
 (first half of the week, second half) and `filemaker_course_id` for the bridge.
-`plan_assignments` is one teacher on one group on one date, with the
+`plan_assignments` was one teacher on one group on one date; since 0045 it is
+a lesson day with a teacher in `course_days` (§Lesson days), with the
 substitute and tentative marks the board draws yellow and with a `?`.
 `teacher_absences` is one teacher on one date with a reason. No audit table:
 mutations write `staff_activity` like everything else. The board and its

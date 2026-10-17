@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -64,6 +64,8 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT id FROM bookings WHERE exam_session_id IS NOT NULL AND deleted_at IS NULL LIMIT 1`),
     // A colleague, the one most on the board: every tab of their page reads (0039).
     firstId(`SELECT s.id FROM staff_members s LEFT JOIN course_days a ON a.teacher_id = s.id GROUP BY s.id ORDER BY count(a.*) DESC LIMIT 1`),
+    // A course, the one with the most lesson days: its page reads days, plan and choices (0045).
+    firstId(`SELECT c.id FROM courses c LEFT JOIN course_days d ON d.course_id = c.id GROUP BY c.id ORDER BY count(d.*) DESC LIMIT 1`),
   ]);
 
 const routes = [
@@ -100,6 +102,8 @@ const routes = [
   offer && `/admin/offers/${offer}/letter`,
   '/admin/catalogue',
   start && `/admin/catalogue/${start}`,
+  course && `/admin/catalogue/courses/${course}`,
+  course && `/admin/catalogue/courses/${course}?tab=plan`,
   '/admin/catalogue/waitlist',
   '/admin/catalogue/waitlist?view=closed',
   '/admin/staff',

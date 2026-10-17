@@ -378,8 +378,15 @@ function LevelCard({
             </p>
           </div>
         </div>
-        {plans ? (
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/admin/catalogue/courses/${group.courseId}`}
+            className="inline-flex h-8 items-center rounded-lg border border-ws-line bg-white px-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm"
+          >
+            {t('Kurstage', 'Lesson days')}
+          </Link>
+          {plans ? (
+            <>
             {form ? (
               <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t(`Kurs ${group.label}`, `Course ${group.label}`)} size="sm" triggerVariant="ghost">
                 <CourseForm course={form} rooms={rooms} returnTo={levelBack} />
@@ -420,8 +427,9 @@ function LevelCard({
                 </ConfirmSubmit>
               </form>
             ) : null}
-          </div>
-        ) : null}
+            </>
+          ) : null}
+        </div>
       </header>
 
       <div className="px-5 py-4">

@@ -240,3 +240,18 @@ export async function openCourseGroup(id: string, groups: number, actor: StaffUs
   await logActivity({ actor, entity: 'course_instance', entityId: row.course_instance_id, action: 'group_opened', detail: { course: id, level: row.level_code, groups: row.groups } });
   return { ok: true };
 }
+
+/** The learners booked on a course: their period on it and their step, the bookings that stand. */
+export type CourseLearner = { bookingId: string; personId: string; name: string; levelCode: string | null; startDate: string; endDate: string; status: string };
+
+export async function courseLearners(courseId: string): Promise<CourseLearner[]> {
+  const rows = await query<{ booking_id: string; person_id: string; name: string; level_code: string | null; start_date: string; end_date: string; status: string }>(
+    `SELECT b.id AS booking_id, b.person_id, concat_ws(' ', p.first_name, p.last_name) AS name, bp.level_code,
+            to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, b.status::text AS status
+       FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
+      WHERE bp.course_id = $1 AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+      ORDER BY p.last_name, p.first_name`,
+    [courseId]
+  );
+  return rows.map((r) => ({ bookingId: r.booking_id, personId: r.person_id, name: r.name, levelCode: r.level_code, startDate: r.start_date, endDate: r.end_date, status: r.status }));
+}
