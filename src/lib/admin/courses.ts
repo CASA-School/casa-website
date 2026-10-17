@@ -4,6 +4,7 @@ import type { PoolClient } from 'pg';
 
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
+import { inSecondHalf, joinStart } from './booking-levels';
 import { query, queryFirst } from './db';
 import type { Bilingual } from './i18n';
 
@@ -15,7 +16,8 @@ import type { Bilingual } from './i18n';
  * `resolveCourse` is the one rule for which course a learner's step at a start means: the start's own
  * course at that step; for an intensive start's second half (`B1.2`) the course of the start before,
  * still running — SchoolMan books a learner joining mid-level on the running course, from their first
- * day to its end.
+ * day to its end. A `.2` learner who joins a start in its own second half (from its fifth teaching week,
+ * 2026-10-17) sits in that start's course of the level.
  */
 
 type Run = <R>(sql: string, params: unknown[]) => Promise<R[]>;
@@ -46,8 +48,8 @@ export async function resolveCourse(
   options: { client?: PoolClient; actor?: StaffUser | null } = {}
 ): Promise<ResolvedCourse | null> {
   const run = options.client ? viaClient(options.client) : viaPool;
-  const [start] = await run<{ id: string; start_date: string; end_date: string; format: string }>(
-    `SELECT i.id, to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date, t.format
+  const [start] = await run<{ id: string; start_date: string; end_date: string; format: string; schedule: { days?: unknown } | null }>(
+    `SELECT i.id, to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date, t.format, i.schedule
        FROM course_instances i JOIN course_types t ON t.id = i.course_type_id WHERE i.id = $1`,
     [courseInstanceId]
   );
@@ -67,18 +69,25 @@ export async function resolveCourse(
   let level = levelCode;
   let clampEnd: string | null = null;
   if (start.format === 'intensive' && /\.2$/.test(levelCode)) {
-    // The start before, still running on this one's first day: its course of the same level.
-    const [running] = await run<{ id: string; end_date: string }>(
-      `SELECT i.id, to_char(i.end_date, 'YYYY-MM-DD') AS end_date
-         FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
-        WHERE t.format = 'intensive' AND i.status <> 'cancelled' AND i.start_date < $1::date AND i.end_date >= $1::date
-        ORDER BY i.start_date DESC LIMIT 1`,
-      [start.start_date]
-    );
-    if (running) {
-      instance = running.id;
+    const days = Array.isArray(start.schedule?.days) ? (start.schedule.days as string[]) : null;
+    const from = joinStart(start.start_date, dates.startDate);
+    if (inSecondHalf({ startDate: start.start_date, endDate: start.end_date, days }, from)) {
+      // Joined in this start's own second half (2026-10-17): its course of the level, which teaches `.2` by now.
       level = `${levelCode.slice(0, -2)}.1`;
-      clampEnd = running.end_date;
+    } else {
+      // The start before, still running on the first day booked: its course of the same level.
+      const [running] = await run<{ id: string; end_date: string }>(
+        `SELECT i.id, to_char(i.end_date, 'YYYY-MM-DD') AS end_date
+           FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
+          WHERE t.format = 'intensive' AND i.status <> 'cancelled' AND i.start_date < $1::date AND i.end_date >= $2::date
+          ORDER BY i.start_date DESC LIMIT 1`,
+        [start.start_date, from]
+      );
+      if (running) {
+        instance = running.id;
+        level = `${levelCode.slice(0, -2)}.1`;
+        clampEnd = running.end_date;
+      }
     }
   }
 

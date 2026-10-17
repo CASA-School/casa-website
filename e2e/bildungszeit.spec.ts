@@ -3,6 +3,8 @@ import { createHash, randomBytes } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import pg from 'pg';
 
+import { openCoursesAroundToday } from './support/open-courses';
+
 /**
  * Bildungszeit (2026-10-17): booked into a week's two intensive classes — the newest start's at its
  * first half and the previous start's at its second — with each class's places checked for those
@@ -24,9 +26,9 @@ test.describe('Bildungszeit', () => {
   let danId = '';
   let startId = '';
   let placesBefore: { groups: number; places_per_group: number } | null = null;
-  // Intensive courses around today that SchoolMan has closed, opened for the run and closed again after:
-  // these tests book open classes; a full one is the third test's.
-  let reopened: string[] = [];
+  // The real classes around today, opened and emptied of SchoolMan's learners for the run and put back
+  // after: these tests book open classes; a full one is the third test's.
+  let courses: { restore: () => Promise<void> } | null = null;
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -42,15 +44,7 @@ test.describe('Bildungszeit', () => {
     beaId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ('Bea', 'Bildungstest', 'e2e') RETURNING id`)).rows[0].id;
     cemId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ('Cem', 'Bildungstest', 'e2e') RETURNING id`)).rows[0].id;
     danId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ('Dan', 'Bildungstest', 'e2e') RETURNING id`)).rows[0].id;
-    reopened = (
-      await client.query<{ id: string }>(
-        `UPDATE courses c SET bookable = true
-           FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
-          WHERE c.course_instance_id = i.id AND t.format = 'intensive' AND NOT c.bookable
-            AND i.end_date >= current_date - 70 AND i.start_date <= current_date + 70
-         RETURNING c.id`
-      )
-    ).rows.map((r) => r.id);
+    courses = await openCoursesAroundToday(client);
   });
 
   test.afterAll(async () => {
@@ -69,7 +63,7 @@ test.describe('Bildungszeit', () => {
         ]);
       else await client.query(`UPDATE courses SET groups = 1, places_per_group = 14 WHERE course_instance_id = $1 AND level_code = 'B1.1'`, [startId]);
     }
-    if (reopened.length) await client.query(`UPDATE courses SET bookable = false WHERE id = ANY($1::uuid[])`, [reopened]);
+    await courses?.restore();
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });

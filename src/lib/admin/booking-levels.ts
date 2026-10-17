@@ -14,6 +14,9 @@ import { addDays } from './offers/stay';
  * dates, so the dates say how much: an intensive period at a first half that runs past four teaching
  * weeks teaches both halves, „A2.1–A2.2". A second half joined at a start runs in the course of the
  * start before, to its end (`resolveCourse`). Every other course teaches the step it is.
+ *
+ * A learner can join a course already running (2026-10-17): the booking starts on their Monday
+ * (`joinWeeks`, `bookedSpan`), and from the fifth teaching week an intensive course teaches the `.2` step.
  */
 
 /** Teaching weeks of a half level in the intensive course. */
@@ -71,6 +74,95 @@ export function halfLevelEnd(start: string, end: string, days: readonly string[]
     if (last && ++weeks === HALF_LEVEL_WEEKS) return last;
   }
   return end;
+}
+
+// ------------------------------------------------------------------ joining a running course
+
+/** The Monday of the week a day falls in. */
+export const mondayOf = (iso: string): string => addDays(iso, -((new Date(`${iso}T00:00:00Z`).getUTCDay() + 6) % 7));
+
+/** `yyyy-mm-dd`, and a day that exists. */
+export function isIsoDay(iso: string): boolean {
+  const time = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? Date.parse(`${iso}T00:00:00Z`) : NaN;
+  return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === iso;
+}
+
+/** A week the course teaches in: a weekday of it inside the course, the school open (`teachingWeeks`' rule). */
+function taughtWeek(monday: string, start: string, end: string): boolean {
+  for (let i = 0; i < 5; i++) {
+    const day = addDays(monday, i);
+    if (day >= start && day <= end && !isSchoolClosed(day)) return true;
+  }
+  return false;
+}
+
+/** A week a learner can join a running course from: its Monday, the course's teaching week (1 the first), the weeks left. */
+export type JoinWeek = { monday: string; week: number; left: number };
+
+/**
+ * The weeks of a course a learner can still join from (2026-10-17, Rahman: FileMaker books a joiner from
+ * their own Monday): the Monday of every teaching week from this one — while a weekday of it is left —
+ * to the last. A week the school is closed is none. `left` counts the teaching weeks from it to the
+ * end, the weeks the booking is priced by (`teachingWeeks`).
+ */
+export function joinWeeks(start: string, end: string, today: string): JoinWeek[] {
+  const weekday = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7;
+  const from = weekday < 5 ? mondayOf(today) : addDays(mondayOf(today), 7);
+  const weeks: { monday: string; week: number }[] = [];
+  let week = 0;
+  for (let monday = mondayOf(start); monday <= end; monday = addDays(monday, 7)) {
+    if (!taughtWeek(monday, start, end)) continue;
+    week++;
+    if (monday >= from) weeks.push({ monday, week });
+  }
+  return weeks.map((w) => ({ ...w, left: week - w.week + 1 }));
+}
+
+/** The week preselected: today when it is a Monday, else the next Monday — or the last week left. */
+export function defaultJoin(weeks: readonly JoinWeek[], today: string): string | null {
+  return weeks.find((w) => w.monday >= today)?.monday ?? weeks[weeks.length - 1]?.monday ?? null;
+}
+
+/**
+ * The server's check of a join Monday from a form: a Monday of a teaching week of the course, not before
+ * this week. A Monday on or before the start is no join at all; the caller books the start.
+ */
+export function isJoinMonday(join: string, start: string, end: string, today: string): boolean {
+  return isIsoDay(join) && mondayOf(join) === join && join <= end && join >= mondayOf(start) && join >= mondayOf(today) && taughtWeek(join, start, end);
+}
+
+/** The first day booked: the join Monday when it is after the start, else the start. */
+export const joinStart = (start: string, join: string | null | undefined): string => (join && join > start ? join : start);
+
+/** A start as the period rule reads it. `runningEnd`: the end of the start before, running on the first day booked. */
+export type StartSpan = { format: string | null; startDate: string; endDate: string; days: readonly string[] | null; runningEnd: string | null };
+
+/**
+ * An intensive course teaches `.1` in its first four teaching weeks and `.2` after (2026-10-17): from
+ * this day on, it is in its second half.
+ */
+export const inSecondHalf = (s: Pick<StartSpan, 'startDate' | 'endDate' | 'days'>, day: string): boolean =>
+  day > halfLevelEnd(s.startDate, s.endDate, s.days);
+
+/**
+ * The dates a booking of a start covers, from the step, how much of the level and the join Monday —
+ * the server's (`bookedPeriod`) and the wizard's one rule. It starts on the join Monday, else the start.
+ * A `.2` step joined in the course's own second half sits in it to its end; at a start not that far
+ * yet, it sits in the running course of the start before, to its end (`resolveCourse`). A first half
+ * alone ends after its fourth teaching week, and is no choice once that is past. Anything else: to the end.
+ */
+export function bookedSpan(s: StartSpan, levelCode: string | null, scope: 'whole' | 'half', join: string | null = null): { startDate: string; endDate: string } {
+  const from = joinStart(s.startDate, join);
+  const intensive = s.format === 'intensive' && levelCode !== null;
+  if (intensive && /\.2$/.test(levelCode)) {
+    if (inSecondHalf(s, from)) return { startDate: from, endDate: s.endDate };
+    if (s.runningEnd && s.runningEnd >= from) return { startDate: from, endDate: s.runningEnd < s.endDate ? s.runningEnd : s.endDate };
+    return { startDate: from, endDate: s.endDate };
+  }
+  if (intensive && /\.1$/.test(levelCode) && scope === 'half' && !inSecondHalf(s, from)) {
+    return { startDate: from, endDate: halfLevelEnd(s.startDate, s.endDate, s.days) };
+  }
+  return { startDate: from, endDate: s.endDate };
 }
 
 /** The stay around a course: arrive the day before it starts, leave on the Saturday after it ends (FileMaker's rule). */

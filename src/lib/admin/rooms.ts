@@ -262,33 +262,6 @@ export async function createRoom(
 
 const ROOM_GONE: Bilingual = { de: 'Diesen Raum gibt es nicht mehr.', en: 'That room no longer exists.' };
 
-/** Puts a cohort in a room, or takes it out (null). */
-export async function assignRoom(
-  courseInstanceId: string,
-  roomId: string | null,
-  actor: StaffUser
-): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
-  if (roomId) {
-    const room = await getRoom(roomId);
-    if (!room) return { ok: false, reason: ROOM_GONE };
-    if (!room.isBookable || !room.isActive || room.kind !== 'classroom') {
-      return {
-        ok: false,
-        reason: { de: `In ${room.name} kann kein Kurs stattfinden.`, en: `${room.name} cannot hold a course.` },
-      };
-    }
-  }
-  await query(`UPDATE course_instances SET room_id = $2 WHERE id = $1`, [courseInstanceId, roomId]);
-  await logActivity({
-    actor,
-    entity: 'course_instance',
-    entityId: courseInstanceId,
-    action: roomId ? 'room_assigned' : 'room_unassigned',
-    detail: roomId ? { room: roomId } : undefined,
-  });
-  return { ok: true };
-}
-
 /**
  * Removes a room. Refused while any cohort is planned into it — the cohort
  * must be moved first, so nothing loses its room silently. Rooms have no

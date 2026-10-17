@@ -351,12 +351,19 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
   const courseInstanceId = optionalId(formData, 'courseInstanceId');
   const levelRaw = text(formData, 'levelCode', 8);
   const levelCode = levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null;
-  // A start's dates are worked out here from the level and how much of it, never taken from the form:
-  // the price follows them (a half level is four weeks).
-  const dates =
-    (courseInstanceId
-      ? await bookedPeriod(courseInstanceId, levelCode, formData.get('levelScope') === 'half' ? 'half' : 'whole')
-      : null) ?? readDates(formData, safeBack, t);
+  // A start's dates are worked out here from the level, how much of it and the Monday a learner joins a
+  // running course from (2026-10-17), never taken from the form: the price follows them.
+  const joinFrom = text(formData, 'joinFrom', 10);
+  const dates = courseInstanceId
+    ? await bookedPeriod(courseInstanceId, levelCode, formData.get('levelScope') === 'half' ? 'half' : 'whole', joinFrom)
+    : readDates(formData, safeBack, t);
+  if (!dates)
+    fail(
+      safeBack,
+      joinFrom
+        ? t('Ab dieser Woche kann niemand mehr in den Kurs einsteigen.', 'The course can no longer be joined from that week.')
+        : t('Diesen Kurstermin gibt es nicht mehr.', 'That course start no longer exists.')
+    );
   const status = String(formData.get('status') ?? 'reserved');
   if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
   const payer = String(formData.get('payer') ?? 'self');

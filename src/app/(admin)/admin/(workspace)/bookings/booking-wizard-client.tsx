@@ -16,7 +16,19 @@ import {
   type CohortOffer,
   type SittingOffer,
 } from '@/lib/admin/booking-offer-types';
-import { HALF_LEVEL_WEEKS, halfLevelEnd, offersWholeLevel, stayFor } from '@/lib/admin/booking-levels';
+import {
+  bookedSpan,
+  defaultJoin,
+  inSecondHalf,
+  joinStart,
+  joinWeeks,
+  offersWholeLevel,
+  stayFor,
+  type JoinWeek,
+  type StartSpan,
+} from '@/lib/admin/booking-levels';
+import { isoWeek } from '@/lib/admin/kursplanung/weeks';
+import { bremenDate } from '@/lib/appointments/schedule';
 import { daysLabel, sessionOf, teachingWeeks } from '@/lib/admin/offers/course';
 import { bzFree, bzPeak, bzRun, bzSegments, type BzShift, type BzWeek } from '@/lib/admin/bildungszeit-rules';
 import { EXAM_PARTS, EXAM_PARTS_LABELS, type ExamParts } from '@/lib/admin/exam-parts';
@@ -85,6 +97,8 @@ export type BookingWizardProps = {
   preselectedLevelScope?: 'whole' | 'half' | null;
   /** From a registration: the accommodation type asked for (`with_germans` for a host family). */
   preselectedAccommodation?: string | null;
+  /** From a link (`from=`): the Monday a learner joins the preselected start from, when it is under way. */
+  preselectedJoinFrom?: string | null;
   sourceRegistrationId?: string | null;
   /** From an exam registration or an exam waiting list (0036): the exam, its sitting and the parts. */
   preselectedExam?: { examTypeId: string; sittingId: string | null; parts: ExamParts } | null;
@@ -104,6 +118,7 @@ export function BookingWizardClient({
   preselectedLevelCode,
   preselectedLevelScope,
   preselectedAccommodation,
+  preselectedJoinFrom,
   sourceRegistrationId,
   preselectedExam,
   sourceExamRegistrationId,
@@ -126,7 +141,15 @@ export function BookingWizardClient({
   // Bildungszeit (2026-10-17): booked into a week's two intensive classes, not on a start of its own.
   const bz = offer.bildungszeit ?? null;
   const presetBz = Boolean(bz && preselected && preselected.courseTypeId === bz.courseTypeId);
-  const [step, setStep] = useState<Step>(presetBz ? 'course' : preselected ? 'level' : presetExam ? 'sitting' : 'what');
+  // A start under way (2026-10-17): the learner joins it from a Monday — the link's, else the next one.
+  // Without the link's week the wizard opens on the start, so the week is asked.
+  const [today] = useState(() => bremenDate());
+  const presetWeeks = presetBz ? [] : joinableWeeks(preselected, today);
+  const presetJoinGiven = presetWeeks.some((w) => w.monday === preselectedJoinFrom);
+  const presetJoin = presetJoinGiven ? (preselectedJoinFrom ?? null) : defaultJoin(presetWeeks, today);
+  const [step, setStep] = useState<Step>(
+    presetBz ? 'course' : preselected ? (presetWeeks.length && !presetJoinGiven ? 'course' : 'level') : presetExam ? 'sitting' : 'what'
+  );
   const [kind, setKind] = useState<'course' | 'exam'>(presetExam ? 'exam' : 'course');
   const [courseTypeId, setCourseTypeId] = useState<string | null>(
     preselected?.courseTypeId ?? null
@@ -147,7 +170,11 @@ export function BookingWizardClient({
     presetExam?.sittings.some((s) => s.id === preselectedExam?.sittingId) ? (preselectedExam?.sittingId ?? null) : null
   );
 
-  const [levelCode, setLevelCode] = useState<string | null>(preselectedLevelCode ?? preselected?.levelCode ?? null);
+  const [joinFrom, setJoinFrom] = useState<string | null>(presetJoin);
+  const presetLevel = preselectedLevelCode ?? preselected?.levelCode ?? null;
+  const [levelCode, setLevelCode] = useState<string | null>(() => stepForJoin(presetLevel, presetBz ? null : preselected, presetJoin, offer.levels));
+  // The step was moved to `.2` by the week chosen, not by a colleague: a week back in the first half moves it back.
+  const [autoSecond, setAutoSecond] = useState(() => stepForJoin(presetLevel, presetBz ? null : preselected, presetJoin, offer.levels) !== presetLevel);
   // The whole level where the start sells one from this step (an intensive start at a first half), else the half.
   const [levelScope, setLevelScope] = useState<'half' | 'whole'>(preselectedLevelScope ?? 'whole');
   const [wantsBooks, setWantsBooks] = useState<boolean | null>(null);
@@ -166,25 +193,35 @@ export function BookingWizardClient({
 
   // How much of the level, and so the dates booked: the whole start; an intensive start's first half
   // alone, to the end of its fourth teaching week; a second half joined here, to the end of the running
-  // course. The server works the same dates out again (`bookedPeriod`).
-  const wholeOffered = offersWholeLevel(cohort?.format ?? null, levelCode, codes);
-  const scope: 'half' | 'whole' = wholeOffered ? levelScope : 'half';
+  // course; a start under way, from the Monday the learner joins. The server works the same dates out
+  // again (`bookedPeriod`, both by `bookedSpan`).
   const cohortStart = cohort ? toDateInputValue(cohort.startDate) : null;
-  const cohortEnd = cohort ? toDateInputValue(cohort.endDate) : null;
-  const joinedUntil = cohort && levelCode ? (cohort.levels[levelCode]?.until ?? null) : null;
-  const periodEnd =
-    !cohortStart || !cohortEnd
-      ? null
-      : joinedUntil
-        ? joinedUntil < cohortEnd
-          ? joinedUntil
-          : cohortEnd
-        : cohort?.format === 'intensive' && levelCode?.endsWith('.1') && scope === 'half'
-          ? halfLevelEnd(cohortStart, cohortEnd, cohort.days)
-          : cohortEnd;
+  const weeksToJoin = useMemo(() => joinableWeeks(cohort, today), [cohort, today]);
+  const join = joinFrom && weeksToJoin.some((w) => w.monday === joinFrom) ? joinFrom : null;
+  const joining = kind === 'course' && Boolean(join && cohortStart && join > cohortStart);
+  // From the fifth teaching week an intensive course teaches its `.2` step: a `.2` learner joining then
+  // sits in this start's own course of the level (`resolveCourse`), not in the start before's.
+  const secondHalf = Boolean(cohort && cohortStart && cohort.format === 'intensive' && inSecondHalf(spanOf(cohort), joinStart(cohortStart, join)));
+  const coursePlaces = (on: CohortOffer, code: string) => levelPlaces(on, secondHalf && /\.2$/.test(code) ? `${code.slice(0, -2)}.1` : code);
+  const joinedUntil = cohort && levelCode && !(secondHalf && /\.2$/.test(levelCode)) ? (cohort.levels[levelCode]?.until ?? null) : null;
+  const wholeOffered = offersWholeLevel(cohort?.format ?? null, levelCode, codes);
+  // „Nur A2.1" is no choice once its four weeks are past.
+  const halfOffered = wholeOffered && !secondHalf;
+  const scope: 'half' | 'whole' = wholeOffered ? (halfOffered ? levelScope : 'whole') : 'half';
+  const spanFor = (how: 'half' | 'whole') => (cohort ? bookedSpan(spanOf(cohort, joinedUntil), levelCode, how, join) : null);
+  const span = spanFor(scope);
   const chooseLevel = (code: string, on: CohortOffer | null = cohort) => {
     setLevelCode(code);
     setLevelScope(offersWholeLevel(on?.format ?? null, code, codes) ? 'whole' : 'half');
+  };
+  /** The week a learner joins from; in an intensive course the step follows it into the second half and back. */
+  const chooseJoin = (monday: string) => {
+    setJoinFrom(monday);
+    if (!cohort || !levelCode) return;
+    const base = (autoSecond && sibling(levelCode, '1', offer.levels)) || levelCode;
+    const moved = stepForJoin(base, cohort, monday, offer.levels) ?? base;
+    if (moved !== levelCode) chooseLevel(moved);
+    setAutoSecond(moved !== base);
   };
 
   const exam = offer.exams.find((e) => e.id === examTypeId) ?? null;
@@ -200,19 +237,21 @@ export function BookingWizardClient({
   const chosenBooks = books.filter((b) => !excludedBooks.has(b.id));
 
   // The chosen level in the chosen start — or the chosen sitting: its places and who already waits for them.
-  const group = isBz ? null : kind === 'course' && cohort && levelCode ? levelPlaces(cohort, levelCode) : kind === 'exam' && sitting ? sitting.places : null;
+  const group = isBz ? null : kind === 'course' && cohort && levelCode ? coursePlaces(cohort, levelCode) : kind === 'exam' && sitting ? sitting.places : null;
   // A Bildungszeit class with no place left in one of its weeks.
   const bzFull = run ? ([['first', bzFirst], ['second', bzSecond]] as const).filter(([half, code]) => code && bzFree(run, half, code) === 0).map(([half, code]) => ({ code: code!, ...bzPeak(run, half, code!) })) : [];
   const free = group ? levelFree(group, personId) : null;
   const ahead = group ? waitingAhead(group, personId) : 0;
   const full = group !== null && free === 0;
-  const queueFirst = Boolean(waitlistAction) && group !== null && (full || ahead > 0);
+  // A course under way has no queue to join: a full one is said, and booking it anyway stays possible.
+  const queueFirst = Boolean(waitlistAction) && !joining && group !== null && (full || ahead > 0);
+  const fullJoin = joining && full;
 
   const chosenAccommodation = wantsAccommodation
     ? (offer.accommodation.find((a) => a.code === accType) ?? null)
     : null;
   // What is booked, from the first day to the last: the stay is around it.
-  const period = run ? { start: run[0].monday, end: run[run.length - 1].friday } : cohortStart && periodEnd ? { start: cohortStart, end: periodEnd } : null;
+  const period = run ? { start: run[0].monday, end: run[run.length - 1].friday } : span ? { start: span.startDate, end: span.endDate } : null;
   const defaultStay = () => {
     const stay = period ? stayFor(period.start, period.end) : null;
     if (stay) {
@@ -225,7 +264,7 @@ export function BookingWizardClient({
   const index = visible.findIndex((s) => s.key === step);
   const canAdvance =
     (step === 'what' && (kind === 'course' || (kind === 'exam' && Boolean(examTypeId)))) ||
-    (step === 'course' && (isBz ? Boolean(run) : Boolean(cohort))) ||
+    (step === 'course' && (isBz ? Boolean(run) : Boolean(cohort) && (weeksToJoin.length === 0 || Boolean(join)))) ||
     (step === 'sitting' && Boolean(sitting)) ||
     (step === 'level' && wantsBooks !== null && (!isBz || Boolean(bzFirst && bzSecond))) ||
     (step === 'accommodation' && wantsAccommodation !== null) ||
@@ -408,16 +447,40 @@ export function BookingWizardClient({
                     key={c.id}
                     selected={cohort?.id === c.id}
                     onSelect={() => {
+                      // A start under way is joined from the next Monday; the step follows the week.
+                      const monday = defaultJoin(joinableWeeks(c, today), today);
+                      const base = c.levelCode ?? ((levelCode && autoSecond && sibling(levelCode, '1', offer.levels)) || levelCode);
+                      const moved = stepForJoin(base, c, monday, offer.levels);
                       setCohort(c);
-                      if (c.levelCode) chooseLevel(c.levelCode, c);
-                      else if (levelCode) chooseLevel(levelCode, c);
+                      setJoinFrom(monday);
+                      setAutoSecond(moved !== base);
+                      if (moved) chooseLevel(moved, c);
                     }}
                     title={c.label}
                   >
-                    {startFacts(c, levelCode, personId, t, lang)}
+                    {startFacts(c, levelCode, personId, today, t, lang)}
                   </Choice>
                 ))}
               </div>
+              {cohort && weeksToJoin.length ? (
+                <div className="space-y-2 border-t border-ws-line-soft pt-4">
+                  <Question small>{t('Einstieg ab', 'Joining from')}</Question>
+                  <div className="grid max-h-60 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                    {weeksToJoin.map((w) => (
+                      <Choice
+                        key={w.monday}
+                        selected={join === w.monday}
+                        onSelect={() => chooseJoin(w.monday)}
+                        title={`${t('KW', 'Week')} ${isoWeek(w.monday)} · ${mondayLabel(w.monday, lang)} · ${
+                          w.left === 1 ? t('noch 1 Woche', '1 week left') : t(`noch ${w.left} Wochen`, `${w.left} weeks left`)
+                        }`}
+                      >
+                        {t(`Kurswoche ${w.week} von ${w.week + w.left - 1}`, `Course week ${w.week} of ${w.week + w.left - 1}`)}
+                      </Choice>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </section>
@@ -478,13 +541,16 @@ export function BookingWizardClient({
           <Question>{t('Mit welchem Niveau beginnt die Person?', 'Which level are they starting at?')}</Question>
           <div className="flex flex-wrap gap-1.5">
             {offer.levels.map((l) => {
-              const places = cohort ? levelPlaces(cohort, l.code) : null;
+              const places = cohort ? coursePlaces(cohort, l.code) : null;
               const isFull = places ? levelFree(places, personId) === 0 : false;
               return (
                 <button
                   key={l.code}
                   type="button"
-                  onClick={() => chooseLevel(l.code)}
+                  onClick={() => {
+                    chooseLevel(l.code);
+                    setAutoSecond(false);
+                  }}
                   className={cn(
                     'rounded-lg border px-2.5 py-1.5 text-sm font-semibold tabular-nums transition-colors',
                     levelCode === l.code
@@ -508,9 +574,10 @@ export function BookingWizardClient({
                 : full
                 ? t(`${levelCode} ist voll: ${group.booked} von ${group.places} Plätzen gebucht`, `${levelCode} is full: ${group.booked} of ${group.places} places booked`)
                 : t(`${levelCode}: ${free} von ${group.places} Plätzen frei`, `${levelCode}: ${free} of ${group.places} places free`)}
-              {group.until
-                ? t(` · im laufenden Kurs bis ${german(group.until)}`, ` · in the running course until ${german(group.until)}`)
+              {joinedUntil
+                ? t(` · im laufenden Kurs bis ${german(joinedUntil)}`, ` · in the running course until ${german(joinedUntil)}`)
                 : ''}
+              {joining && join ? t(` · Einstieg ab ${german(join)}`, ` · joining from ${german(join)}`) : ''}
               {group.offeredTo.includes(personId)
                 ? t(' · der Platz ist für diese Person reserviert', ' · the place is held for this person')
                 : group.queue.length
@@ -522,19 +589,19 @@ export function BookingWizardClient({
           {levelCode ? (
             <>
               {/* Only an intensive start sells the whole level, and only from its first half: an evening term is one half. */}
-              {wholeOffered && cohort ? (
+              {halfOffered && cohort ? (
                 <div className="flex flex-wrap gap-2 border-t border-ws-line-soft pt-4">
                   <Question small>{t(`Wie viel von ${levelBand(levelCode)}?`, `How much of ${levelBand(levelCode)}?`)}</Question>
                   <div className="flex w-full gap-2">
                     <Toggle
                       selected={scope === 'whole'}
                       onSelect={() => setLevelScope('whole')}
-                      label={`${t(`Das ganze ${levelBand(levelCode)}`, `The whole ${levelBand(levelCode)}`)} · ${weeksLabel(t, cohort.weeks)}`}
+                      label={`${t(`Das ganze ${levelBand(levelCode)}`, `The whole ${levelBand(levelCode)}`)} · ${weeksLabel(t, spanWeeks(spanFor('whole')))}`}
                     />
                     <Toggle
                       selected={scope === 'half'}
                       onSelect={() => setLevelScope('half')}
-                      label={`${t(`Nur ${levelCode}`, `${levelCode} only`)} · ${weeksLabel(t, Math.min(HALF_LEVEL_WEEKS, cohort.weeks))}`}
+                      label={`${t(`Nur ${levelCode}`, `${levelCode} only`)} · ${weeksLabel(t, spanWeeks(spanFor('half')))}`}
                     />
                   </div>
                 </div>
@@ -683,6 +750,7 @@ export function BookingWizardClient({
           <input type="hidden" name="endDate" value={period ? period.end : accTo} />
           <input type="hidden" name="levelCode" value={levelCode ?? ''} />
           <input type="hidden" name="levelScope" value={scope} />
+          <input type="hidden" name="joinFrom" value={joining && join ? join : ''} />
           <input type="hidden" name="includeEnrolmentFee" value={includeFee && kind === 'course' ? '1' : ''} />
           {wantsBooks
             ? chosenBooks.map((b) => (
@@ -709,6 +777,7 @@ export function BookingWizardClient({
               levelCode,
               levelScope: scope,
               period,
+              runningUntil: joinedUntil,
               books: wantsBooks ? chosenBooks : [],
               accommodation: chosenAccommodation
                 ? {
@@ -806,6 +875,15 @@ export function BookingWizardClient({
             </p>
           ) : null}
 
+          {fullJoin && group ? (
+            // A course under way with no place left: said, and booking it anyway stays possible.
+            <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+              {group.closed
+                ? t(`${levelCode} ist in diesem Termin geschlossen: nicht zur Buchung angeboten.`, `${levelCode} is closed in this start: not offered for booking.`)
+                : t(`${levelCode} ist in diesem Termin voll (${group.booked} von ${group.places} Plätzen).`, `${levelCode} is full in this start (${group.booked} of ${group.places} places).`)}
+            </p>
+          ) : null}
+
           {queueFirst && group && kind === 'exam' ? (
             // A full sitting, or candidates waiting in front: the queue is offered first.
             <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
@@ -846,7 +924,7 @@ export function BookingWizardClient({
               </Button>
             }
           >
-            {bzFull.length ? (
+            {bzFull.length || fullJoin ? (
               <Button type="submit" variant="secondary">
                 {t('Trotzdem buchen', 'Book anyway')}
               </Button>
@@ -1032,6 +1110,41 @@ const sibling = (code: string, half: '1' | '2', levels: readonly { code: string 
   return levels.some((l) => l.code === other) ? other : null;
 };
 
+/** A start's dates and days as the period rule reads them (`bookedSpan`). */
+const spanOf = (c: CohortOffer, runningEnd: string | null = null): StartSpan => ({
+  format: c.format,
+  startDate: toDateInputValue(c.startDate),
+  endDate: toDateInputValue(c.endDate),
+  days: c.days,
+  runningEnd,
+});
+
+const spanWeeks = (span: { startDate: string; endDate: string } | null) => (span ? teachingWeeks(span.startDate, span.endDate) : 0);
+
+/** A start under way (begun, not over): the weeks it can still be joined from. Else none. */
+function joinableWeeks(c: CohortOffer | null, today: string): JoinWeek[] {
+  if (!c) return [];
+  const start = toDateInputValue(c.startDate);
+  const end = toDateInputValue(c.endDate);
+  return start <= today && today <= end ? joinWeeks(start, end, today) : [];
+}
+
+/**
+ * The step a learner joining from a Monday starts at: in an intensive course weeks 1–4 teach `B1.1`
+ * and weeks 5–8 `B1.2`, so a first half chosen for a join in the second half becomes the second.
+ */
+function stepForJoin(code: string | null, c: CohortOffer | null, join: string | null, levels: readonly { code: string }[]): string | null {
+  if (!code || !c || c.format !== 'intensive' || !/\.1$/.test(code)) return code;
+  const s = spanOf(c);
+  return inSecondHalf(s, joinStart(s.startDate, join)) ? (sibling(code, '2', levels) ?? code) : code;
+}
+
+/** „Mo 19.10.", „Mon 19 Oct": a join week's Monday. */
+const mondayLabel = (iso: string, lang: WsLang) =>
+  lang === 'de'
+    ? `Mo ${iso.slice(8, 10)}.${iso.slice(5, 7)}.`
+    : `Mon ${new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}`;
+
 function Question({ children, small = false }: { children: ReactNode; small?: boolean }) {
   return small ? (
     <h4 className="text-xs font-bold text-[var(--casa-muted)]">{children}</h4>
@@ -1123,6 +1236,7 @@ function summaryRows(
     levelCode,
     levelScope,
     period,
+    runningUntil,
     books,
     accommodation,
     accFrom,
@@ -1137,6 +1251,8 @@ function summaryRows(
     levelCode: string | null;
     levelScope: 'half' | 'whole';
     period: { start: string; end: string } | null;
+    /** A second half joined at a start: the end of the running course of the start before it sits in. */
+    runningUntil: string | null;
     books: readonly { id: string; title: string }[];
     accommodation: { name: string } | null;
     accFrom: string;
@@ -1167,15 +1283,15 @@ function summaryRows(
   }
   if (kind === 'course' && cohort) {
     rows.push({ label: t('Kurs', 'Course'), value: cohort.label });
-    // A second half joined here sits in the running course of the start before, to its end.
-    const until = levelCode ? cohort.levels[levelCode]?.until : null;
+    // A second half joined here sits in the running course of the start before, to its end; a learner
+    // joining a start under way, from their Monday.
     rows.push({
       label: t('Dauer', 'Runs for'),
-      value: until
-        ? t(`${german(toDateInputValue(cohort.startDate))} – ${german(until)} · im laufenden Kurs`, `${german(toDateInputValue(cohort.startDate))} – ${german(until)} · in the running course`)
-        : period
-          ? `${german(period.start)} – ${german(period.end)} · ${weeksLabel(t, teachingWeeks(period.start, period.end))}`
-          : weeksLabel(t, cohort.weeks),
+      value: !period
+        ? weeksLabel(t, cohort.weeks)
+        : runningUntil
+          ? t(`${german(period.start)} – ${german(period.end)} · im laufenden Kurs`, `${german(period.start)} – ${german(period.end)} · in the running course`)
+          : `${german(period.start)} – ${german(period.end)} · ${weeksLabel(t, teachingWeeks(period.start, period.end))}`,
     });
   }
   if (kind === 'exam' && exam) {
@@ -1214,7 +1330,7 @@ function summaryRows(
  * Nachmittag), the weekdays and time of any other; and its free places — the chosen level's when the
  * level is known, else the start's.
  */
-function startFacts(c: CohortOffer, levelCode: string | null, personId: string, t: T, lang: WsLang): string {
+function startFacts(c: CohortOffer, levelCode: string | null, personId: string, today: string, t: T, lang: WsLang): string {
   const slot = c.days && c.time ? { days: c.days, time: c.time } : null;
   const session = c.session ?? sessionOf(slot);
   const when =
@@ -1236,7 +1352,12 @@ function startFacts(c: CohortOffer, levelCode: string | null, personId: string, 
       : places.free === 0
         ? `${prefix}${t('voll', 'full')}`
         : `${prefix}${places.free === 1 ? t('1 Platz frei', '1 place free') : t(`${places.free} Plätze frei`, `${places.free} places free`)}`;
-  return [weeksLabel(t, c.weeks), when, free].filter(Boolean).join(' · ');
+  // A start under way: the weeks still ahead of it, from the next week a learner can join.
+  const ahead = joinableWeeks(c, today);
+  const left = ahead.find((w) => w.monday === defaultJoin(ahead, today))?.left ?? null;
+  const length =
+    left === null ? weeksLabel(t, c.weeks) : left === 1 ? t('läuft, noch 1 Woche', 'running, 1 week left') : t(`läuft, noch ${left} Wochen`, `running, ${left} weeks left`);
+  return [length, when, free].filter(Boolean).join(' · ');
 }
 
 /** "Fr, 13. Nov. 2026 · 09:00": the day of a sitting and when it begins. */

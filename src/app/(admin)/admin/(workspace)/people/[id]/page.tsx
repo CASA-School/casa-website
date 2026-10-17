@@ -148,12 +148,13 @@ export default async function PersonPage({
   params: Promise<{ id: string }>;
   /**
    * `book=1` opens the booking wizard at once; with `sitting` (and `parts`) it starts at that exam
-   * sitting, with `cohort` (and `level`) at that course start — links from a sitting's „Buchen" and an
+   * sitting, with `cohort` (and `level`, and `from`: the Monday a learner joins a course under way,
+   * `yyyy-mm-dd`) at that course start — links from a sitting's „Buchen", a course's „Buchen" and an
    * accepted offer.
    */
-  searchParams: Promise<{ error?: string; tab?: string; book?: string; sitting?: string; parts?: string; cohort?: string; level?: string }>;
+  searchParams: Promise<{ error?: string; tab?: string; book?: string; sitting?: string; parts?: string; cohort?: string; level?: string; from?: string }>;
 }) {
-  const [{ id }, { error, tab, book, sitting, parts, cohort, level }, user] = await Promise.all([params, searchParams, requireModule('people')]);
+  const [{ id }, { error, tab, book, sitting, parts, cohort, level, from }, user] = await Promise.all([params, searchParams, requireModule('people')]);
   const person = await getPerson(id);
 
   if (!person) {
@@ -424,7 +425,7 @@ export default async function PersonPage({
                   personId={person.id}
                   personName={person.displayName}
                   offer={offer}
-                  {...(book === '1' ? wizardStart(offer, { sitting, parts, cohort, level }) : {})}
+                  {...(book === '1' ? wizardStart(offer, { sitting, parts, cohort, level, from }) : {})}
                   returnTo={`/admin/people/${person.id}`}
                   action={createBookingFromWizardAction}
                   waitlistAction={waitlistFromWizardAction}
@@ -828,13 +829,14 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Where the wizard starts when a link says: an exam sitting still bookable (with the parts), or a
- * course start (with the level, „B2" taken as its first half). Anything it does not offer is dropped,
- * and the wizard starts at the beginning as usual.
+ * course start (with the level, „B2" taken as its first half, and the Monday a learner joins it from
+ * when it is under way; the wizard keeps that week only if the course can still be joined from it).
+ * Anything it does not offer is dropped, and the wizard starts at the beginning as usual.
  */
 function wizardStart(
   offer: NonNullable<Awaited<ReturnType<typeof bookingOffer>>>,
-  link: { sitting?: string; parts?: string; cohort?: string; level?: string }
-): Pick<Parameters<typeof BookingWizard>[0], 'preselectedExam' | 'preselectedCohortId' | 'preselectedLevelCode'> {
+  link: { sitting?: string; parts?: string; cohort?: string; level?: string; from?: string }
+): Pick<Parameters<typeof BookingWizard>[0], 'preselectedExam' | 'preselectedCohortId' | 'preselectedLevelCode' | 'preselectedJoinFrom'> {
   if (link.sitting && UUID.test(link.sitting)) {
     const exam = offer.exams.find((e) => e.sittings.some((s) => s.id === link.sitting));
     if (exam) return { preselectedExam: { examTypeId: exam.id, sittingId: link.sitting, parts: isExamParts(link.parts) ? link.parts : 'full' } };
@@ -846,7 +848,8 @@ function wizardStart(
       // A whole level is booked from its first half; the wizard then asks how much of it.
       const half = /^[ABC][12]\+?$/.test(typed) ? `${typed}.1` : typed;
       const known = offer.levels.some((l) => l.code === half);
-      return { preselectedCohortId: cohort.id, preselectedLevelCode: known ? half : null };
+      const from = /^\d{4}-\d{2}-\d{2}$/.test(link.from ?? '') ? link.from! : null;
+      return { preselectedCohortId: cohort.id, preselectedLevelCode: known ? half : null, preselectedJoinFrom: from };
     }
   }
   return {};

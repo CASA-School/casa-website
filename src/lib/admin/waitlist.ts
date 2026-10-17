@@ -97,12 +97,18 @@ export const placeForNext = (g: Places & { waiting: number }) => g.waiting > 0 &
  */
 const BOOKED = `
   SELECT course_id, max(n)::int AS n FROM (
-    SELECT bp.course_id, w.week, count(DISTINCT bp.booking_id) AS n
-      FROM booking_periods bp
-      JOIN bookings b ON b.id = bp.booking_id
-     CROSS JOIN LATERAL generate_series(date_trunc('week', bp.start_date), bp.end_date, interval '7 days') AS w(week)
-     WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.course_id IS NOT NULL
-     GROUP BY bp.course_id, w.week
+    -- A week's learners: booked here, and SchoolMan's that week (0050) while bookings are made there.
+    SELECT course_id, week, sum(n) AS n FROM (
+      SELECT bp.course_id, w.week::date AS week, count(DISTINCT bp.booking_id) AS n
+        FROM booking_periods bp
+        JOIN bookings b ON b.id = bp.booking_id
+       CROSS JOIN LATERAL generate_series(date_trunc('week', bp.start_date), bp.end_date, interval '7 days') AS w(week)
+       WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.course_id IS NOT NULL
+       GROUP BY bp.course_id, w.week
+      UNION ALL
+      SELECT course_id, monday, learners FROM course_week_learners
+    ) sources
+    GROUP BY course_id, week
   ) weekly
   GROUP BY course_id`;
 

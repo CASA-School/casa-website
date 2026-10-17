@@ -52,6 +52,13 @@
     // Removal condition: delete when the FileMaker bridge brings lesson days across.
     "scripts/filemaker/import-lesson-days.mjs",
 
+    // Writes SchoolMan's learners per course and week (counts only) into
+    // `course_week_learners`, from scripts/filemaker/read_course_learners.py
+    // through a pipe (docs/ADMIN_WORKSPACE.md §Courses). Run by hand, never imported.
+    //
+    // Removal condition: delete when bookings are made in the workspace alone.
+    "scripts/filemaker/import-course-learners.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

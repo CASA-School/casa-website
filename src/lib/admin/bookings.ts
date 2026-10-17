@@ -953,15 +953,20 @@ export async function extendBooking(
 export async function setPeriodLevel(bookingId: string, periodId: string, levelCode: string | null, actor: StaffUser): Promise<void> {
   // The start the learner began at: the one of the same course type starting on the period's first
   // day — a joiner's period sits on the running course of the start before.
-  const period = await queryFirst<{ course_instance_id: string | null }>(
+  const period = await queryFirst<{ course_instance_id: string | null; start_date: string; end_date: string }>(
     `SELECT coalesce(
               (SELECT o.id FROM course_instances o WHERE o.course_type_id = i.course_type_id AND o.start_date = bp.start_date AND o.status <> 'cancelled' LIMIT 1),
-              bp.course_instance_id) AS course_instance_id
+              bp.course_instance_id) AS course_instance_id,
+            to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date
        FROM booking_periods bp LEFT JOIN course_instances i ON i.id = bp.course_instance_id
       WHERE bp.id = $1 AND bp.booking_id = $2`,
     [periodId, bookingId]
   );
-  const course = period?.course_instance_id && levelCode ? await resolveCourse(period.course_instance_id, levelCode, undefined, { actor }) : null;
+  // With the period's own dates: a joiner in a course's second half stays on that start's course.
+  const course =
+    period?.course_instance_id && levelCode
+      ? await resolveCourse(period.course_instance_id, levelCode, { startDate: period.start_date, endDate: period.end_date }, { actor })
+      : null;
   await query(`UPDATE booking_periods SET level_code = $3, course_id = $4, course_instance_id = coalesce($5, course_instance_id) WHERE id = $1 AND booking_id = $2`, [
     periodId,
     bookingId,

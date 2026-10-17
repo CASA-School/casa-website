@@ -3,12 +3,13 @@ import { ownCoursePrice } from './courses';
 import type { BookingOffer, CohortOffer, CourseTypeOffer } from './booking-offer-types';
 import { query, queryFirst } from './db';
 import { upcomingSittings } from './exams';
-import { accommodationLine, bookedLevelLabel, ENROLMENT_FEE, halfLevelEnd } from './booking-levels';
+import { accommodationLine, bookedLevelLabel, bookedSpan, ENROLMENT_FEE, isIsoDay, isJoinMonday } from './booking-levels';
 import type { Bilingual } from './i18n';
 import { accommodationWeeks, teachingWeeks, termLessons } from './offers/course';
 import { coursePrice, listOn, rentPrice, type PriceList } from './prices/price-list';
 import { loadPriceLists } from './prices/repo';
 import { upcomingLevelPlaces } from './waitlist';
+import { bremenDate } from '@/lib/appointments/schedule';
 import { toDateInputValue } from '@/lib/dates';
 
 /**
@@ -240,7 +241,8 @@ const names = (r: { name_en: string; name_de: string | null }): Bilingual => ({ 
 
 /**
  * A cohort's tuition from the price list in force when it starts: its teaching weeks, its lessons — or,
- * for the part of it booked (an intensive start's first half, a second half joined here), that part's.
+ * for the part of it booked (an intensive start's first half, a second half joined here, a course joined
+ * while it runs), that part's. `share`: the part's class days of the whole, for a course's own price.
  */
 function cohortPrice(
   prices: readonly PriceList[],
@@ -255,41 +257,49 @@ function cohortPrice(
       : null;
   const span = part && part.endDate >= part.startDate ? part : { startDate, endDate };
   const weeks = teachingWeeks(span.startDate, span.endDate);
-  const lessons = termLessons({ ...span, slot: scheduleOf(row.schedule), lessons: span === part ? null : row.lessons }, row.lessons_per_week);
-  return { weeks, price: coursePrice(prices, row.slug, startDate, { weeks, lessons }) };
+  const slot = scheduleOf(row.schedule);
+  const lessons = termLessons({ ...span, slot, lessons: span === part ? null : row.lessons }, row.lessons_per_week);
+  // Class days, counted alike for the part and the whole: one a day, whatever the lessons a week.
+  const days = (term: { startDate: string; endDate: string }) => termLessons({ ...term, slot, lessons: null }, slot?.days.length || 5);
+  const share = span === part ? days(span) / Math.max(1, days({ startDate, endDate })) : 1;
+  return { weeks, share, price: coursePrice(prices, row.slug, startDate, { weeks, lessons }) };
 }
 
 const format = (d: Date) =>
   new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
 
 /**
- * The dates a booking of a start at a level covers, decided here and not by the form: the whole start;
- * an intensive start's first half alone, to the end of its fourth teaching week; a second half joined
- * at a start, to the end of the running course of the start before (as `resolveCourse` books it).
+ * The dates a booking of a start at a level covers, decided here and not by the form (`bookedSpan`):
+ * the whole start; an intensive start's first half alone, to the end of its fourth teaching week; a
+ * second half joined at a start, to the end of the running course of the start before (as
+ * `resolveCourse` books it). A learner joining a course already running (2026-10-17) starts on their
+ * Monday, `join`: a teaching week of the start, not before this one. Null when the start does not
+ * exist, or the course cannot be joined from that Monday.
  */
 export async function bookedPeriod(
   courseInstanceId: string,
   levelCode: string | null,
-  scope: 'whole' | 'half'
+  scope: 'whole' | 'half',
+  join: string | null = null
 ): Promise<{ startDate: string; endDate: string } | null> {
+  if (join && !isIsoDay(join)) return null;
   const row = await queryFirst<{ start_date: string; end_date: string; format: string | null; schedule: { days?: string[]; time?: string } | null; running_end: string | null }>(
     `SELECT to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date, t.format, i.schedule,
             (SELECT to_char(r.end_date, 'YYYY-MM-DD') FROM course_instances r JOIN course_types rt ON rt.id = r.course_type_id
-              WHERE rt.format = 'intensive' AND r.status <> 'cancelled' AND r.start_date < i.start_date AND r.end_date >= i.start_date
+              WHERE rt.format = 'intensive' AND r.status <> 'cancelled' AND r.start_date < i.start_date AND r.end_date >= greatest(i.start_date, $2::date)
               ORDER BY r.start_date DESC LIMIT 1) AS running_end
        FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
       WHERE i.id = $1`,
-    [courseInstanceId]
+    [courseInstanceId, join]
   );
   if (!row) return null;
-  const { start_date: startDate, end_date: endDate } = row;
-  if (row.format === 'intensive' && levelCode && /\.2$/.test(levelCode) && row.running_end) {
-    return { startDate, endDate: row.running_end < endDate ? row.running_end : endDate };
-  }
-  if (row.format === 'intensive' && levelCode && /\.1$/.test(levelCode) && scope === 'half') {
-    return { startDate, endDate: halfLevelEnd(startDate, endDate, scheduleOf(row.schedule)?.days ?? null) };
-  }
-  return { startDate, endDate };
+  if (join && join > row.start_date && !isJoinMonday(join, row.start_date, row.end_date, bremenDate())) return null;
+  return bookedSpan(
+    { format: row.format, startDate: row.start_date, endDate: row.end_date, days: scheduleOf(row.schedule)?.days ?? null, runningEnd: row.running_end },
+    levelCode,
+    scope,
+    join
+  );
 }
 
 // ------------------------------------------------------------------ accommodation
@@ -483,9 +493,11 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
     );
     if (course) {
       // The course's own price first (an evening term, a module: SchoolMan's per course), then the list.
+      // Either for the part booked: a learner joining a running course pays for the weeks from their Monday
+      // (2026-10-17) — the list by those weeks and lessons, an own price by its share of the class days.
       const own = await ownCoursePrice(selection.courseInstanceId, selection.levelCode);
-      const { price: listed } = cohortPrice(prices, course, { startDate: selection.startDate, endDate: selection.endDate });
-      const price = own ? { id: null, amount: own.amount } : listed;
+      const { price: listed, share } = cohortPrice(prices, course, { startDate: selection.startDate, endDate: selection.endDate });
+      const price = own ? { id: null, amount: Math.round(own.amount * share * 100) / 100 } : listed;
       const resolved = selection.tuitionOverride ?? price?.amount ?? Number(course.default_price);
       // „Intensivkurs A2.1–A2.2 · 26.10.26 – 18.12.26": the course in German, how much of the level, the dates booked.
       const level = bookedLevelLabel([

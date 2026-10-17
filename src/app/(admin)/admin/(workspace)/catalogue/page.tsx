@@ -1,53 +1,33 @@
-import Link from 'next/link';
-
+import { CohortForm } from './cohort-form';
+import { CourseList } from './course-list';
+import { sentenceCase } from './list-parts';
 import { FormDialog } from '@/components/admin/dialogs';
-import { dayRange, euros, ListBar, ListEmpty, ListGroup } from '@/components/admin/list';
+import { Icon } from '@/components/admin/icons';
+import { Tally } from '@/components/admin/inbox';
+import { euros, ListBar, ListEmpty } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import {
-  BOOKED_INTO_OTHER_COURSES,
-  listCourseTypes,
-  listUpcomingCourseInstances,
-  SESSION_LABELS,
-  type CourseInstanceSummary,
-  type CourseTypeSummary,
-} from '@/lib/admin/catalogue';
+import { BOOKED_INTO_OTHER_COURSES, listCourseTypes, type CourseTypeSummary } from '@/lib/admin/catalogue';
+import { listCourses } from '@/lib/admin/course-list';
 import { query } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
-import { Tally } from '@/components/admin/inbox';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { listBookableRooms, type Room } from '@/lib/admin/rooms';
-import { freePlaces, levelGroups, placeForNext, type LevelGroup } from '@/lib/admin/waitlist';
-import { todayInputValue, toDateInputValue } from '@/lib/dates';
-import { nextStart, roomName } from '@/lib/admin/course-starts';
-import { CohortForm } from './cohort-form';
-import { groupRuns, monthKey, monthLabel, openCell, OpenTable, sentenceCase } from './list-parts';
-import { RoomPicker } from './room-picker';
+import { listBookableRooms } from '@/lib/admin/rooms';
+import { todayInputValue } from '@/lib/dates';
 
 /**
- * Courses, with live demand against them.
- *
- * READ-ONLY, DELIBERATELY, for the course types. `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md`
- * is the current authority on every price and hour count on this screen,
- * verified against casa-bremen.de and carrying an explicit list of what is
- * still unverified. An edit form here before that reconciliation would let the
- * workspace quietly contradict the published facts, and the contradiction
- * would surface as a wrong price on a course page.
- *
- * What the workspace adds is the one thing the source of truth cannot hold:
- * how many people have actually registered for the cohort starting in ten days.
- *
- * One list card with two views (docs/ADMIN_WORKSPACE.md §Lists): the upcoming
- * cohorts, grouped by the month they start in, and the course types. Only
- * what differs from the normal case is marked — a cohort that is full or
- * nearly full, a status other than scheduled, a room too small. A cohort's
- * room is a value that opens the rooms as choices; an unset room is an empty
- * cell whose "Set room" appears on hover.
+ * Courses (2026-10-17, Rahman: „running first, then coming up, the past on a switch"). One row per
+ * course under the start it belongs to, with what SchoolMan's course list is read for — the learners
+ * now and week by week against the places, who teaches, who waits, the dates, SchoolMan's number — and
+ * „Buchen", which opens the course with its „Wen buchen?" (`course-list.tsx`). The course types stay a
+ * view of their own, read-only: `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` is the authority on their
+ * prices and hours. The waiting lists are their own item in the rail.
  */
 
-const VIEWS: readonly { key: 'cohorts' | 'types'; label: Bilingual }[] = [
-  { key: 'cohorts', label: { de: 'Kommende Termine', en: 'Upcoming cohorts' } },
+const VIEWS: readonly { key: 'current' | 'past' | 'types'; label: Bilingual }[] = [
+  { key: 'current', label: { de: 'Laufend & kommend', en: 'Running & coming up' } },
+  { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
   { key: 'types', label: { de: 'Kursarten', en: 'Course types' } },
 ];
 
@@ -61,21 +41,22 @@ export default async function CataloguePage({
   const user = await requireModule('catalogue');
   const { t, lang } = await getI18n();
   const plans = canAccess(user, 'rooms', 'edit');
-  const [{ error, view: rawView, new: fresh }, types, instances, rooms, levels] = await Promise.all([
-    searchParams,
+  const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people');
+  const today = todayInputValue();
+  const { error, view: rawView, new: fresh } = await searchParams;
+  const view = rawView === 'types' ? 'types' : rawView === 'past' ? 'past' : 'current';
+  const [types, rows, rooms, levels] = await Promise.all([
     listCourseTypes(),
-    listUpcomingCourseInstances(120),
+    view === 'types' ? Promise.resolve([]) : listCourses(view === 'past' ? 'past' : 'current', today),
     plans ? listBookableRooms() : Promise.resolve([]),
     plans
       ? query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`).then((r) => r.map((x) => x.code))
       : Promise.resolve([]),
   ]);
-  const view = rawView === 'types' ? 'types' : 'cohorts';
-  // The list keeps starts of the last two weeks (under way); the next start is one still ahead.
-  const next = nextStart(instances.filter((i) => i.status !== 'cancelled'), todayInputValue());
-  const taken = instances.reduce((sum, i) => sum + i.bookingCount, 0);
-  // Places are per level (the waiting list, 0031): each start's levels, for what is waiting and free.
-  const groups = await levelGroups(instances.map((i) => i.id));
+  const running = rows.filter((r) => r.phase === 'running');
+  const learnersNow = running.reduce((sum, r) => sum + r.now, 0);
+  const waiting = rows.reduce((sum, r) => sum + r.waiting + r.offered, 0);
+  const next = rows.filter((r) => r.phase === 'upcoming').map((r) => r.startDate).sort()[0] ?? null;
 
   return (
     <>
@@ -87,6 +68,8 @@ export default async function CataloguePage({
               trigger={t('Termin planen', 'Schedule cohort')}
               title={t('Termin planen', 'Schedule a cohort')}
               triggerVariant="primary"
+              icon={Icon.calendar}
+              tint="red"
               defaultOpen={fresh === '1'}
             >
               <CohortForm
@@ -102,19 +85,24 @@ export default async function CataloguePage({
         }
       />
 
-      {/* What is coming, how full it is, and when the next one starts. */}
-      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="working" n={instances.length} label={instances.length === 1 ? t('kommender Termin', 'date ahead') : t('kommende Termine', 'dates ahead')} lang={lang} />
-        <Tally tone="done" n={taken} label={t('gebucht', 'booked')} lang={lang} />
-        {next ? (
-          <span>
-            {t('Nächster Beginn', 'Next start')}{' '}
-            <b className="font-semibold text-[var(--casa-ink)]">
-              {new Date(next.startDate).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' })}
-            </b>
-          </span>
-        ) : null}
-      </p>
+      {/* What runs now, who sits in it, who waits, and when the next start is. */}
+      {view === 'current' ? (
+        <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+          <Tally tone="working" n={running.length} label={running.length === 1 ? t('laufender Kurs', 'course running') : t('laufende Kurse', 'courses running')} lang={lang} />
+          <Tally tone="done" n={learnersNow} label={t('Teilnehmende diese Woche', 'learners this week')} lang={lang} />
+          {waiting ? <Tally tone="new" n={waiting} label={t('auf Wartelisten', 'waiting')} lang={lang} /> : null}
+          {next ? (
+            <span>
+              {t('Nächster Beginn', 'Next start')}{' '}
+              <b className="font-semibold text-[var(--casa-ink)]">
+                {new Date(`${next}T12:00:00`).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' })}
+              </b>
+            </span>
+          ) : null}
+        </p>
+      ) : (
+        <div className="mb-6" />
+      )}
 
       {error ? (
         <p
@@ -125,172 +113,22 @@ export default async function CataloguePage({
         </p>
       ) : null}
 
-      <Card bleed overflow={view === 'cohorts' ? 'visible' : 'hidden'}>
+      <Card bleed overflow="hidden">
         <ListBar
           tabs={VIEWS.map((v) => ({
             key: v.key,
             label: pick(lang, v.label),
-            href: `/admin/catalogue${v.key === 'cohorts' ? '' : `?view=${v.key}`}`,
+            href: `/admin/catalogue${v.key === 'current' ? '' : `?view=${v.key}`}`,
           }))}
           active={view}
         />
-        {view === 'cohorts' ? (
-          <Cohorts instances={instances} groups={groups} rooms={rooms} plans={plans} t={t} lang={lang} />
-        ) : (
+        {view === 'types' ? (
           <CourseTypes types={types} t={t} lang={lang} />
+        ) : (
+          <CourseList rows={rows} view={view} canBook={canBook} today={today} t={t} lang={lang} />
         )}
       </Card>
     </>
-  );
-}
-
-function Cohorts({
-  instances,
-  groups,
-  rooms,
-  plans,
-  t,
-  lang,
-}: {
-  instances: CourseInstanceSummary[];
-  groups: LevelGroup[];
-  rooms: Room[];
-  plans: boolean;
-  t: T;
-  lang: WsLang;
-}) {
-  if (instances.length === 0) return <ListEmpty title={t('Keine Termine geplant', 'No cohorts scheduled')} />;
-
-  // Same-day cohorts in a fixed order, so a row does not swap places after its room changes.
-  const ordered = [...instances].sort(
-    (a, b) =>
-      new Date(a.startDate).getTime() - new Date(b.startDate).getTime() ||
-      a.courseTypeName.localeCompare(b.courseTypeName) ||
-      a.id.localeCompare(b.id)
-  );
-  const months = groupRuns(ordered, (instance) => monthKey(instance.startDate));
-
-  return (
-    <OpenTable
-      head={[
-        { label: t('Kurs', 'Course') },
-        { label: t('Zeitraum', 'Runs'), className: 'w-px md:w-[13.5rem]' },
-        { label: t('Raum', 'Room'), className: `w-[15rem] ${hide}` },
-        { label: t('Belegung', 'Taken'), className: `w-[15rem] ${hide}` },
-      ]}
-    >
-      {months.flatMap((month) => [
-        <ListGroup key={month.key} label={monthLabel(month.key, lang)} count={month.items.length} span={4} />,
-        ...month.items.map((instance) => (
-          <CohortRow key={instance.id} instance={instance} groups={groups.filter((g) => g.courseInstanceId === instance.id)} rooms={rooms} plans={plans} t={t} lang={lang} />
-        )),
-      ])}
-    </OpenTable>
-  );
-}
-
-const STATUS_LABELS: Record<string, { label: Bilingual; tone: 'quiet' | 'neutral' | 'danger' }> = {
-  cancelled: { label: { de: 'Abgesagt', en: 'Cancelled' }, tone: 'danger' },
-  draft: { label: { de: 'Entwurf', en: 'Draft' }, tone: 'quiet' },
-};
-
-/** One cohort: what it is, when, where, how many are booked, who waits and whether a place is free for them. */
-function CohortRow({
-  instance,
-  groups,
-  rooms,
-  plans,
-  t,
-  lang,
-}: {
-  instance: CourseInstanceSummary;
-  groups: LevelGroup[];
-  rooms: Room[];
-  plans: boolean;
-  t: T;
-  lang: WsLang;
-}) {
-  const waiting = groups.reduce((sum, g) => sum + g.waiting + g.offered, 0);
-  const freeForNext = groups.some(placeForNext);
-  // Full — or closed, which SchoolMan does to a full course: by level; a named course is the row itself.
-  const full = groups.filter((g) => !g.cancelled && g.places > 0 && freePlaces(g) === 0);
-  const fullLevels = full.map((g) => g.levelCode).filter((code): code is string => Boolean(code));
-  const overRoom =
-    instance.room?.capacity !== null &&
-    instance.room?.capacity !== undefined &&
-    instance.capacity > instance.room.capacity;
-
-  // The line under the name carries only what the course name does not already say — and a start of
-  // levels names its courses (0041).
-  const courseLabels = instance.title ? [] : groups.filter((g) => !g.cancelled && g.levelCode).map((g) => g.label);
-  const sub = [
-    instance.title && instance.title !== instance.courseTypeName && instance.title !== instance.courseTypeNameDe ? instance.title : null,
-    courseLabels.length ? courseLabels.join(' · ') : instance.levelCode,
-    instance.session ? pick(lang, SESSION_LABELS[instance.session]) : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  const known = STATUS_LABELS[instance.status];
-  const status =
-    instance.status === 'scheduled'
-      ? null
-      : known
-        ? { label: pick(lang, known.label), tone: known.tone }
-        : { label: sentenceCase(instance.status), tone: 'neutral' as const };
-
-  return (
-    <tr className="group" data-cohort={instance.id}>
-      <td className={`${openCell} py-3 md:max-w-0`}>
-        <span className="flex min-w-0 items-center gap-2">
-          <Link href={`/admin/catalogue/${instance.id}`} className="text-[0.9rem] font-semibold text-[var(--casa-ink)] hover:underline md:truncate">
-            {lang === 'de' ? instance.courseTypeNameDe : instance.courseTypeName}
-          </Link>
-          {status ? <Badge tone={status.tone}>{status.label}</Badge> : null}
-        </span>
-        {sub ? <span className="mt-0.5 block truncate text-[0.8rem] text-[var(--casa-muted)]">{sub}</span> : null}
-      </td>
-      <td className={`${openCell} py-3 text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums`}>
-        {/* The month group above says the year; the range names one only when it crosses into another. */}
-        {dayRange(
-          toDateInputValue(instance.startDate),
-          toDateInputValue(instance.endDate),
-          lang,
-          new Date(instance.startDate).getFullYear()
-        )}
-      </td>
-      <td className={`${openCell} py-1.5 ${hide}`}>
-        {plans ? (
-          <RoomPicker instance={instance} rooms={rooms} />
-        ) : instance.room ? (
-          <Link
-            href={`/admin/settings/rooms/${instance.room.id}`}
-            className="text-[0.84rem] font-medium text-[var(--casa-ink)] hover:underline"
-          >
-            {roomName(instance.room)}
-          </Link>
-        ) : instance.location ? (
-          <span className="text-[0.84rem] text-[var(--casa-muted)]">{instance.location}</span>
-        ) : null}
-        {overRoom ? (
-          <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">{t('Raum zu klein', 'Room too small')}</span>
-        ) : null}
-      </td>
-      <td className={`${openCell} py-3 ${hide}`}>
-        <span className="flex flex-wrap items-center gap-1.5 text-[0.84rem]">
-          <span className={instance.bookingCount ? 'font-semibold text-[var(--casa-ink)] tabular-nums' : 'text-[var(--casa-text-subtle)] tabular-nums'}>
-            {t(`${instance.bookingCount} gebucht`, `${instance.bookingCount} booked`)}
-          </span>
-          {freeForNext ? <Badge tone="positive">{t('Platz frei', 'Place free')}</Badge> : null}
-          {waiting ? <Badge tone="accent">{t(`${waiting} Warteliste`, `${waiting} waiting`)}</Badge> : null}
-        </span>
-        {full.length ? (
-          <span className="mt-0.5 block text-xs font-semibold text-[#9a5b00]">
-            {fullLevels.length ? t(`Voll: ${fullLevels.join(', ')}`, `Full: ${fullLevels.join(', ')}`) : t('Voll', 'Full')}
-          </span>
-        ) : null}
-      </td>
-    </tr>
   );
 }
 

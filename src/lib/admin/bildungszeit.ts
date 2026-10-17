@@ -49,7 +49,7 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
   if (!frames.length) return { courseTypeId: type.id, name: type.name, weeks: [] };
 
   const ids = [...new Set(frames.flatMap((f) => [f.start.id, f.previous.id]))];
-  const [codes, groups, periods] = await Promise.all([
+  const [codes, groups, periods, schoolman] = await Promise.all([
     query<{ code: string }>(`SELECT code FROM levels WHERE code ~ '\\.[12]$' ORDER BY sort_order`),
     levelGroups(ids),
     query<PeriodRow>(
@@ -59,11 +59,21 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
           AND b.deleted_at IS NULL AND b.status <> 'cancelled'`,
       [ids]
     ),
+    // SchoolMan's learners in those courses each week (0050), while bookings are made there.
+    query<{ course_id: string; monday: string; learners: number }>(
+      `SELECT course_id, to_char(monday, 'YYYY-MM-DD') AS monday, learners FROM course_week_learners
+        WHERE course_id IN (SELECT id FROM courses WHERE course_instance_id = ANY($1::uuid[]))`,
+      [ids]
+    ),
   ]);
+  const elsewhere = new Map(schoolman.map((r) => [`${r.course_id}|${r.monday}`, r.learners]));
   const course = (instance: string, code: string) => groups.find((g) => g.courseInstanceId === instance && g.levelCode === code && !g.cancelled);
   // The distinct bookings sitting in a course during the week.
   const learners = (week: { monday: string; friday: string }, courseId: string | undefined) =>
-    courseId ? new Set(periods.filter((p) => p.course_id === courseId && p.start_date <= week.friday && p.end_date >= week.monday).map((p) => p.booking_id)).size : 0;
+    courseId
+      ? new Set(periods.filter((p) => p.course_id === courseId && p.start_date <= week.friday && p.end_date >= week.monday).map((p) => p.booking_id)).size +
+        (elsewhere.get(`${courseId}|${week.monday}`) ?? 0)
+      : 0;
 
   const weeks = frames.map((f): BzWeek => {
     const first: Record<string, BzClassPlaces> = {};

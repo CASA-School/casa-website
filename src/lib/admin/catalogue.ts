@@ -40,25 +40,6 @@ export type CourseTypeSummary = {
   registrationCount: number;
 };
 
-export type CourseInstanceSummary = {
-  id: string;
-  courseTypeName: string;
-  /** The type's German name (`name_de`), for the workspace in German; the English one when it has none. */
-  courseTypeNameDe: string;
-  courseTypeSlug: string;
-  startDate: Date;
-  endDate: Date;
-  capacity: number;
-  location: string | null;
-  status: string;
-  registrationCount: number;
-  room: { id: string; name: string; nickname: string | null; capacity: number | null } | null;
-  levelCode: string | null;
-  session: 'morning' | 'afternoon' | 'evening' | null;
-  title: string | null;
-  bookingCount: number;
-};
-
 export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
   const rows = await query<{
     id: string;
@@ -117,81 +98,6 @@ export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
     instanceCount: Number(row.instance_count),
     upcomingCount: Number(row.upcoming_count),
     registrationCount: Number(row.registration_count),
-  }));
-}
-
-export async function listUpcomingCourseInstances(limit = 25): Promise<CourseInstanceSummary[]> {
-  const rows = await query<{
-    id: string;
-    course_type_name: string;
-    course_type_name_de: string;
-    course_type_slug: string;
-    start_date: Date;
-    end_date: Date;
-    capacity: number;
-    location: string | null;
-    status: string;
-    registration_count: string;
-    room_id: string | null;
-    room_name: string | null;
-    room_nickname: string | null;
-    room_capacity: number | null;
-    level_code: string | null;
-    session: 'morning' | 'afternoon' | 'evening' | null;
-    title: string | null;
-    booking_count: string;
-  }>(
-    `SELECT i.id,
-            t.name AS course_type_name,
-            coalesce(t.name_de, t.name) AS course_type_name_de,
-            t.slug AS course_type_slug,
-            i.start_date,
-            i.end_date,
-            i.capacity,
-            i.location,
-            i.status,
-            (SELECT count(*) FROM course_registrations r
-              WHERE r.course_instance_id = i.id AND r.status <> 'spam')
-              AS registration_count,
-            rm.id AS room_id, rm.name AS room_name, rm.nickname AS room_nickname,
-            rm.capacity AS room_capacity,
-            i.level_code, i.session, i.title,
-            (SELECT count(DISTINCT bp.booking_id) FROM booking_periods bp
-               JOIN bookings b ON b.id = bp.booking_id
-              WHERE bp.course_instance_id = i.id AND b.deleted_at IS NULL AND b.status <> 'cancelled')
-              AS booking_count
-       FROM course_instances i
-       JOIN course_types t ON t.id = i.course_type_id
-       LEFT JOIN rooms rm ON rm.id = i.room_id
-      WHERE i.start_date >= current_date - interval '14 days' AND NOT (t.slug = ANY($2::text[]))
-      ORDER BY i.start_date ASC, t.position
-      LIMIT $1`,
-    [limit, BOOKED_INTO_OTHER_COURSES]
-  );
-
-  return rows.map((row) => ({
-    id: row.id,
-    courseTypeName: row.course_type_name,
-    courseTypeNameDe: row.course_type_name_de,
-    courseTypeSlug: row.course_type_slug,
-    startDate: row.start_date,
-    endDate: row.end_date,
-    capacity: row.capacity,
-    location: row.location,
-    status: row.status,
-    registrationCount: Number(row.registration_count),
-    room: row.room_id
-      ? {
-          id: row.room_id,
-          name: row.room_name ?? '',
-          nickname: row.room_nickname,
-          capacity: row.room_capacity,
-        }
-      : null,
-    levelCode: row.level_code,
-    session: row.session,
-    title: row.title,
-    bookingCount: Number(row.booking_count),
   }));
 }
 

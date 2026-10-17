@@ -5,8 +5,7 @@ import { createBookingFromWizardAction } from '../../../bookings/actions';
 import { BookingWizard } from '../../../bookings/booking-wizard';
 import { offerPlaceAction, takeBackOfferAction } from '../../actions';
 import { CloseForm, MoveForm } from '../../waitlist-forms';
-import { cancelSittingAction, deleteSittingAction, fileCandidatesAction, markCollectedAction, unassignExaminerAction, unfileCandidateAction, updateSittingAction } from '../actions';
-import { CandidatePicker } from '../candidate-picker';
+import { cancelSittingAction, deleteSittingAction, fileCandidatesAction, findCandidatesAction, markCollectedAction, unassignExaminerAction, unfileCandidateAction, updateSittingAction } from '../actions';
 import { ExaminerForm } from '../examiner-form';
 import { SittingForm } from '../sitting-form';
 import { PersonForm } from '../../../people/person-form';
@@ -14,6 +13,7 @@ import { RecordFoot } from '../../../bookings/record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { PersonPicker } from '@/components/admin/person-picker';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { Badge, Button, Card, Field, Input, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
@@ -153,8 +153,10 @@ export default async function ExamSittingPage({ params, searchParams }: { params
                 description={`${sitting.examName} · ${sittingWhen(sitting, lang)}`}
                 triggerVariant={next ? 'secondary' : 'primary'}
               >
-                <CandidatePicker
-                  sittingId={id}
+                <PersonPicker
+                  search={findCandidatesAction.bind(null, id)}
+                  bookQuery={`book=1&sitting=${id}`}
+                  alreadyLabel={t('Schon gebucht', 'Already booked')}
                   newPerson={
                     addsPeople ? (
                       <PersonForm countries={countries} hidden={{ then: 'book', sitting: id }} submitLabel={t('Weiter zur Buchung', 'On to the booking')} />

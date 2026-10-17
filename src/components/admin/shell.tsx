@@ -176,15 +176,18 @@ export async function WorkspaceShell({
                     catalogue table and almost nothing else. */}
                 {canAccess(user, 'catalogue') ? (
                   <>
-                    {/* A course start's own page and the waiting lists are under Courses; Exams is its own item. */}
+                    {/* Courses stand alone (a start's and a course's pages are under it); the waiting lists,
+                        of courses and exams alike, are their own item (Rahman, 2026-10-17). */}
                     <NavLink
                       href="/admin/catalogue"
                       icon={Icon.catalogue}
                       title={t('Kurse', 'Courses')}
-                      exclude={['/admin/catalogue/exams']}
-                      items={[{ href: '/admin/catalogue/waitlist', label: t('Wartelisten', 'Waiting lists') }]}
+                      exclude={['/admin/catalogue/exams', '/admin/catalogue/waitlist']}
                     >
                       {t('Kurse', 'Courses')}
+                    </NavLink>
+                    <NavLink href="/admin/catalogue/waitlist" icon={Icon.clock} title={t('Wartelisten', 'Waiting lists')}>
+                      {t('Wartelisten', 'Waiting lists')}
                     </NavLink>
                     <NavLink href="/admin/catalogue/exams" icon={Icon.placement} title={t('Prüfungen', 'Exams')}>
                       {t('Prüfungen', 'Exams')}

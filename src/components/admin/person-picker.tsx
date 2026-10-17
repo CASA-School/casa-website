@@ -3,24 +3,38 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { findCandidatesAction } from './actions';
-import { DialogFooter } from '@/components/admin/dialogs';
-import { Icon } from '@/components/admin/icons';
-import { useWsLang } from '@/components/admin/lang';
-import { Input } from '@/components/admin/ui';
-import type { CandidateMatch } from '@/lib/admin/exams';
+import { DialogFooter } from './dialogs';
+import { Icon } from './icons';
+import { useWsLang } from './lang';
+import { Input } from './ui';
 import type { T } from '@/lib/admin/i18n';
 
+/** A learner found for a „Buchen": their name, address, how many bookings, and whether already in this. */
+export type PersonMatch = { id: string; name: string; email: string | null; bookings: number; booked: boolean };
+
 /**
- * „Buchen" on an exam sitting, the first step: who. A name or an address finds the learner, and
- * choosing one opens their booking wizard with this sitting already chosen (`?book=1&sitting=`). Nobody
- * found: „Neue Person anlegen" shows the person form (rendered on the server, passed in), filled with
- * what was typed, and it leads on to the same wizard.
+ * „Buchen" on an exam sitting or a course (2026-10-17), the first step: who. A name or an address finds
+ * the learner (a server action bound to the sitting or course), and choosing one opens their booking
+ * wizard with that choice already made (`/admin/people/<id>?<bookQuery>`). Someone already in it is
+ * marked and opens their page. Nobody found: „Neue Person anlegen" shows the person form (rendered on
+ * the server, passed in), filled with what was typed, and it leads on to the same wizard.
  */
-export function CandidatePicker({ sittingId, newPerson }: { sittingId: string; newPerson: ReactNode | null }) {
+export function PersonPicker({
+  search,
+  bookQuery,
+  alreadyLabel,
+  newPerson,
+}: {
+  search: (text: string) => Promise<PersonMatch[]>;
+  /** The wizard's choice, as the person page reads it: `book=1&sitting=…` or `book=1&cohort=…&level=…`. */
+  bookQuery: string;
+  /** For someone already booked into it: „Schon gebucht", „Schon im Kurs". */
+  alreadyLabel: string;
+  newPerson: ReactNode | null;
+}) {
   const { t } = useWsLang();
   const [text, setText] = useState('');
-  const [hits, setHits] = useState<CandidateMatch[]>([]);
+  const [hits, setHits] = useState<PersonMatch[]>([]);
   const [searched, setSearched] = useState('');
   const [adding, setAdding] = useState(false);
   const asked = useRef(0);
@@ -31,13 +45,13 @@ export function CandidatePicker({ sittingId, newPerson }: { sittingId: string; n
     if (term.length < 2) return;
     const ask = ++asked.current;
     const timer = window.setTimeout(async () => {
-      const found = await findCandidatesAction(sittingId, term);
+      const found = await search(term);
       if (ask !== asked.current) return;
       setHits(found);
       setSearched(term);
     }, 180);
     return () => window.clearTimeout(timer);
-  }, [sittingId, term]);
+  }, [search, term]);
 
   // The new person's form starts from what was typed: an address as the email, else the name.
   useEffect(() => {
@@ -93,11 +107,11 @@ export function CandidatePicker({ sittingId, newPerson }: { sittingId: string; n
               {hit.booked ? (
                 <Link href={`/admin/people/${hit.id}`} className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm hover:bg-[var(--ws-row-hover)]">
                   <Who hit={hit} t={t} />
-                  <span className="shrink-0 text-xs font-semibold text-[#17693a]">{t('Schon gebucht', 'Already booked')}</span>
+                  <span className="shrink-0 text-xs font-semibold text-[#17693a]">{alreadyLabel}</span>
                 </Link>
               ) : (
                 <Link
-                  href={`/admin/people/${hit.id}?book=1&sitting=${sittingId}`}
+                  href={`/admin/people/${hit.id}?${bookQuery}`}
                   className="group flex items-center justify-between gap-3 px-3 py-2.5 text-sm hover:bg-[var(--ws-row-hover)]"
                 >
                   <Who hit={hit} t={t} />
@@ -130,7 +144,7 @@ export function CandidatePicker({ sittingId, newPerson }: { sittingId: string; n
   );
 }
 
-function Who({ hit, t }: { hit: CandidateMatch; t: T }) {
+function Who({ hit, t }: { hit: PersonMatch; t: T }) {
   return (
     <span className="min-w-0">
       <span className="block truncate font-semibold text-[var(--casa-ink)]">{hit.name}</span>

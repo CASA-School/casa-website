@@ -128,12 +128,23 @@ export async function createPersonAction(formData: FormData): Promise<void> {
   if (typeof input === 'string') redirect(`/admin/people?error=${encodeURIComponent(input)}`);
   const id = await createPersonByStaff(input, actor);
   revalidatePath('/admin/people', 'layout');
-  // „Neu → Buchung" (a walk-in, or a new candidate from an exam sitting's „Buchen"): straight on into
-  // the booking wizard, at the sitting when one came with it.
+  // „Neu → Buchung" (a walk-in, or a new candidate from an exam sitting's or a course's „Buchen"):
+  // straight on into the booking wizard, at the sitting — or at the course start, its level and the
+  // Monday a learner joins a course under way from — when one came with it.
   if (formData.get('then') !== 'book') redirect(`/admin/people/${id}`);
   const sitting = String(formData.get('sitting') ?? '');
   const parts = String(formData.get('parts') ?? '');
-  const at = new URLSearchParams({ book: '1', ...(UUID.test(sitting) ? { sitting } : {}), ...(isExamParts(parts) && parts !== 'full' ? { parts } : {}) });
+  const cohort = String(formData.get('cohort') ?? '');
+  const level = String(formData.get('level') ?? '').trim();
+  const from = String(formData.get('from') ?? '');
+  const at = new URLSearchParams({
+    book: '1',
+    ...(UUID.test(sitting) ? { sitting } : {}),
+    ...(isExamParts(parts) && parts !== 'full' ? { parts } : {}),
+    ...(UUID.test(cohort) ? { cohort } : {}),
+    ...(UUID.test(cohort) && /^[A-C][12]\+?(\.[12])?$/i.test(level) ? { level } : {}),
+    ...(UUID.test(cohort) && /^\d{4}-\d{2}-\d{2}$/.test(from) ? { from } : {}),
+  });
   redirect(`/admin/people/${id}?${at.toString()}`);
 }
 

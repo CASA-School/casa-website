@@ -495,6 +495,17 @@ by the offers module's rule (`rentPrice`). Cost lines are written in German
 (`name_de`), and a letter in English translates them; a whole level reads
 „Intensivkurs A2.1–A2.2" on the booking and its letter.
 
+**Joining a running course (2026-10-17).** A start that has begun is offered with „läuft, noch N
+Wochen" and asks **„Einstieg ab"**: its remaining Mondays (closures skipped), the next one chosen. The
+server decides the period from that Monday (`bookedSpan`, `booking-levels.ts`) and refuses a week that
+is not offered. In an intensive course weeks 1–4 teach `X.1` and weeks 5–8 `X.2`: from the fifth
+teaching week the step is `X.2`, on **that start's own course** (`resolveCourse` with the period's
+dates; changing a booking's level passes them too). The fee is the price list's for the weeks from the
+join; a course with its own price (an evening term, a module) is charged its share of class days —
+pending Rahman's confirmation. Links: `/admin/people/<id>?book=1&cohort=<start>&level=<code>&from=<monday>`
+(`from` only for a running course). Not yet: free places from the join week on (the wizard reads the
+course's busiest week overall), and a waiting-list place for a joiner.
+
 **Accommodation is part of the booking, not only a cost line** (0013). The type,
 room, catering and dates are columns on `bookings`, so the answer is kept even
 though CASA has published no accommodation rate yet; a `booking_charges` line
@@ -1165,6 +1176,27 @@ run: 158 courses, 125 courses here, 22 own starts; 18 courses of three intensive
 starts beyond our twelve months (Oct 2027 – Jan 2028) and one evening course of
 14 Sep 2026 wait for a start of ours.
 
+**The course list (2026-10-17, Rahman: „running first, then coming up, the past on a switch").**
+Kurse lists **courses, one row each**, under the start they belong to, as SchoolMan's `Course_List`
+does: „Laufend & kommend" (running ones first, then those ahead, six months), „Vergangen" (the last
+year), „Kursarten". A start's row says the type, the dates, the shift, days and hours, and „Woche 4 von
+8" while it runs. A course's row: its level, groups and room; SchoolMan's course numbers („Nr. 4780 ·
+5069") while both systems run; the teachers from its lesson days; the learners now against its places
+(amber when over — SchoolMan never enforced its cap) with a bar for each week (this week in ink); who
+waits; and „Buchen", which opens the course with „Wen buchen?" (`?book=1`): a learner found by name or
+address, or a new person, then the wizard at that course — from the next Monday when it already runs
+(`from=`). The picker (`components/admin/person-picker.tsx`) is the exam sitting's too. The waiting
+lists are their own item in the rail, no longer under Kurse.
+
+**Learners from SchoolMan (0050).** While bookings are made in SchoolMan, its learners count:
+`python3 -I scripts/filemaker/read_course_learners.py | node scripts/filemaker/import-course-learners.mjs`
+reads its booking periods of the courses running or ahead (counts only — no name, no booking number)
+into `course_week_learners`, learners per course and week; a level's parallel groups add up. A week's
+learners are the bookings made here plus SchoolMan's, in the list, on the course page and in **booked
+places** everywhere (`BOOKED`, Bildungszeit's weeks), so free places, „voll" and the waiting list are
+right while both systems are used. Each read replaces the last; run it again to refresh. First read:
+916 course weeks of 97 courses, 586 learners this week.
+
 **Planning a start (2026-10-17, migration 0049).** „Termin planen" keeps what was
 typed and answers in the dialog when something is wrong. Hours are read however
 they are written („09:00–12:30", „9-12.30", „bis 12:30 Uhr") and fill from the
@@ -1316,7 +1348,8 @@ SchoolMan's lists filled up (87% of its entries sit at the default status).
   place with a reason, or another start or level keeping the join day — and
   „Von der Liste"/„Abgesagt"), the booked learners and the history of the queue.
   When a level is full and someone waits, „Zweite Gruppe eröffnen" adds a group.
-- **Kurse → Wartelisten** (`/admin/catalogue/waitlist`, nested under Kurse):
+- **Wartelisten** (`/admin/catalogue/waitlist`, its own item in the rail since 2026-10-17; each course's
+  count also shows in the Kurse list):
   every queue, grouped by start and level, with the views *Platz frei* (opens
   there when there is one), *Wartend*, *Angeboten*, *Kurs begonnen* (learners
   whose start has begun while they waited — move them or take them off) and
@@ -1963,3 +1996,13 @@ CI does not have — CI does not run e2e at all.
 | **Self-service password reset** | Needs outbound email |
 | **Owner-set passwords** | Give them in person or by phone, not by email |
 | **`admin.casa-bremen.de`** | DNS record not created yet. Until it is, use `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST=true` or reach it on the public host in development |
+| **Placement fee and deposit on a booking** (2026-10-17) | The offers module adds the placement fee (50 €) and the deposit (580 €) on a learner's first stay; a booking does not. Rahman to decide |
+| **Rent per type, room or meals** (2026-10-17) | The price list has one generic rent (SchoolMan prices every type alike); the Prices screen cannot enter one per type yet |
+| **Closed levels on the website** (2026-10-17) | The public form offers every level of a start, also those SchoolMan has closed; a registration for one becomes a waiting-list place. Hide them? Rahman to decide |
+| **Where a booking came from** (2026-10-17) | A booking made from an offer or an enquiry does not record it; needs a column such as `bookings.source_offer_id` |
+| **Down payment** | 100 € (AGB) or 200 € — open since the booking letters |
+| **Placing learners in flats and host families** (2026-10-17) | Buchungen → Unterkunft lists who arrives when; assigning a flat or a family (SchoolMan's `DateAccommodation`) is not built |
+| **Back to the page after sign-in** (2026-10-17) | A sign-in always lands on the overview; the guard and the Microsoft callback would have to carry `next` |
+| **Pro-rated own prices for joiners** (2026-10-17) | An evening term or module joined late is charged its share of class days (476 € × 18/34 → 252 €). Assumed; Rahman to confirm |
+| **Past courses** (2026-10-17) | Kurse → Vergangen lists what has ended since the SchoolMan import; earlier courses were not read across |
+| **Booking letters from offers** | „Buchung anlegen" on an accepted offer opens the wizard at the offer's start; the offer's prices are not carried over (the booking prices from the list) |

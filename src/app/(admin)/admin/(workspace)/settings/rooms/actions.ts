@@ -9,7 +9,7 @@ import { readStartForm } from '@/lib/admin/course-starts';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { assignRoom, createRoom, deleteRoom, updateRoom, type RoomKind } from '@/lib/admin/rooms';
+import { createRoom, deleteRoom, updateRoom, type RoomKind } from '@/lib/admin/rooms';
 
 /** Planning module mutations. Creating and editing need `edit`; deleting needs `full`. */
 
@@ -106,23 +106,6 @@ export async function createRoomAction(formData: FormData): Promise<void> {
   );
   revalidatePath('/admin/settings/rooms', 'layout');
   redirect(`/admin/settings/rooms/${roomId}`);
-}
-
-/** From the catalogue: put a cohort in a room. An empty value clears it. */
-export async function assignRoomAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('rooms', 'edit');
-  const courseInstanceId = id(formData, 'courseInstanceId');
-  const raw = String(formData.get('roomId') ?? '');
-  const roomId = raw === '' ? null : raw;
-  if (roomId !== null && !UUID.test(roomId)) throw new Error('Invalid roomId');
-
-  const result = await assignRoom(courseInstanceId, roomId, actor);
-  revalidatePath('/admin/catalogue');
-  revalidatePath('/admin/settings/rooms', 'layout');
-  const { lang } = await getI18n();
-  redirect(
-    result.ok ? '/admin/catalogue' : `/admin/catalogue?error=${encodeURIComponent(pick(lang, result.reason))}`
-  );
 }
 
 /** Only after the confirmation dialog: the hidden `confirmed` field must be set. */

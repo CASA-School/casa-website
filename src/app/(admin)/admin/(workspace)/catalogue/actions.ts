@@ -11,6 +11,8 @@ import { issueWaitlistLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { WAITLIST_LETTER_KINDS, type WaitlistLetterKind } from '@/lib/admin/letters/types';
 import { openPlanGroups } from '@/lib/admin/kursplanung/link';
+import { canAccess } from '@/lib/admin/access';
+import { findLearnersForCourse, type PersonMatch } from '@/lib/admin/course-list';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -34,6 +36,13 @@ import {
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** „Buchen" on a course in the list: learners by name or address, marked when already in it. */
+export async function findCourseLearnersAction(courseId: string, text: string): Promise<PersonMatch[]> {
+  const user = await requireModule('bookings', 'edit');
+  if (!canAccess(user, 'people') || typeof courseId !== 'string' || !UUID.test(courseId) || typeof text !== 'string') return [];
+  return findLearnersForCourse(courseId, text);
+}
 
 const id = (formData: FormData, field: string): string => {
   const value = String(formData.get(field) ?? '');

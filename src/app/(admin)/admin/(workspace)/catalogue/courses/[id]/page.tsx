@@ -3,8 +3,11 @@ import { notFound } from 'next/navigation';
 
 import { applyPlanAction, generateDaysAction } from '../actions';
 import { DayForm, WeekPlanForm } from '../day-forms';
+import { findCourseLearnersAction } from '../../actions';
+import { PersonForm } from '../../../people/person-form';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { PersonPicker } from '@/components/admin/person-picker';
 import { dayRange } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
@@ -12,10 +15,12 @@ import { Badge, Button, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { courseDayChoices, courseInfo, hours, listCourseDays, weekPlans, type CourseDay } from '@/lib/admin/course-days';
+import { nextJoinMonday } from '@/lib/admin/course-list';
 import { courseLearners } from '@/lib/admin/courses';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { listCountries } from '@/lib/admin/people';
 import { ABSENCE_LABELS, isAbsenceReason } from '@/lib/admin/kursplanung/types';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
 import { courseGroup } from '@/lib/admin/waitlist';
@@ -29,8 +34,14 @@ import { cn } from '@/lib/utils';
  * dialog; the plan's teacher or room goes onto every day ahead in one step. The intensive courses' days
  * are the ones Kursplanung's board plans.
  */
-export default async function CoursePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; group?: string; error?: string }> }) {
-  const [{ id }, { tab, group, error }, user] = await Promise.all([params, searchParams, requireModule('catalogue')]);
+export default async function CoursePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string; group?: string; error?: string; book?: string }>;
+}) {
+  const [{ id }, { tab, group, error, book }, user] = await Promise.all([params, searchParams, requireModule('catalogue')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const course = await courseInfo(id);
   if (!course) notFound();
@@ -55,6 +66,19 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   // Days ahead still waiting for a teacher — none set, or the one set is away that day: what staff act on.
   const open = held.filter((d) => (!d.teacherId || d.teacherAway) && !d.merged && d.date >= today).length;
   const startHref = `/admin/catalogue/${course.courseInstanceId}`;
+  // „Buchen" (also from the course list, `?book=1`): who, then their wizard at this course — from the
+  // next Monday when it already runs, as a joiner is booked.
+  const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') && !course.cancelled && course.endDate >= today;
+  const running = course.startDate <= today;
+  const joinFrom = running ? nextJoinMonday(today) : null;
+  const joinDay = joinFrom ? new Date(`${joinFrom}T12:00:00`).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+  const bookQuery = new URLSearchParams({
+    book: '1',
+    cohort: course.courseInstanceId,
+    ...(course.levelCode ? { level: course.levelCode } : {}),
+    ...(joinFrom ? { from: joinFrom } : {}),
+  }).toString();
+  const countries = canBook && canAccess(user, 'people', 'edit') ? await listCountries() : null;
 
   const tabs: RecordTab[] = [
     { id: 'days', label: t('Kurstage', 'Lesson days'), icon: Icon.calendar, count: shown.length },
@@ -101,11 +125,39 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
           </MetaLine>
         }
         actions={
-          course.intensive && canAccess(user, 'kursplanung') ? (
-            <Link href="/admin/kursplanung" className="inline-flex h-9 items-center rounded-xl border border-ws-line bg-white px-3.5 text-[0.84rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm">
-              {t('Kursplanung', 'Kursplanung')}
-            </Link>
-          ) : null
+          <>
+            {course.intensive && canAccess(user, 'kursplanung') ? (
+              <Link href="/admin/kursplanung" className="inline-flex h-9 items-center rounded-xl border border-ws-line bg-white px-3.5 text-[0.84rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm">
+                {t('Kursplanung', 'Kursplanung')}
+              </Link>
+            ) : null}
+            {canBook ? (
+              <FormDialog
+                trigger={t('Buchen', 'Book')}
+                title={t('Wen buchen?', 'Who to book?')}
+                description={`${course.typeName} ${course.label}${joinFrom ? t(` · Einstieg ab ${joinDay}`, ` · joining from ${joinDay}`) : ''}`}
+                icon={Icon.bookings}
+                tint="red"
+                triggerVariant="primary"
+                defaultOpen={book === '1'}
+              >
+                <PersonPicker
+                  search={findCourseLearnersAction.bind(null, id)}
+                  bookQuery={bookQuery}
+                  alreadyLabel={t('Schon im Kurs', 'Already in it')}
+                  newPerson={
+                    countries ? (
+                      <PersonForm
+                        countries={countries}
+                        hidden={{ then: 'book', cohort: course.courseInstanceId, ...(course.levelCode ? { level: course.levelCode } : {}), ...(joinFrom ? { from: joinFrom } : {}) }}
+                        submitLabel={t('Weiter zur Buchung', 'On to the booking')}
+                      />
+                    ) : null
+                  }
+                />
+              </FormDialog>
+            ) : null}
+          </>
         }
         bar={
           <StatBar>

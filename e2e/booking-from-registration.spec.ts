@@ -3,6 +3,8 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import pg from 'pg';
 
+import { openCoursesAroundToday } from './support/open-courses';
+
 /**
  * A registration carried into its booking, and the booking kept right afterwards (2026-10-17 audit):
  * „A2 komplett" with a host family opens the wizard at the whole A2 with „bei Deutschen"; the stay
@@ -24,9 +26,13 @@ test.describe('a booking from a registration', () => {
   let personId = '';
   let registrationId = '';
 
+  // The real classes around today, open and without SchoolMan's learners for the run (put back after).
+  let courses: { restore: () => Promise<void> } | null = null;
+
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
     await client.connect();
+    courses = await openCoursesAroundToday(client);
     const { rows } = await client.query<{ id: string }>(`SELECT id FROM staff_users WHERE role = 'owner' AND is_active ORDER BY created_at LIMIT 1`);
     test.skip(rows.length === 0, 'no owner account');
     const { rows: starts } = await client.query<{ id: string; course_type_id: string }>(
@@ -66,6 +72,7 @@ test.describe('a booking from a registration', () => {
       await client.query(`DELETE FROM people WHERE id = $1`, [personId]);
     }
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
+    await courses?.restore();
     await client.end();
   });
 
