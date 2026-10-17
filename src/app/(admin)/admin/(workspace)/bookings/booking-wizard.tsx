@@ -458,6 +458,9 @@ export function BookingWizard({
               {full
                 ? t(`${levelCode} ist voll: ${group.booked} von ${group.places} Plätzen gebucht`, `${levelCode} is full: ${group.booked} of ${group.places} places booked`)
                 : t(`${levelCode}: ${free} von ${group.places} Plätzen frei`, `${levelCode}: ${free} of ${group.places} places free`)}
+              {group.until
+                ? t(` · im laufenden Kurs bis ${german(group.until)}`, ` · in the running course until ${german(group.until)}`)
+                : ''}
               {group.offeredTo.includes(personId)
                 ? t(' · der Platz ist für diese Person reserviert', ' · the place is held for this person')
                 : group.queue.length
@@ -1093,9 +1096,13 @@ function summaryRows(
   }
   if (kind === 'course' && cohort) {
     rows.push({ label: t('Kurs', 'Course'), value: cohort.label });
+    // A second half joined here sits in the running course of the start before, to its end.
+    const until = levelCode ? cohort.levels[levelCode]?.until : null;
     rows.push({
       label: t('Dauer', 'Runs for'),
-      value: weeksLabel(t, cohort.weeks),
+      value: until
+        ? t(`${german(toDateInputValue(cohort.startDate))} – ${german(until)} · im laufenden Kurs`, `${german(toDateInputValue(cohort.startDate))} – ${german(until)} · in the running course`)
+        : weeksLabel(t, cohort.weeks),
     });
   }
   if (kind === 'exam' && exam) {

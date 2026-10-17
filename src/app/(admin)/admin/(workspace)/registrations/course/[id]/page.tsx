@@ -22,7 +22,7 @@ import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from 
 import { getCourseRegistration } from '@/lib/admin/registrations';
 import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
-import { levelGroups } from '@/lib/admin/waitlist';
+import { startLevelPlaces } from '@/lib/admin/waitlist';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForRegistration } from '@/lib/admin/letters/repo';
@@ -67,9 +67,9 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
   const [levels, groups] = queues
     ? await Promise.all([
         query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`).then((rows) => rows.map((r) => r.code)),
-        levelGroups([registration.courseInstanceId!]),
+        startLevelPlaces(registration.courseInstanceId!),
       ])
-    : [[], []];
+    : [[], {}];
 
   const [notes, activity, staff, flags, person, courseName, letters] = await Promise.all([
     listNotes('course_registration', registration.id),
@@ -146,7 +146,7 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
                     personId={registration.personId}
                     courseInstanceId={registration.courseInstanceId!}
                     levels={levels}
-                    groups={groups}
+                    places={groups}
                     registrationId={registration.id}
                     defaultLevel={registration.declaredLevelCode}
                     returnTo={`/admin/registrations/course/${registration.id}`}

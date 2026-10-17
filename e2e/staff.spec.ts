@@ -53,7 +53,7 @@ test.describe('staff register', () => {
            FROM course_types WHERE slug = 'intensive-german' RETURNING id`
       )
     ).rows[0].id;
-    await client.query(`INSERT INTO course_level_places (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'B1.1', 1, 14)`, [startId]);
+    await client.query(`INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'B1.1', 1, 14)`, [startId]);
   });
 
   test.afterAll(async () => {
@@ -179,18 +179,20 @@ test.describe('staff register', () => {
 
   test('a group opened on the course start is opened on the board', async ({ page }) => {
     // One place per group, both taken, and a third learner waiting: the level is full.
-    await client.query(`UPDATE course_level_places SET places_per_group = 1 WHERE course_instance_id = $1`, [startId]);
+    const course = (
+      await client.query<{ id: string }>(`UPDATE courses SET places_per_group = 1 WHERE course_instance_id = $1 AND level_code = 'B1.1' RETURNING id`, [startId])
+    ).rows[0].id;
     for (const name of ['Ada', 'Bo', 'Cy']) {
       const person = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ($1, 'Gruppentest', 'e2e') RETURNING id`, [name])).rows[0].id;
       if (name === 'Cy') {
-        await client.query(`INSERT INTO waitlist_entries (person_id, course_instance_id, level_code, rank) VALUES ($1, $2, 'B1.1', 1)`, [person, startId]);
+        await client.query(`INSERT INTO waitlist_entries (person_id, course_instance_id, level_code, course_id, rank) VALUES ($1, $2, 'B1.1', $3, 1)`, [person, startId, course]);
         continue;
       }
       const booking = (await client.query<{ id: string }>(`INSERT INTO bookings (person_id, status) VALUES ($1, 'confirmed') RETURNING id`, [person])).rows[0].id;
-      await client.query(`INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, level_code) VALUES ($1, $2, '2031-03-03', '2031-04-25', 'initial', 'B1.1')`, [
-        booking,
-        startId,
-      ]);
+      await client.query(
+        `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, level_code, course_id) VALUES ($1, $2, '2031-03-03', '2031-04-25', 'initial', 'B1.1', $3)`,
+        [booking, startId, course]
+      );
     }
 
     await page.goto(`/admin/catalogue/${startId}`);

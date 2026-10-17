@@ -464,6 +464,37 @@ intensive start opens the planning month two weeks after its first day, and a
 level code names the board's level and phase (`B1.1` → B1, phase 1).
 `docs/KURSPLANUNG.md` §Course starts.
 
+## Courses (0041)
+
+```mermaid
+erDiagram
+  COURSE_INSTANCES ||--o{ COURSES : "a start's courses"
+  ROOMS o|--o{ COURSES : room_id
+  ORGANISATIONS o|--o{ COURSES : organisation_id
+  COURSES o|--o{ BOOKING_PERIODS : course_id
+  COURSES o|--o{ WAITLIST_ENTRIES : course_id
+
+  COURSES {
+    uuid id PK
+    uuid course_instance_id FK
+    text level_code FK
+    text title
+    text session
+    uuid room_id FK
+    smallint groups
+    smallint places_per_group
+    bool bookable
+    text status
+    numeric price
+    int lessons
+    uuid organisation_id FK
+    text filemaker_course_id
+  }
+```
+
+One course per start and level (`courses_start_level_key`); a named course has
+no level. `course_level_places` (0031) is gone into it.
+
 ## Notes
 - `course_instances.schedule` should remain structured JSON.
 - Public reads should only expose active or publishable records.

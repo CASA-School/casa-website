@@ -201,7 +201,7 @@ function CohortRow({
 }) {
   const waiting = groups.reduce((sum, g) => sum + g.waiting + g.offered, 0);
   const freeForNext = groups.some(placeForNext);
-  const fullLevels = groups.filter((g) => g.places > 0 && freePlaces(g) === 0).map((g) => g.levelCode);
+  const fullLevels = groups.filter((g) => !g.cancelled && g.places > 0 && freePlaces(g) === 0).map((g) => g.label);
   const overRoom =
     instance.room?.capacity !== null &&
     instance.room?.capacity !== undefined &&

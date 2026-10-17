@@ -1,6 +1,7 @@
 import type { PoolClient } from 'pg';
 
 import { logActivity } from './activity';
+import { resolveCourse } from './courses';
 import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
 import { ratedParts, type ExamOutcome, type ExamParts } from './exam-parts';
@@ -628,10 +629,24 @@ async function addPeriodOn(
   },
   actor: StaffUser
 ): Promise<string> {
+  // The course the learner sits in (0041): a joiner at a second half on the running course, to its end.
+  const course =
+    input.courseInstanceId && input.levelCode
+      ? await resolveCourse(input.courseInstanceId, input.levelCode, { startDate: input.startDate, endDate: input.endDate }, { client, actor })
+      : null;
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, level_code, created_by)
-     VALUES ($1, $2, $3::date, $4::date, $5, $6, $7) RETURNING id`,
-    [bookingId, input.courseInstanceId, input.startDate, input.endDate, input.kind, input.levelCode ?? null, actor.id]
+    `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, kind, level_code, course_id, created_by)
+     VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8) RETURNING id`,
+    [
+      bookingId,
+      course?.courseInstanceId ?? input.courseInstanceId,
+      input.startDate,
+      course?.endDate ?? input.endDate,
+      input.kind,
+      input.levelCode ?? null,
+      course?.courseId ?? null,
+      actor.id,
+    ]
   );
   if (!input.courseInstanceId) {
     await raiseFlag(
@@ -816,9 +831,26 @@ export async function extendBooking(
   });
 }
 
-/** The level a period is taught at — set or corrected on the booking's page. */
+/** The level a period is taught at — set or corrected on the booking's page; its course follows (0041). */
 export async function setPeriodLevel(bookingId: string, periodId: string, levelCode: string | null, actor: StaffUser): Promise<void> {
-  await query(`UPDATE booking_periods SET level_code = $3 WHERE id = $1 AND booking_id = $2`, [periodId, bookingId, levelCode]);
+  // The start the learner began at: the one of the same course type starting on the period's first
+  // day — a joiner's period sits on the running course of the start before.
+  const period = await queryFirst<{ course_instance_id: string | null }>(
+    `SELECT coalesce(
+              (SELECT o.id FROM course_instances o WHERE o.course_type_id = i.course_type_id AND o.start_date = bp.start_date AND o.status <> 'cancelled' LIMIT 1),
+              bp.course_instance_id) AS course_instance_id
+       FROM booking_periods bp LEFT JOIN course_instances i ON i.id = bp.course_instance_id
+      WHERE bp.id = $1 AND bp.booking_id = $2`,
+    [periodId, bookingId]
+  );
+  const course = period?.course_instance_id && levelCode ? await resolveCourse(period.course_instance_id, levelCode, undefined, { actor }) : null;
+  await query(`UPDATE booking_periods SET level_code = $3, course_id = $4, course_instance_id = coalesce($5, course_instance_id) WHERE id = $1 AND booking_id = $2`, [
+    periodId,
+    bookingId,
+    levelCode,
+    course?.courseId ?? null,
+    course?.courseInstanceId ?? null,
+  ]);
   await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'booking_level_set', detail: { period: periodId, level: levelCode } });
 }
 

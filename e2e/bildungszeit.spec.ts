@@ -50,12 +50,12 @@ test.describe('Bildungszeit', () => {
     await client.query(`DELETE FROM people WHERE id = ANY($1::uuid[])`, [people]);
     if (startId) {
       if (placesBefore)
-        await client.query(`UPDATE course_level_places SET groups = $2, places_per_group = $3 WHERE course_instance_id = $1 AND level_code = 'B1.1'`, [
+        await client.query(`UPDATE courses SET groups = $2, places_per_group = $3 WHERE course_instance_id = $1 AND level_code = 'B1.1'`, [
           startId,
           placesBefore.groups,
           placesBefore.places_per_group,
         ]);
-      else await client.query(`DELETE FROM course_level_places WHERE course_instance_id = $1 AND level_code = 'B1.1'`, [startId]);
+      else await client.query(`UPDATE courses SET groups = 1, places_per_group = 14 WHERE course_instance_id = $1 AND level_code = 'B1.1'`, [startId]);
     }
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
@@ -185,13 +185,13 @@ test.describe('Bildungszeit', () => {
   test('a class with no place left that week is marked, and booking it anyway stays possible', async ({ page }) => {
     // One place in the newest start's B1.1, and Bea in it that week.
     const before = await client.query<{ groups: number; places_per_group: number }>(
-      `SELECT groups, places_per_group FROM course_level_places WHERE course_instance_id = $1 AND level_code = 'B1.1'`,
+      `SELECT groups, places_per_group FROM courses WHERE course_instance_id = $1 AND level_code = 'B1.1'`,
       [startId]
     );
     placesBefore = before.rows[0] ?? null;
     await client.query(
-      `INSERT INTO course_level_places (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'B1.1', 1, 1)
-       ON CONFLICT (course_instance_id, level_code) DO UPDATE SET groups = 1, places_per_group = 1`,
+      `INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'B1.1', 1, 1)
+       ON CONFLICT (course_instance_id, level_code) WHERE level_code IS NOT NULL DO UPDATE SET groups = 1, places_per_group = 1`,
       [startId]
     );
 

@@ -20,6 +20,7 @@ test.describe('waiting list', () => {
   let token = '';
   let tokenHash = '';
   let instanceId = '';
+  let courseId = '';
   let firstId = '';
   let firstBookingId = '';
   let nextId = '';
@@ -42,17 +43,19 @@ test.describe('waiting list', () => {
            FROM course_types WHERE slug = 'intensive-german' RETURNING id`
       )
     ).rows[0].id;
-    // B1.1 in this start: one place.
-    await client.query(`INSERT INTO course_level_places (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'B1.1', 1, 1)`, [instanceId]);
+    // The start's B1 course (0041): one place.
+    courseId = (
+      await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'B1.1', 1, 1) RETURNING id`, [instanceId])
+    ).rows[0].id;
     const person = async (first: string, last: string) =>
       (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ($1, $2, 'e2e') RETURNING id`, [first, last])).rows[0].id;
     firstId = await person('Anna', 'Erstbuchung');
     nextId = await person('Ben', 'Wartetest');
     firstBookingId = (await client.query<{ id: string }>(`INSERT INTO bookings (person_id, status) VALUES ($1, 'confirmed') RETURNING id`, [firstId])).rows[0].id;
     await client.query(
-      `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, level_code)
-       SELECT $1, id, start_date, end_date, 'B1.1' FROM course_instances WHERE id = $2`,
-      [firstBookingId, instanceId]
+      `INSERT INTO booking_periods (booking_id, course_instance_id, start_date, end_date, level_code, course_id)
+       SELECT $1, id, start_date, end_date, 'B1.1', $3 FROM course_instances WHERE id = $2`,
+      [firstBookingId, instanceId, courseId]
     );
   });
 

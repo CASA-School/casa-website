@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { isLevelCode } from '@/lib/admin/bookings';
+import { cancelCourse, courseForEdit, createCourse, deleteCourse, openCourseGroup, updateCourse, type CourseInput } from '@/lib/admin/courses';
 import { issueWaitlistLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { WAITLIST_LETTER_KINDS, type WaitlistLetterKind } from '@/lib/admin/letters/types';
@@ -14,21 +15,20 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import {
   addToWaitlist,
   CLOSE_REASONS,
+  courseGroup,
   closeEntry,
   moveEntry,
   moveToStart,
   offerPlace,
-  openGroup,
-  setPlaces,
   takeBackOffer,
   type CloseReason,
 } from '@/lib/admin/waitlist';
 
 /**
  * The waiting list's mutations (docs/ADMIN_WORKSPACE.md §Waiting list). Putting someone in a queue,
- * offering a place, moving and closing an entry are bookings work: `bookings` at `edit`. How many
- * places a level has, and opening another group, is the course's own planning: `rooms` at `edit`,
- * the right that schedules a course start.
+ * offering a place, moving and closing an entry are bookings work: `bookings` at `edit`. A course of a
+ * start (0041) — making one, its places, room and price, another group — is the course's own planning:
+ * `rooms` at `edit`, the right that schedules a course start; cancelling and deleting one, `full`.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -148,32 +148,91 @@ export async function addToWaitlistAction(formData: FormData): Promise<void> {
   done(back);
 }
 
-/** How many groups a level has and how many learners a group takes. */
-export async function setPlacesAction(formData: FormData): Promise<void> {
+/** The course form's fields: places, room, whether it is offered, and a module's name, price and lessons. */
+async function courseInput(formData: FormData, back: string): Promise<CourseInput> {
+  const { t } = await getI18n();
+  const groups = Number(formData.get('groups'));
+  const placesPerGroup = Number(formData.get('placesPerGroup'));
+  if (!Number.isInteger(groups) || groups < 0 || groups > 9) fail(back, t('Gruppen: 0 bis 9.', 'Groups: 0 to 9.'));
+  if (!Number.isInteger(placesPerGroup) || placesPerGroup < 1 || placesPerGroup > 40) fail(back, t('Plätze pro Gruppe: 1 bis 40.', 'Places per group: 1 to 40.'));
+  const money = text(formData, 'price', 12);
+  const price = money === null ? null : Number(money.replace(',', '.'));
+  if (price !== null && (!Number.isFinite(price) || price < 0 || price > 100000)) fail(back, t('Der Preis ist keine Zahl.', 'The price is not a number.'));
+  const count = text(formData, 'lessons', 6);
+  const lessons = count === null ? null : Number(count);
+  if (lessons !== null && (!Number.isInteger(lessons) || lessons < 0 || lessons > 2000)) fail(back, t('Unterrichtseinheiten: eine ganze Zahl.', 'Lessons: a whole number.'));
+  const room = String(formData.get('roomId') ?? '');
+  return {
+    roomId: UUID.test(room) ? room : null,
+    groups,
+    placesPerGroup,
+    bookable: formData.get('bookable') === 'on',
+    title: text(formData, 'title', 120),
+    price: price === null ? null : Math.round(price * 100) / 100,
+    lessons,
+    note: text(formData, 'note', 500),
+  };
+}
+
+/** A new course of a start: a level, or a module's (a group's, a company's) own name. */
+export async function createCourseAction(formData: FormData): Promise<void> {
   const actor = await requireModule('rooms', 'edit');
   const courseInstanceId = id(formData, 'courseInstanceId');
   const back = backTo(formData, `/admin/catalogue/${courseInstanceId}`);
-  const levelCode = await level(formData, back);
-  const groups = Number(formData.get('groups'));
-  const placesPerGroup = Number(formData.get('placesPerGroup'));
-  const { t } = await getI18n();
-  if (!Number.isInteger(groups) || groups < 0 || groups > 9) fail(back, t('Gruppen: 0 bis 9.', 'Groups: 0 to 9.'));
-  if (!Number.isInteger(placesPerGroup) || placesPerGroup < 1 || placesPerGroup > 40) fail(back, t('Plätze pro Gruppe: 1 bis 40.', 'Places per group: 1 to 40.'));
-  await setPlaces(courseInstanceId, levelCode, groups, placesPerGroup, actor);
+  const raw = text(formData, 'levelCode', 8);
+  if (raw && !(await isLevelCode(raw))) fail(back, (await getI18n()).t('Bitte wähle ein Niveau.', 'Choose a level.'));
+  const result = await createCourse(courseInstanceId, { levelCode: raw, ...(await courseInput(formData, back)) }, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   done(back);
 }
 
-/** A second group of the same level: more places, and the queue can be booked in order. */
+/** A course's places, room, whether it is offered, and a module's name, price and lessons. */
+export async function updateCourseAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('rooms', 'edit');
+  const courseId = id(formData, 'courseId');
+  const course = await courseForEdit(courseId);
+  const back = backTo(formData, course ? `/admin/catalogue/${course.courseInstanceId}` : '/admin/catalogue');
+  const result = await updateCourse(courseId, await courseInput(formData, back), actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
+}
+
+/** Called off: kept, no longer offered — not while anyone is booked or waits. */
+export async function cancelCourseAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('rooms', 'full');
+  const courseId = id(formData, 'courseId');
+  const course = await courseForEdit(courseId);
+  const back = backTo(formData, course ? `/admin/catalogue/${course.courseInstanceId}` : '/admin/catalogue');
+  if (formData.get('confirmed') !== '1') redirect(back);
+  const result = await cancelCourse(courseId, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
+}
+
+/** Gone, for a course made by mistake. */
+export async function deleteCourseAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('rooms', 'full');
+  const courseId = id(formData, 'courseId');
+  const course = await courseForEdit(courseId);
+  const back = backTo(formData, course ? `/admin/catalogue/${course.courseInstanceId}` : '/admin/catalogue');
+  if (formData.get('confirmed') !== '1') redirect(back);
+  const result = await deleteCourse(courseId, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
+}
+
+/** A second group of the course: more places, and the queue can be booked in order. */
 export async function openGroupAction(formData: FormData): Promise<void> {
   const actor = await requireModule('rooms', 'edit');
-  const courseInstanceId = id(formData, 'courseInstanceId');
-  const back = backTo(formData, `/admin/catalogue/${courseInstanceId}`);
-  const levelCode = await level(formData, back);
-  if (formData.get('confirmed') !== '1') redirect(back);
-  const result = await openGroup(courseInstanceId, levelCode, actor);
+  const courseId = id(formData, 'courseId');
+  const course = await courseForEdit(courseId);
+  const back = backTo(formData, course ? `/admin/catalogue/${course.courseInstanceId}` : '/admin/catalogue');
+  if (formData.get('confirmed') !== '1' || !course) redirect(back);
+  const shown = await courseGroup(courseId);
+  const result = await openCourseGroup(courseId, (shown?.groups ?? course.groups) + 1, actor);
   if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   // The same group on the Kursplanung board, when the board has the month.
-  await openPlanGroups(courseInstanceId, levelCode, actor);
+  if (course.levelCode) await openPlanGroups(course.courseInstanceId, course.levelCode, actor);
   done(back);
 }
 

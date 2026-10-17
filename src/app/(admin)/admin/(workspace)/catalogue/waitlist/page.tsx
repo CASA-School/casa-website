@@ -9,7 +9,7 @@ import { firstParam } from '@/lib/admin/paging';
 import {
   CLOSE_REASON_LABELS,
   freePlaces,
-  levelGroups,
+  courseGroups,
   listEntries,
   waitlistCounts,
   WAITLIST_SOURCE_LABELS,
@@ -49,7 +49,7 @@ export default async function WaitlistPage({ searchParams }: { searchParams: Pro
   const view: WaitlistView = VIEWS.some((v) => v.key === raw) ? (raw as WaitlistView) : counts.free > 0 ? 'free' : 'waiting';
   const search = firstParam(params.q);
   const entries = await listEntries(view, search);
-  const groups = await levelGroups([...new Set(entries.map((e) => e.courseInstanceId))]);
+  const groups = await courseGroups([...new Set(entries.map((e) => e.courseId).filter((v): v is string => Boolean(v)))]);
   const queues = groupRuns(entries);
 
   return (
@@ -111,12 +111,15 @@ export default async function WaitlistPage({ searchParams }: { searchParams: Pro
             ]}
           >
             {queues.flatMap((queue) => {
-              const group = groups.find((g) => g.courseInstanceId === queue.courseInstanceId && g.levelCode === queue.levelCode);
+              // The course whose queue it is: a joiner waits on the running course of the start before.
+              const group = groups.find((g) => g.courseId === queue.key);
               const free = group ? freePlaces(group) : 0;
-              const href = `/admin/catalogue/${queue.courseInstanceId}?level=${encodeURIComponent(queue.levelCode)}`;
+              const href = group
+                ? `/admin/catalogue/${group.courseInstanceId}?level=${encodeURIComponent(group.levelCode ?? group.courseId)}`
+                : `/admin/catalogue/${queue.items[0].courseInstanceId}`;
               return [
                 <ListGroup
-                  key={`${queue.courseInstanceId}:${queue.levelCode}`}
+                  key={queue.key}
                   label={`${queueLabel(queue.items[0], lang)} · ${free > 0 ? (free === 1 ? t('1 Platz frei', '1 place free') : t(`${free} Plätze frei`, `${free} places free`)) : t('voll', 'full')}`}
                   count={queue.items.length}
                   span={4}
@@ -172,13 +175,14 @@ function queueLabel(entry: WaitlistEntry, lang: WsLang): string {
     .join(' · ');
 }
 
-/** Consecutive entries of one start and level, as one queue. */
+/** The entries of one course as one queue, in the order the first of each came. */
 function groupRuns(entries: WaitlistEntry[]) {
-  const out: { courseInstanceId: string; levelCode: string; items: WaitlistEntry[] }[] = [];
+  const out = new Map<string, { key: string; items: WaitlistEntry[] }>();
   for (const entry of entries) {
-    const last = out[out.length - 1];
-    if (last && last.courseInstanceId === entry.courseInstanceId && last.levelCode === entry.levelCode) last.items.push(entry);
-    else out.push({ courseInstanceId: entry.courseInstanceId, levelCode: entry.levelCode, items: [entry] });
+    const key = entry.courseId ?? `${entry.courseInstanceId}:${entry.levelCode}`;
+    const queue = out.get(key) ?? { key, items: [] };
+    queue.items.push(entry);
+    out.set(key, queue);
   }
-  return out;
+  return [...out.values()];
 }

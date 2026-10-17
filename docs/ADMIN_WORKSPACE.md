@@ -1065,6 +1065,39 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     the same `/admin/lang` the top bar uses). Team, Einstellungen, Preise and
     Räume were already in the shared design and kept as they are.
 
+## Courses (2026-10-17, migration 0041)
+
+Rahman chose SchoolMan's model: a **course is one level of a start** —
+„B1 · Intensiv · Vormittag · ab 26. Okt." — or one module, exam preparation,
+group's or company's course. SchoolMan's live data (counts only): an intensive
+`Course` is one level for one start in one shift, eight weeks (nine or ten with
+a closure), 14 places it never enforces (204 of 351 courses since 2025 hold
+more, because one course is the level's whole cohort, split into groups only in
+practice); an evening course one level for a term, Mon/Wed or Tue/Thu; a
+special course one module of 9–12 weeks with its own price; an exam
+preparation 4–5 weeks. 5,404 of 5,424 intensive bookings since 2025 sit on one
+course with one period; a learner who goes on gets a new booking on the next.
+
+**`courses`** takes over 0031's places per start and level: a start's course per
+level (`level_code` the step it starts at, `B1.1`) or a named one (`title`), with
+its groups and places per group, room, whether it is offered (`bookable`),
+`status` (`cancelled` keeps it with its history), an evening or special course's
+own price and lessons, a group's or company's organisation, and SchoolMan's
+`filemaker_course_id`. A **booked period** and a **waiting-list place** name
+their course (`course_id`); their `level_code` stays the learner's own step.
+`resolveCourse` (`courses.ts`) is the one rule for which course a step at a
+start means: the start's own course at that step, made if missing; for an
+intensive start's second half (`B1.2`) the course of the start before, still
+running — the learner sits in it from their first day to its end, as in
+SchoolMan, and the wizard says so („im laufenden Kurs bis …").
+
+Places, the queue, Bildungszeit's weeks and Kursplanung's „Gebucht" all count
+by course. The course start page lists its courses as cards — places and room,
+who is next, the queue, the booked — with „Bearbeiten" (places, room, offered,
+a named course's price and lessons), „Weitere Gruppe eröffnen" (also on the
+board), and „Absagen" or „Löschen" (`rooms` at `full`; never with anyone booked
+or waiting, and only an unused course is deleted). „Kurs hinzufügen" makes one.
+
 ## Waiting list (2026-10-16, migration 0031)
 
 Rahman: "do it properly and better than FileMaker — it is an important thing".

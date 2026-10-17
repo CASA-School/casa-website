@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation';
 
 import { createBookingFromWizardAction } from '../../bookings/actions';
 import { BookingWizard } from '../../bookings/booking-wizard';
-import { offerPlaceAction, openGroupAction, takeBackOfferAction } from '../actions';
-import { CloseForm, MoveForm, NewLevelForm, PlacesForm } from '../waitlist-forms';
+import { cancelCourseAction, deleteCourseAction, offerPlaceAction, openGroupAction, takeBackOfferAction } from '../actions';
+import { CourseForm, NewCourseForm } from '../course-forms';
+import { CloseForm, MoveForm } from '../waitlist-forms';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
@@ -16,6 +17,7 @@ import { bookingOffer } from '@/lib/admin/booking-offer';
 import type { BookingOffer } from '@/lib/admin/booking-offer-types';
 import { BOOKING_LIGHT_LABELS, bookingLight, type ObservationReason } from '@/lib/admin/bookings';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
+import { coursesForEdit, type CourseForEdit } from '@/lib/admin/courses';
 import { requireModule } from '@/lib/admin/guard';
 import { capitalise, num, pick, relativeDays, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -41,6 +43,7 @@ import { toDateInputValue } from '@/lib/dates';
 import { teachingWeeks } from '@/lib/admin/offers/course';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForEntries, type SentLetter } from '@/lib/admin/letters/repo';
+import { listBookableRooms } from '@/lib/admin/rooms';
 import { cn } from '@/lib/utils';
 
 /**
@@ -67,15 +70,20 @@ export default async function CourseStartPage({
   const { t, lang } = await getI18n();
 
   const plans = canAccess(user, 'rooms', 'edit');
+  const ends = canAccess(user, 'rooms', 'full');
   const handles = canAccess(user, 'bookings', 'edit');
-  const [groups, entries, bookings, levels, starts, teaching] = await Promise.all([
+  const [groups, entries, bookings, levels, starts, teaching, forms, rooms] = await Promise.all([
     levelGroups([id]),
     startEntries(id),
     canAccess(user, 'bookings') ? startBookings(id) : Promise.resolve([]),
     levelCodes(),
     handles ? upcomingStarts() : Promise.resolve([]),
     startClasses(id),
+    plans ? coursesForEdit(id) : Promise.resolve([]),
+    plans ? listBookableRooms().then((r) => r.map((room) => ({ id: room.id, name: room.nickname ?? room.name }))) : Promise.resolve([]),
   ]);
+  // A start of intensive or evening courses has a course per level; any other a named course each.
+  const named = !['intensive-german', 'evening-german'].includes(start.courseTypeSlug);
   // The last letter to each learner in a queue, to say on their row what they have been told.
   const letters = await lettersForEntries(entries.map((e) => e.id));
   // The wizard only where a row can be booked: an offered place, or a waiting learner with a free place.
@@ -122,8 +130,8 @@ export default async function CourseStartPage({
         }
         actions={
           plans ? (
-            <FormDialog trigger={t('Niveau hinzufügen', 'Add a level')} title={t('Plätze für ein Niveau', 'Places for a level')} size="sm">
-              <NewLevelForm courseInstanceId={id} levels={levels.filter((code) => !groups.some((g) => g.levelCode === code))} returnTo={back} />
+            <FormDialog trigger={t('Kurs hinzufügen', 'Add a course')} title={t('Neuer Kurs in diesem Termin', 'A new course in this start')} size="sm">
+              <NewCourseForm courseInstanceId={id} levels={levels.filter((code) => !groups.some((g) => g.levelCode === code))} rooms={rooms} named={named} returnTo={back} />
             </FormDialog>
           ) : null
         }
@@ -135,7 +143,7 @@ export default async function CourseStartPage({
               <span className={free ? 'text-[#17693a]' : 'text-[var(--casa-muted)]'}>{num(lang, free)}</span>
             </Stat>
             {start.withoutLevel ? (
-              <Stat label={t('Ohne Niveau', 'Without a level')}>
+              <Stat label={t('Ohne Kurs', 'Without a course')}>
                 <span className="text-[#9a5b00]">{num(lang, start.withoutLevel)}</span>
               </Stat>
             ) : null}
@@ -154,19 +162,22 @@ export default async function CourseStartPage({
 
         {groups.length === 0 ? (
           <Card>
-            <p className="text-sm text-[var(--casa-muted)]">{t('In diesem Termin ist noch niemand mit Niveau gebucht, und niemand wartet.', 'Nobody is booked with a level in this start yet, and nobody is waiting.')}</p>
+            <p className="text-sm text-[var(--casa-muted)]">{t('Dieser Termin hat noch keine Kurse.', 'This start has no courses yet.')}</p>
           </Card>
         ) : null}
 
         {groups.map((group) => (
           <LevelCard
-            key={group.levelCode}
+            key={group.courseId}
             group={group}
-            entries={entries.filter((e) => e.levelCode === group.levelCode)}
+            form={forms.find((f) => f.id === group.courseId) ?? null}
+            rooms={rooms}
+            entries={entries.filter((e) => e.courseId === group.courseId)}
             letters={letters}
-            bookings={bookings.filter((b) => b.levelCode === group.levelCode)}
-            focused={focusLevel === group.levelCode}
+            bookings={bookings.filter((b) => b.courseId === group.courseId)}
+            focused={focusLevel === group.levelCode || focusLevel === group.courseId}
             plans={plans}
+            ends={ends}
             handles={handles}
             offer={offer}
             startOptions={startOptions}
@@ -177,10 +188,10 @@ export default async function CourseStartPage({
           />
         ))}
 
-        {/* Booked here without a level: they hold a place no level counts until one is set on the booking. */}
-        {bookings.some((b) => !b.levelCode) ? (
-          <Card title={t('Ohne Niveau', 'Without a level')} icon={Icon.attention} tint="sun" bleed>
-            <BookedRows bookings={bookings.filter((b) => !b.levelCode)} lang={lang} />
+        {/* Booked here without a course: they hold a place no course counts until a level is set on the booking. */}
+        {bookings.some((b) => !b.courseId) ? (
+          <Card title={t('Ohne Kurs', 'Without a course')} icon={Icon.attention} tint="sun" bleed>
+            <BookedRows bookings={bookings.filter((b) => !b.courseId)} lang={lang} />
           </Card>
         ) : null}
       </div>
@@ -281,14 +292,17 @@ function TeachingCard({
   );
 }
 
-/** One level of the start: its places, who is next for a free one, the queue, the booked learners. */
+/** One course of the start: its places and room, who is next for a free one, the queue, the booked learners. */
 function LevelCard({
   group,
+  form,
+  rooms,
   entries,
   letters,
   bookings,
   focused,
   plans,
+  ends,
   handles,
   offer,
   startOptions,
@@ -298,11 +312,14 @@ function LevelCard({
   lang,
 }: {
   group: LevelGroup;
+  form: CourseForEdit | null;
+  rooms: { id: string; name: string }[];
   entries: WaitlistEntry[];
   letters: SentLetter[];
   bookings: StartBooking[];
   focused: boolean;
   plans: boolean;
+  ends: boolean;
   handles: boolean;
   offer: BookingOffer | null;
   startOptions: { id: string; label: string }[];
@@ -318,11 +335,11 @@ function LevelCard({
   const next = placeForNext(group) ? open.find((e) => e.status === 'waiting') : undefined;
   // Waiting learners a free place is there for: the first `free` of those still waiting.
   const withPlace = new Set(open.filter((e) => e.status === 'waiting').slice(0, free).map((e) => e.id));
-  const levelBack = `${back}?level=${encodeURIComponent(group.levelCode)}`;
+  const levelBack = `${back}?level=${encodeURIComponent(group.levelCode ?? group.courseId)}`;
 
   return (
     <section
-      id={`level-${group.levelCode}`}
+      id={`level-${group.levelCode ?? group.courseId}`}
       className={cn(
         'scroll-mt-24 overflow-hidden rounded-3xl border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]',
         focused ? 'border-[var(--fm-navy)]/40 ring-2 ring-[var(--fm-navy)]/10' : 'border-ws-line'
@@ -330,33 +347,68 @@ function LevelCard({
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-line px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="inline-flex h-9 min-w-12 items-center justify-center rounded-xl bg-[var(--fm-navy)] px-2.5 text-[0.95rem] font-extrabold tracking-[-0.01em] text-white tabular-nums">
-            {group.levelCode}
+          <span
+            className={cn(
+              'inline-flex h-9 min-w-12 items-center justify-center rounded-xl px-2.5 text-[0.95rem] font-extrabold tracking-[-0.01em] tabular-nums',
+              group.cancelled ? 'bg-ws-sunk text-[var(--casa-muted)] line-through' : 'bg-[var(--fm-navy)] text-white'
+            )}
+          >
+            {group.levelCode ?? (group.title ? group.title.slice(0, 2).toUpperCase() : '—')}
           </span>
           <div className="min-w-0">
             <h2 className="text-[0.95rem] leading-tight font-extrabold text-[var(--casa-ink)]">
-              {full ? t('Voll', 'Full') : t(`${num(lang, free)} ${free === 1 ? 'Platz' : 'Plätze'} frei`, `${num(lang, free)} ${free === 1 ? 'place' : 'places'} free`)}
+              {group.title && group.levelCode ? <span className="mr-1.5">{group.title} ·</span> : group.title ? <span className="mr-1.5">{group.title} ·</span> : null}
+              {group.cancelled
+                ? t('Abgesagt', 'Cancelled')
+                : full
+                  ? t('Voll', 'Full')
+                  : t(`${num(lang, free)} ${free === 1 ? 'Platz' : 'Plätze'} frei`, `${num(lang, free)} ${free === 1 ? 'place' : 'places'} free`)}
               {open.length ? <span className="font-semibold text-[var(--casa-muted)]"> · {t(`${num(lang, open.length)} auf der Warteliste`, `${num(lang, open.length)} on the waiting list`)}</span> : null}
+              {!group.bookable && !group.cancelled ? <Badge tone="quiet" className="ml-2 align-middle">{t('Nicht buchbar', 'Not bookable')}</Badge> : null}
             </h2>
             <p className="mt-0.5 text-xs text-[var(--casa-muted)]">
-              {group.groups === 1
-                ? t(`1 Gruppe · ${group.placesPerGroup} Plätze`, `1 group · ${group.placesPerGroup} places`)
-                : t(`${group.groups} Gruppen à ${group.placesPerGroup} · ${group.places} Plätze`, `${group.groups} groups of ${group.placesPerGroup} · ${group.places} places`)}
+              {[
+                group.groups === 1
+                  ? t(`1 Gruppe · ${group.placesPerGroup} Plätze`, `1 group · ${group.placesPerGroup} places`)
+                  : t(`${group.groups} Gruppen à ${group.placesPerGroup} · ${group.places} Plätze`, `${group.groups} groups of ${group.placesPerGroup} · ${group.places} places`),
+                group.roomName,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           </div>
         </div>
         {plans ? (
           <div className="flex flex-wrap items-center gap-2">
-            <FormDialog trigger={t('Plätze ändern', 'Change places')} title={t(`Plätze für ${group.levelCode}`, `Places for ${group.levelCode}`)} size="sm" triggerVariant="ghost">
-              <PlacesForm group={group} returnTo={levelBack} />
-            </FormDialog>
-            {open.length > 0 && full ? (
+            {form ? (
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t(`Kurs ${group.label}`, `Course ${group.label}`)} size="sm" triggerVariant="ghost">
+                <CourseForm course={form} rooms={rooms} returnTo={levelBack} />
+              </FormDialog>
+            ) : null}
+            {ends && !group.cancelled && !bookings.length && !open.length ? (
+              <form action={group.booked || closed.length ? cancelCourseAction : deleteCourseAction}>
+                <input type="hidden" name="courseId" value={group.courseId} />
+                <input type="hidden" name="returnTo" value={back} />
+                <ConfirmSubmit
+                  title={group.booked || closed.length ? t(`Kurs ${group.label} absagen?`, `Cancel course ${group.label}?`) : t(`Kurs ${group.label} löschen?`, `Delete course ${group.label}?`)}
+                  description={
+                    group.booked || closed.length
+                      ? t('Der Kurs bleibt mit seinem Verlauf und wird nicht mehr angeboten.', 'The course stays with its history and is no longer offered.')
+                      : t('Niemand war in diesem Kurs gebucht oder auf der Warteliste.', 'Nobody was booked into or waited for this course.')
+                  }
+                  confirmLabel={group.booked || closed.length ? t('Absagen', 'Cancel course') : t('Löschen', 'Delete')}
+                  variant="ghost"
+                >
+                  {group.booked || closed.length ? t('Absagen', 'Cancel') : t('Löschen', 'Delete')}
+                </ConfirmSubmit>
+              </form>
+            ) : null}
+            {open.length > 0 && full && !group.cancelled ? (
               <form action={openGroupAction}>
-                <input type="hidden" name="courseInstanceId" value={group.courseInstanceId} />
-                <input type="hidden" name="levelCode" value={group.levelCode} />
+                <input type="hidden" name="courseId" value={group.courseId} />
                 <input type="hidden" name="returnTo" value={levelBack} />
                 <ConfirmSubmit
-                  title={t(`Eine ${group.groups === 1 ? 'zweite' : 'weitere'} Gruppe ${group.levelCode} eröffnen?`, `Open ${group.groups === 1 ? 'a second' : 'another'} ${group.levelCode} group?`)}
+                  title={t(`Eine ${group.groups === 1 ? 'zweite' : 'weitere'} Gruppe ${group.label} eröffnen?`, `Open ${group.groups === 1 ? 'a second' : 'another'} ${group.label} group?`)}
                   description={t(
                     `${group.placesPerGroup} Plätze mehr. Die Warteliste rückt nach: wer vorne steht, kann dann gebucht werden.`,
                     `${group.placesPerGroup} more places. The waiting list moves up: the first in line can then be booked.`

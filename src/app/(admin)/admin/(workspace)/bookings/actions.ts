@@ -466,11 +466,11 @@ async function createBildungszeitBooking(formData: FormData, actor: StaffUser, p
       accommodationTo: selection.accommodationTo,
       charges: lines.map((line) => ({ kind: line.kind as ChargeKind, description: line.description, amount: line.amount, chargeTypeCode: line.chargeTypeCode, rateId: line.rateId })),
       sourceRegistrationId: optionalId(formData, 'sourceRegistrationId'),
-      // Per part of the run, each period on the course whose class it is: the newest start at its first
-      // half, the previous start at its second. A new start in between begins a new part.
+      // Per part of the run, a period at each half of the newest start: its first half is its own course,
+      // its second the running course of the start before (`resolveCourse`). A new start begins a new part.
       periods: bzSegments(classes).flatMap((part) => [
         { courseInstanceId: part.start.id, levelCode: first, startDate: part.from, endDate: part.to },
-        { courseInstanceId: part.previous.id, levelCode: second, startDate: part.from, endDate: part.to },
+        { courseInstanceId: part.start.id, levelCode: second, startDate: part.from, endDate: part.to },
       ]),
     },
     actor

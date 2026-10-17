@@ -8,15 +8,15 @@ import { isSchoolClosed } from '@/config/school-closures';
 
 /**
  * The weeks a Bildungszeit learner can be booked into, with the two intensive classes they would sit
- * in and how full each is that week (`bildungszeit-rules.ts`). A class is the newest start's level at
- * its first half, or the previous start's at its second; its learners that week are the bookings
- * whose period covers it — the regular learners, a `.2` joiner, and other Bildungszeit learners, whose
- * periods sit on the course of the class (`B1.2` on the previous start).
+ * in and how full each is that week (`bildungszeit-rules.ts`). A class is a course (0041): the newest
+ * start's at its first half, or the previous start's at its second; its learners that week are the
+ * bookings with a period on that course covering it — regular learners, joiners and other Bildungszeit
+ * learners alike.
  */
 
 const DEFAULT_PLACES = 14;
 
-type PeriodRow = { course_instance_id: string; level_code: string; start_date: string; end_date: string; booking_id: string };
+type PeriodRow = { course_id: string; start_date: string; end_date: string; booking_id: string };
 
 async function intensiveStarts(): Promise<BzStart[]> {
   const rows = await query<{ id: string; start_date: string; end_date: string; session: string | null; schedule: { time?: string } | null }>(
@@ -53,47 +53,26 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
     query<{ code: string }>(`SELECT code FROM levels WHERE code ~ '\\.[12]$' ORDER BY sort_order`),
     levelGroups(ids),
     query<PeriodRow>(
-      `SELECT bp.course_instance_id, bp.level_code, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date,
-              to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.booking_id
+      `SELECT bp.course_id, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.booking_id
          FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
-        WHERE bp.course_instance_id = ANY($1::uuid[]) AND bp.level_code IS NOT NULL
+        WHERE bp.course_id IN (SELECT id FROM courses WHERE course_instance_id = ANY($1::uuid[]))
           AND b.deleted_at IS NULL AND b.status <> 'cancelled'`,
       [ids]
     ),
   ]);
-  const group = (instance: string, code: string) => groups.find((g) => g.courseInstanceId === instance && g.levelCode === code);
-  // The distinct bookings sitting in these (start, level) places during the week.
-  const learners = (week: { monday: string; friday: string }, places: [string, string][]) =>
-    new Set(
-      periods
-        .filter((p) => p.start_date <= week.friday && p.end_date >= week.monday && places.some(([i, c]) => p.course_instance_id === i && p.level_code === c))
-        .map((p) => p.booking_id)
-    ).size;
+  const course = (instance: string, code: string) => groups.find((g) => g.courseInstanceId === instance && g.levelCode === code && !g.cancelled);
+  // The distinct bookings sitting in a course during the week.
+  const learners = (week: { monday: string; friday: string }, courseId: string | undefined) =>
+    courseId ? new Set(periods.filter((p) => p.course_id === courseId && p.start_date <= week.friday && p.end_date >= week.monday).map((p) => p.booking_id)).size : 0;
 
   const weeks = frames.map((f): BzWeek => {
     const first: Record<string, BzClassPlaces> = {};
     const second: Record<string, BzClassPlaces> = {};
     for (const { code } of codes) {
-      if (code.endsWith('.1')) {
-        const g = group(f.start.id, code);
-        first[code] = { places: g?.places ?? DEFAULT_PLACES, booked: learners(f, [[f.start.id, code]]), offered: g?.offered ?? 0 };
-      } else {
-        // The previous start's class at its second half: its own learners, those booked into its second
-        // half (Bildungszeit), and those who joined at `.2` when the newest course started.
-        const own = `${code.slice(0, -2)}.1`;
-        const g = group(f.previous.id, own);
-        const visiting = group(f.previous.id, code);
-        const joined = group(f.start.id, code);
-        second[code] = {
-          places: g?.places ?? DEFAULT_PLACES,
-          booked: learners(f, [
-            [f.previous.id, own],
-            [f.previous.id, code],
-            [f.start.id, code],
-          ]),
-          offered: (g?.offered ?? 0) + (visiting?.offered ?? 0) + (joined?.offered ?? 0),
-        };
-      }
+      // The newest start's course at its first half; at a second half, the previous start's course of
+      // that level, running — the course a learner at that step sits in (`resolveCourse`).
+      const c = code.endsWith('.1') ? course(f.start.id, code) : course(f.previous.id, `${code.slice(0, -2)}.1`);
+      (code.endsWith('.1') ? first : second)[code] = { places: c?.places ?? DEFAULT_PLACES, booked: learners(f, c?.courseId), offered: c?.offered ?? 0 };
     }
     return { ...f, first, second };
   });
