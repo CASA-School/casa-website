@@ -29,6 +29,8 @@ import {
   type PaymentMethod,
   type Payer,
 } from '@/lib/admin/bookings';
+import { bildungszeitClasses, bildungszeitTypeId } from '@/lib/admin/bildungszeit';
+import { addDays, BZ_WEEKS, bzSegments } from '@/lib/admin/bildungszeit-rules';
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
 import type { StaffUser } from '@/lib/admin/auth';
@@ -315,6 +317,7 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
 
   const kind = String(formData.get('kind') ?? 'course') === 'exam' ? 'exam' : 'course';
   if (kind === 'exam') return createExamBooking(formData, actor, personId, safeBack);
+  if (formData.get('superintensive') === '1') return createBildungszeitBooking(formData, actor, personId, safeBack);
   const { t } = await getI18n();
   const dates = readDates(formData, safeBack, t);
   const status = String(formData.get('status') ?? 'reserved');
@@ -398,6 +401,82 @@ export async function changeExamAction(formData: FormData): Promise<void> {
   }
   revalidatePath('/admin', 'layout');
   redirect(back);
+}
+
+/**
+ * A Bildungszeit booking from the wizard (2026-10-17): one booking of the Bildungszeit course, with a
+ * period in each of the week's two intensive classes — the newest start at its first half (`B1.1`) and
+ * the previous start at its second (`B1.2`) — for the same one or two weeks. The two classes are worked out
+ * again here from the Monday; the form names only the levels. Priced as Bildungszeit on the server.
+ */
+async function createBildungszeitBooking(formData: FormData, actor: StaffUser, personId: string, back: string): Promise<void> {
+  const { t } = await getI18n();
+  const monday = String(formData.get('bzMonday') ?? '');
+  const weeks = Number(formData.get('bzWeeks'));
+  if (!DATE.test(monday) || new Date(`${monday}T00:00:00Z`).getUTCDay() !== 1 || !(BZ_WEEKS as readonly number[]).includes(weeks))
+    fail(back, t('Bitte wähle die Woche.', 'Choose the week.'));
+  const first = String(formData.get('levelFirst') ?? '');
+  const second = String(formData.get('levelSecond') ?? '');
+  if (!first.endsWith('.1') || !second.endsWith('.2') || !(await isLevelCode(first)) || !(await isLevelCode(second)))
+    fail(back, t('Bitte wähle beide Kurse.', 'Choose both classes.'));
+  const [classes, typeId] = await Promise.all([bildungszeitClasses(monday, weeks), bildungszeitTypeId()]);
+  if (!classes || !typeId) fail(back, t('In dieser Woche laufen keine zwei Intensivkurse.', 'No two intensive courses run that week.'));
+  const status = String(formData.get('status') ?? 'reserved');
+  if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
+  const payer = String(formData.get('payer') ?? 'self');
+  if (!PAYERS.has(payer)) throw new Error('Invalid payer');
+  const endDate = addDays(monday, 7 * (weeks - 1) + 4);
+
+  const selection: BookingSelection = {
+    kind: 'course',
+    courseInstanceId: null,
+    courseTypeId: typeId,
+    examTypeId: null,
+    examParts: null,
+    startDate: monday,
+    endDate,
+    levelCode: null,
+    tuitionOverride: null,
+    includeEnrolmentFee: formData.get('includeEnrolmentFee') === '1',
+    materialIds: formData.getAll('materialIds').map(String).filter((value) => UUID.test(value)),
+    accommodationTypeCode: text(formData, 'accommodationTypeCode', 40),
+    roomTypeCode: text(formData, 'roomTypeCode', 40),
+    cateringCode: text(formData, 'cateringCode', 40),
+    accommodationFrom: text(formData, 'accommodationFrom', 10),
+    accommodationTo: text(formData, 'accommodationTo', 10),
+    superintensive: { weeks },
+  };
+  const lines = await priceSelection(selection);
+  const bookingId = await createBooking(
+    {
+      personId,
+      courseTypeId: typeId,
+      courseInstanceId: null,
+      startDate: monday,
+      endDate,
+      status: status as BookingStatus,
+      payer: payer as Payer,
+      payerName: text(formData, 'payerName', 120),
+      visaRequired: formData.get('visaRequired') === 'on',
+      notes: text(formData, 'notes', 2000),
+      accommodationTypeCode: selection.accommodationTypeCode,
+      accommodationRoomTypeCode: selection.roomTypeCode,
+      accommodationCateringCode: selection.cateringCode,
+      accommodationFrom: selection.accommodationFrom,
+      accommodationTo: selection.accommodationTo,
+      charges: lines.map((line) => ({ kind: line.kind as ChargeKind, description: line.description, amount: line.amount, chargeTypeCode: line.chargeTypeCode, rateId: line.rateId })),
+      sourceRegistrationId: optionalId(formData, 'sourceRegistrationId'),
+      // Per part of the run, each period on the course whose class it is: the newest start at its first
+      // half, the previous start at its second. A new start in between begins a new part.
+      periods: bzSegments(classes).flatMap((part) => [
+        { courseInstanceId: part.start.id, levelCode: first, startDate: part.from, endDate: part.to },
+        { courseInstanceId: part.previous.id, levelCode: second, startDate: part.from, endDate: part.to },
+      ]),
+    },
+    actor
+  );
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/bookings/${bookingId}`);
 }
 
 /**

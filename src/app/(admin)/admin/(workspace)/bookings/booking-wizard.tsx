@@ -14,6 +14,7 @@ import {
   type CohortOffer,
   type SittingOffer,
 } from '@/lib/admin/booking-offer-types';
+import { bzFree, bzPeak, bzRun, bzSegments, type BzShift, type BzWeek } from '@/lib/admin/bildungszeit-rules';
 import { EXAM_PARTS, EXAM_PARTS_LABELS, type ExamParts } from '@/lib/admin/exam-parts';
 import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dates';
@@ -106,12 +107,24 @@ export function BookingWizard({
   );
 
   const presetExam = preselectedExam ? (offer.exams.find((e) => e.id === preselectedExam.examTypeId) ?? null) : null;
-  const [step, setStep] = useState<Step>(preselected ? 'level' : presetExam ? 'sitting' : 'what');
+  // Bildungszeit (2026-10-17): booked into a week's two intensive classes, not on a start of its own.
+  const bz = offer.bildungszeit ?? null;
+  const presetBz = Boolean(bz && preselected && preselected.courseTypeId === bz.courseTypeId);
+  const [step, setStep] = useState<Step>(presetBz ? 'course' : preselected ? 'level' : presetExam ? 'sitting' : 'what');
   const [kind, setKind] = useState<'course' | 'exam'>(presetExam ? 'exam' : 'course');
   const [courseTypeId, setCourseTypeId] = useState<string | null>(
     preselected?.courseTypeId ?? null
   );
-  const [cohort, setCohort] = useState<CohortOffer | null>(preselected);
+  const [cohort, setCohort] = useState<CohortOffer | null>(presetBz ? null : preselected);
+  const [bzMonday, setBzMonday] = useState<string | null>(
+    presetBz && preselected ? (bz?.weeks.find((w) => w.monday === toDateInputValue(preselected.startDate))?.monday ?? null) : null
+  );
+  const [bzWeeks, setBzWeeks] = useState<1 | 2>(1);
+  const [bzFirst, setBzFirst] = useState<string | null>(null);
+  const [bzSecond, setBzSecond] = useState<string | null>(null);
+  const isBz = Boolean(bz && courseTypeId === bz.courseTypeId);
+  const bzWeeksList = bz?.weeks ?? [];
+  const run = isBz && bzMonday ? bzRun(bzWeeksList, bzMonday, bzWeeks) : null;
   const [examTypeId, setExamTypeId] = useState<string | null>(presetExam?.id ?? null);
   const [examParts, setExamParts] = useState<ExamParts>(preselectedExam?.parts ?? 'full');
   const [sittingId, setSittingId] = useState<string | null>(
@@ -136,15 +149,17 @@ export function BookingWizard({
 
   /** The books for the chosen level: both halves, or just this one. */
   const books = useMemo(() => {
-    if (!levelCode) return [];
-    const codes = levelScope === 'whole' ? levelSiblings(levelCode) : [levelCode];
+    // Bildungszeit: the books of the two classes.
+    const codes = isBz ? [bzFirst, bzSecond].filter((c): c is string => Boolean(c)) : !levelCode ? [] : levelScope === 'whole' ? levelSiblings(levelCode) : [levelCode];
     return offer.materials.filter((m) => m.levelCode && codes.includes(m.levelCode));
-  }, [levelCode, levelScope, offer.materials]);
+  }, [isBz, bzFirst, bzSecond, levelCode, levelScope, offer.materials]);
 
   const chosenBooks = books.filter((b) => !excludedBooks.has(b.id));
 
   // The chosen level in the chosen start — or the chosen sitting: its places and who already waits for them.
-  const group = kind === 'course' && cohort && levelCode ? levelPlaces(cohort, levelCode) : kind === 'exam' && sitting ? sitting.places : null;
+  const group = isBz ? null : kind === 'course' && cohort && levelCode ? levelPlaces(cohort, levelCode) : kind === 'exam' && sitting ? sitting.places : null;
+  // A Bildungszeit class with no place left in one of its weeks.
+  const bzFull = run ? ([['first', bzFirst], ['second', bzSecond]] as const).filter(([half, code]) => code && bzFree(run, half, code) === 0).map(([half, code]) => ({ code: code!, ...bzPeak(run, half, code!) })) : [];
   const free = group ? levelFree(group, personId) : null;
   const ahead = group ? waitingAhead(group, personId) : 0;
   const full = group !== null && free === 0;
@@ -158,9 +173,9 @@ export function BookingWizard({
   const index = visible.findIndex((s) => s.key === step);
   const canAdvance =
     (step === 'what' && (kind === 'course' || (kind === 'exam' && Boolean(examTypeId)))) ||
-    (step === 'course' && Boolean(cohort)) ||
+    (step === 'course' && (isBz ? Boolean(run) : Boolean(cohort))) ||
     (step === 'sitting' && Boolean(sitting)) ||
-    (step === 'level' && wantsBooks !== null) ||
+    (step === 'level' && wantsBooks !== null && (!isBz || Boolean(bzFirst && bzSecond))) ||
     (step === 'accommodation' && wantsAccommodation !== null) ||
     step === 'review';
 
@@ -275,6 +290,8 @@ export function BookingWizard({
                 onClick={() => {
                   setCourseTypeId(type.id);
                   setCohort(null);
+                  setBzFirst(null);
+                  setBzSecond(null);
                 }}
                 className={cn(
                   'rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors',
@@ -290,13 +307,44 @@ export function BookingWizard({
                     courseTypeId === type.id ? 'text-white/60' : 'text-[var(--casa-text-subtle)]'
                   )}
                 >
-                  {type.cohorts.length}
+                  {bz && type.id === bz.courseTypeId ? bz.weeks.length : type.cohorts.length}
                 </span>
               </button>
             ))}
           </div>
 
-          {courseTypeId ? (
+          {isBz && bz ? (
+            <div className="space-y-3 border-t border-ws-line-soft pt-4">
+              <Question small>{t('Ab welcher Woche?', 'From which week?')}</Question>
+              <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                {bz.weeks.map((w) => (
+                  <Choice
+                    key={w.monday}
+                    selected={bzMonday === w.monday}
+                    onSelect={() => {
+                      setBzMonday(w.monday);
+                      if (!bzRun(bz.weeks, w.monday, bzWeeks)) setBzWeeks(1);
+                    }}
+                    title={`${t('KW', 'Week')} ${w.kw} · ${shortDay(new Date(`${w.monday}T12:00:00`), lang)} – ${shortDay(new Date(`${w.friday}T12:00:00`), lang)}`}
+                  >
+                    {t(
+                      `Intensivkurse ab ${shortDay(new Date(`${w.start.startDate}T12:00:00`), lang)} und ${shortDay(new Date(`${w.previous.startDate}T12:00:00`), lang)}`,
+                      `Intensive courses from ${shortDay(new Date(`${w.start.startDate}T12:00:00`), lang)} and ${shortDay(new Date(`${w.previous.startDate}T12:00:00`), lang)}`
+                    )}
+                  </Choice>
+                ))}
+              </div>
+              {bzMonday ? (
+                <>
+                  <Question small>{t('Wie lange?', 'How long?')}</Question>
+                  <div className="flex gap-2">
+                    <Toggle selected={bzWeeks === 1} onSelect={() => setBzWeeks(1)} label={weeksLabel(t, 1)} />
+                    {bzRun(bz.weeks, bzMonday, 2) ? <Toggle selected={bzWeeks === 2} onSelect={() => setBzWeeks(2)} label={weeksLabel(t, 2)} /> : null}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : courseTypeId ? (
             <div className="space-y-2 border-t border-ws-line-soft pt-4">
               <Question small>{t('Welcher Termin?', 'Which one?')}</Question>
               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
@@ -345,7 +393,40 @@ export function BookingWizard({
         </section>
       ) : null}
 
-      {step === 'level' ? (
+      {step === 'level' && isBz && run ? (
+        <section className="space-y-4">
+          <Question>{t('In welche Kurse?', 'Into which classes?')}</Question>
+          {bzClasses(run, t, lang).map((c) => (
+            <BzClassPicker
+              key={c.half}
+              label={c.label}
+              codes={offer.levels.map((l) => l.code).filter((code) => code.endsWith(c.half === 'first' ? '.1' : '.2'))}
+              run={run}
+              half={c.half}
+              value={c.half === 'first' ? bzFirst : bzSecond}
+              onChange={(code) => {
+                if (c.half === 'first') {
+                  setBzFirst(code);
+                  if (!bzSecond) setBzSecond(sibling(code, '2', offer.levels));
+                } else {
+                  setBzSecond(code);
+                  if (!bzFirst) setBzFirst(sibling(code, '1', offer.levels));
+                }
+              }}
+              t={t}
+            />
+          ))}
+          <BooksQuestion
+            books={books}
+            wantsBooks={wantsBooks}
+            setWantsBooks={setWantsBooks}
+            excludedBooks={excludedBooks}
+            setExcludedBooks={setExcludedBooks}
+            empty={t('Für diese Niveaus ist kein Buch hinterlegt.', 'No book is listed for these levels.')}
+            t={t}
+          />
+        </section>
+      ) : step === 'level' ? (
         <section className="space-y-3">
           <Question>{t('Mit welchem Niveau beginnt die Person?', 'Which level are they starting at?')}</Question>
           <div className="flex flex-wrap gap-1.5">
@@ -405,49 +486,15 @@ export function BookingWizard({
                 </div>
               ) : null}
 
-              <div className="space-y-2 border-t border-ws-line-soft pt-4">
-                <Question small>{t('Möchte die Person das Buch?', 'Do they want the book?')}</Question>
-                <div className="flex gap-2">
-                  <Toggle
-                    selected={wantsBooks === true}
-                    onSelect={() => setWantsBooks(true)}
-                    label={t('Ja', 'Yes')}
-                  />
-                  <Toggle
-                    selected={wantsBooks === false}
-                    onSelect={() => setWantsBooks(false)}
-                    label={t('Nein', 'No')}
-                  />
-                </div>
-
-                {wantsBooks && books.length > 0 ? (
-                  <ul className="mt-2 divide-y divide-ws-line-soft rounded-xl border border-ws-line">
-                    {books.map((b) => (
-                      <li key={b.id} className="px-3 py-2">
-                        <label className="flex min-w-0 items-center gap-2.5 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={!excludedBooks.has(b.id)}
-                            onChange={(e) => {
-                              const next = new Set(excludedBooks);
-                              if (e.target.checked) next.delete(b.id);
-                              else next.add(b.id);
-                              setExcludedBooks(next);
-                            }}
-                            className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
-                          />
-                          <span className="min-w-0 truncate">{b.title}</span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                {wantsBooks && books.length === 0 ? (
-                  <p className="text-xs text-[var(--casa-text-subtle)]">
-                    {t(`Für ${levelCode} ist kein Buch hinterlegt.`, `No book is listed for ${levelCode}.`)}
-                  </p>
-                ) : null}
-              </div>
+              <BooksQuestion
+                books={books}
+                wantsBooks={wantsBooks}
+                setWantsBooks={setWantsBooks}
+                excludedBooks={excludedBooks}
+                setExcludedBooks={setExcludedBooks}
+                empty={t(`Für ${levelCode} ist kein Buch hinterlegt.`, `No book is listed for ${levelCode}.`)}
+                t={t}
+              />
             </>
           ) : null}
         </section>
@@ -464,6 +511,10 @@ export function BookingWizard({
                 if (cohort && !accFrom) {
                   setAccFrom(toDateInputValue(cohort.startDate));
                   setAccTo(toDateInputValue(cohort.endDate));
+                }
+                if (run && !accFrom) {
+                  setAccFrom(run[0].monday);
+                  setAccTo(run[run.length - 1].friday);
                 }
               }}
               label={t('Ja', 'Yes')}
@@ -551,6 +602,15 @@ export function BookingWizard({
             <input type="hidden" name="sourceRegistrationId" value={sourceRegistrationId} />
           ) : null}
           <input type="hidden" name="kind" value={kind} />
+          {run ? (
+            <>
+              <input type="hidden" name="superintensive" value="1" />
+              <input type="hidden" name="bzMonday" value={run[0].monday} />
+              <input type="hidden" name="bzWeeks" value={run.length} />
+              <input type="hidden" name="levelFirst" value={bzFirst ?? ''} />
+              <input type="hidden" name="levelSecond" value={bzSecond ?? ''} />
+            </>
+          ) : null}
           <input type="hidden" name="courseInstanceId" value={cohort?.id ?? ''} />
           <input
             type="hidden"
@@ -568,12 +628,12 @@ export function BookingWizard({
           <input
             type="hidden"
             name="startDate"
-            value={cohort ? toDateInputValue(cohort.startDate) : accFrom}
+            value={run ? run[0].monday : cohort ? toDateInputValue(cohort.startDate) : accFrom}
           />
           <input
             type="hidden"
             name="endDate"
-            value={cohort ? toDateInputValue(cohort.endDate) : accTo}
+            value={run ? run[run.length - 1].friday : cohort ? toDateInputValue(cohort.endDate) : accTo}
           />
           <input type="hidden" name="levelCode" value={levelCode ?? ''} />
           <input type="hidden" name="includeEnrolmentFee" value={includeFee && kind === 'course' ? '1' : ''} />
@@ -595,6 +655,7 @@ export function BookingWizard({
             {summaryRows(t, lang, {
               kind,
               cohort,
+              bildungszeit: run && bz ? { name: bz.name, run, first: bzFirst, second: bzSecond } : null,
               exam,
               sitting,
               examParts,
@@ -675,6 +736,17 @@ export function BookingWizard({
             </p>
           ) : null}
 
+          {bzFull.length ? (
+            // A Bildungszeit class with no place in one of its weeks: said, and booking it anyway stays possible.
+            <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+              {bzFull
+                .map((c) =>
+                  t(`${c.code} ist in dieser Zeit voll (${c.booked} von ${c.places} Plätzen).`, `${c.code} is full in these weeks (${c.booked} of ${c.places} places).`)
+                )
+                .join(' ')}
+            </p>
+          ) : null}
+
           {queueFirst && group && kind === 'exam' ? (
             // A full sitting, or candidates waiting in front: the queue is offered first.
             <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
@@ -707,7 +779,11 @@ export function BookingWizard({
             <Button type="button" variant="ghost" onClick={() => go(-1)}>
               {t('Zurück', 'Back')}
             </Button>
-            {queueFirst && full && kind === 'exam' ? (
+            {bzFull.length ? (
+              <Button type="submit" variant="secondary">
+                {t('Trotzdem buchen', 'Book anyway')}
+              </Button>
+            ) : queueFirst && full && kind === 'exam' ? (
               // A sitting's places are the room's and the examiners': a full one is not booked over.
               <Button type="submit" formAction={waitlistAction}>
                 {t('Auf die Warteliste', 'Add to waiting list')}
@@ -746,6 +822,143 @@ export function BookingWizard({
     </div>
   );
 }
+
+/** Whether the learner takes the books, and which of them. */
+function BooksQuestion({
+  books,
+  wantsBooks,
+  setWantsBooks,
+  excludedBooks,
+  setExcludedBooks,
+  empty,
+  t,
+}: {
+  books: readonly { id: string; title: string }[];
+  wantsBooks: boolean | null;
+  setWantsBooks: (value: boolean) => void;
+  excludedBooks: Set<string>;
+  setExcludedBooks: (value: Set<string>) => void;
+  empty: string;
+  t: T;
+}) {
+  return (
+    <div className="space-y-2 border-t border-ws-line-soft pt-4">
+      <Question small>{t('Möchte die Person das Buch?', 'Do they want the book?')}</Question>
+      <div className="flex gap-2">
+        <Toggle selected={wantsBooks === true} onSelect={() => setWantsBooks(true)} label={t('Ja', 'Yes')} />
+        <Toggle selected={wantsBooks === false} onSelect={() => setWantsBooks(false)} label={t('Nein', 'No')} />
+      </div>
+      {wantsBooks && books.length > 0 ? (
+        <ul className="mt-2 divide-y divide-ws-line-soft rounded-xl border border-ws-line">
+          {books.map((b) => (
+            <li key={b.id} className="px-3 py-2">
+              <label className="flex min-w-0 items-center gap-2.5 text-sm">
+                <input
+                  type="checkbox"
+                  checked={!excludedBooks.has(b.id)}
+                  onChange={(e) => {
+                    const next = new Set(excludedBooks);
+                    if (e.target.checked) next.delete(b.id);
+                    else next.add(b.id);
+                    setExcludedBooks(next);
+                  }}
+                  className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                />
+                <span className="min-w-0 truncate">{b.title}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {wantsBooks && books.length === 0 ? <p className="text-xs text-[var(--casa-text-subtle)]">{empty}</p> : null}
+    </div>
+  );
+}
+
+/** One of a Bildungszeit week's two classes: its levels, a full one marked, and the chosen one's places. */
+function BzClassPicker({
+  label,
+  codes,
+  run,
+  half,
+  value,
+  onChange,
+  t,
+}: {
+  label: string;
+  codes: string[];
+  run: BzWeek[];
+  half: 'first' | 'second';
+  value: string | null;
+  onChange: (code: string) => void;
+  t: T;
+}) {
+  const free = value ? bzFree(run, half, value) : null;
+  const peak = value ? bzPeak(run, half, value) : null;
+  return (
+    <div className="space-y-2">
+      <Question small>{label}</Question>
+      <div className="flex flex-wrap gap-1.5">
+        {codes.map((code) => {
+          const isFull = bzFree(run, half, code) === 0;
+          return (
+            <button
+              key={code}
+              type="button"
+              onClick={() => onChange(code)}
+              aria-pressed={value === code}
+              className={cn(
+                'rounded-lg border px-2.5 py-1.5 text-sm font-semibold tabular-nums transition-colors',
+                value === code
+                  ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
+                  : isFull
+                    ? 'border-[#efdca4] bg-[#fff8e6] text-[#7a4a00] hover:border-[#d9b65c]'
+                    : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
+              )}
+            >
+              {code}
+              {isFull ? <span className="ml-1 text-[0.72rem] font-bold opacity-80">{t('voll', 'full')}</span> : null}
+            </button>
+          );
+        })}
+      </div>
+      {value && peak ? (
+        <p className={cn('text-[0.82rem]', free === 0 ? 'font-semibold text-[#9a5b00]' : 'text-[var(--casa-muted)]')}>
+          {free === 0
+            ? t(`${value} ist in dieser Zeit voll: ${peak.booked} von ${peak.places} Plätzen`, `${value} is full in these weeks: ${peak.booked} of ${peak.places} places`)
+            : t(`${value}: ${free} von ${peak.places} Plätzen frei`, `${value}: ${free} of ${peak.places} places free`)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * The two classes to choose, the morning one first. When a new course starts within the run the shifts
+ * swap from that week on, so the classes are named by their half of the level instead.
+ */
+function bzClasses(run: BzWeek[], t: T, lang: WsLang): { half: 'first' | 'second'; label: string }[] {
+  const since = (iso: string) => `${t('Kursstart', 'started')} ${shortDay(new Date(`${iso}T12:00:00`), lang)}`;
+  if (bzSegments(run).length > 1)
+    return [
+      { half: 'first', label: t('Erste Hälfte des Niveaus (.1)', 'First half of the level (.1)') },
+      { half: 'second', label: t('Zweite Hälfte des Niveaus (.2)', 'Second half of the level (.2)') },
+    ];
+  const [{ start, previous }] = run;
+  const classes = [
+    { half: 'first' as const, shift: start.shift, label: `${bzShift(t, start.shift)} · ${since(start.startDate)}` },
+    { half: 'second' as const, shift: previous.shift, label: `${bzShift(t, previous.shift)} · ${since(previous.startDate)}` },
+  ];
+  return classes.sort((a, b) => (a.shift === 'morning' ? -1 : b.shift === 'morning' ? 1 : 0));
+}
+
+const bzShift = (t: T, shift: BzShift | null) => (shift === 'morning' ? t('Vormittag', 'Morning') : shift === 'afternoon' ? t('Nachmittag', 'Afternoon') : t('Intensivkurs', 'Intensive course'));
+
+/** The same level at the other half: B1.1 → B1.2, when the levels have it. */
+const sibling = (code: string, half: '1' | '2', levels: readonly { code: string }[]) => {
+  const other = `${code.slice(0, -2)}.${half}`;
+  return levels.some((l) => l.code === other) ? other : null;
+};
 
 function Question({ children, small = false }: { children: ReactNode; small?: boolean }) {
   return small ? (
@@ -831,6 +1044,7 @@ function summaryRows(
   {
     kind,
     cohort,
+    bildungszeit,
     exam,
     sitting,
     examParts,
@@ -843,6 +1057,7 @@ function summaryRows(
   }: {
     kind: 'course' | 'exam';
     cohort: CohortOffer | null;
+    bildungszeit: { name: string; run: BzWeek[]; first: string | null; second: string | null } | null;
     exam: { name: string } | null;
     sitting: SittingOffer | null;
     examParts: ExamParts;
@@ -856,6 +1071,26 @@ function summaryRows(
 ): { label: string; value: string }[] {
   const rows: { label: string; value: string }[] = [];
 
+  if (kind === 'course' && bildungszeit) {
+    const { run } = bildungszeit;
+    rows.push({ label: t('Kurs', 'Course'), value: bildungszeit.name });
+    rows.push({
+      label: t('Zeitraum', 'Dates'),
+      value: `${german(run[0].monday)} – ${german(run[run.length - 1].friday)} · ${weeksLabel(t, run.length)}`,
+    });
+    // Per part of the run, which class is when: a new course starting in between swaps the shifts.
+    const parts = bzSegments(run);
+    for (const part of parts) {
+      const classes = [
+        { code: bildungszeit.first, shift: part.start.shift, since: part.start.startDate },
+        { code: bildungszeit.second, shift: part.previous.shift, since: part.previous.startDate },
+      ].sort((a, b) => (a.shift === 'morning' ? -1 : b.shift === 'morning' ? 1 : 0));
+      rows.push({
+        label: parts.length > 1 ? `${german(part.from)} – ${german(part.to)}` : t('Kurse', 'Classes'),
+        value: classes.map((c) => `${c.code ?? '—'} ${bzShift(t, c.shift)} (${t('Kursstart', 'started')} ${german(c.since)})`).join(' · '),
+      });
+    }
+  }
   if (kind === 'course' && cohort) {
     rows.push({ label: t('Kurs', 'Course'), value: cohort.label });
     rows.push({
@@ -869,7 +1104,7 @@ function summaryRows(
     rows.push({ label: t('Teile', 'Parts'), value: pick(lang, EXAM_PARTS_LABELS[examParts]) });
     return rows;
   }
-  if (levelCode) {
+  if (levelCode && !bildungszeit) {
     rows.push({
       label: t('Niveau', 'Level'),
       value:

@@ -602,6 +602,11 @@ export type NewBooking = {
    * only while a place is free for this person — checked with the sitting locked.
    */
   exam?: { sessionId: string; parts: ExamParts; sourceRegistrationId?: string | null } | null;
+  /**
+   * Several courses at once, instead of `courseInstanceId` and the dates: Bildungszeit (2026-10-17) is
+   * a morning and an afternoon intensive class for the same week or two, one period each.
+   */
+  periods?: { courseInstanceId: string; levelCode: string; startDate: string; endDate: string }[] | null;
 };
 
 /** A booking the rules do not allow — a full sitting — with the reason in both languages. */
@@ -696,7 +701,9 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
     const id = rows[0].id;
     // An exam's day is its sitting's: no period of its own. A course's dates are its period.
     if (exam) closedExamEntries = await closeOnExamBooking(client, input.personId, exam.sessionId, id, actor);
-    else await addPeriodOn(
+    else if (input.periods?.length) {
+      for (const p of input.periods) await addPeriodOn(client, id, { ...p, kind: 'initial' }, actor);
+    } else await addPeriodOn(
       client,
       id,
       {

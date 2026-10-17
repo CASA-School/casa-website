@@ -1,8 +1,9 @@
+import { bildungszeitOffer } from './bildungszeit';
 import type { BookingOffer, CohortOffer, CourseTypeOffer } from './booking-offer-types';
 import { query, queryFirst } from './db';
 import { upcomingSittings } from './exams';
 import { accommodationWeeks, teachingWeeks, termLessons } from './offers/course';
-import { coursePrice, rentPrice, type PriceList } from './prices/price-list';
+import { coursePrice, listOn, rentPrice, type PriceList } from './prices/price-list';
 import { loadPriceLists } from './prices/repo';
 import { upcomingLevelPlaces } from './waitlist';
 import { toDateInputValue } from '@/lib/dates';
@@ -177,7 +178,15 @@ export async function bookingOffer(): Promise<BookingOffer> {
       });
   }
 
+  // Bildungszeit is booked into the intensive classes of a week (2026-10-17): offered whenever such a
+  // week is ahead, whether or not it has starts of its own.
+  const bildungszeit = await bildungszeitOffer();
+  if (bildungszeit?.weeks.length && !byType.has(bildungszeit.courseTypeId)) {
+    byType.set(bildungszeit.courseTypeId, { id: bildungszeit.courseTypeId, name: bildungszeit.name, slug: 'bildungszeit', cohorts: [] });
+  }
+
   return {
+    bildungszeit,
     // Intensive, evening and special courses first, then the rest (course_types.position, 0040).
     courseTypes: [...byType.values()].sort((a, b) => (typeOrder.get(a.id) ?? 100) - (typeOrder.get(b.id) ?? 100) || a.name.localeCompare(b.name)),
     exams: examRows.map((e) => ({
@@ -250,6 +259,8 @@ export type BookingSelection = {
   cateringCode: string | null;
   accommodationFrom: string | null;
   accommodationTo: string | null;
+  /** Bildungszeit (2026-10-17): two intensive classes for this many weeks, priced as Bildungszeit. */
+  superintensive?: { weeks: number } | null;
 };
 
 export type PricedLine = {
@@ -303,7 +314,25 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
 
   const prices = await loadPriceLists();
 
-  if (selection.kind === 'course' && selection.courseInstanceId) {
+  if (selection.kind === 'course' && selection.superintensive) {
+    // Bildungszeit's own price for the weeks, else what it is: two intensive courses, twice the weeks
+    // (one week 280 €, two 520 € — the intensive course's two and four weeks).
+    const weeks = selection.superintensive.weeks;
+    const own = listOn(prices, on)?.courses['bildungszeit']?.table[weeks] ?? null;
+    const price = own ?? coursePrice(prices, 'intensive-german', on, { weeks: weeks * 2 });
+    const amount = selection.tuitionOverride ?? price?.amount ?? null;
+    if (amount && amount > 0) {
+      lines.push({
+        kind: 'tuition',
+        chargeTypeCode: 'tuition',
+        description: `Bildungszeit (superintensive) · ${formatIso(selection.startDate)} – ${formatIso(selection.endDate)}`,
+        amount,
+        quantity: null,
+        unitAmount: null,
+        rateId: selection.tuitionOverride === null ? (price?.id ?? null) : null,
+      });
+    }
+  } else if (selection.kind === 'course' && selection.courseInstanceId) {
     // The price list's price for this cohort, else the catalogue's own price.
     const course = await queryFirst<{
       label: string;

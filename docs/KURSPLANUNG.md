@@ -108,8 +108,9 @@ What follows from it (`link.ts`):
   „Weitere Gruppe eröffnen" on a start adds the group on the board too, in the start's shift, and in
   the next month when the board already has it; a month the board has not set up is left alone.
 - **Kurse** shows per level „Gebucht" — the learners booked in the workspace (phase 1: the month's
-  start at `.1`; phase 2: its `.2` joiners and the previous start's `.1` learners whose booking runs
-  into the month) — and „Kursstart 3. Aug." linking to the start. The typed „Anmeldungen" stays: while
+  start at `.1`; phase 2: its `.2` joiners and the previous start's learners whose booking runs into
+  the month, Bildungszeit learners in its second half among them) — and „Kursstart 3. Aug." linking
+  to the start. The typed „Anmeldungen" stays: while
   FileMaker is where CASA books, the bridge's number is the real one, and replacing it with the
   workspace's bookings would show zeros.
 

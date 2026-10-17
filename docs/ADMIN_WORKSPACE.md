@@ -454,6 +454,27 @@ the catalogue's published price when no rate covers it yet.
 rate that has priced a booking cannot be deleted. `bookingOffer()` reads the
 catalogue for the wizard's choices — and carries no money the wizard can show.
 
+**Bildungszeit is booked into two intensive classes (2026-10-17).** Rahman:
+Bildungszeit is not a course of its own; a learner with a Bildungsschein sits in
+a morning and an afternoon intensive course at once (SchoolMan's
+*Superintensivkurs*, the same pair of bookings). In the wizard, „Bildungszeit
+German" asks for the week (KW, Monday to Friday, closures left out) and one or
+two weeks, then „In welche Kurse?": the two intensive classes running that week
+— the newest start at its first half (`B1.1`) and the previous start at its
+second (`B1.2`), the morning one first — each level with its free places for
+exactly those weeks. Choosing one half takes the same level's other half for the
+other class. A full class is marked and said in the review; „Trotzdem buchen"
+stays possible, as for any course (no waiting list: it is a week, not a course).
+The booking is of the Bildungszeit course and has one period per class, each on
+the course whose class it is; when a new course starts within two weeks, the
+second week is its own part with that week's two classes (four periods). The fee
+is Bildungszeit's for the weeks, or else what it is: the intensive course's
+price for twice the weeks (one week 280 €, two 520 €). Places count it in its
+weeks only: a level's booked places are now **the most learners in any one
+week** (`BOOKED`, `waitlist.ts`), which for a full-course booking is the same
+number as before. Code: `bildungszeit-rules.ts` (pure, tested),
+`bildungszeit.ts`, `createBildungszeitBooking` in the bookings actions.
+
 **Accommodation is part of the booking, not only a cost line** (0013). The type,
 room, catering and dates are columns on `bookings`, so the answer is kept even
 though CASA has published no accommodation rate yet; a `booking_charges` line

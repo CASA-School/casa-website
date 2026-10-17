@@ -1,3 +1,5 @@
+import type { BildungszeitOffer } from './bildungszeit-rules';
+
 /**
  * The booking offer's shapes and its two pure helpers.
  *
@@ -91,6 +93,8 @@ export type SittingOffer = {
 
 export type BookingOffer = {
   courseTypes: CourseTypeOffer[];
+  /** Bildungszeit's weeks and their two intensive classes (2026-10-17); null without the course type. */
+  bildungszeit?: BildungszeitOffer | null;
   exams: ExamOffer[];
   levels: { code: string; cefr: string | null }[];
   materials: MaterialOffer[];

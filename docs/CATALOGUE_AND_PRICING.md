@@ -129,10 +129,13 @@ of their own:
 - **German for groups** is an intensive course, 20 lessons a week, with the
   group's own class.
 
-Both should be booked as intensive courses: Bildungszeit as a morning and an
-afternoon period of the same dates, a group on its own course start. Today the
-workspace still books Bildungszeit on its own starts, which Kursplanung does not
-count (docs/KURSPLANUNG.md §Course starts).
+Bildungszeit is booked that way since 2026-10-17: into the week's morning and
+afternoon intensive classes, with their places checked for those weeks
+(docs/ADMIN_WORKSPACE.md §The booking wizard). Its price is Bildungszeit's own
+for the weeks when the list has one, else the intensive course's for twice the
+weeks — 280 € a week and 520 € for two, as the website says. The seeded
+Bildungszeit starts are the website's dates and are no longer booked on. A group
+is still to be booked on its own intensive course start.
 
 ### Rates
 One table, `rates`, prices everything. A row says: **how much**, **per what**,

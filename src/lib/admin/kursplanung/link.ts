@@ -107,7 +107,8 @@ export async function startClasses(startId: string): Promise<{ first: string; se
 /**
  * For the board's month: per level and phase, the learners booked in the workspace, and the start a
  * shift's groups belong to. Phase 1 is the month's own start; phase 2 its `.2` joiners plus the
- * previous start's `.1` learners whose booking runs into this month.
+ * previous start's learners whose booking runs into this month — its own (`.1`) and the Bildungszeit
+ * learners booked into its second half (`.2`).
  */
 export type MonthStart = { id: string; date: string; shift: Shift | null };
 export type MonthBookings = { startOf: (phase: '1' | '2', shift: Shift) => MonthStart | null; booked: Map<string, number> };
@@ -123,17 +124,18 @@ export async function monthBookings(month: string): Promise<MonthBookings> {
     query<{ level_code: string; continued: boolean; n: number }>(
       `WITH starts AS (${INTENSIVE}),
             periods AS (
-              SELECT s.month, bp.level_code, bp.end_date, bp.booking_id
+              SELECT s.month, bp.level_code, bp.start_date, bp.end_date, bp.booking_id
                 FROM booking_periods bp
                 JOIN bookings b ON b.id = bp.booking_id
                 JOIN starts s ON s.id = bp.course_instance_id
                WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.level_code IS NOT NULL
             )
-       SELECT level_code, false AS continued, count(DISTINCT booking_id)::int AS n FROM periods WHERE month = $1 GROUP BY level_code
+       SELECT level_code, false AS continued, count(DISTINCT booking_id)::int AS n FROM periods
+        WHERE month = $1 AND start_date < $4::date GROUP BY level_code
        UNION ALL
        SELECT level_code, true, count(DISTINCT booking_id)::int FROM periods
-        WHERE month = $2 AND level_code ~ '\\.1$' AND end_date >= $3::date GROUP BY level_code`,
-      [month, previous, monthStart(month)]
+        WHERE month = $2 AND end_date >= $3::date GROUP BY level_code`,
+      [month, previous, monthStart(month), monthStart(nextMonth(month))]
     ),
   ]);
   const booked = new Map<string, number>();

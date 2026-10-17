@@ -74,12 +74,22 @@ export const placeForNext = (g: { places: number; booked: number; offered: numbe
 
 // ------------------------------------------------------------------ reads
 
-/** Booked places per start and level: bookings that are not cancelled, with a period there. */
+/**
+ * Booked places per start and level: the most learners in any one week — bookings that are not
+ * cancelled, with a period there covering that week. For a learner booked for the whole course it is
+ * the same as counting the bookings; a Bildungszeit learner there for a week or two (2026-10-17) takes
+ * a place in those weeks only.
+ */
 const BOOKED = `
-  SELECT bp.course_instance_id, bp.level_code, count(DISTINCT bp.booking_id)::int AS n
-    FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.level_code IS NOT NULL
-   GROUP BY bp.course_instance_id, bp.level_code`;
+  SELECT course_instance_id, level_code, max(n)::int AS n FROM (
+    SELECT bp.course_instance_id, bp.level_code, w.week, count(DISTINCT bp.booking_id) AS n
+      FROM booking_periods bp
+      JOIN bookings b ON b.id = bp.booking_id
+     CROSS JOIN LATERAL generate_series(date_trunc('week', bp.start_date), bp.end_date, interval '7 days') AS w(week)
+     WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.level_code IS NOT NULL
+     GROUP BY bp.course_instance_id, bp.level_code, w.week
+  ) weekly
+  GROUP BY course_instance_id, level_code`;
 
 /** Open entries per start and level, split into waiting and offered. */
 const QUEUED = `
